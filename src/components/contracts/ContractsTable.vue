@@ -2,8 +2,8 @@
   <div>
     <v-card class="mt-3">
       <v-container fluid>
-        <v-row class="flex justify-spacebetween ma-1">
-          <v-col cols="6" xl="6" lg="6" md="6" class="my-0 pb-0">
+        <v-row class="d-flex justify-space-between ma-1">
+          <v-col cols="4" class="my-0 pb-0">
             <v-text-field
               id="contractsSearch"
               v-model="search"
@@ -13,41 +13,105 @@
               clearable
             ></v-text-field>
           </v-col>
-          <v-col cols="6" xl="6" lg="6" md="6" class="my-0 pb-0">
-            <v-checkbox v-model="showInactive" label="Show Inactive Contracts/Projects"></v-checkbox>
-          </v-col>
+          <!-- Active Filter -->
+          <div class="d-flex justify-end align-center my-0 pb-0">
+            <span class="fieldset-title mr-3">Status:</span>
+            <v-btn-toggle class="filter_color" v-model="filter.active" text multiple>
+              <!-- Active -->
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <v-btn value="active" id="full" v-on="on" text>
+                    <v-icon class="mr-1" color="#0f9d58">mdi-check-circle-outline</v-icon>
+                  </v-btn>
+                </template>
+                <span>Active</span>
+              </v-tooltip>
+
+              <!-- Inactive -->
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <v-btn value="inactive" id="part" v-on="on" text>
+                    <v-icon color="#f4b400">mdi-stop-circle-outline</v-icon>
+                  </v-btn>
+                </template>
+                <span>Inactive</span>
+              </v-tooltip>
+
+              <!-- Closed -->
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <v-btn value="closed" id="inactive" v-on="on" text>
+                    <v-icon color="#db4437">mdi-close-circle-outline</v-icon>
+                  </v-btn>
+                </template>
+                <span>Closed</span>
+              </v-tooltip>
+            </v-btn-toggle>
+          </div>
+          <!-- End Active Filter -->
+          <div class="d-flex justify-end align-center flex-wrap">
+            <v-btn
+              color="#bc3825"
+              :loading="isDeleting"
+              class="white--text"
+              :disabled="!this.contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
+              @click="clickedDelete()"
+              >Delete<v-icon right dark>delete</v-icon></v-btn
+            >
+            <v-btn
+              class="ml-4 font-weight-medium"
+              :loading="isActivating"
+              :disabled="!this.contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
+              @click="updateStatus(contractStatuses.ACTIVE)"
+              >Activate</v-btn
+            >
+            <v-btn
+              class="ml-4"
+              :loading="isDeactivating"
+              :disabled="!this.contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
+              @click="updateStatus(contractStatuses.INACTIVE)"
+              >Deactivate</v-btn
+            >
+            <v-btn
+              class="ml-4"
+              :loading="isClosing"
+              :disabled="!this.contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
+              @click="updateStatus(contractStatuses.CLOSED)"
+              >Close</v-btn
+            >
+          </div>
         </v-row>
         <!-- START CONTRACTS DATA TABLE -->
         <v-form ref="form" lazy-validation>
           <v-data-table
-            v-if="!$store.getters.contracts"
-            :loading="!$store.getters.contracts"
-            :headers="contractHeaders"
-            :items-per-page="-1"
-          ></v-data-table>
-          <v-data-table
-            v-else
             @click:row="clickedRow"
-            :loading="loading"
             :expanded.sync="expanded"
             :headers="contractHeaders"
             :items="storeContracts"
             :items-per-page="-1"
             :item-class="contractRowClass"
             :search="search"
+            class="contracts-table"
+            show-select
           >
-            <!-- Contract Name Slot -->
-            <template v-slot:[`item.contractName`]="{ item }">
-              <v-text-field
-                name="contractName"
-                v-if="editingItem && editingItem.id == item.id"
-                v-model="editingItem.contractName"
-                prepend-icon="mdi-script-outline"
-                :rules="[(v) => !!v || 'Field is required', duplicateContractPrimeCombo()]"
-                required
-              ></v-text-field>
-              <!-- </v-form> -->
-              <span v-else :class="{ inactive: item.inactive }">{{ item.contractName }}</span>
+            <!-- Header CheckBox Slot -->
+            <template v-slot:[`header.data-table-select`]>
+              <!-- Intentionally empty to hide header checkbox -->
+            </template>
+            <!-- CheckBox Slot -->
+            <template v-slot:[`item.data-table-select`]="{ item }">
+              <div class="checkBox-container fill-height fill-width align-center">
+                <div :class="`${item.status}-status status-indicator`"></div>
+                <v-checkbox
+                  :input-value="item.all"
+                  :indeterminate="item.indeterminate"
+                  primary
+                  class="ma-0 pl-4"
+                  hide-details
+                  @click.stop="toggleContractCheckBox(item)"
+                >
+                </v-checkbox>
+              </div>
             </template>
             <!-- Prime Name Slot -->
             <template v-slot:[`item.primeName`]="{ item }">
@@ -55,99 +119,64 @@
                 name="primeName"
                 v-if="editingItem && editingItem.id == item.id"
                 v-model="editingItem.primeName"
-                prepend-icon="mdi-office-building-outline"
+                label="Prime Name"
                 :rules="[(v) => !!v || 'Field is required', duplicateContractPrimeCombo()]"
                 required
+                @click.stop
               ></v-text-field>
-              <!-- </v-form> -->
-              <span v-else :class="{ inactive: item.inactive }">{{ item.primeName }}</span>
+              <span v-else :class="{ 'font-weight-bold': true }">{{ item.primeName }}</span>
             </template>
-            <!-- Cost Type Slot -->
-            <template v-slot:[`item.costType`]="{ item }">
+
+            <!-- Contract Name Slot -->
+            <template v-slot:[`item.contractName`]="{ item }">
               <v-text-field
-                name="costType"
+                name="contractName"
                 v-if="editingItem && editingItem.id == item.id"
-                v-model="editingItem.costType"
-                prepend-icon="mdi-currency-usd"
+                v-model="editingItem.contractName"
+                label="Contract Name"
+                :rules="[(v) => !!v || 'Field is required', duplicateContractPrimeCombo()]"
+                required
+                @click.stop
               ></v-text-field>
               <!-- </v-form> -->
-              <span v-else :class="{ inactive: item.inactive }">{{ item.costType }}</span>
+              <span v-else :class="{ 'font-weight-bold': true }">{{ item.contractName }}</span>
             </template>
+
+            <!-- Directorate Slot -->
+            <template v-slot:[`item.directorate`]="{ item }">
+              <v-text-field
+                name="directorate"
+                v-if="editingItem && editingItem.id == item.id"
+                v-model="editingItem.directorate"
+                label="Directorate"
+                @click.stop
+              ></v-text-field>
+              <span v-else :class="{ 'font-weight-bold': true }">{{ item.directorate }}</span>
+            </template>
+
             <!-- PoP Start Date Slot -->
             <template v-slot:[`item.popStartDate`]="{ item }">
-              <v-menu
-                name="popStartDate"
+              <v-text-field
                 v-if="editingItem && editingItem.id == item.id"
-                ref="popStartDateMenu"
-                :close-on-content-click="false"
-                v-model="popStartDateMenu"
-                :nudge-right="40"
-                transition="scale-transition"
-                offset-y
-                max-width="290px"
-                min-width="290px"
-              >
-                <template v-slot:activator="{ on }">
-                  <v-text-field
-                    :value="format(editingItem.popStartDate, null, 'MM/DD/YYYY')"
-                    :rules="[...getDateOptionalRules(), startDateRules()]"
-                    hint="MM/DD/YYYY format"
-                    v-mask="'##/##/####'"
-                    persistent-hint
-                    prepend-icon="event"
-                    @blur="editingItem.popStartDate = format($event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD')"
-                    @input="popStartDateMenu = false"
-                    v-on="on"
-                  ></v-text-field>
-                </template>
-                <v-date-picker
-                  v-model="editingItem.popStartDate"
-                  no-title
-                  @input="popStartDateMenu = false"
-                ></v-date-picker>
-              </v-menu>
+                v-model="editingItem.popStartDate"
+                label="PoP Start Date"
+                @click.stop
+              ></v-text-field>
               <!-- </v-form> -->
-              <span v-else :class="{ inactive: item.inactive }">{{
-                format(item.popStartDate, 'YYYY-MM-DD', 'MM/DD/YYYY')
-              }}</span>
+              <span v-else :class="{ 'font-weight-bold': true }">{{ item.popStartDate }}</span>
             </template>
+
             <!-- PoP End Date Slot -->
             <template v-slot:[`item.popEndDate`]="{ item }">
-              <v-menu
-                name="popEndDate"
+              <v-text-field
                 v-if="editingItem && editingItem.id == item.id"
-                ref="popEndDateMenu"
-                :close-on-content-click="false"
-                v-model="popEndDateMenu"
-                :nudge-right="40"
-                transition="scale-transition"
-                offset-y
-                max-width="290px"
-                min-width="290px"
-              >
-                <template v-slot:activator="{ on }">
-                  <v-text-field
-                    :value="format(editingItem.popEndDate, null, 'MM/DD/YYYY')"
-                    :rules="[...getDateOptionalRules(), endDateRules()]"
-                    hint="MM/DD/YYYY format"
-                    v-mask="'##/##/####'"
-                    persistent-hint
-                    prepend-icon="event"
-                    @blur="editingItem.popEndDate = format($event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD')"
-                    @input="popEndDateMenu = false"
-                    v-on="on"
-                  ></v-text-field>
-                </template>
-                <v-date-picker
-                  v-model="editingItem.popEndDate"
-                  no-title
-                  @input="popEndDateMenu = false"
-                ></v-date-picker>
-              </v-menu>
-              <span v-else :class="{ inactive: item.inactive }">{{
-                format(item.popEndDate, 'YYYY-MM-DD', 'MM/DD/YYYY')
-              }}</span>
+                v-model="editingItem.popEndDate"
+                label="PoP End Date"
+                @click.stop
+              ></v-text-field>
+              <span v-else :class="{ 'font-weight-bold': true }">{{ item.popEndDate }}</span>
             </template>
+
             <!-- Contract Description Slot -->
             <template v-slot:[`item.description`]="{ item }">
               <v-textarea
@@ -155,167 +184,21 @@
                 v-model="editingItem.description"
                 name="description"
                 auto-grow
-                prepend-icon="mdi-text"
                 label="Description"
                 rows="1"
                 @click.stop
               ></v-textarea>
-              <span v-else>{{ item.description }}</span>
+              <span v-else :class="{ 'font-weight-bold': true }">{{ item.description }}</span>
             </template>
 
             <!-- Expanded Row Slot -->
-            <template v-slot:expanded-item="contract">
-              <td :colspan="contractHeaders.length" class="pa-0">
-                <v-container fluid class="grey-background">
-                  <!-- START EXPANDED PROJECTS DATA TABLE-->
-                  <v-data-table
-                    :headers="projectHeaders"
-                    :items="contract.item.projects"
-                    hide-default-footer
-                    :item-class="projectRowClass"
-                  >
-                    <template v-slot:[`item.projectName`]="{ item }">
-                      <v-text-field
-                        :rules="[(v) => !!v || 'Field is required', duplicateProjects(contract.item)]"
-                        v-if="editingItem && editingItem.id == item.id"
-                        v-model="editingItem.projectName"
-                        prepend-icon="mdi-briefcase-outline"
-                      ></v-text-field>
-                      <span v-else :class="{ inactive: item.inactive }">{{ item.projectName }}</span>
-                    </template>
-                    <template v-slot:[`item.actions`]="{ item }">
-                      <div v-if="editingItem && editingItem.id == item.id">
-                        <div v-if="!contractLoading">
-                          <!-- Save Project -->
-                          <v-tooltip top>
-                            <template v-slot:activator="{ on }">
-                              <v-btn @click.stop="updateProject(contract.item)" icon text v-on="on">
-                                <v-icon class="case-gray">save</v-icon>
-                              </v-btn>
-                            </template>
-                            <span>Save</span>
-                          </v-tooltip>
-
-                          <!-- Cancel Project Edit -->
-                          <v-tooltip top>
-                            <template v-slot:activator="{ on }">
-                              <v-btn
-                                icon
-                                text
-                                @click.stop="
-                                  () => {
-                                    editingItem = null;
-                                  }
-                                "
-                                v-on="on"
-                              >
-                                <v-icon class="case-gray">cancel</v-icon>
-                              </v-btn>
-                            </template>
-                            <span>Cancel</span>
-                          </v-tooltip>
-                        </div>
-                        <div v-else><v-progress-circular color="#bc3825" indeterminate /></div>
-                      </div>
-                      <div v-else>
-                        <!-- Employees Assigned -->
-                        <v-tooltip top>
-                          <template v-slot:activator="{ on }">
-                            <v-btn
-                              :disabled="
-                                editingItem != null ||
-                                (contractLoading &&
-                                  contractProjectStatusItem &&
-                                  contractProjectStatusItem.id === item.id)
-                              "
-                              @click.stop="
-                                () => {
-                                  toggleProjectEmployeesModal = true;
-                                  contractEmployeesAssigned = contract.item;
-                                  projectEmployeesAsseigned = item;
-                                }
-                              "
-                              icon
-                              text
-                              v-on="on"
-                            >
-                              <v-icon class="case-gray">group</v-icon>
-                            </v-btn></template
-                          >
-                          <span>View Employees Assigned to Project</span>
-                        </v-tooltip>
-
-                        <!-- Edit Project -->
-                        <v-tooltip top>
-                          <template v-slot:activator="{ on }">
-                            <v-btn
-                              :disabled="
-                                editingItem != null ||
-                                (contractLoading &&
-                                  contractProjectStatusItem &&
-                                  contractProjectStatusItem.id === item.id)
-                              "
-                              icon
-                              text
-                              @click.stop="clickedEdit(item)"
-                              v-on="on"
-                            >
-                              <v-icon class="case-gray">edit</v-icon>
-                            </v-btn>
-                          </template>
-                          <span>Edit</span>
-                        </v-tooltip>
-
-                        <!-- Activate/Deactivate Project -->
-                        <v-tooltip top>
-                          <template v-slot:activator="{ on }">
-                            <v-btn
-                              icon
-                              text
-                              :disabled="editingItem != null"
-                              :loading="
-                                contractLoading && contractProjectStatusItem && contractProjectStatusItem.id === item.id
-                              "
-                              v-on="on"
-                              @click.stop="
-                                toggleContractProjectStatusModal = true;
-                                contractProjectStatusItem = cloneDeep(item);
-                              "
-                            >
-                              <v-icon class="case-gray"
-                                >mdi-file-document-{{ item.inactive ? 'check' : 'remove-outline' }}</v-icon
-                              >
-                            </v-btn>
-                          </template>
-                          <span>{{ item.inactive ? 'Activate' : 'Deactivate' }} Project</span>
-                        </v-tooltip>
-
-                        <!-- Delete Project -->
-                        <v-tooltip top>
-                          <template v-slot:activator="{ on }">
-                            <v-btn
-                              :disabled="
-                                editingItem != null ||
-                                (contractLoading &&
-                                  contractProjectStatusItem &&
-                                  contractProjectStatusItem.id === item.id)
-                              "
-                              @click.stop="clickedDeleteProject(contract.item, item)"
-                              icon
-                              text
-                              v-on="on"
-                            >
-                              <v-icon class="case-gray">delete</v-icon>
-                            </v-btn>
-                          </template>
-                          <span>Delete</span>
-                        </v-tooltip>
-                      </div>
-                    </template>
-                  </v-data-table>
-                  <!-- END EXPANDED PROJECTS DATA TABLE-->
-                </v-container>
-              </td>
+            <template v-slot:expanded-item="{ headers, item }">
+              <expanded-contract-table-row
+                :contract="{ item }"
+                :colspan="headers.length"
+                :isEditingContractItem="editingItem != null"
+                :isContractDeletingOrUpdatingStatus="isDeletingOrUpdatingStatus()"
+              />
             </template>
 
             <!-- Actions Slot -->
@@ -357,127 +240,77 @@
 
               <!-- IS NOT EDITING ROW -->
               <div v-else>
-                <!-- Employees Assigned -->
-                <v-tooltip top>
-                  <template v-slot:activator="{ on }">
-                    <v-btn
-                      :disabled="editingItem != null"
-                      @click.stop="
-                        () => {
-                          toggleContractEmployeesModal = true;
-                          contractEmployeesAssigned = item;
-                        }
-                      "
-                      icon
-                      text
-                      v-on="on"
-                    >
-                      <v-icon class="case-gray">group</v-icon>
-                    </v-btn></template
-                  >
-                  <span>View Employees Assigned to Contract</span>
-                </v-tooltip>
-
-                <!-- Add Project -->
-                <v-tooltip top>
-                  <template v-slot:activator="{ on }">
-                    <v-btn
-                      :disabled="
-                        editingItem != null ||
-                        (contractLoading && contractStatusItem && contractStatusItem.id === item.id)
-                      "
-                      @click.stop="
-                        () => {
-                          addProjectUnderContract = item;
-                          toggleProjectForm = !toggleProjectForm;
-                        }
-                      "
-                      icon
-                      text
-                      v-on="on"
-                    >
-                      <v-icon class="case-gray">mdi-file-document-plus</v-icon>
-                    </v-btn>
-                  </template>
-                  <span>Add Project</span>
-                </v-tooltip>
-
-                <!-- Edit Contract -->
-                <v-tooltip top>
-                  <template v-slot:activator="{ on }">
-                    <v-btn
-                      icon
-                      text
-                      :disabled="
-                        editingItem != null ||
-                        (contractLoading && contractStatusItem && contractStatusItem.id === item.id)
-                      "
-                      v-on="on"
-                      @click.stop="clickedEdit(item)"
-                    >
-                      <v-icon class="case-gray">edit</v-icon>
-                    </v-btn>
-                  </template>
-                  <span>Edit</span>
-                </v-tooltip>
-
-                <!-- Deactivate Contract -->
-                <v-tooltip top>
-                  <template v-slot:activator="{ on }">
-                    <v-btn
-                      icon
-                      text
-                      :disabled="editingItem != null"
-                      :loading="contractLoading && contractStatusItem && contractStatusItem.id === item.id"
-                      v-on="on"
-                      @click.stop="
-                        toggleContractStatusModal = true;
-                        contractStatusItem = cloneDeep(item);
-                      "
-                    >
-                      <v-icon class="case-gray"
-                        >mdi-file-document-{{ item.inactive ? 'check' : 'remove-outline' }}</v-icon
+                <div v-if="!isDeletingOrUpdatingStatus(item)">
+                  <!-- Add Project -->
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-btn
+                        :disabled="editingItem != null || isEditingProjectItem || contractLoading"
+                        @click.stop="
+                          () => {
+                            addProjectUnderContract = item;
+                            toggleProjectForm = !toggleProjectForm;
+                          }
+                        "
+                        icon
+                        text
+                        v-on="on"
                       >
-                    </v-btn>
-                  </template>
-                  <span>{{ item.inactive ? 'Activate' : 'Deactivate' }} Contract</span>
-                </v-tooltip>
+                        <v-icon class="case-gray">mdi-file-document-plus</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Add Project</span>
+                  </v-tooltip>
 
-                <!-- Delete Contract -->
-                <v-tooltip top>
-                  <template v-slot:activator="{ on }">
-                    <v-btn
-                      :disabled="
-                        editingItem != null ||
-                        (contractLoading && contractStatusItem && contractStatusItem.id === item.id)
-                      "
-                      @click.stop="clickedDeleteContractPrime(item)"
-                      icon
-                      text
-                      v-on="on"
+                  <!-- Employees Assigned -->
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-btn
+                        :disabled="editingItem != null || isEditingProjectItem || contractLoading"
+                        @click.stop="
+                          () => {
+                            toggleContractEmployeesModal = true;
+                            contractEmployeesAssigned = item;
+                          }
+                        "
+                        icon
+                        text
+                        v-on="on"
+                      >
+                        <v-icon class="case-gray">group</v-icon>
+                      </v-btn></template
                     >
-                      <v-icon class="case-gray">delete</v-icon>
-                    </v-btn>
-                  </template>
-                  <span>Delete</span>
-                </v-tooltip>
+                    <span>View Employees Assigned to Contract</span>
+                  </v-tooltip>
+
+                  <!-- Edit Contract -->
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-btn
+                        icon
+                        text
+                        :disabled="editingItem != null || isEditingProjectItem || contractLoading"
+                        v-on="on"
+                        @click.stop="clickedEdit(item)"
+                      >
+                        <v-icon class="case-gray">edit</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Edit</span>
+                  </v-tooltip>
+                </div>
+                <div v-else><v-progress-circular color="#bc3825" indeterminate /></div>
               </div>
             </template>
           </v-data-table>
         </v-form>
       </v-container>
     </v-card>
-    <projects-employees-assigned-modal
-      :toggleModal="toggleProjectEmployeesModal"
-      :contract="contractEmployeesAssigned"
-      :project="projectEmployeesAsseigned"
-    />
     <contract-employees-assigned-modal
       :contract="contractEmployeesAssigned"
       :toggleModal="toggleContractEmployeesModal"
     />
     <delete-modal :toggleDeleteModal="toggleContractDeleteModal" :type="'contract'"></delete-modal>
-    <delete-modal :toggleDeleteModal="toggleProjectDeleteModal" :type="'project'"></delete-modal>
     <contract-project-delete-warning
       :toggleModal="toggleWarningModal"
       :relationships="relationships"
@@ -489,13 +322,6 @@
       type="contract-status"
       :toggleModal="toggleContractStatusModal"
     ></general-confirmation-modal>
-    <general-confirmation-modal
-      :title="`Are you sure you want to make this project ${
-        contractProjectStatusItem && contractProjectStatusItem.inactive ? 'active' : 'inactive'
-      }?`"
-      type="contract-project-status"
-      :toggleModal="toggleContractProjectStatusModal"
-    ></general-confirmation-modal>
     <project-form :toggleProjectForm="toggleProjectForm" :contract="addProjectUnderContract" />
   </div>
 </template>
@@ -506,12 +332,10 @@ import DeleteModal from '../modals/DeleteModal.vue';
 import ContractProjectDeleteWarning from '../modals/ContractProjectDeleteWarning.vue';
 import ProjectForm from './ProjectForm.vue';
 import { updateStoreContracts, updateStoreEmployees } from '@/utils/storeUtils';
-import { format, isAfter, isBefore } from '@/shared/dateUtils';
-import { getDateOptionalRules } from '@/shared/validationUtils';
-import { mask } from 'vue-the-mask';
-import ProjectsEmployeesAssignedModal from '../modals/ProjectsEmployeesAssignedModal.vue';
 import GeneralConfirmationModal from '@/components/modals/GeneralConfirmationModal.vue';
 import ContractEmployeesAssignedModal from '../modals/ContractEmployeesAssignedModal.vue';
+import ExpandedContractTableRow from './ExpandedContractTableRow.vue';
+import { asyncForEach } from '../../utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -524,74 +348,26 @@ import ContractEmployeesAssignedModal from '../modals/ContractEmployeesAssignedM
  */
 async function created() {
   window.EventBus.$on('confirm-delete-contract', async () => {
-    await this.deleteContractPrime(this.deleteItem.id);
-    this.deleteItem = null;
+    await this.deleteItems(this.deletingItems);
+    this.deletingItems = null;
   });
   window.EventBus.$on('canceled-delete-contract', () => {
-    this.deleteItem = null;
-  });
-  window.EventBus.$on('confirm-delete-project', async () => {
-    await this.deleteProject(this.deleteItem.contract, this.deleteItem.project.id);
-    this.deleteItem = null;
-  });
-  window.EventBus.$on('canceled-delete-project', () => {
-    this.deleteItem = null;
-  });
-  window.EventBus.$on('confirmed-contract-project-status', async () => {
-    this.contractLoading = true;
-    let contracts = this.$store.getters.contracts;
-    let contractIdx = _.findIndex(contracts, (c) =>
-      _.find(c.projects, (p) => p.id === this.contractProjectStatusItem.id)
-    );
-    let projectIdx = _.findIndex(contracts[contractIdx].projects, (p) => p.id === this.contractProjectStatusItem.id);
-    await api.updateItem(api.CONTRACTS, contracts[contractIdx]);
-    contracts[contractIdx].projects[projectIdx]['inactive'] = !contracts[contractIdx].projects[projectIdx]['inactive'];
-    this.displaySuccess(
-      `Contract is now ${contracts[contractIdx].projects[projectIdx]['inactive'] ? 'inactive' : 'active'}!`
-    );
-    this.$store.dispatch('setContracts', { contracts });
-    this.contractProjectStatusItem = null;
-    this.toggleContractProjectStatusModal = false;
-    this.contractLoading = false;
-  });
-  window.EventBus.$on('canceled-contract-project-status', () => {
-    this.toggleContractProjectStatusModal = false;
-  });
-  window.EventBus.$on('confirmed-contract-status', async () => {
-    this.contractLoading = true;
-    let contracts = this.$store.getters.contracts;
-    let contractIdx = _.findIndex(contracts, (c) => this.contractStatusItem.id === c.id);
-    // if contract is becoming inactive, deactivate all of its projects
-    let projects = !contracts[contractIdx]['inactive']
-      ? _.map(contracts[contractIdx].projects, (p) => {
-          return { ...p, inactive: true };
-        })
-      : contracts[contractIdx].projects;
-    await api.updateItem(api.CONTRACTS, {
-      ...contracts[contractIdx],
-      inactive: !contracts[contractIdx]['inactive'],
-      projects
-    });
-    contracts[contractIdx]['inactive'] = !contracts[contractIdx]['inactive'];
-    contracts[contractIdx].projects = projects;
-    this.displaySuccess(`Contract is now ${contracts[contractIdx]['inactive'] ? 'inactive' : 'active'}!`);
-    this.$store.dispatch('setContracts', { contracts });
-    this.contractStatusItem = null;
-    this.toggleContractStatusModal = false;
-    this.contractLoading = false;
-  });
-  window.EventBus.$on('canceled-contract-status', () => {
-    this.toggleContractStatusModal = false;
+    this.deletingItems = null;
   });
   window.EventBus.$on('canceled-project-form', () => {
     this.toggleProjectForm = false;
   });
-  window.EventBus.$on('closed-project-employees-assigned-modal', () => {
-    this.toggleProjectEmployeesModal = false;
-  });
   window.EventBus.$on('closed-contract-employees-assigned-modal', () => {
     this.toggleContractEmployeesModal = false;
   });
+  window.EventBus.$on('is-editing-project-item', (value) => {
+    this.isEditingProjectItem = value;
+  });
+  window.EventBus.$on('toggle-project-checkBox', ({ contract, project }) => {
+    this.toggleProjectCheckBox(contract, project);
+  });
+  this.resetAllCheckBoxes();
+  this.expanded = _.cloneDeep(this.storeContracts);
 } // created
 
 /**
@@ -600,14 +376,11 @@ async function created() {
 function beforeDestroy() {
   window.EventBus.$off('confirm-delete-contract');
   window.EventBus.$off('canceled-delete-contract');
-  window.EventBus.$off('confirm-delete-project');
-  window.EventBus.$off('canceled-delete-project');
-  window.EventBus.$off('confirmed-contract-project-status');
-  window.EventBus.$off('canceled-contract-project-status');
   window.EventBus.$off('confirmed-contract-status');
   window.EventBus.$off('canceled-contract-status');
   window.EventBus.$off('canceled-project-form');
   window.EventBus.$off('closed-project-employees-assigned-modal');
+  window.EventBus.$off('is-editing-project-item');
 } // beforeDestroy
 
 // |--------------------------------------------------|
@@ -621,11 +394,13 @@ function beforeDestroy() {
  * @param contractObj contract object that is clicked
  */
 function clickedRow(contractObj) {
-  if (_.isEmpty(this.expanded) || this.expanded[0].id != contractObj.id) {
-    this.expanded = [];
+  let i = this.expanded.findIndex((c) => c.id == contractObj.id);
+  if (i == -1) {
+    // item is not expanded
     this.expanded.push(contractObj);
   } else {
-    this.expanded = [];
+    // item is expanded
+    this.expanded.splice(i, 1);
   }
 } // clickedRow
 
@@ -635,8 +410,8 @@ function clickedRow(contractObj) {
 async function updateContractPrime() {
   let valid = this.$refs.form.validate();
   if (!valid) return;
+  this.contractLoading = true;
   try {
-    this.contractLoading = true;
     let response = await api.updateItem(api.CONTRACTS, this.editingItem);
     if (response.name === 'AxiosError') {
       throw new Error(response.response.data.message);
@@ -648,81 +423,54 @@ async function updateContractPrime() {
     this.contractLoading = false;
     this.displaySuccess('Item was successfully saved!');
   } catch (err) {
-    this.contractLoading = false;
     this.displayError(err);
   }
+  this.contractLoading = false;
   this.editingItem = null;
 } // updateContractPrime
 
 /**
- * Updates project in inline row edit (expandable row)
- *
- * @param contract contract object that project is under
+ * Delete items
+ * @param items contract and project items to delete
  */
-async function updateProject(contract) {
-  let valid = this.$refs.form.validate();
-  if (!valid) return;
+async function deleteItems(items) {
+  this.isDeleting = true;
   try {
-    this.contractLoading = true;
-    let contractObj = _.cloneDeep(contract);
-    let projectIndex = contractObj.projects.findIndex((item) => item.id == this.editingItem.id);
-    contractObj.projects[projectIndex] = this.editingItem;
-    let response = await api.updateItem(api.CONTRACTS, contractObj);
-    if (response.name === 'AxiosError') {
-      throw new Error(response.response.data.message);
-    }
     let contracts = _.cloneDeep(this.$store.getters.contracts);
-    let contractIndex = contracts.findIndex((c) => c.id == contractObj.id);
-    contracts[contractIndex] = contractObj;
-    this.$store.dispatch('setContracts', { contracts });
-    this.contractLoading = false;
-    this.displaySuccess('Item was successfully saved!');
-  } catch (err) {
-    this.contractLoading = false;
-    this.displayError(err);
-  }
-  this.editingItem = null;
-} // updateProject
+    let deleteContractPromises = [];
+    let deleteProjectPromises = [];
+    items.contracts.forEach((c) => {
+      deleteContractPromises.push(api.deleteItem(api.CONTRACTS, c.id));
+    });
+    if (deleteContractPromises.length) await Promise.all(deleteContractPromises);
 
-/**
- * Deletes contract object given contract ID
- *
- * @param contractID contract ID to delete
- */
-async function deleteContractPrime(contractID) {
-  try {
-    await api.deleteItem(api.CONTRACTS, contractID);
-    let contracts = _.cloneDeep(this.$store.getters.contracts);
-    let itemIndex = contracts.findIndex((item) => item.id == contractID);
-    contracts.splice(itemIndex, 1);
-    this.$store.dispatch('setContracts', { contracts });
-    this.displaySuccess('Item was successfully deleted!');
-  } catch (err) {
-    this.displayError(err);
-  }
-} // deleteContractPrime
+    items.projects.forEach((p) => {
+      let index = p.contractOfProject.projects.findIndex((item) => item.id == p.project.id);
+      p.contractOfProject.projects.splice(index, 1);
+      deleteProjectPromises.push(api.updateItem(api.CONTRACTS, p.contractOfProject));
+    });
 
-/**
- * Deletes project given project ID
- *
- * @param contract contract that project is under
- * @param projectID id of project to delete
- */
-async function deleteProject(contract, projectID) {
-  try {
-    let contractObj = _.cloneDeep(contract);
-    let projectIndex = contractObj.projects.findIndex((item) => item.id == projectID);
-    contractObj.projects.splice(projectIndex, 1);
-    await api.updateItem(api.CONTRACTS, contractObj);
-    let contracts = _.cloneDeep(this.$store.getters.contracts);
-    let contractIndex = contracts.findIndex((c) => c.id == contract.id);
-    contracts[contractIndex] = contractObj;
-    this.$store.dispatch('setContracts', { contracts: contracts });
-    this.displaySuccess('Item was successfully deleted!');
+    if (deleteProjectPromises.length) await Promise.all(deleteProjectPromises);
+
+    items.contracts.forEach((c) => {
+      let contractIndex = contracts.findIndex((item) => item.id == c.id);
+      contracts.splice(contractIndex, 1);
+      this.contractsCheckBoxes.splice(contractIndex, 1);
+    });
+    items.projects.forEach((p) => {
+      let contractIndex = contracts.findIndex((c) => c.id == p.contractOfProject.id);
+      let projectIndex = contracts[contractIndex].projects.findIndex((item) => item.id == p.project.id);
+      this.contractsCheckBoxes[contractIndex].projectsCheckBoxes.splice(projectIndex, 1);
+      contracts[contractIndex].projects.splice(projectIndex, 1);
+    });
+    this.$store.dispatch('setContracts', { contracts });
+    this.displaySuccess('Successfully deleted item(s)!');
   } catch (err) {
     this.displayError(err);
   }
-} // deleteProject
+  this.isDeleting = false;
+  this.resetAllCheckBoxes();
+} // deleteItems
 
 /**
  * Click edit handler
@@ -734,37 +482,78 @@ function clickedEdit(item) {
 } // clickedEdit
 
 /**
- * Handler for click delete contract button
- *
- * @param contract contract that is being deleted
+ * Handler for click delete button event
  */
-async function clickedDeleteContractPrime(contract) {
-  let relationships = await this.getEmployeeContractRelationships(contract);
+async function clickedDelete() {
+  let relationships = [];
+  let selectedItems = this.getSelectedItems();
+  await asyncForEach(selectedItems.contracts, async (c) => {
+    relationships = [...relationships, ...(await this.getEmployeeContractRelationships(c))];
+  });
+  await asyncForEach(selectedItems.projects, async (p) => {
+    relationships = [
+      ...relationships,
+      ...(await this.getEmployeeContractRelationships(p.contractOfProject, p.project))
+    ];
+  });
+
   if (relationships.length != 0) {
     this.toggleWarningModal = !this.toggleWarningModal;
     this.relationships = relationships;
   } else {
-    this.deleteItem = contract;
+    // this.deleteItem = contract;
+    this.deletingItems = selectedItems;
     this.toggleContractDeleteModal = !this.toggleContractDeleteModal;
   }
-} // clickedDeleteContractPrime
+} // clickedDelete
 
 /**
- * Handler for click delete project
+ * Updates the status of the selected items based on the given status.
  *
- * @param contract contract that project is under
- * @param project project to be deleted
+ * @param status status to update selected items to
  */
-async function clickedDeleteProject(contract, project) {
-  let relationships = await this.getEmployeeContractRelationships(contract, project);
-  if (relationships.length != 0) {
-    this.toggleWarningModal = !this.toggleWarningModal;
-    this.relationships = relationships;
+async function updateStatus(status) {
+  this.contractLoading = true;
+  if (status == api.CONTRACT_STATUSES.ACTIVE) {
+    this.isActivating = true;
+  } else if (status == api.CONTRACT_STATUSES.INACTIVE) {
+    this.isDeactivating = true;
   } else {
-    this.deleteItem = { contract: contract, project: project };
-    this.toggleProjectDeleteModal = !this.toggleProjectDeleteModal;
+    this.isClosing = true;
   }
-} // clickedDeleteProject
+  try {
+    let updatePromises = [];
+    let contracts = _.cloneDeep(this.$store.getters.contracts);
+    let selectedItems = this.getSelectedItems();
+
+    selectedItems.contracts.forEach((c) => {
+      let contractIndex = contracts.findIndex((item) => item.id == c.id);
+      contracts[contractIndex].status = status;
+      contracts[contractIndex].projects.forEach((p) => {
+        p.status = status;
+      });
+      updatePromises.push(api.updateItem(api.CONTRACTS, contracts[contractIndex]));
+    });
+
+    selectedItems.projects.forEach((p) => {
+      let contractIndex = contracts.findIndex((item) => item.id == p.contractOfProject.id);
+      let projectIndex = contracts[contractIndex].projects.findIndex((item) => item.id == p.project.id);
+      contracts[contractIndex].projects[projectIndex].status = status;
+      updatePromises.push(api.updateItem(api.CONTRACTS, contracts[contractIndex]));
+    });
+    await Promise.all(updatePromises);
+
+    this.$store.dispatch('setContracts', { contracts });
+    this.displaySuccess(`Successfully marked item(s) as ${status}`);
+  } catch (err) {
+    this.displayError(err);
+  }
+  this.contractLoading = false;
+  this.isActivating = false;
+  this.isDeactivating = false;
+  this.isClosing = false;
+  this.resetAllCheckBoxes();
+} // updateStatus
 
 /**
  * Clones a passed item.
@@ -881,25 +670,183 @@ function contractRowClass(item) {
     (this.editingItem && item.id == this.editingItem.id) ||
     (this.deleteItem && this.deleteItem.id && this.deleteItem.id == item.id)
   ) {
-    return 'highlight-row';
+    return 'highlight-contract-row';
   }
-  return '';
+  return 'highlight-contract-row';
 } // contractRowClass
 
 /**
- * Adds grey highlight to project row when editing or deleting
+ * Returns true if given contract is being deleted or its status is being updated,
+ * if no parameter is specified returns true if there is a contract that is being deleted
+ * or its status is being updated.
  *
- * @param item Item in projects v-data-table row
+ * @param contractItem contract item in data table row
+ * @returns true if contract is being deleted or its status is being updated
  */
-function projectRowClass(item) {
-  if (
-    (this.editingItem && this.editingItem.id == item.id) ||
-    (this.deleteItem && this.deleteItem.project && this.deleteItem.project.id == item.id)
-  ) {
-    return 'highlight-row';
+function isDeletingOrUpdatingStatus(contractItem = null) {
+  return contractItem
+    ? this.contractLoading &&
+        ((this.contractStatusItem && this.contractStatusItem.id == contractItem.id) ||
+          (this.deleteItem && this.deleteItem.id == contractItem.id))
+    : this.contractLoading && (this.contractStatusItem || this.deleteItem);
+} // isDeletingOrUpdatingStatus
+
+/**
+ * Resets (unchecks) all contracts and projects (boxes) in the contracts table.
+ */
+function resetAllCheckBoxes() {
+  let uncheckedBox = { all: false, indeterminate: false };
+  for (let i = 0; i < this.$store.getters.contracts.length; i++) {
+    this.contractsCheckBoxes[i] = _.cloneDeep(uncheckedBox);
+    this.contractsCheckBoxes[i].contractId = this.$store.getters.contracts[i].id;
+    this.contractsCheckBoxes[i].projectsCheckBoxes = this.$store.getters.contracts[i].projects.map((p) => ({
+      projectId: p.id,
+      checkBox: false
+    }));
   }
-  return '';
-} // projectRowClass
+} // resetCheckAllBoxes
+
+/**
+ * Toggles the contract item check box and all the project item boxes
+ *
+ * @param contractItem contract item to check
+ */
+function toggleContractCheckBox(contractItem) {
+  let index = this.contractsCheckBoxes.findIndex((c) => c.contractId == contractItem.id);
+  let contractCheckBox = this.contractsCheckBoxes[index];
+  if (this.determineCheckBox(contractCheckBox).all) {
+    this.setAllProjectsCheckBox(contractItem, false);
+  } else {
+    this.setAllProjectsCheckBox(contractItem, true);
+  }
+  contractCheckBox = this.contractsCheckBoxes[index];
+  let updatedCheckBox = this.determineCheckBox(contractCheckBox);
+  contractCheckBox.all = updatedCheckBox.all;
+  contractCheckBox.indeterminate = updatedCheckBox.indeterminate;
+  this.$set(this.contractsCheckBoxes, index, contractCheckBox);
+} // toggleContractCheckBox
+
+/**
+ * Toggles the project item checkbox
+ *
+ * @param contract contract of selected project item
+ * @param projectItem project item
+ */
+function toggleProjectCheckBox(contract, projectItem) {
+  this.contractsCheckBoxes
+    .find((cb) => cb.contractId == contract.item.id)
+    .projectsCheckBoxes.forEach((pb) => {
+      if (pb.projectId == projectItem.id) {
+        pb.checkBox = !pb.checkBox;
+      }
+    });
+  let index = this.contractsCheckBoxes.findIndex((c) => c.contractId == contract.item.id);
+  let contractCheckBox = this.contractsCheckBoxes[index];
+  let updatedCheckBox = this.determineCheckBox(contractCheckBox);
+  contractCheckBox.all = updatedCheckBox.all;
+  contractCheckBox.indeterminate = updatedCheckBox.indeterminate;
+  this.$set(this.contractsCheckBoxes, index, contractCheckBox);
+} // toggleProjectCheckBox
+
+/**
+ * Determines the checkbox value of the contract based on the
+ * @param contractCheckBox contract check box to determine
+ */
+function determineCheckBox(contractCheckBox) {
+  let checkBox = { all: true, indeterminate: false };
+
+  _.forEach(contractCheckBox.projectsCheckBoxes, (project) => {
+    if (!project.checkBox) {
+      // at least one project is not selected
+      checkBox.all = false;
+    }
+    if (project.checkBox) {
+      // at least one project selected
+      checkBox.indeterminate = true;
+    }
+  });
+
+  if (checkBox.all) {
+    // set indeterminate to false if all projects are selected
+    checkBox.indeterminate = false;
+  }
+
+  return checkBox;
+} // determineCheckBox
+/**
+ * Sets all projects checkbox of a contract to the given value.
+ *
+ * @param contractItem contract item to set all projects checkbox for
+ */
+function setAllProjectsCheckBox(contractItem, value) {
+  let index = this.contractsCheckBoxes.findIndex((c) => c.contractId == contractItem.id);
+  let contractCheckBox = this.contractsCheckBoxes[index];
+  let updatedProjectsCheckBoxes = contractCheckBox.projectsCheckBoxes.map((p) => {
+    p.checkBox = value;
+    return p;
+  });
+  contractCheckBox.projectsCheckBoxes = updatedProjectsCheckBoxes;
+  this.$set(this.contractsCheckBoxes, index, contractCheckBox);
+} // setAllProjectsCheckBox
+
+/**
+ * Gets lists of selected items in the following structure:
+ * { contracts: [...], projects: [{ contractOfProject: {}, project: {} }, ...]}
+ *
+ * @return lists of selected items
+ */
+function getSelectedItems() {
+  let selectedContractIds = [];
+  let selectedProjectIds = [];
+  this.contractsCheckBoxes.forEach((c) => {
+    if (c.all) {
+      selectedContractIds.push(c.contractId);
+    } else if (c.indeterminate) {
+      c.projectsCheckBoxes.forEach((p) => {
+        if (p.checkBox) {
+          selectedProjectIds.push(p.projectId);
+        }
+      });
+    }
+  });
+  let selectedItems = { contracts: [], projects: [] };
+  this.$store.getters.contracts.forEach((c) => {
+    if (selectedContractIds.includes(c.id)) {
+      selectedItems.contracts.push(c);
+    } else {
+      c.projects.forEach((p) => {
+        if (selectedProjectIds.includes(p.id)) {
+          selectedItems.projects.push({ contractOfProject: c, project: p });
+        }
+      });
+    }
+  });
+  return selectedItems;
+} // getSelectedItems
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Merges the checkBox list and the contracts list
+ *
+ * @return filtered out inactive items
+ */
+function storeContracts() {
+  let mergedCheckBoxContractsData = _.merge(this.$store.getters.contracts, this.contractsCheckBoxes);
+  mergedCheckBoxContractsData.forEach((c) => {
+    c.projects = _.merge(c.projects, c.projectsCheckBoxes);
+    delete c.projectsCheckBoxes;
+  });
+  return mergedCheckBoxContractsData
+    .filter((c) => this.filter.active.includes(c.status))
+    .map((c) => {
+      return { ...c, projects: c.projects.filter((p) => this.filter.active.includes(p.status)) };
+    });
+} // storeContracts
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -915,55 +862,37 @@ export default {
     ContractProjectDeleteWarning,
     GeneralConfirmationModal,
     ProjectForm,
-    ProjectsEmployeesAssignedModal,
-    ContractEmployeesAssignedModal
+    ContractEmployeesAssignedModal,
+    ExpandedContractTableRow
   },
   computed: {
-    storeContracts() {
-      return this.showInactive
-        ? this.$store.getters.contracts
-        : this.$store.getters.contracts
-            .filter((c) => !c.inactive)
-            .map((c) => {
-              return { ...c, projects: c.projects.filter((p) => !p.inactive) };
-            });
-    }
+    storeContracts
   },
   methods: {
-    projectRowClass,
     contractRowClass,
     getProject,
     updateStoreEmployees,
     getEmployeeContractRelationships,
-    clickedDeleteContractPrime,
-    clickedDeleteProject,
     cloneDeep,
-    deleteProject,
-    deleteContractPrime,
     displaySuccess,
     displayError,
-    format,
     clickedRow,
     clickedEdit,
     updateStoreContracts,
     updateContractPrime,
-    getDateOptionalRules,
-    updateProject
+    isDeletingOrUpdatingStatus,
+    resetAllCheckBoxes,
+    determineCheckBox,
+    setAllProjectsCheckBox,
+    toggleContractCheckBox,
+    toggleProjectCheckBox,
+    getSelectedItems,
+    clickedDelete,
+    deleteItems,
+    updateStatus
   },
   data() {
     return {
-      duplicateProjects: (contractOfProject) => {
-        if (contractOfProject) {
-          let contract = _.find(this.$store.getters.contracts, (c) => {
-            return c.id == contractOfProject.id;
-          });
-          let found = _.some(contract.projects, (p) => {
-            if (p.id == this.editingItem.id) return false;
-            return p.projectName === this.editingItem.projectName;
-          });
-          return !found || 'Duplicate project names';
-        }
-      },
       duplicateContractPrimeCombo: () => {
         let found = _.some(this.$store.getters.contracts, (c) => {
           if (c.id == this.editingItem.id) return false;
@@ -971,114 +900,164 @@ export default {
         });
         return !found || 'Duplicate contract and prime combination';
       },
-      startDateRules: () => {
-        return this.editingItem.popStartDate && this.editingItem.popEndDate
-          ? isBefore(this.editingItem.popStartDate, this.editingItem.popEndDate) ||
-              'Start date must be before the end date'
-          : true;
-      },
-      endDateRules: () => {
-        return this.editingItem.popStartDate && this.editingItem.popEndDate
-          ? isAfter(this.editingItem.popEndDate, this.editingItem.popStartDate) ||
-              'Start date must be before the end date'
-          : true;
-      },
+      contractStatuses: api.CONTRACT_STATUSES,
+      contracts: this.$store.getters.contracts,
       contractEmployeesAssigned: null,
-      projectEmployeesAsseigned: null,
       contractStatusItem: null,
-      contractProjectStatusItem: null,
       contractValid: true,
       addProjectUnderContract: null,
       toggleProjectForm: false,
       relationships: [],
       deleteItem: null,
+      deletingItems: null,
       toggleContractEmployeesModal: false,
-      toggleProjectEmployeesModal: false,
       toggleWarningModal: false,
       toggleContractDeleteModal: false,
       toggleContractStatusModal: false,
-      toggleContractProjectStatusModal: false,
-      toggleProjectDeleteModal: false,
-      popStartDateFormatted: null,
-      popEndDateFormatted: null,
-      popStartDateMenu: false,
-      popEndDateMenu: false,
       contractLoading: false,
       editingItem: null,
+      isEditingProjectItem: false,
       loading: false,
       expanded: [],
+      filter: { active: [api.CONTRACT_STATUSES.ACTIVE] },
       search: null,
       showInactive: false,
-      projectHeaders: [
-        {
-          text: 'Project',
-          value: 'projectName',
-          align: 'center',
-          width: '85%'
-        },
-        {
-          value: 'actions',
-          sortable: false,
-          width: '15%'
-        }
+      contractsCheckBoxes: [],
+      isDeleting: false,
+      isActivating: false,
+      isDeactivating: false,
+      isClosing: false,
+      legendKey: [
+        { status: 'Active', color: '#0f9d58' },
+        { status: 'Inactive', color: '#f4b400' },
+        { status: 'Closed', color: '#db4437' }
       ],
       contractHeaders: [
         {
-          text: 'Contract',
-          value: 'contractName',
-          align: 'center',
-          width: '12%'
-        },
-        {
           text: 'Prime',
           value: 'primeName',
-          align: 'center',
-          width: '12%'
+          align: 'left'
         },
         {
-          text: 'Cost Type',
-          value: 'costType',
-          align: 'center',
-          width: '12%'
+          text: 'Contract',
+          value: 'contractName',
+          align: 'left'
+        },
+        {
+          text: 'Directorate',
+          value: 'directorate',
+          align: 'left'
         },
         {
           text: 'PoP-Start Date',
           value: 'popStartDate',
-          align: 'center',
-          width: '12%'
+          align: 'left'
         },
         {
           text: 'PoP-End Date',
           value: 'popEndDate',
-          align: 'center',
-          width: '12%'
+          align: 'left'
         },
         {
           text: 'Description',
           value: 'description',
-          align: 'left',
-          width: '27%'
+          align: 'left'
+        },
+        {
+          text: 'Active Employees',
+          value: 'spacer',
+          align: 'left'
         },
         {
           value: 'actions',
           sortable: false,
-          align: 'right',
-          width: '15%'
+          align: 'right'
         }
       ]
     };
   },
-  directives: { mask }
+  watch: {
+    '$store.getters.contracts': function () {
+      if (this.$store.getters.contracts.length > this.contractsCheckBoxes.length) {
+        let newContract = this.$store.getters.contracts[0];
+        let checkBoxObj = {
+          all: false,
+          indeterminate: false,
+          contractId: newContract.id,
+          projectsCheckBoxes: [...newContract.projects.map((p) => ({ checkBox: false, projectId: p.id }))]
+        };
+        this.contractsCheckBoxes = [checkBoxObj, ...this.contractsCheckBoxes];
+      }
+
+      this.$store.getters.contracts.forEach((c, index) => {
+        if (c.projects.length > this.contractsCheckBoxes[index].projectsCheckBoxes.length) {
+          let newProject = c.projects[0];
+          let checkBox = this.contractsCheckBoxes[index].all ? true : false;
+          this.contractsCheckBoxes[index].projectsCheckBoxes = [
+            { checkBox, projectId: newProject.id },
+            ...this.contractsCheckBoxes[index].projectsCheckBoxes
+          ];
+        }
+      });
+      this.expanded = _.cloneDeep(this.storeContracts);
+    }
+  }
 };
 </script>
 
 <style lang="scss">
 @import 'src/assets/styles/styles';
-.inactive {
-  color: $case-red;
+
+.status-indicator {
+  position: absolute;
+  left: 0;
+  height: 100%;
+  width: 5px;
 }
 
-.highlight-row {
-  background-color: rgb(238, 238, 238) !important;
+.checkBox-container {
+  position: relative;
+  display: flex;
+}
+
+.closed-status {
+  background-color: #db4437;
+}
+
+.inactive-status {
+  background-color: #f4b400;
+}
+
+.active-status {
+  background-color: #0f9d58;
+}
+
+.highlight-contract-row {
+  background-color: rgb(224, 224, 224) !important;
+}
+
+.contracts-table td:first-child {
+  padding-left: 0px !important;
+}
+</style>
+
+<style scoped>
+.contracts-table >>> td:first-of-type {
+  width: 1%;
+}
+.contracts-table >>> td:nth-child(n + 2):nth-child(-n + 6) {
+  width: 9%;
+}
+
+.contracts-table >>> td:nth-of-type(7) {
+  width: 19%;
+}
+
+.contracts-table >>> td:nth-of-type(8) {
+  width: 19%;
+}
+
+.contracts-table >>> td:last-of-type {
+  width: 10%;
 }
 </style>

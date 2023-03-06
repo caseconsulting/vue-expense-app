@@ -5,14 +5,17 @@
       <v-col cols="2" class="my-1 py-0">
         <v-skeleton-loader type="text" width="60%" class="center"></v-skeleton-loader>
       </v-col>
-      <v-col cols="3" class="my-1 py-0">
+      <v-col cols="2" class="my-1 py-0">
         <v-skeleton-loader type="text" width="55%" class="center"></v-skeleton-loader>
       </v-col>
       <v-col cols="2" class="my-1 py-0">
-        <v-skeleton-loader type="text" width="85%" class="center"></v-skeleton-loader>
+        <v-skeleton-loader type="text" width="75%" class="center"></v-skeleton-loader>
       </v-col>
-      <v-col cols="3" class="my-1 py-0">
-        <v-skeleton-loader type="text" width="30%" class="center"></v-skeleton-loader>
+      <v-col cols="2" class="my-1 py-0">
+        <v-skeleton-loader type="text" width="40%" class="center"></v-skeleton-loader>
+      </v-col>
+      <v-col cols="2" class="my-1 py-0">
+        <v-skeleton-loader type="text" width="70%" class="center"></v-skeleton-loader>
       </v-col>
       <v-col cols="2" class="my-1 py-0">
         <v-skeleton-loader type="text" width="60%" class="center"></v-skeleton-loader>

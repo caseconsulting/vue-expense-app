@@ -23,6 +23,7 @@
           <v-tab href="#customerOrgs" :disabled="loading">Customer Orgs</v-tab>
           <v-tab href="#certifications" :disabled="loading">Certifications</v-tab>
           <v-tab href="#jobRoles" :disabled="loading">Job Roles</v-tab>
+          <v-tab href="#technologies" :disabled="loading">Technologies</v-tab>
           <v-tab href="#securityInfo" :disabled="loading">Security Info</v-tab>
           <v-tab-item id="contracts" class="mx-2 my-6">
             <ReportsContracts />
@@ -35,6 +36,9 @@
           </v-tab-item>
           <v-tab-item id="jobRoles" class="mx-2 my-6">
             <ReportsJobRoles />
+          </v-tab-item>
+          <v-tab-item id="technologies" class="mx-2 my-6">
+            <ReportsTechnologies />
           </v-tab-item>
           <v-tab-item id="securityInfo" class="mx-2 my-6">
             <ReportsSecurityInfo />
@@ -50,6 +54,7 @@ import ReportsContracts from '@/components/reports/ReportsContracts.vue';
 import ReportsCustomerOrgs from '@/components/reports/ReportsCustomerOrgs.vue';
 import ReportsCertifications from '@/components/reports/ReportsCertifications.vue';
 import ReportsJobRoles from '@/components/reports/ReportsJobRoles.vue';
+import ReportsTechnologies from '@/components/reports/ReportsTechnologies.vue';
 import ReportsSecurityInfo from '../components/reports/ReportsSecurityInfo.vue';
 import { updateStoreEmployees, updateStoreContracts } from '@/utils/storeUtils';
 import { isMobile } from '@/utils/utils';
@@ -132,6 +137,7 @@ export default {
     ReportsCustomerOrgs,
     ReportsCertifications,
     ReportsJobRoles,
+    ReportsTechnologies,
     ReportsSecurityInfo,
     ReportsPageLoader
   },

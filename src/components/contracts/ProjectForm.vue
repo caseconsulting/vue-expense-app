@@ -2,16 +2,49 @@
   <v-form ref="form" v-model="valid" lazy-validation>
     <v-dialog v-model="dialog" persistent max-width="700px">
       <v-card>
-        <v-card-title class="header_style"><span class="text-h5">New Project</span></v-card-title>
+        <v-card-title class="header_style"
+          ><v-icon color="white" class="mr-2">mdi-briefcase-outline</v-icon
+          ><span class="text-h5">New Project</span></v-card-title
+        >
         <v-card-text>
           <v-container>
             <v-row>
-              <v-text-field
-                v-model="projectName"
-                label="Project Name"
-                required
-                :rules="[(v) => !!v || 'Field is required', duplicateProjects()]"
-              ></v-text-field>
+              <!-- Project Name -->
+              <v-col cols="12" sm="6" md="6">
+                <v-text-field
+                  v-model="projectName"
+                  label="Project Name*"
+                  prepend-icon="mdi-briefcase-outline"
+                  required
+                  :rules="[(v) => !!v || 'Field is required', duplicateProjects()]"
+                ></v-text-field>
+              </v-col>
+              <!-- Directorate -->
+              <v-col cols="12" sm="6" md="6">
+                <v-text-field
+                  v-model="directorate"
+                  label="Directorate"
+                  prepend-icon="mdi-office-building-outline"
+                ></v-text-field>
+              </v-col>
+              <!-- PoP Start Date  -->
+              <v-col cols="12" sm="6" md="6">
+                <v-text-field v-model="popStartDate" prepend-icon="event" label="PoP Start Date"></v-text-field>
+              </v-col>
+              <!-- Pop End Date -->
+              <v-col cols="12" sm="6" md="6">
+                <v-text-field v-model="popEndDate" prepend-icon="event" label="PoP End Date"></v-text-field>
+              </v-col>
+              <!-- Description -->
+              <v-col cols="12">
+                <v-textarea
+                  v-model="description"
+                  auto-grow
+                  label="Description"
+                  prepend-icon="mdi-text"
+                  rows="1"
+                ></v-textarea>
+              </v-col>
             </v-row>
           </v-container>
           <small>*indicates required field</small>
@@ -61,7 +94,15 @@ async function submit() {
  * Creates project upon submission.
  */
 async function createProject() {
-  let project = { id: uuid(), projectName: this.projectName };
+  let project = {
+    id: uuid(),
+    projectName: this.projectName,
+    directorate: this.directorate,
+    popStartDate: this.popStartDate,
+    popEndDate: this.popEndDate,
+    description: this.description,
+    status: api.CONTRACT_STATUSES.ACTIVE
+  };
   let contract = _.cloneDeep(this.contract);
   contract.projects = [project, ...contract.projects];
   await api.updateItem(api.CONTRACTS, contract);
@@ -110,8 +151,12 @@ export default {
   data() {
     return {
       valid: true,
+      popStartDate: null,
+      popEndDate: null,
       projectName: null,
+      description: null,
       dialog: false,
+      directorate: null,
       loading: false,
       duplicateProjects: () => {
         if (this.contract) {
@@ -123,9 +168,9 @@ export default {
     };
   },
   methods: {
+    cancel,
     createProject,
     emit,
-    cancel,
     submit
   },
   props: ['toggleProjectForm', 'contract'],

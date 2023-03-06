@@ -72,7 +72,7 @@ function fillData() {
           }
         });
       });
-    } else if (employee.employeeRole === 'intern') {
+    } else if (employee.jobRole === 'Intern') {
       if (awaitingClearance) {
         internsAwaitingClearanceCount++;
       }

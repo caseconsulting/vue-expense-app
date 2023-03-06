@@ -1,7 +1,8 @@
 <template>
   <v-container fluid>
     <v-row justify="center" class="pt-2">
-      <v-col xl="6" lg="8" sm="12">
+      <v-col xl="6" lg="8" sm="12" class="d-flex flex-column align-center">
+        <span style="font-style: italic; font-size: 12px">*Click on a word to see employees</span>
         <vue-word-cloud
           style="height: 25vh; width: inherit"
           :words="words"
@@ -13,7 +14,7 @@
           <template v-slot="props">
             <v-tooltip top>
               <template v-slot:activator="{ on }">
-                <div style="cursor: pointer" v-on="on">{{ props.text }}</div>
+                <div @click="wordClicked(props.text)" style="cursor: pointer" v-on="on">{{ props.text }}</div>
               </template>
               <div style="text-align: center">{{ props.weight }}</div>
             </v-tooltip>
@@ -36,6 +37,12 @@
 import TechBarChart from '../custom-charts/TechBarChart.vue';
 import VueWordCloud from 'vuewordcloud';
 import { storeIsPopulated } from '@/utils/utils';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * Parse through employee data to get technologies.
@@ -62,6 +69,19 @@ function parseEmployeeData() {
     }
   });
 } // parseEmployeeData
+
+/**
+ * Redirects to the reports page with a filter of the word clicked on.
+ *
+ * @param word String - The word clicked on
+ */
+function wordClicked(word) {
+  this.$router.push({
+    path: '/reports',
+    name: 'reports',
+    params: { requestedDataType: 'technologies', requestedFilter: word }
+  });
+} // wordClicked
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -101,7 +121,8 @@ export default {
     };
   },
   methods: {
-    parseEmployeeData
+    parseEmployeeData,
+    wordClicked
   },
   mounted,
   watch: {

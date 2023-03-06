@@ -1,6 +1,14 @@
 <template>
   <v-card v-if="enoughData" class="pa-5">
     <v-container v-if="dataReceived" class="ma-0">
+      <div v-if="userRoleIsAdmin()" class="right">
+        <DownloadCSV
+          filename="technologies.csv"
+          :generateData="generateCsvData"
+          sortKey="Technology"
+          :tooltip="'Download ' + showCurrent + ' Technologies to CSV'"
+        ></DownloadCSV>
+      </div>
       <v-row align="center" justify="end">
         <v-col cols="4" class="text-right">
           <v-tooltip top>
@@ -40,8 +48,10 @@
 </template>
 
 <script>
+import _ from 'lodash';
 import BarChart from '../base-charts/BarChart.vue';
-import { isMobile, storeIsPopulated } from '@/utils/utils';
+import DownloadCSV from '@/components/utils/DownloadCSV.vue';
+import { isMobile, storeIsPopulated, userRoleIsAdmin } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -125,6 +135,16 @@ function fillData() {
         }
       }
     },
+    onClick: (x, y) => {
+      if (_.first(y)) {
+        let index = _.first(y).index;
+        this.$router.push({
+          path: '/reports',
+          name: 'reports',
+          params: { requestedDataType: 'technologies', requestedFilter: this.chartData.labels[index] }
+        });
+      }
+    },
     plugins: {
       legend: {
         display: false
@@ -137,6 +157,13 @@ function fillData() {
         font: {
           size: 15
         }
+      },
+      subtitle: {
+        display: true,
+        text: '*Click on a bar to see employees',
+        font: {
+          style: 'italic'
+        }
       }
     },
     maintainAspectRatio: false
@@ -144,6 +171,28 @@ function fillData() {
   this.chartKey++; // rerenders the chart
   this.dataReceived = true;
 } // fillData
+
+/**
+ * Generates an object of data to be turned into a csv file.
+ *
+ * @returns Array - An array of objects
+ */
+function generateCsvData() {
+  let csvData = [];
+  this.employees.forEach((e) => {
+    if (e.technologies) {
+      e.technologies.forEach((t) => {
+        if (
+          this.showCurrent == 'All' ||
+          (this.showCurrent == 'Current' && t.current) ||
+          (this.showCurrent == 'Past' && !t.current)
+        )
+          csvData.push({ Technology: t.name, Employee: `${e.firstName} ${e.lastName}` });
+      });
+    }
+  });
+  return csvData;
+} // generateCsvData
 
 /**
  * Increases the number of columns on the chart
@@ -311,7 +360,8 @@ function watchShowCurrent() {
 
 export default {
   components: {
-    BarChart
+    BarChart,
+    DownloadCSV
   },
   computed: {
     isMobile,
@@ -338,11 +388,13 @@ export default {
   },
   methods: {
     fillData,
+    generateCsvData,
     oneMoreColumn,
     oneLessColumn,
     sortTech,
     parseEmployeeData,
-    setNumOfColumns
+    setNumOfColumns,
+    userRoleIsAdmin
   },
   beforeDestroy,
   mounted,
@@ -364,5 +416,9 @@ export default {
 <style scoped>
 button {
   top: 30px;
+}
+
+.right {
+  float: right;
 }
 </style>

@@ -23,7 +23,8 @@
         <v-btn @click="toggleContractForm = true" :disabled="!$store.getters.contracts" class="my-2"
           >Create a contract <v-icon right> mdi-file-document-plus </v-icon></v-btn
         >
-        <contracts-table></contracts-table>
+        <contracts-page-loader v-if="loading"></contracts-page-loader>
+        <contracts-table v-else></contracts-table>
       </v-container>
     </v-card>
     <ContractForm :toggleContractForm="toggleContractForm" />
@@ -32,8 +33,9 @@
 <script>
 import ContractsTable from '@/components/contracts/ContractsTable.vue';
 import ContractForm from '@/components/contracts/ContractForm.vue';
+import ContractsPageLoader from '@/components/contracts/ContractsPageLoader.vue';
 
-import { updateStoreContracts } from '@/utils/storeUtils';
+import { updateStoreContracts, updateStoreEmployees } from '@/utils/storeUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -54,6 +56,7 @@ function beforeDestroy() {
  * created life cycle hook
  */
 async function created() {
+  this.loading = true;
   window.EventBus.$on('canceled-contract-form', () => (this.toggleContractForm = false));
   window.EventBus.$on('submitted-contract-form', () => (this.toggleContractForm = false));
   window.EventBus.$on('status-alert', (status) => {
@@ -62,7 +65,11 @@ async function created() {
     this.$set(this.status, 'color', status.color);
   });
 
-  !this.$store.getters.contracts ? await this.updateStoreContracts() : null;
+  await Promise.all([
+    !this.$store.getters.contracts ? await this.updateStoreContracts() : null,
+    !this.$store.getters.employees ? await this.updateStoreEmployees() : null
+  ]);
+  this.loading = false;
 } // created
 
 /**
@@ -84,11 +91,13 @@ export default {
   beforeDestroy,
   components: {
     ContractsTable,
-    ContractForm
+    ContractForm,
+    ContractsPageLoader
   },
   created,
   data() {
     return {
+      loading: false,
       toggleContractForm: false,
       status: {
         statusType: undefined,
@@ -99,6 +108,7 @@ export default {
   },
   methods: {
     updateStoreContracts,
+    updateStoreEmployees,
     clearStatus
   }
 };
