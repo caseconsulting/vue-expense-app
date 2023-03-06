@@ -374,6 +374,8 @@ function clickedRow(contractObj) {
   } else {
     // item is expanded
     this.expanded.splice(i, 1);
+    console.log('collapsed');
+    console.log(this.expanded);
   }
 } // clickedRow
 
@@ -823,6 +825,19 @@ function storeContracts() {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Auto expands rows when switching filter options
+ */
+function watchFilter() {
+  this.expanded = _.cloneDeep(this.storeContracts);
+} // watchFilter
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -974,7 +989,8 @@ export default {
         }
       });
       this.expanded = _.cloneDeep(this.storeContracts);
-    }
+    },
+    filter: watchFilter
   }
 };
 </script>
