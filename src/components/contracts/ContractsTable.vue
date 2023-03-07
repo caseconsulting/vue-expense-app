@@ -317,6 +317,7 @@ import ExpandedContractTableRow from './ExpandedContractTableRow.vue';
  */
 async function created() {
   window.EventBus.$on('confirm-delete-contract', async () => {
+    console.log('Deleting items');
     await this.deleteItems(this.deletingItems);
     this.deletingItems = null;
   });
@@ -326,11 +327,9 @@ async function created() {
   window.EventBus.$on('confirmed-contract-status', () => {
     this.updateStatus(this.statusItemClicked);
     this.toggleContractStatusModal = false;
-    this.statusItemClicked = null;
   });
   window.EventBus.$on('canceled-contract-status', () => {
     this.toggleContractStatusModal = false;
-    this.statusItemClicked = null;
   });
   window.EventBus.$on('canceled-project-form', () => {
     this.toggleProjectForm = false;
@@ -485,12 +484,11 @@ async function clickedUpdateStatus(status) {
     ];
   });
   if (relationships.length != 0) {
+    this.titleMessage = `Cannot mark item(s) as ${status}`;
+    this.validateMessage = `Please remove the following relationships before marking selected item(s) as ${status}.`;
     this.toggleValidateModal = !this.toggleValidateModal;
     this.relationships = relationships;
   } else {
-    this.titleMessage = `Cannot mark item(s) as ${status}`;
-    this.validateMessage =
-      'Please remove the following relationships before marking selected item(s) as ' + status + '.';
     this.toggleContractStatusModal = true;
     this.statusItemClicked = status;
   }
@@ -513,11 +511,11 @@ async function clickedDelete() {
   });
 
   if (relationships.length != 0) {
+    this.titleMessage = 'Cannot delete item(s)';
+    this.validateMessage = 'Please remove the following relationships before deleting selected item(s).';
     this.toggleValidateModal = !this.toggleValidateModal;
     this.relationships = relationships;
   } else {
-    this.titleMessage = 'Cannot delete item(s)';
-    this.validateMessage = 'Please remove the following relationships before deleting selected item(s).';
     this.deletingItems = selectedItems;
     this.toggleContractDeleteModal = !this.toggleContractDeleteModal;
   }
