@@ -254,7 +254,15 @@ async function updateProject(contract) {
     this.projectLoading = true;
     let contractObj = _.cloneDeep(contract);
     let projectIndex = contractObj.projects.findIndex((item) => item.id == this.editingProjectItem.id);
-    contractObj.projects[projectIndex] = this.editingProjectItem;
+    contractObj.projects[projectIndex] = {
+      id: this.editingProjectItem.id,
+      projectName: this.editingProjectItem.projectName,
+      description: this.editingProjectItem.description,
+      directorate: this.editingProjectItem.directorate,
+      popEndDate: this.editingProjectItem.popEndDate,
+      popStartDate: this.editingProjectItem.popStartDate,
+      status: this.editingProjectItem.status
+    };
     let response = await api.updateItem(api.CONTRACTS, contractObj);
     if (response.name === 'AxiosError') {
       throw new Error(response.response.data.message);
