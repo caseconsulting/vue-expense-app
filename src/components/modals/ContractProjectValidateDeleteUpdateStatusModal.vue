@@ -3,9 +3,9 @@
     <v-dialog v-model="activate" persistent max-width="450">
       <v-card>
         <!-- Errors across tabs -->
-        <v-card-title class="headline">Cannot delete item.</v-card-title>
+        <v-card-title class="headline">{{title}}</v-card-title>
         <v-card-text>
-          <span>Delete the following relationships before deleting item:</span>
+          <span>{{message}}</span>
           <br/>
           <br/>
           <p v-for="r in relationships" :key="r.project.id">
@@ -18,7 +18,6 @@
           <v-btn
             text
             @click.native="
-              emit('canceled-form');
               activate = false;
             "
           >
@@ -42,9 +41,10 @@
  *
  * @param msg - Message to emit
  */
-function emit(msg) {
+ function emit(msg) {
   window.EventBus.$emit(msg);
 } // emit
+
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -68,15 +68,15 @@ function watchToggleContractProjectDeleteWarning() {
 export default {
   data() {
     return {
-      activate: false
+      activate: false,
     };
   },
   methods: {
-    emit
+    emit,
   },
   watch: {
     toggleModal: watchToggleContractProjectDeleteWarning
   },
-  props: ['toggleModal', 'relationships']
+  props: ['title', 'message', 'toggleModal', 'relationships']
 };
 </script>

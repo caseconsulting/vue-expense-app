@@ -29,21 +29,21 @@
               class="ml-4 font-weight-medium"
               :loading="isActivating"
               :disabled="!this.contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
-              @click="updateStatus(contractStatuses.ACTIVE)"
+              @click="clickedUpdateStatus(contractStatuses.ACTIVE)"
               >Activate</v-btn
             >
             <v-btn
               class="ml-4"
               :loading="isDeactivating"
               :disabled="!this.contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
-              @click="updateStatus(contractStatuses.INACTIVE)"
+              @click="clickedUpdateStatus(contractStatuses.INACTIVE)"
               >Deactivate</v-btn
             >
             <v-btn
               class="ml-4"
               :loading="isClosing"
               :disabled="!this.contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
-              @click="updateStatus(contractStatuses.CLOSED)"
+              @click="clickedUpdateStatus(contractStatuses.CLOSED)"
               >Close</v-btn
             >
           </div>
@@ -278,14 +278,14 @@
       :toggleModal="toggleContractEmployeesModal"
     />
     <delete-modal :toggleDeleteModal="toggleContractDeleteModal" :type="'contract'"></delete-modal>
-    <contract-project-delete-warning
-      :toggleModal="toggleWarningModal"
+    <contract-project-validate-delete-update-status-modal
+      :toggleModal="toggleValidateModal"
       :relationships="relationships"
-    ></contract-project-delete-warning>
+      :message="validateMessage"
+      :title="titleMessage"
+    ></contract-project-validate-delete-update-status-modal>
     <general-confirmation-modal
-      :title="`Are you sure you want to make this contract ${
-        contractStatusItem && contractStatusItem.inactive ? 'active' : 'inactive'
-      }?`"
+      :title="`Are you sure you want to mark selected item(s) as ${statusItemClicked}?`"
       type="contract-status"
       :toggleModal="toggleContractStatusModal"
     ></general-confirmation-modal>
@@ -300,7 +300,7 @@ import { asyncForEach } from '../../utils/utils';
 
 import DeleteModal from '../modals/DeleteModal.vue';
 import ContractFilter from './ContractFilter.vue';
-import ContractProjectDeleteWarning from '../modals/ContractProjectDeleteWarning.vue';
+import ContractProjectValidateDeleteUpdateStatusModal from '../modals/ContractProjectValidateDeleteUpdateStatusModal.vue';
 import ProjectForm from './ProjectForm.vue';
 import GeneralConfirmationModal from '@/components/modals/GeneralConfirmationModal.vue';
 import ContractEmployeesAssignedModal from '../modals/ContractEmployeesAssignedModal.vue';
@@ -322,6 +322,15 @@ async function created() {
   });
   window.EventBus.$on('canceled-delete-contract', () => {
     this.deletingItems = null;
+  });
+  window.EventBus.$on('confirmed-contract-status', () => {
+    this.updateStatus(this.statusItemClicked);
+    this.toggleContractStatusModal = false;
+    this.statusItemClicked = null;
+  });
+  window.EventBus.$on('canceled-contract-status', () => {
+    this.toggleContractStatusModal = false;
+    this.statusItemClicked = null;
   });
   window.EventBus.$on('canceled-project-form', () => {
     this.toggleProjectForm = false;
@@ -352,8 +361,9 @@ function beforeDestroy() {
   window.EventBus.$off('canceled-contract-status');
   window.EventBus.$off('canceled-project-form');
   window.EventBus.$off('closed-project-employees-assigned-modal');
-  window.EventBus.$off('is-editing-project-item');
   window.EventBus.$off('filter');
+  window.EventBus.$off('is-editing-project-item');
+  window.EventBus.$off('toggle-project-checkbox');
 } // beforeDestroy
 
 // |--------------------------------------------------|
@@ -374,8 +384,6 @@ function clickedRow(contractObj) {
   } else {
     // item is expanded
     this.expanded.splice(i, 1);
-    console.log('collapsed');
-    console.log(this.expanded);
   }
 } // clickedRow
 
@@ -457,6 +465,38 @@ function clickedEdit(item) {
 } // clickedEdit
 
 /**
+ * Handler for clicked update status buttons (Deactivate, Activate, Close)
+ */
+async function clickedUpdateStatus(status) {
+  let relationships = [];
+  let selectedItems = this.getSelectedItems();
+  if (status === this.contractStatuses.ACTIVE) {
+    this.toggleContractStatusModal = true;
+    this.statusItemClicked = status;
+    return;
+  }
+  await asyncForEach(selectedItems.contracts, async (c) => {
+    relationships = [...relationships, ...(await this.getActiveEmployeeContractRelationships(c))];
+  });
+  await asyncForEach(selectedItems.projects, async (p) => {
+    relationships = [
+      ...relationships,
+      ...(await this.getActiveEmployeeContractRelationships(p.contractOfProject, p.project))
+    ];
+  });
+  if (relationships.length != 0) {
+    this.toggleValidateModal = !this.toggleValidateModal;
+    this.relationships = relationships;
+  } else {
+    this.titleMessage = `Cannot mark item(s) as ${status}`;
+    this.validateMessage =
+      'Please remove the following relationships before marking selected item(s) as ' + status + '.';
+    this.toggleContractStatusModal = true;
+    this.statusItemClicked = status;
+  }
+} // clickedUpdateStatus
+
+/**
  * Handler for click delete button event
  */
 async function clickedDelete() {
@@ -473,10 +513,11 @@ async function clickedDelete() {
   });
 
   if (relationships.length != 0) {
-    this.toggleWarningModal = !this.toggleWarningModal;
+    this.toggleValidateModal = !this.toggleValidateModal;
     this.relationships = relationships;
   } else {
-    // this.deleteItem = contract;
+    this.titleMessage = 'Cannot delete item(s)';
+    this.validateMessage = 'Please remove the following relationships before deleting selected item(s).';
     this.deletingItems = selectedItems;
     this.toggleContractDeleteModal = !this.toggleContractDeleteModal;
   }
@@ -541,7 +582,66 @@ function cloneDeep(item) {
 } // cloneDeep
 
 /**
- * Gets relationships between projects and employees
+ * Gets relationships between projects and active employees.
+ *
+ * @param contract contract to find active employees under
+ * @param project project to find active employees under
+ *
+ * @return list of relationships in the following format
+ *        [{contract: "", prime: "", project: {...}, employees: [...]}, ...]
+ */
+async function getActiveEmployeeContractRelationships(contract, project = null) {
+  if (!this.$store.getters.employees) {
+    await this.updateStoreEmployees();
+  }
+  let employees = this.$store.getters.employees;
+  let relationships = [];
+  employees.forEach((e) => {
+    if (e.contracts && e.workStatus > 0) {
+      let contractObj = e.contracts.find((c) => c.contractId == contract.id);
+      if (contractObj) {
+        if (project) {
+          let employeeAssignedToProject = e.contracts.some((c) =>
+            c.projects.some((p) => p.projectId == project.id && p.presentDate)
+          );
+          if (employeeAssignedToProject) {
+            let index = relationships.findIndex((r) => r.project.id == project.id);
+            if (index < 0) {
+              relationships.push({
+                contract: contract.contractName,
+                prime: contract.primeName,
+                project: project,
+                employees: [e]
+              });
+            } else {
+              relationships[index].employees.push(e);
+            }
+          }
+        } else {
+          contractObj.projects.forEach((p) => {
+            if (p.presentDate) {
+              let index = relationships.findIndex((r) => r.project.id == p.projectId);
+              if (index < 0) {
+                relationships.push({
+                  contract: contract.contractName,
+                  prime: contract.primeName,
+                  project: this.getProject(contract.id, p.projectId),
+                  employees: [e]
+                });
+              } else {
+                relationships[index].employees.push(e);
+              }
+            }
+          });
+        }
+      }
+    }
+  });
+  return relationships;
+} // getActiveEmployeeContractRelationships
+
+/**
+ * Gets relationships between projects and employees.
  *
  * @param contract contract to find employees under
  * @param project project to find employees under
@@ -848,7 +948,7 @@ export default {
   components: {
     DeleteModal,
     ContractFilter,
-    ContractProjectDeleteWarning,
+    ContractProjectValidateDeleteUpdateStatusModal,
     GeneralConfirmationModal,
     ProjectForm,
     ContractEmployeesAssignedModal,
@@ -861,6 +961,7 @@ export default {
     contractRowClass,
     getProject,
     updateStoreEmployees,
+    getActiveEmployeeContractRelationships,
     getEmployeeContractRelationships,
     cloneDeep,
     displaySuccess,
@@ -877,6 +978,7 @@ export default {
     toggleProjectCheckBox,
     getSelectedItems,
     clickedDelete,
+    clickedUpdateStatus,
     deleteItems,
     updateStatus
   },
@@ -900,7 +1002,7 @@ export default {
       deleteItem: null,
       deletingItems: null,
       toggleContractEmployeesModal: false,
-      toggleWarningModal: false,
+      toggleValidateModal: false,
       toggleContractDeleteModal: false,
       toggleContractStatusModal: false,
       contractLoading: false,
@@ -910,7 +1012,10 @@ export default {
       expanded: [],
       filter: [api.CONTRACT_STATUSES.ACTIVE],
       search: null,
+      statusItemClicked: null,
       showInactive: false,
+      validateMessage: '',
+      titleMessage: '',
       contractsCheckBoxes: [],
       isDeleting: false,
       isActivating: false,
