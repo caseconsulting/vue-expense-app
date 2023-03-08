@@ -14,7 +14,7 @@
                 >
                 <ul v-else>
                   <li v-for="e in currentEmployees" :key="e.id">
-                    <a :href="`/employee/${e.employeeNumber}`">{{ nicknameAndLastName(e) }}</a>
+                    <a @click="$router.push(`/employee/${e.employee.employeeNumber}`)">{{ nicknameAndLastName(e) }}</a>
                   </li>
                 </ul>
               </v-card-text></v-card
@@ -28,7 +28,7 @@
                 >
                 <ul v-else>
                   <li v-for="e in pastEmployees" :key="e.id">
-                    <a :href="`/employee/${e.employeeNumber}`">{{ nicknameAndLastName(e) }}</a>
+                    <a @click="$router.push(`/employee/${e.employee.employeeNumber}`)">{{ nicknameAndLastName(e) }}</a>
                   </li>
                 </ul>
               </v-card-text></v-card

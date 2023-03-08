@@ -27,7 +27,7 @@
                     <a
                       @click="$router.push(`/employee/${e.employee.employeeNumber}`)"
                       :class="e.employee.workStatus == 0 ? 'inactive' : ''"
-                      >{{ e.employee.firstName + ' ' + e.employee.lastName }}</a
+                      >{{ nicknameAndLastName(e.employee) }}</a
                     ><span>
                       (assigned project{{ e.currentProjects.length > 1 ? 's' : '' }}:
                       {{ e.currentProjects.map((p) => p.projectName).join(', ') }})</span
@@ -59,7 +59,7 @@
                     <a
                       @click="$router.push(`/employee/${e.employee.employeeNumber}`)"
                       :class="e.employee.workStatus == 0 ? 'inactive' : ''"
-                      >{{ e.employee.firstName + ' ' + e.employee.lastName }}</a
+                      >{{ nicknameAndLastName(e.employee) }}</a
                     >
                     <span>
                       (last assigned project{{ e.lastProjects.length > 1 ? 's' : '' }}:
@@ -90,6 +90,7 @@
 <script>
 import { updateStoreContracts, updateStoreEmployees } from '@/utils/storeUtils';
 import dateUtils from '../../shared/dateUtils';
+import { nicknameAndLastName } from '@/shared/employeeUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -220,6 +221,7 @@ export default {
     getCurrentEmployeesAssignedToContract,
     getPastEmployeesAssignedToContract,
     getProject,
+    nicknameAndLastName,
     updateStoreContracts,
     updateStoreEmployees
   },
