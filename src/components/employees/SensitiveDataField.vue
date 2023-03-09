@@ -1,7 +1,7 @@
 <template>
   <div class="field-container">
     <p @click="$emit('click')">
-      <b>{{ label }}:</b> {{ show ? value : '*****' }}
+      <b v-if="label">{{ label }}:</b> {{ show ? value : '*****' }}
     </p>
     <a
       class="show font-weight-bold text-caption"

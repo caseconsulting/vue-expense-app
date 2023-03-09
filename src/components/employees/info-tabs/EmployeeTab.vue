@@ -28,13 +28,15 @@
       <b>Agency Identification Number:</b> {{ this.model.agencyIdentificationNumber }}
     </p>
     <!-- Employee Role -->
-    <p v-if="admin"><b>Employee Role:</b> {{ this.model.employeeRole | startCase }}</p>
+    <sensitive-data-field v-if="admin" label="Employee Role" :value="startCase(this.model.employeeRole)" />
     <!-- Hire Date -->
     <p v-if="admin || employee"><b> Hire Date:</b> {{ monthDayYearFormat(this.model.hireDate) }}</p>
     <!-- Departure Date -->
-    <p v-if="!isEmpty(this.model.deptDate) && admin">
-      <b>Departure Date:</b> {{ monthDayYearFormat(this.model.deptDate) }}
-    </p>
+    <sensitive-data-field
+      v-if="!isEmpty(this.model.deptDate) && admin"
+      label="Departure Date"
+      :value="monthDayYearFormat(this.model.deptDate)"
+    />
     <!-- Status -->
     <p v-if="admin || employee"><b>Status:</b> {{ getWorkStatus(this.model.workStatus) }}</p>
     <!-- Mifi Status -->
@@ -48,9 +50,12 @@
     <div v-if="admin || employee">
       <v-divider></v-divider>
       <p class="mt-4"><b>EEO Compliance Reporting:</b></p>
-      <div v-if="this.model.eeoDeclineSelfIdentify" class="ml-2">
-        <p><b>Status: </b>Declined to self-identify.</p>
-      </div>
+      <sensitive-data-field
+        class="ml-2"
+        v-if="this.model.eeoDeclineSelfIdentify"
+        label="Status"
+        value="Declined to self-identify."
+      />
       <div
         v-else-if="
           !this.model.eeoDeclineSelfIdentify &&
@@ -63,12 +68,12 @@
         "
         class="ml-2"
       >
-        <p><b>Gender: </b>{{ this.model.eeoGender.text }}</p>
-        <p><b>Hispanic or Latino: </b>{{ this.model.eeoHispanicOrLatino.value ? 'Yes' : 'No' }}</p>
-        <p><b>Race or Ethnicity: </b>{{ this.model.eeoRaceOrEthnicity.text }}</p>
-        <p><b>Job Category: </b>{{ this.model.eeoJobCategory.text }}</p>
-        <p><b>Disability: </b>{{ this.model.eeoHasDisability ? 'Yes' : 'No' }}</p>
-        <p><b>Protected Veteran: </b>{{ this.model.eeoIsProtectedVeteran ? 'Yes' : 'No' }}</p>
+        <sensitive-data-field label="Gender" :value="this.model.eeoGender.text" />
+        <sensitive-data-field label="Hispanic or Latino" :value="this.model.eeoHispanicOrLatino.value" />
+        <sensitive-data-field label="Race or Ethnicity" :value="this.model.eeoRaceOrEthnicity.text" />
+        <sensitive-data-field label="Job Category" :value="this.model.eeoJobCategory.text" />
+        <sensitive-data-field label="Disability" :value="this.model.eeoHasDisability ? 'Yes' : 'No'" />
+        <sensitive-data-field label="Protected Veteran" :value="this.model.eeoIsProtectedVeteran ? 'Yes' : 'No'" />
       </div>
       <div
         v-else-if="
@@ -94,6 +99,7 @@
 import employeeUtils from '@/shared/employeeUtils';
 import _ from 'lodash';
 import { isEmpty, monthDayYearFormat } from '@/utils/utils';
+import SensitiveDataField from '../SensitiveDataField.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -201,10 +207,12 @@ export default {
     startCase
   },
   methods: {
+    startCase,
     getWorkStatus,
     isEmpty,
     monthDayYearFormat
   },
-  props: ['admin', 'contracts', 'employee', 'model']
+  props: ['admin', 'contracts', 'employee', 'model'],
+  components: { SensitiveDataField }
 };
 </script>
