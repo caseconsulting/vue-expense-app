@@ -34,8 +34,14 @@
           </v-tooltip>
           <v-list-item-content>
             <v-list-item-subtitle class="mb-1"> {{ number.type }}</v-list-item-subtitle>
-            <v-list-item-title
-              >{{ number.number }}<span v-if="number.ext"> (Ext. {{ number.ext }})</span></v-list-item-title
+            <v-list-item-title>
+              <sensitive-data-field
+                v-if="number.private"
+                :value="number.ext ? `${number.number} (Ext. ${number.ext}) ` : number.number"
+              />
+              <div v-else>
+                {{ number.number }}<span v-if="number.ext"> (Ext. {{ number.ext }})</span>
+              </div></v-list-item-title
             >
           </v-list-item-content>
         </v-list-item>
