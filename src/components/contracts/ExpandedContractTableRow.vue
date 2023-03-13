@@ -330,7 +330,11 @@ function setProjectActiveEmployees() {
       if (employee.contracts) {
         let contractObj = employee.contracts.find((c) => c.contractId == this.contract.item.id);
         if (contractObj) {
-          if (employee.contracts.some((c) => c.projects.some((p) => p.projectId == project.id && !p.endDate))) {
+          if (
+            employee.contracts.some((c) =>
+              c.projects.some((p) => p.projectId == project.id && !p.endDate && employee.workStatus > 0)
+            )
+          ) {
             employeesList.push(employee);
           }
         }
