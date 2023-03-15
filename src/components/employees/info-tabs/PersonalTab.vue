@@ -35,17 +35,17 @@
           <v-list-item-content>
             <v-list-item-subtitle class="mb-1"> {{ number.type }}</v-list-item-subtitle>
             <v-list-item-title>
-              <sensitive-data-field
-                v-if="number.private"
-                :value="number.ext ? `${number.number} (Ext. ${number.ext}) ` : number.number"
-              />
-              <div v-else>
+              <div>
                 {{ number.number }}<span v-if="number.ext"> (Ext. {{ number.ext }})</span>
               </div></v-list-item-title
             >
           </v-list-item-content>
         </v-list-item>
       </v-list>
+    </p>
+    <!-- Birthday Feed -->
+    <p v-if="!isEmpty(this.model.birthdayFeed) && (admin || employee)">
+      <b>Birthday on Feed:</b> {{ this.model.birthdayFeed | birthdayFeedResponse }}
     </p>
     <!-- Birthday -->
     <sensitive-data-field
@@ -55,12 +55,6 @@
       label="Birthday"
       :value="monthDayYearFormat(this.model.birthday)"
     />
-    <!-- Birthday Feed -->
-    <sensitive-data-field
-      v-if="!isEmpty(this.model.birthdayFeed) && (admin || employee)"
-      label="Birthday on Feed"
-      :value="birthdayFeedResponse(this.model.birthdayFeed)"
-    />
     <!-- Place of Birth -->
     <sensitive-data-field
       v-if="!isEmpty(getPlaceOfBirth) && (admin || employee)"
@@ -68,11 +62,9 @@
       :value="getPlaceOfBirth"
     />
     <!-- Current Address -->
-    <sensitive-data-field
-      v-if="!isEmpty(getCurrentAddress) && (employee || !userRoleIsIntern())"
-      label="Current Address"
-      :value="getCurrentAddress"
-    />
+    <p v-if="!isEmpty(getCurrentAddress) && (employee || !userRoleIsIntern())">
+      <b>Current Address:</b> {{ getCurrentAddress }}
+    </p>
   </div>
   <p v-else>No Personal Information</p>
 </template>

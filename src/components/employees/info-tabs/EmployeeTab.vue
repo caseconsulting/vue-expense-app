@@ -28,15 +28,13 @@
       <b>Agency Identification Number:</b> {{ this.model.agencyIdentificationNumber }}
     </p>
     <!-- Employee Role -->
-    <sensitive-data-field v-if="admin" label="Employee Role" :value="startCase(this.model.employeeRole)" />
+    <p v-if="admin"><b>Employee Role:</b> {{ this.model.employeeRole | startCase }}</p>
     <!-- Hire Date -->
     <p v-if="admin || employee"><b> Hire Date:</b> {{ monthDayYearFormat(this.model.hireDate) }}</p>
     <!-- Departure Date -->
-    <sensitive-data-field
-      v-if="!isEmpty(this.model.deptDate) && admin"
-      label="Departure Date"
-      :value="monthDayYearFormat(this.model.deptDate)"
-    />
+    <p v-if="!isEmpty(this.model.deptDate) && admin">
+      <b>Departure Date:</b> {{ monthDayYearFormat(this.model.deptDate) }}
+    </p>
     <!-- Status -->
     <p v-if="admin || employee"><b>Status:</b> {{ getWorkStatus(this.model.workStatus) }}</p>
     <!-- Mifi Status -->
