@@ -20,7 +20,7 @@
             <v-icon color="#f4b400">mdi-stop-circle-outline</v-icon>
           </v-btn>
         </template>
-        <span>Inactive</span>
+        <span>Unstaffed</span>
       </v-tooltip>
 
       <!-- Closed -->

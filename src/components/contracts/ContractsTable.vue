@@ -37,7 +37,7 @@
               :loading="isDeactivating"
               :disabled="!this.contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
               @click="clickedUpdateStatus(contractStatuses.INACTIVE)"
-              >Deactivate</v-btn
+              >Unstaffed</v-btn
             >
             <v-btn
               class="ml-4"
