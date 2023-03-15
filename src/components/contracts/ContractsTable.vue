@@ -152,10 +152,11 @@
                 name="description"
                 auto-grow
                 label="Description"
+                class="smaller-text"
                 rows="1"
                 @click.stop
               ></v-textarea>
-              <span v-else :class="{ 'font-weight-bold': true }">{{ item.description }}</span>
+              <span v-else class="smaller-text" :class="{ 'font-weight-bold': true }">{{ item.description }}</span>
             </template>
 
             <!-- Expanded Row Slot -->
@@ -1123,6 +1124,12 @@ export default {
 
 .active-status {
   background-color: #0f9d58;
+}
+
+.smaller-text {
+  display: block;
+  font-size: 11px;
+  line-height: 1.2;
 }
 
 .highlight-contract-row {

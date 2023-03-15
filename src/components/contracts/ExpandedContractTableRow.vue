@@ -83,21 +83,24 @@
               name="description"
               auto-grow
               label="Description"
+              class="smaller-text"
               rows="1"
               @click.stop
             ></v-textarea>
-            <span v-else>{{ item.description }}</span>
+            <span v-else class="smaller-text">{{ item.description }}</span>
           </template>
 
           <!-- Project Active Employees Slot -->
           <template v-slot:[`item.projectActiveEmployees`]="{ item }">
-            <span
-              v-for="(emp, i) in item.projectActiveEmployees"
-              :key="emp.employeeNumber"
-              :class="{ inactive: item.status == contractStatuses.INACTIVE }"
-            >
-              <a @click="$router.push(`/employee/${emp.employeeNumber}`)">{{ nicknameAndLastName(emp) }}</a>
-              <span v-if="i != item.projectActiveEmployees.length - 1">, </span>
+            <span class="smaller-text">
+              <span
+                v-for="(emp, i) in getProjectActiveEmployees(item)"
+                :key="emp.employeeNumber"
+                :class="{ inactive: item.status == contractStatuses.INACTIVE }"
+              >
+                <a @click="$router.push(`/employee/${emp.employeeNumber}`)">{{ nicknameAndLastName(emp) }}</a>
+                <span v-if="i != getProjectActiveEmployees(item).length - 1">, </span>
+              </span>
             </span>
           </template>
 
@@ -199,8 +202,6 @@ function created() {
   window.EventBus.$on('closed-project-employees-assigned-modal', () => {
     this.toggleProjectEmployeesModal = false;
   });
-
-  this.setProjectActiveEmployees();
 } // created
 
 // |--------------------------------------------------|
@@ -254,15 +255,7 @@ async function updateProject(contract) {
     this.projectLoading = true;
     let contractObj = _.cloneDeep(contract);
     let projectIndex = contractObj.projects.findIndex((item) => item.id == this.editingProjectItem.id);
-    contractObj.projects[projectIndex] = {
-      id: this.editingProjectItem.id,
-      projectName: this.editingProjectItem.projectName,
-      description: this.editingProjectItem.description,
-      directorate: this.editingProjectItem.directorate,
-      popEndDate: this.editingProjectItem.popEndDate,
-      popStartDate: this.editingProjectItem.popStartDate,
-      status: this.editingProjectItem.status
-    };
+    contractObj.projects[projectIndex] = this.editingProjectItem;
     let response = await api.updateItem(api.CONTRACTS, contractObj);
     if (response.name === 'AxiosError') {
       throw new Error(response.response.data.message);
@@ -323,25 +316,20 @@ function getProject(contractId, projectId) {
 /**
  * Sets the projects active employees in the form of a list.
  */
-function setProjectActiveEmployees() {
-  _.forEach(this.contract.item.projects, (project) => {
-    let employeesList = [];
-    _.forEach(this.$store.getters.employees, (employee) => {
-      if (employee.contracts) {
-        let contractObj = employee.contracts.find((c) => c.contractId == this.contract.item.id);
-        if (contractObj) {
-          if (
-            employee.contracts.some((c) =>
-              c.projects.some((p) => p.projectId == project.id && !p.endDate && employee.workStatus > 0)
-            )
-          ) {
-            employeesList.push(employee);
-          }
-        }
+function getProjectActiveEmployees(project) {
+  let employeesList = [];
+  _.forEach(this.$store.getters.employees, (employee) => {
+    if (employee.contracts) {
+      if (
+        employee.contracts.some((c) =>
+          c.projects.some((p) => p.projectId == project.id && !p.endDate && employee.workStatus > 0)
+        )
+      ) {
+        employeesList.push(employee);
       }
-    });
-    project['projectActiveEmployees'] = employeesList;
+    }
   });
+  return employeesList;
 } // setProjectActiveEmployees
 
 /**
@@ -371,7 +359,7 @@ export default {
     displayError,
     getProject,
     nicknameAndLastName,
-    setProjectActiveEmployees,
+    getProjectActiveEmployees,
     toggleProjectCheckBox
   },
   data() {
@@ -441,6 +429,12 @@ export default {
 
 .highlight-project-row {
   background-color: rgb(255, 255, 255) !important;
+}
+
+.smaller-text {
+  display: block;
+  font-size: 11px;
+  line-height: 1.2;
 }
 </style>
 
