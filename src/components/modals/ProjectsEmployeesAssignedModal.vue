@@ -54,6 +54,7 @@
 <script>
 import { updateStoreContracts, updateStoreEmployees } from '@/utils/storeUtils';
 import { nicknameAndLastName } from '@/shared/employeeUtils';
+import { getProjectCurrentEmployees, getProjectPassedEmployees } from '@/shared/contractUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -84,42 +85,6 @@ function emit(msg) {
   window.EventBus.$emit(msg);
 } // emit
 
-/**
- * Gets current employees assigned to project.
- */
-function getCurrentEmployeesAssignedToProject() {
-  this.currentEmployees = this.$store.getters.employees.filter((e) => {
-    if (
-      e.contracts &&
-      e.contracts.some(
-        (c) =>
-          c.contractId == this.contract.id && c.projects.some((p) => p.projectId == this.project.id && p.presentDate)
-      )
-    ) {
-      return true;
-    }
-    return false;
-  });
-} // getCurrentEmployeesAssignedToProject
-
-/**
- * Gets past employees who were assigned to project.
- */
-function getPastEmployeesAssignedToProject() {
-  this.pastEmployees = this.$store.getters.employees.filter((e) => {
-    if (
-      e.contracts &&
-      e.contracts.some(
-        (c) =>
-          c.contractId == this.contract.id && c.projects.some((p) => p.projectId == this.project.id && !p.presentDate)
-      )
-    ) {
-      return true;
-    }
-    return false;
-  });
-} // getPastEmployeesAssignedToProject
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                     WATCHERS                     |
@@ -138,8 +103,8 @@ function watchEmployeesAssignedModal() {
  */
 function watchProject() {
   if (this.project) {
-    this.getCurrentEmployeesAssignedToProject();
-    this.getPastEmployeesAssignedToProject();
+    this.currentEmployees = getProjectCurrentEmployees(this.contract, this.project, this.$store.getters.employees);
+    this.pastEmployees = getProjectPassedEmployees(this.contract, this.project, this.$store.getters.employees);
   }
 } // watchProject
 
@@ -172,8 +137,6 @@ export default {
   },
   methods: {
     emit,
-    getCurrentEmployeesAssignedToProject,
-    getPastEmployeesAssignedToProject,
     nicknameAndLastName,
     updateStoreContracts,
     updateStoreEmployees

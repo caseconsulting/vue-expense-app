@@ -297,7 +297,8 @@
 import _ from 'lodash';
 import api from '@/shared/api';
 import { updateStoreContracts, updateStoreEmployees } from '@/utils/storeUtils';
-import { asyncForEach } from '../../utils/utils';
+import { asyncForEach } from '@/utils/utils';
+import { getProject } from '@/shared/contractUtils';
 
 import DeleteModal from '../modals/DeleteModal.vue';
 import ContractFilter from './ContractFilter.vue';
@@ -624,7 +625,7 @@ async function getActiveEmployeeContractRelationships(contract, project = null) 
                 relationships.push({
                   contract: contract.contractName,
                   prime: contract.primeName,
-                  project: this.getProject(contract.id, p.projectId),
+                  project: this.getProject(contract.id, p.projectId, this.$store.getters.contracts),
                   employees: [e]
                 });
               } else {
@@ -680,7 +681,7 @@ async function getEmployeeContractRelationships(contract, project = null) {
               relationships.push({
                 contract: contract.contractName,
                 prime: contract.primeName,
-                project: this.getProject(contract.id, p.projectId),
+                project: this.getProject(contract.id, p.projectId, this.$store.getters.contracts),
                 employees: [e]
               });
             } else {
@@ -693,17 +694,6 @@ async function getEmployeeContractRelationships(contract, project = null) {
   });
   return relationships;
 } // getEmployeeContractRelationships
-
-/**
- * Gets project object from vuex store based on contract id and project id
- *
- * @param contractId contract id of contract that project is under
- * @param projectId project id
- */
-function getProject(contractId, projectId) {
-  let contracts = this.$store.getters.contracts;
-  return contracts.find((c) => c.id == contractId).projects.find((p) => p.id == projectId);
-} // getProject
 
 /**
  * Displays error snackbar

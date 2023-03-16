@@ -94,12 +94,14 @@
           <template v-slot:[`item.projectActiveEmployees`]="{ item }">
             <span class="smaller-text">
               <span
-                v-for="(emp, i) in getProjectActiveEmployees(item)"
+                v-for="(emp, i) in getProjectCurrentEmployees(contract.item, item, $store.getters.employees)"
                 :key="emp.employeeNumber"
                 :class="{ inactive: item.status == contractStatuses.INACTIVE }"
               >
                 <a @click="$router.push(`/employee/${emp.employeeNumber}`)">{{ nicknameAndLastName(emp) }}</a>
-                <span v-if="i != getProjectActiveEmployees(item).length - 1">, </span>
+                <span v-if="i != getProjectCurrentEmployees(contract.item, item, $store.getters.employees).length - 1"
+                  >,
+                </span>
               </span>
             </span>
           </template>
@@ -188,6 +190,7 @@ import _ from 'lodash';
 import api from '@/shared/api';
 import { nicknameAndLastName } from '@/shared/employeeUtils';
 import ProjectsEmployeesAssignedModal from '../modals/ProjectsEmployeesAssignedModal.vue';
+import { getProjectCurrentEmployees } from '@/shared/contractUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -303,36 +306,6 @@ function displayError(err) {
 } // displayError
 
 /**
- * Gets project object from vuex store based on contract id and project id
- *
- * @param contractId contract id of contract that project is under
- * @param projectId project id
- */
-function getProject(contractId, projectId) {
-  let contracts = this.$store.getters.contracts;
-  return contracts.find((c) => c.id == contractId).projects.find((p) => p.id == projectId);
-} // getProject
-
-/**
- * Sets the projects active employees in the form of a list.
- */
-function getProjectActiveEmployees(project) {
-  let employeesList = [];
-  _.forEach(this.$store.getters.employees, (employee) => {
-    if (employee.contracts) {
-      if (
-        employee.contracts.some((c) =>
-          c.projects.some((p) => p.projectId == project.id && !p.endDate && employee.workStatus > 0)
-        )
-      ) {
-        employeesList.push(employee);
-      }
-    }
-  });
-  return employeesList;
-} // setProjectActiveEmployees
-
-/**
  * Toggles project checkBox item
  *
  * @param projectItem projectItem checkbox to toggle
@@ -357,9 +330,8 @@ export default {
     clickedCancel,
     displaySuccess,
     displayError,
-    getProject,
     nicknameAndLastName,
-    getProjectActiveEmployees,
+    getProjectCurrentEmployees,
     toggleProjectCheckBox
   },
   data() {

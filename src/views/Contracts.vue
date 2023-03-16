@@ -25,6 +25,17 @@
         >
         <contracts-page-loader v-if="loading"></contracts-page-loader>
         <contracts-table v-else></contracts-table>
+
+        <br />
+
+        <!-- Download contracts CSV button -->
+        <v-card-actions class="justify-end">
+          <convert-contracts-to-csv
+            :midAction="midAction"
+            :contracts="$store.getters.contracts"
+            :employees="$store.getters.employees"
+          ></convert-contracts-to-csv>
+        </v-card-actions>
       </v-container>
     </v-card>
     <ContractForm :toggleContractForm="toggleContractForm" />
@@ -36,6 +47,7 @@ import ContractForm from '@/components/contracts/ContractForm.vue';
 import ContractsPageLoader from '@/components/contracts/ContractsPageLoader.vue';
 
 import { updateStoreContracts, updateStoreEmployees } from '@/utils/storeUtils';
+import ConvertContractsToCsv from '../components/contracts/ConvertContractsToCsv.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -92,11 +104,13 @@ export default {
   components: {
     ContractsTable,
     ContractForm,
-    ContractsPageLoader
+    ContractsPageLoader,
+    ConvertContractsToCsv
   },
   created,
   data() {
     return {
+      midAction: false,
       loading: false,
       toggleContractForm: false,
       status: {
