@@ -56,7 +56,7 @@
             :headers="contractHeaders"
             :items="storeContracts"
             :items-per-page="-1"
-            :item-class="contractRowClass"
+            :item-class="() => 'highlight-contract-row'"
             :search="search"
             class="contracts-table"
             show-select
@@ -319,7 +319,6 @@ import ExpandedContractTableRow from './ExpandedContractTableRow.vue';
  */
 async function created() {
   window.EventBus.$on('confirm-delete-contract', async () => {
-    console.log('Deleting items');
     await this.deleteItems(this.deletingItems);
     this.deletingItems = null;
   });
@@ -724,22 +723,6 @@ function displaySuccess(msg) {
 } // displaySuccess
 
 /**
- * Adds grey highlight to contract row when expanded, editing or deleting
- *
- * @param item Item in contracts v-data-table row
- */
-function contractRowClass(item) {
-  if (
-    (this.expanded.length > 0 && item.id == this.expanded[0].id) ||
-    (this.editingItem && item.id == this.editingItem.id) ||
-    (this.deleteItem && this.deleteItem.id && this.deleteItem.id == item.id)
-  ) {
-    return 'highlight-contract-row';
-  }
-  return 'highlight-contract-row';
-} // contractRowClass
-
-/**
  * Returns true if given contract is being deleted or its status is being updated,
  * if no parameter is specified returns true if there is a contract that is being deleted
  * or its status is being updated.
@@ -947,7 +930,6 @@ export default {
     storeContracts
   },
   methods: {
-    contractRowClass,
     getProject,
     updateStoreEmployees,
     getActiveEmployeeContractRelationships,
