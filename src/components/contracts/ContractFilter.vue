@@ -13,10 +13,10 @@
         <span>Active</span>
       </v-tooltip>
 
-      <!-- Inactive -->
+      <!-- Unstaffed -->
       <v-tooltip top>
         <template v-slot:activator="{ on }">
-          <v-btn value="inactive" id="part" v-on="on" text>
+          <v-btn value="unstaffed" id="part" v-on="on" text>
             <v-icon color="#f4b400">mdi-stop-circle-outline</v-icon>
           </v-btn>
         </template>

@@ -36,7 +36,7 @@
               class="ml-4"
               :loading="isDeactivating"
               :disabled="!this.contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
-              @click="clickedUpdateStatus(contractStatuses.INACTIVE)"
+              @click="clickedUpdateStatus(contractStatuses.UNSTAFFED)"
               >Unstaffed</v-btn
             >
             <v-btn
@@ -532,7 +532,7 @@ async function updateStatus(status) {
   this.contractLoading = true;
   if (status == api.CONTRACT_STATUSES.ACTIVE) {
     this.isActivating = true;
-  } else if (status == api.CONTRACT_STATUSES.INACTIVE) {
+  } else if (status == api.CONTRACT_STATUSES.UNSTAFFED) {
     this.isDeactivating = true;
   } else {
     this.isClosing = true;
@@ -897,7 +897,7 @@ function getSelectedItems() {
 /**
  * Merges the checkBox list and the contracts list
  *
- * @return filtered out inactive items
+ * @return filtered out unstaffed items
  */
 function storeContracts() {
   let mergedCheckBoxContractsData = _.merge(this.$store.getters.contracts, this.contractsCheckBoxes);
@@ -1002,7 +1002,6 @@ export default {
       filter: [api.CONTRACT_STATUSES.ACTIVE],
       search: null,
       statusItemClicked: null,
-      showInactive: false,
       validateMessage: '',
       titleMessage: '',
       contractsCheckBoxes: [],
@@ -1012,7 +1011,7 @@ export default {
       isClosing: false,
       legendKey: [
         { status: 'Active', color: '#0f9d58' },
-        { status: 'Inactive', color: '#f4b400' },
+        { status: 'Unstaffed', color: '#f4b400' },
         { status: 'Closed', color: '#db4437' }
       ],
       contractHeaders: [
@@ -1108,7 +1107,7 @@ export default {
   background-color: #db4437;
 }
 
-.inactive-status {
+.unstaffed-status {
   background-color: #f4b400;
 }
 

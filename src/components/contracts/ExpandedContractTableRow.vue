@@ -16,7 +16,7 @@
         >
           <!-- Just a spacer -->
           <template v-if="!editingProjectItem" v-slot:[`item.spacer`]="{ item }">
-            <span :class="{ inactive: item.inactive }">{{ item.spacer }}</span>
+            <span>{{ item.spacer }}</span>
           </template>
 
           <!-- Item CheckBox Slot -->
@@ -96,7 +96,6 @@
               <span
                 v-for="(emp, i) in getProjectCurrentEmployees(contract.item, item, $store.getters.employees)"
                 :key="emp.employeeNumber"
-                :class="{ inactive: item.status == contractStatuses.INACTIVE }"
               >
                 <a @click="$router.push(`/employee/${emp.employeeNumber}`)">{{ nicknameAndLastName(emp) }}</a>
                 <span v-if="i != getProjectCurrentEmployees(contract.item, item, $store.getters.employees).length - 1"
