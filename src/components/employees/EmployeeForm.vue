@@ -686,11 +686,7 @@ async function confirm() {
     let hasErrors = this.hasTabError();
     if (!hasErrors) {
       return false;
-    } else {
-      this.confirmingError = true;
     }
-  } else {
-    this.confirmingError = true;
   }
   return true; //all but !hasErrors
 } //confirm
@@ -726,7 +722,6 @@ async function submit() {
         // failed to update employee
         this.$emit('error', updatedEmployee.response.data.message);
         this.displayError(updatedEmployee.response.data.message);
-        // this.$emit('cancel-form');
       }
       // If mifiStatus on page load is different than the submitted mifiStatus value, create audit log
       if (this.mifiStatusOnLoad !== updatedEmployee.mifiStatus) {
@@ -756,6 +751,8 @@ async function submit() {
         // this.$emit('endAction');
       }
     }
+  } else {
+    this.confirmingError = true;
   }
   this.submitting = false;
   window.EventBus.$emit('badgeExp');
@@ -769,12 +766,9 @@ async function submit() {
  */
 function addErrorTab(name, errors) {
   this.errorTabNames[name] = errors;
-
   //see if a tab is 0 after fixing validations and remove it
   if (this.errorTabNames[name] === 0) {
-    this.errorTabNames = _.filter(this.errorTabNames.keys, (tab) => {
-      return tab !== name;
-    });
+    delete this.errorTabNames[name];
   }
 } // addErrorTab
 
@@ -987,6 +981,10 @@ async function created() {
     this.confirmingValid = false;
     cancelB();
   });
+  // Starts listener to see if the user confirmed to submit the form
+  window.EventBus.$on('canceled-form', async () => {
+    this.confirmingError = false;
+  });
   // Starts listener to see if the user cancelled to submit the form
   window.EventBus.$on('canceled-cancel', () => {
     this.confirmingValid = false;
@@ -1082,6 +1080,7 @@ function beforeDestroy() {
   window.EventBus.$off('uploaded');
   window.EventBus.$off('confirmed');
   window.EventBus.$off('canceled');
+  window.EventBus.$off('canceled-form');
   window.EventBus.$off('canceled-cancel');
   window.EventBus.$off('confirmed-cancel');
   window.EventBus.$off('created');
