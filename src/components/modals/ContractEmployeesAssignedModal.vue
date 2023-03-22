@@ -127,7 +127,7 @@ function getCurrentEmployeesAssignedToContract() {
   this.currentEmployees = [];
   this.$store.getters.employees.forEach((e) => {
     let contract = e.contracts ? e.contracts.find((c) => c.contractId == this.contract.id) : null;
-    if (e.contracts && contract && contract.projects.some((p) => !p.endDate)) {
+    if (e.contracts && contract && contract.projects.some((p) => !p.endDate && e.workStatus > 0)) {
       let currentProjects = contract.projects.filter((p) => !p.endDate);
       this.currentEmployees.push({
         employee: e,
@@ -144,7 +144,7 @@ function getPastEmployeesAssignedToContract() {
   this.pastEmployees = [];
   this.$store.getters.employees.forEach((e) => {
     let contract = e.contracts ? e.contracts.find((c) => c.contractId == this.contract.id) : null;
-    if (e.contracts && contract) {
+    if (e.contracts && contract && e.workStatus > 0) {
       if (!contract.projects.some((ep) => !ep.endDate)) {
         contract.projects.sort((a, b) => {
           dateUtils.isAfter(a.endDate, b.endDate) ? 1 : dateUtils.isAfter(b.endDate, a.endDate) ? -1 : 0;
