@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { nicknameAndLastName } from '@/shared/employeeUtils.js';
-import { getProjectCurrentEmployees, getProjectPassedEmployees } from '@/shared/contractUtils.js';
+import { getProjectCurrentEmployees, getProjectPastEmployees } from '@/shared/contractUtils.js';
 const csvUtils = require('./baseCsv.js');
 
 export function download(contracts, employees) {
@@ -72,7 +72,7 @@ function getCurrentProjectEmployees(contract, project, employees) {
  */
 function getPassedProjectEmployees(contract, project, employees) {
   let employeesList = [];
-  _.forEach(getProjectPassedEmployees(contract, project, employees), (employee) => {
+  _.forEach(getProjectPastEmployees(contract, project, employees), (employee) => {
     employeesList.push(nicknameAndLastName(employee));
   });
   return employeesList.join(', ');

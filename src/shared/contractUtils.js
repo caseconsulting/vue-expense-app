@@ -11,7 +11,7 @@ import _ from 'lodash';
 export function getProjectCurrentEmployees(contract, project, employees) {
   let employeesList = [];
   _.forEach(employees, (employee) => {
-    if (employee.contracts) {
+    if (employee.contracts && employee.workStatus > 0) {
       if (
         employee.contracts.some(
           (c) => contract.id == c.contractId && c.projects.some((p) => p.projectId == project.id && !p.endDate)
@@ -32,10 +32,10 @@ export function getProjectCurrentEmployees(contract, project, employees) {
  * @param {Array} employees - list of employees
  * @return list of current employees
  */
-export function getProjectPassedEmployees(contract, project, employees) {
+export function getProjectPastEmployees(contract, project, employees) {
   let employeesList = [];
   _.forEach(employees, (employee) => {
-    if (employee.contracts) {
+    if (employee.contracts && employee.workStatus > 0) {
       if (
         employee.contracts.some(
           (c) => contract.id == c.contractId && c.projects.some((p) => p.projectId == project.id && !p.presentDate)
@@ -46,7 +46,7 @@ export function getProjectPassedEmployees(contract, project, employees) {
     }
   });
   return employeesList;
-} // getProjectPassedEmployees
+} // getProjectPastEmployees
 
 /**
  * Gets project based on conractId and projecId
@@ -63,6 +63,6 @@ export function getProject(contractId, projectId, contracts) {
 
 export default {
   getProjectCurrentEmployees,
-  getProjectPassedEmployees,
+  getProjectPastEmployees,
   getProject
 };

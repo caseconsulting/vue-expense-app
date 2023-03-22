@@ -24,7 +24,7 @@
             <v-card v-if="tab == 1">
               <v-card-text>
                 <span v-if="pastEmployees.length == 0"
-                  >There are no employees who have worked on {{ project.projectName }} in the past.</span
+                  >There are no active employees who have worked on {{ project.projectName }} in the past.</span
                 >
                 <ul v-else>
                   <li v-for="e in pastEmployees" :key="e.id">
@@ -54,7 +54,7 @@
 <script>
 import { updateStoreContracts, updateStoreEmployees } from '@/utils/storeUtils';
 import { nicknameAndLastName } from '@/shared/employeeUtils';
-import { getProjectCurrentEmployees, getProjectPassedEmployees } from '@/shared/contractUtils';
+import { getProjectCurrentEmployees, getProjectPastEmployees } from '@/shared/contractUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -104,7 +104,7 @@ function watchEmployeesAssignedModal() {
 function watchProject() {
   if (this.project) {
     this.currentEmployees = getProjectCurrentEmployees(this.contract, this.project, this.$store.getters.employees);
-    this.pastEmployees = getProjectPassedEmployees(this.contract, this.project, this.$store.getters.employees);
+    this.pastEmployees = getProjectPastEmployees(this.contract, this.project, this.$store.getters.employees);
   }
 } // watchProject
 
