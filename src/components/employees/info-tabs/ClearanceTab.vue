@@ -8,7 +8,7 @@
         <p><b>Type: </b>{{ clearance.type }}</p>
 
         <!-- Awaiting Clearance-->
-        <p>
+        <p v-if="clearance.awaitingClearance">
           <span class="d-flex align-center">
             <v-checkbox class="ma-0 pa-0" disabled hide-details v-model="clearance.awaitingClearance" />
             <b>Awaiting Clearance</b>
