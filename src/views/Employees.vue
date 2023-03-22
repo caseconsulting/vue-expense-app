@@ -142,13 +142,6 @@
             </v-avatar>
           </template>
 
-          <!-- Employee Number Item Slot -->
-          <template v-slot:[`item.employeeNumber`]="{ item }">
-            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" class="mb-0">
-              {{ item.employeeNumber }}
-            </p>
-          </template>
-
           <!-- First Name Item Slot -->
           <template v-slot:[`item.firstName`]="{ item }">
             <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" class="mb-0">
@@ -586,10 +579,6 @@ export default {
           sortable: false
         },
         {
-          text: 'Employee #',
-          value: 'employeeNumber'
-        },
-        {
           text: 'First Name',
           value: 'firstName'
         },
@@ -655,7 +644,7 @@ export default {
         currentZIP: null
       }, // selected employee
       search: null, // query text for datatable search field
-      sortBy: 'employeeNumber', // sort datatable items
+      sortBy: 'hireDate', // sort datatable items
       sortDesc: false, // sort datatable items
       status: {
         statusType: undefined,
