@@ -89,6 +89,7 @@ function emit(msg) {
 function getCurrentEmployeesAssignedToProject() {
   this.currentEmployees = this.$store.getters.employees.filter((e) => {
     if (
+      e.workStatus > 0 &&
       e.contracts &&
       e.contracts.some(
         (c) =>
@@ -107,6 +108,7 @@ function getCurrentEmployeesAssignedToProject() {
 function getPastEmployeesAssignedToProject() {
   this.pastEmployees = this.$store.getters.employees.filter((e) => {
     if (
+      e.workStatus > 0 &&
       e.contracts &&
       e.contracts.some(
         (c) =>
