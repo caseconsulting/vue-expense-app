@@ -15,7 +15,17 @@
   </div>
 </template>
 <script>
+/**
+ * Created lifecycle hook
+ */
+function created() {
+  window.EventBus.$on('show-all', (val) => {
+    this.show = val;
+  });
+} // created
+
 export default {
+  created,
   data() {
     return {
       show: false

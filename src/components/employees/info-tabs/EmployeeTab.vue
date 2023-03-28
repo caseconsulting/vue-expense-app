@@ -47,7 +47,14 @@
     <!-- EEO Compliance Reporting -->
     <div v-if="admin || employee">
       <v-divider></v-divider>
-      <p class="mt-4"><b>EEO Compliance Reporting:</b></p>
+      <p class="mt-4">
+        <b>EEO Compliance Reporting:</b>
+        <span class="float-right">
+          <a @click="emit('show-all', true)" class="font-weight-bold text-caption pr-3">Show All</a>
+          <a @click="emit('show-all', false)" class="font-weight-bold text-caption">Hide All</a>
+        </span>
+      </p>
+
       <sensitive-data-field
         class="ml-2"
         v-if="this.model.eeoDeclineSelfIdentify"
@@ -157,6 +164,16 @@ function getCurrentProjects() {
 // |--------------------------------------------------|
 
 /**
+ * Emits a message and data if it exists.
+ *
+ * @param msg - Message to emit
+ * @param data - The data to emit
+ */
+function emit(msg, data) {
+  window.EventBus.$emit(msg, data);
+} // emit
+
+/**
  * Returns Full Time, Part Time, or Inactive based on the work status.
  *
  * @param workStatus - the workstatus number
@@ -208,7 +225,8 @@ export default {
     startCase,
     getWorkStatus,
     isEmpty,
-    monthDayYearFormat
+    monthDayYearFormat,
+    emit
   },
   props: ['admin', 'contracts', 'employee', 'model'],
   components: { SensitiveDataField }
