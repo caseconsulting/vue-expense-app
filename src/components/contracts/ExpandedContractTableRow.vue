@@ -83,7 +83,7 @@
               name="description"
               auto-grow
               label="Description"
-              class="smaller-text"
+              class="smaller-text description"
               rows="1"
               @click.stop
             ></v-textarea>
@@ -406,6 +406,13 @@ export default {
   display: block;
   font-size: 11px;
   line-height: 1.2;
+}
+
+.description textarea {
+  line-height: 1.2;
+  font-size: 11px;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
 }
 </style>
 

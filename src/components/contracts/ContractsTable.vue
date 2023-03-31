@@ -152,7 +152,7 @@
                 name="description"
                 auto-grow
                 label="Description"
-                class="smaller-text"
+                class="smaller-text description"
                 rows="1"
                 @click.stop
               ></v-textarea>
@@ -1097,18 +1097,25 @@ export default {
   background-color: #0f9d58;
 }
 
-.smaller-text {
-  display: block;
-  font-size: 11px;
-  line-height: 1.2;
-}
-
 .highlight-contract-row {
   background-color: rgb(224, 224, 224) !important;
 }
 
 .contracts-table td:first-child {
   padding-left: 0px !important;
+}
+
+.description textarea {
+  line-height: 1.2;
+  font-size: 11px;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+}
+
+.smaller-text {
+  display: block;
+  font-size: 11px;
+  line-height: 1.2;
 }
 </style>
 
