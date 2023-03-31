@@ -49,7 +49,18 @@
       <v-divider></v-divider>
       <p class="mt-4">
         <b>EEO Compliance Reporting:</b>
-        <span class="float-right">
+        <span
+          v-if="
+            !this.model.eeoDeclineSelfIdentify &&
+            !isEmpty(this.model.eeoGender) &&
+            !isEmpty(this.model.eeoHispanicOrLatino) &&
+            !isEmpty(this.model.eeoRaceOrEthnicity) &&
+            !isEmpty(this.model.eeoJobCategory) &&
+            !isEmpty(this.model.eeoHasDisability) &&
+            !isEmpty(this.model.eeoIsProtectedVeteran)
+          "
+          class="float-right"
+        >
           <a @click="emit('show-all', true)" class="font-weight-bold text-caption pr-3">Show All</a>
           <a @click="emit('show-all', false)" class="font-weight-bold text-caption">Hide All</a>
         </span>
