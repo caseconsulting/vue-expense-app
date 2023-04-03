@@ -185,19 +185,22 @@ function remainingWorkDays() {
  *  Set budget information for employee. Creates event listeners.
  */
 async function created() {
-  this.isEmployeeView = this.$route.name === 'employee';
-  this.loading = true;
-  // set the current month
-  this.month = format(getTodaysDate(), null, 'MMMM');
-  // set the previous month
-  this.prevMonth = format(subtract(getTodaysDate(), 1, 'months'), null, 'MMM');
-  // set the current year
-  this.year = format(getTodaysDate(), null, 'YYYY');
-  // set the previous year
-  this.prevYear = format(subtract(getTodaysDate(), 1, 'months'), null, 'YYYY');
+  window.EventBus.$on('refresh-quickbooks-data', async () => {
+    this.refresh = true;
+    await this.setData();
+    this.refresh = false;
+  });
 
-  await this.setMonthlyCharges();
+  this.isEmployeeView = this.$route.name === 'employee';
+  await this.setData();
 } // created
+
+/**
+ * destroy listeners
+ */
+function beforeDestroy() {
+  window.EventBus.$off('refresh-quickbooks-data');
+} // beforeDestroy
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -284,6 +287,20 @@ function formatHours(hours) {
   return `${hours}h`;
 } // formatHours
 
+async function setData() {
+  this.loading = true;
+  // set the current month
+  this.month = format(getTodaysDate(), null, 'MMMM');
+  // set the previous month
+  this.prevMonth = format(subtract(getTodaysDate(), 1, 'months'), null, 'MMM');
+  // set the current year
+  this.year = format(getTodaysDate(), null, 'YYYY');
+  // set the previous year
+  this.prevYear = format(subtract(getTodaysDate(), 1, 'months'), null, 'YYYY');
+
+  await this.setMonthlyCharges();
+}
+
 /**
  * Sets the monthly charges for the employee (or user if no employee is specified).
  */
@@ -292,7 +309,11 @@ async function setMonthlyCharges() {
   if (!this.isEmpty(this.employee.id)) {
     this.workDayHours *= this.employee.workStatus * 0.01;
     // make call to api to get data
-    if (!this.$store.getters.quickbooksMonthlyHours || this.$store.getters.user.id != this.employee.id) {
+    if (
+      !this.$store.getters.quickbooksMonthlyHours ||
+      this.$store.getters.user.id != this.employee.id ||
+      this.refresh
+    ) {
       this.quickBooksTimeData = await api.getMonthlyHours(this.employee.employeeNumber);
       if (this.$store.getters.user.id == this.employee.id) {
         // only set vuex store if the user is looking at their own quickbooks data
@@ -368,6 +389,7 @@ export default {
   computed: {
     remainingWorkDays
   },
+  beforeDestroy,
   created,
   data() {
     return {
@@ -381,6 +403,7 @@ export default {
       monthlyHourError: false, // error getting monthly hours
       prevMonth: '', // previous month
       prevYear: '', // previous year
+      refresh: false, // if the data has been refreshed
       remainingHours: 0, // remaining hours this month
       showMore: false, // show more time details
       todaysHours: 0, // hours completed today
@@ -404,6 +427,7 @@ export default {
     isEmpty,
     roundHours,
     setDay, // dateUtils
+    setData,
     setMonthlyCharges,
     subtract, // dateUtils
     toFAQ,

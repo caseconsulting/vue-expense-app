@@ -14,6 +14,18 @@
           <span>{{ tooltipText }}</span>
         </v-tooltip>
         <!--End of Switch-->
+        <!-- Start of Refresh Button -->
+        <v-tooltip top nudge-top="10">
+          <template v-slot:activator="{ on, attrs }">
+            <div v-bind="attrs" v-on="on">
+              <v-btn @click="emit('refresh-quickbooks-data')" icon large>
+                <v-icon color="white">mdi-refresh</v-icon>
+              </v-btn>
+            </div>
+          </template>
+          <span>Refresh Quickbooks Time Data</span>
+        </v-tooltip>
+        <!-- End of Refresh Button -->
       </v-card-title>
       <v-card-text class="pt-5 pb-0 black--text">
         <monthly-charges :passedEmployee="employee" :showMinutes="showMinutes"></monthly-charges>
@@ -43,6 +55,10 @@ function tooltipText() {
   return this.showMinutes ? 'Hours <- Minutes' : 'Hours -> Minutes';
 } //tooltipText
 
+function emit(name) {
+  window.EventBus.$emit(name);
+}
+
 export default {
   components: {
     Balances,
@@ -55,6 +71,9 @@ export default {
     return {
       showMinutes: false
     };
+  },
+  methods: {
+    emit
   },
   props: ['employee']
 };
