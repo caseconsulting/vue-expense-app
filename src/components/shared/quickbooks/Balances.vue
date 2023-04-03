@@ -77,6 +77,13 @@ async function created() {
   await this.setPTOBalances();
 } // created
 
+/**
+ * destroy listeners
+ */
+function beforeDestroy() {
+  window.EventBus.$off('refresh-quickbooks-data');
+} // beforeDestroy
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 COMPUTED                         |
@@ -204,6 +211,7 @@ export default {
     isInactive,
     availableBalances
   },
+  beforeDestroy,
   created,
   data() {
     return {
