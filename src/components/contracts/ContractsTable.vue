@@ -14,40 +14,7 @@
             ></v-text-field>
           </v-col>
           <!-- Active Filter -->
-          <div class="d-flex justify-end align-center my-0 pb-0">
-            <span class="fieldset-title mr-3">Status:</span>
-            <v-btn-toggle class="filter_color" v-model="filter.active" text multiple>
-              <!-- Active -->
-              <v-tooltip top>
-                <template v-slot:activator="{ on }">
-                  <v-btn value="active" id="full" v-on="on" text>
-                    <v-icon class="mr-1" color="#0f9d58">mdi-check-circle-outline</v-icon>
-                  </v-btn>
-                </template>
-                <span>Active</span>
-              </v-tooltip>
-
-              <!-- Inactive -->
-              <v-tooltip top>
-                <template v-slot:activator="{ on }">
-                  <v-btn value="inactive" id="part" v-on="on" text>
-                    <v-icon color="#f4b400">mdi-stop-circle-outline</v-icon>
-                  </v-btn>
-                </template>
-                <span>Inactive</span>
-              </v-tooltip>
-
-              <!-- Closed -->
-              <v-tooltip top>
-                <template v-slot:activator="{ on }">
-                  <v-btn value="closed" id="inactive" v-on="on" text>
-                    <v-icon color="#db4437">mdi-close-circle-outline</v-icon>
-                  </v-btn>
-                </template>
-                <span>Closed</span>
-              </v-tooltip>
-            </v-btn-toggle>
-          </div>
+          <ContractFilter />
           <!-- End Active Filter -->
           <div class="d-flex justify-end align-center flex-wrap">
             <v-btn
@@ -62,21 +29,21 @@
               class="ml-4 font-weight-medium"
               :loading="isActivating"
               :disabled="!this.contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
-              @click="updateStatus(contractStatuses.ACTIVE)"
+              @click="clickedUpdateStatus(contractStatuses.ACTIVE)"
               >Activate</v-btn
             >
             <v-btn
               class="ml-4"
               :loading="isDeactivating"
               :disabled="!this.contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
-              @click="updateStatus(contractStatuses.INACTIVE)"
-              >Deactivate</v-btn
+              @click="clickedUpdateStatus(contractStatuses.UNSTAFFED)"
+              >Unstaffed</v-btn
             >
             <v-btn
               class="ml-4"
               :loading="isClosing"
               :disabled="!this.contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
-              @click="updateStatus(contractStatuses.CLOSED)"
+              @click="clickedUpdateStatus(contractStatuses.CLOSED)"
               >Close</v-btn
             >
           </div>
@@ -89,7 +56,7 @@
             :headers="contractHeaders"
             :items="storeContracts"
             :items-per-page="-1"
-            :item-class="contractRowClass"
+            :item-class="() => 'highlight-contract-row'"
             :search="search"
             class="contracts-table"
             show-select
@@ -185,10 +152,11 @@
                 name="description"
                 auto-grow
                 label="Description"
+                class="smaller-text description"
                 rows="1"
                 @click.stop
               ></v-textarea>
-              <span v-else :class="{ 'font-weight-bold': true }">{{ item.description }}</span>
+              <span v-else class="smaller-text" :class="{ 'font-weight-bold': true }">{{ item.description }}</span>
             </template>
 
             <!-- Expanded Row Slot -->
@@ -311,14 +279,14 @@
       :toggleModal="toggleContractEmployeesModal"
     />
     <delete-modal :toggleDeleteModal="toggleContractDeleteModal" :type="'contract'"></delete-modal>
-    <contract-project-delete-warning
-      :toggleModal="toggleWarningModal"
+    <contract-project-validate-delete-update-status-modal
+      :toggleModal="toggleValidateModal"
       :relationships="relationships"
-    ></contract-project-delete-warning>
+      :message="validateMessage"
+      :title="titleMessage"
+    ></contract-project-validate-delete-update-status-modal>
     <general-confirmation-modal
-      :title="`Are you sure you want to make this contract ${
-        contractStatusItem && contractStatusItem.inactive ? 'active' : 'inactive'
-      }?`"
+      :title="`Are you sure you want to mark selected item(s) as ${statusItemClicked}?`"
       type="contract-status"
       :toggleModal="toggleContractStatusModal"
     ></general-confirmation-modal>
@@ -328,14 +296,17 @@
 <script>
 import _ from 'lodash';
 import api from '@/shared/api';
-import DeleteModal from '../modals/DeleteModal.vue';
-import ContractProjectDeleteWarning from '../modals/ContractProjectDeleteWarning.vue';
-import ProjectForm from './ProjectForm.vue';
 import { updateStoreContracts, updateStoreEmployees } from '@/utils/storeUtils';
+import { asyncForEach } from '@/utils/utils';
+import { getProject } from '@/shared/contractUtils';
+
+import DeleteModal from '../modals/DeleteModal.vue';
+import ContractFilter from './ContractFilter.vue';
+import ContractProjectValidateDeleteUpdateStatusModal from '../modals/ContractProjectValidateDeleteUpdateStatusModal.vue';
+import ProjectForm from './ProjectForm.vue';
 import GeneralConfirmationModal from '@/components/modals/GeneralConfirmationModal.vue';
 import ContractEmployeesAssignedModal from '../modals/ContractEmployeesAssignedModal.vue';
 import ExpandedContractTableRow from './ExpandedContractTableRow.vue';
-import { asyncForEach } from '../../utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -354,11 +325,21 @@ async function created() {
   window.EventBus.$on('canceled-delete-contract', () => {
     this.deletingItems = null;
   });
+  window.EventBus.$on('confirmed-contract-status', () => {
+    this.updateStatus(this.statusItemClicked);
+    this.toggleContractStatusModal = false;
+  });
+  window.EventBus.$on('canceled-contract-status', () => {
+    this.toggleContractStatusModal = false;
+  });
   window.EventBus.$on('canceled-project-form', () => {
     this.toggleProjectForm = false;
   });
   window.EventBus.$on('closed-contract-employees-assigned-modal', () => {
     this.toggleContractEmployeesModal = false;
+  });
+  window.EventBus.$on('filter', (filter) => {
+    this.filter = filter;
   });
   window.EventBus.$on('is-editing-project-item', (value) => {
     this.isEditingProjectItem = value;
@@ -380,7 +361,9 @@ function beforeDestroy() {
   window.EventBus.$off('canceled-contract-status');
   window.EventBus.$off('canceled-project-form');
   window.EventBus.$off('closed-project-employees-assigned-modal');
+  window.EventBus.$off('filter');
   window.EventBus.$off('is-editing-project-item');
+  window.EventBus.$off('toggle-project-checkbox');
 } // beforeDestroy
 
 // |--------------------------------------------------|
@@ -482,6 +465,37 @@ function clickedEdit(item) {
 } // clickedEdit
 
 /**
+ * Handler for clicked update status buttons (Deactivate, Activate, Close)
+ */
+async function clickedUpdateStatus(status) {
+  let relationships = [];
+  let selectedItems = this.getSelectedItems();
+  if (status === this.contractStatuses.ACTIVE) {
+    this.toggleContractStatusModal = true;
+    this.statusItemClicked = status;
+    return;
+  }
+  await asyncForEach(selectedItems.contracts, async (c) => {
+    relationships = [...relationships, ...(await this.getActiveEmployeeContractRelationships(c))];
+  });
+  await asyncForEach(selectedItems.projects, async (p) => {
+    relationships = [
+      ...relationships,
+      ...(await this.getActiveEmployeeContractRelationships(p.contractOfProject, p.project))
+    ];
+  });
+  if (relationships.length != 0) {
+    this.titleMessage = `Cannot mark item(s) as ${status}`;
+    this.validateMessage = `Please remove the following relationships before marking selected item(s) as ${status}.`;
+    this.toggleValidateModal = !this.toggleValidateModal;
+    this.relationships = relationships;
+  } else {
+    this.toggleContractStatusModal = true;
+    this.statusItemClicked = status;
+  }
+} // clickedUpdateStatus
+
+/**
  * Handler for click delete button event
  */
 async function clickedDelete() {
@@ -498,10 +512,11 @@ async function clickedDelete() {
   });
 
   if (relationships.length != 0) {
-    this.toggleWarningModal = !this.toggleWarningModal;
+    this.titleMessage = 'Cannot delete item(s)';
+    this.validateMessage = 'Please remove the following relationships before deleting selected item(s).';
+    this.toggleValidateModal = !this.toggleValidateModal;
     this.relationships = relationships;
   } else {
-    // this.deleteItem = contract;
     this.deletingItems = selectedItems;
     this.toggleContractDeleteModal = !this.toggleContractDeleteModal;
   }
@@ -516,7 +531,7 @@ async function updateStatus(status) {
   this.contractLoading = true;
   if (status == api.CONTRACT_STATUSES.ACTIVE) {
     this.isActivating = true;
-  } else if (status == api.CONTRACT_STATUSES.INACTIVE) {
+  } else if (status == api.CONTRACT_STATUSES.UNSTAFFED) {
     this.isDeactivating = true;
   } else {
     this.isClosing = true;
@@ -566,7 +581,66 @@ function cloneDeep(item) {
 } // cloneDeep
 
 /**
- * Gets relationships between projects and employees
+ * Gets relationships between projects and active employees.
+ *
+ * @param contract contract to find active employees under
+ * @param project project to find active employees under
+ *
+ * @return list of relationships in the following format
+ *        [{contract: "", prime: "", project: {...}, employees: [...]}, ...]
+ */
+async function getActiveEmployeeContractRelationships(contract, project = null) {
+  if (!this.$store.getters.employees) {
+    await this.updateStoreEmployees();
+  }
+  let employees = this.$store.getters.employees;
+  let relationships = [];
+  employees.forEach((e) => {
+    if (e.contracts && e.workStatus > 0) {
+      let contractObj = e.contracts.find((c) => c.contractId == contract.id);
+      if (contractObj) {
+        if (project) {
+          let employeeAssignedToProject = e.contracts.some((c) =>
+            c.projects.some((p) => p.projectId == project.id && p.presentDate)
+          );
+          if (employeeAssignedToProject) {
+            let index = relationships.findIndex((r) => r.project.id == project.id);
+            if (index < 0) {
+              relationships.push({
+                contract: contract.contractName,
+                prime: contract.primeName,
+                project: project,
+                employees: [e]
+              });
+            } else {
+              relationships[index].employees.push(e);
+            }
+          }
+        } else {
+          contractObj.projects.forEach((p) => {
+            if (p.presentDate) {
+              let index = relationships.findIndex((r) => r.project.id == p.projectId);
+              if (index < 0) {
+                relationships.push({
+                  contract: contract.contractName,
+                  prime: contract.primeName,
+                  project: this.getProject(contract.id, p.projectId, this.$store.getters.contracts),
+                  employees: [e]
+                });
+              } else {
+                relationships[index].employees.push(e);
+              }
+            }
+          });
+        }
+      }
+    }
+  });
+  return relationships;
+} // getActiveEmployeeContractRelationships
+
+/**
+ * Gets relationships between projects and employees.
  *
  * @param contract contract to find employees under
  * @param project project to find employees under
@@ -606,7 +680,7 @@ async function getEmployeeContractRelationships(contract, project = null) {
               relationships.push({
                 contract: contract.contractName,
                 prime: contract.primeName,
-                project: this.getProject(contract.id, p.projectId),
+                project: this.getProject(contract.id, p.projectId, this.$store.getters.contracts),
                 employees: [e]
               });
             } else {
@@ -619,17 +693,6 @@ async function getEmployeeContractRelationships(contract, project = null) {
   });
   return relationships;
 } // getEmployeeContractRelationships
-
-/**
- * Gets project object from vuex store based on contract id and project id
- *
- * @param contractId contract id of contract that project is under
- * @param projectId project id
- */
-function getProject(contractId, projectId) {
-  let contracts = this.$store.getters.contracts;
-  return contracts.find((c) => c.id == contractId).projects.find((p) => p.id == projectId);
-} // getProject
 
 /**
  * Displays error snackbar
@@ -658,22 +721,6 @@ function displaySuccess(msg) {
   };
   window.EventBus.$emit('status-alert', status);
 } // displaySuccess
-
-/**
- * Adds grey highlight to contract row when expanded, editing or deleting
- *
- * @param item Item in contracts v-data-table row
- */
-function contractRowClass(item) {
-  if (
-    (this.expanded.length > 0 && item.id == this.expanded[0].id) ||
-    (this.editingItem && item.id == this.editingItem.id) ||
-    (this.deleteItem && this.deleteItem.id && this.deleteItem.id == item.id)
-  ) {
-    return 'highlight-contract-row';
-  }
-  return 'highlight-contract-row';
-} // contractRowClass
 
 /**
  * Returns true if given contract is being deleted or its status is being updated,
@@ -833,7 +880,7 @@ function getSelectedItems() {
 /**
  * Merges the checkBox list and the contracts list
  *
- * @return filtered out inactive items
+ * @return filtered out unstaffed items
  */
 function storeContracts() {
   let mergedCheckBoxContractsData = _.merge(this.$store.getters.contracts, this.contractsCheckBoxes);
@@ -842,11 +889,24 @@ function storeContracts() {
     delete c.projectsCheckBoxes;
   });
   return mergedCheckBoxContractsData
-    .filter((c) => this.filter.active.includes(c.status))
+    .filter((c) => this.filter.includes(c.status))
     .map((c) => {
-      return { ...c, projects: c.projects.filter((p) => this.filter.active.includes(p.status)) };
+      return { ...c, projects: c.projects.filter((p) => this.filter.includes(p.status)) };
     });
 } // storeContracts
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Auto expands rows when switching filter options
+ */
+function watchFilter() {
+  this.expanded = _.cloneDeep(this.storeContracts);
+} // watchFilter
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -859,7 +919,8 @@ export default {
   created,
   components: {
     DeleteModal,
-    ContractProjectDeleteWarning,
+    ContractFilter,
+    ContractProjectValidateDeleteUpdateStatusModal,
     GeneralConfirmationModal,
     ProjectForm,
     ContractEmployeesAssignedModal,
@@ -869,9 +930,9 @@ export default {
     storeContracts
   },
   methods: {
-    contractRowClass,
     getProject,
     updateStoreEmployees,
+    getActiveEmployeeContractRelationships,
     getEmployeeContractRelationships,
     cloneDeep,
     displaySuccess,
@@ -888,6 +949,7 @@ export default {
     toggleProjectCheckBox,
     getSelectedItems,
     clickedDelete,
+    clickedUpdateStatus,
     deleteItems,
     updateStatus
   },
@@ -911,7 +973,7 @@ export default {
       deleteItem: null,
       deletingItems: null,
       toggleContractEmployeesModal: false,
-      toggleWarningModal: false,
+      toggleValidateModal: false,
       toggleContractDeleteModal: false,
       toggleContractStatusModal: false,
       contractLoading: false,
@@ -919,9 +981,11 @@ export default {
       isEditingProjectItem: false,
       loading: false,
       expanded: [],
-      filter: { active: [api.CONTRACT_STATUSES.ACTIVE] },
+      filter: [api.CONTRACT_STATUSES.ACTIVE],
       search: null,
-      showInactive: false,
+      statusItemClicked: null,
+      validateMessage: '',
+      titleMessage: '',
       contractsCheckBoxes: [],
       isDeleting: false,
       isActivating: false,
@@ -929,7 +993,7 @@ export default {
       isClosing: false,
       legendKey: [
         { status: 'Active', color: '#0f9d58' },
-        { status: 'Inactive', color: '#f4b400' },
+        { status: 'Unstaffed', color: '#f4b400' },
         { status: 'Closed', color: '#db4437' }
       ],
       contractHeaders: [
@@ -1000,7 +1064,8 @@ export default {
         }
       });
       this.expanded = _.cloneDeep(this.storeContracts);
-    }
+    },
+    filter: watchFilter
   }
 };
 </script>
@@ -1024,7 +1089,7 @@ export default {
   background-color: #db4437;
 }
 
-.inactive-status {
+.unstaffed-status {
   background-color: #f4b400;
 }
 
@@ -1038,6 +1103,19 @@ export default {
 
 .contracts-table td:first-child {
   padding-left: 0px !important;
+}
+
+.description textarea {
+  line-height: 1.2;
+  font-size: 11px;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+}
+
+.smaller-text {
+  display: block;
+  font-size: 11px;
+  line-height: 1.2;
 }
 </style>
 

@@ -34,23 +34,33 @@
           </v-tooltip>
           <v-list-item-content>
             <v-list-item-subtitle class="mb-1"> {{ number.type }}</v-list-item-subtitle>
-            <v-list-item-title
-              >{{ number.number }}<span v-if="number.ext"> (Ext. {{ number.ext }})</span></v-list-item-title
+            <v-list-item-title>
+              <div>
+                {{ number.number }}<span v-if="number.ext"> (Ext. {{ number.ext }})</span>
+              </div></v-list-item-title
             >
           </v-list-item-content>
         </v-list-item>
       </v-list>
     </p>
-    <!-- Birthday -->
-    <p v-if="!isEmpty(this.model.birthday) && (admin || employee)" :class="isBday ? 'clickable' : ''" @click="confetti">
-      <b>Birthday:</b> {{ monthDayYearFormat(this.model.birthday) }}
-    </p>
     <!-- Birthday Feed -->
     <p v-if="!isEmpty(this.model.birthdayFeed) && (admin || employee)">
       <b>Birthday on Feed:</b> {{ this.model.birthdayFeed | birthdayFeedResponse }}
     </p>
+    <!-- Birthday -->
+    <sensitive-data-field
+      v-if="!isEmpty(this.model.birthday) & (admin || employee)"
+      :class="isBday ? 'clickable' : ''"
+      @click="confetti"
+      label="Birthday"
+      :value="monthDayYearFormat(this.model.birthday)"
+    />
     <!-- Place of Birth -->
-    <p v-if="!isEmpty(getPlaceOfBirth) && (admin || employee)"><b>Place of Birth:</b> {{ getPlaceOfBirth }}</p>
+    <sensitive-data-field
+      v-if="!isEmpty(getPlaceOfBirth) && (admin || employee)"
+      label="Place of Birth"
+      :value="getPlaceOfBirth"
+    />
     <!-- Current Address -->
     <p v-if="!isEmpty(getCurrentAddress) && (employee || !userRoleIsIntern())">
       <b>Current Address:</b> {{ getCurrentAddress }}
@@ -62,6 +72,7 @@
 <script>
 import { isEmpty, monthDayYearFormat, userRoleIsIntern } from '@/utils/utils';
 import { format, getTodaysDate } from '@/shared/dateUtils';
+import SensitiveDataField from '../SensitiveDataField.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -244,17 +255,19 @@ export default {
     birthdayFeedResponse
   },
   methods: {
+    birthdayFeedResponse,
     checkEmptyPersonalInfo,
     confetti,
-    format, // dateUtils
-    getTodaysDate, // dateUtils
+    format,
+    getTodaysDate,
     isBday,
     isEmpty,
     monthDayYearFormat,
     userRoleIsIntern,
     getPhoneNumbers
   },
-  props: ['admin', 'employee', 'model']
+  props: ['admin', 'employee', 'model'],
+  components: { SensitiveDataField }
 };
 </script>
 

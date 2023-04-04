@@ -14,7 +14,7 @@
                 >
                 <ul v-else>
                   <li v-for="e in currentEmployees" :key="e.id">
-                    <a :href="`/employee/${e.employeeNumber}`">{{ e.firstName + ' ' + e.lastName }}</a>
+                    <a @click="$router.push(`/employee/${e.employee.employeeNumber}`)">{{ nicknameAndLastName(e) }}</a>
                   </li>
                 </ul>
               </v-card-text></v-card
@@ -24,11 +24,11 @@
             <v-card v-if="tab == 1">
               <v-card-text>
                 <span v-if="pastEmployees.length == 0"
-                  >There are no employees who have worked on {{ project.projectName }} in the past.</span
+                  >There are no active employees who have worked on {{ project.projectName }} in the past.</span
                 >
                 <ul v-else>
                   <li v-for="e in pastEmployees" :key="e.id">
-                    <a :href="`/employee/${e.employeeNumber}`">{{ e.firstName + ' ' + e.lastName }}</a>
+                    <a @click="$router.push(`/employee/${e.employee.employeeNumber}`)">{{ nicknameAndLastName(e) }}</a>
                   </li>
                 </ul>
               </v-card-text></v-card
@@ -53,6 +53,8 @@
 </template>
 <script>
 import { updateStoreContracts, updateStoreEmployees } from '@/utils/storeUtils';
+import { nicknameAndLastName } from '@/shared/employeeUtils';
+import { getProjectCurrentEmployees, getProjectPastEmployees } from '@/shared/contractUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -83,44 +85,6 @@ function emit(msg) {
   window.EventBus.$emit(msg);
 } // emit
 
-/**
- * Gets current employees assigned to project.
- */
-function getCurrentEmployeesAssignedToProject() {
-  this.currentEmployees = this.$store.getters.employees.filter((e) => {
-    if (
-      e.workStatus > 0 &&
-      e.contracts &&
-      e.contracts.some(
-        (c) =>
-          c.contractId == this.contract.id && c.projects.some((p) => p.projectId == this.project.id && p.presentDate)
-      )
-    ) {
-      return true;
-    }
-    return false;
-  });
-} // getCurrentEmployeesAssignedToProject
-
-/**
- * Gets past employees who were assigned to project.
- */
-function getPastEmployeesAssignedToProject() {
-  this.pastEmployees = this.$store.getters.employees.filter((e) => {
-    if (
-      e.workStatus > 0 &&
-      e.contracts &&
-      e.contracts.some(
-        (c) =>
-          c.contractId == this.contract.id && c.projects.some((p) => p.projectId == this.project.id && !p.presentDate)
-      )
-    ) {
-      return true;
-    }
-    return false;
-  });
-} // getPastEmployeesAssignedToProject
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                     WATCHERS                     |
@@ -139,8 +103,8 @@ function watchEmployeesAssignedModal() {
  */
 function watchProject() {
   if (this.project) {
-    this.getCurrentEmployeesAssignedToProject();
-    this.getPastEmployeesAssignedToProject();
+    this.currentEmployees = getProjectCurrentEmployees(this.contract, this.project, this.$store.getters.employees);
+    this.pastEmployees = getProjectPastEmployees(this.contract, this.project, this.$store.getters.employees);
   }
 } // watchProject
 
@@ -173,8 +137,7 @@ export default {
   },
   methods: {
     emit,
-    getCurrentEmployeesAssignedToProject,
-    getPastEmployeesAssignedToProject,
+    nicknameAndLastName,
     updateStoreContracts,
     updateStoreEmployees
   },

@@ -47,10 +47,31 @@
     <!-- EEO Compliance Reporting -->
     <div v-if="admin || employee">
       <v-divider></v-divider>
-      <p class="mt-4"><b>EEO Compliance Reporting:</b></p>
-      <div v-if="this.model.eeoDeclineSelfIdentify" class="ml-2">
-        <p><b>Status: </b>Declined to self-identify.</p>
-      </div>
+      <p class="mt-4">
+        <b>EEO Compliance Reporting:</b>
+        <span
+          v-if="
+            !this.model.eeoDeclineSelfIdentify &&
+            !isEmpty(this.model.eeoGender) &&
+            !isEmpty(this.model.eeoHispanicOrLatino) &&
+            !isEmpty(this.model.eeoRaceOrEthnicity) &&
+            !isEmpty(this.model.eeoJobCategory) &&
+            !isEmpty(this.model.eeoHasDisability) &&
+            !isEmpty(this.model.eeoIsProtectedVeteran)
+          "
+          class="float-right"
+        >
+          <a @click="emit('show-all', true)" class="font-weight-bold text-caption pr-3">Show All</a>
+          <a @click="emit('show-all', false)" class="font-weight-bold text-caption">Hide All</a>
+        </span>
+      </p>
+
+      <sensitive-data-field
+        class="ml-2"
+        v-if="this.model.eeoDeclineSelfIdentify"
+        label="Status"
+        value="Declined to self-identify."
+      />
       <div
         v-else-if="
           !this.model.eeoDeclineSelfIdentify &&
@@ -63,12 +84,12 @@
         "
         class="ml-2"
       >
-        <p><b>Gender: </b>{{ this.model.eeoGender.text }}</p>
-        <p><b>Hispanic or Latino: </b>{{ this.model.eeoHispanicOrLatino.value ? 'Yes' : 'No' }}</p>
-        <p><b>Race or Ethnicity: </b>{{ this.model.eeoRaceOrEthnicity.text }}</p>
-        <p><b>Job Category: </b>{{ this.model.eeoJobCategory.text }}</p>
-        <p><b>Disability: </b>{{ this.model.eeoHasDisability ? 'Yes' : 'No' }}</p>
-        <p><b>Protected Veteran: </b>{{ this.model.eeoIsProtectedVeteran ? 'Yes' : 'No' }}</p>
+        <sensitive-data-field label="Gender" :value="this.model.eeoGender.text" />
+        <sensitive-data-field label="Hispanic or Latino" :value="this.model.eeoHispanicOrLatino.value" />
+        <sensitive-data-field label="Race or Ethnicity" :value="this.model.eeoRaceOrEthnicity.text" />
+        <sensitive-data-field label="Job Category" :value="this.model.eeoJobCategory.text" />
+        <sensitive-data-field label="Disability" :value="this.model.eeoHasDisability ? 'Yes' : 'No'" />
+        <sensitive-data-field label="Protected Veteran" :value="this.model.eeoIsProtectedVeteran ? 'Yes' : 'No'" />
       </div>
       <div
         v-else-if="
@@ -94,6 +115,7 @@
 import employeeUtils from '@/shared/employeeUtils';
 import _ from 'lodash';
 import { isEmpty, monthDayYearFormat } from '@/utils/utils';
+import SensitiveDataField from '../SensitiveDataField.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -153,6 +175,16 @@ function getCurrentProjects() {
 // |--------------------------------------------------|
 
 /**
+ * Emits a message and data if it exists.
+ *
+ * @param msg - Message to emit
+ * @param data - The data to emit
+ */
+function emit(msg, data) {
+  window.EventBus.$emit(msg, data);
+} // emit
+
+/**
  * Returns Full Time, Part Time, or Inactive based on the work status.
  *
  * @param workStatus - the workstatus number
@@ -201,10 +233,13 @@ export default {
     startCase
   },
   methods: {
+    startCase,
     getWorkStatus,
     isEmpty,
-    monthDayYearFormat
+    monthDayYearFormat,
+    emit
   },
-  props: ['admin', 'contracts', 'employee', 'model']
+  props: ['admin', 'contracts', 'employee', 'model'],
+  components: { SensitiveDataField }
 };
 </script>

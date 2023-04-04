@@ -16,7 +16,7 @@
         >
           <!-- Just a spacer -->
           <template v-if="!editingProjectItem" v-slot:[`item.spacer`]="{ item }">
-            <span :class="{ inactive: item.inactive }">{{ item.spacer }}</span>
+            <span>{{ item.spacer }}</span>
           </template>
 
           <!-- Item CheckBox Slot -->
@@ -83,21 +83,25 @@
               name="description"
               auto-grow
               label="Description"
+              class="smaller-text description"
               rows="1"
               @click.stop
             ></v-textarea>
-            <span v-else>{{ item.description }}</span>
+            <span v-else class="smaller-text">{{ item.description }}</span>
           </template>
 
           <!-- Project Active Employees Slot -->
           <template v-slot:[`item.projectActiveEmployees`]="{ item }">
-            <span
-              v-for="(emp, i) in item.projectActiveEmployees"
-              :key="emp.employeeNumber"
-              :class="{ inactive: item.status == contractStatuses.INACTIVE }"
-            >
-              <a @click="$router.push(`/employee/${emp.employeeNumber}`)">{{ emp.firstName }} {{ emp.lastName }}</a>
-              <span v-if="i != item.projectActiveEmployees.length - 1">, </span>
+            <span class="smaller-text">
+              <span
+                v-for="(emp, i) in getProjectCurrentEmployees(contract.item, item, $store.getters.employees)"
+                :key="emp.employeeNumber"
+              >
+                <a @click="$router.push(`/employee/${emp.employeeNumber}`)">{{ nicknameAndLastName(emp) }}</a>
+                <span v-if="i != getProjectCurrentEmployees(contract.item, item, $store.getters.employees).length - 1"
+                  >,
+                </span>
+              </span>
             </span>
           </template>
 
@@ -183,7 +187,9 @@
 <script>
 import _ from 'lodash';
 import api from '@/shared/api';
+import { nicknameAndLastName } from '@/shared/employeeUtils';
 import ProjectsEmployeesAssignedModal from '../modals/ProjectsEmployeesAssignedModal.vue';
+import { getProjectCurrentEmployees } from '@/shared/contractUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -198,8 +204,6 @@ function created() {
   window.EventBus.$on('closed-project-employees-assigned-modal', () => {
     this.toggleProjectEmployeesModal = false;
   });
-
-  this.setProjectActiveEmployees();
 } // created
 
 // |--------------------------------------------------|
@@ -301,41 +305,6 @@ function displayError(err) {
 } // displayError
 
 /**
- * Gets project object from vuex store based on contract id and project id
- *
- * @param contractId contract id of contract that project is under
- * @param projectId project id
- */
-function getProject(contractId, projectId) {
-  let contracts = this.$store.getters.contracts;
-  return contracts.find((c) => c.id == contractId).projects.find((p) => p.id == projectId);
-} // getProject
-
-/**
- * Sets the projects active employees in the form of a list.
- */
-function setProjectActiveEmployees() {
-  _.forEach(this.contract.item.projects, (project) => {
-    let employeesList = [];
-    _.forEach(this.$store.getters.employees, (employee) => {
-      if (employee.contracts) {
-        let contractObj = employee.contracts.find((c) => c.contractId == this.contract.item.id);
-        if (contractObj) {
-          if (
-            employee.contracts.some((c) =>
-              c.projects.some((p) => p.projectId == project.id && !p.endDate && employee.workStatus > 0)
-            )
-          ) {
-            employeesList.push(employee);
-          }
-        }
-      }
-    });
-    project['projectActiveEmployees'] = employeesList;
-  });
-} // setProjectActiveEmployees
-
-/**
  * Toggles project checkBox item
  *
  * @param projectItem projectItem checkbox to toggle
@@ -360,8 +329,8 @@ export default {
     clickedCancel,
     displaySuccess,
     displayError,
-    getProject,
-    setProjectActiveEmployees,
+    nicknameAndLastName,
+    getProjectCurrentEmployees,
     toggleProjectCheckBox
   },
   data() {
@@ -431,6 +400,19 @@ export default {
 
 .highlight-project-row {
   background-color: rgb(255, 255, 255) !important;
+}
+
+.smaller-text {
+  display: block;
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.description textarea {
+  line-height: 1.2;
+  font-size: 11px;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
 }
 </style>
 

@@ -24,26 +24,26 @@
           <v-row v-if="balanceData == 0 || isInactive" justify="center">
             <p>No available balances</p>
           </v-row>
-        </div>
 
-        <!-- Employee Inactive -->
-        <div v-if="!isInactive">
-          <!-- Loop through and display all balances -->
-          <v-row v-for="balance in this.availableBalances" :key="balance">
-            <p>{{ balance }}:</p>
-            <v-spacer></v-spacer>
-            <p>{{ formatHours(balanceData[balance]) }}</p>
-          </v-row>
-        </div>
+          <!-- Employee Inactive -->
+          <div v-if="!isInactive">
+            <!-- Loop through and display all balances -->
+            <v-row v-for="balance in this.availableBalances" :key="balance">
+              <p>{{ balance }}:</p>
+              <v-spacer></v-spacer>
+              <p>{{ formatHours(balanceData[balance]) }}</p>
+            </v-row>
+          </div>
 
-        <!-- Showing Available Balances -->
-        <div v-if="!showMore && !showAll" align="center">
-          <v-btn @click="showMore = true" top text small class="my-2">Show More &#9662; </v-btn>
-        </div>
+          <!-- Showing Available Balances -->
+          <div v-if="!showMore && !showAll" align="center">
+            <v-btn @click="showMore = true" top text small class="my-2">Show More &#9662; </v-btn>
+          </div>
 
-        <!-- Showing All Balances -->
-        <div v-if="showMore && !showAll" align="center">
-          <v-btn @click="showMore = false" top text small class="my-2">Show Less &#9650; </v-btn>
+          <!-- Showing All Balances -->
+          <div v-if="showMore && !showAll" align="center">
+            <v-btn @click="showMore = false" top text small class="my-2">Show Less &#9650; </v-btn>
+          </div>
         </div>
       </v-card-text>
     </div>
@@ -65,10 +65,24 @@ import _ from 'lodash';
  *  Set Balances information for employee.
  */
 async function created() {
+  window.EventBus.$on('refresh-quickbooks-data', async () => {
+    this.refresh = true;
+    this.loadingBar = true;
+    await this.setPTOBalances();
+    this.refresh = false;
+  });
+
   this.isEmployeeView = this.$route.name === 'employee';
   this.loadingBar = true;
   await this.setPTOBalances();
 } // created
+
+/**
+ * destroy listeners
+ */
+function beforeDestroy() {
+  window.EventBus.$off('refresh-quickbooks-data');
+} // beforeDestroy
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -136,7 +150,7 @@ async function setPTOBalances() {
   if (!this.isEmpty(this.employee.id)) {
     // employee exists
     let ptoBalances;
-    if (!this.$store.getters.quickbooksPTO || this.$store.getters.user.id != this.employee.id) {
+    if (!this.$store.getters.quickbooksPTO || this.$store.getters.user.id != this.employee.id || this.refresh) {
       ptoBalances = await api.getPTOBalances(this.employee.employeeNumber); // call api
       if (this.$store.getters.user.id == this.employee.id) {
         // only set vuex store if the user is looking at their own quickbooks data
@@ -197,6 +211,7 @@ export default {
     isInactive,
     availableBalances
   },
+  beforeDestroy,
   created,
   data() {
     return {
@@ -206,6 +221,7 @@ export default {
       isEmployeeView: false, // viewing from employee route
       keysBalance: [], // balance names
       loadingBar: false, // display loading bar
+      refresh: false, // if the data has been refreshed
       showAll: true, // show all balances
       showMore: false // toggle to show hidden balances
     };

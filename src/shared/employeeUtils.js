@@ -3,7 +3,7 @@
  * @param {JSON} employee - employee object
  * @return Employee name in format First Middle Last
  */
-function fullName(employee) {
+export function fullName(employee) {
   const middleName = employee.middleName ? employee.middleName.trim() : '';
   return `${employee.firstName} ${middleName ? middleName + ' ' : ''}${employee.lastName}`;
 } // fullName
@@ -13,7 +13,7 @@ function fullName(employee) {
  * @param {JSON} employee - employee object
  * @return Employee name in format First Last
  */
-function firstAndLastName(employee) {
+export function firstAndLastName(employee) {
   return `${employee.firstName}` + ' ' + `${employee.lastName}`;
 } // firstAndLastName
 
@@ -22,7 +22,7 @@ function firstAndLastName(employee) {
  * @param {JSON} employee - employee object
  * @return Employee nick name in format First Last
  */
-function nicknameAndLastName(employee) {
+export function nicknameAndLastName(employee) {
   let firstName = employee.nickname ? employee.nickname : employee.firstName;
   return `${firstName}` + ' ' + `${employee.lastName}`;
 } // nicknameAndLastName

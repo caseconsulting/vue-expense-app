@@ -5,6 +5,7 @@
 </template>
 
 <script>
+import _ from 'lodash';
 import BarChart from '../base-charts/BarChart.vue';
 import { storeIsPopulated, isEmpty } from '@/utils/utils';
 
@@ -124,6 +125,16 @@ function fillData() {
         }
       }
     },
+    onClick: (x, y) => {
+      if (_.first(y)) {
+        let index = _.first(y).index;
+        this.$router.push({
+          path: '/reports',
+          name: 'reports',
+          params: { requestedDataType: 'languages', requestedFilter: this.chartData.labels[index] }
+        });
+      }
+    },
     plugins: {
       legend: {
         display: false
@@ -133,6 +144,13 @@ function fillData() {
         text: 'Top Foreign Languages Case Consulting',
         font: {
           size: 15
+        }
+      },
+      subtitle: {
+        display: true,
+        text: '*Click on a bar to see employees',
+        font: {
+          style: 'italic'
         }
       }
     },

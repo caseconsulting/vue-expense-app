@@ -25,7 +25,7 @@ const client = axios.create({
 });
 
 const CONTRACT_STATUSES = {
-  INACTIVE: 'inactive',
+  UNSTAFFED: 'unstaffed',
   ACTIVE: 'active',
   CLOSED: 'closed'
 };
