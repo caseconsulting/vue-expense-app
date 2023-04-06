@@ -4,6 +4,7 @@ import Reimbursements from '@/views/Reimbursements.vue';
 import Login from '@/views/Login.vue';
 import LoginFailed from '@/views/LoginFailed.vue';
 import ExpenseTypes from '@/views/ExpenseTypes.vue';
+import PTOCashOuts from '@/views/PTOCashOuts.vue';
 import Employees from '@/views/Employees.vue';
 import Employee from '@/views/Employee.vue';
 import StatsDashboard from '@/views/StatsDashboard.vue';
@@ -40,6 +41,12 @@ const router = new Router({
       name: 'reimbursements',
       component: Reimbursements,
       beforeEnter: multiguard([requireAuth, isAdmin])
+    },
+    {
+      path: '/ptoCashOuts',
+      name: 'ptoCashOuts',
+      component: PTOCashOuts,
+      beforeEnter: requireAuth
     },
     {
       path: '/expenseTypes',
