@@ -31,14 +31,49 @@
         <monthly-charges :passedEmployee="employee" :showMinutes="showMinutes"></monthly-charges>
         <v-divider></v-divider>
         <balances :passedEmployee="employee" :showMinutes="showMinutes"></balances>
+        <button
+          class="home_buttons"
+          @click="
+            () => {
+              showPTOCashOutFormModal = true;
+            }
+          "
+        >
+          Cash out PTO
+        </button>
       </v-card-text>
     </v-card>
+    <v-dialog v-model="showPTOCashOutFormModal" persistent max-width="500">
+      <p-t-o-cashout-form :showModal="showPTOCashOutFormModal" />
+    </v-dialog>
   </div>
 </template>
 
 <script>
 import MonthlyCharges from '@/components/shared/quickbooks/MonthlyCharges.vue';
 import Balances from '@/components/shared/quickbooks/Balances.vue';
+import PTOCashoutForm from '../PTOCashOutForm.vue';
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+/**
+ * Created lifecycle hook
+ */
+function created() {
+  window.EventBus.$on('cancel-pto-cash-out-form', () => {
+    console.log('success');
+    this.showPTOCashOutFormModal = false;
+  });
+} // created
+
+/**
+ * BeforeDestroy lifecycle hook
+ */
+function beforeDestroy() {
+  window.EventBus.$off('cancel-pto-cash-out-form');
+} // beforeDestroy
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -60,16 +95,20 @@ function emit(name) {
 }
 
 export default {
+  created,
+  beforeDestroy,
   components: {
     Balances,
-    MonthlyCharges
+    MonthlyCharges,
+    PTOCashoutForm
   },
   computed: {
     tooltipText
   },
   data() {
     return {
-      showMinutes: false
+      showMinutes: false,
+      showPTOCashOutFormModal: false
     };
   },
   methods: {
