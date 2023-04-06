@@ -1,76 +1,26 @@
 <template>
-  <v-container fluid>
-    <v-row>
-      <v-col cols="12" md="9">
-        <!-- Expense Table -->
-        <unreimbursed-expenses-table></unreimbursed-expenses-table>
-      </v-col>
-      <v-col v-if="!isMobile" cols="3" class="followScroll">
-        <!-- Expense Info -->
-        <reimbursement-expense-details class="mb-3"></reimbursement-expense-details>
-        <!-- Expenses Total -->
-        <reimbursement-totals></reimbursement-totals>
-        <!-- Status Alert -->
-        <v-alert
-          v-for="(alert, index) in alerts"
-          :key="index"
-          :type="alert.status"
-          :color="alert.color"
-          dense
-          class="mt-1"
-          id="alert"
-        >
-          {{ alert.message }}
-        </v-alert>
-      </v-col>
-      <v-col v-else cols="12">
-        <!-- Expense Info -->
-        <reimbursement-expense-details class="mb-3"></reimbursement-expense-details>
-        <!-- Expenses Total -->
-        <expense-type-totals></expense-type-totals>
-        <!-- Status Alert -->
-        <v-alert
-          v-for="(alert, index) in alerts"
-          :key="index"
-          :type="alert.status"
-          :color="alert.color"
-          dense
-          id="alert"
-        >
-          {{ alert.message }}
-        </v-alert>
-      </v-col>
-    </v-row>
-  </v-container>
+  <v-card :elevation="3" class="">
+    <v-card color="#bc3825">
+      <v-card-title headline v-bind:class="{ 'justify-center': isMobile }">
+        <h2 class="text-center white--text">Reimbursements</h2>
+      </v-card-title>
+    </v-card>
+    <v-tabs v-model="currentTab">
+      <v-tab class="ml-5" href="#expenses">Expenses</v-tab>
+      <v-tab href="#ptoCashOuts">PTO Cash Outs</v-tab>
+      <v-tab-item id="expenses" class="mx-2 mb-6">
+        <UnreimbursedExpenses />
+      </v-tab-item>
+      <v-tab-item id="ptoCashOuts" class="mx-2 my-6">
+        <div>PTO Cash Outs</div>
+      </v-tab-item>
+    </v-tabs>
+  </v-card>
 </template>
 
 <script>
-import ReimbursementExpenseDetails from '@/components/reimbursements/ReimbursementExpenseDetails.vue';
-import ReimbursementTotals from '@/components/reimbursements/ReimbursementTotals.vue';
-import UnreimbursedExpensesTable from '@/components/reimbursements/UnreimbursedExpensesTable.vue';
+import UnreimbursedExpenses from '@/components/reimbursements/UnreimbursedExpenses.vue';
 import { isMobile } from '@/utils/utils';
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                 LIFECYCLE HOOKS                  |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Created lifecycle hook.
- */
-async function created() {
-  window.EventBus.$on('reimburseAlert', (alerts) => {
-    this.alerts = alerts;
-  });
-} // created
-
-/**
- * beforeDestroy lifecycle hook.
- */
-function beforeDestroy() {
-  window.EventBus.$off('reimburseAlert');
-} // beforeDestroy
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -80,27 +30,15 @@ function beforeDestroy() {
 
 export default {
   components: {
-    ReimbursementExpenseDetails,
-    ReimbursementTotals,
-    UnreimbursedExpensesTable
+    UnreimbursedExpenses
   },
   computed: {
     isMobile
   },
-  created,
-  beforeDestroy,
   data() {
     return {
-      alerts: [], // status alerts
-      employee: {}
+      currentTab: 'expenses'
     };
   }
 };
 </script>
-
-<style>
-.followScroll {
-  position: fixed;
-  left: 75%;
-}
-</style>
