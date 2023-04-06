@@ -15,6 +15,7 @@ const GOOGLE_MAPS = 'googleMaps';
 const AUDIT = 'audits';
 const RESUME = 'resume';
 const CONTRACTS = 'contracts';
+const PTO_CASH_OUTS = 'ptoCashOuts';
 const API_HOSTNAME = API_CONFIG.apiHostname;
 const API_PORT = API_CONFIG.apiPort;
 const PORT = API_PORT === '443' ? '' : `:${API_PORT}`;
@@ -162,6 +163,15 @@ async function getFiscalDateViewBudgets(id, fiscalDateView) {
 async function getEmployeeBudgets(id) {
   return execute('get', `/budgets/employee/${id}`);
 } // getEmployeeBudgets
+
+/**
+ * Gets PTO cash outs for an employee
+ *
+ * @return - PTO cash outs for employee
+ */
+async function getEmployeePtoCashOuts(id) {
+  return execute('get', `/${UTILITY}/getAllEmployeePtoCashOuts/${id}`);
+} // getEmployeePtoCashOuts
 
 /**
  * gets all the events
@@ -517,6 +527,7 @@ export default {
   getEmployeeBudget,
   getEmployeeBudgets,
   getEmployeeExpenseTypes,
+  getEmployeePtoCashOuts,
   getFeedEvents,
   getFiscalDateViewBudgets,
   getItem,
@@ -536,6 +547,7 @@ export default {
   EXPENSES,
   EMPLOYEES,
   CONTRACTS,
+  PTO_CASH_OUTS,
   UTILITY,
   QUICK_BOOKS_TIME,
   TRAINING_URLS,
