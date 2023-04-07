@@ -112,3 +112,14 @@ export function getURLRules() {
 export function getValidateFalse() {
   return [(v) => isEmpty(v) || 'Departure date must be after hire date'];
 } // getValidateRules
+
+/**
+ *  Gets the rules for validating employee PTO Cash Out request
+ * @param ptoLimit employee's available PTO
+ * @returns Array - The array of rule functions
+ */
+export function getPTOCashOutRules(ptoLimit) {
+  return [
+    (v) => (!isEmpty(v) && v <= ptoLimit) || `PTO cash out amount can not exceed available PTO (${ptoLimit} hrs)`
+  ];
+} // getPTOCashOutRules

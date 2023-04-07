@@ -8,7 +8,7 @@
             <v-text-field
               prepend-icon="mdi-clock-outline"
               class="pt-5"
-              :rules="[(v) => !!v || 'Field is required', ...getNumberRules()]"
+              :rules="[(v) => !!v || 'Field is required', ...getNumberRules(), ...getPTOCashOutRules(userAvailablePTO)]"
               v-model="hoursRequested"
               label="Number of Hours Requested to be Paid Out"
               required
@@ -33,10 +33,11 @@
   </div>
 </template>
 <script>
-import { getNumberRules, getRequiredRules } from '@/shared/validationUtils.js';
+import { getNumberRules, getRequiredRules, getPTOCashOutRules } from '@/shared/validationUtils.js';
 import api from '@/shared/api.js';
 import dateUtils from '@/shared/dateUtils.js';
 import { v4 as uuid } from 'uuid';
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -142,12 +143,15 @@ export default {
       show: false,
       hoursRequested: null,
       valid: false,
-      isSubmitting: false
+      isSubmitting: false,
+      userAvailablePTO:
+        this.$store.getters.quickbooksPTO.results.users[this.$store.getters.user.employeeNumber]['pto_balances'].PTO
     };
   },
   methods: {
     getNumberRules,
     getRequiredRules,
+    getPTOCashOutRules,
     emit,
     submit,
     cancel,
