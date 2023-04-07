@@ -1,5 +1,20 @@
 <template>
   <v-container fluid>
+    <!-- Status Alert -->
+    <v-snackbar
+      v-model="status.statusType"
+      :color="status.color"
+      :multi-line="true"
+      :right="true"
+      :timeout="5000"
+      :top="true"
+      :vertical="true"
+    >
+      <v-card-title headline color="white">
+        <span class="headline">{{ status.statusMessage }}</span>
+      </v-card-title>
+      <v-btn color="white" text @click="clearStatus"> Close </v-btn>
+    </v-snackbar>
     <span v-if="loading">
       <v-row>
         <v-col cols="12" md="6" class="px-xl-4 px-lg-2 px-md-0 d-flex justify-center align-center">
@@ -506,6 +521,15 @@ async function refreshEmployee() {
   this.accessibleBudgets = this.$store.getters.budgets;
 } // refreshEmployee
 
+/**
+ * Clear the action status that is displayed in the snackbar.
+ */
+function clearStatus() {
+  this.$set(this.status, 'statusType', undefined);
+  this.$set(this.status, 'statusMessage', '');
+  this.$set(this.status, 'color', '');
+} // clearStatus
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -516,11 +540,21 @@ async function refreshEmployee() {
  *  Set budget information for employee. Creates event listeners.
  */
 async function created() {
+  window.EventBus.$on('status-alert', (status) => {
+    this.status = status;
+  });
   if (this.$store.getters.storeIsPopulated) {
     this.loading = false;
     await this.loadHomePageData();
   }
 } // created
+
+/**
+ * Before destroy lifecycle hook. Destroys listeners.
+ */
+function beforeDestroy() {
+  window.EventBus.$off('status-alert');
+} // beforeDestroy
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -587,6 +621,8 @@ export default {
     };
   },
   methods: {
+    beforeDestroy,
+    clearStatus,
     createEvents,
     getCurrentBudgetYear,
     getEmployeeAwards,

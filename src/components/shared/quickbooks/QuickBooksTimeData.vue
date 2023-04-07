@@ -62,8 +62,7 @@ import PTOCashoutForm from '../PTOCashOutForm.vue';
  * Created lifecycle hook
  */
 function created() {
-  window.EventBus.$on('cancel-pto-cash-out-form', () => {
-    console.log('success');
+  window.EventBus.$on('close-pto-cash-out-form', () => {
     this.showPTOCashOutFormModal = false;
   });
 } // created
@@ -72,7 +71,7 @@ function created() {
  * BeforeDestroy lifecycle hook
  */
 function beforeDestroy() {
-  window.EventBus.$off('cancel-pto-cash-out-form');
+  window.EventBus.$off('close-pto-cash-out-form');
 } // beforeDestroy
 
 // |--------------------------------------------------|
