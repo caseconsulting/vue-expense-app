@@ -9,13 +9,11 @@
             <h3 v-else-if="!loading">My PTO Cash Outs</h3>
             <h3 v-else>Loading...</h3>
             <v-spacer></v-spacer>
-            {{ employee }}
             <!-- Filter -->
             <v-autocomplete
               v-if="userRoleIsAdmin()"
               hide-details
               :items="employees"
-              :filter="customFilter"
               v-model="filteredEmployee"
               item-text="text"
               id="employeeIdFilter"
@@ -156,18 +154,6 @@ async function created() {
   this.loading = false;
 } // created
 
-function customFilter(item, queryText) {
-  const query = queryText ? queryText : '';
-  const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
-  const firstNameFullName = `${item.firstName} ${item.lastName}`;
-
-  const queryContainsNickName = nickNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
-  const queryContainsFirstName =
-    firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
-
-  return queryContainsNickName || queryContainsFirstName;
-}
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                     COMPUTED                     |
@@ -180,10 +166,11 @@ function customFilter(item, queryText) {
  * @return Array - filtered PTO cash outs
  */
 function filteredPtoCashOuts() {
-  let filteredPtoCashOuts = this.ptoCashOuts;
+  let filteredPtoCashOuts = _.cloneDeep(this.ptoCashOuts);
 
-  // if (this.filteredEmployee) {
-  // }
+  if (this.filteredEmployee) {
+    filteredPtoCashOuts = _.filter(filteredPtoCashOuts, (p) => p.employeeId == this.filteredEmployee);
+  }
 
   if (this.filter.approved === 'approved') {
     filteredPtoCashOuts = _.filter(filteredPtoCashOuts, (p) => p.approvedDate != null);
@@ -210,7 +197,16 @@ function roleHeaders() {
  */
 function employees() {
   let employeeIdsWithPTOCashOuts = this.ptoCashOuts.map((p) => p.employeeId);
-  return _.filter(this.$store.getters.employees, (e) => employeeIdsWithPTOCashOuts.includes(e.id));
+  return _.map(
+    _.filter(this.$store.getters.employees, (e) => employeeIdsWithPTOCashOuts.includes(e.id)),
+    (e) => ({
+      text: firstAndLastName(e),
+      value: e.id,
+      nickname: e.nickname ? e.nickname : '',
+      firstName: e.firstName,
+      lastName: e.lastName
+    })
+  );
 } // employees
 
 // |--------------------------------------------------|
@@ -246,8 +242,7 @@ export default {
     getEmployeeByID,
     firstAndLastName,
     updateStoreUser,
-    updateStoreEmployees,
-    customFilter
+    updateStoreEmployees
   },
   computed: {
     roleHeaders,
