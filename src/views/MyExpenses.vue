@@ -124,7 +124,7 @@
             </div>
             <!-- End Active Filter -->
 
-            <!-- Reimbursed Fitler -->
+            <!-- Reimbursed Filter -->
             <div class="flagFilter">
               <h4>Reimbursed:</h4>
               <v-btn-toggle class="filter_color" v-model="filter.reimbursed" text mandatory>

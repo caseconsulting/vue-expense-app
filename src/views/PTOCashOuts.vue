@@ -9,14 +9,14 @@
             <h3 v-else-if="!loading">My PTO Cash Outs</h3>
             <h3 v-else>Loading...</h3>
             <v-spacer></v-spacer>
-
+            {{ employee }}
             <!-- Filter -->
             <v-autocomplete
               v-if="userRoleIsAdmin()"
               hide-details
               :items="employees"
               :filter="customFilter"
-              v-model="employee"
+              v-model="filteredEmployee"
               item-text="text"
               id="employeeIdFilter"
               class="mr-3"
@@ -65,8 +65,8 @@
             <!-- Approved Filter -->
             <div class="flagFilter">
               <h4>Approved:</h4>
-              <v-btn-toggle class="filter_color" v-model="filter.reimbursed" text mandatory>
-                <!-- Show Reimbursed -->
+              <v-btn-toggle class="filter_color" v-model="filter.approved" text mandatory>
+                <!-- Show Approved -->
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
                     <v-btn value="approved" v-on="on" text>
@@ -101,19 +101,25 @@
           <br />
           <!-- End Filters -->
           <!-- PTO Cash Outs Data Table -->
-          <v-data-table :headers="headers" :items="ptoCashOuts" class="elevation-4">
+          <v-data-table :headers="roleHeaders" :items="filteredPtoCashOuts" class="elevation-4" :loading="loading">
             <!-- Creation Date slot -->
             <template v-slot:[`item.creationDate`]="{ item }">
-              {{ monthDayYearFormat(item.approvedDate) }}
+              <td>{{ monthDayYearFormat(item.creationDate) }}</td>
             </template>
+
+            <!-- Employee slot -->
+            <template v-slot:[`item.employeeId`]="{ item }">
+              <td v-if="userRoleIsAdmin()">{{ firstAndLastName(getEmployeeByID(item.employeeId)) }}</td>
+            </template>
+
             <!-- Amount slot-->
             <template v-slot:[`item.amount`]="{ item }">
-              {{ item.amount + (item.amount > 1 ? ' hrs' : 'hr') }}
+              <td>{{ item.amount + (item.amount > 1 ? ' hrs' : 'hr') }}</td>
             </template>
 
             <!-- Approved Date slot -->
             <template v-slot:[`item.approvedDate`]="{ item }">
-              {{ monthDayYearFormat(item.approvedDate) }}
+              <td>{{ monthDayYearFormat(item.approvedDate) }}</td>
             </template>
           </v-data-table>
         </v-container>
@@ -123,12 +129,95 @@
 </template>
 <script>
 import { isMobile, userRoleIsAdmin, monthDayYearFormat, isEmpty } from '@/utils/utils';
+import { getEmployeeByID, firstAndLastName } from '@/shared/employeeUtils';
 import api from '@/shared/api.js';
+import { updateStoreUser, updateStoreEmployees } from '@/utils/storeUtils';
+import _ from 'lodash';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Created lifecycle hook
+ */
 async function created() {
-  this.ptoCashOuts = await api.getEmployeePtoCashOuts(this.$store.getters.user.id);
+  if (!this.$store.getters.storeIsPopulated) {
+    await this.updateStoreUser();
+    await this.updateStoreEmployees();
+  }
+  if (this.userRoleIsAdmin()) {
+    this.ptoCashOuts = await api.getItems(api.PTO_CASH_OUTS);
+  } else {
+    this.ptoCashOuts = await api.getEmployeePtoCashOuts(this.$store.getters.user.id);
+  }
   this.loading = false;
+} // created
+
+function customFilter(item, queryText) {
+  const query = queryText ? queryText : '';
+  const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
+  const firstNameFullName = `${item.firstName} ${item.lastName}`;
+
+  const queryContainsNickName = nickNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
+  const queryContainsFirstName =
+    firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
+
+  return queryContainsNickName || queryContainsFirstName;
 }
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Filters data table based on filter settings
+ *
+ * @return Array - filtered PTO cash outs
+ */
+function filteredPtoCashOuts() {
+  let filteredPtoCashOuts = this.ptoCashOuts;
+
+  // if (this.filteredEmployee) {
+  // }
+
+  if (this.filter.approved === 'approved') {
+    filteredPtoCashOuts = _.filter(filteredPtoCashOuts, (p) => p.approvedDate != null);
+  } else if (this.filter.approved === 'notApproved') {
+    filteredPtoCashOuts = _.filter(filteredPtoCashOuts, (p) => p.approvedDate == null);
+  }
+  return filteredPtoCashOuts;
+} // filteredPtOCashOuts
+
+/**
+ * Gets the datatable headers based on user's role. Returns all headers if user role is admin.
+ * Otherwise returns all but 'Employee' header.
+ *
+ * @return Array - datatable headers
+ */
+function roleHeaders() {
+  return this.userRoleIsAdmin() ? this.headers : _.filter(this.headers, (h) => h.text != 'Employee');
+} // roleHeaders
+
+/**
+ * Gets all employees with submitted PTO Cash Out Requests for autocomplete filter component.
+ *
+ * @return Array - filtered employees
+ */
+function employees() {
+  let employeeIdsWithPTOCashOuts = this.ptoCashOuts.map((p) => p.employeeId);
+  return _.filter(this.$store.getters.employees, (e) => employeeIdsWithPTOCashOuts.includes(e.id));
+} // employees
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   created,
@@ -136,11 +225,14 @@ export default {
     return {
       ptoCashOuts: [],
       loading: true,
+      filteredEmployee: null,
       filter: {
-        approved: this.$route.params.defaultFilterReimbursed || 'notReimbursed' //default only shows cash outs that are not approved
+        // active: 'both',
+        approved: 'notApproved' //default only shows cash outs that are not approved
       }, // data table filters
       headers: [
         { text: 'Creation Date', value: 'creationDate' },
+        { text: 'Employee', value: 'employeeId' },
         { text: 'Amount', value: 'amount' },
         { text: 'Approved Date', value: 'approvedDate' }
       ]
@@ -150,7 +242,17 @@ export default {
     isMobile,
     userRoleIsAdmin,
     monthDayYearFormat,
-    isEmpty
+    isEmpty,
+    getEmployeeByID,
+    firstAndLastName,
+    updateStoreUser,
+    updateStoreEmployees,
+    customFilter
+  },
+  computed: {
+    roleHeaders,
+    filteredPtoCashOuts,
+    employees
   }
 };
 </script>
