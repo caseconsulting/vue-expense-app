@@ -44,9 +44,24 @@
           <div v-if="showMore && !showAll" align="center">
             <v-btn @click="showMore = false" top text small class="my-2">Show Less &#9650; </v-btn>
           </div>
+          <div class="align-items-center">
+            <button
+              class="home_buttons mb-0"
+              @click="
+                () => {
+                  showPTOCashOutFormModal = true;
+                }
+              "
+            >
+              Cash Out PTO
+            </button>
+          </div>
         </div>
       </v-card-text>
     </div>
+    <v-dialog v-model="showPTOCashOutFormModal" persistent max-width="500">
+      <p-t-o-cash-out-form />
+    </v-dialog>
   </div>
 </template>
 
@@ -54,6 +69,7 @@
 import api from '@/shared/api.js';
 import { isEmpty } from '@/utils/utils';
 import _ from 'lodash';
+import PTOCashOutForm from '@/components/shared/PTOCashOutForm.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -71,6 +87,9 @@ async function created() {
     await this.setPTOBalances();
     this.refresh = false;
   });
+  window.EventBus.$on('close-pto-cash-out-form', () => {
+    this.showPTOCashOutFormModal = false;
+  });
 
   this.isEmployeeView = this.$route.name === 'employee';
   this.loadingBar = true;
@@ -82,6 +101,7 @@ async function created() {
  */
 function beforeDestroy() {
   window.EventBus.$off('refresh-quickbooks-data');
+  window.EventBus.$off('close-pto-cash-out-form');
 } // beforeDestroy
 
 // |--------------------------------------------------|
@@ -207,6 +227,7 @@ async function watchPassedEmployeeID() {
 // |--------------------------------------------------|
 
 export default {
+  components: { PTOCashOutForm },
   computed: {
     isInactive,
     availableBalances
@@ -223,7 +244,8 @@ export default {
       loadingBar: false, // display loading bar
       refresh: false, // if the data has been refreshed
       showAll: true, // show all balances
-      showMore: false // toggle to show hidden balances
+      showMore: false, // toggle to show hidden balances
+      showPTOCashOutFormModal: false // toggle to show PTO Cash Out form
     };
   },
   methods: {

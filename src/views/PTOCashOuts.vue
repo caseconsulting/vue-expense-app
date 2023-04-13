@@ -99,7 +99,14 @@
           <br />
           <!-- End Filters -->
           <!-- PTO Cash Outs Data Table -->
-          <v-data-table :headers="roleHeaders" :items="filteredPtoCashOuts" class="elevation-4" :loading="loading">
+          <v-data-table
+            :headers="roleHeaders"
+            :sort-by.sync="sortBy"
+            :sort-desc.sync="sortDesc"
+            :items="filteredPtoCashOuts"
+            class="elevation-4"
+            :loading="loading"
+          >
             <!-- Creation Date slot -->
             <template v-slot:[`item.creationDate`]="{ item }">
               <td>{{ monthDayYearFormat(item.creationDate) }}</td>
@@ -231,7 +238,9 @@ export default {
         { text: 'Employee', value: 'employeeId' },
         { text: 'Amount', value: 'amount' },
         { text: 'Approved Date', value: 'approvedDate' }
-      ]
+      ],
+      sortBy: 'creationDate',
+      sortDesc: true
     };
   },
   methods: {
