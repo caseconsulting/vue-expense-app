@@ -133,6 +133,11 @@ function availableBalances() {
       avaibleBalances.push(balance);
     }
   });
+  if (this.pendingPtoCashOuts.length > 0) {
+    let balance = 'Pending PTO Cash Out';
+    avaibleBalances.push(balance);
+    this.balanceData[balance] = this.pendingPtoCashOuts.reduce((n, { amount }) => n + amount, 0);
+  }
   return avaibleBalances;
 } // availableBalances
 
@@ -172,6 +177,8 @@ async function setPTOBalances() {
     let ptoBalances;
     if (!this.$store.getters.quickbooksPTO || this.$store.getters.user.id != this.employee.id || this.refresh) {
       ptoBalances = await api.getPTOBalances(this.employee.employeeNumber); // call api
+      this.pendingPtoCashOuts = await api.getEmployeePtoCashOuts(this.employee.id);
+      this.pendingPtoCashOuts = _.filter(this.pendingPtoCashOuts, (p) => !p.approvedDate);
       if (this.$store.getters.user.id == this.employee.id) {
         // only set vuex store if the user is looking at their own quickbooks data
         this.$store.dispatch('setQuickbooksPTO', { quickbooksPTO: ptoBalances });
@@ -242,6 +249,7 @@ export default {
       isEmployeeView: false, // viewing from employee route
       keysBalance: [], // balance names
       loadingBar: false, // display loading bar
+      pendingPtoCashOuts: [], // pending employee PTO cash outs
       refresh: false, // if the data has been refreshed
       showAll: true, // show all balances
       showMore: false, // toggle to show hidden balances
