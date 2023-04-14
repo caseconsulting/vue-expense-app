@@ -120,6 +120,7 @@ export function getValidateFalse() {
  */
 export function getPTOCashOutRules(ptoLimit) {
   return [
-    (v) => (!isEmpty(v) && v <= ptoLimit) || `PTO cash out amount can not exceed available PTO (${ptoLimit} hrs)`
+    (v) => (!isEmpty(v) && v <= ptoLimit) || `PTO cash out amount can not exceed available PTO (${ptoLimit} hrs)`,
+    (v) => (!isEmpty(v) && ptoLimit - v >= 40) || 'A minimum balance of 40 PTO hrs must be maintained after a cash out'
   ];
 } // getPTOCashOutRules
