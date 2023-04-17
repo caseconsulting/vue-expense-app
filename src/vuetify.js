@@ -2,6 +2,8 @@ import Vue from 'vue';
 import Vuetify from 'vuetify';
 import 'vuetify/dist/vuetify.min.css';
 import '@mdi/font/css/materialdesignicons.css';
+import TwitterIcon from '@/components/custom-icons/TwitterIcon';
+import FacebookIcon from '@/components/custom-icons/FacebookIcon';
 
 Vue.use(Vuetify);
 
@@ -11,7 +13,15 @@ const opts = {
     radioactive: '#0ACF23'
   },
   icons: {
-    iconfont: 'mdi'
+    iconfont: 'mdi',
+    values: {
+      twitter: {
+        component: TwitterIcon
+      },
+      facebook: {
+        component: FacebookIcon
+      }
+    }
   }
 };
 
