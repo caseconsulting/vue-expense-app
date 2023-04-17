@@ -8,7 +8,6 @@ const EMSI = 'emsi';
 const TRAINING_URLS = 'training-urls';
 const UTILITY = 'utility';
 const QUICK_BOOKS_TIME = 'tSheets';
-const TWITTER = 'twitter';
 const BASECAMP = 'basecamp';
 const HIPPO_LAB = 'hippoLabs';
 const GOOGLE_MAPS = 'googleMaps';
@@ -429,24 +428,6 @@ async function getMonthlyHours(employeeNumber) {
 } // getMonthlyHours
 
 /**
- * gets the twitter token for the case twitter
- *
- * @return - the twitter token
- */
-async function getTwitterToken() {
-  return await execute('get', `/${TWITTER}/getTwitterToken`);
-} // getTwitterToken
-
-/**
- * gets the case twitter timeline
- *
- * @return - the case timeline tweet data
- */
-async function getCaseTimeline() {
-  return await execute('get', `${TWITTER}/getCaseTimeline`);
-} // getCaseTimeline
-
-/**
  * get the feed events for basecamp
  *
  * @return - the feed events
@@ -521,7 +502,6 @@ export default {
   getAudits,
   getBasecampAvatars,
   getBasecampCampfires,
-  getCaseTimeline,
   getColleges,
   getCountries,
   getEmployeeBudget,
@@ -537,7 +517,6 @@ export default {
   getResume,
   getMonthlyHours,
   getTechSkills,
-  getTwitterToken,
   getURLInfo,
   getZipCode,
   getUser,
@@ -551,7 +530,6 @@ export default {
   UTILITY,
   QUICK_BOOKS_TIME,
   TRAINING_URLS,
-  TWITTER,
   AUDIT,
   CONTRACT_STATUSES
 };

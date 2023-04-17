@@ -7,7 +7,7 @@
  * and split it into multiple files based on use case.
  * e.g. all current user data in one file
  *      all expense data in one file
- *      all employees/basecamp/twitter
+ *      all employees/basecamp
  *      meta data/other supporting stuff?
  *
  */
