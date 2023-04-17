@@ -68,6 +68,7 @@
 <script>
 import api from '@/shared/api.js';
 import { isEmpty } from '@/utils/utils';
+import { updateStorePtoCashOuts } from '@/utils/storeUtils';
 import _ from 'lodash';
 import PTOCashOutForm from '@/components/shared/PTOCashOutForm.vue';
 
@@ -127,6 +128,10 @@ function isInactive() {
  * @return array - the balances that are shown
  */
 function availableBalances() {
+  this.pendingPtoCashOuts = _.filter(
+    this.$store.getters.ptoCashOuts,
+    (p) => !p.approvedDate && this.employee.id === p.employeeId
+  );
   let avaibleBalances = [];
   this.keysBalance.forEach((balance) => {
     if (this.balanceData[balance] > 0 || this.showMore) {
@@ -175,10 +180,13 @@ async function setPTOBalances() {
   if (!this.isEmpty(this.employee.id)) {
     // employee exists
     let ptoBalances;
-    if (!this.$store.getters.quickbooksPTO || this.$store.getters.user.id != this.employee.id || this.refresh) {
-      ptoBalances = await api.getPTOBalances(this.employee.employeeNumber); // call api
-      this.pendingPtoCashOuts = await api.getEmployeePtoCashOuts(this.employee.id);
-      this.pendingPtoCashOuts = _.filter(this.pendingPtoCashOuts, (p) => !p.approvedDate);
+    if (
+      !this.$store.getters.quickbooksPTO ||
+      !this.$store.getters.ptoCashOuts ||
+      this.$store.getters.user.id != this.employee.id ||
+      this.refresh
+    ) {
+      [ptoBalances] = await Promise.all([api.getPTOBalances(this.employee.employeeNumber), updateStorePtoCashOuts()]); // call api
       if (this.$store.getters.user.id == this.employee.id) {
         // only set vuex store if the user is looking at their own quickbooks data
         this.$store.dispatch('setQuickbooksPTO', { quickbooksPTO: ptoBalances });

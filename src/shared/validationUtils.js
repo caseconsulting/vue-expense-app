@@ -1,5 +1,7 @@
 import { isEmpty } from '@/utils/utils';
 import { getTodaysDate, isBefore, isValid } from '@/shared/dateUtils';
+import store from '../../store/index';
+import _ from 'lodash';
 
 /**
  * Gets the optional date rules in MM/DD/YYYY format.
@@ -118,9 +120,15 @@ export function getValidateFalse() {
  * @param ptoLimit employee's available PTO
  * @returns Array - The array of rule functions
  */
-export function getPTOCashOutRules(ptoLimit) {
+export function getPTOCashOutRules(ptoLimit, employeeId) {
+  let pendingCashOuts = _.filter(store.getters.ptoCashOuts, (p) => !p.approvedDate && employeeId === p.employeeId);
+  let pendingAmount = pendingCashOuts.reduce((n, { amount }) => n + amount, 0);
   return [
-    (v) => (!isEmpty(v) && v <= ptoLimit) || `PTO cash out amount can not exceed available PTO (${ptoLimit} hrs)`,
-    (v) => (!isEmpty(v) && ptoLimit - v >= 40) || 'A minimum balance of 40 PTO hrs must be maintained after a cash out'
+    (v) =>
+      (!isEmpty(v) && v + pendingAmount > ptoLimit) ||
+      `PTO cash out amount can not exceed available PTO (${ptoLimit} hrs)`,
+    (v) =>
+      (!isEmpty(v) && ptoLimit - v - pendingAmount >= 40) ||
+      'A minimum balance of 40 PTO hrs must be maintained after a cash out'
   ];
 } // getPTOCashOutRules

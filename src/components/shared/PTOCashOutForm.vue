@@ -8,7 +8,11 @@
             <v-text-field
               prepend-icon="mdi-clock-outline"
               class="pt-5"
-              :rules="[(v) => !!v || 'Field is required', ...getNumberRules(), ...getPTOCashOutRules(userAvailablePTO)]"
+              :rules="[
+                (v) => !!v || 'Field is required',
+                ...getNumberRules(),
+                ...getPTOCashOutRules(userAvailablePTO, this.$store.getters.user.id)
+              ]"
               v-model="hoursRequested"
               label="Number of Hours Requested to be Paid Out"
               required
@@ -124,12 +128,13 @@ function displaySuccess(msg) {
  * Creates a PTO Cash Out record in the database.
  */
 async function createPTOCashOutRequest() {
-  await api.createItem(api.PTO_CASH_OUTS, {
+  let ptoCashOut = await api.createItem(api.PTO_CASH_OUTS, {
     id: uuid(),
     amount: this.hoursRequested,
     employeeId: this.$store.getters.user.id,
     creationDate: dateUtils.getTodaysDate()
   });
+  this.$store.dispatch('setPtoCashOuts', { ptoCashOuts: [...this.$store.getters.ptoCashOuts, ptoCashOut] });
 } // createPTOCashOutRequest
 
 // |--------------------------------------------------|

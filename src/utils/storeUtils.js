@@ -5,6 +5,8 @@
 // |--------------------------------------------------|
 
 import api from '@/shared/api.js';
+import store from '../../store/index.js';
+import { userRoleIsAdmin, userRoleIsManager, userRoleIsUser } from '@/utils/utils';
 
 /**
  * Update store with latest user data
@@ -55,6 +57,20 @@ export async function updateStoreBudgets() {
   let user = this.$store.getters.user;
   let budgets = await api.getAllActiveEmployeeBudgets(user.id);
   this.$store.dispatch('setBudgets', { budgets: budgets });
+} // updateStoreBudgets
+
+/**
+ * Update store with users budgets
+ */
+export async function updateStorePtoCashOuts() {
+  let user = store.getters.user;
+  let ptoCashOuts = [];
+  if (userRoleIsAdmin() || userRoleIsManager()) {
+    ptoCashOuts = await api.getItems(api.PTO_CASH_OUTS);
+  } else if (userRoleIsUser()) {
+    ptoCashOuts = await api.getEmployeePtoCashOuts(user.id);
+  }
+  store.dispatch('setPtoCashOuts', { ptoCashOuts: ptoCashOuts });
 } // updateStoreBudgets
 
 /**

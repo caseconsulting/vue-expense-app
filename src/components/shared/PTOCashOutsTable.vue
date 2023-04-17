@@ -147,7 +147,7 @@
 import { isMobile, userRoleIsAdmin, monthDayYearFormat, isEmpty } from '@/utils/utils';
 import { getEmployeeByID, firstAndLastName } from '@/shared/employeeUtils';
 import api from '@/shared/api.js';
-import { updateStoreUser, updateStoreEmployees } from '@/utils/storeUtils';
+import { updateStoreUser, updateStoreEmployees, updateStorePtoCashOuts } from '@/utils/storeUtils';
 import _ from 'lodash';
 import GeneralConfirmationModal from '../modals/GeneralConfirmationModal.vue';
 import dateUtils from '@/shared/dateUtils';
@@ -169,14 +169,10 @@ async function created() {
     this.toggleApproveModal = false;
   });
   if (!this.$store.getters.storeIsPopulated) {
-    await this.updateStoreUser();
-    await this.updateStoreEmployees();
+    await Promise.all([this.updateStoreUser(), this.updateStoreEmployees()]);
   }
-  if (this.userRoleIsAdmin()) {
-    this.ptoCashOuts = await api.getItems(api.PTO_CASH_OUTS);
-  } else {
-    this.ptoCashOuts = await api.getEmployeePtoCashOuts(this.$store.getters.user.id);
-  }
+  await this.updateStorePtoCashOuts();
+  this.ptoCashOuts = this.$store.getters.ptoCashOuts;
   this.loading = false;
 } // created
 
@@ -367,6 +363,7 @@ export default {
     firstAndLastName,
     updateStoreUser,
     updateStoreEmployees,
+    updateStorePtoCashOuts,
     uncheckAllBoxes
   },
   computed: {
