@@ -1,5 +1,19 @@
 <template>
   <v-row>
+    <v-snackbar
+      v-model="status.statusType"
+      :color="status.color"
+      :multi-line="true"
+      :right="true"
+      :timeout="5000"
+      :top="true"
+      :vertical="true"
+    >
+      <v-card-title headline color="white">
+        <span class="headline">{{ status.statusMessage }}</span>
+      </v-card-title>
+      <v-btn color="white" text @click="clearStatus"> Close </v-btn>
+    </v-snackbar>
     <v-col cols="12" xl="9" lg="8"><p-t-o-cash-outs-table /> </v-col>
     <v-col cols="12" xl="3" lg="4" class="pl-lg-1 pl-sm-2 mt-3">
       <!-- Skeleton Loader-->
@@ -20,16 +34,36 @@
 import PTOCashOutsTable from '@/components/shared/PTOCashOutsTable.vue';
 import QuickBooksTimeData from '@/components/shared/quickbooks/QuickBooksTimeData';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+/**
+ * Created lifecycle hook
+ */
 function created() {
+  window.EventBus.$on('status-alert', (status) => {
+    this.$set(this.status, 'statusType', status.statusType);
+    this.$set(this.status, 'statusMessage', status.statusMessage);
+    this.$set(this.status, 'color', status.color);
+  });
   if (this.$store.getters.storeIsPopulated) {
     this.employee = this.$store.getters.user;
     this.loading = false;
   }
-}
+} // created
+
+/**
+ * before destroy lifecycle hook
+ */
+function beforeDestroy() {
+  window.EventBus.$off('status-alert');
+} // beforeDestroy
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     COMPUTED                     |
+// |                    COMPUTED                      |
 // |                                                  |
 // |--------------------------------------------------|
 
@@ -60,10 +94,27 @@ async function watchStoreIsPopulated() {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Clear the action status that is displayed in the snackbar.
+ */
+function clearStatus() {
+  this.$set(this.status, 'statusType', undefined);
+  this.$set(this.status, 'statusMessage', '');
+  this.$set(this.status, 'color', '');
+} // clearStatus
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
 export default {
+  beforeDestroy,
+  created,
   components: {
     PTOCashOutsTable,
     QuickBooksTimeData
@@ -74,11 +125,19 @@ export default {
   created,
   data() {
     return {
-      loading: true
+      loading: true,
+      status: {
+        statusType: undefined,
+        statusMessage: '',
+        color: ''
+      }
     };
   },
   watch: {
     storeIsPopulated: watchStoreIsPopulated
+  },
+  methods: {
+    clearStatus
   }
 };
 </script>

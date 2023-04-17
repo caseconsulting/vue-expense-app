@@ -110,12 +110,61 @@
 
         <!-- Amount slot-->
         <template v-slot:[`item.amount`]="{ item }">
-          <td>{{ item.amount + (item.amount > 1 ? ' hrs' : 'hr') }}</td>
+          <td>{{ item.amount + (item.amount > 1 ? ' hrs' : ' hr') }}</td>
         </template>
 
         <!-- Approved Date slot -->
         <template v-slot:[`item.approvedDate`]="{ item }">
           <td>{{ monthDayYearFormat(item.approvedDate) }}</td>
+        </template>
+
+        <template v-slot:[`item.actions`]="{ item }">
+          <td v-if="!unapprovedOnly" class="datatable_btn layout">
+            <!-- Edit Button -->
+            <!-- <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <v-btn :disabled="isUnapproving || isDeleting" text icon id="edit" v-on="on">
+                  <v-icon class="case-gray">edit</v-icon>
+                </v-btn>
+              </template>
+              <span>Edit</span>
+            </v-tooltip> -->
+
+            <!-- Delete Button -->
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <v-btn
+                  :disabled="isUnapproving || isDeleting"
+                  @click="clickedDelete(item)"
+                  text
+                  icon
+                  id="delete"
+                  v-on="on"
+                >
+                  <v-icon class="case-gray"> delete </v-icon>
+                </v-btn>
+              </template>
+              <span>Delete</span>
+            </v-tooltip>
+
+            <!-- Unapprove Button -->
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <v-btn
+                  v-if="userRoleIsAdmin()"
+                  :disabled="!isApproved(item) || isUnapproving || isDeleting"
+                  @click="clickedUnapprove(item)"
+                  text
+                  icon
+                  id="unapprove"
+                  v-on="on"
+                >
+                  <v-icon class="case-gray"> money_off </v-icon>
+                </v-btn>
+              </template>
+              <span>Unapprove</span>
+            </v-tooltip>
+          </td>
         </template>
       </v-data-table>
     </v-container>
@@ -141,6 +190,8 @@
       type="pto-cash-outs"
       :toggleModal="toggleApproveModal"
     />
+    <unapprove-p-t-o-cash-out-modal :toggleUnapproveModal="toggleUnapproveModal" />
+    <delete-modal :toggleDeleteModal="toggleDeleteModal" type="PTO cash out" />
   </v-card>
 </template>
 <script>
@@ -151,6 +202,8 @@ import { updateStoreUser, updateStoreEmployees, updateStorePtoCashOuts } from '@
 import _ from 'lodash';
 import GeneralConfirmationModal from '../modals/GeneralConfirmationModal.vue';
 import dateUtils from '@/shared/dateUtils';
+import UnapprovePTOCashOutModal from '../modals/UnapprovePTOCashOutModal.vue';
+import DeleteModal from '../modals/DeleteModal.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -163,18 +216,42 @@ import dateUtils from '@/shared/dateUtils';
  */
 async function created() {
   window.EventBus.$on('confirmed-pto-cash-outs', () => {
-    this.clickedConfirm();
+    this.clickedConfirmApprove();
   });
   window.EventBus.$on('canceled-pto-cash-outs', () => {
     this.toggleApproveModal = false;
   });
+  window.EventBus.$on('confirm-unapprove-cash-out', () => {
+    this.clickedConfirmUnapprove();
+  });
+  window.EventBus.$on('canceled-unapprove-cash-out', () => {
+    this.clickedCancelUnapprove();
+  });
+  window.EventBus.$on('confirm-delete-PTO cash out', () => {
+    this.clickedConfirmDelete();
+  });
+  window.EventBus.$on('canceled-delete-PTO cash out', () => {
+    this.clickedCancelDelete();
+  });
+
   if (!this.$store.getters.storeIsPopulated) {
     await Promise.all([this.updateStoreUser(), this.updateStoreEmployees()]);
   }
   await this.updateStorePtoCashOuts();
-  this.ptoCashOuts = this.$store.getters.ptoCashOuts;
   this.loading = false;
 } // created
+
+/**
+ * beforeDestroy lifecycle hook. Destroys all event listeners.
+ */
+function beforeDestroy() {
+  window.EventBus.$off('confirm-pto-cash-outs');
+  window.EventBus.$off('canceled-pto-cash-outs');
+  window.EventBus.$off('confirm-unapprove-cash-out');
+  window.EventBus.$off('canceled-unapprove-cash-out');
+  window.EventBus.$off('confirm-delete-pto-cash-out');
+  window.EventBus.$off('canceled-delete-pto-cash-out');
+} // beforeDestroy
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -196,9 +273,9 @@ async function approveSelectedPTOCashOuts() {
 } // approveSelectedPTOCashOuts
 
 /**
- * Event handler confirm clicked
+ * Event handler confirm clicked approve
  */
-async function clickedConfirm() {
+async function clickedConfirmApprove() {
   try {
     this.isApproving = true;
     await this.approveSelectedPTOCashOuts();
@@ -210,7 +287,109 @@ async function clickedConfirm() {
     this.displayError(err);
   }
   this.toggleApproveModal = false;
-} // clickedConfirm
+} // clickedConfirmApprove
+
+/**
+ * Event handler for clicking the unapprove button on row item.
+ *
+ * @param item PTO cash out item
+ */
+function clickedUnapprove(item) {
+  this.clickedUnapproveItem = item;
+  this.isUnapproving = true;
+  this.toggleUnapproveModal = !this.toggleUnapproveModal;
+} // clickedUnapprove
+
+/**
+ * Event handler for clicking the delete button.
+ *
+ * @param item PTO cash out item to delete
+ */
+function clickedDelete(item) {
+  this.clickedDeleteItem = item;
+  this.isDeleting = true;
+  this.toggleDeleteModal = !this.toggleDeleteModal;
+} // clickedDelete
+
+/**
+ * Event handler for clicking confirm delete in delete modal.
+ */
+async function clickedConfirmDelete() {
+  try {
+    this.loading = true;
+    await this.deletePTOCashOut(this.clickedDeleteItem);
+    this.loading = false;
+    this.displaySuccess('Successfully deleted PTO cash out!');
+  } catch (err) {
+    this.loading = false;
+    this.displayError(err);
+  }
+  this.isDeleting = false;
+  this.clickedDeleteItem = null;
+} // clickedConfirmDelete
+
+/**
+ * Event handler for clicking cancel delete in delete modal.
+ */
+function clickedCancelDelete() {
+  this.isDeleting = false;
+} // clickedCancelDelete
+
+/**
+ * Deletes PTO cash out from database. Updates vuex store accordingly.
+ *
+ * @param item PTO cash out item to delete
+ */
+async function deletePTOCashOut(item) {
+  let ptoCashOuts = _.cloneDeep(this.$store.getters.ptoCashOuts);
+  ptoCashOuts = _.filter(ptoCashOuts, (p) => p.id != item.id);
+  let deletedPTOCashOut = await api.deleteItem(api.PTO_CASH_OUTS, item.id);
+  this.$store.dispatch('setPtoCashOuts', { ptoCashOuts });
+  return deletedPTOCashOut;
+} // deletePTOCashOut
+
+/**
+ * Event handler for clicking confirm unapprove from confirmation modal.
+ */
+async function clickedConfirmUnapprove() {
+  try {
+    // this.toggleUnapproveModal = false;
+    this.loading = true;
+    await this.unapprovePTOCashOut(this.clickedUnapproveItem);
+    this.loading = false;
+    this.displaySuccess('Successfully unapproved PTO cash out!');
+  } catch (err) {
+    this.loading = false;
+    this.displayError(err);
+  }
+  this.isUnapproving = false;
+  this.clickedUnapproveItem = null;
+} // clickedConfirmUnapprove
+
+/**
+ * Unapproves PTO cash out item in the database. Removes approved date from
+ * the object.
+ *
+ * @param item PTO cash out item to unapprove.
+ */
+async function unapprovePTOCashOut(item) {
+  let ptoCashOut = _.cloneDeep(item);
+  ptoCashOut.approvedDate = null;
+  let ptoCashOuts = _.cloneDeep(this.$store.getters.ptoCashOuts);
+  let index = ptoCashOuts.findIndex((p) => p.id == ptoCashOut.id);
+  ptoCashOuts[index] = ptoCashOut;
+  let updatedPTOCashOut = await api.updateItem(api.PTO_CASH_OUTS, ptoCashOut);
+  this.$store.dispatch('setPtoCashOuts', { ptoCashOuts });
+  return updatedPTOCashOut;
+} // unapprovePTOCashOut
+
+/**
+ * Event handler for clicking cancel in the confirm unapprove modal.
+ */
+function clickedCancelUnapprove() {
+  this.isUnapproving = false;
+  // this.toggleUnapproveModal = !this.toggleUnapproveModal;
+} // clickedCancelUnapprove
 
 /**
  * Displays error snackbar
@@ -247,6 +426,16 @@ function uncheckAllBoxes() {
   this.selected = [];
 } // uncheckAllBoxes
 
+/**
+ * Returns if PTO cash out is approved, false otherwise
+ *
+ * @param ptoCashOut PTO Cash Out item from database
+ * @return true if PTO Cash Out Item is approved, false otherwise
+ */
+function isApproved(ptoCashOut) {
+  return ptoCashOut && ptoCashOut.approvedDate && !_.isEmpty(ptoCashOut.approvedDate);
+} // isApproved
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     COMPUTED                     |
@@ -259,7 +448,7 @@ function uncheckAllBoxes() {
  * @return Array - filtered PTO cash outs
  */
 function filteredPtoCashOuts() {
-  let filteredPtoCashOuts = _.cloneDeep(this.ptoCashOuts);
+  let filteredPtoCashOuts = _.cloneDeep(this.$store.getters.ptoCashOuts);
 
   if (this.filteredEmployee) {
     filteredPtoCashOuts = _.filter(filteredPtoCashOuts, (p) => p.employeeId == this.filteredEmployee);
@@ -280,7 +469,15 @@ function filteredPtoCashOuts() {
  * @return Array - datatable headers
  */
 function roleHeaders() {
-  return this.userRoleIsAdmin() ? this.headers : _.filter(this.headers, (h) => h.text != 'Employee');
+  let headers = _.cloneDeep(this.headers);
+  if (!this.userRoleIsAdmin()) {
+    headers = _.filter(headers, (h) => h.text != 'Employee');
+  }
+
+  if (this.unapprovedOnly) {
+    headers = _.filter(headers, (h) => h.text != 'actions');
+  }
+  return headers;
 } // roleHeaders
 
 /**
@@ -289,7 +486,9 @@ function roleHeaders() {
  * @return Array - filtered employees
  */
 function employees() {
-  let employeeIdsWithPTOCashOuts = this.ptoCashOuts.map((p) => p.employeeId);
+  let employeeIdsWithPTOCashOuts = this.$store.getters.ptoCashOuts
+    ? this.$store.getters.ptoCashOuts.map((p) => p.employeeId)
+    : [];
   return _.map(
     _.filter(this.$store.getters.employees, (e) => employeeIdsWithPTOCashOuts.includes(e.id)),
     (e) => ({
@@ -326,6 +525,7 @@ function watchSelected() {
 // |--------------------------------------------------|
 
 export default {
+  beforeDestroy,
   created,
   data() {
     return {
@@ -340,21 +540,35 @@ export default {
         { text: 'Creation Date', value: 'creationDate' },
         { text: 'Employee', value: 'employeeId' },
         { text: 'Amount', value: 'amount' },
-        { text: 'Approved Date', value: 'approvedDate' }
+        { text: 'Approved Date', value: 'approvedDate' },
+        { value: 'actions', sortable: false }
       ],
       sortBy: 'creationDate',
       sortDesc: true,
       selected: [],
       isApproving: false,
+      isUnapproving: false,
+      isDeleting: false,
       showApproveButton: false,
-      toggleApproveModal: false
+      toggleApproveModal: false,
+      toggleUnapproveModal: false,
+      toggleDeleteModal: false,
+      clickedUnapproveItem: null
     };
   },
   methods: {
     approveSelectedPTOCashOuts,
-    clickedConfirm,
+    clickedConfirmApprove,
+    clickedConfirmUnapprove,
+    clickedCancelUnapprove,
+    clickedDelete,
+    clickedUnapprove,
+    clickedCancelDelete,
+    clickedConfirmDelete,
+    deletePTOCashOut,
     displayError,
     displaySuccess,
+    isApproved,
     isMobile,
     userRoleIsAdmin,
     monthDayYearFormat,
@@ -364,7 +578,8 @@ export default {
     updateStoreUser,
     updateStoreEmployees,
     updateStorePtoCashOuts,
-    uncheckAllBoxes
+    uncheckAllBoxes,
+    unapprovePTOCashOut
   },
   computed: {
     roleHeaders,
@@ -375,6 +590,6 @@ export default {
   watch: {
     selected: watchSelected
   },
-  components: { GeneralConfirmationModal }
+  components: { GeneralConfirmationModal, UnapprovePTOCashOutModal, DeleteModal }
 };
 </script>
