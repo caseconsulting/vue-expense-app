@@ -5,6 +5,10 @@
         <v-card-title class="header_style"><h3>Cash Out PTO</h3> </v-card-title>
         <div v-if="!isSubmitting">
           <v-card-text>
+            <div>PTO available: {{ getPtoBalance() }}h</div>
+            <div v-if="getPendingPtoCashoutAmount() > 0">
+              Pending PTO cash outs: {{ getPendingPtoCashoutAmount() }}h
+            </div>
             <v-text-field
               prepend-icon="mdi-clock-outline"
               class="pt-5"
@@ -13,6 +17,7 @@
                 ...getNumberRules(),
                 ...getPTOCashOutRules(userAvailablePTO, this.$store.getters.user.id)
               ]"
+              :hint="cashOutHint()"
               v-model="hoursRequested"
               label="Number of Hours Requested to be Paid Out"
               required
@@ -125,6 +130,39 @@ function displaySuccess(msg) {
 } // displaySuccess
 
 /**
+ * Gets the user's available PTO balance.
+ *
+ * @returns Number - The available PTO balance
+ */
+function getPtoBalance() {
+  let user = this.$store.getters.user;
+  return this.$store.getters.quickbooksPTO.results.users[user.employeeNumber].pto_balances.PTO;
+} // getPtoBalance
+
+/**
+ * Gets the user's pending PTO cash out amount
+ *
+ * @returns Number - The pending cash out amount
+ */
+function getPendingPtoCashoutAmount() {
+  let pendingPtoCashOuts = this.$store.getters.ptoCashOuts.filter(
+    (p) => !p.approvedDate && this.$store.getters.user.id === p.employeeId
+  );
+  return pendingPtoCashOuts.reduce((n, { amount }) => n + amount, 0);
+} // getPendingPtoCashoutAmount
+
+/**
+ * Shows the PTO available after the requested cash out amount.
+ *
+ * @returns String - The hint text
+ */
+function cashOutHint() {
+  if (this.hoursRequested) {
+    return `Balance after cash out: ${this.getPtoBalance() - this.getPendingPtoCashoutAmount() - this.hoursRequested}h`;
+  }
+} // cashOutHint
+
+/**
  * Creates a PTO Cash Out record in the database.
  */
 async function createPTOCashOutRequest() {
@@ -160,9 +198,12 @@ export default {
     emit,
     submit,
     cancel,
+    cashOutHint,
     clearForm,
     displaySuccess,
     displayError,
+    getPendingPtoCashoutAmount,
+    getPtoBalance,
     createPTOCashOutRequest
   }
 };
