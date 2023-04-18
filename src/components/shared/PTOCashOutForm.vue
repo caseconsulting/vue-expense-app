@@ -5,10 +5,8 @@
         <v-card-title class="header_style"><h3>Cash Out PTO</h3> </v-card-title>
         <div v-if="!isSubmitting">
           <v-card-text>
-            <div>PTO available: {{ getPtoBalance() }}h</div>
-            <div v-if="getPendingPtoCashoutAmount() > 0">
-              Pending PTO cash outs: {{ getPendingPtoCashoutAmount() }}h
-            </div>
+            <div>PTO: {{ getPtoBalance() }}h</div>
+            <div v-if="getPendingPtoCashoutAmount() > 0">Pending PTO Cash Out: {{ getPendingPtoCashoutAmount() }}h</div>
             <v-text-field
               prepend-icon="mdi-clock-outline"
               class="pt-5"
