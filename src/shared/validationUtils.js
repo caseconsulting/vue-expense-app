@@ -124,6 +124,7 @@ export function getPTOCashOutRules(ptoLimit, employeeId) {
   let pendingCashOuts = _.filter(store.getters.ptoCashOuts, (p) => !p.approvedDate && employeeId === p.employeeId);
   let pendingAmount = pendingCashOuts.reduce((n, { amount }) => n + amount, 0);
   return [
+    (v) => (!isEmpty(v) && v > 0) || `PTO cash out amount must be greater than 0`,
     (v) =>
       (!isEmpty(v) && v + pendingAmount > ptoLimit) ||
       `PTO cash out amount can not exceed available PTO (${ptoLimit} hrs)`,

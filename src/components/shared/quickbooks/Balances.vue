@@ -140,7 +140,9 @@ function availableBalances() {
   });
   if (this.pendingPtoCashOuts.length > 0) {
     let balance = 'Pending PTO Cash Out';
-    avaibleBalances.push(balance);
+    if (!avaibleBalances.includes(balance)) {
+      avaibleBalances.push(balance);
+    }
     this.balanceData[balance] = this.pendingPtoCashOuts.reduce((n, { amount }) => n + amount, 0);
   }
   return avaibleBalances;
