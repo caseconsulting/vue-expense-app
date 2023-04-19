@@ -169,9 +169,8 @@ async function createEvents() {
         anniversary = setDay(anniversary, getDay(hireDate)); //set anniversary to hiredate but this year
         let diff = difference(startOf(getTodaysDate(), 'day'), startOf(anniversary, 'day'), 'day'); //difference between today and anniversary
         event.date = this.getEventDateMessage(anniversary);
-        if (diff < -6) {
+        if (diff < -30) {
           anniversary = subtract(anniversary, 1, 'years');
-          event.date = format(anniversary, null, 'll');
         }
         if (isAfter(cutOff, startOf(anniversary, 'day'))) {
           return null;
@@ -311,8 +310,10 @@ async function createEvents() {
     }
     if (isSame(startOf(startDate, 'day'), startOf(endDate, 'day'), 'day')) {
       event.text = `${a.title}`;
+    } else if (isBefore(startOf(startDate, 'day'), startOf(now, 'day'), 'day')) {
+      event.text = `${a.title} went until ${format(endDate, null, 'LL')}!`;
     } else {
-      event.text = `${a.title} goes until ${format(endDate, 'LL')}!`;
+      event.text = `${a.title} goes until ${format(endDate, null, 'LL')}!`;
     }
     event.icon = 'mdi-calendar';
     event.type = 'Event';
@@ -400,7 +401,7 @@ function getEventDateMessage(date) {
     return diff + ' days ago'; //if it is otherwise less than 7 days ago create message
   } else if (diff == -1) {
     return 'Tomorrow';
-  } else if (diff < 0 && diff >= -6) {
+  } else if (diff < 0 && diff >= -30) {
     return 'Coming up in ' + Math.abs(diff) + ' days'; //if its in the "future" and within 6 days say its coming up
   } else {
     return format(date, null, 'll');
