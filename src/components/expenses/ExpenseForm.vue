@@ -685,8 +685,7 @@ function clearForm() {
   if (this.$refs.form) {
     this.$refs.form.reset();
   }
-
-  this.$emit('finished-editing-expense'); //notify parent no longer editing an expense
+  window.EventBus.$emit('finished-editing-expense'); //notify parent no longer editing an expense
 
   this.reqRecipient = false;
   this.recipientPlaceholder = null;
