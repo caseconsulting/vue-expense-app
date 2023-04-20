@@ -45,18 +45,7 @@
             <v-btn @click="showMore = false" top text small class="my-2">Show Less &#9650; </v-btn>
           </div>
           <div class="align-items-center">
-            <v-row>
-              <button
-                class="home_buttons my-1"
-                @click="
-                  () => {
-                    showPTOCashOutFormModal = true;
-                  }
-                "
-              >
-                Cash Out PTO
-              </button>
-            </v-row>
+            <button class="home_buttons my-1" @click="showPTOCashOutFormModal = true">Cash Out PTO</button>
           </div>
         </div>
       </v-card-text>
