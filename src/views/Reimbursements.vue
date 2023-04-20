@@ -32,7 +32,7 @@
             <p-t-o-cash-outs-table :unapprovedOnly="true" />
           </v-col>
           <v-col cols="12" xl="3" lg="4" class="pl-lg-1 pl-sm-2 mt-3">
-            <quick-books-time-data :employee="employee"></quick-books-time-data>
+            <quick-books-time-data></quick-books-time-data>
           </v-col>
         </v-row>
       </v-tab-item>
