@@ -22,7 +22,6 @@
                 <v-list-item @click="selectDropDown('jobExperience')">Job Experience</v-list-item>
                 <v-list-item @click="selectDropDown('certifications')">Certifications</v-list-item>
                 <v-list-item @click="selectDropDown('awards')">Awards</v-list-item>
-                <v-list-item @click="selectDropDown('technologies')">Tech and Skills</v-list-item>
                 <v-list-item @click="selectDropDown('languages')">Foreign Languages</v-list-item>
               </v-list>
             </v-menu>
