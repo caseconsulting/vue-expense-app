@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-card class="overflow-y-hidden" max-height="850px">
+    <v-card class="overflow-y-hidden">
       <!-- Title -->
       <v-card-title class="header_style">
         <h3>Activity Feed</h3>
@@ -12,17 +12,43 @@
           :items="filters"
           multiple
           v-model="activeFilters"
-          filled
           chips
           deletable-chips
           clearable
+          filled
+          return-object
           :search-input.sync="searchString"
           @change="searchString = ''"
+          class="elevate"
+          append-icon=""
         >
+          <template v-slot:selection="data">
+            <v-chip
+              v-bind="data.attrs"
+              :input-value="data.selected"
+              close
+              @click="data.select"
+              @click:close="remove(data.item)"
+              small
+            >
+              <v-avatar :color="data.item.color" left>
+                <v-icon small color="white"> {{ data.item.icon }}</v-icon>
+              </v-avatar>
+              {{ data.item.type }}
+            </v-chip>
+          </template>
+          <template v-slot:item="data">
+            <v-list-item-avatar :color="data.item.color">
+              <v-icon color="white"> {{ data.item.icon }}</v-icon>
+            </v-list-item-avatar>
+            <v-list-item-content>
+              <v-list-item-title>{{ data.item.type }}</v-list-item-title>
+            </v-list-item-content>
+          </template>
         </v-autocomplete>
       </v-card-text>
       <!-- Loading Bar -->
-      <div v-if="loading" class="py-4">
+      <div v-if="loading" class="pa-8 pt-4">
         <v-progress-linear :indeterminate="true"></v-progress-linear>
       </div>
       <v-timeline v-else dense class="pt-0">
@@ -160,16 +186,12 @@ function itemHeight() {
  */
 function filterEvents() {
   this.events.forEach((event) => {
-    if (!this.filters.includes(event.type)) {
-      this.filters.push(event.type);
-      this.activeFilters.push(event.type);
+    if (!this.filters.some((f) => f.type === event.type)) {
+      this.filters.push(event);
+      this.activeFilters.push(event);
     }
   });
-  var filteredEvents = _.filter(this.events, (event) => {
-    if (this.activeFilters.includes(event.type)) {
-      return true;
-    }
-  });
+  var filteredEvents = _.filter(this.events, (event) => this.activeFilters.some((f) => f.type === event.type));
   return filteredEvents;
 } // filterEvents
 
@@ -193,6 +215,13 @@ function getURL(item) {
   }
 } // getURL
 
+function remove(item) {
+  const index = this.activeFilters.findIndex((f) => f.type === item.type);
+  if (index >= 0) {
+    this.activeFilters.splice(index, 1);
+  }
+}
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -213,7 +242,8 @@ export default {
   },
   methods: {
     filterEvents,
-    getURL
+    getURL,
+    remove
   },
   created,
   props: ['events', 'loading']
