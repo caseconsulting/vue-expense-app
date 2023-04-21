@@ -127,6 +127,10 @@ async function created() {
   if (!this.$store.getters.employees) {
     await this.updateStoreEmployees();
   }
+  if (this.item) {
+    this.ptoCashOutObj = this.item;
+    console.log(this.ptoCashOutObj);
+  }
   this.setActiveEmployeesDropdown();
 } // created
 
@@ -182,6 +186,7 @@ function cancel() {
 function clearForm() {
   this.ptoCashOutObj = {};
   this.approvedDateFormatted = null;
+  this.item = null;
   this.$refs.form.reset();
   this.$refs.form.resetValidation();
 } // clearForm
@@ -326,6 +331,16 @@ function watchApprovedDate() {
   }
 } // watchApprovedDate
 
+/**
+ * Watcher for item prop.
+ */
+function watchEditPTOCashOutItem() {
+  if (this.item) {
+    this.ptoCashOutObj = this.item;
+    console.log(this.ptoCashOutObj);
+  }
+} // watchEditPTOCashOutItem
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -369,7 +384,9 @@ export default {
     format
   },
   watch: {
-    'ptoCashOutObj.approvedDate': watchApprovedDate
-  }
+    'ptoCashOutObj.approvedDate': watchApprovedDate,
+    item: watchEditPTOCashOutItem
+  },
+  props: ['item']
 };
 </script>

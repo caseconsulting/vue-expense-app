@@ -121,14 +121,14 @@
         <template v-slot:[`item.actions`]="{ item }">
           <td v-if="!unapprovedOnly" class="datatable_btn layout">
             <!-- Edit Button -->
-            <!-- <v-tooltip top>
+            <v-tooltip top>
               <template v-slot:activator="{ on }">
-                <v-btn :disabled="isUnapproving || isDeleting" text icon id="edit" v-on="on">
+                <v-btn :disabled="isUnapproving || isDeleting" text icon id="edit" v-on="on" @click="clickedEdit(item)">
                   <v-icon class="case-gray">edit</v-icon>
                 </v-btn>
               </template>
               <span>Edit</span>
-            </v-tooltip> -->
+            </v-tooltip>
 
             <!-- Delete Button -->
             <v-tooltip top>
@@ -192,6 +192,9 @@
     />
     <unapprove-p-t-o-cash-out-modal :toggleUnapproveModal="toggleUnapproveModal" />
     <delete-modal :toggleDeleteModal="toggleDeleteModal" type="PTO cash out" />
+    <v-dialog v-model="toggleEditModal" persistent max-width="500">
+      <p-t-o-cash-out-form :item="clickedEditItem" />
+    </v-dialog>
   </v-card>
 </template>
 <script>
@@ -204,6 +207,7 @@ import GeneralConfirmationModal from '../modals/GeneralConfirmationModal.vue';
 import dateUtils from '@/shared/dateUtils';
 import UnapprovePTOCashOutModal from '../modals/UnapprovePTOCashOutModal.vue';
 import DeleteModal from '../modals/DeleteModal.vue';
+import PTOCashOutForm from './PTOCashOutForm.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -232,6 +236,11 @@ async function created() {
   });
   window.EventBus.$on('canceled-delete-PTO cash out', () => {
     this.clickedCancelDelete();
+  });
+  window.EventBus.$on('close-pto-cash-out-form', () => {
+    console.log('close');
+    this.toggleEditModal = false;
+    this.clickedEditItem = null;
   });
 
   if (!this.$store.getters.storeIsPopulated) {
@@ -436,6 +445,16 @@ function isApproved(ptoCashOut) {
   return ptoCashOut && ptoCashOut.approvedDate && !_.isEmpty(ptoCashOut.approvedDate);
 } // isApproved
 
+/**
+ * Event handler for clicked edit item.
+ *
+ * @param item PTO Cash Out item to edit
+ */
+function clickedEdit(item) {
+  this.clickedEditItem = item;
+  this.toggleEditModal = true;
+} // clickedEdit
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     COMPUTED                     |
@@ -553,7 +572,9 @@ export default {
       toggleApproveModal: false,
       toggleUnapproveModal: false,
       toggleDeleteModal: false,
-      clickedUnapproveItem: null
+      toggleEditModal: false,
+      clickedUnapproveItem: null,
+      clickedEditItem: null
     };
   },
   methods: {
@@ -565,6 +586,7 @@ export default {
     clickedUnapprove,
     clickedCancelDelete,
     clickedConfirmDelete,
+    clickedEdit,
     deletePTOCashOut,
     displayError,
     displaySuccess,
@@ -590,6 +612,6 @@ export default {
   watch: {
     selected: watchSelected
   },
-  components: { GeneralConfirmationModal, UnapprovePTOCashOutModal, DeleteModal }
+  components: { GeneralConfirmationModal, UnapprovePTOCashOutModal, DeleteModal, PTOCashOutForm }
 };
 </script>
