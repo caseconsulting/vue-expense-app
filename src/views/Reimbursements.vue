@@ -32,7 +32,7 @@
             <p-t-o-cash-outs-table :unapprovedOnly="true" />
           </v-col>
           <v-col cols="12" xl="3" lg="4" class="pl-lg-1 pl-sm-2 mt-3">
-            <quick-books-time-data></quick-books-time-data>
+            <quick-books-time-data :employee="employee"></quick-books-time-data>
           </v-col>
         </v-row>
       </v-tab-item>
@@ -61,6 +61,15 @@ function created() {
     this.$set(this.status, 'statusMessage', status.statusMessage);
     this.$set(this.status, 'color', status.color);
   });
+
+  window.EventBus.$on('change-quickbooks-employee', (employee) => {
+    this.employee = employee;
+  });
+
+  if (this.$store.getters.storeIsPopulated) {
+    this.employee = this.$store.getters.user;
+    this.loading = false;
+  }
 } // created
 
 /**
@@ -69,6 +78,21 @@ function created() {
 function beforeDestroy() {
   window.EventBus.$off('status-alert');
 } // beforeDestroy
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Checks if the store is populated from initial page load.
+ *
+ * @returns boolean - True if the store is populated
+ */
+function storeIsPopulated() {
+  return this.$store.getters.storeIsPopulated;
+} // storeIsPopulated
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -87,6 +111,21 @@ function clearStatus() {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * A watcher for when the vuex store is populated with necessary data.
+ */
+async function watchStoreIsPopulated() {
+  if (this.$store.getters.storeIsPopulated) {
+    this.employee = this.$store.getters.user;
+  }
+} // watchStoreIsPopulated
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -100,7 +139,8 @@ export default {
     QuickBooksTimeData
   },
   computed: {
-    isMobile
+    isMobile,
+    storeIsPopulated
   },
   methods: {
     clearStatus
@@ -108,12 +148,16 @@ export default {
   data() {
     return {
       currentTab: 'expenses',
+      employee: null,
       status: {
         statusType: undefined,
         statusMessage: '',
         color: ''
       }
     };
+  },
+  watch: {
+    storeIsPopulated: watchStoreIsPopulated
   }
 };
 </script>

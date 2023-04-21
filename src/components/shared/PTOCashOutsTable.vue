@@ -97,6 +97,7 @@
         class="elevation-4"
         :loading="loading"
         :show-select="unapprovedOnly"
+        @click:row="rowClicked"
       >
         <!-- Creation Date slot -->
         <template v-slot:[`item.creationDate`]="{ item }">
@@ -427,6 +428,11 @@ function displaySuccess(msg) {
   window.EventBus.$emit('status-alert', status);
 } // displaySuccess
 
+function rowClicked(item) {
+  let employee = this.$store.getters.employees.find((e) => e.id === item.employeeId);
+  window.EventBus.$emit('change-quickbooks-employee', employee);
+}
+
 /**
  * Unchecks all boxes in the data table
  */
@@ -596,6 +602,7 @@ export default {
     isEmpty,
     getEmployeeByID,
     firstAndLastName,
+    rowClicked,
     updateStoreUser,
     updateStoreEmployees,
     updateStorePtoCashOuts,

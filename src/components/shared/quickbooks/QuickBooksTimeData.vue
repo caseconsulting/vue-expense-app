@@ -27,7 +27,12 @@
         </v-tooltip>
         <!-- End of Refresh Button -->
       </v-card-title>
-      <v-card-text class="pt-5 pb-0 black--text">
+      <v-card-subtitle>
+        <h5 v-if="userRoleIsAdmin() && employee" class="subtitle white--text font-weight-medium">
+          {{ nicknameAndLastName(employee) }}
+        </h5>
+      </v-card-subtitle>
+      <v-card-text class="pt-0 pb-0 black--text">
         <monthly-charges :passedEmployee="employee" :showMinutes="showMinutes"></monthly-charges>
         <v-divider></v-divider>
         <balances :passedEmployee="employee" :showMinutes="showMinutes"></balances>
@@ -39,6 +44,8 @@
 <script>
 import MonthlyCharges from '@/components/shared/quickbooks/MonthlyCharges.vue';
 import Balances from '@/components/shared/quickbooks/Balances.vue';
+import { nicknameAndLastName } from '@/shared/employeeUtils';
+import { userRoleIsAdmin } from '@/utils/utils';
 // |--------------------------------------------------|
 // |                                                  |
 // |                     COMPUTED                     |
@@ -54,9 +61,12 @@ function tooltipText() {
   return this.showMinutes ? 'Hours <- Minutes' : 'Hours -> Minutes';
 } //tooltipText
 
+/**
+ * Emits a message.
+ */
 function emit(name) {
   window.EventBus.$emit(name);
-}
+} // emit
 
 export default {
   components: {
@@ -72,8 +82,17 @@ export default {
     };
   },
   methods: {
-    emit
+    emit,
+    nicknameAndLastName,
+    userRoleIsAdmin
   },
   props: ['employee']
 };
 </script>
+
+<style scoped>
+.subtitle {
+  position: relative;
+  top: -50px;
+}
+</style>

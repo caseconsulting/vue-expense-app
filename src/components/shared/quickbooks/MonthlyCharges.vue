@@ -1,14 +1,7 @@
 <template>
   <div id="monthly-charges">
-    <div class="d-flex justify-center justify-sm-start mb-2 mt-0 ml-0 ml-md-1">
-      <v-btn
-        v-if="!isPrevMonth"
-        x-small
-        outlined
-        :disabled="loading"
-        @click="changeMonthData"
-        color="#bc3825"
-        class="pa-3"
+    <div v-if="!loading" class="d-flex justify-center justify-sm-start mb-2 mt-0 ml-0 ml-md-1">
+      <v-btn v-if="!isPrevMonth" x-small outlined @click="changeMonthData" color="#bc3825" class="pa-3"
         ><v-icon left dark> mdi-arrow-left-top </v-icon>Hours for {{ prevMonth }} {{ prevYear }}
       </v-btn>
       <v-btn v-else x-small outlined :disabled="loading" @click="changeMonthData" color="#bc3825" class="pa-3"
@@ -375,9 +368,10 @@ function updateEstimate(event) {
  * watcher for passedEmployee.id
  */
 async function watchPassedEmployeeID() {
-  if (this.isEmployeeView) {
-    await this.setMonthlyCharges();
-  }
+  this.loading = true;
+  this.refresh = true;
+  this.isEmployeeView = true;
+  await this.setMonthlyCharges();
 } // watchPassedEmployeeID
 
 // |--------------------------------------------------|
