@@ -128,7 +128,7 @@ async function created() {
     await this.updateStoreEmployees();
   }
   if (this.item) {
-    this.ptoCashOutObj = this.item;
+    this.ptoCashOutObj = _.cloneDeep(this.item);
   }
   this.setActiveEmployeesDropdown();
 } // created
@@ -165,7 +165,11 @@ async function submit() {
       emit('close-pto-cash-out-form');
       this.clearForm();
       this.isSubmitting = false;
-      this.displaySuccess('Successfully created PTO Cash Out request');
+      if (this.item) {
+        this.displaySuccess('Successfully edited PTO Cash Out request!');
+      } else {
+        this.displaySuccess('Successfully created PTO Cash Out request!');
+      }
     }
   } catch (err) {
     emit('close-pto-cash-out-form');
@@ -344,7 +348,7 @@ function watchApprovedDate() {
  */
 function watchEditPTOCashOutItem() {
   if (this.item) {
-    this.ptoCashOutObj = this.item;
+    this.ptoCashOutObj = _.cloneDeep(this.item);
   }
 } // watchEditPTOCashOutItem
 
