@@ -170,7 +170,7 @@ function formatHours(hours) {
  */
 async function setPTOBalances() {
   this.employee = this.isEmployeeView ? this.passedEmployee : this.$store.getters.user;
-  if (!this.isEmpty(this.employee.id)) {
+  if (this.employee && !this.isEmpty(this.employee.id)) {
     // employee exists
     let ptoBalances;
     if (

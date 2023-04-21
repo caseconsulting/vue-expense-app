@@ -299,7 +299,7 @@ async function setData() {
  */
 async function setMonthlyCharges() {
   this.employee = this.isEmployeeView ? this.passedEmployee : this.$store.getters.user;
-  if (!this.isEmpty(this.employee.id)) {
+  if (this.employee && !this.isEmpty(this.employee.id)) {
     this.workDayHours *= this.employee.workStatus * 0.01;
     // make call to api to get data
     if (
