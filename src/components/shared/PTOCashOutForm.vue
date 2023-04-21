@@ -129,7 +129,6 @@ async function created() {
   }
   if (this.item) {
     this.ptoCashOutObj = this.item;
-    console.log(this.ptoCashOutObj);
   }
   this.setActiveEmployeesDropdown();
 } // created
@@ -158,7 +157,11 @@ async function submit() {
     this.valid = this.$refs.form.validate();
     if (this.valid) {
       this.isSubmitting = true;
-      await this.createPTOCashOutRequest();
+      if (this.item) {
+        await this.updatePTOCashOutRequest();
+      } else {
+        await this.createPTOCashOutRequest();
+      }
       emit('close-pto-cash-out-form');
       this.clearForm();
       this.isSubmitting = false;
@@ -186,7 +189,7 @@ function cancel() {
 function clearForm() {
   this.ptoCashOutObj = {};
   this.approvedDateFormatted = null;
-  this.item = null;
+  // this.item = null;
   this.$refs.form.reset();
   this.$refs.form.resetValidation();
 } // clearForm
@@ -279,20 +282,25 @@ async function createPTOCashOutRequest() {
   let ptoCashOut = await api.createItem(api.PTO_CASH_OUTS, {
     id: uuid(),
     amount: this.ptoCashOutObj.amount,
-    employeeId: this.$store.getters.user.id,
-    creationDate: dateUtils.getTodaysDate()
+    employeeId: this.ptoCashOutObj.employeeId ? this.ptoCashOutObj.employeeId : this.$store.getters.user.id,
+    creationDate: dateUtils.getTodaysDate(),
+    approvedDate: this.ptoCashOutObj.approvedDate ? this.ptoCashOutObj.approvedDate : null
   });
   this.$store.dispatch('setPtoCashOuts', { ptoCashOuts: [...this.$store.getters.ptoCashOuts, ptoCashOut] });
 } // createPTOCashOutRequest
 
-// /**
-//  * Update PTO Cash Out record in the database.
-//  */
-// async function updatePTOCashOutRequest() {
-//   let ptoCashOut = await api.updateItem(api.PTO_CASH_OUTS, {
-//     ...this.ptoCashOut
-//   });
-// } // updatePTOCashOutRequest
+/**
+ * Update PTO Cash Out record in the database.
+ */
+async function updatePTOCashOutRequest() {
+  let ptoCashOuts = _.cloneDeep(this.$store.getters.ptoCashOuts);
+  let index = ptoCashOuts.findIndex((p) => p.id == this.ptoCashOutObj.id);
+  ptoCashOuts[index] = this.ptoCashOutObj;
+  await api.updateItem(api.PTO_CASH_OUTS, {
+    ...this.ptoCashOutObj
+  });
+  this.$store.dispatch('setPtoCashOuts', { ptoCashOuts: ptoCashOuts });
+} // updatePTOCashOutRequest
 
 /**
  * Populates the active employee dropdown
@@ -337,7 +345,6 @@ function watchApprovedDate() {
 function watchEditPTOCashOutItem() {
   if (this.item) {
     this.ptoCashOutObj = this.item;
-    console.log(this.ptoCashOutObj);
   }
 } // watchEditPTOCashOutItem
 
@@ -381,6 +388,7 @@ export default {
     userRoleIsAdmin,
     setActiveEmployeesDropdown,
     updateStoreEmployees,
+    updatePTOCashOutRequest,
     format
   },
   watch: {

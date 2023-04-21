@@ -238,7 +238,6 @@ async function created() {
     this.clickedCancelDelete();
   });
   window.EventBus.$on('close-pto-cash-out-form', () => {
-    console.log('close');
     this.toggleEditModal = false;
     this.clickedEditItem = null;
   });
