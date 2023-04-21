@@ -122,7 +122,6 @@ export default {
   computed: {
     storeIsPopulated
   },
-  created,
   data() {
     return {
       loading: true,

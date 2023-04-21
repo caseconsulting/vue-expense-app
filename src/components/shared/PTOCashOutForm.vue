@@ -7,19 +7,77 @@
           <v-card-text>
             <div>PTO: {{ getPtoBalance() }}h</div>
             <div v-if="getPendingPtoCashoutAmount() > 0">Pending PTO Cash Out: {{ getPendingPtoCashoutAmount() }}h</div>
-            <v-text-field
-              prepend-icon="mdi-clock-outline"
-              class="pt-5"
-              :rules="[
-                (v) => !!v || 'Field is required',
-                ...getNumberRules(),
-                ...getPTOCashOutRules(userAvailablePTO, this.$store.getters.user.id)
-              ]"
-              :hint="cashOutHint()"
-              v-model="hoursRequested"
-              label="Number of Hours Requested to be Paid Out"
-              required
-            ></v-text-field>
+            <v-row v-if="userRoleIsAdmin()">
+              <v-col col="12">
+                <!-- Employee picker if admin -->
+                <v-autocomplete
+                  v-if="userRoleIsAdmin()"
+                  :items="activeEmployees"
+                  :rules="getRequiredRules()"
+                  :filter="customFilter"
+                  v-model="ptoCashOutObj.employeeId"
+                  item-text="text"
+                  label="Employee"
+                  id="employeeName"
+                  class="form_padding"
+                ></v-autocomplete>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col col="12">
+                <!-- PTO Cash Out Amount -->
+                <v-text-field
+                  prepend-icon="mdi-clock-outline"
+                  class="pt-5"
+                  :rules="[
+                    (v) => !!v || 'Field is required',
+                    ...getNumberRules(),
+                    ...getPTOCashOutRules(userAvailablePTO, this.$store.getters.user.id)
+                  ]"
+                  :hint="cashOutHint()"
+                  v-model="ptoCashOutObj.amount"
+                  label="Number of Hours Requested to be Paid Out"
+                  required
+                ></v-text-field>
+              </v-col>
+            </v-row>
+            <v-row v-if="userRoleIsAdmin()">
+              <v-col col="12">
+                <!-- Approved Date for PTO Cash Out (Optional) -->
+                <v-menu
+                  v-if="userRoleIsAdmin()"
+                  ref="approvedDateMenu"
+                  :close-on-content-click="false"
+                  v-model="approvedDateMenu"
+                  :nudge-right="40"
+                  transition="scale-transition"
+                  offset-y
+                  max-width="290px"
+                  min-width="290px"
+                >
+                  <template v-slot:activator="{ on }">
+                    <v-text-field
+                      v-model="approvedDateFormatted"
+                      id="approvedDate"
+                      :rules="getDateOptionalRules()"
+                      v-mask="'##/##/####'"
+                      label="Approved Date (optional)"
+                      hint="MM/DD/YYYY format "
+                      persistent-hint
+                      prepend-icon="event"
+                      @blur="ptoCashOutObj.approvedDate = format(approvedDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
+                      @input="approvedDateMenu = false"
+                      v-on="on"
+                    ></v-text-field>
+                  </template>
+                  <v-date-picker
+                    v-model="ptoCashOutObj.approvedDate"
+                    no-title
+                    @input="approvedDateMenu = false"
+                  ></v-date-picker>
+                </v-menu>
+              </v-col>
+            </v-row>
           </v-card-text>
           <v-card-actions>
             <!-- Cancel Button -->
@@ -40,10 +98,37 @@
   </div>
 </template>
 <script>
-import { getNumberRules, getRequiredRules, getPTOCashOutRules } from '@/shared/validationUtils.js';
+import {
+  getNumberRules,
+  getRequiredRules,
+  getPTOCashOutRules,
+  getDateOptionalRules
+} from '@/shared/validationUtils.js';
 import api from '@/shared/api.js';
 import dateUtils from '@/shared/dateUtils.js';
 import { v4 as uuid } from 'uuid';
+import { userRoleIsAdmin } from '../../utils/utils';
+import { updateStoreEmployees } from '../../utils/storeUtils';
+import employeeUtils from '../../shared/employeeUtils';
+import { format } from '../../shared/dateUtils';
+import { mask } from 'vue-the-mask';
+import _ from 'lodash';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Created lifecycle hook
+ */
+async function created() {
+  if (!this.$store.getters.employees) {
+    await this.updateStoreEmployees();
+  }
+  this.setActiveEmployeesDropdown();
+} // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -95,10 +180,30 @@ function cancel() {
  * Clears form and resets validation.
  */
 function clearForm() {
-  this.hoursRequested = null;
+  this.ptoCashOutObj = {};
+  this.approvedDateFormatted = null;
   this.$refs.form.reset();
   this.$refs.form.resetValidation();
 } // clearForm
+
+/**
+ * Custom filter for employee autocomplete options.
+ *
+ * @param item - employee
+ * @param queryText - text used for filtering
+ * @return string - filtered employee name
+ */
+function customFilter(item, queryText) {
+  const query = queryText ? queryText : '';
+  const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
+  const firstNameFullName = `${item.firstName} ${item.lastName}`;
+
+  const queryContainsNickName = nickNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
+  const queryContainsFirstName =
+    firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
+
+  return queryContainsNickName || queryContainsFirstName;
+} // customFilter
 
 /**
  * Displays error snackbar
@@ -155,8 +260,10 @@ function getPendingPtoCashoutAmount() {
  * @returns String - The hint text
  */
 function cashOutHint() {
-  if (this.hoursRequested) {
-    return `Balance after cash out: ${this.getPtoBalance() - this.getPendingPtoCashoutAmount() - this.hoursRequested}h`;
+  if (this.ptoCashOutObj.amount) {
+    return `Balance after cash out: ${
+      this.getPtoBalance() - this.getPendingPtoCashoutAmount() - this.ptoCashOutObj.amount
+    }h`;
   }
 } // cashOutHint
 
@@ -166,12 +273,58 @@ function cashOutHint() {
 async function createPTOCashOutRequest() {
   let ptoCashOut = await api.createItem(api.PTO_CASH_OUTS, {
     id: uuid(),
-    amount: this.hoursRequested,
+    amount: this.ptoCashOutObj.amount,
     employeeId: this.$store.getters.user.id,
     creationDate: dateUtils.getTodaysDate()
   });
   this.$store.dispatch('setPtoCashOuts', { ptoCashOuts: [...this.$store.getters.ptoCashOuts, ptoCashOut] });
 } // createPTOCashOutRequest
+
+// /**
+//  * Update PTO Cash Out record in the database.
+//  */
+// async function updatePTOCashOutRequest() {
+//   let ptoCashOut = await api.updateItem(api.PTO_CASH_OUTS, {
+//     ...this.ptoCashOut
+//   });
+// } // updatePTOCashOutRequest
+
+/**
+ * Populates the active employee dropdown
+ */
+function setActiveEmployeesDropdown() {
+  let employees = this.$store.getters.employees;
+  employees = employees.map((employee) => {
+    return {
+      text: employeeUtils.nicknameAndLastName(employee),
+      value: employee.id,
+      workStatus: employee.workStatus,
+      firstName: employee.firstName,
+      nickname: employee.nickname,
+      lastName: employee.lastName,
+      employeeRole: employee.employeeRole
+    };
+  });
+  this.activeEmployees = employees.map((employee) => {
+    if (employee.workStatus == 0) {
+      return;
+    } else {
+      return employee;
+    }
+  });
+  this.activeEmployees = _.compact(this.activeEmployees);
+} // setActiveEmployeesDropdown
+
+/**
+ * Watcher for ptoCashOutObj.approvedDate - format date.
+ */
+function watchApprovedDate() {
+  this.approvedDateFormatted =
+    this.format(this.ptoCashOutObj.approvedDate, null, 'MM/DD/YYYY') || this.approvedDateFormatted;
+  if (this.ptoCashOutObj.approvedDate !== null && !this.format(this.ptoCashOutObj.approvedDate, null, 'MM/DD/YYYY')) {
+    this.ptoCashOutObj.approvedDate = null;
+  }
+} // watchApprovedDate
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -179,17 +332,23 @@ async function createPTOCashOutRequest() {
 // |                                                  |
 // |--------------------------------------------------|
 export default {
+  created,
   data() {
     return {
       show: false,
-      hoursRequested: null,
+      ptoCashOutObj: { approvedDate: null },
       valid: false,
       isSubmitting: false,
+      approvedDateMenu: false,
+      approvedDateFormatted: null,
+      activeEmployees: [],
       userAvailablePTO:
         this.$store.getters.quickbooksPTO.results.users[this.$store.getters.user.employeeNumber]['pto_balances'].PTO
     };
   },
+  directives: { mask },
   methods: {
+    getDateOptionalRules,
     getNumberRules,
     getRequiredRules,
     getPTOCashOutRules,
@@ -198,11 +357,19 @@ export default {
     cancel,
     cashOutHint,
     clearForm,
+    customFilter,
     displaySuccess,
     displayError,
     getPendingPtoCashoutAmount,
     getPtoBalance,
-    createPTOCashOutRequest
+    createPTOCashOutRequest,
+    userRoleIsAdmin,
+    setActiveEmployeesDropdown,
+    updateStoreEmployees,
+    format
+  },
+  watch: {
+    'ptoCashOutObj.approvedDate': watchApprovedDate
   }
 };
 </script>
