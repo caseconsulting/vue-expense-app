@@ -59,8 +59,8 @@
       <v-row class="pb-3">
         <v-col wrap cols="12" lg="6" class="pa-0 px-xl-4 px-lg-2 px-md-0">
           <!-- QuickBooksTime -->
-          <div class="pb-3 text-center">
-            <quick-books-time-data cols="12" lg="6"></quick-books-time-data>
+          <div class="pb-3">
+            <quick-books-time-data :employee="employee" cols="12" lg="6"></quick-books-time-data>
           </div>
           <!-- Available Budgets -->
           <div class="text-center">

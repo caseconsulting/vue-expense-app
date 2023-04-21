@@ -27,12 +27,12 @@
         </v-tooltip>
         <!-- End of Refresh Button -->
       </v-card-title>
-      <v-card-subtitle>
+      <v-card-subtitle class="pb-0">
         <h5 v-if="userRoleIsAdmin() && employee" class="subtitle white--text font-weight-medium">
           {{ nicknameAndLastName(employee) }}
         </h5>
       </v-card-subtitle>
-      <v-card-text class="pt-0 pb-0 black--text">
+      <v-card-text class="pt-3 pb-0 black--text">
         <monthly-charges :passedEmployee="employee" :showMinutes="showMinutes"></monthly-charges>
         <v-divider></v-divider>
         <balances :passedEmployee="employee" :showMinutes="showMinutes"></balances>
