@@ -1,6 +1,15 @@
 <template>
   <div id="pto-balances">
-    <h3 class="pt-5" align="center">PTO Balances</h3>
+    <h3 class="pt-5" align="center">
+      PTO Balances
+      <v-tooltip top>
+        <template v-slot:activator="{ on }">
+          <v-btn @click="toFAQ()" class="mb-4" x-small icon v-on="on"><v-icon color="#3f51b5">info</v-icon></v-btn>
+        </template>
+        <span>Click for FAQ</span></v-tooltip
+      >
+    </h3>
+
     <!-- Error Getting Balances -->
     <div v-if="balancesError" class="pt-2 pb-6" align="center">
       <v-tooltip right>
@@ -73,17 +82,23 @@ import PTOCashOutForm from '@/components/shared/PTOCashOutForm.vue';
  *  Set Balances information for employee.
  */
 async function created() {
-  window.EventBus.$on('refresh-quickbooks-data', async () => {
-    this.refresh = true;
-    this.loadingBar = true;
-    await this.setPTOBalances();
-    this.refresh = false;
+  window.EventBus.$on('close-pto-cash-out-form', () => {
+    this.showPTOCashOutFormModal = false;
   });
 
   this.isEmployeeView = this.$route.name === 'employee';
   this.loadingBar = true;
   await this.setPTOBalances();
 } // created
+
+async function mounted() {
+  window.EventBus.$on('refresh-quickbooks-data', async () => {
+    this.refresh = true;
+    this.loadingBar = true;
+    await this.setPTOBalances();
+    this.refresh = false;
+  });
+}
 
 /**
  * destroy listeners
@@ -216,6 +231,13 @@ async function setPTOBalances() {
   }
 } // setPTOBalances
 
+/**
+ * Opens new tab when info icon is selected w/in Quickbooks time box
+ */
+function toFAQ() {
+  window.open('https://3.basecamp.com/3097063/buckets/179119/messages/939259168', '_blank');
+} // toFAQ
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                    WATCHERS                      |
@@ -265,7 +287,8 @@ export default {
   methods: {
     formatHours,
     isEmpty,
-    setPTOBalances
+    setPTOBalances,
+    toFAQ
   },
   mounted,
   props: ['passedEmployee', 'showMinutes'],

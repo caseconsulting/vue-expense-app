@@ -1,23 +1,36 @@
 <template>
   <div id="monthly-charges">
-    <div v-if="!loading" class="d-flex justify-center justify-sm-start mb-2 mt-0 ml-0 ml-md-1">
-      <v-btn v-if="!isPrevMonth" x-small outlined @click="changeMonthData" color="#bc3825" class="pa-3"
-        ><v-icon left dark> mdi-arrow-left-top </v-icon>Hours for {{ prevMonth }} {{ prevYear }}
-      </v-btn>
-      <v-btn v-else x-small outlined :disabled="loading" @click="changeMonthData" color="#bc3825" class="pa-3"
-        >Hours for {{ month }} {{ year }} <v-icon right dark> mdi-arrow-right-top </v-icon>
-      </v-btn>
+    <div class="d-flex justify-space-between">
+      <div class="d-inline-block float-left">
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <v-btn :disabled="isPrevMonth || loading" icon @click="changeMonthData" v-on="on"
+              ><v-icon x-large color="#bc3825"> mdi-arrow-left-thin </v-icon>
+            </v-btn>
+          </template>
+          <span>Hours for {{ prevMonth }} {{ prevYear }}</span>
+        </v-tooltip>
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <v-btn :disabled="!isPrevMonth || loading" icon @click="changeMonthData" v-on="on"
+              ><v-icon x-large color="#bc3825"> mdi-arrow-right-thin </v-icon>
+            </v-btn>
+          </template>
+          <span>Hours for {{ month }} {{ year }}</span>
+        </v-tooltip>
+      </div>
+      <h3 align="center" class="d-inline-block">
+        <span v-if="!isPrevMonth"> Hours for {{ month }} {{ year }} </span>
+        <span v-else> Hours for {{ prevMonth }} {{ prevYear }} </span>
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <v-btn @click="toFAQ()" class="mb-4" x-small icon v-on="on"><v-icon color="#3f51b5">info</v-icon></v-btn>
+          </template>
+          <span>Click for FAQ</span>
+        </v-tooltip>
+      </h3>
+      <div class="filler"></div>
     </div>
-    <h3 align="center">
-      <span v-if="!isPrevMonth">Hours for {{ month }} {{ year }}</span>
-      <span v-else>Hours for {{ prevMonth }} {{ prevYear }}</span>
-      <v-tooltip top>
-        <template v-slot:activator="{ on }">
-          <v-btn @click="toFAQ()" class="mb-4" x-small icon v-on="on"><v-icon color="#3f51b5">info</v-icon></v-btn>
-        </template>
-        <span>Click for FAQ</span>
-      </v-tooltip>
-    </h3>
     <!-- Error Getting Monthly Hours -->
     <div v-if="monthlyHourError" class="pt-2 pb-6" align="center">
       <v-tooltip right>
@@ -178,15 +191,17 @@ function remainingWorkDays() {
  *  Set budget information for employee. Creates event listeners.
  */
 async function created() {
+  this.isEmployeeView = this.$route.name === 'employee';
+  await this.setData();
+} // created
+
+async function mounted() {
   window.EventBus.$on('refresh-quickbooks-data', async () => {
     this.refresh = true;
     await this.setData();
     this.refresh = false;
   });
-
-  this.isEmployeeView = this.$route.name === 'employee';
-  await this.setData();
-} // created
+}
 
 /**
  * destroy listeners
@@ -428,9 +443,16 @@ export default {
     toFAQ,
     updateEstimate
   },
+  mounted,
   props: ['passedEmployee', 'showMinutes'],
   watch: {
     'passedEmployee.id': watchPassedEmployeeID
   }
 };
 </script>
+
+<style scoped>
+.filler {
+  width: 72px;
+}
+</style>
