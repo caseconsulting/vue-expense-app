@@ -106,7 +106,9 @@
 
         <!-- Employee slot -->
         <template v-slot:[`item.employeeId`]="{ item }">
-          <td v-if="userRoleIsAdmin()">{{ firstAndLastName(getEmployeeByID(item.employeeId)) }}</td>
+          <td v-if="userRoleIsAdmin()">
+            {{ item.employeeName }}
+          </td>
         </template>
 
         <!-- Amount slot-->
@@ -486,6 +488,13 @@ function filteredPtoCashOuts() {
     filteredPtoCashOuts = _.filter(filteredPtoCashOuts, (p) => p.approvedDate == null);
   } else if (this.filter.approved === 'approved') {
     filteredPtoCashOuts = _.filter(filteredPtoCashOuts, (p) => p.approvedDate != null);
+  }
+  if (this.$store.getters.employees) {
+    filteredPtoCashOuts.forEach((p, index) => {
+      filteredPtoCashOuts[index].employeeName = this.firstAndLastName(
+        this.getEmployeeByID(p.employeeId, this.$store.getters.employees)
+      );
+    });
   }
   return filteredPtoCashOuts;
 } // filteredPtOCashOuts
