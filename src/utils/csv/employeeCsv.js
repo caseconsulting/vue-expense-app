@@ -32,6 +32,7 @@ export function convertEmployees(employees, contracts) {
   _.forEach(employees, (employee) => {
     let placeOfBirth = [employee.city, employee.st, employee.country].join(' ');
     let contractsPrimesProjects = getContractPrimeProject(employee.contracts, contracts);
+    let clearanceData = getClearancesData(employee.clearances);
     tempEmployees.push({
       'Employee #': employee.employeeNumber || '',
       'First Name': employee.firstName || '',
@@ -52,7 +53,14 @@ export function convertEmployees(employees, contracts) {
       Status: getWorkStatus(employee.workStatus) || '',
       Awards: filterUndefined(employee.awards, getAwards) || '',
       Certifications: filterUndefined(employee.certifications, getCertifications) || '',
-      Clearance: filterUndefined(employee.clearances, getClearances) || '',
+      Clearance: clearanceData.titles || '',
+      'Submission Date': clearanceData.submissionDates || '',
+      'Granted Date': clearanceData.grantedDates || '',
+      'BI Dates': clearanceData.biDates || '',
+      'Poly Dates': clearanceData.polyDates || '',
+      'Adjudication Dates': clearanceData.adjudicationDates || '',
+      'Badge Number': clearanceData.badgeNum || '',
+      'Badge Expiration Date': clearanceData.badgeExpDate || '',
       Contracts: contractsPrimesProjects.contracts,
       Primes: contractsPrimesProjects.primes,
       Projects: contractsPrimesProjects.projects,
@@ -139,24 +147,45 @@ export function getCertifications(certification) {
  * Returns clearance data for employee
  *
  * @param clearance - An array of objects.
- * @return String - clearance
+ * @return Object - clearance data
  */
-export function getClearances(clearance) {
-  let a = '';
-  for (let i = 0; i < clearance.length; i++) {
-    a += clearance[i].type;
-    if (typeof clearance[i].grantedDate !== 'undefined') {
-      a += ' - ' + clearance[i].grantedDate;
-    }
-    if (typeof clearance[i].expirationDate !== 'undefined') {
-      a += ' to ' + clearance[i].expirationDate;
-    }
-    if (i + 1 < clearance.length) {
-      a += ', ';
+export function getClearancesData(clearances) {
+  let data = {
+    titles: '',
+    submissionDates: '',
+    grantedDates: '',
+    biDates: '',
+    polyDates: '',
+    adjudicationDates: '',
+    badgeNum: '',
+    badgeExpDate: ''
+  };
+  if (clearances) {
+    for (let i = 0; i < clearances.length; i++) {
+      data.titles += clearances[i].type + `${clearances[i].awaitingClearance ? ' (awaiting clearance)' : ''}`;
+      data.submissionDates += clearances[i].submissionDate ? clearances[i].submissionDate : 'No Date';
+      data.grantedDates += clearances[i].grantedDate ? clearances[i].grantedDate : 'No Date';
+      data.biDates += clearances[i].biDates.length > 0 ? clearances[i].biDates.join(' & ') : 'No Dates';
+      data.polyDates += clearances[i].polyDates.length > 0 ? clearances[i].polyDates.join(' & ') : 'No Dates';
+      data.adjudicationDates +=
+        clearances[i].adjudicationDates.length > 0 ? clearances[i].adjudicationDates.join(' & ') : 'No Dates';
+      data.badgeNum += clearances[i].badgeNum ? clearances[i].badgeNum : 'No Number';
+      data.badgeExpDate += clearances[i].badgeExpirationDate ? clearances[i].badgeExpirationDate : 'No Date';
+      if (i + 1 < clearances.length) {
+        data.titles += ', ';
+        data.submissionDates += ', ';
+        data.grantedDates += ', ';
+        data.biDates += ', ';
+        data.polyDates += ', ';
+        data.adjudicationDates += ', ';
+        data.badgeNum += ', ';
+        data.badgeExpDate += ', ';
+      }
     }
   }
-  return a;
-} // getClearance
+
+  return data;
+} // getClearancesData
 
 /**
  * Converts the contracts' projects' dates to number of years on the contract
