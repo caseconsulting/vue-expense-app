@@ -238,10 +238,6 @@ async function created() {
   window.EventBus.$on('canceled-delete-PTO cash out', () => {
     this.clickedCancelDelete();
   });
-  window.EventBus.$on('close-pto-cash-out-form', () => {
-    this.toggleEditModal = false;
-    this.clickedEditItem = null;
-  });
 
   if (!this.$store.getters.storeIsPopulated) {
     await Promise.all([this.updateStoreUser(), this.updateStoreEmployees()]);
@@ -260,7 +256,15 @@ function beforeDestroy() {
   window.EventBus.$off('canceled-unapprove-cash-out');
   window.EventBus.$off('confirm-delete-pto-cash-out');
   window.EventBus.$off('canceled-delete-pto-cash-out');
+  window.EventBus.$off('close-pto-cash-out-form');
 } // beforeDestroy
+
+function mounted() {
+  window.EventBus.$on('close-pto-cash-out-form', () => {
+    this.toggleEditModal = false;
+    this.clickedEditItem = null;
+  });
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -609,6 +613,7 @@ export default {
     uncheckAllBoxes,
     unapprovePTOCashOut
   },
+  mounted,
   computed: {
     roleHeaders,
     filteredPtoCashOuts,

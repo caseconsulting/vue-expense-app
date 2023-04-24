@@ -79,9 +79,6 @@ async function created() {
     await this.setPTOBalances();
     this.refresh = false;
   });
-  window.EventBus.$on('close-pto-cash-out-form', () => {
-    this.showPTOCashOutFormModal = false;
-  });
 
   this.isEmployeeView = this.$route.name === 'employee';
   this.loadingBar = true;
@@ -95,6 +92,12 @@ function beforeDestroy() {
   window.EventBus.$off('refresh-quickbooks-data');
   window.EventBus.$off('close-pto-cash-out-form');
 } // beforeDestroy
+
+function mounted() {
+  window.EventBus.$on('close-pto-cash-out-form', () => {
+    this.showPTOCashOutFormModal = false;
+  });
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -264,6 +267,7 @@ export default {
     isEmpty,
     setPTOBalances
   },
+  mounted,
   props: ['passedEmployee', 'showMinutes'],
   watch: {
     'passedEmployee.id': watchPassedEmployeeID
