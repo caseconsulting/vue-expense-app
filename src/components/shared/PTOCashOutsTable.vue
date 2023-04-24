@@ -241,10 +241,19 @@ async function created() {
     this.clickedCancelDelete();
   });
 
-  if (!this.$store.getters.storeIsPopulated) {
-    await Promise.all([this.updateStoreUser(), this.updateStoreEmployees()]);
+  let promises = [];
+  if (!this.$store.getters.employees) {
+    promises.push(this.updateStoreEmployees());
   }
-  await this.updateStorePtoCashOuts();
+  if (!this.$store.getters.user) {
+    promises.push(this.updateStoreUser());
+  }
+  if (!this.$store.getters.ptoCashOuts) {
+    promises.push(this.updateStorePtoCashOuts());
+  }
+  if (promises.length > 0) {
+    await Promise.all(promises);
+  }
   this.loading = false;
 } // created
 
