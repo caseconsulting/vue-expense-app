@@ -369,6 +369,7 @@ function updateEstimate(event) {
  */
 async function watchPassedEmployeeID() {
   this.loading = true;
+  this.monthlyHourError = false;
   this.refresh = true;
   this.isEmployeeView = true;
   await this.setMonthlyCharges();

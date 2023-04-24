@@ -224,6 +224,7 @@ async function setPTOBalances() {
  */
 async function watchPassedEmployeeID() {
   this.loadingBar = true;
+  this.balancesError = false;
   this.refresh = true;
   this.isEmployeeView = true;
   await this.setPTOBalances();
