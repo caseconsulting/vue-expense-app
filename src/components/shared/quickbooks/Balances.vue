@@ -82,10 +82,6 @@ import PTOCashOutForm from '@/components/shared/PTOCashOutForm.vue';
  *  Set Balances information for employee.
  */
 async function created() {
-  window.EventBus.$on('close-pto-cash-out-form', () => {
-    this.showPTOCashOutFormModal = false;
-  });
-
   this.isEmployeeView = this.$route.name === 'employee';
   this.loadingBar = true;
   await this.setPTOBalances();

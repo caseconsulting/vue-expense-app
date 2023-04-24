@@ -195,13 +195,16 @@ async function created() {
   await this.setData();
 } // created
 
+/**
+ * The mounted lifecycle hook.
+ */
 async function mounted() {
   window.EventBus.$on('refresh-quickbooks-data', async () => {
     this.refresh = true;
     await this.setData();
     this.refresh = false;
   });
-}
+} // mounted
 
 /**
  * destroy listeners
@@ -295,6 +298,9 @@ function formatHours(hours) {
   return `${hours}h`;
 } // formatHours
 
+/**
+ * Sets all of the fields on initial load or refresh.
+ */
 async function setData() {
   this.loading = true;
   // set the current month
@@ -307,7 +313,7 @@ async function setData() {
   this.prevYear = format(subtract(getTodaysDate(), 1, 'months'), null, 'YYYY');
 
   await this.setMonthlyCharges();
-}
+} // setData
 
 /**
  * Sets the monthly charges for the employee (or user if no employee is specified).
@@ -384,6 +390,7 @@ function updateEstimate(event) {
  */
 async function watchPassedEmployeeID() {
   this.loading = true;
+  this.isPrevMonth = false;
   this.monthlyHourError = false;
   this.refresh = true;
   this.isEmployeeView = true;
