@@ -91,15 +91,6 @@ async function created() {
   await this.setPTOBalances();
 } // created
 
-async function mounted() {
-  window.EventBus.$on('refresh-quickbooks-data', async () => {
-    this.refresh = true;
-    this.loadingBar = true;
-    await this.setPTOBalances();
-    this.refresh = false;
-  });
-}
-
 /**
  * destroy listeners
  */
@@ -108,11 +99,21 @@ function beforeDestroy() {
   window.EventBus.$off('close-pto-cash-out-form');
 } // beforeDestroy
 
-function mounted() {
+/**
+ * Mounted lifecycle hook.
+ */
+async function mounted() {
+  window.EventBus.$on('refresh-quickbooks-data', async () => {
+    this.refresh = true;
+    this.loadingBar = true;
+    await this.setPTOBalances();
+    this.refresh = false;
+  });
+
   window.EventBus.$on('close-pto-cash-out-form', () => {
     this.showPTOCashOutFormModal = false;
   });
-}
+} // mounted
 
 // |--------------------------------------------------|
 // |                                                  |
