@@ -80,6 +80,12 @@
           <activity-feed id="home-activity-feed" :events="events" :loading="loadingEvents"></activity-feed>
         </v-col>
       </v-row>
+      <v-row>
+        <!-- Twitter Feed -->
+        <v-col mt-0 class="pa-0 px-xl-4 px-lg-2 px-md-0">
+          <twitter-feed id="home-twitter-feed" :tweets="tweets" :loading="loadingTweets"></twitter-feed>
+        </v-col>
+      </v-row>
     </span>
   </v-container>
 </template>
@@ -88,6 +94,7 @@
 import api from '@/shared/api.js';
 import ActivityFeed from '@/components/home/ActivityFeed.vue';
 import AvailableBudgets from '@/components/shared/AvailableBudgets.vue';
+import TwitterFeed from '@/components/home/TwitterFeed.vue';
 import _ from 'lodash';
 import { isEmpty, isMobile, getCurrentBudgetYear, updateEmployeeLogin } from '@/utils/utils';
 import { updateStoreExpenseTypes, updateStoreBudgets } from '@/utils/storeUtils';
@@ -472,6 +479,15 @@ function getEmployeePreferredName(e) {
 }
 
 /**
+ * Calls the API to get tweets from the Twitter account.
+ */
+async function getTweets() {
+  this.loadingTweets = true;
+  this.tweets = await api.getCaseTimeline();
+  this.loadingTweets = false;
+} // getTweets
+
+/**
  * Routes user to their employee page
  */
 function handleProfile() {
@@ -485,6 +501,7 @@ async function loadHomePageData() {
   await Promise.all([
     this.refreshEmployee(),
     this.createEvents(),
+    this.getTweets(),
     this.$store.getters.loginTime ? this.updateEmployeeLogin(this.$store.getters.user) : ''
   ]);
 } // loadHomePageData
@@ -566,6 +583,7 @@ export default {
   components: {
     ActivityFeed,
     AvailableBudgets,
+    TwitterFeed,
     QuickBooksTimeData,
     AnniversaryCard
   },
@@ -591,9 +609,11 @@ export default {
       hireDate: '', // employee hire date
       loading: true,
       loadingEvents: true,
+      loadingTweets: true,
       scheduleEntries: [],
       seconds: 0, // seconds until next anniversary date
       textMaxLength: 110,
+      tweets: [],
       status: {
         statusType: undefined,
         statusMessage: '',
@@ -610,6 +630,7 @@ export default {
     getEmployeeCerts,
     getEmployeePreferredName,
     getEventDateMessage,
+    getTweets,
     isEmpty,
     isMobile,
     loadHomePageData,
