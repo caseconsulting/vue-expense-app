@@ -528,8 +528,8 @@ async function created() {
     this.status = status;
   });
   if (this.$store.getters.storeIsPopulated) {
-    this.loading = false;
     await this.loadHomePageData();
+    this.loading = false;
   }
 } // created
 
@@ -551,8 +551,8 @@ function beforeDestroy() {
  */
 async function watchStoreIsPopulated() {
   if (this.$store.getters.storeIsPopulated) {
-    this.loading = false; // get rid of skeleton loaders (will still be loading for individual components)
-    this.loadHomePageData();
+    await this.loadHomePageData();
+    this.loading = false;
   }
 } // watchStoreIsPopulated
 
