@@ -3,12 +3,11 @@
     <v-row>
       <!-- Back button in upper left -->
       <v-col cols="3" align="left" justify="left">
-        <v-skeleton-loader class="pr-1" type="button"></v-skeleton-loader>
+        <v-skeleton-loader width="70%" class="pr-1" type="heading"></v-skeleton-loader>
       </v-col>
       <!-- Buttons in upper right -->
       <v-col cols="9" align="right" justify="right">
-        <v-skeleton-loader class="d-inline-block mr-1" type="button"></v-skeleton-loader>
-        <v-skeleton-loader class="d-inline-block" type="button"></v-skeleton-loader>
+        <v-skeleton-loader width="70%" type="heading"></v-skeleton-loader>
       </v-col>
     </v-row>
     <v-row>
