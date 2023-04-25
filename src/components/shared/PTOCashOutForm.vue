@@ -5,8 +5,10 @@
         <v-card-title class="header_style"><h3>Cash Out PTO</h3> </v-card-title>
         <div v-if="!isSubmitting">
           <v-card-text>
-            <div>PTO: {{ getPtoBalance() }}h</div>
-            <div v-if="getPendingPtoCashoutAmount() > 0">Pending PTO Cash Out: {{ getPendingPtoCashoutAmount() }}h</div>
+            <div v-if="ptoData.ptoBalance">PTO: {{ ptoData.ptoBalance }}h</div>
+            <div v-if="ptoData.pendingPtoCashOutAmount > 0">
+              Pending PTO Cash Out: {{ ptoData.pendingPtoCashOutAmount }}h
+            </div>
             <v-row v-if="userRoleIsAdmin()">
               <v-col col="12">
                 <!-- Employee picker if admin -->
@@ -112,6 +114,8 @@ import { updateStoreEmployees } from '../../utils/storeUtils';
 import employeeUtils from '../../shared/employeeUtils';
 import { format } from '../../shared/dateUtils';
 import { mask } from 'vue-the-mask';
+import { getEmployeeByID } from '../../shared/employeeUtils';
+
 import _ from 'lodash';
 
 // |--------------------------------------------------|
@@ -245,23 +249,27 @@ function displaySuccess(msg) {
 } // displaySuccess
 
 /**
+/**
  * Gets the user's available PTO balance.
- *
+ * 
+ * @param employeeNumber employee's employee number to get PTO balance for
  * @returns Number - The available PTO balance
  */
-function getPtoBalance() {
-  let user = this.$store.getters.user;
-  return this.$store.getters.quickbooksPTO.results.users[user.employeeNumber].pto_balances.PTO;
+function getPtoBalance(employeeNumber) {
+  return this.$store.getters.quickbooksPTO.results.users[employeeNumber]
+    ? this.$store.getters.quickbooksPTO.results.users[employeeNumber].pto_balances.PTO
+    : null;
 } // getPtoBalance
 
 /**
  * Gets the user's pending PTO cash out amount
  *
+ * @param employeeId employee's employee ID to get PTO balances for
  * @returns Number - The pending cash out amount
  */
-function getPendingPtoCashoutAmount() {
+function getPendingPtoCashoutAmount(employeeId) {
   let pendingPtoCashOuts = this.$store.getters.ptoCashOuts.filter(
-    (p) => !p.approvedDate && this.$store.getters.user.id === p.employeeId
+    (p) => !p.approvedDate && employeeId === p.employeeId
   );
   return pendingPtoCashOuts.reduce((n, { amount }) => n + amount, 0);
 } // getPendingPtoCashoutAmount
@@ -354,6 +362,29 @@ function watchEditPTOCashOutItem() {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+function ptoData() {
+  let employeeNumber;
+  let employeeId;
+  if (this.ptoCashOutObj.employeeId) {
+    employeeNumber = this.getEmployeeByID(this.ptoCashOutObj.employeeId, this.$store.getters.employees).employeeNumber;
+    employeeId = this.ptoCashOutObj.employeeId;
+  } else {
+    employeeNumber = this.$store.getters.user.employeeNumber;
+    employeeId = this.$store.getters.user.id;
+  }
+
+  return {
+    pendingPtoCashOutAmount: this.getPendingPtoCashoutAmount(employeeId),
+    ptoBalance: this.getPtoBalance(employeeNumber)
+  };
+}
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -393,12 +424,14 @@ export default {
     setActiveEmployeesDropdown,
     updateStoreEmployees,
     updatePTOCashOutRequest,
+    getEmployeeByID,
     format
   },
   watch: {
     'ptoCashOutObj.approvedDate': watchApprovedDate,
     item: watchEditPTOCashOutItem
   },
+  computed: { ptoData },
   props: ['item']
 };
 </script>

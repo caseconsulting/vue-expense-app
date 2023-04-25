@@ -88,3 +88,20 @@ export async function updateStoreExpenseTypes() {
     this.$store.dispatch('setExpenseTypes', { expenseTypes });
   }
 } // updateStoreExpenseTypes
+
+/**
+ * Update store with latest quickbooks PTO data
+ */
+export async function updateStoreQuickbooksPTO() {
+  let employeeNumbers;
+  if (userRoleIsAdmin()) {
+    employeeNumbers = store.getters.employees
+      .filter((e) => e.workStatus > 0)
+      .map((e) => e.employeeNumber)
+      .join(', ');
+  } else {
+    employeeNumbers = store.getters.user.employeeNumber;
+  }
+  let quickbooksPTO = await api.getPTOBalances(employeeNumbers);
+  store.dispatch('setQuickbooksPTO', { quickbooksPTO });
+} // updateStoreQuickbooksPTO

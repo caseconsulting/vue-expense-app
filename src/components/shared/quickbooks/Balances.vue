@@ -66,9 +66,8 @@
 </template>
 
 <script>
-import api from '@/shared/api.js';
 import { isEmpty } from '@/utils/utils';
-import { updateStorePtoCashOuts } from '@/utils/storeUtils';
+import { updateStorePtoCashOuts, updateStoreQuickbooksPTO, updateStoreEmployees } from '@/utils/storeUtils';
 import _ from 'lodash';
 import PTOCashOutForm from '@/components/shared/PTOCashOutForm.vue';
 
@@ -84,6 +83,9 @@ import PTOCashOutForm from '@/components/shared/PTOCashOutForm.vue';
 async function created() {
   this.isEmployeeView = this.$route.name === 'employee';
   this.loadingBar = true;
+  if (!this.$store.getters.employees) {
+    await this.updateStoreEmployees();
+  }
   await this.setPTOBalances();
 } // created
 
@@ -194,11 +196,11 @@ async function setPTOBalances() {
       this.$store.getters.user.id != this.employee.id ||
       this.refresh
     ) {
-      [ptoBalances] = await Promise.all([api.getPTOBalances(this.employee.employeeNumber), updateStorePtoCashOuts()]); // call api
-      if (this.$store.getters.user.id == this.employee.id) {
-        // only set vuex store if the user is looking at their own quickbooks data
-        this.$store.dispatch('setQuickbooksPTO', { quickbooksPTO: ptoBalances });
-      }
+      await Promise.all([
+        updateStoreQuickbooksPTO() /*api.getPTOBalances(this.employee.employeeNumber)*/,
+        updateStorePtoCashOuts()
+      ]); // call api
+      ptoBalances = this.$store.getters.quickbooksPTO;
     } else {
       ptoBalances = this.$store.getters.quickbooksPTO;
     }
@@ -285,7 +287,8 @@ export default {
     formatHours,
     isEmpty,
     setPTOBalances,
-    toFAQ
+    toFAQ,
+    updateStoreEmployees
   },
   mounted,
   props: ['passedEmployee', 'showMinutes'],
