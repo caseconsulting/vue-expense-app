@@ -78,9 +78,6 @@
                     @input="approvedDateMenu = false"
                   ></v-date-picker>
                 </v-menu>
-                {{ ptoCashOutObj }}
-                <br />
-                {{ approvedDateFormatted ? approvedDateFormatted : 'null' }}
               </v-col>
             </v-row>
           </v-card-text>
@@ -203,9 +200,13 @@ function cancel() {
  * Clears form and resets validation.
  */
 function clearForm() {
-  this.ptoCashOutObj = {};
+  this.$set(this.ptoCashOutObj, 'id', null);
+  this.$set(this.ptoCashOutObj, 'employeeId', null);
+  this.$set(this.ptoCashOutObj, 'amount', null);
+  this.$set(this.ptoCashOutObj, 'creationDate', null);
+  this.$set(this.ptoCashOutObj, 'approvedDate', null);
+
   this.approvedDateFormatted = null;
-  // this.item = null;
   this.$refs.form.reset();
   this.$refs.form.resetValidation();
 } // clearForm
@@ -299,12 +300,13 @@ function cashOutHint() {
  * Creates a PTO Cash Out record in the database.
  */
 async function createPTOCashOutRequest() {
+  let newItem = _.cloneDeep(this.ptoCashOutObj);
   let ptoCashOut = await api.createItem(api.PTO_CASH_OUTS, {
     id: uuid(),
-    amount: this.ptoCashOutObj.amount,
-    employeeId: this.ptoCashOutObj.employeeId ? this.ptoCashOutObj.employeeId : this.$store.getters.user.id,
+    amount: newItem.amount,
+    employeeId: newItem.employeeId ? newItem.employeeId : this.$store.getters.user.id,
     creationDate: dateUtils.getTodaysDate(),
-    approvedDate: this.ptoCashOutObj.approvedDate ? this.ptoCashOutObj.approvedDate : null
+    approvedDate: newItem.approvedDate ? newItem.approvedDate : null
   });
   this.$store.dispatch('setPtoCashOuts', { ptoCashOuts: [...this.$store.getters.ptoCashOuts, ptoCashOut] });
 } // createPTOCashOutRequest
@@ -314,10 +316,11 @@ async function createPTOCashOutRequest() {
  */
 async function updatePTOCashOutRequest() {
   let ptoCashOuts = _.cloneDeep(this.$store.getters.ptoCashOuts);
-  let index = ptoCashOuts.findIndex((p) => p.id == this.ptoCashOutObj.id);
-  ptoCashOuts[index] = this.ptoCashOutObj;
+  let editedItem = _.cloneDeep(this.ptoCashOutObj);
+  let index = ptoCashOuts.findIndex((p) => p.id == editedItem.id);
+  ptoCashOuts[index] = editedItem;
   await api.updateItem(api.PTO_CASH_OUTS, {
-    ...this.ptoCashOutObj
+    ...editedItem
   });
   this.$store.dispatch('setPtoCashOuts', { ptoCashOuts: ptoCashOuts });
 } // updatePTOCashOutRequest
@@ -441,10 +444,7 @@ export default {
     format
   },
   watch: {
-    'ptoCashOutObj.approvedDate': {
-      handler: watchApprovedDate,
-      deep: true
-    },
+    'ptoCashOutObj.approvedDate': watchApprovedDate,
     item: watchEditPTOCashOutItem
   },
   computed: { ptoData },
