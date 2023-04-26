@@ -121,6 +121,7 @@ function clearStatus() {
 async function watchStoreIsPopulated() {
   if (this.$store.getters.storeIsPopulated) {
     this.employee = this.$store.getters.user;
+    this.loading = false;
   }
 } // watchStoreIsPopulated
 

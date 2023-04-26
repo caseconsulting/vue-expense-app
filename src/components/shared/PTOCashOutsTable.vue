@@ -443,10 +443,15 @@ function displaySuccess(msg) {
   window.EventBus.$emit('status-alert', status);
 } // displaySuccess
 
+/**
+ * Changes the QuickBooks Time employee when a row is clicked
+ *
+ * @param item Object - The item from the row clicked
+ */
 function rowClicked(item) {
   let employee = this.$store.getters.employees.find((e) => e.id === item.employeeId);
   window.EventBus.$emit('change-quickbooks-employee', employee);
-}
+} // rowClicked
 
 /**
  * Unchecks all boxes in the data table

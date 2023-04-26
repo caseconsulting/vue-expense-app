@@ -48,6 +48,10 @@ function created() {
     this.$set(this.status, 'statusMessage', status.statusMessage);
     this.$set(this.status, 'color', status.color);
   });
+  window.EventBus.$on('change-quickbooks-employee', (employee) => {
+    this.employee = employee;
+  });
+
   if (this.$store.getters.storeIsPopulated) {
     this.employee = this.$store.getters.user;
     this.loading = false;
@@ -129,7 +133,8 @@ export default {
         statusType: undefined,
         statusMessage: '',
         color: ''
-      }
+      },
+      employee: null
     };
   },
   watch: {
