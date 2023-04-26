@@ -100,16 +100,14 @@ import {
   isValid,
   startOf,
   subtract,
-  setMonth,
-  setDay,
-  getDay,
-  getMonth,
   difference,
   isSame,
   isBefore,
   isAfter,
   getYear,
-  setYear
+  setYear,
+  endOf,
+  DEFAULT_ISOFORMAT
 } from '../shared/dateUtils';
 
 // |--------------------------------------------------|
@@ -134,6 +132,27 @@ function storeIsPopulated() {
 // |--------------------------------------------------|
 
 /**
+ * Gets an employees anniversary. If an employee's anniversary date is more than 2 months in the future,
+ * their previous anniversary date will be used for the activity feed.
+ *
+ * @param date String - the hire date
+ * @return String - The employee's anniversary date that is useful for the activity feed
+ */
+function getAnniversary(date) {
+  let endMonth = format(endOf(getTodaysDate(), 'months'), null, DEFAULT_ISOFORMAT);
+  let anniversary = setYear(date, getYear(endMonth));
+  let diff = difference(endMonth, anniversary, 'months');
+  if (diff <= -2) {
+    // anniversary is 2 or more months away
+    anniversary = setYear(anniversary, getYear(endMonth) - 1);
+  } else if (diff >= 11) {
+    // anniversary is in one month or less
+    anniversary = setYear(anniversary, getYear(endMonth) + 1);
+  }
+  return anniversary;
+} // getAnniversary
+
+/**
  * Create the events to populate the activity feed
  */
 async function createEvents() {
@@ -155,60 +174,82 @@ async function createEvents() {
     employee.firstName = getEmployeePreferredName(employee);
   });
 
-  // generate anniversaries
-  let anniversaries = _.map(this.employees, (a) => {
+  let monthsBack = 5;
+  // created empty two-dimensional array
+  let anniversaries = [...Array(monthsBack)].map(() => Array(monthsBack));
+  let newHires = [];
+  _.forEach(this.employees, (a) => {
     let hireDate = format(a.hireDate, null, 'YYYY-MM-DD');
+    let todaysDate = getTodaysDate();
     let event = {};
-    if (a.workStatus != 0 && isValid(a.hireDate, 'YYYY-MM-DD')) {
-      let now = getTodaysDate();
-      let cutOff = startOf(subtract(getTodaysDate(), 6, 'months', 'YYYY-MM-DD'), 'day'); //can't use now because itll change now
+    if (a.workStatus != 0 && isValid(hireDate, 'YYYY-MM-DD')) {
       //set what we want to see in the Date
-      if (isSameOrAfter(now, a.hireDate, 'day')) {
+      if (isSameOrAfter(todaysDate, hireDate, 'day')) {
         //hire date is before today
-        let anniversary = setMonth(getTodaysDate(), getMonth(hireDate));
-        anniversary = setDay(anniversary, getDay(hireDate)); //set anniversary to hiredate but this year
-        let diff = difference(startOf(getTodaysDate(), 'day'), startOf(anniversary, 'day'), 'day'); //difference between today and anniversary
-        event.date = this.getEventDateMessage(anniversary);
-        if (diff < -30) {
-          anniversary = subtract(anniversary, 1, 'years');
-        }
-        if (isAfter(cutOff, startOf(anniversary, 'day'))) {
-          return null;
-        }
-        if (isSame(anniversary, hireDate, 'day')) {
-          event.text = a.firstName + ' ' + a.lastName + ' has joined the Case Consulting team!'; //new hire message
-          event.icon = 'mdi-account-plus';
-          event.type = 'New Hire';
-          event.newCampfire = 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726';
-        } else {
-          if (difference(anniversary, hireDate, 'year') == 1) {
-            event.text = a.firstName + ' ' + a.lastName + ' is celebrating 1 year at Case Consulting!';
+        let anniversary = getAnniversary(hireDate);
+        let endOfMonth = format(endOf(getTodaysDate(), 'months'), null, DEFAULT_ISOFORMAT);
+        let monthDiff = Math.floor(difference(endOfMonth, anniversary, 'months')) + 1;
+        if (monthDiff >= 0 && monthDiff < monthsBack) {
+          event.date = this.getEventDateMessage(anniversary);
+          if (isSame(anniversary, hireDate, 'day')) {
+            event.text = a.firstName + ' ' + a.lastName + ' has joined the Case Consulting team!'; //new hire message
+            event.icon = 'mdi-account-plus';
+            event.type = 'New Hire';
+            event.newCampfire = 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726';
           } else {
-            event.text =
-              getEmployeePreferredName(a) +
-              ' ' +
-              a.lastName +
-              ' is celebrating ' +
-              difference(anniversary, hireDate, 'year') +
-              ' years at Case Consulting!';
+            if (difference(anniversary, hireDate, 'year') == 1) {
+              event.text = a.firstName + ' ' + a.lastName + ' is celebrating 1 year at Case Consulting!';
+            } else {
+              event.text =
+                getEmployeePreferredName(a) +
+                ' ' +
+                a.lastName +
+                ' is celebrating ' +
+                difference(anniversary, hireDate, 'year') +
+                ' years at Case Consulting!';
+            }
+            event.anniversary = anniversary;
+            event.icon = 'mdi-party-popper';
+            event.type = 'Anniversary';
+            event.congratulateCampfire = 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726';
           }
-          event.icon = 'mdi-party-popper';
-          event.type = 'Anniversary';
-          event.congratulateCampfire = 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726';
+          event.daysFromToday = difference(startOf(todaysDate, 'day'), startOf(anniversary, 'day'), 'day');
+          event.color = '#bc3825';
+          if (this.textMaxLength < event.text.length) {
+            event.truncatedText = _.truncate(event.text, { length: this.textMaxLength });
+          }
+          if (event.type === 'New Hire') {
+            newHires.push(event);
+          } else {
+            if (anniversaries[monthDiff].events) {
+              anniversaries[monthDiff].events.push(event);
+            } else {
+              if (isSame(getTodaysDate(), anniversary, 'month')) {
+                anniversaries[monthDiff].date = "This Month's Anniversaries";
+              } else if (isAfter(getTodaysDate(), anniversary, 'month')) {
+                anniversaries[monthDiff].date = `${format(anniversary, DEFAULT_ISOFORMAT, 'MMMM')}'s Anniversaries`;
+              } else {
+                anniversaries[monthDiff].date = "Next Month's Anniversaries";
+              }
+              anniversaries[monthDiff].type = 'Anniversary';
+              anniversaries[monthDiff].icon = 'mdi-party-popper';
+              anniversaries[monthDiff].congratulateCampfire =
+                'https://3.basecamp.com/3097063/buckets/171415/chats/29039726';
+              anniversaries[monthDiff].color = '#bc3825';
+              anniversaries[monthDiff].events = [event];
+              anniversaries[monthDiff].daysFromToday = difference(
+                startOf(todaysDate, 'day'),
+                startOf(anniversary, 'month'),
+                'day'
+              );
+            }
+          }
         }
-        event.daysFromToday = difference(startOf(now, 'day'), startOf(anniversary, 'day'), 'day');
-        event.color = '#bc3825';
-        if (this.textMaxLength < event.text.length) {
-          event.truncatedText = _.truncate(event.text, { length: this.textMaxLength });
-        }
-        return event;
-      } else {
-        return null; //dont show anything for people hired in the future
       }
-    } else {
-      return null;
     }
   });
+  // filter out empty arrays
+  anniversaries = _.filter(anniversaries, (a) => a.date);
 
   // generate birthdays
   let birthdays = _.map(this.employees, (b) => {
@@ -378,7 +419,7 @@ async function createEvents() {
     return wantToDisplay ? cert : null;
   });
 
-  let mergedEventsList = [...anniversaries, ...birthdays, ...expenses, ...schedules, ...awards, ...certs]; // merges lists
+  let mergedEventsList = [...anniversaries, ...newHires, ...birthdays, ...expenses, ...schedules, ...awards, ...certs]; // merges lists
   this.events = _.sortBy(_.compact(mergedEventsList), 'daysFromToday'); //sorts by days from today
   this.$store.dispatch('setEvents', { events: this.events });
   this.loadingEvents = false;
@@ -401,7 +442,7 @@ function getEventDateMessage(date) {
     return diff + ' days ago'; //if it is otherwise less than 7 days ago create message
   } else if (diff == -1) {
     return 'Tomorrow';
-  } else if (diff < 0 && diff >= -30) {
+  } else if (diff < 0 && diff >= -6) {
     return 'Coming up in ' + Math.abs(diff) + ' days'; //if its in the "future" and within 6 days say its coming up
   } else {
     return format(date, null, 'll');
@@ -605,6 +646,7 @@ export default {
     beforeDestroy,
     clearStatus,
     createEvents,
+    getAnniversary,
     getCurrentBudgetYear,
     getEmployeeAwards,
     getEmployeeCerts,

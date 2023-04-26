@@ -97,40 +97,55 @@
 
                     <!-- Item Title: Date -->
                     <h3>{{ item.date }}</h3>
-                    <!-- Event has a link -->
-                    <v-list-item
-                      class="ma-auto pa-auto activityFeedText"
-                      v-if="item.link"
-                      :href="item.link"
-                      target="_blank"
-                      :dense="true"
-                    >
-                      <v-row dense>
-                        <v-col cols="11">{{ item.truncatedText ? item.truncatedText : item.text }}&nbsp;</v-col>
-                        <v-col cols="1">
-                          <v-icon height="12" width="12" color="blue">open-in-new</v-icon>
-                        </v-col>
-                      </v-row>
-                    </v-list-item>
-                    <!-- Event does not have a link -->
-                    <div class="px-4 activityFeedText" v-else>
-                      {{ item.truncatedText ? item.truncatedText : item.text }}
+
+                    <div v-if="item.type === 'Anniversary'">
+                      <v-btn @click="openAnniversariesModal(item)" color="#bc3825" class="white--text" small
+                        >View {{ item.events.length }}
+                        {{ item.events.length > 1 ? 'Anniversaries' : 'Anniversary' }}</v-btn
+                      >
+                    </div>
+
+                    <div v-else>
+                      <!-- Event has a link -->
+                      <v-list-item
+                        class="ma-auto pa-auto activityFeedText"
+                        v-if="item.link"
+                        :href="item.link"
+                        target="_blank"
+                        :dense="true"
+                      >
+                        <v-row dense>
+                          <v-col cols="11">{{ item.truncatedText ? item.truncatedText : item.text }}&nbsp;</v-col>
+                          <v-col cols="1">
+                            <v-icon height="12" width="12" color="blue">open-in-new</v-icon>
+                          </v-col>
+                        </v-row>
+                      </v-list-item>
+                      <!-- Event does not have a link -->
+                      <div class="px-4 activityFeedText" v-else>
+                        {{ item.truncatedText ? item.truncatedText : item.text }}
+                      </div>
                     </div>
                   </v-timeline-item>
                 </span>
               </template>
               <!-- Expanded Event Description -->
-              <span v-if="item.truncatedText">{{ item.text }}</span>
+              <span v-if="item.truncatedText" class="activityFeedText">{{ item.text }}</span>
             </v-tooltip>
           </template>
         </v-virtual-scroll>
       </v-timeline>
     </v-card>
+    <v-dialog v-model="toggleAnniversariesModal" max-width="700">
+      <AnniversariesModal :item="item" />
+    </v-dialog>
   </div>
 </template>
 
 <script>
 import _ from 'lodash';
+
+import AnniversariesModal from './AnniversariesModal.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -142,6 +157,10 @@ import _ from 'lodash';
  * created lifecycle hook
  */
 function created() {
+  window.EventBus.$on('close-anniversaries-modal', () => {
+    this.toggleAnniversariesModal = false;
+  });
+
   this.filterEvents();
 } // created
 
@@ -215,12 +234,28 @@ function getURL(item) {
   }
 } // getURL
 
+/**
+ * Opens the modal for employees with anniversaries in a certain month.
+ *
+ * @param item Object - The month's anniversariese
+ */
+function openAnniversariesModal(item) {
+  this.toggleAnniversariesModal = true;
+  item.events.sort((a, b) => new Date(a.anniversary) - new Date(b.anniversary));
+  this.item = item;
+} // openAnniversariesModal
+
+/**
+ * Removes an item from the activity feed's active filters
+ *
+ * @param item - The filter to remove
+ */
 function remove(item) {
   const index = this.activeFilters.findIndex((f) => f.type === item.type);
   if (index >= 0) {
     this.activeFilters.splice(index, 1);
   }
-}
+} // remove
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -229,12 +264,17 @@ function remove(item) {
 // |--------------------------------------------------|
 
 export default {
+  components: {
+    AnniversariesModal
+  },
   data() {
     return {
       dense: false,
       filters: [],
+      item: null,
       activeFilters: [],
-      searchString: ''
+      searchString: '',
+      toggleAnniversariesModal: false
     };
   },
   computed: {
@@ -243,6 +283,7 @@ export default {
   methods: {
     filterEvents,
     getURL,
+    openAnniversariesModal,
     remove
   },
   created,
@@ -253,6 +294,7 @@ export default {
 <style lang="scss" scoped>
 .activityFeedText {
   font-weight: normal;
+  white-space: pre;
 }
 
 .v-tooltip__content.menuable__content__active {
