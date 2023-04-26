@@ -78,6 +78,9 @@
                     @input="approvedDateMenu = false"
                   ></v-date-picker>
                 </v-menu>
+                {{ ptoCashOutObj }}
+                <br />
+                {{ approvedDateFormatted ? approvedDateFormatted : 'null' }}
               </v-col>
             </v-row>
           </v-card-text>
@@ -132,7 +135,12 @@ async function created() {
     await this.updateStoreEmployees();
   }
   if (this.item) {
-    this.ptoCashOutObj = _.cloneDeep(this.item);
+    let editingItem = _.cloneDeep(this.item);
+    this.$set(this.ptoCashOutObj, 'id', editingItem.id);
+    this.$set(this.ptoCashOutObj, 'employeeId', editingItem.employeeId);
+    this.$set(this.ptoCashOutObj, 'amount', editingItem.amount);
+    this.$set(this.ptoCashOutObj, 'creationDate', editingItem.creationDate);
+    this.$set(this.ptoCashOutObj, 'approvedDate', editingItem.approvedDate);
   }
   this.setActiveEmployeesDropdown();
 } // created
@@ -356,7 +364,12 @@ function watchApprovedDate() {
  */
 function watchEditPTOCashOutItem() {
   if (this.item) {
-    this.ptoCashOutObj = _.cloneDeep(this.item);
+    let editingItem = _.cloneDeep(this.item);
+    this.$set(this.ptoCashOutObj, 'id', editingItem.id);
+    this.$set(this.ptoCashOutObj, 'employeeId', editingItem.employeeId);
+    this.$set(this.ptoCashOutObj, 'amount', editingItem.amount);
+    this.$set(this.ptoCashOutObj, 'creationDate', editingItem.creationDate);
+    this.$set(this.ptoCashOutObj, 'approvedDate', editingItem.approvedDate);
   }
 } // watchEditPTOCashOutItem
 
@@ -428,7 +441,10 @@ export default {
     format
   },
   watch: {
-    'ptoCashOutObj.approvedDate': watchApprovedDate,
+    'ptoCashOutObj.approvedDate': {
+      handler: watchApprovedDate,
+      deep: true
+    },
     item: watchEditPTOCashOutItem
   },
   computed: { ptoData },
