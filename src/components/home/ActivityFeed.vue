@@ -98,7 +98,7 @@
                     <!-- Item Title: Date -->
                     <h3>{{ item.date }}</h3>
 
-                    <div v-if="item.type === 'Anniversary'">
+                    <div v-if="item.type === 'Anniversary'" class="px-4">
                       <v-btn @click="openAnniversariesModal(item)" color="#bc3825" class="white--text" small
                         >View {{ item.events.length }}
                         {{ item.events.length > 1 ? 'Anniversaries' : 'Anniversary' }}</v-btn
@@ -294,7 +294,6 @@ export default {
 <style lang="scss" scoped>
 .activityFeedText {
   font-weight: normal;
-  white-space: pre;
 }
 
 .v-tooltip__content.menuable__content__active {

@@ -2,14 +2,13 @@
   <div>
     <v-card>
       <v-card-title class="header_style">
-        <v-icon class="mr-2" color="white">{{ item.icon }}</v-icon>
-        <span class="text-h6">{{ item.date }}</span>
+        <span class="text-h5">{{ item.date }}</span>
       </v-card-title>
       <v-card-text>
         <v-list-item-group>
           <v-list-item v-for="event in item.events" :key="event.text" :ripple="false" inactive :three-line="isMobile">
             <v-list-item-icon>
-              <v-icon color="blue">mdi-calendar-today</v-icon>
+              <v-icon :color="item.color">{{ item.icon }}</v-icon>
             </v-list-item-icon>
             <v-list-item-content>
               <v-list-item-title>{{ event.date }}</v-list-item-title>
