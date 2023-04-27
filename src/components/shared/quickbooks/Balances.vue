@@ -60,7 +60,7 @@
       </v-card-text>
     </div>
     <v-dialog v-model="showPTOCashOutFormModal" persistent max-width="500">
-      <p-t-o-cash-out-form />
+      <p-t-o-cash-out-form :employee="passedEmployee" />
     </v-dialog>
   </div>
 </template>
@@ -204,7 +204,7 @@ async function setPTOBalances() {
     } else {
       ptoBalances = this.$store.getters.quickbooksPTO;
     }
-    if (_.isNil(ptoBalances.results)) {
+    if (_.isNil(ptoBalances.results) || _.isNil(ptoBalances.results.users[this.employee.employeeNumber])) {
       // error getting pto balances
       this.balancesError = true;
     } else {

@@ -4,27 +4,15 @@
       <v-card>
         <v-card-title class="header_style"><h3>Cash Out PTO</h3> </v-card-title>
         <div v-if="!isSubmitting">
-          <v-card-text>
-            <div v-if="ptoData.ptoBalance">PTO: {{ ptoData.ptoBalance }}h</div>
-            <div v-if="ptoData.pendingPtoCashOutAmount > 0">
-              Pending PTO Cash Out: {{ ptoData.pendingPtoCashOutAmount }}h
+          <v-card-text v-if="passedEmployee">
+            <div v-if="userRoleIsAdmin()">Employee: {{ nicknameAndLastName(passedEmployee) }}</div>
+            <div v-if="getPtoBalance(passedEmployee.employeeNumber)">
+              PTO: {{ getPtoBalance(passedEmployee.employeeNumber) }}h
             </div>
-            <v-row v-if="userRoleIsAdmin()">
-              <v-col col="12">
-                <!-- Employee picker if admin -->
-                <v-autocomplete
-                  v-if="userRoleIsAdmin()"
-                  :items="activeEmployees"
-                  :rules="getRequiredRules()"
-                  :filter="customFilter"
-                  v-model="ptoCashOutObj.employeeId"
-                  item-text="text"
-                  label="Employee"
-                  id="employeeName"
-                  class="form_padding"
-                ></v-autocomplete>
-              </v-col>
-            </v-row>
+            <div v-else>PTO: Loading...</div>
+            <div v-if="Number(getPendingPtoCashoutAmount(passedEmployee.id)) > 0">
+              Pending PTO Cash Out: {{ Number(getPendingPtoCashoutAmount(passedEmployee.id)) }}h
+            </div>
             <v-row>
               <v-col col="12">
                 <!-- PTO Cash Out Amount -->
@@ -36,7 +24,7 @@
                     ...getNumberRules(),
                     ...getPTOCashOutRules(
                       ptoData.ptoBalance,
-                      ptoCashOutObj.employeeId ? ptoCashOutObj.employeeId : this.$store.getters.user.id
+                      passedEmployee ? passedEmployee.id : this.$store.getters.user.id
                     )
                   ]"
                   :hint="cashOutHint()"
@@ -114,10 +102,9 @@ import dateUtils from '@/shared/dateUtils.js';
 import { v4 as uuid } from 'uuid';
 import { userRoleIsAdmin } from '../../utils/utils';
 import { updateStoreEmployees } from '../../utils/storeUtils';
-import employeeUtils from '../../shared/employeeUtils';
 import { format } from '../../shared/dateUtils';
 import { mask } from 'vue-the-mask';
-import { getEmployeeByID } from '../../shared/employeeUtils';
+import { getEmployeeByID, nicknameAndLastName } from '../../shared/employeeUtils';
 
 import _ from 'lodash';
 
@@ -136,13 +123,15 @@ async function created() {
   }
   if (this.item) {
     let editingItem = _.cloneDeep(this.item);
+    this.passedEmployee = _.find(this.$store.getters.employees, (e) => e.id === this.item.employeeId);
     this.$set(this.ptoCashOutObj, 'id', editingItem.id);
     this.$set(this.ptoCashOutObj, 'employeeId', editingItem.employeeId);
     this.$set(this.ptoCashOutObj, 'amount', editingItem.amount);
     this.$set(this.ptoCashOutObj, 'creationDate', editingItem.creationDate);
     this.$set(this.ptoCashOutObj, 'approvedDate', editingItem.approvedDate);
+  } else {
+    this.passedEmployee = _.cloneDeep(this.employee);
   }
-  this.setActiveEmployeesDropdown();
 } // created
 
 // |--------------------------------------------------|
@@ -268,7 +257,7 @@ function displaySuccess(msg) {
  * @returns Number - The available PTO balance
  */
 function getPtoBalance(employeeNumber) {
-  return this.$store.getters.quickbooksPTO.results.users[employeeNumber]
+  return this.$store.getters.quickbooksPTO && this.$store.getters.quickbooksPTO.results.users[employeeNumber]
     ? this.$store.getters.quickbooksPTO.results.users[employeeNumber].pto_balances.PTO
     : null;
 } // getPtoBalance
@@ -293,8 +282,8 @@ function getPendingPtoCashoutAmount(employeeId) {
  */
 function cashOutHint() {
   let employeeNumber;
-  if (this.ptoCashOutObj.employeeId) {
-    employeeNumber = this.getEmployeeByID(this.ptoCashOutObj.employeeId, this.$store.getters.employees).employeeNumber;
+  if (this.passedEmployee) {
+    employeeNumber = this.passedEmployee.employeeNumber;
   } else {
     employeeNumber = this.$store.getters.user.employeeId;
   }
@@ -313,7 +302,7 @@ async function createPTOCashOutRequest() {
   let ptoCashOut = await api.createItem(api.PTO_CASH_OUTS, {
     id: uuid(),
     amount: newItem.amount,
-    employeeId: newItem.employeeId ? newItem.employeeId : this.$store.getters.user.id,
+    employeeId: this.passedEmployee.id,
     creationDate: dateUtils.getTodaysDate(),
     approvedDate: newItem.approvedDate ? newItem.approvedDate : null
   });
@@ -335,32 +324,6 @@ async function updatePTOCashOutRequest() {
 } // updatePTOCashOutRequest
 
 /**
- * Populates the active employee dropdown
- */
-function setActiveEmployeesDropdown() {
-  let employees = this.$store.getters.employees;
-  employees = employees.map((employee) => {
-    return {
-      text: employeeUtils.nicknameAndLastName(employee),
-      value: employee.id,
-      workStatus: employee.workStatus,
-      firstName: employee.firstName,
-      nickname: employee.nickname,
-      lastName: employee.lastName,
-      employeeRole: employee.employeeRole
-    };
-  });
-  this.activeEmployees = employees.map((employee) => {
-    if (employee.workStatus == 0) {
-      return;
-    } else {
-      return employee;
-    }
-  });
-  this.activeEmployees = _.compact(this.activeEmployees);
-} // setActiveEmployeesDropdown
-
-/**
  * Watcher for ptoCashOutObj.approvedDate - format date.
  */
 function watchApprovedDate() {
@@ -377,6 +340,7 @@ function watchApprovedDate() {
 function watchEditPTOCashOutItem() {
   if (this.item) {
     let editingItem = _.cloneDeep(this.item);
+    this.passedEmployee = _.find(this.$store.getters.employees, (e) => e.id === this.item.employeeId);
     this.$set(this.ptoCashOutObj, 'id', editingItem.id);
     this.$set(this.ptoCashOutObj, 'employeeId', editingItem.employeeId);
     this.$set(this.ptoCashOutObj, 'amount', editingItem.amount);
@@ -384,6 +348,13 @@ function watchEditPTOCashOutItem() {
     this.$set(this.ptoCashOutObj, 'approvedDate', editingItem.approvedDate);
   }
 } // watchEditPTOCashOutItem
+
+/**
+ * Watcher for employee prop.
+ */
+function watchEmployee() {
+  this.passedEmployee = _.cloneDeep(this.employee);
+} // watchEmployee
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -394,9 +365,9 @@ function watchEditPTOCashOutItem() {
 function ptoData() {
   let employeeNumber;
   let employeeId;
-  if (this.ptoCashOutObj.employeeId) {
-    employeeNumber = this.getEmployeeByID(this.ptoCashOutObj.employeeId, this.$store.getters.employees).employeeNumber;
-    employeeId = this.ptoCashOutObj.employeeId;
+  if (this.passedEmployee) {
+    employeeNumber = this.passedEmployee.employeeNumber;
+    employeeId = this.passedEmployee.employeeId;
   } else {
     employeeNumber = this.$store.getters.user.employeeNumber;
     employeeId = this.$store.getters.user.id;
@@ -422,10 +393,7 @@ export default {
       valid: false,
       isSubmitting: false,
       approvedDateMenu: false,
-      approvedDateFormatted: null,
-      activeEmployees: [],
-      userAvailablePTO:
-        this.$store.getters.quickbooksPTO.results.users[this.$store.getters.user.employeeNumber]['pto_balances'].PTO
+      approvedDateFormatted: null
     };
   },
   directives: { mask },
@@ -444,9 +412,9 @@ export default {
     displayError,
     getPendingPtoCashoutAmount,
     getPtoBalance,
+    nicknameAndLastName,
     createPTOCashOutRequest,
     userRoleIsAdmin,
-    setActiveEmployeesDropdown,
     updateStoreEmployees,
     updatePTOCashOutRequest,
     getEmployeeByID,
@@ -454,9 +422,10 @@ export default {
   },
   watch: {
     'ptoCashOutObj.approvedDate': watchApprovedDate,
-    item: watchEditPTOCashOutItem
+    item: watchEditPTOCashOutItem,
+    'employee.id': watchEmployee
   },
   computed: { ptoData },
-  props: ['item']
+  props: ['item', 'employee']
 };
 </script>
