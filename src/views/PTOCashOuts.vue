@@ -1,34 +1,47 @@
 <template>
-  <v-row>
-    <v-snackbar
-      v-model="status.statusType"
-      :color="status.color"
-      :multi-line="true"
-      :right="true"
-      :timeout="5000"
-      :top="true"
-      :vertical="true"
-    >
-      <v-card-title headline color="white">
-        <span class="headline">{{ status.statusMessage }}</span>
-      </v-card-title>
-      <v-btn color="white" text @click="clearStatus"> Close </v-btn>
-    </v-snackbar>
-    <v-col cols="12" xl="9" lg="8"><p-t-o-cash-outs-table /> </v-col>
-    <v-col cols="12" xl="3" lg="4" class="pl-lg-1 pl-sm-2 mt-3">
-      <!-- Skeleton Loader-->
-      <div v-if="loading">
-        <v-card>
-          <v-card-title class="header_style py-6">
-            <h3>QuickBooks Time Data</h3>
-          </v-card-title>
-          <v-skeleton-loader type="article,divider,article"></v-skeleton-loader>
-        </v-card>
-      </div>
-      <!-- QuickBooksTime -->
-      <quick-books-time-data v-else :employee="employee"></quick-books-time-data>
-    </v-col>
-  </v-row>
+  <div>
+    <v-row v-if="loading">
+      <v-col cols="12" xl="9" lg="8">
+        <div class="mt-3">
+          <v-skeleton-loader type="table-heading, list-item@6"></v-skeleton-loader>
+        </div>
+      </v-col>
+      <v-col cols="12" xl="3" lg="4" class="pl-lg-1 pl-sm-2">
+        <v-skeleton-loader class="mt-3" type="card-heading, list-item@12"></v-skeleton-loader>
+      </v-col>
+    </v-row>
+    <v-row v-else>
+      <!-- Status Alert -->
+      <v-snackbar
+        v-model="status.statusType"
+        :color="status.color"
+        :multi-line="true"
+        :right="true"
+        :timeout="5000"
+        :top="true"
+        :vertical="true"
+      >
+        <v-card-title headline color="white">
+          <span class="headline">{{ status.statusMessage }}</span>
+        </v-card-title>
+        <v-btn color="white" text @click="clearStatus"> Close </v-btn>
+      </v-snackbar>
+      <v-col cols="12" xl="9" lg="8"><p-t-o-cash-outs-table /> </v-col>
+      <v-col cols="12" xl="3" lg="4" class="pl-lg-1 pl-sm-2 mt-3">
+        <!-- Skeleton Loader-->
+        <div v-if="loading">
+          <v-card>
+            <v-card-title class="header_style py-6">
+              <h3>QuickBooks Time Data</h3>
+            </v-card-title>
+            <v-skeleton-loader type="article,divider,article"></v-skeleton-loader>
+          </v-card>
+        </div>
+        <!-- QuickBooksTime -->
+        <quick-books-time-data v-else :employee="employee"></quick-books-time-data>
+      </v-col>
+    </v-row>
+  </div>
 </template>
 <script>
 import PTOCashOutsTable from '@/components/shared/PTOCashOutsTable.vue';
