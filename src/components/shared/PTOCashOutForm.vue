@@ -34,7 +34,10 @@
                   :rules="[
                     (v) => !!v || 'Field is required',
                     ...getNumberRules(),
-                    ...getPTOCashOutRules(userAvailablePTO, this.$store.getters.user.id)
+                    ...getPTOCashOutRules(
+                      ptoData.ptoBalance,
+                      ptoCashOutObj.employeeId ? ptoCashOutObj.employeeId : this.$store.getters.user.id
+                    )
                   ]"
                   :hint="cashOutHint()"
                   v-model="ptoCashOutObj.amount"
@@ -289,9 +292,15 @@ function getPendingPtoCashoutAmount(employeeId) {
  * @returns String - The hint text
  */
 function cashOutHint() {
+  let employeeNumber;
+  if (this.ptoCashOutObj.employeeId) {
+    employeeNumber = this.getEmployeeByID(this.ptoCashOutObj.employeeId, this.$store.getters.employees).employeeNumber;
+  } else {
+    employeeNumber = this.$store.getters.user.employeeId;
+  }
   if (this.ptoCashOutObj.amount) {
     return `Balance after cash out: ${
-      this.getPtoBalance() - this.getPendingPtoCashoutAmount() - this.ptoCashOutObj.amount
+      this.getPtoBalance(employeeNumber) - this.getPendingPtoCashoutAmount(employeeNumber) - this.ptoCashOutObj.amount
     }h`;
   }
 } // cashOutHint
