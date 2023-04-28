@@ -215,7 +215,7 @@
               <!--Action Items-->
               <template v-slot:[`item.actions`]="{ item }">
                 <!-- Download Button-->
-                <td class="datatable_btn layout" @click="clickedRow(item)">
+                <td class="datatable_btn layout mr-0" @click="clickedRow(item)">
                   <!-- Download Attachment Button -->
                   <attachment :midAction="midAction" :expense="item" :mode="'expenses'"></attachment>
 

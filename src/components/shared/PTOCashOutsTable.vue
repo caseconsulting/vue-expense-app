@@ -122,7 +122,7 @@
         </template>
 
         <template v-slot:[`item.actions`]="{ item }">
-          <td v-if="!unapprovedOnly" class="datatable_btn layout">
+          <td v-if="!unapprovedOnly" class="layout mr-0">
             <!-- Edit Button -->
             <v-tooltip top>
               <template v-slot:activator="{ on }">
