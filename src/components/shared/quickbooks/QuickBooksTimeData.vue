@@ -88,10 +88,16 @@ function created() {
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * Computed function for the vuex store employees
+ */
 function allEmployees() {
   return this.$store.getters.employees;
-}
+} // allEmployees
 
+/**
+ * Gets the width for the autocomplete component based on screen size.
+ */
 function autocompleteWidth() {
   switch (this.$vuetify.breakpoint.name) {
     case 'xs' || 'sm':
@@ -101,7 +107,7 @@ function autocompleteWidth() {
     case 'xl':
       return 'width: 30%';
   }
-}
+} // autocompleteWidth
 
 /**
  * Calculates the tooltip text to display on v-switch based on value of showMinutes.

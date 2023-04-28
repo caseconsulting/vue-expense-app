@@ -39,7 +39,7 @@
           :items-per-page.sync="itemsPerPage"
           show-select
           item-key="key"
-          class="elevation-1 text-center"
+          class="text-center"
           @click:row="clickedRow"
         >
           <!-- Select item slot in data table -->

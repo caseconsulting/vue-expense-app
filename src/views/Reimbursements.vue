@@ -1,5 +1,5 @@
 <template>
-  <v-card :elevation="3" class="">
+  <v-card :elevation="3">
     <!-- Status Alert -->
     <v-snackbar
       v-model="status.statusType"
@@ -31,7 +31,7 @@
           <v-col cols="12" xl="9" lg="8">
             <p-t-o-cash-outs-table :unapprovedOnly="true" />
           </v-col>
-          <v-col cols="12" xl="3" lg="4" class="pl-lg-1 pl-sm-2 mt-3">
+          <v-col cols="12" xl="3" lg="4" class="pl-lg-1 pl-sm-2">
             <quick-books-time-data :employee="employee"></quick-books-time-data>
           </v-col>
         </v-row>

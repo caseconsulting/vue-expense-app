@@ -27,7 +27,7 @@
         <v-btn color="white" text @click="clearStatus"> Close </v-btn>
       </v-snackbar>
       <v-col cols="12" xl="9" lg="8"><p-t-o-cash-outs-table /> </v-col>
-      <v-col cols="12" xl="3" lg="4" class="pl-lg-1 pl-sm-2 mt-3">
+      <v-col cols="12" xl="3" lg="4" class="pl-lg-1 pl-sm-2">
         <!-- Skeleton Loader-->
         <div v-if="loading">
           <v-card>

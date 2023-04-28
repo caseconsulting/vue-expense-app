@@ -1,5 +1,5 @@
 <template>
-  <v-card class="mt-3">
+  <v-card class="pt-3">
     <v-container fluid>
       <!-- Title -->
       <v-card-title v-if="!isMobile()">
@@ -16,7 +16,7 @@
           v-model="filteredEmployee"
           item-text="text"
           id="employeeIdFilter"
-          class="mr-3"
+          class="mr-3 pt-0 mt-0"
           label="Filter by Employee"
           clearable
         ></v-autocomplete>
@@ -94,7 +94,6 @@
         :sort-by.sync="sortBy"
         :sort-desc.sync="sortDesc"
         :items="filteredPtoCashOuts"
-        class="elevation-4"
         :loading="loading"
         :show-select="unapprovedOnly"
         @click:row="rowClicked"
