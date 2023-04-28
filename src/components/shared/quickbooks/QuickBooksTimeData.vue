@@ -27,15 +27,17 @@
         </v-tooltip>
         <!-- End of Refresh Button -->
       </v-card-title>
-      <v-card-subtitle v-if="userRoleIsAdmin() && passedEmployee" class="pb-0 mt-0 subtitle" :style="autocompleteWidth">
+      <v-card-subtitle v-if="userRoleIsAdmin()" class="pb-0 mt-0 subtitle" :style="autocompleteWidth">
         <v-autocomplete
+          v-if="passedEmployee"
+          v-model="passedEmployee"
           class="autocomplete"
           dark
-          v-model="passedEmployee"
+          dense
           :items="filteredEmployees"
           :filter="customFilter"
-          dense
         ></v-autocomplete>
+        <v-autocomplete v-else label="Loading..." disabled class="autocomplete" dark dense></v-autocomplete>
       </v-card-subtitle>
       <v-card-text class="pt-0 pb-0 black--text" :class="userRoleIsAdmin() ? 'nudge-up' : 'mt-4'">
         <monthly-charges :passedEmployee="passedEmployee" :showMinutes="showMinutes"></monthly-charges>
@@ -63,7 +65,6 @@ import { userRoleIsAdmin } from '@/utils/utils';
  * The created lifecycle hook.
  */
 function created() {
-  this.passedEmployee = _.cloneDeep(this.employee);
   if (this.$store.getters.employees) {
     this.filteredEmployees = this.$store.getters.employees.map((employee) => {
       if (employee.workStatus > 0) {
@@ -79,6 +80,7 @@ function created() {
         return;
       }
     });
+    this.passedEmployee = _.find(this.$store.getters.employees, (e) => e.id === this.employee.id);
   }
 } // created
 
@@ -175,6 +177,7 @@ async function watchEmployees() {
         return;
       }
     });
+    this.passedEmployee = _.find(this.$store.getters.employees, (e) => e.id === this.employee.id);
   }
 } // watchStoreIsPopulated
 
