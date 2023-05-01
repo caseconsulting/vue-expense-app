@@ -126,7 +126,7 @@
             <v-tooltip top>
               <template v-slot:activator="{ on }">
                 <v-btn
-                  :disabled="isUnapproving || isDeleting || item.approvedDate"
+                  :disabled="isUnapproving || isDeleting || !!item.approvedDate"
                   text
                   icon
                   id="edit"
@@ -143,7 +143,7 @@
             <v-tooltip top>
               <template v-slot:activator="{ on }">
                 <v-btn
-                  :disabled="isUnapproving || isDeleting || item.approvedDate"
+                  :disabled="isUnapproving || isDeleting || !!item.approvedDate"
                   @click="clickedDelete(item)"
                   text
                   icon
