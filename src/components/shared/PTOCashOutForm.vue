@@ -2,75 +2,75 @@
   <div>
     <v-form ref="form" v-model="valid" lazy-validation>
       <v-card>
-        <v-card-title class="header_style"><h3>Cash Out PTO</h3> </v-card-title>
+        <v-card-title class="header_style title">
+          <h6 class="subtitle" v-if="userRoleIsAdmin()">Employee: {{ nicknameAndLastName(passedEmployee) }}</h6>
+          <h3>Cash Out PTO</h3>
+        </v-card-title>
         <div v-if="!isSubmitting">
           <v-card-text v-if="passedEmployee">
-            <div v-if="userRoleIsAdmin()">Employee: {{ nicknameAndLastName(passedEmployee) }}</div>
-            <div v-if="getPtoBalance(passedEmployee.employeeNumber)">
-              PTO: {{ getPtoBalance(passedEmployee.employeeNumber) }}h
-            </div>
-            <div v-else>PTO: Loading...</div>
-            <div v-if="Number(getPendingPtoCashoutAmount(passedEmployee.id)) > 0">
-              Pending PTO Cash Out: {{ Number(getPendingPtoCashoutAmount(passedEmployee.id)) }}h
-            </div>
-            <v-row>
-              <v-col col="12">
-                <!-- PTO Cash Out Amount -->
-                <v-text-field
-                  prepend-icon="mdi-clock-outline"
-                  class="pt-5"
-                  :rules="[
-                    (v) => !!v || 'Field is required',
-                    ...getNumberRules(),
-                    ...getPTOCashOutRules(
-                      ptoData.ptoBalance,
-                      passedEmployee ? passedEmployee.id : this.$store.getters.user.id
-                    )
-                  ]"
-                  :hint="cashOutHint()"
-                  v-model="ptoCashOutObj.amount"
-                  label="Number of Hours Requested to be Paid Out"
-                  required
-                ></v-text-field>
-              </v-col>
-            </v-row>
-            <v-row v-if="userRoleIsAdmin()">
-              <v-col col="12">
-                <!-- Approved Date for PTO Cash Out (Optional) -->
-                <v-menu
-                  v-if="userRoleIsAdmin()"
-                  ref="approvedDateMenu"
-                  :close-on-content-click="false"
-                  v-model="approvedDateMenu"
-                  :nudge-right="40"
-                  transition="scale-transition"
-                  offset-y
-                  max-width="290px"
-                  min-width="290px"
-                >
-                  <template v-slot:activator="{ on }">
-                    <v-text-field
-                      v-model="approvedDateFormatted"
-                      id="approvedDate"
-                      :rules="getDateOptionalRules()"
-                      v-mask="'##/##/####'"
-                      label="Approved Date (optional)"
-                      hint="MM/DD/YYYY format "
-                      persistent-hint
-                      prepend-icon="event"
-                      @blur="ptoCashOutObj.approvedDate = format(approvedDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
-                      @input="approvedDateMenu = false"
-                      v-on="on"
-                    ></v-text-field>
-                  </template>
-                  <v-date-picker
-                    v-model="ptoCashOutObj.approvedDate"
-                    no-title
+            <p>
+              <span v-if="getPtoBalance(passedEmployee.employeeNumber)">
+                <b>PTO:</b> {{ getPtoBalance(passedEmployee.employeeNumber) }}h
+                <br />
+              </span>
+              <span v-else>PTO: Loading... <br /></span>
+              <span v-if="Number(getPendingPtoCashoutAmount(passedEmployee.id)) > 0">
+                <b>Pending PTO Cash Out:</b> {{ Number(getPendingPtoCashoutAmount(passedEmployee.id)) }}h
+              </span>
+            </p>
+            <div>
+              <!-- PTO Cash Out Amount -->
+              <v-text-field
+                prepend-icon="mdi-clock-outline"
+                class="pb-2"
+                :rules="[
+                  (v) => !!v || 'Field is required',
+                  ...getNumberRules(),
+                  ...getPTOCashOutRules(
+                    ptoData.ptoBalance,
+                    passedEmployee ? passedEmployee.id : this.$store.getters.user.id
+                  )
+                ]"
+                :hint="cashOutHint()"
+                v-model="ptoCashOutObj.amount"
+                label="Number of Hours Requested to be Paid Out"
+                required
+              ></v-text-field>
+
+              <!-- Approved Date for PTO Cash Out (Optional) -->
+              <v-menu
+                v-if="userRoleIsAdmin()"
+                ref="approvedDateMenu"
+                :close-on-content-click="false"
+                v-model="approvedDateMenu"
+                :nudge-right="40"
+                transition="scale-transition"
+                offset-y
+                max-width="290px"
+                min-width="290px"
+              >
+                <template v-slot:activator="{ on }">
+                  <v-text-field
+                    v-model="approvedDateFormatted"
+                    id="approvedDate"
+                    :rules="getDateOptionalRules()"
+                    v-mask="'##/##/####'"
+                    label="Approved Date (optional)"
+                    hint="MM/DD/YYYY format "
+                    persistent-hint
+                    prepend-icon="event"
+                    @blur="ptoCashOutObj.approvedDate = format(approvedDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
                     @input="approvedDateMenu = false"
-                  ></v-date-picker>
-                </v-menu>
-              </v-col>
-            </v-row>
+                    v-on="on"
+                  ></v-text-field>
+                </template>
+                <v-date-picker
+                  v-model="ptoCashOutObj.approvedDate"
+                  no-title
+                  @input="approvedDateMenu = false"
+                ></v-date-picker>
+              </v-menu>
+            </div>
           </v-card-text>
           <v-card-actions>
             <!-- Cancel Button -->
@@ -429,3 +429,19 @@ export default {
   props: ['item', 'employee']
 };
 </script>
+<style scoped>
+h3 {
+  line-height: 20px;
+}
+h5 {
+  line-height: 14px;
+}
+.title {
+  position: relative;
+}
+.subtitle {
+  position: absolute;
+  top: 8px;
+  line-height: 12px;
+}
+</style>
