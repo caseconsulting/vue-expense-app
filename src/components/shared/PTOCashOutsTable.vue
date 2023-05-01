@@ -303,6 +303,7 @@ async function clickedConfirmApprove() {
   try {
     this.isApproving = true;
     await this.approveSelectedPTOCashOuts();
+    await this.updateStorePtoCashOuts();
     this.isApproving = false;
     this.displaySuccess('Successfully approved PTO cash outs!');
     this.uncheckAllBoxes();
