@@ -181,6 +181,43 @@ async function checkReimbursements() {
 } // checkReimbursements
 
 /**
+ * Checks if a PTO Cash Out was approved.
+ */
+async function checkPtoCashOuts() {
+  let cashOuts = await api.getEmployeePtoCashOuts(this.user.id);
+  let unseenApprovedCashOuts = _.filter(cashOuts, (c) => c.approvedDate && !c.approvalWasSeen);
+
+  if (unseenApprovedCashOuts && unseenApprovedCashOuts.length > 0) {
+    let promises = [];
+    let cashOutAmount = 0;
+    _.forEach(unseenApprovedCashOuts, async (cashOut) => {
+      // determines if a user has an unseen cash out approval
+      if (!cashOut.approvalWasSeen && cashOut.approvedDate) {
+        cashOutAmount += cashOut.amount;
+        cashOut.approvalWasSeen = true;
+
+        // update the cash out item
+        promises.push(api.updateItem(api.PTO_CASH_OUTS, cashOut));
+      }
+    });
+    this.alerts.push({
+      handler: {
+        name: 'PTO Cash Outs',
+        page: 'ptoCashOuts',
+        extras: {}
+      },
+      closeable: true,
+      status: 'info',
+      color: 'cyan',
+      message: `Your PTO cash out request of ${cashOutAmount} ${cashOutAmount == 1 ? 'hour' : 'hours'} was approved`,
+      id: this.randId()
+    });
+    // resolve promises to mark read
+    await Promise.all(promises);
+  }
+} // checkPtoCashOuts
+
+/**
  * Determines what styles to put on the buttons.
  */
 function getButtonStyling() {
@@ -262,6 +299,7 @@ async function created() {
   this.checkBadges();
   this.checkCertifications();
   await this.checkReimbursements();
+  await this.checkPtoCashOuts();
 } // created
 
 // |--------------------------------------------------|
@@ -284,6 +322,7 @@ export default {
     checkBadges,
     checkCertifications,
     checkReimbursements,
+    checkPtoCashOuts,
     format, // dateUtils
     getButtonStyling,
     getTodaysDate, // dateUtils

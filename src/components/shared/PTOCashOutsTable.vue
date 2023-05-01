@@ -290,6 +290,7 @@ async function approveSelectedPTOCashOuts() {
   this.selected.forEach((e) => {
     let item = e;
     item.approvedDate = dateUtils.getTodaysDate();
+    item.approvalWasSeen = false;
     promises.push(api.updateItem(api.PTO_CASH_OUTS, item));
   });
   return await Promise.all(promises);
