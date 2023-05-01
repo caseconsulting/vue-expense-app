@@ -282,14 +282,17 @@ function getPendingPtoCashoutAmount(employeeId) {
  */
 function cashOutHint() {
   let employeeNumber;
+  let employeeId;
   if (this.passedEmployee) {
     employeeNumber = this.passedEmployee.employeeNumber;
+    employeeId = this.passedEmployee.id;
   } else {
-    employeeNumber = this.$store.getters.user.employeeId;
+    employeeNumber = this.$store.getters.user.employeeNumber;
+    employeeId = this.$store.getters.user.id;
   }
   if (this.ptoCashOutObj.amount) {
     return `Balance after cash out: ${
-      this.getPtoBalance(employeeNumber) - this.getPendingPtoCashoutAmount(employeeNumber) - this.ptoCashOutObj.amount
+      this.getPtoBalance(employeeNumber) - this.getPendingPtoCashoutAmount(employeeId) - this.ptoCashOutObj.amount
     }h`;
   }
 } // cashOutHint
