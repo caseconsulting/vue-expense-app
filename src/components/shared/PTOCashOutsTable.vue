@@ -13,6 +13,7 @@
           v-if="userRoleIsAdmin()"
           hide-details
           :items="employees"
+          :filter="customFilter"
           v-model="filteredEmployee"
           item-text="text"
           id="employeeIdFilter"
@@ -35,7 +36,7 @@
               hide-details
               :items="employees"
               :filter="customFilter"
-              v-model="employee"
+              v-model="filteredEmployee"
               item-text="text"
               id="employeeIdFilter"
               label="Filter by Employee"
@@ -208,7 +209,7 @@
 </template>
 <script>
 import { isMobile, userRoleIsAdmin, monthDayYearFormat, isEmpty } from '@/utils/utils';
-import { getEmployeeByID, firstAndLastName } from '@/shared/employeeUtils';
+import { getEmployeeByID, nicknameAndLastName } from '@/shared/employeeUtils';
 import api from '@/shared/api.js';
 import { updateStoreUser, updateStoreEmployees, updateStorePtoCashOuts } from '@/utils/storeUtils';
 import _ from 'lodash';
@@ -368,6 +369,25 @@ function clickedCancelDelete() {
 } // clickedCancelDelete
 
 /**
+ * Custom filter for employee autocomplete options.
+ *
+ * @param item - employee
+ * @param queryText - text used for filtering
+ * @return string - filtered employee name
+ */
+function customFilter(item, queryText) {
+  const query = queryText ? queryText : '';
+  const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
+  const firstNameFullName = `${item.firstName} ${item.lastName}`;
+
+  const queryContainsNickName = nickNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
+  const queryContainsFirstName =
+    firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
+
+  return queryContainsNickName || queryContainsFirstName;
+} // customFilter
+
+/**
  * Deletes PTO cash out from database. Updates vuex store accordingly.
  *
  * @param item PTO cash out item to delete
@@ -513,7 +533,7 @@ function filteredPtoCashOuts() {
   }
   if (this.$store.getters.employees) {
     filteredPtoCashOuts.forEach((p, index) => {
-      filteredPtoCashOuts[index].employeeName = this.firstAndLastName(
+      filteredPtoCashOuts[index].employeeName = this.nicknameAndLastName(
         this.getEmployeeByID(p.employeeId, this.$store.getters.employees)
       );
     });
@@ -551,7 +571,7 @@ function employees() {
   return _.map(
     _.filter(this.$store.getters.employees, (e) => employeeIdsWithPTOCashOuts.includes(e.id)),
     (e) => ({
-      text: firstAndLastName(e),
+      text: nicknameAndLastName(e),
       value: e.id,
       nickname: e.nickname ? e.nickname : '',
       firstName: e.firstName,
@@ -627,6 +647,7 @@ export default {
     clickedCancelDelete,
     clickedConfirmDelete,
     clickedEdit,
+    customFilter,
     deletePTOCashOut,
     displayError,
     displaySuccess,
@@ -636,7 +657,7 @@ export default {
     monthDayYearFormat,
     isEmpty,
     getEmployeeByID,
-    firstAndLastName,
+    nicknameAndLastName,
     rowClicked,
     updateStoreUser,
     updateStoreEmployees,
