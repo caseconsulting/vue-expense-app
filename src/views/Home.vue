@@ -197,6 +197,7 @@ async function createEvents() {
             event.type = 'New Hire';
             event.newCampfire = 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726';
           } else {
+            event.date = format(anniversary, null, 'll');
             if (difference(anniversary, hireDate, 'year') == 1) {
               event.text = a.firstName + ' ' + a.lastName + ' is celebrating 1 year at Case Consulting!';
             } else {
