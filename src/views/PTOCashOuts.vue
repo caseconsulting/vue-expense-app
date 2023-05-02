@@ -56,6 +56,16 @@ import QuickBooksTimeData from '@/components/shared/quickbooks/QuickBooksTimeDat
  * Created lifecycle hook
  */
 function created() {
+  if (this.$store.getters.storeIsPopulated) {
+    this.employee = this.$store.getters.user;
+    this.loading = false;
+  }
+} // created
+
+/**
+ * Mounted lifecycle hook
+ */
+function mounted() {
   window.EventBus.$on('status-alert', (status) => {
     this.$set(this.status, 'statusType', status.statusType);
     this.$set(this.status, 'statusMessage', status.statusMessage);
@@ -64,12 +74,7 @@ function created() {
   window.EventBus.$on('change-quickbooks-employee', (employee) => {
     this.employee = employee;
   });
-
-  if (this.$store.getters.storeIsPopulated) {
-    this.employee = this.$store.getters.user;
-    this.loading = false;
-  }
-} // created
+} // mounted
 
 /**
  * before destroy lifecycle hook
@@ -150,6 +155,7 @@ export default {
       employee: null
     };
   },
+  mounted,
   watch: {
     storeIsPopulated: watchStoreIsPopulated
   },

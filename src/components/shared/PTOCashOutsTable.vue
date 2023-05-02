@@ -229,25 +229,6 @@ import PTOCashOutForm from './PTOCashOutForm.vue';
  * Created lifecycle hook
  */
 async function created() {
-  window.EventBus.$on('confirmed-pto-cash-outs', () => {
-    this.clickedConfirmApprove();
-  });
-  window.EventBus.$on('canceled-pto-cash-outs', () => {
-    this.toggleApproveModal = false;
-  });
-  window.EventBus.$on('confirm-unapprove-cash-out', () => {
-    this.clickedConfirmUnapprove();
-  });
-  window.EventBus.$on('canceled-unapprove-cash-out', () => {
-    this.clickedCancelUnapprove();
-  });
-  window.EventBus.$on('confirm-delete-PTO cash out', () => {
-    this.clickedConfirmDelete();
-  });
-  window.EventBus.$on('canceled-delete-PTO cash out', () => {
-    this.clickedCancelDelete();
-  });
-
   let promises = [];
   if (!this.$store.getters.employees) {
     promises.push(this.updateStoreEmployees());
@@ -277,12 +258,33 @@ function beforeDestroy() {
   window.EventBus.$off('close-pto-cash-out-form');
 } // beforeDestroy
 
-function mounted() {
+/**
+ * Mounted lifecycle hook
+ */
+async function mounted() {
   window.EventBus.$on('close-pto-cash-out-form', () => {
     this.toggleEditModal = false;
     this.clickedEditItem = null;
   });
-}
+  window.EventBus.$on('confirm-unapprove-cash-out', async () => {
+    await this.clickedConfirmUnapprove();
+  });
+  window.EventBus.$on('confirmed-pto-cash-outs', async () => {
+    await this.clickedConfirmApprove();
+  });
+  window.EventBus.$on('canceled-pto-cash-outs', () => {
+    this.toggleApproveModal = false;
+  });
+  window.EventBus.$on('canceled-unapprove-cash-out', () => {
+    this.clickedCancelUnapprove();
+  });
+  window.EventBus.$on('confirm-delete-PTO cash out', async () => {
+    await this.clickedConfirmDelete();
+  });
+  window.EventBus.$on('canceled-delete-PTO cash out', () => {
+    this.clickedCancelDelete();
+  });
+} // mounted
 
 // |--------------------------------------------------|
 // |                                                  |
