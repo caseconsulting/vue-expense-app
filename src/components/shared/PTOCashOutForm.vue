@@ -56,7 +56,8 @@
                     :rules="getDateOptionalRules()"
                     v-mask="'##/##/####'"
                     label="Approved Date (optional)"
-                    hint="MM/DD/YYYY format "
+                    hint="MM/DD/YYYY format"
+                    class="mb-4"
                     persistent-hint
                     prepend-icon="event"
                     @blur="ptoCashOutObj.approvedDate = format(approvedDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
@@ -71,6 +72,22 @@
                 ></v-date-picker>
               </v-menu>
             </div>
+            <small
+              >*cash outs are paid during the normal monthly payroll
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <v-btn
+                    @click="openLink('https://3.basecamp.com/3097063/buckets/179119/messages/939259168')"
+                    class="mb-3"
+                    x-small
+                    icon
+                    v-on="on"
+                    ><v-icon small color="#3f51b5">info</v-icon></v-btn
+                  >
+                </template>
+                <span>Click for more information</span></v-tooltip
+              >
+            </small>
           </v-card-text>
           <v-card-actions>
             <!-- Cancel Button -->
@@ -179,6 +196,15 @@ async function submit() {
     this.displayError(err);
   }
 } // submit
+
+/**
+ * Opens a link in a new tab.
+ *
+ * @param link String - the link to open
+ */
+function openLink(link) {
+  window.open(link, '_blank');
+} // openLink
 
 /**
  * Cancel event handler
@@ -417,6 +443,7 @@ export default {
     getPtoBalance,
     nicknameAndLastName,
     createPTOCashOutRequest,
+    openLink,
     userRoleIsAdmin,
     updateStoreEmployees,
     updatePTOCashOutRequest,
@@ -446,5 +473,6 @@ h5 {
   position: absolute;
   top: 8px;
   line-height: 12px;
+  font-size: 12px;
 }
 </style>
