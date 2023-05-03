@@ -65,9 +65,9 @@ export async function updateStoreBudgets() {
 export async function updateStorePtoCashOuts() {
   let user = store.getters.user;
   let ptoCashOuts = [];
-  if (userRoleIsAdmin() || userRoleIsManager()) {
+  if (userRoleIsAdmin()) {
     ptoCashOuts = await api.getItems(api.PTO_CASH_OUTS);
-  } else if (userRoleIsUser()) {
+  } else if (userRoleIsUser() || userRoleIsManager()) {
     ptoCashOuts = await api.getEmployeePtoCashOuts(user.id);
   }
   store.dispatch('setPtoCashOuts', { ptoCashOuts: ptoCashOuts });
