@@ -179,7 +179,7 @@ function formatHours(hours) {
     hours = hrs + 'h ' + min + 'm';
     return hours;
   }
-  return `${hours}h`;
+  return `${parseInt(hours, 10)}h`;
 } // formatHours
 
 /**
