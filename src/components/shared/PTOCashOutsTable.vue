@@ -253,8 +253,8 @@ function beforeDestroy() {
   window.EventBus.$off('canceled-pto-cash-outs');
   window.EventBus.$off('confirm-unapprove-cash-out');
   window.EventBus.$off('canceled-unapprove-cash-out');
-  window.EventBus.$off('confirm-delete-pto-cash-out');
-  window.EventBus.$off('canceled-delete-pto-cash-out');
+  window.EventBus.$off('confirm-delete-PTO cash out');
+  window.EventBus.$off('canceled-delete-PTO cash out');
   window.EventBus.$off('close-pto-cash-out-form');
 } // beforeDestroy
 
