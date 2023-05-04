@@ -83,6 +83,7 @@ function mounted() {
  */
 function beforeDestroy() {
   window.EventBus.$off('status-alert');
+  window.EventBus.$off('change-quickbooks-employee');
 } // beforeDestroy
 
 // |--------------------------------------------------|

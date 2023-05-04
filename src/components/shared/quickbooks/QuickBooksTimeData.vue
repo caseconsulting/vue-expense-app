@@ -27,7 +27,11 @@
         </v-tooltip>
         <!-- End of Refresh Button -->
       </v-card-title>
-      <v-card-subtitle v-if="userRoleIsAdmin()" class="pb-0 mt-0 subtitle" :style="autocompleteWidth">
+      <v-card-subtitle
+        v-if="userRoleIsAdmin() || userRoleIsManager()"
+        class="pb-0 mt-0 subtitle"
+        :style="autocompleteWidth"
+      >
         <v-autocomplete
           v-if="passedEmployee"
           v-model="passedEmployee"
@@ -39,7 +43,10 @@
         ></v-autocomplete>
         <v-autocomplete v-else label="Loading..." disabled class="autocomplete" dark dense></v-autocomplete>
       </v-card-subtitle>
-      <v-card-text class="pt-0 pb-0 black--text" :class="userRoleIsAdmin() ? 'nudge-up' : 'mt-4'">
+      <v-card-text
+        class="pt-0 pb-0 black--text"
+        :class="userRoleIsAdmin() || userRoleIsManager() ? 'nudge-up' : 'mt-4'"
+      >
         <monthly-charges :passedEmployee="passedEmployee" :showMinutes="showMinutes"></monthly-charges>
         <v-divider></v-divider>
         <balances :passedEmployee="passedEmployee" :showMinutes="showMinutes"></balances>
@@ -53,7 +60,7 @@ import _ from 'lodash';
 import MonthlyCharges from '@/components/shared/quickbooks/MonthlyCharges.vue';
 import Balances from '@/components/shared/quickbooks/Balances.vue';
 import { nicknameAndLastName } from '@/shared/employeeUtils';
-import { userRoleIsAdmin } from '@/utils/utils';
+import { userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -209,7 +216,8 @@ export default {
     customFilter,
     emit,
     nicknameAndLastName,
-    userRoleIsAdmin
+    userRoleIsAdmin,
+    userRoleIsManager
   },
   props: ['employee'],
   watch: {

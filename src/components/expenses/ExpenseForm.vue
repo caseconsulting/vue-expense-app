@@ -2,7 +2,7 @@
   <v-card hover>
     <v-card-title class="header_style">
       <!-- Editing an Expense -->
-      <h3 v-if="expense.id && (userRoleIsAdmin() || !isReimbursed)">Edit Expense</h3>
+      <h3 v-if="expense.id && (userRoleIsAdmin() || userRoleIsManager() || !isReimbursed)">Edit Expense</h3>
       <!-- Creating an Expense -->
       <h3 v-else>Create New Expense</h3>
       <!-- Inactive Employee -->
@@ -191,7 +191,7 @@
 
         <!-- Reimbursed Date -->
         <v-menu
-          v-if="userRoleIsAdmin()"
+          v-if="userRoleIsAdmin() || userRoleIsManager()"
           ref="reimburseMenu"
           :close-on-content-click="false"
           v-model="reimburseMenu"
@@ -241,7 +241,7 @@
 
         <!-- Show On Feed -->
         <v-switch
-          v-if="userRoleIsAdmin()"
+          v-if="userRoleIsAdmin() || userRoleIsManager()"
           :disabled="isInactive"
           v-model="editedExpense.showOnFeed"
           label="Have expense show on company feed?"
@@ -265,7 +265,7 @@
           outlined
           color="success"
           @click="confirmingValid = true"
-          :disabled="(!userRoleIsAdmin() && isReimbursed) || isInactive"
+          :disabled="(!(userRoleIsAdmin() || userRoleIsManager()) && isReimbursed) || isInactive"
           id="submitButton"
           :loading="loading"
           class="ma-2"
@@ -302,7 +302,7 @@ import GeneralConfirmationModal from '@/components/modals/GeneralConfirmationMod
 import api from '@/shared/api.js';
 import employeeUtils from '@/shared/employeeUtils';
 import { getDateRules, getDateOptionalRules, getRequiredRules, getURLRules } from '@/shared/validationUtils.js';
-import { isEmpty, isFullTime, convertToMoneyString, userRoleIsAdmin } from '@/utils/utils';
+import { isEmpty, isFullTime, convertToMoneyString, userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
 import { updateStoreBudgets } from '@/utils/storeUtils';
 import { getRole } from '@/utils/auth';
 import { isBetween, getTodaysDate, format } from '../../shared/dateUtils';
@@ -956,7 +956,7 @@ async function getRemainingBudget() {
 
       // If user is editing the form, give them back the old value for accurate calculations
       // rules for the if statement are the same as the title (around line 5 at time or writing)
-      if (this.expense.id && (this.userRoleIsAdmin() || !this.isReimbursed)) {
+      if (this.expense.id && (userRoleIsAdmin() || userRoleIsManager() || !this.isReimbursed)) {
         this.remainingBudget += budget.budgetObject.pendingAmount;
       }
     }
@@ -1451,11 +1451,7 @@ function created() {
 
   this.myBudgetsView = this.$route.path === '/myBudgets';
   this.isInactive = this.myBudgetsView && this.userInfo.workStatus == 0;
-  this.asUser =
-    this.myBudgetsView ||
-    this.employeeRole === 'user' ||
-    this.employeeRole === 'intern' ||
-    this.employeeRole === 'manager';
+  this.asUser = this.myBudgetsView || this.employeeRole === 'user' || this.employeeRole === 'intern';
   if (this.asUser) {
     // creating or updating an expense as a user
     this.$set(this.editedExpense, 'employeeName', `${this.userInfo.firstName} ${this.userInfo.lastName}`);
@@ -1899,6 +1895,7 @@ export default {
     submit,
     updateExistingEntry,
     userRoleIsAdmin,
+    userRoleIsManager,
     uuid,
     updateStoreBudgets
   },
