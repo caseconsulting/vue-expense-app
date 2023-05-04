@@ -3,7 +3,9 @@
     <v-form ref="form" v-model="valid" lazy-validation>
       <v-card>
         <v-card-title class="header_style title">
-          <h6 class="subtitle" v-if="userRoleIsAdmin()">Employee: {{ nicknameAndLastName(passedEmployee) }}</h6>
+          <h6 class="subtitle" v-if="userRoleIsAdmin() || userRoleIsManager()">
+            Employee: {{ nicknameAndLastName(passedEmployee) }}
+          </h6>
           <h3>Cash Out PTO</h3>
         </v-card-title>
         <div v-if="!isSubmitting">
@@ -39,7 +41,7 @@
 
               <!-- Approved Date for PTO Cash Out (Optional) -->
               <v-menu
-                v-if="userRoleIsAdmin()"
+                v-if="userRoleIsAdmin() || userRoleIsManager()"
                 ref="approvedDateMenu"
                 :close-on-content-click="false"
                 v-model="approvedDateMenu"
@@ -117,7 +119,7 @@ import {
 import api from '@/shared/api.js';
 import dateUtils from '@/shared/dateUtils.js';
 import { v4 as uuid } from 'uuid';
-import { userRoleIsAdmin } from '../../utils/utils';
+import { userRoleIsAdmin, userRoleIsManager } from '../../utils/utils';
 import { updateStoreEmployees } from '../../utils/storeUtils';
 import { format } from '../../shared/dateUtils';
 import { mask } from 'vue-the-mask';
@@ -445,6 +447,7 @@ export default {
     createPTOCashOutRequest,
     openLink,
     userRoleIsAdmin,
+    userRoleIsManager,
     updateStoreEmployees,
     updatePTOCashOutRequest,
     getEmployeeByID,

@@ -3,14 +3,16 @@
     <v-container fluid>
       <!-- Title -->
       <v-card-title v-if="!isMobile()">
-        <h3 v-if="userRoleIsAdmin() && unapprovedOnly && !loading">Unapproved PTO Cash Outs</h3>
-        <h3 v-else-if="userRoleIsAdmin() && !loading">All PTO Cash Outs</h3>
+        <h3 v-if="(userRoleIsAdmin() || userRoleIsManager()) && unapprovedOnly && !loading">
+          Unapproved PTO Cash Outs
+        </h3>
+        <h3 v-else-if="(userRoleIsAdmin() || userRoleIsManager()) && !loading">All PTO Cash Outs</h3>
         <h3 v-else-if="!loading">My PTO Cash Outs</h3>
         <h3 v-else>Loading...</h3>
         <v-spacer></v-spacer>
         <!-- Filter -->
         <v-autocomplete
-          v-if="userRoleIsAdmin()"
+          v-if="userRoleIsAdmin() || userRoleIsManager()"
           hide-details
           :items="employees"
           :filter="customFilter"
@@ -24,13 +26,15 @@
       </v-card-title>
       <div v-else>
         <v-card-title class="px-0">
-          <h3 v-if="userRoleIsAdmin() && unapprovedOnly && !loading">Unapproved PTO Cash Outs</h3>
-          <h3 v-else-if="userRoleIsAdmin() && !loading">All PTO Cash Outs</h3>
+          <h3 v-if="(userRoleIsAdmin() || userRoleIsManager()) && unapprovedOnly && !loading">
+            Unapproved PTO Cash Outs
+          </h3>
+          <h3 v-else-if="(userRoleIsAdmin() || userRoleIsManager()) && !loading">All PTO Cash Outs</h3>
           <h3 v-else-if="!loading">My PTO Cash Outs</h3>
           <h3 v-else>Loading...</h3>
         </v-card-title>
         <v-row class="mb-5">
-          <v-col v-if="userRoleIsAdmin()">
+          <v-col v-if="userRoleIsAdmin() || userRoleIsManager()">
             <!-- Employee Filter -->
             <v-autocomplete
               hide-details
@@ -106,7 +110,7 @@
 
         <!-- Employee slot -->
         <template v-slot:[`item.employeeId`]="{ item }">
-          <td v-if="userRoleIsAdmin()">
+          <td v-if="userRoleIsAdmin() || userRoleIsManager()">
             {{ item.employeeName }}
           </td>
         </template>
@@ -161,7 +165,7 @@
             <v-tooltip top>
               <template v-slot:activator="{ on }">
                 <v-btn
-                  v-if="userRoleIsAdmin()"
+                  v-if="userRoleIsAdmin() || userRoleIsManager()"
                   :disabled="!isApproved(item) || isUnapproving || isDeleting"
                   @click="clickedUnapprove(item)"
                   text
@@ -208,7 +212,7 @@
   </v-card>
 </template>
 <script>
-import { isMobile, userRoleIsAdmin, monthDayYearFormat, isEmpty } from '@/utils/utils';
+import { isMobile, userRoleIsAdmin, userRoleIsManager, monthDayYearFormat, isEmpty } from '@/utils/utils';
 import { getEmployeeByID, nicknameAndLastName } from '@/shared/employeeUtils';
 import api from '@/shared/api.js';
 import { updateStoreUser, updateStoreEmployees, updateStorePtoCashOuts } from '@/utils/storeUtils';
@@ -253,8 +257,8 @@ function beforeDestroy() {
   window.EventBus.$off('canceled-pto-cash-outs');
   window.EventBus.$off('confirm-unapprove-cash-out');
   window.EventBus.$off('canceled-unapprove-cash-out');
-  window.EventBus.$off('confirm-delete-pto-cash-out');
-  window.EventBus.$off('canceled-delete-pto-cash-out');
+  window.EventBus.$off('confirm-delete-PTO cash out');
+  window.EventBus.$off('canceled-delete-PTO cash out');
   window.EventBus.$off('close-pto-cash-out-form');
 } // beforeDestroy
 
@@ -551,7 +555,7 @@ function filteredPtoCashOuts() {
  */
 function roleHeaders() {
   let headers = _.cloneDeep(this.headers);
-  if (!this.userRoleIsAdmin()) {
+  if (!(userRoleIsAdmin() || userRoleIsManager())) {
     headers = _.filter(headers, (h) => h.text != 'Employee');
   }
 
@@ -656,6 +660,7 @@ export default {
     isApproved,
     isMobile,
     userRoleIsAdmin,
+    userRoleIsManager,
     monthDayYearFormat,
     isEmpty,
     getEmployeeByID,

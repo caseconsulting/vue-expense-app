@@ -18,7 +18,7 @@ import Home from '@/views/Home.vue';
 import TrainingAnalytics from '@/views/TrainingAnalytics';
 import PageNotFound from '@/views/PageNotFound';
 import Contracts from '@/views/Contracts.vue';
-import { requireAuth, isAdmin, isAdminOrManager } from '@/utils/auth';
+import { requireAuth, isAdminOrManager } from '@/utils/auth';
 import multiguard from 'vue-router-multiguard';
 
 Vue.use(Router);
@@ -40,7 +40,7 @@ const router = new Router({
       path: '/reimbursements',
       name: 'reimbursements',
       component: Reimbursements,
-      beforeEnter: multiguard([requireAuth, isAdmin])
+      beforeEnter: multiguard([requireAuth, isAdminOrManager])
     },
     {
       path: '/ptoCashOuts',

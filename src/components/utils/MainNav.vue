@@ -210,7 +210,7 @@ export default {
               title: 'Reimbursements',
               icon: 'mdi-monitor',
               route: 'reimbursements',
-              permission: ['admin']
+              permission: ['admin', 'manager']
             }
           ],
           permission: ['user', 'admin', 'intern', 'manager'],
