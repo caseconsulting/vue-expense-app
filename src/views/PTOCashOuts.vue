@@ -1,50 +1,50 @@
 <template>
-  <v-card :elevation="3">
-    <!-- Status Alert -->
-    <v-snackbar
-      v-model="status.statusType"
-      :color="status.color"
-      :multi-line="true"
-      :right="true"
-      :timeout="5000"
-      :top="true"
-      :vertical="true"
-    >
-      <v-card-title headline color="white">
-        <span class="headline">{{ status.statusMessage }}</span>
-      </v-card-title>
-      <v-btn color="white" text @click="clearStatus"> Close </v-btn>
-    </v-snackbar>
-    <v-card color="#bc3825">
-      <v-card-title headline v-bind:class="{ 'justify-center': isMobile }">
-        <h2 class="text-center white--text">Reimbursements</h2>
-      </v-card-title>
-    </v-card>
-    <v-tabs v-model="currentTab">
-      <v-tab class="ml-5" href="#expenses">Expenses</v-tab>
-      <v-tab href="#ptoCashOuts">PTO Cash Outs</v-tab>
-      <v-tab-item id="expenses" class="mx-2 mb-6">
-        <UnreimbursedExpenses />
-      </v-tab-item>
-      <v-tab-item id="ptoCashOuts" class="mx-2 my-6">
-        <v-row>
-          <v-col cols="12" xl="9" lg="8">
-            <p-t-o-cash-outs-table :unapprovedOnly="true" />
-          </v-col>
-          <v-col cols="12" xl="3" lg="4" class="pl-lg-1 pl-sm-2">
-            <quick-books-time-data v-if="employee" :employee="employee"></quick-books-time-data>
-            <v-skeleton-loader v-else class="mt-3" type="card-heading, list-item@12"></v-skeleton-loader>
-          </v-col>
-        </v-row>
-      </v-tab-item>
-    </v-tabs>
-  </v-card>
+  <div>
+    <v-row v-if="loading">
+      <v-col cols="12" xl="9" lg="8">
+        <div class="mt-3">
+          <v-skeleton-loader type="table-heading, list-item@6"></v-skeleton-loader>
+        </div>
+      </v-col>
+      <v-col cols="12" xl="3" lg="4" class="pl-lg-1 pl-sm-2">
+        <v-skeleton-loader class="mt-3" type="card-heading, list-item@12"></v-skeleton-loader>
+      </v-col>
+    </v-row>
+    <v-row v-else>
+      <!-- Status Alert -->
+      <v-snackbar
+        v-model="status.statusType"
+        :color="status.color"
+        :multi-line="true"
+        :right="true"
+        :timeout="5000"
+        :top="true"
+        :vertical="true"
+      >
+        <v-card-title headline color="white">
+          <span class="headline">{{ status.statusMessage }}</span>
+        </v-card-title>
+        <v-btn color="white" text @click="clearStatus"> Close </v-btn>
+      </v-snackbar>
+      <v-col cols="12" xl="9" lg="8"><p-t-o-cash-outs-table /> </v-col>
+      <v-col cols="12" xl="3" lg="4" class="pl-lg-1 pl-sm-2">
+        <!-- Skeleton Loader-->
+        <div v-if="loading">
+          <v-card>
+            <v-card-title class="header_style py-6">
+              <h3>QuickBooks Time Data</h3>
+            </v-card-title>
+            <v-skeleton-loader type="article,divider,article"></v-skeleton-loader>
+          </v-card>
+        </div>
+        <!-- QuickBooksTime -->
+        <quick-books-time-data v-else :employee="employee"></quick-books-time-data>
+      </v-col>
+    </v-row>
+  </div>
 </template>
-
 <script>
-import UnreimbursedExpenses from '@/components/reimbursements/UnreimbursedExpenses.vue';
-import { isMobile } from '@/utils/utils';
-import PTOCashOutsTable from '../components/shared/PTOCashOutsTable.vue';
+import PTOCashOutsTable from '@/components/shared/PTOCashOutsTable.vue';
 import QuickBooksTimeData from '@/components/shared/quickbooks/QuickBooksTimeData';
 
 // |--------------------------------------------------|
@@ -52,7 +52,6 @@ import QuickBooksTimeData from '@/components/shared/quickbooks/QuickBooksTimeDat
 // |                 LIFECYCLE HOOKS                  |
 // |                                                  |
 // |--------------------------------------------------|
-
 /**
  * Created lifecycle hook
  */
@@ -72,7 +71,6 @@ function mounted() {
     this.$set(this.status, 'statusMessage', status.statusMessage);
     this.$set(this.status, 'color', status.color);
   });
-
   window.EventBus.$on('change-quickbooks-employee', (employee) => {
     this.employee = employee;
   });
@@ -87,7 +85,7 @@ function beforeDestroy() {
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     COMPUTED                     |
+// |                    COMPUTED                      |
 // |                                                  |
 // |--------------------------------------------------|
 
@@ -99,21 +97,6 @@ function beforeDestroy() {
 function storeIsPopulated() {
   return this.$store.getters.storeIsPopulated;
 } // storeIsPopulated
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     METHODS                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Clear the action status that is displayed in the snackbar.
- */
-function clearStatus() {
-  this.$set(this.status, 'statusType', undefined);
-  this.$set(this.status, 'statusMessage', '');
-  this.$set(this.status, 'color', '');
-} // clearStatus
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -133,39 +116,51 @@ async function watchStoreIsPopulated() {
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                      EXPORT                      |
+// |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * Clear the action status that is displayed in the snackbar.
+ */
+function clearStatus() {
+  this.$set(this.status, 'statusType', undefined);
+  this.$set(this.status, 'statusMessage', '');
+  this.$set(this.status, 'color', '');
+} // clearStatus
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 export default {
-  created,
   beforeDestroy,
+  created,
   components: {
-    UnreimbursedExpenses,
     PTOCashOutsTable,
     QuickBooksTimeData
   },
   computed: {
-    isMobile,
     storeIsPopulated
-  },
-  methods: {
-    clearStatus
   },
   data() {
     return {
-      currentTab: 'expenses',
-      employee: null,
+      loading: true,
       status: {
         statusType: undefined,
         statusMessage: '',
         color: ''
-      }
+      },
+      employee: null
     };
   },
   mounted,
   watch: {
     storeIsPopulated: watchStoreIsPopulated
+  },
+  methods: {
+    clearStatus
   }
 };
 </script>

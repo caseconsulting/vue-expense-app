@@ -5,6 +5,8 @@
 // |--------------------------------------------------|
 
 import api from '@/shared/api.js';
+import store from '../../store/index.js';
+import { userRoleIsAdmin, userRoleIsManager, userRoleIsUser } from '@/utils/utils';
 
 /**
  * Update store with latest user data
@@ -58,6 +60,20 @@ export async function updateStoreBudgets() {
 } // updateStoreBudgets
 
 /**
+ * Update store with users budgets
+ */
+export async function updateStorePtoCashOuts() {
+  let user = store.getters.user;
+  let ptoCashOuts = [];
+  if (userRoleIsAdmin()) {
+    ptoCashOuts = await api.getItems(api.PTO_CASH_OUTS);
+  } else if (userRoleIsUser() || userRoleIsManager()) {
+    ptoCashOuts = await api.getEmployeePtoCashOuts(user.id);
+  }
+  store.dispatch('setPtoCashOuts', { ptoCashOuts: ptoCashOuts });
+} // updateStoreBudgets
+
+/**
  * Update store with latest expense type data
  */
 export async function updateStoreExpenseTypes() {
@@ -72,3 +88,20 @@ export async function updateStoreExpenseTypes() {
     this.$store.dispatch('setExpenseTypes', { expenseTypes });
   }
 } // updateStoreExpenseTypes
+
+/**
+ * Update store with latest quickbooks PTO data
+ */
+export async function updateStoreQuickbooksPTO() {
+  let employeeNumbers;
+  if (userRoleIsAdmin()) {
+    employeeNumbers = store.getters.employees
+      .filter((e) => e.workStatus > 0)
+      .map((e) => e.employeeNumber)
+      .join(', ');
+  } else {
+    employeeNumbers = store.getters.user.employeeNumber;
+  }
+  let quickbooksPTO = await api.getPTOBalances(employeeNumbers);
+  store.dispatch('setQuickbooksPTO', { quickbooksPTO });
+} // updateStoreQuickbooksPTO

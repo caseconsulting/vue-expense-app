@@ -1,30 +1,36 @@
 <template>
   <div id="monthly-charges">
-    <div class="d-flex justify-center justify-sm-start mb-2 mt-0 ml-0 ml-md-1">
-      <v-btn
-        v-if="!isPrevMonth"
-        x-small
-        outlined
-        :disabled="loading"
-        @click="changeMonthData"
-        color="#bc3825"
-        class="pa-3"
-        ><v-icon left dark> mdi-arrow-left-top </v-icon>Hours for {{ prevMonth }} {{ prevYear }}
-      </v-btn>
-      <v-btn v-else x-small outlined :disabled="loading" @click="changeMonthData" color="#bc3825" class="pa-3"
-        >Hours for {{ month }} {{ year }} <v-icon right dark> mdi-arrow-right-top </v-icon>
-      </v-btn>
+    <div class="d-flex justify-space-between">
+      <div class="d-inline-block float-left">
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <v-btn :disabled="isPrevMonth || loading" icon @click="changeMonthData" v-on="on"
+              ><v-icon x-large color="#bc3825"> mdi-arrow-left-thin </v-icon>
+            </v-btn>
+          </template>
+          <span>Hours for {{ prevMonth }} {{ prevYear }}</span>
+        </v-tooltip>
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <v-btn :disabled="!isPrevMonth || loading" icon @click="changeMonthData" v-on="on"
+              ><v-icon x-large color="#bc3825"> mdi-arrow-right-thin </v-icon>
+            </v-btn>
+          </template>
+          <span>Hours for {{ month }} {{ year }}</span>
+        </v-tooltip>
+      </div>
+      <h3 align="center" class="d-inline-block">
+        <span v-if="!isPrevMonth"> Hours for {{ month }} {{ year }} </span>
+        <span v-else> Hours for {{ prevMonth }} {{ prevYear }} </span>
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <v-btn @click="toFAQ()" class="mb-4" x-small icon v-on="on"><v-icon color="#3f51b5">info</v-icon></v-btn>
+          </template>
+          <span>Click for FAQ</span>
+        </v-tooltip>
+      </h3>
+      <div class="filler"></div>
     </div>
-    <h3 align="center">
-      <span v-if="!isPrevMonth">Hours for {{ month }} {{ year }}</span>
-      <span v-else>Hours for {{ prevMonth }} {{ prevYear }}</span>
-      <v-tooltip top>
-        <template v-slot:activator="{ on }">
-          <v-btn @click="toFAQ()" class="mb-4" x-small icon v-on="on"><v-icon color="#3f51b5">info</v-icon></v-btn>
-        </template>
-        <span>Click for FAQ</span>
-      </v-tooltip>
-    </h3>
     <!-- Error Getting Monthly Hours -->
     <div v-if="monthlyHourError" class="pt-2 pb-6" align="center">
       <v-tooltip right>
@@ -185,15 +191,20 @@ function remainingWorkDays() {
  *  Set budget information for employee. Creates event listeners.
  */
 async function created() {
+  this.isEmployeeView = this.$route.name === 'employee';
+  await this.setData();
+} // created
+
+/**
+ * The mounted lifecycle hook.
+ */
+async function mounted() {
   window.EventBus.$on('refresh-quickbooks-data', async () => {
     this.refresh = true;
     await this.setData();
     this.refresh = false;
   });
-
-  this.isEmployeeView = this.$route.name === 'employee';
-  await this.setData();
-} // created
+} // mounted
 
 /**
  * destroy listeners
@@ -287,6 +298,9 @@ function formatHours(hours) {
   return `${hours}h`;
 } // formatHours
 
+/**
+ * Sets all of the fields on initial load or refresh.
+ */
 async function setData() {
   this.loading = true;
   // set the current month
@@ -299,14 +313,14 @@ async function setData() {
   this.prevYear = format(subtract(getTodaysDate(), 1, 'months'), null, 'YYYY');
 
   await this.setMonthlyCharges();
-}
+} // setData
 
 /**
  * Sets the monthly charges for the employee (or user if no employee is specified).
  */
 async function setMonthlyCharges() {
   this.employee = this.isEmployeeView ? this.passedEmployee : this.$store.getters.user;
-  if (!this.isEmpty(this.employee.id)) {
+  if (this.employee && !this.isEmpty(this.employee.id)) {
     this.workDayHours *= this.employee.workStatus * 0.01;
     // make call to api to get data
     if (
@@ -375,9 +389,12 @@ function updateEstimate(event) {
  * watcher for passedEmployee.id
  */
 async function watchPassedEmployeeID() {
-  if (this.isEmployeeView) {
-    await this.setMonthlyCharges();
-  }
+  this.loading = true;
+  this.isPrevMonth = false;
+  this.monthlyHourError = false;
+  this.refresh = true;
+  this.isEmployeeView = true;
+  await this.setMonthlyCharges();
 } // watchPassedEmployeeID
 
 // |--------------------------------------------------|
@@ -433,9 +450,16 @@ export default {
     toFAQ,
     updateEstimate
   },
+  mounted,
   props: ['passedEmployee', 'showMinutes'],
   watch: {
     'passedEmployee.id': watchPassedEmployeeID
   }
 };
 </script>
+
+<style scoped>
+.filler {
+  width: 72px;
+}
+</style>

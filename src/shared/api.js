@@ -8,13 +8,13 @@ const EMSI = 'emsi';
 const TRAINING_URLS = 'training-urls';
 const UTILITY = 'utility';
 const QUICK_BOOKS_TIME = 'tSheets';
-const TWITTER = 'twitter';
 const BASECAMP = 'basecamp';
 const HIPPO_LAB = 'hippoLabs';
 const GOOGLE_MAPS = 'googleMaps';
 const AUDIT = 'audits';
 const RESUME = 'resume';
 const CONTRACTS = 'contracts';
+const PTO_CASH_OUTS = 'ptoCashOuts';
 const API_HOSTNAME = API_CONFIG.apiHostname;
 const API_PORT = API_CONFIG.apiPort;
 const PORT = API_PORT === '443' ? '' : `:${API_PORT}`;
@@ -162,6 +162,15 @@ async function getFiscalDateViewBudgets(id, fiscalDateView) {
 async function getEmployeeBudgets(id) {
   return execute('get', `/budgets/employee/${id}`);
 } // getEmployeeBudgets
+
+/**
+ * Gets PTO cash outs for an employee
+ *
+ * @return - PTO cash outs for employee
+ */
+async function getEmployeePtoCashOuts(id) {
+  return execute('get', `/${UTILITY}/getAllEmployeePtoCashOuts/${id}`);
+} // getEmployeePtoCashOuts
 
 /**
  * gets all the events
@@ -419,24 +428,6 @@ async function getMonthlyHours(employeeNumber) {
 } // getMonthlyHours
 
 /**
- * gets the twitter token for the case twitter
- *
- * @return - the twitter token
- */
-async function getTwitterToken() {
-  return await execute('get', `/${TWITTER}/getTwitterToken`);
-} // getTwitterToken
-
-/**
- * gets the case twitter timeline
- *
- * @return - the case timeline tweet data
- */
-async function getCaseTimeline() {
-  return await execute('get', `${TWITTER}/getCaseTimeline`);
-} // getCaseTimeline
-
-/**
  * get the feed events for basecamp
  *
  * @return - the feed events
@@ -511,12 +502,12 @@ export default {
   getAudits,
   getBasecampAvatars,
   getBasecampCampfires,
-  getCaseTimeline,
   getColleges,
   getCountries,
   getEmployeeBudget,
   getEmployeeBudgets,
   getEmployeeExpenseTypes,
+  getEmployeePtoCashOuts,
   getFeedEvents,
   getFiscalDateViewBudgets,
   getItem,
@@ -526,7 +517,6 @@ export default {
   getResume,
   getMonthlyHours,
   getTechSkills,
-  getTwitterToken,
   getURLInfo,
   getZipCode,
   getUser,
@@ -536,10 +526,10 @@ export default {
   EXPENSES,
   EMPLOYEES,
   CONTRACTS,
+  PTO_CASH_OUTS,
   UTILITY,
   QUICK_BOOKS_TIME,
   TRAINING_URLS,
-  TWITTER,
   AUDIT,
   CONTRACT_STATUSES
 };

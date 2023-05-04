@@ -7,159 +7,161 @@
     />
   </div>
   <v-container v-else class="my-3" fluid>
-    <v-snackbar
-      v-model="uploadStatus.statusType"
-      :color="uploadStatus.color"
-      :multi-line="true"
-      :right="true"
-      :timeout="3000"
-      :top="true"
-      :vertical="true"
-    >
-      <v-card-title headline color="white">
-        <span class="headline">{{ uploadStatus.statusMessage }}</span>
-      </v-card-title>
-      <v-btn color="white" text @click="clearStatus"> Close </v-btn>
-    </v-snackbar>
-    <v-row class="pa-0">
-      <v-col cols="3" align="left" justify="left">
-        <v-btn id="backBtn" elevation="2" @click="$router.back()" :x-small="isMobile()"
-          ><v-icon class="pr-1">arrow_back</v-icon>Back</v-btn
-        >
-      </v-col>
-      <v-col
-        cols="9"
-        v-if="hasAdminPermissions() || userIsEmployee()"
-        align="right"
-        justify="right"
-        class="px-0 pr-3 ma-0"
-      >
-        <v-btn
-          @click="toggleResumeParser = !toggleResumeParser"
-          v-if="!editing"
-          :x-small="isMobile()"
-          color="#bc3825"
-          class="white--text mr-1"
-          ><b>Upload Resume</b></v-btn
-        >
-        <v-btn
-          class="white--text"
-          v-if="!editing"
-          color="#bc3825"
-          @click="toggleDeleteModal = !toggleDeleteModal"
-          :x-small="isMobile()"
-          :disabled="!hasResume"
-          :loading="deleteLoading"
-          ><b>Delete Resume</b></v-btn
-        >
-      </v-col>
+    <v-row v-if="basicEmployeeDataLoading" class="pt-0">
+      <employee-page-loader></employee-page-loader>
     </v-row>
-    <v-row v-if="basicEmployeeDataLoading" class="my-10" justify="center">
-      <v-progress-circular :size="70" :width="7" color="#bc3825" indeterminate></v-progress-circular>
-    </v-row>
-    <v-row v-else class="pt-0">
-      <!-- QuickBooks Time and Budgets-->
-      <v-col v-if="displayQuickBooksTimeAndBalances" cols="12" md="5" lg="4" class="pt-0">
-        <quick-books-time-data :employee="this.model" class="mb-4"></quick-books-time-data>
-        <available-budgets
-          class="mb-4"
-          v-if="this.model.id"
-          :employee="this.model"
-          :expenses="expenses"
-          :expenseTypes="expenseTypes"
-          :accessibleBudgets="accessibleBudgets"
-          :employeeDataLoading="loading"
-        ></available-budgets>
-        <anniversary-card
-          v-if="!loading"
-          :employee="this.model"
-          :hasBudgets="this.hasAccessToBudgets"
-          location="profile"
-        ></anniversary-card>
-      </v-col>
-
-      <!-- Employee Form -->
-      <v-col
-        cols="12"
-        :md="displayQuickBooksTimeAndBalances ? 7 : 12"
-        :lg="displayQuickBooksTimeAndBalances ? 8 : 12"
-        class="pt-0"
+    <div v-else>
+      <v-snackbar
+        v-model="uploadStatus.statusType"
+        :color="uploadStatus.color"
+        :multi-line="true"
+        :right="true"
+        :timeout="3000"
+        :top="true"
+        :vertical="true"
       >
-        <v-card>
-          <v-card-title class="header_style" v-if="!editing">
-            <h3 id="employeeName" v-if="userIsEmployee()">My Profile</h3>
-            <h3 id="employeeName" v-else>
-              {{ this.model.nickname || this.model.firstName }} {{ this.model.lastName }}
-            </h3>
-            <v-spacer></v-spacer>
-            <convert-employee-to-csv
-              v-if="userRoleIsAdmin()"
-              :contracts="contracts"
-              :employee="this.model"
-              color="white"
-            />
-            <v-tooltip v-if="hasAdminPermissions() || userIsEmployee()" top>
-              <template #activator="{ on }">
-                <div v-on="on">
-                  <v-icon
-                    :disabled="!hasResume"
-                    class="pr-2"
-                    @click="downloadResume()"
-                    color="white"
-                    align="right"
-                    v-on="on"
-                    id="resume-download"
-                    >sim_card_download</v-icon
-                  >
-                </div>
-              </template>
-              <span>{{ hasResume ? 'Download Resume' : 'No resume available' }}</span>
-            </v-tooltip>
-            <v-tooltip v-if="hasAdminPermissions() || userIsEmployee()" top>
-              <template #activator="{ on }">
-                <v-icon class="pr-2" @click="editing = true" color="white" align="right" v-on="on" id="edit"
-                  >edit</v-icon
-                >
-              </template>
-              <span>Edit Profile</span>
-            </v-tooltip>
-          </v-card-title>
-          <employee-info
-            :model="this.model"
-            :contracts="this.contracts"
-            :currentTab="this.currentTab"
+        <v-card-title headline color="white">
+          <span class="headline">{{ uploadStatus.statusMessage }}</span>
+        </v-card-title>
+        <v-btn color="white" text @click="clearStatus"> Close </v-btn>
+      </v-snackbar>
+      <v-row class="pa-0">
+        <v-col cols="3" align="left" justify="left">
+          <v-btn id="backBtn" elevation="2" @click="$router.back()" :x-small="isMobile()"
+            ><v-icon class="pr-1">arrow_back</v-icon>Back</v-btn
+          >
+        </v-col>
+        <v-col
+          cols="9"
+          v-if="hasAdminPermissions() || userIsEmployee()"
+          align="right"
+          justify="right"
+          class="px-0 pr-3 ma-0"
+        >
+          <v-btn
+            @click="toggleResumeParser = !toggleResumeParser"
             v-if="!editing"
-          ></employee-info>
-        </v-card>
-        <!-- Edit Info (Form) -->
-        <employee-form
-          :employee="this.model"
-          :contracts="this.contracts"
-          :currentTab="this.currentTab"
-          v-if="editing"
-        ></employee-form>
-        <div class="mt-4">
-          <budget-chart
-            v-if="(userRoleIsAdmin() || userIsEmployee()) && hasAccessToBudgets"
+            :x-small="isMobile()"
+            color="#bc3825"
+            class="white--text mr-1"
+            ><b>Upload Resume</b></v-btn
+          >
+          <v-btn
+            class="white--text"
+            v-if="!editing"
+            color="#bc3825"
+            @click="toggleDeleteModal = !toggleDeleteModal"
+            :x-small="isMobile()"
+            :disabled="!hasResume"
+            :loading="deleteLoading"
+            ><b>Delete Resume</b></v-btn
+          >
+        </v-col>
+      </v-row>
+      <v-row class="pt-0">
+        <!-- QuickBooks Time and Budgets-->
+        <v-col v-if="displayQuickBooksTimeAndBalances" cols="12" md="5" lg="4" class="pt-0">
+          <quick-books-time-data :employee="this.model" class="mb-4"></quick-books-time-data>
+          <available-budgets
+            class="mb-4"
+            v-if="this.model.id"
             :employee="this.model"
-            :accessibleBudgets="accessibleBudgets"
             :expenses="expenses"
             :expenseTypes="expenseTypes"
-            :fiscalDateView="fiscalDateView"
-          ></budget-chart>
-        </div>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12"> </v-col>
-    </v-row>
-    <resume-parser
-      v-if="!loading && !editing"
-      :toggleResumeParser="this.toggleResumeParser"
-      :employee="this.model"
-      @resume="resumeReceived"
-    ></resume-parser>
-    <delete-modal :toggleDeleteModal="this.toggleDeleteModal" type="resume"></delete-modal>
+            :accessibleBudgets="accessibleBudgets"
+            :employeeDataLoading="loading"
+          ></available-budgets>
+          <anniversary-card
+            v-if="!loading"
+            :employee="this.model"
+            :hasBudgets="this.hasAccessToBudgets"
+            location="profile"
+          ></anniversary-card>
+        </v-col>
+
+        <!-- Employee Form -->
+        <v-col
+          cols="12"
+          :md="displayQuickBooksTimeAndBalances ? 7 : 12"
+          :lg="displayQuickBooksTimeAndBalances ? 8 : 12"
+          class="pt-0"
+        >
+          <v-card>
+            <v-card-title class="header_style" v-if="!editing">
+              <h3 id="employeeName" v-if="userIsEmployee()">My Profile</h3>
+              <h3 id="employeeName" v-else>
+                {{ this.model.nickname || this.model.firstName }} {{ this.model.lastName }}
+              </h3>
+              <v-spacer></v-spacer>
+              <convert-employee-to-csv
+                v-if="userRoleIsAdmin()"
+                :contracts="contracts"
+                :employee="this.model"
+                color="white"
+              />
+              <v-tooltip v-if="hasAdminPermissions() || userIsEmployee()" top>
+                <template #activator="{ on }">
+                  <div v-on="on">
+                    <v-icon
+                      :disabled="!hasResume"
+                      class="pr-2"
+                      @click="downloadResume()"
+                      color="white"
+                      align="right"
+                      v-on="on"
+                      id="resume-download"
+                      >sim_card_download</v-icon
+                    >
+                  </div>
+                </template>
+                <span>{{ hasResume ? 'Download Resume' : 'No resume available' }}</span>
+              </v-tooltip>
+              <v-tooltip v-if="hasAdminPermissions() || userIsEmployee()" top>
+                <template #activator="{ on }">
+                  <v-icon class="pr-2" @click="editing = true" color="white" align="right" v-on="on" id="edit"
+                    >edit</v-icon
+                  >
+                </template>
+                <span>Edit Profile</span>
+              </v-tooltip>
+            </v-card-title>
+            <employee-info
+              :model="this.model"
+              :contracts="this.contracts"
+              :currentTab="this.currentTab"
+              v-if="!editing"
+            ></employee-info>
+          </v-card>
+          <!-- Edit Info (Form) -->
+          <employee-form
+            :employee="this.model"
+            :contracts="this.contracts"
+            :currentTab="this.currentTab"
+            v-if="editing"
+          ></employee-form>
+          <div class="mt-4">
+            <budget-chart
+              v-if="(userRoleIsAdmin() || userIsEmployee()) && hasAccessToBudgets"
+              :employee="this.model"
+              :accessibleBudgets="accessibleBudgets"
+              :expenses="expenses"
+              :expenseTypes="expenseTypes"
+              :fiscalDateView="fiscalDateView"
+            ></budget-chart>
+          </div>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="12"> </v-col>
+      </v-row>
+      <resume-parser
+        v-if="!loading && !editing"
+        :toggleResumeParser="this.toggleResumeParser"
+        :employee="this.model"
+        @resume="resumeReceived"
+      ></resume-parser>
+      <delete-modal :toggleDeleteModal="this.toggleDeleteModal" type="resume"></delete-modal>
+    </div>
   </v-container>
 </template>
 
@@ -190,6 +192,7 @@ import AnniversaryCard from '@/components/shared/AnniversaryCard.vue';
 import BudgetChart from '@/components/charts/custom-charts/BudgetChart.vue';
 import ResumeParser from '@/components/modals/ResumeParser';
 import DeleteModal from '@/components/modals/DeleteModal';
+import EmployeePageLoader from '@/components/employees/EmployeePageLoader';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -455,7 +458,8 @@ export default {
     ConvertEmployeeToCsv,
     AnniversaryCard,
     BudgetChart,
-    ResumeParser
+    ResumeParser,
+    EmployeePageLoader
   },
   created,
   data() {

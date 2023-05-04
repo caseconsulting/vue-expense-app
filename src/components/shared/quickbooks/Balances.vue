@@ -1,6 +1,15 @@
 <template>
   <div id="pto-balances">
-    <h3 class="pt-5" align="center">PTO Balances</h3>
+    <h3 class="pt-5" align="center">
+      PTO Balances
+      <v-tooltip top>
+        <template v-slot:activator="{ on }">
+          <v-btn @click="toFAQ()" class="mb-4" x-small icon v-on="on"><v-icon color="#3f51b5">info</v-icon></v-btn>
+        </template>
+        <span>Click for FAQ</span></v-tooltip
+      >
+    </h3>
+
     <!-- Error Getting Balances -->
     <div v-if="balancesError" class="pt-2 pb-6" align="center">
       <v-tooltip right>
@@ -44,16 +53,23 @@
           <div v-if="showMore && !showAll" align="center">
             <v-btn @click="showMore = false" top text small class="my-2">Show Less &#9650; </v-btn>
           </div>
+          <div class="d-flex align-items-center justify-center">
+            <button class="home_buttons my-1" @click="showPTOCashOutFormModal = true">Cash Out PTO</button>
+          </div>
         </div>
       </v-card-text>
     </div>
+    <v-dialog v-model="showPTOCashOutFormModal" persistent max-width="500">
+      <p-t-o-cash-out-form :employee="passedEmployee" />
+    </v-dialog>
   </div>
 </template>
 
 <script>
-import api from '@/shared/api.js';
 import { isEmpty } from '@/utils/utils';
+import { updateStorePtoCashOuts, updateStoreQuickbooksPTO, updateStoreEmployees } from '@/utils/storeUtils';
 import _ from 'lodash';
+import PTOCashOutForm from '@/components/shared/PTOCashOutForm.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -65,15 +81,11 @@ import _ from 'lodash';
  *  Set Balances information for employee.
  */
 async function created() {
-  window.EventBus.$on('refresh-quickbooks-data', async () => {
-    this.refresh = true;
-    this.loadingBar = true;
-    await this.setPTOBalances();
-    this.refresh = false;
-  });
-
   this.isEmployeeView = this.$route.name === 'employee';
   this.loadingBar = true;
+  if (!this.$store.getters.employees) {
+    await this.updateStoreEmployees();
+  }
   await this.setPTOBalances();
 } // created
 
@@ -82,7 +94,24 @@ async function created() {
  */
 function beforeDestroy() {
   window.EventBus.$off('refresh-quickbooks-data');
+  window.EventBus.$off('close-pto-cash-out-form');
 } // beforeDestroy
+
+/**
+ * Mounted lifecycle hook.
+ */
+async function mounted() {
+  window.EventBus.$on('refresh-quickbooks-data', async () => {
+    this.refresh = true;
+    this.loadingBar = true;
+    await this.setPTOBalances();
+    this.refresh = false;
+  });
+
+  window.EventBus.$on('close-pto-cash-out-form', () => {
+    this.showPTOCashOutFormModal = false;
+  });
+} // mounted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -107,12 +136,23 @@ function isInactive() {
  * @return array - the balances that are shown
  */
 function availableBalances() {
+  this.pendingPtoCashOuts = _.filter(
+    this.$store.getters.ptoCashOuts,
+    (p) => !p.approvedDate && this.employee.id === p.employeeId
+  );
   let avaibleBalances = [];
   this.keysBalance.forEach((balance) => {
     if (this.balanceData[balance] > 0 || this.showMore) {
       avaibleBalances.push(balance);
     }
   });
+  if (this.pendingPtoCashOuts.length > 0) {
+    let balance = 'Pending PTO Cash Out';
+    if (!avaibleBalances.includes(balance)) {
+      avaibleBalances.push(balance);
+    }
+    this.balanceData[balance] = this.pendingPtoCashOuts.reduce((n, { amount }) => n + amount, 0);
+  }
   return avaibleBalances;
 } // availableBalances
 
@@ -139,7 +179,7 @@ function formatHours(hours) {
     hours = hrs + 'h ' + min + 'm';
     return hours;
   }
-  return `${hours}h`;
+  return `${Number(hours)}h`;
 } // formatHours
 
 /**
@@ -147,19 +187,24 @@ function formatHours(hours) {
  */
 async function setPTOBalances() {
   this.employee = this.isEmployeeView ? this.passedEmployee : this.$store.getters.user;
-  if (!this.isEmpty(this.employee.id)) {
+  if (this.employee && !this.isEmpty(this.employee.id)) {
     // employee exists
     let ptoBalances;
-    if (!this.$store.getters.quickbooksPTO || this.$store.getters.user.id != this.employee.id || this.refresh) {
-      ptoBalances = await api.getPTOBalances(this.employee.employeeNumber); // call api
-      if (this.$store.getters.user.id == this.employee.id) {
-        // only set vuex store if the user is looking at their own quickbooks data
-        this.$store.dispatch('setQuickbooksPTO', { quickbooksPTO: ptoBalances });
-      }
+    if (
+      !this.$store.getters.quickbooksPTO ||
+      !this.$store.getters.ptoCashOuts ||
+      this.$store.getters.user.id != this.employee.id ||
+      this.refresh
+    ) {
+      await Promise.all([
+        updateStoreQuickbooksPTO() /*api.getPTOBalances(this.employee.employeeNumber)*/,
+        updateStorePtoCashOuts()
+      ]); // call api
+      ptoBalances = this.$store.getters.quickbooksPTO;
     } else {
       ptoBalances = this.$store.getters.quickbooksPTO;
     }
-    if (_.isNil(ptoBalances.results)) {
+    if (_.isNil(ptoBalances.results) || _.isNil(ptoBalances.results.users[this.employee.employeeNumber])) {
       // error getting pto balances
       this.balancesError = true;
     } else {
@@ -185,6 +230,13 @@ async function setPTOBalances() {
   }
 } // setPTOBalances
 
+/**
+ * Opens new tab when info icon is selected w/in Quickbooks time box
+ */
+function toFAQ() {
+  window.open('https://3.basecamp.com/3097063/buckets/179119/messages/939259168', '_blank');
+} // toFAQ
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                    WATCHERS                      |
@@ -195,9 +247,11 @@ async function setPTOBalances() {
  * watcher for passedEmployee.id - if it is employee view it will set or reset PTOBalances
  */
 async function watchPassedEmployeeID() {
-  if (this.isEmployeeView) {
-    await this.setPTOBalances();
-  }
+  this.loadingBar = true;
+  this.balancesError = false;
+  this.refresh = true;
+  this.isEmployeeView = true;
+  await this.setPTOBalances();
 } // watchPassedEmployeeID
 
 // |--------------------------------------------------|
@@ -207,6 +261,7 @@ async function watchPassedEmployeeID() {
 // |--------------------------------------------------|
 
 export default {
+  components: { PTOCashOutForm },
   computed: {
     isInactive,
     availableBalances
@@ -221,16 +276,21 @@ export default {
       isEmployeeView: false, // viewing from employee route
       keysBalance: [], // balance names
       loadingBar: false, // display loading bar
+      pendingPtoCashOuts: [], // pending employee PTO cash outs
       refresh: false, // if the data has been refreshed
       showAll: true, // show all balances
-      showMore: false // toggle to show hidden balances
+      showMore: false, // toggle to show hidden balances
+      showPTOCashOutFormModal: false // toggle to show PTO Cash Out form
     };
   },
   methods: {
     formatHours,
     isEmpty,
-    setPTOBalances
+    setPTOBalances,
+    toFAQ,
+    updateStoreEmployees
   },
+  mounted,
   props: ['passedEmployee', 'showMinutes'],
   watch: {
     'passedEmployee.id': watchPassedEmployeeID

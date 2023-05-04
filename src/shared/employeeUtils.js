@@ -27,8 +27,19 @@ export function nicknameAndLastName(employee) {
   return `${firstName}` + ' ' + `${employee.lastName}`;
 } // nicknameAndLastName
 
+/**
+ * Gets an employee object based on the employee ID parameter
+ * @param {Number} employeeId - employee ID
+ * @param {Array} employees - list of employees
+ * @returns Employee object
+ */
+export function getEmployeeByID(employeeId, employees) {
+  return employees.find((e) => e.id == employeeId);
+} // getEmployeeByID
+
 export default {
   fullName,
   firstAndLastName,
-  nicknameAndLastName
+  nicknameAndLastName,
+  getEmployeeByID
 };

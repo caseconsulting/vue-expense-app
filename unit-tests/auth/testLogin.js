@@ -16,7 +16,6 @@ describe('testing sign-in', () => {
       .assert.visible('#t-sheets-data')
       .assert.visible('#home-available-budgets')
       .assert.visible('#home-anniversary')
-      .assert.visible('#home-activity-feed')
-      .assert.visible('#home-twitter-feed');
+      .assert.visible('#home-activity-feed');
   });
 });

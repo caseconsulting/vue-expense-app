@@ -58,7 +58,9 @@
             icon
             target="_blank"
           >
-            <v-icon>{{ link.icon }}</v-icon>
+            <v-icon v-if="link.icon">{{ link.icon }}</v-icon>
+            <v-icon v-else-if="link.name == 'Twitter'">$twitter</v-icon>
+            <v-icon v-else-if="link.name == 'Facebook'">$facebook</v-icon>
           </v-btn>
         </v-item-group>
 
@@ -123,7 +125,7 @@
                 id="P"
                 class="black--text"
                 target="_blank"
-                href="https://3.basecamp.com/3097063/buckets/4708396/documents/5997866143"
+                href="https://3.basecamp.com/3097063/buckets/4708396/documents/6103442047"
                 ><strong>Version</strong> {{ version }}</a
               >
             </template>
@@ -397,8 +399,8 @@ export default {
       { name: 'Github', link: 'https://github.com/caseconsulting', icon: 'mdi-github' },
       { name: 'LinkedIn', link: 'https://linkedin.com/company/case-consulting-inc', icon: 'mdi-linkedin' },
       { name: 'Youtube', link: 'https://www.youtube.com/channel/UC_oJY4OrOpLNrIBAN7Y-9fA', icon: 'mdi-youtube' },
-      { name: 'Twitter', link: 'https://twitter.com/consultwithcase?lang=en', icon: 'mdi-twitter' },
-      { name: 'Facebook', link: 'https://www.facebook.com/ConsultwithCase/', icon: 'mdi-facebook' }
+      { name: 'Twitter', link: 'https://twitter.com/consultwithcase?lang=en' },
+      { name: 'Facebook', link: 'https://www.facebook.com/ConsultwithCase/' }
     ],
     version: null
   }),

@@ -217,6 +217,12 @@ export default {
           active: false
         },
         {
+          title: 'PTO Cash Outs',
+          icon: 'mdi-cash',
+          route: 'ptoCashOuts',
+          permission: ['admin', 'user', 'manager']
+        },
+        {
           title: 'Employees',
           alias: ['employee'],
           icon: 'mdi-account-group',

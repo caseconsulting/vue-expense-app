@@ -1,361 +1,373 @@
 <template>
-  <v-row>
-    <!-- Status Alert -->
-    <v-snackbar
-      v-model="status.statusType"
-      :color="status.color"
-      :multi-line="true"
-      :right="true"
-      :timeout="5000"
-      :top="true"
-      :vertical="true"
-    >
-      <v-card-title headline color="white">
-        <span class="headline">{{ status.statusMessage }}</span>
-      </v-card-title>
-      <v-btn color="white" text @click="clearStatus"> Close </v-btn>
-    </v-snackbar>
+  <div>
+    <v-row v-if="initialPageLoading">
+      <v-col cols="12" lg="8">
+        <div class="mt-3">
+          <v-skeleton-loader type="table-heading, list-item@6"></v-skeleton-loader>
+        </div>
+      </v-col>
+      <v-col cols="12" lg="4">
+        <v-skeleton-loader class="mt-3" type="card-heading, list-item@12"></v-skeleton-loader>
+      </v-col>
+    </v-row>
+    <v-row v-else>
+      <!-- Status Alert -->
+      <v-snackbar
+        v-model="status.statusType"
+        :color="status.color"
+        :multi-line="true"
+        :right="true"
+        :timeout="5000"
+        :top="true"
+        :vertical="true"
+      >
+        <v-card-title headline color="white">
+          <span class="headline">{{ status.statusMessage }}</span>
+        </v-card-title>
+        <v-btn color="white" text @click="clearStatus"> Close </v-btn>
+      </v-snackbar>
 
-    <v-col cols="12" lg="8">
-      <v-card class="mt-3">
-        <v-container fluid>
-          <!-- Title -->
-          <v-card-title v-if="!isMobile()">
-            <h3 v-if="userRoleIsAdmin() && !loading">All Expenses</h3>
-            <h3 v-else-if="!loading">My Expenses</h3>
-            <h3 v-else>Loading...</h3>
-            <v-spacer></v-spacer>
-
-            <!-- Employee Filter -->
-            <v-autocomplete
-              v-if="userRoleIsAdmin()"
-              hide-details
-              :items="employees"
-              :filter="customFilter"
-              v-model="employee"
-              item-text="text"
-              id="employeeIdFilter"
-              class="mr-3"
-              label="Filter by Employee"
-              clearable
-            ></v-autocomplete>
-
-            <!-- Search Bar -->
-            <v-text-field
-              v-model="search"
-              append-icon="search"
-              id="search"
-              label="Search"
-              single-line
-              hide-details
-            ></v-text-field>
-          </v-card-title>
-
-          <div v-else>
-            <v-card-title class="px-0">
+      <v-col cols="12" lg="8">
+        <v-card class="mt-3">
+          <v-container fluid>
+            <!-- Title -->
+            <v-card-title v-if="!isMobile()">
               <h3 v-if="userRoleIsAdmin() && !loading">All Expenses</h3>
               <h3 v-else-if="!loading">My Expenses</h3>
               <h3 v-else>Loading...</h3>
+              <v-spacer></v-spacer>
+
+              <!-- Employee Filter -->
+              <v-autocomplete
+                v-if="userRoleIsAdmin()"
+                hide-details
+                :items="employees"
+                :filter="customFilter"
+                v-model="employee"
+                item-text="text"
+                id="employeeIdFilter"
+                class="mr-3"
+                label="Filter by Employee"
+                clearable
+              ></v-autocomplete>
+
+              <!-- Search Bar -->
+              <v-text-field
+                v-model="search"
+                append-icon="search"
+                id="search"
+                label="Search"
+                single-line
+                hide-details
+              ></v-text-field>
             </v-card-title>
-            <v-row class="mb-5">
-              <v-col v-if="userRoleIsAdmin()">
-                <!-- Employee Filter -->
-                <v-autocomplete
-                  hide-details
-                  :items="employees"
-                  :filter="customFilter"
-                  v-model="employee"
-                  item-text="text"
-                  id="employeeIdFilter"
-                  label="Filter by Employee"
-                  clearable
-                ></v-autocomplete>
-              </v-col>
-              <v-col>
-                <!-- Search Bar -->
-                <v-text-field
-                  v-model="search"
-                  append-icon="search"
-                  id="search"
-                  label="Search"
-                  single-line
-                  hide-details
-                ></v-text-field>
-              </v-col>
-            </v-row>
-          </div>
 
-          <!-- Filters -->
-          <fieldset class="filter_border">
-            <legend class="legend_style">Filters</legend>
-
-            <!-- Active Filter -->
-            <div v-if="userRoleIsAdmin()" class="flagFilter">
-              <h4>Active Expense Type:</h4>
-              <v-btn-toggle class="filter_color" v-model="filter.active" text mandatory>
-                <!-- Show Active -->
-                <v-tooltip top>
-                  <template v-slot:activator="{ on }">
-                    <v-btn value="active" v-on="on" text>
-                      <v-icon class="mr-1">mdi-check-circle-outline</v-icon>
-                    </v-btn>
-                  </template>
-                  <span>Show Active</span>
-                </v-tooltip>
-
-                <!-- Show Inactive -->
-                <v-tooltip top>
-                  <template v-slot:activator="{ on }">
-                    <v-btn value="notActive" v-on="on" text>
-                      <v-icon>mdi-close-circle-outline</v-icon>
-                    </v-btn>
-                  </template>
-                  <span>Show Inactive</span>
-                </v-tooltip>
-
-                <!-- Show Active and Inactive -->
-                <v-tooltip top>
-                  <template v-slot:activator="{ on }">
-                    <v-btn value="both" v-on="on" text> BOTH </v-btn>
-                  </template>
-                  <span>Show All</span>
-                </v-tooltip>
-              </v-btn-toggle>
+            <div v-else>
+              <v-card-title class="px-0">
+                <h3 v-if="userRoleIsAdmin() && !loading">All Expenses</h3>
+                <h3 v-else-if="!loading">My Expenses</h3>
+                <h3 v-else>Loading...</h3>
+              </v-card-title>
+              <v-row class="mb-5">
+                <v-col v-if="userRoleIsAdmin()">
+                  <!-- Employee Filter -->
+                  <v-autocomplete
+                    hide-details
+                    :items="employees"
+                    :filter="customFilter"
+                    v-model="employee"
+                    item-text="text"
+                    id="employeeIdFilter"
+                    label="Filter by Employee"
+                    clearable
+                  ></v-autocomplete>
+                </v-col>
+                <v-col>
+                  <!-- Search Bar -->
+                  <v-text-field
+                    v-model="search"
+                    append-icon="search"
+                    id="search"
+                    label="Search"
+                    single-line
+                    hide-details
+                  ></v-text-field>
+                </v-col>
+              </v-row>
             </div>
-            <!-- End Active Filter -->
 
-            <!-- Reimbursed Fitler -->
-            <div class="flagFilter">
-              <h4>Reimbursed:</h4>
-              <v-btn-toggle class="filter_color" v-model="filter.reimbursed" text mandatory>
-                <!-- Show Reimbursed -->
-                <v-tooltip top>
-                  <template v-slot:activator="{ on }">
-                    <v-btn value="reimbursed" v-on="on" text>
-                      <v-icon id="showReimbursed" class="mr-1">mdi-check-circle-outline</v-icon>
-                    </v-btn>
-                  </template>
-                  <span>Show Reimbursed</span>
-                </v-tooltip>
+            <!-- Filters -->
+            <fieldset class="filter_border">
+              <legend class="legend_style">Filters</legend>
 
-                <!-- Show Pending -->
-                <v-tooltip top>
-                  <template v-slot:activator="{ on }">
-                    <v-btn value="notReimbursed" v-on="on" text>
-                      <v-icon id="showPending">mdi-close-circle-outline</v-icon>
-                    </v-btn>
-                  </template>
-                  <span>Show Pending</span>
-                </v-tooltip>
+              <!-- Active Filter -->
+              <div v-if="userRoleIsAdmin()" class="flagFilter">
+                <h4>Active Expense Type:</h4>
+                <v-btn-toggle class="filter_color" v-model="filter.active" text mandatory>
+                  <!-- Show Active -->
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-btn value="active" v-on="on" text>
+                        <v-icon class="mr-1">mdi-check-circle-outline</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Show Active</span>
+                  </v-tooltip>
 
-                <!-- Show Reimbursed and Pending -->
-                <v-tooltip top>
-                  <template v-slot:activator="{ on }">
-                    <v-btn id="bothReimbursed" value="both" v-on="on" text> BOTH </v-btn>
-                  </template>
-                  <span>Show All</span>
-                </v-tooltip>
-              </v-btn-toggle>
-            </div>
-            <!-- End Reimbursed Filter -->
-            <div class="flagFilter"></div>
-          </fieldset>
-          <br />
-          <!-- End Filters -->
+                  <!-- Show Inactive -->
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-btn value="notActive" v-on="on" text>
+                        <v-icon>mdi-close-circle-outline</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Show Inactive</span>
+                  </v-tooltip>
 
-          <!-- My Expenses Data Table-->
-          <v-data-table
-            :headers="roleHeaders"
-            :items="filteredExpenses"
-            :sort-by.sync="sortBy"
-            :sort-desc.sync="sortDesc"
-            :expanded.sync="expanded"
-            :loading="loading || initialPageLoading"
-            :items-per-page="15"
-            :search="search"
-            item-key="id"
-            class="elevation-4"
-            @click:row="clickedRow"
-          >
-            <!-- Cost slot -->
-            <template v-slot:[`item.cost`]="{ item }">
-              <td>{{ convertToMoneyString(item.cost) }}</td>
-            </template>
-            <!-- Purchase date slot -->
-            <template v-slot:[`item.purchaseDate`]="{ item }">
-              <td>{{ monthDayYearFormat(item.purchaseDate) }}</td>
-            </template>
-            <!-- Reimburse date Slot -->
-            <template v-slot:[`item.reimbursedDate`]="{ item }">
-              <td>{{ monthDayYearFormat(item.reimbursedDate) }}</td>
-            </template>
-            <!-- Creation date slot -->
-            <template v-slot:[`item.createdAt`]="{ item }">
-              <td>{{ monthDayYearFormat(item.createdAt) }}</td>
-            </template>
-            <!-- Employee name slot-->
-            <template v-slot:[`item.employeeName`]="{ item }">
-              <td v-if="userRoleIsAdmin()">{{ item.employeeName }}</td>
-            </template>
-            <!-- Budget Name Slot -->
-            <template v-slot:[`item.budgetName`]="{ item }">
-              <td>{{ item.budgetName }}</td>
-            </template>
-            <!--Action Items-->
-            <template v-slot:[`item.actions`]="{ item }">
-              <!-- Download Button-->
-              <td class="datatable_btn layout" @click="clickedRow(item)">
-                <!-- Download Attachment Button -->
-                <attachment :midAction="midAction" :expense="item" :mode="'expenses'"></attachment>
+                  <!-- Show Active and Inactive -->
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-btn value="both" v-on="on" text> BOTH </v-btn>
+                    </template>
+                    <span>Show All</span>
+                  </v-tooltip>
+                </v-btn-toggle>
+              </div>
+              <!-- End Active Filter -->
 
-                <!-- Edit Button -->
-                <v-tooltip top>
-                  <template v-slot:activator="{ on }">
-                    <v-btn
-                      :disabled="
-                        isEditing ||
-                        (!userRoleIsAdmin() && isReimbursed(item)) ||
-                        midAction ||
-                        (!userRoleIsAdmin() && !canDelete(item))
-                      "
-                      text
-                      icon
-                      id="edit"
-                      @click="
-                        toTopOfForm();
-                        onSelect(item);
-                      "
-                      v-on="on"
-                    >
-                      <v-icon class="case-gray">edit</v-icon>
-                    </v-btn>
-                  </template>
-                  <span>Edit</span>
-                </v-tooltip>
-                <!-- Delete Button -->
-                <v-tooltip top>
-                  <template v-slot:activator="{ on }">
-                    <v-btn
-                      :disabled="
-                        isReimbursed(item) || isEditing || midAction || (!userRoleIsAdmin() && !canDelete(item))
-                      "
-                      text
-                      icon
-                      id="delete"
-                      @click="
-                        deleting = !deleting;
-                        midAction = true;
-                        propExpense = item;
-                      "
-                      v-on="on"
-                    >
-                      <v-icon class="case-gray"> delete </v-icon>
-                    </v-btn>
-                  </template>
-                  <span>Delete</span>
-                </v-tooltip>
-                <!-- Unreimburse Button -->
-                <v-tooltip top>
-                  <template v-slot:activator="{ on }">
-                    <v-btn
-                      v-if="userRoleIsAdmin()"
-                      :disabled="!isReimbursed(item) || isEditing || midAction"
-                      text
-                      icon
-                      id="unreimburse"
-                      @click="
-                        unreimbursing = !unreimbursing;
-                        midAction = true;
-                        propExpense = item;
-                      "
-                      v-on="on"
-                    >
-                      <v-icon class="case-gray"> money_off </v-icon>
-                    </v-btn>
-                  </template>
-                  <span>Unreimburse</span>
-                </v-tooltip>
-              </td>
-            </template>
+              <!-- Reimbursed Filter -->
+              <div class="flagFilter">
+                <h4>Reimbursed:</h4>
+                <v-btn-toggle class="filter_color" v-model="filter.reimbursed" text mandatory>
+                  <!-- Show Reimbursed -->
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-btn value="reimbursed" v-on="on" text>
+                        <v-icon id="showReimbursed" class="mr-1">mdi-check-circle-outline</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Show Reimbursed</span>
+                  </v-tooltip>
 
-            <!-- Expanded slot in datatable -->
-            <template v-slot:expanded-item="{ headers, item }">
-              <td :colspan="headers.length" class="pa-0">
-                <v-card text>
-                  <v-card-text>
-                    <div class="expandedInfo">
-                      <p v-if="item.description">
-                        <b>Description: </b>
-                        {{ item.description }}
-                      </p>
-                      <p v-if="item.recipient && !initialPageLoading">
-                        <b>Recipient: </b>
-                        {{ getEmployee(item.recipient) }}
-                      </p>
-                      <p v-if="!isEmpty(item.note)"><b>Notes: </b>{{ item.note }}</p>
-                      <p v-if="!isEmpty(item.receipt)"><b>Receipt: </b>{{ item.receipt }}</p>
-                      <p v-if="!isEmpty(item.url)">
-                        <b>Url: </b> <a v-if="item.url" :href="item.url" target="_blank">{{ item.url }}</a>
-                      </p>
-                      <p v-if="!isEmpty(item.category)"><b>Category: </b>{{ item.category }}</p>
-                      <div v-if="userRoleIsAdmin()" class="flagExp">
-                        <p>Inactive:</p>
-                        <v-icon v-if="useInactiveStyle(item)" id="marks" class="mr-1 mx-3"
-                          >mdi-check-circle-outline</v-icon
-                        >
-                        <v-icon v-else class="mr-1 mx-3" id="marks">mdi-close-circle-outline</v-icon>
-                        <br />
-                        <p>Show On Feed:</p>
-                        <v-icon v-if="item.showOnFeed" id="marks" class="mr-1 mx-3">mdi-check-circle-outline</v-icon>
-                        <v-icon v-else class="mr-1 mx-3" id="marks">mdi-close-circle-outline</v-icon>
+                  <!-- Show Pending -->
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-btn value="notReimbursed" v-on="on" text>
+                        <v-icon id="showPending">mdi-close-circle-outline</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Show Pending</span>
+                  </v-tooltip>
+
+                  <!-- Show Reimbursed and Pending -->
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-btn id="bothReimbursed" value="both" v-on="on" text> BOTH </v-btn>
+                    </template>
+                    <span>Show All</span>
+                  </v-tooltip>
+                </v-btn-toggle>
+              </div>
+              <!-- End Reimbursed Filter -->
+              <div class="flagFilter"></div>
+            </fieldset>
+            <br />
+            <!-- End Filters -->
+
+            <!-- My Expenses Data Table-->
+            <v-data-table
+              :headers="roleHeaders"
+              :items="filteredExpenses"
+              :sort-by.sync="sortBy"
+              :sort-desc.sync="sortDesc"
+              :expanded.sync="expanded"
+              :loading="loading || initialPageLoading"
+              :items-per-page="15"
+              :search="search"
+              item-key="id"
+              class="elevation-4"
+              @click:row="clickedRow"
+            >
+              <!-- Cost slot -->
+              <template v-slot:[`item.cost`]="{ item }">
+                <td>{{ convertToMoneyString(item.cost) }}</td>
+              </template>
+              <!-- Purchase date slot -->
+              <template v-slot:[`item.purchaseDate`]="{ item }">
+                <td>{{ monthDayYearFormat(item.purchaseDate) }}</td>
+              </template>
+              <!-- Reimburse date Slot -->
+              <template v-slot:[`item.reimbursedDate`]="{ item }">
+                <td>{{ monthDayYearFormat(item.reimbursedDate) }}</td>
+              </template>
+              <!-- Creation date slot -->
+              <template v-slot:[`item.createdAt`]="{ item }">
+                <td>{{ monthDayYearFormat(item.createdAt) }}</td>
+              </template>
+              <!-- Employee name slot-->
+              <template v-slot:[`item.employeeName`]="{ item }">
+                <td v-if="userRoleIsAdmin()">{{ item.employeeName }}</td>
+              </template>
+              <!-- Budget Name Slot -->
+              <template v-slot:[`item.budgetName`]="{ item }">
+                <td>{{ item.budgetName }}</td>
+              </template>
+              <!--Action Items-->
+              <template v-slot:[`item.actions`]="{ item }">
+                <!-- Download Button-->
+                <td class="datatable_btn layout mr-0" @click="clickedRow(item)">
+                  <!-- Download Attachment Button -->
+                  <attachment :midAction="midAction" :expense="item" :mode="'expenses'"></attachment>
+
+                  <!-- Edit Button -->
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-btn
+                        :disabled="
+                          isEditing ||
+                          (!userRoleIsAdmin() && isReimbursed(item)) ||
+                          midAction ||
+                          (!userRoleIsAdmin() && !canDelete(item))
+                        "
+                        text
+                        icon
+                        id="edit"
+                        @click="
+                          toTopOfForm();
+                          onSelect(item);
+                        "
+                        v-on="on"
+                      >
+                        <v-icon class="case-gray">edit</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Edit</span>
+                  </v-tooltip>
+                  <!-- Delete Button -->
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-btn
+                        :disabled="
+                          isReimbursed(item) || isEditing || midAction || (!userRoleIsAdmin() && !canDelete(item))
+                        "
+                        text
+                        icon
+                        id="delete"
+                        @click="
+                          deleting = !deleting;
+                          midAction = true;
+                          propExpense = item;
+                        "
+                        v-on="on"
+                      >
+                        <v-icon class="case-gray"> delete </v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Delete</span>
+                  </v-tooltip>
+                  <!-- Unreimburse Button -->
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-btn
+                        v-if="userRoleIsAdmin()"
+                        :disabled="!isReimbursed(item) || isEditing || midAction"
+                        text
+                        icon
+                        id="unreimburse"
+                        @click="
+                          unreimbursing = !unreimbursing;
+                          midAction = true;
+                          propExpense = item;
+                        "
+                        v-on="on"
+                      >
+                        <v-icon class="case-gray"> money_off </v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Unreimburse</span>
+                  </v-tooltip>
+                </td>
+              </template>
+
+              <!-- Expanded slot in datatable -->
+              <template v-slot:expanded-item="{ headers, item }">
+                <td :colspan="headers.length" class="pa-0">
+                  <v-card text>
+                    <v-card-text>
+                      <div class="expandedInfo">
+                        <p v-if="item.description">
+                          <b>Description: </b>
+                          {{ item.description }}
+                        </p>
+                        <p v-if="item.recipient && !initialPageLoading">
+                          <b>Recipient: </b>
+                          {{ getEmployee(item.recipient) }}
+                        </p>
+                        <p v-if="!isEmpty(item.note)"><b>Notes: </b>{{ item.note }}</p>
+                        <p v-if="!isEmpty(item.receipt)"><b>Receipt: </b>{{ item.receipt }}</p>
+                        <p v-if="!isEmpty(item.url)">
+                          <b>Url: </b> <a v-if="item.url" :href="item.url" target="_blank">{{ item.url }}</a>
+                        </p>
+                        <p v-if="!isEmpty(item.category)"><b>Category: </b>{{ item.category }}</p>
+                        <div v-if="userRoleIsAdmin()" class="flagExp">
+                          <p>Inactive:</p>
+                          <v-icon v-if="useInactiveStyle(item)" id="marks" class="mr-1 mx-3"
+                            >mdi-check-circle-outline</v-icon
+                          >
+                          <v-icon v-else class="mr-1 mx-3" id="marks">mdi-close-circle-outline</v-icon>
+                          <br />
+                          <p>Show On Feed:</p>
+                          <v-icon v-if="item.showOnFeed" id="marks" class="mr-1 mx-3">mdi-check-circle-outline</v-icon>
+                          <v-icon v-else class="mr-1 mx-3" id="marks">mdi-close-circle-outline</v-icon>
+                        </div>
                       </div>
-                    </div>
-                  </v-card-text>
-                </v-card>
-              </td>
-            </template>
-            <!-- End expanded slot in datatable -->
+                    </v-card-text>
+                  </v-card>
+                </td>
+              </template>
+              <!-- End expanded slot in datatable -->
 
-            <!-- Alert for no search results -->
-            <v-alert slot="no-results" :value="true" color="error" icon="warning">
-              Your search for "{{ search }}" found no results.
-            </v-alert>
-            <!-- End alert for no search results -->
-          </v-data-table>
-          <br />
+              <!-- Alert for no search results -->
+              <v-alert slot="no-results" :value="true" color="error" icon="warning">
+                Your search for "{{ search }}" found no results.
+              </v-alert>
+              <!-- End alert for no search results -->
+            </v-data-table>
+            <br />
 
-          <!-- Download expense csv button -->
-          <v-card-actions>
-            <convert-expenses-to-csv
-              v-if="userRoleIsAdmin()"
-              :midAction="midAction"
-              :expenses="filteredExpenses"
-            ></convert-expenses-to-csv>
-          </v-card-actions>
+            <!-- Download expense csv button -->
+            <v-card-actions>
+              <convert-expenses-to-csv
+                v-if="userRoleIsAdmin()"
+                :midAction="midAction"
+                :expenses="filteredExpenses"
+              ></convert-expenses-to-csv>
+            </v-card-actions>
 
-          <!-- Confirmation Modals -->
-          <unreimburse-modal :toggleUnreimburseModal="unreimbursing"></unreimburse-modal>
-          <delete-modal :toggleDeleteModal="deleting" :type="'expense'"></delete-modal>
-          <!-- End Confirmation Modals -->
-        </v-container>
-      </v-card>
-    </v-col>
+            <!-- Confirmation Modals -->
+            <unreimburse-modal :toggleUnreimburseModal="unreimbursing"></unreimburse-modal>
+            <delete-modal :toggleDeleteModal="deleting" :type="'expense'"></delete-modal>
+            <!-- End Confirmation Modals -->
+          </v-container>
+        </v-card>
+      </v-col>
 
-    <!-- Expense Form -->
-    <v-col v-if="userRoleIsAdmin() || !userIsInactive" cols="12" lg="4">
-      <expense-form
-        v-if="!initialPageLoading"
-        ref="form"
-        :isEdit="isEditing"
-        :expense="expense"
-        v-on:add="addModelToTable"
-        v-on:delete="deleteModelFromTable"
-        v-on:startAction="startAction"
-        v-on:update="updateModelInTable"
-        v-on:error="displayError"
-      ></expense-form>
-    </v-col>
-  </v-row>
+      <!-- Expense Form -->
+      <v-col v-if="userRoleIsAdmin() || !userIsInactive" cols="12" lg="4">
+        <expense-form
+          v-if="!initialPageLoading"
+          ref="form"
+          :isEdit="isEditing"
+          :expense="expense"
+          v-on:add="addModelToTable"
+          v-on:delete="deleteModelFromTable"
+          v-on:startAction="startAction"
+          v-on:update="updateModelInTable"
+          v-on:error="displayError"
+        ></expense-form>
+      </v-col>
+    </v-row>
+  </div>
 </template>
 
 <script>
@@ -732,6 +744,7 @@ function onSelect(item) {
   this.expense = _.mergeWith(this.expense, item, (expenseValue, itemValue) => {
     return _.isNil(itemValue) ? expenseValue : itemValue;
   });
+  this.isEditing = true;
   this.expense.edit = true;
   this.$set(this.expense, 'cost', moneyFilter(item.cost));
 } // onSelect

@@ -7,7 +7,7 @@
  * and split it into multiple files based on use case.
  * e.g. all current user data in one file
  *      all expense data in one file
- *      all employees/basecamp/twitter
+ *      all employees/basecamp
  *      meta data/other supporting stuff?
  *
  */
@@ -34,7 +34,8 @@ export default new Vuex.Store({
       budgets: null,
       loginTime: null,
       quickbooksPTO: null,
-      quickbooksMonthlyHours: null
+      quickbooksMonthlyHours: null,
+      ptoCashOuts: null
     };
   },
   mutations: {
@@ -75,6 +76,9 @@ export default new Vuex.Store({
     },
     setQuickbooksMonthlyHours(state, payload) {
       state.quickbooksMonthlyHours = payload.quickbooksMonthlyHours;
+    },
+    setPtoCashOuts(state, payload) {
+      state.ptoCashOuts = payload.ptoCashOuts;
     }
   },
   actions: {
@@ -113,6 +117,9 @@ export default new Vuex.Store({
     },
     setQuickbooksMonthlyHours(context, payload) {
       context.commit('setQuickbooksMonthlyHours', payload);
+    },
+    setPtoCashOuts(context, payload) {
+      context.commit('setPtoCashOuts', payload);
     }
   },
   getters: {
@@ -157,6 +164,9 @@ export default new Vuex.Store({
     },
     quickbooksMonthlyHours(state) {
       return state.quickbooksMonthlyHours;
+    },
+    ptoCashOuts(state) {
+      return state.ptoCashOuts;
     }
   }
 });

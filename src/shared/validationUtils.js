@@ -1,5 +1,7 @@
 import { isEmpty } from '@/utils/utils';
 import { getTodaysDate, isBefore, isValid } from '@/shared/dateUtils';
+import store from '../../store/index';
+import _ from 'lodash';
 
 /**
  * Gets the optional date rules in MM/DD/YYYY format.
@@ -112,3 +114,19 @@ export function getURLRules() {
 export function getValidateFalse() {
   return [(v) => isEmpty(v) || 'Departure date must be after hire date'];
 } // getValidateRules
+
+/**
+ *  Gets the rules for validating employee PTO Cash Out request
+ * @param ptoLimit employee's available PTO
+ * @returns Array - The array of rule functions
+ */
+export function getPTOCashOutRules(ptoLimit, employeeId) {
+  let pendingCashOuts = _.filter(store.getters.ptoCashOuts, (p) => !p.approvedDate && employeeId === p.employeeId);
+  let pendingAmount = pendingCashOuts.reduce((n, { amount }) => n + amount, 0);
+  return [
+    (v) => (!isEmpty(v) && v > 0) || `PTO cash out amount must be greater than 0`,
+    (v) =>
+      (!isEmpty(v) && ptoLimit - v - pendingAmount >= 40) ||
+      'A minimum balance of 40h must be maintained after a cash out'
+  ];
+} // getPTOCashOutRules

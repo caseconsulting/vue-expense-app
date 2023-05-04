@@ -12,7 +12,7 @@
         <p class="ma-0" style="display: inline-block">{{ alert.message }}</p>
         <div :class="getButtonStyling()">
           <v-btn
-            :disabled="onProfile()"
+            :disabled="onPage(alert.handler.page)"
             @click="handleClick(alert.handler.page, alert.handler.extras)"
             class="justify-center black--text notif-action-btn"
             elevation="0"
@@ -181,6 +181,43 @@ async function checkReimbursements() {
 } // checkReimbursements
 
 /**
+ * Checks if a PTO Cash Out was approved.
+ */
+async function checkPtoCashOuts() {
+  let cashOuts = await api.getEmployeePtoCashOuts(this.user.id);
+  let unseenApprovedCashOuts = _.filter(cashOuts, (c) => c.approvedDate && !c.approvalWasSeen);
+
+  if (unseenApprovedCashOuts && unseenApprovedCashOuts.length > 0) {
+    let promises = [];
+    let cashOutAmount = 0;
+    _.forEach(unseenApprovedCashOuts, async (cashOut) => {
+      // determines if a user has an unseen cash out approval
+      if (!cashOut.approvalWasSeen && cashOut.approvedDate) {
+        cashOutAmount += cashOut.amount;
+        cashOut.approvalWasSeen = true;
+
+        // update the cash out item
+        promises.push(api.updateItem(api.PTO_CASH_OUTS, cashOut));
+      }
+    });
+    this.alerts.push({
+      handler: {
+        name: 'PTO Cash Outs',
+        page: 'ptoCashOuts',
+        extras: {}
+      },
+      closeable: true,
+      status: 'info',
+      color: 'cyan',
+      message: `Your PTO cash out request of ${cashOutAmount} ${cashOutAmount == 1 ? 'hour' : 'hours'} was approved`,
+      id: this.randId()
+    });
+    // resolve promises to mark read
+    await Promise.all(promises);
+  }
+} // checkPtoCashOuts
+
+/**
  * Determines what styles to put on the buttons.
  */
 function getButtonStyling() {
@@ -240,13 +277,14 @@ function randId() {
 // |--------------------------------------------------|
 
 /**
- * Checks if the current profile someone is on is the user's profile
+ * Checks if the user is already on the given page.
  *
- * @return boolean - checks to see if the current banner is on user profile
+ * @param page String - The page of the button
+ * @return boolean - checks to see if the current banner is on the page
  */
-function onProfile() {
-  return this.$route.params.id == this.user.employeeNumber;
-} // onProfile
+function onPage(page) {
+  return page == this.$route.name;
+} // onPage
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -262,6 +300,7 @@ async function created() {
   this.checkBadges();
   this.checkCertifications();
   await this.checkReimbursements();
+  await this.checkPtoCashOuts();
 } // created
 
 // |--------------------------------------------------|
@@ -284,6 +323,7 @@ export default {
     checkBadges,
     checkCertifications,
     checkReimbursements,
+    checkPtoCashOuts,
     format, // dateUtils
     getButtonStyling,
     getTodaysDate, // dateUtils
@@ -293,7 +333,7 @@ export default {
     isMobile,
     isSmallScreen,
     randId,
-    onProfile,
+    onPage,
     updateStoreExpenseTypes
   }
 };
