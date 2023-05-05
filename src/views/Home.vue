@@ -220,6 +220,7 @@ async function createEvents() {
             event.truncatedText = _.truncate(event.text, { length: this.textMaxLength });
           }
           if (event.type === 'New Hire') {
+            event.color = 'black';
             newHires.push(event);
           } else {
             if (anniversaries[monthDiff].events) {
@@ -258,7 +259,7 @@ async function createEvents() {
       let event = {};
       let now = getTodaysDate();
       let cutOff = startOf(subtract(now, 6, 'months'), 'day');
-      let birthday = format(b.birthday, 'YYYY-MM-DD', 'YYYY-MM-DD');
+      let birthday = format(b.birthday, 'MM-DD', 'MM-DD');
       birthday = setYear(birthday, getYear(now));
       let diff = difference(startOf(now, 'day'), startOf(birthday, 'day'), 'day');
       // Get event date text
@@ -278,7 +279,7 @@ async function createEvents() {
       }
       event.icon = 'mdi-cake-variant';
       event.type = 'Birthday';
-      event.color = 'orange';
+      event.color = 'orange darken-3';
       event.daysFromToday = difference(startOf(now, 'day'), startOf(birthday, 'day'), 'day');
       event.birthdayCampfire = 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726';
       if (this.textMaxLength < event.text.length) {
@@ -322,6 +323,11 @@ async function createEvents() {
         event.icon = 'mdi-thumbs-up';
         event.type = 'Congratulate';
         event.color = 'purple';
+      } else if (a.budgetName === 'Training') {
+        event.campfire = a.campfire;
+        event.icon = 'mdi-dumbbell';
+        event.type = 'Training';
+        event.color = 'brown';
       } else {
         event.campfire = a.campfire;
         event.icon = 'mdi-currency-usd';
@@ -365,7 +371,7 @@ async function createEvents() {
     }
     event.link = a.app_url;
     event.eventScheduled = a.app_url;
-    event.color = '#1a73e8';
+    event.color = 'blue darken-3';
     if (this.textMaxLength < event.text.length) {
       event.truncatedText = _.truncate(event.text, { length: this.textMaxLength });
     }
@@ -405,7 +411,7 @@ async function createEvents() {
     const dateSubmitted = c.dateSubmitted || c.dateReceived;
     let cert = {
       icon: 'mdi-certificate',
-      color: '#3C7DD0',
+      color: 'blue lighten-1',
       type: 'Certification',
       daysFromToday: difference(startOf(now, 'day'), startOf(dateSubmitted, 'day'), 'day'),
       text: `${getEmployeePreferredName(c.employee)} ${c.employee.lastName} was certified "${c.name}"`,
