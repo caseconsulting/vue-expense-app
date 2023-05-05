@@ -62,7 +62,7 @@
 <script>
 import api from '../../shared/api';
 import _ from 'lodash';
-import { v4 as uuid } from 'uuid';
+import { generateUUID } from '@/utils/utils';
 
 /**
  * Resets the form and closed the form dialog.
@@ -95,7 +95,7 @@ async function submit() {
  */
 async function createProject() {
   let project = {
-    id: uuid(),
+    id: generateUUID(),
     projectName: this.projectName,
     directorate: this.directorate,
     popStartDate: this.popStartDate,

@@ -409,7 +409,7 @@ import TechnologyTab from '@/components/employees/form-tabs/TechnologyTab';
 import { updateStoreEmployees, updateStoreUser } from '@/utils/storeUtils';
 import { format } from '@/shared/dateUtils';
 import { getRole } from '@/utils/auth';
-import { v4 as uuid } from 'uuid';
+import { generateUUID } from '@/utils/utils';
 import _ from 'lodash';
 
 // |--------------------------------------------------|
@@ -726,7 +726,7 @@ async function submit() {
       // If mifiStatus on page load is different than the submitted mifiStatus value, create audit log
       if (this.mifiStatusOnLoad !== updatedEmployee.mifiStatus) {
         await api.createItem(api.AUDIT, {
-          id: uuid(),
+          id: generateUUID(),
           type: 'mifi',
           tags: ['submit', `mifi set to ${this.model.mifiStatus}`],
           employeeId: this.employee.id,
@@ -736,7 +736,7 @@ async function submit() {
       }
     } else {
       // creating employee
-      this.model.id = uuid();
+      this.model.id = generateUUID();
       let newEmployee = await api.createItem(api.EMPLOYEES, this.model);
       // getEmployees and update store with latest data
       await this.updateStoreEmployees();

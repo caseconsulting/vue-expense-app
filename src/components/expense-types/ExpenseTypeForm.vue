@@ -321,9 +321,8 @@
 import api from '@/shared/api.js';
 import GeneralConfirmationModal from '@/components/modals/GeneralConfirmationModal.vue';
 import _ from 'lodash';
-import { v4 as uuid } from 'uuid';
 import { getDateRules, getRequiredRules } from '@/shared/validationUtils.js';
-import { isEmpty } from '@/utils/utils';
+import { generateUUID, isEmpty } from '@/utils/utils';
 import { format } from '@/shared/dateUtils';
 import { updateStoreExpenseTypes, updateStoreCampfires } from '@/utils/storeUtils';
 import { mask } from 'vue-the-mask';
@@ -573,7 +572,7 @@ async function submit() {
       }
     } else {
       // creating a new expense type
-      let newUUID = uuid();
+      let newUUID = generateUUID();
       this.$set(this.editedExpenseType, 'id', newUUID);
       let newExpenseType = await api.createItem(api.EXPENSE_TYPES, this.editedExpenseType);
 

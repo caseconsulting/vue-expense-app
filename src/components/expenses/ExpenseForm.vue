@@ -302,12 +302,17 @@ import GeneralConfirmationModal from '@/components/modals/GeneralConfirmationMod
 import api from '@/shared/api.js';
 import employeeUtils from '@/shared/employeeUtils';
 import { getDateRules, getDateOptionalRules, getRequiredRules, getURLRules } from '@/shared/validationUtils.js';
-import { isEmpty, isFullTime, convertToMoneyString, userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
+import {
+  isEmpty,
+  isFullTime,
+  convertToMoneyString,
+  generateUUID,
+  userRoleIsAdmin,
+  userRoleIsManager
+} from '@/utils/utils';
 import { updateStoreBudgets } from '@/utils/storeUtils';
 import { getRole } from '@/utils/auth';
 import { isBetween, getTodaysDate, format } from '../../shared/dateUtils';
-
-import { v4 as uuid } from 'uuid';
 import { mask } from 'vue-the-mask';
 
 import _ from 'lodash';
@@ -744,7 +749,7 @@ async function createNewEntry() {
   let updatedAttachment;
   let updatedExpense;
 
-  let newUUID = this.uuid();
+  let newUUID = generateUUID();
   this.$set(this.editedExpense, 'id', newUUID);
   this.$set(this.editedExpense, 'createdAt', getTodaysDate());
   if (this.isReceiptRequired() && this.file) {
@@ -1896,7 +1901,6 @@ export default {
     updateExistingEntry,
     userRoleIsAdmin,
     userRoleIsManager,
-    uuid,
     updateStoreBudgets
   },
   props: [

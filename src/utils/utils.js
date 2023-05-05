@@ -1,7 +1,6 @@
 import api from '@/shared/api.js';
 import MobileDetect from 'mobile-detect';
 import _ from 'lodash';
-import { v4 as uuid } from 'uuid';
 import { getRole } from '@/utils/auth';
 import { format, getTodaysDate, isAfter, isBefore, setYear, subtract, DEFAULT_ISOFORMAT } from '@/shared/dateUtils';
 
@@ -32,6 +31,15 @@ export function getCurrentBudgetYear(hireDate) {
   }
   return format(hireDate, null, DEFAULT_ISOFORMAT);
 } // getCurrentBudgetYear
+
+/**
+ * Generates a random v4 UUID from the native Node.js crypto function.
+ *
+ * @returns String - A random v4 UUID
+ */
+export function generateUUID() {
+  return window.crypto.randomUUID();
+} // generateUUID
 
 /**
  * Checks if a value is empty. Returns true if the value is null or an empty/blank string.
@@ -137,7 +145,7 @@ export async function updateEmployeeLogin(employee) {
   await Promise.all([
     api.updateItem(api.EMPLOYEES, employee), // updates last logged in for employee
     api.createItem(api.AUDIT, {
-      id: uuid(),
+      id: generateUUID(),
       type: 'login',
       tags: ['account'],
       employeeId: employee.id,
