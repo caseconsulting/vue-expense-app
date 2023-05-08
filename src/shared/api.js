@@ -287,6 +287,15 @@ async function getAllAggregateExpenses() {
 } // getAllAggregateExpenses
 
 /**
+ * gets all the unreimbursed expenses
+ *
+ * @return - the expense data
+ */
+async function getUnreimbursedExpenses() {
+  return await execute('get', `/${UTILITY}/getUnreimbursedExpenses`);
+} // getUnreimbursedExpenses
+
+/**
  * gets current user
  *
  * @return - get current signed in user
@@ -495,6 +504,7 @@ export default {
   extractResumeText,
   getAllActiveEmployeeBudgets,
   getAllAggregateExpenses,
+  getUnreimbursedExpenses,
   getAllEmployeeExpenses,
   getAllEvents,
   getAllExpenseTypeExpenses,
