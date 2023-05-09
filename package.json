@@ -3,7 +3,7 @@
   "version": "3.14.0",
   "private": true,
   "scripts": {
-    "build": "vue-cli-service build",
+    "build": "export NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service build",
     "cli": "vue-cli-service",
     "predeploy:dev": "npm run download:dev:env",
     "deploy:dev": "vue-cli-service build && grunt deploy:dev",
@@ -24,7 +24,7 @@
     "inspect": "vue-cli-service inspect > output.log",
     "lint": "npm run eslint",
     "precommit": "npm run validate && npm run lint && npm run stylelint && npm run unit",
-    "serve": "vue-cli-service serve",
+    "serve": "export NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service serve",
     "start": "npm run serve",
     "stylelint": "stylelint src/**/*.{css,scss,vue}",
     "test": "node ./node_modules/nightwatch/bin/nightwatch -e default unit-tests --suiteRetries 2",
