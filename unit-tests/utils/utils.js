@@ -109,7 +109,7 @@ function login(browser, username = null, password = null) {
     .pause(vars.SMALL_PAUSE)
     .setValue('input[type="password"]', password) // password input
     .keys(browser.Keys.ENTER) // submit form
-    .waitForElementVisible('#home', vars.WAIT_TIME); // header text 'Case Portal'
+    .waitForElementVisible('#home', vars.WAIT_TIME); // header text 'CASE Portal'
 } // login
 
 /**

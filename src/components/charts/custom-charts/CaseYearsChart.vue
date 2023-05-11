@@ -111,7 +111,7 @@ function drawCaseYearsHistGraph() {
         },
         title: {
           display: true,
-          text: 'Years at Case Consulting',
+          text: 'Years at CASE',
           font: {
             weight: 'bold'
           }
@@ -124,7 +124,7 @@ function drawCaseYearsHistGraph() {
       },
       title: {
         display: true,
-        text: 'Number of Years at Case Consulting for Employees',
+        text: 'Number of Years at CASE for Employees',
         font: {
           size: 15
         }

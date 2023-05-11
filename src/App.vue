@@ -17,13 +17,13 @@
         <v-app-bar-nav-icon v-show="isLoggedIn() && isMobile" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
         <div class="d-flex align-center siteId" @click="goToHome">
           <v-avatar size="40" color="grey lighten-4" class="mr-2">
-            <img src="@/assets/img/case-logo-circle.png" class="logo-bar" />
+            <img src="@/assets/img/logo-big.png" class="logo-bar" />
           </v-avatar>
           <v-toolbar-title v-show="!isMobile">
-            <h1>Case Portal</h1>
+            <h1>CASE Portal</h1>
           </v-toolbar-title>
           <!-- In Mobile View decrease title size-->
-          <h1 v-show="isMobile" class="font-25">Case Portal</h1>
+          <h1 v-show="isMobile" class="font-25">CASE Portal</h1>
         </div>
         <v-spacer></v-spacer>
         <!-- Display social media icons and links dropdown menu -->
@@ -382,8 +382,8 @@ export default {
     badgeKey: 0,
     date: null,
     links: [
-      { name: 'Case Website', link: 'https://www.consultwithcase.com/' },
-      { name: 'Case Information', link: 'https://3.basecamp.com/3097063/buckets/4708396/messages/650777910' },
+      { name: 'CASE Website', link: 'https://www.consultwithcase.com/' },
+      { name: 'CASE Information', link: 'https://3.basecamp.com/3097063/buckets/4708396/messages/650777910' },
       { name: 'Basecamp', link: 'https://3.basecamp.com/3097063' },
       { name: 'Net Benefits/Fidelity', link: 'https://nb.fidelity.com/public/nb/default/home' },
       { name: 'Health Insurance', link: 'https://3.basecamp.com/3097063/buckets/179119/messages/4799723388' },

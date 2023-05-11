@@ -304,7 +304,7 @@
           </div>
         </template>
         <span
-          >Most Case employees are considered 'Professionals'. Please select 'Professional' unless you know you fall
+          >Most CASE employees are considered 'Professionals'. Please select 'Professional' unless you know you fall
           into a different category.</span
         >
       </v-tooltip>

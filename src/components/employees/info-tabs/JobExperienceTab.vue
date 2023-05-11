@@ -5,7 +5,7 @@
     <hr class="my-3" />
 
     <!-- Case Consulting -->
-    <p><b>Case Consulting Info</b></p>
+    <p><b>CASE Info</b></p>
     <p v-if="model.jobRole"><b>Position: </b>{{ model.jobRole }}</p>
     <p><b>Start Date: </b>{{ monthDayYearFormat(model.hireDate) }}</p>
     <p v-if="model.deptDate"><b>End Date: </b>{{ monthDayYearFormat(model.deptDate) }}</p>

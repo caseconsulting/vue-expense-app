@@ -4,8 +4,8 @@
       <v-card>
         <v-card-title class="headline">Are you sure you want to decline to self-identify?</v-card-title>
         <v-card-text>
-          EEOC prefers employees self-identify as to race and gender. If you refuses to identify, Case Consulting Inc.
-          will complete the information on your behalf based on other records or visual observation.
+          EEOC prefers employees self-identify as to race and gender. If you refuses to identify, CASE will complete the
+          information on your behalf based on other records or visual observation.
         </v-card-text>
         <v-card-text>
           For more information please refer to

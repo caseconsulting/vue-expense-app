@@ -141,7 +141,7 @@ function fillData() {
       },
       title: {
         display: true,
-        text: 'Top Foreign Languages Case Consulting',
+        text: 'Top Foreign Languages CASE',
         font: {
           size: 15
         }

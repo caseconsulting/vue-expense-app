@@ -192,14 +192,14 @@ async function createEvents() {
         if (monthDiff >= 0 && monthDiff < monthsBack) {
           event.date = this.getEventDateMessage(anniversary);
           if (isSame(anniversary, hireDate, 'day')) {
-            event.text = a.firstName + ' ' + a.lastName + ' has joined the Case Consulting team!'; //new hire message
+            event.text = a.firstName + ' ' + a.lastName + ' has joined the CASE team!'; //new hire message
             event.icon = 'mdi-account-plus';
             event.type = 'New Hire';
             event.newCampfire = 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726';
           } else {
             event.date = format(anniversary, null, 'll');
             if (difference(anniversary, hireDate, 'year') == 1) {
-              event.text = a.firstName + ' ' + a.lastName + ' is celebrating 1 year at Case Consulting!';
+              event.text = a.firstName + ' ' + a.lastName + ' is celebrating 1 year at CASE!';
             } else {
               event.text =
                 getEmployeePreferredName(a) +
@@ -207,7 +207,7 @@ async function createEvents() {
                 a.lastName +
                 ' is celebrating ' +
                 difference(anniversary, hireDate, 'year') +
-                ' years at Case Consulting!';
+                ' years at CASE!';
             }
             event.anniversary = anniversary;
             event.icon = 'mdi-party-popper';
