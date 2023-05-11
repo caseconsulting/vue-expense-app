@@ -1,7 +1,7 @@
 <template>
   <v-container class="text-md-center">
     <div>
-      <img src="../assets/img/logo-banner.gif" alt="" />
+      <img width="419" height="160" src="../assets/img/logo-banner.gif" alt="" />
       <h1 class="my-4">CASE Portal</h1>
     </div>
     <v-btn @click="login()" id="custom-button-color" large>Login</v-btn>
