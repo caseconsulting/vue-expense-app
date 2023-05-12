@@ -65,11 +65,11 @@
           <!-- Available Budgets -->
           <div class="text-center">
             <available-budgets
-              v-if="accessibleBudgets"
               id="home-available-budgets"
               :employee="employee"
               :expenses="expenses"
               :expenseTypes="expenseTypes"
+              :employeeDataLoading="loadingBudgets"
               :fiscalDateView="fiscalDateView"
               :accessibleBudgets="accessibleBudgets"
             ></available-budgets>
@@ -541,6 +541,7 @@ async function loadHomePageData() {
  * Refresh and sets employee information.
  */
 async function refreshEmployee() {
+  this.loadingBudgets = true;
   this.employee = this.$store.getters.user;
   this.hireDate = this.employee.hireDate;
   this.fiscalDateView = this.getCurrentBudgetYear(this.hireDate);
@@ -550,6 +551,7 @@ async function refreshEmployee() {
   ]);
   this.expenseTypes = this.$store.getters.expenseTypes;
   this.accessibleBudgets = this.$store.getters.budgets;
+  this.loadingBudgets = false;
 } // refreshEmployee
 
 /**
@@ -575,8 +577,8 @@ async function created() {
     this.status = status;
   });
   if (this.$store.getters.storeIsPopulated) {
-    await this.loadHomePageData();
     this.loading = false;
+    await this.loadHomePageData();
   }
 } // created
 
@@ -598,8 +600,8 @@ function beforeDestroy() {
  */
 async function watchStoreIsPopulated() {
   if (this.$store.getters.storeIsPopulated) {
-    await this.loadHomePageData();
     this.loading = false;
+    await this.loadHomePageData();
   }
 } // watchStoreIsPopulated
 
@@ -637,6 +639,7 @@ export default {
       fiscalDateView: '', // current budget year view by anniversary day
       hireDate: '', // employee hire date
       loading: true,
+      loadingBudgets: true,
       loadingEvents: true,
       scheduleEntries: [],
       seconds: 0, // seconds until next anniversary date
