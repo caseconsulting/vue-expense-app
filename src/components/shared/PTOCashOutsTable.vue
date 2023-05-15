@@ -160,24 +160,6 @@
               </template>
               <span>Delete</span>
             </v-tooltip>
-
-            <!-- Unapprove Button -->
-            <v-tooltip top>
-              <template v-slot:activator="{ on }">
-                <v-btn
-                  v-if="userRoleIsAdmin() || userRoleIsManager()"
-                  :disabled="!isApproved(item) || isUnapproving || isDeleting"
-                  @click="clickedUnapprove(item)"
-                  text
-                  icon
-                  id="unapprove"
-                  v-on="on"
-                >
-                  <v-icon class="case-gray"> money_off </v-icon>
-                </v-btn>
-              </template>
-              <span>Unapprove</span>
-            </v-tooltip>
           </td>
         </template>
       </v-data-table>
@@ -204,7 +186,6 @@
       type="pto-cash-outs"
       :toggleModal="toggleApproveModal"
     />
-    <unapprove-p-t-o-cash-out-modal :toggleUnapproveModal="toggleUnapproveModal" />
     <delete-modal :toggleDeleteModal="toggleDeleteModal" type="PTO cash out" />
     <v-dialog v-model="toggleEditModal" persistent max-width="500">
       <p-t-o-cash-out-form :item="clickedEditItem" />
@@ -219,7 +200,6 @@ import { updateStoreUser, updateStoreEmployees, updateStorePtoCashOuts } from '@
 import _ from 'lodash';
 import GeneralConfirmationModal from '../modals/GeneralConfirmationModal.vue';
 import dateUtils from '@/shared/dateUtils';
-import UnapprovePTOCashOutModal from '../modals/UnapprovePTOCashOutModal.vue';
 import DeleteModal from '../modals/DeleteModal.vue';
 import PTOCashOutForm from './PTOCashOutForm.vue';
 
@@ -255,8 +235,6 @@ async function created() {
 function beforeDestroy() {
   window.EventBus.$off('confirm-pto-cash-outs');
   window.EventBus.$off('canceled-pto-cash-outs');
-  window.EventBus.$off('confirm-unapprove-cash-out');
-  window.EventBus.$off('canceled-unapprove-cash-out');
   window.EventBus.$off('confirm-delete-PTO cash out');
   window.EventBus.$off('canceled-delete-PTO cash out');
   window.EventBus.$off('close-pto-cash-out-form');
@@ -270,17 +248,11 @@ async function mounted() {
     this.toggleEditModal = false;
     this.clickedEditItem = null;
   });
-  window.EventBus.$on('confirm-unapprove-cash-out', async () => {
-    await this.clickedConfirmUnapprove();
-  });
   window.EventBus.$on('confirmed-pto-cash-outs', async () => {
     await this.clickedConfirmApprove();
   });
   window.EventBus.$on('canceled-pto-cash-outs', () => {
     this.toggleApproveModal = false;
-  });
-  window.EventBus.$on('canceled-unapprove-cash-out', () => {
-    this.clickedCancelUnapprove();
   });
   window.EventBus.$on('confirm-delete-PTO cash out', async () => {
     await this.clickedConfirmDelete();
@@ -327,17 +299,6 @@ async function clickedConfirmApprove() {
   }
   this.toggleApproveModal = false;
 } // clickedConfirmApprove
-
-/**
- * Event handler for clicking the unapprove button on row item.
- *
- * @param item PTO cash out item
- */
-function clickedUnapprove(item) {
-  this.clickedUnapproveItem = item;
-  this.isUnapproving = true;
-  this.toggleUnapproveModal = !this.toggleUnapproveModal;
-} // clickedUnapprove
 
 /**
  * Event handler for clicking the delete button.
@@ -405,49 +366,6 @@ async function deletePTOCashOut(item) {
   this.$store.dispatch('setPtoCashOuts', { ptoCashOuts });
   return deletedPTOCashOut;
 } // deletePTOCashOut
-
-/**
- * Event handler for clicking confirm unapprove from confirmation modal.
- */
-async function clickedConfirmUnapprove() {
-  try {
-    // this.toggleUnapproveModal = false;
-    this.loading = true;
-    await this.unapprovePTOCashOut(this.clickedUnapproveItem);
-    this.loading = false;
-    this.displaySuccess('Successfully unapproved PTO cash out!');
-  } catch (err) {
-    this.loading = false;
-    this.displayError(err);
-  }
-  this.isUnapproving = false;
-  this.clickedUnapproveItem = null;
-} // clickedConfirmUnapprove
-
-/**
- * Unapproves PTO cash out item in the database. Removes approved date from
- * the object.
- *
- * @param item PTO cash out item to unapprove.
- */
-async function unapprovePTOCashOut(item) {
-  let ptoCashOut = _.cloneDeep(item);
-  ptoCashOut.approvedDate = null;
-  let ptoCashOuts = _.cloneDeep(this.$store.getters.ptoCashOuts);
-  let index = ptoCashOuts.findIndex((p) => p.id == ptoCashOut.id);
-  ptoCashOuts[index] = ptoCashOut;
-  let updatedPTOCashOut = await api.updateItem(api.PTO_CASH_OUTS, ptoCashOut);
-  this.$store.dispatch('setPtoCashOuts', { ptoCashOuts });
-  return updatedPTOCashOut;
-} // unapprovePTOCashOut
-
-/**
- * Event handler for clicking cancel in the confirm unapprove modal.
- */
-function clickedCancelUnapprove() {
-  this.isUnapproving = false;
-  // this.toggleUnapproveModal = !this.toggleUnapproveModal;
-} // clickedCancelUnapprove
 
 /**
  * Displays error snackbar
@@ -636,20 +554,15 @@ export default {
       isDeleting: false,
       showApproveButton: false,
       toggleApproveModal: false,
-      toggleUnapproveModal: false,
       toggleDeleteModal: false,
       toggleEditModal: false,
-      clickedUnapproveItem: null,
       clickedEditItem: null
     };
   },
   methods: {
     approveSelectedPTOCashOuts,
     clickedConfirmApprove,
-    clickedConfirmUnapprove,
-    clickedCancelUnapprove,
     clickedDelete,
-    clickedUnapprove,
     clickedCancelDelete,
     clickedConfirmDelete,
     clickedEdit,
@@ -669,8 +582,7 @@ export default {
     updateStoreUser,
     updateStoreEmployees,
     updateStorePtoCashOuts,
-    uncheckAllBoxes,
-    unapprovePTOCashOut
+    uncheckAllBoxes
   },
   mounted,
   computed: {
@@ -682,6 +594,6 @@ export default {
   watch: {
     selected: watchSelected
   },
-  components: { GeneralConfirmationModal, UnapprovePTOCashOutModal, DeleteModal, PTOCashOutForm }
+  components: { GeneralConfirmationModal, DeleteModal, PTOCashOutForm }
 };
 </script>
