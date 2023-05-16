@@ -324,7 +324,7 @@ export default {
             abilities: [
               { ability: 'View/update personal profile data', admin: 'X', manager: 'X', user: 'X', intern: 'X' },
               { ability: 'Add/edit personal expenses', admin: 'X', manager: 'X', user: 'X', intern: 'X' },
-              { ability: 'Add/edit personal PTO cash out requests', admin: 'X', manager: 'X', user: 'X', intern: 'X' },
+              { ability: 'Add/edit personal PTO cash out requests', admin: 'X', manager: 'X', user: 'X', intern: '' },
               { ability: 'View other’s profile data', admin: 'X', manager: 'X', user: 'X', intern: '' },
               { ability: 'Create employees', admin: 'X', manager: 'X', user: '', intern: '' },
               { ability: 'Edit other’s profile data', admin: 'X', manager: 'X', user: '', intern: '' },
