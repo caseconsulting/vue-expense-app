@@ -145,6 +145,14 @@ async function mounted() {
   });
 } // mounted
 
+/**
+ * beforeDestroy lifecycle hook
+ */
+async function beforeDestroy() {
+  window.EventBus.$off('canceled-delete-tag');
+  window.EventBus.$off('confirm-delete-tag');
+} // beforeDestroy
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -305,6 +313,7 @@ function watchCreatingTag() {
 // |--------------------------------------------------|
 
 export default {
+  beforeDestroy,
   components: {
     DeleteModal
   },
