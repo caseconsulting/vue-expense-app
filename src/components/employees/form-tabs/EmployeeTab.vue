@@ -233,7 +233,7 @@
       <v-switch
         v-model="mifiStatus"
         label="Use Mifi instead of increased technology budget ($150)"
-        v-if="!userRoleIsIntern() && !isInactive()"
+        v-if="userRoleIsAdmin() && !isInactive()"
       ></v-switch>
 
       <!-- START EEO Compliance Reporting Section -->
