@@ -419,7 +419,6 @@ async function refreshEmployees() {
   this.employees = this.$store.getters.employees; // get all employees
   this.filterEmployees(); // filter employees
   this.expanded = []; // collapse any expanded rows in the database
-
   let avatars = this.$store.getters.basecampAvatars;
   _.map(this.employees, (employee) => {
     let avatar = _.find(avatars, ['email_address', employee.email]);

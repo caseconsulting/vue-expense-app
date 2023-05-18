@@ -2,9 +2,11 @@
   <div>
     <v-row class="mb-4">
       <v-col cols="6">
+        <!-- Create Tag -->
         <v-btn :disabled="creatingTag" @click="creatingTag = true">Create Tag <v-icon right>mdi-tag</v-icon></v-btn>
       </v-col>
       <v-col cols="6">
+        <!-- Table Search Field -->
         <v-text-field
           id="tagSearch"
           v-model="search"
@@ -16,23 +18,18 @@
         ></v-text-field>
       </v-col>
     </v-row>
-    <v-data-table
-      :headers="headers"
-      :items="tags"
-      :search="search"
-      item-key="id"
-      :loading="loading"
-      mobile-breakpoint="800"
-    >
+    <v-data-table v-if="loading" :headers="headers" :items="[]" loading></v-data-table>
+    <v-data-table v-else :headers="headers" :items="tags" :search="search" item-key="id" mobile-breakpoint="800">
       <!-- Tag Name Slot -->
       <template v-slot:[`item.tagName`]="{ item }">
         <v-text-field
           v-if="editedTag && item.id === editedTag.id"
           v-model="editedTag.tagName"
+          :disabled="tagLoading"
           :hide-details="true"
           dense
           single-line
-          :autofocus="true"
+          autofocus
         ></v-text-field>
         <span v-else>{{ item.tagName }}</span>
       </template>
@@ -42,11 +39,15 @@
         <v-autocomplete
           v-if="editedTag && item.id === editedTag.id"
           v-model="editedTag.employees"
+          :disabled="tagLoading"
           :items="filteredEmployees"
           :filter="customFilter"
           multiple
           chips
           small-chips
+          deletable-chips
+          :search-input.sync="employeeSearch"
+          @change="employeeSearch = ''"
           item-text="employeeName"
           item-value="id"
         ></v-autocomplete>
@@ -62,7 +63,7 @@
           <!-- Save Edited Tag -->
           <v-tooltip top>
             <template v-slot:activator="{ on }">
-              <v-btn text icon @click="saveEditedTag()" v-on="on">
+              <v-btn :disabled="tagLoading" :loading="tagLoading" text icon @click="saveEditedTag" v-on="on">
                 <v-icon>save</v-icon>
               </v-btn>
             </template>
@@ -71,7 +72,7 @@
           <!-- Cancel Edited Tag -->
           <v-tooltip top>
             <template v-slot:activator="{ on }">
-              <v-btn text icon @click="cancelEdit()" v-on="on">
+              <v-btn :disabled="tagLoading" text icon @click="cancelEdit" v-on="on">
                 <v-icon>cancel</v-icon>
               </v-btn>
             </template>
@@ -82,7 +83,7 @@
           <!-- Edit Tag -->
           <v-tooltip top>
             <template v-slot:activator="{ on }">
-              <v-btn :disabled="!!editedTag" text icon @click="editTag(item)" v-on="on">
+              <v-btn :disabled="!!editedTag || tagLoading" text icon @click="editTag(item)" v-on="on">
                 <v-icon>edit</v-icon>
               </v-btn>
             </template>
@@ -91,7 +92,14 @@
           <!-- Delete Tag -->
           <v-tooltip top>
             <template v-slot:activator="{ on }">
-              <v-btn :disabled="!!editedTag" text icon @click="deleteTag(item)" v-on="on">
+              <v-btn
+                :loading="tagLoading && !!deletedTag && deletedTag.id === item.id"
+                :disabled="!!editedTag || tagLoading"
+                text
+                icon
+                @click="deletedTag = item"
+                v-on="on"
+              >
                 <v-icon>delete</v-icon>
               </v-btn>
             </template>
@@ -100,13 +108,18 @@
         </div>
       </template>
     </v-data-table>
+    <!-- Confirmation Modals -->
+    <delete-modal :toggleDeleteModal="!!deletedTag" type="tag"></delete-modal>
   </div>
 </template>
 
 <script>
 import _ from 'lodash';
+import api from '@/shared/api';
 import { generateUUID } from '@/utils/utils';
 import { nicknameAndLastName } from '@/shared/employeeUtils';
+
+import DeleteModal from '@/components/modals/DeleteModal.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -117,21 +130,20 @@ import { nicknameAndLastName } from '@/shared/employeeUtils';
 /**
  * Created lifecycle hook
  */
-function created() {
-  this.tags = [
-    {
-      id: 'wlrtkmwrlkm',
-      tagName: 'Fire Team',
-      employees: ['6f55856c-5e35-4fca-9381-adbf99b4994e', 'e7ca4fb6-9983-4b0d-8961-d4257505787c']
-    },
-    {
-      id: 'sdgwrgwrg',
-      tagName: 'Developer',
-      employees: ['6f55856c-5e35-4fca-9381-adbf99b4994e']
-    }
-  ];
+async function created() {
+  this.tags = await api.getItems(api.TAGS);
   this.loading = false;
 } // created
+
+/**
+ * Mounted lifecycle hook
+ */
+async function mounted() {
+  window.EventBus.$on('canceled-delete-tag', () => (this.deletedTag = null));
+  window.EventBus.$on('confirm-delete-tag', async () => {
+    await this.deleteTag();
+  });
+} // mounted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -152,11 +164,10 @@ function cancelEdit() {
 
 /**
  * Creates a tag.
- *
  */
-function createTag() {
-  // TODO
+async function createTag() {
   this.editedTag.id = generateUUID();
+  this.editedTag = await api.createItem(api.TAGS, this.editedTag);
   this.tags[0] = _.cloneDeep(this.editedTag);
   this.editedTag = null;
   this.creatingTag = false;
@@ -183,12 +194,15 @@ function customFilter(item, queryText) {
 
 /**
  * Deletes a tag.
- *
- * @param tag Object - The tag to delete
  */
-function deleteTag(tag) {
+async function deleteTag() {
+  this.tagLoading = true;
+  let tag = _.cloneDeep(this.deletedTag);
+  await api.deleteItem(api.TAGS, tag.id);
   let tagIndex = this.tags.findIndex((t) => t.id === tag.id);
   this.tags.splice(tagIndex, 1);
+  this.deletedTag = null;
+  this.tagLoading = false;
 } // deleteTag
 
 /**
@@ -230,17 +244,20 @@ function getTagEmployees(employees) {
 /**
  * Either creates a tag or saves an edited tag that already exists.
  */
-function saveEditedTag() {
+async function saveEditedTag() {
+  this.tagLoading = true;
   if (_.isEmpty(this.editedTag.id)) {
     // Create new tag
-    this.createTag();
+    await this.createTag();
   } else {
     // Save existing tag
     let tagIndex = this.tags.findIndex((t) => t.id === this.editedTag.id);
+    this.editedTag = await api.updateItem(api.TAGS, this.editedTag);
     this.tags[tagIndex] = _.cloneDeep(this.editedTag);
     this.tags = _.cloneDeep(this.tags);
     this.editedTag = null;
   }
+  this.tagLoading = false;
 } // saveEditedTag
 
 // |--------------------------------------------------|
@@ -288,6 +305,9 @@ function watchCreatingTag() {
 // |--------------------------------------------------|
 
 export default {
+  components: {
+    DeleteModal
+  },
   created,
   computed: {
     filteredEmployees
@@ -295,27 +315,31 @@ export default {
   data() {
     return {
       creatingTag: false,
+      deletedTag: null,
       editedTag: null,
+      employeeSearch: '',
       headers: [
         {
           text: 'Tag Name',
           value: 'tagName',
-          width: '40%'
+          width: '25%'
         },
         {
           text: 'Employees',
           value: 'employees',
-          width: '40%'
+          sortable: false,
+          width: '60%'
         },
         {
           text: 'Actions',
           value: 'actions',
           sortable: false,
           align: 'center',
-          width: '20%'
+          width: '15%'
         }
       ],
       loading: true,
+      tagLoading: false,
       tags: null,
       search: null
     };
@@ -331,6 +355,7 @@ export default {
     nicknameAndLastName,
     saveEditedTag
   },
+  mounted,
   watch: {
     creatingTag: watchCreatingTag
   }
