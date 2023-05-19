@@ -19,7 +19,15 @@
       </v-col>
     </v-row>
     <v-data-table v-if="loading" :headers="headers" :items="[]" loading></v-data-table>
-    <v-data-table v-else :headers="headers" :items="tags" :search="search" item-key="id" mobile-breakpoint="800">
+    <v-data-table
+      v-else
+      :headers="headers"
+      :items="tags"
+      :search="search"
+      :custom-filter="tableFilter"
+      item-key="id"
+      mobile-breakpoint="800"
+    >
       <!-- Tag Name Slot -->
       <template v-slot:[`item.tagName`]="{ item }">
         <v-text-field
@@ -118,7 +126,7 @@
 import _ from 'lodash';
 import api from '@/shared/api';
 import { generateUUID } from '@/utils/utils';
-import { nicknameAndLastName } from '@/shared/employeeUtils';
+import { firstAndLastName, fullName, nicknameAndLastName } from '@/shared/employeeUtils';
 import { getRequiredRules } from '@/shared/validationUtils';
 
 import DeleteModal from '@/components/modals/DeleteModal.vue';
@@ -311,6 +319,31 @@ async function saveEditedTag() {
   }
 } // saveEditedTag
 
+/**
+ * Custom filter for searching in the tag table.
+ *
+ * @param _ - The value
+ * @param search - The search value in the search bar
+ * @param item - The item in the tag table
+ * @returns Boolean - True if the item matches the search criteria
+ */
+function tableFilter(_, search, item) {
+  let found = false;
+  if (item.tagName.includes(search)) return true; // early exit if tag name matches search
+  _.forEach(item.employees, (id) => {
+    let e = _.find(this.$store.getters.employees, (emp) => emp.id === id);
+    if (
+      e &&
+      (this.nicknameAndLastName(e).includes(search) ||
+        this.firstAndLastName(e).includes(search) ||
+        this.fullName(e).includes(search))
+    ) {
+      found = true;
+    }
+  });
+  return found;
+} // tableFilter
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     COMPUTED                     |
@@ -410,10 +443,13 @@ export default {
     displaySuccess,
     editTag,
     emit,
+    firstAndLastName,
+    fullName,
     getRequiredRules,
     getTagEmployees,
     nicknameAndLastName,
-    saveEditedTag
+    saveEditedTag,
+    tableFilter
   },
   mounted,
   watch: {
