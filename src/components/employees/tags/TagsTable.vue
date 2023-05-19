@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <v-form ref="form" v-model="valid" lazy-validation>
     <v-row class="mb-4">
       <v-col cols="6">
         <!-- Create Tag -->
@@ -25,9 +25,9 @@
         <v-text-field
           v-if="editedTag && item.id === editedTag.id"
           v-model="editedTag.tagName"
+          :rules="[(v) => !!v || 'Field is required', duplicateTagName()]"
           :disabled="tagLoading"
-          :hide-details="true"
-          dense
+          label="Tag Name*"
           single-line
           autofocus
         ></v-text-field>
@@ -48,6 +48,7 @@
           deletable-chips
           :search-input.sync="employeeSearch"
           @change="employeeSearch = ''"
+          label="Employees (optional)"
           item-text="employeeName"
           item-value="id"
         ></v-autocomplete>
@@ -110,7 +111,7 @@
     </v-data-table>
     <!-- Confirmation Modals -->
     <delete-modal :toggleDeleteModal="!!deletedTag" type="tag"></delete-modal>
-  </div>
+  </v-form>
 </template>
 
 <script>
@@ -118,6 +119,7 @@ import _ from 'lodash';
 import api from '@/shared/api';
 import { generateUUID } from '@/utils/utils';
 import { nicknameAndLastName } from '@/shared/employeeUtils';
+import { getRequiredRules } from '@/shared/validationUtils';
 
 import DeleteModal from '@/components/modals/DeleteModal.vue';
 
@@ -253,19 +255,22 @@ function getTagEmployees(employees) {
  * Either creates a tag or saves an edited tag that already exists.
  */
 async function saveEditedTag() {
-  this.tagLoading = true;
-  if (_.isEmpty(this.editedTag.id)) {
-    // Create new tag
-    await this.createTag();
-  } else {
-    // Save existing tag
-    let tagIndex = this.tags.findIndex((t) => t.id === this.editedTag.id);
-    this.editedTag = await api.updateItem(api.TAGS, this.editedTag);
-    this.tags[tagIndex] = _.cloneDeep(this.editedTag);
-    this.tags = _.cloneDeep(this.tags);
-    this.editedTag = null;
+  this.valid = this.$refs.form.validate();
+  if (this.valid) {
+    this.tagLoading = true;
+    if (_.isEmpty(this.editedTag.id)) {
+      // Create new tag
+      await this.createTag();
+    } else {
+      // Save existing tag
+      let tagIndex = this.tags.findIndex((t) => t.id === this.editedTag.id);
+      this.editedTag = await api.updateItem(api.TAGS, this.editedTag);
+      this.tags[tagIndex] = _.cloneDeep(this.editedTag);
+      this.tags = _.cloneDeep(this.tags);
+      this.editedTag = null;
+    }
+    this.tagLoading = false;
   }
-  this.tagLoading = false;
 } // saveEditedTag
 
 // |--------------------------------------------------|
@@ -350,7 +355,12 @@ export default {
       loading: true,
       tagLoading: false,
       tags: null,
-      search: null
+      search: null,
+      valid: true,
+      duplicateTagName: () => {
+        let arr = _.filter(this.tags, (t) => t.tagName === this.editedTag.tagName);
+        return arr.length < 2 || 'Duplicate tag name';
+      }
     };
   },
   methods: {
@@ -360,6 +370,7 @@ export default {
     deleteTag,
     editTag,
     emit,
+    getRequiredRules,
     getTagEmployees,
     nicknameAndLastName,
     saveEditedTag
