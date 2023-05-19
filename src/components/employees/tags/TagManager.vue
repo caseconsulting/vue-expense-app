@@ -1,10 +1,21 @@
 <template>
   <div>
+    <!-- Status Alert -->
+    <v-snackbar v-model="status.statusType" :color="status.color" multi-line right :timeout="5000" top vertical>
+      <v-card-title headline color="white">
+        <span class="headline">{{ status.statusMessage }}</span>
+      </v-card-title>
+      <v-btn color="white" text @click="clearStatus"> Close </v-btn>
+    </v-snackbar>
+    <!-- Modal Card -->
     <v-card>
+      <!-- Modal Title -->
       <v-card-title class="headline header_style">Tag Manager</v-card-title>
+      <!-- Modal Content -->
       <v-card-text class="mt-4">
         <tags-table></tags-table>
       </v-card-text>
+      <!-- Action Button -->
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn
@@ -25,11 +36,38 @@
 <script>
 import TagsTable from '@/components/employees/tags/TagsTable.vue';
 
+/**
+ * beforeDestroy life cycle hook
+ */
+function beforeDestroy() {
+  window.EventBus.$off('status-alert');
+} // beforeDestroy
+
+/**
+ * Mounted life cycle hook
+ */
+function mounted() {
+  window.EventBus.$on('status-alert', (status) => {
+    this.$set(this.status, 'statusType', status.statusType);
+    this.$set(this.status, 'statusMessage', status.statusMessage);
+    this.$set(this.status, 'color', status.color);
+  });
+} // mounted
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Clear the action status that is displayed in the snackbar.
+ */
+function clearStatus() {
+  this.$set(this.status, 'statusType', undefined);
+  this.$set(this.status, 'statusMessage', '');
+  this.$set(this.status, 'color', '');
+} // clearStatus
 
 /**
  * Emits a message and data if it exists.
@@ -54,17 +92,25 @@ function emit(msg, data) {
 // |--------------------------------------------------|
 
 export default {
+  beforeDestroy,
   components: {
     TagsTable
   },
   data() {
     return {
       activate: false, // dialog activator
-      creatingTag: false
+      creatingTag: false,
+      status: {
+        statusType: undefined,
+        statusMessage: '',
+        color: ''
+      }
     };
   },
   methods: {
+    clearStatus,
     emit
-  }
+  },
+  mounted
 };
 </script>

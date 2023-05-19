@@ -206,14 +206,47 @@ function customFilter(item, queryText) {
  * Deletes a tag.
  */
 async function deleteTag() {
-  this.tagLoading = true;
-  let tag = _.cloneDeep(this.deletedTag);
-  await api.deleteItem(api.TAGS, tag.id);
-  let tagIndex = this.tags.findIndex((t) => t.id === tag.id);
-  this.tags.splice(tagIndex, 1);
-  this.deletedTag = null;
-  this.tagLoading = false;
+  try {
+    this.tagLoading = true;
+    let tag = _.cloneDeep(this.deletedTag);
+    await api.deleteItem(api.TAGS, tag.id);
+    let tagIndex = this.tags.findIndex((t) => t.id === tag.id);
+    this.tags.splice(tagIndex, 1);
+    this.deletedTag = null;
+    this.tagLoading = false;
+    this.displaySuccess('Item was successfully deleted!');
+  } catch (err) {
+    this.displayError(err);
+  }
 } // deleteTag
+
+/**
+ * Displays error snackbar
+ *
+ * @param err error message to display
+ */
+function displayError(err) {
+  let status = {
+    statusType: 'ERROR',
+    statusMessage: err,
+    color: 'red'
+  };
+
+  window.EventBus.$emit('status-alert', status);
+} // displayError
+
+/**
+ * Displays success message
+ * @param msg success message to display
+ */
+function displaySuccess(msg) {
+  let status = {
+    statusType: 'SUCCESS',
+    statusMessage: msg,
+    color: 'green'
+  };
+  window.EventBus.$emit('status-alert', status);
+} // displaySuccess
 
 /**
  * Edits a tag.
@@ -257,19 +290,24 @@ function getTagEmployees(employees) {
 async function saveEditedTag() {
   this.valid = this.$refs.form.validate();
   if (this.valid) {
-    this.tagLoading = true;
-    if (_.isEmpty(this.editedTag.id)) {
-      // Create new tag
-      await this.createTag();
-    } else {
-      // Save existing tag
-      let tagIndex = this.tags.findIndex((t) => t.id === this.editedTag.id);
-      this.editedTag = await api.updateItem(api.TAGS, this.editedTag);
-      this.tags[tagIndex] = _.cloneDeep(this.editedTag);
-      this.tags = _.cloneDeep(this.tags);
-      this.editedTag = null;
+    try {
+      this.tagLoading = true;
+      if (_.isEmpty(this.editedTag.id)) {
+        // Create new tag
+        await this.createTag();
+      } else {
+        // Save existing tag
+        let tagIndex = this.tags.findIndex((t) => t.id === this.editedTag.id);
+        this.editedTag = await api.updateItem(api.TAGS, this.editedTag);
+        this.tags[tagIndex] = _.cloneDeep(this.editedTag);
+        this.tags = _.cloneDeep(this.tags);
+        this.editedTag = null;
+      }
+      this.tagLoading = false;
+      this.displaySuccess('Item was successfully saved!');
+    } catch (err) {
+      this.displayError(err);
     }
-    this.tagLoading = false;
   }
 } // saveEditedTag
 
@@ -368,6 +406,8 @@ export default {
     createTag,
     customFilter,
     deleteTag,
+    displayError,
+    displaySuccess,
     editTag,
     emit,
     getRequiredRules,
