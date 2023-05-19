@@ -1168,7 +1168,8 @@ export default {
         recurringFlag: false,
         requiredFlag: true,
         requireURL: false,
-        startDate: null
+        startDate: null,
+        tagBudgets: []
       }, // selected expense type
       search: '', // query text for datatable search field
       sortBy: 'budgetName', // sort datatable items

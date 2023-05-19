@@ -48,6 +48,89 @@
           @input="formatBudget(budgetFormatted)"
         ></v-text-field>
 
+        <!-- Employee Access -->
+        <div class="form-text">
+          Employee Access
+          <v-btn @click="toFAQ()" class="mb-4" x-small icon><v-icon color="#3f51b5">info</v-icon></v-btn>
+        </div>
+        <v-row no-gutters>
+          <v-col cols="6" lg="3">
+            <v-checkbox
+              label="Full-time"
+              value="FullTime"
+              v-model="editedExpenseType.accessibleBy"
+              :rules="checkBoxValid"
+            ></v-checkbox>
+          </v-col>
+          <v-col cols="6" lg="3">
+            <v-checkbox
+              label="Part-time"
+              value="PartTime"
+              v-model="editedExpenseType.accessibleBy"
+              :rules="checkBoxValid"
+            ></v-checkbox>
+          </v-col>
+          <v-col cols="6" lg="3">
+            <v-checkbox
+              label="Intern"
+              value="Intern"
+              v-model="editedExpenseType.accessibleBy"
+              :rules="checkBoxValid"
+            ></v-checkbox>
+          </v-col>
+          <v-col cols="6" lg="3">
+            <v-checkbox
+              label="Custom"
+              value="Custom"
+              v-model="editedExpenseType.accessibleBy"
+              :rules="checkBoxValid"
+            ></v-checkbox>
+          </v-col>
+        </v-row>
+        <p id="error" v-if="checkBoxRule">At least one checkbox must be checked</p>
+
+        <!-- Tag Management -->
+        <div class="form-text">
+          Tag Budgets (optional)
+          <!-- <v-btn @click="toFAQ()" class="mb-4" x-small icon><v-icon color="#3f51b5">info</v-icon></v-btn> -->
+        </div>
+        <v-container>
+          <v-row v-for="(tag, index) in editedExpenseType.tagBudgets" :key="index">
+            <v-col cols="8">
+              <v-autocomplete
+                v-model="tag.tags"
+                item-text="tagName"
+                item-value="id"
+                small-chips
+                deletable-chips
+                multiple
+                chips
+                :items="tags"
+              >
+                <template v-slot:selection="data">
+                  <v-chip
+                    small
+                    v-bind="data.attrs"
+                    :input-value="data.selected"
+                    close
+                    @click="data.select"
+                    @click:close="remove(data.item, index)"
+                    ><v-icon left>mdi-tag</v-icon>{{ data.item.tagName }}</v-chip
+                  >
+                </template>
+              </v-autocomplete>
+            </v-col>
+            <v-col cols="2"> <v-text-field v-model="tag.budget" prefix="$" label="Amount" /></v-col>
+            <v-col cols="2" class="d-flex justify-center align-center">
+              <v-btn @click="removeTagBudget(index)"><v-icon>mdi-trash-can</v-icon></v-btn>
+            </v-col>
+          </v-row>
+          <v-row class="d-flex justify-center align-center"
+            ><v-btn @click="addTagBudget()"><v-icon>mdi-plus</v-icon></v-btn></v-row
+          >
+          {{ editedExpenseType.tagBudgets }}
+        </v-container>
+
         <!-- Flags -->
         <v-row>
           <v-col cols="6">
@@ -166,47 +249,6 @@
           label="Basecamp Campfire (optional)"
           clearable
         ></v-autocomplete>
-
-        <!-- Employee Access -->
-        <div class="form-text">
-          Employee Access
-          <v-btn @click="toFAQ()" class="mb-4" x-small icon><v-icon color="#3f51b5">info</v-icon></v-btn>
-        </div>
-        <v-row no-gutters>
-          <v-col cols="6" lg="3">
-            <v-checkbox
-              label="Full-time"
-              value="FullTime"
-              v-model="editedExpenseType.accessibleBy"
-              :rules="checkBoxValid"
-            ></v-checkbox>
-          </v-col>
-          <v-col cols="6" lg="3">
-            <v-checkbox
-              label="Part-time"
-              value="PartTime"
-              v-model="editedExpenseType.accessibleBy"
-              :rules="checkBoxValid"
-            ></v-checkbox>
-          </v-col>
-          <v-col cols="6" lg="3">
-            <v-checkbox
-              label="Intern"
-              value="Intern"
-              v-model="editedExpenseType.accessibleBy"
-              :rules="checkBoxValid"
-            ></v-checkbox>
-          </v-col>
-          <v-col cols="6" lg="3">
-            <v-checkbox
-              label="Custom"
-              value="Custom"
-              v-model="editedExpenseType.accessibleBy"
-              :rules="checkBoxValid"
-            ></v-checkbox>
-          </v-col>
-        </v-row>
-        <p id="error" v-if="checkBoxRule">At least one checkbox must be checked</p>
 
         <!-- Custom Access: Employee List -->
         <v-autocomplete
@@ -633,6 +675,28 @@ function toggleRequireReceipt() {
   }
 } // toggleRequireReceipt
 
+/**
+ * Creates empty tag budget field in tagBudgets list
+ */
+function addTagBudget() {
+  this.editedExpenseType.tagBudgets.push({});
+} // addTagBudgets
+
+/**
+ * Removes specified tag budget from list of tag budgets
+ *
+ * @param index index of tag budget to remove
+ */
+function removeTagBudget(index) {
+  this.editedExpenseType.tagBudgets.splice(index, 1);
+} // removeTagBudget
+
+function remove(data, index) {
+  console.log(data);
+  let indx = this.tagBudgets[index].tags.findIndex((t) => t.id == data.id);
+  this.tagBudgets[index].tags.splice(indx, 1);
+}
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                    COMPUTED                      |
@@ -667,6 +731,7 @@ async function created() {
     this.submitting = false;
     this.submitForm = false;
   });
+  this.tags = await api.getItems(api.TAGS);
   // get all employees
   let employees = this.$store.getters.employees;
   let activeEmployees = [];
@@ -863,11 +928,13 @@ export default {
       startDateFormatted: null, // formatted start date
       submitting: false, // submitting form
       submitForm: false, //triggers submit form modal when changed
-      valid: false // form is valid
+      valid: false, // form is valid
+      tags: []
     };
   },
   directives: { mask },
   methods: {
+    addTagBudget,
     checkRequireReceipt,
     checkRequireURL,
     checkSelection,
@@ -884,7 +951,9 @@ export default {
     isValid,
     odFlagHint,
     parseBudget,
+    remove,
     removeCategory,
+    removeTagBudget,
     submit,
     toFAQ,
     toggleRequireURL,
