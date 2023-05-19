@@ -322,12 +322,12 @@ async function saveEditedTag() {
 /**
  * Custom filter for searching in the tag table.
  *
- * @param _ - The value
+ * @param __ - The value
  * @param search - The search value in the search bar
  * @param item - The item in the tag table
  * @returns Boolean - True if the item matches the search criteria
  */
-function tableFilter(_, search, item) {
+function tableFilter(__, search, item) {
   let found = false;
   if (item.tagName.includes(search)) return true; // early exit if tag name matches search
   _.forEach(item.employees, (id) => {
