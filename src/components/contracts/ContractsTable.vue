@@ -1123,9 +1123,6 @@ export default {
 .contracts-table >>> td:first-of-type {
   width: 1%;
 }
-.contracts-table >>> td:nth-child(n + 2):nth-child(-n + 6) {
-  width: 9%;
-}
 
 .contracts-table >>> td:nth-of-type(7) {
   width: 19%;
@@ -1137,5 +1134,9 @@ export default {
 
 .contracts-table >>> td:last-of-type {
   width: 10%;
+}
+
+.contracts-table >>> td:nth-child(n + 2):nth-child(-n + 6) {
+  width: 9%;
 }
 </style>
