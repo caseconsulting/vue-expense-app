@@ -310,5 +310,5 @@ $colors: (#d13447, #ffbf00, #263672);
   }
 }
 // stylelint-enable scss/function-unquote-no-unquoted-strings-inside
-// stylelint-enable scss/no-global-function-names,
+// stylelint-enable scss/no-global-function-names
 </style>
