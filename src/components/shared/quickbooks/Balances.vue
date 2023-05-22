@@ -67,8 +67,9 @@
 
 <script>
 import { isEmpty } from '@/utils/utils';
-import { updateStorePtoCashOuts, updateStoreQuickbooksPTO, updateStoreEmployees } from '@/utils/storeUtils';
+import { updateStorePtoCashOuts, updateStoreEmployees } from '@/utils/storeUtils';
 import _ from 'lodash';
+import api from '@/shared/api';
 import PTOCashOutForm from '@/components/shared/PTOCashOutForm.vue';
 
 // |--------------------------------------------------|
@@ -196,11 +197,11 @@ async function setPTOBalances() {
       this.$store.getters.user.id != this.employee.id ||
       this.refresh
     ) {
-      await Promise.all([
-        updateStoreQuickbooksPTO() /*api.getPTOBalances(this.employee.employeeNumber)*/,
-        updateStorePtoCashOuts()
-      ]); // call api
-      ptoBalances = this.$store.getters.quickbooksPTO;
+      [ptoBalances] = await Promise.all([api.getPTOBalances(this.employee.employeeNumber), updateStorePtoCashOuts()]); // call api
+      if (this.$store.getters.user.id == this.employee.id) {
+        // only set vuex store if the user is looking at their own quickbooks data
+        this.$store.dispatch('setQuickbooksPTO', { quickbooksPTO: ptoBalances });
+      }
     } else {
       ptoBalances = this.$store.getters.quickbooksPTO;
     }
