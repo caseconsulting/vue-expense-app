@@ -329,14 +329,15 @@ async function saveEditedTag() {
  */
 function tableFilter(__, search, item) {
   let found = false;
-  if (item.tagName.includes(search)) return true; // early exit if tag name matches search
+  let lcSearch = search.toLowerCase();
+  if (item.tagName.toLowerCase().includes(lcSearch)) return true; // early exit if tag name matches search
   _.forEach(item.employees, (id) => {
     let e = _.find(this.$store.getters.employees, (emp) => emp.id === id);
     if (
       e &&
-      (this.nicknameAndLastName(e).includes(search) ||
-        this.firstAndLastName(e).includes(search) ||
-        this.fullName(e).includes(search))
+      (this.nicknameAndLastName(e).toLowerCase().includes(lcSearch) ||
+        this.firstAndLastName(e).toLowerCase().includes(lcSearch) ||
+        this.fullName(e).toLowerCase().includes(lcSearch))
     ) {
       found = true;
     }
