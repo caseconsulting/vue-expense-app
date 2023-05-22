@@ -131,7 +131,7 @@
                 deletable-chips
                 multiple
                 chips
-                :items="tags"
+                :items="tagOptions(tag.tags)"
               >
                 <template v-slot:selection="data">
                   <v-chip
@@ -697,8 +697,9 @@ function removeTagBudget(index) {
  * @param index autocomplete input index
  */
 function remove(data, index) {
-  let indx = this.tagBudgets[index].tags.findIndex((t) => t.id == data.id);
-  this.tagBudgets[index].tags.splice(indx, 1);
+  console.log(this.editedExpenseType.tagBudgets);
+  let indx = this.editedExpenseType.tagBudgets[index].tags.findIndex((t) => t.id == data.id);
+  this.editedExpenseType.tagBudgets[index].tags.splice(indx, 1);
 } // remove
 
 // |--------------------------------------------------|
@@ -715,6 +716,23 @@ function remove(data, index) {
 function checkBoxRule() {
   return !(this.editedExpenseType.accessibleBy && this.editedExpenseType.accessibleBy.length > 0);
 } // checkBoxRule
+
+function tagOptions(selectedItems) {
+  let selectedTags = [];
+  if (this.editedExpenseType.tagBudgets.length > 0) {
+    this.editedExpenseType.tagBudgets.forEach((t) => {
+      if (t.tags) {
+        t.tags.forEach((id) => {
+          selectedTags.push(id);
+        });
+      }
+    });
+  }
+  if (selectedItems && selectedItems.length > 0) {
+    selectedTags = selectedTags.filter((st) => !selectedItems.includes(st));
+  }
+  return this.tags.filter((t) => !selectedTags.includes(t.id));
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -964,11 +982,13 @@ export default {
     toggleRequireReceipt,
     toggleShowAllCategories,
     updateStoreExpenseTypes,
-    updateStoreCampfires
+    updateStoreCampfires,
+    tagOptions
   },
   props: ['model'], // expense type to be created/updated
   computed: {
     checkBoxRule
+    // tagOptions
   },
   watch: {
     'model.id': watchModelID,
