@@ -89,6 +89,32 @@
         </v-row>
         <p id="error" v-if="checkBoxRule">At least one checkbox must be checked</p>
 
+        <!-- Custom Access: Employee List -->
+        <v-autocomplete
+          v-if="editedExpenseType.accessibleBy && editedExpenseType.accessibleBy.includes('Custom')"
+          v-model="customAccess"
+          :items="activeEmployees"
+          :filter="customFilter"
+          no-data-text="No Employees Available"
+          item-color="gray"
+          multiple
+          :rules="customAccessRules"
+          chips
+          clearable
+          small-chips
+          deletable-chips
+          class="mt-0 pt-0"
+          :search-input.sync="searchString"
+          @change="searchString = ''"
+        >
+          <template v-slot:label>
+            <span v-if="customAccess.length == 0" class="grey--text caption">No custom employee access</span>
+            <span v-else class="grey--text caption"
+              >{{ customAccess.length }} employee(s) have custom access to this expense type</span
+            >
+          </template>
+        </v-autocomplete>
+
         <!-- Budget Tags -->
         <div class="form-text">
           Tag Budgets (optional)
@@ -248,32 +274,6 @@
           label="Basecamp Campfire (optional)"
           clearable
         ></v-autocomplete>
-
-        <!-- Custom Access: Employee List -->
-        <v-autocomplete
-          v-if="editedExpenseType.accessibleBy && editedExpenseType.accessibleBy.includes('Custom')"
-          v-model="customAccess"
-          :items="activeEmployees"
-          :filter="customFilter"
-          no-data-text="No Employees Available"
-          item-color="gray"
-          multiple
-          :rules="customAccessRules"
-          chips
-          clearable
-          small-chips
-          deletable-chips
-          class="mt-0 pt-0"
-          :search-input.sync="searchString"
-          @change="searchString = ''"
-        >
-          <template v-slot:label>
-            <span v-if="customAccess.length == 0" class="grey--text caption">No custom employee access</span>
-            <span v-else class="grey--text caption"
-              >{{ customAccess.length }} employee(s) have custom access to this expense type</span
-            >
-          </template>
-        </v-autocomplete>
 
         <!-- Switches -->
         <!-- Pro-rated expense -->
@@ -690,11 +690,16 @@ function removeTagBudget(index) {
   this.editedExpenseType.tagBudgets.splice(index, 1);
 } // removeTagBudget
 
+/**
+ * Removes given chip from tag autocomplete input.
+ *
+ * @param data chip data to remove
+ * @param index autocomplete input index
+ */
 function remove(data, index) {
-  console.log(data);
   let indx = this.tagBudgets[index].tags.findIndex((t) => t.id == data.id);
   this.tagBudgets[index].tags.splice(indx, 1);
-}
+} // remove
 
 // |--------------------------------------------------|
 // |                                                  |

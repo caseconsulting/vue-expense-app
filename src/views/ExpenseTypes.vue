@@ -617,6 +617,7 @@ function clearModel() {
   this.$set(this.model, 'alwaysOnFeed', false);
   this.$set(this.model, 'campfire', null);
   this.$set(this.model, 'requireURL', false);
+  this.$set(this.model, 'tagBudgets', []);
 } // clearModel
 
 /**
@@ -914,6 +915,7 @@ function onSelect(item) {
   this.$set(this.model, 'alwaysOnFeed', item.alwaysOnFeed);
   this.$set(this.model, 'campfire', item.campfire);
   this.$set(this.model, 'requireURL', item.requireURL);
+  this.$set(this.model, 'tagBudgets', item.tagBudgets);
 } // onSelect
 
 /**
