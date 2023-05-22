@@ -89,7 +89,7 @@
         </v-row>
         <p id="error" v-if="checkBoxRule">At least one checkbox must be checked</p>
 
-        <!-- Tag Management -->
+        <!-- Budget Tags -->
         <div class="form-text">
           Tag Budgets (optional)
           <!-- <v-btn @click="toFAQ()" class="mb-4" x-small icon><v-icon color="#3f51b5">info</v-icon></v-btn> -->
@@ -126,9 +126,8 @@
             </v-col>
           </v-row>
           <v-row class="d-flex justify-center align-center"
-            ><v-btn @click="addTagBudget()"><v-icon>mdi-plus</v-icon></v-btn></v-row
+            ><v-btn elevation="2" @click="addTagBudget()"><v-icon>add</v-icon>Tag Budget</v-btn></v-row
           >
-          {{ editedExpenseType.tagBudgets }}
         </v-container>
 
         <!-- Flags -->
