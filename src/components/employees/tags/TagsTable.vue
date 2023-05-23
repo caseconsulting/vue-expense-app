@@ -52,6 +52,7 @@
           :filter="customFilter"
           multiple
           chips
+          clearable
           small-chips
           deletable-chips
           :search-input.sync="employeeSearch"
