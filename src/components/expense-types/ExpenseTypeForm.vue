@@ -157,6 +157,7 @@
           <v-row class="d-flex justify-center align-center">
             <v-btn elevation="2" @click="addTagBudget()"><v-icon>add</v-icon>Tag Budget</v-btn></v-row
           >
+          {{ editedExpenseType.tagBudgets }}
         </v-container>
 
         <!-- Flags -->
@@ -792,12 +793,12 @@ async function created() {
   this.editedExpenseType = _.cloneDeep(this.model);
 
   // Retrieves selected tag objects
-  if (this.editedExpenseType.tagBudgets && this.editedExpenseType.tagBudgets.length > 0) {
-    this.editedExpenseType.tagBudgets = this.editedExpenseType.tagBudgets.map((tb) => {
-      tb.tags = tb.tags.map((t) => this.getTagByID(t));
-      return tb;
-    });
-  }
+  // if (this.editedExpenseType.tagBudgets && this.editedExpenseType.tagBudgets.length > 0) {
+  //   this.editedExpenseType.tagBudgets = this.editedExpenseType.tagBudgets.map((tb) => {
+  //     tb.tags = tb.tags.map((t) => this.getTagByID(t));
+  //     return tb;
+  //   });
+  // }
 
   this.clearForm();
 } // created
@@ -823,12 +824,12 @@ function watchModelID() {
   this.editedExpenseType = _.cloneDeep(this.model); //set editedExpense to new value of model
 
   // Retrieve selected tag objects
-  if (this.editedExpenseType.tagBudgets && this.editedExpenseType.tagBudgets.length > 0) {
-    this.editedExpenseType.tagBudgets = this.editedExpenseType.tagBudgets.map((tb) => {
-      tb.tags = tb.tags.map((t) => this.getTagByID(t));
-      return tb;
-    });
-  }
+  // if (this.editedExpenseType.tagBudgets && this.editedExpenseType.tagBudgets.length > 0) {
+  //   this.editedExpenseType.tagBudgets = this.editedExpenseType.tagBudgets.map((tb) => {
+  //     tb.tags = tb.tags.map((t) => this.getTagByID(t));
+  //     return tb;
+  //   });
+  // }
 
   // set array used for custom access chip-selector to previously saved data but without the access strings
   // This code sucks
