@@ -984,7 +984,7 @@ export default {
       valid: false, // form is valid
       tagBudgetRules: [
         (v) => !!v || 'Budget amount is required',
-        (v) => parseFloat(v, 10) > 0 || 'Budget must be greater than 0.',
+        (v) => parseFloat(v, 10) >= 0 || 'Budget must either be a positive or zero dollar amount.',
         (v) =>
           /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?$/.test(v) ||
           'Budget amount must be a number with two decimal digits.'
