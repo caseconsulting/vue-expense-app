@@ -128,6 +128,7 @@ import api from '@/shared/api';
 import { generateUUID } from '@/utils/utils';
 import { firstAndLastName, fullName, nicknameAndLastName } from '@/shared/employeeUtils';
 import { getRequiredRules } from '@/shared/validationUtils';
+import { updateStoreExpenseTypes } from '@/utils/storeUtils';
 
 import DeleteModal from '@/components/modals/DeleteModal.vue';
 import { AxiosError } from 'axios';
@@ -219,6 +220,7 @@ async function deleteTag() {
     this.tagLoading = true;
     let tag = _.cloneDeep(this.deletedTag);
     let response = await api.deleteItem(api.TAGS, tag.id);
+    await updateStoreExpenseTypes();
     if (response instanceof AxiosError) {
       throw new Error(response.response.data.message);
     }

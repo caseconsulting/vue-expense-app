@@ -78,13 +78,13 @@ export async function updateStorePtoCashOuts() {
  */
 export async function updateStoreExpenseTypes() {
   // getExpenseTypes
-  let user = this.$store.getters.user;
+  let user = store.getters.user;
   let employeeRole = user.employeeRole;
   if (employeeRole == 'admin' || employeeRole == 'manager') {
     let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
-    this.$store.dispatch('setExpenseTypes', { expenseTypes });
+    store.dispatch('setExpenseTypes', { expenseTypes });
   } else if (employeeRole == 'intern' || employeeRole == 'user') {
     let expenseTypes = await api.getEmployeeExpenseTypes();
-    this.$store.dispatch('setExpenseTypes', { expenseTypes });
+    store.dispatch('setExpenseTypes', { expenseTypes });
   }
 } // updateStoreExpenseTypes
