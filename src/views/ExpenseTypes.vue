@@ -370,6 +370,34 @@
                         </v-row>
                         <!-- End Accessible By -->
 
+                        <!-- Tag Budgets -->
+                        <v-row no-gutters v-if="userRoleIsAdmin() && item.tagBudgets && item.tagBudgets.length > 0">
+                          <v-col cols="12" sm="6" md="3">
+                            <div>
+                              <p><b>Tag Budgets:</b></p>
+                            </div>
+                          </v-col>
+                          <v-col class="d-flex justify-space-between flex-wrap">
+                            <div v-for="(item, index) in item.tagBudgets" :key="index" class="d-flex px-2 pb-4">
+                              <div class="d-flex pr-3">
+                                <b>Tag(s):</b>
+                                <div class="d-flex flex-column">
+                                  <v-chip small v-for="tagID in item.tags" :key="tagID">
+                                    <v-icon left>mdi-tag</v-icon>{{ getTagByID(tagID).tagName }}</v-chip
+                                  >
+                                </div>
+                              </div>
+                              <div class="d-flex flex-nowrap">
+                                <span>
+                                  <b>Budget: </b>
+                                  {{ convertToMoneyString(item.budget) }}
+                                </span>
+                              </div>
+                            </div>
+                          </v-col>
+                        </v-row>
+                        <!-- End Tag Budgets -->
+
                         <!-- Basecamp Campfire -->
                         <p v-if="getCampfire(item.campfire)">
                           <b>Basecamp Campfire:</b>
@@ -1012,6 +1040,14 @@ async function validateDelete(item) {
   }
 } // validateDelete
 
+/**
+ * Gets tag object given id
+ * @param id id of tag to find
+ */
+function getTagByID(id) {
+  return this.tags.find((t) => t.id === id);
+} // getTagByID
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -1053,6 +1089,8 @@ async function created() {
   window.EventBus.$on('invalid-expense type-delete', () => {
     this.midAction = false;
   });
+
+  this.tags = await api.getItems(api.TAGS);
 
   if (this.$store.getters.storeIsPopulated) {
     this.loadExpenseTypesData();
@@ -1185,6 +1223,7 @@ export default {
         statusMessage: '',
         color: ''
       }, // snakcbar action status
+      tags: [],
       userInfo: null, // user information
       deleteType: '' //item.budgetName for when item is deleted
     };
@@ -1212,6 +1251,7 @@ export default {
     getCampfire,
     getEmployeeList,
     getEmployeeName,
+    getTagByID,
     hasAccess,
     isInactive,
     loadExpenseTypesData,
