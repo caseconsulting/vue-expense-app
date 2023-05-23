@@ -130,6 +130,7 @@ import { firstAndLastName, fullName, nicknameAndLastName } from '@/shared/employ
 import { getRequiredRules } from '@/shared/validationUtils';
 
 import DeleteModal from '@/components/modals/DeleteModal.vue';
+import { AxiosError } from 'axios';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -217,7 +218,10 @@ async function deleteTag() {
   try {
     this.tagLoading = true;
     let tag = _.cloneDeep(this.deletedTag);
-    await api.deleteItem(api.TAGS, tag.id);
+    let response = await api.deleteItem(api.TAGS, tag.id);
+    if (response instanceof AxiosError) {
+      throw new Error(response.response.data.message);
+    }
     let tagIndex = this.tags.findIndex((t) => t.id === tag.id);
     this.tags.splice(tagIndex, 1);
     this.deletedTag = null;
@@ -225,6 +229,8 @@ async function deleteTag() {
     this.displaySuccess('Item was successfully deleted!');
   } catch (err) {
     this.displayError(err);
+    this.deletedTag = null;
+    this.tagLoading = false;
   }
 } // deleteTag
 
