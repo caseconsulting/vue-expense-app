@@ -126,6 +126,7 @@
               <v-autocomplete
                 v-model="tag.tags"
                 item-text="tagName"
+                :rules="getRequiredRules()"
                 item-value="id"
                 small-chips
                 deletable-chips
@@ -146,13 +147,15 @@
                 </template>
               </v-autocomplete>
             </v-col>
-            <v-col cols="2"> <v-text-field v-model="tag.budget" prefix="$" label="Amount" /></v-col>
+            <v-col cols="2">
+              <v-text-field v-model="tag.budget" prefix="$" :rules="tagBudgetRules" label="Amount"
+            /></v-col>
             <v-col cols="2" class="d-flex justify-center align-center">
               <v-btn @click="removeTagBudget(index)"><v-icon>mdi-trash-can</v-icon></v-btn>
             </v-col>
           </v-row>
-          <v-row class="d-flex justify-center align-center"
-            ><v-btn elevation="2" @click="addTagBudget()"><v-icon>add</v-icon>Tag Budget</v-btn></v-row
+          <v-row class="d-flex justify-center align-center">
+            <v-btn elevation="2" @click="addTagBudget()"><v-icon>add</v-icon>Tag Budget</v-btn></v-row
           >
         </v-container>
 
@@ -697,26 +700,14 @@ function removeTagBudget(index) {
  * @param index autocomplete input index
  */
 function remove(data, index) {
-  console.log(this.editedExpenseType.tagBudgets);
   let indx = this.editedExpenseType.tagBudgets[index].tags.findIndex((t) => t.id == data.id);
   this.editedExpenseType.tagBudgets[index].tags.splice(indx, 1);
 } // remove
 
-// |--------------------------------------------------|
-// |                                                  |
-// |                    COMPUTED                      |
-// |                                                  |
-// |--------------------------------------------------|
-
 /**
- * boolean for checkBox appearance
- *
- * @return boolean - whether checkbox appears
+ * Gets tag options for the v-autocomplete dropdown completes. Makes sure that tag name cannot be used more than once.
+ * @param selectedItems tag IDs already selected
  */
-function checkBoxRule() {
-  return !(this.editedExpenseType.accessibleBy && this.editedExpenseType.accessibleBy.length > 0);
-} // checkBoxRule
-
 function tagOptions(selectedItems) {
   let selectedTags = [];
   if (this.editedExpenseType.tagBudgets.length > 0) {
@@ -732,7 +723,30 @@ function tagOptions(selectedItems) {
     selectedTags = selectedTags.filter((st) => !selectedItems.includes(st));
   }
   return this.tags.filter((t) => !selectedTags.includes(t.id));
-}
+} // tagOptions
+
+/**
+ * Gets tag object given id
+ * @param id id of tag to find
+ */
+function getTagByID(id) {
+  return this.tags.find((t) => t.id === id);
+} // getTagByID
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                    COMPUTED                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * boolean for checkBox appearance
+ *
+ * @return boolean - whether checkbox appears
+ */
+function checkBoxRule() {
+  return !(this.editedExpenseType.accessibleBy && this.editedExpenseType.accessibleBy.length > 0);
+} // checkBoxRule
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -776,6 +790,15 @@ async function created() {
   await this.updateStoreCampfires();
   this.campfires = this.$store.getters.basecampCampfires;
   this.editedExpenseType = _.cloneDeep(this.model);
+
+  // Retrieves selected tag objects
+  if (this.editedExpenseType.tagBudgets && this.editedExpenseType.tagBudgets.length > 0) {
+    this.editedExpenseType.tagBudgets = this.editedExpenseType.tagBudgets.map((tb) => {
+      tb.tags = tb.tags.map((t) => this.getTagByID(t));
+      return tb;
+    });
+  }
+
   this.clearForm();
 } // created
 
@@ -798,6 +821,14 @@ function beforeDestroy() {
  */
 function watchModelID() {
   this.editedExpenseType = _.cloneDeep(this.model); //set editedExpense to new value of model
+
+  // Retrieve selected tag objects
+  if (this.editedExpenseType.tagBudgets && this.editedExpenseType.tagBudgets.length > 0) {
+    this.editedExpenseType.tagBudgets = this.editedExpenseType.tagBudgets.map((tb) => {
+      tb.tags = tb.tags.map((t) => this.getTagByID(t));
+      return tb;
+    });
+  }
 
   // set array used for custom access chip-selector to previously saved data but without the access strings
   // This code sucks
@@ -951,6 +982,13 @@ export default {
       submitting: false, // submitting form
       submitForm: false, //triggers submit form modal when changed
       valid: false, // form is valid
+      tagBudgetRules: [
+        (v) => !!v || 'Budget amount is required',
+        (v) => parseFloat(v, 10) > 0 || 'Budget must be greater than 0.',
+        (v) =>
+          /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?$/.test(v) ||
+          'Budget amount must be a number with two decimal digits.'
+      ], // rules for a tag budget,
       tags: []
     };
   },
@@ -966,6 +1004,7 @@ export default {
     format,
     getDateRules,
     getRequiredRules,
+    getTagByID,
     isCustomSelected,
     isEmpty,
     isSameOrAfter,
@@ -995,6 +1034,7 @@ export default {
     categories: watchCategories,
     'editedExpenseType.endDate': watchEditedExpenseTypeEndDate,
     'editedExpenseType.startDate': watchEditedExpenseTypeStartDate
+    // 'editedExpenseType.tagBudgets': watchEditedExpenseTypeTagBudgets
   }
 };
 </script>

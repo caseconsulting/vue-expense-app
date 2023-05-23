@@ -116,7 +116,7 @@ export function getValidateFalse() {
 } // getValidateRules
 
 /**
- *  Gets the rules for validating employee PTO Cash Out request
+ * Gets the rules for validating employee PTO Cash Out request
  * @param ptoLimit employee's available PTO
  * @returns Array - The array of rule functions
  */
