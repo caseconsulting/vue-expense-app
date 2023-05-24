@@ -22,20 +22,21 @@ export default new Vuex.Store({
     return {
       basecampAvatars: null,
       basecampCampfires: null,
+      budgets: null,
       contracts: null,
       employees: null,
       employeeNumber: null,
+      events: null,
       expenseTypes: null,
       fiscalDateView: null,
-      storeIsPopulated: false,
-      user: null,
-      userRole: null,
-      events: null,
-      budgets: null,
       loginTime: null,
+      ptoCashOuts: null,
       quickbooksPTO: null,
       quickbooksMonthlyHours: null,
-      ptoCashOuts: null
+      user: null,
+      userRole: null,
+      storeIsPopulated: false,
+      tags: null
     };
   },
   mutations: {
@@ -79,6 +80,9 @@ export default new Vuex.Store({
     },
     setPtoCashOuts(state, payload) {
       state.ptoCashOuts = payload.ptoCashOuts;
+    },
+    setTags(state, payload) {
+      state.tags = payload.tags;
     }
   },
   actions: {
@@ -120,6 +124,9 @@ export default new Vuex.Store({
     },
     setPtoCashOuts(context, payload) {
       context.commit('setPtoCashOuts', payload);
+    },
+    setTags(context, payload) {
+      context.commit('setTags', payload);
     }
   },
   getters: {
@@ -167,6 +174,9 @@ export default new Vuex.Store({
     },
     ptoCashOuts(state) {
       return state.ptoCashOuts;
+    },
+    tags(state) {
+      return state.tags;
     }
   }
 });

@@ -368,7 +368,7 @@ import _ from 'lodash';
 import { getDateRules, getRequiredRules } from '@/shared/validationUtils.js';
 import { generateUUID, isEmpty } from '@/utils/utils';
 import { format } from '@/shared/dateUtils';
-import { updateStoreExpenseTypes, updateStoreCampfires } from '@/utils/storeUtils';
+import { updateStoreExpenseTypes } from '@/utils/storeUtils';
 import { mask } from 'vue-the-mask';
 import { isValid, isSameOrAfter, isSameOrBefore } from '../../shared/dateUtils';
 
@@ -767,7 +767,7 @@ async function created() {
     this.submitting = false;
     this.submitForm = false;
   });
-  this.tags = await api.getItems(api.TAGS);
+  this.tags = this.$store.getters.tags;
   // get all employees
   let employees = this.$store.getters.employees;
   let activeEmployees = [];
@@ -787,7 +787,6 @@ async function created() {
 
   activeEmployees = _.sortBy(activeEmployees, ['text']); // sort employees
   this.activeEmployees = activeEmployees;
-  await this.updateStoreCampfires();
   this.campfires = this.$store.getters.basecampCampfires;
   this.editedExpenseType = _.cloneDeep(this.model);
 
@@ -1005,7 +1004,6 @@ export default {
     toggleRequireReceipt,
     toggleShowAllCategories,
     updateStoreExpenseTypes,
-    updateStoreCampfires,
     tagOptions
   },
   props: ['model'], // expense type to be created/updated

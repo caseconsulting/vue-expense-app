@@ -129,7 +129,7 @@ import api from '@/shared/api';
 import { generateUUID } from '@/utils/utils';
 import { firstAndLastName, fullName, nicknameAndLastName } from '@/shared/employeeUtils';
 import { getRequiredRules } from '@/shared/validationUtils';
-import { updateStoreExpenseTypes } from '@/utils/storeUtils';
+import { updateStoreExpenseTypes, updateStoreTags } from '@/utils/storeUtils';
 
 import DeleteModal from '@/components/modals/DeleteModal.vue';
 import { AxiosError } from 'axios';
@@ -144,7 +144,8 @@ import { AxiosError } from 'axios';
  * Created lifecycle hook
  */
 async function created() {
-  this.tags = await api.getItems(api.TAGS);
+  !this.$store.getters.tags ? await updateStoreTags() : _;
+  this.tags = _.cloneDeep(this.$store.getters.tags);
   this.loading = false;
 } // created
 
@@ -190,6 +191,7 @@ async function createTag() {
   this.editedTag.id = generateUUID();
   this.editedTag = await api.createItem(api.TAGS, this.editedTag);
   this.tags[0] = _.cloneDeep(this.editedTag);
+  this.$store.dispatch('setTags', { tags: this.tags });
   this.editedTag = null;
   this.creatingTag = false;
 } // createTag
@@ -227,6 +229,7 @@ async function deleteTag() {
     }
     let tagIndex = this.tags.findIndex((t) => t.id === tag.id);
     this.tags.splice(tagIndex, 1);
+    this.$store.dispatch('setTags', { tags: this.tags });
     this.deletedTag = null;
     this.tagLoading = false;
     this.displaySuccess('Item was successfully deleted!');
@@ -318,6 +321,7 @@ async function saveEditedTag() {
         this.editedTag = await api.updateItem(api.TAGS, this.editedTag);
         this.tags[tagIndex] = _.cloneDeep(this.editedTag);
         this.tags = _.cloneDeep(this.tags);
+        this.$store.dispatch('setTags', { tags: this.tags });
         this.editedTag = null;
       }
       this.tagLoading = false;

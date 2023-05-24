@@ -433,7 +433,9 @@ import {
   updateStoreExpenseTypes,
   updateStoreEmployees,
   updateStoreAvatars,
-  updateStoreBudgets
+  updateStoreBudgets,
+  updateStoreCampfires,
+  updateStoreTags
 } from '@/utils/storeUtils';
 
 // |--------------------------------------------------|
@@ -859,9 +861,11 @@ async function loadExpenseTypesData() {
   this.userInfo = this.$store.getters.user;
   [this.campfires] = await Promise.all([
     this.userRoleIsAdmin() ? api.getBasecampCampfires() : '',
-    this.userRoleIsAdmin() && !this.$store.getters.employees ? this.updateStoreEmployees() : '',
-    this.userRoleIsAdmin() && !this.$store.getters.avatars ? this.updateStoreAvatars() : '',
-    this.refreshExpenseTypes()
+    this.userRoleIsAdmin() && !this.$store.getters.tags ? this.updateStoreTags() : _,
+    this.userRoleIsAdmin() && !this.$store.getters.employees ? this.updateStoreEmployees() : _,
+    this.userRoleIsAdmin() && !this.$store.getters.avatars ? this.updateStoreAvatars() : _,
+    this.refreshExpenseTypes(),
+    this.updateStoreCampfires()
   ]);
 
   if (this.userRoleIsAdmin()) {
@@ -1222,7 +1226,9 @@ export default {
     updateStoreAvatars,
     updateStoreBudgets,
     updateStoreEmployees,
-    updateStoreExpenseTypes
+    updateStoreExpenseTypes,
+    updateStoreCampfires,
+    updateStoreTags
   },
   watch: {
     'filter.active': watchFilterExpenseTypes,
