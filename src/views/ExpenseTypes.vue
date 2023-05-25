@@ -1045,7 +1045,7 @@ async function validateDelete(item) {
  * @param id id of tag to find
  */
 function getTagByID(id) {
-  return this.tags.find((t) => t.id === id);
+  return this.$store.getters.tags.find((t) => t.id === id);
 } // getTagByID
 
 // |--------------------------------------------------|
@@ -1089,8 +1089,6 @@ async function created() {
   window.EventBus.$on('invalid-expense type-delete', () => {
     this.midAction = false;
   });
-
-  this.tags = await api.getItems(api.TAGS);
 
   if (this.$store.getters.storeIsPopulated) {
     this.loadExpenseTypesData();
