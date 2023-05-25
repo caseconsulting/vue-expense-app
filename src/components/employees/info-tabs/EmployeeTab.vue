@@ -23,9 +23,17 @@
     </div>
     <!-- Job Role -->
     <p v-if="!isEmpty(this.model.jobRole)"><b>Job Role:</b> {{ this.model.jobRole }}</p>
-    <!-- Job Role -->
+    <!-- AIN-->
     <p v-if="!isEmpty(this.model.agencyIdentificationNumber)">
       <b>Agency Identification Number:</b> {{ this.model.agencyIdentificationNumber }}
+    </p>
+    <!-- Employee Tags -->
+    <p v-if="admin">
+      <b>Employee Tags: </b>
+      <span v-if="getEmployeeTags.length == 0">None</span>
+      <span v-else v-for="tag in getEmployeeTags" :key="tag.id" class="ml-2 mr-1">
+        <v-icon small>mdi-tag</v-icon> {{ tag.tagName }}
+      </span>
     </p>
     <!-- Employee Role -->
     <p v-if="admin"><b>Employee Role:</b> {{ this.model.employeeRole | startCase }}</p>
@@ -168,6 +176,15 @@ function getCurrentProjects() {
   return currentContracts;
 } // getCurrentProjects
 
+/**
+ * Gets all of an employee's tags they are included in.
+ *
+ * @return Array - The list of tags an employee is in
+ */
+function getEmployeeTags() {
+  return _.filter(this.$store.getters.tags, (tag) => _.includes(tag.employees, this.model.id));
+} // getEmployeeTags
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -227,7 +244,8 @@ function startCase(value) {
 export default {
   computed: {
     fullName,
-    getCurrentProjects
+    getCurrentProjects,
+    getEmployeeTags
   },
   filters: {
     startCase

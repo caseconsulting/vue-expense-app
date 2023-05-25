@@ -92,6 +92,23 @@
         data-vv-name="Agency Identification Number"
       ></v-text-field>
 
+      <!-- Employee Tags -->
+      <v-autocomplete
+        v-if="!loading && (userRoleIsAdmin() || userRoleIsManager())"
+        id="employeeTags"
+        ref="formFields"
+        :items="$store.getters.tags"
+        v-model="employeeEditedTags"
+        multiple
+        chips
+        clearable
+        small-chips
+        deletable-chips
+        label="Employee Tags"
+        item-text="tagName"
+        return-object
+      ></v-autocomplete>
+
       <!-- Employee Role -->
       <v-autocomplete
         v-if="!loading && (userRoleIsAdmin() || (userRoleIsManager() && !thisIsMyProfile()))"
@@ -407,6 +424,10 @@ async function created() {
     // clear depature date if fails to format
     this.editedEmployee.deptDate = null;
   }
+  // find an employees tags
+  this.employeeTags = _.filter(this.$store.getters.tags, (tag) => _.includes(tag.employees, this.model.id));
+  // using this field to determine if an api call to update tags is needed
+  this.employeeEditedTags = _.cloneDeep(this.employeeTags);
   // capitalize the employee role
   this.employeeRoleFormatted = _.startCase(this.editedEmployee.employeeRole);
   // determine if employee has expenses
@@ -528,6 +549,18 @@ function validateFields() {
   _.forEach(components, (field) => {
     if (field && !field.validate()) errorCount++;
   });
+
+  // get symmetric difference of tags to determine which tags need to update
+  this.employeeEditedTags = _.xor(
+    _.map(this.employeeTags, (t) => t.id),
+    _.map(this.employeeEditedTags, (t) => t.id)
+  );
+  // turn array of ids back into their original objects
+  this.employeeEditedTags = _.filter(this.$store.getters.tags, (tag) =>
+    _.find(this.employeeEditedTags, (t) => t === tag.id)
+  );
+  // employee will be added to tags in EmployeeForm when all fields are successfully validated
+  this.editedEmployee.editedTags = _.cloneDeep(this.employeeEditedTags);
 
   // Fail safe in case users or interns somehow change their disabled info
   // Without this, they could change the html to change their data
@@ -721,6 +754,8 @@ export default {
         (v) => !this.isEmpty(v) || 'Email is required',
         (v) => regex.test(v) || 'Not a valid @consultwithcase email address'
       ], // rules for an employee email
+      employeeTags: null,
+      employeeEditedTags: null,
       employeeRoleFormatted: null,
       employees: [], // all employees
       hasExpenses: false, // employee has expenses

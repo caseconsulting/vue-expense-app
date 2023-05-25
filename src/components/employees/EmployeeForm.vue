@@ -38,7 +38,6 @@
           </v-col>
         </v-row>
       </v-card-title>
-
       <div v-if="submitting" class="py-10 px-6">
         <v-progress-linear :indeterminate="true"></v-progress-linear>
       </div>
@@ -717,7 +716,6 @@ async function submit() {
         // getEmployees and update store with latest data
         if (this.model.id === this.$store.getters.user.id) await this.updateStoreUser();
         await this.updateStoreEmployees();
-        await this.cancelB();
       } else {
         // failed to update employee
         this.$emit('error', updatedEmployee.response.data.message);
@@ -748,15 +746,48 @@ async function submit() {
         this.$emit('error', newEmployee.response.data.message);
         this.displayError(newEmployee.response.data.message);
         this.$set(this.model, 'id', null); // reset id
-        // this.$emit('endAction');
       }
     }
+    if (this.tagsToUpdate && this.tagsToUpdate.length > 0) {
+      await this.updateTags();
+    }
+    await this.cancelB();
   } else {
     this.confirmingError = true;
   }
   this.submitting = false;
   window.EventBus.$emit('badgeExp');
 } // submit
+
+/**
+ * Updates the tags that the employee was added to and removed from.
+ * If the employee is in a tag, they need to be removed.
+ * If the employee is not in a tag, they need to be added.
+ */
+async function updateTags() {
+  let employeeId = this.model.id;
+  let promises = [];
+  _.forEach(this.tagsToUpdate, (tag) => {
+    let index = _.findIndex(tag.employees, (eId) => eId === employeeId);
+    if (index > -1) {
+      // remove employee from tag
+      tag.employees.splice(index, 1);
+    } else {
+      // add employee to tag
+      tag.employees.push(employeeId);
+    }
+    promises.push(api.updateItem(api.TAGS, tag));
+  });
+  // update db tags
+  await Promise.all(promises);
+  // update store tags
+  let updatedStoreTags = _.map(this.$store.getters.tags, (tag) => {
+    let foundTag = _.find(this.tagsToUpdate, (t) => t.id === tag.id);
+    return foundTag ? foundTag : tag;
+  });
+  this.$store.dispatch('setTags', { tags: updatedStoreTags });
+  return;
+} // updateTags
 
 /**
  * add a tab to number of errors in the form
@@ -865,6 +896,7 @@ function setFormData(tab, data) {
     this.$set(this.model, 'eeoIsProtectedVeteran', data.eeoIsProtectedVeteran);
     if (this.hasAdminPermissions()) {
       this.$set(this.model, 'eeoAdminHasFilledOutEeoForm', true);
+      this.tagsToUpdate = _.cloneDeep(data.editedTags);
     } else {
       this.$set(this.model, 'eeoAdminHasFilledOutEeoForm', false);
     }
@@ -979,7 +1011,7 @@ async function created() {
   // Starts listener to see if the user confirmed to submit the form
   window.EventBus.$on('confirmed-form', async () => {
     this.confirmingValid = false;
-    cancelB();
+    await cancelB();
   });
   // Starts listener to see if the user confirmed to submit the form
   window.EventBus.$on('canceled-form', async () => {
@@ -989,9 +1021,9 @@ async function created() {
   window.EventBus.$on('canceled-cancel', () => {
     this.confirmingValid = false;
   });
-  window.EventBus.$on('confirmed-cancel', () => {
+  window.EventBus.$on('confirmed-cancel', async () => {
     this.confirmingValid = true;
-    this.cancelB();
+    await this.cancelB();
   });
   // set tab mounted
   window.EventBus.$on('created', (tab) => {
@@ -1269,6 +1301,7 @@ export default {
         personal: false,
         technologies: false
       }, // tab component created
+      tagsToUpdate: [],
       toggleResumeParser: false,
       updateEmpTab: 0,
       uploadDisabled: true,
@@ -1309,7 +1342,8 @@ export default {
     resumeReceived,
     selectDropDown,
     updateStoreEmployees,
-    updateStoreUser
+    updateStoreUser,
+    updateTags
   },
   props: ['contracts', 'currentTab', 'employee'], // employee to be created/updated
   watch: {
