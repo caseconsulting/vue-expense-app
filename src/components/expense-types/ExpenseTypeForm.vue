@@ -122,7 +122,30 @@
         </div>
         <v-container>
           <v-row v-for="(tag, index) in editedExpenseType.tagBudgets" :key="index">
-            <v-col cols="8">
+            <v-col class="d-flex flex-row justify-center align-center" cols="2">
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <v-btn
+                    :disabled="isLast(index, editedExpenseType.tagBudgets)"
+                    v-on="on"
+                    @click="moveTagBudgetDown(index)"
+                    x-small
+                    class="mr-1"
+                    ><v-icon>mdi-arrow-down-thin</v-icon></v-btn
+                  >
+                </template>
+                <span>Move Tag Budget Priority Down One</span>
+              </v-tooltip>
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <v-btn :disabled="isFirst(index)" x-small @click="moveTagBudgetUp(index)" v-on="on"
+                    ><v-icon>mdi-arrow-up-thin</v-icon></v-btn
+                  >
+                </template>
+                <span>Move Tag Budget Priority Up One</span>
+              </v-tooltip>
+            </v-col>
+            <v-col cols="6">
               <v-autocomplete
                 v-model="tag.tags"
                 item-text="tagName"
@@ -147,11 +170,11 @@
                 </template>
               </v-autocomplete>
             </v-col>
-            <v-col cols="2">
+            <v-col cols="3">
               <v-text-field v-model="tag.budget" prefix="$" :rules="tagBudgetRules" label="Amount"
             /></v-col>
-            <v-col cols="2" class="d-flex justify-center align-center">
-              <v-btn @click="removeTagBudget(index)"><v-icon>mdi-trash-can</v-icon></v-btn>
+            <v-col cols="1" class="d-flex justify-center align-center">
+              <v-btn small @click="removeTagBudget(index)"><v-icon>mdi-trash-can</v-icon></v-btn>
             </v-col>
           </v-row>
           <v-row class="d-flex justify-center align-center">
@@ -733,6 +756,44 @@ function getTagByID(id) {
   return this.tags.find((t) => t.id === id);
 } // getTagByID
 
+/**
+ * Checks if index in element is first in array
+ *
+ * @param index index of element
+ */
+function isFirst(index) {
+  return index == 0;
+} // isFirst
+
+/**
+ * Checks if index of elment is last in array
+ * @param index index of element
+ * @param arr array
+ */
+function isLast(index, arr) {
+  return index == arr.length - 1;
+} // isLast
+
+/**
+ * Moves tag budget up one in priority
+ * @param index index of tag budget to move
+ */
+function moveTagBudgetUp(index) {
+  let temp = this.editedExpenseType.tagBudgets[index - 1];
+  this.$set(this.editedExpenseType.tagBudgets, index - 1, this.editedExpenseType.tagBudgets[index]);
+  this.$set(this.editedExpenseType.tagBudgets, index, temp);
+} // moveTagBudgetUp
+
+/**
+ * Moves tag budget down one in priority
+ * @param index index of tag budget to move
+ */
+function moveTagBudgetDown(index) {
+  let temp = this.editedExpenseType.tagBudgets[index + 1];
+  this.$set(this.editedExpenseType.tagBudgets, index + 1, this.editedExpenseType.tagBudgets[index]);
+  this.$set(this.editedExpenseType.tagBudgets, index, temp);
+} // moveTagBudgetDown
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                    COMPUTED                      |
@@ -990,9 +1051,13 @@ export default {
     getTagByID,
     isCustomSelected,
     isEmpty,
+    isFirst,
+    isLast,
     isSameOrAfter,
     isSameOrBefore,
     isValid,
+    moveTagBudgetDown,
+    moveTagBudgetUp,
     odFlagHint,
     parseBudget,
     remove,
