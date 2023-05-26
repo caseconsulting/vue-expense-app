@@ -390,7 +390,7 @@ import {
   userRoleIsAdmin,
   userRoleIsManager
 } from '@/utils/utils';
-import { updateStoreBudgets, updateStoreExpenseTypes, updateStoreEmployees, updateStoreTags } from '@/utils/storeUtils';
+import { updateStoreBudgets, updateStoreExpenseTypes, updateStoreEmployees } from '@/utils/storeUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -700,7 +700,6 @@ async function loadMyExpensesData() {
     !this.$store.getters.expenseTypes ? this.updateStoreExpenseTypes() : '',
     !this.$store.getters.employees ? this.updateStoreEmployees() : '',
     !this.$store.getters.budgets ? this.updateStoreBudgets() : '',
-    !this.$store.getters.tags ? this.updateStoreTags() : '',
     this.refreshExpenses()
   ]);
 
@@ -1080,7 +1079,6 @@ export default {
     updateStoreEmployees,
     updateStoreBudgets,
     updateStoreExpenseTypes,
-    updateStoreTags,
     useInactiveStyle
   },
   watch: {

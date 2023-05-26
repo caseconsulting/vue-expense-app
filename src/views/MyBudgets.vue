@@ -94,13 +94,7 @@ import BudgetTable from '@/components/budgets/BudgetTable.vue';
 import ExpenseForm from '@/components/expenses/ExpenseForm.vue';
 import AnniversaryCard from '@/components/shared/AnniversaryCard.vue';
 import { isMobile, getCurrentBudgetYear } from '@/utils/utils';
-import {
-  updateStoreBudgets,
-  updateStoreEmployees,
-  updateStoreExpenseTypes,
-  updateStoreUser,
-  updateStoreTags
-} from '@/utils/storeUtils';
+import { updateStoreBudgets, updateStoreEmployees, updateStoreExpenseTypes, updateStoreUser } from '@/utils/storeUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -163,8 +157,7 @@ async function refreshEmployee() {
     api.getAllEmployeeExpenses(this.employee.id),
     !this.$store.getters.budgets ? this.updateStoreBudgets() : '',
     !this.$store.getters.expenseTypes ? this.updateStoreExpenseTypes() : '',
-    !this.$store.getters.employees ? this.updateStoreEmployees() : '',
-    !this.$store.getters.tags ? this.updateStoreTags() : ''
+    !this.$store.getters.employees ? this.updateStoreEmployees() : ''
   ]);
   this.accessibleBudgets = this.$store.getters.budgets;
   this.expenseTypes = this.$store.getters.expenseTypes;
@@ -310,8 +303,7 @@ export default {
     updateStoreBudgets,
     updateStoreEmployees,
     updateStoreExpenseTypes,
-    updateStoreUser,
-    updateStoreTags
+    updateStoreUser
   },
   props: {
     employ: {

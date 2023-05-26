@@ -914,32 +914,6 @@ function getCategories() {
 } // getCategories
 
 /**
- * Gets a budget for an expense type based on an employees involvement in budget tags
- * that are relevant to an expense type.
- *
- * @param expenseType - The expense type in the form
- * @param employeeId - The employee's id in the form
- * @returns Number - The expense type's budget for the employee
- */
-function getExpenseTypeBudget(expenseType, employeeId) {
-  if (expenseType.tagBudgets && expenseType.tagBudgets.length > 0) {
-    // tag budgets exist
-    let employeeTags = _.filter(this.$store.getters.tags, (tag) => _.includes(tag.employees, employeeId));
-    // get array of just tag ids
-    employeeTags = _.map(employeeTags, (t) => t.id);
-    // finds the first tag budget a user is involved in
-    let tagBudget = _.find(expenseType.tagBudgets, (tagBudget) =>
-      _.find(tagBudget.tags, (t) => _.includes(employeeTags, t))
-    );
-    if (tagBudget) {
-      return tagBudget.budget;
-    }
-  }
-  // return default budget if employee has no budget tag involvement
-  return expenseType.budget;
-} // getExpenseTypeBudget
-
-/**
  * Gets an expense type given an expense type id. Returns the expense type selected and clears the expense
  * category.
  *
@@ -960,18 +934,34 @@ function getExpenseTypeSelected(expenseTypeId) {
  * Gets the remaining budget for the current expense type
  */
 async function getRemainingBudget() {
-  if (this.editedExpense.expenseTypeId && this.editedExpense.employeeId) {
-    let budgets;
-
+  if (this.editedExpense.employeeId) {
     // get budgets for employee, use budgets store if it is for yourself.
     if (this.editedExpense.employeeId == this.$store.getters.user.id) {
-      budgets = this.$store.getters.budgets;
+      this.employeeBudgets = this.$store.getters.budgets;
     } else {
-      budgets = await api.getAllActiveEmployeeBudgets(this.editedExpense.employeeId);
+      this.employeeBudgets = await api.getAllActiveEmployeeBudgets(this.editedExpense.employeeId);
     }
-
-    if (budgets) {
-      let budget = budgets.find((currBudget) => currBudget.expenseTypeId === this.editedExpense.expenseTypeId);
+    // update expense type text and budget amounts
+    _.forEach(this.expenseTypes, (expenseType) => {
+      let budget = _.find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id);
+      if (budget) {
+        expenseType.text = `${expenseType.budgetName} - $${budget.budgetObject.amount}`;
+        expenseType.budget = budget.budgetObject.amount;
+      }
+    });
+    let employee = _.find(this.$store.getters.employees, (e) => e.id === this.editedExpense.employeeId);
+    // filter out expense types that an employee does not have a budget to
+    this.expenseTypes = _.filter(
+      this.expenseTypes,
+      (expenseType) =>
+        this.hasAccess(employee, expenseType) && _.find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id)
+    );
+  }
+  if (this.editedExpense.expenseTypeId && this.editedExpense.employeeId) {
+    if (this.employeeBudgets) {
+      let budget = this.employeeBudgets.find(
+        (currBudget) => currBudget.expenseTypeId === this.editedExpense.expenseTypeId
+      );
 
       if (budget) {
         this.remainingBudget =
@@ -1329,6 +1319,7 @@ function setDefaultExpenseTypeData() {
   let expenseTypes = this.$store.getters.expenseTypes;
   this.expenseTypes = _.map(expenseTypes, (expenseType) => {
     return {
+      id: expenseType.id,
       text: `${expenseType.budgetName} - $${expenseType.budget}`,
       startDate: expenseType.startDate,
       endDate: expenseType.endDate,
@@ -1471,23 +1462,6 @@ async function updateExistingEntry() {
     }
   }
 } // updateExistingEntry
-
-/**
- * Sets the expense type text and budget amount to match an employees budget for that
- * expense type based on budget tags.
- *
- * @param employeeId - The employees id to update expense types for
- */
-function updateExpenseTypeBudgetAmounts(employeeId) {
-  this.expenseTypes = _.forEach(this.expenseTypes, (expenseType) => {
-    let budget = this.getExpenseTypeBudget(expenseType, employeeId);
-    expenseType.text = `${expenseType.budgetName} - $${budget}`;
-    expenseType.budget = budget;
-  });
-  // remove any expense types where an employee has access to an expense type but has no
-  // budget amount due to a budget tag
-  this.expenseTypes = _.filter(this.expenseTypes, (e) => e.budget > 0);
-} // updateExpenseTypeBudgetAmounts
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -1783,11 +1757,7 @@ function watchEditedExpenseCategory() {
  * watcher for editedExpense.employeeId - set options and get budgets.
  */
 async function watchEditedExpenseEmployeeID() {
-  if (!this.editedExpense.employeeId) {
-    this.setDefaultExpenseTypeData();
-  } else {
-    this.updateExpenseTypeBudgetAmounts(this.editedExpense.employeeId);
-  }
+  if (!this.editedExpense.employeeId) this.setDefaultExpenseTypeData();
   this.setRecipientOptions();
   await this.getRemainingBudget();
 } // watchEditedExpenseEmployeeID
@@ -1882,6 +1852,7 @@ export default {
       //editedExpense: {}, // data being edited --
       editedExpense: _.cloneDeep(this.expense),
       employee: null, // employee selected
+      employeeBudgets: null, // selected employee's budgets
       employeeRole: '', // employee role
       employees: [], // employees
       expenseTypes: [], // expense types
@@ -1935,7 +1906,6 @@ export default {
     getCategories,
     getDateRules,
     getDateOptionalRules,
-    getExpenseTypeBudget,
     getExpenseTypeSelected,
     getRole,
     getRemainingBudget,
@@ -1957,8 +1927,7 @@ export default {
     updateExistingEntry,
     userRoleIsAdmin,
     userRoleIsManager,
-    updateStoreBudgets,
-    updateExpenseTypeBudgetAmounts
+    updateStoreBudgets
   },
   props: [
     'expense', // expense to be created/updated
