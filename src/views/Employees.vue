@@ -122,6 +122,8 @@
                     v-if="userRoleIsAdmin()"
                     :midAction="midAction"
                     :employee="item"
+                    :contracts="contracts"
+                    :tags="tags"
                     v-on="on"
                   ></convert-employee-to-csv>
                   <v-btn
@@ -224,6 +226,7 @@
             :midAction="midAction"
             :contracts="contracts"
             :employees="filteredEmployees"
+            :tags="tags"
           ></convert-employees-to-csv>
           <generate-csv-eeo-report
             v-if="userRoleIsAdmin()"
@@ -249,7 +252,7 @@
 
 <script>
 import api from '@/shared/api.js';
-import { updateStoreEmployees, updateStoreAvatars, updateStoreContracts } from '@/utils/storeUtils';
+import { updateStoreEmployees, updateStoreAvatars, updateStoreContracts, updateStoreTags } from '@/utils/storeUtils';
 import ConvertEmployeesToCsv from '@/components/employees/csv/ConvertEmployeesToCsv.vue';
 import DeleteErrorModal from '@/components/modals/DeleteErrorModal.vue';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
@@ -414,7 +417,8 @@ async function refreshEmployees() {
   await Promise.all([
     !this.$store.getters.employees ? this.updateStoreEmployees() : '',
     !this.$store.getters.basecampAvatars ? this.updateStoreAvatars() : '',
-    !this.$store.getters.contracts ? this.updateStoreContracts() : ''
+    !this.$store.getters.contracts ? this.updateStoreContracts() : '',
+    !this.$store.getters.tags ? this.updateStoreTags() : ''
   ]);
   this.employees = this.$store.getters.employees; // get all employees
   this.filterEmployees(); // filter employees
@@ -427,6 +431,7 @@ async function refreshEmployees() {
     return employee;
   });
   this.contracts = this.$store.getters.contracts;
+  this.tags = this.$store.getters.tags;
   this.loading = false; // set loading status to false
 } // refreshEmployees
 
@@ -679,7 +684,8 @@ export default {
         statusType: undefined,
         statusMessage: null,
         color: null
-      } // snackbar action status
+      }, // snackbar action status
+      tags: []
     };
   },
   methods: {
@@ -708,7 +714,8 @@ export default {
     validateDelete,
     updateStoreAvatars,
     updateStoreContracts,
-    updateStoreEmployees
+    updateStoreEmployees,
+    updateStoreTags
   },
   watch: {
     'filter.active': watchFilterActive,

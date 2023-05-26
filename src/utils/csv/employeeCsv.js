@@ -11,9 +11,9 @@ const csvUtils = require('./baseCsv.js');
  * @param employees - array of employee objects
  * @param contracts - the contracts from DyanmoDB to connect employee contract IDs to
  */
-export function download(employees, contracts) {
+export function download(employees, contracts, tags) {
   let filename = Array.isArray(employees) ? 'employees.csv' : 'employee.csv';
-  let convertedEmployees = convertEmployees(employees, contracts); // convert employees into csv object
+  let convertedEmployees = convertEmployees(employees, contracts, tags); // convert employees into csv object
   let csvEmployees = csvUtils.sort(convertedEmployees, 'Employee #'); // sort by employee #
   let csvFileString = csvUtils.generate(csvEmployees); // convert to csv file string
   csvUtils.download(csvFileString, filename); // download csv file string as .csv
@@ -24,9 +24,10 @@ export function download(employees, contracts) {
  * an array of employees but supports having a single employee object.
  * @param employees - employee object to convert
  * @param contracts - the contracts from DyanmoDB to connect employee contract IDs to
+ * @param tags - tags attached to employees
  * @return a new object passable to csv.js
  */
-export function convertEmployees(employees, contracts) {
+export function convertEmployees(employees, contracts, tags) {
   if (!Array.isArray(employees)) employees = [employees];
   let tempEmployees = [];
   _.forEach(employees, (employee) => {
@@ -68,6 +69,7 @@ export function convertEmployees(employees, contracts) {
       Education: filterUndefined(employee.education, getEducation) || '',
       'Job Experience': filterUndefined(employee.companies, getCompanies) || '',
       Technology: filterUndefined(employee.technologies, getTechnologies) || '',
+      Tags: getTags(employee.id, tags) || '',
       id: employee.id || ''
     });
   });
@@ -416,3 +418,19 @@ export function getTechnologies(tech) {
   }
   return a;
 } // getTechnologies
+
+/**
+ * Returns tags assigned to employee
+ * @param employeeID employeeID of employee
+ * @param tags tags retrieved from db table
+ * @returns String - comma separated list of tag names
+ */
+export function getTags(employeeID, tags) {
+  let employeeTags = tags.filter((tag) => {
+    if (tag.employees.includes(employeeID)) {
+      return true;
+    }
+    return false;
+  });
+  return employeeTags && employeeTags.length > 0 ? employeeTags.map((t) => t.tagName).join(', ') : null;
+} // getTags
