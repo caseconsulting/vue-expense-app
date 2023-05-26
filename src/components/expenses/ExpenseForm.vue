@@ -914,6 +914,32 @@ function getCategories() {
 } // getCategories
 
 /**
+ * Gets a budget for an expense type based on an employees involvement in budget tags
+ * that are relevant to an expense type.
+ *
+ * @param expenseType - The expense type in the form
+ * @param employeeId - The employee's id in the form
+ * @returns Number - The expense type's budget for the employee
+ */
+function getExpenseTypeBudget(expenseType, employeeId) {
+  if (expenseType.tagBudgets && expenseType.tagBudgets.length > 0) {
+    // tag budgets exist
+    let employeeTags = _.filter(this.$store.getters.tags, (tag) => _.includes(tag.employees, employeeId));
+    // get array of just tag ids
+    employeeTags = _.map(employeeTags, (t) => t.id);
+    // finds the first tag budget a user is involved in
+    let tagBudget = _.find(expenseType.tagBudgets, (tagBudget) =>
+      _.find(tagBudget.tags, (t) => _.includes(employeeTags, t))
+    );
+    if (tagBudget) {
+      return tagBudget.budget;
+    }
+  }
+  // return default budget if employee has no budget tag involvement
+  return expenseType.budget;
+} // getExpenseTypeBudget
+
+/**
  * Gets an expense type given an expense type id. Returns the expense type selected and clears the expense
  * category.
  *
@@ -1297,6 +1323,33 @@ async function scanFile() {
 } // scanFile
 
 /**
+ * Sets all of the expense type data to its original fields.
+ */
+function setDefaultExpenseTypeData() {
+  let expenseTypes = this.$store.getters.expenseTypes;
+  this.expenseTypes = _.map(expenseTypes, (expenseType) => {
+    return {
+      text: `${expenseType.budgetName} - $${expenseType.budget}`,
+      startDate: expenseType.startDate,
+      endDate: expenseType.endDate,
+      budgetName: expenseType.budgetName,
+      value: expenseType.id,
+      budget: expenseType.budget,
+      odFlag: expenseType.odFlag,
+      requiredFlag: expenseType.requiredFlag,
+      recurringFlag: expenseType.recurringFlag,
+      isInactive: expenseType.isInactive,
+      categories: expenseType.categories,
+      accessibleBy: expenseType.accessibleBy,
+      hasRecipient: expenseType.hasRecipient,
+      alwaysOnFeed: expenseType.alwaysOnFeed,
+      requireURL: expenseType.requireURL,
+      tagBudgets: expenseType.tagBudgets
+    };
+  });
+} // setDefaultExpenseTypeData
+
+/**
  * Sets the recipients to choose from based on expense type.
  */
 function setRecipientOptions() {
@@ -1419,6 +1472,23 @@ async function updateExistingEntry() {
   }
 } // updateExistingEntry
 
+/**
+ * Sets the expense type text and budget amount to match an employees budget for that
+ * expense type based on budget tags.
+ *
+ * @param employeeId - The employees id to update expense types for
+ */
+function updateExpenseTypeBudgetAmounts(employeeId) {
+  this.expenseTypes = _.forEach(this.expenseTypes, (expenseType) => {
+    let budget = this.getExpenseTypeBudget(expenseType, employeeId);
+    expenseType.text = `${expenseType.budgetName} - $${budget}`;
+    expenseType.budget = budget;
+  });
+  // remove any expense types where an employee has access to an expense type but has no
+  // budget amount due to a budget tag
+  this.expenseTypes = _.filter(this.expenseTypes, (e) => e.budget > 0);
+} // updateExpenseTypeBudgetAmounts
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -1488,28 +1558,7 @@ function created() {
   this.setRecipientOptions();
 
   // set aggregate expense types
-  let expenseTypes = this.$store.getters.expenseTypes;
-  this.expenseTypes = _.map(expenseTypes, (expenseType) => {
-    return {
-      /* beautify preserve:start */
-      text: `${expenseType.budgetName} - $${expenseType.budget}`,
-      startDate: expenseType.startDate,
-      endDate: expenseType.endDate,
-      /* beautify preserve:end */
-      budgetName: expenseType.budgetName,
-      value: expenseType.id,
-      budget: expenseType.budget,
-      odFlag: expenseType.odFlag,
-      requiredFlag: expenseType.requiredFlag,
-      recurringFlag: expenseType.recurringFlag,
-      isInactive: expenseType.isInactive,
-      categories: expenseType.categories,
-      accessibleBy: expenseType.accessibleBy,
-      hasRecipient: expenseType.hasRecipient,
-      alwaysOnFeed: expenseType.alwaysOnFeed,
-      requireURL: expenseType.requireURL
-    };
-  });
+  this.setDefaultExpenseTypeData();
 
   // adjust costRules to prevent users from using negative expenses
   if (this.employeeRole && this.employeeRole == 'admin') {
@@ -1734,6 +1783,11 @@ function watchEditedExpenseCategory() {
  * watcher for editedExpense.employeeId - set options and get budgets.
  */
 async function watchEditedExpenseEmployeeID() {
+  if (!this.editedExpense.employeeId) {
+    this.setDefaultExpenseTypeData();
+  } else {
+    this.updateExpenseTypeBudgetAmounts(this.editedExpense.employeeId);
+  }
   this.setRecipientOptions();
   await this.getRemainingBudget();
 } // watchEditedExpenseEmployeeID
@@ -1881,6 +1935,7 @@ export default {
     getCategories,
     getDateRules,
     getDateOptionalRules,
+    getExpenseTypeBudget,
     getExpenseTypeSelected,
     getRole,
     getRemainingBudget,
@@ -1896,12 +1951,14 @@ export default {
     preformatFloat,
     scanFile,
     setFile,
+    setDefaultExpenseTypeData,
     setRecipientOptions,
     submit,
     updateExistingEntry,
     userRoleIsAdmin,
     userRoleIsManager,
-    updateStoreBudgets
+    updateStoreBudgets,
+    updateExpenseTypeBudgetAmounts
   },
   props: [
     'expense', // expense to be created/updated
