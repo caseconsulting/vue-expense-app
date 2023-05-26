@@ -1757,7 +1757,7 @@ function watchEditedExpenseCategory() {
  * watcher for editedExpense.employeeId - set options and get budgets.
  */
 async function watchEditedExpenseEmployeeID() {
-  if (!this.editedExpense.employeeId) this.setDefaultExpenseTypeData();
+  this.setDefaultExpenseTypeData();
   this.setRecipientOptions();
   await this.getRemainingBudget();
 } // watchEditedExpenseEmployeeID
