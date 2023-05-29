@@ -479,7 +479,6 @@ export default {
 
 .profile-button {
   cursor: pointer;
-  border: 1px solid $case-darkgray;
 }
 
 #P {
