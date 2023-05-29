@@ -257,7 +257,7 @@
                         icon
                         id="delete"
                         @click="
-                          deleting = !deleting;
+                          deleting = true;
                           midAction = true;
                           propExpense = item;
                         "
@@ -334,7 +334,7 @@
               <v-alert slot="no-results" :value="true" color="error" icon="warning">
                 Your search for "{{ search }}" found no results.
               </v-alert>
-              <!-- End alert for no search results -->
+              <!-- End alert for no search results -->deleting
             </v-data-table>
             <br />
 
@@ -874,8 +874,10 @@ async function created() {
 
   window.EventBus.$on('canceled-delete-expense', () => {
     this.midAction = false;
+    this.deleting = false;
   });
   window.EventBus.$on('confirm-delete-expense', async () => {
+    this.deleting = false;
     await this.deleteExpense();
   });
 
