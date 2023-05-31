@@ -13,12 +13,31 @@
       <v-card color="#bc3825">
         <v-card-title headline v-bind:class="{ 'justify-center': isMobile }">
           <h2 class="white--text">Reports</h2>
+          <v-spacer></v-spacer>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn id="contactEmployeesBtn" @click="renderContactEmployeesModal()" v-bind="attrs" v-on="on">
+                Contact
+                <v-icon right>email</v-icon>
+              </v-btn>
+            </template>
+            <span>Contact Active Employees In The Table Below</span>
+          </v-tooltip>
         </v-card-title>
       </v-card>
       <v-container fluid>
         <reports-page-loader v-if="loading"></reports-page-loader>
         <!-- user is not mobile -->
-        <v-tabs v-else color="blue" center-active grow show-arrows @change="changeTab" v-model="currentTab">
+        <v-tabs
+          v-else
+          color="blue"
+          center-active
+          grow
+          show-arrows
+          :key="tabKey"
+          @change="changeTab"
+          v-model="currentTab"
+        >
           <v-tab href="#contracts" :disabled="loading">Contracts</v-tab>
           <v-tab href="#customerOrgs" :disabled="loading">Customer Orgs</v-tab>
           <v-tab href="#certifications" :disabled="loading">Certifications</v-tab>
@@ -50,9 +69,13 @@
         </v-tabs>
       </v-container>
     </v-card>
+    <v-dialog v-model="toggleContactEmployeesModal" width="50%" persistent>
+      <contact-employees-modal :passedEmployees="employeesToContact" :key="contactKey"></contact-employees-modal>
+    </v-dialog>
   </div>
 </template>
 <script>
+import ContactEmployeesModal from '@/components/shared/ContactEmployeesModal.vue';
 import ReportsPageLoader from '@/components/reports/ReportsPageLoader.vue';
 import ReportsContracts from '@/components/reports/ReportsContracts.vue';
 import ReportsCustomerOrgs from '@/components/reports/ReportsCustomerOrgs.vue';
@@ -74,6 +97,9 @@ import { isMobile } from '@/utils/utils';
  * Created lifecycle hook.
  */
 async function created() {
+  window.EventBus.$on('close-contact-employees-modal', () => (this.toggleContactEmployeesModal = false));
+  window.EventBus.$on('list-of-employees-to-contact', (employees) => (this.employeesToContact = employees));
+
   if (this.$store.getters.storeIsPopulated) {
     await Promise.all([
       !this.$store.getters.employees ? this.updateStoreEmployees() : '',
@@ -111,8 +137,15 @@ function backClick() {
  * @param event - the new tab
  */
 function changeTab(event) {
+  this.tabKey++;
   this.currentTab = event;
 } // changeTab
+
+function renderContactEmployeesModal() {
+  this.contactKey++;
+  window.EventBus.$emit('get-employees-to-contact');
+  this.toggleContactEmployeesModal = true;
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -138,6 +171,7 @@ function storeIsPopulated() {
 export default {
   created,
   components: {
+    ContactEmployeesModal,
     ReportsContracts,
     ReportsCustomerOrgs,
     ReportsCertifications,
@@ -153,15 +187,20 @@ export default {
   },
   data() {
     return {
+      tabKey: 0,
+      contactKey: 0,
       contracts: null,
       currentTab: null,
+      employeesToContact: [],
       loading: true,
+      toggleContactEmployeesModal: false,
       wasRedirected: false
     };
   },
   methods: {
     backClick,
     changeTab,
+    renderContactEmployeesModal,
     updateStoreContracts,
     updateStoreEmployees
   },

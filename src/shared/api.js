@@ -123,6 +123,16 @@ async function getBasecampCampfires() {
 } // getBasecampCampfires
 
 /**
+ * Get a Basecamp Circle url to ping a group of employees.
+ *
+ * @param data - An object that contains a list of employees emails to create a circle for
+ * @return String - Basecamp Circle URL
+ */
+async function getBasecampCircle(data) {
+  return await execute('post', `/${BASECAMP}/getBasecampCircle`, data);
+} // getBasecampCircle
+
+/**
  * gets specific budget for an employee
  *
  * @param id - the id of the employee
@@ -513,6 +523,7 @@ export default {
   getAudits,
   getBasecampAvatars,
   getBasecampCampfires,
+  getBasecampCircle,
   getColleges,
   getCountries,
   getEmployeeBudget,

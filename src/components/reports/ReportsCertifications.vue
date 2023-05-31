@@ -93,6 +93,10 @@ import { getTodaysDate, isSameOrBefore } from '@/shared/dateUtils';
  * The created lifecycle hook.
  */
 function created() {
+  window.EventBus.$on('get-employees-to-contact', () => {
+    window.EventBus.$emit('list-of-employees-to-contact', this.filteredEmployees);
+  });
+
   this.employeesInfo = this.getActive(this.$store.getters.employees); // default to filtered list
   this.filteredEmployees = this.employeesInfo; // this one is shown
   this.populateDropdowns(this.employeesInfo);

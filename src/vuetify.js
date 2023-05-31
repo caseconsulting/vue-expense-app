@@ -4,6 +4,7 @@ import 'vuetify/dist/vuetify.min.css';
 import '@mdi/font/css/materialdesignicons.css';
 import TwitterIcon from '@/components/custom-icons/TwitterIcon';
 import FacebookIcon from '@/components/custom-icons/FacebookIcon';
+import BasecampIcon from '@/components/custom-icons/BasecampIcon';
 
 Vue.use(Vuetify);
 
@@ -20,6 +21,9 @@ const opts = {
       },
       facebook: {
         component: FacebookIcon
+      },
+      basecamp: {
+        component: BasecampIcon
       }
     }
   }
