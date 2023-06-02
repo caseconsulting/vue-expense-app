@@ -919,7 +919,7 @@ export default {
   height: 55px;
 }
 
-.employeeStatusBox >>> input {
+.employeeStatusBox :deep(input) {
   text-align: center;
 }
 
