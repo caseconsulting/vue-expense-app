@@ -10,8 +10,9 @@
           <br/>
           <p v-for="r in relationships" :key="r.project.id">
             <span><b>Contract:</b> {{ r.contract }}, <b>Prime:</b> {{ r.prime }}, <b>Project:</b> {{ r.project.projectName }}</span>
-          <ul> <li v-for="e in r.employees" :key="e.id">{{`${e.firstName} ${e.lastName}`}}</li></ul></p>
-         
+            <ul> <li v-for="e in r.employees" :key="e.id">{{`${e.firstName} ${e.lastName}`}}</li></ul>
+          </p>
+
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>

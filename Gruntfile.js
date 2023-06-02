@@ -38,7 +38,7 @@ module.exports = (grunt) => {
           // Add copy commands
           const recursive = '--recursive --exclude "*.map"';
           const security = '--acl private';
-          const cacheControl = stage === 'dev' ? 'max-age=600,s-maxage=300' : 'max-age=600,s-maxage=300';
+          const cacheControl = 'max-age=600,s-maxage=300';
           const metadata = `--metadata-directive REPLACE --cache-control ${cacheControl}`;
           _.each(paths, (source, destination) => {
             commands.push(

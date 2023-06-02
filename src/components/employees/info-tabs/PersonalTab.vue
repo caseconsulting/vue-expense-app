@@ -286,6 +286,8 @@ export default {
 
 $colors: (#d13447, #ffbf00, #263672);
 
+// stylelint-disable scss/function-unquote-no-unquoted-strings-inside
+// stylelint-disable scss/no-global-function-names
 @for $i from 0 through 150 {
   $w: random(8);
   $l: random(98);
@@ -307,4 +309,6 @@ $colors: (#d13447, #ffbf00, #263672);
     }
   }
 }
+// stylelint-enable scss/function-unquote-no-unquoted-strings-inside
+// stylelint-enable scss/no-global-function-names
 </style>
