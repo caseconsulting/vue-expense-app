@@ -112,26 +112,37 @@
         </v-row>
 
         <!-- Cost -->
-        <v-text-field
-          prefix="$"
-          v-model="costFormatted"
-          :rules="costRules"
-          :disabled="isReimbursed || isInactive || isHighFive"
-          label="Cost"
-          id="cost"
-          class="mt-3"
-          maxlength="12"
-          data-vv-name="Cost"
-          persistent-hint
-          :hint="costHint()"
-          @blur="editedExpense.cost = parseCost(costFormatted)"
-          @input="formatCost"
-          validate-on-blur
-        >
-          <template v-slot:message="{ message }">
-            <span v-html="message"></span>
-          </template>
-        </v-text-field>
+        <v-row class="mx-1">
+          <v-text-field
+            prefix="$"
+            v-model="costFormatted"
+            :rules="costRules"
+            :disabled="isReimbursed || isInactive || isHighFive"
+            label="Cost"
+            id="cost"
+            class="py-0"
+            maxlength="12"
+            data-vv-name="Cost"
+            persistent-hint
+            :hint="costHint()"
+            @blur="editedExpense.cost = parseCost(costFormatted)"
+            @input="formatCost"
+            validate-on-blur
+          >
+            <template v-slot:message="{ message }">
+              <span v-html="message"></span>
+            </template>
+          </v-text-field>
+          <!-- Exchange Hours Calculator -->
+          <v-btn
+            v-if="editedExpense.category && editedExpense.category === 'Exchange for training hours'"
+            small
+            class="ml-3"
+            @click="showExchangeCalculator = true"
+          >
+            Show Calculator
+          </v-btn>
+        </v-row>
 
         <!-- Recipient Employee Selection List -->
         <v-autocomplete
@@ -289,6 +300,9 @@
       ></general-confirmation-modal>
       <!-- Cancel Confirmation Modal -->
       <cancel-confirmation :toggleSubmissionConfirmation="confirmBackingOut" type="expense"> </cancel-confirmation>
+      <v-dialog v-model="showExchangeCalculator" width="50%" persistent>
+        <ExchangeTrainingHoursCalculator />
+      </v-dialog>
     </v-container>
   </v-card>
 </template>
@@ -298,6 +312,7 @@ import CancelConfirmation from '@/components/modals/CancelConfirmation.vue';
 import ConfirmationBox from '@/components/modals/ConfirmationBox.vue';
 import FileUpload from '@/components/utils/FileUpload.vue';
 import GeneralConfirmationModal from '@/components/modals/GeneralConfirmationModal.vue';
+import ExchangeTrainingHoursCalculator from '@/components/expenses/ExchangeTrainingHoursCalculator.vue';
 
 import api from '@/shared/api.js';
 import employeeUtils from '@/shared/employeeUtils';
@@ -1497,6 +1512,15 @@ function created() {
     this.confirmBackingOut = false;
     this.clearForm();
   });
+  window.EventBus.$on('close-exchange-training-hours-calculator', () => {
+    this.showExchangeCalculator = false;
+  });
+  window.EventBus.$on('insert-training-hours', (amount) => {
+    this.showExchangeCalculator = false;
+    this.costFormatted = amount;
+    this.formatCost();
+    this.editedExpense.cost = this.parseCost(this.costFormatted);
+  });
 
   this.myBudgetsView = this.$route.path === '/myBudgets';
   this.isInactive = this.myBudgetsView && this.userInfo.workStatus == 0;
@@ -1818,7 +1842,8 @@ export default {
     CancelConfirmation,
     ConfirmationBox,
     FileUpload,
-    GeneralConfirmationModal
+    GeneralConfirmationModal,
+    ExchangeTrainingHoursCalculator
   },
   computed: {
     isDifferentExpenseType,
@@ -1879,6 +1904,7 @@ export default {
       scanLoading: false, // determines if the scanning functionality is loading
       selectedEmployee: {}, // selected employees
       selectedExpenseType: {}, // selected expense types
+      showExchangeCalculator: false,
       submittedReceipt: null, // the receipt to show when editing an expense
       urlInfo: {
         id: null,
