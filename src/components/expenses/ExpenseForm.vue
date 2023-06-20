@@ -78,10 +78,10 @@
         >
 
         <!-- Upload Receipt -->
-        <v-row class="mt-2">
+        <v-row class="mt-2 justify-space-between">
           <file-upload
             v-if="receiptRequired && ((allowReceipt && isEdit) || !isEdit || isEmpty(expense.receipt))"
-            class="ml-1 py-0 w-60"
+            class="ml-1 py-0 w-70"
             @fileSelected="setFile"
             :passedRules="receiptRules"
             :receipt="expense.receipt"
@@ -90,23 +90,23 @@
           <!-- Scan Receipt Button -->
           <v-tooltip bottom>
             <template v-slot:activator="{ on, attrs }">
-              <span v-on="on">
+              <span v-on="on" class="d-flex align-center">
                 <v-btn
                   v-if="receiptRequired && ((allowReceipt && isEdit) || !isEdit || isEmpty(expense.receipt))"
                   color="white"
                   @click="scanFile"
-                  class="ma-3"
+                  class="mx-3"
                   :disabled="isInactive || disableScan"
                   :loading="scanLoading"
                   v-bind="attrs"
                 >
-                  Scan
+                  <v-icon>mdi-barcode-scan</v-icon>
                 </v-btn>
               </span>
             </template>
-            <span v-if="!scanLoading"
-              >Scans the receipt and autofills fields. Scanning only works for pdfs, pngs, and jpegs.</span
-            >
+            <span v-if="!scanLoading">
+              Scans the receipt and autofills fields. Scanning only works for pdfs, pngs, and jpegs.
+            </span>
             <span v-else>Scanning your receipt, this may take up to 15 seconds</span>
           </v-tooltip>
         </v-row>
@@ -134,14 +134,21 @@
             </template>
           </v-text-field>
           <!-- Exchange Hours Calculator -->
-          <v-btn
-            v-if="editedExpense.category && editedExpense.category === 'Exchange for training hours'"
-            small
-            class="ml-3"
-            @click="showExchangeCalculator = true"
-          >
-            Show Calculator
-          </v-btn>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <span v-on="on">
+                <v-btn
+                  v-if="editedExpense.category && editedExpense.category === 'Exchange for training hours'"
+                  class="ml-3"
+                  :disabled="isInactive"
+                  @click="showExchangeCalculator = true"
+                >
+                  <v-icon>mdi-calculator</v-icon>
+                </v-btn>
+              </span>
+            </template>
+            <span>Show Exchange Calculator</span>
+          </v-tooltip>
         </v-row>
 
         <!-- Recipient Employee Selection List -->
