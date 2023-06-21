@@ -13,33 +13,6 @@
       <v-card-title class="headline header_style">Contact Employees</v-card-title>
       <!-- Modal Content -->
       <v-card-text class="mt-4">
-        <v-row>
-          <v-col cols="5" class="d-flex justify-center">
-            <v-btn @click="emailEmployees()" color="light-blue lighten-2"
-              >Group Email
-              <v-icon right>email</v-icon>
-            </v-btn>
-          </v-col>
-          <v-col cols="2" class="d-flex justify-center align-center"> OR </v-col>
-          <v-col cols="5" class="d-flex justify-center">
-            <v-btn @click="pingEmployees()" class="basecamp">
-              Basecamp Ping
-              <v-icon large>$basecamp</v-icon>
-            </v-btn>
-          </v-col>
-        </v-row>
-        <!-- Modal Divider -->
-        <v-row class="my-1">
-          <v-col cols="5" class="px-0">
-            <hr class="light-blue lighten-1" />
-          </v-col>
-          <v-col cols="2" class="px-0">
-            <hr class="middle" />
-          </v-col>
-          <v-col cols="5" class="px-0">
-            <hr class="basecamp" />
-          </v-col>
-        </v-row>
         <v-autocomplete
           v-model="employees"
           :items="filteredEmployees"
@@ -55,17 +28,19 @@
           item-text="employeeName"
           return-object
         ></v-autocomplete>
-        <div>
-          <v-btn @click="copyEmailList()" small text color="grey darken-1">
-            Copy to Clipboard
-            <v-icon v-if="copied" right>mdi-check</v-icon>
-            <v-icon v-else right>mdi-content-copy</v-icon>
-          </v-btn>
-        </div>
       </v-card-text>
       <!-- Action Button -->
       <v-card-actions>
+        <v-btn @click="copyEmailList()" small text color="grey darken-1">
+          Copy to Clipboard
+          <v-icon v-if="copied" right>mdi-check</v-icon>
+          <v-icon v-else right>mdi-content-copy</v-icon>
+        </v-btn>
         <v-spacer></v-spacer>
+        <v-btn @click="emailEmployees()" text color="light-blue" class="mr-1">
+          Group Email
+          <v-icon right>email</v-icon>
+        </v-btn>
         <v-btn
           color="grey darken-3"
           text
@@ -83,7 +58,6 @@
 
 <script>
 import _ from 'lodash';
-import api from '@/shared/api';
 import { nicknameAndLastName } from '@/shared/employeeUtils';
 
 /**
@@ -151,19 +125,6 @@ function emailEmployees() {
 } // emailEmployees
 
 /**
- * Generate the Basecamp URL of a circle with all employees to ping.
- */
-async function pingEmployees() {
-  let emails = _.map(this.employees, (e) => e.email);
-  let data = { emails };
-  let url = await api.getBasecampCircle(data);
-  if (url) {
-    url = url.replace('api', '');
-    window.open(url, '_blank');
-  }
-} // pingEmployees
-
-/**
  * Emits a message and data if it exists.
  *
  * @param msg - Message to emit
@@ -222,8 +183,7 @@ export default {
     copyEmailList,
     customFilter,
     emailEmployees,
-    emit,
-    pingEmployees
+    emit
   },
   mounted,
   props: ['passedEmployees']
