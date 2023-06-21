@@ -723,7 +723,7 @@ function removeTagBudget(index) {
  * @param index autocomplete input index
  */
 function remove(data, index) {
-  let indx = this.editedExpenseType.tagBudgets[index].tags.findIndex((t) => t.id == data.id);
+  let indx = this.editedExpenseType.tagBudgets[index].tags.findIndex((t) => t == data.id);
   this.editedExpenseType.tagBudgets[index].tags.splice(indx, 1);
 } // remove
 
