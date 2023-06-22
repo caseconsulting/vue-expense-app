@@ -1123,12 +1123,9 @@ export default {
 .contracts-table :deep(td:first-of-type) {
   width: 1%;
 }
-<<<<<<< HEAD
-=======
 .contracts-table :deep(td:nth-child(n + 2):nth-child(-n + 6)) {
   width: 9%;
 }
->>>>>>> 0daf93dc (POR-2209: migrate from vue 2.6 to vue 2.7)
 
 .contracts-table :deep(td:nth-of-type(7)) {
   width: 19%;
@@ -1142,7 +1139,7 @@ export default {
   width: 10%;
 }
 
-.contracts-table >>> td:nth-child(n + 2):nth-child(-n + 6) {
+.contracts-table :deep(td:nth-child(n + 2):nth-child(-n + 6)) {
   width: 9%;
 }
 </style>
