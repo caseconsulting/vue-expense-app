@@ -1,5 +1,5 @@
 import { isEmpty } from '@/utils/utils';
-import { getTodaysDate, isBefore, isValid } from '@/shared/dateUtils';
+import { getTodaysDate, isSameOrBefore, isValid } from '@/shared/dateUtils';
 import store from '../../store/index';
 import _ from 'lodash';
 
@@ -59,7 +59,7 @@ export function getDateMonthYearRules() {
  * @return Array - The array of rule functions
  */
 export function getNonFutureDateRules() {
-  return [(v) => isBefore(v, getTodaysDate('MM/DD/YYYY'), null, 'MM/DD/YYYY') || 'Date must be before today'];
+  return [(v) => isSameOrBefore(v, getTodaysDate('MM/DD/YYYY'), 'd') || 'Date must be today or earlier'];
 } // getNonFutureDateRules
 
 /**

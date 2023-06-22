@@ -192,7 +192,7 @@
             <v-text-field
               v-model="purchaseDateFormatted"
               id="purchaseDate"
-              :rules="getDateRules()"
+              :rules="[...getDateRules(), ...getNonFutureDateRules()]"
               :disabled="(isReimbursed && !isDifferentExpenseType) || isInactive"
               v-mask="'##/##/####'"
               label="Purchase Date"
@@ -252,7 +252,7 @@
         <!-- URL -->
         <v-text-field
           v-model="editedExpense.url"
-          :rules="[...getURLRules(), ...getRequireURL()]"
+          :rules="[...getURLRules(), getRequireURL()]"
           :label="urlLabel"
           :disabled="isInactive"
         ></v-text-field>
@@ -323,7 +323,13 @@ import ExchangeTrainingHoursCalculator from '@/components/expenses/ExchangeTrain
 
 import api from '@/shared/api.js';
 import employeeUtils from '@/shared/employeeUtils';
-import { getDateRules, getDateOptionalRules, getRequiredRules, getURLRules } from '@/shared/validationUtils.js';
+import {
+  getDateRules,
+  getDateOptionalRules,
+  getNonFutureDateRules,
+  getRequiredRules,
+  getURLRules
+} from '@/shared/validationUtils.js';
 import {
   isEmpty,
   isFullTime,
@@ -1939,6 +1945,7 @@ export default {
     getCategories,
     getDateRules,
     getDateOptionalRules,
+    getNonFutureDateRules,
     getExpenseTypeSelected,
     getRole,
     getRemainingBudget,
