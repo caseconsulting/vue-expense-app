@@ -220,7 +220,7 @@ async function createEvents() {
             event.truncatedText = _.truncate(event.text, { length: this.textMaxLength });
           }
           if (event.type === 'New Hire') {
-            event.color = 'grey darken-3';
+            event.color = '#415364';
             newHires.push(event);
           } else {
             if (anniversaries[monthDiff].events) {
