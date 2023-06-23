@@ -31,6 +31,7 @@
         <employee-tab
           v-if="infoTab === 'employee'"
           :admin="hasAdminPermissions()"
+          :contracts="contracts"
           :employee="userIsEmployee()"
           :model="model"
         >
@@ -43,7 +44,7 @@
         >
         </personal-tab>
         <customer-org-tab v-if="infoTab === 'customerOrgExp'" :model="model"></customer-org-tab>
-        <contracts-tab v-if="infoTab === 'contracts'" :model="model"></contracts-tab>
+        <contracts-tab v-if="infoTab === 'contracts'" :model="model" :contracts="contracts"></contracts-tab>
         <clearance-tab
           v-if="infoTab === 'clearance' && (hasAdminPermissions() || userIsEmployee())"
           :model="model"
