@@ -146,14 +146,16 @@ export default {
     fileTooBig,
     megabytes
   },
-  data: () => ({
-    dialog: false,
-    fileSizeLimit: 3.5,
-    previewURL: '',
-    title: 'receipt upload',
-    inputFile: null,
-    label: 'Select Receipt'
-  }),
+  data() {
+    return {
+      dialog: false,
+      fileSizeLimit: 3,
+      previewURL: '',
+      title: 'receipt upload',
+      inputFile: null,
+      label: 'Select Receipt'
+    };
+  },
   created,
   methods: {
     fileSizeRule,
