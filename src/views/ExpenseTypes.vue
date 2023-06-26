@@ -1031,9 +1031,9 @@ async function validateDelete(item) {
     let expenses = await api.getAllExpenseTypeExpenses(item.id);
     if (expenses.length <= 0) {
       this.$set(this.deleteModel, 'id', item.id);
-      this.deleting = !this.deleting;
+      this.deleting = true;
     } else {
-      this.invalidDelete = !this.invalidDelete;
+      this.invalidDelete = true;
     }
   } catch (err) {
     this.displayError(err);
@@ -1082,8 +1082,10 @@ async function created() {
 
   window.EventBus.$on('canceled-delete-expense-type', () => {
     this.midAction = false;
+    this.deleting = false;
   });
   window.EventBus.$on('confirm-delete-expense-type', async () => {
+    this.deleting = false;
     await this.deleteExpenseType();
   });
   window.EventBus.$on('invalid-expense type-delete', () => {
