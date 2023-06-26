@@ -1,14 +1,9 @@
 <template>
   <div class="text-xs-center text-sm-center text-md-center text-lg-center">
-    <!-- Receipt Size Error -->
-    <v-alert :value="fileTooBig" type="error">
-      The file you selected is {{ megabytes }} MBs which exceeds the maximum file size of {{ fileSizeLimit }}MB.
-    </v-alert>
-
     <!-- Receipt Input -->
     <v-file-input
       v-model="inputFile"
-      :rules="passedRules"
+      :rules="[...passedRules, ...fileSizeRule()]"
       :label="label"
       :accept="acceptedFileTypes"
       :disabled="disabled"
@@ -84,6 +79,17 @@ function acceptedFileTypes() {
 // |--------------------------------------------------|
 
 /**
+ * Validates the file size with the file size limit.
+ */
+function fileSizeRule() {
+  return [
+    () =>
+      !this.fileTooBig ||
+      `The selected file (${this.megabytes.toFixed(2)} MB) exceeds the size limit of ${this.fileSizeLimit} MB`
+  ];
+} // fileSizeRule
+
+/**
  * Set file data.
  */
 function receiptChange() {
@@ -142,7 +148,7 @@ export default {
   },
   data: () => ({
     dialog: false,
-    fileSizeLimit: 5,
+    fileSizeLimit: 3.5,
     previewURL: '',
     title: 'receipt upload',
     inputFile: null,
@@ -150,6 +156,7 @@ export default {
   }),
   created,
   methods: {
+    fileSizeRule,
     receiptChange
   },
   watch: {

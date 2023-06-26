@@ -81,7 +81,7 @@
         <v-row class="mt-2 justify-space-between">
           <file-upload
             v-if="receiptRequired && ((allowReceipt && isEdit) || !isEdit || isEmpty(expense.receipt))"
-            class="ml-1 py-0 w-70"
+            class="ml-1 mb-2 py-0 w-70"
             @fileSelected="setFile"
             :passedRules="receiptRules"
             :receipt="expense.receipt"
