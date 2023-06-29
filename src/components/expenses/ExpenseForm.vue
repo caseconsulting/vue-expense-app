@@ -93,9 +93,11 @@
               <span v-on="on" class="d-flex align-center">
                 <v-btn
                   v-if="receiptRequired && ((allowReceipt && isEdit) || !isEdit || isEmpty(expense.receipt))"
-                  color="white"
+                  color="black"
                   @click="scanFile"
-                  class="mx-3"
+                  class="mx-3 mb-5"
+                  outlined
+                  elevation="1"
                   :disabled="isInactive || disableScan"
                   :loading="scanLoading"
                   v-bind="attrs"

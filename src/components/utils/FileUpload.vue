@@ -85,7 +85,9 @@ function fileSizeRule() {
   return [
     () =>
       !this.fileTooBig ||
-      `The selected file (${this.megabytes.toFixed(2)} MB) exceeds the size limit of ${this.fileSizeLimit} MB`
+      `The selected file (${this.megabytes.toFixed(2)} MB) exceeds the size limit of ${this.fileSizeLimit.toFixed(
+        1
+      )} MB`
   ];
 } // fileSizeRule
 
@@ -153,7 +155,7 @@ export default {
       previewURL: '',
       title: 'receipt upload',
       inputFile: null,
-      label: 'Select Receipt'
+      label: 'Select Receipt (3.0 MB limit)'
     };
   },
   created,
