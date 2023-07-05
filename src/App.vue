@@ -125,7 +125,7 @@
                 id="P"
                 class="black--text"
                 target="_blank"
-                href="https://3.basecamp.com/3097063/buckets/4708396/documents/6103442047"
+                href="https://3.basecamp.com/3097063/buckets/4708396/documents/6321360262"
                 ><strong>Version</strong> {{ version }}</a
               >
             </template>
