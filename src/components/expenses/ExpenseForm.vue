@@ -877,7 +877,7 @@ function filteredExpenseTypes() {
   let filteredExpType = [];
   let selectedEmployee = _.find(this.employees, ['value', this.editedExpense.employeeId]);
   if (!this.asUser) {
-    // creating or updating an expense as a user
+    // creating or updating an expense as an admin
     _.forEach(this.expenseTypes, (expenseType) => {
       if (!expenseType.isInactive) {
         // expense type is active
@@ -894,7 +894,7 @@ function filteredExpenseTypes() {
       }
     });
   } else {
-    // creating or updating an expense as an admin
+    // creating or updating an expense as a user
     let employee = this.userInfo;
     _.forEach(this.expenseTypes, (expenseType) => {
       if (!expenseType.isInactive) {
@@ -1549,6 +1549,7 @@ function created() {
   let employees = this.$store.getters.employees;
   this.employees = employees.map((employee) => {
     return {
+      id: employee.id,
       text: employeeUtils.nicknameAndLastName(employee),
       value: employee.id,
       workStatus: employee.workStatus,
