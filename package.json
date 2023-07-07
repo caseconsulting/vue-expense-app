@@ -82,7 +82,7 @@
     "raw-loader": "4.0.2",
     "sass": "1.62.1",
     "sass-loader": "10.2.1",
-    "stylelint": "15.6.2",
+    "stylelint": "15.10.1",
     "stylelint-config-recommended-scss": "11.0.0",
     "stylelint-config-recommended-vue": "1.4.0",
     "stylus": "0.59.0",
