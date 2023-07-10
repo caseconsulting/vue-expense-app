@@ -62,7 +62,7 @@
     <!-- Case Info -->
     <div class="gray-border ma-0 pt-2 pb-1 px-5">
       <!-- Company Name -->
-      <v-text-field label="Company" data-vv-name="Company" disabled value="Case Consulting"></v-text-field>
+      <v-text-field label="Company" data-vv-name="Company" disabled value="CASE"></v-text-field>
 
       <!-- Job Position -->
       <v-text-field

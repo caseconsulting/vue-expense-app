@@ -6,135 +6,137 @@
         <h3>Activity Feed</h3>
       </v-card-title>
       <v-spacer></v-spacer>
-      <!-- Autocomplete filters -->
-      <v-card-text class="pb-0">
-        <v-autocomplete
-          :items="filters"
-          multiple
-          v-model="activeFilters"
-          chips
-          deletable-chips
-          clearable
-          filled
-          return-object
-          :search-input.sync="searchString"
-          @change="searchString = ''"
-          class="elevate"
-          append-icon=""
-        >
-          <template v-slot:selection="data">
-            <v-chip
-              v-bind="data.attrs"
-              :input-value="data.selected"
-              close
-              @click="data.select"
-              @click:close="remove(data.item)"
-              small
-            >
-              <v-avatar :color="data.item.color" left>
-                <v-icon small color="white"> {{ data.item.icon }}</v-icon>
-              </v-avatar>
-              {{ data.item.type }}
-            </v-chip>
-          </template>
-          <template v-slot:item="data">
-            <v-list-item-avatar :color="data.item.color">
-              <v-icon color="white"> {{ data.item.icon }}</v-icon>
-            </v-list-item-avatar>
-            <v-list-item-content>
-              <v-list-item-title>{{ data.item.type }}</v-list-item-title>
-            </v-list-item-content>
-          </template>
-        </v-autocomplete>
-      </v-card-text>
-      <!-- Loading Bar -->
-      <div v-if="loading" class="pa-8 pt-4">
+      <div v-if="loading" class="pa-8 pt-6">
         <v-progress-linear :indeterminate="true"></v-progress-linear>
       </div>
-      <v-timeline v-else dense class="pt-0">
-        <!-- Timeline -->
-        <v-virtual-scroll :items="filterEvents()" :item-height="itemHeight" height="700" bench="2">
-          <template v-slot="{ item }">
-            <v-tooltip
-              open-on-hover
-              top
-              max-width="400px"
-              min-width="200px"
-              :color="item.truncatedText ? 'grey darken-3' : 'rgba(0, 0, 0, 0)'"
-              open-delay="200"
-            >
-              <template v-slot:activator="{ on, attrs }">
-                <span v-bind="attrs" v-on="on">
-                  <v-timeline-item :color="item.color" :key="item.name">
-                    <!-- Icon -->
-                    <template v-slot:icon v-if="item.icon">
-                      <v-tooltip
-                        bottom
-                        v-if="
-                          item.newCampfire ||
-                          item.congratulateCampfire ||
-                          item.birthdayCampfire ||
-                          item.campfire ||
-                          item.eventScheduled
-                        "
-                      >
-                        <template v-slot:activator="{ on }">
-                          <v-btn v-on="on" text icon :href="getURL(item)" target="blank">
-                            <v-icon class="white--text">{{ item.icon }}</v-icon>
-                          </v-btn>
-                        </template>
-                        <!-- Icon Hover Text -->
-                        <span v-if="item.newCampfire">Welcome to team</span>
-                        <span v-else-if="item.congratulateCampfire">Congratulate</span>
-                        <span v-else-if="item.birthdayCampfire">Say happy birthday</span>
-                        <span v-else-if="item.campfire">Comment in campfire</span>
-                        <span v-else-if="item.eventScheduled">See event</span>
-                      </v-tooltip>
+      <div v-else>
+        <!-- Autocomplete filters -->
+        <v-card-text class="pb-0">
+          <!-- Loading Bar -->
+          <v-autocomplete
+            :items="filters"
+            multiple
+            v-model="activeFilters"
+            chips
+            deletable-chips
+            clearable
+            filled
+            return-object
+            :search-input.sync="searchString"
+            @change="searchString = ''"
+            class="elevate"
+            append-icon=""
+          >
+            <template v-slot:selection="data">
+              <v-chip
+                v-bind="data.attrs"
+                :input-value="data.selected"
+                close
+                @click="data.select"
+                @click:close="remove(data.item)"
+                small
+              >
+                <v-avatar :color="data.item.color" left>
+                  <v-icon small color="white"> {{ data.item.icon }}</v-icon>
+                </v-avatar>
+                {{ data.item.type }}
+              </v-chip>
+            </template>
+            <template v-slot:item="data">
+              <v-list-item-avatar :color="data.item.color">
+                <v-icon color="white"> {{ data.item.icon }}</v-icon>
+              </v-list-item-avatar>
+              <v-list-item-content>
+                <v-list-item-title>{{ data.item.type }}</v-list-item-title>
+              </v-list-item-content>
+            </template>
+          </v-autocomplete>
+        </v-card-text>
+        <v-timeline dense class="pt-0">
+          <!-- Timeline -->
+          <v-virtual-scroll :items="filterEvents()" :item-height="itemHeight" height="700" bench="2">
+            <template v-slot="{ item }">
+              <v-tooltip
+                open-on-hover
+                top
+                max-width="400px"
+                min-width="200px"
+                :color="item.truncatedText ? 'grey darken-3' : 'rgba(0, 0, 0, 0)'"
+                open-delay="200"
+              >
+                <template v-slot:activator="{ on, attrs }">
+                  <span v-bind="attrs" v-on="on">
+                    <v-timeline-item :color="item.color" :key="item.name">
+                      <!-- Icon -->
+                      <template v-slot:icon v-if="item.icon">
+                        <v-tooltip
+                          bottom
+                          v-if="
+                            item.newCampfire ||
+                            item.congratulateCampfire ||
+                            item.birthdayCampfire ||
+                            item.campfire ||
+                            item.eventScheduled
+                          "
+                        >
+                          <template v-slot:activator="{ on }">
+                            <v-btn v-on="on" text icon :href="getURL(item)" target="blank">
+                              <v-icon class="white--text">{{ item.icon }}</v-icon>
+                            </v-btn>
+                          </template>
+                          <!-- Icon Hover Text -->
+                          <span v-if="item.newCampfire">Welcome to team</span>
+                          <span v-else-if="item.congratulateCampfire">Congratulate</span>
+                          <span v-else-if="item.birthdayCampfire">Say happy birthday</span>
+                          <span v-else-if="item.campfire">Comment in campfire</span>
+                          <span v-else-if="item.eventScheduled">See event</span>
+                        </v-tooltip>
 
-                      <v-icon class="white--text" v-else>{{ item.icon }}</v-icon>
-                    </template>
-                    <!-- End Icon -->
+                        <v-icon class="white--text" v-else>{{ item.icon }}</v-icon>
+                      </template>
+                      <!-- End Icon -->
 
-                    <!-- Item Title: Date -->
-                    <h3>{{ item.date }}</h3>
+                      <!-- Item Title: Date -->
+                      <h3>{{ item.date }}</h3>
 
-                    <div v-if="item.type === 'Anniversary'" class="px-4">
-                      <v-btn @click="openAnniversariesModal(item)" color="#bc3825" class="white--text" small
-                        >View {{ item.events.length }}
-                        {{ item.events.length > 1 ? 'Anniversaries' : 'Anniversary' }}</v-btn
-                      >
-                    </div>
-
-                    <div v-else>
-                      <!-- Event has a link -->
-                      <v-list-item
-                        class="ma-auto pa-auto activityFeedText"
-                        v-if="item.link"
-                        :href="item.link"
-                        target="_blank"
-                        :dense="true"
-                      >
-                        <v-row dense>
-                          <v-col cols="11">{{ item.truncatedText ? item.truncatedText : item.text }}&nbsp;</v-col>
-                          <v-col cols="1">
-                            <v-icon height="12" width="12" color="blue">open-in-new</v-icon>
-                          </v-col>
-                        </v-row>
-                      </v-list-item>
-                      <!-- Event does not have a link -->
-                      <div class="px-4 activityFeedText" v-else>
-                        {{ item.truncatedText ? item.truncatedText : item.text }}
+                      <div v-if="item.type === 'Anniversary'" class="px-4">
+                        <v-btn @click="openAnniversariesModal(item)" color="#bc3825" class="white--text" small
+                          >View {{ item.events.length }}
+                          {{ item.events.length > 1 ? 'Anniversaries' : 'Anniversary' }}</v-btn
+                        >
                       </div>
-                    </div>
-                  </v-timeline-item>
-                </span>
-              </template>
-              <!-- Expanded Event Description -->
-              <span v-if="item.truncatedText" class="activityFeedText">{{ item.text }}</span>
-            </v-tooltip>
-          </template>
-        </v-virtual-scroll>
-      </v-timeline>
+
+                      <div v-else>
+                        <!-- Event has a link -->
+                        <v-list-item
+                          class="ma-auto pa-auto activityFeedText"
+                          v-if="item.link"
+                          :href="item.link"
+                          target="_blank"
+                          :dense="true"
+                        >
+                          <v-row dense>
+                            <v-col cols="11">{{ item.truncatedText ? item.truncatedText : item.text }}&nbsp;</v-col>
+                            <v-col cols="1">
+                              <v-icon height="12" width="12" color="blue">open-in-new</v-icon>
+                            </v-col>
+                          </v-row>
+                        </v-list-item>
+                        <!-- Event does not have a link -->
+                        <div class="px-4 activityFeedText" v-else>
+                          {{ item.truncatedText ? item.truncatedText : item.text }}
+                        </div>
+                      </div>
+                    </v-timeline-item>
+                  </span>
+                </template>
+                <!-- Expanded Event Description -->
+                <span v-if="item.truncatedText" class="activityFeedText">{{ item.text }}</span>
+              </v-tooltip>
+            </template>
+          </v-virtual-scroll>
+        </v-timeline>
+      </div>
     </v-card>
     <v-dialog v-model="toggleAnniversariesModal" max-width="700">
       <AnniversariesModal :item="item" />

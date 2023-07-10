@@ -184,7 +184,8 @@ import {
   updateStoreContracts,
   updateStoreEmployees,
   updateStoreExpenseTypes,
-  updateStoreUser
+  updateStoreUser,
+  updateStoreTags
 } from '@/utils/storeUtils';
 import _ from 'lodash';
 import ConvertEmployeeToCsv from '@/components/employees/csv/ConvertEmployeeToCsv.vue';
@@ -240,9 +241,10 @@ async function downloadResume() {
 async function getProfileData() {
   this.loading = true;
   await Promise.all([
-    !this.$store.getters.employees ? this.updateStoreEmployees() : '',
-    !this.$store.getters.user ? this.updateStoreUser() : '',
-    !this.$store.getters.contracts ? this.updateStoreContracts() : ''
+    !this.$store.getters.employees ? this.updateStoreEmployees() : _,
+    !this.$store.getters.user ? this.updateStoreUser() : _,
+    !this.$store.getters.contracts ? this.updateStoreContracts() : _,
+    this.hasAdminPermissions() && !this.$store.getters.tags ? this.updateStoreTags() : _
   ]);
   if (this.$store.getters.user.employeeNumber == this.$route.params.id) {
     // user looking at their own profile
@@ -546,6 +548,7 @@ export default {
     updateStoreEmployees,
     updateStoreExpenseTypes,
     updateStoreUser,
+    updateStoreTags,
     userRoleIsAdmin,
     userRoleIsManager,
     userIsEmployee,

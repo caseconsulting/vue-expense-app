@@ -65,11 +65,11 @@
           <!-- Available Budgets -->
           <div class="text-center">
             <available-budgets
-              v-if="accessibleBudgets"
               id="home-available-budgets"
               :employee="employee"
               :expenses="expenses"
               :expenseTypes="expenseTypes"
+              :employeeDataLoading="loadingBudgets"
               :fiscalDateView="fiscalDateView"
               :accessibleBudgets="accessibleBudgets"
             ></available-budgets>
@@ -192,14 +192,14 @@ async function createEvents() {
         if (monthDiff >= 0 && monthDiff < monthsBack) {
           event.date = this.getEventDateMessage(anniversary);
           if (isSame(anniversary, hireDate, 'day')) {
-            event.text = a.firstName + ' ' + a.lastName + ' has joined the Case Consulting team!'; //new hire message
+            event.text = a.firstName + ' ' + a.lastName + ' has joined the CASE team!'; //new hire message
             event.icon = 'mdi-account-plus';
             event.type = 'New Hire';
             event.newCampfire = 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726';
           } else {
             event.date = format(anniversary, null, 'll');
             if (difference(anniversary, hireDate, 'year') == 1) {
-              event.text = a.firstName + ' ' + a.lastName + ' is celebrating 1 year at Case Consulting!';
+              event.text = a.firstName + ' ' + a.lastName + ' is celebrating 1 year at CASE!';
             } else {
               event.text =
                 getEmployeePreferredName(a) +
@@ -207,7 +207,7 @@ async function createEvents() {
                 a.lastName +
                 ' is celebrating ' +
                 difference(anniversary, hireDate, 'year') +
-                ' years at Case Consulting!';
+                ' years at CASE!';
             }
             event.anniversary = anniversary;
             event.icon = 'mdi-party-popper';
@@ -220,6 +220,7 @@ async function createEvents() {
             event.truncatedText = _.truncate(event.text, { length: this.textMaxLength });
           }
           if (event.type === 'New Hire') {
+            event.color = '#415364';
             newHires.push(event);
           } else {
             if (anniversaries[monthDiff].events) {
@@ -258,7 +259,7 @@ async function createEvents() {
       let event = {};
       let now = getTodaysDate();
       let cutOff = startOf(subtract(now, 6, 'months'), 'day');
-      let birthday = format(b.birthday, 'YYYY-MM-DD', 'YYYY-MM-DD');
+      let birthday = format(b.birthday, 'MM-DD', 'MM-DD');
       birthday = setYear(birthday, getYear(now));
       let diff = difference(startOf(now, 'day'), startOf(birthday, 'day'), 'day');
       // Get event date text
@@ -278,7 +279,7 @@ async function createEvents() {
       }
       event.icon = 'mdi-cake-variant';
       event.type = 'Birthday';
-      event.color = 'orange';
+      event.color = 'orange darken-3';
       event.daysFromToday = difference(startOf(now, 'day'), startOf(birthday, 'day'), 'day');
       event.birthdayCampfire = 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726';
       if (this.textMaxLength < event.text.length) {
@@ -322,6 +323,11 @@ async function createEvents() {
         event.icon = 'mdi-thumbs-up';
         event.type = 'Congratulate';
         event.color = 'purple';
+      } else if (a.budgetName === 'Training') {
+        event.campfire = a.campfire;
+        event.icon = 'mdi-dumbbell';
+        event.type = 'Training';
+        event.color = 'brown';
       } else {
         event.campfire = a.campfire;
         event.icon = 'mdi-currency-usd';
@@ -365,7 +371,7 @@ async function createEvents() {
     }
     event.link = a.app_url;
     event.eventScheduled = a.app_url;
-    event.color = '#1a73e8';
+    event.color = 'blue darken-3';
     if (this.textMaxLength < event.text.length) {
       event.truncatedText = _.truncate(event.text, { length: this.textMaxLength });
     }
@@ -405,7 +411,7 @@ async function createEvents() {
     const dateSubmitted = c.dateSubmitted || c.dateReceived;
     let cert = {
       icon: 'mdi-certificate',
-      color: '#3C7DD0',
+      color: 'blue lighten-1',
       type: 'Certification',
       daysFromToday: difference(startOf(now, 'day'), startOf(dateSubmitted, 'day'), 'day'),
       text: `${getEmployeePreferredName(c.employee)} ${c.employee.lastName} was certified "${c.name}"`,
@@ -535,16 +541,17 @@ async function loadHomePageData() {
  * Refresh and sets employee information.
  */
 async function refreshEmployee() {
+  this.loadingBudgets = true;
   this.employee = this.$store.getters.user;
   this.hireDate = this.employee.hireDate;
   this.fiscalDateView = this.getCurrentBudgetYear(this.hireDate);
-  [this.expenses] = await Promise.all([
-    api.getAllAggregateExpenses(),
+  await Promise.all([
     !this.$store.getters.expenseTypes ? this.updateStoreExpenseTypes() : '',
     !this.$store.getters.budgets ? this.updateStoreBudgets() : ''
   ]);
   this.expenseTypes = this.$store.getters.expenseTypes;
   this.accessibleBudgets = this.$store.getters.budgets;
+  this.loadingBudgets = false;
 } // refreshEmployee
 
 /**
@@ -570,8 +577,8 @@ async function created() {
     this.status = status;
   });
   if (this.$store.getters.storeIsPopulated) {
-    await this.loadHomePageData();
     this.loading = false;
+    await this.loadHomePageData();
   }
 } // created
 
@@ -593,8 +600,8 @@ function beforeDestroy() {
  */
 async function watchStoreIsPopulated() {
   if (this.$store.getters.storeIsPopulated) {
-    await this.loadHomePageData();
     this.loading = false;
+    await this.loadHomePageData();
   }
 } // watchStoreIsPopulated
 
@@ -632,6 +639,7 @@ export default {
       fiscalDateView: '', // current budget year view by anniversary day
       hireDate: '', // employee hire date
       loading: true,
+      loadingBudgets: true,
       loadingEvents: true,
       scheduleEntries: [],
       seconds: 0, // seconds until next anniversary date

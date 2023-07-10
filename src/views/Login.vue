@@ -1,11 +1,11 @@
 <template>
   <v-container class="text-md-center">
     <v-row justify="center">
-      <v-col align="center" cols="12">
-        <img id="caseLogo" class="case_logo" src="../assets/img/logo-banner.gif" alt="" />
+      <v-col align="center" cols="12" class="pb-0">
+        <img id="caseLogo" class="case_logo" width="419" height="160" src="../assets/img/logo-banner.gif" alt="" />
       </v-col>
       <v-col align="center" cols="12">
-        <h1 class="my-4">Case Portal</h1>
+        <h1 class="my-4">CASE Portal</h1>
       </v-col>
       <v-col align="center" cols="12">
         <v-btn @click="login()" id="custom-button-color" class="reimburse_button" elevation="1" large>Login</v-btn>

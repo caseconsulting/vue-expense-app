@@ -324,14 +324,24 @@ export default {
             abilities: [
               { ability: 'View/update personal profile data', admin: 'X', manager: 'X', user: 'X', intern: 'X' },
               { ability: 'Add/edit personal expenses', admin: 'X', manager: 'X', user: 'X', intern: 'X' },
+              { ability: 'Add/edit personal PTO cash out requests', admin: 'X', manager: 'X', user: 'X', intern: '' },
               { ability: 'View other’s profile data', admin: 'X', manager: 'X', user: 'X', intern: '' },
               { ability: 'Create employees', admin: 'X', manager: 'X', user: '', intern: '' },
               { ability: 'Edit other’s profile data', admin: 'X', manager: 'X', user: '', intern: '' },
               { ability: 'View audits', admin: 'X', manager: 'X', user: '', intern: '' },
+              { ability: 'Reimburse expenses', admin: 'X', manager: 'X', user: '', intern: '' },
+              { ability: 'Approve PTO cash out requests', admin: 'X', manager: 'X', user: '', intern: '' },
+              { ability: "View other's expenses", admin: 'X', manager: 'X', user: '', intern: '' },
+              { ability: 'Create/update other’s expenses', admin: 'X', manager: 'X', user: '', intern: '' },
+              { ability: "View other's PTO cash out requests", admin: 'X', manager: 'X', user: '', intern: '' },
+              {
+                ability: "Create/update other's PTO cash out requests",
+                admin: 'X',
+                manager: 'X',
+                user: '',
+                intern: ''
+              },
               { ability: 'Create/update expense types', admin: 'X', manager: '', user: '', intern: '' },
-              { ability: "View other's expenses", admin: 'X', manager: '', user: '', intern: '' },
-              { ability: 'Create/update other’s expenses', admin: 'X', manager: '', user: '', intern: '' },
-              { ability: 'Reimburse expenses', admin: 'X', manager: '', user: '', intern: '' },
               { ability: 'Download employee CSV’s', admin: 'X', manager: '', user: '', intern: '' },
               { ability: 'View login dates', admin: 'X', manager: '', user: '', intern: '' }
             ]

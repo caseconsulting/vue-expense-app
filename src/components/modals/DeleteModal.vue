@@ -68,7 +68,7 @@ function emit(msg, data) {
  * watcher for toggleDeleteModal
  */
 function watchToggleDeleteModal() {
-  this.activate = true;
+  this.activate = this.toggleDeleteModal;
 } // watchToggleDeleteModal
 
 // |--------------------------------------------------|

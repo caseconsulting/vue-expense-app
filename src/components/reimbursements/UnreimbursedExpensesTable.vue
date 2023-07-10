@@ -308,9 +308,18 @@ function createExpenses(aggregatedData) {
       showSwitch: false,
       failed: false
     };
+    const employees = this.$store.getters.employees;
+    let employee = _.find(employees, (emp) => emp.id === expense.employeeId);
+    let expenseType = _.find(this.expenseTypes, (expenseType) => expenseType.id === expense.expenseTypeId);
+    expense.budgetName = expenseType.budgetName;
+    expense.employeeName = employeeUtils.firstAndLastName(employee);
+    expense.firstName = employee.firstName;
+    expense.middleName = employee.middleName;
+    expense.lastName = employee.lastName;
+    expense.campfire = expenseType.campfire;
+    expense.nickname = employee.nickname;
     // high fives should have a dynamic description
     if (expense.budgetName == 'High Five') {
-      const employees = this.$store.getters.employees;
       // get high fiver
       const giver = _.find(employees, (e) => {
         return e.id === expense.employeeId;
@@ -448,16 +457,6 @@ function emitSelectionChange(expense, newSelect) {
 } // emitSelectionChange
 
 /**
- * Remove reimbursed expenses and returns a list of pending expenses.
- *
- * @param expenses - list of expenses
- * @return Array - pending expenses
- */
-function filterOutReimbursed(expenses) {
-  return _.filter(expenses, (expense) => !this.isReimbursed(expense));
-} // filterOutReimbursed
-
-/**
  * Get the total cost of expenses in a group budget.
  *
  * @param expenses - list of expenses
@@ -493,16 +492,6 @@ function groupEmployeeExpenses(expenses) {
 } // groupEmployeeExpenses
 
 /**
- * Checks if the expense is reimbursed. Returns true if the expense is reimbursed, otherwise returns false.
- *
- * @param expense - expense to check
- * @return boolean - expense is reimbursed
- */
-function isReimbursed(expense) {
-  return expense && !this.isEmpty(expense.reimbursedDate);
-} // isReimbursed
-
-/**
  * Return true if two items have the same employeeId and expenseTypeId and not reimbursed.
  *
  * @param expense - first expense to compare
@@ -510,8 +499,7 @@ function isReimbursed(expense) {
  * @return boolean - item not reimbursed and employee and expense type match
  */
 function matchingEmployeeAndExpenseType(expense, item) {
-  let reimbursed = this.isReimbursed(item);
-  return expense.employeeId === item.employeeId && expense.expenseTypeId === item.expenseTypeId && !reimbursed;
+  return expense.employeeId === item.employeeId && expense.expenseTypeId === item.expenseTypeId;
 } // matchingEmployeeAndExpenseType
 
 /**
@@ -521,7 +509,7 @@ function refreshExpenses() {
   this.pendingExpenses = [];
   _.forEach(this.empBudgets, (budget) => {
     _.forEach(budget.expenses, (budgetExpense) => {
-      if (!this.isReimbursed(budgetExpense)) {
+      if (!budgetExpense.reimbursedDate) {
         this.pendingExpenses.push(budgetExpense);
       }
     });
@@ -659,15 +647,14 @@ function determineShowOnFeed(expense) {
 /**
  * Loads and organizes all data relevant to the data table.
  */
-function loadExpensesData(aggData) {
-  let allExpenses = this.createExpenses(aggData);
-  this.pendingExpenses = this.filterOutReimbursed(allExpenses);
+function loadExpensesData(unreimbursedExpenses) {
+  this.pendingExpenses = this.createExpenses(unreimbursedExpenses);
   this.constructAutoComplete(this.pendingExpenses);
   this.empBudgets = this.groupEmployeeExpenses(this.pendingExpenses);
   this.unCheckAllBoxes();
   this.resetShowOnFeedToggles();
   this.loading = false;
-}
+} // loadExpensesData
 
 /**
  * Remove additional attributes from the aggregate expense.
@@ -800,12 +787,13 @@ async function created() {
 
   //window.EventBus.$on('canceled-reimburse', () => (this.buttonClicked = false));
   window.EventBus.$on('confirm-reimburse', async () => await this.reimburseExpenses());
-  let aggData;
-  [aggData] = await Promise.all([
-    api.getAllAggregateExpenses(),
+  let unreimbursedExpenses;
+  [unreimbursedExpenses, this.expenseTypes] = await Promise.all([
+    api.getUnreimbursedExpenses(),
+    api.getItems(api.EXPENSE_TYPES),
     !this.$store.getters.employees ? this.updateStoreEmployees() : ''
   ]);
-  this.loadExpensesData(aggData);
+  this.loadExpensesData(unreimbursedExpenses);
   if (this.$store.getters.loginTime) {
     // updates and audits employee login for admins
     await this.updateEmployeeLogin(this.$store.getters.user);
@@ -920,11 +908,9 @@ export default {
     determineShowOnFeed,
     determineShowSwitch,
     emitSelectionChange,
-    filterOutReimbursed,
     getBudgetTotal,
     groupEmployeeExpenses,
     isEmpty,
-    isReimbursed,
     loadExpensesData,
     matchingEmployeeAndExpenseType,
     refreshExpenses,

@@ -118,8 +118,7 @@ import {
 } from '@/shared/validationUtils.js';
 import api from '@/shared/api.js';
 import dateUtils from '@/shared/dateUtils.js';
-import { v4 as uuid } from 'uuid';
-import { userRoleIsAdmin, userRoleIsManager } from '../../utils/utils';
+import { generateUUID, userRoleIsAdmin, userRoleIsManager } from '../../utils/utils';
 import { updateStoreEmployees } from '../../utils/storeUtils';
 import { format } from '../../shared/dateUtils';
 import { mask } from 'vue-the-mask';
@@ -331,7 +330,7 @@ function cashOutHint() {
 async function createPTOCashOutRequest() {
   let newItem = _.cloneDeep(this.ptoCashOutObj);
   let ptoCashOut = await api.createItem(api.PTO_CASH_OUTS, {
-    id: uuid(),
+    id: generateUUID(),
     amount: newItem.amount,
     employeeId: this.passedEmployee.id,
     creationDate: dateUtils.getTodaysDate(),

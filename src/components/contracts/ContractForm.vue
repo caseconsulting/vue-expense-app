@@ -96,7 +96,7 @@
 import _ from 'lodash';
 import api from '@/shared/api.js';
 import { updateStoreContracts } from '@/utils/storeUtils';
-import { v4 as uuid } from 'uuid';
+import { generateUUID } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -121,10 +121,10 @@ function cancel() {
  */
 async function createContract() {
   let contractProjects = this.projects.map((project) => {
-    return { id: uuid(), projectName: project, status: api.CONTRACT_STATUSES.ACTIVE };
+    return { id: generateUUID(), projectName: project, status: api.CONTRACT_STATUSES.ACTIVE };
   });
   let contract = await api.createItem(api.CONTRACTS, {
-    id: uuid(),
+    id: generateUUID(),
     contractName: this.contractName,
     primeName: this.primeName,
     directorate: this.directorate,

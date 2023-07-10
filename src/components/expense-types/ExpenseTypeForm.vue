@@ -48,6 +48,140 @@
           @input="formatBudget(budgetFormatted)"
         ></v-text-field>
 
+        <!-- Employee Access -->
+        <div class="form-text">
+          Employee Access
+          <v-btn @click="toFAQ()" class="mb-4" x-small icon><v-icon color="#3f51b5">info</v-icon></v-btn>
+        </div>
+        <v-row no-gutters>
+          <v-col cols="6" lg="3">
+            <v-checkbox
+              label="Full-time"
+              value="FullTime"
+              v-model="editedExpenseType.accessibleBy"
+              :rules="checkBoxValid"
+            ></v-checkbox>
+          </v-col>
+          <v-col cols="6" lg="3">
+            <v-checkbox
+              label="Part-time"
+              value="PartTime"
+              v-model="editedExpenseType.accessibleBy"
+              :rules="checkBoxValid"
+            ></v-checkbox>
+          </v-col>
+          <v-col cols="6" lg="3">
+            <v-checkbox
+              label="Intern"
+              value="Intern"
+              v-model="editedExpenseType.accessibleBy"
+              :rules="checkBoxValid"
+            ></v-checkbox>
+          </v-col>
+          <v-col cols="6" lg="3">
+            <v-checkbox
+              label="Custom"
+              value="Custom"
+              v-model="editedExpenseType.accessibleBy"
+              :rules="checkBoxValid"
+            ></v-checkbox>
+          </v-col>
+        </v-row>
+        <p id="error" v-if="checkBoxRule">At least one checkbox must be checked</p>
+
+        <!-- Custom Access: Employee List -->
+        <v-autocomplete
+          v-if="editedExpenseType.accessibleBy && editedExpenseType.accessibleBy.includes('Custom')"
+          v-model="customAccess"
+          :items="activeEmployees"
+          :filter="customFilter"
+          no-data-text="No Employees Available"
+          item-color="gray"
+          multiple
+          :rules="customAccessRules"
+          chips
+          clearable
+          small-chips
+          deletable-chips
+          class="mt-0 pt-0"
+          :search-input.sync="searchString"
+          @change="searchString = ''"
+        >
+          <template v-slot:label>
+            <span v-if="customAccess.length == 0" class="grey--text caption">No custom employee access</span>
+            <span v-else class="grey--text caption"
+              >{{ customAccess.length }} employee(s) have custom access to this expense type</span
+            >
+          </template>
+        </v-autocomplete>
+
+        <!-- Budget Tags -->
+        <div class="form-text">
+          Tag Budgets (optional)
+          <!-- <v-btn @click="toFAQ()" class="mb-4" x-small icon><v-icon color="#3f51b5">info</v-icon></v-btn> -->
+        </div>
+        <v-container>
+          <v-row v-for="(tag, index) in editedExpenseType.tagBudgets" :key="index">
+            <v-col class="d-flex flex-row justify-center align-center" cols="2">
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <v-btn
+                    :disabled="isLast(index, editedExpenseType.tagBudgets)"
+                    v-on="on"
+                    @click="moveTagBudgetDown(index)"
+                    x-small
+                    class="mr-1"
+                    ><v-icon>mdi-arrow-down-thin</v-icon></v-btn
+                  >
+                </template>
+                <span>Move Tag Budget Priority Down One</span>
+              </v-tooltip>
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <v-btn :disabled="isFirst(index)" x-small @click="moveTagBudgetUp(index)" v-on="on"
+                    ><v-icon>mdi-arrow-up-thin</v-icon></v-btn
+                  >
+                </template>
+                <span>Move Tag Budget Priority Up One</span>
+              </v-tooltip>
+            </v-col>
+            <v-col cols="6">
+              <v-autocomplete
+                v-model="tag.tags"
+                item-text="tagName"
+                :rules="getRequiredRules()"
+                item-value="id"
+                small-chips
+                deletable-chips
+                multiple
+                chips
+                :items="tagOptions(tag.tags)"
+              >
+                <template v-slot:selection="data">
+                  <v-chip
+                    small
+                    v-bind="data.attrs"
+                    :input-value="data.selected"
+                    close
+                    @click="data.select"
+                    @click:close="remove(data.item, index)"
+                    ><v-icon left>mdi-tag</v-icon>{{ data.item.tagName }}</v-chip
+                  >
+                </template>
+              </v-autocomplete>
+            </v-col>
+            <v-col cols="3">
+              <v-text-field v-model="tag.budget" prefix="$" :rules="tagBudgetRules" label="Amount"
+            /></v-col>
+            <v-col cols="1" class="d-flex justify-center align-center">
+              <v-btn small @click="removeTagBudget(index)"><v-icon>mdi-trash-can</v-icon></v-btn>
+            </v-col>
+          </v-row>
+          <v-row class="d-flex justify-center align-center">
+            <v-btn elevation="2" @click="addTagBudget()"><v-icon>add</v-icon>Tag Budget</v-btn></v-row
+          >
+        </v-container>
+
         <!-- Flags -->
         <v-row>
           <v-col cols="6">
@@ -167,73 +301,6 @@
           clearable
         ></v-autocomplete>
 
-        <!-- Employee Access -->
-        <div class="form-text">
-          Employee Access
-          <v-btn @click="toFAQ()" class="mb-4" x-small icon><v-icon color="#3f51b5">info</v-icon></v-btn>
-        </div>
-        <v-row no-gutters>
-          <v-col cols="6" lg="3">
-            <v-checkbox
-              label="Full-time"
-              value="FullTime"
-              v-model="editedExpenseType.accessibleBy"
-              :rules="checkBoxValid"
-            ></v-checkbox>
-          </v-col>
-          <v-col cols="6" lg="3">
-            <v-checkbox
-              label="Part-time"
-              value="PartTime"
-              v-model="editedExpenseType.accessibleBy"
-              :rules="checkBoxValid"
-            ></v-checkbox>
-          </v-col>
-          <v-col cols="6" lg="3">
-            <v-checkbox
-              label="Intern"
-              value="Intern"
-              v-model="editedExpenseType.accessibleBy"
-              :rules="checkBoxValid"
-            ></v-checkbox>
-          </v-col>
-          <v-col cols="6" lg="3">
-            <v-checkbox
-              label="Custom"
-              value="Custom"
-              v-model="editedExpenseType.accessibleBy"
-              :rules="checkBoxValid"
-            ></v-checkbox>
-          </v-col>
-        </v-row>
-        <p id="error" v-if="checkBoxRule">At least one checkbox must be checked</p>
-
-        <!-- Custom Access: Employee List -->
-        <v-autocomplete
-          v-if="editedExpenseType.accessibleBy && editedExpenseType.accessibleBy.includes('Custom')"
-          v-model="customAccess"
-          :items="activeEmployees"
-          :filter="customFilter"
-          no-data-text="No Employees Available"
-          item-color="gray"
-          multiple
-          :rules="customAccessRules"
-          chips
-          clearable
-          small-chips
-          deletable-chips
-          class="mt-0 pt-0"
-          :search-input.sync="searchString"
-          @change="searchString = ''"
-        >
-          <template v-slot:label>
-            <span v-if="customAccess.length == 0" class="grey--text caption">No custom employee access</span>
-            <span v-else class="grey--text caption"
-              >{{ customAccess.length }} employee(s) have custom access to this expense type</span
-            >
-          </template>
-        </v-autocomplete>
-
         <!-- Switches -->
         <!-- Pro-rated expense -->
         <v-switch v-model="editedExpenseType.proRated" label="Should this expense be pro-rated?"></v-switch>
@@ -321,11 +388,10 @@
 import api from '@/shared/api.js';
 import GeneralConfirmationModal from '@/components/modals/GeneralConfirmationModal.vue';
 import _ from 'lodash';
-import { v4 as uuid } from 'uuid';
 import { getDateRules, getRequiredRules } from '@/shared/validationUtils.js';
-import { isEmpty } from '@/utils/utils';
+import { generateUUID, isEmpty } from '@/utils/utils';
 import { format } from '@/shared/dateUtils';
-import { updateStoreExpenseTypes, updateStoreCampfires } from '@/utils/storeUtils';
+import { updateStoreExpenseTypes } from '@/utils/storeUtils';
 import { mask } from 'vue-the-mask';
 import { isValid, isSameOrAfter, isSameOrBefore } from '../../shared/dateUtils';
 
@@ -573,7 +639,7 @@ async function submit() {
       }
     } else {
       // creating a new expense type
-      let newUUID = uuid();
+      let newUUID = generateUUID();
       this.$set(this.editedExpenseType, 'id', newUUID);
       let newExpenseType = await api.createItem(api.EXPENSE_TYPES, this.editedExpenseType);
 
@@ -634,6 +700,100 @@ function toggleRequireReceipt() {
   }
 } // toggleRequireReceipt
 
+/**
+ * Creates empty tag budget field in tagBudgets list
+ */
+function addTagBudget() {
+  this.editedExpenseType.tagBudgets.push({});
+} // addTagBudgets
+
+/**
+ * Removes specified tag budget from list of tag budgets
+ *
+ * @param index index of tag budget to remove
+ */
+function removeTagBudget(index) {
+  this.editedExpenseType.tagBudgets.splice(index, 1);
+} // removeTagBudget
+
+/**
+ * Removes given chip from tag autocomplete input.
+ *
+ * @param data chip data to remove
+ * @param index autocomplete input index
+ */
+function remove(data, index) {
+  let indx = this.editedExpenseType.tagBudgets[index].tags.findIndex((t) => t == data.id);
+  this.editedExpenseType.tagBudgets[index].tags.splice(indx, 1);
+} // remove
+
+/**
+ * Gets tag options for the v-autocomplete dropdown completes. Makes sure that tag name cannot be used more than once.
+ * @param selectedItems tag IDs already selected
+ */
+function tagOptions(selectedItems) {
+  let selectedTags = [];
+  if (this.editedExpenseType.tagBudgets.length > 0) {
+    this.editedExpenseType.tagBudgets.forEach((t) => {
+      if (t.tags) {
+        t.tags.forEach((id) => {
+          selectedTags.push(id);
+        });
+      }
+    });
+  }
+  if (selectedItems && selectedItems.length > 0) {
+    selectedTags = selectedTags.filter((st) => !selectedItems.includes(st));
+  }
+  return this.tags.filter((t) => !selectedTags.includes(t.id));
+} // tagOptions
+
+/**
+ * Gets tag object given id
+ * @param id id of tag to find
+ */
+function getTagByID(id) {
+  return this.tags.find((t) => t.id === id);
+} // getTagByID
+
+/**
+ * Checks if index in element is first in array
+ *
+ * @param index index of element
+ */
+function isFirst(index) {
+  return index == 0;
+} // isFirst
+
+/**
+ * Checks if index of elment is last in array
+ * @param index index of element
+ * @param arr array
+ */
+function isLast(index, arr) {
+  return index == arr.length - 1;
+} // isLast
+
+/**
+ * Moves tag budget up one in priority
+ * @param index index of tag budget to move
+ */
+function moveTagBudgetUp(index) {
+  let temp = this.editedExpenseType.tagBudgets[index - 1];
+  this.$set(this.editedExpenseType.tagBudgets, index - 1, this.editedExpenseType.tagBudgets[index]);
+  this.$set(this.editedExpenseType.tagBudgets, index, temp);
+} // moveTagBudgetUp
+
+/**
+ * Moves tag budget down one in priority
+ * @param index index of tag budget to move
+ */
+function moveTagBudgetDown(index) {
+  let temp = this.editedExpenseType.tagBudgets[index + 1];
+  this.$set(this.editedExpenseType.tagBudgets, index + 1, this.editedExpenseType.tagBudgets[index]);
+  this.$set(this.editedExpenseType.tagBudgets, index, temp);
+} // moveTagBudgetDown
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                    COMPUTED                      |
@@ -668,6 +828,7 @@ async function created() {
     this.submitting = false;
     this.submitForm = false;
   });
+  this.tags = this.$store.getters.tags;
   // get all employees
   let employees = this.$store.getters.employees;
   let activeEmployees = [];
@@ -687,9 +848,9 @@ async function created() {
 
   activeEmployees = _.sortBy(activeEmployees, ['text']); // sort employees
   this.activeEmployees = activeEmployees;
-  await this.updateStoreCampfires();
   this.campfires = this.$store.getters.basecampCampfires;
   this.editedExpenseType = _.cloneDeep(this.model);
+
   this.clearForm();
 } // created
 
@@ -864,11 +1025,20 @@ export default {
       startDateFormatted: null, // formatted start date
       submitting: false, // submitting form
       submitForm: false, //triggers submit form modal when changed
-      valid: false // form is valid
+      valid: false, // form is valid
+      tagBudgetRules: [
+        (v) => !!v || 'Budget amount is required',
+        (v) => parseFloat(v, 10) >= 0 || 'Budget must either be a positive or zero dollar amount.',
+        (v) =>
+          /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?$/.test(v) ||
+          'Budget amount must be a number with two decimal digits.'
+      ], // rules for a tag budget,
+      tags: []
     };
   },
   directives: { mask },
   methods: {
+    addTagBudget,
     checkRequireReceipt,
     checkRequireURL,
     checkSelection,
@@ -878,21 +1048,28 @@ export default {
     format,
     getDateRules,
     getRequiredRules,
+    getTagByID,
     isCustomSelected,
     isEmpty,
+    isFirst,
+    isLast,
     isSameOrAfter,
     isSameOrBefore,
     isValid,
+    moveTagBudgetDown,
+    moveTagBudgetUp,
     odFlagHint,
     parseBudget,
+    remove,
     removeCategory,
+    removeTagBudget,
     submit,
     toFAQ,
     toggleRequireURL,
     toggleRequireReceipt,
     toggleShowAllCategories,
     updateStoreExpenseTypes,
-    updateStoreCampfires
+    tagOptions
   },
   props: ['model'], // expense type to be created/updated
   computed: {

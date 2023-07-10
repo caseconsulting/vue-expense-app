@@ -410,14 +410,13 @@
 
 <script>
 import api from '@/shared/api.js';
-import { isEmpty, isSmallScreen } from '@/utils/utils';
+import { generateUUID, isEmpty, isSmallScreen } from '@/utils/utils';
 import _ from 'lodash';
 import CancelConfirmation from '@/components/modals/CancelConfirmation.vue';
 import UniversityForm from '@/components/employees/form-tabs/education-types/UniversityForm.vue';
 import MilitaryForm from '@/components/employees/form-tabs/education-types/MilitaryForm.vue';
 import HighSchoolForm from '@/components/employees/form-tabs/education-types/HighSchoolForm.vue';
 import GeneralConfirmationModal from '@/components/modals/GeneralConfirmationModal.vue';
-import { v4 as uuid } from 'uuid';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -432,7 +431,7 @@ async function created() {
   window.EventBus.$on('confirmed-parser', async () => {
     // Create an audit of the success
     await api.createItem(api.AUDIT, {
-      id: uuid(),
+      id: generateUUID(),
       type: 'resume',
       tags: ['submit'],
       employeeId: this.employee.id,
@@ -735,7 +734,7 @@ async function submit() {
 
       // Create an audit of the timeout
       await api.createItem(api.AUDIT, {
-        id: uuid(),
+        id: generateUUID(),
         type: 'resume',
         tags: ['upload', 'failure'],
         employeeId: this.employee.id,
@@ -748,7 +747,7 @@ async function submit() {
 
     // Create an audit of the success
     await api.createItem(api.AUDIT, {
-      id: uuid(),
+      id: generateUUID(),
       type: 'resume',
       tags: ['upload', 'success'],
       employeeId: this.employee.id,

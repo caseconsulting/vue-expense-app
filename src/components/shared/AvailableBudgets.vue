@@ -123,16 +123,14 @@ async function refreshBudget() {
 
   budgetsVar = _.union(budgetsVar, existingBudgets); // combine existing and active budgets
   budgetsVar = _.uniqBy(budgetsVar, 'expenseTypeId'); // remove duplicate expense types
-  // remove inactive budgets (exception: there contains a pending expense under that budget)
+  // remove inactive budgets
   budgetsVar = _.filter(budgetsVar, (b) => {
     let budget = b.budgetObject;
-    return (
-      !_.some(
-        this.expenseTypes,
-        (e) =>
-          e.id == budget.expenseTypeId &&
-          (e.isInactive || !isBetween(getTodaysDate(), budget.fiscalStartDate, budget.fiscalEndDate, 'days', '[]'))
-      ) || _.some(this.expenses, (e) => e.expenseTypeId == budget.expenseTypeId && _.isEmpty(e.reimbursedDate))
+    return !_.some(
+      this.expenseTypes,
+      (e) =>
+        e.id == budget.expenseTypeId &&
+        (e.isInactive || !isBetween(getTodaysDate(), budget.fiscalStartDate, budget.fiscalEndDate, 'days', '[]'))
     );
   });
   budgetsVar = _.sortBy(budgetsVar, (budget) => {
@@ -265,7 +263,7 @@ export default {
     refreshEmployee,
     selectBudget
   },
-  props: ['employee', 'expenses', 'expenseTypes', 'accessibleBudgets', 'fiscalDateView', 'employeeDataLoading'],
+  props: ['employee', 'expenseTypes', 'accessibleBudgets', 'fiscalDateView', 'employeeDataLoading'],
   watch: {
     accessibleBudgets: watchAccessibleBudgets
   }

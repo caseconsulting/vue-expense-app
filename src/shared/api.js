@@ -15,6 +15,7 @@ const AUDIT = 'audits';
 const RESUME = 'resume';
 const CONTRACTS = 'contracts';
 const PTO_CASH_OUTS = 'ptoCashOuts';
+const TAGS = 'tags';
 const API_HOSTNAME = API_CONFIG.apiHostname;
 const API_PORT = API_CONFIG.apiPort;
 const PORT = API_PORT === '443' ? '' : `:${API_PORT}`;
@@ -287,6 +288,15 @@ async function getAllAggregateExpenses() {
 } // getAllAggregateExpenses
 
 /**
+ * gets all the unreimbursed expenses
+ *
+ * @return - the expense data
+ */
+async function getUnreimbursedExpenses() {
+  return await execute('get', `/${UTILITY}/getUnreimbursedExpenses`);
+} // getUnreimbursedExpenses
+
+/**
  * gets current user
  *
  * @return - get current signed in user
@@ -495,6 +505,7 @@ export default {
   extractResumeText,
   getAllActiveEmployeeBudgets,
   getAllAggregateExpenses,
+  getUnreimbursedExpenses,
   getAllEmployeeExpenses,
   getAllEvents,
   getAllExpenseTypeExpenses,
@@ -527,6 +538,7 @@ export default {
   EMPLOYEES,
   CONTRACTS,
   PTO_CASH_OUTS,
+  TAGS,
   UTILITY,
   QUICK_BOOKS_TIME,
   TRAINING_URLS,

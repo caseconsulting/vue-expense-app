@@ -136,7 +136,7 @@ function fillData() {
       },
       title: {
         display: true,
-        text: 'Top Job Roles at Case Consulting',
+        text: 'Top Job Roles at CASE',
         font: {
           size: 15
         }

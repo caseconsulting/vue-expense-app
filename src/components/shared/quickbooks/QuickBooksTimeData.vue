@@ -227,7 +227,7 @@ export default {
 </script>
 
 <style scoped>
-.autocomplete >>> .v-input__slot::before {
+.autocomplete :deep(.v-input__slot::before) {
   border-style: none !important;
 }
 .autocomplete {

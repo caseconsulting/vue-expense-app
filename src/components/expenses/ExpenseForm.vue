@@ -78,10 +78,10 @@
         >
 
         <!-- Upload Receipt -->
-        <v-row class="mt-2">
+        <v-row class="mt-2 justify-space-between">
           <file-upload
             v-if="receiptRequired && ((allowReceipt && isEdit) || !isEdit || isEmpty(expense.receipt))"
-            class="ml-1 py-0 w-60"
+            class="ml-1 mb-2 py-0 w-70"
             @fileSelected="setFile"
             :passedRules="receiptRules"
             :receipt="expense.receipt"
@@ -90,48 +90,68 @@
           <!-- Scan Receipt Button -->
           <v-tooltip bottom>
             <template v-slot:activator="{ on, attrs }">
-              <span v-on="on">
+              <span v-on="on" class="d-flex align-center">
                 <v-btn
                   v-if="receiptRequired && ((allowReceipt && isEdit) || !isEdit || isEmpty(expense.receipt))"
-                  color="white"
+                  color="black"
                   @click="scanFile"
-                  class="ma-3"
+                  class="mx-3 mb-5"
+                  outlined
+                  elevation="1"
                   :disabled="isInactive || disableScan"
                   :loading="scanLoading"
                   v-bind="attrs"
                 >
-                  Scan
+                  <v-icon>mdi-barcode-scan</v-icon>
                 </v-btn>
               </span>
             </template>
-            <span v-if="!scanLoading"
-              >Scans the receipt and autofills fields. Scanning only works for pdfs, pngs, and jpegs.</span
-            >
+            <span v-if="!scanLoading">
+              Scans the receipt and autofills fields. Scanning only works for pdfs, pngs, and jpegs.
+            </span>
             <span v-else>Scanning your receipt, this may take up to 15 seconds</span>
           </v-tooltip>
         </v-row>
 
         <!-- Cost -->
-        <v-text-field
-          prefix="$"
-          v-model="costFormatted"
-          :rules="costRules"
-          :disabled="isReimbursed || isInactive || isHighFive"
-          label="Cost"
-          id="cost"
-          class="mt-3"
-          maxlength="12"
-          data-vv-name="Cost"
-          persistent-hint
-          :hint="costHint()"
-          @blur="editedExpense.cost = parseCost(costFormatted)"
-          @input="formatCost"
-          validate-on-blur
-        >
-          <template v-slot:message="{ message }">
-            <span v-html="message"></span>
-          </template>
-        </v-text-field>
+        <v-row class="mx-1">
+          <v-text-field
+            prefix="$"
+            v-model="costFormatted"
+            :rules="costRules"
+            :disabled="isReimbursed || isInactive || isHighFive"
+            label="Cost"
+            id="cost"
+            class="py-0"
+            maxlength="12"
+            data-vv-name="Cost"
+            persistent-hint
+            :hint="costHint()"
+            @blur="editedExpense.cost = parseCost(costFormatted)"
+            @input="formatCost"
+            validate-on-blur
+          >
+            <template v-slot:message="{ message }">
+              <span v-html="message"></span>
+            </template>
+          </v-text-field>
+          <!-- Exchange Hours Calculator -->
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <span v-on="on">
+                <v-btn
+                  v-if="editedExpense.category && editedExpense.category === 'Exchange for training hours'"
+                  class="ml-3"
+                  :disabled="isInactive"
+                  @click="showExchangeCalculator = true"
+                >
+                  <v-icon>mdi-calculator</v-icon>
+                </v-btn>
+              </span>
+            </template>
+            <span>Show Exchange Calculator</span>
+          </v-tooltip>
+        </v-row>
 
         <!-- Recipient Employee Selection List -->
         <v-autocomplete
@@ -174,7 +194,7 @@
             <v-text-field
               v-model="purchaseDateFormatted"
               id="purchaseDate"
-              :rules="getDateRules()"
+              :rules="[...getDateRules(), ...getNonFutureDateRules()]"
               :disabled="(isReimbursed && !isDifferentExpenseType) || isInactive"
               v-mask="'##/##/####'"
               label="Purchase Date"
@@ -234,7 +254,7 @@
         <!-- URL -->
         <v-text-field
           v-model="editedExpense.url"
-          :rules="[...getURLRules(), ...getRequireURL()]"
+          :rules="[...getURLRules(), getRequireURL()]"
           :label="urlLabel"
           :disabled="isInactive"
         ></v-text-field>
@@ -289,6 +309,9 @@
       ></general-confirmation-modal>
       <!-- Cancel Confirmation Modal -->
       <cancel-confirmation :toggleSubmissionConfirmation="confirmBackingOut" type="expense"> </cancel-confirmation>
+      <v-dialog v-model="showExchangeCalculator" width="50%" persistent>
+        <ExchangeTrainingHoursCalculator />
+      </v-dialog>
     </v-container>
   </v-card>
 </template>
@@ -298,16 +321,28 @@ import CancelConfirmation from '@/components/modals/CancelConfirmation.vue';
 import ConfirmationBox from '@/components/modals/ConfirmationBox.vue';
 import FileUpload from '@/components/utils/FileUpload.vue';
 import GeneralConfirmationModal from '@/components/modals/GeneralConfirmationModal.vue';
+import ExchangeTrainingHoursCalculator from '@/components/expenses/ExchangeTrainingHoursCalculator.vue';
 
 import api from '@/shared/api.js';
 import employeeUtils from '@/shared/employeeUtils';
-import { getDateRules, getDateOptionalRules, getRequiredRules, getURLRules } from '@/shared/validationUtils.js';
-import { isEmpty, isFullTime, convertToMoneyString, userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
+import {
+  getDateRules,
+  getDateOptionalRules,
+  getNonFutureDateRules,
+  getRequiredRules,
+  getURLRules
+} from '@/shared/validationUtils.js';
+import {
+  isEmpty,
+  isFullTime,
+  convertToMoneyString,
+  generateUUID,
+  userRoleIsAdmin,
+  userRoleIsManager
+} from '@/utils/utils';
 import { updateStoreBudgets } from '@/utils/storeUtils';
 import { getRole } from '@/utils/auth';
 import { isBetween, getTodaysDate, format } from '../../shared/dateUtils';
-
-import { v4 as uuid } from 'uuid';
 import { mask } from 'vue-the-mask';
 
 import _ from 'lodash';
@@ -744,7 +779,7 @@ async function createNewEntry() {
   let updatedAttachment;
   let updatedExpense;
 
-  let newUUID = this.uuid();
+  let newUUID = generateUUID();
   this.$set(this.editedExpense, 'id', newUUID);
   this.$set(this.editedExpense, 'createdAt', getTodaysDate());
   if (this.isReceiptRequired() && this.file) {
@@ -842,7 +877,7 @@ function filteredExpenseTypes() {
   let filteredExpType = [];
   let selectedEmployee = _.find(this.employees, ['value', this.editedExpense.employeeId]);
   if (!this.asUser) {
-    // creating or updating an expense as a user
+    // creating or updating an expense as an admin
     _.forEach(this.expenseTypes, (expenseType) => {
       if (!expenseType.isInactive) {
         // expense type is active
@@ -859,7 +894,7 @@ function filteredExpenseTypes() {
       }
     });
   } else {
-    // creating or updating an expense as an admin
+    // creating or updating an expense as a user
     let employee = this.userInfo;
     _.forEach(this.expenseTypes, (expenseType) => {
       if (!expenseType.isInactive) {
@@ -929,18 +964,34 @@ function getExpenseTypeSelected(expenseTypeId) {
  * Gets the remaining budget for the current expense type
  */
 async function getRemainingBudget() {
-  if (this.editedExpense.expenseTypeId && this.editedExpense.employeeId) {
-    let budgets;
-
+  if (this.editedExpense.employeeId) {
     // get budgets for employee, use budgets store if it is for yourself.
     if (this.editedExpense.employeeId == this.$store.getters.user.id) {
-      budgets = this.$store.getters.budgets;
+      this.employeeBudgets = this.$store.getters.budgets;
     } else {
-      budgets = await api.getAllActiveEmployeeBudgets(this.editedExpense.employeeId);
+      this.employeeBudgets = await api.getAllActiveEmployeeBudgets(this.editedExpense.employeeId);
     }
-
-    if (budgets) {
-      let budget = budgets.find((currBudget) => currBudget.expenseTypeId === this.editedExpense.expenseTypeId);
+    // update expense type text and budget amounts
+    _.forEach(this.expenseTypes, (expenseType) => {
+      let budget = _.find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id);
+      if (budget) {
+        expenseType.text = `${expenseType.budgetName} - $${budget.budgetObject.amount}`;
+        expenseType.budget = budget.budgetObject.amount;
+      }
+    });
+    let employee = _.find(this.$store.getters.employees, (e) => e.id === this.editedExpense.employeeId);
+    // filter out expense types that an employee does not have a budget to
+    this.expenseTypes = _.filter(
+      this.expenseTypes,
+      (expenseType) =>
+        this.hasAccess(employee, expenseType) && _.find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id)
+    );
+  }
+  if (this.editedExpense.expenseTypeId && this.editedExpense.employeeId) {
+    if (this.employeeBudgets) {
+      let budget = this.employeeBudgets.find(
+        (currBudget) => currBudget.expenseTypeId === this.editedExpense.expenseTypeId
+      );
 
       if (budget) {
         this.remainingBudget =
@@ -1292,6 +1343,34 @@ async function scanFile() {
 } // scanFile
 
 /**
+ * Sets all of the expense type data to its original fields.
+ */
+function setDefaultExpenseTypeData() {
+  let expenseTypes = this.$store.getters.expenseTypes;
+  this.expenseTypes = _.map(expenseTypes, (expenseType) => {
+    return {
+      id: expenseType.id,
+      text: `${expenseType.budgetName} - $${expenseType.budget}`,
+      startDate: expenseType.startDate,
+      endDate: expenseType.endDate,
+      budgetName: expenseType.budgetName,
+      value: expenseType.id,
+      budget: expenseType.budget,
+      odFlag: expenseType.odFlag,
+      requiredFlag: expenseType.requiredFlag,
+      recurringFlag: expenseType.recurringFlag,
+      isInactive: expenseType.isInactive,
+      categories: expenseType.categories,
+      accessibleBy: expenseType.accessibleBy,
+      hasRecipient: expenseType.hasRecipient,
+      alwaysOnFeed: expenseType.alwaysOnFeed,
+      requireURL: expenseType.requireURL,
+      tagBudgets: expenseType.tagBudgets
+    };
+  });
+} // setDefaultExpenseTypeData
+
+/**
  * Sets the recipients to choose from based on expense type.
  */
 function setRecipientOptions() {
@@ -1448,6 +1527,15 @@ function created() {
     this.confirmBackingOut = false;
     this.clearForm();
   });
+  window.EventBus.$on('close-exchange-training-hours-calculator', () => {
+    this.showExchangeCalculator = false;
+  });
+  window.EventBus.$on('insert-training-hours', (amount) => {
+    this.showExchangeCalculator = false;
+    this.costFormatted = amount;
+    this.formatCost();
+    this.editedExpense.cost = this.parseCost(this.costFormatted);
+  });
 
   this.myBudgetsView = this.$route.path === '/myBudgets';
   this.isInactive = this.myBudgetsView && this.userInfo.workStatus == 0;
@@ -1461,6 +1549,7 @@ function created() {
   let employees = this.$store.getters.employees;
   this.employees = employees.map((employee) => {
     return {
+      id: employee.id,
       text: employeeUtils.nicknameAndLastName(employee),
       value: employee.id,
       workStatus: employee.workStatus,
@@ -1483,28 +1572,7 @@ function created() {
   this.setRecipientOptions();
 
   // set aggregate expense types
-  let expenseTypes = this.$store.getters.expenseTypes;
-  this.expenseTypes = _.map(expenseTypes, (expenseType) => {
-    return {
-      /* beautify preserve:start */
-      text: `${expenseType.budgetName} - $${expenseType.budget}`,
-      startDate: expenseType.startDate,
-      endDate: expenseType.endDate,
-      /* beautify preserve:end */
-      budgetName: expenseType.budgetName,
-      value: expenseType.id,
-      budget: expenseType.budget,
-      odFlag: expenseType.odFlag,
-      requiredFlag: expenseType.requiredFlag,
-      recurringFlag: expenseType.recurringFlag,
-      isInactive: expenseType.isInactive,
-      categories: expenseType.categories,
-      accessibleBy: expenseType.accessibleBy,
-      hasRecipient: expenseType.hasRecipient,
-      alwaysOnFeed: expenseType.alwaysOnFeed,
-      requireURL: expenseType.requireURL
-    };
-  });
+  this.setDefaultExpenseTypeData();
 
   // adjust costRules to prevent users from using negative expenses
   if (this.employeeRole && this.employeeRole == 'admin') {
@@ -1729,6 +1797,7 @@ function watchEditedExpenseCategory() {
  * watcher for editedExpense.employeeId - set options and get budgets.
  */
 async function watchEditedExpenseEmployeeID() {
+  this.setDefaultExpenseTypeData();
   this.setRecipientOptions();
   await this.getRemainingBudget();
 } // watchEditedExpenseEmployeeID
@@ -1789,7 +1858,8 @@ export default {
     CancelConfirmation,
     ConfirmationBox,
     FileUpload,
-    GeneralConfirmationModal
+    GeneralConfirmationModal,
+    ExchangeTrainingHoursCalculator
   },
   computed: {
     isDifferentExpenseType,
@@ -1823,6 +1893,7 @@ export default {
       //editedExpense: {}, // data being edited --
       editedExpense: _.cloneDeep(this.expense),
       employee: null, // employee selected
+      employeeBudgets: null, // selected employee's budgets
       employeeRole: '', // employee role
       employees: [], // employees
       expenseTypes: [], // expense types
@@ -1849,6 +1920,7 @@ export default {
       scanLoading: false, // determines if the scanning functionality is loading
       selectedEmployee: {}, // selected employees
       selectedExpenseType: {}, // selected expense types
+      showExchangeCalculator: false,
       submittedReceipt: null, // the receipt to show when editing an expense
       urlInfo: {
         id: null,
@@ -1876,6 +1948,7 @@ export default {
     getCategories,
     getDateRules,
     getDateOptionalRules,
+    getNonFutureDateRules,
     getExpenseTypeSelected,
     getRole,
     getRemainingBudget,
@@ -1891,12 +1964,12 @@ export default {
     preformatFloat,
     scanFile,
     setFile,
+    setDefaultExpenseTypeData,
     setRecipientOptions,
     submit,
     updateExistingEntry,
     userRoleIsAdmin,
     userRoleIsManager,
-    uuid,
     updateStoreBudgets
   },
   props: [

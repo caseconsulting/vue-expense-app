@@ -78,11 +78,24 @@
         <v-btn
           id="createEmployeeBtn"
           class="mb-5"
+          :disabled="loading"
           @click="renderCreateEmployee()"
           elevation="2"
           v-if="hasAdminPermissions()"
         >
           Create an Employee<v-icon class="pl-2">person_add</v-icon>
+        </v-btn>
+
+        <!-- Create an Employee -->
+        <v-btn
+          id="manageTagsBtn"
+          class="mb-5 ml-4"
+          :disabled="loading"
+          @click="renderManageTags()"
+          elevation="2"
+          v-if="hasAdminPermissions()"
+        >
+          Manage Tags<v-icon class="pl-2">mdi-tag-multiple</v-icon>
         </v-btn>
 
         <!-- NEW DATA TABLE -->
@@ -109,6 +122,8 @@
                     v-if="userRoleIsAdmin()"
                     :midAction="midAction"
                     :employee="item"
+                    :contracts="contracts"
+                    :tags="tags"
                     v-on="on"
                   ></convert-employee-to-csv>
                   <v-btn
@@ -211,6 +226,7 @@
             :midAction="midAction"
             :contracts="contracts"
             :employees="filteredEmployees"
+            :tags="tags"
           ></convert-employees-to-csv>
           <generate-csv-eeo-report
             v-if="userRoleIsAdmin()"
@@ -228,12 +244,15 @@
     <v-dialog @click:outside="clearCreateEmployee" v-model="createEmployee"
       ><employee-form :contracts="contracts" :key="childKey" :model="this.model"></employee-form
     ></v-dialog>
+    <v-dialog v-model="manageTags" width="70%" persistent>
+      <tag-manager :key="childKey"></tag-manager>
+    </v-dialog>
   </div>
 </template>
 
 <script>
 import api from '@/shared/api.js';
-import { updateStoreEmployees, updateStoreAvatars, updateStoreContracts } from '@/utils/storeUtils';
+import { updateStoreEmployees, updateStoreAvatars, updateStoreContracts, updateStoreTags } from '@/utils/storeUtils';
 import ConvertEmployeesToCsv from '@/components/employees/csv/ConvertEmployeesToCsv.vue';
 import DeleteErrorModal from '@/components/modals/DeleteErrorModal.vue';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
@@ -241,6 +260,7 @@ import EmployeeForm from '@/components/employees/EmployeeForm.vue';
 import _ from 'lodash';
 import ConvertEmployeeToCsv from '@/components/employees/csv/ConvertEmployeeToCsv.vue';
 import GenerateCsvEeoReport from '@/components/employees/csv/GenerateCsvEeoReport.vue';
+import TagManager from '@/components/employees/tags/TagManager.vue';
 import {
   isEmpty,
   isFullTime,
@@ -397,12 +417,12 @@ async function refreshEmployees() {
   await Promise.all([
     !this.$store.getters.employees ? this.updateStoreEmployees() : '',
     !this.$store.getters.basecampAvatars ? this.updateStoreAvatars() : '',
-    !this.$store.getters.contracts ? this.updateStoreContracts() : ''
+    !this.$store.getters.contracts ? this.updateStoreContracts() : '',
+    !this.$store.getters.tags ? this.updateStoreTags() : ''
   ]);
   this.employees = this.$store.getters.employees; // get all employees
   this.filterEmployees(); // filter employees
   this.expanded = []; // collapse any expanded rows in the database
-
   let avatars = this.$store.getters.basecampAvatars;
   _.map(this.employees, (employee) => {
     let avatar = _.find(avatars, ['email_address', employee.email]);
@@ -411,6 +431,7 @@ async function refreshEmployees() {
     return employee;
   });
   this.contracts = this.$store.getters.contracts;
+  this.tags = this.$store.getters.tags;
   this.loading = false; // set loading status to false
 } // refreshEmployees
 
@@ -421,6 +442,14 @@ function renderCreateEmployee() {
   this.createEmployee = true;
   this.childKey++;
 } // renderCreateEmployee
+
+/**
+ * open the tags management modal
+ */
+function renderManageTags() {
+  this.manageTags = true;
+  this.childKey++;
+} // renderManageTags
 
 /**
  * Validates if an employee can be deleted. Returns true if the employee has no expenses, otherwise returns false.
@@ -481,9 +510,11 @@ async function created() {
   window.EventBus.$on('invalid-employee-delete', () => {
     this.midAction = false;
   });
-
   window.EventBus.$on('empNum', (empNum) => {
     this.employeeNumber = empNum;
+  });
+  window.EventBus.$on('close-tag-manager', () => {
+    this.manageTags = false;
   });
 
   // only refresh employees if data is in store. Otherwise, set loading and wait in watcher
@@ -513,6 +544,7 @@ function beforeDestroy() {
   window.EventBus.$off('confirm-delete-employee');
   window.EventBus.$off('invalid-employee-delete');
   window.EventBus.$off('empNum');
+  window.EventBus.$off('close-tag-manager');
 } // beforeDestroy
 
 // |--------------------------------------------------|
@@ -551,7 +583,8 @@ export default {
     DeleteModal,
     EmployeeForm,
     ConvertEmployeeToCsv,
-    GenerateCsvEeoReport
+    GenerateCsvEeoReport,
+    TagManager
   },
   computed: {
     storeIsPopulated
@@ -615,6 +648,7 @@ export default {
       invalidDelete: false, // invalid delete status
       itemsPerPage: -1, // items per datatable page
       loading: false, // loading status
+      manageTags: false, // modal for tag management
       model: {
         id: null,
         firstName: null,
@@ -650,7 +684,8 @@ export default {
         statusType: undefined,
         statusMessage: null,
         color: null
-      } // snackbar action status
+      }, // snackbar action status
+      tags: []
     };
   },
   methods: {
@@ -673,12 +708,14 @@ export default {
     monthDayYearFormat,
     refreshEmployees,
     renderCreateEmployee,
+    renderManageTags,
     userRoleIsAdmin,
     userRoleIsManager,
     validateDelete,
     updateStoreAvatars,
     updateStoreContracts,
-    updateStoreEmployees
+    updateStoreEmployees,
+    updateStoreTags
   },
   watch: {
     'filter.active': watchFilterActive,

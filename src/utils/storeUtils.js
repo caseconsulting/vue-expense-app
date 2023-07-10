@@ -78,30 +78,25 @@ export async function updateStorePtoCashOuts() {
  */
 export async function updateStoreExpenseTypes() {
   // getExpenseTypes
-  let user = this.$store.getters.user;
+  let user = store.getters.user;
   let employeeRole = user.employeeRole;
   if (employeeRole == 'admin' || employeeRole == 'manager') {
     let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
-    this.$store.dispatch('setExpenseTypes', { expenseTypes });
+    store.dispatch('setExpenseTypes', { expenseTypes });
   } else if (employeeRole == 'intern' || employeeRole == 'user') {
     let expenseTypes = await api.getEmployeeExpenseTypes();
-    this.$store.dispatch('setExpenseTypes', { expenseTypes });
+    store.dispatch('setExpenseTypes', { expenseTypes });
   }
 } // updateStoreExpenseTypes
 
 /**
- * Update store with latest quickbooks PTO data
+ * Update store with latest tag data
  */
-export async function updateStoreQuickbooksPTO() {
-  let employeeNumbers;
-  if (userRoleIsAdmin() || userRoleIsManager()) {
-    employeeNumbers = store.getters.employees
-      .filter((e) => e.workStatus > 0)
-      .map((e) => e.employeeNumber)
-      .join(', ');
-  } else {
-    employeeNumbers = store.getters.user.employeeNumber;
+export async function updateStoreTags() {
+  let user = store.getters.user;
+  let employeeRole = user.employeeRole;
+  if (employeeRole == 'admin' || employeeRole == 'manager') {
+    let tags = await api.getItems(api.TAGS);
+    store.dispatch('setTags', { tags });
   }
-  let quickbooksPTO = await api.getPTOBalances(employeeNumbers);
-  store.dispatch('setQuickbooksPTO', { quickbooksPTO });
-} // updateStoreQuickbooksPTO
+} // updateStoreTags

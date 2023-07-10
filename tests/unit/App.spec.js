@@ -3,7 +3,7 @@ import App from '@/App.vue';
 
 describe('App.vue', () => {
   it('displays app name', () => {
-    const msg = 'Case Portal';
+    const msg = 'CASE Portal';
     const wrapper = shallowMount(App);
     expect(wrapper.text()).toMatch(msg);
   });
