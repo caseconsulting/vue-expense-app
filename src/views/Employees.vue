@@ -71,6 +71,50 @@
             </v-btn-toggle>
           </div>
           <!-- End Active Filter -->
+
+          <!-- Tags filter -->
+          <v-card-text class="pb-0">
+            <!-- Loading Bar -->
+            <v-autocomplete
+              :items="tags"
+              multiple
+              v-model="selectedTags"
+              chips
+              deletable-chips
+              clearable
+              filled
+              return-object
+              :search-input.sync="tagSearchString"
+              @change="tagSearchString = ''"
+              class="elevate"
+              append-icon=""
+            >
+              <template v-slot:selection="data">
+                <v-chip
+                  v-bind="data.attrs"
+                  :input-value="data.selected"
+                  close
+                  @click="data.select"
+                  @click:close="removeTag(data.item)"
+                  small
+                >
+                  {{ data.item.tagName }}
+                </v-chip>
+              </template>
+              <template v-slot:item="data">
+                <v-list-item-content>
+                  <v-list-item-title>{{ data.item.tagName }}</v-list-item-title>
+                </v-list-item-content>
+              </template>
+            </v-autocomplete>
+          </v-card-text>
+          <v-tooltip top>
+            <template>
+              <v-checkbox v-model="tagFlip" label="Flip tag(s)" v-bind="props"></v-checkbox>
+            </template>
+            <span>Filter OUT employees with tag(s)</span>
+          </v-tooltip>
+          <!-- End Tags Filter -->
         </fieldset>
         <br />
         <!-- End Filters -->
@@ -356,12 +400,13 @@ function employeePath(item) {
  * Filters list of employees.
  */
 function filterEmployees() {
-  //filter for Active Expense Types (available to admin only)
+  //filter for Active Expense Types
   this.filteredEmployees = _.filter(this.employees, (employee) => {
     let fullCheck = this.filter.active.includes('full') && this.isFullTime(employee);
     let partCheck = this.filter.active.includes('part') && this.isPartTime(employee);
     let inactiveCheck = this.filter.active.includes('inactive') && this.isInactive(employee);
-    return fullCheck || partCheck || inactiveCheck;
+    let tagCheck = this.selectedTagsHasEmployee(employee);
+    return (fullCheck || partCheck || inactiveCheck) && (this.selectedTags.length <= 0 || tagCheck);
   });
 } // filterEmployees
 
@@ -436,6 +481,18 @@ async function refreshEmployees() {
 } // refreshEmployees
 
 /**
+ * Removes an item from the tag filters's active filters
+ *
+ * @param item - The filter to remove
+ */
+function removeTag(item) {
+  const index = this.selectedTags.findIndex((t) => t.id === item.id);
+  if (index >= 0) {
+    this.selectedTags.splice(index, 1);
+  }
+} // remove
+
+/**
  * open the create employee form
  */
 function renderCreateEmployee() {
@@ -450,6 +507,21 @@ function renderManageTags() {
   this.manageTags = true;
   this.childKey++;
 } // renderManageTags
+
+/**
+ * helper function: return true if any selected tag has employee listed under it.
+ *
+ * @param e - the employee
+ * @return true if the employee has a tag selected in filters
+ */
+function selectedTagsHasEmployee(e) {
+  for (let i = 0; i < this.selectedTags.length; i++) {
+    if (this.selectedTags[i].employees.includes(e.id)) {
+      return !this.tagFlip;
+    }
+  }
+  return this.tagFlip;
+} // selectedTagsHasEmployee
 
 /**
  * Validates if an employee can be deleted. Returns true if the employee has no expenses, otherwise returns false.
@@ -569,6 +641,22 @@ async function watchStoreIsPopulated() {
   if (this.storeIsPopulated) await this.refreshEmployees();
 } // watchStoreIsPopulated
 
+/**
+ * In the case that the page has been force reloaded (and the store cleared)
+ * this watcher will be activated when the store is populated again.
+ */
+async function watchSelectedTags() {
+  this.filterEmployees();
+} // watchStoreIsPopulated
+
+/**
+ * In the case that the page has been force reloaded (and the store cleared)
+ * this watcher will be activated when the store is populated again.
+ */
+async function watchTagFlip() {
+  this.filterEmployees();
+} // watchStoreIsPopulated
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -678,6 +766,7 @@ export default {
         currentZIP: null
       }, // selected employee
       search: null, // query text for datatable search field
+      selectedTags: [], // tags to include or exclude in filter
       sortBy: 'hireDate', // sort datatable items
       sortDesc: false, // sort datatable items
       status: {
@@ -685,7 +774,9 @@ export default {
         statusMessage: null,
         color: null
       }, // snackbar action status
-      tags: []
+      tags: [],
+      tagFlip: false,
+      tagSearchString: ''
     };
   },
   methods: {
@@ -709,6 +800,8 @@ export default {
     refreshEmployees,
     renderCreateEmployee,
     renderManageTags,
+    removeTag,
+    selectedTagsHasEmployee,
     userRoleIsAdmin,
     userRoleIsManager,
     validateDelete,
@@ -719,7 +812,9 @@ export default {
   },
   watch: {
     'filter.active': watchFilterActive,
-    storeIsPopulated: watchStoreIsPopulated
+    storeIsPopulated: watchStoreIsPopulated,
+    selectedTags: watchSelectedTags,
+    tagFlip: watchTagFlip
   }
 };
 </script>
