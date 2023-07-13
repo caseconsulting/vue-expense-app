@@ -32,90 +32,87 @@
         </v-card-title>
 
         <!-- Filters -->
-        <fieldset v-if="hasAdminPermissions()" class="filter_border">
-          <legend class="legend_style">Filters</legend>
+        <v-card outlined>
+          <v-container>
+            <v-row :justify="start">
+              <!-- Active Filter -->
+              <v-col cols="12" md="6">
+                <h4>Employee Status:</h4>
+                <v-btn-toggle class="filter_color" v-model="filter.active" text multiple>
+                  <!-- Full Time -->
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-btn value="full" id="full" v-on="on" text>
+                        <v-icon class="mr-1" color="black">mdi-clock-outline</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Full Time</span>
+                  </v-tooltip>
 
-          <!-- Active Filter -->
-          <div class="flagFilter">
-            <h4>Employee Status:</h4>
-            <v-btn-toggle class="filter_color" v-model="filter.active" text multiple>
-              <!-- Full Time -->
-              <v-tooltip top>
-                <template v-slot:activator="{ on }">
-                  <v-btn value="full" id="full" v-on="on" text>
-                    <v-icon class="mr-1" color="black">mdi-clock-outline</v-icon>
-                  </v-btn>
-                </template>
-                <span>Full Time</span>
-              </v-tooltip>
+                  <!-- Part Time -->
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-btn value="part" id="part" v-on="on" text>
+                        <v-icon color="black">mdi-progress-clock</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Part Time</span>
+                  </v-tooltip>
 
-              <!-- Part Time -->
-              <v-tooltip top>
-                <template v-slot:activator="{ on }">
-                  <v-btn value="part" id="part" v-on="on" text>
-                    <v-icon color="black">mdi-progress-clock</v-icon>
-                  </v-btn>
-                </template>
-                <span>Part Time</span>
-              </v-tooltip>
+                  <!-- Inactive -->
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <v-btn value="inactive" id="inactive" v-on="on" text>
+                        <v-icon color="black">mdi-stop-circle-outline</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Inactive</span>
+                  </v-tooltip>
+                </v-btn-toggle>
+              </v-col>
+              <!-- End Active Filter -->
 
-              <!-- Inactive -->
-              <v-tooltip top>
-                <template v-slot:activator="{ on }">
-                  <v-btn value="inactive" id="inactive" v-on="on" text>
-                    <v-icon color="black">mdi-stop-circle-outline</v-icon>
-                  </v-btn>
-                </template>
-                <span>Inactive</span>
-              </v-tooltip>
-            </v-btn-toggle>
-          </div>
-          <!-- End Active Filter -->
+              <!-- Tags filter -->
 
-          <!-- Tags filter -->
-          <v-card-text class="pb-0">
-            <!-- Loading Bar -->
-            <v-autocomplete
-              :items="tags"
-              multiple
-              v-model="selectedTags"
-              chips
-              deletable-chips
-              clearable
-              filled
-              return-object
-              :search-input.sync="tagSearchString"
-              @change="tagSearchString = ''"
-              class="elevate"
-              append-icon=""
-            >
-              <template v-slot:selection="data">
-                <v-chip
-                  v-bind="data.attrs"
-                  :input-value="data.selected"
-                  close
-                  @click="data.select"
-                  @click:close="removeTag(data.item)"
-                  small
-                >
-                  {{ data.item.tagName }}
-                </v-chip>
-              </template>
-              <template v-slot:item="data">
-                <v-list-item-content>
-                  <v-list-item-title>{{ data.item.tagName }}</v-list-item-title>
-                </v-list-item-content>
-              </template>
-            </v-autocomplete>
-          </v-card-text>
-          <v-tooltip top>
-            <template>
-              <v-checkbox v-model="tagFlip" label="Flip tag(s)" v-bind="props"></v-checkbox>
-            </template>
-            <span>Filter OUT employees with tag(s)</span>
-          </v-tooltip>
-          <!-- End Tags Filter -->
-        </fieldset>
+              <v-col>
+                <v-container>
+                  <v-row>
+                    <v-col>
+                      <v-card-text>
+                        <v-autocomplete
+                          clearable
+                          chips
+                          deletabledeletable-chips
+                          label="Filter by Tag"
+                          v-model="selectedTags"
+                          :items="tags"
+                          multiple
+                          variant="solo-filled"
+                          item-color="gray"
+                          item-text="tagName"
+                          item-value="id"
+                          return-object
+                        >
+                        </v-autocomplete>
+                      </v-card-text>
+                    </v-col>
+                    <v-col>
+                      <v-tooltip top>
+                        <template v-slot:activator="{ on }">
+                          <span v-on="on">
+                            <v-checkbox v-model="tagFlip" label="Flip tag(s)" />
+                          </span>
+                        </template>
+                        <span>Filter OUT employees with tag(s)</span>
+                      </v-tooltip>
+                    </v-col>
+                  </v-row>
+                </v-container>
+              </v-col>
+              <!-- End Tags Filter -->
+            </v-row>
+          </v-container>
+        </v-card>
         <br />
         <!-- End Filters -->
         <!-- Create an Employee -->
@@ -401,6 +398,7 @@ function employeePath(item) {
  */
 function filterEmployees() {
   //filter for Active Expense Types
+  console.log(this.tags);
   this.filteredEmployees = _.filter(this.employees, (employee) => {
     let fullCheck = this.filter.active.includes('full') && this.isFullTime(employee);
     let partCheck = this.filter.active.includes('part') && this.isPartTime(employee);
@@ -647,7 +645,7 @@ async function watchStoreIsPopulated() {
  */
 async function watchSelectedTags() {
   this.filterEmployees();
-} // watchStoreIsPopulated
+} // watchSelectedTags
 
 /**
  * In the case that the page has been force reloaded (and the store cleared)
