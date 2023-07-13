@@ -843,10 +843,10 @@ export default {
       eeoJobCategoryItems: [
         { text: 'Professional', value: 0 },
         {
-          text: 'Executive/Senior Level Offcial and Manager',
+          text: 'Executive/Senior Level Official and Manager',
           value: 1
         },
-        { text: 'First/Mid-Level Offcial and Manager', value: 2 },
+        { text: 'First/Mid Level Official and Manager', value: 2 },
         {
           text: 'Technician',
           value: 3
