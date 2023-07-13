@@ -82,7 +82,7 @@
                         <v-autocomplete
                           clearable
                           chips
-                          deletabledeletable-chips
+                          deletable-chips
                           label="Filter by Tag"
                           v-model="selectedTags"
                           :items="tags"
