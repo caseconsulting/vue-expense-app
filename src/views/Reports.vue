@@ -84,7 +84,7 @@ import ReportsForeignLanguages from '@/components/reports/ReportsForeignLanguage
 import ReportsJobRoles from '@/components/reports/ReportsJobRoles.vue';
 import ReportsTechnologies from '@/components/reports/ReportsTechnologies.vue';
 import ReportsSecurityInfo from '../components/reports/ReportsSecurityInfo.vue';
-import { updateStoreEmployees, updateStoreContracts } from '@/utils/storeUtils';
+import { updateStoreEmployees, updateStoreContracts, updateStoreTags } from '@/utils/storeUtils';
 import { isMobile } from '@/utils/utils';
 
 // |--------------------------------------------------|
@@ -193,6 +193,10 @@ export default {
       currentTab: null,
       employeesToContact: [],
       loading: true,
+      selectedTags: [],
+      tags: [],
+      tagFlip: false,
+      tagSearchString: '',
       toggleContactEmployeesModal: false,
       wasRedirected: false
     };
@@ -202,14 +206,16 @@ export default {
     changeTab,
     renderContactEmployeesModal,
     updateStoreContracts,
-    updateStoreEmployees
+    updateStoreEmployees,
+    updateStoreTags
   },
   watch: {
     async storeIsPopulated() {
       if (this.$store.getters.storeIsPopulated) {
         await Promise.all([
           !this.$store.getters.employees ? this.updateStoreEmployees() : '',
-          !this.$store.getters.contracts ? this.updateStoreContracts() : ''
+          !this.$store.getters.contracts ? this.updateStoreContracts() : '',
+          !this.$store.getters.tags ? this.updateStoreTags() : ''
         ]);
         this.loading = false;
       }

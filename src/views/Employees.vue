@@ -32,86 +32,71 @@
         </v-card-title>
 
         <!-- Filters -->
-        <v-card outlined>
-          <v-container>
-            <v-row :justify="start">
-              <!-- Active Filter -->
-              <v-col cols="12" md="6">
-                <h4>Employee Status:</h4>
-                <v-btn-toggle class="filter_color" v-model="filter.active" text multiple>
-                  <!-- Full Time -->
-                  <v-tooltip top>
-                    <template v-slot:activator="{ on }">
-                      <v-btn value="full" id="full" v-on="on" text>
-                        <v-icon class="mr-1" color="black">mdi-clock-outline</v-icon>
-                      </v-btn>
-                    </template>
-                    <span>Full Time</span>
-                  </v-tooltip>
+        <v-card v-if="userRoleIsAdmin() || userRoleIsManager()" class="pa-4" outlined>
+          <v-row>
+            <!-- Active Filter -->
+            <v-col cols="12" md="12">
+              <h4>Employee Status:</h4>
+              <v-btn-toggle class="filter_color d-inline-block mr-6" v-model="filter.active" text multiple>
+                <!-- Full Time -->
+                <v-tooltip top>
+                  <template v-slot:activator="{ on }">
+                    <v-btn value="full" id="full" v-on="on" text>
+                      <v-icon class="mr-1" color="black">mdi-clock-outline</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Full Time</span>
+                </v-tooltip>
 
-                  <!-- Part Time -->
-                  <v-tooltip top>
-                    <template v-slot:activator="{ on }">
-                      <v-btn value="part" id="part" v-on="on" text>
-                        <v-icon color="black">mdi-progress-clock</v-icon>
-                      </v-btn>
-                    </template>
-                    <span>Part Time</span>
-                  </v-tooltip>
+                <!-- Part Time -->
+                <v-tooltip top>
+                  <template v-slot:activator="{ on }">
+                    <v-btn value="part" id="part" v-on="on" text>
+                      <v-icon color="black">mdi-progress-clock</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Part Time</span>
+                </v-tooltip>
 
-                  <!-- Inactive -->
-                  <v-tooltip top>
-                    <template v-slot:activator="{ on }">
-                      <v-btn value="inactive" id="inactive" v-on="on" text>
-                        <v-icon color="black">mdi-stop-circle-outline</v-icon>
-                      </v-btn>
-                    </template>
-                    <span>Inactive</span>
-                  </v-tooltip>
-                </v-btn-toggle>
-              </v-col>
+                <!-- Inactive -->
+                <v-tooltip top>
+                  <template v-slot:activator="{ on }">
+                    <v-btn value="inactive" id="inactive" v-on="on" text>
+                      <v-icon color="black">mdi-stop-circle-outline</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Inactive</span>
+                </v-tooltip>
+              </v-btn-toggle>
               <!-- End Active Filter -->
-
               <!-- Tags filter -->
-
-              <v-col>
-                <v-container>
-                  <v-row>
-                    <v-col>
-                      <v-card-text>
-                        <v-autocomplete
-                          clearable
-                          chips
-                          deletable-chips
-                          label="Filter by Tag"
-                          v-model="selectedTags"
-                          :items="tags"
-                          multiple
-                          variant="solo-filled"
-                          item-color="gray"
-                          item-text="tagName"
-                          item-value="id"
-                          return-object
-                        >
-                        </v-autocomplete>
-                      </v-card-text>
-                    </v-col>
-                    <v-col>
-                      <v-tooltip top>
-                        <template v-slot:activator="{ on }">
-                          <span v-on="on">
-                            <v-checkbox v-model="tagFlip" label="Flip tag(s)" />
-                          </span>
-                        </template>
-                        <span>Filter OUT employees with tag(s)</span>
-                      </v-tooltip>
-                    </v-col>
-                  </v-row>
-                </v-container>
-              </v-col>
-              <!-- End Tags Filter -->
-            </v-row>
-          </v-container>
+              <v-autocomplete
+                class="d-inline-block"
+                clearable
+                chips
+                deletable-chips
+                label="Filter by Tag"
+                v-model="selectedTags"
+                :items="tags"
+                multiple
+                variant="solo-filled"
+                item-color="gray"
+                item-text="tagName"
+                item-value="id"
+                return-object
+              >
+              </v-autocomplete>
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <span v-on="on">
+                    <v-checkbox class="d-inline-block" v-model="tagFlip" label="Flip tag(s)" />
+                  </span>
+                </template>
+                <span>Filter OUT employees with tag(s)</span>
+              </v-tooltip>
+            </v-col>
+            <!-- End Tags Filter -->
+          </v-row>
         </v-card>
         <br />
         <!-- End Filters -->
