@@ -4,7 +4,7 @@
       <div class="d-inline-block float-left">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
-            <v-btn :disabled="isPrevPeriod || loading" icon @click="changeMonthData" v-on="on"
+            <v-btn :disabled="isPrevPeriod || loading" icon @click="changePeriodData" v-on="on"
               ><v-icon x-large color="#bc3825"> mdi-arrow-left-thin </v-icon>
             </v-btn>
           </template>
@@ -12,7 +12,7 @@
         </v-tooltip>
         <v-tooltip top>
           <template v-slot:activator="{ on }">
-            <v-btn :disabled="!isPrevPeriod || loading" icon @click="changeMonthData" v-on="on"
+            <v-btn :disabled="!isPrevPeriod || loading" icon @click="changePeriodData" v-on="on"
               ><v-icon x-large color="#bc3825"> mdi-arrow-right-thin </v-icon>
             </v-btn>
           </template>
@@ -31,7 +31,7 @@
       </h3>
       <div class="filler"></div>
     </div>
-    <!-- Error Getting Monthly Hours -->
+    <!-- Error Getting Pay Period Hours -->
     <div v-if="monthlyHourError" class="pt-2 pb-6" align="center">
       <v-tooltip right>
         <template v-slot:activator="{ on }">
@@ -84,13 +84,13 @@
             <v-btn @click="showMore = true" top text small class="my-2">Show More &#9662; </v-btn>
           </div>
           <div v-if="showMore" max-width="400">
-            <!-- Hours left this month -->
+            <!-- Hours left this period -->
             <v-row :class="isPrevPeriod ? 'pt-3' : ''">
               Remaining:
               <v-spacer></v-spacer>
               <p>{{ formatHours(this.remainingHours) }}</p>
             </v-row>
-            <!-- Hours worked this month -->
+            <!-- Hours worked this period -->
             <v-row>
               Completed:
               <v-spacer></v-spacer>
@@ -108,7 +108,7 @@
               </p>
               <p v-else class="green--text">{{ formatHours(this.todaysHours) }}</p>
             </v-row>
-            <!-- Future hours for this month -->
+            <!-- Future hours for this period -->
             <v-row v-if="!isPrevPeriod">
               Future:
               <v-spacer></v-spacer>
@@ -170,7 +170,7 @@ import {
 // |--------------------------------------------------|
 
 /**
- * Calculates and returns the remaining work days of the month.
+ * Calculates and returns the remaining work days of the period.
  *
  * @return int - number of remaining working days
  */
@@ -272,9 +272,9 @@ function calcWorkHours() {
 } // calcWorkHours
 
 /**
- * Changes all data for hours for the month chosen by the user, which is either this month's hours or last month's hours.
+ * Changes all data for hours for the period chosen by the user, which is either this period's hours or last period's hours.
  */
-function changeMonthData() {
+function changePeriodData() {
   this.isPrevPeriod = !this.isPrevPeriod;
   if (this.isPrevPeriod) {
     if (_.isNil(this.quickBooksTimeData.previousPeriodHours)) {
@@ -286,7 +286,7 @@ function changeMonthData() {
       this.remainingHours = this.workHours - this.totalHours;
     }
   } else {
-    // if the user switches back to this month's hours after seeing the previous month's hours
+    // if the user switches back to this period's hours after seeing the previous period's hours
     if (_.isNil(this.quickBooksTimeData.previousHours)) {
       this.monthlyHourError = true;
     } else {
@@ -297,7 +297,7 @@ function changeMonthData() {
       this.remainingHours = this.workHours - this.totalHours;
     }
   }
-} // changeToPrevMonthHours
+} // changePeriodData
 
 /**
  * Rounds hours to 2 decimal places.
@@ -337,7 +337,7 @@ async function setData() {
   this.loading = true;
   let today = getTodaysDate(DEFAULT_ISOFORMAT);
 
-  // determine if employee is in first or second pay period of the month
+  // determine if employee is in first or second pay period of the period
   this.isFirstPeriod = getDay(today) < 16;
 
   // set the first day of the current pay period
@@ -360,13 +360,13 @@ async function setData() {
     ? format(endOf(subtract(today, 1, 'months'), 'month'), null, DEFAULT_ISOFORMAT)
     : format(setDay(today, 15), null, DEFAULT_ISOFORMAT);
 
-  await this.setMonthlyCharges();
+  await this.setPeriodCharges();
 } // setData
 
 /**
- * Sets the monthly charges for the employee (or user if no employee is specified).
+ * Sets the pay period charges for the employee (or user if no employee is specified).
  */
-async function setMonthlyCharges() {
+async function setPeriodCharges() {
   this.employee = this.isEmployeeView ? this.passedEmployee : this.$store.getters.user;
   if (this.employee && !this.isEmpty(this.employee.id)) {
     this.workDayHours *= this.employee.workStatus * 0.01;
@@ -404,7 +404,7 @@ async function setMonthlyCharges() {
     }
     this.loading = false;
   }
-} // setMonthlyCharges
+} // setPeriodCharges
 
 /**
  * Opens new tab when info icon is selected w/in Quickbooks time box
@@ -442,7 +442,7 @@ async function watchPassedEmployeeID() {
   this.monthlyHourError = false;
   this.refresh = true;
   this.isEmployeeView = true;
-  await this.setMonthlyCharges();
+  await this.setPeriodCharges();
 } // watchPassedEmployeeID
 
 // |--------------------------------------------------|
@@ -465,23 +465,23 @@ export default {
       isFirstPeriod: false, // if the pay period is days 1-15 or not
       futureHours: 0, // hours recorded for the future
       isEmployeeView: false, // viewing component on the employee page
-      isPrevPeriod: false, // viewing previous month hours
+      isPrevPeriod: false, // viewing previous period hours
       loading: false, // loading
-      month: '', // the month of the pay period
+      month: '', // the period of the pay period
       periodStartDay: '', // current pay period start
       periodEndDay: '', // current pay period end
-      monthlyHourError: false, // error getting monthly hours
+      monthlyHourError: false, // error getting pay period hours
       prevPeriodStart: '', // previous pay period start
       prevPeriodEnd: '', // previous pay period end
       refresh: false, // if the data has been refreshed
-      remainingHours: 0, // remaining hours this month
+      remainingHours: 0, // remaining hours this period
       showMore: false, // show more time details
       todaysHours: 0, // hours completed today
-      totalHours: 0, // total hours completed this month
+      totalHours: 0, // total hours completed this period
       quickBooksTimeData: {}, // time sheet data
-      userWorkDays: 0, // work days remaining this month
+      userWorkDays: 0, // work days remaining this period
       workDayHours: 8, // average work day hours
-      workedHours: 0, // total hours worked this month
+      workedHours: 0, // total hours worked this period
       previousHours: 0, // total hours recorded prior to today
       year: '' // the year of the pay period
     };
@@ -489,7 +489,7 @@ export default {
   methods: {
     add, // dateUtils
     calcWorkHours,
-    changeMonthData,
+    changePeriodData,
     endOf,
     format, // dateUtils
     formatHours,
@@ -500,7 +500,7 @@ export default {
     roundHours,
     setDay, // dateUtils
     setData,
-    setMonthlyCharges,
+    setPeriodCharges,
     subtract, // dateUtils
     toFAQ,
     updateEstimate
