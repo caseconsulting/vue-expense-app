@@ -130,7 +130,11 @@ function autocompleteWidth() {
  * @returns Boolean - whether the employee was FireTeam or not
  */
 function isLegacyFireTeam() {
-  return parseInt(this.passedEmployee.employeeNumber, 10) < 100;
+  if (!this.passedEmployee) {
+    return parseInt(this.employee.employeeNumber, 10) < 100;
+  } else {
+    return parseInt(this.passedEmployee.employeeNumber, 10) < 100;
+  }
 } // isLegacyFireTeam
 
 /**
