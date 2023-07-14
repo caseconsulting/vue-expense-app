@@ -47,7 +47,12 @@
         class="pt-0 pb-0 black--text"
         :class="userRoleIsAdmin() || userRoleIsManager() ? 'nudge-up' : 'mt-4'"
       >
-        <monthly-charges :passedEmployee="passedEmployee" :showMinutes="showMinutes"></monthly-charges>
+        <semi-monthly-charges
+          v-if="isLegacyFireTeam"
+          :passedEmployee="passedEmployee"
+          :showMinutes="showMinutes"
+        ></semi-monthly-charges>
+        <monthly-charges v-else :passedEmployee="passedEmployee" :showMinutes="showMinutes"></monthly-charges>
         <v-divider></v-divider>
         <balances :passedEmployee="passedEmployee" :showMinutes="showMinutes"></balances>
       </v-card-text>
@@ -58,6 +63,7 @@
 <script>
 import _ from 'lodash';
 import MonthlyCharges from '@/components/shared/quickbooks/MonthlyCharges.vue';
+import SemiMonthlyCharges from '@/components/shared/quickbooks/SemiMonthlyCharges.vue';
 import Balances from '@/components/shared/quickbooks/Balances.vue';
 import { nicknameAndLastName } from '@/shared/employeeUtils';
 import { userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
@@ -117,6 +123,15 @@ function autocompleteWidth() {
       return 'width: 30%';
   }
 } // autocompleteWidth
+
+/**
+ * Determines if an employee is a legacy FireTeam employee.
+ *
+ * @returns Boolean - whether the employee was FireTeam or not
+ */
+function isLegacyFireTeam() {
+  return parseInt(this.passedEmployee.employeeNumber, 10) < 100;
+} // isLegacyFireTeam
 
 /**
  * Calculates the tooltip text to display on v-switch based on value of showMinutes.
@@ -197,11 +212,13 @@ async function watchEmployees() {
 export default {
   components: {
     Balances,
-    MonthlyCharges
+    MonthlyCharges,
+    SemiMonthlyCharges
   },
   computed: {
     allEmployees,
     autocompleteWidth,
+    isLegacyFireTeam,
     tooltipText
   },
   created,
