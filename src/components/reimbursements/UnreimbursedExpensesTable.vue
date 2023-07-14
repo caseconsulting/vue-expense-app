@@ -3,7 +3,7 @@
     <v-card class="mt-3">
       <v-container fluid>
         <!-- Table Header -->
-        <v-card-title>
+        <v-card-title class="pb-0">
           <h3>Unreimbursed Expenses</h3>
           <v-spacer></v-spacer>
 
@@ -18,15 +18,41 @@
             label="Filter by Employee"
             clearable
           ></v-autocomplete>
-          <p>&nbsp;</p>
           <v-autocomplete
             :items="expenseTypes"
             v-model="expenseType"
             id="filterExpense"
             item-text="text"
+            class="mr-3"
             label="Filter by Expense Type"
             clearable
           ></v-autocomplete>
+        </v-card-title>
+        <v-card-title class="pt-0">
+          <v-autocomplete
+            class="mr-3"
+            clearable
+            chips
+            deletable-chips
+            label="Filter by Employee Tag"
+            v-model="selectedTags"
+            :items="tags"
+            multiple
+            variant="solo-filled"
+            item-color="gray"
+            item-text="tagName"
+            item-value="id"
+            return-object
+          >
+          </v-autocomplete>
+          <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <span v-on="on">
+                <v-checkbox v-model="tagFlip" label="Flip tag(s)" />
+              </span>
+            </template>
+            <span>Filter OUT employees with tag(s)</span>
+          </v-tooltip>
         </v-card-title>
 
         <!-- START DATA TABLE -->
@@ -144,7 +170,7 @@ import api from '@/shared/api.js';
 import _ from 'lodash';
 import { asyncForEach, isEmpty, convertToMoneyString, updateEmployeeLogin } from '@/utils/utils';
 import { storeIsPopulated } from '@/utils/utils';
-import { updateStoreEmployees } from '@/utils/storeUtils';
+import { updateStoreEmployees, updateStoreTags } from '@/utils/storeUtils';
 import { getTodaysDate } from '@/shared/dateUtils';
 import employeeUtils from '@/shared/employeeUtils';
 
@@ -160,7 +186,17 @@ import employeeUtils from '@/shared/employeeUtils';
  * @return Array - filtered budgets
  */
 function filteredItems() {
-  let data = _.filter(this.empBudgets, (budget) => {
+  let data = this.empBudgets;
+  data = _.filter(data, (budget) => {
+    if( this.selectedTags.length == 0) return true;
+    for (let i = 0; i < this.selectedTags.length; i++) {
+      if (this.selectedTags[i].employees.includes(budget.employeeId)) {
+        return !this.tagFlip;
+      }
+    }
+    return this.tagFlip;
+  });
+  data = _.filter(data, (budget) => {
     if (!this.employee && !this.expenseType) {
       return true;
     } else if (!this.employee && this.expenseType) {
@@ -785,6 +821,7 @@ async function created() {
   window.EventBus.$on('selectExpense', this.selectExpense);
   window.EventBus.$on('toggleExpense', this.toggleShowOnFeed);
 
+
   //window.EventBus.$on('canceled-reimburse', () => (this.buttonClicked = false));
   window.EventBus.$on('confirm-reimburse', async () => await this.reimburseExpenses());
   let unreimbursedExpenses;
@@ -798,6 +835,10 @@ async function created() {
     // updates and audits employee login for admins
     await this.updateEmployeeLogin(this.$store.getters.user);
   }
+  if (!this.$store.getters.tags) {
+    await this.updateStoreTags();
+  }
+  this.tags = this.$store.getters.tags; // get the tags
 } // created
 
 /**
@@ -893,7 +934,10 @@ export default {
       statusType: undefined,
       statusMessage: '',
       color: ''
-    } // reimburse status
+    }, // reimburse
+    selectedTags: [],
+    tags: [],
+    tagFlip: false
   }),
   methods: {
     asyncForEach,
@@ -925,7 +969,8 @@ export default {
     toggleShowOnFeed,
     unCheckAllBoxes,
     updateEmployeeLogin,
-    updateStoreEmployees
+    updateStoreEmployees,
+    updateStoreTags
   },
   watch: {
     employee: watchEmployee,

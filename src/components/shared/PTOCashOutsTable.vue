@@ -23,6 +23,31 @@
           label="Filter by Employee"
           clearable
         ></v-autocomplete>
+        <v-autocomplete
+          v-if="userRoleIsAdmin() || userRoleIsManager()"
+          class="mr-3"
+          clearable
+          chips
+          deletable-chips
+          label="Filter by Employee Tag"
+          v-model="selectedTags"
+          :items="tags"
+          multiple
+          variant="solo-filled"
+          item-color="gray"
+          item-text="tagName"
+          item-value="id"
+          return-object
+        >
+        </v-autocomplete>
+        <v-tooltip v-if="userRoleIsAdmin() || userRoleIsManager()" top>
+          <template v-slot:activator="{ on }">
+            <span v-on="on">
+              <v-checkbox v-model="tagFlip" label="Flip tag(s)" />
+            </span>
+          </template>
+          <span>Filter OUT employees with tag(s)</span>
+        </v-tooltip>
       </v-card-title>
       <div v-else>
         <v-card-title class="px-0">
@@ -196,7 +221,7 @@
 import { isMobile, userRoleIsAdmin, userRoleIsManager, monthDayYearFormat, isEmpty } from '@/utils/utils';
 import { getEmployeeByID, nicknameAndLastName } from '@/shared/employeeUtils';
 import api from '@/shared/api.js';
-import { updateStoreUser, updateStoreEmployees, updateStorePtoCashOuts } from '@/utils/storeUtils';
+import { updateStoreUser, updateStoreEmployees, updateStorePtoCashOuts, updateStoreTags } from '@/utils/storeUtils';
 import _ from 'lodash';
 import GeneralConfirmationModal from '../modals/GeneralConfirmationModal.vue';
 import dateUtils from '@/shared/dateUtils';
@@ -223,6 +248,10 @@ async function created() {
   if (!this.$store.getters.ptoCashOuts) {
     promises.push(this.updateStorePtoCashOuts());
   }
+  if (!this.$store.getters.tags) {
+    await this.updateStoreTags();
+  }
+  this.tags = this.$store.getters.tags; // get the tags
   if (promises.length > 0) {
     await Promise.all(promises);
   }
@@ -449,6 +478,17 @@ function filteredPtoCashOuts() {
   if (this.filteredEmployee) {
     filteredPtoCashOuts = _.filter(filteredPtoCashOuts, (p) => p.employeeId == this.filteredEmployee);
   }
+  // filter tags
+  if (this.selectedTags.length > 0) {
+    filteredPtoCashOuts = _.filter(filteredPtoCashOuts, (p) => {
+      for (let i = 0; i < this.selectedTags.length; i++) {
+        if (this.selectedTags[i].employees.includes(p.employeeId)) {
+          return !this.tagFlip;
+        }
+      }
+      return this.tagFlip;
+    });
+  }
 
   if (this.filter.approved === 'notApproved' || this.unapprovedOnly) {
     filteredPtoCashOuts = _.filter(filteredPtoCashOuts, (p) => p.approvedDate == null);
@@ -549,6 +589,9 @@ export default {
       sortBy: 'creationDate',
       sortDesc: true,
       selected: [],
+      selectedTags: [],
+      tagFlip: false,
+      tags: [],
       isApproving: false,
       isUnapproving: false,
       isDeleting: false,
@@ -582,6 +625,7 @@ export default {
     updateStoreUser,
     updateStoreEmployees,
     updateStorePtoCashOuts,
+    updateStoreTags,
     uncheckAllBoxes
   },
   mounted,

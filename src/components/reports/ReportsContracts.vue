@@ -46,6 +46,35 @@
         <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
           <v-checkbox v-model="showInactiveEmployees" label="Show Inactive Users"></v-checkbox>
         </v-col>
+        <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
+          <v-autocomplete
+            class="mr-3"
+            clearable
+            chips
+            deletable-chips
+            label="Filter by Employee Tag"
+            v-model="selectedTags"
+            :items="tags"
+            multiple
+            variant="solo-filled"
+            item-color="gray"
+            item-text="tagName"
+            item-value="id"
+            return-object
+            @change="refreshDropdownItems()"
+          >
+          </v-autocomplete>
+        </v-col>
+        <v-col cols="2" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
+          <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <span v-on="on">
+                <v-checkbox @change="refreshDropdownItems()" v-model="tagFlip" label="Flip tag(s)" />
+              </span>
+            </template>
+            <span>Filter OUT employees with tag(s)</span>
+          </v-tooltip>
+        </v-col>
       </v-row>
 
       <!-- START EMPLOYEE TABLE -->
@@ -117,6 +146,7 @@ function created() {
   });
 
   this.employeesInfo = this.getActive(this.$store.getters.employees); // default to filtered list
+  this.tags = this.$store.getters.tags;
   this.filteredEmployees = this.employeesInfo; // this one is shown
   this.populateDropdowns(this.employeesInfo);
   this.buildContractsColumn();
@@ -272,6 +302,16 @@ function refreshDropdownItems() {
   if (this.search === null && this.contractSearch === null && this.primeSearch === null) {
     this.filteredEmployees = this.employeesInfo;
   }
+  if (this.selectedTags.length > 0) {
+    this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
+      for (let i = 0; i < this.selectedTags.length; i++) {
+        if (this.selectedTags[i].employees.includes(employee.id)) {
+          return !this.tagFlip;
+        }
+      }
+      return this.tagFlip;
+    });
+  }
 
   this.populateDropdowns(this.filteredEmployees);
 } // refreshDropdownItems
@@ -388,9 +428,13 @@ export default {
       primeSearch: null,
       primesDropDown: [],
       search: null, // query text for datatable search field
+      selectedTags: [],
       showInactiveEmployees: false,
       sortBy: 'firstName', // sort datatable items
-      sortDesc: false
+      sortDesc: false,
+      tags: [],
+      tagFlip: false,
+      tagSearchString: ''
     };
   },
   methods: {
