@@ -31,11 +31,9 @@
         </v-col>
         <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
           <v-autocomplete
-            class="mr-3"
+            class="d-inline-block"
             clearable
-            chips
-            deletable-chips
-            label="Filter by Employee Tag"
+            label="Filter by Tag (click to flip)"
             v-model="selectedTags"
             :items="tags"
             multiple
@@ -43,20 +41,21 @@
             item-color="gray"
             item-text="tagName"
             item-value="id"
-            return-object
             @change="refreshDropdownItems()"
+            return-object
           >
-          </v-autocomplete>
-        </v-col>
-        <v-col cols="2" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
-          <v-tooltip top>
-            <template v-slot:activator="{ on }">
-              <span v-on="on">
-                <v-checkbox @change="refreshDropdownItems()" v-model="tagFlip" label="Flip tag(s)" />
-              </span>
+            <template v-slot:selection="data">
+              <v-chip
+                close
+                @click="negateTag(data.item)"
+                @click:close="removeTag(data.item)"
+                :color="chipColor(data.item.id)"
+              >
+                {{ tagFlip.includes(data.item.id) ? 'NOT ' : '' }}
+                {{ data.item.tagName }}
+              </v-chip>
             </template>
-            <span>Filter OUT employees with tag(s)</span>
-          </v-tooltip>
+          </v-autocomplete>
         </v-col>
         <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
           <v-checkbox v-model="showInactiveEmployees" label="Show Inactive Users"></v-checkbox>
@@ -161,6 +160,16 @@ function buildLanguagesColumn() {
 } // buildLanguagesColumn
 
 /**
+ * Returns the color that at tag filter chip should be
+ *
+ * @param id ID of the tag item
+ *
+ */
+function chipColor(id) {
+  return this.tagFlip.includes(id) ? 'red' : 'gray';
+} // chipColor
+
+/**
  * handles click event of the employee table entry
  *
  * @param item - the employee
@@ -168,6 +177,19 @@ function buildLanguagesColumn() {
 function handleClick(item) {
   this.$router.push(`/employee/${item.employeeNumber}`);
 } //handleClick
+
+/**
+ * negates a tag
+ */
+function negateTag(item) {
+  // try to find the id in the tagFlip array, if it is there then remove it else add it
+  const index = this.tagFlip.indexOf(item.id);
+  if (index >= 0) {
+    this.tagFlip.splice(index, 1);
+  } else {
+    this.tagFlip.push(item.id);
+  }
+} // negateTag
 
 /**
  * Populates all languages in the search dropdown.
@@ -208,17 +230,24 @@ function refreshDropdownItems() {
   }
   if (this.selectedTags.length > 0) {
     this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
-      for (let i = 0; i < this.selectedTags.length; i++) {
-        if (this.selectedTags[i].employees.includes(employee.id)) {
-          return !this.tagFlip;
-        }
-      }
-      return this.tagFlip;
+      return this.selectedTagsHasEmployee(employee);
     });
   }
 
   this.populateDropdowns(this.filteredEmployees);
 } // refreshDropdownItems
+
+/**
+ * Removes an item from the tag filters's active filters
+ *
+ * @param item - The filter to remove
+ */
+function removeTag(item) {
+  const selIndex = this.selectedTags.findIndex((t) => t.id === item.id);
+  if (selIndex >= 0) {
+    this.selectedTags.splice(selIndex, 1);
+  }
+} // remove
 
 /**
  * Filters employees on the data table by the language entered by the user.
@@ -239,6 +268,24 @@ function searchLanguages() {
   }
 } // searchLanguages
 
+/**
+ * helper function: return true if any selected tag has employee listed under it.
+ *
+ * @param e - the employee
+ * @return true if the employee has a tag selected in filters
+ */
+function selectedTagsHasEmployee(e) {
+  let inTag, tagFlipped;
+  for (let i = 0; i < this.selectedTags.length; i++) {
+    inTag = this.selectedTags[i].employees.includes(e.id);
+    tagFlipped = this.tagFlip.includes(this.selectedTags[i].id);
+    if (inTag != tagFlipped) {
+      return true;
+    }
+  }
+  return false;
+} // selectedTagsHasEmployee
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     WATCHERS                     |
@@ -255,6 +302,33 @@ function watchShowInactiveUsers() {
   this.populateDropdowns(this.employeesInfo);
   this.refreshDropdownItems();
 } // watchShowInactiveUsers
+
+/**
+ * In the case that the page has been force reloaded (and the store cleared)
+ * this watcher will be activated when the store is populated again.
+ */
+function watchTagFlip() {
+  this.refreshDropdownItems();
+} // watchTagFlip
+
+/**
+ * Remove items from tagFlip array when they are removed from the selected
+ * tags
+ */
+function watchSelectedTags() {
+  let negatedTagRemoved = true;
+  // use normal for loop to have the index
+  for (let i = 0; i < this.tagFlip.length; i++) {
+    // try to find the current tag in the selectedTags
+    _.forEach(this.selectedTags, (t) => {
+      if (t.id === this.tagFlip[i]) negatedTagRemoved = false;
+    });
+    // if it isn't there, remove it from tagFlip too
+    if (negatedTagRemoved) {
+      this.tagFlip.splice(i, 1);
+    }
+  }
+} // watchSelectedTags
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -295,24 +369,30 @@ export default {
       sortBy: 'firstName', // sort datatable items
       sortDesc: false,
       tags: [],
-      tagFlip: false,
+      tagFlip: [],
       tagSearchString: ''
     };
   },
   methods: {
     buildLanguagesColumn,
     customEmployeeFilter,
+    chipColor,
     getActive,
     getFullName,
     handleClick,
+    negateTag,
     populateEmployeesDropdown,
     populateLanguagesDropdown,
     populateDropdowns,
     refreshDropdownItems,
-    searchLanguages
+    removeTag,
+    searchLanguages,
+    selectedTagsHasEmployee
   },
   watch: {
-    showInactiveEmployees: watchShowInactiveUsers
+    showInactiveEmployees: watchShowInactiveUsers,
+    tagFlip: watchTagFlip,
+    selectedTags: watchSelectedTags
   }
 };
 </script>
