@@ -93,7 +93,7 @@
         class="ml-2"
       >
         <sensitive-data-field label="Gender" :value="this.model.eeoGender.text" />
-        <sensitive-data-field label="Hispanic or Latino" :value="this.model.eeoHispanicOrLatino.value" />
+        <sensitive-data-field label="Hispanic or Latino" :value="this.model.eeoHispanicOrLatino.value ? 'Yes' : 'No'" />
         <sensitive-data-field label="Race or Ethnicity" :value="this.model.eeoRaceOrEthnicity.text" />
         <sensitive-data-field label="Job Category" :value="this.model.eeoJobCategory.text" />
         <sensitive-data-field label="Disability" :value="this.model.eeoHasDisability ? 'Yes' : 'No'" />
