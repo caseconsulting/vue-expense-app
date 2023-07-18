@@ -312,25 +312,6 @@ function watchTagFlip() {
   this.refreshDropdownItems();
 } // watchTagFlip
 
-/**
- * Remove items from tagFlip array when they are removed from the selected
- * tags
- */
-function watchSelectedTags() {
-  let negatedTagRemoved = true;
-  // use normal for loop to have the index
-  for (let i = 0; i < this.tagFlip.length; i++) {
-    // try to find the current tag in the selectedTags
-    _.forEach(this.selectedTags, (t) => {
-      if (t.id === this.tagFlip[i]) negatedTagRemoved = false;
-    });
-    // if it isn't there, remove it from tagFlip too
-    if (negatedTagRemoved) {
-      this.tagFlip.splice(i, 1);
-    }
-  }
-} // watchSelectedTags
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                     WATCHERS                     |
@@ -361,6 +342,26 @@ function watchShowInactiveUsers() {
   this.populateDropdowns(this.employeesInfo);
   this.refreshDropdownItems();
 } // watchShowInactiveUsers
+
+/**
+ * Remove items from tagFlip array when they are removed from the selected
+ * tags
+ */
+function watchSelectedTags() {
+  let negatedTagRemoved = true;
+  // use normal for loop to have the index
+  for (let i = 0; i < this.tagFlip.length; i++) {
+    // try to find the current tag in the selectedTags
+    _.forEach(this.selectedTags, (t) => {
+      if (t.id === this.tagFlip[i]) negatedTagRemoved = false;
+    });
+    // if it isn't there, remove it from tagFlip too
+    if (negatedTagRemoved) {
+      this.tagFlip.splice(i, 1);
+    }
+  }
+  this.refreshDropdownItems();
+} // watchSelectedTags
 
 // |--------------------------------------------------|
 // |                                                  |

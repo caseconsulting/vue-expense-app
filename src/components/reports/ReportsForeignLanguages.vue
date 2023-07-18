@@ -328,6 +328,7 @@ function watchSelectedTags() {
       this.tagFlip.splice(i, 1);
     }
   }
+  this.refreshDropdownItems();
 } // watchSelectedTags
 
 // |--------------------------------------------------|
