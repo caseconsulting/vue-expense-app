@@ -30,11 +30,9 @@
         </v-card-title>
         <v-card-title class="pt-0">
           <v-autocomplete
-            class="mr-3"
+            class="d-inline-block"
             clearable
-            chips
-            deletable-chips
-            label="Filter by Employee Tag"
+            label="Filter by Tag (click to flip)"
             v-model="selectedTags"
             :items="tags"
             multiple
@@ -44,15 +42,18 @@
             item-value="id"
             return-object
           >
-          </v-autocomplete>
-          <v-tooltip top>
-            <template v-slot:activator="{ on }">
-              <span v-on="on">
-                <v-checkbox v-model="tagFlip" label="Flip tag(s)" />
-              </span>
+            <template v-slot:selection="data">
+              <v-chip
+                close
+                @click="negateTag(data.item)"
+                @click:close="removeTag(data.item)"
+                :color="chipColor(data.item.id)"
+              >
+                {{ tagFlip.includes(data.item.id) ? 'NOT ' : '' }}
+                {{ data.item.tagName }}
+              </v-chip>
             </template>
-            <span>Filter OUT employees with tag(s)</span>
-          </v-tooltip>
+          </v-autocomplete>
         </v-card-title>
 
         <!-- START DATA TABLE -->
@@ -188,13 +189,8 @@ import employeeUtils from '@/shared/employeeUtils';
 function filteredItems() {
   let data = this.empBudgets;
   data = _.filter(data, (budget) => {
-    if( this.selectedTags.length == 0) return true;
-    for (let i = 0; i < this.selectedTags.length; i++) {
-      if (this.selectedTags[i].employees.includes(budget.employeeId)) {
-        return !this.tagFlip;
-      }
-    }
-    return this.tagFlip;
+    if (this.selectedTags.length == 0) return true;
+    return this.selectedTagsHasEmployee(budget.employeeId);
   });
   data = _.filter(data, (budget) => {
     if (!this.employee && !this.expenseType) {
@@ -279,6 +275,16 @@ function checkAllBoxes() {
     });
   });
 } // checkAllBoxes
+
+/**
+ * Returns the color that at tag filter chip should be
+ *
+ * @param id ID of the tag item
+ *
+ */
+function chipColor(id) {
+  return this.tagFlip.includes(id) ? 'red' : 'gray';
+} // chipColor
 
 /**
  * Expands an expense. Adds the expense to expanded row when clicked.
@@ -539,6 +545,19 @@ function matchingEmployeeAndExpenseType(expense, item) {
 } // matchingEmployeeAndExpenseType
 
 /**
+ * negates a tag
+ */
+function negateTag(item) {
+  // try to find the id in the tagFlip array, if it is there then remove it else add it
+  const index = this.tagFlip.indexOf(item.id);
+  if (index >= 0) {
+    this.tagFlip.splice(index, 1);
+  } else {
+    this.tagFlip.push(item.id);
+  }
+} // negateTag
+
+/**
  * Refresh expenses.
  */
 function refreshExpenses() {
@@ -553,6 +572,18 @@ function refreshExpenses() {
   this.empBudgets = this.groupEmployeeExpenses(this.pendingExpenses);
   this.unCheckAllBoxes();
 } // refreshExpenses
+
+/**
+ * Removes an item from the tag filters's active filters
+ *
+ * @param item - The filter to remove
+ */
+function removeTag(item) {
+  const selIndex = this.selectedTags.findIndex((t) => t.id === item.id);
+  if (selIndex >= 0) {
+    this.selectedTags.splice(selIndex, 1);
+  }
+} // removeTag
 
 /**
  * Reimburse the selected list of expenses.
@@ -643,6 +674,24 @@ function selectExpense(expense) {
     }
   });
 } // selectExpense
+
+/**
+ * helper function: return true if any selected tag has employee listed under it.
+ *
+ * @param e - the employee
+ * @return true if the employee has a tag selected in filters
+ */
+function selectedTagsHasEmployee(eId) {
+  let inTag, tagFlipped;
+  for (let i = 0; i < this.selectedTags.length; i++) {
+    inTag = this.selectedTags[i].employees.includes(eId);
+    tagFlipped = this.tagFlip.includes(this.selectedTags[i].id);
+    if (inTag != tagFlipped) {
+      return true;
+    }
+  }
+  return false;
+} // selectedTagsHasEmployee
 
 /**
  * Toggles show on feed switch for individual expenses
@@ -937,11 +986,12 @@ export default {
     }, // reimburse
     selectedTags: [],
     tags: [],
-    tagFlip: false
+    tagFlip: []
   }),
   methods: {
     asyncForEach,
     checkAllBoxes,
+    chipColor,
     clickedRow,
     constructAutoComplete,
     convertToMoneyString,
@@ -956,13 +1006,16 @@ export default {
     groupEmployeeExpenses,
     isEmpty,
     loadExpensesData,
+    negateTag,
     matchingEmployeeAndExpenseType,
+    removeTag,
     refreshExpenses,
     reimburseExpenses,
     resetShowOnFeedToggles,
     selectExpense,
     removeAggregateExpenseData,
     getTodaysDate,
+    selectedTagsHasEmployee,
     toggleAll,
     toggleGroup,
     toggleShowOnFeedGroup,
