@@ -69,7 +69,7 @@
         </v-tabs>
       </v-container>
     </v-card>
-    <v-dialog v-model="toggleContactEmployeesModal" width="50%" persistent>
+    <v-dialog v-model="toggleContactEmployeesModal" width="60%" persistent>
       <contact-employees-modal :passedEmployees="employeesToContact" :key="contactKey"></contact-employees-modal>
     </v-dialog>
   </div>
