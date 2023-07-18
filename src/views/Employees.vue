@@ -81,7 +81,6 @@
                 item-color="gray"
                 item-text="tagName"
                 item-value="id"
-                @change="filterEmployees"
                 return-object
               >
                 <template v-slot:selection="data">
@@ -395,6 +394,7 @@ function employeePath(item) {
  */
 function filterEmployees() {
   //filter for Active Expense Types
+  console.log('filtering');
   this.filteredEmployees = _.filter(this.employees, (employee) => {
     let fullCheck = this.filter.active.includes('full') && this.isFullTime(employee);
     let partCheck = this.filter.active.includes('part') && this.isPartTime(employee);
@@ -676,6 +676,7 @@ function watchSelectedTags() {
       this.tagFlip.splice(i, 1);
     }
   }
+  this.filterEmployees();
 }
 
 // |--------------------------------------------------|

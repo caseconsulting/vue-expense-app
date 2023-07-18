@@ -870,7 +870,6 @@ async function created() {
   window.EventBus.$on('selectExpense', this.selectExpense);
   window.EventBus.$on('toggleExpense', this.toggleShowOnFeed);
 
-
   //window.EventBus.$on('canceled-reimburse', () => (this.buttonClicked = false));
   window.EventBus.$on('confirm-reimburse', async () => await this.reimburseExpenses());
   let unreimbursedExpenses;
@@ -920,6 +919,24 @@ function watchExpenseType() {
   //unchecks all checkboxes when filter changes
   this.unCheckAllBoxes();
 } // watchExpenseType
+
+/**
+ * wacher for selectedTags
+ */
+function watchSelectedTags() {
+  let negatedTagRemoved = true;
+  // use normal for loop to have the index
+  for (let i = 0; i < this.tagFlip.length; i++) {
+    // try to find the current tag in the selectedTags
+    _.forEach(this.selectedTags, (t) => {
+      if (t.id === this.tagFlip[i]) negatedTagRemoved = false;
+    });
+    // if it isn't there, remove it from tagFlip too
+    if (negatedTagRemoved) {
+      this.tagFlip.splice(i, 1);
+    }
+  }
+} // watchSelectedTags
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -1027,7 +1044,8 @@ export default {
   },
   watch: {
     employee: watchEmployee,
-    expenseType: watchExpenseType
+    expenseType: watchExpenseType,
+    selectedTags: watchSelectedTags
   }
 };
 </script>
