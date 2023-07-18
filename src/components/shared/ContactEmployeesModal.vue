@@ -132,6 +132,9 @@ function emit(msg, data) {
   }
 } // emit
 
+/**
+ * Gets the formatted list of employee emails for the email client.
+ */
 function getList() {
   let list = 'mailto:';
   _.forEach(this.employees, (e) => {
@@ -141,7 +144,7 @@ function getList() {
     }
   });
   return list;
-}
+} // getList
 
 // |--------------------------------------------------|
 // |                                                  |
