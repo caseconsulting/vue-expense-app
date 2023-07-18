@@ -36,10 +36,16 @@
                 @click:close="remove(data.item)"
                 small
               >
+                <v-avatar :color="data.item.color" left>
+                  <v-icon small color="white"> {{ data.item.icon }}</v-icon>
+                </v-avatar>
                 {{ data.item.type }}
               </v-chip>
             </template>
             <template v-slot:item="data">
+              <v-list-item-avatar :color="data.item.color">
+                <v-icon color="white"> {{ data.item.icon }}</v-icon>
+              </v-list-item-avatar>
               <v-list-item-content>
                 <v-list-item-title>{{ data.item.type }}</v-list-item-title>
               </v-list-item-content>
