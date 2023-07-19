@@ -44,7 +44,9 @@
           >
             <template v-slot:selection="data">
               <v-chip
+                small
                 close
+                @click.stop
                 @click="negateTag(data.item)"
                 @click:close="removeTag(data.item)"
                 :color="chipColor(data.item.id)"

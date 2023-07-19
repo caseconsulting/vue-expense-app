@@ -193,10 +193,6 @@ export default {
       currentTab: null,
       employeesToContact: [],
       loading: true,
-      selectedTags: [],
-      tags: [],
-      tagFlip: false,
-      tagSearchString: '',
       toggleContactEmployeesModal: false,
       wasRedirected: false
     };
