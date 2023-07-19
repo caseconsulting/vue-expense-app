@@ -46,7 +46,9 @@
           >
             <template v-slot:selection="data">
               <v-chip
+                small
                 close
+                @click.stop
                 @click="negateTag(data.item)"
                 @click:close="removeTag(data.item)"
                 :color="chipColor(data.item.id)"
@@ -234,19 +236,17 @@ function populateDropdowns(employees) {
  * Refresh the list based on the current queries
  */
 function refreshDropdownItems() {
+  this.filteredEmployees = this.employeesInfo;
   if (this.search) {
-    this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
+    this.filteredEmployees = _.filter(this.filteredEmployees, (employee) => {
       return employee.employeeNumber == this.search;
     });
   }
   if (this.certificationSearch) {
     this.searchCertifications();
   }
-  if (this.search === null && this.certificationSearch === null) {
-    this.filteredEmployees = this.employeesInfo;
-  }
   if (this.selectedTags.length > 0) {
-    this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
+    this.filteredEmployees = _.filter(this.filteredEmployees, (employee) => {
       return this.selectedTagsHasEmployee(employee);
     });
   }
@@ -270,19 +270,13 @@ function removeTag(item) {
  * Filters employees on the data table by the certification entered by the user.
  */
 function searchCertifications() {
-  this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
+  this.filteredEmployees = _.filter(this.filteredEmployees, (employee) => {
     if (employee.certificationNames) {
       return employee.certificationNames.includes(this.certificationSearch);
     } else {
       return false;
     }
   });
-  if (this.search) {
-    // if there is a desired employee search then only show that employee
-    this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
-      return employee.employeeNumber == this.search;
-    });
-  }
 } // searchCertifications
 
 /**

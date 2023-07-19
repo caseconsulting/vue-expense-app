@@ -85,7 +85,9 @@
               >
                 <template v-slot:selection="data">
                   <v-chip
+                    small
                     close
+                    @click.stop
                     @click="negateTag(data.item)"
                     @click:close="removeTag(data.item)"
                     :color="chipColor(data.item.id)"
@@ -394,7 +396,6 @@ function employeePath(item) {
  */
 function filterEmployees() {
   //filter for Active Expense Types
-  console.log('filtering');
   this.filteredEmployees = _.filter(this.employees, (employee) => {
     let fullCheck = this.filter.active.includes('full') && this.isFullTime(employee);
     let partCheck = this.filter.active.includes('part') && this.isPartTime(employee);
@@ -497,7 +498,7 @@ function removeTag(item) {
   if (selIndex >= 0) {
     this.selectedTags.splice(selIndex, 1);
   }
-} // remove
+} // removeTag
 
 /**
  * open the create employee form

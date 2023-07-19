@@ -46,7 +46,9 @@
           >
             <template v-slot:selection="data">
               <v-chip
+                small
                 close
+                @click.stop
                 @click="negateTag(data.item)"
                 @click:close="removeTag(data.item)"
                 :color="chipColor(data.item.id)"
@@ -269,19 +271,17 @@ function populateDropdowns(employees) {
  * Refresh the list based on the current queries
  */
 function refreshDropdownItems() {
+  this.filteredEmployees = this.employeesInfo;
   if (this.search) {
-    this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
+    this.filteredEmployees = _.filter(this.filteredEmployees, (employee) => {
       return employee.employeeNumber == this.search;
     });
   }
   if (this.badgeExpirationDateSearch) {
     this.searchBadgeExpirationDates(this.badgeExpirationDateSearch);
   }
-  if (this.search === null && this.badgeExpirationDateSearch === null) {
-    this.filteredEmployees = this.employeesInfo;
-  }
   if (this.selectedTags.length > 0) {
-    this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
+    this.filteredEmployees = _.filter(this.filteredEmployees, (employee) => {
       return this.selectedTagsHasEmployee(employee);
     });
   }

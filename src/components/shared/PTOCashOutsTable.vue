@@ -25,11 +25,9 @@
         ></v-autocomplete>
         <v-autocomplete
           v-if="userRoleIsAdmin() || userRoleIsManager()"
-          class="mr-3"
+          class="d-inline-block"
           clearable
-          chips
-          deletable-chips
-          label="Filter by Employee Tag"
+          label="Filter by Tag (click to flip)"
           v-model="selectedTags"
           :items="tags"
           multiple
@@ -39,15 +37,20 @@
           item-value="id"
           return-object
         >
-        </v-autocomplete>
-        <v-tooltip v-if="userRoleIsAdmin() || userRoleIsManager()" top>
-          <template v-slot:activator="{ on }">
-            <span v-on="on">
-              <v-checkbox v-model="tagFlip" label="Flip tag(s)" />
-            </span>
+          <template v-slot:selection="data">
+            <v-chip
+              small
+              close
+              @click.stop
+              @click="negateTag(data.item)"
+              @click:close="removeTag(data.item)"
+              :color="chipColor(data.item.id)"
+            >
+              {{ tagFlip.includes(data.item.id) ? 'NOT ' : '' }}
+              {{ data.item.tagName }}
+            </v-chip>
           </template>
-          <span>Filter OUT employees with tag(s)</span>
-        </v-tooltip>
+        </v-autocomplete>
       </v-card-title>
       <div v-else>
         <v-card-title class="px-0">
@@ -312,6 +315,16 @@ async function approveSelectedPTOCashOuts() {
 } // approveSelectedPTOCashOuts
 
 /**
+ * Returns the color that at tag filter chip should be
+ *
+ * @param id ID of the tag item
+ *
+ */
+function chipColor(id) {
+  return this.tagFlip.includes(id) ? 'red' : 'gray';
+} // chipColor
+
+/**
  * Event handler confirm clicked approve
  */
 async function clickedConfirmApprove() {
@@ -425,6 +438,31 @@ function displaySuccess(msg) {
 } // displaySuccess
 
 /**
+ * negates a tag
+ */
+function negateTag(item) {
+  // try to find the id in the tagFlip array, if it is there then remove it else add it
+  const index = this.tagFlip.indexOf(item.id);
+  if (index >= 0) {
+    this.tagFlip.splice(index, 1);
+  } else {
+    this.tagFlip.push(item.id);
+  }
+} // negateTag
+
+/**
+ * Removes an item from the tag filters's active filters
+ *
+ * @param item - The filter to remove
+ */
+function removeTag(item) {
+  const selIndex = this.selectedTags.findIndex((t) => t.id === item.id);
+  if (selIndex >= 0) {
+    this.selectedTags.splice(selIndex, 1);
+  }
+} // removeTag
+
+/**
  * Changes the QuickBooks Time employee when a row is clicked
  *
  * @param item Object - The item from the row clicked
@@ -481,12 +519,15 @@ function filteredPtoCashOuts() {
   // filter tags
   if (this.selectedTags.length > 0) {
     filteredPtoCashOuts = _.filter(filteredPtoCashOuts, (p) => {
+      let inTag, tagFlipped;
       for (let i = 0; i < this.selectedTags.length; i++) {
-        if (this.selectedTags[i].employees.includes(p.employeeId)) {
-          return !this.tagFlip;
+        inTag = this.selectedTags[i].employees.includes(p.employeeId);
+        tagFlipped = this.tagFlip.includes(this.selectedTags[i].id);
+        if (inTag != tagFlipped) {
+          return true;
         }
       }
-      return this.tagFlip;
+      return false;
     });
   }
 
@@ -503,7 +544,7 @@ function filteredPtoCashOuts() {
     });
   }
   return filteredPtoCashOuts;
-} // filteredPtOCashOuts
+} // filteredPtoCashOuts
 
 /**
  * Gets the datatable headers based on user's role. Returns all headers if user role is admin.
@@ -561,6 +602,34 @@ function watchSelected() {
   }
 } // watchSelected
 
+/**
+ * In the case that the page has been force reloaded (and the store cleared)
+ * this watcher will be activated when the store is populated again.
+ */
+function watchTagFlip() {
+  // this.filteredPtoCashOuts();
+} // watchTagFlip
+
+/**
+ * Remove items from tagFlip array when they are removed from the selected
+ * tags
+ */
+function watchSelectedTags() {
+  let negatedTagRemoved = true;
+  // use normal for loop to have the index
+  for (let i = 0; i < this.tagFlip.length; i++) {
+    // try to find the current tag in the selectedTags
+    _.forEach(this.selectedTags, (t) => {
+      if (t.id === this.tagFlip[i]) negatedTagRemoved = false;
+    });
+    // if it isn't there, remove it from tagFlip too
+    if (negatedTagRemoved) {
+      this.tagFlip.splice(i, 1);
+    }
+  }
+  // this.filteredPtoCashOuts();
+}
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -590,7 +659,7 @@ export default {
       sortDesc: true,
       selected: [],
       selectedTags: [],
-      tagFlip: false,
+      tagFlip: [],
       tags: [],
       isApproving: false,
       isUnapproving: false,
@@ -604,6 +673,7 @@ export default {
   },
   methods: {
     approveSelectedPTOCashOuts,
+    chipColor,
     clickedConfirmApprove,
     clickedDelete,
     clickedCancelDelete,
@@ -617,10 +687,12 @@ export default {
     isMobile,
     userRoleIsAdmin,
     userRoleIsManager,
-    monthDayYearFormat,
     isEmpty,
     getEmployeeByID,
+    monthDayYearFormat,
     nicknameAndLastName,
+    negateTag,
+    removeTag,
     rowClicked,
     updateStoreUser,
     updateStoreEmployees,
@@ -636,7 +708,9 @@ export default {
   },
   props: ['unapprovedOnly'],
   watch: {
-    selected: watchSelected
+    selected: watchSelected,
+    tagFlip: watchTagFlip,
+    selectedTags: watchSelectedTags
   },
   components: { GeneralConfirmationModal, DeleteModal, PTOCashOutForm }
 };
