@@ -1125,7 +1125,7 @@ function clearForm() {
   if (this.$refs.submit !== undefined) {
     this.$refs.submit.reset();
   }
-  this.extractResume = true;
+  this.extractResume = false;
 } // clearForm
 
 // |--------------------------------------------------|
@@ -1195,7 +1195,7 @@ export default {
       confirmingValid: false,
       confirmBackingOut: false,
       editedEmployeeForm: null,
-      extractResume: true, // whether or not we want to just upload resume or extract data too
+      extractResume: false, // whether or not we want to just upload resume or extract data too
       file: null,
       gitHubCanceled: false,
       linkedInCanceled: false,
