@@ -248,11 +248,13 @@ function toFAQ() {
  * watcher for passedEmployee.id - if it is employee view it will set or reset PTOBalances
  */
 async function watchPassedEmployeeID() {
-  this.loadingBar = true;
-  this.balancesError = false;
-  this.refresh = true;
-  this.isEmployeeView = true;
-  await this.setPTOBalances();
+  if (this.passedEmployee) {
+    this.loadingBar = true;
+    this.balancesError = false;
+    this.refresh = true;
+    this.isEmployeeView = true;
+    await this.setPTOBalances();
+  }
 } // watchPassedEmployeeID
 
 // |--------------------------------------------------|
