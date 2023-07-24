@@ -191,7 +191,6 @@ function remainingWorkDays() {
  *  Set budget information for employee. Creates event listeners.
  */
 async function created() {
-  this.isEmployeeView = this.$route.name === 'employee';
   await this.setData();
 } // created
 
@@ -319,7 +318,7 @@ async function setData() {
  * Sets the monthly charges for the employee (or user if no employee is specified).
  */
 async function setMonthlyCharges() {
-  this.employee = this.isEmployeeView ? this.passedEmployee : this.$store.getters.user;
+  this.employee = this.passedEmployee ? this.passedEmployee : this.$store.getters.user;
   if (this.employee && !this.isEmpty(this.employee.id)) {
     this.workDayHours *= this.employee.workStatus * 0.01;
     // make call to api to get data
@@ -393,7 +392,6 @@ async function watchPassedEmployeeID() {
   this.isPrevMonth = false;
   this.monthlyHourError = false;
   this.refresh = true;
-  this.isEmployeeView = true;
   await this.setMonthlyCharges();
 } // watchPassedEmployeeID
 
@@ -413,7 +411,6 @@ export default {
       employee: null, // employee to view
       estimatedDailyHours: 0, // estimated hours each day
       futureHours: 0, // hours recorded for the future
-      isEmployeeView: false, // viewing component on the employee page
       isPrevMonth: false, // viewing previous month hours
       loading: false, // loading
       month: '', // current month
