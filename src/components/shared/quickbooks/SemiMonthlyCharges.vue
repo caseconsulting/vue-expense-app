@@ -436,11 +436,13 @@ function updateEstimate(event) {
  * watcher for passedEmployee.id
  */
 async function watchPassedEmployeeID() {
-  this.loading = true;
-  this.isPrevPeriod = false;
-  this.monthlyHourError = false;
-  this.refresh = true;
-  await this.setPeriodCharges();
+  if (this.passedEmployee) {
+    this.loading = true;
+    this.isPrevPeriod = false;
+    this.monthlyHourError = false;
+    this.refresh = true;
+    await this.setPeriodCharges();
+  }
 } // watchPassedEmployeeID
 
 // |--------------------------------------------------|

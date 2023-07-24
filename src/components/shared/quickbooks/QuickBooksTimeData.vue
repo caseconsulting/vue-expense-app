@@ -33,7 +33,6 @@
         :style="autocompleteWidth"
       >
         <v-autocomplete
-          v-if="passedEmployee"
           v-model="passedEmployee"
           class="autocomplete"
           dark
@@ -41,7 +40,6 @@
           :items="filteredEmployees"
           :filter="customFilter"
         ></v-autocomplete>
-        <v-autocomplete v-else label="Loading..." disabled class="autocomplete" dark dense></v-autocomplete>
       </v-card-subtitle>
       <v-card-text
         class="pt-0 pb-0 black--text"
