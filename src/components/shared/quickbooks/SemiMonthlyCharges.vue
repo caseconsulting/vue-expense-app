@@ -225,7 +225,6 @@ function prevPayPeriod() {
  *  Set budget information for employee. Creates event listeners.
  */
 async function created() {
-  this.isEmployeeView = this.$route.name === 'employee';
   await this.setData();
 } // created
 
@@ -367,7 +366,7 @@ async function setData() {
  * Sets the pay period charges for the employee (or user if no employee is specified).
  */
 async function setPeriodCharges() {
-  this.employee = this.isEmployeeView ? this.passedEmployee : this.$store.getters.user;
+  this.employee = this.passedEmployee ? this.passedEmployee : this.$store.getters.user;
   if (this.employee && !this.isEmpty(this.employee.id)) {
     this.workDayHours *= this.employee.workStatus * 0.01;
     // make call to api to get data
@@ -441,7 +440,6 @@ async function watchPassedEmployeeID() {
   this.isPrevPeriod = false;
   this.monthlyHourError = false;
   this.refresh = true;
-  this.isEmployeeView = true;
   await this.setPeriodCharges();
 } // watchPassedEmployeeID
 
@@ -464,7 +462,6 @@ export default {
       estimatedDailyHours: 0, // estimated hours each day
       isFirstPeriod: false, // if the pay period is days 1-15 or not
       futureHours: 0, // hours recorded for the future
-      isEmployeeView: false, // viewing component on the employee page
       isPrevPeriod: false, // viewing previous period hours
       loading: false, // loading
       month: '', // the period of the pay period
