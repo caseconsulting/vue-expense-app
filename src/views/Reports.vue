@@ -104,7 +104,7 @@ async function created() {
     await Promise.all([
       !this.$store.getters.employees ? this.updateStoreEmployees() : '',
       !this.$store.getters.contracts ? this.updateStoreContracts() : '',
-    !this.$store.getters.tags ? this.updateStoreTags() : ''
+      !this.$store.getters.tags ? this.updateStoreTags() : ''
     ]);
     this.loading = false;
   }
