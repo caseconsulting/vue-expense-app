@@ -888,12 +888,12 @@ async function created() {
     !this.$store.getters.employees ? this.updateStoreEmployees() : '',
     !this.$store.getters.tags ? this.updateStoreTags() : ''
   ]);
+  this.tags = this.$store.getters.tags; // get the tags
   this.loadExpensesData(unreimbursedExpenses);
   if (this.$store.getters.loginTime) {
     // updates and audits employee login for admins
     await this.updateEmployeeLogin(this.$store.getters.user);
   }
-  this.tags = this.$store.getters.tags; // get the tags
 } // created
 
 /**

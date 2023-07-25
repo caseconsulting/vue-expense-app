@@ -93,10 +93,6 @@ export async function updateStoreExpenseTypes() {
  * Update store with latest tag data
  */
 export async function updateStoreTags() {
-  let user = store.getters.user;
-  let employeeRole = user.employeeRole;
-  if (employeeRole == 'admin' || employeeRole == 'manager') {
-    let tags = await api.getItems(api.TAGS);
-    store.dispatch('setTags', { tags });
-  }
+  let tags = await api.getItems(api.TAGS);
+  store.dispatch('setTags', { tags });
 } // updateStoreTags
