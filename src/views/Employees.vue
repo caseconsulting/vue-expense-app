@@ -71,6 +71,7 @@
               <!-- End Active Filter -->
               <!-- Tags filter -->
               <v-autocomplete
+                v-if="userRoleIsAdmin() || userRoleIsManager()"
                 class="d-inline-block"
                 clearable
                 label="Filter by Tag (click to flip)"
