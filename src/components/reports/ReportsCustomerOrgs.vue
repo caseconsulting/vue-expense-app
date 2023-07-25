@@ -29,7 +29,7 @@
             @click:clear="custOrgSearch = null"
           ></v-autocomplete>
         </v-col>
-        <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
+        <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
           <v-autocomplete
             class="d-inline-block"
             clearable
@@ -116,6 +116,7 @@
 
 <script>
 import _ from 'lodash';
+import { userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
 import { customEmployeeFilter, getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
 
 // |--------------------------------------------------|
@@ -407,7 +408,9 @@ export default {
     refreshDropdownItems,
     removeTag,
     searchCustomerOrgs,
-    selectedTagsHasEmployee
+    selectedTagsHasEmployee,
+    userRoleIsAdmin,
+    userRoleIsManager
   },
   watch: {
     showInactiveEmployees: watchShowInactiveUsers,

@@ -31,6 +31,7 @@
         </v-col>
         <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
           <v-autocomplete
+            v-if="userRoleIsAdmin() || userRoleIsManager()"
             class="d-inline-block"
             clearable
             label="Filter by Tag (click to flip)"
@@ -110,6 +111,7 @@
 
 <script>
 import _ from 'lodash';
+import { userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
 import { customEmployeeFilter, getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
 import { getTodaysDate, isSameOrBefore } from '@/shared/dateUtils';
 
@@ -399,7 +401,9 @@ export default {
     refreshDropdownItems,
     removeTag,
     searchCertifications,
-    selectedTagsHasEmployee
+    selectedTagsHasEmployee,
+    userRoleIsAdmin,
+    userRoleIsManager
   },
   watch: {
     showInactiveEmployees: watchShowInactiveUsers,

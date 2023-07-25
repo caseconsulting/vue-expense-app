@@ -28,7 +28,7 @@
             clearable
           ></v-autocomplete>
         </v-card-title>
-        <v-card-title class="pt-0">
+        <v-card-title v-if="userRoleIsAdmin() || userRoleIsManager()" class="pt-0">
           <v-autocomplete
             class="d-inline-block"
             clearable
@@ -171,7 +171,14 @@ import UnreimbursedExpensesExpandedTable from '@/components/reimbursements/Unrei
 
 import api from '@/shared/api.js';
 import _ from 'lodash';
-import { asyncForEach, isEmpty, convertToMoneyString, updateEmployeeLogin } from '@/utils/utils';
+import {
+  asyncForEach,
+  isEmpty,
+  convertToMoneyString,
+  userRoleIsAdmin,
+  userRoleIsManager,
+  updateEmployeeLogin
+} from '@/utils/utils';
 import { storeIsPopulated } from '@/utils/utils';
 import { updateStoreEmployees, updateStoreTags } from '@/utils/storeUtils';
 import { getTodaysDate } from '@/shared/dateUtils';
@@ -1042,7 +1049,9 @@ export default {
     unCheckAllBoxes,
     updateEmployeeLogin,
     updateStoreEmployees,
-    updateStoreTags
+    updateStoreTags,
+    userRoleIsAdmin,
+    userRoleIsManager
   },
   watch: {
     employee: watchEmployee,
