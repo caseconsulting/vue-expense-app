@@ -129,7 +129,7 @@ function created() {
     window.EventBus.$emit('list-of-employees-to-contact', this.filteredEmployees);
   });
 
-  this.employeesInfo = this.getActive(this.$store.getters.employees); // default to filtered 
+  this.employeesInfo = this.getActive(this.$store.getters.employees); // default to filtered
   this.tags = this.$store.getters.tags;
   this.filteredEmployees = this.employeesInfo; // this one is shown
   this.populateDropdowns(this.employeesInfo);

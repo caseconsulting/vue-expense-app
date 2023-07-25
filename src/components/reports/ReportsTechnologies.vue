@@ -130,7 +130,7 @@ function created() {
     window.EventBus.$emit('list-of-employees-to-contact', this.filteredEmployees);
   });
 
-  this.employeesInfo = this.getActive(this.$store.getters.employees); // default to filtered 
+  this.employeesInfo = this.getActive(this.$store.getters.employees); // default to filtered
   this.tags = this.$store.getters.tags;
   this.filteredEmployees = this.employeesInfo; // this one is shown
   this.populateDropdowns(this.employeesInfo);
@@ -234,7 +234,7 @@ function populateDropdowns(employees) {
  * Refresh the list based on the current queries
  */
 function refreshDropdownItems() {
-  this.filteredEmployees = this.employeesInfo
+  this.filteredEmployees = this.employeesInfo;
   if (this.search) {
     this.filteredEmployees = _.filter(this.filteredEmployees, (employee) => {
       return employee.employeeNumber == this.search;

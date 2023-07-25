@@ -603,6 +603,9 @@ async function created() {
 
   // only refresh employees if data is in store. Otherwise, set loading and wait in watcher
   this.storeIsPopulated ? await this.refreshEmployees() : (this.loading = true);
+  if (!this.$store.getters.tags) {
+    await this.updateStoreTags();
+  }
 
   // remove admin-only actions if user is not admin (by default everything is included)
   const adminSpecific = ['lastLoginSeconds']; // requires admin role, NOT manager
