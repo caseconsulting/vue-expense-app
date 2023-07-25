@@ -256,8 +256,8 @@ async function created() {
   }
   if (promises.length > 0) {
     await Promise.all(promises);
-    this.tags = this.$store.getters.tags; // get the tags
   }
+  this.tags = this.$store.getters.tags; // get the tags
   this.loading = false;
 } // created¬
 
