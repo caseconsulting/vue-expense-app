@@ -391,7 +391,7 @@ export default {
       sortDesc: false,
       tags: [],
       tagFlip: [],
-      tagSearchString: '',
+      tagSearchString: ''
     };
   },
   methods: {

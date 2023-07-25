@@ -685,8 +685,6 @@ export default {
     displaySuccess,
     isApproved,
     isMobile,
-    userRoleIsAdmin,
-    userRoleIsManager,
     isEmpty,
     getEmployeeByID,
     monthDayYearFormat,
