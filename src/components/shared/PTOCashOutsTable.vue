@@ -254,9 +254,9 @@ async function created() {
   if (!this.$store.getters.tags) {
     promises.push(this.updateStoreTags());
   }
-  this.tags = this.$store.getters.tags; // get the tags
   if (promises.length > 0) {
     await Promise.all(promises);
+    this.tags = this.$store.getters.tags; // get the tags
   }
   this.loading = false;
 } // created¬
