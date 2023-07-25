@@ -252,14 +252,14 @@ async function created() {
     promises.push(this.updateStorePtoCashOuts());
   }
   if (!this.$store.getters.tags) {
-    await this.updateStoreTags();
+    promises.push(this.updateStoreTags());
   }
   this.tags = this.$store.getters.tags; // get the tags
   if (promises.length > 0) {
     await Promise.all(promises);
   }
   this.loading = false;
-} // created
+} // created¬
 
 /**
  * beforeDestroy lifecycle hook. Destroys all event listeners.
@@ -696,7 +696,9 @@ export default {
     updateStoreEmployees,
     updateStorePtoCashOuts,
     updateStoreTags,
-    uncheckAllBoxes
+    uncheckAllBoxes,
+    userRoleIsAdmin,
+    userRoleIsManager
   },
   mounted,
   computed: {
