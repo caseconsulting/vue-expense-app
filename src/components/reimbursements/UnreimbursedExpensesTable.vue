@@ -885,15 +885,13 @@ async function created() {
   [unreimbursedExpenses, this.expenseTypes] = await Promise.all([
     api.getUnreimbursedExpenses(),
     api.getItems(api.EXPENSE_TYPES),
-    !this.$store.getters.employees ? this.updateStoreEmployees() : ''
+    !this.$store.getters.employees ? this.updateStoreEmployees() : '',
+    !this.$store.getters.tags ? this.updateStoreTags() : ''
   ]);
   this.loadExpensesData(unreimbursedExpenses);
   if (this.$store.getters.loginTime) {
     // updates and audits employee login for admins
     await this.updateEmployeeLogin(this.$store.getters.user);
-  }
-  if (!this.$store.getters.tags) {
-    await this.updateStoreTags();
   }
   this.tags = this.$store.getters.tags; // get the tags
 } // created
