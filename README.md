@@ -1,3 +1,12 @@
+### Table of Contents
+
+- [Setup](#setup)
+- [Environment Variables](#environment-variables)
+- [Application Tasks](#application-tasks)
+- [Deployment](#deployment)
+- [Nightwatch Tests](#nightwatch-tests)
+- [Documentation](#documentation)
+
 ## Setup
 
 The **Expense Application** is written in **Vue.js** and relies on **Node.js** v18.x+ and the **npm** package management system. UI is enhanced with **Vuetify.js** and **BootStrap-vue**.
@@ -133,7 +142,7 @@ To reset for local development, after a deployment:
 npm run download:local:env
 ```
 
-## Nightwatch tests
+## Nightwatch Tests
 
 **To run all nightwatch tests (Warning: this may take a while):**
 
