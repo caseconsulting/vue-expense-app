@@ -97,6 +97,7 @@
                 v-if="userRoleIsAdmin()"
                 :contracts="contracts"
                 :employee="this.model"
+                :tags="$store.getters.tags"
                 color="white"
               />
               <v-tooltip v-if="hasAdminPermissions() || userIsEmployee()" top>
