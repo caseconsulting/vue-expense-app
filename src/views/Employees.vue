@@ -471,8 +471,8 @@ async function refreshEmployees() {
   await Promise.all([
     !this.$store.getters.employees ? this.updateStoreEmployees() : '',
     !this.$store.getters.basecampAvatars ? this.updateStoreAvatars() : '',
-    !this.$store.getters.contracts ? this.updateStoreContracts() : '',
-    !this.$store.getters.tags ? this.updateStoreTags() : ''
+    !this.$store.getters.contracts && (userRoleIsAdmin() || userRoleIsManager()) ? this.updateStoreContracts() : '',
+    !this.$store.getters.tags && (userRoleIsAdmin() || userRoleIsManager()) ? this.updateStoreTags() : ''
   ]);
   this.employees = this.$store.getters.employees; // get all employees
   this.filterEmployees(); // filter employees

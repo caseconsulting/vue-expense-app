@@ -251,7 +251,7 @@ async function created() {
   if (!this.$store.getters.ptoCashOuts) {
     promises.push(this.updateStorePtoCashOuts());
   }
-  if (!this.$store.getters.tags) {
+  if (!this.$store.getters.tags && (userRoleIsAdmin() || userRoleIsManager())) {
     promises.push(this.updateStoreTags());
   }
   if (promises.length > 0) {

@@ -263,15 +263,15 @@ async function getProfileData() {
   this.basicEmployeeDataLoading = false;
   if (this.model) {
     [this.hasResume, this.expenses] = await Promise.all([
-      api.getResume(this.$route.params.id),
-      api.getAllAggregateExpenses(),
+      this.hasAdminPermissions() || this.userIsEmployee() ? api.getResume(this.$route.params.id) : '',
+      this.hasAdminPermissions() || this.userIsEmployee() ? api.getAllAggregateExpenses() : '', // only load if neededapi.getAllAggregateExpenses(),
       !this.$store.getters.expenseTypes ? this.updateStoreExpenseTypes() : '',
       this.checkForBudgetAccess()
     ]);
     this.hasResume = this.hasResume != null; // update this.hasResume to be boolean
     this.expenseTypes = this.$store.getters.expenseTypes;
     this.fiscalDateView = this.getCurrentBudgetYear(this.model.hireDate);
-    this.hasAccessToBudgets = this.accessibleBudgets.length !== 0; // enable budget chart
+    this.hasAccessToBudgets = this.accessibleBudgets && this.accessibleBudgets.length !== 0; // enable budget chart
   }
   this.loading = false;
 } // getProfileData
@@ -347,7 +347,7 @@ async function checkForBudgetAccess() {
       await this.updateStoreBudgets();
     }
     this.accessibleBudgets = this.$store.getters.budgets;
-  } else {
+  } else if (this.hasAdminPermissions()) {
     this.accessibleBudgets = await api.getAllActiveEmployeeBudgets(this.model.id);
   }
 } // checkForBudgetAccess

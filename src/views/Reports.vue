@@ -85,7 +85,7 @@ import ReportsJobRoles from '@/components/reports/ReportsJobRoles.vue';
 import ReportsTechnologies from '@/components/reports/ReportsTechnologies.vue';
 import ReportsSecurityInfo from '../components/reports/ReportsSecurityInfo.vue';
 import { updateStoreEmployees, updateStoreContracts, updateStoreTags } from '@/utils/storeUtils';
-import { isMobile } from '@/utils/utils';
+import { isMobile, userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -104,7 +104,7 @@ async function created() {
     await Promise.all([
       !this.$store.getters.employees ? this.updateStoreEmployees() : '',
       !this.$store.getters.contracts ? this.updateStoreContracts() : '',
-      !this.$store.getters.tags ? this.updateStoreTags() : ''
+      !this.$store.getters.tags && (userRoleIsAdmin() || userRoleIsManager()) ? this.updateStoreTags() : ''
     ]);
     this.loading = false;
   }
@@ -212,7 +212,7 @@ export default {
         await Promise.all([
           !this.$store.getters.employees ? this.updateStoreEmployees() : '',
           !this.$store.getters.contracts ? this.updateStoreContracts() : '',
-          !this.$store.getters.tags ? this.updateStoreTags() : ''
+          !this.$store.getters.tags && (userRoleIsAdmin() || userRoleIsManager()) ? this.updateStoreTags() : ''
         ]);
         this.loading = false;
       }
