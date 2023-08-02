@@ -3,7 +3,7 @@
     <!-- Loop Clearances -->
     <div v-for="(clearance, cIndex) in editedClearances" class="gray-border ma-0 pt-3 pb-1 px-5" :key="cIndex">
       <!-- Type of Clearance -->
-      <v-combobox
+      <v-autocomplete
         ref="formFields"
         v-model="clearance.type"
         :rules="[...getRequiredRules(), duplicateClearanceTypes(cIndex)]"
@@ -12,7 +12,7 @@
         data-vv-name="Type"
         clearable
       >
-      </v-combobox>
+      </v-autocomplete>
       <!-- Awaiting Clearance -->
       <v-checkbox
         v-model="clearance.awaitingClearance"
@@ -313,7 +313,6 @@ const ISOFORMAT = 'YYYY-MM-DD';
 async function created() {
   window.EventBus.$emit('created', 'clearance'); // emit clearance tab was created
   this.employees = this.$store.getters.employees; // get all employees
-  this.populateDropDowns(); // get autocomplete drop down data
 } // created
 
 // |--------------------------------------------------|
@@ -441,21 +440,6 @@ function parseEventDate() {
 } // parseEventDate
 
 /**
- * Populate drop downs with information that other employees have filled out.
- */
-function populateDropDowns() {
-  let employeesClearances = _.map(this.employees, (employee) => employee.clearances); // extract clearances
-  employeesClearances = _.compact(employeesClearances); //remove falsey values
-  // loop employees
-  _.forEach(employeesClearances, (clearances) => {
-    // loop certifications
-    _.forEach(clearances, (clearance) => {
-      this.clearanceTypeDropDown.push(clearance.type); // add clearance type
-    });
-  });
-} // populateDropDowns
-
-/**
  * Removes the desired date from the right clearance.
  *
  * @param item - the date to remove
@@ -558,7 +542,7 @@ export default {
   data() {
     return {
       clearanceElement: {},
-      clearanceTypeDropDown: [], // autocomplete clearance type options
+      clearanceTypeDropDown: ['TS/SCI - Full Scope', 'TS/SCI - CI Poly', 'TS/SCI - No Poly', 'Secret'], // autocomplete clearance type options
       dateBadgeRules: (index) => {
         let currClearance = this.editedClearances[index];
         return currClearance.grantedDate && currClearance.badgeExpirationDate && currClearance.submissionDate
@@ -606,7 +590,6 @@ export default {
     maxSubmission,
     minExpiration,
     parseEventDate,
-    populateDropDowns,
     removeAdjDate,
     removeBiDate,
     removePolyDate,
