@@ -176,7 +176,7 @@
           <v-text-field
             ref="formFields"
             v-model="deptDateFormatted"
-            :rules="[...getDateRules(), ...validateDates()]"
+            :rules="[...getDateRules(), validateDates()]"
             label="Departure Date"
             hint="MM/DD/YYYY format"
             v-mask="'##/##/####'"
