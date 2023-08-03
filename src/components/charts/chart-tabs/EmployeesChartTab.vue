@@ -4,6 +4,9 @@
       <v-col md="6" sm="12" class="mt-4">
         <employees-table></employees-table>
       </v-col>
+      <v-col md="6" sm="12" class="mt-4">
+        <employee-clearances-table></employee-clearances-table>
+      </v-col>
     </v-row>
     <v-row>
       <v-col md="6" sm="12" class="mt-2">
@@ -36,6 +39,7 @@ import JobRoleChart from '../custom-charts/JobRoleChart.vue';
 import PrimesChart from '../custom-charts/PrimesChart.vue';
 import LanguagesChart from '../custom-charts/LanguagesChart.vue';
 import EmployeesTable from '../custom-charts/EmployeesTable.vue';
+import EmployeeClearancesTable from '../custom-charts/EmployeeClearancesTable.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -50,7 +54,8 @@ export default {
     JobRoleChart,
     PrimesChart,
     LanguagesChart,
-    EmployeesTable
+    EmployeesTable,
+    EmployeeClearancesTable
   }
 };
 </script>
