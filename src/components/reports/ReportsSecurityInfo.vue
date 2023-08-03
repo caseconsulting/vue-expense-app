@@ -29,6 +29,17 @@
             @click:clear="badgeExpirationDateSearch = null"
           ></v-autocomplete>
         </v-col>
+        <v-col cols="12" xl="3" lg="3" md="3" sm="12" class="my-0 py-0">
+          <v-autocomplete
+            v-model="clearanceSearch"
+            :items="clearances"
+            label="Search By Clearance"
+            clearable
+            auto-select-first
+            @change="refreshDropdownItems()"
+            @click:clear="clearanceSearch = null"
+          ></v-autocomplete>
+        </v-col>
         <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
           <v-autocomplete
             class="d-inline-block"
@@ -281,6 +292,9 @@ function refreshDropdownItems() {
   if (this.badgeExpirationDateSearch) {
     this.searchBadgeExpirationDates(this.badgeExpirationDateSearch);
   }
+  if (this.clearanceSearch) {
+    this.searchClearances(this.clearanceSearch);
+  }
   if (this.selectedTags.length > 0) {
     this.filteredEmployees = _.filter(this.filteredEmployees, (employee) => {
       return this.selectedTagsHasEmployee(employee);
@@ -354,6 +368,22 @@ function searchBadgeExpirationDates(requestedDate, forDropdown) {
     return foundEmployees.length > 0; // used to filter the dropdowns in populateDataTypeDropDowns
   }
 } // searchBadgeExpirationDates
+
+/**
+ * Filter by clearances, modifies the filteredEmployees variable
+ *
+ * @param search - the clearance to search for
+ */
+function searchClearances(search) {
+  this.filteredEmployees = _.filter(this.filteredEmployees, (e) => {
+    if (e.clearances) {
+      for (let i = 0; i < e.clearances.length; i++) {
+        if (e.clearances[i].type == search) return true;
+      }
+    }
+    return false;
+  });
+}
 
 /**
  * helper function: return true if any selected tag has employee listed under it.
@@ -455,6 +485,8 @@ export default {
       ], // datatable headers
       badgeExpirationDateSearch: null,
       badgeExpirations: [],
+      clearanceSearch: null,
+      clearances: ['TS/SCI - Full Scope', 'TS/SCI - CI Poly', 'TS/SCI - No Poly', 'Secret'],
       search: null, // query text for datatable search field
       selectedTags: [],
       showInactiveEmployees: false,
@@ -480,6 +512,7 @@ export default {
     refreshDropdownItems,
     removeTag,
     searchBadgeExpirationDates,
+    searchClearances,
     selectedTagsHasEmployee,
     userRoleIsAdmin,
     userRoleIsManager
