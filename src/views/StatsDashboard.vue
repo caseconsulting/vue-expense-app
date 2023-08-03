@@ -57,7 +57,14 @@
         </v-tabs>
         <!-- loading -->
         <div v-if="!dataLoaded">
-          <v-skeleton-loader type="list-item@5" class="mx-auto" width="40%"></v-skeleton-loader>
+          <v-row class="flex justify-center">
+            <v-col md="6" sm="12" class="mt-4">
+              <v-skeleton-loader type="list-item@5" class="mx-auto" width="70%"></v-skeleton-loader>
+            </v-col>
+            <v-col md="6" sm="12" class="mt-4">
+              <v-skeleton-loader type="list-item@5" class="mx-auto" width="70%"></v-skeleton-loader>
+            </v-col>
+          </v-row>
           <div v-for="i in 2" :key="i" class="mx-auto my-6" style="width: 80%">
             <v-skeleton-loader
               v-for="i in 2"

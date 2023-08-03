@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <v-row class="flex justify-center">
+    <v-row>
       <v-col md="6" sm="12" class="mt-4">
         <employees-table></employees-table>
       </v-col>
