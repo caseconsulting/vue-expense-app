@@ -176,7 +176,7 @@
           <v-text-field
             ref="formFields"
             v-model="deptDateFormatted"
-            :rules="[...getDateRules(), ...validateDates()]"
+            :rules="[...getDateRules(), validateDates()]"
             label="Departure Date"
             hint="MM/DD/YYYY format"
             v-mask="'##/##/####'"
@@ -424,6 +424,7 @@ async function created() {
     // clear depature date if fails to format
     this.editedEmployee.deptDate = null;
   }
+  this.populateJobRoleDropdown();
   // find an employees tags
   this.employeeTags = _.filter(this.$store.getters.tags, (tag) => _.includes(tag.employees, this.model.id));
   // using this field to determine if an api call to update tags is needed
@@ -525,6 +526,15 @@ function isInactive() {
 function isPartTime() {
   return this.statusRadio == 'part';
 } // isPartTime
+
+/**
+ * Populates the job roles dropdown with employee data.
+ */
+function populateJobRoleDropdown() {
+  let employeeJobTitles = _.map(this.employees, (e) => e.jobRole);
+  employeeJobTitles = _.compact(employeeJobTitles);
+  _.forEach(employeeJobTitles, (jobTitle) => this.jobTitles.push(jobTitle));
+} // populateJobRoleDropdown
 
 /**
  * Checks if the profile accessed is the signed-in user's profile,
@@ -765,13 +775,17 @@ export default {
         'Software Developer',
         'Project Manager',
         'System Engineer',
+        'Systems Administrator',
         'Cloud Architect',
         'Cloud Engineer',
+        'Cloud Cost Engineer',
         'Data Scientist',
+        'Storage Engineer',
+        'Network Engineer',
+        'Windows Engineer',
         'QA/Tester',
-        'Intern',
-        'Accountant',
-        'Other'
+        'QA Automated Test Engineer',
+        'Accountant'
       ], // job title options
       loading: true,
       mifiStatus: true,
@@ -843,10 +857,10 @@ export default {
       eeoJobCategoryItems: [
         { text: 'Professional', value: 0 },
         {
-          text: 'Executive/Senior Level Offcial and Manager',
+          text: 'Executive/Senior Level Official and Manager',
           value: 1
         },
-        { text: 'First/Mid-Level Offcial and Manager', value: 2 },
+        { text: 'First/Mid Level Official and Manager', value: 2 },
         {
           text: 'Technician',
           value: 3
@@ -884,6 +898,7 @@ export default {
     isInactive,
     isMobile,
     isPartTime,
+    populateJobRoleDropdown,
     thisIsMyProfile,
     userRoleIsAdmin,
     userRoleIsManager,

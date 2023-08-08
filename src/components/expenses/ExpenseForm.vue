@@ -388,7 +388,11 @@ function receiptRequired() {
 
   // if the whole expense requires receipt
   if (this.selectedExpenseType && this.selectedExpenseType.requiredFlag) {
-    return this.selectedExpenseType.requiredFlag;
+    // return true unless expense is training and the category is exchange
+    return !(
+      this.selectedExpenseType.budgetName === 'Training' &&
+      this.editedExpense.category === 'Exchange for training hours'
+    );
   }
   // otherwise, does one of it's categories require a receipt
   if (this.editedExpense.category) {

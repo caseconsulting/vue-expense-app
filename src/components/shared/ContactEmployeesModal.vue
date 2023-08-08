@@ -13,6 +13,10 @@
       <v-card-title class="headline header_style">Contact Employees</v-card-title>
       <!-- Modal Content -->
       <v-card-text class="mt-4">
+        <v-alert v-if="getList().length >= listLimit" dense type="info">
+          Email list is too large for the default email client, please use the 'copy to clipboard' button and manually
+          paste into the email client
+        </v-alert>
         <v-autocomplete
           v-model="employees"
           :items="filteredEmployees"
@@ -99,13 +103,7 @@ function customFilter(item, queryText) {
  * Copyies the list of employee emails to the user's clipboard.
  */
 async function copyEmailList() {
-  let list = '';
-  _.forEach(this.employees, (e) => {
-    if (e.employeeNumber < 90000) {
-      // do not include fake employee emails
-      list += e.email ? `${e.email},` : '';
-    }
-  });
+  let list = this.getList();
   await navigator.clipboard.writeText(list);
   this.copied = true;
 } // copyEmailList
@@ -114,13 +112,7 @@ async function copyEmailList() {
  * Generate the list of emails and separate by comma for the mail service.
  */
 function emailEmployees() {
-  let list = 'mailto:';
-  _.forEach(this.employees, (e) => {
-    if (e.employeeNumber < 90000) {
-      // do not include fake employee emails
-      list += e.email ? `${e.email},` : '';
-    }
-  });
+  let list = this.getList();
   window.open(list, '_blank');
 } // emailEmployees
 
@@ -139,6 +131,20 @@ function emit(msg, data) {
     window.EventBus.$emit(msg);
   }
 } // emit
+
+/**
+ * Gets the formatted list of employee emails for the email client.
+ */
+function getList() {
+  let list = 'mailto:';
+  _.forEach(this.employees, (e) => {
+    if (e.employeeNumber < 90000) {
+      // do not include fake employee emails
+      list += e.email ? `${e.email},` : '';
+    }
+  });
+  return list;
+} // getList
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -176,14 +182,16 @@ export default {
       activate: false, // dialog activator
       copied: false,
       employees: [],
-      employeeSearch: ''
+      employeeSearch: '',
+      listLimit: 2000
     };
   },
   methods: {
     copyEmailList,
     customFilter,
     emailEmployees,
-    emit
+    emit,
+    getList
   },
   mounted,
   props: ['passedEmployees']
