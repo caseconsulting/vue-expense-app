@@ -67,7 +67,7 @@
 
 <script>
 import { isEmpty } from '@/utils/utils';
-import { updateStorePtoCashOuts, updateStoreEmployees } from '@/utils/storeUtils';
+import { updateStorePtoCashOuts, updateStoreEmployees, updateStoreTags } from '@/utils/storeUtils';
 import _ from 'lodash';
 import api from '@/shared/api';
 import PTOCashOutForm from '@/components/shared/PTOCashOutForm.vue';
@@ -84,10 +84,7 @@ import PTOCashOutForm from '@/components/shared/PTOCashOutForm.vue';
 async function created() {
   this.isEmployeeView = this.$route.name === 'employee';
   this.loadingBar = true;
-  if (!this.$store.getters.employees) {
-    await this.updateStoreEmployees();
-  }
-  await this.setPTOBalances();
+  await Promise.all([!this.$store.getters.employees ? this.updateStoreEmployees() : '', this.setPTOBalances()]);
 } // created
 
 /**
@@ -156,6 +153,19 @@ function availableBalances() {
   }
   return avaibleBalances;
 } // availableBalances
+
+/**
+ * Determines if an employee is a legacy FireTeam employee.
+ *
+ * @returns Boolean - whether the employee was FireTeam or not
+ */
+function isLegacyFireTeam() {
+  if (!this.passedEmployee) {
+    return parseInt(this.employee.employeeNumber, 10) < 100;
+  } else {
+    return parseInt(this.passedEmployee.employeeNumber, 10) < 100;
+  }
+} // isLegacyFireTeam
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -235,7 +245,10 @@ async function setPTOBalances() {
  * Opens new tab when info icon is selected w/in Quickbooks time box
  */
 function toFAQ() {
-  window.open('https://3.basecamp.com/3097063/buckets/179119/messages/939259168', '_blank');
+  let link = this.isLegacyFireTeam
+    ? 'https://3.basecamp.com/3097063/buckets/179119/messages/6450437179'
+    : 'https://3.basecamp.com/3097063/buckets/179119/messages/939259168';
+  window.open(link, '_blank');
 } // toFAQ
 
 // |--------------------------------------------------|
@@ -267,7 +280,8 @@ export default {
   components: { PTOCashOutForm },
   computed: {
     isInactive,
-    availableBalances
+    availableBalances,
+    isLegacyFireTeam
   },
   beforeDestroy,
   created,
@@ -291,7 +305,8 @@ export default {
     isEmpty,
     setPTOBalances,
     toFAQ,
-    updateStoreEmployees
+    updateStoreEmployees,
+    updateStoreTags
   },
   mounted,
   props: ['passedEmployee', 'showMinutes'],
