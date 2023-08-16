@@ -23,6 +23,7 @@ function mounted() {
   this.$nextTick(async function () {
     try {
       // set tokens
+      console.log(window.location);
       this.setAccessToken();
       this.setIdToken();
       this.setProfile();
@@ -34,13 +35,7 @@ function mounted() {
       localStorage.setItem('user', JSON.stringify(user));
       localStorage.setItem('lastLogin', getTodaysDate(login_format));
 
-      if (employeeRole === 'admin') {
-        // user's role is admin
-        window.location.href = '/reimbursements';
-      } else {
-        // user's role is not admin
-        window.location.href = '/';
-      }
+      window.location.href = localStorage.getItem('redirectUrl');
     } catch (error) {
       window.location.href = '/loginFailed';
     }

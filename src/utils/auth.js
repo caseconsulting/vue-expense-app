@@ -231,6 +231,16 @@ export function setAccessToken() {
 } // setAccessToken
 
 /**
+ * Refresh the user session and replace access_token and id token with new values
+ */
+export function refreshUserSession() {
+  auth.checkSession({}, function (err, authResult) {
+    setCookie(ACCESS_TOKEN_KEY, authResult.accessToken);
+    setCookie(ID_TOKEN_KEY, authResult.idToken);
+  });
+} // refreshUserSession
+
+/**
  * sets the cookie
  *
  * @param {*} cname - name of the cookie

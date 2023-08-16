@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" @mousedown="refreshSession()">
     <v-app>
       <v-navigation-drawer
         light
@@ -145,7 +145,14 @@
 </template>
 
 <script>
-import { isLoggedIn, logout, getProfile, getTokenExpirationDate, getAccessToken } from '@/utils/auth';
+import {
+  isLoggedIn,
+  logout,
+  getProfile,
+  getTokenExpirationDate,
+  getAccessToken,
+  refreshUserSession
+} from '@/utils/auth';
 import { isMobile, isSmallScreen, storeIsPopulated } from '@/utils/utils';
 import {
   updateStoreUser,
@@ -223,7 +230,7 @@ function getMainPadding() {
   } else {
     return '56px 0px 0px 0px';
   }
-}
+} // getMainPadding
 
 /*
  * Logout of expense app
@@ -275,6 +282,53 @@ function goToHome() {
   }
 } // goToHome
 
+/**
+ * Refreshes a user session if they are still actively using the application
+ * and the refresh token is expiring soon.
+ */
+function refreshSession() {
+  let accessToken = getAccessToken();
+  if (accessToken && isLoggedIn()) {
+    let expTime = Math.trunc(getTokenExpirationDate(accessToken).getTime());
+    let now = Math.trunc(new Date().getTime());
+    let sessionRemainder = expTime - now;
+    let halfHour = 60 * 60 * 1000; // 60 min in unix time difference
+    console.log(
+      `${Math.floor(sessionRemainder / 60 / 1000)} minutes and ${Math.floor((sessionRemainder / 1000) % 60)} seconds`
+    );
+    if (sessionRemainder - halfHour <= 0) {
+      // session ending in < 60 min while user is still active, refresh access token
+      this.refreshUserSession();
+      clearTimeout(this.sessionTimeout);
+      clearTimeout(this.sessionTimeoutWarning);
+      this.session = false;
+      this.setSessionTimeouts();
+    }
+  }
+} // refreshSession
+
+/**
+ * Sets the session timeout and the session timeout warning
+ */
+function setSessionTimeouts() {
+  let accessToken = getAccessToken();
+  let expTime = Math.trunc(getTokenExpirationDate(accessToken).getTime());
+  let now = Math.trunc(new Date().getTime());
+  let sessionRemainder = expTime - now;
+  // set session timeout
+  this.sessionTimeout = window.setTimeout(() => {
+    this.timedOut = true;
+    this.session = false;
+  }, sessionRemainder);
+
+  // set session warning timeout, time minus 300000 = - 5 min
+  if (sessionRemainder > 300000) {
+    this.sessionTimeoutWarning = window.setTimeout(() => {
+      this.session = true;
+    }, sessionRemainder - 300000);
+  }
+} // setSessionTimeouts
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -289,28 +343,14 @@ async function created() {
 
   this.environment = process.env.VUE_APP_AUTH0_CALLBACK;
 
-  window.EventBus.$on('relog', handleLogout); // Session end - log out
+  window.EventBus.$on('relog', () => handleLogout()); // Session end - log out
   window.EventBus.$on('badgeExp', () => {
     this.badgeKey++;
   }); // used to refresh badge expiration banner
   // set expiration date if access token received
   let accessToken = getAccessToken();
   if (accessToken && isLoggedIn()) {
-    this.date = Math.trunc(getTokenExpirationDate(accessToken).getTime());
-    this.now = Math.trunc(new Date().getTime());
-    let timeRemaining = this.date - this.now; // default access key (2 hours)
-
-    window.setTimeout(() => {
-      this.timedOut = true;
-      this.session = false;
-    }, timeRemaining);
-
-    // Time minus 300000 = - 5 min
-    if (timeRemaining > 300000) {
-      window.setTimeout(() => {
-        this.session = true;
-      }, timeRemaining - 300000);
-    }
+    this.setSessionTimeouts();
 
     await this.populateStore();
 
@@ -377,6 +417,8 @@ export default {
     profilePic: 'src/assets/img/logo-big.png',
     timedOut: false,
     session: false,
+    sessionTimeout: null,
+    sessionTimeoutWarning: null,
     now: Math.trunc(new Date().getTime() / 1000),
     userId: null,
     badgeKey: 0,
@@ -428,6 +470,9 @@ export default {
     isLoggedIn,
     populateStore,
     goToHome,
+    refreshUserSession,
+    refreshSession,
+    setSessionTimeouts,
     updateStoreUser,
     updateStoreEmployees,
     updateStoreAvatars,
