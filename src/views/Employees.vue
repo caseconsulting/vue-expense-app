@@ -553,8 +553,7 @@ function selectedTagsHasEmployee(e) {
  */
 function syncApplications() {
   this.syncing = true;
-  api.syncApplications().then((response) => {
-    console.log(response);
+  api.syncApplications().then(() => {
     this.syncing = false;
   });
 } // syncApplications

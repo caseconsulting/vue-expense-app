@@ -171,14 +171,7 @@ import UnreimbursedExpensesExpandedTable from '@/components/reimbursements/Unrei
 
 import api from '@/shared/api.js';
 import _ from 'lodash';
-import {
-  asyncForEach,
-  isEmpty,
-  convertToMoneyString,
-  userRoleIsAdmin,
-  userRoleIsManager,
-  updateEmployeeLogin
-} from '@/utils/utils';
+import { asyncForEach, isEmpty, convertToMoneyString, userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
 import { storeIsPopulated } from '@/utils/utils';
 import { updateStoreEmployees, updateStoreTags } from '@/utils/storeUtils';
 import { getTodaysDate } from '@/shared/dateUtils';
@@ -890,10 +883,6 @@ async function created() {
   ]);
   this.tags = this.$store.getters.tags; // get the tags
   this.loadExpensesData(unreimbursedExpenses);
-  if (this.$store.getters.loginTime) {
-    // updates and audits employee login for admins
-    await this.updateEmployeeLogin(this.$store.getters.user);
-  }
 } // created
 
 /**
@@ -1045,7 +1034,6 @@ export default {
     toggleShowOnFeedGroup,
     toggleShowOnFeed,
     unCheckAllBoxes,
-    updateEmployeeLogin,
     updateStoreEmployees,
     updateStoreTags,
     userRoleIsAdmin,

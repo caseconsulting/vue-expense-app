@@ -153,14 +153,8 @@ import {
   getAccessToken,
   refreshUserSession
 } from '@/utils/auth';
-import { isMobile, isSmallScreen, storeIsPopulated } from '@/utils/utils';
-import {
-  updateStoreUser,
-  updateStoreEmployees,
-  updateStoreAvatars,
-  updateStoreBudgets,
-  updateStoreExpenseTypes
-} from '@/utils/storeUtils';
+import { isMobile, isSmallScreen, storeIsPopulated, updateEmployeeLogin } from '@/utils/utils';
+import { updateStoreUser } from '@/utils/storeUtils';
 import floorPlan from '@/assets/img/MakeOfficesfloorplan.jpg';
 import MainNav from '@/components/utils/MainNav.vue';
 import NotificationBanners from '@/components/utils/NotificationBanners.vue';
@@ -261,7 +255,7 @@ async function populateStore() {
     this.$store.dispatch('setLoginTime', { loginTime: lastLogin });
     //await updateEmployee(employee);
   } else {
-    await this.updateStoreUser(); // calling first since updateStoreExpenseTypes relies on user data
+    await this.updateStoreUser();
     employee = this.$store.getters.user;
   }
   localStorage.removeItem('user');
@@ -356,6 +350,8 @@ async function created() {
 
     //stores the employee number
     this.userId = this.$store.getters.employeeNumber;
+
+    this.$store.getters.loginTime ? this.updateEmployeeLogin(this.$store.getters.user) : '';
   }
 
   let pic = getProfile();
@@ -474,10 +470,7 @@ export default {
     refreshSession,
     setSessionTimeouts,
     updateStoreUser,
-    updateStoreEmployees,
-    updateStoreAvatars,
-    updateStoreBudgets,
-    updateStoreExpenseTypes
+    updateEmployeeLogin
   },
   watch: {
     $route
