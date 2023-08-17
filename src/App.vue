@@ -287,9 +287,6 @@ function refreshSession() {
     let now = Math.trunc(new Date().getTime());
     let sessionRemainder = expTime - now;
     let halfHour = 60 * 60 * 1000; // 60 min in unix time difference
-    console.log(
-      `${Math.floor(sessionRemainder / 60 / 1000)} minutes and ${Math.floor((sessionRemainder / 1000) % 60)} seconds`
-    );
     if (sessionRemainder - halfHour <= 0) {
       // session ending in < 60 min while user is still active, refresh access token
       this.refreshUserSession();

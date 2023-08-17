@@ -23,7 +23,6 @@ function mounted() {
   this.$nextTick(async function () {
     try {
       // set tokens
-      console.log(window.location);
       this.setAccessToken();
       this.setIdToken();
       this.setProfile();
