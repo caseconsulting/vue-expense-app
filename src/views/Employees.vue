@@ -553,7 +553,25 @@ function selectedTagsHasEmployee(e) {
  */
 function syncApplications() {
   this.syncing = true;
-  api.syncApplications().then(() => {
+  api.syncApplications().then((res) => {
+    let body = res.body;
+    if (body && body.failures === 0) {
+      this.$set(this.status, 'statusType', 'SUCCESS');
+      this.$set(
+        this.status,
+        'statusMessage',
+        `Successfully synced applications with ${body.usersCreated} user(s) created and ${body.usersUpdated} user(s) updated.`
+      );
+      this.$set(this.status, 'color', 'green');
+    } else {
+      this.$set(this.status, 'statusType', 'ERROR');
+      this.$set(
+        this.status,
+        'statusMessage',
+        `Application sync finished with ${body.failures} failure(s), ${body.usersCreated} user(s) created and ${body.usersUpdated} user(s) updated.`
+      );
+      this.$set(this.status, 'color', 'red');
+    }
     this.syncing = false;
   });
 } // syncApplications
