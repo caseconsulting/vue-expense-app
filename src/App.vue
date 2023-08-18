@@ -286,14 +286,10 @@ function refreshSession() {
     let expTime = Math.trunc(getTokenExpirationDate(accessToken).getTime());
     let now = Math.trunc(new Date().getTime());
     let sessionRemainder = expTime - now;
-    let halfHour = 60 * 60 * 1000; // 60 min in unix time difference
-    if (sessionRemainder - halfHour <= 0) {
+    let unixHour = 60 * 60 * 1000; // 60 min in unix time difference
+    if (sessionRemainder - unixHour <= 0) {
       // session ending in < 60 min while user is still active, refresh access token
       this.refreshUserSession();
-      clearTimeout(this.sessionTimeout);
-      clearTimeout(this.sessionTimeoutWarning);
-      this.session = false;
-      this.setSessionTimeouts();
     }
   }
 } // refreshSession
@@ -338,6 +334,12 @@ async function created() {
   window.EventBus.$on('badgeExp', () => {
     this.badgeKey++;
   }); // used to refresh badge expiration banner
+  window.EventBus.$on('user-session-refreshed', () => {
+    clearTimeout(this.sessionTimeout);
+    clearTimeout(this.sessionTimeoutWarning);
+    this.session = false;
+    this.setSessionTimeouts();
+  });
   // set expiration date if access token received
   let accessToken = getAccessToken();
   if (accessToken && isLoggedIn()) {
@@ -369,6 +371,7 @@ async function created() {
 function beforeDestroy() {
   window.EventBus.$off('relog');
   window.EventBus.$off('badgeExp');
+  window.EventBus.$off('user-session-refreshed');
 } //beforeDestroy
 
 // |--------------------------------------------------|
