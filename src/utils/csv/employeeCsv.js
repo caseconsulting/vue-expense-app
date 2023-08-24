@@ -46,7 +46,6 @@ export function convertEmployees(employees, contracts, tags) {
       'Job Role': employee.jobRole || '',
       AIN: employee.agencyIdentificationNumber || '',
       Email: employee.email || '',
-      'Mifi Status': employee.mifiStatus != undefined && employee.mifiStatus != null ? employee.mifiStatus : 'true',
       Twitter: employee.twitter || '',
       Github: employee.github || '',
       LinkedIn: employee.linkedIn || '',
