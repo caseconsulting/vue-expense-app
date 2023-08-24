@@ -388,7 +388,7 @@ export default {
       { name: 'Net Benefits/Fidelity', link: 'https://nb.fidelity.com/public/nb/default/home' },
       { name: 'Health Insurance', link: 'https://3.basecamp.com/3097063/buckets/179119/messages/4799723388' },
       { name: 'QuickBooks Time', link: 'https://tsheets.intuit.com/page/login_oii' },
-      { name: 'ADP', link: 'https://my.adp.com/' },
+      { name: 'ADP', link: 'https://workforcenow.adp.com/' },
       { name: 'Life Insurance', link: 'https://www.reliancestandard.com/home/' },
       {
         name: 'Jira',
