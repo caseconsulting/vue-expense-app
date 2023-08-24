@@ -45,11 +45,6 @@
     </p>
     <!-- Status -->
     <p v-if="admin || employee"><b>Status:</b> {{ getWorkStatus(this.model.workStatus) }}</p>
-    <!-- Mifi Status -->
-    <p v-if="this.model.employeeRole !== 'intern' && this.model.workStatus !== 0">
-      <b>Mifi Status:</b>
-      {{ !isEmpty(this.model.mifiStatus) ? (this.model.mifiStatus === true ? 'Yes' : 'No') : 'Yes' }}
-    </p>
     <!-- Last Login -->
     <p v-if="admin && !isEmpty(this.model.lastLogin)"><b>Last Logged In:</b> {{ this.model.lastLogin }}</p>
     <!-- EEO Compliance Reporting -->

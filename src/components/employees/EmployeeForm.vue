@@ -721,17 +721,6 @@ async function submit() {
         this.$emit('error', updatedEmployee.response.data.message);
         this.displayError(updatedEmployee.response.data.message);
       }
-      // If mifiStatus on page load is different than the submitted mifiStatus value, create audit log
-      if (this.mifiStatusOnLoad !== updatedEmployee.mifiStatus) {
-        await api.createItem(api.AUDIT, {
-          id: generateUUID(),
-          type: 'mifi',
-          tags: ['submit', `mifi set to ${this.model.mifiStatus}`],
-          employeeId: this.employee.id,
-          description: `${this.model.firstName} ${this.model.lastName} changed their mifi status to ${this.model.mifiStatus}.`,
-          timeToLive: 60
-        });
-      }
     } else {
       // creating employee
       this.model.id = generateUUID();
@@ -886,7 +875,6 @@ function setFormData(tab, data) {
     this.$set(this.model, 'hireDate', data.hireDate);
     this.$set(this.model, 'workStatus', data.workStatus);
     this.$set(this.model, 'deptDate', data.deptDate);
-    this.$set(this.model, 'mifiStatus', data.mifiStatus);
     this.$set(this.model, 'eeoDeclineSelfIdentify', data.eeoDeclineSelfIdentify);
     this.$set(this.model, 'eeoGender', data.eeoGender);
     this.$set(this.model, 'eeoHispanicOrLatino', data.eeoHispanicOrLatino);
@@ -1097,7 +1085,6 @@ async function created() {
   );
   if (this.employee) {
     this.fullName = `${this.employee.firstName} ${this.employee.lastName}`;
-    this.mifiStatusOnLoad = this.employee.mifiStatus;
   }
   this.formTab = this.currentTab;
   this.afterCreate = true;
@@ -1228,7 +1215,6 @@ export default {
       formTab: null, // currently active tab
       fullName: '', // employee's first and last name
       hasResume: false,
-      mifiStatusOnLoad: null, // used as a way to see if mifi status was changed (to updated audit log)
       model: {
         agencyIdentificationNumber: null,
         awards: [],
@@ -1261,7 +1247,6 @@ export default {
         languages: [],
         lastName: null,
         middleName: null,
-        mifiStatus: true,
         nickname: null,
         noMiddleName: false,
         privatePhoneNumbers: [],

@@ -247,11 +247,6 @@
         <!-- End Full/Part/Inactive Status [DESKTOP] -->
       </v-radio-group>
       <!-- End [DESKTOP] -->
-      <v-switch
-        v-model="mifiStatus"
-        label="Use Mifi instead of increased technology budget ($150)"
-        v-if="userRoleIsAdmin() && !isInactive()"
-      ></v-switch>
 
       <!-- START EEO Compliance Reporting Section -->
       <v-divider class="my-2"></v-divider>
@@ -447,11 +442,6 @@ async function created() {
     } else {
       this.statusRadio = 'part';
     }
-  }
-
-  //set the mifiStatus switch initial value
-  if (this.editedEmployee.mifiStatus != null) {
-    this.mifiStatus = this.editedEmployee.mifiStatus;
   }
 
   // set email username for textfield population
@@ -695,13 +685,6 @@ function watchStatus() {
 } // watchStatus
 
 /**
- * watcher for mifiStatus sets the editedEmployee when mifiStatus changes.
- */
-function watchMifiStatus() {
-  this.editedEmployee.mifiStatus = this.mifiStatus;
-} // watchMifiStatus
-
-/**
  * watcher for validating - validates fields.
  *
  * @param val - val prop that needs to exist before validating
@@ -788,7 +771,6 @@ export default {
         'Accountant'
       ], // job title options
       loading: true,
-      mifiStatus: true,
       duplicateEmployeeNumberRule: [
         (v) => {
           this.duplicate = false;
@@ -916,7 +898,6 @@ export default {
     'editedEmployee.employeeNumber': watchEditedEmployeeEmployeeNumber,
     statusRadio: watchStatusRadio,
     status: watchStatus,
-    mifiStatus: watchMifiStatus,
     validating: watchValidating,
     'editedEmployee.eeoDeclineSelfIdentify': watchEeoDeclineSelfIdentify,
     'editedEmployee.eeoHispanicOrLatino': watchEeoHispanicOrLatino
