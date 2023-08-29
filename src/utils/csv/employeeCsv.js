@@ -39,7 +39,7 @@ export function convertEmployees(employees, contracts, tags) {
       'First Name': employee.firstName || '',
       'Middle Name': employee.middleName || '',
       'Last Name': employee.lastName || '',
-      'Birthday (yy-mm-dd)': employee.birthday || '',
+      'Birthday (yyyy-mm-dd)': employee.birthday || '',
       'Place of Birth': placeOfBirth || '',
       'State of Residence': employee.currentState || '',
       'Hire Date': employee.hireDate || '',
