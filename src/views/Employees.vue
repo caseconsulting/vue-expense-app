@@ -788,10 +788,12 @@ export default {
           text: 'Email',
           value: 'email'
         },
-        {
-          text: 'Last Login',
-          value: 'lastLoginSeconds'
-        },
+        userRoleIsAdmin() || userRoleIsManager()
+          ? {
+              text: 'Last Login',
+              value: 'lastLoginSeconds'
+            }
+          : _,
         {
           value: 'actions',
           sortable: false
