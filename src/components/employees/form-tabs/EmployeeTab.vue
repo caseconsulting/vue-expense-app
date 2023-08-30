@@ -8,7 +8,7 @@
       <v-text-field
         id="employeeFirstName"
         ref="formFields"
-        v-model="editedEmployee.firstName"
+        v-model.trim="editedEmployee.firstName"
         :rules="getRequiredRules()"
         label="First Name"
         data-vv-name="First Name"
@@ -17,7 +17,7 @@
       <v-text-field
         id="employeeMiddleName"
         ref="formFields"
-        v-model="editedEmployee.middleName"
+        v-model.trim="editedEmployee.middleName"
         :rules="middleNameRules()"
         label="Middle Name"
         data-vv-name="Middle Name"
@@ -34,7 +34,7 @@
       <v-text-field
         id="employeeLastName"
         ref="formFields"
-        v-model="editedEmployee.lastName"
+        v-model.trim="editedEmployee.lastName"
         :rules="getRequiredRules()"
         label="Last Name"
         data-vv-name="Last Name"
@@ -43,7 +43,7 @@
       <v-text-field
         id="employeeNickname"
         ref="formFields"
-        v-model="editedEmployee.nickname"
+        v-model.trim="editedEmployee.nickname"
         label="Nickname (optional)"
         data-vv-name="Nickname"
         :disabled="!userRoleIsAdmin() && !thisIsMyProfile() && !userRoleIsManager()"
@@ -65,7 +65,7 @@
       <v-text-field
         id="employeeEmail"
         ref="formFields"
-        v-model="emailUsername"
+        v-model.trim="emailUsername"
         suffix="@consultwithcase.com"
         :rules="emailRules"
         label="Email"
@@ -87,7 +87,7 @@
       <v-text-field
         id="agencyIdentificationNumber"
         ref="formFields"
-        v-model="editedEmployee.agencyIdentificationNumber"
+        v-model.trim="editedEmployee.agencyIdentificationNumber"
         label="Agency Identification Number"
         data-vv-name="Agency Identification Number"
       ></v-text-field>
