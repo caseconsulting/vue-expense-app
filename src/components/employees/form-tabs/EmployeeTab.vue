@@ -1,50 +1,53 @@
 <template>
   <div>
+    <small class="info--text">*indicates required field</small>
     <!-- We have to put the fields in a v-for
       in order the 'ref=formFields' to be placed into
       an array -->
-    <div v-for="i in [0]" :key="i">
+    <div v-for="i in [0]" :key="i" class="mt-3">
       <!-- First Name -->
       <v-text-field
         id="employeeFirstName"
         ref="formFields"
         v-model.trim="editedEmployee.firstName"
         :rules="getRequiredRules()"
-        label="First Name"
+        label="First Name*"
         data-vv-name="First Name"
       ></v-text-field>
       <!-- Middle Name -->
-      <v-text-field
-        id="employeeMiddleName"
-        ref="formFields"
-        v-model.trim="editedEmployee.middleName"
-        :rules="middleNameRules()"
-        label="Middle Name"
-        data-vv-name="Middle Name"
-        :disabled="editedEmployee.noMiddleName"
-      ></v-text-field>
-      <v-checkbox
-        class="mt-0"
-        id="employeeMiddleBox"
-        label="Do not have a middle name"
-        v-model="editedEmployee.noMiddleName"
-        @click="editedEmployee.middleName = null"
-      ></v-checkbox>
+      <div class="d-flex align-center">
+        <v-text-field
+          id="employeeMiddleName"
+          ref="formFields"
+          v-model="editedEmployee.middleName"
+          :rules="middleNameRules()"
+          label="Middle Name*"
+          data-vv-name="Middle Name"
+          :disabled="editedEmployee.noMiddleName"
+        ></v-text-field>
+        <v-checkbox
+          class="ml-3"
+          id="employeeMiddleBox"
+          label="No middle name"
+          v-model="editedEmployee.noMiddleName"
+          @click="editedEmployee.middleName = null"
+        ></v-checkbox>
+      </div>
       <!-- Last Name -->
       <v-text-field
         id="employeeLastName"
         ref="formFields"
         v-model.trim="editedEmployee.lastName"
         :rules="getRequiredRules()"
-        label="Last Name"
+        label="Last Name*"
         data-vv-name="Last Name"
       ></v-text-field>
       <!-- Nickname -->
       <v-text-field
         id="employeeNickname"
         ref="formFields"
-        v-model.trim="editedEmployee.nickname"
-        label="Nickname (optional)"
+        v-model="editedEmployee.nickname"
+        label="Nickname"
         data-vv-name="Nickname"
         :disabled="!userRoleIsAdmin() && !thisIsMyProfile() && !userRoleIsManager()"
       ></v-text-field>
@@ -55,8 +58,8 @@
         ref="formFields"
         v-model="editedEmployee.employeeNumber"
         :rules="[...getRequiredRules(), ...getNumberRules(), ...duplicateEmployeeNumberRule]"
-        label="Employee #"
-        data-vv-name="Employee #"
+        label="Employee Number*"
+        data-vv-name="Employee Number"
         :disabled="!admin || disableEmpNum"
         @input.native="duplicateEmployeeNum"
       ></v-text-field>
@@ -68,7 +71,7 @@
         v-model.trim="emailUsername"
         suffix="@consultwithcase.com"
         :rules="emailRules"
-        label="Email"
+        label="Email*"
         data-vv-name="Email"
         :disabled="!admin"
         @blur="combineEmailUsernameAndDomain"
@@ -80,7 +83,7 @@
         :items="jobTitles"
         v-model="editedEmployee.jobRole"
         item-text="text"
-        label="Job Role (optional)"
+        label="Job Role"
       ></v-combobox>
 
       <!-- AIN -->
@@ -117,7 +120,7 @@
         :items="permissions"
         :rules="getRequiredRules()"
         v-model="employeeRoleFormatted"
-        label="Employee Role"
+        label="Employee Role*"
         @blur="editedEmployee.employeeRole = formatKebabCase(employeeRoleFormatted)"
       ></v-autocomplete>
 
@@ -141,7 +144,7 @@
             :rules="getDateRules()"
             :disabled="hasExpenses || !admin"
             v-mask="'##/##/####'"
-            label="Hire Date"
+            label="Hire Date*"
             hint="MM/DD/YYYY format"
             persistent-hint
             prepend-icon="event"
@@ -773,12 +776,10 @@ export default {
       loading: true,
       duplicateEmployeeNumberRule: [
         (v) => {
-          this.duplicate = false;
-          _.forEach(this.employees, (employee) => {
-            if (employee.employeeNumber != this.userId && employee.employeeNumber == v) {
-              this.duplicate = true;
-            }
-          });
+          this.duplicate = _.some(
+            this.employees,
+            (e) => e.employeeNumber === Number(v) && e.employeeNumber !== this.userId
+          );
           return !this.duplicate || 'This employee id is already in use';
         }
       ],
@@ -921,5 +922,13 @@ export default {
 
 .inputError {
   border: solid 1px red !important;
+}
+
+.middle-name-width {
+  width: 75%;
+}
+
+.no-middle-name-width {
+  width: 25%;
 }
 </style>
