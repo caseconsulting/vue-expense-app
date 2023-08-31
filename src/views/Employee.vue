@@ -52,7 +52,7 @@
             color="#bc3825"
             @click="toggleDeleteModal = !toggleDeleteModal"
             :x-small="isMobile()"
-            :disabled="!hasResume"
+            :disabled="resumeData == null"
             :loading="deleteLoading"
             ><b>Delete Resume</b></v-btn
           >
@@ -104,7 +104,7 @@
                 <template #activator="{ on }">
                   <div v-on="on">
                     <v-icon
-                      :disabled="!hasResume"
+                      :disabled="resumeData == null"
                       class="pr-2"
                       @click="downloadResume()"
                       color="white"
@@ -115,7 +115,10 @@
                     >
                   </div>
                 </template>
-                <span>{{ hasResume ? 'Download Resume' : 'No resume available' }}</span>
+                <p class="ma-0 pa-0">{{ resumeData != null ? 'Download Resume' : 'No resume available' }}</p>
+                <p class="ma-0 pa-0">
+                  {{ resumeData != null ? `Uploaded ${format(resumeData.lastModified, null, dateFormat)}` : '' }}
+                </p>
               </v-tooltip>
               <v-tooltip v-if="hasAdminPermissions() || userIsEmployee()" top>
                 <template #activator="{ on }">
@@ -188,6 +191,7 @@ import {
   updateStoreUser,
   updateStoreTags
 } from '@/utils/storeUtils';
+import { format, FORMATTED_ISOFORMAT } from '@/shared/dateUtils';
 import _ from 'lodash';
 import ConvertEmployeeToCsv from '@/components/employees/csv/ConvertEmployeeToCsv.vue';
 import AnniversaryCard from '@/components/shared/AnniversaryCard.vue';
@@ -230,9 +234,8 @@ function clearStatus() {
  * Downloads the resume of the employee
  */
 async function downloadResume() {
-  let signedURL = await api.getResume(this.$route.params.id);
-  if (signedURL !== null) {
-    window.open(signedURL, '_blank');
+  if (this.resumeData.data) {
+    window.open(this.resumeData.data, '_blank');
   }
 } // downloadResume
 
@@ -262,13 +265,12 @@ async function getProfileData() {
   this.displayQuickBooksTimeAndBalances = this.userRoleIsAdmin() || this.userIsEmployee();
   this.basicEmployeeDataLoading = false;
   if (this.model) {
-    [this.hasResume, this.expenses] = await Promise.all([
+    [this.resumeData, this.expenses] = await Promise.all([
       this.hasAdminPermissions() || this.userIsEmployee() ? api.getResume(this.$route.params.id) : '',
       this.hasAdminPermissions() || this.userIsEmployee() ? api.getAllAggregateExpenses() : '', // only load if neededapi.getAllAggregateExpenses(),
       !this.$store.getters.expenseTypes ? this.updateStoreExpenseTypes() : '',
       this.checkForBudgetAccess()
     ]);
-    this.hasResume = this.hasResume != null; // update this.hasResume to be boolean
     this.expenseTypes = this.$store.getters.expenseTypes;
     this.fiscalDateView = this.getCurrentBudgetYear(this.model.hireDate);
     this.hasAccessToBudgets = this.accessibleBudgets && this.accessibleBudgets.length !== 0; // enable budget chart
@@ -330,7 +332,7 @@ async function deleteResume() {
   this.deleteLoading = true;
   let deleteResult = await api.deleteResume(this.$route.params.id);
   if (!(deleteResult instanceof Error)) {
-    this.hasResume = false;
+    this.resumeData = null;
     this.displayMessage('SUCCESS', 'Successfully deleted resume', 'green');
   } else {
     this.displayMessage('ERROR', 'Failure to delete resume', 'red');
@@ -372,12 +374,12 @@ async function created() {
 
   window.EventBus.$on('delete-resume', (newResume) => {
     if (newResume != null) {
-      this.hasResume = newResume;
+      this.resumeData = newResume;
     }
   });
   window.EventBus.$on('upload-resume-complete', (newResume) => {
     if (newResume != null) {
-      this.hasResume = newResume;
+      this.resumeData = newResume;
     }
   });
   this.basicEmployeeDataLoading = true;
@@ -398,9 +400,9 @@ function mounted() {
     }
   });
 
-  window.EventBus.$on('uploaded', (isUploaded, displayMessage) => {
-    this.hasResume = isUploaded;
+  window.EventBus.$on('uploaded', async (isUploaded, displayMessage) => {
     if (displayMessage) {
+      this.resumeData = await api.getResume(this.$route.params.id);
       this.displayMessage('SUCCESS', 'Successfully uploaded resume', 'green');
     }
   });
@@ -469,6 +471,7 @@ export default {
     return {
       currentTab: null,
       contracts: null,
+      dateFormat: FORMATTED_ISOFORMAT,
       deleteLoading: false,
       displayQuickBooksTimeAndBalances: false,
       editing: false,
@@ -479,7 +482,7 @@ export default {
         active: ['full', 'part'] // default only shows full and part time employees
       }, // datatable filter
       fiscalDateView: '',
-      hasResume: false,
+      resumeData: null,
       loading: false, // loading status
       model: {
         awards: [],
@@ -538,6 +541,7 @@ export default {
     deleteResume,
     displayMessage,
     downloadResume,
+    format,
     hasAdminPermissions,
     getProfileData,
     getCurrentBudgetYear,
