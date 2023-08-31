@@ -39,7 +39,7 @@
           single-line
           autofocus
         ></v-text-field>
-        <span v-else>{{ item.tagName }}</span>
+        <span v-else>{{ item.tagName }} ({{ item.employees.length }})</span>
       </template>
 
       <!-- Employees Slot -->
