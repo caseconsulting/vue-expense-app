@@ -81,7 +81,7 @@ body {
   height: 150px;
   margin: -75px 0 0 -75px;
   border-radius: 50%;
-  border: 5px solid transparent;
+  border: 10px solid transparent;
   border-top-color: #bc3825;
   -webkit-animation: spin 2s linear infinite;
   animation: spin 2s linear infinite;
@@ -94,21 +94,21 @@ body {
   right: 5px;
   bottom: 5px;
   border-radius: 50%;
-  border: 5px solid transparent;
-  border-top-color: gray;
+  border: 9px solid transparent;
+  border-top-color: #415364;
   -webkit-animation: spin 3s linear infinite;
   animation: spin 3s linear infinite;
 }
 #loader:after {
   content: '';
   position: absolute;
-  top: 15px;
-  left: 15px;
-  right: 15px;
-  bottom: 15px;
+  top: 18px;
+  left: 18px;
+  right: 18px;
+  bottom: 18px;
   border-radius: 50%;
-  border: 5px solid transparent;
-  border-top-color: #415364;
+  border: 8px solid transparent;
+  border-top-color: #ccc;
   -webkit-animation: spin 1.5s linear infinite;
   animation: spin 1.5s linear infinite;
 }
