@@ -19,7 +19,7 @@
         <v-text-field
           id="employeeMiddleName"
           ref="formFields"
-          v-model="editedEmployee.middleName"
+          v-model.trim="editedEmployee.middleName"
           :rules="middleNameRules()"
           label="Middle Name*"
           data-vv-name="Middle Name"
@@ -46,7 +46,7 @@
       <v-text-field
         id="employeeNickname"
         ref="formFields"
-        v-model="editedEmployee.nickname"
+        v-model.trim="editedEmployee.nickname"
         label="Nickname"
         data-vv-name="Nickname"
         :disabled="!userRoleIsAdmin() && !thisIsMyProfile() && !userRoleIsManager()"
