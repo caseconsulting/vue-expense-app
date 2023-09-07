@@ -116,7 +116,7 @@
           Create an Employee<v-icon class="pl-2">person_add</v-icon>
         </v-btn>
 
-        <!-- Create an Employee -->
+        <!-- Tag Manager -->
         <v-btn
           id="manageTagsBtn"
           class="mb-5 ml-4"
@@ -126,6 +126,19 @@
           v-if="hasAdminPermissions()"
         >
           Manage Tags<v-icon class="pl-2">mdi-tag-multiple</v-icon>
+        </v-btn>
+
+        <!-- Sync Applications -->
+        <v-btn
+          id="syncApplicationsBtn"
+          class="mb-5 ml-4"
+          :disabled="loading || syncing"
+          @click="syncApplications()"
+          elevation="2"
+          v-if="hasAdminPermissions()"
+          >Sync Applications
+          <v-progress-circular v-if="syncing" class="ml-2" :size="25" indeterminate color="grey"></v-progress-circular>
+          <v-icon v-else class="pl-2">mdi-web-sync</v-icon>
         </v-btn>
 
         <!-- NEW DATA TABLE -->
@@ -536,6 +549,34 @@ function selectedTagsHasEmployee(e) {
 } // selectedTagsHasEmployee
 
 /**
+ * Syncs data between different applications (Portal, BambooHR, ADP, ...).
+ */
+function syncApplications() {
+  this.syncing = true;
+  api.syncApplications().then((res) => {
+    let body = res.body;
+    if (body && body.failures === 0) {
+      this.$set(this.status, 'statusType', 'SUCCESS');
+      this.$set(
+        this.status,
+        'statusMessage',
+        `Successfully synced applications with ${body.usersCreated} user(s) created and ${body.usersUpdated} user(s) updated.`
+      );
+      this.$set(this.status, 'color', 'green');
+    } else {
+      this.$set(this.status, 'statusType', 'ERROR');
+      this.$set(
+        this.status,
+        'statusMessage',
+        `Application sync finished with ${body.failures} failure(s), ${body.usersCreated} user(s) created and ${body.usersUpdated} user(s) updated.`
+      );
+      this.$set(this.status, 'color', 'red');
+    }
+    this.syncing = false;
+  });
+} // syncApplications
+
+/**
  * Validates if an employee can be deleted. Returns true if the employee has no expenses, otherwise returns false.
  *
  * @param item - employee to validate
@@ -747,10 +788,12 @@ export default {
           text: 'Email',
           value: 'email'
         },
-        {
-          text: 'Last Login',
-          value: 'lastLoginSeconds'
-        },
+        userRoleIsAdmin() || userRoleIsManager()
+          ? {
+              text: 'Last Login',
+              value: 'lastLoginSeconds'
+            }
+          : _,
         {
           value: 'actions',
           sortable: false
@@ -798,6 +841,7 @@ export default {
         statusMessage: null,
         color: null
       }, // snackbar action status
+      syncing: false,
       tags: [],
       tagFlip: [],
       tagSearchString: ''
@@ -828,6 +872,7 @@ export default {
     renderManageTags,
     removeTag,
     selectedTagsHasEmployee,
+    syncApplications,
     userRoleIsAdmin,
     userRoleIsManager,
     validateDelete,

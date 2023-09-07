@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" @mousedown="refreshSession()">
     <v-app>
       <v-navigation-drawer
         light
@@ -125,7 +125,7 @@
                 id="P"
                 class="black--text"
                 target="_blank"
-                href="https://3.basecamp.com/3097063/buckets/4708396/documents/6414892698"
+                href="https://3.basecamp.com/3097063/buckets/4708396/documents/6517848652"
                 ><strong>Version</strong> {{ version }}</a
               >
             </template>
@@ -145,15 +145,16 @@
 </template>
 
 <script>
-import { isLoggedIn, logout, getProfile, getTokenExpirationDate, getAccessToken } from '@/utils/auth';
-import { isMobile, isSmallScreen, storeIsPopulated } from '@/utils/utils';
 import {
-  updateStoreUser,
-  updateStoreEmployees,
-  updateStoreAvatars,
-  updateStoreBudgets,
-  updateStoreExpenseTypes
-} from '@/utils/storeUtils';
+  isLoggedIn,
+  logout,
+  getProfile,
+  getTokenExpirationDate,
+  getAccessToken,
+  refreshUserSession
+} from '@/utils/auth';
+import { isMobile, isSmallScreen, storeIsPopulated, updateEmployeeLogin } from '@/utils/utils';
+import { updateStoreUser } from '@/utils/storeUtils';
 import floorPlan from '@/assets/img/MakeOfficesfloorplan.jpg';
 import MainNav from '@/components/utils/MainNav.vue';
 import NotificationBanners from '@/components/utils/NotificationBanners.vue';
@@ -223,7 +224,7 @@ function getMainPadding() {
   } else {
     return '56px 0px 0px 0px';
   }
-}
+} // getMainPadding
 
 /*
  * Logout of expense app
@@ -254,7 +255,7 @@ async function populateStore() {
     this.$store.dispatch('setLoginTime', { loginTime: lastLogin });
     //await updateEmployee(employee);
   } else {
-    await this.updateStoreUser(); // calling first since updateStoreExpenseTypes relies on user data
+    await this.updateStoreUser();
     employee = this.$store.getters.user;
   }
   localStorage.removeItem('user');
@@ -275,6 +276,46 @@ function goToHome() {
   }
 } // goToHome
 
+/**
+ * Refreshes a user session if they are still actively using the application
+ * and the refresh token is expiring soon.
+ */
+function refreshSession() {
+  let accessToken = getAccessToken();
+  if (accessToken && isLoggedIn()) {
+    let expTime = Math.trunc(getTokenExpirationDate(accessToken).getTime());
+    let now = Math.trunc(new Date().getTime());
+    let sessionRemainder = expTime - now;
+    let unixHour = 60 * 60 * 1000; // 60 min in unix time difference
+    if (sessionRemainder - unixHour <= 0) {
+      // session ending in < 60 min while user is still active, refresh access token
+      this.refreshUserSession();
+    }
+  }
+} // refreshSession
+
+/**
+ * Sets the session timeout and the session timeout warning
+ */
+function setSessionTimeouts() {
+  let accessToken = getAccessToken();
+  let expTime = Math.trunc(getTokenExpirationDate(accessToken).getTime());
+  let now = Math.trunc(new Date().getTime());
+  let sessionRemainder = expTime - now;
+  // set session timeout
+  this.sessionTimeout = window.setTimeout(() => {
+    this.timedOut = true;
+    this.session = false;
+  }, sessionRemainder);
+
+  // set session warning timeout, time minus 300000 = - 5 min
+  if (sessionRemainder > 300000) {
+    this.sessionTimeoutWarning = window.setTimeout(() => {
+      this.session = true;
+    }, sessionRemainder - 300000);
+  }
+} // setSessionTimeouts
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -289,33 +330,27 @@ async function created() {
 
   this.environment = process.env.VUE_APP_AUTH0_CALLBACK;
 
-  window.EventBus.$on('relog', handleLogout); // Session end - log out
+  window.EventBus.$on('relog', () => handleLogout()); // Session end - log out
   window.EventBus.$on('badgeExp', () => {
     this.badgeKey++;
   }); // used to refresh badge expiration banner
+  window.EventBus.$on('user-session-refreshed', () => {
+    clearTimeout(this.sessionTimeout);
+    clearTimeout(this.sessionTimeoutWarning);
+    this.session = false;
+    this.setSessionTimeouts();
+  });
   // set expiration date if access token received
   let accessToken = getAccessToken();
   if (accessToken && isLoggedIn()) {
-    this.date = Math.trunc(getTokenExpirationDate(accessToken).getTime());
-    this.now = Math.trunc(new Date().getTime());
-    let timeRemaining = this.date - this.now; // default access key (2 hours)
-
-    window.setTimeout(() => {
-      this.timedOut = true;
-      this.session = false;
-    }, timeRemaining);
-
-    // Time minus 300000 = - 5 min
-    if (timeRemaining > 300000) {
-      window.setTimeout(() => {
-        this.session = true;
-      }, timeRemaining - 300000);
-    }
+    this.setSessionTimeouts();
 
     await this.populateStore();
 
     //stores the employee number
     this.userId = this.$store.getters.employeeNumber;
+
+    this.$store.getters.loginTime ? this.updateEmployeeLogin(this.$store.getters.user) : '';
   }
 
   let pic = getProfile();
@@ -336,6 +371,7 @@ async function created() {
 function beforeDestroy() {
   window.EventBus.$off('relog');
   window.EventBus.$off('badgeExp');
+  window.EventBus.$off('user-session-refreshed');
 } //beforeDestroy
 
 // |--------------------------------------------------|
@@ -377,6 +413,8 @@ export default {
     profilePic: 'src/assets/img/logo-big.png',
     timedOut: false,
     session: false,
+    sessionTimeout: null,
+    sessionTimeoutWarning: null,
     now: Math.trunc(new Date().getTime() / 1000),
     userId: null,
     badgeKey: 0,
@@ -428,11 +466,11 @@ export default {
     isLoggedIn,
     populateStore,
     goToHome,
+    refreshUserSession,
+    refreshSession,
+    setSessionTimeouts,
     updateStoreUser,
-    updateStoreEmployees,
-    updateStoreAvatars,
-    updateStoreBudgets,
-    updateStoreExpenseTypes
+    updateEmployeeLogin
   },
   watch: {
     $route

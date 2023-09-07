@@ -27,8 +27,11 @@ import { isLoggedIn, login } from '@/utils/auth';
  * Route to home page on log in.
  */
 function created() {
+  let path = decodeURIComponent(window.location.search).split('=/')[1];
+  path = path ? path : 'home';
+  localStorage.setItem('redirectUrl', path);
   if (this.isLoggedIn()) {
-    this.$router.push('home');
+    this.$router.push(path);
   }
 } // created
 

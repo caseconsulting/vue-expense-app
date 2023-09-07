@@ -3,7 +3,7 @@
     <!-- Github -->
     <v-text-field
       prepend-icon="mdi-github"
-      v-model="editedPersonalInfo.github"
+      v-model.trim="editedPersonalInfo.github"
       ref="github"
       label="Github (username)"
       data-vv-name="Github"
@@ -12,7 +12,7 @@
     <!-- Twitter -->
     <v-text-field
       prepend-icon="mdi-twitter"
-      v-model="editedPersonalInfo.twitter"
+      v-model.trim="editedPersonalInfo.twitter"
       ref="twitter"
       label="Twitter (username)"
       data-vv-name="Twitter"
@@ -21,7 +21,7 @@
     <!-- LinkedIn -->
     <v-text-field
       prepend-icon="mdi-linkedin"
-      v-model="editedPersonalInfo.linkedIn"
+      v-model.trim="editedPersonalInfo.linkedIn"
       label="LinkedIn (profile url)"
       :rules="getURLRules()"
       ref="linkedin"
@@ -45,7 +45,7 @@
         </v-col>
         <v-col class="pt-0" cols="6" xl="6" lg="4" md="3" sm="3" xs="12">
           <v-text-field
-            v-model="phoneNumber.number"
+            v-model.trim="phoneNumber.number"
             v-mask="'###-###-####'"
             hint="###-###-#### format"
             :rules="getPhoneNumberRules()"
@@ -184,14 +184,14 @@
       <div class="groove pr-5 pl-2">
         <!-- Current Address: Street text field -->
         <v-text-field
-          v-model="editedPersonalInfo.currentStreet"
+          v-model.trim="editedPersonalInfo.currentStreet"
           label="Street"
           data-vv-name="Street"
           class="pt-0"
         ></v-text-field>
         <!-- Current Address: City text field -->
         <v-text-field
-          v-model="editedPersonalInfo.currentCity"
+          v-model.trim="editedPersonalInfo.currentCity"
           label="City"
           data-vv-name="Current City"
           class="pt-0"
@@ -206,7 +206,7 @@
         ></v-autocomplete>
         <!-- Current Address: ZIP text field -->
         <v-text-field
-          v-model="editedPersonalInfo.currentZIP"
+          v-model.trim="editedPersonalInfo.currentZIP"
           v-mask="'#####'"
           label="ZIP"
           data-vv-name="Current ZIP"

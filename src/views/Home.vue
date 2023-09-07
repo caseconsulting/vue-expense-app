@@ -89,7 +89,7 @@ import api from '@/shared/api.js';
 import ActivityFeed from '@/components/home/ActivityFeed.vue';
 import AvailableBudgets from '@/components/shared/AvailableBudgets.vue';
 import _ from 'lodash';
-import { isEmpty, isMobile, getCurrentBudgetYear, updateEmployeeLogin } from '@/utils/utils';
+import { isEmpty, isMobile, getCurrentBudgetYear } from '@/utils/utils';
 import { updateStoreExpenseTypes, updateStoreBudgets } from '@/utils/storeUtils';
 import QuickBooksTimeData from '@/components/shared/quickbooks/QuickBooksTimeData';
 import AnniversaryCard from '@/components/shared/AnniversaryCard';
@@ -530,11 +530,7 @@ function handleProfile() {
  * Loads all of the home page data concurrently upon entering the page.
  */
 async function loadHomePageData() {
-  await Promise.all([
-    this.refreshEmployee(),
-    this.createEvents(),
-    this.$store.getters.loginTime ? this.updateEmployeeLogin(this.$store.getters.user) : ''
-  ]);
+  await Promise.all([this.refreshEmployee(), this.createEvents()]);
 } // loadHomePageData
 
 /**
@@ -666,7 +662,6 @@ export default {
     loadHomePageData,
     refreshEmployee,
     handleProfile,
-    updateEmployeeLogin,
     updateStoreExpenseTypes,
     updateStoreBudgets
   },

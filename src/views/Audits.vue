@@ -23,11 +23,6 @@
               <v-list-item v-if="selectedDropdown !== 'Resume Parser'" @click="selectDropDown('Resume Parser')"
                 >Resume Parser</v-list-item
               >
-              <v-list-item
-                v-if="selectedDropdown !== 'Mifi Status Changes'"
-                @click="selectDropDown('Mifi Status Changes')"
-                >Mifi Status Changes</v-list-item
-              >
             </v-list>
           </v-menu>
         </v-col>
@@ -72,13 +67,13 @@
           </v-tooltip>
         </v-col>
       </v-row>
+      <!-- Displays of Audit Data -->
       <login-audits
         v-if="selectedDropdown === 'User Logins'"
         :queryStartDate="queryA"
         :queryEndDate="queryB"
         :show24HourTitle="firstLoad"
       ></login-audits>
-      <!-- Displays of Audit Data -->
       <resume-parser-audits
         v-if="selectedDropdown === 'Resume Parser'"
         :queryStartDate="queryA"
@@ -86,13 +81,6 @@
         :show24HourTitle="firstLoad"
         :key="reloader"
       ></resume-parser-audits>
-      <mifi-log-audits
-        v-if="selectedDropdown === 'Mifi Status Changes'"
-        :queryStartDate="queryA"
-        :queryEndDate="queryB"
-        :show24HourTitle="firstLoad"
-        :key="reloader"
-      ></mifi-log-audits>
     </v-container>
   </v-card>
 </template>
@@ -100,7 +88,6 @@
 <script>
 import ResumeParserAudits from '@/components/audits/ResumeParserAudits.vue';
 import LoginAudits from '@/components/audits/LoginAudits.vue';
-import MifiLogAudits from '@/components/audits/MifiLogAudits.vue';
 import _ from 'lodash';
 import { storeIsPopulated } from '@/utils/utils';
 import { updateStoreEmployees } from '@/utils/storeUtils';
@@ -162,7 +149,7 @@ function formatRange(range) {
 } // formatRange
 
 /**
- * Selects which audit view to change to (Login, Mifi, Resume Parser)
+ * Selects which audit view to change to (Login, Resume Parser)
  *
  * @param tab - the dropdown to select
  */
@@ -223,8 +210,7 @@ async function watchStoreIsPopulated() {
 export default {
   components: {
     LoginAudits,
-    ResumeParserAudits,
-    MifiLogAudits
+    ResumeParserAudits
   },
   computed: {
     storeIsPopulated

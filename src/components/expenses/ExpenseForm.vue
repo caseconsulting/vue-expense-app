@@ -975,14 +975,6 @@ async function getRemainingBudget() {
     } else {
       this.employeeBudgets = await api.getAllActiveEmployeeBudgets(this.editedExpense.employeeId);
     }
-    // update expense type text and budget amounts
-    _.forEach(this.expenseTypes, (expenseType) => {
-      let budget = _.find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id);
-      if (budget) {
-        expenseType.text = `${expenseType.budgetName} - $${budget.budgetObject.amount}`;
-        expenseType.budget = budget.budgetObject.amount;
-      }
-    });
     let employee = _.find(this.$store.getters.employees, (e) => e.id === this.editedExpense.employeeId);
     // filter out expense types that an employee does not have a budget to
     this.expenseTypes = _.filter(

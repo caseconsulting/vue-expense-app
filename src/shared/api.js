@@ -495,6 +495,15 @@ async function getColleges(inputValue) {
   }
 } // getColleges
 
+/**
+ * Syncs application data between the Portal, BambooHR, ADP, etc.
+ *
+ * @return - The response from the data sync function
+ */
+async function syncApplications() {
+  return await execute('post', `/${UTILITY}/syncApplications`, {});
+} // syncApplications
+
 export default {
   createAttachment,
   createItem,
@@ -533,6 +542,7 @@ export default {
   getUser,
   updateItem,
   uploadResume,
+  syncApplications,
   EXPENSE_TYPES,
   EXPENSES,
   EMPLOYEES,

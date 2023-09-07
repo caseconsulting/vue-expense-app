@@ -231,6 +231,19 @@ export function setAccessToken() {
 } // setAccessToken
 
 /**
+ * Refresh the user session and replace access_token and id token with new values
+ */
+export function refreshUserSession() {
+  auth.checkSession({}, function (err, authResult) {
+    if (authResult && authResult.accessToken && authResult.idToken) {
+      setCookie(ACCESS_TOKEN_KEY, authResult.accessToken);
+      setCookie(ID_TOKEN_KEY, authResult.idToken);
+      window.EventBus.$emit('user-session-refreshed');
+    }
+  });
+} // refreshUserSession
+
+/**
  * sets the cookie
  *
  * @param {*} cname - name of the cookie
