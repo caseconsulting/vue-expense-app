@@ -179,14 +179,21 @@
         hint="Search address and select option to auto-fill fields below."
         persistent-hint
       >
-        <v-list slot="append-item" name="joe" class="case-gray"> Powered By Google </v-list>
+        <v-list slot="append-item" name="joe" class="case-gray"> <span class="ml-2">Powered By Google</span> </v-list>
       </v-combobox>
       <div class="groove pr-5 pl-2">
-        <!-- Current Address: Street text field -->
+        <!-- Current Address: Street 1 text field -->
         <v-text-field
           v-model.trim="editedPersonalInfo.currentStreet"
-          label="Street"
-          data-vv-name="Street"
+          label="Street 1"
+          data-vv-name="Street 1"
+          class="pt-0"
+        ></v-text-field>
+        <!-- Current Address: Street 2 text field -->
+        <v-text-field
+          v-model.trim="editedPersonalInfo.currentStreet2"
+          label="Street 2"
+          data-vv-name="Street 2"
           class="pt-0"
         ></v-text-field>
         <!-- Current Address: City text field -->

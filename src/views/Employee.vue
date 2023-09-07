@@ -496,6 +496,7 @@ export default {
         currentCity: '',
         currentState: '',
         currentStreet: '',
+        currentStreet2: '',
         currentZIP: '',
         degrees: [],
         deptDate: '',

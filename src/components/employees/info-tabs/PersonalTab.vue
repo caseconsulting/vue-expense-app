@@ -125,7 +125,11 @@ function checkEmptyPersonalInfo() {
 function getCurrentAddress() {
   let currentAddress = '';
   if (!this.isEmpty(this.model.currentStreet)) {
-    currentAddress += `${this.model.currentStreet}, `;
+    if (!this.isEmpty(this.model.currentStreet2)) {
+      currentAddress += `${this.model.currentStreet} ${this.model.currentStreet2}, `;
+    } else {
+      currentAddress += `${this.model.currentStreet}, `;
+    }
   }
   if (!this.isEmpty(this.model.currentCity)) {
     currentAddress += `${this.model.currentCity}, `;

@@ -830,6 +830,7 @@ export default {
         currentCity: null,
         currentState: null,
         currentStreet: null,
+        currentStreet2: null,
         currentZIP: null
       }, // selected employee
       search: null, // query text for datatable search field

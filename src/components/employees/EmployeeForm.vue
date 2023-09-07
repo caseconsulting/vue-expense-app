@@ -917,6 +917,7 @@ function setFormData(tab, data) {
     this.$set(this.model, 'currentCity', data.currentCity);
     this.$set(this.model, 'currentState', data.currentState);
     this.$set(this.model, 'currentStreet', data.currentStreet);
+    this.$set(this.model, 'currentStreet2', data.currentStreet2);
     this.$set(this.model, 'currentZIP', data.currentZIP);
   } else if (tab == 'education') {
     this.$set(this.model, 'education', data); //sets education to data returned from education tab
@@ -1230,6 +1231,7 @@ export default {
         currentCity: null,
         currentState: null,
         currentStreet: null,
+        currentStreet2: null,
         currentZIP: null,
         customerOrgExp: [],
         degrees: [],
