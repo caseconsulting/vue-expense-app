@@ -88,6 +88,18 @@
         >
           <v-card>
             <v-card-title class="header_style" v-if="!editing">
+              <v-tooltip v-if="hasAdminPermissions() || userIsEmployee()" top>
+                <template #activator="{ on }">
+                  <v-icon v-on="on" @click="navEmployee(-1)" color="white">mdi-arrow-left-bold</v-icon>
+                </template>
+                <span>Previous employee</span>
+              </v-tooltip>
+              <v-tooltip v-if="hasAdminPermissions() || userIsEmployee()" top>
+                <template #activator="{ on }">
+                  <v-icon v-on="on" @click="navEmployee(1)" color="white">mdi-arrow-right-bold</v-icon>
+                </template>
+                <span>Next employee</span>
+              </v-tooltip>
               <h3 id="employeeName" v-if="userIsEmployee()">My Profile</h3>
               <h3 id="employeeName" v-else>
                 {{ this.model.nickname || this.model.firstName }} {{ this.model.lastName }}
@@ -354,6 +366,24 @@ async function checkForBudgetAccess() {
   }
 } // checkForBudgetAccess
 
+/**
+ * Navigates to an employee
+ * TODO: support custom loops
+ *
+ * @input num - amount of employees to move fowards (may be negative for backwards)
+ */
+async function navEmployee(num) {
+  // create the loop
+  let loop, pos;
+  loop = this.$store.getters.employees || (await this.updateStoreEmployees());
+  loop = Array.from(loop, (e) => e.employeeNumber);
+  loop = _.sortBy(loop);
+  pos = loop.indexOf(Number(this.$route.params.id));
+
+  // route
+  this.$router.push(`/employee/${loop[(pos + num) % loop.length]}`);
+}
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -384,6 +414,7 @@ async function created() {
   });
   this.basicEmployeeDataLoading = true;
   this.storeIsPopulated ? await this.getProfileData() : (this.loading = true);
+  if (!this.$store.getters.employees) await this.updateStoreEmployees();
 } // created
 
 /**
@@ -557,7 +588,8 @@ export default {
     userRoleIsAdmin,
     userRoleIsManager,
     userIsEmployee,
-    checkForBudgetAccess
+    checkForBudgetAccess,
+    navEmployee
   },
   computed: {
     minimizeWindow,
