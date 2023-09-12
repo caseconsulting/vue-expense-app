@@ -55,12 +55,14 @@ export function escape(item, quotify = false) {
   let to_return;
   if (Array.isArray(item)) {
     to_return = _.map(item, (s) => {
-      if (quotify) return `"${s.replace('"', '""')}"`;
-      else return s.replace('"', '""');
+      s = `${s || ''}`;
+      to_return = s.replaceAll('"', '""');
+      if (quotify) to_return = `"${to_return}"`;
+      return to_return;
     });
   } else {
     item = `${item}`;
-    to_return = item.replace('"', '""');
+    to_return = item.replaceAll('"', '""');
     if (quotify) to_return = `"${to_return}"`;
   }
   return to_return;
@@ -124,6 +126,7 @@ export function generate(object_array, delimiter = ', ') {
       if (current == undefined) {
         line.push('""');
       } else if (Array.isArray(current)) {
+        current = current.filter((i) => i !== undefined);
         line.push(`"${this.escape(current).join(delimiter)}"`);
       } else {
         line.push(`"${this.escape(current)}"`);
