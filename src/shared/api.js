@@ -467,9 +467,13 @@ async function uploadResume(employeeId, file) {
  * @return a list of colleges that match that query
  */
 async function getColleges(inputValue) {
+  // If a college needs to be manually added to the dropdown, add it to this array
+  let collegesToAdd = ['Ferrum College'];
+
   try {
     let response = await execute('get', `/${HIPPO_LAB}/getColleges/${inputValue}`);
 
+    // add common names in parenthesis
     for (let i = 0; i < response.length; i++) {
       if (response[i] === 'Virginia Polytechnic Institute and State University') {
         response[i] = 'Virginia Polytechnic Institute and State University (Virginia Tech)';
@@ -489,6 +493,12 @@ async function getColleges(inputValue) {
         response[i] = 'California Institute of Technology (Caltech)';
       }
     }
+
+    // add custom colleges
+    for (let college of collegesToAdd) {
+      response.push(college);
+    }
+
     return response;
   } catch (err) {
     return [];
