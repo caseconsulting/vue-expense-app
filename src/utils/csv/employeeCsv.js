@@ -31,46 +31,91 @@ export function convertEmployees(employees, contracts, tags) {
   if (!Array.isArray(employees)) employees = [employees];
   let tempEmployees = [];
   _.forEach(employees, (employee) => {
-    let placeOfBirth = [employee.city, employee.st, employee.country].join(' ');
-    let contractsPrimesProjects = getContractPrimeProject(employee.contracts, contracts);
-    let clearanceData = getClearancesData(employee.clearances);
-    tempEmployees.push({
-      'Employee #': employee.employeeNumber || '',
-      'First Name': employee.firstName || '',
-      'Middle Name': employee.middleName || '',
-      'Last Name': employee.lastName || '',
-      'Birthday (yyyy-mm-dd)': employee.birthday || '',
-      'Place of Birth': placeOfBirth || '',
-      'State of Residence': employee.currentState || '',
-      'Hire Date': employee.hireDate || '',
-      'Job Role': employee.jobRole || '',
-      AIN: employee.agencyIdentificationNumber || '',
-      Email: employee.email || '',
-      Twitter: employee.twitter || '',
-      Github: employee.github || '',
-      LinkedIn: employee.linkedIn || '',
-      'Expense App Role': employee.employeeRole || '',
-      Status: getWorkStatus(employee.workStatus) || '',
-      Awards: filterUndefined(employee.awards, getAwards) || '',
-      Certifications: filterUndefined(employee.certifications, getCertifications) || '',
-      Clearance: clearanceData.titles || '',
-      'Submission Date': clearanceData.submissionDates || '',
-      'Granted Date': clearanceData.grantedDates || '',
-      'BI Dates': clearanceData.biDates || '',
-      'Poly Dates': clearanceData.polyDates || '',
-      'Adjudication Dates': clearanceData.adjudicationDates || '',
-      'Badge Number': clearanceData.badgeNum || '',
-      'Badge Expiration Date': clearanceData.badgeExpDate || '',
-      Contracts: contractsPrimesProjects.contracts,
-      Primes: contractsPrimesProjects.primes,
-      Projects: contractsPrimesProjects.projects,
-      'Customer Org': filterUndefined(employee.customerOrgExp, getCustomerOrgExp) || '',
-      Education: filterUndefined(employee.education, getEducation) || '',
-      'Job Experience': filterUndefined(employee.companies, getCompanies) || '',
-      Technology: filterUndefined(employee.technologies, getTechnologies) || '',
-      Tags: getTags(employee.id, tags) || '',
-      id: employee.id || ''
-    });
+    try {
+      let placeOfBirth = [employee.city, employee.st, employee.country];
+      let contractsPrimesProjects = getContractPrimeProject(employee.contracts, contracts);
+      let clearanceData = getClearancesData(employee.clearances);
+      tempEmployees.push({
+        // NOTE: if you change this, please also change in the catch{} below
+        'Employee #': employee.employeeNumber || '',
+        'First Name': employee.firstName || '',
+        'Middle Name': employee.middleName || '',
+        'Last Name': employee.lastName || '',
+        'Birthday (yyyy-mm-dd)': employee.birthday || '',
+        'Place of Birth': placeOfBirth || '',
+        'State of Residence': employee.currentState || '',
+        'Hire Date': employee.hireDate || '',
+        'Job Role': employee.jobRole || '',
+        AIN: employee.agencyIdentificationNumber || '',
+        Email: employee.email || '',
+        Twitter: employee.twitter || '',
+        Github: employee.github || '',
+        LinkedIn: employee.linkedIn || '',
+        'Expense App Role': employee.employeeRole || '',
+        Status: getWorkStatus(employee.workStatus) || '',
+        Awards: filterUndefined(employee.awards, getAwards) || '',
+        Certifications: filterUndefined(employee.certifications, getCertifications) || '',
+        Clearance: clearanceData.titles || '',
+        'Submission Date': clearanceData.submissionDates || '',
+        'Granted Date': clearanceData.grantedDates || '',
+        'BI Dates': clearanceData.biDates || '',
+        'Poly Dates': clearanceData.polyDates || '',
+        'Adjudication Dates': clearanceData.adjudicationDates || '',
+        'Badge Number': clearanceData.badgeNum || '',
+        'Badge Expiration Date': clearanceData.badgeExpDate || '',
+        Contracts: contractsPrimesProjects.contracts || '',
+        Primes: contractsPrimesProjects.primes || '',
+        Projects: contractsPrimesProjects.projects || '',
+        'Customer Org': filterUndefined(employee.customerOrgExp, getCustomerOrgExp) || '',
+        Education: filterUndefined(employee.education, getEducation) || '',
+        'Job Experience': filterUndefined(employee.companies, getCompanies) || '',
+        Technology: filterUndefined(employee.technologies, getTechnologies) || '',
+        Tags: getTags(employee.id, tags) || '',
+        id: employee.id || ''
+      });
+    } catch (e) {
+      console.log(
+        `Error converting employee ${employee.firstName} ${employee.lastName} to CSV, skipping. Error message:`
+      );
+      console.log(e);
+      tempEmployees.push({
+        'Employee #': `(ERROR) ${employee.employeeNumber}` || '',
+        'First Name': '---',
+        'Middle Name': '---',
+        'Last Name': '---',
+        'Birthday (yyyy-mm-dd)': '---',
+        'Place of Birth': '---',
+        'State of Residence': '---',
+        'Hire Date': '---',
+        'Job Role': '---',
+        AIN: '---',
+        Email: '---',
+        Twitter: '---',
+        Github: '---',
+        LinkedIn: '---',
+        'Expense App Role': '---',
+        Status: '---',
+        Awards: '---',
+        Certifications: '---',
+        Clearance: '---',
+        'Submission Date': '---',
+        'Granted Date': '---',
+        'BI Dates': '---',
+        'Poly Dates': '---',
+        'Adjudication Dates': '---',
+        'Badge Number': '---',
+        'Badge Expiration Date': '---',
+        Contracts: '---',
+        Primes: '---',
+        Projects: '---',
+        'Customer Org': '---',
+        Education: '---',
+        'Job Experience': '---',
+        Technology: '---',
+        Tags: '---',
+        id: '---'
+      });
+    }
   });
   return tempEmployees;
 } // convertEmployees
