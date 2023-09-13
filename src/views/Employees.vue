@@ -25,7 +25,7 @@
             id="employeesSearch"
             v-model="search"
             append-icon="search"
-            label="Search"
+            label="Search (comma separate terms)"
             single-line
             hide-details
           ></v-text-field>
@@ -151,6 +151,7 @@
           :loading="loading"
           :items-per-page.sync="itemsPerPage"
           :search="search"
+          :custom-filter="customFilter"
           mobile-breakpoint="800"
           item-key="employeeNumber"
           class="elevation-1 employees-table"
@@ -357,6 +358,70 @@ function clearStatus() {
 function chipColor(id) {
   return this.tagFlip.includes(id) ? 'red' : 'gray';
 } // chipColor
+
+/**
+ * Custom filter for employee table searching
+ *
+ * @param _ - unused value
+ * @param search - The search value in the search bar
+ * @param item - The item in the table
+ * @returns Boolean - True if the item matches the search criteria
+ */
+function customFilter(_, search, item) {
+  // short circuit to return everyone if there is no search term yet
+  if (search == null) return true;
+
+  // split the search to allow for multiple search terms
+  let terms = search.split(',');
+  if (terms.length == 1 && terms[0].length < 2) return true;
+
+  // different items from the employee to look through
+  let [frst, midl, last, nick, F, M, N, L] = [
+    item.firstName?.trim(),
+    item.middleName?.trim(),
+    item.lastName?.trim(),
+    item.nickname?.trim(),
+    item.firstName ? item.firstName.trim()[0] : '',
+    item.middleName ? item.middleName.trim()[0] : '',
+    item.nickname ? item.nickname.trim()[0] : '',
+    item.lastName ? item.lastName.trim()[0] : ''
+  ];
+  let searchableTerms = [
+    `${item.employeeNumber}`,
+    `${frst} ${last}`,
+    `${last} ${frst}`,
+    `${frst} ${midl} ${last}`,
+    `${frst} ${nick} ${last}`,
+    `${frst} ${nick} ${midl} ${last}`,
+    `${frst} ${midl} ${nick} ${last}`,
+    `${F}${M}${L}`,
+    `${F}${N}${L}`,
+    `${F}${M}${N}${L}`,
+    `${F}${N}${M}${L}`,
+    `${F} ${L}`,
+    `${L} ${F}`,
+    `${F} ${N} ${last}`,
+    `${F} ${M} ${last}`,
+    `${F} ${N} ${M} ${last}`,
+    `${F} ${M} ${N} ${last}`,
+    `${frst} ${M} ${last}`,
+    `${frst} ${N} ${last}`,
+    `${frst} ${N} ${M} ${last}`,
+    `${frst} ${M} ${N} ${last}`
+  ];
+
+  // search through all searchable terms with all search terms
+  for (let t of terms) {
+    t = t.trim();
+    if (t.length < 2) continue;
+    for (let s of searchableTerms) {
+      if (s && s.toLowerCase().includes(t.toLowerCase())) {
+        return true;
+      }
+    }
+  }
+  return false;
+} // customFilter
 
 /**
  * Delete an employee and display status.
@@ -852,6 +917,7 @@ export default {
     clearCreateEmployee,
     clearStatus,
     chipColor,
+    customFilter,
     deleteEmployee,
     deleteModelFromTable,
     displayError,
