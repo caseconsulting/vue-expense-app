@@ -381,7 +381,9 @@ async function navEmployee(num) {
   pos = loop.indexOf(Number(this.$route.params.id));
 
   // route
-  this.$router.push(`/employee/${loop[(pos + num) % loop.length]}`);
+  let res = (pos + num) % loop.length;
+  if (res < 0) res = loop.length - 1;
+  this.$router.push(`/employee/${loop[res]}`);
 }
 
 // |--------------------------------------------------|
