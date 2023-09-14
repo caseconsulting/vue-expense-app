@@ -376,6 +376,7 @@ async function navEmployee(num) {
   // create the loop
   let loop, pos;
   loop = this.$store.getters.employees || (await this.updateStoreEmployees());
+  loop = loop.filter((e) => e.workStatus !== 0);
   loop = Array.from(loop, (e) => e.employeeNumber);
   loop = _.sortBy(loop);
   pos = loop.indexOf(Number(this.$route.params.id));
@@ -384,7 +385,7 @@ async function navEmployee(num) {
   let res = (pos + num) % loop.length;
   if (res < 0) res = loop.length - 1;
   this.$router.push(`/employee/${loop[res]}`);
-}
+} // navEmployee
 
 // |--------------------------------------------------|
 // |                                                  |
