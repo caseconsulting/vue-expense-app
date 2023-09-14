@@ -28,7 +28,7 @@
               <v-text-field
                 ref="formFields"
                 :value="format(military.startDate, null, 'MM/YYYY')"
-                :rules="getDateMonthYearRules()"
+                :rules="getDateMonthYearOptionalRules()"
                 label="Starting Date"
                 prepend-icon="event_available"
                 hint="MM/YYYY format"
@@ -65,7 +65,7 @@
               <v-text-field
                 ref="formFields"
                 :value="format(military.completeDate, null, 'MM/YYYY')"
-                :rules="[...dateSubmissionRules()]"
+                :rules="getDateMonthYearOptionalRules()"
                 label="Completion Date"
                 prepend-icon="event_available"
                 hint="MM/YYYY format"
@@ -110,7 +110,7 @@
 <script>
 import _ from 'lodash';
 import { mask } from 'vue-the-mask';
-import { getDateMonthYearRules, getRequiredRules } from '@/shared/validationUtils.js';
+import { getDateMonthYearOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
 import { format, isBefore } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
@@ -204,7 +204,7 @@ export default {
     dateSubmissionRules,
     emitToParser,
     format,
-    getDateMonthYearRules,
+    getDateMonthYearOptionalRules,
     getRequiredRules,
     isBefore,
     parseEventDate,

@@ -66,7 +66,7 @@
               :value="format(degree.completionDate, null, 'MM/YYYY')"
               label="Completion Date"
               prepend-icon="event"
-              :rules="getDateMonthYearRules()"
+              :rules="getDateMonthYearOptionalRules()"
               hint="MM/YYYY format"
               v-mask="'##/####'"
               persistent-hint
@@ -203,7 +203,7 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
-import { getDateMonthYearRules, getRequiredRules } from '@/shared/validationUtils.js';
+import { getDateMonthYearOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
 import { format } from '@/shared/dateUtils';
 import { mask } from 'vue-the-mask';
 import { majorsAndMinors } from '../dropdown-info/majorsAndMinors';
@@ -441,7 +441,7 @@ export default {
   methods: {
     emitToParser,
     format,
-    getDateMonthYearRules,
+    getDateMonthYearOptionalRules,
     getRequiredRules,
     parseEventDate,
     addItem,
