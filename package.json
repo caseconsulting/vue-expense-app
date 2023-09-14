@@ -1,6 +1,6 @@
 {
   "name": "vue-expense-app",
-  "version": "3.17.0",
+  "version": "3.17.1",
   "private": true,
   "scripts": {
     "build": "export NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service build",
