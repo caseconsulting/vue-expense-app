@@ -88,13 +88,13 @@
         >
           <v-card>
             <v-card-title class="header_style" v-if="!editing">
-              <v-tooltip v-if="hasAdminPermissions() || userIsEmployee()" top>
+              <v-tooltip v-if="hasAdminPermissions()" top>
                 <template #activator="{ on }">
                   <v-icon v-on="on" @click="navEmployee(-1)" color="white">mdi-arrow-left-bold</v-icon>
                 </template>
                 <span>Previous employee</span>
               </v-tooltip>
-              <v-tooltip v-if="hasAdminPermissions() || userIsEmployee()" top>
+              <v-tooltip v-if="hasAdminPermissions()" top>
                 <template #activator="{ on }">
                   <v-icon v-on="on" @click="navEmployee(1)" color="white">mdi-arrow-right-bold</v-icon>
                 </template>
