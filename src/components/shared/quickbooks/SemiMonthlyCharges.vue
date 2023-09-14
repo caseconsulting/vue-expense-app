@@ -208,11 +208,9 @@ function payPeriod() {
  * @returns the formatted previous pay period
  */
 function prevPayPeriod() {
-  return `Hours for ${format(this.prevPeriodStartDay, null, 'MMM')} ${format(
-    this.prevPeriodStartDay,
-    null,
-    'DD'
-  )}-${format(this.prevPeriodEndDay, null, 'DD')}, ${format(this.prevPeriodStartDay, null, 'YYYY')}`;
+  return `Hours for ${format(this.prevPeriodStartDay, null, 'MMM')} ${this.prevPeriodStartDay.split('-')[2]}-${
+    this.prevPeriodEndDay.split('-')[2]
+  }, ${this.prevPeriodEndDay.split('-')[0]}`;
 } // prevPayPeriod
 
 // |--------------------------------------------------|
