@@ -16,7 +16,9 @@
             <li v-for="(degree, index) in edu.degrees" :key="degree + index" class="mb-2">
               <b>{{ degree.degreeType }}</b>
               <ul>
-                <li><b>Completion Date: </b>{{ monthYearFormat(degree.completionDate) }}</li>
+                <li v-if="degree.completionDate">
+                  <b>Completion Date: </b>{{ monthYearFormat(degree.completionDate) }}
+                </li>
                 <li v-if="degree.majors.length > 1">
                   <p class="mb-0"><b>Majors:</b></p>
                   <ul class="mb-0">

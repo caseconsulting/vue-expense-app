@@ -23,7 +23,7 @@
           <v-text-field
             :value="format(highSchool.gradDate, null, 'MM/YYYY')"
             ref="formFields"
-            :rules="getDateMonthYearRules()"
+            :rules="getDateMonthYearOptionalRules()"
             label="Graduation Date"
             prepend-icon="event_available"
             hint="MM/YYYY format"
@@ -66,7 +66,7 @@
 <script>
 import _ from 'lodash';
 import { mask } from 'vue-the-mask';
-import { getDateMonthYearRules, getRequiredRules } from '@/shared/validationUtils.js';
+import { getDateMonthYearOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
 import { format } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
@@ -149,7 +149,7 @@ export default {
     format,
     parseEventDate,
     validateFields,
-    getDateMonthYearRules,
+    getDateMonthYearOptionalRules,
     getRequiredRules
   },
   data() {

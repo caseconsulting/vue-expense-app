@@ -57,98 +57,92 @@ function initDegrees() {
         // handle universities
         if (edu.type === 'university') {
           _.forEach(edu.degrees, (degree) => {
-            if (this.isBefore(degree.completionDate, this.getTodaysDate())) {
-              if (highestDegrees.length != 0) {
-                if (highestDegrees[0].type === 'Military') {
-                  highestDegrees.unshift({
-                    name: this.getDegreeName(this.getDegreeValue(degree.degreeType)),
-                    majors: degree.majors,
-                    type: edu.type,
-                    value: this.getDegreeValue(degree.degreeType)
-                  });
-                } else {
-                  let result = this.compareDegree(highestDegrees[0].value, this.getDegreeValue(degree.degreeType));
-                  //if a degree of a higher prestige is found, remove all previous entries except militaries
-                  if (result === 1) {
-                    highestDegrees = _.filter(highestDegrees, (education) => {
-                      return education.type === 'Military';
-                    });
-                    highestDegrees.unshift({
-                      name: this.getDegreeName(this.getDegreeValue(degree.degreeType)),
-                      majors: degree.majors,
-                      type: edu.type,
-                      value: this.getDegreeValue(degree.degreeType)
-                    });
-                  }
-                  //Adds to highestDegrees, excluding degrees with a lower prestige
-                  if (result > -1 && result !== 1) {
-                    highestDegrees.push({
-                      name: this.getDegreeName(this.getDegreeValue(degree.degreeType)),
-                      majors: degree.majors,
-                      type: edu.type,
-                      value: this.getDegreeValue(degree.degreeType)
-                    });
-                  }
-                }
-              } else {
-                //Adds the first degree found to the array
-                highestDegrees.push({
+            if (highestDegrees.length != 0) {
+              if (highestDegrees[0].type === 'Military') {
+                highestDegrees.unshift({
                   name: this.getDegreeName(this.getDegreeValue(degree.degreeType)),
                   majors: degree.majors,
                   type: edu.type,
                   value: this.getDegreeValue(degree.degreeType)
                 });
-              }
-            }
-          });
-        } else if (edu.type === 'highSchool') {
-          if (this.isBefore(edu.gradDate, this.getTodaysDate())) {
-            if (highestDegrees.length != 0) {
-              if (highestDegrees[0].type === 'Military') {
-                highestDegrees.unshift({
-                  type: 'High School',
-                  name: edu.name,
-                  value: this.getDegreeValue(edu.type)
-                });
               } else {
-                let result = this.compareDegree(highestDegrees[0].value, this.getDegreeValue(edu.type));
+                let result = this.compareDegree(highestDegrees[0].value, this.getDegreeValue(degree.degreeType));
                 //if a degree of a higher prestige is found, remove all previous entries except militaries
                 if (result === 1) {
                   highestDegrees = _.filter(highestDegrees, (education) => {
                     return education.type === 'Military';
                   });
                   highestDegrees.unshift({
-                    type: 'High School',
-                    name: edu.name,
-                    value: this.getDegreeValue(edu.type)
+                    name: this.getDegreeName(this.getDegreeValue(degree.degreeType)),
+                    majors: degree.majors,
+                    type: edu.type,
+                    value: this.getDegreeValue(degree.degreeType)
                   });
                 }
                 //Adds to highestDegrees, excluding degrees with a lower prestige
-                if (result > -1) {
+                if (result > -1 && result !== 1) {
                   highestDegrees.push({
-                    type: 'High School',
-                    name: edu.name,
-                    value: this.getDegreeValue(edu.type)
+                    name: this.getDegreeName(this.getDegreeValue(degree.degreeType)),
+                    majors: degree.majors,
+                    type: edu.type,
+                    value: this.getDegreeValue(degree.degreeType)
                   });
                 }
               }
             } else {
               //Adds the first degree found to the array
               highestDegrees.push({
+                name: this.getDegreeName(this.getDegreeValue(degree.degreeType)),
+                majors: degree.majors,
+                type: edu.type,
+                value: this.getDegreeValue(degree.degreeType)
+              });
+            }
+          });
+        } else if (edu.type === 'highSchool') {
+          if (highestDegrees.length != 0) {
+            if (highestDegrees[0].type === 'Military') {
+              highestDegrees.unshift({
                 type: 'High School',
                 name: edu.name,
                 value: this.getDegreeValue(edu.type)
               });
+            } else {
+              let result = this.compareDegree(highestDegrees[0].value, this.getDegreeValue(edu.type));
+              //if a degree of a higher prestige is found, remove all previous entries except militaries
+              if (result === 1) {
+                highestDegrees = _.filter(highestDegrees, (education) => {
+                  return education.type === 'Military';
+                });
+                highestDegrees.unshift({
+                  type: 'High School',
+                  name: edu.name,
+                  value: this.getDegreeValue(edu.type)
+                });
+              }
+              //Adds to highestDegrees, excluding degrees with a lower prestige
+              if (result > -1) {
+                highestDegrees.push({
+                  type: 'High School',
+                  name: edu.name,
+                  value: this.getDegreeValue(edu.type)
+                });
+              }
             }
-          }
-        } else if (edu.type === 'military') {
-          if (this.isBefore(edu.startDate, this.getTodaysDate())) {
+          } else {
+            //Adds the first degree found to the array
             highestDegrees.push({
-              type: 'Military',
-              name: edu.branch,
+              type: 'High School',
+              name: edu.name,
               value: this.getDegreeValue(edu.type)
             });
           }
+        } else if (edu.type === 'military') {
+          highestDegrees.push({
+            type: 'Military',
+            name: edu.branch,
+            value: this.getDegreeValue(edu.type)
+          });
         }
       });
       education = this.addToEducation(education, highestDegrees);
