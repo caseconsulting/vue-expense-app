@@ -10,6 +10,7 @@
           class="projects-table"
           hide-default-footer
           hide-default-header
+          :items-per-page="-1"
           no-data-text="No active projects"
           show-select
           single-select
