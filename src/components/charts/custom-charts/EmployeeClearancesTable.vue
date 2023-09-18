@@ -6,6 +6,7 @@
       :items="tableContents"
       item-key="title"
       :single-expand="true"
+      @click:row="clickedRow"
       class="elevation-1"
       id="clearancesTable"
       hide-default-footer
@@ -42,6 +43,19 @@ async function mounted() {
 // |                      METHODS                     |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Routes user to reports page and autofills their clearance search.
+ *
+ * @param value - item clicked
+ */
+function clickedRow(value) {
+  this.$router.push({
+    path: '/reports',
+    name: 'reports',
+    params: { requestedDataType: 'securityInfo', requestedFilter: value.title }
+  });
+} // clickedRow
 
 /**
  * Gets the number of employees that hold a clearance of the type passed.
@@ -102,6 +116,7 @@ export default {
     };
   },
   methods: {
+    clickedRow,
     getClearanceCount,
     fillData
   },

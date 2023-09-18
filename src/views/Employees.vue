@@ -707,6 +707,12 @@ async function created() {
     this.manageTags = false;
   });
 
+  // fill in search box if routed from another page
+  if (this.$route.params.requestedFilter) {
+    this.search = this.$route.params.requestedFilter;
+    this.$route.params.requestedFilter = null;
+  }
+
   // only refresh employees if data is in store. Otherwise, set loading and wait in watcher
   this.storeIsPopulated ? await this.refreshEmployees() : (this.loading = true);
 

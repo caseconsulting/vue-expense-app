@@ -149,6 +149,13 @@ function created() {
   this.tags = this.$store.getters.tags;
   this.filteredEmployees = this.employeesInfo; // this one is shown
   this.populateDropdowns(this.employeesInfo);
+
+  // fill in search boxes if routed from another page
+  if (this.$route.params.requestedFilter) {
+    this.clearanceSearch = this.$route.params.requestedFilter;
+    this.refreshDropdownItems();
+    this.$route.params.requestedFilter = null;
+  }
 } // created
 
 // |--------------------------------------------------|

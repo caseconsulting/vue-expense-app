@@ -6,6 +6,7 @@
       :items="tableContents"
       item-key="title"
       :single-expand="true"
+      @click:row="clickedRow"
       class="elevation-1"
       id="employeesTable"
       hide-default-footer
@@ -44,6 +45,19 @@ async function mounted() {
 // |--------------------------------------------------|
 
 /**
+ * Routes the user to the reports page and autofills the search fields.
+ *
+ * @param value - row clicked
+ */
+function clickedRow(value) {
+  this.$router.push({
+    path: '/employees',
+    name: 'employees',
+    params: { requestedFilter: value.employeeNames.join(', ') }
+  });
+} // clickedRow
+
+/**
  * Gets the employee data, and sets the chart formatting and data options.
  */
 function fillData() {
@@ -58,24 +72,33 @@ function fillData() {
   let overheadAwaitingClearanceCount = 0;
   let internsAwaitingClearanceCount = 0;
   let nonPeopleCount = 1; // info account
+  let [billableEmployeeNames, internEmployeeNames] = [[], []];
+  let overheadEmployeeNames = _.map(this.employees, (e) => {
+    return { name: `${e.nickname || e.firstName} ${e.lastName}` };
+  });
   // tally up counts
-  _.forEach(this.employees, (employee) => {
-    let awaitingClearance = employee.clearances && employee.clearances.some((c) => c.awaitingClearance);
-    if (employee.contracts && employee.contracts.some((c) => c.projects.some((p) => !p.endDate))) {
+  _.forEach(this.employees, (e) => {
+    let name = `${e.nickname || e.firstName} ${e.lastName}`;
+    let awaitingClearance = e.clearances && e.clearances.some((c) => c.awaitingClearance);
+    if (e.contracts && e.contracts.some((c) => c.projects.some((p) => !p.endDate))) {
       let isBillable = false;
-      _.forEach(employee.contracts, (contract) => {
+      _.forEach(e.contracts, (contract) => {
         _.forEach(contract.projects, (project) => {
           if (!project.endDate && !isBillable) {
             // employee is active on a contract
-            billableCount += 1;
+            billableEmployeeNames.push(name);
+            _.remove(overheadEmployeeNames, (x) => name === x.name);
+            billableCount++;
             isBillable = true;
           }
         });
       });
-    } else if (employee.jobRole === 'Intern') {
+    } else if (e.jobRole === 'Intern') {
       if (awaitingClearance) {
         internsAwaitingClearanceCount++;
       }
+      internEmployeeNames.push(name);
+      _.remove(overheadEmployeeNames, (x) => name === x.name);
       internCount++;
     } else if (awaitingClearance) {
       overheadAwaitingClearanceCount++;
@@ -83,22 +106,28 @@ function fillData() {
   });
 
   overheadCount = this.employees.length - billableCount - internCount - nonPeopleCount;
+  _.remove(overheadEmployeeNames, (x) => x.name === 'Info Account');
+  overheadEmployeeNames = _.map(overheadEmployeeNames, (x) => {
+    return x.name;
+  });
 
   this.tableContents = [
-    { title: 'Billable Employees', value: billableCount },
+    { title: 'Billable Employees', value: billableCount, employeeNames: billableEmployeeNames },
     {
       title: 'Overhead Employees',
       value: `${overheadCount} (${
         overheadAwaitingClearanceCount == 0 ? 'none' : overheadAwaitingClearanceCount
-      } awaiting clearance)`
+      } awaiting clearance)`,
+      employeeNames: overheadEmployeeNames
     },
     {
       title: 'Interns',
       value: `${internCount} (${
         internsAwaitingClearanceCount == 0 ? 'none' : internsAwaitingClearanceCount
-      } awaiting clearance)`
+      } awaiting clearance)`,
+      employeeNames: internEmployeeNames
     },
-    { title: 'Total Employees', value: this.employees.length - nonPeopleCount } // -1 for the info account on prod
+    { title: 'Total Employees', value: this.employees.length - nonPeopleCount, employeeNames: [] } // -1 for the info account on prod
   ];
 
   this.headers = [
@@ -132,6 +161,7 @@ export default {
     };
   },
   methods: {
+    clickedRow,
     fillData
   },
   mounted,
