@@ -175,7 +175,8 @@ export default {
 
 <style>
 #employeesTable tr:hover {
-  background-color: transparent;
+  cursor: pointer;
+  background-color: #e8e8e8;
 }
 
 #employeesTable tr:last-child {
