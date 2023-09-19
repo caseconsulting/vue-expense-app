@@ -291,6 +291,9 @@
     <v-dialog v-model="manageTags" width="70%" persistent>
       <tag-manager :key="childKey"></tag-manager>
     </v-dialog>
+    <v-dialog v-model="toggleEmployeesSyncModal" width="70%" persistent>
+      <employees-sync-modal :syncData="applicationSyncData" :key="childKey"></employees-sync-modal>
+    </v-dialog>
   </div>
 </template>
 
@@ -305,6 +308,7 @@ import _ from 'lodash';
 import ConvertEmployeeToCsv from '@/components/employees/csv/ConvertEmployeeToCsv.vue';
 import GenerateCsvEeoReport from '@/components/employees/csv/GenerateCsvEeoReport.vue';
 import TagManager from '@/components/employees/tags/TagManager.vue';
+import EmployeesSyncModal from '@/components/modals/EmployeesSyncModal.vue';
 import {
   isEmpty,
   isFullTime,
@@ -618,27 +622,20 @@ function selectedTagsHasEmployee(e) {
  */
 function syncApplications() {
   this.syncing = true;
-  api.syncApplications().then((res) => {
-    let body = res.body;
-    if (body && body.failures === 0) {
-      this.$set(this.status, 'statusType', 'SUCCESS');
-      this.$set(
-        this.status,
-        'statusMessage',
-        `Successfully synced applications with ${body.usersCreated} user(s) created and ${body.usersUpdated} user(s) updated.`
-      );
-      this.$set(this.status, 'color', 'green');
-    } else {
-      this.$set(this.status, 'statusType', 'ERROR');
-      this.$set(
-        this.status,
-        'statusMessage',
-        `Application sync finished with ${body.failures} failure(s), ${body.usersCreated} user(s) created and ${body.usersUpdated} user(s) updated.`
-      );
-      this.$set(this.status, 'color', 'red');
-    }
-    this.syncing = false;
-  });
+  api
+    .syncApplications()
+    .then(async (res) => {
+      this.applicationSyncData = res.body;
+      await this.updateStoreEmployees();
+      await this.refreshEmployees();
+    })
+    .catch((err) => {
+      this.applicationSyncData = err;
+    })
+    .finally(() => {
+      this.toggleEmployeesSyncModal = true;
+      this.syncing = false;
+    });
 } // syncApplications
 
 /**
@@ -706,6 +703,11 @@ async function created() {
   window.EventBus.$on('close-tag-manager', () => {
     this.manageTags = false;
   });
+  window.EventBus.$on('close-data-sync-results-modal', () => {
+    this.toggleEmployeesSyncModal = false;
+    this.applicationSyncData = null;
+    this.childKey++;
+  });
 
   // fill in search box if routed from another page
   if (this.$route.params.requestedFilter) {
@@ -741,6 +743,7 @@ function beforeDestroy() {
   window.EventBus.$off('invalid-employee-delete');
   window.EventBus.$off('empNum');
   window.EventBus.$off('close-tag-manager');
+  window.EventBus.$off('close-data-sync-results-modal');
 } // beforeDestroy
 
 // |--------------------------------------------------|
@@ -806,6 +809,7 @@ export default {
     DeleteErrorModal,
     DeleteModal,
     EmployeeForm,
+    EmployeesSyncModal,
     ConvertEmployeeToCsv,
     GenerateCsvEeoReport,
     TagManager
@@ -816,6 +820,7 @@ export default {
   created,
   data() {
     return {
+      applicationSyncData: null,
       childKey: 0,
       contracts: [],
       createEmployee: false,
@@ -916,7 +921,8 @@ export default {
       syncing: false,
       tags: [],
       tagFlip: [],
-      tagSearchString: ''
+      tagSearchString: '',
+      toggleEmployeesSyncModal: false
     };
   },
   methods: {
