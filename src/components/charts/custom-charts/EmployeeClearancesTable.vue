@@ -83,7 +83,7 @@ function fillData() {
   // filter out inactive and interns if selected
   this.employees = this.employees.filter((emp) => emp.workStatus != 0);
 
-  const CLEARANCE_TYPES = ['TS/SCI - Full Scope', 'TS/SCI - CI Poly', 'TS/SCI - No Poly', 'Secret'];
+  const CLEARANCE_TYPES = ['TS/SCI - Full Scope', 'TS/SCI - CI Poly', 'TS/SCI - No Poly', 'Top Secret', 'Secret'];
   this.tableContents = _.map(CLEARANCE_TYPES, (type) => ({ title: type, value: this.getClearanceCount(type) }));
 
   this.headers = [

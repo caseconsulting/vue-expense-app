@@ -542,7 +542,7 @@ export default {
   data() {
     return {
       clearanceElement: {},
-      clearanceTypeDropDown: ['TS/SCI - Full Scope', 'TS/SCI - CI Poly', 'TS/SCI - No Poly', 'Secret'], // autocomplete clearance type options
+      clearanceTypeDropDown: ['TS/SCI - Full Scope', 'TS/SCI - CI Poly', 'TS/SCI - No Poly', 'Top Secret', 'Secret'], // autocomplete clearance type options
       dateBadgeRules: (index) => {
         let currClearance = this.editedClearances[index];
         return currClearance.grantedDate && currClearance.badgeExpirationDate && currClearance.submissionDate

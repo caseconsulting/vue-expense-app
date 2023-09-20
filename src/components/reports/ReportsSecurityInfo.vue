@@ -493,7 +493,7 @@ export default {
       badgeExpirationDateSearch: null,
       badgeExpirations: [],
       clearanceSearch: null,
-      clearances: ['TS/SCI - Full Scope', 'TS/SCI - CI Poly', 'TS/SCI - No Poly', 'Secret'],
+      clearances: ['TS/SCI - Full Scope', 'TS/SCI - CI Poly', 'TS/SCI - No Poly', 'Top Secret', 'Secret'],
       search: null, // query text for datatable search field
       selectedTags: [],
       showInactiveEmployees: false,

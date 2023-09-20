@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <v-row>
-      <v-col md="6" sm="12" class="mt-4">
+      <v-col md="6" sm="12" class="mt-4 d-flex flex-column justify-center">
         <employees-table></employees-table>
       </v-col>
       <v-col md="6" sm="12" class="mt-4">
@@ -59,3 +59,10 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.test {
+  display: flex !important;
+  align-items: center !important;
+}
+</style>
