@@ -25,17 +25,6 @@
             <h3 v-if="model.id">Editing {{ fullName }}</h3>
             <h3 v-else>New Employee</h3>
           </v-col>
-          <v-col v-if="!model.id" col="6" class="text-right">
-            <v-tooltip v-if="!model.id && uploadDisabled" right>
-              <template v-slot:activator="{ on }">
-                <div v-on="on">
-                  <v-btn :disabled="true">Upload Resume</v-btn>
-                </div>
-              </template>
-              <span>Please enter a valid employee #</span>
-            </v-tooltip>
-            <v-btn v-if="!model.id && !uploadDisabled" @click="openUpload">Upload Resume</v-btn>
-          </v-col>
         </v-row>
       </v-card-title>
       <div v-if="submitting" class="py-10 px-6">
@@ -451,7 +440,7 @@ async function cancelB() {
   //if the user types an employee number that matches another employee's
   let existingResume = employees.some((emp) => emp.employeeNumber == this.employeeNumber);
   if (this.model.employeeNumber && this.$route.params.id === undefined && !existingResume) {
-    await api.deleteResume(this.model.employeeNumber);
+    await api.deleteResume(this.model.id);
   }
   window.EventBus.$emit('cancel-form');
 } // cancelB
@@ -1090,7 +1079,7 @@ async function created() {
   }
   this.formTab = this.currentTab;
   this.afterCreate = true;
-  this.hasResume = (await api.getResume(this.$route.params.id)) != null;
+  this.hasResume = (await api.getResume(this.employee.id)) != null;
 } // created
 
 /**

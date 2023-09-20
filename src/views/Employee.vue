@@ -278,7 +278,7 @@ async function getProfileData() {
   this.basicEmployeeDataLoading = false;
   if (this.model) {
     [this.resumeData, this.expenses] = await Promise.all([
-      this.hasAdminPermissions() || this.userIsEmployee() ? api.getResume(this.$route.params.id) : '',
+      this.hasAdminPermissions() || this.userIsEmployee() ? api.getResume(this.model.id) : '',
       this.hasAdminPermissions() || this.userIsEmployee() ? api.getAllAggregateExpenses() : '', // only load if neededapi.getAllAggregateExpenses(),
       !this.$store.getters.expenseTypes ? this.updateStoreExpenseTypes() : '',
       this.checkForBudgetAccess()
@@ -342,7 +342,7 @@ function displayMessage(type, msg, color) {
  */
 async function deleteResume() {
   this.deleteLoading = true;
-  let deleteResult = await api.deleteResume(this.$route.params.id);
+  let deleteResult = await api.deleteResume(this.model.id);
   if (!(deleteResult instanceof Error)) {
     this.resumeData = null;
     this.displayMessage('SUCCESS', 'Successfully deleted resume', 'green');
@@ -436,7 +436,7 @@ function mounted() {
 
   window.EventBus.$on('uploaded', async (isUploaded, displayMessage) => {
     if (displayMessage) {
-      this.resumeData = await api.getResume(this.$route.params.id);
+      this.resumeData = await api.getResume(this.model.id);
       this.displayMessage('SUCCESS', 'Successfully uploaded resume', 'green');
     }
   });

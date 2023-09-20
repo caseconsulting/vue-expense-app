@@ -670,9 +670,9 @@ async function validateDelete(item) {
  */
 async function clearCreateEmployee() {
   this.createEmployee = false;
-  if (this.employeeNumber) {
-    await api.deleteResume(this.employeeNumber);
-  }
+  // if (this.employeeNumber) {
+  //   await api.deleteResume(this.model.id);
+  // }
 } // clearCreateEmployee
 
 // |--------------------------------------------------|

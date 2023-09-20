@@ -652,12 +652,12 @@ function getPhoneNumActionDropdowns() {
  * When the checkbox is not selected on the resume modal, it uploads the resume and closes the window upon
  * successful completion
  *
- * @param employeeNumber - the employee number
+ * @param eId - the employee Id
  */
-async function onlyUploadResume(employeeNumber) {
+async function onlyUploadResume(eId) {
   try {
     this.loading = true;
-    await api.uploadResume(employeeNumber, this.file); //uploads resume to s3
+    await api.uploadResume(eId, this.file); //uploads resume to s3
     this.loading = false;
 
     //confirmation upload pop-up in employee.vue
@@ -678,7 +678,7 @@ async function submit() {
 
   // If we only want to upload resume and not parse it
   if (!this.extractResume) {
-    await this.onlyUploadResume(employeeNumber);
+    await this.onlyUploadResume(this.employee.id);
     return;
   }
 
@@ -724,7 +724,7 @@ async function submit() {
       }
     }, 15000);
 
-    this.resumeObject = (await api.extractResumeText(employeeNumber, this.file)).comprehend;
+    this.resumeObject = (await api.extractResumeText(this.employee.id, this.file)).comprehend;
 
     // If it takes too long it should timeout
     if (this.resumeObject instanceof Error || !this.resumeObject) {
