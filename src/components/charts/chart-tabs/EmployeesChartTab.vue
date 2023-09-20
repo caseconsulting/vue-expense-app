@@ -59,10 +59,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-.test {
-  display: flex !important;
-  align-items: center !important;
-}
-</style>
