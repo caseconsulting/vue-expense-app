@@ -15,6 +15,10 @@
       <v-icon class="mr-1">mdi-linkedin</v-icon>
       <a :href="this.model.linkedIn" target="_blank">{{ this.model.linkedIn }}</a>
     </p>
+    <!-- Personal Email -->
+    <p v-if="!isEmpty(this.model.personalEmail) && (admin || employee)">
+      <b>Personal Email:</b> {{ this.model.personalEmail }}
+    </p>
     <!-- Phone Number -->
     <p v-if="!isEmpty(getPhoneNumbers()) && (employee || !userRoleIsIntern())">
       <b>Phone Numbers:</b>

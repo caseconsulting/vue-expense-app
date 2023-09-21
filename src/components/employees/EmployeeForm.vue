@@ -907,6 +907,7 @@ function setFormData(tab, data) {
     this.$set(this.model, 'github', data.github);
     this.$set(this.model, 'twitter', data.twitter);
     this.$set(this.model, 'linkedIn', data.linkedIn);
+    this.$set(this.model, 'personalEmail', data.personalEmail);
     this.$set(this.model, 'privatePhoneNumbers', data.privatePhoneNumbers);
     this.$set(this.model, 'publicPhoneNumbers', data.publicPhoneNumbers);
     this.$set(this.model, 'birthday', data.birthday);
@@ -1251,6 +1252,7 @@ export default {
         middleName: null,
         nickname: null,
         noMiddleName: false,
+        personalEmail: null,
         privatePhoneNumbers: [],
         publicPhoneNumbers: [],
         prime: null,

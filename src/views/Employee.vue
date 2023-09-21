@@ -547,6 +547,7 @@ export default {
         middleName: '',
         nickname: '',
         noMiddleName: false,
+        personalEmail: '',
         phoneNumber: '',
         prime: '',
         st: '',

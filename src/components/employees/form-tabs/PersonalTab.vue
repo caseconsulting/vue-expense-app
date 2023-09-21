@@ -28,6 +28,16 @@
       data-vv-name="LinkedIn"
     ></v-text-field>
 
+    <!-- Personal Email -->
+    <v-text-field
+      prepend-icon="mdi-email"
+      v-model.trim="editedPersonalInfo.personalEmail"
+      label="Personal Email"
+      :rules="getEmailRules()"
+      ref="personalEmail"
+      data-vv-name="personal email"
+    ></v-text-field>
+
     <!-- Phone Numbers -->
     <p class="mt-5">Phone Numbers</p>
     <div class="groove pr-0 pl-2 mb-4">
@@ -229,6 +239,7 @@ import api from '@/shared/api.js';
 import _ from 'lodash';
 import {
   getDateOptionalRules,
+  getEmailRules,
   getNonFutureDateRules,
   getURLRules,
   getPhoneNumberRules,
@@ -570,6 +581,7 @@ export default {
   methods: {
     format,
     getDateOptionalRules,
+    getEmailRules,
     getNonFutureDateRules,
     getPhoneNumberRules,
     getPhoneNumberTypeRules,
