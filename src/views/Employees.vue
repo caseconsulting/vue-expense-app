@@ -625,9 +625,9 @@ function syncApplications() {
   api
     .syncApplications()
     .then(async (res) => {
-      this.applicationSyncData = res.body;
       await this.updateStoreEmployees();
       await this.refreshEmployees();
+      this.applicationSyncData = res.body;
     })
     .catch((err) => {
       this.applicationSyncData = err;

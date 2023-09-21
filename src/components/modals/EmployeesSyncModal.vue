@@ -53,14 +53,6 @@
 import { nicknameAndLastName } from '@/shared/employeeUtils';
 const _ = require('lodash');
 
-function mounted() {
-  if (this.syncData && !this.isError(this.syncData)) {
-    this.setUpdates();
-    this.setCreations();
-    this.setFailures();
-  }
-}
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -120,6 +112,13 @@ function isError(data) {
 // |                    WATCHERS                      |
 // |                                                  |
 // |--------------------------------------------------|
+function watchSyncData() {
+  if (this.syncData && !this.isError(this.syncData)) {
+    this.setUpdates();
+    this.setCreations();
+    this.setFailures();
+  }
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -128,7 +127,6 @@ function isError(data) {
 // |--------------------------------------------------|
 
 export default {
-  mounted,
   data() {
     return {
       dialog: false,
@@ -146,6 +144,9 @@ export default {
     setCreations,
     setFailures
   },
-  props: ['syncData']
+  props: ['syncData'],
+  watch: {
+    syncData: watchSyncData
+  }
 };
 </script>
