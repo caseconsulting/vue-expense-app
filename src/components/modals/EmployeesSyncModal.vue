@@ -59,10 +59,22 @@ const _ = require('lodash');
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * Emits a message and data to the event bus.
+ *
+ * @param msg - The message to emit
+ * @param data - The data to emit
+ */
 function emit(msg, data) {
   window.EventBus.$emit(msg, data);
-}
+} // emit
 
+/**
+ * Converts an employee number to an employee's name.
+ *
+ * @param employeeNumber - An employee number
+ * @returns An employee's name if the employee number exists
+ */
 function getName(employeeNumber) {
   let employees = this.$store.getters.employees;
   if (employees) {
@@ -70,8 +82,11 @@ function getName(employeeNumber) {
     return employee ? this.nicknameAndLastName(employee) : employeeNumber;
   }
   return employeeNumber;
-}
+} // getName
 
+/**
+ * Sets up and formats updates made by the data sync function response.
+ */
 function setUpdates() {
   this.updatesToUsers = {};
 
@@ -93,32 +108,48 @@ function setUpdates() {
       this.updatesToUsers[eNum] = new Set([fieldName]);
     }
   });
-}
+} // setUpdates
 
+/**
+ * * Sets up and formats creations made by the data sync function response.
+ */
 function setCreations() {
   this.creations = this.syncData.caseAndBambooSyncResult.usersCreated;
-}
+} // setCreations
 
+/**
+ * * Sets up and formats failures found by the data sync function response.
+ */
 function setFailures() {
   this.failures = [...this.syncData.caseAndBambooSyncResult.failures, ...this.syncData.bambooAndADPSyncResult.failures];
-}
+} // setFailures
 
+/**
+ * Checks if there was a fatal error while getting the data from the data sync function.
+ *
+ * @param data - The data sync response
+ * @returns True if there was a fatal error
+ */
 function isError(data) {
   return data instanceof Error;
-}
+} // isError
 
 // |--------------------------------------------------|
 // |                                                  |
 // |                    WATCHERS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Resets data when data sync was manually invoked.
+ */
 function watchSyncData() {
   if (this.syncData && !this.isError(this.syncData)) {
     this.setUpdates();
     this.setCreations();
     this.setFailures();
   }
-}
+} // watchSyncData
 
 // |--------------------------------------------------|
 // |                                                  |
