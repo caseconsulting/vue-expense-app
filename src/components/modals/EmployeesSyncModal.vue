@@ -33,11 +33,42 @@
       </div>
       <!-- Failures -->
       <div v-if="failures && failures.length > 0" class="mt-4 text-h6 font-weight-black">Failures</div>
-      <div v-for="failure in failures" :key="failure * Math.random()">
+      <div v-for="(failure, i) in failures" :key="failure * Math.random()">
         <div class="text-subtitle-2">
           &nbsp;&nbsp;&nbsp;
           <v-icon small class="mr-2" color="red">close</v-icon>
-          {{ failure }}
+          {{ Object.keys(failures[i])[0] }} - {{ Object.values(failures[i])[0] }}
+        </div>
+      </div>
+
+      <div class="mt-5">
+        <v-btn v-if="!showMore" @click="showMore = true" class="ml-0 pl-0 mt-0" x-small plain
+          >Show More Details
+          <v-icon right> mdi-menu-down </v-icon>
+        </v-btn>
+        <v-btn v-else @click="showMore = false" class="ml-0 pl-0 mt-0" x-small plain
+          >Show Less Details
+          <v-icon right> mdi-menu-up </v-icon>
+        </v-btn>
+        <v-divider></v-divider>
+        <div v-if="showMore">
+          <div class="mt-4">
+            <v-icon large>$case</v-icon>
+            <v-icon large class="mx-3">mdi-arrow-right-thin</v-icon>
+            <v-icon large>$bamboo</v-icon>
+            <v-icon large class="mx-3">mdi-arrow-right-thin</v-icon>
+            <v-icon x-large>$adp</v-icon>
+          </div>
+          <!-- Portal To BambooHR Synced fields -->
+          <div class="mt-4 text-caption font-weight-black">
+            All fields that are synced between the Portal and BambooHR
+            <div class="text-caption">{{ syncData.caseAndBambooSyncResult.fields.join(', ') }}</div>
+          </div>
+          <!-- BambooHR To ADP Synced fields -->
+          <div class="mt-4 text-caption font-weight-black">
+            All fields that are synced between BambooHR and ADP
+            <div class="text-caption">{{ syncData.bambooAndADPSyncResult.fields.join(', ') }}</div>
+          </div>
         </div>
       </div>
     </v-card-text>
@@ -52,6 +83,23 @@
 <script>
 import { nicknameAndLastName } from '@/shared/employeeUtils';
 const _ = require('lodash');
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                LIFECYCLE HOOKS                   |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Mounted lifecycle hook
+ */
+function mounted() {
+  if (this.syncData && !this.isError(this.syncData)) {
+    this.setUpdates();
+    this.setCreations();
+    this.setFailures();
+  }
+} // mounted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -121,7 +169,12 @@ function setCreations() {
  * * Sets up and formats failures found by the data sync function response.
  */
 function setFailures() {
-  this.failures = [...this.syncData.caseAndBambooSyncResult.failures, ...this.syncData.bambooAndADPSyncResult.failures];
+  let failures = [...this.syncData.caseAndBambooSyncResult.failures, ...this.syncData.bambooAndADPSyncResult.failures];
+  this.failures = [];
+  _.forEach(failures, (f) => {
+    const [eNum, error] = Object.entries(f)[0];
+    this.failures.push({ [this.getName(eNum)]: error });
+  });
 } // setFailures
 
 /**
@@ -145,6 +198,7 @@ function isError(data) {
  */
 function watchSyncData() {
   if (this.syncData && !this.isError(this.syncData)) {
+    console.log(this.syncData);
     this.setUpdates();
     this.setCreations();
     this.setFailures();
@@ -158,12 +212,14 @@ function watchSyncData() {
 // |--------------------------------------------------|
 
 export default {
+  mounted,
   data() {
     return {
       dialog: false,
       updatesToUsers: null,
       creations: null,
-      failures: null
+      failures: null,
+      showMore: false
     };
   },
   methods: {

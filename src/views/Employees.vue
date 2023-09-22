@@ -633,6 +633,7 @@ function syncApplications() {
       this.applicationSyncData = err;
     })
     .finally(() => {
+      console.log(this.applicationSyncData);
       this.toggleEmployeesSyncModal = true;
       this.syncing = false;
     });
