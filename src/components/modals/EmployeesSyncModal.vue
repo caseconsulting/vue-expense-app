@@ -68,7 +68,8 @@
             <div class="text-caption">
               First, fields will be synced between the Portal and BambooHR. The Portal is the central source of data, so
               any conflicts/differences found between fields will use the Portal's data. Second, fields will be synced
-              between BambooHR and ADP in which BambooHR is the central source of data.
+              between BambooHR and ADP in which BambooHR is the central source of data. Note, if there is a user that is
+              not being synced, make sure their employee number matches on all applications.
             </div>
           </div>
           <!-- Icons -->
