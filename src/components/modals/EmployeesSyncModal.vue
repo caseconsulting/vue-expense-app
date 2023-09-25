@@ -52,22 +52,32 @@
         </v-btn>
         <v-divider></v-divider>
         <div v-if="showMore">
+          <!-- Portal To BambooHR Synced Fields -->
+          <div class="mt-4 text-caption font-weight-black">
+            All fields that are synced between the Portal and BambooHR
+            <div class="text-caption">{{ syncData.caseAndBambooSyncResult.fields.join(', ') }}</div>
+          </div>
+          <!-- BambooHR To ADP Synced Fields -->
+          <div class="mt-4 text-caption font-weight-black">
+            All fields that are synced between BambooHR and ADP
+            <div class="text-caption">{{ syncData.bambooAndADPSyncResult.fields.join(', ') }}</div>
+          </div>
+          <!-- Additional Information -->
+          <div class="mt-4 text-caption font-weight-black">
+            How the data sync works
+            <div class="text-caption">
+              First, fields will be synced between the Portal and BambooHR. The Portal is the central source of data, so
+              any conflicts/differences found between fields will use the Portal's data. Second, fields will be synced
+              between BambooHR and ADP in which BambooHR is the central source of data.
+            </div>
+          </div>
+          <!-- Icons -->
           <div class="mt-4">
             <v-icon large>$case</v-icon>
             <v-icon large class="mx-3">mdi-arrow-right-thin</v-icon>
             <v-icon large>$bamboo</v-icon>
             <v-icon large class="mx-3">mdi-arrow-right-thin</v-icon>
             <v-icon x-large>$adp</v-icon>
-          </div>
-          <!-- Portal To BambooHR Synced fields -->
-          <div class="mt-4 text-caption font-weight-black">
-            All fields that are synced between the Portal and BambooHR
-            <div class="text-caption">{{ syncData.caseAndBambooSyncResult.fields.join(', ') }}</div>
-          </div>
-          <!-- BambooHR To ADP Synced fields -->
-          <div class="mt-4 text-caption font-weight-black">
-            All fields that are synced between BambooHR and ADP
-            <div class="text-caption">{{ syncData.bambooAndADPSyncResult.fields.join(', ') }}</div>
           </div>
         </div>
       </div>
