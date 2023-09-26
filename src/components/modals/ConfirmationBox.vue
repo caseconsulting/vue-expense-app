@@ -11,8 +11,8 @@
           <!-- Overdraft Allowed start above overdraft and not going over overdraft limit -->
           <p v-if="isOverCovered">
             You are already above the initial budget of {{ convertToMoneyString(expense.budget) }}. However you are
-            still within within within the overdraft limit of {{ convertToMoneyString(expense.budget * 2) }}. You will
-            be reimbursed will be charged next year for an additional {{ convertToMoneyString(expense.cost) }}.
+            still within the overdraft limit of {{ convertToMoneyString(expense.budget * 2) }}. You will be reimbursed
+            but will be charged next year for an additional {{ convertToMoneyString(expense.cost) }}.
           </p>
           <!-- Overdraft Allowed and Going over initial budget-->
           <p v-else-if="expense.od && isCovered">

@@ -606,7 +606,7 @@ async function checkCoverage() {
                 // BRANCH 4.2 goes over initial budget with new expense but stays below overdraft budget
                 this.$set(this.editedExpense, 'budget', expenseType.budget);
                 this.$set(this.editedExpense, 'remaining', expenseType.budget - newCommittedAmount);
-                // this.$set(this.editedExpensee, 'od', true);
+                this.$set(this.editedExpense, 'od', true);
                 this.isCovered = true;
                 this.isOverCovered = false;
                 this.confirming = !this.confirming;
