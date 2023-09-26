@@ -219,7 +219,7 @@ function getClearanceType(clearances, item) {
   let clearanceList = _.sortBy(clearances, (c) => c.badgeExpirationDate);
   _.forEach(clearanceList, (clearance) => {
     if (clearance.type) {
-      types.push(clearance.type);
+      clearance.awaitingClearance ? types.push(clearance.type + ' (awaiting clearance)') : types.push(clearance.type);
     }
   });
   item.clearanceType = _.join(types, ' | ');
