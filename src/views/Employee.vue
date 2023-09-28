@@ -52,7 +52,7 @@
             color="#bc3825"
             @click="toggleDeleteModal = !toggleDeleteModal"
             :x-small="isMobile()"
-            :disabled="resumeData == null"
+            :disabled="model.resumeUpdated == null"
             :loading="deleteLoading"
             ><b>Delete Resume</b></v-btn
           >
@@ -116,7 +116,7 @@
                 <template #activator="{ on }">
                   <div v-on="on">
                     <v-icon
-                      :disabled="resumeData == null"
+                      :disabled="model.resumeUpdated == null"
                       class="pr-2"
                       @click="downloadResume()"
                       color="white"
@@ -127,9 +127,15 @@
                     >
                   </div>
                 </template>
-                <p class="ma-0 pa-0">{{ resumeData != null ? 'Download Resume' : 'No resume available' }}</p>
                 <p class="ma-0 pa-0">
-                  {{ resumeData != null ? `Uploaded ${format(resumeData.lastModified, null, dateFormat)}` : '' }}
+                  {{ this.model.resumeUpdated != null ? 'Download Resume' : 'No resume available' }}
+                </p>
+                <p class="ma-0 pa-0">
+                  {{
+                    this.model.resumeUpdated != null
+                      ? `Uploaded ${format(this.model.resumeUpdated, null, dateFormat)}`
+                      : ''
+                  }}
                 </p>
               </v-tooltip>
               <v-tooltip v-if="hasAdminPermissions() || userIsEmployee()" top>
@@ -203,7 +209,7 @@ import {
   updateStoreUser,
   updateStoreTags
 } from '@/utils/storeUtils';
-import { format, FORMATTED_ISOFORMAT } from '@/shared/dateUtils';
+import { format, getTodaysDate, FORMATTED_ISOFORMAT } from '@/shared/dateUtils';
 import _ from 'lodash';
 import ConvertEmployeeToCsv from '@/components/employees/csv/ConvertEmployeeToCsv.vue';
 import AnniversaryCard from '@/components/shared/AnniversaryCard.vue';
@@ -246,9 +252,8 @@ function clearStatus() {
  * Downloads the resume of the employee
  */
 async function downloadResume() {
-  if (this.resumeData.data) {
-    window.open(this.resumeData.data, '_blank');
-  }
+  let res = await api.getResume(this.model.id);
+  window.open(res.data, '_blank');
 } // downloadResume
 
 /**
@@ -257,10 +262,10 @@ async function downloadResume() {
 async function getProfileData() {
   this.loading = true;
   await Promise.all([
-    !this.$store.getters.employees ? this.updateStoreEmployees() : _,
-    !this.$store.getters.user ? this.updateStoreUser() : _,
-    !this.$store.getters.contracts ? this.updateStoreContracts() : _,
-    this.hasAdminPermissions() && !this.$store.getters.tags ? this.updateStoreTags() : _
+    !this.$store.getters.employees ? this.updateStoreEmployees() : '',
+    !this.$store.getters.user ? this.updateStoreUser() : '',
+    !this.$store.getters.contracts ? this.updateStoreContracts() : '',
+    this.hasAdminPermissions() && !this.$store.getters.tags ? this.updateStoreTags() : ''
   ]);
   if (this.$store.getters.user.employeeNumber == this.$route.params.id) {
     // user looking at their own profile
@@ -277,8 +282,7 @@ async function getProfileData() {
   this.displayQuickBooksTimeAndBalances = this.userRoleIsAdmin() || this.userIsEmployee();
   this.basicEmployeeDataLoading = false;
   if (this.model) {
-    [this.resumeData, this.expenses] = await Promise.all([
-      this.hasAdminPermissions() || this.userIsEmployee() ? api.getResume(this.model.id) : '',
+    [this.expenses] = await Promise.all([
       this.hasAdminPermissions() || this.userIsEmployee() ? api.getAllAggregateExpenses() : '', // only load if neededapi.getAllAggregateExpenses(),
       !this.$store.getters.expenseTypes ? this.updateStoreExpenseTypes() : '',
       this.checkForBudgetAccess()
@@ -343,8 +347,9 @@ function displayMessage(type, msg, color) {
 async function deleteResume() {
   this.deleteLoading = true;
   let deleteResult = await api.deleteResume(this.model.id);
-  if (!(deleteResult instanceof Error)) {
-    this.resumeData = null;
+  let updateEmpRes = await api.updateItem(api.EMPLOYEES, { ...this.model, resumeupdated: null });
+  if (!(deleteResult instanceof Error) || !(updateEmpRes instanceof Error)) {
+    this.model.resumeUpdated = getTodaysDate();
     this.displayMessage('SUCCESS', 'Successfully deleted resume', 'green');
   } else {
     this.displayMessage('ERROR', 'Failure to delete resume', 'red');
@@ -404,17 +409,6 @@ async function created() {
   window.EventBus.$on('canceled-delete-resume', () => {
     this.midAction = false;
   });
-
-  window.EventBus.$on('delete-resume', (newResume) => {
-    if (newResume != null) {
-      this.resumeData = newResume;
-    }
-  });
-  window.EventBus.$on('upload-resume-complete', (newResume) => {
-    if (newResume != null) {
-      this.resumeData = newResume;
-    }
-  });
   this.basicEmployeeDataLoading = true;
   this.storeIsPopulated ? await this.getProfileData() : (this.loading = true);
   if (!this.$store.getters.employees) await this.updateStoreEmployees();
@@ -436,7 +430,7 @@ function mounted() {
 
   window.EventBus.$on('uploaded', async (isUploaded, displayMessage) => {
     if (displayMessage) {
-      this.resumeData = await api.getResume(this.model.id);
+      this.model.resumeUpdated = getTodaysDate();
       this.displayMessage('SUCCESS', 'Successfully uploaded resume', 'green');
     }
   });
@@ -516,7 +510,6 @@ export default {
         active: ['full', 'part'] // default only shows full and part time employees
       }, // datatable filter
       fiscalDateView: '',
-      resumeData: null,
       loading: false, // loading status
       model: {
         awards: [],

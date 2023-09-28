@@ -417,6 +417,7 @@ import UniversityForm from '@/components/employees/form-tabs/education-types/Uni
 import MilitaryForm from '@/components/employees/form-tabs/education-types/MilitaryForm.vue';
 import HighSchoolForm from '@/components/employees/form-tabs/education-types/HighSchoolForm.vue';
 import GeneralConfirmationModal from '@/components/modals/GeneralConfirmationModal.vue';
+import { getTodaysDate } from '../../shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -658,6 +659,7 @@ async function onlyUploadResume(eId) {
   try {
     this.loading = true;
     await api.uploadResume(eId, this.file); //uploads resume to s3
+    await api.updateItem(api.EMPLOYEES, { ...this.employee, resumeupdated: getTodaysDate() });
     this.loading = false;
 
     //confirmation upload pop-up in employee.vue
@@ -674,11 +676,10 @@ async function onlyUploadResume(eId) {
  * Submit new resume and parse it
  */
 async function submit() {
-  let employeeNumber = !this.$route.params.id ? this.employee.employeeNumber : this.$route.params.id;
-
   // If we only want to upload resume and not parse it
   if (!this.extractResume) {
     await this.onlyUploadResume(this.employee.id);
+    await api.updateItem(api.EMPLOYEES, { ...this.employee, resumeupdated: getTodaysDate() });
     return;
   }
 
@@ -725,6 +726,7 @@ async function submit() {
     }, 15000);
 
     this.resumeObject = (await api.extractResumeText(this.employee.id, this.file)).comprehend;
+    await api.updateItem(api.EMPLOYEES, { ...this.model, resumeupdated: getTodaysDate() });
 
     // If it takes too long it should timeout
     if (this.resumeObject instanceof Error || !this.resumeObject) {
