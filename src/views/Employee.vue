@@ -347,9 +347,9 @@ function displayMessage(type, msg, color) {
 async function deleteResume() {
   this.deleteLoading = true;
   let deleteResult = await api.deleteResume(this.model.id);
-  let updateEmpRes = await api.updateItem(api.EMPLOYEES, { ...this.model, resumeupdated: null });
+  let updateEmpRes = await api.updateItem(api.EMPLOYEES, { ...this.model, resumeUpdated: null });
   if (!(deleteResult instanceof Error) || !(updateEmpRes instanceof Error)) {
-    this.model.resumeUpdated = getTodaysDate();
+    this.model.resumeUpdated = null;
     this.displayMessage('SUCCESS', 'Successfully deleted resume', 'green');
   } else {
     this.displayMessage('ERROR', 'Failure to delete resume', 'red');
