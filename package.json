@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "export NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service build",
+    "clean": "rm -rf dist tests_output",
     "cli": "vue-cli-service",
     "predeploy:dev": "npm run download:dev:env",
     "deploy:dev": "export NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service build && grunt deploy:dev",
@@ -33,6 +34,10 @@
     "test:unit": "vue-cli-service test:unit",
     "unit": "npm run test:unit",
     "validate": "npm ci"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
   },
   "dependencies": {
     "@mdi/font": "6.9.96",
