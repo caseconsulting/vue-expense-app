@@ -9,7 +9,7 @@
 
 ## Setup
 
-The **Expense Application** is written in **Vue.js** and relies on **Node.js** v18.x+ and the **npm** package management system. UI is enhanced with **Vuetify.js** and **BootStrap-vue**.
+The **Expense Application** is written in **Vue.js** and relies on **Node.js** v18.x+ and the **npm** package management system. UI is enhanced with **Vuetify.js**.
 
 - Download and install Node.js v18.x from: https://nodejs.org/en/ or https://nodejs.org/dist/latest-v18.x/
 - Install required Node.js modules:
@@ -191,10 +191,6 @@ Please note we are currently using Vue2. When we migrate to Vue3 replace the abo
 **Vuetify:**
 
 https://vuetifyjs.com/en/
-
-**Bootstrap-vue:**
-
-https://bootstrap-vue.org/docs
 
 **Lodash:**
 
