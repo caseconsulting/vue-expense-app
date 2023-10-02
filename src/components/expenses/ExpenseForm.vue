@@ -521,7 +521,7 @@ async function checkCoverage() {
         this.employee = this.$store.getters.user;
       } else {
         // creating or updating an expense as an admin
-        this.employee = await api.getItem(api.EMPLOYEES, this.editedExpense.employeeId);
+        this.employee = _.find(this.$store.getters.employees, (e) => e.id === this.editedExpense.employeeId);
       }
 
       // get budget
@@ -532,6 +532,9 @@ async function checkCoverage() {
         return b.expenseTypeId == expenseType.value && isActiveBudget;
       });
       let budgetExists = budget ? true : false;
+      let budgetAmount = parseInt(
+        _.find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id).budgetObject.amount
+      );
 
       if (this.employee.workStatus == 0) {
         // emit error if user is inactive
@@ -597,42 +600,42 @@ async function checkCoverage() {
           }
           if (expenseType.odFlag && this.isFullTime(this.employee)) {
             // BRANCH 2.1 selected expense type allows overdraft and employee is full time
-            if (expenseType.budget > newCommittedAmount) {
+            if (budgetAmount > newCommittedAmount) {
               //BRANCH 3.1 under initial budget (not including overdraft)
-              if (newCommittedAmount + cost <= expenseType.budget) {
+              if (newCommittedAmount + cost <= budgetAmount) {
                 // BRANCH 4.1 under initial budget and not going into overdraft after applying expense
                 await this.submit();
-              } else if (newCommittedAmount + cost <= 2 * expenseType.budget) {
+              } else if (newCommittedAmount + cost <= 2 * budgetAmount) {
                 // BRANCH 4.2 goes over initial budget with new expense but stays below overdraft budget
-                this.$set(this.editedExpense, 'budget', expenseType.budget);
-                this.$set(this.editedExpense, 'remaining', expenseType.budget - newCommittedAmount);
+                this.$set(this.editedExpense, 'budget', budgetAmount);
+                this.$set(this.editedExpense, 'remaining', budgetAmount - newCommittedAmount);
                 this.$set(this.editedExpense, 'od', true);
                 this.isCovered = true;
                 this.isOverCovered = false;
                 this.confirming = !this.confirming;
               } else {
                 // BRANCH 4.3 goes over overdraft budget completely
-                this.$set(this.editedExpense, 'budget', expenseType.budget);
-                this.$set(this.editedExpense, 'remaining', 2 * expenseType.budget - newCommittedAmount);
+                this.$set(this.editedExpense, 'budget', budgetAmount);
+                this.$set(this.editedExpense, 'remaining', 2 * budgetAmount - newCommittedAmount);
                 this.$set(this.editedExpense, 'od', true);
                 this.isCovered = false;
                 this.isOverCovered = false;
                 this.confirming = !this.confirming;
               }
-            } else if (2 * expenseType.budget > newCommittedAmount) {
+            } else if (2 * budgetAmount > newCommittedAmount) {
               // BRANCH 3.2 under overdraft budget -- expense is able to be made
-              if (newCommittedAmount + cost <= 2 * expenseType.budget) {
+              if (newCommittedAmount + cost <= 2 * budgetAmount) {
                 // BRANCH 5.1 above initial budget but below overdraft budget TODO: add condirmation box handling? new flag?
-                this.$set(this.editedExpense, 'budget', expenseType.budget);
-                this.$set(this.editedExpense, 'remaining', 2 * expenseType.budget - newCommittedAmount);
+                this.$set(this.editedExpense, 'budget', budgetAmount);
+                this.$set(this.editedExpense, 'remaining', 2 * budgetAmount - newCommittedAmount);
                 this.$set(this.editedExpense, 'od', true);
                 this.isCovered = true;
                 this.isOverCovered = true;
                 this.confirming = !this.confirming;
               } else {
                 // BRANCH 5.2 budget not maxed out before this expense (going over overdraft) but expense not fully covered. Show adusted confirmation dialog
-                this.$set(this.editedExpense, 'budget', expenseType.budget);
-                this.$set(this.editedExpense, 'remaining', 2 * expenseType.budget - newCommittedAmount);
+                this.$set(this.editedExpense, 'budget', budgetAmount);
+                this.$set(this.editedExpense, 'remaining', 2 * budgetAmount - newCommittedAmount);
                 this.$set(this.editedExpense, 'od', true);
                 this.isCovered = false;
                 this.isOverCovered = false;
@@ -647,16 +650,16 @@ async function checkCoverage() {
           } else {
             // BRANCH 2.2 selected expense type does not allow overdraft or employee is not full time
             this.$set(this.editedExpense, 'od', false);
-            if (newCommittedAmount <= budget.amount) {
+            if (newCommittedAmount <= budgetAmount) {
               // BRANCH 6.1 starts under initial budget
-              if (newCommittedAmount + cost <= budget.amount) {
+              if (newCommittedAmount + cost <= budgetAmount) {
                 // BRANCH 7.1 doesnt go over budget
                 // reimburse the full expense
                 await this.submit();
               } else {
                 // BRANCH 7.2 goes over budget
-                this.$set(this.editedExpense, 'budget', budget.amount);
-                this.$set(this.editedExpense, 'remaining', budget.amount - newCommittedAmount);
+                this.$set(this.editedExpense, 'budget', budgetAmount);
+                this.$set(this.editedExpense, 'remaining', budgetAmount - newCommittedAmount);
                 this.isCovered = false;
                 this.isOverCovered = false;
                 this.confirming = !this.confirming;
@@ -672,21 +675,21 @@ async function checkCoverage() {
           // BRANCH 1.2 budget for this expense does not exist
           if (expenseType.odFlag && this.isFullTime(this.employee)) {
             // Branch 8.1 selected expense type allows overdraft and employee is full time
-            if (cost <= expenseType.budget) {
+            if (cost <= budgetAmount) {
               // full amount reimbursed
               await this.submit();
-            } else if (cost <= 2 * expenseType.budget) {
+            } else if (cost <= 2 * budgetAmount) {
               // the expense goes into overdraft but fully covered
-              this.$set(this.editedExpense, 'budget', expenseType.budget);
-              this.$set(this.editedExpense, 'remaining', expenseType.budget);
+              this.$set(this.editedExpense, 'budget', budgetAmount);
+              this.$set(this.editedExpense, 'remaining', budgetAmount);
               this.$set(this.editedExpense, 'od', true);
               this.isCovered = true;
               this.isOverCovered = false;
               this.confirming = !this.confirming;
             } else {
               // expense goes past overdraft budget completely and is partially covered
-              this.$set(this.editedExpense, 'budget', expenseType.budget);
-              this.$set(this.editedExpense, 'remaining', 2 * expenseType.budget);
+              this.$set(this.editedExpense, 'budget', budgetAmount);
+              this.$set(this.editedExpense, 'remaining', 2 * budgetAmount);
               this.$set(this.editedExpense, 'od', true);
               this.isCovered = false;
               this.isOverCovered = false;
@@ -695,15 +698,13 @@ async function checkCoverage() {
           } else {
             // BRANCH 8.2 selected expense type does not allow overdraft or employee is not full time
             this.$set(this.editedExpense, 'od', false);
-            // calculate adjusted budget amount based on employee's current work status
-            let adjustedBudget = this.calcAdjustedBudget(this.employee, expenseType);
-            if (cost <= adjustedBudget) {
+            if (cost <= budgetAmount) {
               // reimburse the full expense
               await this.submit();
             } else {
               // expense exceeds the budget but the expense not fully covered
-              this.$set(this.editedExpense, 'budget', adjustedBudget);
-              this.$set(this.editedExpense, 'remaining', adjustedBudget);
+              this.$set(this.editedExpense, 'budget', budgetAmount);
+              this.$set(this.editedExpense, 'remaining', budgetAmount);
               this.isCovered = false;
               this.isOverCovered = false;
               this.confirming = !this.confirming;
@@ -764,9 +765,19 @@ function costHint() {
       str += this.convertToMoneyString(this.remainingBudget);
       return str;
     }
-    if (this.remainingBudget < 0 && this.remainingBudget >= -this.overdraftBudget && this.selectedExpenseType.odFlag) {
+    let employee = _.find(this.$store.getters.employees, (e) => e.id === this.editedExpense.employeeId);
+    if (
+      this.remainingBudget < 0 &&
+      this.remainingBudget >= -this.overdraftBudget &&
+      this.selectedExpenseType.odFlag &&
+      this.isFullTime(employee)
+    ) {
       str += ` (Overdraftable and within ${this.convertToMoneyString(this.overdraftBudget)} limit)`;
-    } else if (this.remainingBudget < -this.overdraftBudget && this.selectedExpenseType.odFlag) {
+    } else if (
+      this.remainingBudget < -this.overdraftBudget &&
+      this.selectedExpenseType.odFlag &&
+      this.isFullTime(employee)
+    ) {
       str += ` (Exceeds overdraftable amount of ${this.convertToMoneyString(this.overdraftBudget)})`;
     } else if (this.remainingBudget < 0 && !this.selectedExpenseType.odFlag) {
       str += ' (Not Overdraftable)';
@@ -891,7 +902,8 @@ function filteredExpenseTypes() {
           filteredExpType.push(expenseType);
         } else if (this.hasAccess(selectedEmployee, expenseType)) {
           // add expense type if the employee is selected and has access
-          let amount = this.calcAdjustedBudget(selectedEmployee, expenseType); // calculate budget
+          let budget = _.find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id);
+          let amount = budget ? budget.budgetObject.amount : this.calcAdjustedBudget(selectedEmployee, expenseType); // calculate budget
           expenseType.text = `${expenseType.budgetName} - $${Number(amount).toLocaleString().toString()}`;
           filteredExpType.push(expenseType);
         }
