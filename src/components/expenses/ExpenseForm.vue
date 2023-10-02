@@ -766,18 +766,17 @@ function costHint() {
       return str;
     }
     let employee = _.find(this.$store.getters.employees, (e) => e.id === this.editedExpense.employeeId);
+    let isOverdraftable =
+      (this.selectedExpenseType.proRated && this.isFullTime(employee) && this.selectedExpenseType.odFlag) ||
+      (!this.selectedExpenseType.proRated && this.selectedExpenseType.odFlag);
     if (
       this.remainingBudget < 0 &&
       this.remainingBudget >= -this.overdraftBudget &&
       this.selectedExpenseType.odFlag &&
-      this.isFullTime(employee)
+      isOverdraftable
     ) {
       str += ` (Overdraftable and within ${this.convertToMoneyString(this.overdraftBudget)} limit)`;
-    } else if (
-      this.remainingBudget < -this.overdraftBudget &&
-      this.selectedExpenseType.odFlag &&
-      this.isFullTime(employee)
-    ) {
+    } else if (this.remainingBudget < -this.overdraftBudget && this.selectedExpenseType.odFlag && isOverdraftable) {
       str += ` (Exceeds overdraftable amount of ${this.convertToMoneyString(this.overdraftBudget)})`;
     } else if (this.remainingBudget < 0 && !this.selectedExpenseType.odFlag) {
       str += ' (Not Overdraftable)';
@@ -922,7 +921,8 @@ function filteredExpenseTypes() {
             isBetween(getTodaysDate(), expenseType.startDate, expenseType.endDate, 'day', '[]')
           ) {
             // expense type is active
-            let amount = this.calcAdjustedBudget(employee, expenseType);
+            let budget = _.find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id);
+            let amount = budget ? budget.budgetObject.amount : expenseType.budgetAmount;
             expenseType.text = `${expenseType.budgetName} - $${Number(amount).toLocaleString().toString()}`;
             filteredExpType.push(expenseType);
           }
@@ -1357,23 +1357,9 @@ function setDefaultExpenseTypeData() {
   let expenseTypes = this.$store.getters.expenseTypes;
   this.expenseTypes = _.map(expenseTypes, (expenseType) => {
     return {
-      id: expenseType.id,
       text: `${expenseType.budgetName} - $${expenseType.budget}`,
-      startDate: expenseType.startDate,
-      endDate: expenseType.endDate,
-      budgetName: expenseType.budgetName,
       value: expenseType.id,
-      budget: expenseType.budget,
-      odFlag: expenseType.odFlag,
-      requiredFlag: expenseType.requiredFlag,
-      recurringFlag: expenseType.recurringFlag,
-      isInactive: expenseType.isInactive,
-      categories: expenseType.categories,
-      accessibleBy: expenseType.accessibleBy,
-      hasRecipient: expenseType.hasRecipient,
-      alwaysOnFeed: expenseType.alwaysOnFeed,
-      requireURL: expenseType.requireURL,
-      tagBudgets: expenseType.tagBudgets
+      ...expenseType
     };
   });
 } // setDefaultExpenseTypeData
