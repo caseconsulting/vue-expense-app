@@ -209,7 +209,6 @@ function isError(data) {
  */
 function watchSyncData() {
   if (this.syncData && !this.isError(this.syncData)) {
-    console.log(this.syncData);
     this.setUpdates();
     this.setCreations();
     this.setFailures();
