@@ -636,6 +636,7 @@ function clearModel() {
   this.$set(this.model, 'budgetName', '');
   this.$set(this.model, 'description', '');
   this.$set(this.model, 'odFlag', false);
+  this.$set(this.model, 'proRated', false);
   this.$set(this.model, 'startDate', '');
   this.$set(this.model, 'endDate', '');
   this.$set(this.model, 'recurringFlag', false);
@@ -931,23 +932,7 @@ function twoDecimals(value) {
  * @param item - expense type selected
  */
 function onSelect(item) {
-  this.$set(this.model, 'id', item.id);
-  this.$set(this.model, 'budget', twoDecimals(item.budget));
-  this.$set(this.model, 'budgetName', item.budgetName);
-  this.$set(this.model, 'description', item.description);
-  this.$set(this.model, 'odFlag', item.odFlag);
-  this.$set(this.model, 'startDate', item.startDate);
-  this.$set(this.model, 'endDate', item.endDate);
-  this.$set(this.model, 'recurringFlag', item.recurringFlag);
-  this.$set(this.model, 'requiredFlag', item.requiredFlag);
-  this.$set(this.model, 'isInactive', item.isInactive);
-  this.$set(this.model, 'categories', item.categories);
-  this.$set(this.model, 'accessibleBy', item.accessibleBy);
-  this.$set(this.model, 'hasRecipient', item.hasRecipient);
-  this.$set(this.model, 'alwaysOnFeed', item.alwaysOnFeed);
-  this.$set(this.model, 'campfire', item.campfire);
-  this.$set(this.model, 'requireURL', item.requireURL);
-  this.$set(this.model, 'tagBudgets', item.tagBudgets);
+  this.model = _.cloneDeep(item);
 } // onSelect
 
 /**
@@ -1209,6 +1194,7 @@ export default {
         id: '',
         isInactive: false,
         odFlag: false,
+        proRated: false,
         recurringFlag: false,
         requiredFlag: true,
         requireURL: false,
