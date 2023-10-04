@@ -568,6 +568,10 @@ async function refreshEmployees() {
   });
   this.contracts = this.$store.getters.contracts;
   this.tags = this.$store.getters.tags;
+  // let empIds = new Set();
+  // for (let e of this.employees) empIds.add(e.id);
+  // for (let t of this.tags)
+  //   for (let e of t.employees) if (!empIds.has(e)) console.log(`Id ${e} from ${t.tagName} does not exist!`);
   this.loading = false; // set loading status to false
 } // refreshEmployees
 
@@ -618,6 +622,20 @@ function selectedTagsHasEmployee(e) {
 } // selectedTagsHasEmployee
 
 /**
+ * helper function: return true if given employee is on a tag
+ *
+ * @param e - the employee or employee id
+ * @return true if the employee has a tag selected in filters
+ */
+function employeeIsOnTag(e) {
+  if (e.id) e = e.id; // just use the id
+  for (let t of this.tags) {
+    if (t.employees.includes(e)) return true;
+  }
+  return false;
+} // selectedTagsHasEmployee
+
+/**
  * Syncs data between different applications (Portal, BambooHR, ADP, ...).
  */
 function syncApplications() {
@@ -644,6 +662,20 @@ function syncApplications() {
  * @param item - employee to validate
  */
 async function validateDelete(item) {
+  // remove employee from tag object first
+  if (this.employeeIsOnTag(item.id)) {
+    // remove them from the tag
+    let tagPromises = [];
+    for (let t of this.tags) {
+      if (t.employees.includes(item.id)) {
+        let index = t.employees.indexOf(item.id);
+        t.employees.splice(index, 1);
+      }
+      tagPromises.push(api.updateItem(api.TAGS, t));
+    }
+    await Promise.all(tagPromises);
+  }
+
   this.midAction = true;
   try {
     let expenses = await api.getAllEmployeeExpenses(item.id); // get employee expenses
@@ -951,6 +983,7 @@ export default {
     renderManageTags,
     removeTag,
     selectedTagsHasEmployee,
+    employeeIsOnTag,
     syncApplications,
     userRoleIsAdmin,
     userRoleIsManager,
