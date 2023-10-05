@@ -568,10 +568,6 @@ async function refreshEmployees() {
   });
   this.contracts = this.$store.getters.contracts;
   this.tags = this.$store.getters.tags;
-  // let empIds = new Set();
-  // for (let e of this.employees) empIds.add(e.id);
-  // for (let t of this.tags)
-  //   for (let e of t.employees) if (!empIds.has(e)) console.log(`Id ${e} from ${t.tagName} does not exist!`);
   this.loading = false; // set loading status to false
 } // refreshEmployees
 
