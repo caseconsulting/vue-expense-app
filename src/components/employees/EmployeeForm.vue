@@ -1079,7 +1079,6 @@ async function created() {
   }
   this.formTab = this.currentTab;
   this.afterCreate = true;
-  this.hasResume = (await api.getResume(this.employee.id)) != null;
 } // created
 
 /**
@@ -1205,7 +1204,6 @@ export default {
       errorTabNames: {},
       formTab: null, // currently active tab
       fullName: '', // employee's first and last name
-      hasResume: false,
       model: {
         agencyIdentificationNumber: null,
         awards: [],
