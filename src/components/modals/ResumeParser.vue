@@ -417,7 +417,6 @@ import UniversityForm from '@/components/employees/form-tabs/education-types/Uni
 import MilitaryForm from '@/components/employees/form-tabs/education-types/MilitaryForm.vue';
 import HighSchoolForm from '@/components/employees/form-tabs/education-types/HighSchoolForm.vue';
 import GeneralConfirmationModal from '@/components/modals/GeneralConfirmationModal.vue';
-import { getTodaysDate } from '../../shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -659,11 +658,10 @@ async function onlyUploadResume(eId) {
   try {
     this.loading = true;
     await api.uploadResume(eId, this.file); //uploads resume to s3
-    await api.updateItem(api.EMPLOYEES, { ...this.employee, resumeupdated: getTodaysDate() });
     this.loading = false;
 
     //confirmation upload pop-up in employee.vue
-    window.EventBus.$emit('uploaded', true, true);
+    window.EventBus.$emit('uploaded', true);
     this.clearForm();
     this.activate = false;
   } catch (err) {
@@ -679,7 +677,6 @@ async function submit() {
   // If we only want to upload resume and not parse it
   if (!this.extractResume) {
     await this.onlyUploadResume(this.employee.id);
-    await api.updateItem(api.EMPLOYEES, { ...this.employee, resumeupdated: getTodaysDate() });
     return;
   }
 
@@ -726,7 +723,7 @@ async function submit() {
     }, 15000);
 
     this.resumeObject = (await api.extractResumeText(this.employee.id, this.file)).comprehend;
-    await api.updateItem(api.EMPLOYEES, { ...this.model, resumeupdated: getTodaysDate() });
+    window.EventBus.$emit('uploaded', false);
 
     // If it takes too long it should timeout
     if (this.resumeObject instanceof Error || !this.resumeObject) {
@@ -756,9 +753,6 @@ async function submit() {
       description: `${this.employee.firstName} ${this.employee.lastName} successfully uploaded a resume.`,
       timeToLive: 60
     });
-
-    // Notify employee component that resume has been uploaded and parsed
-    window.EventBus.$emit('upload-resume-complete', true);
 
     // PERSONAL info
     let personalComprehend = this.resumeObject.filter((entity) => {

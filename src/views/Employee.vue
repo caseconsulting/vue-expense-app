@@ -236,6 +236,7 @@ async function resumeReceived(newEmployeeForm, changes) {
   }
 
   this.model = newEmployeeForm;
+  this.model.resumeUpdated = getTodaysDate();
   await api.updateItem(api.EMPLOYEES, this.model);
 } // resumeReceived
 
@@ -428,11 +429,11 @@ function mounted() {
     }
   });
 
-  window.EventBus.$on('uploaded', async (isUploaded, displayMessage) => {
-    if (displayMessage) {
-      this.model.resumeUpdated = getTodaysDate();
-      this.displayMessage('SUCCESS', 'Successfully uploaded resume', 'green');
-    }
+  window.EventBus.$on('uploaded', async (displayMessage) => {
+    if (displayMessage) this.displayMessage('SUCCESS', 'Successfully uploaded resume', 'green');
+    this.model.resumeUpdated = getTodaysDate();
+    this.model = _.cloneDeep(this.model); // force vue to reload the object
+    await api.updateItem(api.EMPLOYEES, this.model);
   });
 
   window.EventBus.$on('tabChange', (tab) => {
@@ -451,7 +452,6 @@ function mounted() {
  */
 function beforeDestroy() {
   window.EventBus.$off('delete-resume');
-  window.EventBus.$off('upload-resume-complete');
   window.EventBus.$off('confirm-delete-resume');
   window.EventBus.$off('canceled-delete-resume');
   window.EventBus.$off('cancel-form');
