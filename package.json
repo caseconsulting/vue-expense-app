@@ -30,7 +30,6 @@
     "stylelint": "stylelint src/**/*.{css,scss,vue}",
     "test": "npm run test:unit",
     "test:e2e": "vue-cli-service test:e2e",
-    "test:nightwatch": "node ./node_modules/nightwatch/bin/nightwatch -e default unit-tests --suiteRetries 2",
     "test:unit": "vue-cli-service test:unit",
     "unit": "npm run test:unit",
     "validate": "npm ci"
@@ -65,7 +64,6 @@
     "@babel/core": "7.23.0",
     "@babel/eslint-parser": "7.22.15",
     "@vue/cli-plugin-babel": "4.5.17",
-    "@vue/cli-plugin-e2e-cypress": "4.5.17",
     "@vue/cli-plugin-unit-jest": "4.5.17",
     "@vue/cli-service": "4.5.17",
     "@vue/eslint-config-prettier": "8.0.0",
@@ -79,7 +77,6 @@
     "geckodriver": "4.2.1",
     "grunt": "1.5.3",
     "grunt-shell": "4.0.0",
-    "nightwatch": "1.7.13",
     "postcss": "8.4.31",
     "postcss-html": "1.5.0",
     "postcss-loader": "4.3.0",

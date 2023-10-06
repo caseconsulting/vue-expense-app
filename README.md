@@ -4,7 +4,6 @@
 - [Environment Variables](#environment-variables)
 - [Application Tasks](#application-tasks)
 - [Deployment](#deployment)
-- [Nightwatch Tests](#nightwatch-tests)
 - [Documentation](#documentation)
 
 ## Setup
@@ -78,18 +77,6 @@ To run unit tests (with Jest):
 npm run test
 ```
 
-To run integration tests (with Cypress), headlessly in the background:
-
-```
-npm run e2e
-```
-
-To run integration tests (with Cypress), interactively in an open window:
-
-```
-npm run e2e:open
-```
-
 To inspect internal webpack config:
 
 ```
@@ -142,28 +129,6 @@ To reset for local development, after a deployment:
 npm run download:local:env
 ```
 
-## Nightwatch Tests
-
-**To run all nightwatch tests (Warning: this may take a while):**
-
-```
-npm run test
-```
-
-**To run a set of nightwatch tests:**
-
-```
-npm run test -- --tag {TAG NAME}
-```
-
-Note: any test with this tag will be run.
-
-Example:
-
-```
-npm run test -- --tag logout
-```
-
 ## Documentation
 
 ### Internal documentation
@@ -175,10 +140,6 @@ https://github.com/caseconsulting/vue-expense-app/blob/master/src/utils/csv/READ
 **Charts and ChartJS**
 
 https://github.com/caseconsulting/vue-expense-app/blob/master/src/components/charts/README.md
-
-**Nightwatch utils**
-
-https://github.com/caseconsulting/vue-expense-app/blob/master/unit-tests/utils/README.md
 
 ### External documentation
 
