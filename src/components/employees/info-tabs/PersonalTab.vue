@@ -2,17 +2,23 @@
   <div v-if="childrenVisible" class="infoTab wrapper" id="personalTab">
     <!-- GitHub -->
     <p v-if="!isEmpty(this.model.github)">
-      <v-icon class="mr-1">mdi-github</v-icon>
+      <v-avatar rounded="0" size="23">
+        <v-img class="grayImage" :src="github" alt="Github icon`"></v-img>
+      </v-avatar>
       <a :href="'https://github.com/' + this.model.github" target="_blank">{{ this.model.github }}</a>
     </p>
     <!-- Twitter -->
-    <p v-if="!isEmpty(this.model.twitter)">
-      <v-icon class="mr-1">mdi-twitter</v-icon>
-      <a :href="'https://twitter.com/' + this.model.twitter" target="_blank">{{ this.model.twitter }}</a>
+    <p v-if="!isEmpty(this.model.x)">
+      <v-avatar rounded="0" size="23">
+        <v-img class="grayImage" :src="x" alt="X icon`"></v-img>
+      </v-avatar>
+      <a :href="'https://x.com/' + this.model.x" target="_blank">{{ this.model.x }}</a>
     </p>
     <!-- LinkedIn -->
     <p v-if="!isEmpty(this.model.linkedIn)">
-      <v-icon class="mr-1">mdi-linkedin</v-icon>
+      <v-avatar rounded="0" size="23">
+        <v-img class="grayImage" :src="linkedin" alt="LinkedIn icon`"></v-img>
+      </v-avatar>
       <a :href="this.model.linkedIn" target="_blank">{{ this.model.linkedIn }}</a>
     </p>
     <!-- Personal Email -->
@@ -77,6 +83,9 @@
 import { isEmpty, monthDayYearFormat, userRoleIsIntern } from '@/utils/utils';
 import { format, getTodaysDate } from '@/shared/dateUtils';
 import SensitiveDataField from '../SensitiveDataField.vue';
+import github from '@/assets/img/trademarks/github.png';
+import linkedin from '@/assets/img/trademarks/linkedin.png';
+import x from '@/assets/img/trademarks/x.png';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -106,7 +115,7 @@ function checkEmptyPersonalInfo() {
   // this is crap code but I needed a quick-fix for the code that was here and causing an error. :W
   if (
     this.model.github ||
-    this.model.twitter ||
+    this.model.x ||
     this.model.linkedIn ||
     !isEmpty(this.model.privatePhoneNumbers) ||
     !isEmpty(this.model.publicPhoneNumbers) ||
@@ -255,6 +264,9 @@ export default {
   created,
   data() {
     return {
+      github,
+      x,
+      linkedin,
       userId: null,
       childrenVisible: true
     };
@@ -276,13 +288,18 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style scoped lang="scss">
 .clickable {
   cursor: pointer;
 }
 
 .wrapper {
   position: relative;
+}
+
+.grayImage {
+  -webkit-filter: brightness(0) invert(1);
+  filter: brightness(0) invert(1);
 }
 
 [class|='confetti'] {
