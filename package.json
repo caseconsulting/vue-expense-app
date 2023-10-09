@@ -19,8 +19,6 @@
     "download:local:env": "aws s3 cp s3://case-expense-app-resources-local/.env .env",
     "download:prod:env": "aws s3 cp s3://case-consulting-expense-app-resources-prod/.env .env --profile prod",
     "download:test:env": "aws s3 cp s3://case-expense-app-resources-test/.env .env",
-    "e2e": "npm run test:e2e",
-    "e2e:open": "vue-cli-service e2e:open",
     "eslint": "eslint src/**/*.{js,vue} --fix",
     "inspect": "vue-cli-service inspect > output.log",
     "lint": "npm run eslint && npm run stylelint",
@@ -29,7 +27,6 @@
     "start": "npm run serve",
     "stylelint": "stylelint src/**/*.{css,scss,vue}",
     "test": "npm run test:unit",
-    "test:e2e": "vue-cli-service test:e2e",
     "test:unit": "vue-cli-service test:unit",
     "unit": "npm run test:unit",
     "validate": "npm ci"
