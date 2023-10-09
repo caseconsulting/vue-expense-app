@@ -58,9 +58,9 @@
             icon
             target="_blank"
           >
-            <v-icon v-if="link.icon">{{ link.icon }}</v-icon>
-            <v-icon v-else-if="link.name == 'Twitter'">$twitter</v-icon>
-            <v-icon v-else-if="link.name == 'Facebook'">$facebook</v-icon>
+            <v-avatar rounded="0" :size="link.size || 23">
+              <v-img class="whiteImage" :src="link.img" :alt="`${link.name} icon`"></v-img>
+            </v-avatar>
           </v-btn>
         </v-item-group>
 
@@ -156,6 +156,11 @@ import {
 import { isMobile, isSmallScreen, storeIsPopulated, updateEmployeeLogin } from '@/utils/utils';
 import { updateStoreUser } from '@/utils/storeUtils';
 import floorPlan from '@/assets/img/MakeOfficesfloorplan.jpg';
+import facebook from '@/assets/img/trademarks/facebook.png';
+import github from '@/assets/img/trademarks/github.png';
+import linkedin from '@/assets/img/trademarks/linkedin.png';
+import x from '@/assets/img/trademarks/x.png';
+import youtube from '@/assets/img/trademarks/youtube.png';
 import MainNav from '@/components/utils/MainNav.vue';
 import NotificationBanners from '@/components/utils/NotificationBanners.vue';
 import SwitchRoleModal from '@/components/modals/SwitchRoleModal.vue';
@@ -434,11 +439,11 @@ export default {
       }
     ],
     mediaLinks: [
-      { name: 'Github', link: 'https://github.com/caseconsulting', icon: 'mdi-github' },
-      { name: 'LinkedIn', link: 'https://linkedin.com/company/case-consulting-inc', icon: 'mdi-linkedin' },
-      { name: 'Youtube', link: 'https://www.youtube.com/channel/UC_oJY4OrOpLNrIBAN7Y-9fA', icon: 'mdi-youtube' },
-      { name: 'Twitter', link: 'https://twitter.com/consultwithcase?lang=en' },
-      { name: 'Facebook', link: 'https://www.facebook.com/ConsultwithCase/' }
+      { name: 'Github', link: 'https://github.com/caseconsulting', img: github },
+      { name: 'LinkedIn', link: 'https://linkedin.com/company/case-consulting-inc', img: linkedin },
+      { name: 'Youtube', link: 'https://www.youtube.com/channel/UC_oJY4OrOpLNrIBAN7Y-9fA', img: youtube, size: 25 },
+      { name: 'X', link: 'https://x.com/consultwithcase?lang=en', img: x, size: 18 },
+      { name: 'Facebook', link: 'https://www.facebook.com/ConsultwithCase/', img: facebook }
     ],
     version: null
   }),
@@ -522,9 +527,12 @@ export default {
 #P {
   text-decoration: none;
 }
-</style>
 
-<style>
+.whiteImage {
+  -webkit-filter: brightness(0) invert(1);
+  filter: brightness(0) invert(1);
+}
+
 .siteId {
   cursor: pointer;
 }

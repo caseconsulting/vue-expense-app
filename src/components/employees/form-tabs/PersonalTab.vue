@@ -7,16 +7,22 @@
       ref="github"
       label="Github (username)"
       data-vv-name="Github"
-    ></v-text-field>
+    >
+      <template v-slot:prepend>
+        <v-avatar rounded="0" size="23">
+          <v-img class="grayImage" :src="github" alt="Github icon`"></v-img>
+        </v-avatar>
+      </template>
+    </v-text-field>
 
-    <!-- Twitter -->
-    <v-text-field
-      prepend-icon="mdi-twitter"
-      v-model.trim="editedPersonalInfo.twitter"
-      ref="twitter"
-      label="Twitter (username)"
-      data-vv-name="Twitter"
-    ></v-text-field>
+    <!-- X -->
+    <v-text-field v-model.trim="editedPersonalInfo.x" ref="x" label="X (username)" data-vv-name="X">
+      <template v-slot:prepend>
+        <v-avatar rounded="0" size="23">
+          <v-img class="grayImage" :src="x" alt="X icon`"></v-img>
+        </v-avatar>
+      </template>
+    </v-text-field>
 
     <!-- LinkedIn -->
     <v-text-field
@@ -26,7 +32,13 @@
       :rules="getURLRules()"
       ref="linkedin"
       data-vv-name="LinkedIn"
-    ></v-text-field>
+    >
+      <template v-slot:prepend>
+        <v-avatar rounded="0" size="23">
+          <v-img class="grayImage" :src="linkedin" alt="Linkedin icon`"></v-img>
+        </v-avatar>
+      </template>
+    </v-text-field>
 
     <!-- Personal Email -->
     <v-text-field
@@ -237,6 +249,9 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
+import github from '@/assets/img/trademarks/github.png';
+import linkedin from '@/assets/img/trademarks/linkedin.png';
+import x from '@/assets/img/trademarks/x.png';
 import {
   getDateOptionalRules,
   getEmailRules,
@@ -400,7 +415,7 @@ function validateFields() {
 
   // for some reason, this page didn't overwrote the elements as formFields like the other pages did so
   // we added individual refs and put them into the components list manually
-  components = [...components, this.$refs.twitter, this.$refs.github, this.$refs.linkedin, this.$refs.phoneNumbers];
+  components = [...components, this.$refs.x, this.$refs.github, this.$refs.linkedin, this.$refs.phoneNumbers];
   _.forEach(components, (field) => {
     if (field && !field.validate()) errorCount++;
   });
@@ -514,6 +529,9 @@ export default {
       searchString: '',
       placeIds: {},
       userId: null,
+      github,
+      linkedin,
+      x,
       states: {
         AL: 'Alabama',
         AK: 'Alaska',
@@ -606,3 +624,10 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.grayImage {
+  -webkit-filter: brightness(0) opacity(55%);
+  filter: brightness(0) opacity(55%);
+}
+</style>
