@@ -27,7 +27,7 @@
     "start": "npm run serve",
     "stylelint": "stylelint src/**/*.{css,scss,vue}",
     "test": "npm run test:unit",
-    "test:unit": "vue-cli-service test:unit",
+    "test:unit": "vue-cli-service test:unit --transformIgnorePatterns \"node_modules/(?!axios)/\"",
     "unit": "npm run test:unit",
     "validate": "npm ci"
   },
