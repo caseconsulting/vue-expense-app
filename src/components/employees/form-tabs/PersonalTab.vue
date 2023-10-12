@@ -102,7 +102,7 @@
             <span v-else>Based on user preference, this is visible to everyone</span>
           </v-tooltip>
         </v-col>
-        <v-col v-if="index != phoneNumbers.length - 1 && $vuetify.breakpoint.name === 'xs'" cols="12">
+        <v-col v-if="index != phoneNumbers.length - 1 && $vuetify.display.name === 'xs'" cols="12">
           <v-divider class="mb-2"></v-divider>
         </v-col>
       </v-row>

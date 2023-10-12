@@ -15,19 +15,18 @@
         v-model="uploadStatus.statusType"
         :color="uploadStatus.color"
         :multi-line="true"
-        :right="true"
         :timeout="3000"
-        :top="true"
         :vertical="true"
+        location="top right"
       >
         <v-card-title headline color="white">
-          <span class="headline">{{ uploadStatus.statusMessage }}</span>
+          <span class="text-h5">{{ uploadStatus.statusMessage }}</span>
         </v-card-title>
-        <v-btn color="white" text @click="clearStatus"> Close </v-btn>
+        <v-btn color="white" variant="text" @click="clearStatus"> Close </v-btn>
       </v-snackbar>
       <v-row class="pa-0">
         <v-col cols="3" align="left" justify="left">
-          <v-btn id="backBtn" elevation="2" @click="$router.back()" :x-small="isMobile()"
+          <v-btn id="backBtn" elevation="2" @click="$router.back()" :size="isMobile() && 'x-small'"
             ><v-icon class="pr-1">arrow_back</v-icon>Back</v-btn
           >
         </v-col>
@@ -41,17 +40,17 @@
           <v-btn
             @click="toggleResumeParser = !toggleResumeParser"
             v-if="!editing"
-            :x-small="isMobile()"
+            :size="isMobile() && 'x-small'"
             color="#bc3825"
-            class="white--text mr-1"
+            class="text-white mr-1"
             ><b>Upload Resume</b></v-btn
           >
           <v-btn
-            class="white--text"
+            class="text-white"
             v-if="!editing"
             color="#bc3825"
             @click="toggleDeleteModal = !toggleDeleteModal"
-            :x-small="isMobile()"
+            :size="isMobile() && 'x-small'"
             :disabled="model.resumeUpdated == null"
             :loading="deleteLoading"
             ><b>Delete Resume</b></v-btn
@@ -88,13 +87,13 @@
         >
           <v-card>
             <v-card-title class="header_style" v-if="!editing">
-              <v-tooltip v-if="hasAdminPermissions()" top>
+              <v-tooltip v-if="hasAdminPermissions()" location="top">
                 <template #activator="{ on }">
                   <v-icon v-on="on" @click="navEmployee(-1)" color="white">mdi-arrow-left-bold</v-icon>
                 </template>
                 <span>Previous employee</span>
               </v-tooltip>
-              <v-tooltip v-if="hasAdminPermissions()" top>
+              <v-tooltip v-if="hasAdminPermissions()" location="top">
                 <template #activator="{ on }">
                   <v-icon v-on="on" @click="navEmployee(1)" color="white">mdi-arrow-right-bold</v-icon>
                 </template>
@@ -112,11 +111,10 @@
                 :tags="$store.getters.tags"
                 color="white"
               />
-              <v-tooltip v-if="hasAdminPermissions() || userIsEmployee()" top>
+              <v-tooltip v-if="hasAdminPermissions() || userIsEmployee()" location="top">
                 <template #activator="{ on }">
                   <div v-on="on">
                     <v-icon
-                      :disabled="model.resumeUpdated == null"
                       class="pr-2"
                       @click="downloadResume()"
                       color="white"
@@ -138,7 +136,7 @@
                   }}
                 </p>
               </v-tooltip>
-              <v-tooltip v-if="hasAdminPermissions() || userIsEmployee()" top>
+              <v-tooltip v-if="hasAdminPermissions() || userIsEmployee()" location="top">
                 <template #activator="{ on }">
                   <v-icon class="pr-2" @click="editing = true" color="white" align="right" v-on="on" id="edit"
                     >edit</v-icon
@@ -301,7 +299,7 @@ async function getProfileData() {
  * @return boolean - whether or not to minimize window
  */
 function minimizeWindow() {
-  switch (this.$vuetify.breakpoint.name) {
+  switch (this.$vuetify.display.name) {
     case 'xs':
       return true;
     case 'sm':

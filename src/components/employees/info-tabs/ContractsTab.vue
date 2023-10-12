@@ -37,9 +37,9 @@
                 </v-col>
               </v-row>
             </p>
-            <p><b>Start Date: </b>{{ project.startDate | monthYearFormat }}</p>
+            <p><b>Start Date: </b>{{ monthYearFormat(project.startDate) }}</p>
             <div v-if="project.endDate">
-              <p><b>End Date: </b>{{ project.endDate | monthYearFormat }}</p>
+              <p><b>End Date: </b>{{ monthYearFormat(project.endDate) }}</p>
             </div>
             <p><b>Time on Project: </b>{{ getProjectLengthInYearsReadable(project) }}</p>
             <hr v-if="projIndex < contract.projects.length - 1" class="horizontalBar mb-3" />
@@ -225,22 +225,6 @@ function getProjectLengthInYears(project) {
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     FILTERS                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * filter that checks if value exists for current
- *
- * @param value - value to check
- * @return - either 'yes' if it exists or 'no' otherwise
- */
-function current(value) {
-  return value ? 'Yes' : 'No';
-} // current
-
-// |--------------------------------------------------|
-// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -254,10 +238,6 @@ export default {
       page: 1
     };
   },
-  filters: {
-    current,
-    monthYearFormat
-  },
   methods: {
     difference, // dateUtils
     getContractEarliestDate,
@@ -270,7 +250,8 @@ export default {
     getTodaysDate, // dateUtils
     dateReadable,
     isEmpty,
-    onPageChange
+    onPageChange,
+    monthYearFormat
   },
   props: ['contracts', 'model']
 };

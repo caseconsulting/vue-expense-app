@@ -48,7 +48,7 @@
         <!-- Description -->
         <template v-slot:[`item.description`]="{ item }">
           <p id="description-team" :class="{ failed: item.failed }" class="mb-0">
-            {{ item.description | descriptionFormat }}
+            {{ descriptionFormat(item.description) }}
           </p>
         </template>
 
@@ -155,11 +155,9 @@ export default {
       sortDesc: false // sort data table in descending order
     };
   },
-  filters: {
-    descriptionFormat
-  },
   methods: {
     convertToMoneyString,
+    descriptionFormat,
     expenseClicked,
     expenseSelected,
     expenseToggle,

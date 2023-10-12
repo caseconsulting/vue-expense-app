@@ -1119,7 +1119,7 @@ function beforeDestroy() {
  * @return boolean - returns true for small screens
  */
 function useDropDown() {
-  switch (this.$vuetify.breakpoint.name) {
+  switch (this.$vuetify.display.name) {
     case 'xs':
       return true;
     default:

@@ -54,21 +54,14 @@
         </v-card-text>
         <v-timeline dense class="pt-0">
           <!-- Timeline -->
-          <v-virtual-scroll :items="filterEvents()" :item-height="itemHeight" height="700" bench="2">
-            <template v-slot="{ item }">
-              <v-tooltip
-                open-on-hover
-                top
-                max-width="400px"
-                min-width="200px"
-                :color="item.truncatedText ? 'grey darken-3' : 'rgba(0, 0, 0, 0)'"
-                open-delay="200"
-              >
+          <v-virtual-scroll :items="filterEvents()" :item-height="itemHeight" height="700">
+            <!-- <template v-slot:default="{ item }">
+              <v-tooltip open-on-hover top max-width="400px" min-width="200px" :color="hello(item)" open-delay="200">
                 <template v-slot:activator="{ on, attrs }">
                   <span v-bind="attrs" v-on="on">
-                    <v-timeline-item :color="item.color" :key="item.name">
-                      <!-- Icon -->
-                      <template v-slot:icon v-if="item.icon">
+                    <v-timeline-item :color="item.color" :key="item.name"> -->
+            <!-- Icon -->
+            <!-- <template v-slot:icon v-if="item.icon">
                         <v-tooltip
                           bottom
                           v-if="
@@ -84,8 +77,8 @@
                               <v-icon class="white--text">{{ item.icon }}</v-icon>
                             </v-btn>
                           </template>
-                          <!-- Icon Hover Text -->
-                          <span v-if="item.newCampfire">Welcome to team</span>
+                          Icon Hover Text -->
+            <!-- <span v-if="item.newCampfire">Welcome to team</span>
                           <span v-else-if="item.congratulateCampfire">Congratulate</span>
                           <span v-else-if="item.birthdayCampfire">Say happy birthday</span>
                           <span v-else-if="item.campfire">Comment in campfire</span>
@@ -93,11 +86,11 @@
                         </v-tooltip>
 
                         <v-icon class="white--text" v-else>{{ item.icon }}</v-icon>
-                      </template>
-                      <!-- End Icon -->
+                      </template> -->
+            <!-- End Icon -->
 
-                      <!-- Item Title: Date -->
-                      <h3>{{ item.date }}</h3>
+            <!-- Item Title: Date -->
+            <!-- <h3>{{ item.date }}</h3>
 
                       <div v-if="item.type === 'Anniversary'" class="px-4">
                         <v-btn @click="openAnniversariesModal(item)" color="#bc3825" class="white--text" small
@@ -106,9 +99,9 @@
                         >
                       </div>
 
-                      <div v-else>
-                        <!-- Event has a link -->
-                        <v-list-item
+                      <div v-else> -->
+            <!-- Event has a link -->
+            <!-- <v-list-item
                           class="ma-auto pa-auto activityFeedText"
                           v-if="item.link"
                           :href="item.link"
@@ -121,19 +114,19 @@
                               <v-icon height="12" width="12" color="blue">open-in-new</v-icon>
                             </v-col>
                           </v-row>
-                        </v-list-item>
-                        <!-- Event does not have a link -->
-                        <div class="px-4 activityFeedText" v-else>
+                        </v-list-item> -->
+            <!-- Event does not have a link -->
+            <!-- <div class="px-4 activityFeedText" v-else>
                           {{ item.truncatedText ? item.truncatedText : item.text }}
                         </div>
                       </div>
                     </v-timeline-item>
                   </span>
-                </template>
-                <!-- Expanded Event Description -->
-                <span v-if="item.truncatedText" class="activityFeedText">{{ item.text }}</span>
-              </v-tooltip>
-            </template>
+                </template> -->
+            <!-- Expanded Event Description -->
+            <!-- <span v-if="item.truncatedText" class="activityFeedText">{{ item.text }}</span>
+              </v-tooltip> -->
+            <!-- </template> -->
           </v-virtual-scroll>
         </v-timeline>
       </div>
@@ -146,7 +139,6 @@
 
 <script>
 import _ from 'lodash';
-
 import AnniversariesModal from './AnniversariesModal.vue';
 
 // |--------------------------------------------------|
@@ -155,6 +147,9 @@ import AnniversariesModal from './AnniversariesModal.vue';
 // |                                                  |
 // |--------------------------------------------------|
 
+function hello(item) {
+  console.log(item);
+}
 /**
  * created lifecycle hook
  */
@@ -178,7 +173,7 @@ function created() {
  * @return int - height for activity feed item
  */
 function itemHeight() {
-  switch (this.$vuetify.breakpoint.name) {
+  switch (this.$vuetify.display.name) {
     case 'xs':
       return 115;
     case 'sm':
@@ -242,6 +237,7 @@ function getURL(item) {
  * @param item Object - The month's anniversariese
  */
 function openAnniversariesModal(item) {
+  console.log(item);
   this.toggleAnniversariesModal = true;
   item.events.sort((a, b) => new Date(a.anniversary) - new Date(b.anniversary));
   this.item = item;
@@ -284,6 +280,7 @@ export default {
   },
   methods: {
     filterEvents,
+    hello,
     getURL,
     openAnniversariesModal,
     remove

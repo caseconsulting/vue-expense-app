@@ -204,9 +204,6 @@ export default {
       sortedTech: this.model.technologies
     };
   },
-  filters: {
-    current
-  },
   methods: {
     isEmpty,
     onPageChange,

@@ -13,7 +13,13 @@ module.exports = {
     jest: true,
     node: true
   },
-  extends: ['eslint:recommended', 'plugin:vue/essential', '@vue/eslint-config-prettier'],
+  extends: [
+    'eslint:recommended',
+    'plugin:vue/essential',
+    '@vue/eslint-config-prettier',
+    'plugin:vue/base',
+    'plugin:vuetify/base'
+  ],
   rules: {
     // allow console during development
     'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',

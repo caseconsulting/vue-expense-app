@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="$store.getters.ptoCashOuts">
     <v-form ref="form" v-model="valid" lazy-validation>
       <v-card>
         <v-card-title class="header_style title">
@@ -290,7 +290,8 @@ function displaySuccess(msg) {
  * @returns Number - The available PTO balance
  */
 function getPtoBalance(employeeNumber) {
-  return this.$store.getters.quickbooksPTO.results && this.$store.getters.quickbooksPTO.results.users[employeeNumber]
+  console.log(this.$store);
+  return this.$store.getters.quickbooksPTO && this.$store.getters.quickbooksPTO.results.users[employeeNumber]
     ? this.$store.getters.quickbooksPTO.results.users[employeeNumber].pto_balances.PTO
     : null;
 } // getPtoBalance

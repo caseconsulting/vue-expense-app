@@ -36,7 +36,7 @@
       </span>
     </p>
     <!-- Employee Role -->
-    <p v-if="admin"><b>Employee Role:</b> {{ this.model.employeeRole | startCase }}</p>
+    <p v-if="admin"><b>Employee Role:</b> {{ startCase(this.model.employeeRole) }}</p>
     <!-- Hire Date -->
     <p v-if="admin || employee"><b> Hire Date:</b> {{ monthDayYearFormat(this.model.hireDate) }}</p>
     <!-- Departure Date -->
@@ -241,9 +241,6 @@ export default {
     fullName,
     getCurrentProjects,
     getEmployeeTags
-  },
-  filters: {
-    startCase
   },
   methods: {
     startCase,

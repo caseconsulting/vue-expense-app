@@ -16,15 +16,14 @@
         v-model="status.statusType"
         :color="status.color"
         :multi-line="true"
-        :right="true"
+        location="top right"
         :timeout="5000"
-        :top="true"
         :vertical="true"
       >
         <v-card-title headline color="white">
-          <span class="headline">{{ status.statusMessage }}</span>
+          <span class="text-h5">{{ status.statusMessage }}</span>
         </v-card-title>
-        <v-btn color="white" text @click="clearStatus"> Close </v-btn>
+        <v-btn color="white" variant="text" @click="clearStatus"> Close </v-btn>
       </v-snackbar>
 
       <v-col cols="12" lg="8">
@@ -42,9 +41,9 @@
                 v-if="userRoleIsAdmin() || userRoleIsManager()"
                 hide-details
                 :items="employees"
-                :filter="customFilter"
+                :customFilter="customFilter"
                 v-model="employee"
-                item-text="text"
+                item-title="text"
                 id="employeeIdFilter"
                 class="mr-3"
                 label="Filter by Employee"
@@ -74,9 +73,9 @@
                   <v-autocomplete
                     hide-details
                     :items="employees"
-                    :filter="customFilter"
+                    :customFilter="customFilter"
                     v-model="employee"
-                    item-text="text"
+                    item-title="text"
                     id="employeeIdFilter"
                     label="Filter by Employee"
                     clearable
@@ -105,9 +104,9 @@
                 <h4>Active Expense Type:</h4>
                 <v-btn-toggle class="filter_color" v-model="filter.active" text mandatory>
                   <!-- Show Active -->
-                  <v-tooltip top>
+                  <v-tooltip location="top">
                     <template v-slot:activator="{ on }">
-                      <v-btn value="active" v-on="on" text>
+                      <v-btn value="active" v-on="on" variant="text">
                         <v-icon class="mr-1">mdi-check-circle-outline</v-icon>
                       </v-btn>
                     </template>
@@ -115,9 +114,9 @@
                   </v-tooltip>
 
                   <!-- Show Inactive -->
-                  <v-tooltip top>
+                  <v-tooltip location="top">
                     <template v-slot:activator="{ on }">
-                      <v-btn value="notActive" v-on="on" text>
+                      <v-btn value="notActive" v-on="on" variant="text">
                         <v-icon>mdi-close-circle-outline</v-icon>
                       </v-btn>
                     </template>
@@ -125,9 +124,9 @@
                   </v-tooltip>
 
                   <!-- Show Active and Inactive -->
-                  <v-tooltip top>
+                  <v-tooltip location="top">
                     <template v-slot:activator="{ on }">
-                      <v-btn value="both" v-on="on" text> BOTH </v-btn>
+                      <v-btn value="both" v-on="on" variant="text"> BOTH </v-btn>
                     </template>
                     <span>Show All</span>
                   </v-tooltip>
@@ -140,9 +139,9 @@
                 <h4>Reimbursed:</h4>
                 <v-btn-toggle class="filter_color" v-model="filter.reimbursed" text mandatory>
                   <!-- Show Reimbursed -->
-                  <v-tooltip top>
+                  <v-tooltip location="top">
                     <template v-slot:activator="{ on }">
-                      <v-btn value="reimbursed" v-on="on" text>
+                      <v-btn value="reimbursed" v-on="on" variant="text">
                         <v-icon id="showReimbursed" class="mr-1">mdi-check-circle-outline</v-icon>
                       </v-btn>
                     </template>
@@ -150,9 +149,9 @@
                   </v-tooltip>
 
                   <!-- Show Pending -->
-                  <v-tooltip top>
+                  <v-tooltip location="top">
                     <template v-slot:activator="{ on }">
-                      <v-btn value="notReimbursed" v-on="on" text>
+                      <v-btn value="notReimbursed" v-on="on" variant="text">
                         <v-icon id="showPending">mdi-close-circle-outline</v-icon>
                       </v-btn>
                     </template>
@@ -160,9 +159,9 @@
                   </v-tooltip>
 
                   <!-- Show Reimbursed and Pending -->
-                  <v-tooltip top>
+                  <v-tooltip location="top">
                     <template v-slot:activator="{ on }">
-                      <v-btn id="bothReimbursed" value="both" v-on="on" text> BOTH </v-btn>
+                      <v-btn id="bothReimbursed" value="both" v-on="on" variant="text"> BOTH </v-btn>
                     </template>
                     <span>Show All</span>
                   </v-tooltip>
@@ -220,7 +219,7 @@
                   <attachment :midAction="midAction" :expense="item" :mode="'expenses'"></attachment>
 
                   <!-- Edit Button -->
-                  <v-tooltip top>
+                  <v-tooltip location="top">
                     <template v-slot:activator="{ on }">
                       <v-btn
                         :disabled="
@@ -229,7 +228,7 @@
                           midAction ||
                           (!(userRoleIsAdmin() || userRoleIsManager()) && !canDelete(item))
                         "
-                        text
+                        variant="text"
                         icon
                         id="edit"
                         @click="
@@ -244,7 +243,7 @@
                     <span>Edit</span>
                   </v-tooltip>
                   <!-- Delete Button -->
-                  <v-tooltip top>
+                  <v-tooltip location="top">
                     <template v-slot:activator="{ on }">
                       <v-btn
                         :disabled="
@@ -253,7 +252,7 @@
                           midAction ||
                           (!(userRoleIsAdmin() || userRoleIsManager()) && !canDelete(item))
                         "
-                        text
+                        variant="text"
                         icon
                         id="delete"
                         @click="
@@ -269,12 +268,12 @@
                     <span>Delete</span>
                   </v-tooltip>
                   <!-- Unreimburse Button -->
-                  <v-tooltip top>
+                  <v-tooltip location="top">
                     <template v-slot:activator="{ on }">
                       <v-btn
                         v-if="userRoleIsAdmin() || userRoleIsManager()"
                         :disabled="!isReimbursed(item) || isEditing || midAction"
-                        text
+                        variant="text"
                         icon
                         id="unreimburse"
                         @click="

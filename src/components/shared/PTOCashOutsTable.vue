@@ -192,23 +192,20 @@
         </template>
       </v-data-table>
     </v-container>
-    <v-fab-transition class="reimburse_button">
-      <v-btn
-        @click="toggleApproveModal = true"
-        id="custom-button-color"
-        :loading="isApproving"
-        v-show="showApproveButton"
-        fab
-        dark
-        large
-        bottom
-        left
-        fixed
-        class="reimburse_button"
-      >
-        <v-icon>mdi-currency-usd</v-icon>
-      </v-btn>
-    </v-fab-transition>
+    <v-btn
+      @click="toggleApproveModal = true"
+      id="custom-button-color"
+      :loading="isApproving"
+      v-show="showApproveButton"
+      theme="dark"
+      large
+      bottom
+      left
+      fixed
+      class="reimburse_button"
+    >
+      <v-icon>mdi-currency-usd</v-icon>
+    </v-btn>
     <general-confirmation-modal
       title="Are you sure you want to approve selected PTO cash outs?"
       type="pto-cash-outs"

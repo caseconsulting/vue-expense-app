@@ -8,8 +8,8 @@
     <br />
 
     <div class="mb-5">
-      <div class="text-xs-center mb-3"></div>
-      <v-expansion-panels accordion v-model="panel">
+      <div class="text-center mb-3"></div>
+      <v-expansion-panels variant="accordion" v-model="panel">
         <v-expansion-panel v-for="section in sections" :key="section[0]">
           <!-- Header -->
           <v-expansion-panel-header :id="section[0]" v-if="canView(section[1])">
@@ -23,7 +23,7 @@
               :headers="section[2].headers"
               :items="section[4].abilities"
               :items-per-page="-1"
-              class="elevation-1 grey lighten-3"
+              class="elevation-1 bg-grey-lighten-3"
               mobile-breakpoint="0"
               hide-default-footer
             ></v-data-table>
@@ -32,14 +32,14 @@
               :headers="section[3].headersMobile"
               :items="section[4].abilities"
               :items-per-page="-1"
-              class="elevation-1 grey lighten-3 dataTable"
+              class="elevation-1 bg-grey-lighten-3 dataTable"
               mobile-breakpoint="0"
               hide-default-footer
             ></v-data-table>
           </v-expansion-panel-content>
           <v-expansion-panel-content v-else-if="canView(section[1])">
             <v-card>
-              <v-card-text class="grey lighten-3">
+              <v-card-text class="bg-grey-lighten-3">
                 <li v-for="(ques, index) in section" :key="ques.title">
                   <div v-if="ques.title && (!ques.employeeRole || canView(ques.employeeRole))" class="pb-1">
                     <body class="italics" :id="section[0] + '-' + index">

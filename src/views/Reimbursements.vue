@@ -5,19 +5,18 @@
       v-model="status.statusType"
       :color="status.color"
       :multi-line="true"
-      :right="true"
+      location="top right"
       :timeout="5000"
-      :top="true"
       :vertical="true"
     >
       <v-card-title headline color="white">
-        <span class="headline">{{ status.statusMessage }}</span>
+        <span class="text-h5">{{ status.statusMessage }}</span>
       </v-card-title>
-      <v-btn color="white" text @click="clearStatus"> Close </v-btn>
+      <v-btn color="white" variant="text" @click="clearStatus"> Close </v-btn>
     </v-snackbar>
     <v-card color="#bc3825">
       <v-card-title headline v-bind:class="{ 'justify-center': isMobile }">
-        <h2 class="text-center white--text">Reimbursements</h2>
+        <h2 class="text-center text-white">Reimbursements</h2>
       </v-card-title>
     </v-card>
     <v-tabs v-model="currentTab">

@@ -137,23 +137,20 @@
         <!-- END DATA TABLE -->
 
         <!-- Reimburse Button -->
-        <v-fab-transition class="reimburse_button">
-          <v-btn
-            @click="buttonClicked = !buttonClicked"
-            id="custom-button-color"
-            :loading="reimbursing"
-            v-show="showReimburseButton"
-            fab
-            dark
-            large
-            bottom
-            left
-            fixed
-            class="reimburse_button"
-          >
-            <v-icon>mdi-currency-usd</v-icon>
-          </v-btn>
-        </v-fab-transition>
+        <v-btn
+          @click="buttonClicked = !buttonClicked"
+          id="custom-button-color"
+          :loading="reimbursing"
+          v-show="showReimburseButton"
+          theme="dark"
+          large
+          bottom
+          left
+          fixed
+          class="reimburse_button"
+        >
+          <v-icon>mdi-currency-usd</v-icon>
+        </v-btn>
       </v-container>
 
       <!-- Reimburse Modal -->

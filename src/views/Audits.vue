@@ -3,16 +3,16 @@
     <!-- Red header title -->
     <v-card color="#bc3825">
       <v-card-title headline
-        ><h2 class="white--text">{{ selectedDropdown }} Audits</h2>
+        ><h2 class="text-white">{{ selectedDropdown }} Audits</h2>
       </v-card-title>
     </v-card>
     <v-container fluid>
       <!-- Drop down for selecting audit tabs -->
       <v-row>
         <v-col cols="2" align-self="center">
-          <v-menu offset-y>
+          <v-menu offset="y">
             <template v-slot:activator="{ on, attrs }">
-              <v-btn text color="#bc3825" dark class="font-weight-bold" v-bind="attrs" v-on="on"
+              <v-btn variant="text" color="#bc3825" theme="dark" class="font-weight-bold" v-bind="attrs" v-on="on"
                 >{{ selectedDropdown }}<v-icon>expand_more</v-icon>
               </v-btn>
             </template>
@@ -35,14 +35,14 @@
               v-model="auditsQuery.showRangeMenu"
               :close-on-content-click="false"
               transition="scale-transition"
-              offset-y
+              offset="y"
               max-width="290px"
               min-width="290px"
             >
               <template v-slot:activator="{ on, attrs }">
                 <v-text-field
                   class="mt-0 ml-1 pt-0"
-                  :value="formatRange(auditsQuery.range)"
+                  :model-value="formatRange(auditsQuery.range)"
                   label="Date Range"
                   prepend-icon="date_range"
                   readonly
@@ -59,7 +59,7 @@
         </v-col>
         <!-- Submit Button -->
         <v-col cols="1">
-          <v-tooltip top>
+          <v-tooltip location="top">
             <template v-slot:activator="{ on, attrs }">
               <v-btn class="ml-2" @click="setDateRange" v-bind="attrs" v-on="on">Apply</v-btn>
             </template>

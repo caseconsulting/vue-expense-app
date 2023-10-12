@@ -5,23 +5,22 @@
       v-model="status.statusType"
       :color="status.color"
       :multi-line="true"
-      :right="true"
+      location="top right"
       :timeout="5000"
-      :top="true"
       :vertical="true"
     >
       <v-card-title headline color="white">
-        <span class="headline">{{ status.statusMessage }}</span>
+        <span class="text-h5">{{ status.statusMessage }}</span>
       </v-card-title>
-      <v-btn color="white" text @click="clearStatus"> Close </v-btn>
+      <v-btn color="white" variant="text" @click="clearStatus"> Close </v-btn>
     </v-snackbar>
     <v-card>
       <v-card color="#bc3825">
-        <v-card-title headline><h2 class="white--text">Contracts</h2> </v-card-title>
+        <v-card-title headline><h2 class="text-white">Contracts</h2> </v-card-title>
       </v-card>
       <v-container fluid>
         <v-btn @click="toggleContractForm = true" :disabled="!$store.getters.contracts" class="my-2"
-          >Create a contract <v-icon right> mdi-file-document-plus </v-icon></v-btn
+          >Create a contract <v-icon end> mdi-file-document-plus </v-icon></v-btn
         >
         <contracts-page-loader v-if="loading"></contracts-page-loader>
         <contracts-table v-else></contracts-table>

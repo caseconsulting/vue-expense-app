@@ -28,7 +28,7 @@
         <v-spacer></v-spacer>
         <!-- Display social media icons and links dropdown menu -->
         <v-item-group class="hidden-sm-and-down" v-show="isLoggedIn() && !isMobile">
-          <v-menu open-on-hover offset-y>
+          <v-menu open-on-hover offset="y">
             <template v-slot:activator="{ on, attrs }">
               <v-btn top text small class="my-2" v-bind="attrs" v-on="on" id="links-btn">Links &#9662; </v-btn>
             </template>
@@ -65,7 +65,7 @@
         </v-item-group>
 
         <!-- User image and logout -->
-        <v-menu bottom offset-y open-on-click v-if="isLoggedIn()">
+        <v-menu bottom offset="y" open-on-click v-if="isLoggedIn()">
           <template v-slot:activator="{ on }">
             <v-avatar id="profile" class="profile-button ml-3" size="40">
               <img :src="profilePic" alt="avatar" v-on="on" />
@@ -374,9 +374,9 @@ async function created() {
  * beforeDestroy lifecycle hook - close event listener
  */
 function beforeDestroy() {
-  window.EventBus.$off('relog');
-  window.EventBus.$off('badgeExp');
-  window.EventBus.$off('user-session-refreshed');
+  this.emitter.off('relog');
+  this.emitter.off('badgeExp');
+  this.emitter.off('user-session-refreshed');
 } //beforeDestroy
 
 // |--------------------------------------------------|
