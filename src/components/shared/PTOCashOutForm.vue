@@ -290,7 +290,6 @@ function displaySuccess(msg) {
  * @returns Number - The available PTO balance
  */
 function getPtoBalance(employeeNumber) {
-  console.log(this.$store);
   return this.$store.getters.quickbooksPTO && this.$store.getters.quickbooksPTO.results.users[employeeNumber]
     ? this.$store.getters.quickbooksPTO.results.users[employeeNumber].pto_balances.PTO
     : null;

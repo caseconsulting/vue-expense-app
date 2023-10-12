@@ -28,8 +28,6 @@ let auth = new auth0.WebAuth({
  * clears the cookies
  */
 function clearCookies() {
-  console.log('COOKIES:');
-  console.log(document.cookie);
   document.cookie.split(';').forEach(function (c) {
     document.cookie = c.replace(/^ +/, '').replace(/=.*/, '=;expires=' + new Date().toUTCString() + ';path=/');
   });
