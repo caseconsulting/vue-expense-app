@@ -148,11 +148,11 @@ async function created() {
   if (this.item) {
     let editingItem = _.cloneDeep(this.item);
     this.passedEmployee = _.find(this.$store.getters.employees, (e) => e.id === this.item.employeeId);
-    this.$set(this.ptoCashOutObj, 'id', editingItem.id);
-    this.$set(this.ptoCashOutObj, 'employeeId', editingItem.employeeId);
-    this.$set(this.ptoCashOutObj, 'amount', editingItem.amount);
-    this.$set(this.ptoCashOutObj, 'creationDate', editingItem.creationDate);
-    this.$set(this.ptoCashOutObj, 'approvedDate', editingItem.approvedDate);
+    this.ptoCashOutObj['id'] = editingItem.id;
+    this.ptoCashOutObj['employeeId'] = editingItem.employeeId;
+    this.ptoCashOutObj['amount'] = editingItem.amount;
+    this.ptoCashOutObj['creationDate'] = editingItem.creationDate;
+    this.ptoCashOutObj['approvedDate'] = editingItem.approvedDate;
   } else {
     this.passedEmployee = _.cloneDeep(this.employee);
   }
@@ -225,11 +225,11 @@ function cancel() {
  * Clears form and resets validation.
  */
 function clearForm() {
-  this.$set(this.ptoCashOutObj, 'id', null);
-  this.$set(this.ptoCashOutObj, 'employeeId', null);
-  this.$set(this.ptoCashOutObj, 'amount', null);
-  this.$set(this.ptoCashOutObj, 'creationDate', null);
-  this.$set(this.ptoCashOutObj, 'approvedDate', null);
+  this.ptoCashOutObj['id'] = null;
+  this.ptoCashOutObj['employeeId'] = null;
+  this.ptoCashOutObj['amount'] = null;
+  this.ptoCashOutObj['creationDate'] = null;
+  this.ptoCashOutObj['approvedDate'] = null;
 
   this.approvedDateFormatted = null;
   this.$refs.form.reset();
@@ -378,11 +378,11 @@ function watchEditPTOCashOutItem() {
   if (this.item) {
     let editingItem = _.cloneDeep(this.item);
     this.passedEmployee = _.find(this.$store.getters.employees, (e) => e.id === this.item.employeeId);
-    this.$set(this.ptoCashOutObj, 'id', editingItem.id);
-    this.$set(this.ptoCashOutObj, 'employeeId', editingItem.employeeId);
-    this.$set(this.ptoCashOutObj, 'amount', editingItem.amount);
-    this.$set(this.ptoCashOutObj, 'creationDate', editingItem.creationDate);
-    this.$set(this.ptoCashOutObj, 'approvedDate', editingItem.approvedDate);
+    this.ptoCashOutObj['id'] = editingItem.id;
+    this.ptoCashOutObj['employeeId'] = editingItem.employeeId;
+    this.ptoCashOutObj['amount'] = editingItem.amount;
+    this.ptoCashOutObj['creationDate'] = editingItem.creationDate;
+    this.ptoCashOutObj['approvedDate'] = editingItem.approvedDate;
   }
 } // watchEditPTOCashOutItem
 

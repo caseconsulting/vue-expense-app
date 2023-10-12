@@ -71,9 +71,9 @@ async function created() {
   this.emitter.on('canceled-contract-form', () => (this.toggleContractForm = false));
   this.emitter.on('submitted-contract-form', () => (this.toggleContractForm = false));
   this.emitter.on('status-alert', (status) => {
-    this.$set(this.status, 'statusType', status.statusType);
-    this.$set(this.status, 'statusMessage', status.statusMessage);
-    this.$set(this.status, 'color', status.color);
+    this.status['statusType'] = status.statusType;
+    this.status['statusMessage'] = status.statusMessage;
+    this.status['color'] = status.color;
   });
 
   await Promise.all([
@@ -87,9 +87,9 @@ async function created() {
  * Clear the action status that is displayed in the snackbar.
  */
 function clearStatus() {
-  this.$set(this.status, 'statusType', undefined);
-  this.$set(this.status, 'statusMessage', '');
-  this.$set(this.status, 'color', '');
+  this.status['statusType'] = undefined;
+  this.status['statusMessage'] = '';
+  this.status['color'] = '';
 } // clearStatus
 
 // |--------------------------------------------------|

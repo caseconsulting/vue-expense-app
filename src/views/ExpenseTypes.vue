@@ -513,9 +513,9 @@ async function addModelToTable() {
   await this.updateStoreExpenseTypes();
   await this.refreshExpenseTypes();
 
-  this.$set(this.status, 'statusType', 'SUCCESS');
-  this.$set(this.status, 'statusMessage', 'Item was successfully submitted!');
-  this.$set(this.status, 'color', 'green');
+  this.status['statusType'] = 'SUCCESS';
+  this.status['statusMessage'] = 'Item was successfully submitted!';
+  this.status['color'] = 'green';
 } // addModelToTable
 
 /**
@@ -628,33 +628,33 @@ function changeAvatar(item) {
  * Clear the selected expense type.
  */
 function clearModel() {
-  this.$set(this.model, 'id', '');
-  this.$set(this.model, 'budget', 0);
-  this.$set(this.model, 'budgetName', '');
-  this.$set(this.model, 'description', '');
-  this.$set(this.model, 'odFlag', false);
-  this.$set(this.model, 'proRated', false);
-  this.$set(this.model, 'startDate', '');
-  this.$set(this.model, 'endDate', '');
-  this.$set(this.model, 'recurringFlag', false);
-  this.$set(this.model, 'requiredFlag', false);
-  this.$set(this.model, 'isInactive', false);
-  this.$set(this.model, 'categories', []);
-  this.$set(this.model, 'accessibleBy', ['FullTime']);
-  this.$set(this.model, 'hasRecipient', false);
-  this.$set(this.model, 'alwaysOnFeed', false);
-  this.$set(this.model, 'campfire', null);
-  this.$set(this.model, 'requireURL', false);
-  this.$set(this.model, 'tagBudgets', []);
+  this.model['id'] = '';
+  this.model['budget'] = 0;
+  this.model['budgetName'] = '';
+  this.model['description'] = '';
+  this.model['odFlag'] = false;
+  this.model['proRated'] = false;
+  this.model['startDate'] = '';
+  this.model['endDate'] = '';
+  this.model['recurringFlag'] = false;
+  this.model['requiredFlag'] = false;
+  this.model['isInactive'] = false;
+  this.model['categories'] = [];
+  this.model['accessibleBy'] = ['FullTime'];
+  this.model['hasRecipient'] = false;
+  this.model['alwaysOnFeed'] = false;
+  this.model['campfire'] = null;
+  this.model['requireURL'] = false;
+  this.model['tagBudgets'] = [];
 } // clearModel
 
 /**
  * Clear the action status that is displayed in the snackbar.
  */
 function clearStatus() {
-  this.$set(this.status, 'statusType', undefined);
-  this.$set(this.status, 'statusMessage', '');
-  this.$set(this.status, 'color', '');
+  this.status['statusType'] = undefined;
+  this.status['statusMessage'] = '';
+  this.status['color'] = '';
 } // clearStatus
 
 /**
@@ -695,9 +695,9 @@ async function deleteModelFromTable() {
   await this.updateStoreExpenseTypes();
   await this.refreshExpenseTypes();
 
-  this.$set(this.status, 'statusType', 'SUCCESS');
-  this.$set(this.status, 'statusMessage', 'Item was successfully deleted!');
-  this.$set(this.status, 'color', 'green');
+  this.status['statusType'] = 'SUCCESS';
+  this.status['statusMessage'] = 'Item was successfully deleted!';
+  this.status['color'] = 'green';
 } // deleteModelFromTable
 
 /**
@@ -706,9 +706,9 @@ async function deleteModelFromTable() {
  * @param err - String error message
  */
 function displayError(err) {
-  this.$set(this.status, 'statusType', 'ERROR');
-  this.$set(this.status, 'statusMessage', err);
-  this.$set(this.status, 'color', 'red');
+  this.status['statusType'] = 'ERROR';
+  this.status['statusMessage'] = err;
+  this.status['color'] = 'red';
 } // displayError
 
 /**
@@ -995,9 +995,9 @@ async function updateModelInTable() {
   await this.updateStoreExpenseTypes();
   await this.refreshExpenseTypes();
 
-  this.$set(this.status, 'statusType', 'SUCCESS');
-  this.$set(this.status, 'statusMessage', 'Item was successfully updated!');
-  this.$set(this.status, 'color', 'green');
+  this.status['statusType'] = 'SUCCESS';
+  this.status['statusMessage'] = 'Item was successfully updated!';
+  this.status['color'] = 'green';
 } // updateModelInTable
 
 /**
@@ -1012,7 +1012,7 @@ async function validateDelete(item) {
   try {
     let expenses = await api.getAllExpenseTypeExpenses(item.id);
     if (expenses.length <= 0) {
-      this.$set(this.deleteModel, 'id', item.id);
+      this.deleteModel['id'] = item.id;
       this.deleting = true;
     } else {
       this.invalidDelete = true;

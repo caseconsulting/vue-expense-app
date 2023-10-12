@@ -613,9 +613,9 @@ function cleanUpData() {
  * Clear the action status that is displayed in the snackbar.
  */
 function clearStatus() {
-  this.$set(this.errorStatus, 'statusType', undefined);
-  this.$set(this.errorStatus, 'statusMessage', null);
-  this.$set(this.errorStatus, 'color', null);
+  this.errorStatus['statusType'] = undefined;
+  this.errorStatus['statusMessage'] = null;
+  this.errorStatus['color'] = null;
 } // clearStatus
 
 /**
@@ -624,9 +624,9 @@ function clearStatus() {
  * @param err - String error message
  */
 function displayError(err) {
-  this.$set(this.errorStatus, 'statusType', 'ERROR');
-  this.$set(this.errorStatus, 'statusMessage', err);
-  this.$set(this.errorStatus, 'color', 'red');
+  this.errorStatus['statusType'] = 'ERROR';
+  this.errorStatus['statusMessage'] = err;
+  this.errorStatus['color'] = 'red';
 } // displayError
 
 /**
@@ -723,7 +723,7 @@ async function submit() {
         // failed to create employee
         this.emitter.emit('error', newEmployee.response.data.message);
         this.displayError(newEmployee.response.data.message);
-        this.$set(this.model, 'id', null); // reset id
+        this.model['id'] = null; // reset id
       }
     }
     if (this.tagsToUpdate && this.tagsToUpdate.length > 0) {
@@ -849,33 +849,33 @@ async function convertAutocompleteToTitlecase() {
 function setFormData(tab, data) {
   if (tab == 'employee') {
     //sets all employee info to data returned from employee tab
-    this.$set(this.model, 'firstName', data.firstName);
-    this.$set(this.model, 'middleName', data.middleName);
-    this.$set(this.model, 'noMiddleName', data.noMiddleName);
-    this.$set(this.model, 'lastName', data.lastName);
-    this.$set(this.model, 'nickname', data.nickname);
-    this.$set(this.model, 'employeeNumber', data.employeeNumber);
-    this.$set(this.model, 'email', data.email);
-    this.$set(this.model, 'prime', data.prime);
-    this.$set(this.model, 'contract', data.contract);
-    this.$set(this.model, 'jobRole', data.jobRole);
-    this.$set(this.model, 'agencyIdentificationNumber', data.agencyIdentificationNumber);
-    this.$set(this.model, 'employeeRole', data.employeeRole);
-    this.$set(this.model, 'hireDate', data.hireDate);
-    this.$set(this.model, 'workStatus', data.workStatus);
-    this.$set(this.model, 'deptDate', data.deptDate);
-    this.$set(this.model, 'eeoDeclineSelfIdentify', data.eeoDeclineSelfIdentify);
-    this.$set(this.model, 'eeoGender', data.eeoGender);
-    this.$set(this.model, 'eeoHispanicOrLatino', data.eeoHispanicOrLatino);
-    this.$set(this.model, 'eeoRaceOrEthnicity', data.eeoRaceOrEthnicity);
-    this.$set(this.model, 'eeoJobCategory', data.eeoJobCategory);
-    this.$set(this.model, 'eeoHasDisability', data.eeoHasDisability);
-    this.$set(this.model, 'eeoIsProtectedVeteran', data.eeoIsProtectedVeteran);
+    this.model['firstName'] = data.firstName;
+    this.model['middleName'] = data.middleName;
+    this.model['noMiddleName'] = data.noMiddleName;
+    this.model['lastName'] = data.lastName;
+    this.model['nickname'] = data.nickname;
+    this.model['employeeNumber'] = data.employeeNumber;
+    this.model['email'] = data.email;
+    this.model['prime'] = data.prime;
+    this.model['contract'] = data.contract;
+    this.model['jobRole'] = data.jobRole;
+    this.model['agencyIdentificationNumber'] = data.agencyIdentificationNumber;
+    this.model['employeeRole'] = data.employeeRole;
+    this.model['hireDate'] = data.hireDate;
+    this.model['workStatus'] = data.workStatus;
+    this.model['deptDate'] = data.deptDate;
+    this.model['eeoDeclineSelfIdentify'] = data.eeoDeclineSelfIdentify;
+    this.model['eeoGender'] = data.eeoGender;
+    this.model['eeoHispanicOrLatino'] = data.eeoHispanicOrLatino;
+    this.model['eeoRaceOrEthnicity'] = data.eeoRaceOrEthnicity;
+    this.model['eeoJobCategory'] = data.eeoJobCategory;
+    this.model['eeoHasDisability'] = data.eeoHasDisability;
+    this.model['eeoIsProtectedVeteran'] = data.eeoIsProtectedVeteran;
     if (this.hasAdminPermissions()) {
-      this.$set(this.model, 'eeoAdminHasFilledOutEeoForm', true);
+      this.model['eeoAdminHasFilledOutEeoForm'] = true;
       this.tagsToUpdate = _.cloneDeep(data.editedTags);
     } else {
-      this.$set(this.model, 'eeoAdminHasFilledOutEeoForm', false);
+      this.model['eeoAdminHasFilledOutEeoForm'] = false;
     }
   } else if (tab == 'personal') {
     // filter github and twitter links
@@ -893,28 +893,28 @@ function setFormData(tab, data) {
     }
 
     //sets all personal info to data returned from personal tab
-    this.$set(this.model, 'github', data.github);
-    this.$set(this.model, 'twitter', data.twitter);
-    this.$set(this.model, 'linkedIn', data.linkedIn);
-    this.$set(this.model, 'personalEmail', data.personalEmail);
-    this.$set(this.model, 'privatePhoneNumbers', data.privatePhoneNumbers);
-    this.$set(this.model, 'publicPhoneNumbers', data.publicPhoneNumbers);
-    this.$set(this.model, 'birthday', data.birthday);
-    this.$set(this.model, 'birthdayFeed', data.birthdayFeed);
-    this.$set(this.model, 'city', data.city);
-    this.$set(this.model, 'country', data.country);
-    this.$set(this.model, 'st', data.st);
-    this.$set(this.model, 'currentCity', data.currentCity);
-    this.$set(this.model, 'currentState', data.currentState);
-    this.$set(this.model, 'currentStreet', data.currentStreet);
-    this.$set(this.model, 'currentStreet2', data.currentStreet2);
-    this.$set(this.model, 'currentZIP', data.currentZIP);
+    this.model['github'] = data.github;
+    this.model['twitter'] = data.twitter;
+    this.model['linkedIn'] = data.linkedIn;
+    this.model['personalEmail'] = data.personalEmail;
+    this.model['privatePhoneNumbers'] = data.privatePhoneNumbers;
+    this.model['publicPhoneNumbers'] = data.publicPhoneNumbers;
+    this.model['birthday'] = data.birthday;
+    this.model['birthdayFeed'] = data.birthdayFeed;
+    this.model['city'] = data.city;
+    this.model['country'] = data.country;
+    this.model['st'] = data.st;
+    this.model['currentCity'] = data.currentCity;
+    this.model['currentState'] = data.currentState;
+    this.model['currentStreet'] = data.currentStreet;
+    this.model['currentStreet2'] = data.currentStreet2;
+    this.model['currentZIP'] = data.currentZIP;
   } else if (tab == 'education') {
-    this.$set(this.model, 'education', data); //sets education to data returned from education tab
+    this.model['education'] = data; //sets education to data returned from education tab
   } else if (tab == 'jobExperience') {
     //sets all jobExperience info to data returned from job experience tab
-    this.$set(this.model, 'icTimeFrames', data.icTimeFrames);
-    this.$set(this.model, 'companies', data.companies);
+    this.model['icTimeFrames'] = data.icTimeFrames;
+    this.model['companies'] = data.companies;
   } else if (tab == 'certifications') {
     // update cert expirationWasSeen if needed
     // this presumes that they cannot be rearranged
@@ -929,19 +929,19 @@ function setFormData(tab, data) {
         }
       }
     }
-    this.$set(this.model, 'certifications', data); //sets certifications to data returned from certifications tab
+    this.model['certifications'] = data; //sets certifications to data returned from certifications tab
   } else if (tab == 'awards') {
-    this.$set(this.model, 'awards', data); //sets awards to data returned from awards tab
+    this.model['awards'] = data; //sets awards to data returned from awards tab
   } else if (tab == 'technologies') {
-    this.$set(this.model, 'technologies', data); //sets technologies to data returned from technologies tab
+    this.model['technologies'] = data; //sets technologies to data returned from technologies tab
   } else if (tab == 'customerOrgExp') {
-    this.$set(this.model, 'customerOrgExp', data); //sets degrees to data returned from education tab
+    this.model['customerOrgExp'] = data; //sets degrees to data returned from education tab
   } else if (tab == 'contracts') {
-    this.$set(this.model, 'contracts', data); //sets contracts to data returned from contracts tab
+    this.model['contracts'] = data; //sets contracts to data returned from contracts tab
   } else if (tab == 'clearance') {
-    this.$set(this.model, 'clearances', data); //sets clearances to data returned from clearance tab
+    this.model['clearances'] = data; //sets clearances to data returned from clearance tab
   } else if (tab == 'languages') {
-    this.$set(this.model, 'languages', data); //sets clearances to data returned from clearance tab
+    this.model['languages'] = data; //sets clearances to data returned from clearance tab
   }
 } //setFormData
 

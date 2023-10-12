@@ -468,9 +468,9 @@ function moneyFilter(value) {
 async function addModelToTable() {
   await this.refreshExpenses();
 
-  this.$set(this.status, 'statusType', 'SUCCESS');
-  this.$set(this.status, 'statusMessage', 'Item was successfully submitted!');
-  this.$set(this.status, 'color', 'green');
+  this.status['statusType'] = 'SUCCESS';
+  this.status['statusMessage'] = 'Item was successfully submitted!';
+  this.status['color'] = 'green';
 } // addModelToTable
 
 /**
@@ -478,17 +478,17 @@ async function addModelToTable() {
  * if user sets employeeId and employeeName.
  */
 function clearExpense() {
-  this.$set(this.expense, 'description', null);
+  this.expense['description'] = null;
   this.expense = _.mapValues(this.expense, () => {
     return null;
   });
   if (this.asUser) {
     // creating or updating an expense as a user
-    this.$set(this.expense, 'employeeId', this.userInfo.id);
-    this.$set(this.expense, 'employeeName', this.userInfo.id);
+    this.expense['employeeId'] = this.userInfo.id;
+    this.expense['employeeName'] = this.userInfo.id;
   } else {
-    this.$set(this.expense, 'employeeId', null);
-    this.$set(this.expense, 'employeeName', null);
+    this.expense['employeeId'] = null;
+    this.expense['employeeName'] = null;
   }
 } // clearExpense
 
@@ -496,9 +496,9 @@ function clearExpense() {
  * Clear the action status that is displayed in the snackbar.
  */
 function clearStatus() {
-  this.$set(this.status, 'statusType', undefined);
-  this.$set(this.status, 'statusMessage', '');
-  this.$set(this.status, 'color', '');
+  this.status['statusType'] = undefined;
+  this.status['statusMessage'] = '';
+  this.status['color'] = '';
 } // clearStatus
 
 /**
@@ -600,9 +600,9 @@ async function deleteExpense() {
 async function deleteModelFromTable() {
   await this.refreshExpenses();
 
-  this.$set(this.status, 'statusType', 'SUCCESS');
-  this.$set(this.status, 'statusMessage', 'Item was successfully deleted!');
-  this.$set(this.status, 'color', 'green');
+  this.status['statusType'] = 'SUCCESS';
+  this.status['statusMessage'] = 'Item was successfully deleted!';
+  this.status['color'] = 'green';
 } // deleteModelFromTable
 
 /**
@@ -611,9 +611,9 @@ async function deleteModelFromTable() {
  * @param err - String error message
  */
 function displayError(err) {
-  this.$set(this.status, 'statusType', 'ERROR');
-  this.$set(this.status, 'statusMessage', err);
-  this.$set(this.status, 'color', 'red');
+  this.status['statusType'] = 'ERROR';
+  this.status['statusMessage'] = err;
+  this.status['color'] = 'red';
 } // displayError
 
 /**
@@ -755,7 +755,7 @@ function onSelect(item) {
   });
   this.isEditing = true;
   this.expense.edit = true;
-  this.$set(this.expense, 'cost', moneyFilter(item.cost));
+  this.expense['cost'] = moneyFilter(item.cost);
 } // onSelect
 
 /**
@@ -797,9 +797,9 @@ async function unreimburseExpense() {
 
   if (updatedExpense.id) {
     // successfully unreimburses expense
-    this.$set(this.status, 'statusType', 'SUCCESS');
-    this.$set(this.status, 'statusMessage', 'Item was successfully unreimbursed!');
-    this.$set(this.status, 'color', 'green');
+    this.status['statusType'] = 'SUCCESS';
+    this.status['statusMessage'] = 'Item was successfully unreimbursed!';
+    this.status['color'] = 'green';
   } else {
     // fails to unreimburse expense
     this.displayError('Error Unreimburseing Expense');
@@ -817,9 +817,9 @@ async function unreimburseExpense() {
 async function updateModelInTable() {
   await this.refreshExpenses();
 
-  this.$set(this.status, 'statusType', 'SUCCESS');
-  this.$set(this.status, 'statusMessage', 'Item was successfully updated!');
-  this.$set(this.status, 'color', 'green');
+  this.status['statusType'] = 'SUCCESS';
+  this.status['statusMessage'] = 'Item was successfully updated!';
+  this.status['color'] = 'green';
 } // updateModelInTable
 
 /**

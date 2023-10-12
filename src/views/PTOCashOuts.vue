@@ -66,9 +66,9 @@ function created() {
  */
 function mounted() {
   this.emitter.on('status-alert', (status) => {
-    this.$set(this.status, 'statusType', status.statusType);
-    this.$set(this.status, 'statusMessage', status.statusMessage);
-    this.$set(this.status, 'color', status.color);
+    this.status['statusType'] = status.statusType;
+    this.status['statusMessage'] = status.statusMessage;
+    this.status['color'] = status.color;
   });
   this.emitter.on('change-quickbooks-employee', (employee) => {
     this.employee = employee;
@@ -123,9 +123,9 @@ async function watchStoreIsPopulated() {
  * Clear the action status that is displayed in the snackbar.
  */
 function clearStatus() {
-  this.$set(this.status, 'statusType', undefined);
-  this.$set(this.status, 'statusMessage', '');
-  this.$set(this.status, 'color', '');
+  this.status['statusType'] = undefined;
+  this.status['statusMessage'] = '';
+  this.status['color'] = '';
 } // clearStatus
 
 // |--------------------------------------------------|

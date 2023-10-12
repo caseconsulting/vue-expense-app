@@ -347,9 +347,9 @@ function changeAvatar(item) {
  * Clear the action status that is displayed in the snackbar.
  */
 function clearStatus() {
-  this.$set(this.status, 'statusType', undefined);
-  this.$set(this.status, 'statusMessage', null);
-  this.$set(this.status, 'color', null);
+  this.status['statusType'] = undefined;
+  this.status['statusMessage'] = null;
+  this.status['color'] = null;
 } // clearStatus
 
 /**
@@ -447,9 +447,9 @@ async function deleteEmployee() {
 async function deleteModelFromTable() {
   await this.refreshEmployees();
 
-  this.$set(this.status, 'statusType', 'SUCCESS');
-  this.$set(this.status, 'statusMessage', 'Employee was successfully deleted!');
-  this.$set(this.status, 'color', 'green');
+  this.status['statusType'] = 'SUCCESS';
+  this.status['statusMessage'] = 'Employee was successfully deleted!';
+  this.status['color'] = 'green';
 } // deleteModelFromTable
 
 /**
@@ -458,9 +458,9 @@ async function deleteModelFromTable() {
  * @param err - String error message
  */
 function displayError(err) {
-  this.$set(this.status, 'statusType', 'ERROR');
-  this.$set(this.status, 'statusMessage', err);
-  this.$set(this.status, 'color', 'red');
+  this.status['statusType'] = 'ERROR';
+  this.status['statusMessage'] = err;
+  this.status['color'] = 'red';
 } // displayError
 
 /**
@@ -678,7 +678,7 @@ async function validateDelete(item) {
 
     if (valid) {
       // employee can be deleted
-      this.$set(this.deleteModel, 'id', item.id);
+      this.deleteModel['id'] = item.id;
       this.deleting = !this.deleting; // activate model to confirm delete
     } else {
       // employee cannot be deleted

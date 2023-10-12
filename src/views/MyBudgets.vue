@@ -130,9 +130,9 @@ function viewingCurrentBudgetYear() {
  * Clear the action status that is displayed in the snackbar.
  */
 function clearStatus() {
-  this.$set(this.status, 'statusType', undefined);
-  this.$set(this.status, 'statusMessage', '');
-  this.$set(this.status, 'color', '');
+  this.status['statusType'] = undefined;
+  this.status['statusMessage'] = '';
+  this.status['color'] = '';
 } // clearStatus
 
 /**
@@ -141,9 +141,9 @@ function clearStatus() {
  * @param err - String error message
  */
 function displayError(err) {
-  this.$set(this.status, 'statusType', 'ERROR');
-  this.$set(this.status, 'statusMessage', err);
-  this.$set(this.status, 'color', 'red');
+  this.status['statusType'] = 'ERROR';
+  this.status['statusMessage'] = err;
+  this.status['color'] = 'red';
 } // displayError
 
 /**
@@ -173,9 +173,9 @@ async function refreshEmployee() {
  * Set and display a successful submit status in the snackbar.
  */
 function showSuccessfulSubmit() {
-  this.$set(this.status, 'statusType', 'SUCCESS');
-  this.$set(this.status, 'statusMessage', 'Item was successfully submitted!');
-  this.$set(this.status, 'color', 'green');
+  this.status['statusType'] = 'SUCCESS';
+  this.status['statusMessage'] = 'Item was successfully submitted!';
+  this.status['color'] = 'green';
 } // showSuccessfulSubmit
 
 /**

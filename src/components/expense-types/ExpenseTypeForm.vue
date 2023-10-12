@@ -621,8 +621,8 @@ async function submit() {
     // form is validated
     if (this.editedExpenseType.recurringFlag) {
       // clear start and end date fields if expense type is recurring
-      this.$set(this.editedExpenseType, 'startDate', null);
-      this.$set(this.editedExpenseType, 'endDate', null);
+      this.editedExpenseType['startDate'] = null;
+      this.editedExpenseType['endDate'] = null;
     }
 
     if (this.editedExpenseType.id) {
@@ -640,18 +640,18 @@ async function submit() {
     } else {
       // creating a new expense type
       let newUUID = generateUUID();
-      this.$set(this.editedExpenseType, 'id', newUUID);
+      this.editedExpenseType['id'] = newUUID;
       let newExpenseType = await api.createItem(api.EXPENSE_TYPES, this.editedExpenseType);
 
       if (newExpenseType.id) {
         // successfully creates an expense type
-        this.$set(this.editedExpenseType, 'id', newExpenseType.id);
+        this.editedExpenseType['id'] = newExpenseType.id;
         this.emitter.emit('add', newExpenseType);
         this.clearForm();
       } else {
         // emit error if fails to create an expense type
         this.emitter.emit('error', newExpenseType.response.data.message);
-        this.$set(this.editedExpenseType, 'id', '');
+        this.editedExpenseType['id'] = '';
       }
     }
   }
@@ -780,8 +780,8 @@ function isLast(index, arr) {
  */
 function moveTagBudgetUp(index) {
   let temp = this.editedExpenseType.tagBudgets[index - 1];
-  this.$set(this.editedExpenseType.tagBudgets, index - 1, this.editedExpenseType.tagBudgets[index]);
-  this.$set(this.editedExpenseType.tagBudgets, index, temp);
+  this.editedExpenseType.tagBudgets[index - 1] = this.editedExpenseType.tagBudgets[index];
+  this.editedExpenseType.tagBudgets[index] = temp;
 } // moveTagBudgetUp
 
 /**
@@ -790,8 +790,8 @@ function moveTagBudgetUp(index) {
  */
 function moveTagBudgetDown(index) {
   let temp = this.editedExpenseType.tagBudgets[index + 1];
-  this.$set(this.editedExpenseType.tagBudgets, index + 1, this.editedExpenseType.tagBudgets[index]);
-  this.$set(this.editedExpenseType.tagBudgets, index, temp);
+  this.editedExpenseType.tagBudgets[index + 1] = this.editedExpenseType.tagBudgets[index];
+  this.editedExpenseType.tagBudgets[index] = temp;
 } // moveTagBudgetDown
 
 // |--------------------------------------------------|

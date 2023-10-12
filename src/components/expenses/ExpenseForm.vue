@@ -467,15 +467,15 @@ async function addURLInfo(newExpense) {
     await this.incrementURLHits();
   } else {
     // create a new url and category if it does not already exist
-    this.$set(this.urlInfo, 'id', newExpense.url);
+    this.urlInfo['id'] = newExpense.url;
 
     //adds categories to the list if applicable
     if (newExpense.category) {
-      this.$set(this.urlInfo, 'category', newExpense.category);
+      this.urlInfo['category'] = newExpense.category;
     } else {
-      this.$set(this.urlInfo, 'category', null);
+      this.urlInfo['category'] = null;
     }
-    this.$set(this.urlInfo, 'hits', 1);
+    this.urlInfo['hits'] = 1;
     await api.createItem(api.TRAINING_URLS, this.urlInfo);
   }
 } // addURLInfo
@@ -607,17 +607,17 @@ async function checkCoverage() {
                 await this.submit();
               } else if (newCommittedAmount + cost <= 2 * budgetAmount) {
                 // BRANCH 4.2 goes over initial budget with new expense but stays below overdraft budget
-                this.$set(this.editedExpense, 'budget', budgetAmount);
-                this.$set(this.editedExpense, 'remaining', budgetAmount - newCommittedAmount);
-                this.$set(this.editedExpense, 'od', true);
+                this.editedExpense['budget'] = budgetAmount;
+                this.editedExpense['remaining'] = budgetAmount - newCommittedAmount;
+                this.editedExpense['od'] = true;
                 this.isCovered = true;
                 this.isOverCovered = false;
                 this.confirming = !this.confirming;
               } else {
                 // BRANCH 4.3 goes over overdraft budget completely
-                this.$set(this.editedExpense, 'budget', budgetAmount);
-                this.$set(this.editedExpense, 'remaining', 2 * budgetAmount - newCommittedAmount);
-                this.$set(this.editedExpense, 'od', true);
+                this.editedExpense['budget'] = budgetAmount;
+                this.editedExpense['remaining'] = 2 * budgetAmount - newCommittedAmount;
+                this.editedExpense['od'] = true;
                 this.isCovered = false;
                 this.isOverCovered = false;
                 this.confirming = !this.confirming;
@@ -626,17 +626,17 @@ async function checkCoverage() {
               // BRANCH 3.2 under overdraft budget -- expense is able to be made
               if (newCommittedAmount + cost <= 2 * budgetAmount) {
                 // BRANCH 5.1 above initial budget but below overdraft budget TODO: add condirmation box handling? new flag?
-                this.$set(this.editedExpense, 'budget', budgetAmount);
-                this.$set(this.editedExpense, 'remaining', 2 * budgetAmount - newCommittedAmount);
-                this.$set(this.editedExpense, 'od', true);
+                this.editedExpense['budget'] = budgetAmount;
+                this.editedExpense['remaining'] = 2 * budgetAmount - newCommittedAmount;
+                this.editedExpense['od'] = true;
                 this.isCovered = true;
                 this.isOverCovered = true;
                 this.confirming = !this.confirming;
               } else {
                 // BRANCH 5.2 budget not maxed out before this expense (going over overdraft) but expense not fully covered. Show adusted confirmation dialog
-                this.$set(this.editedExpense, 'budget', budgetAmount);
-                this.$set(this.editedExpense, 'remaining', 2 * budgetAmount - newCommittedAmount);
-                this.$set(this.editedExpense, 'od', true);
+                this.editedExpense['budget'] = budgetAmount;
+                this.editedExpense['remaining'] = 2 * budgetAmount - newCommittedAmount;
+                this.editedExpense['od'] = true;
                 this.isCovered = false;
                 this.isOverCovered = false;
                 this.confirming = !this.confirming;
@@ -649,7 +649,7 @@ async function checkCoverage() {
             }
           } else {
             // BRANCH 2.2 selected expense type does not allow overdraft or employee is not full time
-            this.$set(this.editedExpense, 'od', false);
+            this.editedExpense['od'] = false;
             if (newCommittedAmount <= budgetAmount) {
               // BRANCH 6.1 starts under initial budget
               if (newCommittedAmount + cost <= budgetAmount) {
@@ -658,8 +658,8 @@ async function checkCoverage() {
                 await this.submit();
               } else {
                 // BRANCH 7.2 goes over budget
-                this.$set(this.editedExpense, 'budget', budgetAmount);
-                this.$set(this.editedExpense, 'remaining', budgetAmount - newCommittedAmount);
+                this.editedExpense['budget'] = budgetAmount;
+                this.editedExpense['remaining'] = budgetAmount - newCommittedAmount;
                 this.isCovered = false;
                 this.isOverCovered = false;
                 this.confirming = !this.confirming;
@@ -680,31 +680,31 @@ async function checkCoverage() {
               await this.submit();
             } else if (cost <= 2 * budgetAmount) {
               // the expense goes into overdraft but fully covered
-              this.$set(this.editedExpense, 'budget', budgetAmount);
-              this.$set(this.editedExpense, 'remaining', budgetAmount);
-              this.$set(this.editedExpense, 'od', true);
+              this.editedExpense['budget'] = budgetAmount;
+              this.editedExpense['remaining'] = budgetAmount;
+              this.editedExpense['od'] = true;
               this.isCovered = true;
               this.isOverCovered = false;
               this.confirming = !this.confirming;
             } else {
               // expense goes past overdraft budget completely and is partially covered
-              this.$set(this.editedExpense, 'budget', budgetAmount);
-              this.$set(this.editedExpense, 'remaining', 2 * budgetAmount);
-              this.$set(this.editedExpense, 'od', true);
+              this.editedExpense['budget'] = budgetAmount;
+              this.editedExpense['remaining'] = 2 * budgetAmount;
+              this.editedExpense['od'] = true;
               this.isCovered = false;
               this.isOverCovered = false;
               this.confirming = !this.confirming;
             }
           } else {
             // BRANCH 8.2 selected expense type does not allow overdraft or employee is not full time
-            this.$set(this.editedExpense, 'od', false);
+            this.editedExpense['od'] = false;
             if (cost <= budgetAmount) {
               // reimburse the full expense
               await this.submit();
             } else {
               // expense exceeds the budget but the expense not fully covered
-              this.$set(this.editedExpense, 'budget', budgetAmount);
-              this.$set(this.editedExpense, 'remaining', budgetAmount);
+              this.editedExpense['budget'] = budgetAmount;
+              this.editedExpense['remaining'] = budgetAmount;
               this.isCovered = false;
               this.isOverCovered = false;
               this.confirming = !this.confirming;
@@ -734,14 +734,14 @@ function clearForm() {
   this.purchaseDateFormatted = null;
   this.file = null;
 
-  this.$set(this.urlInfo, 'url', '');
-  this.$set(this.urlInfo, 'category', '');
-  this.$set(this.urlInfo, 'hits', 0);
+  this.urlInfo['url'] = '';
+  this.urlInfo['category'] = '';
+  this.urlInfo['hits'] = 0;
 
   if (this.asUser) {
     // creating or updating an expense as a user
-    this.$set(this.editedExpense, 'employeeName', `${this.userInfo.firstName} ${this.userInfo.lastName}`);
-    this.$set(this.editedExpense, 'employeeId', this.userInfo.id);
+    this.editedExpense['employeeName'] = `${this.userInfo.firstName} ${this.userInfo.lastName}`;
+    this.editedExpense['employeeId'] = this.userInfo.id;
   }
 } // clearForm
 
@@ -794,12 +794,12 @@ async function createNewEntry() {
   let updatedExpense;
 
   let newUUID = generateUUID();
-  this.$set(this.editedExpense, 'id', newUUID);
-  this.$set(this.editedExpense, 'createdAt', getTodaysDate());
+  this.editedExpense['id'] = newUUID;
+  this.editedExpense['createdAt'] = getTodaysDate();
   if (this.isReceiptRequired() && this.file) {
     // if receipt required and updating receipt
     // stores file name for lookup later
-    this.$set(this.editedExpense, 'receipt', this.file.name);
+    this.editedExpense['receipt'] = this.file.name;
     // upload attachment to S3
     updatedAttachment = await api.createAttachment(this.editedExpense, this.file);
     if (updatedAttachment.key) {
@@ -813,24 +813,24 @@ async function createNewEntry() {
           await this.addURLInfo(updatedExpense);
         }
 
-        this.$set(this.editedExpense, 'id', updatedExpense.id);
+        this.editedExpense['id'] = updatedExpense.id;
         this.emitter.emit('add', updatedExpense);
         this.clearForm();
       } else {
         // emit error if fails to update expense
         this.emitter.emit('error', updatedExpense.response.data.message);
-        this.$set(this.editedExpense, 'id', '');
+        this.editedExpense['id'] = '';
       }
     } else {
       // emit error if fails to upload file
       this.emitter.emit('error', updatedAttachment.response.data.message);
-      this.$set(this.editedExpense, 'id', '');
+      this.editedExpense['id'] = '';
     }
   } else {
     // if receipt not required or not updating receipt
     if (!this.isReceiptRequired()) {
       this.file = null;
-      this.$set(this.editedExpense, 'receipt', null);
+      this.editedExpense['receipt'] = null;
     }
     updatedExpense = await api.createItem(api.EXPENSES, this.editedExpense);
 
@@ -842,13 +842,13 @@ async function createNewEntry() {
         await this.addURLInfo(updatedExpense);
       }
 
-      this.$set(this.editedExpense, 'id', updatedExpense.id);
+      this.editedExpense['id'] = updatedExpense.id;
       this.emitter.emit('add', updatedExpense);
       this.clearForm();
     } else {
       // emit error if fails to update expense
       this.emitter.emit('error', updatedExpense.response.data.message);
-      this.$set(this.editedExpense, 'id', '');
+      this.editedExpense['id'] = '';
     }
   }
 } // createNewEntry
@@ -1169,11 +1169,11 @@ function setFile(file) {
   if (file) {
     this.isInactive = true;
     this.file = file;
-    this.$set(this.editedExpense, 'receipt', file.name);
+    this.editedExpense['receipt'] = file.name;
     this.isInactive = false;
   } else {
     this.file = null;
-    this.$set(this.editedExpense, 'receipt', null);
+    this.editedExpense['receipt'] = null;
     this.receipt = null;
   }
 } // setFile
@@ -1434,7 +1434,7 @@ async function updateExistingEntry() {
   if (this.isReceiptRequired() && this.file) {
     // if receipt required and updating receipt
     // stores file name for lookup later
-    this.$set(this.editedExpense, 'receipt', this.file.name);
+    this.editedExpense['receipt'] = this.file.name;
     // upload attachment to S3
     updatedAttachment = await api.createAttachment(this.editedExpense, this.file);
     if (updatedAttachment.key) {
@@ -1464,7 +1464,7 @@ async function updateExistingEntry() {
     // if not updating receipt
     if (!this.isReceiptRequired()) {
       this.file = null;
-      this.$set(this.editedExpense, 'receipt', null);
+      this.editedExpense['receipt'] = null;
     }
 
     // update item in database
@@ -1536,8 +1536,8 @@ function created() {
   this.asUser = this.myBudgetsView || this.employeeRole === 'user' || this.employeeRole === 'intern';
   if (this.asUser) {
     // creating or updating an expense as a user
-    this.$set(this.editedExpense, 'employeeName', `${this.userInfo.firstName} ${this.userInfo.lastName}`);
-    this.$set(this.editedExpense, 'employeeId', this.userInfo.id);
+    this.editedExpense['employeeName'] = `${this.userInfo.firstName} ${this.userInfo.lastName}`;
+    this.editedExpense['employeeId'] = this.userInfo.id;
   }
   // creating or updating an expense as an admin
   let employees = this.$store.getters.employees;
@@ -1637,8 +1637,8 @@ function watchExpenseID() {
 
   if (this.asUser) {
     // creating or updating an expense as a user
-    this.$set(this.editedExpense, 'employeeName', `${this.userInfo.firstName} ${this.userInfo.lastName}`);
-    this.$set(this.editedExpense, 'employeeId', this.userInfo.id);
+    this.editedExpense['employeeName'] = `${this.userInfo.firstName} ${this.userInfo.lastName}`;
+    this.editedExpense['employeeId'] = this.userInfo.id;
   }
 } // watchExpenseID
 
