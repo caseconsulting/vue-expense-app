@@ -129,8 +129,8 @@ import { customEmployeeFilter, getActive, getFullName, populateEmployeesDropdown
  * The created lifecycle hook.
  */
 function created() {
-  window.EventBus.$on('get-employees-to-contact', () => {
-    window.EventBus.$emit('list-of-employees-to-contact', this.filteredEmployees);
+  this.emitter.on('get-employees-to-contact', () => {
+    this.emitter.emit('list-of-employees-to-contact', this.filteredEmployees);
   });
 
   this.employeesInfo = this.getActive(this.$store.getters.employees); // default to filtered list

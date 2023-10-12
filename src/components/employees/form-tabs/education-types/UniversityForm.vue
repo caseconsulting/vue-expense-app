@@ -256,7 +256,7 @@ async function created() {
  * @param include - whether or not to include this education
  */
 function emitToParser(include) {
-  this.$emit(include ? 'confirm' : 'deny', include ? this.uni : undefined);
+  this.emitter.emit(include ? 'confirm' : 'deny', include ? this.uni : undefined);
 } // emitToParser
 
 /**
@@ -380,7 +380,7 @@ function validateFields() {
   _.forEach(components, (field) => {
     if (field && !field.validate()) errorCount++;
   });
-  window.EventBus.$emit('doneValidatingEducation', this.uni, this.schoolIndex, errorCount); // emit done validating
+  this.emitter.emit('doneValidatingEducation', this.uni, this.schoolIndex, errorCount); // emit done validating
 } // validateFields
 
 // |--------------------------------------------------|

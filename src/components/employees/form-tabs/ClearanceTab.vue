@@ -311,7 +311,7 @@ const ISOFORMAT = 'YYYY-MM-DD';
  * Emits to parent the component was created and get data.
  */
 async function created() {
-  window.EventBus.$emit('created', 'clearance'); // emit clearance tab was created
+  this.emitter.emit('created', 'clearance'); // emit clearance tab was created
   this.employees = this.$store.getters.employees; // get all employees
 } // created
 
@@ -491,8 +491,8 @@ function validateFields() {
   _.forEach(components, (field) => {
     if (field && !field.validate()) errorCount++;
   });
-  window.EventBus.$emit('doneValidating', 'clearance', this.editedClearances); // emit done validating and sends edited data back to parent
-  window.EventBus.$emit('clearanceStatus', errorCount); // emit error status
+  this.emitter.emit('doneValidating', 'clearance', this.editedClearances); // emit done validating and sends edited data back to parent
+  this.emitter.emit('clearanceStatus', errorCount); // emit error status
 } // validateFields
 
 // |--------------------------------------------------|

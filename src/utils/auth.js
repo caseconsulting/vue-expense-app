@@ -236,7 +236,7 @@ export function refreshUserSession() {
     if (authResult && authResult.accessToken && authResult.idToken) {
       setCookie(ACCESS_TOKEN_KEY, authResult.accessToken);
       setCookie(ID_TOKEN_KEY, authResult.idToken);
-      window.EventBus.$emit('user-session-refreshed');
+      window.emitter.emit('user-session-refreshed');
     }
   });
 } // refreshUserSession

@@ -442,7 +442,7 @@ async function cancelB() {
   if (this.model.employeeNumber && this.$route.params.id === undefined && !existingResume) {
     await api.deleteResume(this.model.id);
   }
-  window.EventBus.$emit('cancel-form');
+  this.emitter.emit('cancel-form');
 } // cancelB
 
 /**
@@ -692,7 +692,7 @@ async function submit() {
     // convert appropriate fields to title case
     await this.convertAutocompleteToTitlecase(); // recursion here lol confirm -> submit -> cATT -> confirm
     // form validated
-    this.$emit('startAction');
+    this.emitter.emit('startAction');
     this.cleanUpData();
     this.checkEmployeeDeactivation();
     if (this.model.id) {
@@ -701,13 +701,13 @@ async function submit() {
       if (updatedEmployee.id) {
         // successfully updated employee
         this.fullName = `${updatedEmployee.firstName} ${updatedEmployee.lastName}`;
-        window.EventBus.$emit('update', updatedEmployee);
+        this.emitter.emit('update', updatedEmployee);
         // getEmployees and update store with latest data
         if (this.model.id === this.$store.getters.user.id) await this.updateStoreUser();
         await this.updateStoreEmployees();
       } else {
         // failed to update employee
-        this.$emit('error', updatedEmployee.response.data.message);
+        this.emitter.emit('error', updatedEmployee.response.data.message);
         this.displayError(updatedEmployee.response.data.message);
       }
     } else {
@@ -721,7 +721,7 @@ async function submit() {
         this.$router.push(`/employee/${newEmployee.employeeNumber}`);
       } else {
         // failed to create employee
-        this.$emit('error', newEmployee.response.data.message);
+        this.emitter.emit('error', newEmployee.response.data.message);
         this.displayError(newEmployee.response.data.message);
         this.$set(this.model, 'id', null); // reset id
       }
@@ -734,7 +734,7 @@ async function submit() {
     this.confirmingError = true;
   }
   this.submitting = false;
-  window.EventBus.$emit('badgeExp');
+  this.emitter.emit('badgeExp');
 } // submit
 
 /**
@@ -974,7 +974,7 @@ async function openUpload() {
  * created lifecycle hook - create all the listeners and set up employee info.
  */
 async function created() {
-  window.EventBus.$on('disableUpload', (result, employeeNumber) => {
+  this.emitter.on('disableUpload', (result, employeeNumber) => {
     //disables upload resume button if invalid employee number
     this.uploadDisabled = result;
     //used to send up to Employees creating employee form
@@ -983,88 +983,88 @@ async function created() {
     this.model.employeeNumber = employeeNumber;
   });
   // Starts listener to check if resume is uploaded
-  window.EventBus.$on('uploaded', (result) => {
+  this.emitter.on('uploaded', (result) => {
     this.disableEmpNum = result;
-    window.EventBus.$emit('empNum', this.employeeNumber);
+    this.emitter.emit('empNum', this.employeeNumber);
   });
   // Starts listener to see if the user confirmed to submit the form
-  window.EventBus.$on('confirmed-form', async () => {
+  this.emitter.on('confirmed-form', async () => {
     this.confirmingValid = false;
     await cancelB();
   });
   // Starts listener to see if the user confirmed to submit the form
-  window.EventBus.$on('canceled-form', async () => {
+  this.emitter.on('canceled-form', async () => {
     this.confirmingError = false;
   });
   // Starts listener to see if the user cancelled to submit the form
-  window.EventBus.$on('canceled-cancel', () => {
+  this.emitter.on('canceled-cancel', () => {
     this.confirmingValid = false;
   });
-  window.EventBus.$on('confirmed-cancel', async () => {
+  this.emitter.on('confirmed-cancel', async () => {
     this.confirmingValid = true;
     await this.cancelB();
   });
   // set tab mounted
-  window.EventBus.$on('created', (tab) => {
+  this.emitter.on('created', (tab) => {
     this.tabCreated[tab] = true;
   });
   // reset validating status and sets the data based on the tab
-  window.EventBus.$on('doneValidating', (tab, data) => {
+  this.emitter.on('doneValidating', (tab, data) => {
     this.setFormData(tab, data); //sets the form data
     this.validating[tab] = false;
   });
   // set tab error status
-  window.EventBus.$on('awardStatus', (errorCount) => {
+  this.emitter.on('awardStatus', (errorCount) => {
     this.tabErrors.awards = errorCount > 0; //boolean if there are errors
     this.addErrorTab('Awards', errorCount); //error count
   });
   // Starts listener to check the Certifications tab has any errors
-  window.EventBus.$on('certificationsStatus', (errorCount) => {
+  this.emitter.on('certificationsStatus', (errorCount) => {
     this.tabErrors.certifications = errorCount > 0;
     this.addErrorTab('Certifications', errorCount);
   });
   // Starts listener to check the Clearance tab has any errors
-  window.EventBus.$on('clearanceStatus', (errorCount) => {
+  this.emitter.on('clearanceStatus', (errorCount) => {
     this.tabErrors.clearance = errorCount > 0;
     this.addErrorTab('Clearance', errorCount);
   });
   // Starts listener to check the Contracts tab has any errors
-  window.EventBus.$on('contractsStatus', (errorCount) => {
+  this.emitter.on('contractsStatus', (errorCount) => {
     this.tabErrors.contracts = errorCount > 0;
     this.addErrorTab('Contracts', errorCount);
   });
   // Starts listener to check the Customer Org tab has any errors
-  window.EventBus.$on('customerOrgExpStatus', (errorCount) => {
+  this.emitter.on('customerOrgExpStatus', (errorCount) => {
     this.tabErrors.customerOrgExp = errorCount > 0;
     this.addErrorTab('Customer Org', errorCount);
   });
   // Starts listener to check the Education tab has any errors
-  window.EventBus.$on('educationStatus', (errorCount) => {
+  this.emitter.on('educationStatus', (errorCount) => {
     this.tabErrors.education = errorCount > 0;
     this.addErrorTab('Education', errorCount);
   });
   // Starts listener to check the Employee tab has any errors
-  window.EventBus.$on('employeeStatus', (errorCount) => {
+  this.emitter.on('employeeStatus', (errorCount) => {
     this.tabErrors.employee = errorCount > 0;
     this.addErrorTab('Employee', errorCount);
   });
   // Starts listener to check the Job Experience tab has any errors
-  window.EventBus.$on('jobExperienceStatus', (errorCount) => {
+  this.emitter.on('jobExperienceStatus', (errorCount) => {
     this.tabErrors.jobExperience = errorCount > 0;
     this.addErrorTab('Job Experience', errorCount);
   });
   // Starts listener to check the Languages tab has any errors
-  window.EventBus.$on('languagesStatus', (errorCount) => {
+  this.emitter.on('languagesStatus', (errorCount) => {
     this.tabErrors.languages = errorCount > 0;
     this.addErrorTab('Foreign Languages', errorCount);
   });
   // Starts listener to check the Personal tab has any errors
-  window.EventBus.$on('personalStatus', (errorCount) => {
+  this.emitter.on('personalStatus', (errorCount) => {
     this.tabErrors.personal = errorCount > 0;
     this.addErrorTab('Personal', errorCount);
   });
   // Starts listener to check the Technologies tab has any errors
-  window.EventBus.$on('technologiesStatus', (errorCount) => {
+  this.emitter.on('technologiesStatus', (errorCount) => {
     this.tabErrors.technologies = errorCount > 0;
     this.addErrorTab('Technologies and Skills', errorCount);
   });
@@ -1085,26 +1085,26 @@ async function created() {
  * destroying all listeners
  */
 function beforeDestroy() {
-  window.EventBus.$off('disableUpload');
-  window.EventBus.$off('uploaded');
-  window.EventBus.$off('confirmed');
-  window.EventBus.$off('canceled');
-  window.EventBus.$off('canceled-form');
-  window.EventBus.$off('canceled-cancel');
-  window.EventBus.$off('confirmed-cancel');
-  window.EventBus.$off('created');
-  window.EventBus.$off('doneValidating');
-  window.EventBus.$off('awardStatus');
-  window.EventBus.$off('certificationsStatus');
-  window.EventBus.$off('clearanceStatus');
-  window.EventBus.$off('contractsStatus');
-  window.EventBus.$off('customerOrgExpStatus');
-  window.EventBus.$off('educationStatus');
-  window.EventBus.$off('employeeStatus');
-  window.EventBus.$off('jobExperienceStatus');
-  window.EventBus.$off('languagesStatus');
-  window.EventBus.$off('personalStatus');
-  window.EventBus.$off('technologiesStatus');
+  this.emitter.off('disableUpload');
+  this.emitter.off('uploaded');
+  this.emitter.off('confirmed');
+  this.emitter.off('canceled');
+  this.emitter.off('canceled-form');
+  this.emitter.off('canceled-cancel');
+  this.emitter.off('confirmed-cancel');
+  this.emitter.off('created');
+  this.emitter.off('doneValidating');
+  this.emitter.off('awardStatus');
+  this.emitter.off('certificationsStatus');
+  this.emitter.off('clearanceStatus');
+  this.emitter.off('contractsStatus');
+  this.emitter.off('customerOrgExpStatus');
+  this.emitter.off('educationStatus');
+  this.emitter.off('employeeStatus');
+  this.emitter.off('jobExperienceStatus');
+  this.emitter.off('languagesStatus');
+  this.emitter.off('personalStatus');
+  this.emitter.off('technologiesStatus');
 } // beforeDestroy
 
 // |--------------------------------------------------|
@@ -1157,7 +1157,7 @@ function watchFormTab(val) {
   // track current tab when switching between form and info
   if (this.afterCreate) {
     if (!_.isEqual(val, this.currentTab)) {
-      window.EventBus.$emit('tabChange', val); // emit to parent tab was changed
+      this.emitter.emit('tabChange', val); // emit to parent tab was changed
     }
   }
 } // watchFormTab

@@ -569,7 +569,7 @@ function clearStatus() {
  *  Set budget information for employee. Creates event listeners.
  */
 async function created() {
-  window.EventBus.$on('status-alert', (status) => {
+  this.emitter.on('status-alert', (status) => {
     this.status = status;
   });
   if (this.$store.getters.storeIsPopulated) {
@@ -582,7 +582,7 @@ async function created() {
  * Before destroy lifecycle hook. Destroys listeners.
  */
 function beforeDestroy() {
-  window.EventBus.$off('status-alert');
+  this.emitter.off('status-alert');
 } // beforeDestroy
 
 // |--------------------------------------------------|

@@ -24,7 +24,7 @@
             </template>
             <span>Switch role and redirect to default page</span>
           </v-tooltip>
-          <v-btn class="ma-2" @click.native="$emit('close')">Cancel</v-btn>
+          <v-btn class="ma-2" @click.native="emitter.emit('close')">Cancel</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -81,7 +81,7 @@ async function switchRole() {
       }
     }
   });
-  this.$emit('close');
+  this.emitter.emit('close');
 } // switchRole
 
 // |--------------------------------------------------|

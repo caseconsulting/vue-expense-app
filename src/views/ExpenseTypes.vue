@@ -1042,11 +1042,11 @@ function getTagByID(id) {
  * destroy listeners
  */
 function beforeDestroy() {
-  window.EventBus.$off('canceled-delete-expense-type');
-  window.EventBus.$off('confirm-delete-expense-type');
-  window.EventBus.$off('finished-editing-expense-type');
-  window.EventBus.$off('editing-expense-type');
-  window.EventBus.$off('invalid-expense type-delete');
+  this.emitter.off('canceled-delete-expense-type');
+  this.emitter.off('confirm-delete-expense-type');
+  this.emitter.off('finished-editing-expense-type');
+  this.emitter.off('editing-expense-type');
+  this.emitter.off('invalid-expense type-delete');
 } // beforeDestroy
 
 /**
@@ -1054,25 +1054,25 @@ function beforeDestroy() {
  */
 async function created() {
   //no longer editing an expense (clear model and enable buttons)
-  window.EventBus.$on('finished-editing-expense-type', () => {
+  this.emitter.on('finished-editing-expense-type', () => {
     this.clearModel();
     this.endAction();
   });
 
   //when expense type is being edited buttons should be disabled
-  window.EventBus.$on('editing-expense-type', () => {
+  this.emitter.on('editing-expense-type', () => {
     this.startAction();
   });
 
-  window.EventBus.$on('canceled-delete-expense-type', () => {
+  this.emitter.on('canceled-delete-expense-type', () => {
     this.midAction = false;
     this.deleting = false;
   });
-  window.EventBus.$on('confirm-delete-expense-type', async () => {
+  this.emitter.on('confirm-delete-expense-type', async () => {
     this.deleting = false;
     await this.deleteExpenseType();
   });
-  window.EventBus.$on('invalid-expense type-delete', () => {
+  this.emitter.on('invalid-expense type-delete', () => {
     this.midAction = false;
   });
 

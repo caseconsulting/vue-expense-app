@@ -18,7 +18,7 @@ import PieChart from '../base-charts/PieChart.vue';
  */
 async function mounted() {
   // emit comes from HighestDegreeChart when a pie slice is clicked
-  await window.EventBus.$on('majors-update', async (receiveData, title) => {
+  await this.emitter.on('majors-update', async (receiveData, title) => {
     this.quantities = [];
     this.labels = [];
     this.dataReceived = false;
@@ -42,7 +42,7 @@ async function created() {
  * Before destroy lifecycle hook.
  */
 function beforeDestroy() {
-  window.EventBus.$off('majors-update');
+  this.emitter.off('majors-update');
   this.$refs.chart.destroyChart();
 } //beforeDestroy
 

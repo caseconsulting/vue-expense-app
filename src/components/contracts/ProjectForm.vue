@@ -125,7 +125,7 @@ async function createProject() {
  * @param data - The data to emit
  */
 function emit(msg, data) {
-  window.EventBus.$emit(msg, data);
+  this.emitter.emit(msg, data);
 } // emit
 
 // |--------------------------------------------------|

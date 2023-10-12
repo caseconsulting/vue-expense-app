@@ -73,17 +73,17 @@ import _ from 'lodash';
  * Emits to parent the component was created and get data.
  */
 async function created() {
-  window.EventBus.$emit('created', 'education');
+  this.emitter.emit('created', 'education');
 
-  window.EventBus.$on('doneValidatingEducation', async (content, index, errorCount) => {
+  this.emitter.on('doneValidatingEducation', async (content, index, errorCount) => {
     this.editedEducation[index] = content;
     this.eduCount++;
     this.numErrors += errorCount;
 
     if (this.eduCount === this.editedEducation.length) {
-      window.EventBus.$emit('educationStatus', this.numErrors); // emit error status
-      window.EventBus.$emit('doneValidating', 'education', this.editedEducation); // emit done validating
-      if (this.numErrors === 0) window.EventBus.$off('doneValidatingEducation');
+      this.emitter.emit('educationStatus', this.numErrors); // emit error status
+      this.emitter.emit('doneValidating', 'education', this.editedEducation); // emit done validating
+      if (this.numErrors === 0) this.emitter.off('doneValidatingEducation');
       this.numErrors = 0; // just in case
       this.eduCount = 0; // just in case
     }
@@ -173,9 +173,9 @@ function getRandId() {
  */
 function watchValidating() {
   if (this.editedEducation.length === 0) {
-    window.EventBus.$emit('doneValidating', 'education', this.editedEducation); // emit done validating
-    window.EventBus.$emit('educationStatus', 0); // emit error status
-    window.EventBus.$off('doneValidatingEducation'); // emit done validating
+    this.emitter.emit('doneValidating', 'education', this.editedEducation); // emit done validating
+    this.emitter.emit('educationStatus', 0); // emit error status
+    this.emitter.off('doneValidatingEducation'); // emit done validating
   }
 } // watchValidating
 

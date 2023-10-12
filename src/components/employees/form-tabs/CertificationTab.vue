@@ -133,7 +133,7 @@ import { mask } from 'vue-the-mask';
  * Emits to parent the component was created and get data.
  */
 async function created() {
-  window.EventBus.$emit('created', 'certifications'); // emit certifications tab was created
+  this.emitter.emit('created', 'certifications'); // emit certifications tab was created
   this.employees = this.$store.getters.employees; // get all employees
   this.populateDropDowns(); // get autocomplete drop down data
 } // created
@@ -202,8 +202,8 @@ function validateFields() {
   _.forEach(components, (field) => {
     if (field && !field.validate()) errorCount++;
   });
-  window.EventBus.$emit('doneValidating', 'certifications', this.editedCertifications); // emit done validating and sends edited data back to parent
-  window.EventBus.$emit('certificationsStatus', errorCount); // emit error status
+  this.emitter.emit('doneValidating', 'certifications', this.editedCertifications); // emit done validating and sends edited data back to parent
+  this.emitter.emit('certificationsStatus', errorCount); // emit error status
 } // validateFields
 
 // |--------------------------------------------------|

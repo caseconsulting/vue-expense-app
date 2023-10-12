@@ -423,7 +423,7 @@ function majorsEmit(edu) {
   this.showMajors = true;
   let title = edu === 'High School' ? 'Top High Schools' : edu === 'Military' ? 'Top Military Branches' : '';
 
-  window.EventBus.$emit('majors-update', majorsOrSchoolsData, title);
+  this.emitter.emit('majors-update', majorsOrSchoolsData, title);
 } // majorsEmit
 
 /**
@@ -435,7 +435,7 @@ function minorsEmit(degree) {
   let minorsData = {};
   minorsData.minors = this.getDegreeMinors(degree);
   minorsData.degree = degree;
-  window.EventBus.$emit('minors-update', minorsData);
+  this.emitter.emit('minors-update', minorsData);
 } // minorsEmit
 
 /**
@@ -447,7 +447,7 @@ function concentrationsEmit(degree) {
   let concentrationsData = {};
   concentrationsData.concentrations = this.getDegreeConcentrations(degree);
   concentrationsData.degree = degree;
-  window.EventBus.$emit('concentrations-update', concentrationsData);
+  this.emitter.emit('concentrations-update', concentrationsData);
 } // concentrationsEmit
 
 // |--------------------------------------------------|

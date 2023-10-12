@@ -507,7 +507,7 @@ function calcAdjustedBudget(employee, expenseType) {
 async function checkCoverage() {
   this.isInactive = true;
   if (this.$refs.form.validate()) {
-    this.$emit('startAction');
+    this.emitter.emit('startAction');
     // form is validated
     this.loading = true; // set loading status to true
     if (this.editedExpense) {
@@ -538,8 +538,8 @@ async function checkCoverage() {
 
       if (this.employee.workStatus == 0) {
         // emit error if user is inactive
-        this.$emit('error', 'Current user is inactive');
-        this.$emit('endAction');
+        this.emitter.emit('error', 'Current user is inactive');
+        this.emitter.emit('endAction');
         this.loading = false; // set loading status to false
       } else {
         // user is active
@@ -643,9 +643,9 @@ async function checkCoverage() {
               }
             } else {
               // BRANCH 3.3 budget is already maxed out for overdraft expense can't be made
-              this.$emit('error', 'Budget is maxed out');
+              this.emitter.emit('error', 'Budget is maxed out');
               this.loading = false; // set loading status to false
-              this.$emit('endAction');
+              this.emitter.emit('endAction');
             }
           } else {
             // BRANCH 2.2 selected expense type does not allow overdraft or employee is not full time
@@ -666,9 +666,9 @@ async function checkCoverage() {
               }
             } else {
               // BRANCH 6.2 budget is maxed out
-              this.$emit('error', `${expenseType.budgetName} budget is maxed out`);
+              this.emitter.emit('error', `${expenseType.budgetName} budget is maxed out`);
               this.loading = false; // set loading status to false
-              this.$emit('endAction');
+              this.emitter.emit('endAction');
             }
           }
         } else {
@@ -725,7 +725,7 @@ function clearForm() {
   if (this.$refs.form) {
     this.$refs.form.reset();
   }
-  window.EventBus.$emit('finished-editing-expense'); //notify parent no longer editing an expense
+  this.emitter.emit('finished-editing-expense'); //notify parent no longer editing an expense
 
   this.reqRecipient = false;
   this.recipientPlaceholder = null;
@@ -814,16 +814,16 @@ async function createNewEntry() {
         }
 
         this.$set(this.editedExpense, 'id', updatedExpense.id);
-        this.$emit('add', updatedExpense);
+        this.emitter.emit('add', updatedExpense);
         this.clearForm();
       } else {
         // emit error if fails to update expense
-        this.$emit('error', updatedExpense.response.data.message);
+        this.emitter.emit('error', updatedExpense.response.data.message);
         this.$set(this.editedExpense, 'id', '');
       }
     } else {
       // emit error if fails to upload file
-      this.$emit('error', updatedAttachment.response.data.message);
+      this.emitter.emit('error', updatedAttachment.response.data.message);
       this.$set(this.editedExpense, 'id', '');
     }
   } else {
@@ -843,11 +843,11 @@ async function createNewEntry() {
       }
 
       this.$set(this.editedExpense, 'id', updatedExpense.id);
-      this.$emit('add', updatedExpense);
+      this.emitter.emit('add', updatedExpense);
       this.clearForm();
     } else {
       // emit error if fails to update expense
-      this.$emit('error', updatedExpense.response.data.message);
+      this.emitter.emit('error', updatedExpense.response.data.message);
       this.$set(this.editedExpense, 'id', '');
     }
   }
@@ -1410,7 +1410,7 @@ async function submit() {
     }
     this.loading = false; // set loading status to false
 
-    window.EventBus.$emit('endAction');
+    this.emitter.emit('endAction');
     this.isHighFive = false; // set high five back to false
     this.reqRecipient = false;
     this.clearForm();
@@ -1418,7 +1418,7 @@ async function submit() {
     // update budgets in vuex store if needed
     if (this.editedExpense.employeeId == this.$store.getters.user.id) {
       await this.updateStoreBudgets();
-      window.EventBus.$emit('updateData');
+      this.emitter.emit('updateData');
     }
   }
 } // submit
@@ -1445,20 +1445,20 @@ async function updateExistingEntry() {
         // successfully updates expense
         if (this.editedExpense.expenseTypeId == this.originalExpense.expenseTypeId) {
           // same expense type
-          this.$emit('update', updatedExpense);
+          this.emitter.emit('update', updatedExpense);
         } else {
           // changing expense type
-          this.$emit('delete', this.originalExpense);
-          this.$emit('add', updatedExpense);
+          this.emitter.emit('delete', this.originalExpense);
+          this.emitter.emit('add', updatedExpense);
         }
         this.clearForm();
       } else {
         // emit error if failed to upload expense
-        this.$emit('error', updatedExpense.response.data.message);
+        this.emitter.emit('error', updatedExpense.response.data.message);
       }
     } else {
       // error uploading file
-      this.$emit('error', updatedAttachment.response.data.message);
+      this.emitter.emit('error', updatedAttachment.response.data.message);
     }
   } else {
     // if not updating receipt
@@ -1473,16 +1473,16 @@ async function updateExistingEntry() {
       // successfully updates expense
       if (this.editedExpense.expenseTypeId == this.originalExpense.expenseTypeId) {
         // same expense type
-        this.$emit('update', updatedExpense);
+        this.emitter.emit('update', updatedExpense);
       } else {
         // changing expense type
-        this.$emit('delete', this.originalExpense);
-        this.$emit('add', updatedExpense);
+        this.emitter.emit('delete', this.originalExpense);
+        this.emitter.emit('add', updatedExpense);
       }
       this.clearForm();
     } else {
       // emit error if failed to upload expense
-      this.$emit('error', updatedExpense.response.data.message);
+      this.emitter.emit('error', updatedExpense.response.data.message);
     }
   }
 } // updateExistingEntry
@@ -1500,31 +1500,31 @@ function created() {
   this.employeeRole = this.getRole();
   this.userInfo = this.$store.getters.user;
 
-  window.EventBus.$on('canceledSubmit', () => {
+  this.emitter.on('canceledSubmit', () => {
     this.loading = false; // set loading status to false
-    this.$emit('endAction');
+    this.emitter.emit('endAction');
   });
-  window.EventBus.$on('confirmSubmit', async () => {
+  this.emitter.on('confirmSubmit', async () => {
     await this.submit(); // submit expense
   });
-  window.EventBus.$on('confirmed-expense', async () => {
+  this.emitter.on('confirmed-expense', async () => {
     this.confirmingValid = false;
     await this.checkCoverage();
   });
-  window.EventBus.$on('canceled-expense', () => {
+  this.emitter.on('canceled-expense', () => {
     this.confirmingValid = false;
   });
-  window.EventBus.$on('backout-canceled-expense', () => {
+  this.emitter.on('backout-canceled-expense', () => {
     this.confirmBackingOut = false;
   });
-  window.EventBus.$on('backout-confirmed-expense', () => {
+  this.emitter.on('backout-confirmed-expense', () => {
     this.confirmBackingOut = false;
     this.clearForm();
   });
-  window.EventBus.$on('close-exchange-training-hours-calculator', () => {
+  this.emitter.on('close-exchange-training-hours-calculator', () => {
     this.showExchangeCalculator = false;
   });
-  window.EventBus.$on('insert-training-hours', (amount) => {
+  this.emitter.on('insert-training-hours', (amount) => {
     this.showExchangeCalculator = false;
     this.costFormatted = amount;
     this.formatCost();
@@ -1586,12 +1586,12 @@ function created() {
  * destroy listeners
  */
 function beforeDestroy() {
-  window.EventBus.$off('canceledSubmit');
-  window.EventBus.$off('confirmSubmit');
-  window.EventBus.$off('confirmed-expense');
-  window.EventBus.$off('canceled-expense');
-  window.EventBus.$off('backout-canceled-expense');
-  window.EventBus.$off('backout-confirmed-expense');
+  this.emitter.off('canceledSubmit');
+  this.emitter.off('confirmSubmit');
+  this.emitter.off('confirmed-expense');
+  this.emitter.off('canceled-expense');
+  this.emitter.off('backout-canceled-expense');
+  this.emitter.off('backout-confirmed-expense');
 } // beforeDestroy
 
 /**
@@ -1622,7 +1622,7 @@ function watchExpenseID() {
   this.originalExpense = _.cloneDeep(this.editedExpense);
   //when model id is not empty then must be editing an expense
   if (!this.isEmpty(this.expense.id)) {
-    this.$emit('editing-expense'); //notify parent that expense is being edited
+    this.emitter.emit('editing-expense'); //notify parent that expense is being edited
     this.costFormatted = Number(this.editedExpense.cost).toLocaleString();
     this.submittedReceipt = this.editedExpense.receipt;
   } else {

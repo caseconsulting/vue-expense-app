@@ -403,11 +403,11 @@ async function navEmployee(num) {
  *  Adjust datatable header for user view.
  */
 async function created() {
-  window.EventBus.$on('confirm-delete-resume', async () => {
+  this.emitter.on('confirm-delete-resume', async () => {
     await this.deleteResume();
   });
 
-  window.EventBus.$on('canceled-delete-resume', () => {
+  this.emitter.on('canceled-delete-resume', () => {
     this.midAction = false;
   });
   this.basicEmployeeDataLoading = true;
@@ -419,28 +419,28 @@ async function created() {
  * Mount event listeners.
  */
 function mounted() {
-  window.EventBus.$on('cancel-form', () => {
+  this.emitter.on('cancel-form', () => {
     this.editing = false;
   });
 
-  window.EventBus.$on('update', (updatedEmployee) => {
+  this.emitter.on('update', (updatedEmployee) => {
     if (updatedEmployee) {
       this.model = updatedEmployee;
     }
   });
 
-  window.EventBus.$on('uploaded', async (displayMessage) => {
+  this.emitter.on('uploaded', async (displayMessage) => {
     if (displayMessage) this.displayMessage('SUCCESS', 'Successfully uploaded resume', 'green');
     this.model.resumeUpdated = getTodaysDate();
     this.model = _.cloneDeep(this.model); // force vue to reload the object
     await api.updateItem(api.EMPLOYEES, this.model);
   });
 
-  window.EventBus.$on('tabChange', (tab) => {
+  this.emitter.on('tabChange', (tab) => {
     this.currentTab = tab;
   });
 
-  window.EventBus.$on('selected-budget-year', (date) => {
+  this.emitter.on('selected-budget-year', (date) => {
     if (date != this.fiscalDateView) {
       this.fiscalDateView = date;
     }
@@ -451,14 +451,14 @@ function mounted() {
  * destroy listeners
  */
 function beforeDestroy() {
-  window.EventBus.$off('delete-resume');
-  window.EventBus.$off('confirm-delete-resume');
-  window.EventBus.$off('canceled-delete-resume');
-  window.EventBus.$off('cancel-form');
-  window.EventBus.$off('update');
-  window.EventBus.$off('uploaded');
-  window.EventBus.$off('tabChange');
-  window.EventBus.$off('selected-budget-year');
+  this.emitter.off('delete-resume');
+  this.emitter.off('confirm-delete-resume');
+  this.emitter.off('canceled-delete-resume');
+  this.emitter.off('cancel-form');
+  this.emitter.off('update');
+  this.emitter.off('uploaded');
+  this.emitter.off('tabChange');
+  this.emitter.off('selected-budget-year');
 } // beforeDestroy
 
 // |--------------------------------------------------|

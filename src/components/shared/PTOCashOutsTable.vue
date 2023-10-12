@@ -265,31 +265,31 @@ async function created() {
  * beforeDestroy lifecycle hook. Destroys all event listeners.
  */
 function beforeDestroy() {
-  window.EventBus.$off('confirm-pto-cash-outs');
-  window.EventBus.$off('canceled-pto-cash-outs');
-  window.EventBus.$off('confirm-delete-PTO cash out');
-  window.EventBus.$off('canceled-delete-PTO cash out');
-  window.EventBus.$off('close-pto-cash-out-form');
+  this.emitter.off('confirm-pto-cash-outs');
+  this.emitter.off('canceled-pto-cash-outs');
+  this.emitter.off('confirm-delete-PTO cash out');
+  this.emitter.off('canceled-delete-PTO cash out');
+  this.emitter.off('close-pto-cash-out-form');
 } // beforeDestroy
 
 /**
  * Mounted lifecycle hook
  */
 async function mounted() {
-  window.EventBus.$on('close-pto-cash-out-form', () => {
+  this.emitter.on('close-pto-cash-out-form', () => {
     this.toggleEditModal = false;
     this.clickedEditItem = null;
   });
-  window.EventBus.$on('confirmed-pto-cash-outs', async () => {
+  this.emitter.on('confirmed-pto-cash-outs', async () => {
     await this.clickedConfirmApprove();
   });
-  window.EventBus.$on('canceled-pto-cash-outs', () => {
+  this.emitter.on('canceled-pto-cash-outs', () => {
     this.toggleApproveModal = false;
   });
-  window.EventBus.$on('confirm-delete-PTO cash out', async () => {
+  this.emitter.on('confirm-delete-PTO cash out', async () => {
     await this.clickedConfirmDelete();
   });
-  window.EventBus.$on('canceled-delete-PTO cash out', () => {
+  this.emitter.on('canceled-delete-PTO cash out', () => {
     this.clickedCancelDelete();
   });
 } // mounted
@@ -421,7 +421,7 @@ function displayError(err) {
     color: 'red'
   };
 
-  window.EventBus.$emit('status-alert', status);
+  this.emitter.emit('status-alert', status);
 } // displayError
 
 /**
@@ -434,7 +434,7 @@ function displaySuccess(msg) {
     statusMessage: msg,
     color: 'green'
   };
-  window.EventBus.$emit('status-alert', status);
+  this.emitter.emit('status-alert', status);
 } // displaySuccess
 
 /**
@@ -469,7 +469,7 @@ function removeTag(item) {
  */
 function rowClicked(item) {
   let employee = this.$store.getters.employees.find((e) => e.id === item.employeeId);
-  window.EventBus.$emit('change-quickbooks-employee', employee);
+  this.emitter.emit('change-quickbooks-employee', employee);
 } // rowClicked
 
 /**

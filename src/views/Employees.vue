@@ -710,28 +710,28 @@ async function clearCreateEmployee() {
  *  Adjust datatable header for user view. Creates event listeners.
  */
 async function created() {
-  window.EventBus.$on('cancel-form', async () => {
+  this.emitter.on('cancel-form', async () => {
     //used to reset the employee form modal
     await this.clearCreateEmployee();
   });
-  window.EventBus.$on('canceled-delete-employee', () => {
+  this.emitter.on('canceled-delete-employee', () => {
     this.midAction = false;
   });
-  window.EventBus.$on('confirm-delete-employee', async () => {
+  this.emitter.on('confirm-delete-employee', async () => {
     await this.deleteEmployee();
     await this.updateStoreEmployees();
     await this.refreshEmployees();
   });
-  window.EventBus.$on('invalid-employee-delete', () => {
+  this.emitter.on('invalid-employee-delete', () => {
     this.midAction = false;
   });
-  window.EventBus.$on('empNum', (empNum) => {
+  this.emitter.on('empNum', (empNum) => {
     this.employeeNumber = empNum;
   });
-  window.EventBus.$on('close-tag-manager', () => {
+  this.emitter.on('close-tag-manager', () => {
     this.manageTags = false;
   });
-  window.EventBus.$on('close-data-sync-results-modal', () => {
+  this.emitter.on('close-data-sync-results-modal', () => {
     this.toggleEmployeesSyncModal = false;
     this.applicationSyncData = null;
     this.childKey++;
@@ -765,13 +765,13 @@ async function created() {
  * destroy listeners
  */
 function beforeDestroy() {
-  window.EventBus.$off('cancel-form');
-  window.EventBus.$off('canceled-delete-employee');
-  window.EventBus.$off('confirm-delete-employee');
-  window.EventBus.$off('invalid-employee-delete');
-  window.EventBus.$off('empNum');
-  window.EventBus.$off('close-tag-manager');
-  window.EventBus.$off('close-data-sync-results-modal');
+  this.emitter.off('cancel-form');
+  this.emitter.off('canceled-delete-employee');
+  this.emitter.off('confirm-delete-employee');
+  this.emitter.off('invalid-employee-delete');
+  this.emitter.off('empNum');
+  this.emitter.off('close-tag-manager');
+  this.emitter.off('close-data-sync-results-modal');
 } // beforeDestroy
 
 // |--------------------------------------------------|

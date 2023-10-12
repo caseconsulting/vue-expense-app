@@ -47,7 +47,7 @@ export default {
   },
   watch: {
     filter: function () {
-      window.EventBus.$emit('filter', this.filter);
+      this.emitter.emit('filter', this.filter);
     }
   }
 };

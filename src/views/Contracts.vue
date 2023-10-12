@@ -59,9 +59,9 @@ import ConvertContractsToCsv from '../components/contracts/ConvertContractsToCsv
  * beforeDestroy life cycle hook
  */
 function beforeDestroy() {
-  window.EventBus.$off('canceled-contract-form');
-  window.EventBus.$off('submitted-contract-form');
-  window.EventBus.$off('status-alert');
+  this.emitter.off('canceled-contract-form');
+  this.emitter.off('submitted-contract-form');
+  this.emitter.off('status-alert');
 } // beforeDestroy
 
 /**
@@ -69,9 +69,9 @@ function beforeDestroy() {
  */
 async function created() {
   this.loading = true;
-  window.EventBus.$on('canceled-contract-form', () => (this.toggleContractForm = false));
-  window.EventBus.$on('submitted-contract-form', () => (this.toggleContractForm = false));
-  window.EventBus.$on('status-alert', (status) => {
+  this.emitter.on('canceled-contract-form', () => (this.toggleContractForm = false));
+  this.emitter.on('submitted-contract-form', () => (this.toggleContractForm = false));
+  this.emitter.on('status-alert', (status) => {
     this.$set(this.status, 'statusType', status.statusType);
     this.$set(this.status, 'statusMessage', status.statusMessage);
     this.$set(this.status, 'color', status.color);

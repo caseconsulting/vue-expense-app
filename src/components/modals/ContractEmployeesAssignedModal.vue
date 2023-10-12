@@ -119,7 +119,7 @@ function created() {
  * @param msg - Message to emit
  */
 function emit(msg) {
-  window.EventBus.$emit(msg);
+  this.emitter.emit(msg);
 } // emit
 
 /**

@@ -330,11 +330,11 @@ async function created() {
 
   this.environment = process.env.VUE_APP_AUTH0_CALLBACK;
 
-  window.EventBus.$on('relog', () => handleLogout()); // Session end - log out
-  window.EventBus.$on('badgeExp', () => {
+  this.emitter.on('relog', () => handleLogout()); // Session end - log out
+  this.emitter.on('badgeExp', () => {
     this.badgeKey++;
   }); // used to refresh badge expiration banner
-  window.EventBus.$on('user-session-refreshed', () => {
+  this.emitter.on('user-session-refreshed', () => {
     clearTimeout(this.sessionTimeout);
     clearTimeout(this.sessionTimeoutWarning);
     this.session = false;

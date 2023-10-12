@@ -387,20 +387,20 @@ const regex = /^[a-zA-Z]+$/;
  * Turn off listeners.
  */
 function beforeDestroy() {
-  window.EventBus.$off('cancel-decline-self-identify');
-  window.EventBus.$off('confirm-decline-self-identify');
+  this.emitter.off('cancel-decline-self-identify');
+  this.emitter.off('confirm-decline-self-identify');
 } // beforeDestroy
 
 /**
  * Emits to parent the component was created and get data.
  */
 async function created() {
-  window.EventBus.$emit('created', 'employee'); // emit employee tab was created
-  window.EventBus.$on('cancel-decline-self-identify', () => {
+  this.emitter.emit('created', 'employee'); // emit employee tab was created
+  this.emitter.on('cancel-decline-self-identify', () => {
     this.editedEmployee.eeoDeclineSelfIdentify = false;
     this.toggleDeclineSelfIdentifyModal = false;
   });
-  window.EventBus.$on('confirm-decline-self-identify', () => {
+  this.emitter.on('confirm-decline-self-identify', () => {
     // clear fields
     this.editedEmployee.eeoGender = null;
     this.editedEmployee.eeoHispanicOrLatino = null;
@@ -575,8 +575,8 @@ function validateFields() {
     this.editedEmployee.workStatus = this.model.workStatus;
   }
 
-  window.EventBus.$emit('doneValidating', 'employee', this.editedEmployee); // emit done validating
-  window.EventBus.$emit('employeeStatus', errorCount); // emit error status
+  this.emitter.emit('doneValidating', 'employee', this.editedEmployee); // emit done validating
+  this.emitter.emit('employeeStatus', errorCount); // emit error status
 } // validateFields
 
 /**
@@ -594,7 +594,7 @@ function viewStatus() {
  * Emits the duplicated employee number.
  */
 function duplicateEmployeeNum() {
-  window.EventBus.$emit('disableUpload', this.duplicate, this.editedEmployee.employeeNumber);
+  this.emitter.emit('disableUpload', this.duplicate, this.editedEmployee.employeeNumber);
 } // duplicateEmployeeNum
 
 // |--------------------------------------------------|
@@ -651,9 +651,9 @@ function watchEditedEmployeeEmployeeNumber() {
   let empNum = this.editedEmployee.employeeNumber;
   // determine if the resume button should be disabled or not
   if (empNum !== '' && !isNaN(empNum) && parseInt(empNum) > 0) {
-    window.EventBus.$emit('disableUpload', false, empNum);
+    this.emitter.emit('disableUpload', false, empNum);
   } else {
-    window.EventBus.$emit('disableUpload', true, empNum);
+    this.emitter.emit('disableUpload', true, empNum);
   }
 } // watchEditedEmployeeEmployeeNumber
 

@@ -202,7 +202,7 @@ import { getProjectCurrentEmployees } from '@/shared/contractUtils';
  * created life cycle hook
  */
 function created() {
-  window.EventBus.$on('closed-project-employees-assigned-modal', () => {
+  this.emitter.on('closed-project-employees-assigned-modal', () => {
     this.toggleProjectEmployeesModal = false;
   });
 } // created
@@ -235,7 +235,7 @@ function projectRowClass(item) {
  */
 function clickedEdit(item) {
   this.editingProjectItem = _.cloneDeep(item);
-  window.EventBus.$emit('is-editing-project-item', true);
+  this.emitter.emit('is-editing-project-item', true);
 } // clickedEdit
 
 /**
@@ -243,7 +243,7 @@ function clickedEdit(item) {
  */
 function clickedCancel() {
   this.editingProjectItem = null;
-  window.EventBus.$emit('is-editing-project-item', false);
+  this.emitter.emit('is-editing-project-item', false);
 } // clickedCancel
 
 /**
@@ -274,7 +274,7 @@ async function updateProject(contract) {
     this.projectLoading = false;
   }
   this.editingProjectItem = null;
-  window.EventBus.$emit('is-editing-project-item', false);
+  this.emitter.emit('is-editing-project-item', false);
 } // updateProject
 
 /**
@@ -287,7 +287,7 @@ function displaySuccess(msg) {
     statusMessage: msg,
     color: 'green'
   };
-  window.EventBus.$emit('status-alert', status);
+  this.emitter.emit('status-alert', status);
 } // displaySuccess
 
 /**
@@ -302,7 +302,7 @@ function displayError(err) {
     color: 'red'
   };
 
-  window.EventBus.$emit('status-alert', status);
+  this.emitter.emit('status-alert', status);
 } // displayError
 
 /**
@@ -311,7 +311,7 @@ function displayError(err) {
  * @param projectItem projectItem checkbox to toggle
  */
 function toggleProjectCheckBox(projectItem) {
-  window.EventBus.$emit('toggle-project-checkBox', { contract: this.contract, project: projectItem });
+  this.emitter.emit('toggle-project-checkBox', { contract: this.contract, project: projectItem });
 } // toggleProjectCheckBox
 
 // |--------------------------------------------------|

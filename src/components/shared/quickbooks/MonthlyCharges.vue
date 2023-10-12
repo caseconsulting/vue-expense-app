@@ -198,7 +198,7 @@ async function created() {
  * The mounted lifecycle hook.
  */
 async function mounted() {
-  window.EventBus.$on('refresh-quickbooks-data', async () => {
+  this.emitter.on('refresh-quickbooks-data', async () => {
     this.refresh = true;
     await this.setData();
     this.refresh = false;
@@ -209,7 +209,7 @@ async function mounted() {
  * destroy listeners
  */
 function beforeDestroy() {
-  window.EventBus.$off('refresh-quickbooks-data');
+  this.emitter.off('refresh-quickbooks-data');
 } // beforeDestroy
 
 // |--------------------------------------------------|

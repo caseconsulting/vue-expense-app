@@ -851,32 +851,32 @@ function useInactiveStyle(expense) {
  */
 async function created() {
   //no longer editing an expense (clear model and enable buttons)
-  window.EventBus.$on('finished-editing-expense', () => {
+  this.emitter.on('finished-editing-expense', () => {
     this.clearExpense();
     this.isEditing = false;
   });
 
-  window.EventBus.$on('endAction', () => {
+  this.emitter.on('endAction', () => {
     this.midAction = false;
   });
 
   //when expense type is being edited buttons should be disabled
-  window.EventBus.$on('editing-expense', () => {
+  this.emitter.on('editing-expense', () => {
     this.isEditing = true;
   });
 
-  window.EventBus.$on('canceled-unreimburse-expense', () => {
+  this.emitter.on('canceled-unreimburse-expense', () => {
     this.midAction = false;
   });
-  window.EventBus.$on('confirm-unreimburse-expense', async () => {
+  this.emitter.on('confirm-unreimburse-expense', async () => {
     await this.unreimburseExpense();
   });
 
-  window.EventBus.$on('canceled-delete-expense', () => {
+  this.emitter.on('canceled-delete-expense', () => {
     this.midAction = false;
     this.deleting = false;
   });
-  window.EventBus.$on('confirm-delete-expense', async () => {
+  this.emitter.on('confirm-delete-expense', async () => {
     this.deleting = false;
     await this.deleteExpense();
   });
@@ -895,12 +895,12 @@ async function created() {
  * destroy listeners
  */
 function beforeDestroy() {
-  window.EventBus.$off('canceled-delete-expense');
-  window.EventBus.$off('confirm-delete-expense');
-  window.EventBus.$off('finished-editing-expense');
-  window.EventBus.$off('editing-expense');
-  window.EventBus.$off('confirm-unreimburse-expense');
-  window.EventBus.$off('canceled-unreimburse-expense');
+  this.emitter.off('canceled-delete-expense');
+  this.emitter.off('confirm-delete-expense');
+  this.emitter.off('finished-editing-expense');
+  this.emitter.off('editing-expense');
+  this.emitter.off('confirm-unreimburse-expense');
+  this.emitter.off('canceled-unreimburse-expense');
 } // beforeDestroy
 
 function mounted() {
