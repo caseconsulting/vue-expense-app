@@ -69,9 +69,6 @@
             <!-- End Loop all budgets -->
           </v-row>
         </template>
-        <template slot="no-data">
-          <div></div>
-        </template>
       </v-data-iterator>
     </div>
   </div>

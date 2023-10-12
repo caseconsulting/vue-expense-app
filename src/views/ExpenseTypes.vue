@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 <template>
   <div>
     <v-row v-if="initialPageLoading">
@@ -337,8 +336,8 @@
                               <v-card-text class="pb-0">
                                 <v-row>
                                   <v-list color="#f0f0f0" width="376">
-                                    <template v-for="employee in getEmployeeList(item.accessibleBy)">
-                                      <v-list-item :key="employee.id">
+                                    <div v-for="employee in getEmployeeList(item.accessibleBy)" :key="employee.id">
+                                      <v-list-item>
                                         <!-- Employee Image -->
                                         <v-list-item-avatar>
                                           <img
@@ -354,7 +353,7 @@
                                           <v-list-item-title>{{ getEmployeeName(employee.id) }}</v-list-item-title>
                                         </v-list-item-content>
                                       </v-list-item>
-                                    </template>
+                                    </div>
                                   </v-list>
                                 </v-row>
                               </v-card-text>
