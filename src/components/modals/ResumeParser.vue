@@ -967,10 +967,10 @@ function submitInfo(field, value, newValue) {
   if (field === 'address') {
     // Create fields in editedEmployeeForm if they don't exist
     if (!this.editedEmployeeForm.currentStreet) {
-      this.$set(this.editedEmployeeForm, 'currentStreet', '');
-      this.$set(this.editedEmployeeForm, 'currentCity', '');
-      this.$set(this.editedEmployeeForm, 'currentState', '');
-      this.$set(this.editedEmployeeForm, 'currentZIP', '');
+      this.editedEmployeeForm['currentStreet'] = '';
+      this.editedEmployeeForm['currentCity'] = '';
+      this.editedEmployeeForm['currentState'] = '';
+      this.editedEmployeeForm['currentZIP'] = '';
     }
     this.editedEmployeeForm.currentStreet = this.newPersonal.currentStreet;
     this.editedEmployeeForm.currentCity = this.newPersonal.currentCity;
@@ -1007,24 +1007,24 @@ function submitInfo(field, value, newValue) {
         break;
     }
     if (!this.editedEmployeeForm.phoneNumber) {
-      this.$set(this.editedEmployeeForm, 'phoneNumber', '');
+      this.editedEmployeeForm['phoneNumber'] = '';
     }
     this.editedEmployeeForm.phoneNumber = this.newPersonal.phoneNumber;
   } else if (field === 'github') {
     if (!this.editedEmployeeForm.github) {
-      this.$set(this.editedEmployeeForm, 'github', '');
+      this.editedEmployeeForm['github'] = '';
     }
     this.editedEmployeeForm.github = this.newPersonal.github;
   } else if (field === 'linkedIn') {
     if (!this.editedEmployeeForm.linkedIn) {
-      this.$set(this.editedEmployeeForm, 'linkedIn', '');
+      this.editedEmployeeForm['linkedIn'] = '';
     }
     this.editedEmployeeForm.linkedIn = this.newPersonal.linkedIn;
   } else if (field === 'technology' && this.$refs['tech' + value][0].validate()) {
     this.newTechnology[value].canceled = true;
     // Create fields in editedEmployeeForm if they don't exist
     if (!this.editedEmployeeForm.technologies) {
-      this.$set(this.editedEmployeeForm, 'technologies', []);
+      this.editedEmployeeForm['technologies'] = [];
     }
     // Add new tech
     this.editedEmployeeForm.technologies.push({
@@ -1038,7 +1038,7 @@ function submitInfo(field, value, newValue) {
     this.newEducation[value].degrees = newValue.degrees;
     // Create fields in editedEmployeeForm if they don't exist
     if (!this.editedEmployeeForm.education) {
-      this.$set(this.editedEmployeeForm, 'education', []);
+      this.editedEmployeeForm['education'] = [];
     }
     // Build correct structure, filters out fields we don't care about
     let toAdd = {};

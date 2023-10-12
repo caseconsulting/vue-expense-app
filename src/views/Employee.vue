@@ -242,9 +242,9 @@ async function resumeReceived(newEmployeeForm, changes) {
  * Clears the status message of the uploadStatus
  */
 function clearStatus() {
-  this.$set(this.uploadStatus, 'statusType', undefined);
-  this.$set(this.uploadStatus, 'statusMessage', null);
-  this.$set(this.uploadStatus, 'color', null);
+  this.uploadStatus['statusType'] = undefined;
+  this.uploadStatus['statusMessage'] = null;
+  this.uploadStatus['color'] = null;
 } // clearStatus
 
 /**
@@ -335,9 +335,9 @@ function userIsEmployee() {
  * @param color - the color of the banner
  */
 function displayMessage(type, msg, color) {
-  this.$set(this.uploadStatus, 'statusType', type);
-  this.$set(this.uploadStatus, 'statusMessage', msg);
-  this.$set(this.uploadStatus, 'color', color);
+  this.uploadStatus['statusType'] = type;
+  this.uploadStatus['statusMessage'] = msg;
+  this.uploadStatus['color'] = color;
 } // displayMessage
 
 /**

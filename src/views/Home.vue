@@ -553,9 +553,9 @@ async function refreshEmployee() {
  * Clear the action status that is displayed in the snackbar.
  */
 function clearStatus() {
-  this.$set(this.status, 'statusType', undefined);
-  this.$set(this.status, 'statusMessage', '');
-  this.$set(this.status, 'color', '');
+  this.status['statusType'] = undefined;
+  this.status['statusMessage'] = '';
+  this.status['color'] = '';
 } // clearStatus
 
 // |--------------------------------------------------|

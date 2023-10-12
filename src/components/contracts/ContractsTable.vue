@@ -770,7 +770,7 @@ function toggleContractCheckBox(contractItem) {
   let updatedCheckBox = this.determineCheckBox(contractCheckBox);
   contractCheckBox.all = updatedCheckBox.all;
   contractCheckBox.indeterminate = updatedCheckBox.indeterminate;
-  this.$set(this.contractsCheckBoxes, index, contractCheckBox);
+  this.contractsCheckBoxes[index] = contractCheckBox;
 } // toggleContractCheckBox
 
 /**
@@ -792,7 +792,7 @@ function toggleProjectCheckBox(contract, projectItem) {
   let updatedCheckBox = this.determineCheckBox(contractCheckBox);
   contractCheckBox.all = updatedCheckBox.all;
   contractCheckBox.indeterminate = updatedCheckBox.indeterminate;
-  this.$set(this.contractsCheckBoxes, index, contractCheckBox);
+  this.contractsCheckBoxes[index] = contractCheckBox;
 } // toggleProjectCheckBox
 
 /**
@@ -833,7 +833,7 @@ function setAllProjectsCheckBox(contractItem, value) {
     return p;
   });
   contractCheckBox.projectsCheckBoxes = updatedProjectsCheckBoxes;
-  this.$set(this.contractsCheckBoxes, index, contractCheckBox);
+  this.contractsCheckBoxes[index] = contractCheckBox;
 } // setAllProjectsCheckBox
 
 /**
