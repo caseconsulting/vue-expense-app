@@ -2,28 +2,28 @@
   <div v-if="childrenVisible" class="infoTab wrapper" id="personalTab">
     <!-- GitHub -->
     <p v-if="!isEmpty(this.model.github)">
-      <v-avatar rounded="0" size="23">
-        <v-img class="grayImage" :src="github" alt="Github icon`"></v-img>
+      <v-avatar class="mr-3" rounded="0" size="23">
+        <v-img class="grayImage" :src="github" alt="Github icon"></v-img>
       </v-avatar>
       <a :href="'https://github.com/' + this.model.github" target="_blank">{{ this.model.github }}</a>
     </p>
     <!-- Twitter -->
-    <p v-if="!isEmpty(this.model.x)">
-      <v-avatar rounded="0" size="23">
-        <v-img class="grayImage" :src="x" alt="X icon`"></v-img>
+    <p v-if="!isEmpty(this.model.twitter)">
+      <v-avatar class="mr-3" rounded="0" size="23">
+        <v-img class="grayImage" :src="x" alt="X icon"></v-img>
       </v-avatar>
-      <a :href="'https://x.com/' + this.model.x" target="_blank">{{ this.model.x }}</a>
+      <a :href="'https://x.com/' + this.model.twitter" target="_blank">{{ this.model.twitter }}</a>
     </p>
     <!-- LinkedIn -->
     <p v-if="!isEmpty(this.model.linkedIn)">
-      <v-avatar rounded="0" size="23">
+      <v-avatar class="mr-3" rounded="0" size="23">
         <v-img class="grayImage" :src="linkedin" alt="LinkedIn icon`"></v-img>
       </v-avatar>
       <a :href="this.model.linkedIn" target="_blank">{{ this.model.linkedIn }}</a>
     </p>
     <!-- Personal Email -->
     <p v-if="!isEmpty(this.model.personalEmail) && (admin || employee)">
-      <b>Personal Email:</b> {{ this.model.personalEmail }}
+      <v-icon class="mr-2">mdi-email</v-icon> {{ this.model.personalEmail }}
     </p>
     <!-- Phone Number -->
     <p v-if="!isEmpty(getPhoneNumbers()) && (employee || !userRoleIsIntern())">
@@ -115,7 +115,7 @@ function checkEmptyPersonalInfo() {
   // this is crap code but I needed a quick-fix for the code that was here and causing an error. :W
   if (
     this.model.github ||
-    this.model.x ||
+    this.model.twitter ||
     this.model.linkedIn ||
     !isEmpty(this.model.privatePhoneNumbers) ||
     !isEmpty(this.model.publicPhoneNumbers) ||
@@ -298,8 +298,8 @@ export default {
 }
 
 .grayImage {
-  -webkit-filter: brightness(0) invert(1);
-  filter: brightness(0) invert(1);
+  -webkit-filter: brightness(0) opacity(55%);
+  filter: brightness(0) opacity(55%);
 }
 
 [class|='confetti'] {

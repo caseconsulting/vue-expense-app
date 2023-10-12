@@ -10,16 +10,16 @@
     >
       <template v-slot:prepend>
         <v-avatar rounded="0" size="23">
-          <v-img class="grayImage" :src="github" alt="Github icon`"></v-img>
+          <v-img class="grayImage" :src="github" alt="Github icon"></v-img>
         </v-avatar>
       </template>
     </v-text-field>
 
     <!-- X -->
-    <v-text-field v-model.trim="editedPersonalInfo.x" ref="x" label="X (username)" data-vv-name="X">
+    <v-text-field v-model.trim="editedPersonalInfo.twitter" ref="x" label="X (username)" data-vv-name="X">
       <template v-slot:prepend>
         <v-avatar rounded="0" size="23">
-          <v-img class="grayImage" :src="x" alt="X icon`"></v-img>
+          <v-img class="grayImage" :src="x" alt="X icon"></v-img>
         </v-avatar>
       </template>
     </v-text-field>
@@ -415,7 +415,7 @@ function validateFields() {
 
   // for some reason, this page didn't overwrote the elements as formFields like the other pages did so
   // we added individual refs and put them into the components list manually
-  components = [...components, this.$refs.x, this.$refs.github, this.$refs.linkedin, this.$refs.phoneNumbers];
+  components = [...components, this.$refs.twitter, this.$refs.github, this.$refs.linkedin, this.$refs.phoneNumbers];
   _.forEach(components, (field) => {
     if (field && !field.validate()) errorCount++;
   });
