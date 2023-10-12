@@ -1,5 +1,4 @@
-import Vue from 'vue';
-import Vuetify from 'vuetify';
+import { createVuetify } from 'vuetify';
 import 'vuetify/dist/vuetify.min.css';
 import '@mdi/font/css/materialdesignicons.css';
 import TwitterIcon from '@/components/custom-icons/TwitterIcon';
@@ -7,8 +6,6 @@ import FacebookIcon from '@/components/custom-icons/FacebookIcon';
 import AdpIcon from '@/components/custom-icons/AdpIcon';
 import BambooIcon from '@/components/custom-icons/BambooIcon';
 import CaseIcon from '@/components/custom-icons/CaseIcon';
-
-Vue.use(Vuetify);
 
 const opts = {
   theme: {
@@ -37,4 +34,4 @@ const opts = {
   }
 };
 
-export default new Vuetify(opts);
+export default createVuetify(opts);

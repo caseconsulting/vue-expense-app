@@ -30,10 +30,8 @@
   </v-container>
 </template>
 
-<script type="application/javascript" src="https://unpkg.com/vue"></script>
-<script type="application/javascript" src="https://unpkg.com/vuewordcloud"></script>
-
 <script>
+import _ from 'lodash';
 import TechBarChart from '../custom-charts/TechBarChart.vue';
 import VueWordCloud from 'vuewordcloud';
 import { storeIsPopulated } from '@/utils/utils';

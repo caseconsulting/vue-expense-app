@@ -1,7 +1,7 @@
 import decode from 'jwt-decode';
 import auth0 from 'auth0-js';
+import router from '../router';
 import { AUTH_CONFIG } from './auth0-variables';
-import Router from 'vue-router';
 let CryptoJS = require('crypto-js');
 
 const AUDIENCE = AUTH_CONFIG.audience;
@@ -24,14 +24,12 @@ let auth = new auth0.WebAuth({
   scope: SCOPE
 });
 
-let router = new Router({
-  mode: 'history'
-});
-
 /**
  * clears the cookies
  */
 function clearCookies() {
+  console.log('COOKIES:');
+  console.log(document.cookie);
   document.cookie.split(';').forEach(function (c) {
     document.cookie = c.replace(/^ +/, '').replace(/=.*/, '=;expires=' + new Date().toUTCString() + ';path=/');
   });

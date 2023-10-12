@@ -11,8 +11,8 @@
         <v-list two-line>
           <!-- Budget List -->
           <div v-if="hasBudgets">
-            <template v-for="(budgetYear, index) in budgetYears">
-              <v-list-item :key="budgetYear" ripple @click.native="select(budgetYear)" class="list-hover">
+            <div v-for="(budgetYear, index) in budgetYears" :key="budgetYear">
+              <v-list-item ripple @click.native="select(budgetYear)" class="list-hover">
                 <v-list-item-content>
                   <v-list-item-title>
                     <h2 v-bind:class="{ 'text-center': true, 'text-decoration-underline': isCurrent(budgetYear) }">
@@ -22,7 +22,7 @@
                 </v-list-item-content>
               </v-list-item>
               <v-divider :key="index"></v-divider>
-            </template>
+            </div>
           </div>
           <div v-else>
             <template>
