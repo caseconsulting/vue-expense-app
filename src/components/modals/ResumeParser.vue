@@ -260,7 +260,7 @@
                         md="4"
                         lg="3"
                         class="px-0 pb-0"
-                        :class="{ 'px-4': $vuetify.breakpoint.sm, 'px-4': $vuetify.breakpoint.lg }"
+                        :class="{ 'px-4': $vuetify.display.sm, 'px-4': $vuetify.display.lg }"
                       >
                         <v-text-field
                           class="px-3"

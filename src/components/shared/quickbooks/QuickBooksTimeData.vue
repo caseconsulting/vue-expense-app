@@ -112,7 +112,7 @@ function allEmployees() {
  * Gets the width for the autocomplete component based on screen size.
  */
 function autocompleteWidth() {
-  switch (this.$vuetify.breakpoint.name) {
+  switch (this.$vuetify.display.name) {
     case 'xs' || 'sm':
       return 'width: 50%';
     case 'md' || 'lg':

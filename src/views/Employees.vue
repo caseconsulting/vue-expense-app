@@ -5,15 +5,14 @@
       v-model="status.statusType"
       :color="status.color"
       :multi-line="true"
-      :right="true"
+      location="top right"
       :timeout="5000"
-      :top="true"
       :vertical="true"
     >
       <v-card-title headline color="white">
-        <span class="headline">{{ status.statusMessage }}</span>
+        <span class="text-h5">{{ status.statusMessage }}</span>
       </v-card-title>
-      <v-btn color="white" text @click="clearStatus"> Close </v-btn>
+      <v-btn color="white" variant="text" @click="clearStatus"> Close </v-btn>
     </v-snackbar>
     <v-card>
       <v-container fluid>
@@ -32,16 +31,16 @@
         </v-card-title>
 
         <!-- Filters -->
-        <v-card v-if="userRoleIsAdmin() || userRoleIsManager()" class="pa-4" outlined>
+        <v-card v-if="userRoleIsAdmin() || userRoleIsManager()" class="pa-4" variant="outlined">
           <v-row>
             <!-- Active Filter -->
             <v-col cols="12" md="12">
               <h4>Employee Status:</h4>
               <v-btn-toggle class="filter_color d-inline-block mr-6" v-model="filter.active" text multiple>
                 <!-- Full Time -->
-                <v-tooltip top>
+                <v-tooltip location="top">
                   <template v-slot:activator="{ on }">
-                    <v-btn value="full" id="full" v-on="on" text>
+                    <v-btn value="full" id="full" v-on="on" variant="text">
                       <v-icon class="mr-1" color="black">mdi-clock-outline</v-icon>
                     </v-btn>
                   </template>
@@ -49,9 +48,9 @@
                 </v-tooltip>
 
                 <!-- Part Time -->
-                <v-tooltip top>
+                <v-tooltip location="top">
                   <template v-slot:activator="{ on }">
-                    <v-btn value="part" id="part" v-on="on" text>
+                    <v-btn value="part" id="part" v-on="on" variant="text">
                       <v-icon color="black">mdi-progress-clock</v-icon>
                     </v-btn>
                   </template>
@@ -59,9 +58,9 @@
                 </v-tooltip>
 
                 <!-- Inactive -->
-                <v-tooltip top>
+                <v-tooltip location="top">
                   <template v-slot:activator="{ on }">
-                    <v-btn value="inactive" id="inactive" v-on="on" text>
+                    <v-btn value="inactive" id="inactive" v-on="on" variant="text">
                       <v-icon color="black">mdi-stop-circle-outline</v-icon>
                     </v-btn>
                   </template>
@@ -79,15 +78,15 @@
                 :items="tags"
                 multiple
                 variant="solo-filled"
-                item-color="gray"
-                item-text="tagName"
-                item-value="id"
+                item-props.color="gray"
+                item-props.title="tagName"
+                item-props.value="id"
                 return-object
               >
                 <template v-slot:selection="data">
                   <v-chip
                     small
-                    close
+                    closable
                     @click.stop
                     @click="negateTag(data.item)"
                     @click:close="removeTag(data.item)"
@@ -160,7 +159,7 @@
           <!-- Delete Action Item Slot -->
           <template v-slot:[`item.actions`]="{ item }">
             <div class="datatable_btn layout">
-              <v-tooltip top>
+              <v-tooltip location="top">
                 <template v-slot:activator="{ on }">
                   <convert-employee-to-csv
                     v-if="userRoleIsAdmin()"
@@ -174,7 +173,7 @@
                     v-if="hasAdminPermissions()"
                     id="employeesDeleteBtn"
                     :disabled="midAction"
-                    text
+                    variant="text"
                     icon
                     @click.stop="validateDelete(item)"
                     v-on="on"
@@ -194,8 +193,8 @@
               <img :src="item.avatar" @error="changeAvatar(employee)" />
             </v-avatar>
             <!-- Invalid Avatar -->
-            <v-avatar v-else size="35" color="grey darken-2">
-              <div class="white--text">
+            <v-avatar v-else size="35" color="grey-darken-2">
+              <div class="text-white">
                 <b>{{ item.firstName.substring(0, 1) }}{{ item.lastName.substring(0, 1) }}</b>
               </div>
             </v-avatar>

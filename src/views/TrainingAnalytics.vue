@@ -21,10 +21,9 @@
               @click="filterByCategory(category.value)"
               class="mx-3 pa-12"
               elevation="6"
-              fab
               :rounded="isFocus(category.value)"
-              dark
-              large
+              theme="dark"
+              size="large"
               color="#bc3825"
             >
               <v-icon dark size="60px">{{ category.icon }}</v-icon>
@@ -57,8 +56,8 @@
                       <v-col cols="12">
                         <!-- Title and Description -->
                         <div v-if="!isEmpty(url.title)">
-                          <v-card-title class="headline" v-text="url.title"></v-card-title>
-                          <v-card-subtitle v-text="url.description"></v-card-subtitle>
+                          <v-card-title class="text-h5">{{ url.title }}</v-card-title>
+                          <v-card-subtitle>{{ url.description }}</v-card-subtitle>
                         </div>
 
                         <!-- No title or Description -->

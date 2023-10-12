@@ -328,7 +328,7 @@ async function setMonthlyCharges() {
       this.refresh
     ) {
       this.quickBooksTimeData = await api.getMonthlyHours(this.employee.employeeNumber);
-      if (this.$store.getters.user.id == this.employee.id) {
+      if (!(this.quickBooksTimeData instanceof Error) && this.$store.getters.user.id == this.employee.id) {
         // only set vuex store if the user is looking at their own quickbooks data
         this.$store.dispatch('setQuickbooksMonthlyHours', { quickbooksMonthlyHours: this.quickBooksTimeData });
       }

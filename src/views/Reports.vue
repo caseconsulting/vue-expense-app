@@ -6,19 +6,19 @@
       class="mb-3"
       elevation="2"
       @click="backClick()"
-      :x-small="isMobile"
+      :size="isMobile && 'x-small'"
       ><v-icon class="pr-1">arrow_back</v-icon>Back</v-btn
     >
     <v-card>
       <v-card color="#bc3825">
         <v-card-title headline v-bind:class="{ 'justify-center': isMobile }">
-          <h2 class="white--text">Reports</h2>
+          <h2 class="text-white">Reports</h2>
           <v-spacer></v-spacer>
-          <v-tooltip bottom>
+          <v-tooltip location="bottom">
             <template v-slot:activator="{ on, attrs }">
               <v-btn id="contactEmployeesBtn" @click="renderContactEmployeesModal()" v-bind="attrs" v-on="on">
                 Contact
-                <v-icon right>email</v-icon>
+                <v-icon end>email</v-icon>
               </v-btn>
             </template>
             <span>Contact Active Employees In The Table Below</span>
@@ -35,7 +35,7 @@
           grow
           show-arrows
           :key="tabKey"
-          @change="changeTab"
+          @update:model-value="changeTab"
           v-model="currentTab"
         >
           <v-tab href="#contracts" :disabled="loading">Contracts</v-tab>

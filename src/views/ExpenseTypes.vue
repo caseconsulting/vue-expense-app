@@ -16,15 +16,14 @@
         v-model="status.statusType"
         :color="status.color"
         :multi-line="true"
-        :right="true"
+        location="right"
         :timeout="5000"
-        :top="true"
         :vertical="true"
       >
         <v-card-title headline color="white">
-          <span class="headline">{{ status.statusMessage }}</span>
+          <span class="text-h5">{{ status.statusMessage }}</span>
         </v-card-title>
-        <v-btn color="white" text @click="clearStatus">Close</v-btn>
+        <v-btn color="white" variant="text" @click="clearStatus">Close</v-btn>
       </v-snackbar>
 
       <v-col cols="12" :lg="userRoleIsAdmin() ? 8 : 12">
@@ -54,9 +53,9 @@
                 <h4>Active Expense Type:</h4>
                 <v-btn-toggle class="filter_color" v-model="filter.active" text mandatory>
                   <!-- Show Active -->
-                  <v-tooltip top>
+                  <v-tooltip location="top">
                     <template v-slot:activator="{ on }">
-                      <v-btn value="active" v-on="on" text>
+                      <v-btn value="active" v-on="on" variant="text">
                         <v-icon class="mr-1">mdi-check-circle-outline</v-icon>
                       </v-btn>
                     </template>
@@ -64,9 +63,9 @@
                   </v-tooltip>
 
                   <!-- Show Inactive -->
-                  <v-tooltip top>
+                  <v-tooltip location="top">
                     <template v-slot:activator="{ on }">
-                      <v-btn value="notActive" v-on="on" text>
+                      <v-btn value="notActive" v-on="on" variant="text">
                         <v-icon>mdi-close-circle-outline</v-icon>
                       </v-btn>
                     </template>
@@ -74,9 +73,9 @@
                   </v-tooltip>
 
                   <!-- Show Active and Inactive -->
-                  <v-tooltip top>
+                  <v-tooltip location="top">
                     <template v-slot:activator="{ on }">
-                      <v-btn value="both" v-on="on" text>BOTH</v-btn>
+                      <v-btn value="both" v-on="on" variant="text">BOTH</v-btn>
                     </template>
                     <span>Show All</span>
                   </v-tooltip>
@@ -89,9 +88,9 @@
                 <h4>Overdraft:</h4>
                 <v-btn-toggle class="filter_color" v-model="filter.overdraft" text mandatory>
                   <!-- Show Overdraft -->
-                  <v-tooltip top>
+                  <v-tooltip location="top">
                     <template v-slot:activator="{ on }">
-                      <v-btn value="overdraft" v-on="on" text>
+                      <v-btn value="overdraft" v-on="on" variant="text">
                         <v-icon class="mr-1">mdi-check-circle-outline</v-icon>
                       </v-btn>
                     </template>
@@ -99,9 +98,9 @@
                   </v-tooltip>
 
                   <!-- Show No Overdraft -->
-                  <v-tooltip top>
+                  <v-tooltip location="top">
                     <template v-slot:activator="{ on }">
-                      <v-btn value="noOverdraft" v-on="on" text>
+                      <v-btn value="noOverdraft" v-on="on" variant="text">
                         <v-icon>mdi-close-circle-outline</v-icon>
                       </v-btn>
                     </template>
@@ -109,9 +108,9 @@
                   </v-tooltip>
 
                   <!-- Show Overdraft and No Overdraft -->
-                  <v-tooltip top>
+                  <v-tooltip location="top">
                     <template v-slot:activator="{ on }">
-                      <v-btn value="both" v-on="on" text>BOTH</v-btn>
+                      <v-btn value="both" v-on="on" variant="text">BOTH</v-btn>
                     </template>
                     <span>Show All</span>
                   </v-tooltip>
@@ -124,9 +123,9 @@
                 <h4>Recurring:</h4>
                 <v-btn-toggle class="filter_color" v-model="filter.recurring" text mandatory>
                   <!-- Show Recurring -->
-                  <v-tooltip top>
+                  <v-tooltip location="top">
                     <template v-slot:activator="{ on }">
-                      <v-btn value="recurring" v-on="on" text>
+                      <v-btn value="recurring" v-on="on" variant="text">
                         <v-icon class="mr-1">mdi-check-circle-outline</v-icon>
                       </v-btn>
                     </template>
@@ -134,9 +133,9 @@
                   </v-tooltip>
 
                   <!-- Show Non-Recurring -->
-                  <v-tooltip top>
+                  <v-tooltip location="top">
                     <template v-slot:activator="{ on }">
-                      <v-btn value="notRecurring" v-on="on" text>
+                      <v-btn value="notRecurring" v-on="on" variant="text">
                         <v-icon>mdi-close-circle-outline</v-icon>
                       </v-btn>
                     </template>
@@ -144,9 +143,9 @@
                   </v-tooltip>
 
                   <!-- Show Recurring and Non-Recurring -->
-                  <v-tooltip top>
+                  <v-tooltip location="top">
                     <template v-slot:activator="{ on }">
-                      <v-btn value="both" v-on="on" text>BOTH</v-btn>
+                      <v-btn value="both" v-on="on" variant="text">BOTH</v-btn>
                     </template>
                     <span>Show All</span>
                   </v-tooltip>
@@ -173,7 +172,7 @@
             >
               <!-- Budget Name slot -->
               <template v-slot:[`item.budgetName`]="{ item }">
-                <td>{{ item.budgetName | limitedText }}</td>
+                <td>{{ limitedText(item.budgetName) }}</td>
               </template>
               <!-- Budget slot -->
               <template v-slot:[`item.budget`]="{ item }">
@@ -181,12 +180,12 @@
               </template>
               <!-- Actions -->
               <template v-if="userRoleIsAdmin()" v-slot:[`item.actions`]="{ item }">
-                <v-tooltip top>
+                <v-tooltip location="top">
                   <template v-slot:activator="{ on }">
                     <v-btn
                       v-if="userRoleIsAdmin()"
                       :disabled="midAction"
-                      text
+                      variant="text"
                       icon
                       @click="
                         toTopOfForm();
@@ -199,13 +198,13 @@
                   </template>
                   <span>Edit</span>
                 </v-tooltip>
-                <v-tooltip top>
+                <v-tooltip location="top">
                   <template v-slot:activator="{ on }">
                     <v-btn
                       v-if="userRoleIsAdmin()"
                       id="delete"
                       :disabled="midAction"
-                      text
+                      variant="text"
                       icon
                       @click="validateDelete(item)"
                       v-on="on"
@@ -324,12 +323,12 @@
                           <!-- Button to view names of employees with access -->
                           <v-dialog v-model="showAccess" max-width="400px" scrollable>
                             <template v-slot:activator="{ on }">
-                              <v-btn class="px-1 ml-3" x-small outlined v-on="on">view</v-btn>
+                              <v-btn class="px-1 ml-3" size="x-small" variant="outlined" v-on="on">view</v-btn>
                             </template>
                             <v-card color="#bc3825">
                               <!-- Dialog Title -->
                               <v-card-title>
-                                <span class="headline white--text">Accessible By</span>
+                                <span class="text-h5 text-white">Accessible By</span>
                               </v-card-title>
                               <v-divider color="black"></v-divider>
                               <!-- List of employee names/ISSUES -->
@@ -339,19 +338,18 @@
                                     <div v-for="employee in getEmployeeList(item.accessibleBy)" :key="employee.id">
                                       <v-list-item>
                                         <!-- Employee Image -->
-                                        <v-list-item-avatar>
+                                        <v-list-item-media>
                                           <img
                                             v-if="employee.avatar"
                                             :src="employee.avatar"
                                             @error="changeAvatar(employee)"
                                           />
                                           <v-icon class="user-circle" name="user-circle" v-else></v-icon>
-                                        </v-list-item-avatar>
+                                        </v-list-item-media>
 
                                         <!-- Employee Name -->
-                                        <v-list-item-content>
-                                          <v-list-item-title>{{ getEmployeeName(employee.id) }}</v-list-item-title>
-                                        </v-list-item-content>
+
+                                        <v-list-item-title>{{ getEmployeeName(employee.id) }}</v-list-item-title>
                                       </v-list-item>
                                     </div>
                                   </v-list>
@@ -362,7 +360,7 @@
                               <!-- Close dialog button -->
                               <v-card-actions>
                                 <v-spacer></v-spacer>
-                                <v-btn dark text @click="showAccess = false">Close</v-btn>
+                                <v-btn theme="dark" variant="text" @click="showAccess = false">Close</v-btn>
                               </v-card-actions>
                             </v-card>
                           </v-dialog>
@@ -382,7 +380,7 @@
                                 <b>Tag(s):</b>
                                 <div class="d-flex flex-column">
                                   <v-chip small v-for="tagID in item.tags" :key="tagID">
-                                    <v-icon left>mdi-tag</v-icon>{{ getTagByID(tagID).tagName }}</v-chip
+                                    <v-icon start>mdi-tag</v-icon>{{ getTagByID(tagID).tagName }}</v-chip
                                   >
                                 </div>
                               </div>
@@ -1213,9 +1211,6 @@ export default {
       deleteType: '' //item.budgetName for when item is deleted
     };
   },
-  filters: {
-    limitedText
-  },
   methods: {
     addModelToTable,
     categoriesToString,
@@ -1231,6 +1226,7 @@ export default {
     deleteModelFromTable,
     displayError,
     endAction,
+    limitedText,
     filterExpenseTypes,
     getAccess,
     getCampfire,

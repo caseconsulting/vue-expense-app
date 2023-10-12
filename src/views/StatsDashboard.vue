@@ -3,15 +3,15 @@
     <v-card :elevation="3" class="">
       <v-card color="#bc3825">
         <v-card-title headline v-bind:class="{ 'justify-center': isMobile }">
-          <h2 class="text-center white--text">Stats Dashboard</h2>
+          <h2 class="text-center text-white">Stats Dashboard</h2>
         </v-card-title>
       </v-card>
       <v-container fluid>
         <!-- user is mobile -->
         <div v-if="isMobile" class="text-center">
-          <v-menu offset-y>
+          <v-menu offset="y">
             <template v-slot:activator="{ on, attrs }">
-              <v-btn text color="#bc3825" dark class="font-weight-bold" v-bind="attrs" v-on="on"
+              <v-btn variant="text" color="#bc3825" theme="dark" class="font-weight-bold" v-bind="attrs" v-on="on"
                 >{{ statsTab.toUpperCase() }} <v-icon class="pb-1">expand_more</v-icon>
               </v-btn>
             </template>
@@ -33,7 +33,16 @@
           <customer-org-chart-tab v-if="statsTab === 'customer Org' && dataLoaded"></customer-org-chart-tab>
         </div>
         <!-- user is not mobile -->
-        <v-tabs v-else color="basil" v-model="currentTab" center-active grow show-arrows class="" @change="changeTab">
+        <v-tabs
+          v-else
+          color="basil"
+          v-model="currentTab"
+          center-active
+          grow
+          show-arrows
+          class=""
+          @update:model-value="changeTab"
+        >
           <v-tab href="#employees">Employees</v-tab>
           <v-tab href="#education" :disabled="!dataLoaded">Education</v-tab>
           <v-tab href="#technologies" :disabled="!dataLoaded">Technology</v-tab>

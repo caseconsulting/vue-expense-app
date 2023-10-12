@@ -75,22 +75,6 @@ function onPageChange() {
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     FILTERS                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * filter that checks if value exists for current
- *
- * @param value - value to check
- * @return - either 'yes' if it exists or 'no' otherwise
- */
-function current(value) {
-  return value ? 'Yes' : 'No';
-} // current
-
-// |--------------------------------------------------|
-// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -102,9 +86,6 @@ export default {
       filteredList: [],
       page: 1
     };
-  },
-  filters: {
-    current
   },
   methods: {
     isEmpty,

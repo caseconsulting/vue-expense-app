@@ -49,7 +49,7 @@
     </p>
     <!-- Birthday Feed -->
     <p v-if="!isEmpty(this.model.birthdayFeed) && (admin || employee)">
-      <b>Birthday on Feed:</b> {{ this.model.birthdayFeed | birthdayFeedResponse }}
+      <b>Birthday on Feed:</b> {{ birthdayFeedResponse(this.model.birthdayFeed) }}
     </p>
     <!-- Birthday -->
     <sensitive-data-field
@@ -258,9 +258,6 @@ export default {
       userId: null,
       childrenVisible: true
     };
-  },
-  filters: {
-    birthdayFeedResponse
   },
   methods: {
     birthdayFeedResponse,

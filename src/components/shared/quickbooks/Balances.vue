@@ -208,7 +208,7 @@ async function setPTOBalances() {
       this.refresh
     ) {
       [ptoBalances] = await Promise.all([api.getPTOBalances(this.employee.employeeNumber), updateStorePtoCashOuts()]); // call api
-      if (this.$store.getters.user.id == this.employee.id) {
+      if (!(ptoBalances instanceof Error) && this.$store.getters.user.id == this.employee.id) {
         // only set vuex store if the user is looking at their own quickbooks data
         this.$store.dispatch('setQuickbooksPTO', { quickbooksPTO: ptoBalances });
       }

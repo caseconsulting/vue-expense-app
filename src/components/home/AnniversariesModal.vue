@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="item">
     <v-card>
       <v-card-title class="header_style">
         <span class="text-h5">{{ item.date }}</span>

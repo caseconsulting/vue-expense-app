@@ -5,7 +5,7 @@
       <!-- Loop Awards -->
       <div v-for="(award, index) in this.filteredList" :key="award.name + index">
         <p><b>Award: </b>{{ award.name }}</p>
-        <p><b>Date Received: </b>{{ award.dateReceived | monthYearFormat }}</p>
+        <p><b>Date Received: </b>{{ monthYearFormat(award.dateReceived) }}</p>
         <hr v-if="index < filteredList.length - 1" class="mb-3" />
       </div>
       <!-- End Loop Awards -->
@@ -74,9 +74,7 @@ export default {
   },
   methods: {
     isEmpty,
-    onPageChange
-  },
-  filters: {
+    onPageChange,
     monthYearFormat
   },
   props: ['model']

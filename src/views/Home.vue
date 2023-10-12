@@ -5,15 +5,14 @@
       v-model="status.statusType"
       :color="status.color"
       :multi-line="true"
-      :right="true"
+      location="top right"
       :timeout="5000"
-      :top="true"
       :vertical="true"
     >
       <v-card-title headline color="white">
-        <span class="headline">{{ status.statusMessage }}</span>
+        <span class="text-h5">{{ status.statusMessage }}</span>
       </v-card-title>
-      <v-btn color="white" text @click="clearStatus"> Close </v-btn>
+      <v-btn color="white" variant="text" @click="clearStatus"> Close </v-btn>
     </v-snackbar>
     <span v-if="loading">
       <v-row>
@@ -47,7 +46,7 @@
         <v-col cols="12" md="6">
           <h1 align="center" justify="center" id="home-greeting">Hello, {{ getEmployeePreferredName(employee) }}!</h1>
           <div class="text-center">
-            <v-btn @click="handleProfile()" color="#bc3825" dark>View Profile</v-btn>
+            <v-btn @click="handleProfile()" color="#bc3825" theme="dark">View Profile</v-btn>
           </div>
         </v-col>
 
