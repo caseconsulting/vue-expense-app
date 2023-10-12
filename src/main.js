@@ -7,9 +7,6 @@ import vuetify from './vuetify';
 import(/* webpackMode: "eager" */ 'vuetify/dist/vuetify.min.css');
 
 import App from './App.vue';
-import Vue2Filters from 'vue2-filters';
-
-Vue.use(Vue2Filters);
 
 window.EventBus = new Vue();
 new Vue({
