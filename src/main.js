@@ -8,6 +8,8 @@ import(/* webpackMode: "eager" */ 'vuetify/dist/vuetify.min.css');
 
 import App from './App.vue';
 
+const emitter = mitt();
 const app = createApp(App).use(router).use(store).use(vuetify);
-app.config.globalProperties.emitter = mitt();
+window.emitter = emitter;
+app.config.globalProperties.emitter = emitter;
 app.mount('#app');

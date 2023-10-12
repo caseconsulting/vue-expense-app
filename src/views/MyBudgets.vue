@@ -202,17 +202,17 @@ async function created() {
     await this.refreshEmployee();
   }
 
-  window.EventBus.$on('updateData', async () => {
+  this.emitter.on('updateData', async () => {
     await this.updateData();
   });
 
-  window.EventBus.$on('selected-budget-year', (date) => {
+  this.emitter.on('selected-budget-year', (date) => {
     if (date != this.fiscalDateView) {
       this.fiscalDateView = date;
     }
   });
 
-  window.EventBus.$on('confirmSubmit', async () => {
+  this.emitter.on('confirmSubmit', async () => {
     // expense submitted, refresh budgets for page
   });
 } // created
@@ -221,8 +221,8 @@ async function created() {
  * beforeDestroy lifecycle hook.
  */
 function beforeDestroy() {
-  window.EventBus.$off('updateData');
-  window.EventBus.$off('selected-budget-year');
+  this.emitter.off('updateData');
+  this.emitter.off('selected-budget-year');
 } // beforeDestroy
 
 // |--------------------------------------------------|

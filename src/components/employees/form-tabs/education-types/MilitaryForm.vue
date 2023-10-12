@@ -137,7 +137,7 @@ function dateSubmissionRules() {
  * @param include - whether or not to include this education
  */
 function emitToParser(include) {
-  this.$emit(include ? 'confirm' : 'deny', include ? this.military : undefined);
+  this.emitter.emit(include ? 'confirm' : 'deny', include ? this.military : undefined);
 } // emitToParser
 
 /**
@@ -159,7 +159,7 @@ function validateFields() {
   _.forEach(components, (field) => {
     if (field && !field.validate()) errorCount++;
   });
-  window.EventBus.$emit('doneValidatingEducation', this.military, this.militaryIndex, errorCount); // emit done validating
+  this.emitter.emit('doneValidatingEducation', this.military, this.militaryIndex, errorCount); // emit done validating
 } // validateFields
 
 // |--------------------------------------------------|

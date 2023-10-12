@@ -428,7 +428,7 @@ import GeneralConfirmationModal from '@/components/modals/GeneralConfirmationMod
  * Sets up event listeners for confirming and canceling resume parser
  */
 async function created() {
-  window.EventBus.$on('confirmed-parser', async () => {
+  this.emitter.on('confirmed-parser', async () => {
     // Create an audit of the success
     await api.createItem(api.AUDIT, {
       id: generateUUID(),
@@ -439,19 +439,19 @@ async function created() {
       timeToLive: 60
     });
 
-    this.$emit('resume', this.editedEmployeeForm, this.totalChanges);
+    this.emitter.emit('resume', this.editedEmployeeForm, this.totalChanges);
     this.resumeProcessed = false;
     this.confirmingValid = false;
     this.activate = !this.activate;
     this.totalChanges = 0;
   });
-  window.EventBus.$on('canceled-parser', () => {
+  this.emitter.on('canceled-parser', () => {
     this.confirmingValid = false;
   });
-  window.EventBus.$on('backout-canceled-parser', () => {
+  this.emitter.on('backout-canceled-parser', () => {
     this.confirmBackingOut = false;
   });
-  window.EventBus.$on('backout-confirmed-parser', () => {
+  this.emitter.on('backout-confirmed-parser', () => {
     this.confirmBackingOut = false;
     this.clearForm();
   });
@@ -461,10 +461,10 @@ async function created() {
  * destroy listeners
  */
 function beforeDestroy() {
-  window.EventBus.$off('confirmed-parser');
-  window.EventBus.$off('canceled-parser');
-  window.EventBus.$off('backout-canceled-parser');
-  window.EventBus.$off('backout-confirmed-parser');
+  this.emitter.off('confirmed-parser');
+  this.emitter.off('canceled-parser');
+  this.emitter.off('backout-canceled-parser');
+  this.emitter.off('backout-confirmed-parser');
 } // beforeDestroy
 
 // |--------------------------------------------------|
@@ -661,7 +661,7 @@ async function onlyUploadResume(eId) {
     this.loading = false;
 
     //confirmation upload pop-up in employee.vue
-    window.EventBus.$emit('uploaded', true);
+    this.emitter.emit('uploaded', true);
     this.clearForm();
     this.activate = false;
   } catch (err) {
@@ -723,7 +723,7 @@ async function submit() {
     }, 15000);
 
     this.resumeObject = (await api.extractResumeText(this.employee.id, this.file)).comprehend;
-    window.EventBus.$emit('uploaded', false);
+    this.emitter.emit('uploaded', false);
 
     // If it takes too long it should timeout
     if (this.resumeObject instanceof Error || !this.resumeObject) {

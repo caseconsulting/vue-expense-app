@@ -1,6 +1,6 @@
 <template>
   <div class="field-container">
-    <p @click="$emit('click')">
+    <p @click="emitter.emit('click')">
       <b v-if="label">{{ label }}:</b> {{ show ? value : '*****' }}
     </p>
     <a
@@ -19,7 +19,7 @@
  * Created lifecycle hook
  */
 function created() {
-  window.EventBus.$on('show-all', (val) => {
+  this.emitter.on('show-all', (val) => {
     this.show = val;
   });
 } // created

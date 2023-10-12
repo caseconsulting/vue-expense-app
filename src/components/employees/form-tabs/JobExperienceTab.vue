@@ -278,7 +278,7 @@ import { getRole } from '@/utils/auth';
  * Emits to parent the component was created and get data.
  */
 async function created() {
-  window.EventBus.$emit('created', 'jobExperience'); // emit education tab was created
+  this.emitter.emit('created', 'jobExperience'); // emit education tab was created
   this.employees = this.$store.getters.employees; // get all employees
   this.populateDropDowns(); // get autocomplete drop down data
 } // created
@@ -471,8 +471,8 @@ function validateFields() {
     });
   });
 
-  window.EventBus.$emit('doneValidating', 'jobExperience', this.editedJobExperienceInfo); // emit done validating
-  window.EventBus.$emit('jobExperienceStatus', errorCount); // emit error status
+  this.emitter.emit('doneValidating', 'jobExperience', this.editedJobExperienceInfo); // emit done validating
+  this.emitter.emit('jobExperienceStatus', errorCount); // emit error status
 } // validateFields
 
 // |--------------------------------------------------|

@@ -60,7 +60,7 @@ import { isMobile } from '@/utils/utils';
  * Created lifecycle hook.
  */
 async function created() {
-  window.EventBus.$on('reimburseAlert', (alerts) => {
+  this.emitter.on('reimburseAlert', (alerts) => {
     this.alerts = alerts;
   });
 } // created
@@ -69,7 +69,7 @@ async function created() {
  * beforeDestroy lifecycle hook.
  */
 function beforeDestroy() {
-  window.EventBus.$off('reimburseAlert');
+  this.emitter.off('reimburseAlert');
 } // beforeDestroy
 
 // |--------------------------------------------------|

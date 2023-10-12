@@ -471,7 +471,7 @@ function clearForm() {
   if (this.$refs.expenseTypeForm) {
     this.$refs.expenseTypeForm.reset();
   }
-  this.$emit('finished-editing-expense-type'); //notify parent no longer editing an expense type
+  this.emitter.emit('finished-editing-expense-type'); //notify parent no longer editing an expense type
   this.startDateFormatted = null;
   this.endDateFormatted = null;
   this.customAccess = [];
@@ -580,7 +580,7 @@ function removeCategory(category) {
  */
 async function submit() {
   this.submitting = true; // set loading status to true
-  this.$emit('startAction');
+  this.emitter.emit('startAction');
 
   // set accessibleBy based on access radio
   if (this.isCustomSelected()) {
@@ -631,11 +631,11 @@ async function submit() {
 
       if (newExpenseType.id) {
         // successfully updates expense type
-        this.$emit('update');
+        this.emitter.emit('update');
         this.clearForm();
       } else {
         // emit error if fails to update expense type
-        this.$emit('error', newExpenseType.response.data.message);
+        this.emitter.emit('error', newExpenseType.response.data.message);
       }
     } else {
       // creating a new expense type
@@ -646,18 +646,18 @@ async function submit() {
       if (newExpenseType.id) {
         // successfully creates an expense type
         this.$set(this.editedExpenseType, 'id', newExpenseType.id);
-        this.$emit('add', newExpenseType);
+        this.emitter.emit('add', newExpenseType);
         this.clearForm();
       } else {
         // emit error if fails to create an expense type
-        this.$emit('error', newExpenseType.response.data.message);
+        this.emitter.emit('error', newExpenseType.response.data.message);
         this.$set(this.editedExpenseType, 'id', '');
       }
     }
   }
 
   this.submitting = false; // set loading status to false
-  this.$emit('endAction');
+  this.emitter.emit('endAction');
 } // submit
 
 /**
@@ -819,12 +819,12 @@ function checkBoxRule() {
  * Gets and sets all employees.
  */
 async function created() {
-  window.EventBus.$on('confirmed-type', async () => {
+  this.emitter.on('confirmed-type', async () => {
     this.submitForm = false;
     await this.submit();
     await this.updateStoreExpenseTypes();
   });
-  window.EventBus.$on('canceled-type', () => {
+  this.emitter.on('canceled-type', () => {
     this.submitting = false;
     this.submitForm = false;
   });
@@ -858,8 +858,8 @@ async function created() {
  * beforeDestroy lifecycle hook
  */
 function beforeDestroy() {
-  window.EventBus.$off('confirmed-type');
-  window.EventBus.$off('canceled-type');
+  this.emitter.off('confirmed-type');
+  this.emitter.off('canceled-type');
 } //beforeDestroy
 
 // |--------------------------------------------------|
@@ -893,7 +893,7 @@ function watchModelID() {
 
   //when model id is not empty then must be editing an expense
   if (!this.isEmpty(this.model.id)) {
-    this.$emit('editing-expense-type'); //notify parent that expense is being edited
+    this.emitter.emit('editing-expense-type'); //notify parent that expense is being edited
   }
   if (this.editedExpenseType.id != null) {
     //map categories

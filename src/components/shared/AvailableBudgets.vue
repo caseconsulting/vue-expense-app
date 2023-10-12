@@ -60,7 +60,7 @@ import { getTodaysDate, isBetween } from '@/shared/dateUtils';
  * created lifecycle hook
  */
 async function created() {
-  window.EventBus.$on('close-summary', () => {
+  this.emitter.on('close-summary', () => {
     this.showDialog = false;
   });
   this.currentUser = this.$store.getters.user;
@@ -97,7 +97,7 @@ function calcRemaining(budget) {
  * beforeDestroy lifecycle hook
  */
 function beforeDestroy() {
-  window.EventBus.$off('close-summary');
+  this.emitter.off('close-summary');
 } //beforeDestroy
 
 /**

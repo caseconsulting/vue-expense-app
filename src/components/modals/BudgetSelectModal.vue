@@ -96,7 +96,7 @@ function isCurrent(budgetYear) {
  */
 function select(budgetYear) {
   let fiscalYear = setYear(this.hireDate, budgetYear);
-  window.EventBus.$emit(`selected-budget-year`, fiscalYear);
+  this.emitter.emit(`selected-budget-year`, fiscalYear);
   this.activate = false;
 } // select
 

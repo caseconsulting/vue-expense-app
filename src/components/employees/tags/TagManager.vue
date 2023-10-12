@@ -40,14 +40,14 @@ import TagsTable from '@/components/employees/tags/TagsTable.vue';
  * beforeDestroy life cycle hook
  */
 function beforeDestroy() {
-  window.EventBus.$off('status-alert');
+  this.emitter.off('status-alert');
 } // beforeDestroy
 
 /**
  * Mounted life cycle hook
  */
 function mounted() {
-  window.EventBus.$on('status-alert', (status) => {
+  this.emitter.on('status-alert', (status) => {
     this.$set(this.status, 'statusType', status.statusType);
     this.$set(this.status, 'statusMessage', status.statusMessage);
     this.$set(this.status, 'color', status.color);
@@ -78,10 +78,10 @@ function clearStatus() {
 function emit(msg, data) {
   if (data) {
     // data exists
-    window.EventBus.$emit(msg, data);
+    this.emitter.emit(msg, data);
   } else {
     // data does not exist
-    window.EventBus.$emit(msg);
+    this.emitter.emit(msg);
   }
 } // emit
 

@@ -97,8 +97,8 @@ import { isMobile, userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
  * Created lifecycle hook.
  */
 async function created() {
-  window.EventBus.$on('close-contact-employees-modal', () => (this.toggleContactEmployeesModal = false));
-  window.EventBus.$on('list-of-employees-to-contact', (employees) => (this.employeesToContact = employees));
+  this.emitter.on('close-contact-employees-modal', () => (this.toggleContactEmployeesModal = false));
+  this.emitter.on('list-of-employees-to-contact', (employees) => (this.employeesToContact = employees));
 
   if (this.$store.getters.storeIsPopulated) {
     await Promise.all([
@@ -144,7 +144,7 @@ function changeTab(event) {
 
 function renderContactEmployeesModal() {
   this.contactKey++;
-  window.EventBus.$emit('get-employees-to-contact');
+  this.emitter.emit('get-employees-to-contact');
   this.toggleContactEmployeesModal = true;
 }
 

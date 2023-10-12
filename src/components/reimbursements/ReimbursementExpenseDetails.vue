@@ -84,14 +84,14 @@ function displayExpense(clickedExpense) {
  * Creates event listeners.
  */
 function created() {
-  window.EventBus.$on('expenseClicked', this.displayExpense);
+  this.emitter.on('expenseClicked', this.displayExpense);
 } // created
 
 /**
  * beforeDestroy lifecycle hook
  */
 function beforeDestroy() {
-  window.EventBus.$off('expenseClicked');
+  this.emitter.off('expenseClicked');
 } //beforeDestroy
 
 // |--------------------------------------------------|

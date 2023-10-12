@@ -185,7 +185,7 @@ function refreshBudgetYears() {
 async function created() {
   await this.loadData();
 
-  window.EventBus.$on('selected-budget-year', (date) => {
+  this.emitter.on('selected-budget-year', (date) => {
     if (date != this.fiscalDateView) {
       this.fiscalDateView = date;
     }
@@ -196,7 +196,7 @@ async function created() {
  * beforeDestroy lifecycle hook
  */
 function beforeDestroy() {
-  window.EventBus.$off('selected-budget-year');
+  this.emitter.off('selected-budget-year');
 } //beforeDestroy
 
 // |--------------------------------------------------|

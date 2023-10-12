@@ -105,12 +105,12 @@ function receiptChange() {
     fr.readAsDataURL(this.inputFile);
     fr.addEventListener('load', () => {
       this.previewURL = fr.result;
-      this.$emit('fileSelected', this.inputFile);
+      this.emitter.emit('fileSelected', this.inputFile);
     });
   } else {
     // file does not exist
     this.previewURL = '';
-    this.$emit('fileSelected', null);
+    this.emitter.emit('fileSelected', null);
   }
 } // receiptChanged
 

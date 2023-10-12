@@ -68,7 +68,7 @@ import { isEmpty } from '@/utils/utils';
  * Emits to parent the component was created and get data.
  */
 async function created() {
-  window.EventBus.$emit('created', 'languages');
+  this.emitter.emit('created', 'languages');
   this.employees = this.$store.getters.employees; // get all employees
   this.populateDropDowns();
 } // created
@@ -161,8 +161,8 @@ function validateFields() {
       errorCount++;
     }
   });
-  window.EventBus.$emit('languagesStatus', errorCount);
-  window.EventBus.$emit('doneValidating', 'languages', this.editedLanguages); // emit done validating
+  this.emitter.emit('languagesStatus', errorCount);
+  this.emitter.emit('doneValidating', 'languages', this.editedLanguages); // emit done validating
 } // validateFields
 
 // |--------------------------------------------------|

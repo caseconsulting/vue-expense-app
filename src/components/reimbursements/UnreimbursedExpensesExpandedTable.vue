@@ -80,7 +80,7 @@ import { convertToMoneyString, monthDayYearFormat } from '@/utils/utils';
  * @param clickedExpense - expense clicked
  */
 function expenseClicked(clickedExpense) {
-  window.EventBus.$emit('expenseClicked', clickedExpense);
+  this.emitter.emit('expenseClicked', clickedExpense);
 } // expenseClicked
 
 /**
@@ -89,7 +89,7 @@ function expenseClicked(clickedExpense) {
  * @param selectExpense - selected expense
  */
 function expenseSelected(selectedExpense) {
-  window.EventBus.$emit('selectExpense', selectedExpense);
+  this.emitter.emit('selectExpense', selectedExpense);
 } // expenseSelected
 
 /**
@@ -98,7 +98,7 @@ function expenseSelected(selectedExpense) {
  * @param toggledExpense - expense toggled
  */
 function expenseToggle(toggledExpense) {
-  window.EventBus.$emit('toggleExpense', toggledExpense);
+  this.emitter.emit('toggleExpense', toggledExpense);
 } // expenseToggle
 
 // |--------------------------------------------------|

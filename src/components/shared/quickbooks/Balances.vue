@@ -91,22 +91,22 @@ async function created() {
  * destroy listeners
  */
 function beforeDestroy() {
-  window.EventBus.$off('refresh-quickbooks-data');
-  window.EventBus.$off('close-pto-cash-out-form');
+  this.emitter.off('refresh-quickbooks-data');
+  this.emitter.off('close-pto-cash-out-form');
 } // beforeDestroy
 
 /**
  * Mounted lifecycle hook.
  */
 async function mounted() {
-  window.EventBus.$on('refresh-quickbooks-data', async () => {
+  this.emitter.on('refresh-quickbooks-data', async () => {
     this.refresh = true;
     this.loadingBar = true;
     await this.setPTOBalances();
     this.refresh = false;
   });
 
-  window.EventBus.$on('close-pto-cash-out-form', () => {
+  this.emitter.on('close-pto-cash-out-form', () => {
     this.showPTOCashOutFormModal = false;
   });
 } // mounted

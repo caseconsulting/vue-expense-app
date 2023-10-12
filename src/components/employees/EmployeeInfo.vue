@@ -218,7 +218,7 @@ function watchInfoTab(val) {
   // track current tab when switching between info and form
   if (this.afterCreate) {
     if (!_.isEqual(val, this.currentTab)) {
-      window.EventBus.$emit('tabChange', val);
+      this.emitter.emit('tabChange', val);
     }
   }
 } // watchInfoTab

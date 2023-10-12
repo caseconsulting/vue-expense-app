@@ -101,7 +101,7 @@ import { getRequiredRules } from '@/shared/validationUtils.js';
  * Emits to parent the component was created and get data.
  */
 async function created() {
-  window.EventBus.$emit('created', 'technologies'); // emit technologies tab was created
+  this.emitter.emit('created', 'technologies'); // emit technologies tab was created
   this.employees = this.$store.getters.employees; // get all employees
   this.populateDropDowns();
 } // created
@@ -214,8 +214,8 @@ function validateFields() {
   });
   //emit error status with a custom message
   // emit error status
-  window.EventBus.$emit('technologiesStatus', errorCount);
-  window.EventBus.$emit('doneValidating', 'technologies', this.editedTechnologies); // emit done validating
+  this.emitter.emit('technologiesStatus', errorCount);
+  this.emitter.emit('doneValidating', 'technologies', this.editedTechnologies); // emit done validating
 } // validateFields
 
 // |--------------------------------------------------|

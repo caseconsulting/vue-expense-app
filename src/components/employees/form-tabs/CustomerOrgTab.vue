@@ -93,7 +93,7 @@ import { getRequiredRules } from '@/shared/validationUtils.js';
  * Emits to parent the component was created and get data.
  */
 async function created() {
-  window.EventBus.$emit('created', 'customerOrgExp'); // emit customer organization tab was created
+  this.emitter.emit('created', 'customerOrgExp'); // emit customer organization tab was created
   this.employees = this.$store.getters.employees; // get all employees
 } // created
 
@@ -141,8 +141,8 @@ function validateFields() {
   _.forEach(components, (field) => {
     if (field && !field.validate()) errorCount++;
   });
-  window.EventBus.$emit('doneValidating', 'customerOrgExp', this.editedCustomerOrgExp); // emit done validating and send edited data to parent
-  window.EventBus.$emit('customerOrgExpStatus', errorCount); // emit error status
+  this.emitter.emit('doneValidating', 'customerOrgExp', this.editedCustomerOrgExp); // emit done validating and send edited data to parent
+  this.emitter.emit('customerOrgExpStatus', errorCount); // emit error status
 } // validateFields
 
 // |--------------------------------------------------|

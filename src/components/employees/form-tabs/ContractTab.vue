@@ -198,7 +198,7 @@ import { add, format, isAfter } from '@/shared/dateUtils';
  * Emits to parent the component was created and get data.
  */
 async function created() {
-  window.EventBus.$emit('created', 'contracts'); // emit contracts tab was created
+  this.emitter.emit('created', 'contracts'); // emit contracts tab was created
   this.employees = this.$store.getters.employees; // get all employees
   this.editedContracts.forEach((contract) => {
     contract.contractName = this.contracts.find((c) => c.id === contract.contractId).contractName;
@@ -427,8 +427,8 @@ function validateFields() {
     });
   });
 
-  window.EventBus.$emit('doneValidating', 'contracts', this.editedContracts); // emit done validating and sends edited data back to parent
-  window.EventBus.$emit('contractsStatus', errorCount); // emit error status
+  this.emitter.emit('doneValidating', 'contracts', this.editedContracts); // emit done validating and sends edited data back to parent
+  this.emitter.emit('contractsStatus', errorCount); // emit error status
 } // validateFields
 
 // |--------------------------------------------------|

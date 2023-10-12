@@ -159,7 +159,7 @@ import AnniversariesModal from './AnniversariesModal.vue';
  * created lifecycle hook
  */
 function created() {
-  window.EventBus.$on('close-anniversaries-modal', () => {
+  this.emitter.on('close-anniversaries-modal', () => {
     this.toggleAnniversariesModal = false;
   });
 

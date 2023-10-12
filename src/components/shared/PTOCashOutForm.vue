@@ -170,7 +170,7 @@ async function created() {
  * @param msg - Message to emit
  */
 function emit(msg) {
-  window.EventBus.$emit(msg);
+  this.emitter.emit(msg);
 } // emit
 
 /**
@@ -266,7 +266,7 @@ function displayError(err) {
     statusMessage: err,
     color: 'red'
   };
-  window.EventBus.$emit('status-alert', status);
+  this.emitter.emit('status-alert', status);
 } // displayError
 
 /**
@@ -279,7 +279,7 @@ function displaySuccess(msg) {
     statusMessage: msg,
     color: 'green'
   };
-  window.EventBus.$emit('status-alert', status);
+  this.emitter.emit('status-alert', status);
 } // displaySuccess
 
 /**
@@ -290,7 +290,7 @@ function displaySuccess(msg) {
  * @returns Number - The available PTO balance
  */
 function getPtoBalance(employeeNumber) {
-  return this.$store.getters.quickbooksPTO && this.$store.getters.quickbooksPTO.results.users[employeeNumber]
+  return this.$store.getters.quickbooksPTO.results && this.$store.getters.quickbooksPTO.results.users[employeeNumber]
     ? this.$store.getters.quickbooksPTO.results.users[employeeNumber].pto_balances.PTO
     : null;
 } // getPtoBalance

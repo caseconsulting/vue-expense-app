@@ -173,7 +173,7 @@ function customFilter(item, queryText) {
  * Emits a message.
  */
 function emit(name) {
-  window.EventBus.$emit(name);
+  this.emitter.emit(name);
 } // emit
 
 // |--------------------------------------------------|

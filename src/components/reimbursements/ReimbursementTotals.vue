@@ -99,16 +99,16 @@ function updateSelected(item) {
  *  Creates event listeners.
  */
 function created() {
-  window.EventBus.$on('selectExpense', this.updateSelected);
-  window.EventBus.$on('expenseChange', this.updateSelected);
+  this.emitter.on('selectExpense', this.updateSelected);
+  this.emitter.on('expenseChange', this.updateSelected);
 } // created
 
 /**
  * beforeDestroy lifecycle hook
  */
 function beforeDestroy() {
-  window.EventBus.$off('selectExpense');
-  window.EventBus.$off('expenseChange');
+  this.emitter.off('selectExpense');
+  this.emitter.off('expenseChange');
 } //beforeDestroy
 
 // |--------------------------------------------------|

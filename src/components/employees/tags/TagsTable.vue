@@ -153,8 +153,8 @@ async function created() {
  * Mounted lifecycle hook
  */
 async function mounted() {
-  window.EventBus.$on('canceled-delete-tag', () => (this.deletedTag = null));
-  window.EventBus.$on('confirm-delete-tag', async () => {
+  this.emitter.on('canceled-delete-tag', () => (this.deletedTag = null));
+  this.emitter.on('confirm-delete-tag', async () => {
     await this.deleteTag();
   });
 } // mounted
@@ -163,8 +163,8 @@ async function mounted() {
  * beforeDestroy lifecycle hook
  */
 async function beforeDestroy() {
-  window.EventBus.$off('canceled-delete-tag');
-  window.EventBus.$off('confirm-delete-tag');
+  this.emitter.off('canceled-delete-tag');
+  this.emitter.off('confirm-delete-tag');
 } // beforeDestroy
 
 // |--------------------------------------------------|
@@ -252,7 +252,7 @@ function displayError(err) {
     color: 'red'
   };
 
-  window.EventBus.$emit('status-alert', status);
+  this.emitter.emit('status-alert', status);
 } // displayError
 
 /**
@@ -265,7 +265,7 @@ function displaySuccess(msg) {
     statusMessage: msg,
     color: 'green'
   };
-  window.EventBus.$emit('status-alert', status);
+  this.emitter.emit('status-alert', status);
 } // displaySuccess
 
 /**
@@ -286,10 +286,10 @@ function editTag(tag) {
 function emit(msg, data) {
   if (data) {
     // data exists
-    window.EventBus.$emit(msg, data);
+    this.emitter.emit(msg, data);
   } else {
     // data does not exist
-    window.EventBus.$emit(msg);
+    this.emitter.emit(msg);
   }
 } // emit
 

@@ -81,7 +81,7 @@ import { format } from '@/shared/dateUtils';
  * @param include - whether or not to include this education
  */
 function emitToParser(include) {
-  this.$emit(include ? 'confirm' : 'deny', include ? this.highSchool : undefined);
+  this.emitter.emit(include ? 'confirm' : 'deny', include ? this.highSchool : undefined);
 } // emitToParser
 
 /**
@@ -103,7 +103,7 @@ function validateFields() {
   _.forEach(components, (field) => {
     if (field && !field.validate()) errorCount++;
   });
-  window.EventBus.$emit('doneValidatingEducation', this.highSchool, this.schoolIndex, errorCount); // emit done validating
+  this.emitter.emit('doneValidatingEducation', this.highSchool, this.schoolIndex, errorCount); // emit done validating
 } // validateFields
 
 // |--------------------------------------------------|

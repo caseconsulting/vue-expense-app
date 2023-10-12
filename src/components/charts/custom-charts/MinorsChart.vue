@@ -24,7 +24,7 @@ import _ from 'lodash';
  * Before destroy lifecycle hook.
  */
 function beforeDestroy() {
-  window.EventBus.$off('minors-update');
+  this.emitter.off('minors-update');
   this.$refs.pieChart.destroyChart();
 } // beforeDestroy
 
@@ -33,7 +33,7 @@ function beforeDestroy() {
  */
 async function mounted() {
   // emit comes from HighestDegreeChart.vue when a pie slice is clicked
-  window.EventBus.$on('minors-update', async (receiveMinors) => {
+  this.emitter.on('minors-update', async (receiveMinors) => {
     this.quantities = [];
     this.labels = [];
     this.dataReceived = false;

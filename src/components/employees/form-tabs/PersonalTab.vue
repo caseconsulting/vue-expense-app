@@ -275,7 +275,7 @@ import { getRole } from '@/utils/auth';
  * Emits to parent the component was created and get data.
  */
 async function created() {
-  window.EventBus.$emit('created', 'personal'); // emit personal tab was created
+  this.emitter.emit('created', 'personal'); // emit personal tab was created
   // get countries
   this.countries = countryList;
   // set formatted birthday date
@@ -420,8 +420,8 @@ function validateFields() {
     if (field && !field.validate()) errorCount++;
   });
 
-  window.EventBus.$emit('personalStatus', errorCount); // emit error status
-  window.EventBus.$emit('doneValidating', 'personal', this.editedPersonalInfo); // emit done validating
+  this.emitter.emit('personalStatus', errorCount); // emit error status
+  this.emitter.emit('doneValidating', 'personal', this.editedPersonalInfo); // emit done validating
 } // validateFields
 
 /**

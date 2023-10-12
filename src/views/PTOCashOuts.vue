@@ -66,12 +66,12 @@ function created() {
  * Mounted lifecycle hook
  */
 function mounted() {
-  window.EventBus.$on('status-alert', (status) => {
+  this.emitter.on('status-alert', (status) => {
     this.$set(this.status, 'statusType', status.statusType);
     this.$set(this.status, 'statusMessage', status.statusMessage);
     this.$set(this.status, 'color', status.color);
   });
-  window.EventBus.$on('change-quickbooks-employee', (employee) => {
+  this.emitter.on('change-quickbooks-employee', (employee) => {
     this.employee = employee;
   });
 } // mounted
@@ -80,7 +80,7 @@ function mounted() {
  * before destroy lifecycle hook
  */
 function beforeDestroy() {
-  window.EventBus.$off('status-alert');
+  this.emitter.off('status-alert');
 } // beforeDestroy
 
 // |--------------------------------------------------|

@@ -318,33 +318,33 @@ import ExpandedContractTableRow from './ExpandedContractTableRow.vue';
  * created life cycle hook
  */
 async function created() {
-  window.EventBus.$on('confirm-delete-contract', async () => {
+  this.emitter.on('confirm-delete-contract', async () => {
     await this.deleteItems(this.deletingItems);
     this.deletingItems = null;
   });
-  window.EventBus.$on('canceled-delete-contract', () => {
+  this.emitter.on('canceled-delete-contract', () => {
     this.deletingItems = null;
   });
-  window.EventBus.$on('confirmed-contract-status', () => {
+  this.emitter.on('confirmed-contract-status', () => {
     this.updateStatus(this.statusItemClicked);
     this.toggleContractStatusModal = false;
   });
-  window.EventBus.$on('canceled-contract-status', () => {
+  this.emitter.on('canceled-contract-status', () => {
     this.toggleContractStatusModal = false;
   });
-  window.EventBus.$on('canceled-project-form', () => {
+  this.emitter.on('canceled-project-form', () => {
     this.toggleProjectForm = false;
   });
-  window.EventBus.$on('closed-contract-employees-assigned-modal', () => {
+  this.emitter.on('closed-contract-employees-assigned-modal', () => {
     this.toggleContractEmployeesModal = false;
   });
-  window.EventBus.$on('filter', (filter) => {
+  this.emitter.on('filter', (filter) => {
     this.filter = filter;
   });
-  window.EventBus.$on('is-editing-project-item', (value) => {
+  this.emitter.on('is-editing-project-item', (value) => {
     this.isEditingProjectItem = value;
   });
-  window.EventBus.$on('toggle-project-checkBox', ({ contract, project }) => {
+  this.emitter.on('toggle-project-checkBox', ({ contract, project }) => {
     this.toggleProjectCheckBox(contract, project);
   });
   this.resetAllCheckBoxes();
@@ -355,15 +355,15 @@ async function created() {
  * beforeDestroy lifecycle hook - close event listeners
  */
 function beforeDestroy() {
-  window.EventBus.$off('confirm-delete-contract');
-  window.EventBus.$off('canceled-delete-contract');
-  window.EventBus.$off('confirmed-contract-status');
-  window.EventBus.$off('canceled-contract-status');
-  window.EventBus.$off('canceled-project-form');
-  window.EventBus.$off('closed-project-employees-assigned-modal');
-  window.EventBus.$off('filter');
-  window.EventBus.$off('is-editing-project-item');
-  window.EventBus.$off('toggle-project-checkbox');
+  this.emitter.off('confirm-delete-contract');
+  this.emitter.off('canceled-delete-contract');
+  this.emitter.off('confirmed-contract-status');
+  this.emitter.off('canceled-contract-status');
+  this.emitter.off('canceled-project-form');
+  this.emitter.off('closed-project-employees-assigned-modal');
+  this.emitter.off('filter');
+  this.emitter.off('is-editing-project-item');
+  this.emitter.off('toggle-project-checkbox');
 } // beforeDestroy
 
 // |--------------------------------------------------|
@@ -706,7 +706,7 @@ function displayError(err) {
     color: 'red'
   };
 
-  window.EventBus.$emit('status-alert', status);
+  this.emitter.emit('status-alert', status);
 } // displayError
 
 /**
@@ -719,7 +719,7 @@ function displaySuccess(msg) {
     statusMessage: msg,
     color: 'green'
   };
-  window.EventBus.$emit('status-alert', status);
+  this.emitter.emit('status-alert', status);
 } // displaySuccess
 
 /**

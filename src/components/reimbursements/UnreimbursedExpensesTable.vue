@@ -496,7 +496,7 @@ function determineShowSwitch(budget) {
  */
 function emitSelectionChange(expense, newSelect) {
   if (expense.selected != newSelect) {
-    window.EventBus.$emit('expenseChange', expense);
+    this.emitter.emit('expenseChange', expense);
   }
 } // emitSelectionChange
 
@@ -601,8 +601,8 @@ async function reimburseExpenses() {
     return _.forEach(budget.expenses, (expense) => {
       if (expense.selected) {
         //to remove the expense type data in the ExpenseTypeTotal modal
-        window.EventBus.$emit('expenseChange', expense);
-        window.EventBus.$emit('expenseClicked', undefined);
+        this.emitter.emit('expenseChange', expense);
+        this.emitter.emit('expenseClicked', undefined);
         expense.reimbursedDate = getTodaysDate();
         expense.reimbursementWasSeen = false;
         expensesToReimburse.push(this.removeAggregateExpenseData(expense));
@@ -641,7 +641,7 @@ async function reimburseExpenses() {
         self.alerts.shift();
       }, 10000);
     }
-    window.EventBus.$emit('reimburseAlert', this.alerts);
+    this.emitter.emit('reimburseAlert', this.alerts);
   });
 
   this.refreshExpenses();
@@ -869,11 +869,11 @@ function unCheckAllBoxes() {
  *  Sets the aggregated expeneses and datatable. Creates event listeners.
  */
 async function created() {
-  window.EventBus.$on('selectExpense', this.selectExpense);
-  window.EventBus.$on('toggleExpense', this.toggleShowOnFeed);
+  this.emitter.on('selectExpense', this.selectExpense);
+  this.emitter.on('toggleExpense', this.toggleShowOnFeed);
 
-  //window.EventBus.$on('canceled-reimburse', () => (this.buttonClicked = false));
-  window.EventBus.$on('confirm-reimburse', async () => await this.reimburseExpenses());
+  //this.emitter.on('canceled-reimburse', () => (this.buttonClicked = false));
+  this.emitter.on('confirm-reimburse', async () => await this.reimburseExpenses());
   let unreimbursedExpenses;
   [unreimbursedExpenses, this.expenseTypes] = await Promise.all([
     api.getUnreimbursedExpenses(),
@@ -889,9 +889,9 @@ async function created() {
  * beforeDestroy lifecycle hook
  */
 function beforeDestroy() {
-  window.EventBus.$off('selectExpense');
-  window.EventBus.$off('toggleExpense');
-  window.EventBus.$off('confirm-reimburse');
+  this.emitter.off('selectExpense');
+  this.emitter.off('toggleExpense');
+  this.emitter.off('confirm-reimburse');
 } //beforeDestroy
 
 // |--------------------------------------------------|

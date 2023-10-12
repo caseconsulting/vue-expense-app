@@ -85,10 +85,10 @@ function emit(msg, data) {
       }
       this.expense.cost = this.expense.remaining;
     }
-    window.EventBus.$emit(msg, data);
+    this.emitter.emit(msg, data);
   } else {
     // data does not exist
-    window.EventBus.$emit(msg);
+    this.emitter.emit(msg);
   }
   this.activate = false;
 } // emit
