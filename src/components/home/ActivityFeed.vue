@@ -56,7 +56,7 @@
           <!-- Timeline -->
           <v-virtual-scroll :items="filterEvents()" :item-height="itemHeight" height="700">
             <!-- <template v-slot:default="{ item }">
-              <v-tooltip open-on-hover top max-width="400px" min-width="200px" :color="hello(item)" open-delay="200">
+              <v-tooltip open-on-hover top max-width="400px" min-width="200px" :color="item.truncatedText ? 'grey-darken-3' : 'rgba(0, 0, 0, 0)'" open-delay="200">
                 <template v-slot:activator="{ on, attrs }">
                   <span v-bind="attrs" v-on="on">
                     <v-timeline-item :color="item.color" :key="item.name"> -->
@@ -147,9 +147,6 @@ import AnniversariesModal from './AnniversariesModal.vue';
 // |                                                  |
 // |--------------------------------------------------|
 
-function hello(item) {
-  console.log(item);
-}
 /**
  * created lifecycle hook
  */
@@ -237,7 +234,6 @@ function getURL(item) {
  * @param item Object - The month's anniversariese
  */
 function openAnniversariesModal(item) {
-  console.log(item);
   this.toggleAnniversariesModal = true;
   item.events.sort((a, b) => new Date(a.anniversary) - new Date(b.anniversary));
   this.item = item;
@@ -280,7 +276,6 @@ export default {
   },
   methods: {
     filterEvents,
-    hello,
     getURL,
     openAnniversariesModal,
     remove
