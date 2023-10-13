@@ -1,14 +1,10 @@
 <template>
-  <v-tooltip top>
-    <template v-slot:activator="{ on }">
-      <v-btn v-on="on" @click.stop="download" text icon>
-        <v-icon :class="{ 'white--text': color == 'white', 'gray-icon': color != 'white' }" scale="1.5"
-          >mdi-download</v-icon
-        >
-      </v-btn>
-    </template>
-    <span>{{ tooltip }}</span>
-  </v-tooltip>
+  <v-btn @click.stop="download" variant="text" icon>
+    <v-tooltip activator="parent" location="top">{{ tooltip }}</v-tooltip>
+    <v-icon :class="{ 'white--text': color == 'white', 'gray-icon': color != 'white' }" scale="1.5"
+      >mdi-download</v-icon
+    >
+  </v-btn>
 </template>
 
 <script>

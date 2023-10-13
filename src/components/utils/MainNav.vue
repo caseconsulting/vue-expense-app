@@ -1,23 +1,22 @@
 <template>
   <div>
     <!-- Navigation Links -->
-    <v-list class="pt-0" dense>
+    <v-list class="pt-0" density="compact">
       <v-divider></v-divider>
       <div v-for="(item, i) in visibleTiles" :key="i">
         <!-- Grouped Navigation Links -->
-        <v-list-group v-if="item.subItems" :key="item.title" no-action active-class="red--text v-list__tile--active">
-          <template v-slot:activator>
-            <!-- Parent Item Icon -->
-            <v-list-item-icon class="list-icons">
-              <v-icon :id="item.icon" v-bind:class="{ iconSelected: item.active }" class="navbar-icons">
-                {{ item.icon }}
-              </v-icon>
-            </v-list-item-icon>
-
-            <!-- Parent Item Title -->
-            <v-list-item-content>
+        <v-list-group v-if="item.subItems" active-color="red">
+          <template v-slot:activator="{ props }">
+            <v-list-item v-bind="props">
+              <!-- Parent Item Icon -->
+              <template v-slot:prepend>
+                <v-icon :id="item.icon" v-bind:class="{ iconSelected: item.active }" class="navbar-icons">
+                  {{ item.icon }}
+                </v-icon>
+              </template>
+              <!-- Parent Item Title -->
               <v-list-item-title>{{ item.title }}</v-list-item-title>
-            </v-list-item-content>
+            </v-list-item>
           </template>
 
           <v-list-item
@@ -28,9 +27,7 @@
             @click="scrollUp"
           >
             <!-- SubItems Title -->
-            <v-list-item-content>
-              <v-list-item-title>{{ subItem.title }}</v-list-item-title>
-            </v-list-item-content>
+            <v-list-item-title>{{ subItem.title }}</v-list-item-title>
           </v-list-item>
         </v-list-group>
         <!-- End Grouped Navigation Links -->
@@ -39,22 +36,19 @@
         <v-list-item
           v-else
           :id="item.icon"
-          :key="item.title"
           active-class="red--text v-list__tile--active"
           :to="{ name: item.route }"
           @click="scrollUp"
         >
           <!--NavBar icons-->
           <!-- Item Icon -->
-
-          <v-list-item-icon class="list-icons">
-            <v-icon v-bind:class="{ iconSelected: item.active }" class="navbar-icons">{{ item.icon }}</v-icon>
-          </v-list-item-icon>
-
+          <template v-slot:prepend>
+            <v-icon :id="item.icon" v-bind:class="{ iconSelected: item.active }" class="navbar-icons">
+              {{ item.icon }}
+            </v-icon>
+          </template>
           <!-- Item mTitle -->
-          <v-list-item-content>
-            <v-list-item-title>{{ item.title }}</v-list-item-title>
-          </v-list-item-content>
+          <v-list-item-title>{{ item.title }}</v-list-item-title>
         </v-list-item>
       </div>
     </v-list>
@@ -107,6 +101,9 @@ function visibleTiles() {
  * Updates active field of item with subItems.
  */
 function checkActive() {
+  console.log(this.$route);
+  console.log(this.route);
+  console.log(this.items);
   var isAnyActive;
   for (var i in this.items) {
     if (this.items[i].subItems) {
@@ -147,7 +144,7 @@ function scrollUp() {
  */
 function created() {
   this.permissions = this.getRole();
-  this.route = this.$route.name;
+  this.route = this.$route.name ? this.$route.name : '/';
 } // created
 
 // |--------------------------------------------------|
@@ -160,7 +157,8 @@ function created() {
  * Handler for watcher of the route.
  */
 function watchRouteHandler() {
-  this.route = this.$route.name;
+  console.log(this.$route);
+  this.route = this.$route.name ? this.$route.name : '/';
 } // watchRouteHandler
 
 // |--------------------------------------------------|

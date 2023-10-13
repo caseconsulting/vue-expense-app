@@ -5,29 +5,29 @@
         :type="alert.status"
         :color="alert.color"
         :id="alert.id"
-        :dismissible="alert.closeable"
+        :closable="alert.closeable"
         class="my-0"
-        dense
+        density="compact"
       >
         <p class="ma-0" style="display: inline-block">{{ alert.message }}</p>
         <div :class="getButtonStyling()">
           <v-btn
             :disabled="onPage(alert.handler.page)"
             @click="handleClick(alert.handler.page, alert.handler.extras)"
-            class="justify-center black--text notif-action-btn"
+            class="justify-center text-black notif-action-btn"
             elevation="0"
             color="#f5f5f5"
-            small
+            size="small"
           >
             Go To {{ alert.handler.name }}
           </v-btn>
           <v-btn
             @click="handleMarkSeen(alert.type, alert.item, alert.id)"
             v-if="!!alert.seenButton"
-            class="right-shift black--text notif-action-btn"
+            class="right-shift text-black notif-action-btn"
             elevation="0"
             color="#f5f5f5"
-            small
+            size="small"
           >
             Mark seen
           </v-btn>

@@ -10,14 +10,10 @@
 
   <!-- Expenses -->
   <div v-else>
-    <v-tooltip top>
-      <template v-slot:activator="{ on }">
-        <v-btn :disabled="isEmpty(expense.receipt) || midAction" text icon @click="openDownloadTab" v-on="on">
-          <v-icon class="case-gray"> cloud_download </v-icon>
-        </v-btn>
-      </template>
-      <span>Download Attachment</span>
-    </v-tooltip>
+    <v-btn :disabled="isEmpty(expense.receipt) || midAction" variant="text" icon @click="openDownloadTab">
+      <v-tooltip activator="parent" location="top">Download Attachment</v-tooltip>
+      <v-icon class="case-gray"> cloud_download </v-icon>
+    </v-btn>
   </div>
   <!-- End Expenses -->
 </template>
