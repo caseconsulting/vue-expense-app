@@ -1,5 +1,5 @@
 <template>
-  <div class="text-xs-center text-sm-center text-md-center text-lg-center">
+  <div class="text-sm-center text-md-center text-lg-center">
     <!-- Receipt Input -->
     <v-file-input
       v-model="inputFile"
