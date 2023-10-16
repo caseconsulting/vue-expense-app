@@ -8,7 +8,14 @@
         </v-col>
 
         <v-col class="mb-1" cols="12" sm="8">
-          <v-text-field variant="underlined" v-model="search" hide-details single-line append-inner-icon="fa:fas fa-search" label="Search"></v-text-field>
+          <v-text-field
+            variant="underlined"
+            v-model="search"
+            hide-details
+            single-line
+            append-inner-icon="fa:fas fa-search"
+            label="Search"
+          ></v-text-field>
         </v-col>
       </v-row>
 
