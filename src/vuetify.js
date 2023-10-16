@@ -21,7 +21,7 @@ const opts = {
   },
   icons: {
     defaultSet: 'mdi',
-    iconfont: 'fa4',
+    iconfont: 'fa',
     aliases,
     sets: {
       mdi,
