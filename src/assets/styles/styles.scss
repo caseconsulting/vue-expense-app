@@ -1,6 +1,14 @@
 $case-red: #bc3825;
 $case-darkgray: #415364;
 
+.case-red-text {
+  color: $case-red !important;
+}
+
+.case-darkgray-text {
+  color: $case-darkgray !important;
+}
+
 /* RolledupExpenseTypeTable.vue */
 #money-team {
   color: green;
@@ -96,7 +104,7 @@ $case-darkgray: #415364;
   }
 
   100% {
-    color: gold;
+    color: $case-red;
   }
 }
 
@@ -106,7 +114,7 @@ $case-darkgray: #415364;
   }
 
   100% {
-    color: gold;
+    color: $case-red;
   }
 }
 
@@ -116,7 +124,7 @@ $case-darkgray: #415364;
   }
 
   100% {
-    color: gold;
+    color: $case-red;
   }
 }
 
@@ -126,7 +134,7 @@ $case-darkgray: #415364;
   }
 
   100% {
-    color: gold;
+    color: $case-red;
   }
 }
 
@@ -136,7 +144,7 @@ $case-darkgray: #415364;
   }
 
   100% {
-    color: gold;
+    color: $case-red;
   }
 }
 
@@ -151,7 +159,7 @@ $case-darkgray: #415364;
 
 @-webkit-keyframes color-change {
   0% {
-    color: gold;
+    color: $case-darkgray;
   }
 
   100% {
@@ -161,7 +169,7 @@ $case-darkgray: #415364;
 
 @-moz-keyframes color-change {
   0% {
-    color: gold;
+    color: $case-darkgray;
   }
 
   100% {
@@ -171,7 +179,7 @@ $case-darkgray: #415364;
 
 @-ms-keyframes color-change {
   0% {
-    color: gold;
+    color: $case-darkgray;
   }
 
   100% {
@@ -181,7 +189,7 @@ $case-darkgray: #415364;
 
 @-o-keyframes color-change {
   0% {
-    color: gold;
+    color: $case-darkgray;
   }
 
   100% {
@@ -191,7 +199,7 @@ $case-darkgray: #415364;
 
 @keyframes color-change {
   0% {
-    color: gold;
+    color: $case-darkgray;
   }
 
   100% {

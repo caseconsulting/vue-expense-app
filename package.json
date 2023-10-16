@@ -36,6 +36,7 @@
     "npm": ">=9.0.0"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-free": "6.4.2",
     "@mdi/font": "6.9.96",
     "auth0-js": "9.23.0",
     "axios": "1.5.1",
@@ -67,9 +68,12 @@
     "babel-jest": "29.7.0",
     "eslint": "8.50.0",
     "eslint-plugin-vue": "9.17.0",
-    "eslint-plugin-vuetify": "^2.0.5",
+    "eslint-plugin-vuetify": "2.0.5",
     "grunt": "1.6.1",
     "grunt-shell": "4.0.0",
+    "postcss": "8.4.31",
+    "postcss-html": "1.5.0",
+    "postcss-loader": "7.3.3",
     "precommit-hook": "3.0.0",
     "prettier": "3.0.3",
     "sass": "1.69.3",

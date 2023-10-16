@@ -1,4 +1,4 @@
-import { createRouter, createWebHashHistory } from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router';
 import Reimbursements from '@/views/Reimbursements.vue';
 import Login from '@/views/Login.vue';
 import LoginFailed from '@/views/LoginFailed.vue';
@@ -21,7 +21,7 @@ import { requireAuth, isAdminOrManager } from '@/utils/auth';
 import multiguard from 'vue-router-multiguard';
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(),
   routes: [
     {
       path: '/',
@@ -137,7 +137,7 @@ const router = createRouter({
     //Below catch-all code works for Vue 2
     //For Vue 3 change the path variable to path: '/:pathMatch(.*)*'
     {
-      path: '/:catchAll(.*)',
+      path: '/:pathMatch(.*)*',
       name: 'pageNotFound',
       component: PageNotFound,
       beforeEnter: requireAuth
