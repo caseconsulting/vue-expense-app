@@ -1,6 +1,17 @@
 <template>
   <div id="app" @mousedown="refreshSession()">
     <v-app>
+      <v-navigation-drawer
+        theme="light"
+        v-model="drawer"
+        rail
+        order="1"
+        :expand-on-hover="!isMobile"
+        :permanent="isLoggedIn() && !isMobile"
+        class="fixed"
+      >
+        <main-nav></main-nav>
+      </v-navigation-drawer>
       <v-app-bar class="nav-color" theme="dark">
         <v-app-bar-nav-icon v-show="isLoggedIn() && isMobile" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
         <div class="d-flex align-center siteId ml-4" @click="goToHome">
@@ -16,9 +27,9 @@
         <v-spacer></v-spacer>
         <!-- Display social media icons and links dropdown menu -->
         <v-item-group class="hidden-sm-and-down" v-show="isLoggedIn() && !isMobile">
-          <v-menu open-on-hover theme="light">
+          <v-menu open-on-hover open-delay="0" close-delay="0" theme="light">
             <template v-slot:activator="{ props }">
-              <v-btn id="links-btn" location="top" size="small" class="my-2" v-bind="props">Links &#9662; </v-btn>
+              <v-btn id="links-btn" size="small" class="my-2" v-bind="props">Links &#9662; </v-btn>
             </template>
 
             <v-list>
@@ -46,17 +57,17 @@
             icon
             target="_blank"
           >
-            <v-avatar rounded="0" :size="link.size || 23">
+            <v-avatar rounded="0" :size="link.size || 21">
               <v-img class="whiteImage" :src="link.img" :alt="`${link.name} icon`"></v-img>
             </v-avatar>
           </v-btn>
         </v-item-group>
 
         <!-- User image and logout -->
-        <v-menu location="bottom" offset="y" open-on-click v-if="isLoggedIn()">
-          <template v-slot:activator="{ on }">
-            <v-avatar id="profile" class="profile-button ml-3" size="40">
-              <img :src="profilePic" alt="avatar" v-on="on" />
+        <v-menu location="bottom" theme="light" open-on-click v-if="isLoggedIn()">
+          <template v-slot:activator="{ props }">
+            <v-avatar id="profile" class="profile-button mx-3" size="40">
+              <v-img :src="profilePic" alt="avatar" v-bind="props" />
             </v-avatar>
           </template>
           <v-list v-if="!(isMobile || isSmallScreen)">
@@ -98,17 +109,6 @@
         </v-menu>
         <!-- End user image and logout -->
       </v-app-bar>
-      <v-navigation-drawer
-        theme="light"
-        v-model="drawer"
-        disable-resize-watcher
-        rail
-        :expand-on-hover="!isMobile"
-        :permanent="isLoggedIn() && !isMobile"
-        class="fixed"
-      >
-        <main-nav></main-nav>
-      </v-navigation-drawer>
       <v-main :style="{ padding: getMainPadding() }">
         <v-container fluid grid-list-lg>
           <notification-banners v-if="isLoggedIn() && storeIsPopulated" />
@@ -440,8 +440,8 @@ export default {
     mediaLinks: [
       { name: 'Github', link: 'https://github.com/caseconsulting', img: github },
       { name: 'LinkedIn', link: 'https://linkedin.com/company/case-consulting-inc', img: linkedin },
-      { name: 'Youtube', link: 'https://www.youtube.com/channel/UC_oJY4OrOpLNrIBAN7Y-9fA', img: youtube, size: 25 },
-      { name: 'X', link: 'https://x.com/consultwithcase?lang=en', img: x, size: 18 },
+      { name: 'Youtube', link: 'https://www.youtube.com/channel/UC_oJY4OrOpLNrIBAN7Y-9fA', img: youtube, size: 23 },
+      { name: 'X', link: 'https://x.com/consultwithcase?lang=en', img: x, size: 17 },
       { name: 'Facebook', link: 'https://www.facebook.com/ConsultwithCase/', img: facebook }
     ],
     version: null
@@ -494,14 +494,6 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   color: #3f3f3c;
   background: #f5f5f5;
-}
-
-.e {
-  -webkit-animation: color-change 1s infinite alternate both;
-  -moz-animation: color-change 10s infinite alternate both;
-  -o-animation: color-change 10s infinite alternate both;
-  -ms-animation: color-change 10s infinite alternate both;
-  animation: color-change 5s infinite alternate both;
 }
 
 .logo-bar {

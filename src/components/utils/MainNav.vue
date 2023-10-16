@@ -15,7 +15,7 @@
                 </v-icon>
               </template>
               <!-- Parent Item Title -->
-              <v-list-item-title>{{ item.title }}</v-list-item-title>
+              <v-list-item-title class="nav-item">{{ item.title }}</v-list-item-title>
             </v-list-item>
           </template>
 
@@ -23,17 +23,16 @@
             v-for="subItem in item.subItems"
             :key="subItem.title"
             color="red"
-            :to="{ name: subItem.route }"
-            @click="scrollUp"
+            @click="handleNavigation(subItem)"
           >
             <!-- SubItems Title -->
-            <v-list-item-title>{{ subItem.title }}</v-list-item-title>
+            <v-list-item-title class="nav-item">{{ subItem.title }}</v-list-item-title>
           </v-list-item>
         </v-list-group>
         <!-- End Grouped Navigation Links -->
 
         <!-- Individual Navavigation Links -->
-        <v-list-item v-else :id="item.icon" color="red" :to="{ name: item.route }" @click="scrollUp">
+        <v-list-item v-else :id="item.icon" color="red" @click="handleNavigation(item)">
           <!--NavBar icons-->
           <!-- Item Icon -->
           <template v-slot:prepend>
@@ -42,7 +41,7 @@
             </v-icon>
           </template>
           <!-- Item mTitle -->
-          <v-list-item-title>{{ item.title }}</v-list-item-title>
+          <v-list-item-title class="nav-item">{{ item.title }}</v-list-item-title>
         </v-list-item>
       </div>
     </v-list>
@@ -106,13 +105,14 @@ function checkActive() {
       }
       this.items[i].active = isAnyActive;
     } else {
-      this.items[i].active =
-        this.route.includes(this.items[i].route) ||
-        !_.isNil(
-          _.find(this.items[i].alias, (alias) => {
-            return this.route.includes(alias);
-          })
-        );
+      this.items[i].active = this.route
+        ? this.route.includes(this.items[i].route) ||
+          !_.isNil(
+            _.find(this.items[i].alias, (alias) => {
+              return this.route.includes(alias);
+            })
+          )
+        : null;
     }
   }
 } // checkActive
@@ -120,8 +120,9 @@ function checkActive() {
 /**
  * Scrolls up the page.
  */
-function scrollUp() {
-  this.$vuetify.goTo(0);
+function handleNavigation(item) {
+  this.$router.push({ name: item.route });
+  window.scrollTo(0, 0);
 } // scrollUp
 
 // |--------------------------------------------------|
@@ -270,7 +271,7 @@ export default {
   methods: {
     checkActive,
     getRole,
-    scrollUp
+    handleNavigation
   },
   watch: {
     '$route.name': {
@@ -292,5 +293,11 @@ export default {
 
 .list-icons {
   width: 24px;
+}
+
+.nav-item {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1rem;
 }
 </style>

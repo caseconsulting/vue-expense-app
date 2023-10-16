@@ -62,7 +62,7 @@
             <quick-books-time-data :employee="employee" cols="12" lg="6"></quick-books-time-data>
           </div>
           <!-- Available Budgets -->
-          <div class="text-center">
+          <div>
             <available-budgets
               id="home-available-budgets"
               :employee="employee"
