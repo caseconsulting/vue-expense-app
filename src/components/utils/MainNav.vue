@@ -5,12 +5,12 @@
       <v-divider></v-divider>
       <div v-for="(item, i) in visibleTiles" :key="i">
         <!-- Grouped Navigation Links -->
-        <v-list-group v-if="item.subItems" active-color="red">
+        <v-list-group v-if="item.subItems" color="red" @click="item.active = !item.active">
           <template v-slot:activator="{ props }">
             <v-list-item v-bind="props">
               <!-- Parent Item Icon -->
               <template v-slot:prepend>
-                <v-icon :id="item.icon" v-bind:class="{ iconSelected: item.active }" class="navbar-icons">
+                <v-icon :id="item.icon" class="navbar-icons">
                   {{ item.icon }}
                 </v-icon>
               </template>
@@ -22,7 +22,7 @@
           <v-list-item
             v-for="subItem in item.subItems"
             :key="subItem.title"
-            active-class="red--text v-list__tile--active"
+            color="red"
             :to="{ name: subItem.route }"
             @click="scrollUp"
           >
@@ -33,17 +33,11 @@
         <!-- End Grouped Navigation Links -->
 
         <!-- Individual Navavigation Links -->
-        <v-list-item
-          v-else
-          :id="item.icon"
-          active-class="red--text v-list__tile--active"
-          :to="{ name: item.route }"
-          @click="scrollUp"
-        >
+        <v-list-item v-else :id="item.icon" color="red" :to="{ name: item.route }" @click="scrollUp">
           <!--NavBar icons-->
           <!-- Item Icon -->
           <template v-slot:prepend>
-            <v-icon :id="item.icon" v-bind:class="{ iconSelected: item.active }" class="navbar-icons">
+            <v-icon :id="item.icon" class="navbar-icons">
               {{ item.icon }}
             </v-icon>
           </template>
@@ -101,9 +95,6 @@ function visibleTiles() {
  * Updates active field of item with subItems.
  */
 function checkActive() {
-  console.log(this.$route);
-  console.log(this.route);
-  console.log(this.items);
   var isAnyActive;
   for (var i in this.items) {
     if (this.items[i].subItems) {
@@ -144,7 +135,7 @@ function scrollUp() {
  */
 function created() {
   this.permissions = this.getRole();
-  this.route = this.$route.name ? this.$route.name : '/';
+  this.route = this.$route.name;
 } // created
 
 // |--------------------------------------------------|
@@ -157,8 +148,7 @@ function created() {
  * Handler for watcher of the route.
  */
 function watchRouteHandler() {
-  console.log(this.$route);
-  this.route = this.$route.name ? this.$route.name : '/';
+  this.route = this.$route.name;
 } // watchRouteHandler
 
 // |--------------------------------------------------|
@@ -177,7 +167,7 @@ export default {
       items: [
         {
           title: 'Home',
-          icon: 'home',
+          icon: 'mdi-home',
           route: 'home',
           permission: ['user', 'admin', 'intern', 'manager'],
           active: false
@@ -295,13 +285,9 @@ export default {
 <style lang="scss" scoped>
 .navbar-icons {
   vertical-align: middle;
-  fill: #415364 !important;
-  color: #415364 !important;
   text-align: center;
-  width: 100%;
-  height: 100%;
-  max-width: 100%;
-  max-height: 100%;
+  opacity: 1 !important;
+  color: #415364 !important;
 }
 
 .list-icons {

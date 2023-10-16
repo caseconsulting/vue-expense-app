@@ -18,41 +18,43 @@
             multiple
             v-model="activeFilters"
             chips
-            deletable-chips
+            closable-chips
             clearable
-            filled
+            variant="filled"
             return-object
-            :search-input.sync="searchString"
-            @change="searchString = ''"
+            :search.sync="searchString"
+            @update:model-value="searchString = ''"
             class="elevate"
             append-icon=""
           >
             <template v-slot:selection="data">
               <v-chip
                 v-bind="data.attrs"
-                :input-value="data.selected"
-                close
+                :model-value="data.selected"
+                closable
                 @click="data.select"
                 @click:close="remove(data.item)"
                 small
               >
-                <v-avatar :color="data.item.color" left>
-                  <v-icon small color="white"> {{ data.item.icon }}</v-icon>
+                <v-avatar :color="data.item.color" start>
+                  <v-icon size="small" color="white"> {{ data.item.icon }}</v-icon>
                 </v-avatar>
                 {{ data.item.type }}
               </v-chip>
             </template>
             <template v-slot:item="data">
-              <v-list-item-avatar :color="data.item.color">
-                <v-icon color="white"> {{ data.item.icon }}</v-icon>
-              </v-list-item-avatar>
-              <v-list-item-content>
+              <v-list-item>
+                <template v-slot:prepend>
+                  <v-btn rounded="100" :color="data.item.color">
+                    <v-icon color="white"> {{ data.item.icon }}</v-icon>
+                  </v-btn>
+                </template>
                 <v-list-item-title>{{ data.item.type }}</v-list-item-title>
-              </v-list-item-content>
+              </v-list-item>
             </template>
           </v-autocomplete>
         </v-card-text>
-        <v-timeline dense class="pt-0">
+        <v-timeline density="compact" class="pt-0">
           <!-- Timeline -->
           <v-virtual-scroll :items="filterEvents()" :item-height="itemHeight" height="700">
             <!-- <template v-slot:default="{ item }">

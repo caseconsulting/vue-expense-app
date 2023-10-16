@@ -1,36 +1,24 @@
 <template>
   <div id="app" @mousedown="refreshSession()">
     <v-app>
-      <v-navigation-drawer
-        light
-        v-model="drawer"
-        fixed
-        app
-        disableResizeWatcher
-        :expand-on-hover="!isMobile"
-        :permanent="isLoggedIn() && !isMobile"
-        clipped
-      >
-        <main-nav></main-nav>
-      </v-navigation-drawer>
-      <v-app-bar class="nav-color" dark fixed app clipped-left>
+      <v-app-bar class="nav-color" theme="dark">
         <v-app-bar-nav-icon v-show="isLoggedIn() && isMobile" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
-        <div class="d-flex align-center siteId" @click="goToHome">
-          <v-avatar size="40" color="grey lighten-4" class="mr-2">
+        <div class="d-flex align-center siteId ml-4" @click="goToHome">
+          <v-avatar size="40" color="grey-lighten-4" class="mr-2">
             <img src="@/assets/img/logo-big.png" class="logo-bar" />
           </v-avatar>
-          <v-toolbar-title v-show="!isMobile">
+          <div v-if="!isMobile" class="app-title">
             <h1>CASE Portal</h1>
-          </v-toolbar-title>
+          </div>
           <!-- In Mobile View decrease title size-->
           <h1 v-show="isMobile" class="font-25">CASE Portal</h1>
         </div>
         <v-spacer></v-spacer>
         <!-- Display social media icons and links dropdown menu -->
         <v-item-group class="hidden-sm-and-down" v-show="isLoggedIn() && !isMobile">
-          <v-menu open-on-hover offset="y">
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn top text small class="my-2" v-bind="attrs" v-on="on" id="links-btn">Links &#9662; </v-btn>
+          <v-menu open-on-hover theme="light">
+            <template v-slot:activator="{ props }">
+              <v-btn id="links-btn" location="top" size="small" class="my-2" v-bind="props">Links &#9662; </v-btn>
             </template>
 
             <v-list>
@@ -50,7 +38,7 @@
             </v-list>
           </v-menu>
           <v-btn
-            class="mx-auto white--text"
+            class="mx-auto text-white"
             v-for="link in mediaLinks"
             :key="link.name"
             :id="link.name"
@@ -65,7 +53,7 @@
         </v-item-group>
 
         <!-- User image and logout -->
-        <v-menu bottom offset="y" open-on-click v-if="isLoggedIn()">
+        <v-menu location="bottom" offset="y" open-on-click v-if="isLoggedIn()">
           <template v-slot:activator="{ on }">
             <v-avatar id="profile" class="profile-button ml-3" size="40">
               <img :src="profilePic" alt="avatar" v-on="on" />
@@ -73,25 +61,25 @@
           </template>
           <v-list v-if="!(isMobile || isSmallScreen)">
             <v-list-item>
-              <v-btn :disabled="onUserProfile" text @click="handleProfile()">Profile</v-btn>
+              <v-btn :disabled="onUserProfile" variant="text" @click="handleProfile()">Profile</v-btn>
             </v-list-item>
             <v-list-item>
-              <v-btn id="logoutBtn" text @click="handleLogout()">Logout</v-btn>
+              <v-btn id="logoutBtn" variant="text" @click="handleLogout()">Logout</v-btn>
             </v-list-item>
             <v-list-item v-if="environment != 'https://app.consultwithcase.com'">
-              <v-btn text id="switchRoleBtn" @click="switchRole = true">Switch Role</v-btn>
+              <v-btn variant="text" id="switchRoleBtn" @click="switchRole = true">Switch Role</v-btn>
             </v-list-item>
           </v-list>
           <!--In MOBILE VIEW/Smaller Screen sizes display all links under the user image dropdown-->
           <v-list class="scrollLink" v-else>
             <v-list-item>
-              <v-btn text :disabled="onUserProfile" @click="handleProfile()">Profile</v-btn>
+              <v-btn variant="text" :disabled="onUserProfile" @click="handleProfile()">Profile</v-btn>
             </v-list-item>
             <v-list-item>
-              <v-btn text @click="handleLogout()">Logout</v-btn>
+              <v-btn variant="text" @click="handleLogout()">Logout</v-btn>
             </v-list-item>
             <v-list-item v-if="environment != 'https://app.consultwithcase.com'">
-              <v-btn text id="switchRoleBtn" @click="switchRole = true">Switch Role</v-btn>
+              <v-btn variant="text" id="switchRoleBtn" @click="switchRole = true">Switch Role</v-btn>
             </v-list-item>
             <hr role="separator" aria-orientation="horizontal" class="v-divider theme--light" :inset="inset" vertical />
             <div class="v-subheader theme--light">Company Links</div>
@@ -102,7 +90,7 @@
             <hr role="separator" aria-orientation="horizontal" class="v-divider theme--light" :inset="inset" vertical />
             <div class="v-subheader theme--light">Social</div>
             <v-list-item v-for="link in mediaLinks" :key="link.name" :href="link.link" icon target="_blank">
-              <v-icon large>{{ link.icon }}</v-icon>
+              <v-icon size="large">{{ link.icon }}</v-icon>
               <span class="mr-2"> </span>
               <v-list-item-title> {{ link.name }}</v-list-item-title>
             </v-list-item>
@@ -110,20 +98,31 @@
         </v-menu>
         <!-- End user image and logout -->
       </v-app-bar>
+      <v-navigation-drawer
+        theme="light"
+        v-model="drawer"
+        disable-resize-watcher
+        rail
+        :expand-on-hover="!isMobile"
+        :permanent="isLoggedIn() && !isMobile"
+        class="fixed"
+      >
+        <main-nav></main-nav>
+      </v-navigation-drawer>
       <v-main :style="{ padding: getMainPadding() }">
         <v-container fluid grid-list-lg>
           <notification-banners v-if="isLoggedIn() && storeIsPopulated" />
           <router-view></router-view>
         </v-container>
       </v-main>
-      <v-footer padless v-if="isLoggedIn()">
+      <v-footer v-if="isLoggedIn()">
         <v-col class="text-right text-caption" cols="12">
-          <v-tooltip top>
+          <v-tooltip location="top">
             <template v-slot:activator="{ on }">
               <a
                 v-on="on"
                 id="P"
-                class="black--text"
+                class="text-black"
                 target="_blank"
                 href="https://3.basecamp.com/3097063/buckets/4708396/documents/6600265506"
                 ><strong>Version</strong> {{ version }}</a
@@ -506,7 +505,7 @@ export default {
 }
 
 .logo-bar {
-  width: 25px;
+  width: 40px;
 }
 
 .scrollLink {
@@ -533,7 +532,19 @@ export default {
   filter: brightness(0) invert(1);
 }
 
+.app-title {
+  font-size: 1.25rem;
+  line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .siteId {
   cursor: pointer;
+}
+
+.fixed {
+  position: fixed;
 }
 </style>
