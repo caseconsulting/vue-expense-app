@@ -5,9 +5,15 @@
       <v-divider></v-divider>
       <div v-for="(item, i) in visibleTiles" :key="i">
         <!-- Grouped Navigation Links -->
-        <v-list-group v-if="item.subItems" color="red" @click="item.active = !item.active">
+        <v-list-group v-if="item.subItems" color="red">
           <template v-slot:activator="{ props }">
-            <v-list-item v-bind="props">
+            <v-list-item
+              v-bind="props"
+              active-class="case-red-text"
+              active-color="#bc3825"
+              :color="item.active ? '#bc3825' : '#415364'"
+              :class="item.active ? 'case-red-text' : ''"
+            >
               <!-- Parent Item Icon -->
               <template v-slot:prepend>
                 <v-icon :id="item.icon" class="navbar-icons">
@@ -22,7 +28,8 @@
           <v-list-item
             v-for="subItem in item.subItems"
             :key="subItem.title"
-            color="red"
+            :color="'#bc3825'"
+            :class="subItem.active ? 'case-red-text' : ''"
             @click="handleNavigation(subItem)"
           >
             <!-- SubItems Title -->
@@ -32,7 +39,13 @@
         <!-- End Grouped Navigation Links -->
 
         <!-- Individual Navavigation Links -->
-        <v-list-item v-else :id="item.icon" color="red" @click="handleNavigation(item)">
+        <v-list-item
+          v-else
+          :id="item.icon"
+          :color="item.active ? '#bc3825' : '#415364'"
+          :class="item.active ? 'case-red-text' : ''"
+          @click="handleNavigation(item)"
+        >
           <!--NavBar icons-->
           <!-- Item Icon -->
           <template v-slot:prepend>
@@ -100,7 +113,10 @@ function checkActive() {
       isAnyActive = false;
       for (var j in this.items[i].subItems) {
         if (this.items[i].subItems[j].route == this.route) {
+          this.items[i].subItems[j].active = true;
           isAnyActive = true;
+        } else {
+          this.items[i].subItems[j].active = false;
         }
       }
       this.items[i].active = isAnyActive;
@@ -181,25 +197,29 @@ export default {
               title: 'My Budgets',
               icon: 'mdi-hand-coin',
               route: 'myBudgets',
-              permission: ['user', 'admin', 'intern', 'manager']
+              permission: ['user', 'admin', 'intern', 'manager'],
+              active: false
             },
             {
               title: 'My Expenses',
               icon: 'mdi-currency-usd',
               route: 'expenses',
-              permission: ['admin', 'user', 'intern', 'manager']
+              permission: ['admin', 'user', 'intern', 'manager'],
+              active: false
             },
             {
               title: 'Expense Types',
               icon: 'mdi-book',
               route: 'expenseTypes',
-              permission: ['admin', 'user', 'manager']
+              permission: ['admin', 'user', 'manager'],
+              active: false
             },
             {
               title: 'Reimbursements',
               icon: 'mdi-monitor',
               route: 'reimbursements',
-              permission: ['admin', 'manager']
+              permission: ['admin', 'manager'],
+              active: false
             }
           ],
           permission: ['user', 'admin', 'intern', 'manager'],
@@ -209,7 +229,8 @@ export default {
           title: 'PTO Cash Outs',
           icon: 'mdi-cash',
           route: 'ptoCashOuts',
-          permission: ['admin', 'user', 'manager']
+          permission: ['admin', 'user', 'manager'],
+          active: false
         },
         {
           title: 'Employees',
@@ -232,7 +253,8 @@ export default {
           alias: ['audit'],
           icon: 'mdi-clipboard-check',
           route: 'audits',
-          permission: ['admin', 'manager']
+          permission: ['admin', 'manager'],
+          active: false
         },
         {
           title: 'Contracts',
@@ -284,11 +306,14 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.case-red-text {
+  color: #bc3825;
+}
+
 .navbar-icons {
   vertical-align: middle;
   text-align: center;
   opacity: 1 !important;
-  color: #415364 !important;
 }
 
 .list-icons {
