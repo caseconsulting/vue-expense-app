@@ -9,15 +9,15 @@
 
     <div class="mb-5">
       <div class="text-center mb-3"></div>
-      <v-expansion-panels variant="accordion" v-model="panel">
+      <v-expansion-panels variant="accordion" model-value="panel">
         <v-expansion-panel v-for="section in sections" :key="section[0]">
           <!-- Header -->
-          <v-expansion-panel-header :id="section[0]" v-if="canView(section[1])">
+          <v-expansion-panel-title :id="section[0]" v-if="canView(section[1])">
             {{ section[0] }}
-          </v-expansion-panel-header>
+          </v-expansion-panel-title>
 
           <!-- Content -->
-          <v-expansion-panel-content v-if="section[0] === 'Role Abilities'">
+          <v-expansion-panel-text v-if="section[0] === 'Role Abilities'">
             <v-data-table
               v-if="!isMobile"
               :headers="section[2].headers"
@@ -36,8 +36,8 @@
               mobile-breakpoint="0"
               hide-default-footer
             ></v-data-table>
-          </v-expansion-panel-content>
-          <v-expansion-panel-content v-else-if="canView(section[1])">
+          </v-expansion-panel-text>
+          <v-expansion-panel-text v-else-if="canView(section[1])">
             <v-card>
               <v-card-text class="bg-grey-lighten-3">
                 <li v-for="(ques, index) in section" :key="ques.title">
@@ -50,7 +50,7 @@
                 </li>
               </v-card-text>
             </v-card>
-          </v-expansion-panel-content>
+          </v-expansion-panel-text>
         </v-expansion-panel>
       </v-expansion-panels>
     </div>
