@@ -8,7 +8,7 @@
         </v-col>
 
         <v-col class="mb-1" cols="12" sm="8">
-          <v-text-field v-model="search" hide-details single-line append-icon="search" label="Search"></v-text-field>
+          <v-text-field variant="underlined" v-model="search" hide-details single-line append-inner-icon="fa:fas fa-search" label="Search"></v-text-field>
         </v-col>
       </v-row>
 
@@ -19,14 +19,17 @@
           <div v-for="category in categories" :key="category.value">
             <v-btn
               @click="filterByCategory(category.value)"
-              class="mx-3 pa-12"
+              class="mx-3"
+              height="90"
+              width="90"
               elevation="6"
               :rounded="isFocus(category.value)"
               theme="dark"
               size="large"
               color="#bc3825"
+              icon
             >
-              <v-icon dark size="60px">{{ category.icon }}</v-icon>
+              <v-icon size="x-large" :icon="category.icon" />
             </v-btn>
             <h4>{{ category.value }}</h4>
           </div>
@@ -46,7 +49,7 @@
                 <v-row class="ma-1" dense>
                   <v-col cols="12" sm="3" md="2" xl="1" class="d-flex align-center justify-center">
                     <v-avatar class="ma-1 iconImage" size="80">
-                      <img :src="url.display" :class="{ caseImage: url.isCaseLogo }" @error="changeDisplay(url)" />
+                      <v-img :src="url.display" :class="{ caseImage: url.isCaseLogo }" @error="changeDisplay(url)" />
                     </v-avatar>
                     <h3 v-if="url.publisher">{{ url.publisher }}</h3>
                   </v-col>
@@ -247,7 +250,7 @@ export default {
   created,
   data() {
     return {
-      caseLogo: caseLogo, // default case logo
+      caseLogo, // default case logo
       categoryFilter: 'All', // category filter
       search: '', // search filter
       urlsShow: [], // training urls to display
@@ -255,27 +258,27 @@ export default {
       categories: [
         {
           value: 'Training',
-          icon: 'fitness_center'
+          icon: 'fa:fas fa-dumbbell'
         },
         {
           value: 'Conference',
-          icon: 'group'
+          icon: 'fa:fas fa-user-friends'
         },
         {
           value: 'Certifications',
-          icon: 'stars'
+          icon: 'fa:fas fa-star'
         },
         {
           value: 'Lodging',
-          icon: 'hotel'
+          icon: 'fa:fas fa-bed'
         },
         {
           value: 'Travel',
-          icon: 'airplanemode_active'
+          icon: 'fa:fas fa-plane'
         },
         {
           value: 'Meals',
-          icon: 'restaurant'
+          icon: 'fa:fas fa-utensils'
         }
       ] // categories for button filters
     };
