@@ -19,8 +19,10 @@
             multiple
             chips
             closable-chips
+            hide-details
             variant="filled"
             density="compact"
+            return-object
             item-title="type"
             item-value="type"
             :search.sync="searchString"
@@ -28,6 +30,21 @@
             class="elevate"
             append-icon=""
           >
+            <template v-slot:selection="{ item, select, selected, attrs }">
+              <v-chip
+                v-bind="attrs"
+                :model-value="selected"
+                closable
+                @click="select"
+                @click:close="remove(item.raw)"
+                small
+              >
+                <v-avatar :color="data.item.color" start>
+                  <v-icon size="small" color="white"> {{ data.item.icon }}</v-icon>
+                </v-avatar>
+                {{ data.item.type }}
+              </v-chip>
+            </template>
             <template v-slot:chip="{ props, item }">
               <v-chip v-bind="props" class="pl-2">
                 <v-avatar :color="item.raw.color" size="23" class="mr-1">
@@ -49,9 +66,9 @@
             </template>
           </v-autocomplete>
         </v-card-text>
-        <v-timeline side="end" class="timeline">
+        <v-timeline side="end" density="compact" class="timeline ml-9">
           <!-- Timeline -->
-          <v-timeline-item v-for="item in filterEvents()" :dot-color="item.color" :key="item.name">
+          <v-timeline-item v-for="item in filterEvents()" density="compact" :dot-color="item.color" :key="item.name">
             <!-- Expanded Event Description -->
             <v-tooltip
               v-if="item.truncatedText"
@@ -285,15 +302,10 @@ export default {
 .timeline {
   height: 600px;
   max-height: 600px;
-  overflow: scroll;
+  overflow-y: scroll;
 }
 
 .v-tooltip__content.menuable__content__active {
   opacity: 1 !important;
-}
-
-.v-timeline::before {
-  top: -29px;
-  height: calc(100% - -25px);
 }
 </style>

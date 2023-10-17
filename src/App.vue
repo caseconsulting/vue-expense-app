@@ -117,25 +117,21 @@
       </v-main>
       <v-footer v-if="isLoggedIn()">
         <v-col class="text-right text-caption" cols="12">
-          <v-tooltip location="top">
-            <template v-slot:activator="{ on }">
-              <a
-                v-on="on"
-                id="P"
-                class="text-black"
-                target="_blank"
-                href="https://3.basecamp.com/3097063/buckets/4708396/documents/6600265506"
-                ><strong>Version</strong> {{ version }}</a
-              >
-            </template>
-            <span>View Release Notes</span>
-          </v-tooltip>
+          <a
+            v-on="on"
+            id="P"
+            class="text-black"
+            target="_blank"
+            href="https://3.basecamp.com/3097063/buckets/4708396/documents/6600265506"
+          >
+            <v-tooltip activator="parent" location="top">View Release Notes</v-tooltip>
+            <strong>Version</strong> {{ version }}
+          </a>
         </v-col>
       </v-footer>
       <switch-role-modal
         v-if="environment != 'https://app.consultwithcase.com'"
         :toggleSwitchRole="switchRole"
-        @close="switchRole = false"
       ></switch-role-modal>
       <time-out-modal :toggleTimeOut="timedOut"></time-out-modal>
       <time-out-warning-modal :toggleWarning="session"></time-out-warning-modal>
@@ -335,6 +331,7 @@ async function created() {
   this.environment = process.env.VUE_APP_AUTH0_CALLBACK;
 
   this.emitter.on('relog', () => handleLogout()); // Session end - log out
+  this.emitter.on('close', () => (this.switchRole = false));
   this.emitter.on('badgeExp', () => {
     this.badgeKey++;
   }); // used to refresh badge expiration banner
@@ -373,6 +370,7 @@ async function created() {
  * beforeDestroy lifecycle hook - close event listener
  */
 function beforeDestroy() {
+  this.emitter.off('close');
   this.emitter.off('relog');
   this.emitter.off('badgeExp');
   this.emitter.off('user-session-refreshed');
