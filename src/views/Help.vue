@@ -26,7 +26,9 @@
               class="elevation-1 bg-grey-lighten-3"
               mobile-breakpoint="0"
               hide-default-footer
-            ></v-data-table>
+            >
+              <template v-slot:bottom></template>
+            </v-data-table>
             <v-data-table
               v-else
               :headers="section[3].headersMobile"
@@ -35,6 +37,8 @@
               class="elevation-1 bg-grey-lighten-3 dataTable"
               mobile-breakpoint="0"
               hide-default-footer
+            >
+              <template v-slot:bottom></template
             ></v-data-table>
           </v-expansion-panel-text>
           <v-expansion-panel-text v-else-if="canView(section[1])">
@@ -304,20 +308,20 @@ export default {
           'user',
           {
             headers: [
-              { text: 'Ability', sortable: false, divider: true, value: 'ability' },
-              { text: 'Admin', sortable: false, value: 'admin', align: 'center' },
-              { text: 'Manager', sortable: false, value: 'manager', align: 'center' },
-              { text: 'User', sortable: false, value: 'user', align: 'center' },
-              { text: 'Intern', sortable: false, value: 'intern', align: 'center' }
+              { title: 'Ability', sortable: false, divider: true, value: 'ability' },
+              { title: 'Admin', sortable: false, value: 'admin', align: 'center' },
+              { title: 'Manager', sortable: false, value: 'manager', align: 'center' },
+              { title: 'User', sortable: false, value: 'user', align: 'center' },
+              { title: 'Intern', sortable: false, value: 'intern', align: 'center' }
             ]
           },
           {
             headersMobile: [
-              { text: 'Ability', sortable: false, value: 'ability', width: '32%' },
-              { text: 'Admin', sortable: false, value: 'admin', width: '17%', align: 'right' },
-              { text: 'Manager', sortable: false, value: 'manager', width: '20%', align: 'right' },
-              { text: 'User', sortable: false, value: 'user', width: '14%', align: 'right' },
-              { text: 'Intern', sortable: false, value: 'intern', width: '17%', align: 'right' }
+              { title: 'Ability', sortable: false, value: 'ability', width: '32%' },
+              { title: 'Admin', sortable: false, value: 'admin', width: '17%', align: 'right' },
+              { title: 'Manager', sortable: false, value: 'manager', width: '20%', align: 'right' },
+              { title: 'User', sortable: false, value: 'user', width: '14%', align: 'right' },
+              { title: 'Intern', sortable: false, value: 'intern', width: '17%', align: 'right' }
             ]
           },
           {
