@@ -2,7 +2,7 @@
   <div>
     <v-dialog v-model="activate" persistent max-width="310">
       <v-card>
-        <v-card-title class="headline">Switch Role</v-card-title>
+        <v-card-title class="text-h5">Switch Role</v-card-title>
         <v-card-subtitle v-if="roleOriginial" class="mb-0 pb-0"
           >Current Role: {{ roleOriginial.charAt(0).toUpperCase() + roleOriginial.slice(1) }}
         </v-card-subtitle>
@@ -18,13 +18,11 @@
           </v-radio-group>
         </v-card-actions>
         <v-card-actions>
-          <v-tooltip top>
-            <template v-slot:activator="{ on }">
-              <v-btn v-on="on" class="ma-2" id="confirmSwitch" @click="switchRole(false)">Switch</v-btn>
-            </template>
-            <span>Switch role and redirect to default page</span>
-          </v-tooltip>
-          <v-btn class="ma-2" @click.native="emitter.emit('close')">Cancel</v-btn>
+          <v-btn class="ma-2" id="confirmSwitch" @click="switchRole(false)">
+            <v-tooltip activator="parent" location="top">Switch role and redirect to default page</v-tooltip>
+            Switch
+          </v-btn>
+          <v-btn class="ma-2" @click="emitter.emit('close')"> Cancel </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
