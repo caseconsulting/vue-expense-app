@@ -4,63 +4,65 @@
       <v-toolbar-title v-if="selectedBudget">{{ selectedBudget.expenseTypeName }}</v-toolbar-title>
     </v-toolbar>
     <v-divider></v-divider>
-    <v-list v-if="selectedBudget" class="font-13" dense>
+    <v-list v-if="selectedBudget" class="font-13" density="compact">
       <!-- Display Start Date -->
       <v-list-item>
-        <v-list-item-content>Start Date:</v-list-item-content>
-        <v-list-item-content class="text-right">
-          <div>{{ monthDayYearFormat(selectedBudget.budgetObject.fiscalStartDate) }}</div>
-        </v-list-item-content>
+        <div class="d-flex justify-space-between">
+          <span>Start Date:</span>
+          <span>{{ monthDayYearFormat(selectedBudget.budgetObject.fiscalStartDate) }}</span>
+        </div>
       </v-list-item>
       <!-- Display End Date -->
       <v-list-item>
-        <v-list-item-content>End Date:</v-list-item-content>
-        <v-list-item-content class="text-right">
-          <div>{{ monthDayYearFormat(selectedBudget.budgetObject.fiscalEndDate) }}</div>
-        </v-list-item-content>
+        <div class="d-flex justify-space-between">
+          <span>End Date:</span>
+          <span>{{ monthDayYearFormat(selectedBudget.budgetObject.fiscalEndDate) }}</span>
+        </div>
       </v-list-item>
 
       <!-- Display Budget Amount -->
       <v-list-item>
-        <v-list-item-content>Budget:</v-list-item-content>
-        <v-list-item-content class="text-right">
-          <div>{{ convertToMoneyString(getAmount(selectedBudget)) }}</div>
-        </v-list-item-content>
+        <div class="d-flex justify-space-between">
+          <span>Budget:</span>
+          <span>{{ convertToMoneyString(getAmount(selectedBudget)) }}</span>
+        </div>
       </v-list-item>
 
       <!-- Display Reimbursed Amount -->
       <v-list-item>
-        <v-list-item-content>Reimbursed:</v-list-item-content>
-        <v-list-item-content class="text-right">
-          <div>{{ convertToMoneyString(getReimbursed(selectedBudget)) }}</div>
-        </v-list-item-content>
+        <div class="d-flex justify-space-between">
+          <span>Reimbursed:</span>
+          <span>{{ convertToMoneyString(getReimbursed(selectedBudget)) }}</span>
+        </div>
       </v-list-item>
 
       <!-- Display Pending Amount -->
       <v-list-item>
-        <v-list-item-content>Pending:</v-list-item-content>
-        <v-list-item-content class="text-right">
-          <div>{{ convertToMoneyString(getPending(selectedBudget)) }}</div>
-        </v-list-item-content>
+        <div class="d-flex justify-space-between">
+          <span>Pending:</span>
+          <span>{{ convertToMoneyString(getPending(selectedBudget)) }}</span>
+        </div>
       </v-list-item>
 
       <!-- Display Remaining Amount -->
       <v-list-item>
-        <v-list-item-content class="bold">Remaining:</v-list-item-content>
-        <v-list-item-content v-if="noRemaining(selectedBudget)" class="text-right bold red--text">
-          <div>{{ convertToMoneyString(calcRemaining(selectedBudget)) }}</div>
-        </v-list-item-content>
-        <v-list-item-content v-else class="text-right bold black--text">
-          <div>{{ convertToMoneyString(calcRemaining(selectedBudget)) }}</div>
-        </v-list-item-content>
+        <div class="d-flex justify-space-between">
+          <span class="font-weight-bold">Remaining:</span>
+          <span v-if="noRemaining(selectedBudget)" class="font-weight-bold text-red">{{
+            convertToMoneyString(calcRemaining(selectedBudget))
+          }}</span>
+          <span v-else class="font-weight-bold text-black">{{
+            convertToMoneyString(calcRemaining(selectedBudget))
+          }}</span>
+        </div>
       </v-list-item>
 
       <!-- Display Overdraft Permissions -->
       <v-list-item>
-        <v-list-item-content>Overdraft:</v-list-item-content>
-        <v-list-item-content class="text-right">
-          <div>{{ odFlagMessage(selectedBudget) }}</div>
-        </v-list-item-content>
+        <div class="d-flex justify-space-between">
+          <span>Overdraft:</span>
+          <span>{{ odFlagMessage(selectedBudget) }}</span>
+        </div>
       </v-list-item>
     </v-list>
   </v-dialog>

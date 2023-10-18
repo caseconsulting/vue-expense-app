@@ -1,44 +1,46 @@
 <template>
   <div id="monthly-charges">
     <div class="d-flex justify-space-between">
-      <div class="d-inline-block float-left">
-        <v-tooltip top>
-          <template v-slot:activator="{ on }">
-            <v-btn :disabled="isPrevPeriod || loading" icon @click="changePeriodData" v-on="on"
-              ><v-icon x-large color="#bc3825"> mdi-arrow-left-thin </v-icon>
-            </v-btn>
-          </template>
-          <span>{{ prevPayPeriod }}</span>
-        </v-tooltip>
-        <v-tooltip top>
-          <template v-slot:activator="{ on }">
-            <v-btn :disabled="!isPrevPeriod || loading" icon @click="changePeriodData" v-on="on"
-              ><v-icon x-large color="#bc3825"> mdi-arrow-right-thin </v-icon>
-            </v-btn>
-          </template>
-          <span>{{ payPeriod }}</span>
-        </v-tooltip>
+      <div class="d-flex align-center d-inline-block float-left">
+        <v-btn
+          icon=""
+          variant="text"
+          size="x-large"
+          density="compact"
+          :disabled="isPrevPeriod || loading"
+          @click="changePeriodData"
+        >
+          <v-tooltip activator="parent" location="top">{{ prevPayPeriod }}</v-tooltip>
+          <v-icon size="x-large" color="#bc3825"> mdi-arrow-left-thin </v-icon>
+        </v-btn>
+        <v-btn
+          density="compact"
+          variant="text"
+          size="x-large"
+          icon=""
+          :disabled="!isPrevPeriod || loading"
+          @click="changePeriodData"
+        >
+          <v-tooltip activator="parent" location="top">{{ payPeriod }}</v-tooltip>
+          <v-icon size="x-large" color="#bc3825"> mdi-arrow-right-thin </v-icon>
+        </v-btn>
       </div>
       <h3 align="center" class="d-inline-block">
         <span v-if="!isPrevPeriod">{{ payPeriod }}</span>
         <span v-else-if="isPrevPeriod"> {{ prevPayPeriod }}</span>
-        <v-tooltip top>
-          <template v-slot:activator="{ on }">
-            <v-btn @click="toFAQ()" class="mb-4" x-small icon v-on="on"><v-icon color="#3f51b5">info</v-icon></v-btn>
-          </template>
-          <span>Click for FAQ</span>
-        </v-tooltip>
+        <v-avatar @click="toFAQ()" class="mb-4" size="small">
+          <v-tooltip activator="parent" location="top">Click for FAQ</v-tooltip>
+          <v-icon color="#3f51b5" size="small">mdi-information</v-icon>
+        </v-avatar>
       </h3>
       <div class="filler"></div>
     </div>
     <!-- Error Getting Pay Period Hours -->
     <div v-if="monthlyHourError" class="pt-2 pb-6" align="center">
-      <v-tooltip right>
-        <template v-slot:activator="{ on }">
-          <v-icon v-on="on">warning</v-icon>
-        </template>
-        <span>Error</span>
-      </v-tooltip>
+      <span>
+        <v-tooltip activator="parent" location="right">Error</v-tooltip>
+        <v-icon size="large">mdi-alert</v-icon>
+      </span>
     </div>
     <!-- End Error -->
     <div v-else>
@@ -48,77 +50,77 @@
         </div>
         <div v-else>
           <!-- Display Charge Code Hours -->
-          <div class="pt-3 gray-border">
+          <div class="py-3 gray-border">
             <div v-if="!isPrevPeriod">
-              <v-row v-for="job in quickBooksTimeData.jobcodeHours" :key="job.name">
+              <v-row v-for="job in quickBooksTimeData.jobcodeHours" :key="job.name" class="pb-3">
                 {{ job.name }}:
                 <v-spacer></v-spacer>
                 <p>{{ formatHours(job.hours) }}</p>
               </v-row>
             </div>
             <div v-else>
-              <v-row v-for="job in quickBooksTimeData.previousPeriodJobcodeHours" :key="job.name">
+              <v-row v-for="job in quickBooksTimeData.previousPeriodJobcodeHours" :key="job.name" class="pb-3">
                 {{ job.name }}:
                 <v-spacer></v-spacer>
                 <p>{{ formatHours(job.hours) }}</p>
               </v-row>
             </div>
-            <v-row class="bold">
+            <v-row class="bold py-1">
               Total:
               <v-spacer></v-spacer>
               <div>
                 <p v-if="remainingHours > 0">{{ formatHours(totalHours) }} / {{ formatHours(workHours) }}</p>
-                <p v-else class="green--text">{{ formatHours(totalHours) }} / {{ formatHours(workHours) }}</p>
+                <p v-else class="text-green">{{ formatHours(totalHours) }} / {{ formatHours(workHours) }}</p>
               </div>
             </v-row>
           </div>
           <!-- Average Hours per Day -->
-          <v-row v-if="!isPrevPeriod" class="pt-3">
+          <v-row v-if="!isPrevPeriod" class="py-5">
             Remaining Avg Hours/Day:
             <v-spacer></v-spacer>
             <p v-if="this.estimatedDailyHours < 24">{{ formatHours(this.estimatedDailyHours) }}</p>
-            <p v-else class="red--text">{{ formatHours(this.estimatedDailyHours) }}</p>
+            <p v-else class="text-red">{{ formatHours(this.estimatedDailyHours) }}</p>
           </v-row>
           <!-- Button to Show More -->
           <div v-if="!showMore" @click="showMore = true" align="center">
-            <v-btn @click="showMore = true" top text small class="my-2">Show More &#9662; </v-btn>
+            <v-btn @click="showMore = true" variant="text" size="small" class="my-2">Show More &#9662; </v-btn>
           </div>
-          <div v-if="showMore" max-width="400">
+          <div v-if="showMore" max-width="400" class="py-2">
             <!-- Hours left this period -->
-            <v-row :class="isPrevPeriod ? 'pt-3' : ''">
+            <v-row :class="isPrevPeriod ? 'pt-4' : ''">
               Remaining:
               <v-spacer></v-spacer>
               <p>{{ formatHours(this.remainingHours) }}</p>
             </v-row>
             <!-- Hours worked this period -->
-            <v-row>
+            <v-row class="py-2">
               Completed:
               <v-spacer></v-spacer>
               <p v-if="this.workedHours < this.workHours - this.workDayHours * this.remainingWorkDays">
                 {{ formatHours(this.workedHours) }}
               </p>
-              <p v-else class="green--text">{{ formatHours(this.workedHours) }}</p>
+              <p v-else class="text-green">{{ formatHours(this.workedHours) }}</p>
             </v-row>
             <!-- Hours worked today -->
-            <v-row v-if="!isPrevPeriod">
+            <v-row v-if="!isPrevPeriod" class="py-2">
               Today:
               <v-spacer></v-spacer>
               <p v-if="this.todaysHours < this.workDayHours">
                 {{ formatHours(this.todaysHours) }}
               </p>
-              <p v-else class="green--text">{{ formatHours(this.todaysHours) }}</p>
+              <p v-else class="text-green">{{ formatHours(this.todaysHours) }}</p>
             </v-row>
             <!-- Future hours for this period -->
-            <v-row v-if="!isPrevPeriod">
+            <v-row v-if="!isPrevPeriod" class="py-2">
               Future:
               <v-spacer></v-spacer>
               <p v-if="this.futureHours < this.workDayHours * (this.remainingWorkDays - 1)">
                 {{ formatHours(this.futureHours) }}
               </p>
-              <p v-else class="green--text">{{ formatHours(this.futureHours) }}</p>
+              <p v-else class="text-green">{{ formatHours(this.futureHours) }}</p>
             </v-row>
             <!-- Work days left -->
-            <v-row v-if="!isPrevPeriod">
+            <v-row v-if="!isPrevPeriod" class="py-2">
               Days Remaining:
               <v-spacer></v-spacer>
               <div>
@@ -139,7 +141,7 @@
           </div>
           <!-- Button to Show Less -->
           <div v-if="showMore" align="center">
-            <v-btn @click="showMore = false" top text small class="my-2">Show Less &#9650; </v-btn>
+            <v-btn @click="showMore = false" variant="text" size="small" class="my-2">Show Less &#9650; </v-btn>
           </div>
         </div>
       </v-card-text>

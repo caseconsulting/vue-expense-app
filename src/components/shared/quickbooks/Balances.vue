@@ -2,22 +2,18 @@
   <div id="pto-balances">
     <h3 class="pt-5" align="center">
       PTO Balances
-      <v-tooltip top>
-        <template v-slot:activator="{ on }">
-          <v-btn @click="toFAQ()" class="mb-4" x-small icon v-on="on"><v-icon color="#3f51b5">info</v-icon></v-btn>
-        </template>
-        <span>Click for FAQ</span></v-tooltip
-      >
+      <v-avatar @click="toFAQ()" class="mb-4" size="small">
+        <v-tooltip activator="parent" location="top">Click for FAQ</v-tooltip>
+        <v-icon color="#3f51b5" size="small">mdi-information</v-icon>
+      </v-avatar>
     </h3>
 
     <!-- Error Getting Balances -->
     <div v-if="balancesError" class="pt-2 pb-6" align="center">
-      <v-tooltip right>
-        <template v-slot:activator="{ on }">
-          <v-icon v-on="on">warning</v-icon>
-        </template>
-        <span>Error</span>
-      </v-tooltip>
+      <span>
+        <v-tooltip activator="parent" location="right">Error</v-tooltip>
+        <v-icon size="large">mdi-alert</v-icon>
+      </span>
     </div>
     <!-- End Error -->
 
@@ -37,7 +33,7 @@
           <!-- Employee Inactive -->
           <div v-if="!isInactive">
             <!-- Loop through and display all balances -->
-            <v-row v-for="balance in this.availableBalances" :key="balance">
+            <v-row v-for="balance in this.availableBalances" :key="balance" class="mb-4">
               <p>{{ balance }}:</p>
               <v-spacer></v-spacer>
               <p>{{ formatHours(balanceData[balance]) }}</p>
@@ -45,13 +41,13 @@
           </div>
 
           <!-- Showing Available Balances -->
-          <div v-if="!showMore && !showAll" align="center">
-            <v-btn @click="showMore = true" top text small class="my-2">Show More &#9662; </v-btn>
+          <div v-if="!showMore && !showAll" class="d-flex justify-center">
+            <v-btn @click="showMore = true" variant="text" size="small" class="my-2"> Show More &#9662; </v-btn>
           </div>
 
           <!-- Showing All Balances -->
-          <div v-if="showMore && !showAll" align="center">
-            <v-btn @click="showMore = false" top text small class="my-2">Show Less &#9650; </v-btn>
+          <div v-if="showMore && !showAll" class="d-flex justify-center">
+            <v-btn @click="showMore = false" variant="text" size="small" class="my-2"> Show Less &#9650; </v-btn>
           </div>
           <div class="d-flex align-items-center justify-center">
             <button class="home_buttons my-1" @click="showPTOCashOutFormModal = true">Cash Out PTO</button>

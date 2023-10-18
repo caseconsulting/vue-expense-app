@@ -1,13 +1,13 @@
 <template v-slot="{ active }">
   <div id="available-budgets">
     <v-card>
-      <v-card-title class="header_style">
+      <v-card-title class="d-flex align-center header_style">
         <router-link class="no-decoration" v-if="isUser" to="/myBudgets">
-          <h3 id="link" class="white--text px-2">Available Budgets</h3>
+          <h3 id="link" class="text-white px-2">Available Budgets</h3>
         </router-link>
-        <h3 v-else class="white--text px-2">Available Budgets</h3>
+        <h3 v-else class="text-white px-2">Available Budgets</h3>
       </v-card-title>
-      <v-card-text class="px-7 pt-5 pb-1 black--text">
+      <v-card-text class="px-7 pt-5 pb-1 text-black">
         <div v-if="this.loading || employeeDataLoading" class="pb-4">
           <v-progress-linear :indeterminate="true"></v-progress-linear>
         </div>
@@ -24,17 +24,22 @@
               v-for="budget in budgets"
               :key="budget.expenseTypeId"
               @click="selectBudget(budget)"
-              class="px-1"
-              :dense="true"
-              >{{ budget.expenseTypeName }}:
-              <v-spacer></v-spacer>
-              <p>{{ convertToMoneyString(calcRemaining(budget)) }}</p>
+              class="px-1 py-2"
+              density="compact"
+            >
+              <div class="d-flex justify-space-between">
+                <span>{{ budget.expenseTypeName }}:</span>
+                <v-spacer></v-spacer>
+                <span>{{ convertToMoneyString(calcRemaining(budget)) }}</span>
+              </div>
             </v-list-item>
             <div class="mt-2"></div>
             <!-- End Loop all budgets -->
-            <router-link v-if="this.fiscalDateView" to="/myExpenses" class="no-decoration">
-              <button class="home_buttons" @click="selectReceipt = true">Create an Expense</button>
-            </router-link>
+            <div class="d-flex justify-center align-center">
+              <router-link v-if="this.fiscalDateView" to="/myExpenses" class="no-decoration center">
+                <button class="home_buttons" @click="selectReceipt = true">Create an Expense</button>
+              </router-link>
+            </div>
           </div>
         </div>
       </v-card-text>

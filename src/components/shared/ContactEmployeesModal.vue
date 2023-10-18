@@ -1,53 +1,61 @@
 <template>
   <div>
     <!-- Status Alert -->
-    <v-snackbar v-model="copied" dark bottom :timeout="3000">
+    <v-snackbar v-model="copied" color="black" location="bottom" :timeout="3000">
       Copied email list to clipboard
-      <template v-slot:action="{ attrs }">
-        <v-btn color="red" text @click="copied = false" v-bind="attrs"> Close </v-btn>
+      <template v-slot:actions>
+        <v-btn color="red" variant="text" @click="copied = false" v-bind="attrs"> Close </v-btn>
       </template>
     </v-snackbar>
     <!-- Modal Card -->
     <v-card>
       <!-- Modal Title -->
-      <v-card-title class="headline header_style">Contact Employees</v-card-title>
+      <v-card-title class="d-flex align-center text-h5 header_style">Contact Employees</v-card-title>
       <!-- Modal Content -->
       <v-card-text class="mt-4">
-        <v-alert v-if="getList().length >= listLimit" dense type="info">
+        <v-alert v-if="getList().length >= listLimit" density="compact" type="info">
           Email list is too large for the default email client, please use the 'copy to clipboard' button and manually
           paste into the email client
         </v-alert>
         <v-autocomplete
           v-model="employees"
           :items="filteredEmployees"
-          :filter="customFilter"
+          :customFilter="customFilter"
           multiple
           chips
           clearable
-          deletable-chips
+          closable-chips
           :label="employees.length == 1 ? `${employees.length} Employee` : `${employees.length} Employees`"
-          :small-chips="employees.length > 10"
-          :search-input.sync="employeeSearch"
-          @change="employeeSearch = ''"
-          item-text="employeeName"
+          :search.sync="employeeSearch"
+          @update:model-value="employeeSearch = ''"
+          item-title="employeeName"
           return-object
-        ></v-autocomplete>
+        >
+          <template v-slot:chip="{ props, item }">
+            <v-chip
+              v-bind="props"
+              class="mb-1"
+              :size="employees.length > 40 ? 'x-small' : employees.length > 10 ? 'small' : 'default'"
+              >{{ item.raw.employeeName }}</v-chip
+            >
+          </template>
+        </v-autocomplete>
       </v-card-text>
       <!-- Action Button -->
       <v-card-actions>
-        <v-btn @click="copyEmailList()" small text color="grey darken-1">
+        <v-btn @click="copyEmailList()" size="small" variant="text" color="grey-darken-1">
           Copy to Clipboard
-          <v-icon v-if="copied" right>mdi-check</v-icon>
-          <v-icon v-else right>mdi-content-copy</v-icon>
+          <v-icon v-if="copied" end color="green">mdi-check</v-icon>
+          <v-icon v-else end>mdi-content-copy</v-icon>
         </v-btn>
         <v-spacer></v-spacer>
-        <v-btn @click="emailEmployees()" text color="light-blue" class="mr-1">
+        <v-btn @click="emailEmployees()" variant="text" color="light-blue" class="mr-1">
           Group Email
-          <v-icon right>email</v-icon>
+          <v-icon end>mdi-email</v-icon>
         </v-btn>
         <v-btn
-          color="grey darken-3"
-          text
+          color="grey-darken-3"
+          variant="text"
           @click.native="
             emit('close-contact-employees-modal');
             activate = false;

@@ -2,7 +2,7 @@
   <div v-if="$store.getters.ptoCashOuts">
     <v-form ref="form" v-model="valid" lazy-validation>
       <v-card>
-        <v-card-title class="header_style title">
+        <v-card-title class="d-flex align-center header_style text-h6">
           <h6 class="subtitle" v-if="userRoleIsAdmin() || userRoleIsManager()">
             Employee: {{ nicknameAndLastName(passedEmployee) }}
           </h6>
@@ -24,7 +24,8 @@
               <!-- PTO Cash Out Amount -->
               <v-text-field
                 prepend-icon="mdi-clock-outline"
-                class="pb-2"
+                variant="underlined"
+                class="py-2"
                 :rules="[
                   (v) => !!v || 'Field is required',
                   ...getNumberRules(),
@@ -45,67 +46,75 @@
                 ref="approvedDateMenu"
                 :close-on-content-click="false"
                 v-model="approvedDateMenu"
-                :nudge-right="40"
-                transition="scale-transition"
-                offset-y
-                max-width="290px"
-                min-width="290px"
+                location="start center"
               >
-                <template v-slot:activator="{ on }">
+                <template v-slot:activator="{ props }">
                   <v-text-field
                     v-model="approvedDateFormatted"
                     id="approvedDate"
                     :rules="getDateOptionalRules()"
                     v-mask="'##/##/####'"
+                    variant="underlined"
                     label="Approved Date (optional)"
                     hint="MM/DD/YYYY format"
                     class="mb-4"
                     persistent-hint
-                    prepend-icon="event"
                     @blur="ptoCashOutObj.approvedDate = format(approvedDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
-                    @input="approvedDateMenu = false"
-                    v-on="on"
-                  ></v-text-field>
+                    @update:model-value="approvedDateMenu = false"
+                    @click:prepend="approvedDateMenu = true"
+                    @click:control="approvedDateMenu = false"
+                  >
+                    <template v-slot:prepend>
+                      <div v-bind="props" class="d-flex justify-center align-center flex-column pointer">
+                        <v-icon color="grey-darken-1">mdi-calendar</v-icon>
+                        <span class="tiny-text font-weight-black">click me!</span>
+                      </div>
+                    </template>
+                  </v-text-field>
+                  <span v-bind="props"></span>
                 </template>
                 <v-date-picker
                   v-model="ptoCashOutObj.approvedDate"
-                  no-title
-                  @input="approvedDateMenu = false"
-                ></v-date-picker>
+                  @update:model-value="approvedDateMenu = false"
+                  hide-actions
+                  rounded
+                  input-placeholder="MM/DD/YYYY"
+                  color="#bc3825"
+                  title="Approved Date"
+                >
+                  <template v-slot:header></template>
+                </v-date-picker>
               </v-menu>
             </div>
-            <small
-              >*cash outs are paid during the normal monthly payroll
-              <v-tooltip top>
-                <template v-slot:activator="{ on }">
-                  <v-btn
-                    @click="
-                      openLink(
-                        isLegacyFireTeam
-                          ? 'https://3.basecamp.com/3097063/buckets/179119/messages/6450437179'
-                          : 'https://3.basecamp.com/3097063/buckets/179119/messages/939259168'
-                      )
-                    "
-                    class="mb-3"
-                    x-small
-                    icon
-                    v-on="on"
-                    ><v-icon small color="#3f51b5">info</v-icon></v-btn
-                  >
-                </template>
-                <span>Click for more information</span></v-tooltip
+            <small>
+              *cash outs are paid during the normal payroll period
+              <v-avatar
+                @click="
+                  openLink(
+                    isLegacyFireTeam
+                      ? 'https://3.basecamp.com/3097063/buckets/179119/messages/6450437179'
+                      : 'https://3.basecamp.com/3097063/buckets/179119/messages/939259168'
+                  )
+                "
+                class="mb-3"
+                size="small"
               >
+                <v-tooltip activator="parent" location="top">Click for more information</v-tooltip>
+                <v-icon size="small" color="#3f51b5">mdi-information</v-icon>
+              </v-avatar>
             </small>
           </v-card-text>
           <v-card-actions>
-            <!-- Cancel Button -->
-            <v-btn color="white " @click="cancel()" class="ma-2" elevation="2">
-              <v-icon class="mr-1">cancel</v-icon>Cancel
-            </v-btn>
+            <v-spacer></v-spacer>
             <!-- Submit Button -->
-            <v-btn outlined class="ma-2" color="success" :disabled="!valid" @click="submit()">
-              <v-icon class="mr-1">save</v-icon>Submit
+            <v-btn variant="text" class="mx-2" color="success" :disabled="!valid" @click="submit()">
+              <template v-slot:prepend>
+                <v-icon>mdi-content-save</v-icon>
+              </template>
+              Submit
             </v-btn>
+            <!-- Cancel Button -->
+            <v-btn color="black" @click="cancel()" variant="text" class="mx-2"> Cancel </v-btn>
           </v-card-actions>
         </div>
         <div v-else class="py-10 px-6">
@@ -165,15 +174,6 @@ async function created() {
 // |--------------------------------------------------|
 
 /**
- * Emits a message and data if it exists.
- *
- * @param msg - Message to emit
- */
-function emit(msg) {
-  this.emitter.emit(msg);
-} // emit
-
-/**
  * Submit event handler. Validates form and creates a PTO Cash Out record
  * in the database.
  */
@@ -187,7 +187,7 @@ async function submit() {
       } else {
         await this.createPTOCashOutRequest();
       }
-      emit('close-pto-cash-out-form');
+      this.emitter.emit('close-pto-cash-out-form');
       this.clearForm();
       this.isSubmitting = false;
       if (this.item) {
@@ -197,7 +197,7 @@ async function submit() {
       }
     }
   } catch (err) {
-    emit('close-pto-cash-out-form');
+    this.emitter.emit('close-pto-cash-out-form');
     this.clearForm();
     this.isSubmitting = false;
     this.displayError(err);
@@ -217,7 +217,7 @@ function openLink(link) {
  * Cancel event handler
  */
 function cancel() {
-  emit('close-pto-cash-out-form');
+  this.emitter.emit('close-pto-cash-out-form');
   this.clearForm();
 } // cancel
 
@@ -451,7 +451,6 @@ export default {
     getNumberRules,
     getRequiredRules,
     getPTOCashOutRules,
-    emit,
     submit,
     cancel,
     cashOutHint,
@@ -486,6 +485,14 @@ h3 {
 }
 h5 {
   line-height: 14px;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+.tiny-text {
+  font-size: 7px;
 }
 .title {
   position: relative;
