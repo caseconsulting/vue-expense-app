@@ -1,14 +1,8 @@
 <template>
-  <v-tooltip top>
-    <template v-slot:activator="{ on }">
-      <v-btn v-on="on" @click.stop="download" text icon>
-        <v-icon :class="{ 'white--text': color == 'white', 'gray-icon': color != 'white' }" scale="1.5"
-          >mdi-download</v-icon
-        >
-      </v-btn>
-    </template>
-    <span>Download CSV</span>
-  </v-tooltip>
+  <v-btn @click.stop="download" density="comfortable" variant="text" icon="">
+    <v-tooltip activator="parent" location="top">Download CSV</v-tooltip>
+    <v-icon size="large" color="white">mdi-download</v-icon>
+  </v-btn>
 </template>
 
 <script>

@@ -1,114 +1,114 @@
 <template>
-  <v-card-text class="black--text pb-1">
-    <div class="savedInfo">
-      <!-- For smaller screens -->
-      <div v-if="useDropDown">
-        <v-row>
-          <v-col cols="12" align="center">
-            <v-menu>
-              <template v-slot:activator="{ on, attrs }">
-                <v-btn text x-large class="pt-5 font-weight-bold" v-bind="attrs" v-on="on"
-                  >{{ parsedInfoTab }} <v-icon class="pb-1">expand_more</v-icon>
-                </v-btn>
-              </template>
-              <v-list>
-                <v-list-item @click="selectDropDown('employee')">Employee</v-list-item>
-                <v-list-item @click="selectDropDown('personal')">Personal</v-list-item>
-                <v-list-item @click="selectDropDown('customerOrgExp')">Customer Org</v-list-item>
-                <v-list-item @click="selectDropDown('contracts')">Contracts</v-list-item>
-                <v-list-item @click="selectDropDown('clearance')">Clearance</v-list-item>
-                <v-list-item @click="selectDropDown('technologies')">Tech and Skills</v-list-item>
-                <v-list-item @click="selectDropDown('education')">Education</v-list-item>
-                <v-list-item @click="selectDropDown('jobExperience')">Job Experience</v-list-item>
-                <v-list-item @click="selectDropDown('certifications')">Certifications</v-list-item>
-                <v-list-item @click="selectDropDown('awards')">Awards</v-list-item>
-                <v-list-item @click="selectDropDown('languages')">Foreign Languages</v-list-item>
-              </v-list>
-            </v-menu>
-          </v-col>
-        </v-row>
-        <hr class="my-3" />
+  <v-card-text class="text-black pb-1">
+    <!-- For smaller screens -->
+    <div v-if="useDropDown">
+      <v-row>
+        <v-col cols="12" align="center">
+          <v-menu>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn variant="text" size="x-large" class="pt-5 font-weight-bold" v-bind="attrs" v-on="on"
+                >{{ parsedInfoTab }} <v-icon class="pb-1">expand_more</v-icon>
+              </v-btn>
+            </template>
+            <v-list>
+              <v-list-item @click="selectDropDown('employee')">Employee</v-list-item>
+              <v-list-item @click="selectDropDown('personal')">Personal</v-list-item>
+              <v-list-item @click="selectDropDown('customerOrgExp')">Customer Org</v-list-item>
+              <v-list-item @click="selectDropDown('contracts')">Contracts</v-list-item>
+              <v-list-item @click="selectDropDown('clearance')">Clearance</v-list-item>
+              <v-list-item @click="selectDropDown('technologies')">Tech and Skills</v-list-item>
+              <v-list-item @click="selectDropDown('education')">Education</v-list-item>
+              <v-list-item @click="selectDropDown('jobExperience')">Job Experience</v-list-item>
+              <v-list-item @click="selectDropDown('certifications')">Certifications</v-list-item>
+              <v-list-item @click="selectDropDown('awards')">Awards</v-list-item>
+              <v-list-item @click="selectDropDown('languages')">Foreign Languages</v-list-item>
+            </v-list>
+          </v-menu>
+        </v-col>
+      </v-row>
+      <hr class="my-3" />
+      <employee-tab
+        v-if="infoTab === 'employee'"
+        :admin="hasAdminPermissions()"
+        :contracts="contracts"
+        :employee="userIsEmployee()"
+        :model="model"
+      >
+      </employee-tab>
+      <personal-tab
+        v-if="infoTab === 'personal'"
+        :admin="hasAdminPermissions()"
+        :employee="userIsEmployee()"
+        :model="model"
+      >
+      </personal-tab>
+      <customer-org-tab v-if="infoTab === 'customerOrgExp'" :model="model"></customer-org-tab>
+      <contracts-tab v-if="infoTab === 'contracts'" :model="model" :contracts="contracts"></contracts-tab>
+      <clearance-tab
+        v-if="infoTab === 'clearance' && (hasAdminPermissions() || userIsEmployee())"
+        :model="model"
+      ></clearance-tab>
+      <technologies-tab v-if="infoTab === 'technologies'" :model="model"></technologies-tab>
+      <education-tab v-if="infoTab === 'education'" :model="model"></education-tab>
+      <job-experience-tab v-if="infoTab === 'jobExperience'" :model="model"></job-experience-tab>
+      <certifications-tab v-if="infoTab === 'certifications'" :model="model"></certifications-tab>
+      <awards-tab v-if="infoTab === 'awards'" :model="model"></awards-tab>
+      <languages-tab v-if="infoTab === 'languages'" :model="model"></languages-tab>
+    </div>
+    <!-- For larger screens -->
+    <v-tabs v-if="!useDropDown" v-model="infoTab" center-active show-arrows color="blue" class="ma-4">
+      <v-tab value="employee">Employee</v-tab>
+      <v-tab value="personal">Personal</v-tab>
+      <v-tab value="customerOrgExp">Customer Org</v-tab>
+      <v-tab value="contracts">Contracts</v-tab>
+      <v-tab value="clearance" v-if="hasAdminPermissions() || userIsEmployee()">Clearance</v-tab>
+      <v-tab value="technologies">Tech and Skills</v-tab>
+      <v-tab value="education">Education</v-tab>
+      <v-tab value="jobExperience">Job Experience</v-tab>
+      <v-tab value="certifications">Certifications</v-tab>
+      <v-tab value="awards">Awards</v-tab>
+      <v-tab value="languages">Foreign Languages</v-tab>
+    </v-tabs>
+    <v-window v-model="infoTab">
+      <v-window-item value="employee" class="ma-6">
         <employee-tab
-          v-if="infoTab === 'employee'"
           :admin="hasAdminPermissions()"
           :contracts="contracts"
           :employee="userIsEmployee()"
           :model="model"
-        >
-        </employee-tab>
-        <personal-tab
-          v-if="infoTab === 'personal'"
-          :admin="hasAdminPermissions()"
-          :employee="userIsEmployee()"
-          :model="model"
-        >
-        </personal-tab>
-        <customer-org-tab v-if="infoTab === 'customerOrgExp'" :model="model"></customer-org-tab>
-        <contracts-tab v-if="infoTab === 'contracts'" :model="model" :contracts="contracts"></contracts-tab>
-        <clearance-tab
-          v-if="infoTab === 'clearance' && (hasAdminPermissions() || userIsEmployee())"
-          :model="model"
-        ></clearance-tab>
-        <technologies-tab v-if="infoTab === 'technologies'" :model="model"></technologies-tab>
-        <education-tab v-if="infoTab === 'education'" :model="model"></education-tab>
-        <job-experience-tab v-if="infoTab === 'jobExperience'" :model="model"></job-experience-tab>
-        <certifications-tab v-if="infoTab === 'certifications'" :model="model"></certifications-tab>
-        <awards-tab v-if="infoTab === 'awards'" :model="model"></awards-tab>
-        <languages-tab v-if="infoTab === 'languages'" :model="model"></languages-tab>
-      </div>
-      <!-- For larger screens -->
-      <v-tabs v-if="!useDropDown" v-model="infoTab" center-active show-arrows class="ma-4">
-        <v-tab href="#employee">Employee</v-tab>
-        <v-tab href="#personal">Personal</v-tab>
-        <v-tab href="#customerOrgExp">Customer Org</v-tab>
-        <v-tab href="#contracts">Contracts</v-tab>
-        <v-tab href="#clearance" v-if="hasAdminPermissions() || userIsEmployee()">Clearance</v-tab>
-        <v-tab href="#technologies">Tech and Skills</v-tab>
-        <v-tab href="#education">Education</v-tab>
-        <v-tab href="#jobExperience">Job Experience</v-tab>
-        <v-tab href="#certifications">Certifications</v-tab>
-        <v-tab href="#awards">Awards</v-tab>
-        <v-tab href="#languages">Foreign Languages</v-tab>
-        <v-tab-item id="employee" class="ma-6">
-          <employee-tab
-            :admin="hasAdminPermissions()"
-            :contracts="contracts"
-            :employee="userIsEmployee()"
-            :model="model"
-          ></employee-tab>
-        </v-tab-item>
-        <v-tab-item id="personal" class="ma-6">
-          <personal-tab :admin="hasAdminPermissions()" :employee="userIsEmployee()" :model="model"></personal-tab>
-        </v-tab-item>
-        <v-tab-item id="customerOrgExp" class="ma-6">
-          <customer-org-tab :model="model"></customer-org-tab>
-        </v-tab-item>
-        <v-tab-item id="contracts" class="ma-6">
-          <contracts-tab :contracts="contracts" :model="model"></contracts-tab>
-        </v-tab-item>
-        <v-tab-item id="clearance" v-if="hasAdminPermissions() || userIsEmployee()" class="ma-6">
-          <clearance-tab :model="model"></clearance-tab>
-        </v-tab-item>
-        <v-tab-item id="technologies" class="ma-6">
-          <technologies-tab :model="model"></technologies-tab>
-        </v-tab-item>
-        <v-tab-item id="education" class="ma-6">
-          <education-tab :model="model"></education-tab>
-        </v-tab-item>
-        <v-tab-item id="jobExperience" class="ma-6">
-          <job-experience-tab :model="model"></job-experience-tab>
-        </v-tab-item>
-        <v-tab-item id="certifications" class="ma-6">
-          <certifications-tab :model="model"></certifications-tab>
-        </v-tab-item>
-        <v-tab-item id="awards" class="ma-6">
-          <awards-tab :model="model"></awards-tab>
-        </v-tab-item>
-        <v-tab-item id="languages" class="ma-6">
-          <languages-tab :model="model"></languages-tab>
-        </v-tab-item>
-      </v-tabs>
-    </div>
+        ></employee-tab>
+      </v-window-item>
+      <v-window-item value="personal" class="ma-6">
+        <personal-tab :admin="hasAdminPermissions()" :employee="userIsEmployee()" :model="model"></personal-tab>
+      </v-window-item>
+      <v-window-item value="customerOrgExp" class="ma-6">
+        <customer-org-tab :model="model"></customer-org-tab>
+      </v-window-item>
+      <v-window-item value="contracts" class="ma-6">
+        <contracts-tab :contracts="contracts" :model="model"></contracts-tab>
+      </v-window-item>
+      <v-window-item value="clearance" v-if="hasAdminPermissions() || userIsEmployee()" class="ma-6">
+        <clearance-tab :model="model"></clearance-tab>
+      </v-window-item>
+      <v-window-item value="technologies" class="ma-6">
+        <technologies-tab :model="model"></technologies-tab>
+      </v-window-item>
+      <v-window-item value="education" class="ma-6">
+        <education-tab :model="model"></education-tab>
+      </v-window-item>
+      <v-window-item value="jobExperience" class="ma-6">
+        <job-experience-tab :model="model"></job-experience-tab>
+      </v-window-item>
+      <v-window-item value="certifications" class="ma-6">
+        <certifications-tab :model="model"></certifications-tab>
+      </v-window-item>
+      <v-window-item value="awards" class="ma-6">
+        <awards-tab :model="model"></awards-tab>
+      </v-window-item>
+      <v-window-item value="languages" class="ma-6">
+        <languages-tab :model="model"></languages-tab>
+      </v-window-item>
+    </v-window>
   </v-card-text>
 </template>
 
@@ -267,14 +267,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-.savedInfo a {
-  font-size: 14px;
-  color: blue;
-}
-
-.savedInfo a:hover {
-  color: #0cf;
-}
-</style>

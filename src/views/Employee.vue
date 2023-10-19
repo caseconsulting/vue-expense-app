@@ -26,9 +26,10 @@
       </v-snackbar>
       <v-row class="pa-0">
         <v-col cols="3" align="left" justify="left">
-          <v-btn id="backBtn" elevation="2" @click="$router.back()" :size="isMobile() && 'x-small'"
-            ><v-icon class="pr-1">arrow_back</v-icon>Back</v-btn
-          >
+          <v-btn id="backBtn" elevation="2" @click="$router.back()" :size="isMobile ? 'x-small' : 'default'">
+            <v-icon size="large" class="pr-1">mdi-arrow-left-thin</v-icon>
+            Back
+          </v-btn>
         </v-col>
         <v-col
           cols="9"
@@ -40,7 +41,7 @@
           <v-btn
             @click="toggleResumeParser = !toggleResumeParser"
             v-if="!editing"
-            :size="isMobile() && 'x-small'"
+            :size="isMobile ? 'x-small' : 'default'"
             color="#bc3825"
             class="text-white mr-1"
             ><b>Upload Resume</b></v-btn
@@ -50,7 +51,7 @@
             v-if="!editing"
             color="#bc3825"
             @click="toggleDeleteModal = !toggleDeleteModal"
-            :size="isMobile() && 'x-small'"
+            :size="isMobile ? 'x-small' : 'default'"
             :disabled="model.resumeUpdated == null"
             :loading="deleteLoading"
             ><b>Delete Resume</b></v-btn
@@ -86,19 +87,15 @@
           class="pt-0"
         >
           <v-card>
-            <v-card-title class="header_style" v-if="!editing">
-              <v-tooltip v-if="hasAdminPermissions()" location="top">
-                <template #activator="{ on }">
-                  <v-icon v-on="on" @click="navEmployee(-1)" color="white">mdi-arrow-left-bold</v-icon>
-                </template>
-                <span>Previous employee</span>
-              </v-tooltip>
-              <v-tooltip v-if="hasAdminPermissions()" location="top">
-                <template #activator="{ on }">
-                  <v-icon v-on="on" @click="navEmployee(1)" color="white">mdi-arrow-right-bold</v-icon>
-                </template>
-                <span>Next employee</span>
-              </v-tooltip>
+            <v-card-title class="d-flex align-center header_style" v-if="!editing">
+              <span>
+                <v-tooltip v-if="hasAdminPermissions()" activator="parent" location="top">Previous employee</v-tooltip>
+                <v-icon size="large" @click="navEmployee(-1)" color="white">mdi-arrow-left-thin</v-icon>
+              </span>
+              <span class="mr-3">
+                <v-tooltip v-if="hasAdminPermissions()" activator="parent" location="top">Next employee</v-tooltip>
+                <v-icon size="large" v-on="on" @click="navEmployee(1)" color="white">mdi-arrow-right-thin</v-icon>
+              </span>
               <h3 id="employeeName" v-if="userIsEmployee()">My Profile</h3>
               <h3 id="employeeName" v-else>
                 {{ this.model.nickname || this.model.firstName }} {{ this.model.lastName }}
@@ -111,39 +108,27 @@
                 :tags="$store.getters.tags"
                 color="white"
               />
-              <v-tooltip v-if="hasAdminPermissions() || userIsEmployee()" location="top">
-                <template #activator="{ on }">
-                  <div v-on="on">
-                    <v-icon
-                      class="pr-2"
-                      @click="downloadResume()"
-                      color="white"
-                      align="right"
-                      v-on="on"
-                      id="resume-download"
-                      >sim_card_download</v-icon
-                    >
-                  </div>
-                </template>
-                <p class="ma-0 pa-0">
-                  {{ this.model.resumeUpdated != null ? 'Download Resume' : 'No resume available' }}
-                </p>
-                <p class="ma-0 pa-0">
-                  {{
-                    this.model.resumeUpdated != null
-                      ? `Uploaded ${format(this.model.resumeUpdated, null, dateFormat)}`
-                      : ''
-                  }}
-                </p>
-              </v-tooltip>
-              <v-tooltip v-if="hasAdminPermissions() || userIsEmployee()" location="top">
-                <template #activator="{ on }">
-                  <v-icon class="pr-2" @click="editing = true" color="white" align="right" v-on="on" id="edit"
-                    >edit</v-icon
-                  >
-                </template>
-                <span>Edit Profile</span>
-              </v-tooltip>
+              <v-btn @click="downloadResume()" density="comfortable" variant="text" icon="" class="mx-1">
+                <v-tooltip v-if="hasAdminPermissions() || userIsEmployee()" activator="parent" location="top"
+                  ><p class="ma-0 pa-0">
+                    {{ this.model.resumeUpdated != null ? 'Download Resume' : 'No resume available' }}
+                  </p>
+                  <p class="ma-0 pa-0">
+                    {{
+                      this.model.resumeUpdated != null
+                        ? `Uploaded ${format(this.model.resumeUpdated, null, dateFormat)}`
+                        : ''
+                    }}
+                  </p>
+                </v-tooltip>
+                <v-icon color="white" id="resume-download">mdi-file-download</v-icon>
+              </v-btn>
+              <v-btn @click="editing = true" density="comfortable" variant="text" icon="">
+                <v-tooltip v-if="hasAdminPermissions() || userIsEmployee()" activator="parent" location="top">
+                  Edit Profile
+                </v-tooltip>
+                <v-icon color="white" id="edit">mdi-pencil</v-icon>
+              </v-btn>
             </v-card-title>
             <employee-info
               :model="this.model"
@@ -573,7 +558,6 @@ export default {
     getProfileData,
     getCurrentBudgetYear,
     isEmpty,
-    isMobile,
     resumeReceived,
     updateStoreBudgets,
     updateStoreContracts,
@@ -588,6 +572,7 @@ export default {
     navEmployee
   },
   computed: {
+    isMobile,
     minimizeWindow,
     storeIsPopulated
   },
