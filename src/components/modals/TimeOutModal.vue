@@ -2,19 +2,19 @@
   <div>
     <v-dialog v-model="activate" persistent max-width="350">
       <v-card>
-        <v-card-title class="headline">Session Timed Out</v-card-title>
+        <v-card-title class="text-h5">Session Timed Out</v-card-title>
         <v-card-text>Your session has timed out. Please login again.</v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn
             color="gray darken-1"
-            text
+            variant="text"
             @click.native="
-              emit('relog');
+              emitter.emit('timeout-acknowledged');
               activate = false;
             "
           >
-            Log In
+            Ok
           </v-btn>
           <v-spacer></v-spacer>
         </v-card-actions>
@@ -24,21 +24,6 @@
 </template>
 
 <script>
-// |--------------------------------------------------|
-// |                                                  |
-// |                     METHODS                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Emits a message.
- *
- * @param msg - Message to emit
- */
-function emit(msg) {
-  this.emitter.emit(msg);
-} // emit
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                    WATCHERS                      |
@@ -63,9 +48,6 @@ export default {
     return {
       activate: false // dialog activator
     };
-  },
-  methods: {
-    emit
   },
   props: ['toggleTimeOut'], // dialog activator
   watch: {

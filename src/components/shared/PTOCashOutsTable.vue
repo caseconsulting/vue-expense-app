@@ -2,55 +2,13 @@
   <v-card class="pt-3">
     <v-container fluid>
       <!-- Title -->
-      <v-card-title v-if="!isMobile()">
+      <v-card-title v-if="!isMobile()" class="pb-8">
         <h3 v-if="(userRoleIsAdmin() || userRoleIsManager()) && unapprovedOnly && !loading">
           Unapproved PTO Cash Outs
         </h3>
         <h3 v-else-if="(userRoleIsAdmin() || userRoleIsManager()) && !loading">All PTO Cash Outs</h3>
         <h3 v-else-if="!loading">My PTO Cash Outs</h3>
         <h3 v-else>Loading...</h3>
-        <v-spacer></v-spacer>
-        <!-- Filter -->
-        <v-autocomplete
-          v-if="userRoleIsAdmin() || userRoleIsManager()"
-          hide-details
-          :items="employees"
-          :filter="customFilter"
-          v-model="filteredEmployee"
-          item-text="text"
-          id="employeeIdFilter"
-          class="mr-3 pt-0 mt-0"
-          label="Filter by Employee"
-          clearable
-        ></v-autocomplete>
-        <v-autocomplete
-          v-if="userRoleIsAdmin() || userRoleIsManager()"
-          class="d-inline-block"
-          clearable
-          label="Filter by Tag (click to flip)"
-          v-model="selectedTags"
-          :items="tags"
-          multiple
-          variant="solo-filled"
-          item-color="gray"
-          item-text="tagName"
-          item-value="id"
-          return-object
-        >
-          <template v-slot:selection="data">
-            <v-chip
-              small
-              close
-              @click.stop
-              @click="negateTag(data.item)"
-              @click:close="removeTag(data.item)"
-              :color="chipColor(data.item.id)"
-            >
-              {{ tagFlip.includes(data.item.id) ? 'NOT ' : '' }}
-              {{ data.item.tagName }}
-            </v-chip>
-          </template>
-        </v-autocomplete>
       </v-card-title>
       <div v-else>
         <v-card-title class="px-0">
@@ -61,62 +19,86 @@
           <h3 v-else-if="!loading">My PTO Cash Outs</h3>
           <h3 v-else>Loading...</h3>
         </v-card-title>
-        <v-row class="mb-5">
-          <v-col v-if="userRoleIsAdmin() || userRoleIsManager()">
-            <!-- Employee Filter -->
-            <v-autocomplete
-              hide-details
-              :items="employees"
-              :filter="customFilter"
-              v-model="filteredEmployee"
-              item-text="text"
-              id="employeeIdFilter"
-              label="Filter by Employee"
-              clearable
-            ></v-autocomplete>
-          </v-col>
-        </v-row>
       </div>
 
       <!-- Filters -->
       <fieldset v-if="!unapprovedOnly" class="filter_border">
         <legend class="legend_style">Filters</legend>
-
-        <!-- Approved Filter -->
-        <div class="flagFilter">
-          <h4>Approved:</h4>
-          <v-btn-toggle class="filter_color" v-model="filter.approved" text mandatory>
-            <!-- Show Approved -->
-            <v-tooltip top>
-              <template v-slot:activator="{ on }">
-                <v-btn value="approved" v-on="on" text>
-                  <v-icon id="showApproved" class="mr-1">mdi-check-circle-outline</v-icon>
+        <v-row class="d-flex align-end">
+          <v-col cols="12" sm="12" md="4" lg="4" xl="4">
+            <!-- Approved Filter -->
+            <div class="px-4 pt-4 pb-md-4 pb-lg-4 pb-xl-4 pb-xxl-4">
+              <h4>Status:</h4>
+              <v-btn-toggle class="filter_color" v-model="filter.approved" text mandatory>
+                <!-- Show Approved -->
+                <v-btn value="approved" variant="text">
+                  <v-tooltip activator="parent" location="top">Show Approved</v-tooltip>
+                  <v-icon size="x-large" id="showApproved" class="mr-1">mdi-check-circle-outline</v-icon>
                 </v-btn>
-              </template>
-              <span>Show Approved</span>
-            </v-tooltip>
 
-            <!-- Show Pending -->
-            <v-tooltip top>
-              <template v-slot:activator="{ on }">
-                <v-btn value="notApproved" v-on="on" text>
-                  <v-icon id="showPending">mdi-close-circle-outline</v-icon>
+                <!-- Show Pending -->
+                <v-btn value="notApproved" variant="text">
+                  <v-tooltip activator="parent" location="top">Show Pending</v-tooltip>
+                  <v-icon size="x-large" id="showPending">mdi-close-circle-outline</v-icon>
                 </v-btn>
-              </template>
-              <span>Show Pending</span>
-            </v-tooltip>
 
-            <!-- Show Reimbursed and Pending -->
-            <v-tooltip top>
-              <template v-slot:activator="{ on }">
-                <v-btn id="bothApproved" value="both" v-on="on" text> BOTH </v-btn>
+                <!-- Show Reimbursed and Pending -->
+                <v-btn id="bothApproved" value="both" variant="text">
+                  <v-tooltip activator="parent" location="top">Show All</v-tooltip>
+                  BOTH
+                </v-btn>
+              </v-btn-toggle>
+            </div>
+          </v-col>
+          <v-col cols="12" sm="12" md="4" lg="4" xl="4">
+            <!-- Employee Filter -->
+            <v-autocomplete
+              v-if="userRoleIsAdmin() || userRoleIsManager()"
+              hide-details
+              :items="employees"
+              :customFilter="customFilter"
+              v-model="filteredEmployee"
+              item-title="text"
+              id="employeeIdFilter"
+              variant="underlined"
+              class="ml-5 ml-md-0 ml-lg-0 ml-xl-0 ml-xxl-0 mr-5 py-0 pb-md-4 pb-lg-4 pb-xl-4 pb-xxl-4"
+              label="Filter by Employee"
+              clearable
+            ></v-autocomplete>
+          </v-col>
+          <v-col cols="12" sm="12" md="4" lg="4" xl="4" xxl="4">
+            <!-- Tag Filter -->
+            <v-autocomplete
+              v-if="userRoleIsAdmin() || userRoleIsManager()"
+              clearable
+              hide-details
+              label="Filter by Tag (click to flip)"
+              v-model="selectedTags"
+              :items="tags"
+              multiple
+              class="ml-5 ml-md-0 ml-lg-0 ml-xl-0 ml-xxl-0 mr-5 pt-0 pb-4"
+              variant="underlined"
+              item-title="tagName"
+              item-value="id"
+              return-object
+            >
+              <template v-slot:chip="{ props, item }">
+                <v-chip
+                  size="small"
+                  closable
+                  v-bind="props"
+                  @click.stop
+                  @click="negateTag(item.raw)"
+                  @click:close="removeTag(item.raw)"
+                  :color="chipColor(item.raw.id)"
+                >
+                  {{ tagFlip.includes(item.raw.id) ? 'NOT ' : '' }}
+                  {{ item.raw.tagName }}
+                </v-chip>
               </template>
-              <span>Show All</span>
-            </v-tooltip>
-          </v-btn-toggle>
-        </div>
-        <!-- End Reimbursed Filter -->
-        <div class="flagFilter"></div>
+            </v-autocomplete>
+          </v-col>
+        </v-row>
       </fieldset>
       <br />
       <!-- End Filters -->
@@ -124,8 +106,7 @@
       <v-data-table
         v-model="selected"
         :headers="roleHeaders"
-        :sort-by.sync="sortBy"
-        :sort-desc.sync="sortDesc"
+        :sort-by="sortBy"
         :items="filteredPtoCashOuts"
         :loading="loading"
         :show-select="unapprovedOnly"
@@ -156,38 +137,28 @@
         <template v-slot:[`item.actions`]="{ item }">
           <td v-if="!unapprovedOnly" class="layout mr-0">
             <!-- Edit Button -->
-            <v-tooltip top>
-              <template v-slot:activator="{ on }">
-                <v-btn
-                  :disabled="isUnapproving || isDeleting || !!item.approvedDate"
-                  text
-                  icon
-                  id="edit"
-                  v-on="on"
-                  @click="clickedEdit(item)"
-                >
-                  <v-icon class="case-gray">edit</v-icon>
-                </v-btn>
-              </template>
-              <span>Edit</span>
-            </v-tooltip>
+            <v-btn
+              :disabled="isUnapproving || isDeleting || !!item.approvedDate"
+              variant="text"
+              icon=""
+              id="edit"
+              @click="clickedEdit(item)"
+            >
+              <v-tooltip activator="parent" location="top">Edit</v-tooltip>
+              <v-icon class="case-gray">mdi-pencil</v-icon>
+            </v-btn>
 
             <!-- Delete Button -->
-            <v-tooltip top>
-              <template v-slot:activator="{ on }">
-                <v-btn
-                  :disabled="isUnapproving || isDeleting || !!item.approvedDate"
-                  @click="clickedDelete(item)"
-                  text
-                  icon
-                  id="delete"
-                  v-on="on"
-                >
-                  <v-icon class="case-gray"> delete </v-icon>
-                </v-btn>
-              </template>
-              <span>Delete</span>
-            </v-tooltip>
+            <v-btn
+              :disabled="isUnapproving || isDeleting || !!item.approvedDate"
+              @click="clickedDelete(item)"
+              variant="text"
+              icon
+              id="delete"
+            >
+              <v-tooltip activator="parent" location="top">Delete</v-tooltip>
+              <v-icon class="case-gray"> mdi-delete </v-icon>
+            </v-btn>
           </td>
         </template>
       </v-data-table>
@@ -198,9 +169,7 @@
       :loading="isApproving"
       v-show="showApproveButton"
       theme="dark"
-      large
-      bottom
-      left
+      size="large"
       fixed
       class="reimburse_button"
     >
@@ -365,6 +334,7 @@ async function clickedConfirmDelete() {
   }
   this.isDeleting = false;
   this.clickedDeleteItem = null;
+  this.toggleDeleteModal = false;
 } // clickedConfirmDelete
 
 /**
@@ -372,6 +342,7 @@ async function clickedConfirmDelete() {
  */
 function clickedCancelDelete() {
   this.isDeleting = false;
+  this.toggleDeleteModal = false;
 } // clickedCancelDelete
 
 /**
@@ -381,7 +352,8 @@ function clickedCancelDelete() {
  * @param queryText - text used for filtering
  * @return string - filtered employee name
  */
-function customFilter(item, queryText) {
+function customFilter(itemValue, queryText, itemObject) {
+  const item = itemObject.raw;
   const query = queryText ? queryText : '';
   const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
   const firstNameFullName = `${item.firstName} ${item.lastName}`;
@@ -600,14 +572,6 @@ function watchSelected() {
 } // watchSelected
 
 /**
- * In the case that the page has been force reloaded (and the store cleared)
- * this watcher will be activated when the store is populated again.
- */
-function watchTagFlip() {
-  // this.filteredPtoCashOuts();
-} // watchTagFlip
-
-/**
  * Remove items from tagFlip array when they are removed from the selected
  * tags
  */
@@ -624,8 +588,7 @@ function watchSelectedTags() {
       this.tagFlip.splice(i, 1);
     }
   }
-  // this.filteredPtoCashOuts();
-}
+} // watchSelectedTags
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -646,13 +609,13 @@ export default {
         approved: 'notApproved' // default only shows cash outs that are not approved
       },
       headers: [
-        { text: 'Creation Date', value: 'creationDate' },
-        { text: 'Employee', value: 'employeeId' },
-        { text: 'Amount', value: 'amount' },
-        { text: 'Approved Date', value: 'approvedDate' },
-        { value: 'actions', sortable: false }
+        { title: 'Creation Date', key: 'creationDate' },
+        { title: 'Employee', key: 'employeeId' },
+        { title: 'Amount', key: 'amount' },
+        { title: 'Approved Date', key: 'approvedDate' },
+        { key: 'actions', sortable: false }
       ],
-      sortBy: 'creationDate',
+      sortBy: [{ key: 'creationDate', order: 'asc' }],
       sortDesc: true,
       selected: [],
       selectedTags: [],
@@ -706,7 +669,6 @@ export default {
   props: ['unapprovedOnly'],
   watch: {
     selected: watchSelected,
-    tagFlip: watchTagFlip,
     selectedTags: watchSelectedTags
   },
   components: { GeneralConfirmationModal, DeleteModal, PTOCashOutForm }

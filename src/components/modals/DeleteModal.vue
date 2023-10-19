@@ -2,15 +2,15 @@
   <div>
     <v-dialog v-model="activate" persistent max-width="350">
       <v-card>
-        <v-card-title class="headline">Are you sure you want to delete?</v-card-title>
+        <v-card-title class="text-h5">Delete item</v-card-title>
         <v-card-text> Are you sure you want to delete this {{ type }}? {{ deleteInfo }}</v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn
             color="red"
-            text
-            @click.native="
-              emit(`canceled-delete-${type}`);
+            variant="text"
+            @click="
+              emitter.emit(`canceled-delete-${type}`);
               activate = false;
             "
           >
@@ -18,11 +18,11 @@
           </v-btn>
           <v-spacer></v-spacer>
           <v-btn
-            color="green darken-1"
+            color="green-darken-1"
             id="confirmDelete"
-            text
-            @click.native="
-              emit(`confirm-delete-${type}`);
+            variant="text"
+            @click="
+              emitter.emit(`confirm-delete-${type}`);
               activate = false;
             "
           >
@@ -36,28 +36,6 @@
 </template>
 
 <script>
-// |--------------------------------------------------|
-// |                                                  |
-// |                     METHODS                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Emits a message and data if it exists.
- *
- * @param msg - Message to emit
- * @param data - Data to emit
- */
-function emit(msg, data) {
-  if (data) {
-    // data exists
-    this.emitter.emit(msg, data);
-  } else {
-    // data does not exist
-    this.emitter.emit(msg);
-  }
-} // emit
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                    WATCHERS                      |
@@ -82,9 +60,6 @@ export default {
     return {
       activate: false // dialog activator
     };
-  },
-  methods: {
-    emit
   },
   props: [
     'toggleDeleteModal', // dialog activator

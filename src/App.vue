@@ -330,7 +330,7 @@ async function created() {
 
   this.environment = process.env.VUE_APP_AUTH0_CALLBACK;
 
-  this.emitter.on('relog', () => handleLogout()); // Session end - log out
+  this.emitter.on('timeout-acknowledged', () => (this.timedOut = false)); // Session end - log out
   this.emitter.on('close', () => (this.switchRole = false));
   this.emitter.on('badgeExp', () => {
     this.badgeKey++;
@@ -397,6 +397,15 @@ function $route(to, from) {
     this.badgeKey++;
   }
 } // $route
+
+/**
+ * Logs user out when their session expires
+ */
+function watchSessionTimedOut() {
+  if (this.timedOut) {
+    this.handleLogout();
+  }
+} // watchSessionTimedOut
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -475,7 +484,8 @@ export default {
     updateEmployeeLogin
   },
   watch: {
-    $route
+    $route,
+    timedOut: watchSessionTimedOut
   },
   beforeDestroy,
   created

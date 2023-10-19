@@ -106,6 +106,8 @@
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
+            <!-- Cancel Button -->
+            <v-btn color="black" @click="cancel()" variant="text" class="mx-2"> Cancel </v-btn>
             <!-- Submit Button -->
             <v-btn variant="text" class="mx-2" color="success" :disabled="!valid" @click="submit()">
               <template v-slot:prepend>
@@ -113,8 +115,6 @@
               </template>
               Submit
             </v-btn>
-            <!-- Cancel Button -->
-            <v-btn color="black" @click="cancel()" variant="text" class="mx-2"> Cancel </v-btn>
           </v-card-actions>
         </div>
         <div v-else class="py-10 px-6">

@@ -15,10 +15,10 @@
       <v-snackbar
         v-model="status.statusType"
         :color="status.color"
-        :multi-line="true"
+        multi-line
         location="top right"
         :timeout="5000"
-        :vertical="true"
+        vertical
       >
         <v-card-title headline color="white">
           <span class="text-h5">{{ status.statusMessage }}</span>

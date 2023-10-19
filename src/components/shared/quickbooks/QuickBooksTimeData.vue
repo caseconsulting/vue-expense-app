@@ -172,13 +172,6 @@ function customFilter(itemValue, queryText, itemObject) {
   return queryContainsNickName || queryContainsFirstName;
 } // customFilter
 
-/**
- * Emits a message.
- */
-function emit(name) {
-  this.emitter.emit(name);
-} // emit
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                     WATCHERS                     |
@@ -234,7 +227,6 @@ export default {
   },
   methods: {
     customFilter,
-    emit,
     nicknameAndLastName,
     userRoleIsAdmin,
     userRoleIsManager
