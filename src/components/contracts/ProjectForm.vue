@@ -52,8 +52,8 @@
         <!-- Actions -->
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn @click="cancel()" :disabled="loading" color="danger" text>Cancel</v-btn>
-          <v-btn @click="submit()" :loading="loading" color="success" text>Submit</v-btn>
+          <v-btn @click="cancel()" :disabled="loading" color="danger" variant="text">Cancel</v-btn>
+          <v-btn @click="submit()" :loading="loading" color="success" variant="text">Submit</v-btn>
         </v-card-actions>
       </v-card></v-dialog
     >

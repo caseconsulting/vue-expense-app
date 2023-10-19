@@ -6,15 +6,17 @@
         <v-data-table
           :headers="projectHeaders"
           :items="contract.item.projects"
-          :item-class="projectRowClass"
           class="projects-table"
           hide-default-footer
           hide-default-header
           :items-per-page="-1"
           no-data-text="No active projects"
           show-select
-          single-select
         >
+          <!-- Blank header and footer -->
+          <template v-slot:headers></template>
+          <template v-slot:bottom></template>
+
           <!-- Just a spacer -->
           <template v-if="!editingProjectItem" v-slot:[`item.spacer`]="{ item }">
             <span>{{ item.spacer }}</span>
@@ -25,7 +27,7 @@
             <div class="checkBox-container fill-height fill-width align-center">
               <div :class="`${item.status}-status status-indicator`"></div>
               <v-checkbox
-                :input-value="item.checkBox"
+                :model-value="item.checkBox"
                 primary
                 class="ma-0 pl-4"
                 hide-details
@@ -111,20 +113,20 @@
             <div v-if="editingProjectItem && editingProjectItem.id == item.id">
               <div v-if="!projectLoading">
                 <!-- Save Project -->
-                <v-tooltip top>
+                <v-tooltip location="top">
                   <template v-slot:activator="{ on }">
-                    <v-btn @click.stop="updateProject(contract.item)" icon text v-on="on">
-                      <v-icon class="case-gray">save</v-icon>
+                    <v-btn @click.stop="updateProject(contract.item)" icon variant="text" v-on="on">
+                      <v-icon class="case-gray" icon="fa:fas fa-save" />
                     </v-btn>
                   </template>
                   <span>Save</span>
                 </v-tooltip>
 
                 <!-- Cancel Project Edit -->
-                <v-tooltip top>
+                <v-tooltip location="top">
                   <template v-slot:activator="{ on }">
-                    <v-btn icon text @click.stop="clickedCancel()" v-on="on">
-                      <v-icon class="case-gray">cancel</v-icon>
+                    <v-btn icon variant="text" @click.stop="clickedCancel()" v-on="on">
+                      <v-icon class="case-gray" icon="fa:fas fa-times-circle" />
                     </v-btn>
                   </template>
                   <span>Cancel</span>
@@ -135,7 +137,7 @@
             <div v-else>
               <div>
                 <!-- Employees Assigned -->
-                <v-tooltip top>
+                <v-tooltip location="top">
                   <template v-slot:activator="{ on }">
                     <v-btn
                       :disabled="editingProjectItem != null || isEditingContractItem || projectLoading"
@@ -147,26 +149,26 @@
                         }
                       "
                       icon
-                      text
+                      variant="text"
                       v-on="on"
                     >
-                      <v-icon class="case-gray">group</v-icon>
-                    </v-btn></template
-                  >
+                      <v-icon class="case-gray" icon="fa:fas fa-user-friends" />
+                    </v-btn>
+                  </template>
                   <span>View Employees Assigned to Project</span>
                 </v-tooltip>
 
                 <!-- Edit Project -->
-                <v-tooltip top>
+                <v-tooltip location="top">
                   <template v-slot:activator="{ on }">
                     <v-btn
                       :disabled="editingProjectItem != null || isEditingContractItem || projectLoading"
                       icon
-                      text
+                      variant="text"
                       @click.stop="clickedEdit(item)"
                       v-on="on"
                     >
-                      <v-icon class="case-gray">edit</v-icon>
+                      <v-icon class="case-gray" icon="fa:fas fa-edit" />
                     </v-btn>
                   </template>
                   <span>Edit</span>

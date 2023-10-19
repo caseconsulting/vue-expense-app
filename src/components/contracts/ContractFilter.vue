@@ -4,9 +4,9 @@
     <span class="fieldset-title mr-3">Status:</span>
     <v-btn-toggle class="filter_color" v-model="filter" text multiple>
       <!-- Active -->
-      <v-tooltip top>
+      <v-tooltip location="top">
         <template v-slot:activator="{ on }">
-          <v-btn value="active" id="full" v-on="on" text>
+          <v-btn value="active" id="full" v-on="on" variant="text">
             <v-icon class="mr-1" color="#0f9d58">mdi-check-circle-outline</v-icon>
           </v-btn>
         </template>
@@ -14,9 +14,9 @@
       </v-tooltip>
 
       <!-- Unstaffed -->
-      <v-tooltip top>
+      <v-tooltip location="top">
         <template v-slot:activator="{ on }">
-          <v-btn value="unstaffed" id="part" v-on="on" text>
+          <v-btn value="unstaffed" id="part" v-on="on" variant="text">
             <v-icon color="#f4b400">mdi-stop-circle-outline</v-icon>
           </v-btn>
         </template>
@@ -24,9 +24,9 @@
       </v-tooltip>
 
       <!-- Closed -->
-      <v-tooltip top>
+      <v-tooltip location="top">
         <template v-slot:activator="{ on }">
-          <v-btn value="closed" id="inactive" v-on="on" text>
+          <v-btn value="closed" id="inactive" v-on="on" variant="text">
             <v-icon color="#db4437">mdi-close-circle-outline</v-icon>
           </v-btn>
         </template>

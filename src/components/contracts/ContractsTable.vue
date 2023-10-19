@@ -10,6 +10,7 @@
               label="Search Table Contents"
               auto-select-first
               append-icon="search"
+              variant="underlined"
               clearable
             ></v-text-field>
           </v-col>
@@ -20,11 +21,11 @@
             <v-btn
               color="#bc3825"
               :loading="isDeleting"
-              class="white--text"
+              class="text-white"
               :disabled="!this.contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
               @click="clickedDelete()"
-              >Delete<v-icon right dark>delete</v-icon></v-btn
-            >
+              >Delete<v-icon end dark icon="fa:fas fa-trash" />
+            </v-btn>
             <v-btn
               class="ml-4 font-weight-medium"
               :loading="isActivating"
@@ -51,26 +52,29 @@
         <!-- START CONTRACTS DATA TABLE -->
         <v-form ref="form" lazy-validation>
           <v-data-table
-            @click:row="clickedRow"
-            :expanded.sync="expanded"
             :headers="contractHeaders"
             :items="storeContracts"
             :items-per-page="-1"
-            :item-class="() => 'highlight-contract-row'"
             :search="search"
+            v-model:expanded="expanded"
+            color="purple"
             class="contracts-table"
+            density="compact"
+            hover
             show-select
+            expand-on-click
           >
             <!-- Header CheckBox Slot -->
             <template v-slot:[`header.data-table-select`]>
               <!-- Intentionally empty to hide header checkbox -->
             </template>
+
             <!-- CheckBox Slot -->
             <template v-slot:[`item.data-table-select`]="{ item }">
               <div class="checkBox-container fill-height fill-width align-center">
                 <div :class="`${item.status}-status status-indicator`"></div>
                 <v-checkbox
-                  :input-value="item.all"
+                  :model-value="item.all"
                   :indeterminate="item.indeterminate"
                   primary
                   class="ma-0 pl-4"
@@ -160,10 +164,10 @@
             </template>
 
             <!-- Expanded Row Slot -->
-            <template v-slot:expanded-item="{ headers, item }">
+            <template v-slot:expanded-row="{ columns, item }">
               <expanded-contract-table-row
                 :contract="{ item }"
-                :colspan="headers.length"
+                :colspan="columns.length"
                 :isEditingContractItem="editingItem != null"
                 :isContractDeletingOrUpdatingStatus="isDeletingOrUpdatingStatus()"
               />
@@ -175,21 +179,21 @@
               <div v-if="editingItem && editingItem.id == item.id">
                 <div v-if="!contractLoading">
                   <!-- Save Contract -->
-                  <v-tooltip top>
+                  <v-tooltip location="top">
                     <template v-slot:activator="{ on }">
-                      <v-btn @click.stop="updateContractPrime()" icon text v-on="on">
-                        <v-icon class="case-gray">save</v-icon>
+                      <v-btn @click.stop="updateContractPrime()" icon variant="text" v-on="on">
+                        <v-icon class="case-gray" icon="fa:fas fa-save" />
                       </v-btn>
                     </template>
                     <span>Save</span>
                   </v-tooltip>
 
                   <!-- Cancel Contract -->
-                  <v-tooltip top>
+                  <v-tooltip location="top">
                     <template v-slot:activator="{ on }">
                       <v-btn
                         icon
-                        text
+                        variant="text"
                         @click.stop="
                           () => {
                             editingItem = null;
@@ -197,7 +201,7 @@
                         "
                         v-on="on"
                       >
-                        <v-icon class="case-gray">cancel</v-icon>
+                        <v-icon class="case-gray" icon="fa:fas fa-times-circle" />
                       </v-btn>
                     </template>
                     <span>Cancel</span>
@@ -210,7 +214,7 @@
               <div v-else>
                 <div v-if="!isDeletingOrUpdatingStatus(item)">
                   <!-- Add Project -->
-                  <v-tooltip top>
+                  <v-tooltip location="top">
                     <template v-slot:activator="{ on }">
                       <v-btn
                         :disabled="editingItem != null || isEditingProjectItem || contractLoading"
@@ -221,17 +225,17 @@
                           }
                         "
                         icon
-                        text
+                        variant="text"
                         v-on="on"
                       >
-                        <v-icon class="case-gray">mdi-file-document-plus</v-icon>
+                        <v-icon class="case-gray" icon="fa:fas fa-file-medical" />
                       </v-btn>
                     </template>
                     <span>Add Project</span>
                   </v-tooltip>
 
                   <!-- Employees Assigned -->
-                  <v-tooltip top>
+                  <v-tooltip location="top">
                     <template v-slot:activator="{ on }">
                       <v-btn
                         :disabled="editingItem != null || isEditingProjectItem || contractLoading"
@@ -242,26 +246,25 @@
                           }
                         "
                         icon
-                        text
+                        variant="text"
                         v-on="on"
                       >
-                        <v-icon class="case-gray">group</v-icon>
-                      </v-btn></template
-                    >
+                        <v-icon class="case-gray" icon="fa:fas fa-user-friends"></v-icon> </v-btn
+                    ></template>
                     <span>View Employees Assigned to Contract</span>
                   </v-tooltip>
 
                   <!-- Edit Contract -->
-                  <v-tooltip top>
+                  <v-tooltip location="top">
                     <template v-slot:activator="{ on }">
                       <v-btn
                         icon
-                        text
+                        variant="text"
                         :disabled="editingItem != null || isEditingProjectItem || contractLoading"
                         v-on="on"
                         @click.stop="clickedEdit(item)"
                       >
-                        <v-icon class="case-gray">edit</v-icon>
+                        <v-icon class="case-gray" icon="fa:fas fa-edit" />
                       </v-btn>
                     </template>
                     <span>Edit</span>
@@ -348,7 +351,7 @@ async function created() {
     this.toggleProjectCheckBox(contract, project);
   });
   this.resetAllCheckBoxes();
-  this.expanded = _.cloneDeep(this.storeContracts);
+  this.expanded = _.map(this.$store.getters.contracts, 'id'); // expands all contracts in table
 } // created
 
 /**
@@ -371,21 +374,6 @@ function beforeDestroy() {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
-
-/**
- * Handler for clicked contract row in data table
- * @param contractObj contract object that is clicked
- */
-function clickedRow(contractObj) {
-  let i = this.expanded.findIndex((c) => c.id == contractObj.id);
-  if (i == -1) {
-    // item is not expanded
-    this.expanded.push(contractObj);
-  } else {
-    // item is expanded
-    this.expanded.splice(i, 1);
-  }
-} // clickedRow
 
 /**
  * Updates contract object in inline row edit
@@ -901,13 +889,6 @@ function storeContracts() {
 // |                                                  |
 // |--------------------------------------------------|
 
-/**
- * Auto expands rows when switching filter options
- */
-function watchFilter() {
-  this.expanded = _.cloneDeep(this.storeContracts);
-} // watchFilter
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -937,7 +918,6 @@ export default {
     cloneDeep,
     displaySuccess,
     displayError,
-    clickedRow,
     clickedEdit,
     updateStoreContracts,
     updateContractPrime,
@@ -972,6 +952,7 @@ export default {
       relationships: [],
       deleteItem: null,
       deletingItems: null,
+      expanded: [],
       toggleContractEmployeesModal: false,
       toggleValidateModal: false,
       toggleContractDeleteModal: false,
@@ -980,7 +961,6 @@ export default {
       editingItem: null,
       isEditingProjectItem: false,
       loading: false,
-      expanded: [],
       filter: [api.CONTRACT_STATUSES.ACTIVE],
       search: null,
       statusItemClicked: null,
@@ -998,42 +978,42 @@ export default {
       ],
       contractHeaders: [
         {
-          text: 'Prime',
-          value: 'primeName',
-          align: 'left'
+          title: 'Prime',
+          key: 'primeName',
+          align: 'start'
         },
         {
-          text: 'Contract',
-          value: 'contractName',
-          align: 'left'
+          title: 'Contract',
+          key: 'contractName',
+          align: 'start'
         },
         {
-          text: 'Directorate',
-          value: 'directorate',
-          align: 'left'
+          title: 'Directorate',
+          key: 'directorate',
+          align: 'start'
         },
         {
-          text: 'PoP-Start Date',
-          value: 'popStartDate',
-          align: 'left'
+          title: 'PoP-Start Date',
+          key: 'popStartDate',
+          align: 'start'
         },
         {
-          text: 'PoP-End Date',
-          value: 'popEndDate',
-          align: 'left'
+          title: 'PoP-End Date',
+          key: 'popEndDate',
+          align: 'start'
         },
         {
-          text: 'Description',
-          value: 'description',
-          align: 'left'
+          title: 'Description',
+          key: 'description',
+          align: 'start'
         },
         {
-          text: 'Active Employees',
-          value: 'spacer',
-          align: 'left'
+          title: 'Active Employees',
+          key: 'spacer',
+          align: 'start'
         },
         {
-          value: 'actions',
+          key: 'actions',
           sortable: false,
           align: 'right'
         }
@@ -1041,6 +1021,9 @@ export default {
     };
   },
   watch: {
+    expanded: function () {
+      console.log(this.expanded);
+    },
     '$store.getters.contracts': function () {
       if (this.$store.getters.contracts.length > this.contractsCheckBoxes.length) {
         let newContract = this.$store.getters.contracts[0];
@@ -1063,9 +1046,7 @@ export default {
           ];
         }
       });
-      this.expanded = _.cloneDeep(this.storeContracts);
-    },
-    filter: watchFilter
+    }
   }
 };
 </script>
@@ -1103,6 +1084,7 @@ export default {
 
 .contracts-table td:first-child {
   padding-left: 0px !important;
+  background-color: red;
 }
 
 .description textarea {
@@ -1120,6 +1102,10 @@ export default {
 </style>
 
 <style scoped>
+td {
+  background-color: red;
+}
+
 .contracts-table :deep(td:first-of-type) {
   width: 1%;
 }

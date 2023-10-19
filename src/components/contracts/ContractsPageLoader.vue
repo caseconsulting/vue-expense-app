@@ -24,7 +24,7 @@
           </v-col>
         </v-row>
         <!-- data table -->
-        <v-skeleton-loader type="table-row-divider@20" class="px-4 white"></v-skeleton-loader>
+        <v-skeleton-loader type="table-row-divider@20" class="px-4 bg-white"></v-skeleton-loader>
       </v-container>
     </v-card>
   </div>
