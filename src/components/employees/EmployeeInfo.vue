@@ -70,7 +70,7 @@
       <v-tab value="languages">Foreign Languages</v-tab>
     </v-tabs>
     <v-window v-model="infoTab">
-      <v-window-item value="employee" class="ma-6">
+      <v-window-item value="employee" class="ma-4">
         <employee-tab
           :admin="hasAdminPermissions()"
           :contracts="contracts"
@@ -78,34 +78,34 @@
           :model="model"
         ></employee-tab>
       </v-window-item>
-      <v-window-item value="personal" class="ma-6">
+      <v-window-item value="personal" class="ma-4">
         <personal-tab :admin="hasAdminPermissions()" :employee="userIsEmployee()" :model="model"></personal-tab>
       </v-window-item>
-      <v-window-item value="customerOrgExp" class="ma-6">
+      <v-window-item value="customerOrgExp" class="ma-4">
         <customer-org-tab :model="model"></customer-org-tab>
       </v-window-item>
-      <v-window-item value="contracts" class="ma-6">
+      <v-window-item value="contracts" class="ma-4">
         <contracts-tab :contracts="contracts" :model="model"></contracts-tab>
       </v-window-item>
       <v-window-item value="clearance" v-if="hasAdminPermissions() || userIsEmployee()" class="ma-6">
         <clearance-tab :model="model"></clearance-tab>
       </v-window-item>
-      <v-window-item value="technologies" class="ma-6">
+      <v-window-item value="technologies" class="ma-4">
         <technologies-tab :model="model"></technologies-tab>
       </v-window-item>
-      <v-window-item value="education" class="ma-6">
+      <v-window-item value="education" class="ma-4">
         <education-tab :model="model"></education-tab>
       </v-window-item>
-      <v-window-item value="jobExperience" class="ma-6">
+      <v-window-item value="jobExperience" class="ma-4">
         <job-experience-tab :model="model"></job-experience-tab>
       </v-window-item>
-      <v-window-item value="certifications" class="ma-6">
+      <v-window-item value="certifications" class="ma-4">
         <certifications-tab :model="model"></certifications-tab>
       </v-window-item>
-      <v-window-item value="awards" class="ma-6">
+      <v-window-item value="awards" class="ma-4">
         <awards-tab :model="model"></awards-tab>
       </v-window-item>
-      <v-window-item value="languages" class="ma-6">
+      <v-window-item value="languages" class="ma-4">
         <languages-tab :model="model"></languages-tab>
       </v-window-item>
     </v-window>

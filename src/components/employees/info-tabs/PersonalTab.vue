@@ -2,54 +2,52 @@
   <div v-if="childrenVisible" class="infoTab wrapper" id="personalTab">
     <!-- GitHub -->
     <p v-if="!isEmpty(this.model.github)">
-      <v-avatar class="mr-3" rounded="0" size="23">
+      <v-avatar class="mr-3 nudge-right" rounded="0" size="20">
         <v-img class="grayImage" :src="github" alt="Github icon"></v-img>
       </v-avatar>
       <a :href="'https://github.com/' + this.model.github" target="_blank">{{ this.model.github }}</a>
     </p>
     <!-- Twitter -->
     <p v-if="!isEmpty(this.model.twitter)">
-      <v-avatar class="mr-3" rounded="0" size="23">
+      <v-avatar class="mr-3 nudge-right" rounded="0" size="20">
         <v-img class="grayImage" :src="x" alt="X icon"></v-img>
       </v-avatar>
       <a :href="'https://x.com/' + this.model.twitter" target="_blank">{{ this.model.twitter }}</a>
     </p>
     <!-- LinkedIn -->
     <p v-if="!isEmpty(this.model.linkedIn)">
-      <v-avatar class="mr-3" rounded="0" size="23">
+      <v-avatar class="mr-3 nudge-right" rounded="0" size="20">
         <v-img class="grayImage" :src="linkedin" alt="LinkedIn icon`"></v-img>
       </v-avatar>
       <a :href="this.model.linkedIn" target="_blank">{{ this.model.linkedIn }}</a>
     </p>
     <!-- Personal Email -->
     <p v-if="!isEmpty(this.model.personalEmail) && (admin || employee)">
-      <v-icon class="mr-2">mdi-email</v-icon> {{ this.model.personalEmail }}
+      <v-icon size="large" class="mr-2 grayImage">mdi-email</v-icon> {{ this.model.personalEmail }}
     </p>
     <!-- Phone Number -->
     <p v-if="!isEmpty(getPhoneNumbers()) && (employee || !userRoleIsIntern())">
       <b>Phone Numbers:</b>
-      <v-list>
+      <v-list class="left-border">
         <v-list-item v-for="number in getPhoneNumbers()" :key="number.number">
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn text icon v-bind="attrs" v-on="on" class="mr-2">
-                <v-icon v-if="number.private">mdi-shield</v-icon>
-                <v-icon v-else>mdi-shield-outline</v-icon>
-              </v-btn>
-            </template>
-            <span v-if="number.private"
-              >Based on user preference, this is only visible to You, Managers, and Admins</span
-            >
-            <span v-else>Based on user preference, this is visible to everyone</span>
-          </v-tooltip>
-          <v-list-item-content>
-            <v-list-item-subtitle class="mb-1"> {{ number.type }}</v-list-item-subtitle>
-            <v-list-item-title>
-              <div>
-                {{ number.number }}<span v-if="number.ext"> (Ext. {{ number.ext }})</span>
-              </div></v-list-item-title
-            >
-          </v-list-item-content>
+          <template v-slot:prepend>
+            <v-avatar variant="text" icon v-bind="attrs" class="mr-2">
+              <v-tooltip activator="parent" location="bottom">
+                <span v-if="number.private"
+                  >Based on user preference, this is only visible to You, Managers, and Admins</span
+                >
+                <span v-else>Based on user preference, this is visible to everyone</span>
+              </v-tooltip>
+              <v-icon size="large" color="grey-darken-1" v-if="number.private">mdi-shield</v-icon>
+              <v-icon size="large" color="grey-darken-1" v-else>mdi-shield-outline</v-icon>
+            </v-avatar>
+          </template>
+          <v-list-item-subtitle class="mb-1"> {{ number.type }}</v-list-item-subtitle>
+          <v-list-item-title>
+            <div>
+              {{ number.number }}<span v-if="number.ext"> (Ext. {{ number.ext }})</span>
+            </div>
+          </v-list-item-title>
         </v-list-item>
       </v-list>
     </p>
@@ -61,6 +59,7 @@
     <sensitive-data-field
       v-if="!isEmpty(this.model.birthday) & (admin || employee)"
       :class="isBday ? 'clickable' : ''"
+      class="mb-5"
       @click="confetti"
       label="Birthday"
       :value="monthDayYearFormat(this.model.birthday)"
@@ -69,6 +68,7 @@
     <sensitive-data-field
       v-if="!isEmpty(getPlaceOfBirth) && (admin || employee)"
       label="Place of Birth"
+      class="mb-5"
       :value="getPlaceOfBirth"
     />
     <!-- Current Address -->
@@ -289,6 +289,10 @@ export default {
 </script>
 
 <style scoped lang="scss">
+p {
+  margin-bottom: 12px;
+}
+
 .clickable {
   cursor: pointer;
 }
@@ -300,6 +304,10 @@ export default {
 .grayImage {
   -webkit-filter: brightness(0) opacity(55%);
   filter: brightness(0) opacity(55%);
+}
+
+.nudge-right {
+  margin-left: 2px;
 }
 
 [class|='confetti'] {

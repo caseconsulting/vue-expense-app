@@ -7,33 +7,21 @@
         <fieldset class="filter_border">
           <legend class="legend_style">Sort By</legend>
           <v-col cols="12">
-            <v-btn-toggle v-model="sortFunction" borderless>
-              <v-tooltip top>
-                <template v-slot:activator="{ on }">
-                  <v-btn v-on="on" @click="sortByCurrent">
-                    <v-icon>check</v-icon>
-                  </v-btn>
-                </template>
-                <span>Current</span>
-              </v-tooltip>
+            <v-btn-toggle v-model="sortFunction" density="compact">
+              <v-btn @click="sortByCurrent">
+                <v-tooltip activator="parent" location="top">Current</v-tooltip>
+                <v-icon size="x-large">mdi-check</v-icon>
+              </v-btn>
 
-              <v-tooltip top>
-                <template v-slot:activator="{ on }">
-                  <v-btn v-on="on" @click="sortByDate">
-                    <v-icon>mdi-calendar-multiple</v-icon>
-                  </v-btn>
-                </template>
-                <span>Years of Experience</span>
-              </v-tooltip>
+              <v-btn @click="sortByDate">
+                <v-tooltip activator="parent" location="top">Years of Experience</v-tooltip>
+                <v-icon size="x-large">mdi-calendar-multiple</v-icon>
+              </v-btn>
 
-              <v-tooltip top>
-                <template v-slot:activator="{ on }">
-                  <v-btn v-on="on" @click="sortByName">
-                    <v-icon>mdi-sort-alphabetical-descending-variant </v-icon>
-                  </v-btn>
-                </template>
-                <span>Alphabetical</span>
-              </v-tooltip>
+              <v-btn @click="sortByName">
+                <v-tooltip activator="parent" location="top">Alphabetical</v-tooltip>
+                <v-icon size="x-large">mdi-sort-alphabetical-descending-variant </v-icon>
+              </v-btn>
             </v-btn-toggle>
           </v-col>
         </fieldset>
@@ -46,16 +34,14 @@
             <p><b>Technology: </b>{{ technology.name }}</p>
           </v-col>
           <v-col>
-            <v-tooltip v-if="technology.current" right>
-              <template v-slot:activator="{ on }">
-                <v-icon v-on="on">check</v-icon>
-              </template>
-              <span>Current Skill</span>
-            </v-tooltip>
+            <span>
+              <v-icon>mdi-check</v-icon>
+              <v-tooltip v-if="technology.current" activator="parent" location="right">Current Skill</v-tooltip>
+            </span>
           </v-col>
         </v-row>
         <p><b>Experience: </b>{{ Number(technology.years).toFixed(1) }} years</p>
-        <hr v-if="index < pageList.length - 1" class="mb-3" />
+        <hr v-if="index < pageList.length - 1" class="my-3" />
       </div>
       <!-- End Loop Technologies -->
       <div v-if="!isEmpty(this.sortedTech) && Math.ceil(this.sortedTech.length / 5) != 1" class="text-center">
@@ -63,7 +49,7 @@
           v-model="page"
           :length="Math.ceil(this.sortedTech.length / 5)"
           :total-visible="8"
-          @input="onPageChange"
+          @update:model-value="onPageChange"
         ></v-pagination>
       </div>
     </div>
@@ -174,22 +160,6 @@ function watchModel(val) {
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     FILTERS                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * filter that checks if value exists for current.
- *
- * @param value - value to check
- * @return - either 'yes' if it exists or 'no' otherwise
- */
-function current(value) {
-  return value ? 'Yes' : 'No';
-} // current
-
-// |--------------------------------------------------|
-// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -217,3 +187,9 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+p {
+  margin-bottom: 12px;
+}
+</style>

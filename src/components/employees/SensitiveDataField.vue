@@ -4,7 +4,7 @@
       <b v-if="label">{{ label }}:</b> {{ show ? value : '*****' }}
     </p>
     <a
-      class="show font-weight-bold text-caption"
+      class="show font-weight-bold text-caption text-blue"
       @click="
         () => {
           show = !show;

@@ -11,7 +11,7 @@
     <!-- Current Projects -->
     <p><b>Current Projects: </b> {{ getCurrentProjects.length === 0 ? 'None' : '' }}</p>
     <!-- Loop for Current Projects -->
-    <div v-for="(contract, contractIndex) in getCurrentProjects" :key="contractIndex" class="pb-1 px-4">
+    <div v-for="(contract, contractIndex) in getCurrentProjects" :key="contractIndex" class="px-4 left-border">
       <p><b>Contract: </b>{{ contract.contractName }}</p>
       <p><b>Prime: </b>{{ contract.primeName }}</p>
       <div v-for="(project, projIndex) in contract.projects" :key="projIndex" class="px-4">
@@ -32,7 +32,7 @@
       <b>Employee Tags: </b>
       <span v-if="getEmployeeTags.length == 0">None</span>
       <span v-else v-for="tag in getEmployeeTags" :key="tag.id" class="ml-2 mr-1">
-        <v-icon small>mdi-tag</v-icon> {{ tag.tagName }}
+        <v-icon size="small" color="brown-lighten-1">mdi-tag</v-icon> {{ tag.tagName }}
       </span>
     </p>
     <!-- Employee Role -->
@@ -64,13 +64,13 @@
           "
           class="float-right"
         >
-          <a @click="emit('show-all', true)" class="font-weight-bold text-caption pr-3">Show All</a>
-          <a @click="emit('show-all', false)" class="font-weight-bold text-caption">Hide All</a>
+          <a @click="emit('show-all', true)" class="font-weight-bold text-caption text-blue pr-3">Show All</a>
+          <a @click="emit('show-all', false)" class="font-weight-bold text-caption text-blue">Hide All</a>
         </span>
       </p>
 
       <sensitive-data-field
-        class="ml-2"
+        class="ml-2 mb-5"
         v-if="this.model.eeoDeclineSelfIdentify"
         label="Status"
         value="Declined to self-identify."
@@ -87,12 +87,20 @@
         "
         class="ml-2"
       >
-        <sensitive-data-field label="Gender" :value="this.model.eeoGender.text" />
-        <sensitive-data-field label="Hispanic or Latino" :value="this.model.eeoHispanicOrLatino.value ? 'Yes' : 'No'" />
-        <sensitive-data-field label="Race or Ethnicity" :value="this.model.eeoRaceOrEthnicity.text" />
-        <sensitive-data-field label="Job Category" :value="this.model.eeoJobCategory.text" />
-        <sensitive-data-field label="Disability" :value="this.model.eeoHasDisability ? 'Yes' : 'No'" />
-        <sensitive-data-field label="Protected Veteran" :value="this.model.eeoIsProtectedVeteran ? 'Yes' : 'No'" />
+        <sensitive-data-field class="mb-5" label="Gender" :value="this.model.eeoGender.text" />
+        <sensitive-data-field
+          class="mb-5"
+          label="Hispanic or Latino"
+          :value="this.model.eeoHispanicOrLatino.value ? 'Yes' : 'No'"
+        />
+        <sensitive-data-field class="mb-5" label="Race or Ethnicity" :value="this.model.eeoRaceOrEthnicity.text" />
+        <sensitive-data-field class="mb-5" label="Job Category" :value="this.model.eeoJobCategory.text" />
+        <sensitive-data-field class="mb-5" label="Disability" :value="this.model.eeoHasDisability ? 'Yes' : 'No'" />
+        <sensitive-data-field
+          class="mb-5"
+          label="Protected Veteran"
+          :value="this.model.eeoIsProtectedVeteran ? 'Yes' : 'No'"
+        />
       </div>
       <div
         v-else-if="
@@ -253,3 +261,13 @@ export default {
   components: { SensitiveDataField }
 };
 </script>
+
+<style scoped>
+p {
+  margin-bottom: 12px;
+}
+
+.left-border {
+  border-left: 2px solid rgb(187, 187, 187);
+}
+</style>

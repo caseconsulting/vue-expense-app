@@ -5,14 +5,9 @@
       <!-- Loop Clearances -->
       <div v-for="(clearance, index) in this.filteredList" :key="index">
         <!-- Type -->
-        <p><b>Type: </b>{{ clearance.type }}</p>
-
-        <!-- Awaiting Clearance-->
-        <p v-if="clearance.awaitingClearance">
-          <span class="d-flex align-center">
-            <v-checkbox class="ma-0 pa-0" disabled hide-details v-model="clearance.awaitingClearance" />
-            <b>Awaiting Clearance</b>
-          </span>
+        <p>
+          <b>Type: </b>{{ clearance.type }}
+          <span v-if="clearance.awaitingClearance" class="font-weight-bold text-red"> (awaiting clearance)</span>
         </p>
 
         <!-- Submission, Granted Date -->
@@ -32,7 +27,7 @@
         <!-- BI Dates -->
         <p v-if="clearance.biDates.length == 1"><b>Bi Date: </b> {{ monthDayYearFormat(clearance.biDates[0]) }}</p>
         <p v-if="clearance.biDates.length > 1" class="mb-2"><b>Bi Dates: </b></p>
-        <ul v-if="clearance.biDates.length > 1" class="mb-4">
+        <ul v-if="clearance.biDates.length > 1" class="mb-4 ml-6">
           <li v-for="(biDate, pIndex) in clearance.biDates" :key="pIndex">{{ monthDayYearFormat(biDate) }}</li>
         </ul>
 
@@ -41,7 +36,7 @@
           <b>Adjudication Date: </b>{{ monthDayYearFormat(clearance.adjudicationDates[0]) }}
         </p>
         <p v-if="clearance.adjudicationDates.length > 1" class="mb-2"><b>Adjudication Dates: </b></p>
-        <ul v-if="clearance.adjudicationDates.length > 1" class="mb-4">
+        <ul v-if="clearance.adjudicationDates.length > 1" class="mb-4 ml-6">
           <li v-for="(adjudicationDate, aIndex) in clearance.adjudicationDates" :key="aIndex">
             {{ monthDayYearFormat(adjudicationDate) }}
           </li>
@@ -52,7 +47,7 @@
           <b>Poly Date: </b> {{ monthDayYearFormat(clearance.polyDates[0]) }}
         </p>
         <p v-if="clearance.polyDates.length > 1" class="mb-2"><b>Poly Dates: </b></p>
-        <ul v-if="clearance.polyDates.length > 1" class="mb-4">
+        <ul v-if="clearance.polyDates.length > 1" class="mb-4 ml-6">
           <li v-for="(polyDate, pIndex) in clearance.polyDates" :key="pIndex">{{ monthDayYearFormat(polyDate) }}</li>
         </ul>
         <hr v-if="index < filteredList.length - 1" class="mb-3" />
@@ -67,7 +62,7 @@
         v-model="page"
         :length="Math.ceil(model.clearances.length / 5)"
         :total-visible="8"
-        @input="onPageChange"
+        @update:model-value="onPageChange"
       ></v-pagination>
     </div>
   </div>
@@ -129,3 +124,9 @@ export default {
   props: ['model']
 };
 </script>
+
+<style scoped>
+p {
+  margin-bottom: 12px;
+}
+</style>

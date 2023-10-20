@@ -15,12 +15,10 @@
                   <b>Project {{ projIndex + 1 }}: </b>{{ getProjectName(project) }}
                 </v-col>
                 <v-col>
-                  <v-tooltip v-if="!project.endDate" right>
-                    <template v-slot:activator="{ on }">
-                      <v-icon v-on="on">check</v-icon>
-                    </template>
-                    <span>Current Project</span>
-                  </v-tooltip>
+                  <span v-if="!project.endDate">
+                    <v-tooltip activator="parent" location="right">Current Project</v-tooltip>
+                    <v-icon>mdi-check</v-icon>
+                  </span>
                 </v-col>
               </v-row>
             </p>
@@ -28,12 +26,10 @@
               <v-row>
                 <v-col> <b>Project: </b>{{ getProjectName(project) }} </v-col>
                 <v-col>
-                  <v-tooltip v-if="!project.endDate" right>
-                    <template v-slot:activator="{ on }">
-                      <v-icon v-on="on">check</v-icon>
-                    </template>
-                    <span>Current Project</span>
-                  </v-tooltip>
+                  <span v-if="!project.endDate">
+                    <v-tooltip activator="parent" location="right">Current Project</v-tooltip>
+                    <v-icon>mdi-check</v-icon>
+                  </span>
                 </v-col>
               </v-row>
             </p>
@@ -57,7 +53,7 @@
         v-model="page"
         :length="Math.ceil(model.contracts.length / 5)"
         :total-visible="8"
-        @input="onPageChange"
+        @update:model-value="onPageChange"
       ></v-pagination>
     </div>
   </div>
@@ -258,6 +254,10 @@ export default {
 </script>
 
 <style scoped>
+p {
+  margin-bottom: 12px;
+}
+
 .horizontalBar {
   border-top: 1px dashed;
 }
