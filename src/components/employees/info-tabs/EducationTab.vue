@@ -12,10 +12,10 @@
           <p class="my-0" v-if="edu.degrees.length > 1"><b>Degrees: </b></p>
           <p class="my-0" v-else><b>Degree: </b></p>
 
-          <ul>
+          <ul class="ml-6">
             <li v-for="(degree, index) in edu.degrees" :key="degree + index" class="mb-2">
               <b>{{ degree.degreeType }}</b>
-              <ul>
+              <ul class="ml-6">
                 <li v-if="degree.completionDate">
                   <b>Completion Date: </b>{{ monthYearFormat(degree.completionDate) }}
                 </li>
@@ -81,7 +81,7 @@
           v-model="page"
           :length="Math.ceil(model.education.length / 4)"
           :total-visible="8"
-          @input="onPageChange"
+          @update:model-value="onPageChange"
         ></v-pagination>
       </div>
     </div>
@@ -168,9 +168,13 @@ export default {
 </script>
 
 <style>
+p {
+  margin-bottom: 12px;
+}
+
 .edu:not(:last-of-type) {
   border-bottom: 1px solid grey;
-  margin-bottom: 12px;
-  padding-bottom: 12px;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
 }
 </style>

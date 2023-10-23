@@ -18,7 +18,7 @@
         v-model="page"
         :length="Math.ceil(model.awards.length / 5)"
         :total-visible="8"
-        @input="onPageChange"
+        @update:model-value="onPageChange"
       ></v-pagination>
     </div>
   </div>
@@ -80,3 +80,9 @@ export default {
   props: ['model']
 };
 </script>
+
+<style scoped>
+p {
+  margin-bottom: 12px;
+}
+</style>

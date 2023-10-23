@@ -9,24 +9,34 @@
     <p v-if="model.jobRole"><b>Position: </b>{{ model.jobRole }}</p>
     <p><b>Start Date: </b>{{ monthDayYearFormat(model.hireDate) }}</p>
     <p v-if="model.deptDate"><b>End Date: </b>{{ monthDayYearFormat(model.deptDate) }}</p>
-    <hr class="mb-3" />
+    <hr />
 
     <div v-if="!isEmpty(model.companies)">
-      <h3>Job History</h3>
-      <v-combobox
-        label="Filter by Company Name"
-        v-model="filter"
-        @input.native="updateCompanies()"
-        :items="companyNames"
-        :menu-props="{ top: true, offsetY: true }"
-      ></v-combobox>
+      <v-row class="d-flex align-center">
+        <v-col>
+          <h3 class="d-inline-block mr-10 mt-0 pt-0">Job History</h3>
+        </v-col>
+        <v-col>
+          <v-combobox
+            placeholder="Filter by Company Name"
+            v-model="filter"
+            @update:model-value="updateCompanies()"
+            single-line
+            clearable
+            variant="underlined"
+            :items="companyNames"
+            hide-details
+            class="mb-6"
+          ></v-combobox>
+        </v-col>
+      </v-row>
       <!-- Other Jobs -->
       <!-- Loop Jobs -->
       <div v-for="(company, index) in this.pageList" :key="company.companyName + index">
         <p class="mb-1"><b>Company: </b>{{ company.companyName }}</p>
         <div class="ml-4" v-if="company.positions.length > 1">
           <p class="my-0"><b>Positions: </b></p>
-          <ul>
+          <ul class="ml-6">
             <li v-for="(position, posIndex) in company.positions" :key="position.title + posIndex">
               {{ position.title }}
               <ul>
@@ -38,7 +48,7 @@
         </div>
         <div class="ml-4" v-else>
           <p class="my-0"><b>Position:</b> {{ company.positions[0].title }}</p>
-          <ul>
+          <ul class="ml-6">
             <li>Start Date: {{ monthYearFormat(company.positions[0].startDate) }}</li>
             <li v-if="company.positions[0].endDate">End Date: {{ monthYearFormat(company.positions[0].endDate) }}</li>
           </ul>
@@ -52,7 +62,7 @@
           v-model="page"
           :length="Math.ceil(filterCompanies.length / 4)"
           :total-visible="8"
-          @input="onPageChange"
+          @update:model-value="onPageChange"
         ></v-pagination>
       </div>
     </div>
@@ -170,18 +180,17 @@ function onPageChange() {
  * @param query - the query used to decide which companies to show
  */
 function updateCompanies(query) {
-  if (query === undefined) {
-    query = event.target.value;
-  }
-  if (query !== undefined) {
+  if (query !== undefined && query !== null) {
     this.filterCompanies = _.filter(this.model.companies, (company) => {
-      if (company.companyName.toLowerCase().includes(query.toLowerCase())) {
+      if (query && company.companyName.toLowerCase().includes(query.toLowerCase())) {
         return true;
       }
     });
-    this.page = 1;
-    this.pageList = this.filterCompanies.slice(0, 4);
+  } else {
+    this.filterCompanies = _.cloneDeep(this.model.companies);
   }
+  this.page = 1;
+  this.pageList = this.filterCompanies.slice(0, 4);
 } // updateCompanies
 
 // |--------------------------------------------------|
@@ -209,7 +218,7 @@ export default {
     return {
       companyNames: _.map(this.model.companies, 'companyName'),
       filterCompanies: _.cloneDeep(this.model.companies),
-      filter: '',
+      filter: null,
       page: 1,
       pageList: []
     };
@@ -238,6 +247,10 @@ export default {
 </script>
 
 <style scoped>
+p {
+  margin-bottom: 12px;
+}
+
 .horizontalBar {
   border-top: 1px dashed;
 }

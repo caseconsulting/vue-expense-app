@@ -50,7 +50,7 @@
         <ul v-if="clearance.polyDates.length > 1" class="mb-4 ml-6">
           <li v-for="(polyDate, pIndex) in clearance.polyDates" :key="pIndex">{{ monthDayYearFormat(polyDate) }}</li>
         </ul>
-        <hr v-if="index < filteredList.length - 1" class="mb-3" />
+        <hr v-if="index < filteredList.length - 1" class="my-3" />
       </div>
       <!-- End Loop Clearances -->
     </div>
