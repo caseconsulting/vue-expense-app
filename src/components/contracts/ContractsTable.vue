@@ -17,6 +17,7 @@
           <!-- Active Filter -->
           <ContractFilter />
           <!-- End Active Filter -->
+
           <div class="d-flex justify-end align-center flex-wrap">
             <v-btn
               color="#bc3825"
@@ -58,7 +59,7 @@
             :search="search"
             v-model:expanded="expanded"
             color="purple"
-            class="contracts-table"
+            class="contracts-table text-body-2"
             density="compact"
             hover
             show-select
@@ -84,6 +85,7 @@
                 </v-checkbox>
               </div>
             </template>
+
             <!-- Prime Name Slot -->
             <template v-slot:[`item.primeName`]="{ item }">
               <v-text-field
@@ -157,7 +159,6 @@
                 auto-grow
                 label="Description"
                 class="smaller-text description"
-                rows="1"
                 @click.stop
               ></v-textarea>
               <span v-else class="smaller-text" :class="{ 'font-weight-bold': true }">{{ item.description }}</span>
@@ -166,6 +167,7 @@
             <!-- Expanded Row Slot -->
             <template v-slot:expanded-row="{ columns, item }">
               <expanded-contract-table-row
+                class="overflow-y-hidden"
                 :contract="{ item }"
                 :colspan="columns.length"
                 :isEditingContractItem="editingItem != null"
@@ -181,7 +183,7 @@
                   <!-- Save Contract -->
                   <v-tooltip location="top">
                     <template v-slot:activator="{ on }">
-                      <v-btn @click.stop="updateContractPrime()" icon variant="text" v-on="on">
+                      <v-btn size="small" @click.stop="updateContractPrime()" icon variant="text" v-on="on">
                         <v-icon class="case-gray" icon="fa:fas fa-save" />
                       </v-btn>
                     </template>
@@ -192,6 +194,7 @@
                   <v-tooltip location="top">
                     <template v-slot:activator="{ on }">
                       <v-btn
+                        size="small"
                         icon
                         variant="text"
                         @click.stop="
@@ -217,6 +220,7 @@
                   <v-tooltip location="top">
                     <template v-slot:activator="{ on }">
                       <v-btn
+                        size="small"
                         :disabled="editingItem != null || isEditingProjectItem || contractLoading"
                         @click.stop="
                           () => {
@@ -238,6 +242,7 @@
                   <v-tooltip location="top">
                     <template v-slot:activator="{ on }">
                       <v-btn
+                        size="small"
                         :disabled="editingItem != null || isEditingProjectItem || contractLoading"
                         @click.stop="
                           () => {
@@ -258,6 +263,7 @@
                   <v-tooltip location="top">
                     <template v-slot:activator="{ on }">
                       <v-btn
+                        size="small"
                         icon
                         variant="text"
                         :disabled="editingItem != null || isEditingProjectItem || contractLoading"
@@ -1021,9 +1027,6 @@ export default {
     };
   },
   watch: {
-    expanded: function () {
-      console.log(this.expanded);
-    },
     '$store.getters.contracts': function () {
       if (this.$store.getters.contracts.length > this.contractsCheckBoxes.length) {
         let newContract = this.$store.getters.contracts[0];
@@ -1082,9 +1085,9 @@ export default {
   background-color: rgb(224, 224, 224) !important;
 }
 
-.contracts-table td:first-child {
-  padding-left: 0px !important;
-  background-color: red;
+.contracts-table > div > table > tbody > tr > td {
+  background: #f0f0f0 !important;
+  opacity: 1;
 }
 
 .description textarea {
@@ -1099,6 +1102,12 @@ export default {
   font-size: 11px;
   line-height: 1.2;
 }
+
+/*
+tr.v-data-table__tr--clickable > td {
+  background: red !important;
+  opacity: 1;
+}*/
 </style>
 
 <style scoped>
@@ -1109,6 +1118,7 @@ td {
 .contracts-table :deep(td:first-of-type) {
   width: 1%;
 }
+
 .contracts-table :deep(td:nth-child(n + 2):nth-child(-n + 6)) {
   width: 9%;
 }

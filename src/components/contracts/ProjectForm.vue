@@ -69,7 +69,7 @@ import { generateUUID } from '@/utils/utils';
  */
 function cancel() {
   this.dialog = false;
-  emit('canceled-project-form');
+  this.emitter.emit('canceled-project-form');
   this.$refs.form.reset();
   this.$refs.form.resetValidation();
 } // cancel
@@ -86,7 +86,7 @@ async function submit() {
     this.$refs.form.resetValidation();
     this.dialog = false;
     this.loading = false;
-    emit('submitted-project-form');
+    this.emitter.emit('submitted-project-form');
   }
 } // submit
 
@@ -111,22 +111,6 @@ async function createProject() {
   contracts[contractIndex] = contract;
   this.$store.dispatch('setContracts', { contracts: contracts });
 } // createProject
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     METHODS                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Emits a message and data if it exists.
- *
- * @param msg - Message to emit
- * @param data - The data to emit
- */
-function emit(msg, data) {
-  this.emitter.emit(msg, data);
-} // emit
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -170,7 +154,6 @@ export default {
   methods: {
     cancel,
     createProject,
-    emit,
     submit
   },
   props: ['toggleProjectForm', 'contract'],

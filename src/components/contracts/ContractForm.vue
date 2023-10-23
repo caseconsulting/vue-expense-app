@@ -5,7 +5,7 @@
         <v-card>
           <!-- Title -->
           <v-card-title class="header_style">
-            <v-icon color="white" class="mr-2">mdi-file-document-plus</v-icon>
+            <v-icon color="white">mdi-file-document-plus</v-icon>
             <span class="text-h5">New Contract</span>
           </v-card-title>
           <v-card-text>
@@ -14,6 +14,7 @@
                 <!-- Contract Name -->
                 <v-col cols="12" sm="6" md="6">
                   <v-text-field
+                    variant="underlined"
                     v-model="contractName"
                     :rules="[(v) => !!v || 'Field is required', duplicateContractPrimeCombo()]"
                     label="Contract Name*"
@@ -24,6 +25,7 @@
                 <!-- Prime Name -->
                 <v-col cols="12" sm="6" md="6">
                   <v-text-field
+                    variant="underlined"
                     v-model="primeName"
                     :rules="[(v) => !!v || 'Field is required', duplicateContractPrimeCombo()]"
                     label="Prime Name*"
@@ -34,6 +36,7 @@
                 <!-- Directorate -->
                 <v-col cols="12" sm="6" md="4">
                   <v-text-field
+                    variant="underlined"
                     v-model="directorate"
                     label="Directorate"
                     prepend-icon="mdi-office-building-outline"
@@ -41,21 +44,33 @@
                 </v-col>
                 <!-- PoP Start Date  -->
                 <v-col cols="12" sm="6" md="4">
-                  <v-text-field v-model="popStartDate" prepend-icon="event" label="PoP Start Date"></v-text-field>
+                  <v-text-field
+                    variant="underlined"
+                    v-model="popStartDate"
+                    prepend-icon="event"
+                    label="PoP Start Date"
+                  ></v-text-field>
                 </v-col>
                 <!-- Pop End Date -->
                 <v-col cols="12" sm="6" md="4">
-                  <v-text-field v-model="popEndDate" prepend-icon="event" label="PoP End Date"></v-text-field>
+                  <v-text-field
+                    variant="underlined"
+                    v-model="popEndDate"
+                    prepend-icon="event"
+                    label="PoP End Date"
+                  ></v-text-field>
                 </v-col>
                 <!-- Projects -->
                 <v-col cols="12">
                   <v-combobox
+                    variant="underlined"
+                    chips
                     v-model="projects"
                     :rules="[
                       (v) => projects.length != 0 || 'Field is required: type and press tab/enter to add a project'
                     ]"
                     hide-selected
-                    hint="Type and press tab/enter to add a project"
+                    hint="Type and press enter/tab to add a project"
                     label="Projects*"
                     multiple
                     persistent-hint
@@ -70,6 +85,7 @@
                   <v-textarea
                     v-model="description"
                     auto-grow
+                    variant="underlined"
                     label="Description"
                     prepend-icon="mdi-text"
                     rows="1"
@@ -108,7 +124,7 @@ import { generateUUID } from '@/utils/utils';
  */
 function cancel() {
   this.dialog = false;
-  emit('canceled-contract-form');
+  this.emitter.emit('canceled-contract-form');
   this.$refs.form.reset();
   this.$refs.form.resetValidation();
 } // cancel
@@ -137,16 +153,6 @@ async function createContract() {
 } // createContract
 
 /**
- * Emits a message and data if it exists.
- *
- * @param msg - Message to emit
- * @param data - The data to emit
- */
-function emit(msg, data) {
-  this.emitter.emit(msg, data);
-} // emit
-
-/**
  * Creates a validated contract.
  */
 async function submit() {
@@ -158,7 +164,7 @@ async function submit() {
     this.$refs.form.resetValidation();
     this.dialog = false;
     this.loading = false;
-    emit('submitted-contract-form', contract);
+    this.emitter.emit('submitted-contract-form', contract);
   }
 } // submit
 
@@ -206,7 +212,6 @@ export default {
   methods: {
     cancel,
     createContract,
-    emit,
     submit,
     updateStoreContracts
   },

@@ -115,7 +115,7 @@
                 <!-- Save Project -->
                 <v-tooltip location="top">
                   <template v-slot:activator="{ on }">
-                    <v-btn @click.stop="updateProject(contract.item)" icon variant="text" v-on="on">
+                    <v-btn size="small" @click.stop="updateProject(contract.item)" icon variant="text" v-on="on">
                       <v-icon class="case-gray" icon="fa:fas fa-save" />
                     </v-btn>
                   </template>
@@ -125,7 +125,7 @@
                 <!-- Cancel Project Edit -->
                 <v-tooltip location="top">
                   <template v-slot:activator="{ on }">
-                    <v-btn icon variant="text" @click.stop="clickedCancel()" v-on="on">
+                    <v-btn size="small" icon variant="text" @click.stop="clickedCancel()" v-on="on">
                       <v-icon class="case-gray" icon="fa:fas fa-times-circle" />
                     </v-btn>
                   </template>
@@ -140,6 +140,7 @@
                 <v-tooltip location="top">
                   <template v-slot:activator="{ on }">
                     <v-btn
+                      size="small"
                       :disabled="editingProjectItem != null || isEditingContractItem || projectLoading"
                       @click.stop="
                         () => {
@@ -162,6 +163,7 @@
                 <v-tooltip location="top">
                   <template v-slot:activator="{ on }">
                     <v-btn
+                      size="small"
                       :disabled="editingProjectItem != null || isEditingContractItem || projectLoading"
                       icon
                       variant="text"
