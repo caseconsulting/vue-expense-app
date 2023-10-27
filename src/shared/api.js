@@ -9,7 +9,6 @@ const TRAINING_URLS = 'training-urls';
 const UTILITY = 'utility';
 const QUICK_BOOKS_TIME = 'tSheets';
 const BASECAMP = 'basecamp';
-const HIPPO_LAB = 'hippoLabs';
 const GOOGLE_MAPS = 'googleMaps';
 const AUDIT = 'audits';
 const RESUME = 'resume';
@@ -57,19 +56,6 @@ async function execute(method, resource, data) {
     return err;
   }
 }
-
-/**
- * gets all the countries from the restcountries api
- *
- * @return - list of countries or an error
- */
-async function getCountries() {
-  let countries = await client({
-    method: 'get',
-    url: 'https://restcountries.eu/rest/v2/all'
-  });
-  return countries.data;
-} // getCountries
 
 /**
  * gets list of tech skills from emsi
@@ -461,41 +447,6 @@ async function uploadResume(employeeId, file) {
 } // uploadResume
 
 /**
- * returns a list of colleges that matches the query provided
- *
- * @param inputValue This is the query for the college
- * @return a list of colleges that match that query
- */
-async function getColleges(inputValue) {
-  try {
-    let response = await execute('get', `/${HIPPO_LAB}/getColleges/${inputValue}`);
-
-    for (let i = 0; i < response.length; i++) {
-      if (response[i] === 'Virginia Polytechnic Institute and State University') {
-        response[i] = 'Virginia Polytechnic Institute and State University (Virginia Tech)';
-      } else if (response[i] === 'University of Mississippi') {
-        response[i] = 'University of Mississippi (Ole Miss)';
-      } else if (response[i] === 'United States Military Academy') {
-        response[i] = 'United States Military Academy (West Point)';
-      } else if (response[i] === 'Northern Virginia Community College') {
-        response[i] = 'Northern Virginia Community College (NoVa)';
-      } else if (response[i] === 'Georgia Institute of Technology') {
-        response[i] = 'Georgia Institute of Technology (Georgia Tech)';
-      } else if (response[i] === 'Florida Institute of Technology') {
-        response[i] = 'Florida Institute of Technology (Florida Tech)';
-      } else if (response[i] === 'City University of New York') {
-        response[i] = 'City University of New York (City Tech)';
-      } else if (response[i] === 'California Institute of Technology') {
-        response[i] = 'California Institute of Technology (Caltech)';
-      }
-    }
-    return response;
-  } catch (err) {
-    return [];
-  }
-} // getColleges
-
-/**
  * Syncs application data between the Portal, BambooHR, ADP, etc.
  *
  * @return - The response from the data sync function
@@ -522,8 +473,6 @@ export default {
   getAudits,
   getBasecampAvatars,
   getBasecampCampfires,
-  getColleges,
-  getCountries,
   getEmployeeBudget,
   getEmployeeBudgets,
   getEmployeeExpenseTypes,

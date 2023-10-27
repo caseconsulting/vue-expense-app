@@ -8,11 +8,12 @@
         v-model="contract.contractName"
         :rules="[...getRequiredRules(), duplicateContractPrimeCombo(index)]"
         :items="getContractsDropdownItems(contract)"
-        @change="
+        @update:model-value="
           editedContracts.push(0); // force re-render for the items prop
           editedContracts.pop(0);
         "
         label="Contract"
+        variant="underlined"
         data-vv-name="Contract"
         clearable
       >
@@ -24,11 +25,12 @@
         v-model="contract.primeName"
         :rules="getRequiredRules()"
         :items="getPrimesDropdownItems(contract)"
-        @change="
+        @update:model-value="
           editedContracts.push(0); // force re-render for the items prop
           editedContracts.pop(0);
         "
         label="Prime"
+        variant="underlined"
         data-vv-name="Prime"
         clearable
       >
@@ -42,77 +44,69 @@
           :items="getProjectsDropdownItems(contract)"
           :rules="[...getRequiredRules(), duplicateContractProjects(project, index)]"
           :label="'Project ' + (projIndex + 1)"
-          @change="
+          variant="underlined"
+          @update:model-value="
             editedContracts.push(0); // force re-render for the items prop
             editedContracts.pop(0);
           "
           data-vv-name="Project"
           clearable
         >
-          <v-tooltip v-if="contract.projects.length > 1" bottom slot="append-outer">
-            <template v-slot:activator="{ on }">
-              <v-btn text icon v-on="on" @click="deleteProject(index, projIndex)"
-                ><v-icon class="case-gray">delete</v-icon></v-btn
-              >
-            </template>
-            <span>Delete Project</span>
-          </v-tooltip>
+          <template v-if="contract.projects.length > 1" v-slot:append>
+            <v-btn variant="text" icon="" density="comfortable" @click="deleteProject(index, projIndex)">
+              <v-tooltip activator="parent" location="bottom">Delete Project</v-tooltip>
+              <v-icon class="case-gray">mdi-delete</v-icon>
+            </v-btn>
+          </template>
         </v-select>
         <v-row>
           <v-col cols="12" sm="6" md="12" lg="6" class="pt-3">
             <!-- Start Date -->
-            <v-menu
-              v-model="project.showStartMenu"
-              :close-on-content-click="false"
-              transition="scale-transition"
-              offset-y
-              max-width="290px"
-              min-width="290px"
-            >
-              <template v-slot:activator="{ on, attrs }">
+            <v-menu v-model="project.showStartMenu" :close-on-content-click="false" location="start center">
+              <template v-slot:activator="{ props }">
                 <v-text-field
                   :id="'start-field-' + index + '-' + projIndex"
                   ref="formFields"
-                  :value="format(project.startDate, null, 'MM/YYYY')"
+                  :model-value="format(project.startDate, null, 'MM/YYYY')"
                   label="Start Date"
                   hint="MM/YYYY format"
                   v-mask="'##/####'"
-                  prepend-icon="event_available"
+                  variant="underlined"
                   :rules="[...getRequiredRules(), ...getDateMonthYearRules(), dateOrderRule(index, projIndex)]"
-                  v-bind="attrs"
-                  v-on="on"
                   @blur="project.startDate = parseEventDate($event)"
                   clearable
-                  @input="project.showStartMenu = false"
-                ></v-text-field>
+                  @click:prepend="project.showStartMenu = true"
+                  @click:control="project.showStartMenu = false"
+                >
+                  <template v-slot:prepend>
+                    <div v-bind="props" class="pointer">
+                      <v-icon :color="caseGray">mdi-calendar</v-icon>
+                    </div>
+                  </template>
+                </v-text-field>
               </template>
               <v-date-picker
                 v-model="project.startDate"
+                @update:model-value="project.showStartMenu = false"
                 :max="project.endDate"
-                no-title
-                @input="project.showStartMenu = false"
-                type="month"
+                show-adjacent-months
+                hide-actions
+                keyboard-icon=""
+                color="#bc3825"
+                title="Start Date"
               ></v-date-picker>
             </v-menu>
           </v-col>
           <v-col cols="12" sm="6" md="12" lg="6" class="pt-3">
             <!-- End Date -->
-            <v-menu
-              v-model="project.showEndMenu"
-              :close-on-content-click="false"
-              transition="scale-transition"
-              offset-y
-              max-width="290px"
-              min-width="290px"
-            >
-              <template v-slot:activator="{ on, attrs }">
+            <v-menu v-model="project.showEndMenu" :close-on-content-click="false" location="start center">
+              <template v-slot:activator="{ props }">
                 <v-text-field
                   :id="'end-field-' + index + '-' + projIndex"
                   ref="formFields"
-                  :disabled="project.presentDate"
-                  :value="format(project.endDate, null, 'MM/YYYY')"
-                  label="End Date"
-                  prepend-icon="event_busy"
+                  :model-value="format(project.endDate, null, 'MM/YYYY')"
+                  :label="project.presentDate ? 'Currently active' : 'End Date'"
+                  variant="underlined"
                   :rules="[
                     ...getDateMonthYearOptionalRules(),
                     dateOrderRule(index, projIndex),
@@ -120,63 +114,78 @@
                   ]"
                   hint="MM/YYYY format"
                   v-mask="'##/####'"
-                  v-bind="attrs"
-                  v-on="on"
                   clearable
                   @click:clear="project.endDate = null"
                   @blur="project.endDate = parseEventDate($event)"
-                  @input="project.showEndMenu = false"
-                ></v-text-field>
+                  @click:prepend="project.showEndMenu = true"
+                  @click:control="project.showEndMenu = false"
+                  @update:model-value="
+                    project.endDate && project.endDate.length > 0 ? (project.presentDate = false) : ''
+                  "
+                >
+                  <template v-slot:prepend>
+                    <div v-bind="props" class="pointer">
+                      <v-icon :color="caseGray">mdi-calendar</v-icon>
+                    </div>
+                  </template>
+                  <template v-slot:append-inner>
+                    <v-avatar
+                      v-if="checkProjectStatus(project)"
+                      @click="project.presentDate = !project.presentDate"
+                      class="pointer"
+                      size="x-small"
+                    >
+                      <span v-if="!project.presentDate">
+                        <v-tooltip activator="parent">Click if active</v-tooltip>
+                        <v-icon color="black"> mdi-check-circle-outline </v-icon>
+                      </span>
+                      <span v-else>
+                        <v-tooltip activator="parent">Currently active</v-tooltip>
+                        <v-icon color="black"> mdi-check-circle </v-icon>
+                      </span>
+                    </v-avatar>
+                  </template>
+                </v-text-field>
               </template>
               <v-date-picker
                 v-model="project.endDate"
                 :min="project.startDate"
-                no-title
-                @input="project.showEndMenu = false"
-                type="month"
+                @update:model-value="project.showEndMenu = false"
+                show-adjacent-months
+                hide-actions
+                keyboard-icon=""
+                color="#bc3825"
+                title="End Date"
               ></v-date-picker>
             </v-menu>
             <!-- End End Date -->
-          </v-col>
-          <v-col v-if="!isMobile"></v-col>
-          <v-col>
-            <v-layout justify-start class="pl-2">
-              <v-checkbox
-                class="ma-0 pa-0"
-                v-model="project.presentDate"
-                :label="`Present`"
-                @click="project.endDate = null"
-              ></v-checkbox>
-            </v-layout>
           </v-col>
         </v-row>
       </div>
       <!-- End of project loop -->
 
       <div class="pb-4" align="center">
-        <v-btn @click="addProject(index)" :id="'add-proj-' + index" elevation="2"
-          ><v-icon class="pr-1">add</v-icon>Project</v-btn
-        >
+        <v-btn @click="addProject(index)" :id="'add-proj-' + index" elevation="2">
+          <v-icon class="pr-1">mdi-plus</v-icon>
+          Project
+        </v-btn>
       </div>
 
       <div class="pb-4" align="center">
-        <v-tooltip bottom>
-          <template v-slot:activator="{ on }">
-            <v-btn v-on="on" @click="deleteContract(index)" icon text
-              ><v-icon class="case-gray pr-1">delete</v-icon></v-btn
-            >
-          </template>
-          <span>Delete Contract</span>
-        </v-tooltip>
+        <v-btn @click="deleteContract(index)" icon variant="text">
+          <v-tooltip activator="parent" location="bottom">Delete Contract</v-tooltip>
+          <v-icon class="case-gray pr-1">mdi-delete</v-icon>
+        </v-btn>
       </div>
     </div>
     <!-- End Loop Contracts -->
 
     <!-- Button to Add Contracts -->
     <div class="pt-4" align="center">
-      <v-btn @click="addContract()" elevation="2" id="addContractButton"
-        ><v-icon class="pr-1">add</v-icon>Contract</v-btn
-      >
+      <v-btn @click="addContract()" elevation="2" id="addContractButton">
+        <v-icon class="pr-1">mdi-plus</v-icon>
+        Contract
+      </v-btn>
     </div>
   </div>
 </template>
@@ -235,14 +244,14 @@ async function created() {
 function addContract() {
   if (!this.editedContracts) this.editedContracts = [];
   this.editedContracts.push({
-    contractId: '',
-    contractName: '',
-    primeName: '',
+    contractId: null,
+    contractName: null,
+    primeName: null,
     years: 0,
     current: false,
     projects: [
       {
-        projectName: '',
+        projectName: null,
         endDate: null,
         presentDate: false,
         startDate: null,
@@ -260,7 +269,7 @@ function addContract() {
  */
 function addProject(contractIndex) {
   this.editedContracts[contractIndex].projects.push({
-    projectName: '',
+    projectName: null,
     endDate: null,
     presentDate: false,
     startDate: null,
@@ -268,6 +277,20 @@ function addProject(contractIndex) {
     showEndMenu: false
   });
 } // addProject
+
+/**
+ * Checks if a position is active or not.
+ *
+ * @param position - the job position
+ */
+function checkProjectStatus(project) {
+  if (!project.endDate) {
+    return true;
+  } else {
+    project.presentDate = false;
+    return false;
+  }
+} // checkProjectStatus
 
 /**
  * Deletes a Contract.
@@ -427,7 +450,7 @@ function validateFields() {
     });
   });
 
-  this.emitter.emit('doneValidating', 'contracts', this.editedContracts); // emit done validating and sends edited data back to parent
+  this.emitter.emit('doneValidating', { tab: 'contracts', data: this.editedContracts }); // emit done validating and sends edited data back to parent
   this.emitter.emit('contractsStatus', errorCount); // emit error status
 } // validateFields
 
@@ -518,6 +541,7 @@ export default {
     add, // dateUtils
     addContract,
     addProject,
+    checkProjectStatus,
     getContractsDropdownItems,
     getPrimesDropdownItems,
     getProjectsDropdownItems,

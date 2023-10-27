@@ -1,6 +1,6 @@
 <template>
   <v-card class="px-10 pt-5 my-7">
-    <div v-if="dataReceived">
+    <div v-if="dataReceived" class="pointer">
       <bar-chart
         ref="barChart"
         :key="chartKey"
@@ -408,9 +408,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-div {
-  cursor: pointer;
-}
-</style>

@@ -58,7 +58,7 @@
     <!-- Birthday -->
     <sensitive-data-field
       v-if="!isEmpty(this.model.birthday) & (admin || employee)"
-      :class="isBday ? 'clickable' : ''"
+      :class="isBday ? 'pointer' : ''"
       class="mb-5"
       @click="confetti"
       label="Birthday"
@@ -291,10 +291,6 @@ export default {
 <style scoped lang="scss">
 p {
   margin-bottom: 12px;
-}
-
-.clickable {
-  cursor: pointer;
 }
 
 .wrapper {

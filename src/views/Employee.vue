@@ -245,6 +245,7 @@ async function downloadResume() {
  */
 async function getProfileData() {
   this.loading = true;
+  this.basicEmployeeDataLoading = true;
   await Promise.all([
     !this.$store.getters.employees ? this.updateStoreEmployees() : '',
     !this.$store.getters.user ? this.updateStoreUser() : '',
@@ -393,7 +394,6 @@ async function created() {
   this.emitter.on('canceled-delete-resume', () => {
     this.midAction = false;
   });
-  this.basicEmployeeDataLoading = true;
   this.storeIsPopulated ? await this.getProfileData() : (this.loading = true);
   if (!this.$store.getters.employees) await this.updateStoreEmployees();
 } // created
@@ -480,6 +480,7 @@ export default {
   created,
   data() {
     return {
+      basicEmployeeDataLoading: false,
       currentTab: null,
       contracts: null,
       dateFormat: FORMATTED_ISOFORMAT,
@@ -496,7 +497,6 @@ export default {
       loading: false, // loading status
       model: {
         awards: [],
-        basicEmployeeDataLoading: false,
         birthday: '',
         birthdayFeed: false,
         certifications: [],

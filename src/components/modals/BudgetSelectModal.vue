@@ -12,7 +12,7 @@
           <!-- Budget List -->
           <div v-if="hasBudgets">
             <div v-for="(budgetYear, index) in budgetYears" :key="budgetYear">
-              <v-list-item ripple @click.native="select(budgetYear)" class="list-hover">
+              <v-list-item ripple @click.native="select(budgetYear)" class="pointer">
                 <v-list-item-content>
                   <v-list-item-title>
                     <h2 v-bind:class="{ 'text-center': true, 'text-decoration-underline': isCurrent(budgetYear) }">
@@ -146,10 +146,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-.list-hover:hover {
-  background-color: #f0f0f0;
-  cursor: pointer;
-}
-</style>

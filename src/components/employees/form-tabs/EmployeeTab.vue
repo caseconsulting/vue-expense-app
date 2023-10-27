@@ -1,56 +1,85 @@
 <template>
   <div>
-    <small class="info--text">*indicates required field</small>
+    <small class="text-info">*indicates required field</small>
     <!-- We have to put the fields in a v-for
       in order the 'ref=formFields' to be placed into
       an array -->
-    <div v-for="i in [0]" :key="i" class="mt-3">
-      <!-- First Name -->
-      <v-text-field
-        id="employeeFirstName"
-        ref="formFields"
-        v-model.trim="editedEmployee.firstName"
-        :rules="getRequiredRules()"
-        label="First Name*"
-        data-vv-name="First Name"
-      ></v-text-field>
-      <!-- Middle Name -->
-      <div class="d-flex align-center">
-        <v-text-field
-          id="employeeMiddleName"
-          ref="formFields"
-          v-model.trim="editedEmployee.middleName"
-          :rules="middleNameRules()"
-          label="Middle Name*"
-          data-vv-name="Middle Name"
-          :disabled="editedEmployee.noMiddleName"
-        ></v-text-field>
-        <v-checkbox
-          class="ml-3"
-          id="employeeMiddleBox"
-          label="No middle name"
-          v-model="editedEmployee.noMiddleName"
-          @click="editedEmployee.middleName = null"
-        ></v-checkbox>
-      </div>
-      <!-- Last Name -->
-      <v-text-field
-        id="employeeLastName"
-        ref="formFields"
-        v-model.trim="editedEmployee.lastName"
-        :rules="getRequiredRules()"
-        label="Last Name*"
-        data-vv-name="Last Name"
-      ></v-text-field>
-      <!-- Nickname -->
-      <v-text-field
-        id="employeeNickname"
-        ref="formFields"
-        v-model.trim="editedEmployee.nickname"
-        label="Nickname"
-        data-vv-name="Nickname"
-        :disabled="!userRoleIsAdmin() && !thisIsMyProfile() && !userRoleIsManager()"
-      ></v-text-field>
+    <div v-for="i in [0]" :key="i" class="mt-6">
+      <v-row>
+        <v-col cols="12" md="3" class="my-0 py-0 mb-md-4">
+          <!-- First Name -->
+          <v-text-field
+            id="employeeFirstName"
+            ref="formFields"
+            v-model.trim="editedEmployee.firstName"
+            :rules="getRequiredRules()"
+            label="First Name*"
+            variant="underlined"
+            data-vv-name="First Name"
+          ></v-text-field
+        ></v-col>
+        <v-col cols="12" md="3" class="my-0 py-0">
+          <!-- Middle Name -->
+          <div class="d-flex align-center">
+            <v-text-field
+              id="employeeMiddleName"
+              ref="formFields"
+              v-model.trim="editedEmployee.middleName"
+              :rules="middleNameRules()"
+              :label="editedEmployee.noMiddleName ? 'Not Applicable' : 'Middle Name*'"
+              variant="underlined"
+              data-vv-name="Middle Name"
+              @update:model-value="
+                editedEmployee.middleName && editedEmployee.middleName.length > 0
+                  ? (editedEmployee.noMiddleName = false)
+                  : ''
+              "
+            >
+              <template v-slot:append-inner>
+                <v-avatar
+                  v-if="!editedEmployee.middleName"
+                  @click="editedEmployee.noMiddleName = !editedEmployee.noMiddleName"
+                  class="pointer"
+                  size="x-small"
+                >
+                  <span v-if="!editedEmployee.noMiddleName">
+                    <v-tooltip activator="parent">Click if you have no middle name</v-tooltip>
+                    <v-icon color="black"> mdi-close-circle-outline </v-icon>
+                  </span>
+                  <span v-else>
+                    <v-tooltip activator="parent">I do not have a middle name</v-tooltip>
+                    <v-icon color="black"> mdi-minus-circle </v-icon>
+                  </span>
+                </v-avatar>
+              </template>
+            </v-text-field>
+          </div>
+        </v-col>
+        <v-col cols="12" md="3" class="my-0 py-0">
+          <!-- Last Name -->
+          <v-text-field
+            id="employeeLastName"
+            ref="formFields"
+            v-model.trim="editedEmployee.lastName"
+            :rules="getRequiredRules()"
+            label="Last Name*"
+            variant="underlined"
+            data-vv-name="Last Name"
+          ></v-text-field>
+        </v-col>
+        <v-col cols="12" md="3" class="my-0 py-0">
+          <!-- Nickname -->
+          <v-text-field
+            id="employeeNickname"
+            ref="formFields"
+            v-model.trim="editedEmployee.nickname"
+            label="Nickname"
+            variant="underlined"
+            data-vv-name="Nickname"
+            :disabled="!userRoleIsAdmin() && !thisIsMyProfile() && !userRoleIsManager()"
+          ></v-text-field>
+        </v-col>
+      </v-row>
 
       <!-- Employee # -->
       <v-text-field
@@ -59,9 +88,10 @@
         v-model="editedEmployee.employeeNumber"
         :rules="[...getRequiredRules(), ...getNumberRules(), ...duplicateEmployeeNumberRule]"
         label="Employee Number*"
+        variant="underlined"
         data-vv-name="Employee Number"
         :disabled="!admin || disableEmpNum"
-        @input.native="duplicateEmployeeNum"
+        @update:model-value="duplicateEmployeeNum"
       ></v-text-field>
 
       <!-- Email -->
@@ -72,6 +102,7 @@
         suffix="@consultwithcase.com"
         :rules="emailRules"
         label="Email*"
+        variant="underlined"
         data-vv-name="Email"
         :disabled="!admin"
         @blur="combineEmailUsernameAndDomain"
@@ -82,7 +113,8 @@
         id="employeeJobRole"
         :items="jobTitles"
         v-model="editedEmployee.jobRole"
-        item-text="text"
+        variant="underlined"
+        item-title="text"
         label="Job Role"
       ></v-combobox>
 
@@ -92,6 +124,7 @@
         ref="formFields"
         v-model.trim="editedEmployee.agencyIdentificationNumber"
         label="Agency Identification Number"
+        variant="underlined"
         data-vv-name="Agency Identification Number"
       ></v-text-field>
 
@@ -105,10 +138,10 @@
         multiple
         chips
         clearable
-        small-chips
-        deletable-chips
+        closable-chips
         label="Employee Tags"
-        item-text="tagName"
+        variant="underlined"
+        item-title="tagName"
         return-object
       ></v-autocomplete>
 
@@ -121,22 +154,19 @@
         :rules="getRequiredRules()"
         v-model="employeeRoleFormatted"
         label="Employee Role*"
+        variant="underlined"
         @blur="editedEmployee.employeeRole = formatKebabCase(employeeRoleFormatted)"
       ></v-autocomplete>
 
       <!-- Hire Date -->
       <v-menu
         ref="hireMenu"
+        location="start center"
         :close-on-content-click="false"
         v-model="hireMenu"
-        :nudge-right="40"
-        transition="scale-transition"
-        offset-y
-        max-width="290px"
-        min-width="290px"
         :disabled="!admin"
       >
-        <template v-slot:activator="{ on }">
+        <template v-slot:activator="{ props }">
           <v-text-field
             id="employeeHireDateField"
             ref="formFields"
@@ -145,20 +175,30 @@
             :disabled="hasExpenses || !admin"
             v-mask="'##/##/####'"
             label="Hire Date*"
+            variant="underlined"
             hint="MM/DD/YYYY format"
             persistent-hint
-            prepend-icon="event"
             @blur="editedEmployee.hireDate = format(hireDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
-            @input="hireMenu = false"
-            v-on="on"
-          ></v-text-field>
+            @click:prepend="hireMenu = true"
+            @click:control="hireMenu = false"
+          >
+            <template v-slot:prepend>
+              <div v-bind="props" class="pointer">
+                <v-icon :color="caseGray">mdi-calendar</v-icon>
+              </div>
+            </template>
+          </v-text-field>
         </template>
         <v-date-picker
           v-model="editedEmployee.hireDate"
-          no-title
+          @update:model-value="hireMenu = false"
           :max="editedEmployee.deptDate"
-          @input="hireMenu = false"
           :disabled="!admin"
+          show-adjacent-months
+          hide-actions
+          keyboard-icon=""
+          color="#bc3825"
+          title="Hire Date"
         ></v-date-picker>
       </v-menu>
       <!-- If inactive, set Departure Date -->
@@ -168,45 +208,53 @@
         :rules="getRequiredRules()"
         :close-on-content-click="false"
         v-model="departureMenu"
-        :nudge-right="40"
-        transition="scale-transition"
-        offset-y
-        max-width="290px"
-        min-width="290px"
         :disabled="!admin"
+        location="start center"
       >
-        <template v-slot:activator="{ on }">
+        <template v-slot:activator="{ props }">
           <v-text-field
             ref="formFields"
             v-model="deptDateFormatted"
             :rules="[...getDateRules(), validateDates()]"
             label="Departure Date"
+            variant="underlined"
             hint="MM/DD/YYYY format"
             v-mask="'##/##/####'"
+            class="mt-1"
             persistent-hint
-            prepend-icon="event"
             @blur="editedEmployee.deptDate = format(deptDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
-            @input="departureMenu = false"
-            v-on="on"
+            @click:prepend="departureMenu = true"
+            @click:control="departureMenu = false"
             :disabled="!admin"
-          ></v-text-field>
+          >
+            <template v-slot:prepend>
+              <div v-bind="props" class="pointer">
+                <v-icon :color="caseGray">mdi-calendar</v-icon>
+              </div>
+            </template>
+          </v-text-field>
+          <span v-bind="props"></span>
         </template>
         <v-date-picker
           v-model="editedEmployee.deptDate"
-          no-title
+          @update:model-value="departureMenu = false"
           :min="editedEmployee.hireDate"
-          @input="departureMenu = false"
           :disabled="!admin"
+          show-adjacent-months
+          hide-actions
+          keyboard-icon=""
+          color="#bc3825"
+          title="Departure Date"
         ></v-date-picker>
       </v-menu>
       <!-- Full/Part/Inactive Status [MOBILE] -->
-      <v-radio-group v-if="isMobile()" v-model="statusRadio" row mandatory :disabled="!admin">
+      <v-radio-group v-if="isMobile()" v-model="statusRadio" inline mandatory :disabled="!admin">
         <v-row class="ma-0">
           <v-col cols="6" sm="3">
             <v-radio label="Full Time" value="full"></v-radio>
           </v-col>
           <v-col cols="6" sm="3">
-            <v-radio label="Part Time" value="part" @change="viewStatus()"></v-radio>
+            <v-radio label="Part Time" value="part" @update:model-value="viewStatus()"></v-radio>
           </v-col>
           <v-col cols="6" sm="3">
             <v-radio label="Inactive" value="inactive"></v-radio>
@@ -215,8 +263,7 @@
           <v-col v-if="isPartTime()" cols="6" sm="3">
             <v-text-field
               class="employeeStatusBox"
-              height="40"
-              outlined
+              variant="outlined"
               ref="formFields"
               :rules="statusRules"
               suffix="%"
@@ -230,16 +277,15 @@
       <!-- End [Full/Part/Inactive Status [MOBILE]] -->
 
       <!-- Full/Part/Inactive Status [DESKTOP] -->
-      <v-radio-group v-else v-model="statusRadio" row mandatory hide-details :disabled="!admin">
+      <v-radio-group v-else v-model="statusRadio" inline mandatory hide-details :disabled="!admin" class="mt-5">
         <v-radio label="Full Time" value="full"></v-radio>
-        <v-radio label="Part Time" value="part" @change="viewStatus()"></v-radio>
+        <v-radio label="Part Time" value="part" @update:model-value="viewStatus()"></v-radio>
         <v-radio label="Inactive" value="inactive"></v-radio>
         <!-- custom input field -->
         <div v-if="isPartTime()">
           <v-text-field
-            class="employeeStatusBox"
-            height="40"
-            outlined
+            class="employeeStatusBox ml-4"
+            variant="outlined"
             ref="formFields"
             :rules="statusRules"
             suffix="%"
@@ -255,16 +301,14 @@
       <v-divider class="my-2"></v-divider>
       <p class="mb-0 mt-5">
         EEO Compliance Reporting
-        <v-tooltip top max-width="500">
-          <template v-slot:activator="{ on }">
-            <v-icon v-on="on" class="case-gray">shield</v-icon>
-          </template>
-          <span
-            >Data in this section is only Visible to You, Managers, and Admins. Equal Employment Opportunity (EEO)
+        <span>
+          <v-tooltip activator="parent" location="top" max-width="500">
+            Data in this section is only Visible to You, Managers, and Admins. Equal Employment Opportunity (EEO)
             reporting is required for companies with more than 50 employees. <b>Note:</b> options for the fields below
             are the same as the options listed in the paper format.
-          </span>
-        </v-tooltip>
+          </v-tooltip>
+          <v-icon v-on="on" class="case-gray">shield</v-icon>
+        </span>
       </p>
 
       <!-- Gender -->
@@ -272,7 +316,8 @@
         label="Gender"
         v-model="editedEmployee.eeoGender"
         :items="eeoGenderItems"
-        item-text="text"
+        variant="underlined"
+        item-title="text"
         item-value="value"
         return-object
         :disabled="(editedEmployee.eeoDeclineSelfIdentify && thisIsMyProfile()) || !adminCanEditEeo()"
@@ -283,7 +328,8 @@
         label="Hispanic or Latino"
         v-model="editedEmployee.eeoHispanicOrLatino"
         :items="eeoHispanicOrLatinoItems"
-        item-text="text"
+        variant="underlined"
+        item-title="text"
         item-value="value"
         return-object
         :disabled="(editedEmployee.eeoDeclineSelfIdentify && thisIsMyProfile()) || !adminCanEditEeo()"
@@ -294,7 +340,8 @@
         label="Race or Ethnicity"
         v-model="editedEmployee.eeoRaceOrEthnicity"
         :items="eeoRaceOrEthnicityItems"
-        item-text="text"
+        variant="underlined"
+        item-title="text"
         item-value="value"
         return-object
         :disabled="
@@ -302,36 +349,35 @@
         "
       >
       </v-select>
-      <!-- Job Category -->
-      <v-tooltip top max-width="400"
-        ><template v-slot:activator="{ on }">
-          <div v-on="on">
-            <v-select
-              label="Job Category"
-              v-model="editedEmployee.eeoJobCategory"
-              :items="eeoJobCategoryItems"
-              item-text="text"
-              item-value="value"
-              return-object
-              :disabled="(editedEmployee.eeoDeclineSelfIdentify && thisIsMyProfile()) || !adminCanEditEeo()"
-            >
-            </v-select>
-          </div>
-        </template>
-        <span
-          >Most CASE employees are considered 'Professionals'. Please select 'Professional' unless you know you fall
-          into a different category.</span
+
+      <div>
+        <!-- Job Category -->
+        <v-tooltip activator="parent" location="top" max-width="400">
+          Most CASE employees are considered 'Professionals'. Please select 'Professional' unless you know you fall into
+          a different category.
+        </v-tooltip>
+        <v-select
+          label="Job Category"
+          v-model="editedEmployee.eeoJobCategory"
+          :items="eeoJobCategoryItems"
+          variant="underlined"
+          item-title="text"
+          item-value="value"
+          return-object
+          :disabled="(editedEmployee.eeoDeclineSelfIdentify && thisIsMyProfile()) || !adminCanEditEeo()"
         >
-      </v-tooltip>
+        </v-select>
+      </div>
 
       <!-- Disability -->
       <v-radio-group
         v-model="editedEmployee.eeoHasDisability"
         :disabled="(editedEmployee.eeoDeclineSelfIdentify && thisIsMyProfile()) || !adminCanEditEeo()"
-        row
+        inline
+        hide-details
         class="mt-0"
       >
-        <span class="mr-4">Disability:</span>
+        <span class="mt-2 mr-4">Disability:</span>
         <v-radio label="Yes" :value="true"></v-radio>
         <v-radio label="No" :value="false"></v-radio>
       </v-radio-group>
@@ -340,20 +386,22 @@
       <v-radio-group
         v-model="editedEmployee.eeoIsProtectedVeteran"
         :disabled="(editedEmployee.eeoDeclineSelfIdentify && thisIsMyProfile()) || !adminCanEditEeo()"
-        row
-        class="mt-0"
+        inline
+        hide-details
+        class="mt-2"
       >
-        <span class="mr-4">Protected Veteran:</span>
+        <span class="mt-2 mr-4">Protected Veteran:</span>
         <v-radio label="Yes" :value="true"></v-radio>
         <v-radio label="No" :value="false"></v-radio>
       </v-radio-group>
 
       <!-- Decline Self-identify -->
       <v-checkbox
-        class="mt-0"
+        class="my-1"
         label="Decline to self-identify"
         v-model="editedEmployee.eeoDeclineSelfIdentify"
         :disabled="!thisIsMyProfile()"
+        hide-details
       ></v-checkbox>
 
       <!-- Confirm Decline Self-Identify Modal -->
@@ -575,7 +623,7 @@ function validateFields() {
     this.editedEmployee.workStatus = this.model.workStatus;
   }
 
-  this.emitter.emit('doneValidating', 'employee', this.editedEmployee); // emit done validating
+  this.emitter.emit('doneValidating', { tab: 'employee', data: this.editedEmployee }); // emit done validating
   this.emitter.emit('employeeStatus', errorCount); // emit error status
 } // validateFields
 
@@ -594,7 +642,7 @@ function viewStatus() {
  * Emits the duplicated employee number.
  */
 function duplicateEmployeeNum() {
-  this.emitter.emit('disableUpload', this.duplicate, this.editedEmployee.employeeNumber);
+  this.emitter.emit('disableUpload', { disabled: this.duplicate, employeeNumber: this.editedEmployee.employeeNumber });
 } // duplicateEmployeeNum
 
 // |--------------------------------------------------|
@@ -651,9 +699,9 @@ function watchEditedEmployeeEmployeeNumber() {
   let empNum = this.editedEmployee.employeeNumber;
   // determine if the resume button should be disabled or not
   if (empNum !== '' && !isNaN(empNum) && parseInt(empNum) > 0) {
-    this.emitter.emit('disableUpload', false, empNum);
+    this.emitter.emit('disableUpload', { disabled: false, employeeNumber: empNum });
   } else {
-    this.emitter.emit('disableUpload', true, empNum);
+    this.emitter.emit('disableUpload', { disabled: true, employeeNumber: empNum });
   }
 } // watchEditedEmployeeEmployeeNumber
 
@@ -922,13 +970,5 @@ export default {
 
 .inputError {
   border: solid 1px red !important;
-}
-
-.middle-name-width {
-  width: 75%;
-}
-
-.no-middle-name-width {
-  width: 25%;
 }
 </style>

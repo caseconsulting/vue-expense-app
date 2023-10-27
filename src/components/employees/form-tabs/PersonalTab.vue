@@ -2,10 +2,10 @@
   <div>
     <!-- Github -->
     <v-text-field
-      prepend-icon="mdi-github"
       v-model.trim="editedPersonalInfo.github"
       ref="github"
       label="Github (username)"
+      variant="underlined"
       data-vv-name="Github"
     >
       <template v-slot:prepend>
@@ -16,7 +16,13 @@
     </v-text-field>
 
     <!-- X -->
-    <v-text-field v-model.trim="editedPersonalInfo.twitter" ref="x" label="X (username)" data-vv-name="X">
+    <v-text-field
+      v-model.trim="editedPersonalInfo.twitter"
+      ref="x"
+      label="X (username)"
+      variant="underlined"
+      data-vv-name="X"
+    >
       <template v-slot:prepend>
         <v-avatar rounded="0" size="23">
           <v-img class="grayImage" :src="x" alt="X icon"></v-img>
@@ -26,9 +32,9 @@
 
     <!-- LinkedIn -->
     <v-text-field
-      prepend-icon="mdi-linkedin"
       v-model.trim="editedPersonalInfo.linkedIn"
       label="LinkedIn (profile url)"
+      variant="underlined"
       :rules="getURLRules()"
       ref="linkedin"
       data-vv-name="LinkedIn"
@@ -45,6 +51,7 @@
       prepend-icon="mdi-email"
       v-model.trim="editedPersonalInfo.personalEmail"
       label="Personal Email"
+      variant="underlined"
       :rules="getEmailRules()"
       ref="personalEmail"
       data-vv-name="personal email"
@@ -58,6 +65,7 @@
           <v-autocomplete
             v-model="phoneNumber.type"
             label="Type"
+            variant="underlined"
             :items="phoneNumberTypes"
             data-vv-name="Phone Type"
             :rules="getPhoneNumberTypeRules()"
@@ -73,34 +81,30 @@
             :rules="getPhoneNumberRules()"
             ref="phoneNum"
             label="Phone Number"
+            variant="underlined"
             data-vv-name="Phone Number"
           >
           </v-text-field>
         </v-col>
         <v-col class="pt-0" cols="2" xl="2" lg="3" md="3" sm="3" xs="12">
-          <v-text-field v-model="phoneNumber.ext" v-mask="'####'" label="Ext" data-vv-name="Ext"> </v-text-field>
+          <v-text-field v-model="phoneNumber.ext" v-mask="'####'" label="Ext" variant="underlined" data-vv-name="Ext">
+          </v-text-field>
         </v-col>
         <v-col class="py-0 pr-0" cols="2" xl="2" lg="2" md="3" sm="3" xs="12">
-          <v-tooltip bottom slot="append-outer">
-            <template v-slot:activator="{ on }">
-              <v-btn class="mr-2" v-on="on" @click="deletePhoneInput(index)" text icon>
-                <v-icon class="case-gray">delete</v-icon>
-              </v-btn>
-            </template>
-            <span>Delete Number</span>
-          </v-tooltip>
-          <v-tooltip bottom slot="append-outer">
-            <template v-slot:activator="{ on }">
-              <v-btn v-on="on" @click="changeNumberVisibility(index)" text icon>
-                <v-icon v-if="phoneNumber.private">mdi-shield</v-icon>
-                <v-icon v-else>mdi-shield-outline</v-icon>
-              </v-btn>
-            </template>
-            <span v-if="phoneNumber.private"
-              >Based on user preference, this is only visible to You, Managers, and Admins</span
-            >
-            <span v-else>Based on user preference, this is visible to everyone</span>
-          </v-tooltip>
+          <v-btn class="mr-2" @click="deletePhoneInput(index)" variant="text" icon="">
+            <v-tooltip activator="parent" location="bottom">Delete Number</v-tooltip>
+            <v-icon class="case-gray">mdi-delete</v-icon>
+          </v-btn>
+          <v-btn @click="changeNumberVisibility(index)" variant="text" icon="">
+            <v-tooltip activator="parent" location="bottom">
+              <span v-if="phoneNumber.private"
+                >Based on user preference, this is only visible to You, Managers, and Admins</span
+              >
+              <span v-else>Based on user preference, this is visible to everyone</span>
+            </v-tooltip>
+            <v-icon v-if="phoneNumber.private" class="case-gray">mdi-shield</v-icon>
+            <v-icon v-else class="case-gray">mdi-shield-outline</v-icon>
+          </v-btn>
         </v-col>
         <v-col v-if="index != phoneNumbers.length - 1 && $vuetify.display.name === 'xs'" cols="12">
           <v-divider class="mb-2"></v-divider>
@@ -112,32 +116,37 @@
     </div>
 
     <!-- Birthday Picker -->
-    <v-menu
-      ref="BirthdayMenu"
-      :close-on-content-click="false"
-      v-model="BirthdayMenu"
-      :nudge-right="40"
-      transition="scale-transition"
-      offset-y
-      max-width="290px"
-      min-width="290px"
-    >
-      <template v-slot:activator="{ on }">
+    <v-menu ref="BirthdayMenu" :close-on-content-click="false" v-model="BirthdayMenu" location="start center">
+      <template v-slot:activator="{ props }">
         <v-text-field
           ref="formFields"
           v-mask="'##/##/####'"
           v-model="birthdayFormat"
           :rules="[...getDateOptionalRules(), ...getNonFutureDateRules()]"
           label="Birthday"
+          variant="underlined"
           hint="MM/DD/YYYY format"
           persistent-hint
-          prepend-icon="event"
           @blur="editedPersonalInfo.birthday = format(birthdayFormat, 'MM/DD/YYYY', 'YYYY-MM-DD')"
-          @input="BirthdayMenu = false"
-          v-on="on"
-        ></v-text-field>
+          @click:prepend="BirthdayMenu = true"
+          @click:control="BirthdayMenu = false"
+        >
+          <template v-slot:prepend>
+            <div v-bind="props" class="pointer">
+              <v-icon :color="caseGray">mdi-calendar</v-icon>
+            </div>
+          </template>
+        </v-text-field>
       </template>
-      <v-date-picker v-model="editedPersonalInfo.birthday" no-title @input="BirthdayMenu = false"></v-date-picker>
+      <v-date-picker
+        v-model="editedPersonalInfo.birthday"
+        @update:model-value="BirthdayMenu = false"
+        show-adjacent-months
+        hide-actions
+        keyboard-icon=""
+        color="#bc3825"
+        title="Birthday"
+      ></v-date-picker>
     </v-menu>
 
     <!-- Show Birthday -->
@@ -145,28 +154,34 @@
       v-model="editedPersonalInfo.birthdayFeed"
       label="Have birthday (MM/DD format) recognized on company feed?"
       :disabled="disableBirthdayFeed"
+      :color="caseGray"
     ></v-switch>
 
     <!-- Place of Birth -->
     <p>
       Place of Birth
-      <v-tooltip bottom slot="append-outer">
-        <template v-slot:activator="{ on }">
-          <v-btn class="pb-1" text icon v-on="on"><v-icon class="case-gray">shield</v-icon></v-btn>
-        </template>
-        <span>Only Visible to You, Managers, and Admins</span>
-      </v-tooltip>
+      <v-avatar class="pb-1" variant="text" icon="">
+        <v-tooltip activator="parent" location="bottom">Only Visible to You, Managers, and Admins</v-tooltip>
+        <v-icon class="case-gray">mdi-shield </v-icon>
+      </v-avatar>
     </p>
     <div class="groove pr-5 pl-2">
       <!-- Place of Birth: City text field -->
-      <v-text-field v-model="editedPersonalInfo.city" label="City" data-vv-name="City" class="pt-0"></v-text-field>
+      <v-text-field
+        v-model="editedPersonalInfo.city"
+        label="City"
+        variant="underlined"
+        data-vv-name="City"
+        class="pt-0"
+      ></v-text-field>
 
       <!-- Place of Birth: Country autocomplete -->
       <v-autocomplete
         :items="countries"
         v-model="editedPersonalInfo.country"
-        item-text="text"
+        item-title="text"
         label="Country"
+        variant="underlined"
       ></v-autocomplete>
 
       <!-- Place of Birth: State autocomplete -->
@@ -174,40 +189,42 @@
         v-if="isUSA"
         :items="Object.values(states)"
         v-model="editedPersonalInfo.st"
-        item-text="text"
+        item-title="text"
         label="State"
         class="pt-0"
+        variant="underlined"
       ></v-autocomplete>
     </div>
     <!-- Current Address -->
     <div v-if="userhasAdminPermissions() || userIsEmployee()">
       <p class="pt-4 mb-0 pb-0">
         Current Address
-        <v-tooltip bottom slot="append-outer">
-          <template v-slot:activator="{ on }">
-            <v-btn class="pb-1" text icon v-on="on"><v-icon class="case-gray">shield</v-icon></v-btn>
-          </template>
-          <span>Only Visible to You, Managers, and Admins</span>
-        </v-tooltip>
+        <v-avatar class="pb-1" variant="text" icon="">
+          <v-tooltip activator="parent" location="bottom">Only Visible to You, Managers, and Admins</v-tooltip>
+          <v-icon class="case-gray">mdi-shield</v-icon>
+        </v-avatar>
       </p>
-      <v-combobox
+      <v-autocomplete
         class="pb-3 pt-0"
-        @input.native="updateAddressDropDown"
-        :items="Object.keys(this.placeIds)"
+        @update:search="updateAddressDropDown($event)"
+        :items="Object.keys(placeIds)"
         v-model="searchString"
-        :search-input.sync="searchString"
-        @change="updateBoxes"
-        outlined
+        hide-no-data
+        variant="outlined"
         hint="Search address and select option to auto-fill fields below."
         persistent-hint
       >
+        <template v-slot:item="{ item, props }">
+          <v-list-item @click="updateBoxes(item, props)">{{ item.value }}</v-list-item>
+        </template>
         <v-list slot="append-item" name="joe" class="case-gray"> <span class="ml-2">Powered By Google</span> </v-list>
-      </v-combobox>
+      </v-autocomplete>
       <div class="groove pr-5 pl-2">
         <!-- Current Address: Street 1 text field -->
         <v-text-field
           v-model.trim="editedPersonalInfo.currentStreet"
           label="Street 1"
+          variant="underlined"
           data-vv-name="Street 1"
           class="pt-0"
         ></v-text-field>
@@ -215,6 +232,7 @@
         <v-text-field
           v-model.trim="editedPersonalInfo.currentStreet2"
           label="Street 2"
+          variant="underlined"
           data-vv-name="Street 2"
           class="pt-0"
         ></v-text-field>
@@ -222,6 +240,7 @@
         <v-text-field
           v-model.trim="editedPersonalInfo.currentCity"
           label="City"
+          variant="underlined"
           data-vv-name="Current City"
           class="pt-0"
         ></v-text-field>
@@ -229,8 +248,9 @@
         <v-autocomplete
           :items="Object.values(states)"
           v-model="editedPersonalInfo.currentState"
-          item-text="text"
+          item-title="text"
           label="State"
+          variant="underlined"
           class="pt-0"
         ></v-autocomplete>
         <!-- Current Address: ZIP text field -->
@@ -238,6 +258,7 @@
           v-model.trim="editedPersonalInfo.currentZIP"
           v-mask="'#####'"
           label="ZIP"
+          variant="underlined"
           data-vv-name="Current ZIP"
           class="pt-0"
         ></v-text-field>
@@ -335,8 +356,7 @@ function isUSA() {
 /**
  * Updates the address dropdown according to the user's input.
  */
-async function updateAddressDropDown() {
-  let query = event.target.value;
+async function updateAddressDropDown(query) {
   if (query.length > 3) {
     let locations = await api.getLocation(query);
     //object used to contain addresses and their respective ID's
@@ -355,7 +375,8 @@ async function updateAddressDropDown() {
  * It also updates the zip code field making an additional Google Maps API call
  * to obtain the selected address's zip code.
  */
-async function updateBoxes() {
+async function updateBoxes(item) {
+  this.searchString = item.value;
   if (!this.isEmpty(this.searchString)) {
     let fullAddress = this.searchString.split(', ');
     //fills in the first three fields
@@ -377,7 +398,7 @@ async function updateBoxes() {
     });
     //resets addresses and ID's in dropdown
     this.placeIds = {};
-    this.searchString = '';
+    this.searchString = null;
   }
 } // updateBoxes
 
@@ -421,7 +442,7 @@ function validateFields() {
   });
 
   this.emitter.emit('personalStatus', errorCount); // emit error status
-  this.emitter.emit('doneValidating', 'personal', this.editedPersonalInfo); // emit done validating
+  this.emitter.emit('doneValidating', { tab: 'personal', data: this.editedPersonalInfo }); // emit done validating
 } // validateFields
 
 /**
@@ -429,8 +450,8 @@ function validateFields() {
  */
 function addPhoneInput() {
   this.phoneNumbers.push({
-    type: '',
-    number: '',
+    type: null,
+    number: null,
     private: true,
     valid: true
   });
@@ -526,7 +547,7 @@ export default {
       phoneNumbers: [],
       phonePrivacyBadgeIcon: 'mdi-shield-outline',
       phoneNumberTypes: ['Home', 'Cell', 'Work'],
-      searchString: '',
+      searchString: null,
       placeIds: {},
       userId: null,
       github,

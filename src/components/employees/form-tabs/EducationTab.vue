@@ -21,27 +21,26 @@
         :militaryIndex="index"
         :validating="validating"
       ></military-form>
-      <!-- Button to Delete School -->
+      <!-- Button to Delete Education -->
       <div class="pb-4" align="center" v-if="allowAdditions">
-        <v-tooltip bottom>
-          <template v-slot:activator="{ on }">
-            <v-btn v-on="on" @click="deleteEducation(index)" text icon
-              ><v-icon class="case-gray pr-1">delete</v-icon></v-btn
-            >
-          </template>
-          <span>Delete School</span>
-        </v-tooltip>
+        <v-btn @click="deleteEducation(index)" variant="text" icon="">
+          <v-tooltip activator="parent" location="bottom"> Delete Education </v-tooltip>
+          <v-icon class="case-gray pr-1">mdi-delete</v-icon></v-btn
+        >
       </div>
     </div>
     <!-- End Loop Education -->
 
     <!-- Button to Add Education -->
     <div class="pt-4" align="center">
-      <v-menu offset-y>
-        <template v-slot:activator="{ on, attrs }">
-          <v-btn v-bind="attrs" v-on="on"><v-icon class="pr-1">add</v-icon>Education</v-btn>
+      <v-menu location="bottom">
+        <template v-slot:activator="{ props }">
+          <v-btn v-bind="props">
+            <v-icon class="pr-1">mdi-plus</v-icon>
+            Education
+          </v-btn>
         </template>
-        <v-list style="cursor: pointer" class="py-0">
+        <v-list class="py-0 pointer">
           <v-list-item
             ripple
             v-for="item in eduTypes"
@@ -75,14 +74,14 @@ import _ from 'lodash';
 async function created() {
   this.emitter.emit('created', 'education');
 
-  this.emitter.on('doneValidatingEducation', async (content, index, errorCount) => {
-    this.editedEducation[index] = content;
+  this.emitter.on('doneValidatingEducation', async (data) => {
+    this.editedEducation[data.index] = data.content;
     this.eduCount++;
-    this.numErrors += errorCount;
+    this.numErrors += data.errors;
 
     if (this.eduCount === this.editedEducation.length) {
       this.emitter.emit('educationStatus', this.numErrors); // emit error status
-      this.emitter.emit('doneValidating', 'education', this.editedEducation); // emit done validating
+      this.emitter.emit('doneValidating', { tab: 'education', data: this.editedEducation }); // emit done validating
       if (this.numErrors === 0) this.emitter.off('doneValidatingEducation');
       this.numErrors = 0; // just in case
       this.eduCount = 0; // just in case
@@ -107,13 +106,13 @@ function addSchool(type) {
       this.editedEducation.push({
         type: type,
         id: this.getRandId(),
-        name: '',
+        name: null,
         degrees: [
           {
             completionDate: null,
             concentrations: [],
-            degreeType: '',
-            majors: [''],
+            degreeType: null,
+            majors: [null],
             minors: [],
             showEducationMenu: false
           }
@@ -124,7 +123,7 @@ function addSchool(type) {
       this.editedEducation.push({
         type: type,
         id: this.getRandId(),
-        branch: '',
+        branch: null,
         startDate: null,
         completionDate: null
       });
@@ -133,7 +132,7 @@ function addSchool(type) {
       this.editedEducation.push({
         type: type,
         id: this.getRandId(),
-        name: '',
+        name: null,
         gradDate: null
       });
       break;
@@ -173,7 +172,7 @@ function getRandId() {
  */
 function watchValidating() {
   if (this.editedEducation.length === 0) {
-    this.emitter.emit('doneValidating', 'education', this.editedEducation); // emit done validating
+    this.emitter.emit('doneValidating', { tab: 'education', data: this.editedEducation }); // emit done validating
     this.emitter.emit('educationStatus', 0); // emit error status
     this.emitter.off('doneValidatingEducation'); // emit done validating
   }

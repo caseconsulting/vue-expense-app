@@ -11,12 +11,12 @@
               v-bind="props"
               active-class="case-red-text"
               active-color="#bc3825"
-              :color="item.active ? '#bc3825' : '#415364'"
+              :color="item.active ? caseRed : caseGray"
               :class="item.active ? 'case-red-text' : ''"
             >
               <!-- Parent Item Icon -->
               <template v-slot:prepend>
-                <v-icon :id="item.icon" :color="isOpen ? '#bc3825' : '#415364'" class="navbar-icons">
+                <v-icon :id="item.icon" :color="isOpen ? caseRed : caseGray" class="navbar-icons">
                   {{ item.icon }}
                 </v-icon>
               </template>
@@ -42,14 +42,14 @@
         <v-list-item
           v-else
           :id="item.icon"
-          :color="item.active ? '#bc3825' : '#415364'"
+          :color="item.active ? caseRed : caseGray"
           :class="item.active ? 'case-red-text' : ''"
           @click="handleNavigation(item)"
         >
           <!--NavBar icons-->
           <!-- Item Icon -->
           <template v-slot:prepend>
-            <v-icon :id="item.icon" :color="item.active ? '#bc3825' : '#415364'" class="navbar-icons">
+            <v-icon :id="item.icon" :color="item.active ? caseRed : caseGray" class="navbar-icons">
               {{ item.icon }}
             </v-icon>
           </template>

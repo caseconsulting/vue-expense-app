@@ -12,33 +12,34 @@
       :key="'technology: ' + index"
     >
       <!-- Name of Technology -->
-      <v-combobox
+      <v-autocomplete
         class="pb-5"
         ref="formFields"
         v-model="technology.name"
+        @update:search="updateTechDropDown($event)"
         :rules="[duplicateRules(technology.name), ...getRequiredRules()]"
         :items="technologyDropDown"
+        hide-no-data
         label="Technology or Skill*"
+        variant="underlined"
         data-vv-name="Technology"
-        @input.native="updateTechDropDown(index)"
         clearable
       >
-      </v-combobox>
+      </v-autocomplete>
       <!-- Time Intervals -->
       <v-row justify="center">
         <!-- Current Switch -->
         <v-col cols="10" sm="6" md="6" lg="6" class="ml-3 ml-sm-0">
-          <v-tooltip top nudge-left="75" nudge-bottom="10" max-width="300">
-            <template v-slot:activator="{ on }">
-              <div v-on="on">
-                <v-switch
-                  v-model="technology.current"
-                  label="Currently working with this technology / skill"
-                ></v-switch>
-              </div>
-            </template>
-            <span>Enabling this will auto-increment the years of experience every month</span>
-          </v-tooltip>
+          <div>
+            <v-tooltip activator="parent" location="top">
+              Enabling this will auto-increment the years of experience every month
+            </v-tooltip>
+            <v-switch
+              v-model="technology.current"
+              :color="caseGray"
+              label="Currently working with this technology / skill"
+            ></v-switch>
+          </div>
         </v-col>
 
         <!-- Years of Experience -->
@@ -59,29 +60,28 @@
             max="99"
             min="0"
             suffix="years"
-            dense
+            density="compact"
             type="number"
-            outlined
-            @input="technology.years = Number(technology.years)"
+            variant="outlined"
+            @update:model-value="technology.years = Number(technology.years)"
           >
           </v-text-field>
         </v-col>
         <v-col cols="2" class="mt-0 mb-5 text-center">
-          <v-tooltip bottom slot="append-outer">
-            <template v-slot:activator="{ on }">
-              <v-btn text icon v-on="on" @click="deleteTechnology(index)"
-                ><v-icon class="case-gray">delete</v-icon></v-btn
-              >
-            </template>
-            <span>Delete Technology</span>
-          </v-tooltip>
+          <v-btn variant="text" icon @click="deleteTechnology(index)">
+            <v-tooltip activator="parent" location="bottom">Delete Technology</v-tooltip>
+            <v-icon class="case-gray">mdi-delete</v-icon></v-btn
+          >
         </v-col>
       </v-row>
       <!-- End Loop Technologies -->
     </div>
     <!-- Button to Add Technologies -->
     <div class="pt-4" align="center">
-      <v-btn @click="addTechnology()" elevation="2"><v-icon class="pr-1">add</v-icon>Technology</v-btn>
+      <v-btn @click="addTechnology()" elevation="2">
+        <v-icon class="pr-1">mdi-plus</v-icon>
+        Technology
+      </v-btn>
     </div>
   </div>
 </template>
@@ -118,7 +118,7 @@ async function created() {
 function addTechnology() {
   if (!this.editedTechnologies) this.editedTechnologies = [];
   this.editedTechnologies.push({
-    name: '',
+    name: null,
     years: 0,
     current: false
   });
@@ -183,15 +183,15 @@ function populateDropDowns() {
     });
     this.technologyDropDown = _.uniq(this.technologyDropDown);
   });
+  this.technologyDropDown.sort((a, b) => a.length - b.length);
 } // populateDropDowns
 
 /**
  * Retrieves list of skills to display a dropdown
  * related to what the user just typed in.
  */
-async function updateTechDropDown() {
-  let query = event.target.value;
-  if (query.length > 2) {
+async function updateTechDropDown(query) {
+  if (query.length > 0) {
     let techList = await api.getTechSkills(query);
     this.technologyDropDown = techList;
     this.populateDropDowns();
@@ -215,7 +215,7 @@ function validateFields() {
   //emit error status with a custom message
   // emit error status
   this.emitter.emit('technologiesStatus', errorCount);
-  this.emitter.emit('doneValidating', 'technologies', this.editedTechnologies); // emit done validating
+  this.emitter.emit('doneValidating', { tab: 'technologies', data: this.editedTechnologies }); // emit done validating
 } // validateFields
 
 // |--------------------------------------------------|

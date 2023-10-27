@@ -9,47 +9,45 @@
         :rules="[...getRequiredRules(), duplicateClearanceTypes(cIndex)]"
         :items="clearanceTypeDropDown"
         label="Type"
+        variant="underlined"
         data-vv-name="Type"
         clearable
       >
+        <template v-slot:append>
+          <!-- Awaiting Clearance -->
+          <v-checkbox
+            v-model="clearance.awaitingClearance"
+            density="compact"
+            class="mx-5"
+            hide-details
+            label="Awaiting Clearance"
+            @update:model-value="
+              () => {
+                if (clearance.awaitingClearance) {
+                  clearance.grantedDate = null;
+                  clearance.badgeExpirationDate = null;
+                  clearance.badgeNum = null;
+                }
+              }
+            "
+          ></v-checkbox>
+        </template>
       </v-autocomplete>
-      <!-- Awaiting Clearance -->
-      <v-checkbox
-        v-model="clearance.awaitingClearance"
-        label="Awaiting Clearance"
-        @change="
-          () => {
-            if (clearance.awaitingClearance) {
-              clearance.grantedDate = null;
-              clearance.badgeExpirationDate = null;
-              clearance.badgeNum = null;
-            }
-          }
-        "
-      ></v-checkbox>
+
       <v-row class="py-3">
         <!-- Granted Date -->
         <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
-          <v-menu
-            v-model="clearance.showGrantedMenu"
-            :close-on-content-click="false"
-            transition="scale-transition"
-            offset-y
-            max-width="290px"
-            min-width="290px"
-          >
-            <template v-slot:activator="{ on, attrs }">
+          <v-menu v-model="clearance.showGrantedMenu" :close-on-content-click="false" location="start center">
+            <template v-slot:activator="{ props }">
               <v-text-field
                 ref="formFields"
-                :value="format(clearance.grantedDate, null, 'MM/DD/YYYY')"
+                :model-value="format(clearance.grantedDate, null, 'MM/DD/YYYY')"
                 label="Granted Date"
-                prepend-icon="event_available"
                 clearable
                 :rules="[...getDateOptionalRules(), dateGrantedRules(cIndex)]"
                 hint="MM/DD/YYYY format"
                 v-mask="'##/##/####'"
-                v-bind="attrs"
-                v-on="on"
+                variant="underlined"
                 :disabled="clearance.awaitingClearance"
                 @change="
                   () => {
@@ -58,52 +56,66 @@
                 "
                 @click:clear="clearance.grantedDate = null"
                 @blur="clearance.grantedDate = parseEventDate($event)"
-                @input="clearance.showGrantedMenu = false"
+                @update:model-value="clearance.showGrantedMenu = false"
+                @click:prepend="clearance.showGrantedMenu = true"
+                @click:control="clearance.showGrantedMenu = false"
                 @focus="clearanceElement = clearance"
-              ></v-text-field>
+              >
+                <template v-slot:prepend>
+                  <div v-bind="props" class="pointer">
+                    <v-icon :color="caseGray">mdi-calendar</v-icon>
+                  </div>
+                </template>
+              </v-text-field>
             </template>
             <v-date-picker
               v-model="clearance.grantedDate"
+              @update:model-value="clearance.showGrantedMenu = false"
               :min="clearance.submissionDate"
-              no-title
-              @input="clearance.showGrantedMenu = false"
+              show-adjacent-months
+              hide-actions
+              keyboard-icon=""
+              color="#bc3825"
+              title="Granted Date"
             ></v-date-picker>
           </v-menu>
         </v-col>
         <!-- End Granted Date -->
         <!-- Submission Date -->
         <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
-          <v-menu
-            v-model="clearance.showSubmissionMenu"
-            :close-on-content-click="false"
-            transition="scale-transition"
-            offset-y
-            max-width="290px"
-            min-width="290px"
-          >
-            <template v-slot:activator="{ on, attrs }">
+          <v-menu v-model="clearance.showSubmissionMenu" :close-on-content-click="false" location="start center">
+            <template v-slot:activator="{ props }">
               <v-text-field
                 ref="formFields"
-                :value="format(clearance.submissionDate, null, 'MM/DD/YYYY')"
+                :model-value="format(clearance.submissionDate, null, 'MM/DD/YYYY')"
                 label="Submission Date"
-                prepend-icon="event_note"
                 clearable
                 :rules="[...getDateOptionalRules(), dateSubmissionRules(cIndex)]"
                 hint="MM/DD/YYYY format"
                 v-mask="'##/##/####'"
-                v-bind="attrs"
-                v-on="on"
+                variant="underlined"
                 @click:clear="clearance.submissionDate = null"
                 @blur="clearance.submissionDate = parseEventDate($event)"
-                @input="clearance.showSubmissionMenu = false"
+                @click:prepend="clearance.showSubmissionMenu = true"
+                @click:control="clearance.showSubmissionMenu = false"
                 @focus="clearanceElement = clearance"
-              ></v-text-field>
+              >
+                <template v-slot:prepend>
+                  <div v-bind="props" class="pointer">
+                    <v-icon :color="caseGray">mdi-calendar</v-icon>
+                  </div>
+                </template>
+              </v-text-field>
             </template>
             <v-date-picker
               v-model="clearance.submissionDate"
+              @update:model-value="clearance.showSubmissionMenu = false"
               :max="maxSubmission(cIndex)"
-              no-title
-              @input="clearance.showSubmissionMenu = false"
+              show-adjacent-months
+              hide-actions
+              keyboard-icon=""
+              color="#bc3825"
+              title="Submission Date"
             ></v-date-picker>
           </v-menu>
         </v-col>
@@ -116,6 +128,7 @@
         prepend-icon="mdi-badge-account-outline"
         counter="5"
         label="Badge Number"
+        variant="underlined"
         clearable
         :disabled="clearance.awaitingClearance"
         @blur="capitalizeBadges(clearance)"
@@ -123,73 +136,77 @@
       <!-- End Badge Number -->
 
       <!-- Badge Expiration Date -->
-      <v-menu
-        v-model="clearance.showBadgeMenu"
-        :close-on-content-click="false"
-        transition="scale-transition"
-        offset-y
-        max-width="290px"
-        min-width="290px"
-      >
-        <template v-slot:activator="{ on, attrs }">
+      <v-menu v-model="clearance.showBadgeMenu" :close-on-content-click="false" location="start center">
+        <template v-slot:activator="{ props }">
           <v-text-field
             ref="formFields"
-            :value="format(clearance.badgeExpirationDate, null, 'MM/DD/YYYY')"
+            :model-value="format(clearance.badgeExpirationDate, null, 'MM/DD/YYYY')"
             label="Badge Expiration Date"
-            prepend-icon="event_busy"
             clearable
             :rules="[...getDateOptionalRules(), dateBadgeRules(cIndex)]"
             hint="MM/DD/YYYY format"
             v-mask="'##/##/####'"
-            v-bind="attrs"
-            v-on="on"
+            variant="underlined"
             :disabled="clearance.awaitingClearance"
             @click:clear="clearance.badgeExpirationDate = null"
             @blur="clearance.badgeExpirationDate = parseEventDate($event)"
-            @input="clearance.showBadgeMenu = false"
+            @update:model-value="clearance.showBadgeMenu = false"
+            @click:prepend="clearance.showBadgeMenu = true"
+            @click:control="clearance.showBadgeMenu = false"
             @focus="clearanceElement = clearance"
-          ></v-text-field>
+          >
+            <template v-slot:prepend>
+              <div v-bind="props" class="pointer">
+                <v-icon :color="caseGray">mdi-calendar</v-icon>
+              </div>
+            </template>
+          </v-text-field>
         </template>
         <v-date-picker
           v-model="clearance.badgeExpirationDate"
+          @update:model-value="clearance.showBadgeMenu = false"
           :min="minExpiration(cIndex)"
-          no-title
-          @input="clearance.showBadgeMenu = false"
+          show-adjacent-months
+          hide-actions
+          keyboard-icon=""
+          color="#bc3825"
+          title="Badge Expiration Date"
         ></v-date-picker>
       </v-menu>
       <!-- End Badge Expiration Dxate -->
 
       <!-- Bi Dates -->
-      <v-menu
-        ref="biMenu"
-        v-model="clearance.showBIMenu"
-        :close-on-content-click="false"
-        :return-value.sync="clearance.biDates"
-        transition="scale-transition"
-        offset-y
-        min-width="290px"
-      >
-        <template v-slot:activator="{ on, attrs }">
+      <v-menu ref="biMenu" v-model="clearance.showBIMenu" :close-on-content-click="false" location="start center">
+        <template v-slot:activator="{ props }">
           <v-combobox
-            :value="formatDates(clearance.biDates)"
+            :model-value="formatDates(clearance.biDates)"
             multiple
             label="BI Dates"
-            prepend-icon="event"
+            variant="underlined"
             readonly
             clearable
-            v-bind="attrs"
-            v-on="on"
             @click:clear="clearance.biDates = []"
           >
+            <template v-slot:prepend>
+              <div v-bind="props" class="pointer">
+                <v-icon :color="caseGray">mdi-calendar</v-icon>
+              </div>
+            </template>
             <template #selection="{ item }">
-              <v-chip outlined close @click:close="removeBiDate(item, cIndex)">{{ item }}</v-chip>
+              <v-chip variant="outlined" closable @click:close="removeBiDate(item, cIndex)">{{ item.raw }}</v-chip>
             </template>
           </v-combobox>
         </template>
-        <v-date-picker v-model="clearance.biDates" :min="clearance.submissionDate" multiple no-title scrollable>
-          <v-spacer></v-spacer>
-          <v-btn text color="primary" @click="clearance.showBIMenu = false">Cancel</v-btn>
-          <v-btn text color="primary" @click="$refs.biMenu[cIndex].save(clearance.biDates)">OK</v-btn>
+        <v-date-picker
+          v-model="clearance.biDates"
+          :min="clearance.submissionDate"
+          multiple
+          show-adjacent-months
+          hide-actions
+          keyboard-icon=""
+          color="#bc3825"
+          title="BI Dates"
+        >
         </v-date-picker>
       </v-menu>
       <!-- End Bi Dates -->
@@ -199,25 +216,27 @@
         ref="adjudicationMenu"
         v-model="clearance.showAdjudicationMenu"
         :close-on-content-click="false"
-        :return-value.sync="clearance.adjudicationDates"
-        transition="scale-transition"
-        offset-y
-        min-width="290px"
+        location="start center"
       >
-        <template v-slot:activator="{ on, attrs }">
+        <template v-slot:activator="{ props }">
           <v-combobox
-            :value="formatDates(clearance.adjudicationDates)"
+            :model-value="formatDates(clearance.adjudicationDates)"
             multiple
             label="Adjudication Dates"
-            prepend-icon="event"
+            variant="underlined"
             clearable
             readonly
-            v-bind="attrs"
-            v-on="on"
+            @click:prepend="clearance.showAdjudicationMenu = true"
+            @click:control="clearance.showAdjudicationMenu = false"
             @click:clear="clearance.adjudicationDates = []"
           >
+            <template v-slot:prepend>
+              <div v-bind="props" class="pointer">
+                <v-icon :color="caseGray">mdi-calendar</v-icon>
+              </div>
+            </template>
             <template #selection="{ item }">
-              <v-chip outlined close @click:close="removeAdjDate(item, cIndex)">{{ item }}</v-chip>
+              <v-chip variant="outlined" closable @click:close="removeAdjDate(item, cIndex)">{{ item.raw }}</v-chip>
             </template>
           </v-combobox>
         </template>
@@ -225,69 +244,65 @@
           v-model="clearance.adjudicationDates"
           :min="clearance.submissionDate"
           multiple
-          no-title
-          scrollable
+          show-adjacent-months
+          hide-actions
+          keyboard-icon=""
+          color="#bc3825"
+          title="Adjudication Dates"
         >
-          <v-spacer></v-spacer>
-          <v-btn text color="primary" @click="clearance.showAdjudicationMenu = false">Cancel</v-btn>
-          <v-btn text color="primary" @click="$refs.adjudicationMenu[cIndex].save(clearance.adjudicationDates)"
-            >OK</v-btn
-          >
         </v-date-picker>
       </v-menu>
       <!-- End Adjudication Dates -->
 
       <!-- Poly Dates -->
-      <v-menu
-        ref="polyMenu"
-        v-model="clearance.showPolyMenu"
-        :close-on-content-click="false"
-        :return-value.sync="clearance.polyDates"
-        transition="scale-transition"
-        offset-y
-        min-width="290px"
-      >
-        <template v-slot:activator="{ on, attrs }">
+      <v-menu ref="polyMenu" v-model="clearance.showPolyMenu" :close-on-content-click="false" location="start center">
+        <template v-slot:activator="{ props }">
           <v-combobox
-            :value="formatDates(clearance.polyDates)"
+            :model-value="formatDates(clearance.polyDates)"
             multiple
             label="Poly Dates"
-            prepend-icon="event"
+            variant="underlined"
             clearable
             readonly
-            v-bind="attrs"
-            v-on="on"
             @click:clear="clearance.polyDates = []"
-            @input="clearance.showPolyMenu = false"
+            @click:prepend="clearance.showPolyMenu = true"
+            @click:control="clearance.showPolyMenu = false"
           >
+            <template v-slot:prepend>
+              <div v-bind="props" class="pointer">
+                <v-icon :color="caseGray">mdi-calendar</v-icon>
+              </div>
+            </template>
             <template #selection="{ item }">
-              <v-chip outlined close @click:close="removePolyDate(item, cIndex)">{{ item }}</v-chip>
+              <v-chip variant="outlined" closable @click:close="removePolyDate(item, cIndex)">{{ item.raw }}</v-chip>
             </template>
           </v-combobox>
         </template>
-        <v-date-picker v-model="clearance.polyDates" :min="clearance.submissionDate" multiple no-title scrollable>
-          <v-spacer></v-spacer>
-          <v-btn text color="primary" @click="clearance.showPolyMenu = false">Cancel</v-btn>
-          <v-btn text color="primary" @click="$refs.polyMenu[cIndex].save(clearance.polyDates)">OK</v-btn>
+        <v-date-picker
+          v-model="clearance.polyDates"
+          :min="clearance.submissionDate"
+          multiple
+          show-adjacent-months
+          hide-actions
+          keyboard-icon=""
+          color="#bc3825"
+          title="Poly Dates"
+        >
         </v-date-picker>
       </v-menu>
       <!-- End Poly Dates -->
       <div align="center">
-        <v-tooltip bottom slot="append-outer">
-          <template v-slot:activator="{ on }">
-            <v-btn text icon v-on="on" @click="deleteClearance(cIndex)"
-              ><v-icon class="case-gray">delete</v-icon></v-btn
-            >
-          </template>
-          <span>Delete Clearance</span>
-        </v-tooltip>
+        <v-btn variant="text" icon="" @click="deleteClearance(cIndex)">
+          <v-tooltip activator="parent" location="bottom">Delete Clearance</v-tooltip>
+          <v-icon class="case-gray">mdi-delete</v-icon></v-btn
+        >
       </div>
     </div>
     <!-- End Loop Clearances -->
 
     <!-- Button to add Clearances -->
     <div class="pt-4" align="center">
-      <v-btn @click="addClearance" elevation="2"><v-icon class="pr-1">add</v-icon>Clearance</v-btn>
+      <v-btn @click="addClearance" elevation="2"><v-icon class="pr-1">mdi-plus</v-icon>Clearance</v-btn>
     </div>
   </div>
 </template>
@@ -491,7 +506,7 @@ function validateFields() {
   _.forEach(components, (field) => {
     if (field && !field.validate()) errorCount++;
   });
-  this.emitter.emit('doneValidating', 'clearance', this.editedClearances); // emit done validating and sends edited data back to parent
+  this.emitter.emit('doneValidating', { tab: 'clearance', data: this.editedClearances }); // emit done validating and sends edited data back to parent
   this.emitter.emit('clearanceStatus', errorCount); // emit error status
 } // validateFields
 

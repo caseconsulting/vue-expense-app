@@ -51,22 +51,22 @@
         </div>
         <div v-else>
           <!-- Display Charge Code Hours -->
-          <div class="py-3 gray-border">
+          <div class="gray-border">
             <div v-if="!isPrevMonth">
-              <v-row v-for="job in quickBooksTimeData.jobcodeHours" :key="job.name" class="pb-3">
+              <v-row v-for="job in quickBooksTimeData.jobcodeHours" :key="job.name" class="my-1">
                 {{ job.name }}:
                 <v-spacer></v-spacer>
                 <p>{{ formatHours(job.hours) }}</p>
               </v-row>
             </div>
             <div v-else>
-              <v-row v-for="job in quickBooksTimeData.previousPeriodJobcodeHours" :key="job.name" class="pb-3">
+              <v-row v-for="job in quickBooksTimeData.previousPeriodJobcodeHours" :key="job.name" class="my-1">
                 {{ job.name }}:
                 <v-spacer></v-spacer>
                 <p>{{ formatHours(job.hours) }}</p>
               </v-row>
             </div>
-            <v-row class="bold">
+            <v-row class="bold mt-1">
               Total:
               <v-spacer></v-spacer>
               <div>
@@ -88,7 +88,7 @@
           </div>
           <div v-if="showMore" max-width="400" class="py-2">
             <!-- Hours left this month -->
-            <v-row :class="isPrevMonth ? 'pt-4' : ''">
+            <v-row :class="isPrevMonth ? 'mt-4' : ''">
               Remaining:
               <v-spacer></v-spacer>
               <p>{{ formatHours(this.remainingHours) }}</p>

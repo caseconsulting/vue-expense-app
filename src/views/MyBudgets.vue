@@ -32,7 +32,7 @@
         </div>
         <div v-else-if="loading && !isMobile">
           <!-- This has to be in a v-col because of padding that comes from the anniversary card v-col. Without the v-col, the loader is off-->
-          <v-skeleton-loader type="card-heading, list-item"></v-skeleton-loader>
+          <v-skeleton-loader type="list-item"></v-skeleton-loader>
         </div>
       </v-col>
     </v-row>
@@ -43,7 +43,7 @@
         <div v-if="loading">
           <v-row>
             <v-col v-for="index in 4" :key="index" cols="12" sm="6" lg="6">
-              <v-skeleton-loader type="card-heading, list-item@6"></v-skeleton-loader>
+              <v-skeleton-loader type="list-item@6"></v-skeleton-loader>
             </v-col>
           </v-row>
         </div>
@@ -60,7 +60,7 @@
       <!-- Expense Form-->
       <v-col cols="12" lg="4">
         <div v-if="loading">
-          <v-skeleton-loader type="card-heading, list-item@12"></v-skeleton-loader>
+          <v-skeleton-loader type="list-item@12"></v-skeleton-loader>
         </div>
         <div v-else-if="!loading && viewingCurrentBudgetYear">
           <expense-form :expense="expense" v-on:error="displayError"></expense-form>
@@ -70,7 +70,7 @@
     <v-row>
       <v-col cols="12">
         <div v-if="loading">
-          <v-skeleton-loader type="card-heading, list-item@3"></v-skeleton-loader>
+          <v-skeleton-loader type="list-item@3"></v-skeleton-loader>
         </div>
         <div v-if="!isMobile && hasAccessToBudgets">
           <budget-chart

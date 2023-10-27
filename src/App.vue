@@ -14,7 +14,7 @@
       </v-navigation-drawer>
       <v-app-bar class="nav-color" theme="dark">
         <v-app-bar-nav-icon v-show="isLoggedIn() && isMobile" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
-        <div class="d-flex align-center siteId ml-4" @click="goToHome">
+        <div class="d-flex align-center pointer ml-4" @click="goToHome">
           <v-avatar size="40" color="grey-lighten-4" class="mr-2">
             <img src="@/assets/img/logo-big.png" class="logo-bar" />
           </v-avatar>
@@ -66,7 +66,7 @@
         <!-- User image and logout -->
         <v-menu location="bottom" theme="light" open-on-click v-if="isLoggedIn()">
           <template v-slot:activator="{ props }">
-            <v-avatar id="profile" class="profile-button mx-3" size="40">
+            <v-avatar id="profile" class="pointer mx-3" size="40">
               <v-img :src="profilePic" alt="avatar" v-bind="props" />
             </v-avatar>
           </template>
@@ -519,10 +519,6 @@ export default {
   background: transparent;
 }
 
-.profile-button {
-  cursor: pointer;
-}
-
 #P {
   text-decoration: none;
 }
@@ -538,10 +534,6 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.siteId {
-  cursor: pointer;
 }
 
 .fixed {

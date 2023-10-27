@@ -13,6 +13,7 @@
         :rules="[duplicateCustomerOrg(exp.name), ...getRequiredRules()]"
         :items="experienceDropDown"
         label="Customer Organization Experience"
+        variant="underlined"
         data-vv-name="Customer Organization Experience"
         clearable
         :error="isDuplicate(exp.name)"
@@ -22,14 +23,16 @@
       <v-row align="center" class="py-3" justify="center">
         <!-- Current Switch -->
         <v-col cols="6" sm="7" md="6" lg="7">
-          <v-tooltip top nudge-left="75" nudge-bottom="10" max-width="300">
-            <template v-slot:activator="{ on }">
-              <div v-on="on">
-                <v-switch v-model="exp.current" label="Currently working with this customer organization"></v-switch>
-              </div>
-            </template>
-            <span>Enabling this will auto-increment the years of experience every month</span>
-          </v-tooltip>
+          <div>
+            <v-tooltip activator="parent" location="top">
+              Enabling this will auto-increment the years of experience every month
+            </v-tooltip>
+            <v-switch
+              v-model="exp.current"
+              :color="caseGray"
+              label="Currently working with this customer organization"
+            ></v-switch>
+          </div>
         </v-col>
 
         <!-- Years of Experience -->
@@ -50,23 +53,19 @@
             max="99"
             min="0"
             suffix="years"
-            dense
+            density="compact"
             type="number"
-            outlined
-            @input="exp.years = Number(exp.years)"
+            variant="outlined"
+            @update:model-value="exp.years = Number(exp.years)"
           ></v-text-field>
         </v-col>
 
         <!-- Button to Delete Customer Organization -->
         <v-col cols="2" class="mb-3" align="center">
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on }">
-              <v-btn v-on="on" @click="deleteExperience(index)" text icon
-                ><v-icon class="case-gray pr-1">delete</v-icon></v-btn
-              >
-            </template>
-            <span>Delete Experience</span>
-          </v-tooltip>
+          <v-btn @click="deleteExperience(index)" variant="text" icon>
+            <v-tooltip activator="parent" location="bottom">Delete Experience</v-tooltip>
+            <v-icon class="case-gray pr-1">mdi-delete</v-icon>
+          </v-btn>
         </v-col>
       </v-row>
     </div>
@@ -74,7 +73,10 @@
 
     <!-- Button to Add Customer Organization -->
     <div class="pt-4" align="center">
-      <v-btn @click="addExperience()" elevation="2"><v-icon class="pr-1">add</v-icon>Experience</v-btn>
+      <v-btn @click="addExperience()" elevation="2">
+        <v-icon class="pr-1">mdi-plus</v-icon>
+        Experience
+      </v-btn>
     </div>
   </div>
 </template>
@@ -109,7 +111,7 @@ async function created() {
 function addExperience() {
   if (!this.editedCustomerOrgExp) this.editedCustomerOrgExp = [];
   this.editedCustomerOrgExp.push({
-    name: '',
+    name: null,
     years: 0,
     current: false
   });
@@ -141,7 +143,7 @@ function validateFields() {
   _.forEach(components, (field) => {
     if (field && !field.validate()) errorCount++;
   });
-  this.emitter.emit('doneValidating', 'customerOrgExp', this.editedCustomerOrgExp); // emit done validating and send edited data to parent
+  this.emitter.emit('doneValidating', { tab: 'customerOrgExp', data: this.editedCustomerOrgExp }); // emit done validating and send edited data to parent
   this.emitter.emit('customerOrgExpStatus', errorCount); // emit error status
 } // validateFields
 

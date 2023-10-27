@@ -38,14 +38,3 @@ export default {
   props: ['color', 'filename', 'generateData', 'sortKey', 'tooltip']
 };
 </script>
-
-<style scoped>
-.download {
-  font-size: 20px;
-  cursor: pointer;
-}
-
-.icon-white {
-  color: white;
-}
-</style>

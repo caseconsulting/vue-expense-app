@@ -6,81 +6,70 @@
         ref="formFields"
         v-model="uni.name"
         :rules="getRequiredRules()"
-        :items="schoolNamePlaceholder(uni.name)"
-        :attach="isAttached"
+        :items="schoolDropDown"
         label="School"
+        variant="underlined"
         data-vv-name="School"
         clearable
       ></v-autocomplete>
       <div v-for="(degree, dIndex) in uni.degrees" :key="`${dIndex}`">
         <!-- Name of Degree -->
-        <div v-if="uni.degrees.length === 1">
-          <v-select
-            ref="formFields"
-            v-model="degree.degreeType"
-            :rules="getRequiredRules()"
-            :items="degreeDropDown"
-            :attach="isAttached"
-            label="Degree"
-            data-vv-name="Degree"
-            clearable
-          >
-          </v-select>
-        </div>
-        <div v-else>
-          <v-select
-            ref="formFields"
-            v-model="degree.degreeType"
-            :rules="getRequiredRules()"
-            :items="degreeDropDown"
-            :attach="isAttached"
-            label="Degree"
-            data-vv-name="Degree"
-            clearable
-            append-outer-icon="delete"
-          >
-            <v-tooltip bottom slot="append-outer">
-              <template v-slot:activator="{ on }">
-                <v-btn v-on="on" @click="deleteDegree(dIndex)" text icon
-                  ><v-icon class="case-gray pr-1">delete</v-icon></v-btn
-                >
-              </template>
-              <span>Delete Degree</span>
-            </v-tooltip>
-          </v-select>
-        </div>
+
+        <v-select
+          ref="formFields"
+          v-model="degree.degreeType"
+          :rules="getRequiredRules()"
+          :items="degreeDropDown"
+          label="Degree"
+          variant="underlined"
+          data-vv-name="Degree"
+          clearable
+        >
+          <template v-if="uni.degrees.length > 1" v-slot:append>
+            <v-btn @click="deleteDegree(dIndex)" variant="text" density="comfortable" icon="">
+              <v-tooltip activator="parent" location="bottom">Delete Degree</v-tooltip>
+              <v-icon :color="caseGray" class="pr-1">mdi-delete</v-icon>
+            </v-btn>
+          </template>
+        </v-select>
 
         <!-- Month and Year of Completion -->
         <v-menu
           v-model="degree.showEducationMenu"
           :close-on-content-click="false"
           :attach="isAttached"
-          transition="scale-transition"
-          offset-y
-          max-width="290px"
-          min-width="290px"
+          location="start center"
         >
-          <template v-slot:activator="{ on }">
+          <template v-slot:activator="{ props }">
             <v-text-field
               ref="formFields"
-              :value="format(degree.completionDate, null, 'MM/YYYY')"
+              :model-value="format(degree.completionDate, null, 'MM/YYYY')"
               label="Completion Date"
-              prepend-icon="event"
               :rules="getDateMonthYearOptionalRules()"
               hint="MM/YYYY format"
               v-mask="'##/####'"
+              variant="underlined"
               persistent-hint
-              v-on="on"
               @blur="degree.completionDate = parseEventDate($event)"
               clearable
-              @input="degree.showEducationMenu = false"
-            ></v-text-field>
+              @click:prepend="degree.showEducationMenu = true"
+              @click:control="degree.showEducationMenu = false"
+            >
+              <template v-slot:prepend>
+                <div v-bind="props" class="pointer">
+                  <v-icon :color="caseGray">mdi-calendar</v-icon>
+                </div>
+              </template>
+            </v-text-field>
           </template>
           <v-date-picker
             v-model="degree.completionDate"
-            no-title
-            @input="degree.showEducationMenu = false"
-            type="month"
+            @update:model-value="degree.showEducationMenu = false"
+            show-adjacent-months
+            hide-actions
+            keyboard-icon=""
+            color="#bc3825"
+            title="Completion Date"
           ></v-date-picker>
         </v-menu>
         <!-- End Month and Year of Completion -->
@@ -94,25 +83,29 @@
             v-model="degree.majors[mIndex]"
             :rules="[...getRequiredRules(), duplicateDiscipline('majors', major, dIndex)]"
             :items="majorDropDown"
-            :attach="isAttached"
             label="Major"
+            variant="underlined"
             data-vv-name="Major"
             clearable
           >
-            <v-tooltip v-if="degree.majors.length > 1" bottom slot="append-outer">
-              <template v-slot:activator="{ on }">
-                <v-btn text icon v-on="on" @click="deleteItem(degree.majors, mIndex)"
-                  ><v-icon class="case-gray">delete</v-icon></v-btn
-                >
-              </template>
-              <span>Delete Major</span>
-            </v-tooltip>
+            <template v-slot:append>
+              <v-btn
+                v-if="degree.majors.length > 1"
+                variant="text"
+                icon=""
+                density="comfortable"
+                @click="deleteItem(degree.majors, mIndex)"
+              >
+                <v-tooltip activator="parent" location="bottom">Delete Major</v-tooltip>
+                <v-icon :color="caseGray">mdi-delete</v-icon>
+              </v-btn>
+            </template>
           </v-combobox>
         </div>
         <!-- End Loop Majors -->
         <!-- Button to Add Major -->
         <div align="center" class="py-2">
-          <v-btn @click="addItem(degree.majors)" depressed outlined small>Add a Major</v-btn>
+          <v-btn @click="addItem(degree.majors)" variant="outlined" size="small">Add a Major</v-btn>
         </div>
         <!-- End Majors -->
 
@@ -124,25 +117,23 @@
             v-model="degree.minors[mIndex]"
             :rules="[...getRequiredRules(), duplicateDiscipline('minors', minor, dIndex)]"
             :items="minorDropDown"
-            :attach="isAttached"
             label="Minor"
+            variant="underlined"
             data-vv-name="Minor"
             clearable
           >
-            <v-tooltip bottom slot="append-outer">
-              <template v-slot:activator="{ on }">
-                <v-btn text icon v-on="on" @click="deleteItem(degree.minors, mIndex)">
-                  <v-icon class="case-gray">delete</v-icon>
-                </v-btn>
-              </template>
-              <span>Delete Minor</span>
-            </v-tooltip>
+            <template v-slot:append>
+              <v-btn variant="text" icon="" density="comfortable" @click="deleteItem(degree.minors, mIndex)">
+                <v-tooltip activator="parent" location="bottom">Delete Minor</v-tooltip>
+                <v-icon :color="caseGray">mdi-delete</v-icon>
+              </v-btn>
+            </template>
           </v-autocomplete>
         </div>
         <!-- End Loops Minors -->
         <!-- Button to Add Minor -->
         <div align="center" class="py-2">
-          <v-btn @click="addItem(degree.minors)" depressed outlined small>Add a Minor</v-btn>
+          <v-btn @click="addItem(degree.minors)" variant="outlined" size="small">Add a Minor</v-btn>
         </div>
         <!-- End Minors -->
 
@@ -154,58 +145,57 @@
             v-model="degree.concentrations[cIndex]"
             :rules="[...getRequiredRules(), duplicateDiscipline('concentrations', concentration, dIndex)]"
             :items="concentrationDropDown"
-            :attach="isAttached"
+            variant="underlined"
             data-vv-name="Concentration"
             clearable
             label="Concentration"
           >
-            <v-tooltip bottom slot="append-outer">
-              <template v-slot:activator="{ on }">
-                <v-btn text icon v-on="on" @click="deleteItem(degree.concentrations, cIndex)">
-                  <v-icon class="case-gray">delete</v-icon>
-                </v-btn>
-              </template>
-              <span>Delete Concentration</span>
-            </v-tooltip>
+            <template v-slot:append>
+              <v-btn variant="text" density="comfortable" icon="" @click="deleteItem(degree.concentrations, cIndex)">
+                <v-tooltip activator="parent" location="bottom">Delete Concentration</v-tooltip>
+                <v-icon :color="caseGray">mdi-delete</v-icon>
+              </v-btn>
+            </template>
           </v-autocomplete>
         </div>
         <!-- End Loop Concentrations -->
         <!-- Button to Add Concentration -->
         <div align="center" class="py-2">
-          <v-btn @click="addItem(degree.concentrations)" depressed outlined small>Add a Concentration</v-btn>
+          <v-btn @click="addItem(degree.concentrations)" variant="outlined" size="small">Add a Concentration</v-btn>
         </div>
         <!-- End Concentrations -->
       </div>
       <!-- Button to Add Degrees -->
-      <div class="pt-4" align="center">
-        <v-btn @click="addDegree()" elevation="2"><v-icon class="pr-1">add</v-icon>Degree</v-btn>
+      <div class="pt-2" align="center">
+        <v-btn @click="addDegree()" elevation="2">
+          <template v-slot:prepend>
+            <v-icon :color="caseGray" class="pr-1">mdi-plus</v-icon>
+          </template>
+          Degree
+        </v-btn>
       </div>
     </div>
     <!-- Resume Parser Buttons -->
     <div v-if="parser" class="center">
-      <v-tooltip top>
-        <template v-slot:activator="{ on }">
-          <v-icon v-on="on" large right color="red" @click="emitToParser(false)">close</v-icon>
-        </template>
-        <span>Ignore Pending Change</span>
-      </v-tooltip>
-      <v-tooltip top>
-        <template v-slot:activator="{ on }">
-          <v-icon v-on="on" large left color="green" @click="emitToParser(true)">done</v-icon>
-        </template>
-        <span>Add Pending Change</span>
-      </v-tooltip>
+      <span>
+        <v-tooltip activator="parent" location="top">Ignore Pending Change</v-tooltip>
+        <v-icon size="large" end color="red" @click="emitToParser(false)">mdi-close</v-icon>
+      </span>
+      <span>
+        <v-tooltip activator="parent" location="top">Add Pending Change</v-tooltip>
+        <v-icon size="large" start color="green" @click="emitToParser(true)">mdi-check</v-icon>
+      </span>
     </div>
   </div>
   <!-- End Loop Education -->
 </template>
 
 <script>
-import api from '@/shared/api.js';
 import _ from 'lodash';
 import { getDateMonthYearOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
 import { format } from '@/shared/dateUtils';
 import { mask } from 'vue-the-mask';
+import { SCHOOLS } from '../dropdown-info/schools';
 import { majorsAndMinors } from '../dropdown-info/majorsAndMinors';
 
 // |--------------------------------------------------|
@@ -218,28 +208,6 @@ import { majorsAndMinors } from '../dropdown-info/majorsAndMinors';
  * Emits to parent the component was created and get data.
  */
 async function created() {
-  this.schoolDropDown = await api.getColleges('');
-
-  let alias = this.schoolDropDown.indexOf('Virginia Polytechnic Institute and State University');
-  this.schoolDropDown[alias] = 'Virginia Polytechnic Institute and State University (Virginia Tech)';
-  alias = this.schoolDropDown.indexOf('University of Mississippi');
-  this.schoolDropDown[alias] = 'University of Mississippi (Ole Miss)';
-  alias = this.schoolDropDown.indexOf('United States Military Academy');
-  this.schoolDropDown[alias] = 'United States Military Academy (West Point)';
-  alias = this.schoolDropDown.indexOf('Northern Virginia Community College');
-  this.schoolDropDown[alias] = 'Northern Virginia Community College (NoVa)';
-  alias = this.schoolDropDown.indexOf('Georgia Institute of Technology');
-  this.schoolDropDown[alias] = 'Georgia Institute of Technology (Georgia Tech)';
-  alias = this.schoolDropDown.indexOf('Florida Institute of Technology');
-  this.schoolDropDown[alias] = 'Florida Institute of Technology (Florida Tech)';
-  alias = this.schoolDropDown.indexOf('City University of New York');
-  this.schoolDropDown[alias] = 'City University of New York (City Tech)';
-  alias = this.schoolDropDown.indexOf('California Institute of Technology');
-  this.schoolDropDown[alias] = 'California Institute of Technology (Caltech)';
-
-  // add schools not included in getColleges api call
-  this.schoolDropDown.push('Belmont Abbey College');
-
   //update drop downs with majors and minors not on the list
   this.updateDropdowns();
 } // created
@@ -274,7 +242,7 @@ function parseEventDate() {
  * @param array - array to add item to.
  */
 function addItem(array) {
-  array.push('');
+  array.push(null);
 } //addItem
 
 /**
@@ -284,8 +252,8 @@ function addDegree() {
   this.uni.degrees.push({
     completionDate: null,
     concentrations: [],
-    degreeType: '',
-    majors: [''],
+    degreeType: null,
+    majors: [null],
     minors: [],
     showEducationMenu: false
   });
@@ -380,7 +348,11 @@ function validateFields() {
   _.forEach(components, (field) => {
     if (field && !field.validate()) errorCount++;
   });
-  this.emitter.emit('doneValidatingEducation', this.uni, this.schoolIndex, errorCount); // emit done validating
+  this.emitter.emit('doneValidatingEducation', {
+    content: this.uni,
+    index: this.schoolIndex,
+    errors: errorCount
+  }); // emit done validating
 } // validateFields
 
 // |--------------------------------------------------|
@@ -431,7 +403,7 @@ export default {
       degreeDropDown: ['Associates', 'Bachelors', 'Masters', 'PhD/Doctorate', 'Other (trade school, etc)'], // autocomplete degree name options
       majorDropDown: _.map(majorsAndMinors, (elem) => titleCase(elem)), // autocomplete major options
       minorDropDown: _.map(majorsAndMinors, (elem) => titleCase(elem)), // autocomplete minor options
-      schoolDropDown: [] // autocomplete school options
+      schoolDropDown: SCHOOLS // autocomplete school options
     };
   },
   directives: { mask },

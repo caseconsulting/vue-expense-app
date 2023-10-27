@@ -7,8 +7,8 @@
         :items="dodForces"
         v-model="military.branch"
         :rules="getRequiredRules()"
-        :attach="isAttached"
         label="Military Branch"
+        variant="underlined"
         auto-select-first
         clearable
       ></v-autocomplete>
@@ -19,32 +19,38 @@
             v-model="military.showStartMenu"
             :close-on-content-click="false"
             :attach="isAttached"
-            transition="scale-transition"
-            max-width="290px"
-            min-width="290px"
-            offset-y
+            location="start center"
           >
-            <template v-slot:activator="{ on }">
+            <template v-slot:activator="{ props }">
               <v-text-field
                 ref="formFields"
-                :value="format(military.startDate, null, 'MM/YYYY')"
+                :model-value="format(military.startDate, null, 'MM/YYYY')"
                 :rules="getDateMonthYearOptionalRules()"
                 label="Starting Date"
-                prepend-icon="event_available"
                 hint="MM/YYYY format"
                 v-mask="'##/####'"
-                v-on="on"
+                variant="underlined"
                 @blur="military.startDate = parseEventDate($event)"
-                @input="military.showStartMenu = false"
+                @click:prepend="military.showStartMenu = true"
+                @click:control="military.showStartMenu = false"
                 clearable
                 persistent-hint
-              ></v-text-field>
+              >
+                <template v-slot:prepend>
+                  <div v-bind="props" class="pointer">
+                    <v-icon :color="caseGray">mdi-calendar</v-icon>
+                  </div>
+                </template>
+              </v-text-field>
             </template>
             <v-date-picker
               v-model="military.startDate"
-              @input="military.showStartMenu = false"
-              type="month"
-              no-title
+              @update:model-value="military.showStartMenu = false"
+              show-adjacent-months
+              hide-actions
+              keyboard-icon=""
+              color="#bc3825"
+              title="Starting Date"
             ></v-date-picker>
           </v-menu>
           <!-- End Starting Date -->
@@ -56,32 +62,38 @@
             v-model="military.showCompleteMenu"
             :close-on-content-click="false"
             :attach="isAttached"
-            transition="scale-transition"
-            max-width="290px"
-            min-width="290px"
-            offset-y
+            location="start center"
           >
-            <template v-slot:activator="{ on }">
+            <template v-slot:activator="{ props }">
               <v-text-field
                 ref="formFields"
-                :value="format(military.completeDate, null, 'MM/YYYY')"
+                :model-value="format(military.completeDate, null, 'MM/YYYY')"
                 :rules="getDateMonthYearOptionalRules()"
                 label="Completion Date"
-                prepend-icon="event_available"
                 hint="MM/YYYY format"
                 v-mask="'##/####'"
-                v-on="on"
+                variant="underlined"
                 @blur="military.completeDate = parseEventDate($event)"
-                @input="military.showCompleteMenu = false"
+                @click:prepend="military.showCompleteMenu = true"
+                @click:control="military.showCompleteMenu = false"
                 clearable
                 persistent-hint
-              ></v-text-field>
+              >
+                <template v-slot:prepend>
+                  <div v-bind="props" class="pointer">
+                    <v-icon :color="caseGray">mdi-calendar</v-icon>
+                  </div>
+                </template>
+              </v-text-field>
             </template>
             <v-date-picker
               v-model="military.completeDate"
-              @input="military.showCompleteMenu = false"
-              type="month"
-              no-title
+              @update:model-value="military.showCompleteMenu = false"
+              show-adjacent-months
+              hide-actions
+              keyboard-icon=""
+              color="#bc3825"
+              title="Completion Date"
             ></v-date-picker>
           </v-menu>
         </v-col>
@@ -90,18 +102,14 @@
     </div>
     <!-- Resume Parser Buttons -->
     <div v-if="parser" class="center">
-      <v-tooltip top>
-        <template v-slot:activator="{ on }">
-          <v-icon v-on="on" large right color="red" @click="emitToParser(false)">close</v-icon>
-        </template>
-        <span>Ignore Pending Change</span>
-      </v-tooltip>
-      <v-tooltip top>
-        <template v-slot:activator="{ on }">
-          <v-icon v-on="on" large left color="green" @click="emitToParser(true)">done</v-icon>
-        </template>
-        <span>Add Pending Change</span>
-      </v-tooltip>
+      <span>
+        <v-tooltip activator="parent" location="top">Ignore Pending Change</v-tooltip>
+        <v-icon size="large" end color="red" @click="emitToParser(false)">mdi-close</v-icon>
+      </span>
+      <span>
+        <v-tooltip activator="parent" location="top">Add Pending Change</v-tooltip>
+        <v-icon v-on="on" size="large" start color="green" @click="emitToParser(true)">mdi-check</v-icon>
+      </span>
     </div>
     <!-- End Resume Parser Buttons -->
   </div>
@@ -159,7 +167,11 @@ function validateFields() {
   _.forEach(components, (field) => {
     if (field && !field.validate()) errorCount++;
   });
-  this.emitter.emit('doneValidatingEducation', this.military, this.militaryIndex, errorCount); // emit done validating
+  this.emitter.emit('doneValidatingEducation', {
+    content: this.military,
+    index: this.militaryIndex,
+    errors: errorCount
+  }); // emit done validating
 } // validateFields
 
 // |--------------------------------------------------|

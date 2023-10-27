@@ -14,6 +14,7 @@
         :rules="getRequiredRules()"
         :items="languagesList"
         label="Language"
+        variant="underlined"
         data-vv-name="Language"
         class="pb-5"
         clearable
@@ -26,29 +27,29 @@
         :items="proficiencyTypes"
         v-model="languages.proficiency"
         :rules="getRequiredRules()"
-        item-text="text"
+        item-title="text"
         label="Level of proficiency"
+        variant="underlined"
         clearable
       ></v-autocomplete>
 
       <v-row align="center" class="py-3" justify="center">
         <!-- Button to Delete Language -->
         <v-col cols="2" class="mb-3" align="center">
-          <v-tooltip bottom slot="append-outer">
-            <template v-slot:activator="{ on }">
-              <v-btn text icon v-on="on" @click="deleteLanguage(index)"
-                ><v-icon class="case-gray">delete</v-icon></v-btn
-              >
-            </template>
-            <span>Delete Language</span>
-          </v-tooltip>
+          <v-btn variant="text" icon @click="deleteLanguage(index)">
+            <v-tooltip activator="parent" location="bottom">Delete Language</v-tooltip>
+            <v-icon class="case-gray">mdi-delete</v-icon></v-btn
+          >
         </v-col>
       </v-row>
       <!-- End Loop Languages -->
     </div>
     <!-- Button to Add A Language -->
     <div class="pt-4" align="center">
-      <v-btn @click="addLanguage()" elevation="2"><v-icon class="pr-1">add</v-icon>Foreign Language</v-btn>
+      <v-btn @click="addLanguage()" elevation="2">
+        <v-icon class="pr-1">mdi-plus</v-icon>
+        Foreign Language
+      </v-btn>
     </div>
   </div>
 </template>
@@ -85,8 +86,8 @@ async function created() {
 function addLanguage() {
   if (!this.editedLanguages) this.editedLanguages = [];
   this.editedLanguages.push({
-    name: '',
-    proficiency: ''
+    name: null,
+    proficiency: null
   });
 } // addLanguage
 
@@ -162,7 +163,7 @@ function validateFields() {
     }
   });
   this.emitter.emit('languagesStatus', errorCount);
-  this.emitter.emit('doneValidating', 'languages', this.editedLanguages); // emit done validating
+  this.emitter.emit('doneValidating', { tab: 'languages', data: this.editedLanguages }); // emit done validating
 } // validateFields
 
 // |--------------------------------------------------|

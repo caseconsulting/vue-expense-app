@@ -33,7 +33,7 @@
           <!-- Employee Inactive -->
           <div v-if="!isInactive">
             <!-- Loop through and display all balances -->
-            <v-row v-for="balance in this.availableBalances" :key="balance" class="mb-4">
+            <v-row v-for="balance in this.availableBalances" :key="balance" class="mb-2">
               <p>{{ balance }}:</p>
               <v-spacer></v-spacer>
               <p>{{ formatHours(balanceData[balance]) }}</p>

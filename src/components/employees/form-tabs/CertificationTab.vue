@@ -9,6 +9,7 @@
         :rules="getRequiredRules()"
         :items="certificationDropDown"
         label="Certification"
+        variant="underlined"
         data-vv-name="Certification"
         clearable
       >
@@ -16,72 +17,76 @@
       <v-row class="pt-3">
         <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
           <!-- Received Date -->
-          <v-menu
-            v-model="certification.showReceivedMenu"
-            :close-on-content-click="false"
-            transition="scale-transition"
-            offset-y
-            max-width="290px"
-            min-width="290px"
-          >
-            <template v-slot:activator="{ on, attrs }">
+          <v-menu v-model="certification.showReceivedMenu" :close-on-content-click="false" location="start center">
+            <template v-slot:activator="{ props }">
               <v-text-field
                 ref="formFields"
-                :value="format(certification.dateReceived, null, 'MM/DD/YYYY')"
+                :model-value="format(certification.dateReceived, null, 'MM/DD/YYYY')"
                 label="Date Received"
-                prepend-icon="event_available"
                 :rules="[...getDateRules()]"
                 hint="MM/DD/YYYY format"
                 v-mask="'##/##/####'"
-                v-bind="attrs"
-                v-on="on"
+                variant="underlined"
                 @blur="certification.dateReceived = parseEventDate($event)"
-                @input="certification.showReceivedMenu = false"
                 @focus="certificationIndex = index"
+                @click:prepend="certification.showReceivedMenu = true"
+                @click:control="certification.showReceivedMenu = false"
                 clearable
-              ></v-text-field>
+              >
+                <template v-slot:prepend>
+                  <div v-bind="props" class="pointer">
+                    <v-icon :color="caseGray">mdi-calendar</v-icon>
+                  </div>
+                </template>
+              </v-text-field>
             </template>
             <v-date-picker
               v-model="certification.dateReceived"
               :max="certification.expirationDate"
-              no-title
-              @input="certification.showReceivedMenu = false"
+              @update:model-value="certification.showReceivedMenu = false"
+              show-adjacent-months
+              hide-actions
+              keyboard-icon=""
+              color="#bc3825"
+              title="Date Received"
             ></v-date-picker>
           </v-menu>
           <!-- End Received Date -->
         </v-col>
         <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
           <!-- Expiration Date -->
-          <v-menu
-            v-model="certification.showExpirationMenu"
-            :close-on-content-click="false"
-            transition="scale-transition"
-            offset-y
-            max-width="290px"
-            min-width="290px"
-          >
-            <template v-slot:activator="{ on, attrs }">
+          <v-menu v-model="certification.showExpirationMenu" :close-on-content-click="false" location="start center">
+            <template v-slot:activator="{ props }">
               <v-text-field
                 ref="formFields"
-                :value="format(certification.expirationDate, null, 'MM/DD/YYYY')"
+                :model-value="format(certification.expirationDate, null, 'MM/DD/YYYY')"
                 label="Expiration Date (optional)"
-                prepend-icon="event_busy"
                 :rules="[...getDateOptionalRules(), dateOrderRules(index)]"
                 hint="MM/DD/YYYY format"
                 v-mask="'##/##/####'"
-                v-bind="attrs"
-                v-on="on"
+                variant="underlined"
                 clearable
                 @blur="certification.expirationDate = parseEventDate($event)"
-                @input="certification.showExpirationMenu = false"
+                @click:prepend="certification.showExpirationMenu = true"
+                @click:control="certification.showExpirationMenu = false"
                 @focus="certificationIndex = index"
-              ></v-text-field>
+              >
+                <template v-slot:prepend>
+                  <div v-bind="props" class="pointer">
+                    <v-icon :color="caseGray">mdi-calendar</v-icon>
+                  </div>
+                </template>
+              </v-text-field>
             </template>
             <v-date-picker
               v-model="certification.expirationDate"
               :min="certification.dateReceived"
-              no-title
-              @input="certification.showExpirationMenu = false"
+              @update:model-value="certification.showExpirationMenu = false"
+              show-adjacent-months
+              hide-actions
+              keyboard-icon=""
+              color="#bc3825"
+              title="Expiration Date"
             ></v-date-picker>
           </v-menu>
           <!-- End Expiration Date -->
@@ -96,14 +101,10 @@
       </v-row>
       <v-row>
         <v-col cols="12" align="center" justify="center" class="pb-4 mb-2">
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on }">
-              <v-btn v-on="on" @click="deleteCertification(index)" icon text
-                ><v-icon class="case-gray">delete</v-icon></v-btn
-              >
-            </template>
-            <span>Delete Certification</span>
-          </v-tooltip>
+          <v-btn @click="deleteCertification(index)" icon variant="text">
+            <v-tooltip activator="parent" location="bottom">Delete Certification</v-tooltip>
+            <v-icon class="case-gray">mdi-delete</v-icon>
+          </v-btn>
         </v-col>
       </v-row>
     </div>
@@ -111,7 +112,10 @@
 
     <!-- Button to Add Certifications -->
     <div class="pt-4" align="center">
-      <v-btn @click="addCertification()" elevation="2"><v-icon class="pr-1">add</v-icon>Certification</v-btn>
+      <v-btn @click="addCertification()" elevation="2">
+        <v-icon class="pr-1">mdi-plus</v-icon>
+        Certification
+      </v-btn>
     </div>
   </div>
 </template>
@@ -202,7 +206,7 @@ function validateFields() {
   _.forEach(components, (field) => {
     if (field && !field.validate()) errorCount++;
   });
-  this.emitter.emit('doneValidating', 'certifications', this.editedCertifications); // emit done validating and sends edited data back to parent
+  this.emitter.emit('doneValidating', { tab: 'certifications', data: this.editedCertifications }); // emit done validating and sends edited data back to parent
   this.emitter.emit('certificationsStatus', errorCount); // emit error status
 } // validateFields
 

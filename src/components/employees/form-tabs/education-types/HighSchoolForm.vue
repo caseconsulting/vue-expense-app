@@ -6,6 +6,7 @@
         ref="formFields"
         v-model="highSchool.name"
         :rules="getRequiredRules()"
+        variant="underlined"
         label="High School"
         clearable
       ></v-text-field>
@@ -14,49 +15,51 @@
         v-model="highSchool.showReceivedMenu"
         :close-on-content-click="false"
         :attach="isAttached"
-        transition="scale-transition"
-        offset-y
-        max-width="290px"
-        min-width="290px"
+        location="start center"
       >
-        <template v-slot:activator="{ on }">
+        <template v-slot:activator="{ props }">
           <v-text-field
-            :value="format(highSchool.gradDate, null, 'MM/YYYY')"
+            :model-value="format(highSchool.gradDate, null, 'MM/YYYY')"
             ref="formFields"
             :rules="getDateMonthYearOptionalRules()"
             label="Graduation Date"
-            prepend-icon="event_available"
             hint="MM/YYYY format"
             v-mask="'##/####'"
             persistent-hint
-            v-on="on"
+            variant="underlined"
             @blur="highSchool.gradDate = parseEventDate($event)"
             clearable
-            @input="highSchool.showReceivedMenu = false"
-          ></v-text-field>
+            @click:prepend="highSchool.showReceivedMenu = true"
+            @click:control="highSchool.showReceivedMenu = false"
+          >
+            <template v-slot:prepend>
+              <div v-bind="props" class="pointer">
+                <v-icon :color="caseGray">mdi-calendar</v-icon>
+              </div>
+            </template>
+          </v-text-field>
         </template>
         <v-date-picker
           v-model="highSchool.gradDate"
-          no-title
-          @input="highSchool.showReceivedMenu = false"
-          type="month"
+          @update:model-value="highSchool.showReceivedMenu = false"
+          show-adjacent-months
+          hide-actions
+          keyboard-icon=""
+          color="#bc3825"
+          title="Graduation Date"
         ></v-date-picker>
       </v-menu>
       <!-- End Received Date -->
       <!-- Resume Parser Buttons -->
       <div v-if="parser" class="center">
-        <v-tooltip top>
-          <template v-slot:activator="{ on }">
-            <v-icon v-on="on" large right color="red" @click="emitToParser(false)">close</v-icon>
-          </template>
-          <span>Ignore Pending Change</span>
-        </v-tooltip>
-        <v-tooltip top>
-          <template v-slot:activator="{ on }">
-            <v-icon v-on="on" large left color="green" @click="emitToParser(true)">done</v-icon>
-          </template>
-          <span>Add Pending Change</span>
-        </v-tooltip>
+        <span>
+          <v-tooltip activator="parent" location="top">Ignore Pending Change</v-tooltip>
+          <v-icon size="large" end color="red" @click="emitToParser(false)">mdi-close</v-icon>
+        </span>
+        <span>
+          <v-tooltip activator="parent" location="top">Add Pending Change</v-tooltip>
+          <v-icon size="large" start color="green" @click="emitToParser(true)">mdi-check</v-icon>
+        </span>
       </div>
       <!-- End Resume Parser Buttons -->
     </div>
@@ -103,7 +106,12 @@ function validateFields() {
   _.forEach(components, (field) => {
     if (field && !field.validate()) errorCount++;
   });
-  this.emitter.emit('doneValidatingEducation', this.highSchool, this.schoolIndex, errorCount); // emit done validating
+
+  this.emitter.emit('doneValidatingEducation', {
+    content: this.highSchool,
+    index: this.schoolIndex,
+    errors: errorCount
+  }); // emit done validating
 } // validateFields
 
 // |--------------------------------------------------|

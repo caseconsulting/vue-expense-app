@@ -13,12 +13,12 @@
     <v-row>
       <!-- Quickbooks and available budgets widgets -->
       <v-col cols="12" md="5" lg="4" class="pt-0">
-        <v-skeleton-loader class="mb-4" type="card-heading, list-item@5"></v-skeleton-loader>
-        <v-skeleton-loader type="card-heading, list-item@5"></v-skeleton-loader>
+        <v-skeleton-loader class="mb-4" type="list-item@5"></v-skeleton-loader>
+        <v-skeleton-loader type="list-item@5"></v-skeleton-loader>
       </v-col>
       <!-- Employee profile data -->
       <v-col cols="12" md="7" lg="8" class="pt-0">
-        <v-skeleton-loader type="card-heading, list-item@25"></v-skeleton-loader>
+        <v-skeleton-loader type="list-item@25"></v-skeleton-loader>
       </v-col>
     </v-row>
   </v-container>

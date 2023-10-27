@@ -32,7 +32,7 @@
           </v-col>
           <v-col cols="12" xl="3" lg="4" class="pl-lg-1 pl-sm-2">
             <quick-books-time-data v-if="employee" :employee="employee"></quick-books-time-data>
-            <v-skeleton-loader v-else class="mt-3" type="card-heading, list-item@12"></v-skeleton-loader>
+            <v-skeleton-loader v-else class="mt-3" type="list-item@12"></v-skeleton-loader>
           </v-col>
         </v-row>
       </v-tab-item>

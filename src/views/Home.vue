@@ -25,18 +25,18 @@
       </v-row>
       <v-row>
         <v-col cols="6" class="px-xl-4 px-lg-2 px-md-0">
-          <v-skeleton-loader type="card-heading, list-item@5"></v-skeleton-loader>
+          <v-skeleton-loader type="list-item@5"></v-skeleton-loader>
         </v-col>
         <v-col cols="6" class="px-xl-4 px-lg-2 px-md-0">
-          <v-skeleton-loader type="card-heading, list-item@5"></v-skeleton-loader>
+          <v-skeleton-loader type="list-item@5"></v-skeleton-loader>
         </v-col>
         <v-col cols="12" class="pb-3 px-xl-4 px-lg-2 px-md-0">
-          <v-skeleton-loader type="card-heading, list-item@14"></v-skeleton-loader>
+          <v-skeleton-loader type="list-item@14"></v-skeleton-loader>
         </v-col>
       </v-row>
       <v-row>
         <v-col mt-0 class="pa-0 px-xl-4 px-lg-2 px-md-0">
-          <v-skeleton-loader type="card-heading, list-item@14"></v-skeleton-loader>
+          <v-skeleton-loader type="list-item@14"></v-skeleton-loader>
         </v-col>
       </v-row>
     </span>
@@ -219,7 +219,7 @@ async function createEvents() {
             event.truncatedText = _.truncate(event.text, { length: this.textMaxLength });
           }
           if (event.type === 'New Hire') {
-            event.color = '#415364';
+            event.color = this.caseGray;
             newHires.push(event);
           } else {
             if (anniversaries[monthDiff].events) {

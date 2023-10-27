@@ -8,6 +8,7 @@
         v-model="award.name"
         :rules="getRequiredRules()"
         label="Award"
+        variant="underlined"
         data-vv-name="Award"
         clearable
       >
@@ -16,35 +17,37 @@
       <v-row class="py-3">
         <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
           <!-- Received Date -->
-          <v-menu
-            v-model="award.showReceivedMenu"
-            :close-on-content-click="false"
-            transition="scale-transition"
-            offset-y
-            max-width="290px"
-            min-width="290px"
-          >
-            <template v-slot:activator="{ on }">
+          <v-menu v-model="award.showReceivedMenu" :close-on-content-click="false" location="start center">
+            <template v-slot:activator="{ props }">
               <v-text-field
                 ref="formFields"
-                :value="format(award.dateReceived, null, 'MM/YYYY')"
+                :model-value="format(award.dateReceived, null, 'MM/YYYY')"
                 label="Date Received"
-                prepend-icon="event_available"
                 :rules="getDateMonthYearRules()"
                 hint="MM/YYYY format"
                 v-mask="'##/####'"
+                variant="underlined"
                 persistent-hint
-                v-on="on"
                 @blur="award.dateReceived = parseEventDate($event)"
                 clearable
-                @input="award.showReceivedMenu = false"
-              ></v-text-field>
+                @click:prepend="award.showReceivedMenu = true"
+                @click:control="award.showReceivedMenu = false"
+              >
+                <template v-slot:prepend>
+                  <div v-bind="props" class="pointer">
+                    <v-icon :color="caseGray">mdi-calendar</v-icon>
+                  </div>
+                </template>
+              </v-text-field>
             </template>
             <v-date-picker
               v-model="award.dateReceived"
-              no-title
-              @input="award.showReceivedMenu = false"
-              type="month"
+              @update:model-value="award.showReceivedMenu = false"
+              show-adjacent-months
+              hide-actions
+              keyboard-icon=""
+              color="#bc3825"
+              title="Date Received"
             ></v-date-picker>
             <!-- Hidden field to record the date the user submitted -->
             <v-date-picker
@@ -57,14 +60,10 @@
           <!-- End Received Date -->
         </v-col>
         <v-col class="pb-1" sm="6" md="12" lg="6" align="center">
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on }">
-              <v-btn v-on="on" @click="deleteAward(index)" icon text
-                ><v-icon class="case-gray pr-1">delete</v-icon></v-btn
-              >
-            </template>
-            <span>Delete Award</span>
-          </v-tooltip>
+          <v-btn @click="deleteAward(index)" icon variant="text">
+            <v-tooltip activator="parent" location="bottom">Delete Award</v-tooltip>
+            <v-icon class="case-gray pr-1">mdi-delete</v-icon></v-btn
+          >
         </v-col>
       </v-row>
     </div>
@@ -72,7 +71,10 @@
 
     <!-- Button to Add Awards -->
     <div class="pt-4" align="center">
-      <v-btn @click="addAward()" elevation="2"><v-icon class="pr-1">add</v-icon>Award</v-btn>
+      <v-btn @click="addAward()" elevation="2">
+        <v-icon class="pr-1">mdi-plus</v-icon>
+        Award
+      </v-btn>
     </div>
   </div>
 </template>
@@ -146,7 +148,7 @@ function validateFields() {
   _.forEach(components, (field) => {
     if (field && !field.validate()) errorCount++;
   });
-  this.emitter.emit('doneValidating', 'awards', this.editedAwards); // emit done validating and sends edited data back to parent
+  this.emitter.emit('doneValidating', { tab: 'awards', data: this.editedAwards }); // emit done validating and sends edited data back to parent
   this.emitter.emit('awardStatus', errorCount); // emit error status
 } // validateFields
 

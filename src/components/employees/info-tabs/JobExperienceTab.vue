@@ -18,7 +18,7 @@
         </v-col>
         <v-col>
           <v-combobox
-            placeholder="Filter by Company Name"
+            label="Filter by Company Name"
             v-model="filter"
             @update:model-value="updateCompanies()"
             single-line

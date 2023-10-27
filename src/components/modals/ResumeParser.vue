@@ -411,6 +411,7 @@
 <script>
 import api from '@/shared/api.js';
 import { generateUUID, isEmpty, isSmallScreen } from '@/utils/utils';
+import { SCHOOLS } from '@/components/employees/form-tabs/dropdown-info/schools';
 import _ from 'lodash';
 import CancelConfirmation from '@/components/modals/CancelConfirmation.vue';
 import UniversityForm from '@/components/employees/form-tabs/education-types/UniversityForm.vue';
@@ -854,17 +855,17 @@ async function submit() {
     let dodForces = ['Army', 'Marine Corps', 'Navy', 'Air Force', 'Space Force', 'Coast Guard', 'National Guard'];
     for (let i = 0; i < educationComprehend.length; i++) {
       let educationEntity = educationComprehend[i];
-      let collegeList = await api.getColleges(educationEntity.Text);
+      let college = this.collegeList[educationEntity.Text];
       // If the exact college exists
-      if (collegeList.length == 1) {
+      if (college) {
         // Remove duplicate
         if (
           (!this.employee.education ||
-            this.employee.education.filter((e) => e.name && e.name === collegeList[0]).length == 0) &&
-          this.newEducation.filter((e) => e.name && e.name === collegeList[0]).length == 0
+            this.employee.education.filter((e) => e.name && e.name === college).length == 0) &&
+          this.newEducation.filter((e) => e.name && e.name === college).length == 0
         ) {
           this.newEducation.push({
-            name: collegeList[0],
+            name: college,
             type: 'university',
             degrees: [
               {
@@ -1188,6 +1189,7 @@ export default {
       activate: false, // whether or not the modal is open
       addressCanceled: false,
       phoneCanceled: false,
+      collegeList: SCHOOLS,
       confirmingValid: false,
       confirmBackingOut: false,
       editedEmployeeForm: null,

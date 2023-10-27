@@ -7,7 +7,7 @@
         </div>
       </v-col>
       <v-col v-if="userRoleIsAdmin()" cols="12" lg="4">
-        <v-skeleton-loader class="mt-3" type="card-heading, list-item@12"></v-skeleton-loader>
+        <v-skeleton-loader class="mt-3" type="list-item@12"></v-skeleton-loader>
       </v-col>
     </v-row>
     <v-row v-else>

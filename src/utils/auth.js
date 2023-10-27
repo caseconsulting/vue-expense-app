@@ -270,8 +270,6 @@ export function setIdToken() {
  */
 export function setProfile() {
   let profile = decode(getIdToken());
-  console.log(profile);
-
   setCookie(IMG, profile.picture);
 } // setProfile
 

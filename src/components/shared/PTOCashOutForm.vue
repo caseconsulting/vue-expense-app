@@ -46,7 +46,7 @@
                 ref="approvedDateMenu"
                 :close-on-content-click="false"
                 v-model="approvedDateMenu"
-                location="start center"
+                location="end center"
               >
                 <template v-slot:activator="{ props }">
                   <v-text-field
@@ -60,14 +60,12 @@
                     class="mb-4"
                     persistent-hint
                     @blur="ptoCashOutObj.approvedDate = format(approvedDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
-                    @update:model-value="approvedDateMenu = false"
                     @click:prepend="approvedDateMenu = true"
                     @click:control="approvedDateMenu = false"
                   >
                     <template v-slot:prepend>
-                      <div v-bind="props" class="d-flex justify-center align-center flex-column pointer">
+                      <div v-bind="props" class="pointer">
                         <v-icon color="grey-darken-1">mdi-calendar</v-icon>
-                        <span class="tiny-text font-weight-black">click me!</span>
                       </div>
                     </template>
                   </v-text-field>
@@ -77,12 +75,11 @@
                   v-model="ptoCashOutObj.approvedDate"
                   @update:model-value="approvedDateMenu = false"
                   hide-actions
-                  rounded
-                  input-placeholder="MM/DD/YYYY"
+                  show-adjacent-months
+                  keyboard-icon=""
                   color="#bc3825"
                   title="Approved Date"
                 >
-                  <template v-slot:header></template>
                 </v-date-picker>
               </v-menu>
             </div>
@@ -485,14 +482,6 @@ h3 {
 }
 h5 {
   line-height: 14px;
-}
-
-.pointer {
-  cursor: pointer;
-}
-
-.tiny-text {
-  font-size: 7px;
 }
 .title {
   position: relative;

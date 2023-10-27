@@ -12,6 +12,8 @@ const emitter = mitt();
 const app = createApp(App).use(router).use(store).use(vuetify);
 window.emitter = emitter;
 app.config.globalProperties.emitter = emitter;
+app.config.globalProperties.caseRed = '#bc3825';
+app.config.globalProperties.caseGray = '#415364';
 // TEMPORARY FIX TO THIS ISSUE
 window.addEventListener('error', (e) => {
   if (e.message.includes("Cannot read properties of undefined (reading 'includes')")) {

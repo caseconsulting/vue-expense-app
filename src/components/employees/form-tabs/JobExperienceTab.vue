@@ -6,47 +6,53 @@
       <div class="pb-2">
         <b>Experience in IC:</b>
         <!-- Info Tooltip Message -->
-        <v-tooltip bottom>
-          <template v-slot:activator="{ on }">
-            <v-icon v-on="on" class="pl-2 pb-2" small>info</v-icon>
-          </template>
-          <span>Date ranges are inclusive. Overlapping months will add extended time to IC experience</span>
-        </v-tooltip>
+        <span>
+          <v-tooltip activator="parent" location="bottom">
+            Date ranges are inclusive. Overlapping months will add extended time to IC experience.
+          </v-tooltip>
+          <v-icon v-on="on" class="pl-2 pb-2" size="x-small">mdi-information</v-icon>
+        </span>
       </div>
 
       <!-- Loop Time Frames -->
       <div v-for="(timeFrame, index) in editedJobExperienceInfo.icTimeFrames" :key="index">
         <!-- Range -->
-        <v-menu
-          v-model="timeFrame.showRangeMenu"
-          :close-on-content-click="false"
-          transition="scale-transition"
-          offset-y
-          max-width="290px"
-          min-width="290px"
-        >
-          <template v-slot:activator="{ on, attrs }">
+        <v-menu v-model="timeFrame.showRangeMenu" :close-on-content-click="false" location="start center">
+          <template v-slot:activator="{ props }">
             <v-text-field
-              :value="formatRange(timeFrame.range)"
+              :model-value="formatRange(timeFrame.range)"
               :rules="getRequiredRules()"
               label="Date Range"
-              prepend-icon="date_range"
+              variant="underlined"
               readonly
-              v-bind="attrs"
-              v-on="on"
+              v-bind="props"
               clearable
+              @click:prepend="timeFrame.showRangeMenu = true"
+              @click:control="timeFrame.showRangeMenu = false"
             >
-              <v-tooltip top slot="append-outer">
-                <template v-slot:activator="{ on }">
-                  <v-btn class="pb-3" v-on="on" icon text @click="deleteICTimeFrame(index)"
-                    ><v-icon class="case-gray">delete</v-icon></v-btn
-                  >
-                </template>
-                <span>Delete IC Time Frame</span>
-              </v-tooltip>
+              <template v-slot:prepend>
+                <div v-bind="props" class="pointer">
+                  <v-icon :color="caseGray">mdi-calendar</v-icon>
+                </div>
+              </template>
+              <template v-slot:append>
+                <v-btn class="pb-3" icon="" density="comfortable" variant="text" @click="deleteICTimeFrame(index)">
+                  <v-tooltip activator="parent" location="top">Delete IC Time Frame</v-tooltip>
+                  <v-icon class="case-gray">mdi-delete</v-icon>
+                </v-btn>
+              </template>
             </v-text-field>
           </template>
-          <v-date-picker v-model="timeFrame.range" no-title type="month" range :max="today"></v-date-picker>
+          <v-date-picker
+            v-model="timeFrame.range"
+            multiple
+            :max="today"
+            show-adjacent-months
+            hide-actions
+            keyboard-icon=""
+            color="#bc3825"
+            title="Date Range"
+          ></v-date-picker>
         </v-menu>
         <!-- End Range -->
       </div>
@@ -54,7 +60,7 @@
 
       <!-- Button to Add IC Time Frame -->
       <div align="center" class="pt-2 pb-4">
-        <v-btn @click="addICTimeFrame()" depressed outlined small>Add a Time Frame</v-btn>
+        <v-btn @click="addICTimeFrame()" variant="outlined" size="small">Add a Time Frame</v-btn>
       </div>
     </div>
     <!-- End Experience in IC -->
@@ -62,13 +68,20 @@
     <!-- Case Info -->
     <div class="gray-border ma-0 pt-2 pb-1 px-5">
       <!-- Company Name -->
-      <v-text-field label="Company" data-vv-name="Company" disabled value="CASE"></v-text-field>
+      <v-text-field
+        label="Company"
+        data-vv-name="Company"
+        disabled
+        variant="underlined"
+        model-value="CASE"
+      ></v-text-field>
 
       <!-- Job Position -->
       <v-text-field
         v-model="editedJobExperienceInfo.jobRole"
         disabled
         label="Position"
+        variant="underlined"
         data-vv-name="Position"
       ></v-text-field>
 
@@ -76,9 +89,10 @@
         <!-- Start Date -->
         <v-text-field
           ref="formFields"
-          :value="format(editedJobExperienceInfo.hireDate, null, 'MM/DD/YYYY')"
+          :model-value="format(editedJobExperienceInfo.hireDate, null, 'MM/DD/YYYY')"
           label="Start Date"
-          prepend-icon="event_available"
+          variant="underlined"
+          prepend-icon="mdi-calendar"
           disabled
         ></v-text-field>
         <!-- End Start Date -->
@@ -100,102 +114,81 @@
         :rules="[...getRequiredRules(), duplicateCompanyName(compIndex)]"
         :items="companyDropDown"
         label="Company"
+        variant="underlined"
         data-vv-name="Company"
         clearable
       >
       </v-combobox>
       <div v-for="(position, index) in company.positions" :key="index">
         <!-- Job Position -->
-        <div v-if="editedJobExperienceInfo.companies[compIndex].positions.length === 1">
-          <v-text-field
-            ref="formFields"
-            :id="'pos-field-' + compIndex + '-' + index"
-            v-model.trim="position.title"
-            :rules="getRequiredRules()"
-            label="Position"
-            data-vv-name="Position"
-            clearable
-          ></v-text-field>
-        </div>
-        <div v-else>
-          <v-text-field
-            ref="formFields"
-            :id="'pos-field-' + compIndex + '-' + index"
-            v-model.trim="position.title"
-            :rules="getRequiredRules()"
-            label="Position"
-            data-vv-name="Position"
-            append-outer-icon="delete"
-            clearable
-          >
-            <v-tooltip bottom slot="append-outer">
-              <template v-slot:activator="{ on }">
-                <v-btn text icon v-on="on" @click="deletePosition(compIndex, index)"
-                  ><v-icon class="case-gray">delete</v-icon></v-btn
-                >
-              </template>
-              <span>Delete Position</span>
-            </v-tooltip>
-          </v-text-field>
-        </div>
+        <v-text-field
+          ref="formFields"
+          :id="'pos-field-' + compIndex + '-' + index"
+          v-model.trim="position.title"
+          :rules="getRequiredRules()"
+          label="Position"
+          variant="underlined"
+          data-vv-name="Position"
+          clearable
+        >
+          <template v-slot:append v-if="editedJobExperienceInfo.companies[compIndex].positions.length > 1">
+            <v-btn variant="text" icon="" density="comfortable" @click="deletePosition(compIndex, index)">
+              <v-tooltip activator="parent" location="bottom">Delete Position</v-tooltip>
+              <v-icon class="case-gray">mdi-delete</v-icon>
+            </v-btn>
+          </template>
+        </v-text-field>
 
         <v-row>
           <v-col cols="12" sm="6" md="12" lg="6" class="pt-3">
             <!-- Start Date -->
-            <v-menu
-              v-model="position.showStartMenu"
-              :close-on-content-click="false"
-              transition="scale-transition"
-              offset-y
-              max-width="290px"
-              min-width="290px"
-            >
-              <template v-slot:activator="{ on, attrs }">
+            <v-menu v-model="position.showStartMenu" :close-on-content-click="false" location="start center">
+              <template v-slot:activator="{ props }">
                 <v-text-field
                   :id="'start-field-' + compIndex + '-' + index"
                   ref="formFields"
-                  :value="format(position.startDate, null, 'MM/YYYY')"
+                  :model-value="format(position.startDate, null, 'MM/YYYY')"
                   label="Start Date"
                   hint="MM/YYYY format"
                   v-mask="'##/####'"
-                  prepend-icon="event_available"
                   :rules="[...getDateMonthYearRules(), dateOrderRule(compIndex, index)]"
-                  v-bind="attrs"
-                  v-on="on"
+                  variant="underlined"
                   @blur="position.startDate = parseEventDate($event)"
-                  @input="position.showStartMenu = false"
+                  @click:prepend="position.showStartMenu = true"
+                  @click:control="position.showStartMenu = false"
                   @focus="setIndices(compIndex, index)"
                   clearable
-                ></v-text-field>
+                >
+                  <template v-slot:prepend>
+                    <div v-bind="props" class="pointer">
+                      <v-icon :color="caseGray">mdi-calendar</v-icon>
+                    </div>
+                  </template>
+                </v-text-field>
               </template>
               <v-date-picker
                 v-model="position.startDate"
+                @update:model-value="position.showStartMenu = false"
                 :max="position.endDate"
-                no-title
-                type="month"
-                @input="position.showStartMenu = false"
+                show-adjacent-months
+                hide-actions
+                keyboard-icon=""
+                color="#bc3825"
+                title="Start Date"
               ></v-date-picker>
             </v-menu>
             <!-- End Start Date -->
           </v-col>
           <v-col cols="12" sm="6" md="12" lg="6" class="pt-3">
             <!-- End Date -->
-            <v-menu
-              v-model="position.showEndMenu"
-              :close-on-content-click="false"
-              transition="scale-transition"
-              offset-y
-              max-width="290px"
-              min-width="290px"
-            >
-              <template v-slot:activator="{ on, attrs }">
+            <v-menu v-model="position.showEndMenu" :close-on-content-click="false" location="start center">
+              <template v-slot:activator="{ props }">
                 <v-text-field
                   :id="'end-field-' + compIndex + '-' + index"
                   ref="formFields"
-                  :disabled="position.presentDate"
-                  :value="format(position.endDate, null, 'MM/YYYY')"
-                  label="End Date"
-                  prepend-icon="event_busy"
+                  :model-value="format(position.endDate, null, 'MM/YYYY')"
+                  :label="position.presentDate ? 'Currently active' : 'End Date'"
+                  variant="underlined"
                   :rules="[
                     ...getDateMonthYearOptionalRules(),
                     dateOrderRule(compIndex, index),
@@ -203,59 +196,76 @@
                   ]"
                   hint="MM/YYYY format"
                   v-mask="'##/####'"
-                  v-bind="attrs"
-                  v-on="on"
                   clearable
                   @click:clear="position.endDate = null"
                   @blur="position.endDate = parseEventDate($event)"
-                  @input="position.showEndMenu = false"
+                  @click:prepend="position.showEndMenu = true"
+                  @click:control="position.showEndMenu = false"
                   @focus="setIndices(compIndex, index)"
-                ></v-text-field>
+                  @update:model-value="
+                    position.endDate && position.endDate.length > 0 ? (position.presentDate = false) : ''
+                  "
+                >
+                  <template v-slot:prepend>
+                    <div v-bind="props" class="pointer">
+                      <v-icon :color="caseGray">mdi-calendar</v-icon>
+                    </div>
+                  </template>
+                  <template v-slot:append-inner>
+                    <v-avatar
+                      v-if="checkPositionStatus(position)"
+                      @click="position.presentDate = !position.presentDate"
+                      class="pointer"
+                      size="x-small"
+                    >
+                      <span v-if="!position.presentDate">
+                        <v-tooltip activator="parent">Click if active</v-tooltip>
+                        <v-icon color="black"> mdi-check-circle-outline </v-icon>
+                      </span>
+                      <span v-else>
+                        <v-tooltip activator="parent">Currently active</v-tooltip>
+                        <v-icon color="black"> mdi-check-circle </v-icon>
+                      </span>
+                    </v-avatar>
+                  </template>
+                </v-text-field>
               </template>
               <v-date-picker
                 v-model="position.endDate"
                 :min="position.startDate"
-                no-title
-                type="month"
-                @input="position.showEndMenu = false"
+                @update:model-value="position.showEndMenu = false"
+                show-adjacent-months
+                hide-actions
+                keyboard-icon=""
+                color="#bc3825"
+                title="Starting Date"
               ></v-date-picker>
             </v-menu>
             <!-- End End Date -->
           </v-col>
-          <v-col v-if="!isMobile"></v-col>
-          <v-col>
-            <v-layout justify-start class="pl-2">
-              <v-checkbox
-                class="ma-0 pa-0"
-                v-model="position.presentDate"
-                :label="`Present`"
-                @click="position.endDate = null"
-              ></v-checkbox>
-            </v-layout>
-          </v-col>
         </v-row>
       </div>
       <div class="pb-4" align="center">
-        <v-btn @click="addPosition(compIndex)" :id="'add-pos-' + compIndex" elevation="2"
-          ><v-icon class="pr-1">add</v-icon>Position</v-btn
-        >
+        <v-btn @click="addPosition(compIndex)" :id="'add-pos-' + compIndex" elevation="2">
+          <v-icon class="pr-1">mdi-plus</v-icon>
+          Position
+        </v-btn>
       </div>
       <div class="pb-4" align="center">
-        <v-tooltip bottom>
-          <template v-slot:activator="{ on }">
-            <v-btn text icon v-on="on" id="delete-company" @click="deleteCompany(compIndex)"
-              ><v-icon class="case-gray">delete</v-icon></v-btn
-            >
-          </template>
-          <span>Delete Company</span>
-        </v-tooltip>
+        <v-btn variant="text" icon="" id="delete-company" @click="deleteCompany(compIndex)">
+          <v-tooltip activator="parent" location="bottom">Delete Company</v-tooltip>
+          <v-icon class="case-gray">mdi-delete</v-icon>
+        </v-btn>
       </div>
     </div>
     <!-- End Loop Jobs -->
 
     <!-- Button to Add Jobs -->
     <div class="pt-4" align="center">
-      <v-btn @click="addCompany()" elevation="2" id="add-job"><v-icon class="pr-1">add</v-icon>Job</v-btn>
+      <v-btn @click="addCompany()" elevation="2" id="add-job">
+        <v-icon class="pr-1">mdi-plus</v-icon>
+        Job
+      </v-btn>
     </div>
   </div>
 </template>
@@ -305,10 +315,10 @@ function addICTimeFrame() {
 function addCompany() {
   if (!this.editedJobExperienceInfo) this.editedJobExperienceInfo = [];
   this.editedJobExperienceInfo.companies.push({
-    companyName: '',
+    companyName: null,
     positions: [
       {
-        title: '',
+        title: null,
         endDate: null,
         presentDate: false,
         startDate: null,
@@ -326,7 +336,7 @@ function addCompany() {
  */
 function addPosition(compIndex) {
   this.editedJobExperienceInfo.companies[compIndex].positions.push({
-    title: '',
+    title: null,
     endDate: null,
     startDate: null,
     showStartMenu: false,
@@ -334,6 +344,20 @@ function addPosition(compIndex) {
     presentDate: false
   });
 } // addPosition
+
+/**
+ * Checks if a position is active or not.
+ *
+ * @param position - the job position
+ */
+function checkPositionStatus(position) {
+  if (!position.endDate) {
+    return true;
+  } else {
+    position.presentDate = false;
+    return false;
+  }
+} // checkPositionStatus
 
 /**
  * Deletes an IC Time Frame.
@@ -471,7 +495,7 @@ function validateFields() {
     });
   });
 
-  this.emitter.emit('doneValidating', 'jobExperience', this.editedJobExperienceInfo); // emit done validating
+  this.emitter.emit('doneValidating', { tab: 'jobExperience', data: this.editedJobExperienceInfo }); // emit done validating
   this.emitter.emit('jobExperienceStatus', errorCount); // emit error status
 } // validateFields
 
@@ -538,7 +562,7 @@ export default {
         }
       },
       editedJobExperienceInfo: _.cloneDeep(this.model), //edited job experience info
-      today: getTodaysDate('YYYY-MM')
+      today: getTodaysDate('MM/DD/YYYY')
     };
   },
   directives: { mask },
@@ -547,6 +571,7 @@ export default {
     addICTimeFrame,
     addCompany,
     addPosition,
+    checkPositionStatus,
     deleteICTimeFrame,
     deleteCompany,
     deletePosition,
