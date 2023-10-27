@@ -3,11 +3,12 @@
     <v-row class="mb-4">
       <v-col cols="6">
         <!-- Create Tag -->
-        <v-btn :disabled="creatingTag" @click="creatingTag = true">Create Tag <v-icon right>mdi-tag</v-icon></v-btn>
+        <v-btn :disabled="creatingTag" @click="creatingTag = true">Create Tag <v-icon end>mdi-tag</v-icon></v-btn>
       </v-col>
       <v-col cols="6">
         <!-- Table Search Field -->
         <v-text-field
+          variant="underlined"
           id="tagSearch"
           v-model="search"
           append-icon="search"
@@ -31,6 +32,7 @@
       <!-- Tag Name Slot -->
       <template v-slot:[`item.tagName`]="{ item }">
         <v-text-field
+          variant="underlined"
           v-if="editedTag && item.id === editedTag.id"
           v-model="editedTag.tagName"
           :rules="[(v) => !!v || 'Field is required', duplicateTagName()]"
@@ -45,20 +47,21 @@
       <!-- Employees Slot -->
       <template v-slot:[`item.employees`]="{ item }">
         <v-autocomplete
+          auto-select-first
           v-if="editedTag && item.id === editedTag.id"
           v-model="editedTag.employees"
           :disabled="tagLoading"
           :items="filteredEmployees"
-          :filter="customFilter"
+          :custom-filter="customFilter"
           multiple
+          variant="underlined"
           chips
           clearable
-          small-chips
-          deletable-chips
-          :search-input.sync="employeeSearch"
-          @change="employeeSearch = ''"
+          closable-chips
+          :search.sync="employeeSearch"
+          @update:modelValue="employeeSearch = ''"
           label="Employees (optional)"
-          item-text="employeeName"
+          item-title="employeeName"
           item-value="id"
         ></v-autocomplete>
         <span v-else v-for="(emp, i) in getTagEmployees(item.employees)" :key="i">
@@ -71,50 +74,42 @@
       <template v-slot:[`item.actions`]="{ item }">
         <div v-if="editedTag && item.id === editedTag.id">
           <!-- Save Edited Tag -->
-          <v-tooltip top>
-            <template v-slot:activator="{ on }">
-              <v-btn :disabled="tagLoading" :loading="tagLoading" text icon @click="saveEditedTag" v-on="on">
-                <v-icon>save</v-icon>
-              </v-btn>
-            </template>
-            <span>Save</span>
-          </v-tooltip>
+          <span>
+            <v-tooltip activator="parent" text="Save" location="top"></v-tooltip>
+            <v-btn :disabled="tagLoading" :loading="tagLoading" variant="text" icon @click="saveEditedTag" v-on="on">
+              <v-icon>mdi-content-save</v-icon>
+            </v-btn>
+          </span>
           <!-- Cancel Edited Tag -->
-          <v-tooltip top>
-            <template v-slot:activator="{ on }">
-              <v-btn :disabled="tagLoading" text icon @click="cancelEdit" v-on="on">
-                <v-icon>cancel</v-icon>
-              </v-btn>
-            </template>
-            <span>Cancel</span>
-          </v-tooltip>
+          <span>
+            <v-tooltip activator="parent" text="Cancel" location="top"></v-tooltip>
+            <v-btn :disabled="tagLoading" variant="text" icon @click="cancelEdit" v-on="on">
+              <v-icon>mdi-cancel</v-icon>
+            </v-btn>
+          </span>
         </div>
         <div v-else>
           <!-- Edit Tag -->
-          <v-tooltip top>
-            <template v-slot:activator="{ on }">
-              <v-btn :disabled="!!editedTag || tagLoading" text icon @click="editTag(item)" v-on="on">
-                <v-icon>edit</v-icon>
-              </v-btn>
-            </template>
-            <span>Edit</span>
-          </v-tooltip>
+          <span>
+            <v-tooltip activator="parent" text="Edit" location="top" />
+            <v-btn :disabled="!!editedTag || tagLoading" variant="text" icon @click="editTag(item)" v-on="on">
+              <v-icon>mdi-pencil</v-icon>
+            </v-btn>
+          </span>
           <!-- Delete Tag -->
-          <v-tooltip top>
-            <template v-slot:activator="{ on }">
-              <v-btn
-                :loading="tagLoading && !!deletedTag && deletedTag.id === item.id"
-                :disabled="!!editedTag || tagLoading"
-                text
-                icon
-                @click="deletedTag = item"
-                v-on="on"
-              >
-                <v-icon>delete</v-icon>
-              </v-btn>
-            </template>
-            <span>Delete</span>
-          </v-tooltip>
+          <span>
+            <v-tooltip activator="parent" text="Delete" location="top" />
+            <v-btn
+              :loading="tagLoading && !!deletedTag && deletedTag.id === item.id"
+              :disabled="!!editedTag || tagLoading"
+              variant="text"
+              icon
+              @click="deletedTag = item"
+              v-on="on"
+            >
+              <v-icon>mdi-delete</v-icon>
+            </v-btn>
+          </span>
         </div>
       </template>
     </v-data-table>
@@ -199,20 +194,24 @@ async function createTag() {
 /**
  * Custom filter for employee autocomplete options.
  *
- * @param item - employee
+ * @param _ - unused
  * @param queryText - text used for filtering
+ * @param item - employee
  * @return string - filtered employee name
  */
-function customFilter(item, queryText) {
+function customFilter(_, queryText, item) {
+  item = item.raw;
+
   const query = queryText ? queryText : '';
   const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
   const firstNameFullName = `${item.firstName} ${item.lastName}`;
 
-  const queryContainsNickName = nickNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
-  const queryContainsFirstName =
-    firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
+  const queryNickName = nickNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase());
+  const queryFirstName = firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase());
 
-  return queryContainsNickName || queryContainsFirstName;
+  if (queryNickName >= 0) return queryNickName;
+  if (queryFirstName >= 0) return queryFirstName;
+  return false;
 } // customFilter
 
 /**
@@ -341,6 +340,7 @@ async function saveEditedTag() {
  * @returns Boolean - True if the item matches the search criteria
  */
 function tableFilter(__, search, item) {
+  item = item.raw;
   let found = false;
   let lcSearch = search.toLowerCase();
   if (item.tagName.toLowerCase().includes(lcSearch)) return true; // early exit if tag name matches search
@@ -419,19 +419,19 @@ export default {
       employeeSearch: '',
       headers: [
         {
-          text: 'Tag Name',
-          value: 'tagName',
+          title: 'Tag Name',
+          key: 'tagName',
           width: '25%'
         },
         {
-          text: 'Employees',
-          value: 'employees',
+          title: 'Employees',
+          key: 'employees',
           sortable: false,
           width: '60%'
         },
         {
-          text: 'Actions',
-          value: 'actions',
+          title: 'Actions',
+          key: 'actions',
           sortable: false,
           align: 'center',
           width: '15%'
@@ -471,3 +471,9 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+a {
+  color: #1e79d3;
+}
+</style>

@@ -1,16 +1,16 @@
 <template>
   <div>
     <!-- Status Alert -->
-    <v-snackbar v-model="status.statusType" :color="status.color" multi-line right :timeout="5000" top vertical>
+    <v-snackbar v-model="status.statusType" :color="status.color" multi-line :timeout="5000" location="bottom" vertical>
       <v-card-title headline color="white">
-        <span class="headline">{{ status.statusMessage }}</span>
+        <span class="text-h5">{{ status.statusMessage }}</span>
       </v-card-title>
-      <v-btn color="white" text @click="clearStatus"> Close </v-btn>
+      <v-btn color="white" variant="text" @click="clearStatus"> Close </v-btn>
     </v-snackbar>
     <!-- Modal Card -->
     <v-card>
       <!-- Modal Title -->
-      <v-card-title class="headline header_style">Tag Manager</v-card-title>
+      <v-card-title class="text-h5 header_style">Tag Manager</v-card-title>
       <!-- Modal Content -->
       <v-card-text class="mt-4">
         <tags-table></tags-table>
@@ -19,8 +19,8 @@
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn
-          color="grey darken-3"
-          text
+          color="grey-darken-3"
+          variant="text"
           @click.native="
             emit(`close-tag-manager`);
             activate = false;

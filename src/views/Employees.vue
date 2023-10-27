@@ -5,7 +5,7 @@
       v-model="status.statusType"
       :color="status.color"
       :multi-line="true"
-      location="top right"
+      location="top end"
       :timeout="5000"
       :vertical="true"
     >
@@ -17,40 +17,41 @@
     <v-card>
       <v-container fluid>
         <!-- Title -->
-        <v-card-title>
-          <h2>Employees</h2>
-          <v-spacer></v-spacer>
-          <v-text-field
-            id="employeesSearch"
-            v-model="search"
-            append-icon="search"
-            label="Search (comma separate terms)"
-            single-line
-            hide-details
-          ></v-text-field>
+        <v-card-title class="">
+          <v-row>
+            <h2 class="my-2">Employees</h2>
+            <v-spacer></v-spacer>
+            <v-text-field
+              id="employeesSearch"
+              v-model="search"
+              append-inner-icon="fa:fas fa-search"
+              label="Search (comma separate terms)"
+              variant="underlined"
+              single-line
+            ></v-text-field>
+          </v-row>
         </v-card-title>
 
         <!-- Filters -->
         <v-card v-if="userRoleIsAdmin() || userRoleIsManager()" class="pa-4" variant="outlined">
-          <v-row>
+          <v-row color="black" class="mx-5 my-1">
             <!-- Active Filter -->
-            <v-col cols="12" md="12">
-              <h4>Employee Status:</h4>
-              <v-btn-toggle class="filter_color d-inline-block mr-6" v-model="filter.active" text multiple>
+            <v-col :align="isMobile() ? 'center' : ''" cols="12" md="4" sm="6">
+              <h4 class="d-block mx-auto">Employee Status:</h4>
+              <v-btn-toggle class="filter_color mx-auto" v-model="filter.active" text multiple>
                 <!-- Full Time -->
-                <v-tooltip location="top">
-                  <template v-slot:activator="{ on }">
-                    <v-btn value="full" id="full" v-on="on" variant="text">
+                <v-tooltip location="top" text="Full Time">
+                  <template v-slot:activator="{ props }">
+                    <v-btn value="full" id="full" v-bind="props" variant="text">
                       <v-icon class="mr-1" color="black">mdi-clock-outline</v-icon>
                     </v-btn>
                   </template>
-                  <span>Full Time</span>
                 </v-tooltip>
 
                 <!-- Part Time -->
                 <v-tooltip location="top">
-                  <template v-slot:activator="{ on }">
-                    <v-btn value="part" id="part" v-on="on" variant="text">
+                  <template v-slot:activator="{ props }">
+                    <v-btn value="part" id="part" v-bind="props" variant="text">
                       <v-icon color="black">mdi-progress-clock</v-icon>
                     </v-btn>
                   </template>
@@ -59,45 +60,49 @@
 
                 <!-- Inactive -->
                 <v-tooltip location="top">
-                  <template v-slot:activator="{ on }">
-                    <v-btn value="inactive" id="inactive" v-on="on" variant="text">
+                  <template v-slot:activator="{ props }">
+                    <v-btn value="inactive" id="inactive" v-bind="props" variant="text">
                       <v-icon color="black">mdi-stop-circle-outline</v-icon>
                     </v-btn>
                   </template>
                   <span>Inactive</span>
                 </v-tooltip>
               </v-btn-toggle>
-              <!-- End Active Filter -->
-              <!-- Tags filter -->
+            </v-col>
+            <!-- Tags filter -->
+            <v-col :align="isMobile() ? 'center' : ''" cols="12" md="5" sm="6">
               <v-autocomplete
                 v-if="userRoleIsAdmin() || userRoleIsManager()"
-                class="d-inline-block"
+                class="mt-4 ml-4"
+                variant="underlined"
                 clearable
                 label="Filter by Tag (click to flip)"
                 v-model="selectedTags"
                 :items="tags"
                 multiple
-                variant="solo-filled"
-                item-props.color="gray"
-                item-props.title="tagName"
-                item-props.value="id"
+                color="gray"
+                item-title="tagName"
+                item-value="id"
                 return-object
               >
-                <template v-slot:selection="data">
+                <template v-slot:chip="{ props, item }">
                   <v-chip
                     small
                     closable
+                    v-bind="props"
                     @click.stop
-                    @click="negateTag(data.item)"
-                    @click:close="removeTag(data.item)"
-                    :color="chipColor(data.item.id)"
+                    @click="negateTag(item.raw)"
+                    @click:close="removeTag(item.raw)"
+                    :color="chipColor(item.raw.id)"
                   >
-                    {{ tagFlip.includes(data.item.id) ? 'NOT ' : '' }}
-                    {{ data.item.tagName }}
+                    {{ tagFlip.includes(item.raw.id) ? 'NOT ' : '' }}
+                    {{ item.raw.tagName }}
                   </v-chip>
                 </template>
               </v-autocomplete>
             </v-col>
+            <!-- Blank space -->
+            <v-col></v-col>
             <!-- End Tags Filter -->
           </v-row>
         </v-card>
@@ -112,7 +117,7 @@
           elevation="2"
           v-if="hasAdminPermissions()"
         >
-          Create an Employee<v-icon class="pl-2">person_add</v-icon>
+          Create an Employee <v-icon class="pl-2" size="small" icon="fa:fas fa-user-plus" />
         </v-btn>
 
         <!-- Tag Manager -->
@@ -146,43 +151,41 @@
           :items="filteredEmployees"
           :sort-by.sync="sortBy"
           :sort-desc.sync="sortDesc"
-          :expanded.sync="expanded"
+          v-model:expanded="expanded"
           :loading="loading"
           :items-per-page.sync="itemsPerPage"
           :search="search"
           :custom-filter="customFilter"
           mobile-breakpoint="800"
           item-key="employeeNumber"
-          class="elevation-1 employees-table"
+          class="elevation-1 employees-table text-body-2"
           @click:row="handleClick"
         >
           <!-- Delete Action Item Slot -->
           <template v-slot:[`item.actions`]="{ item }">
             <div class="datatable_btn layout">
-              <v-tooltip location="top">
-                <template v-slot:activator="{ on }">
-                  <convert-employee-to-csv
-                    v-if="userRoleIsAdmin()"
-                    :midAction="midAction"
-                    :employee="item"
-                    :contracts="contracts"
-                    :tags="tags"
-                    v-on="on"
-                  ></convert-employee-to-csv>
-                  <v-btn
-                    v-if="hasAdminPermissions()"
-                    id="employeesDeleteBtn"
-                    :disabled="midAction"
-                    variant="text"
-                    icon
-                    @click.stop="validateDelete(item)"
-                    v-on="on"
-                  >
-                    <v-icon class="case-gray"> delete </v-icon>
-                  </v-btn>
-                </template>
-                <span>Delete</span>
-              </v-tooltip>
+              <convert-employee-to-csv
+                v-if="userRoleIsAdmin()"
+                :midAction="midAction"
+                :employee="item"
+                :contracts="contracts"
+                :tags="tags"
+                v-on="on"
+              ></convert-employee-to-csv>
+              <span>
+                <v-tooltip activator="parent" location="top" text="Delete" />
+                <v-btn
+                  v-if="hasAdminPermissions()"
+                  id="employeesDeleteBtn"
+                  :disabled="midAction"
+                  @click.stop="validateDelete(item)"
+                  v-on="props"
+                  size="small"
+                  variant="text"
+                  icon="fa: fas fa-trash"
+                >
+                </v-btn>
+              </span>
             </div>
           </template>
 
@@ -190,12 +193,15 @@
           <template v-slot:[`item.avatars`]="{ item }">
             <!-- Valid Avatar -->
             <v-avatar v-if="item.avatar" size="35">
-              <img :src="item.avatar" @error="changeAvatar(employee)" />
+              <img :src="item.avatar" @error="changeAvatar(employee)" style="width: 100%" />
             </v-avatar>
             <!-- Invalid Avatar -->
             <v-avatar v-else size="35" color="grey-darken-2">
               <div class="text-white">
-                <b>{{ item.firstName.substring(0, 1) }}{{ item.lastName.substring(0, 1) }}</b>
+                <b
+                  >{{ item.firstName.substring(0, 1).toUpperCase()
+                  }}{{ item.lastName.substring(0, 1).toUpperCase() }}</b
+                >
               </div>
             </v-avatar>
           </template>
@@ -252,11 +258,6 @@
               {{ item.email }}
             </p>
           </template>
-
-          <!-- Alert for no search results -->
-          <v-alert slot="no-results" :value="true" color="error" icon="warning">
-            Your search for "{{ search }}" found no results.
-          </v-alert>
         </v-data-table>
         <!-- NEW DATA TABLE -->
 
@@ -313,6 +314,7 @@ import {
   isFullTime,
   isInactive,
   isPartTime,
+  isMobile,
   monthDayYearFormat,
   storeIsPopulated,
   userRoleIsAdmin,
@@ -365,18 +367,33 @@ function chipColor(id) {
 /**
  * Custom filter for employee table searching
  *
- * @param _ - unused value
+ * @param value - unused value
  * @param search - The search value in the search bar
  * @param item - The item in the table
  * @returns Boolean - True if the item matches the search criteria
  */
-function customFilter(_, search, item) {
-  // short circuit to return everyone if there is no search term yet
-  if (search == null) return true;
+function customFilter(value, search, item) {
+  item = item.raw;
 
-  // split the search to allow for multiple search terms
-  let terms = search.split(',');
-  if (terms.length == 1 && terms[0].length < 2) return true;
+  // reset index if search is different than before
+  if (this.searchCache != search) {
+    this.searchIndex = new Set();
+    this.searchCache = search;
+  }
+
+  /**
+   * Bounce conditions:
+   *  - nothing is being searched
+   *  - the search is only one character and one term
+   *  - searching something that's not the employee object
+   *  - the employee has been searched before
+   */
+  let terms = search.split(','); // used for searching later, search is split by comma
+  if (search == null || (terms.length == 1 && terms[0].length < 2)) return true;
+  if (typeof value !== 'object' || this.searchIndex.has(item.email)) return false;
+
+  // mark employee as searched
+  this.searchIndex.add(item.email);
 
   // different items from the employee to look through
   let [frst, midl, last, nick, F, M, N, L] = [
@@ -507,8 +524,8 @@ function getLoginDate(item) {
  *
  * @param item - the employee
  */
-function handleClick(item) {
-  this.$router.push(employeePath(item));
+function handleClick(_, tableItem) {
+  this.$router.push(employeePath(tableItem.item));
 } //handleClick
 
 /**
@@ -542,6 +559,7 @@ function negateTag(item) {
   } else {
     this.tagFlip.push(item.id);
   }
+  this.refreshEmployees();
 } // negateTag
 
 /**
@@ -628,7 +646,7 @@ function employeeIsOnTag(e) {
     if (t.employees.includes(e)) return true;
   }
   return false;
-} // selectedTagsHasEmployee
+} // employeeIsOnTag
 
 /**
  * Syncs data between different applications (Portal, BambooHR, ADP, ...).
@@ -868,37 +886,38 @@ export default {
           sortable: false
         },
         {
-          text: 'First Name',
-          value: 'firstName'
+          title: 'First Name',
+          key: 'firstName'
         },
         {
-          text: 'Middle Name',
-          value: 'middleName'
+          title: 'Middle Name',
+          key: 'middleName'
         },
         {
-          text: 'Last Name',
-          value: 'lastName'
+          title: 'Last Name',
+          key: 'lastName'
         },
         {
-          text: 'Nickname',
-          value: 'nickname'
+          title: 'Nickname',
+          key: 'nickname'
         },
         {
-          text: 'Hire Date',
-          value: 'hireDate'
+          title: 'Hire Date',
+          key: 'hireDate'
         },
         {
-          text: 'Email',
-          value: 'email'
+          title: 'Email',
+          key: 'email'
         },
         userRoleIsAdmin() || userRoleIsManager()
           ? {
-              text: 'Last Login',
-              value: 'lastLoginSeconds'
+              title: 'Last Login',
+              key: 'lastLoginSeconds'
             }
           : _,
         {
-          value: 'actions',
+          title: 'Actions',
+          key: 'actions',
           sortable: false
         }
       ], // datatable headers
@@ -937,8 +956,10 @@ export default {
         currentZIP: null
       }, // selected employee
       search: null, // query text for datatable search field
+      searchIndex: new Set(),
+      searchCache: null,
       selectedTags: [], // tags to include or exclude in filter
-      sortBy: 'hireDate', // sort datatable items
+      sortBy: ['hireDate'], // sort datatable items
       sortDesc: false, // sort datatable items
       status: {
         statusType: undefined,
@@ -971,6 +992,7 @@ export default {
     isFullTime,
     isInactive,
     isPartTime,
+    isMobile,
     monthDayYearFormat,
     negateTag,
     refreshEmployees,
