@@ -480,7 +480,7 @@ export default {
   created,
   data() {
     return {
-      basicEmployeeDataLoading: false,
+      basicEmployeeDataLoading: true,
       currentTab: null,
       contracts: null,
       dateFormat: FORMATTED_ISOFORMAT,
