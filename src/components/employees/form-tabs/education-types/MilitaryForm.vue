@@ -102,14 +102,14 @@
     </div>
     <!-- Resume Parser Buttons -->
     <div v-if="parser" class="center">
-      <span>
+      <v-btn icon="" variant="text">
         <v-tooltip activator="parent" location="top">Ignore Pending Change</v-tooltip>
-        <v-icon size="large" end color="red" @click="emitToParser(false)">mdi-close</v-icon>
-      </span>
-      <span>
+        <v-icon size="large" color="red" @click="emitToParser(false)">mdi-close</v-icon>
+      </v-btn>
+      <v-btn icon="" variant="text">
         <v-tooltip activator="parent" location="top">Add Pending Change</v-tooltip>
-        <v-icon v-on="on" size="large" start color="green" @click="emitToParser(true)">mdi-check</v-icon>
-      </span>
+        <v-icon v-on="on" size="large" color="green" @click="emitToParser(true)">mdi-check</v-icon>
+      </v-btn>
     </div>
     <!-- End Resume Parser Buttons -->
   </div>
@@ -145,7 +145,10 @@ function dateSubmissionRules() {
  * @param include - whether or not to include this education
  */
 function emitToParser(include) {
-  this.emitter.emit(include ? 'confirm' : 'deny', include ? this.military : undefined);
+  this.emitter.emit(include ? 'confirm' : 'deny', {
+    index: this.militaryIndex,
+    value: include ? this.military : undefined
+  });
 } // emitToParser
 
 /**
@@ -207,7 +210,7 @@ function watchValidating() {
 // |--------------------------------------------------|
 
 export default {
-  props: ['parser', 'service', 'militaryIndex', 'validating', 'attach'],
+  props: ['parser', 'service', 'militaryIndex', 'validating', 'attach', 'index'],
   directives: { mask },
   computed: {
     isAttached

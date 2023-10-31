@@ -945,8 +945,8 @@ async function created() {
     this.disableEmpNum = result;
     this.emitter.emit('empNum', this.employeeNumber);
   });
-  this.emitter.on('resume', () => {
-    this.resumeReceived();
+  this.emitter.on('resume', (result) => {
+    this.resumeReceived(result.newEmployeeForm);
   });
   // Starts listener to see if the user confirmed to submit the form
   this.emitter.on('confirmed-form', async () => {

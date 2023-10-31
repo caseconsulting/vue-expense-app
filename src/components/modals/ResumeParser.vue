@@ -3,7 +3,7 @@
     <v-card>
       <v-card-title class="header_style d-flex justify-space-between align-center">
         <p style="margin: 0"><strong>Upload Resume</strong></p>
-        <v-btn icon dark @click="confirmBackingOut = !loading">
+        <v-btn icon="" variant="text" @click="confirmBackingOut = !loading">
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </v-card-title>
@@ -17,11 +17,11 @@
               </v-col>
             </v-row>
             <v-row justify="center" align="center">
-              <v-col xl="10" lg="10" md="10" sm="10" xs="2" class="pr-0">
-                <v-file-input :rules="fileRules" v-model="file" label="Resume"></v-file-input>
+              <v-col cols="2" xl="10" lg="10" md="10" sm="10" class="pr-0">
+                <v-file-input :rules="fileRules" variant="underlined" v-model="file" label="Resume"></v-file-input>
               </v-col>
-              <v-col xl="2" lg="2" md="2" sm="2" xs="2" class="text-center">
-                <v-btn @click="submit" color="green" outlined :disabled="!validFile || loading">Upload</v-btn>
+              <v-col cols="2" xl="2" lg="2" md="2" sm="2" class="text-center">
+                <v-btn @click="submit" color="green" variant="outlined" :disabled="!validFile || loading">Upload</v-btn>
               </v-col>
             </v-row>
           </v-container>
@@ -75,35 +75,28 @@
               <!-- Address -->
               <v-row v-if="showAddress">
                 <v-col xl="5" lg="5" md="5" sm="6" cols="6">
-                  <v-text-field v-model="address" disabled label="Old Address"> </v-text-field>
+                  <v-text-field v-model="address" variant="underlined" disabled label="Old Address"> </v-text-field>
                 </v-col>
                 <v-col xl="5" lg="5" md="5" sm="6" cols="6">
-                  <v-text-field v-model="newAddress" readonly label="New Address"> </v-text-field>
+                  <v-text-field v-model="newAddress" variant="underlined" readonly label="New Address"> </v-text-field>
                 </v-col>
                 <v-col xl="2" lg="2" md="2" sm="12" cols="12" class="pt-md-6 pt-0 text-center">
-                  <v-tooltip top>
-                    <template v-slot:activator="{ on }">
-                      <v-icon v-on="on" large right color="red" @click="addressCanceled = true">close</v-icon>
-                    </template>
-                    <span>Ignore Pending Change</span>
-                  </v-tooltip>
-                  <v-tooltip top>
-                    <template v-slot:activator="{ on }">
-                      <v-icon
-                        v-on="on"
-                        large
-                        left
-                        color="green"
-                        @click="
-                          submitInfo('address', newAddress);
-                          addressCanceled = true;
-                        "
-                      >
-                        done
-                      </v-icon>
-                    </template>
-                    <span>Add Pending Change</span>
-                  </v-tooltip>
+                  <v-btn @click="addressCanceled = true" icon="" variant="text">
+                    <v-tooltip activator="parent" location="top">Ignore Pending Change</v-tooltip>
+                    <v-icon size="large" color="red">mdi-close</v-icon>
+                  </v-btn>
+
+                  <v-btn
+                    @click="
+                      submitInfo('address', newAddress);
+                      addressCanceled = true;
+                    "
+                    icon=""
+                    variant="text"
+                  >
+                    <v-tooltip activator="parent" location="top">Add Pending Change</v-tooltip>
+                    <v-icon size="large" color="green"> mdi-check </v-icon>
+                  </v-btn>
                 </v-col>
               </v-row>
               <!-- Phone Number -->
@@ -114,16 +107,16 @@
                       <v-autocomplete
                         label="Actions *"
                         v-model="phoneNumAction"
-                        attach
+                        variant="underlined"
                         :items="getPhoneNumActionDropdowns()"
-                        @change="toggleOldNumsDropdown()"
+                        @update:model-value="toggleOldNumsDropdown()"
                       ></v-autocomplete>
                     </v-col>
                     <v-col sm="6" cols="12">
                       <v-autocomplete
                         :disabled="disableOldPhoneNums"
                         label="Number"
-                        attach
+                        variant="underlined"
                         v-model="oldPhoneNumToReplace"
                         :items="getOldPhoneNums()"
                       ></v-autocomplete>
@@ -131,101 +124,82 @@
                   </v-row>
                 </v-col>
                 <v-col xl="3" lg="3" md="3" sm="4" cols="6">
-                  <v-text-field v-model="newPhoneNumber" readonly label="New Phone Number"> </v-text-field>
+                  <v-text-field v-model="newPhoneNumber" variant="underlined" readonly label="New Phone Number">
+                  </v-text-field>
                 </v-col>
                 <v-col xl="2" lg="2" md="2" sm="12" cols="12" class="pt-md-6 pt-0 text-center">
-                  <v-tooltip top>
-                    <template v-slot:activator="{ on }">
-                      <v-icon v-on="on" large right color="red" @click="phoneCanceled = true">close</v-icon>
-                    </template>
-                    <span>Ignore Pending Change</span>
-                  </v-tooltip>
-                  <v-tooltip top>
-                    <template v-slot:activator="{ on }">
-                      <v-icon
-                        v-on="on"
-                        large
-                        left
-                        color="green"
-                        :disabled="phoneNumAction === ''"
-                        @click="
-                          submitInfo('phoneNumber', newPhoneNumber);
-                          phoneCanceled = true;
-                        "
-                      >
-                        done
-                      </v-icon>
-                    </template>
-                    <span>Add Pending Change</span>
-                  </v-tooltip>
+                  <v-btn @click="phoneCanceled = true" icon="" variant="text">
+                    <v-tooltip activator="parent" location="top">Ignore Pending Change</v-tooltip>
+                    <v-icon size="large" color="red">mdi-close</v-icon>
+                  </v-btn>
+                  <v-btn
+                    @click="
+                      submitInfo('phoneNumber', newPhoneNumber);
+                      phoneCanceled = true;
+                    "
+                    icon=""
+                    variant="text"
+                    :disabled="phoneNumAction === null"
+                  >
+                    <v-tooltip activator="parent" location="top">Add Pending Change</v-tooltip>
+                    <v-icon size="large" color="green"> mdi-check </v-icon>
+                  </v-btn>
                 </v-col>
               </v-row>
               <!-- GitHub -->
               <v-row v-if="showGitHub" class="text-center">
                 <v-col xl="5" lg="5" md="5" sm="6" cols="6">
-                  <v-text-field :value="employee.github" disabled label="Old GitHub"> </v-text-field>
+                  <v-text-field :model-value="employee.github" variant="underlined" disabled label="Old GitHub">
+                  </v-text-field>
                 </v-col>
                 <v-col xl="5" lg="5" md="5" sm="6" cols="6">
-                  <v-text-field v-model="newPersonal.github" readonly label="New GitHub"> </v-text-field>
+                  <v-text-field v-model="newPersonal.github" variant="underlined" readonly label="New GitHub">
+                  </v-text-field>
                 </v-col>
                 <v-col xl="2" lg="2" md="2" sm="12" cols="12" class="pt-md-6 pt-0 text-center">
-                  <v-tooltip top>
-                    <template v-slot:activator="{ on }">
-                      <v-icon v-on="on" large right color="red" @click="gitHubCanceled = true">close</v-icon>
-                    </template>
-                    <span>Ignore Pending Change</span>
-                  </v-tooltip>
-                  <v-tooltip top>
-                    <template v-slot:activator="{ on }">
-                      <v-icon
-                        v-on="on"
-                        large
-                        left
-                        color="green"
-                        @click="
-                          submitInfo('github', newPersonal.github);
-                          gitHubCanceled = true;
-                        "
-                      >
-                        done
-                      </v-icon>
-                    </template>
-                    <span>Add Pending Change</span>
-                  </v-tooltip>
+                  <v-btn @click="gitHubCanceled = true" icon="" variant="text">
+                    <v-tooltip activator="parent" location="top">Ignore Pending Change</v-tooltip>
+                    <v-icon size="large" color="red">mdi-close</v-icon>
+                  </v-btn>
+                  <v-btn
+                    @click="
+                      submitInfo('github', newPersonal.github);
+                      gitHubCanceled = true;
+                    "
+                    icon=""
+                    variant="text"
+                  >
+                    <v-tooltip activator="parent" location="top">Add Pending Change</v-tooltip>
+                    <v-icon size="large" color="green"> mdi-check </v-icon>
+                  </v-btn>
                 </v-col>
               </v-row>
               <!-- LinkedIn -->
               <v-row v-if="showLinkedIn" class="text-center">
                 <v-col xl="5" lg="5" md="5" sm="6" cols="6">
-                  <v-text-field :value="employee.linkedIn" disabled label="Old LinkedIn"> </v-text-field>
+                  <v-text-field :model-value="employee.linkedIn" variant="underlined" disabled label="Old LinkedIn">
+                  </v-text-field>
                 </v-col>
                 <v-col xl="5" lg="5" md="5" sm="6" cols="6">
-                  <v-text-field v-model="newPersonal.linkedIn" readonly label="New LinkedIn"> </v-text-field>
+                  <v-text-field v-model="newPersonal.linkedIn" variant="underlined" readonly label="New LinkedIn">
+                  </v-text-field>
                 </v-col>
                 <v-col xl="2" lg="2" md="2" sm="12" cols="12" class="pt-md-6 pt-0 text-center">
-                  <v-tooltip top>
-                    <template v-slot:activator="{ on }">
-                      <v-icon v-on="on" large right color="red" @click="linkedInCanceled = true">close</v-icon>
-                    </template>
-                    <span>Ignore Pending Change</span>
-                  </v-tooltip>
-                  <v-tooltip top>
-                    <template v-slot:activator="{ on }">
-                      <v-icon
-                        v-on="on"
-                        large
-                        left
-                        color="green"
-                        @click="
-                          submitInfo('linkedIn', newPersonal.linkedIn);
-                          linkedInCanceled = true;
-                        "
-                      >
-                        done
-                      </v-icon>
-                    </template>
-                    <span>Add Pending Change</span>
-                  </v-tooltip>
+                  <v-btn @click="linkedInCanceled = true" icon="" variant="text">
+                    <v-tooltip activator="parent" location="top">Ignore Pending Change</v-tooltip>
+                    <v-icon size="large" color="red">mdi-close</v-icon>
+                  </v-btn>
+                  <v-btn
+                    @click="
+                      submitInfo('linkedIn', newPersonal.linkedIn);
+                      linkedInCanceled = true;
+                    "
+                    icon=""
+                    variant="text"
+                  >
+                    <v-tooltip activator="parent" location="top">Add Pending Change</v-tooltip>
+                    <v-icon size="large" color="green"> mdi-check </v-icon>
+                  </v-btn>
                 </v-col>
               </v-row>
             </v-container>
@@ -243,14 +217,24 @@
                 <div v-if="!tech.canceled" class="gray-border pt-3 pb-1 px-5 ma-1">
                   <!-- Loop Technologies -->
                   <!-- Name of Technology -->
-                  <v-text-field class="pb-5" :value="tech.name" readonly label="Technology"></v-text-field>
+                  <v-text-field
+                    class="pb-5"
+                    :model-value="tech.name"
+                    variant="underlined"
+                    readonly
+                    label="Technology"
+                  ></v-text-field>
 
                   <!-- Current and Years of Experience -->
                   <div class="mb-3">
                     <v-row justify="center" align="center" class="py-3">
                       <!-- Current Switch -->
                       <v-col cols="4" sm="4" md="4" lg="4">
-                        <v-switch v-model="tech.current" label="Currently know this technology"></v-switch>
+                        <v-switch
+                          :color="caseGray"
+                          v-model="tech.current"
+                          label="Currently know this technology"
+                        ></v-switch>
                       </v-col>
 
                       <!-- Years of Experience -->
@@ -271,29 +255,23 @@
                           max="99"
                           min="0"
                           suffix="years"
-                          dense
+                          density="compact"
                           type="number"
-                          outlined
+                          variant="outlined"
                         ></v-text-field>
                       </v-col>
                     </v-row>
                   </div>
 
                   <v-row align="center" class="py-3" justify="center">
-                    <v-tooltip top>
-                      <template v-slot:activator="{ on }">
-                        <v-icon v-on="on" large right color="red" @click="tech.canceled = true">close</v-icon>
-                      </template>
-                      <span>Ignore Pending Change</span>
-                    </v-tooltip>
-                    <v-tooltip top>
-                      <template v-slot:activator="{ on }">
-                        <v-icon v-on="on" large left color="green" @click="submitInfo('technology', index)">
-                          done
-                        </v-icon>
-                      </template>
-                      <span>Add Pending Change</span>
-                    </v-tooltip>
+                    <v-btn @click="tech.canceled = true" icon="" variant="text">
+                      <v-tooltip activator="parent" location="top">Ignore Pending Change</v-tooltip>
+                      <v-icon size="large" color="red">mdi-close</v-icon>
+                    </v-btn>
+                    <v-btn @click="submitInfo('technology', index)" icon="" variant="text">
+                      <v-tooltip activator="parent" location="top">Add Pending Change</v-tooltip>
+                      <v-icon size="large" color="green"> mdi-check </v-icon>
+                    </v-btn>
                   </v-row>
                 </div>
               </v-form>
@@ -319,8 +297,7 @@
                 :school="edu"
                 :schoolIndex="index"
                 :attach="true"
-                @deny="edu.canceled = true"
-                @confirm="submitInfo('education', index, $event)"
+                :index="index"
               ></university-form>
               <high-school-form
                 v-else-if="!edu.canceled && edu.type === 'highSchool'"
@@ -328,8 +305,7 @@
                 :school="edu"
                 :schoolIndex="index"
                 :attach="true"
-                @deny="edu.canceled = true"
-                @confirm="submitInfo('education', index, $event)"
+                :index="index"
               ></high-school-form>
               <military-form
                 v-else-if="!edu.canceled && edu.type === 'military'"
@@ -337,8 +313,7 @@
                 :service="edu"
                 :militaryIndex="index"
                 :attach="true"
-                @deny="edu.canceled = true"
-                @confirm="submitInfo('education', index, $event)"
+                :index="index"
               ></military-form>
             </v-form>
           </div>
@@ -366,7 +341,7 @@
           "
         >
           <v-col>
-            <v-btn color="red" outlined @click="clearForm">Close Form</v-btn>
+            <v-btn color="red" variant="outlined" @click="clearForm">Close Form</v-btn>
           </v-col>
         </v-row>
         <!-- Changes exist -->
@@ -378,12 +353,24 @@
           "
         >
           <v-col class="text-right">
-            <v-btn color="red" class="mx-0 my-3" outlined @click="confirmBackingOut = true" :x-small="isSmallScreen">
+            <v-btn
+              color="red"
+              class="mx-0 my-3"
+              variant="outlined"
+              @click="confirmBackingOut = true"
+              :size="isSmallScreen ? 'x-small' : 'default'"
+            >
               Cancel Form Edits
             </v-btn>
           </v-col>
           <v-col class="text-left">
-            <v-btn color="green" class="mx-0 my-3" outlined @click="submitForm" :x-small="isSmallScreen">
+            <v-btn
+              color="green"
+              class="mx-0 my-3"
+              variant="outlined"
+              @click="submitForm"
+              :size="isSmallScreen ? 'x-small' : 'default'"
+            >
               Submit Form
             </v-btn>
           </v-col>
@@ -394,7 +381,7 @@
     <v-dialog v-model="toggleResumeFormErrorModal" max-width="350">
       <v-card>
         <v-card-title> Please make sure you process all pending changes. </v-card-title>
-        <v-btn text color="red" @click="toggleResumeFormErrorModal = false">Close</v-btn>
+        <v-btn variant="text" color="red" @click="toggleResumeFormErrorModal = false">Close</v-btn>
       </v-card>
     </v-dialog>
     <!-- Confirmation Modal -->
@@ -440,7 +427,7 @@ async function created() {
       timeToLive: 60
     });
 
-    this.emitter.emit('resume', this.editedEmployeeForm, this.totalChanges);
+    this.emitter.emit('resume', { newEmployeeForm: this.editedEmployeeForm, totalChanges: this.totalChanges });
     this.resumeProcessed = false;
     this.confirmingValid = false;
     this.activate = !this.activate;
@@ -449,6 +436,8 @@ async function created() {
   this.emitter.on('canceled-parser', () => {
     this.confirmingValid = false;
   });
+  this.emitter.on('deny', (result) => (this.newEducation[result.index].canceled = true));
+  this.emitter.on('confirm', (result) => this.submitInfo('education', result.index, result.value));
   this.emitter.on('backout-canceled-parser', () => {
     this.confirmBackingOut = false;
   });
@@ -521,7 +510,11 @@ function showLinkedIn() {
 function address() {
   let currentAddress = '';
   if (!this.isEmpty(this.employee.currentStreet)) {
-    currentAddress += `${this.employee.currentStreet}, `;
+    if (!this.isEmpty(this.employee.currentStreet2)) {
+      currentAddress += `${this.employee.currentStreet} ${this.employee.currentStreet2}, `;
+    } else {
+      currentAddress += `${this.employee.currentStreet}, `;
+    }
   }
   if (!this.isEmpty(this.employee.currentCity)) {
     currentAddress += `${this.employee.currentCity}, `;
@@ -658,7 +651,7 @@ function getPhoneNumActionDropdowns() {
 async function onlyUploadResume(eId) {
   try {
     this.loading = true;
-    await api.uploadResume(eId, this.file); //uploads resume to s3
+    await api.uploadResume(eId, this.file[0]); //uploads resume to s3
     this.loading = false;
 
     //confirmation upload pop-up in employee.vue
@@ -723,7 +716,7 @@ async function submit() {
       }
     }, 15000);
 
-    this.resumeObject = (await api.extractResumeText(this.employee.id, this.file)).comprehend;
+    this.resumeObject = (await api.extractResumeText(this.employee.id, this.file[0])).comprehend;
     this.emitter.emit('uploaded', false);
 
     // If it takes too long it should timeout
@@ -855,7 +848,7 @@ async function submit() {
     let dodForces = ['Army', 'Marine Corps', 'Navy', 'Air Force', 'Space Force', 'Coast Guard', 'National Guard'];
     for (let i = 0; i < educationComprehend.length; i++) {
       let educationEntity = educationComprehend[i];
-      let college = this.collegeList[educationEntity.Text];
+      let college = this.collegeList.find((c) => c.toLowerCase() === educationEntity.Text.toLowerCase());
       // If the exact college exists
       if (college) {
         // Remove duplicate
@@ -871,8 +864,8 @@ async function submit() {
               {
                 completionDate: null,
                 concentrations: [],
-                degreeType: '',
-                majors: [''],
+                degreeType: null,
+                majors: [null],
                 minors: [],
                 showEducationMenu: false
               }
@@ -961,7 +954,7 @@ async function submit() {
  *
  * @param field - The type of info to be submitted (address/phoneNumber/education/technology)
  * @param value - For education and tech, the index of the education/technology in the parsed info arrays
- * @param newValue - Used for education the new education to be submitted
+ * @param newValue - Used for education the new d to be submitted
  */
 function submitInfo(field, value, newValue) {
   this.totalChanges++;
@@ -1208,7 +1201,9 @@ export default {
         (v) => {
           return (
             (!this.isEmpty(v) &&
-              (v.type.includes('application/pdf') || v.type.includes('image/png') || v.type.includes('image/jpeg'))) ||
+              (v[0].type.includes('application/pdf') ||
+                v[0].type.includes('image/png') ||
+                v[0].type.includes('image/jpeg'))) ||
             'File unsupported, please submit a .png, .pdf, or a .jpeg file'
           );
         }
@@ -1226,8 +1221,8 @@ export default {
         currentZIP: null
       },
       disableOldPhoneNums: true,
-      oldPhoneNumToReplace: '',
-      phoneNumAction: '',
+      oldPhoneNumToReplace: null,
+      phoneNumAction: null,
       toggleResumeFormErrorModal: false,
       totalChanges: 0,
       timeoutError: false,

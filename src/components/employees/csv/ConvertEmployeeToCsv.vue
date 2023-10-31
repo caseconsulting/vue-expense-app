@@ -5,6 +5,7 @@
       v-on="on"
       @click.stop="download"
       variant="text"
+      density="comfortable"
       icon="mdi-download"
       :class="{ 'white--text': color == 'white', 'gray-icon': color != 'white' }"
     />

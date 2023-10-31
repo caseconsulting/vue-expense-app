@@ -2,13 +2,13 @@
   <div>
     <v-dialog v-model="activate" persistent max-width="350">
       <v-card>
-        <v-card-title class="headline">{{ title }}</v-card-title>
+        <v-card-title class="text-h5">{{ title }}</v-card-title>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn
             id="submitNoBtn"
             color="red"
-            text
+            variant="text"
             @click.native="
               emit(`canceled-${type}`);
               activate = false;
@@ -21,8 +21,8 @@
           <v-spacer></v-spacer>
           <v-btn
             id="submitYesBtn"
-            color="green darken-1"
-            text
+            color="green-darken-1"
+            variant="text"
             @click.native="
               emit(`confirmed-${type}`);
               activate = false;

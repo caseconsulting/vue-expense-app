@@ -78,7 +78,7 @@
         <!-- Loop Majors -->
         <div v-for="(major, mIndex) in degree.majors" :key="'major: ' + major + mIndex">
           <!-- Majors -->
-          <v-combobox
+          <v-autocomplete
             ref="formFields"
             v-model="degree.majors[mIndex]"
             :rules="[...getRequiredRules(), duplicateDiscipline('majors', major, dIndex)]"
@@ -100,7 +100,7 @@
                 <v-icon :color="caseGray">mdi-delete</v-icon>
               </v-btn>
             </template>
-          </v-combobox>
+          </v-autocomplete>
         </div>
         <!-- End Loop Majors -->
         <!-- Button to Add Major -->
@@ -177,14 +177,14 @@
     </div>
     <!-- Resume Parser Buttons -->
     <div v-if="parser" class="center">
-      <span>
+      <v-btn icon="" variant="text">
         <v-tooltip activator="parent" location="top">Ignore Pending Change</v-tooltip>
-        <v-icon size="large" end color="red" @click="emitToParser(false)">mdi-close</v-icon>
-      </span>
-      <span>
+        <v-icon size="large" color="red" @click="emitToParser(false)">mdi-close</v-icon>
+      </v-btn>
+      <v-btn icon="" variant="text">
         <v-tooltip activator="parent" location="top">Add Pending Change</v-tooltip>
-        <v-icon size="large" start color="green" @click="emitToParser(true)">mdi-check</v-icon>
-      </span>
+        <v-icon size="large" color="green" @click="emitToParser(true)">mdi-check</v-icon>
+      </v-btn>
     </div>
   </div>
   <!-- End Loop Education -->
@@ -224,7 +224,10 @@ async function created() {
  * @param include - whether or not to include this education
  */
 function emitToParser(include) {
-  this.emitter.emit(include ? 'confirm' : 'deny', include ? this.uni : undefined);
+  this.emitter.emit(include ? 'confirm' : 'deny', {
+    index: this.schoolIndex,
+    value: include ? this.uni : undefined
+  });
 } // emitToParser
 
 /**
@@ -426,7 +429,7 @@ export default {
     validateFields
   },
   //Education index is only used in the resume parser
-  props: ['parser', 'validating', 'allowAdditions', 'school', 'schoolIndex', 'attach'],
+  props: ['parser', 'validating', 'allowAdditions', 'school', 'schoolIndex', 'attach', 'index'],
   watch: {
     validating: watchValidating
   }

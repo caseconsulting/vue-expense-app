@@ -108,7 +108,14 @@
                 :tags="$store.getters.tags"
                 color="white"
               />
-              <v-btn @click="downloadResume()" density="comfortable" variant="text" icon="" class="mx-1">
+              <v-btn
+                @click="downloadResume()"
+                :disabled="!model.resumeUpdated"
+                density="comfortable"
+                variant="text"
+                icon=""
+                class="mx-1"
+              >
                 <v-tooltip v-if="hasAdminPermissions() || userIsEmployee()" activator="parent" location="top"
                   ><p class="ma-0 pa-0">
                     {{ this.model.resumeUpdated != null ? 'Download Resume' : 'No resume available' }}
@@ -163,7 +170,6 @@
         v-if="!loading && !editing"
         :toggleResumeParser="this.toggleResumeParser"
         :employee="this.model"
-        @resume="resumeReceived"
       ></resume-parser>
       <delete-modal :toggleDeleteModal="this.toggleDeleteModal" type="resume"></delete-modal>
     </div>
@@ -217,10 +223,11 @@ async function resumeReceived(newEmployeeForm, changes) {
   if (changes && changes > 0) {
     this.displayMessage('SUCCESS', `Added ${changes} change(s) to profile!`, 'green');
   }
-
-  this.model = newEmployeeForm;
-  this.model.resumeUpdated = getTodaysDate();
-  await api.updateItem(api.EMPLOYEES, this.model);
+  if (newEmployeeForm) {
+    this.model = newEmployeeForm;
+    this.model['resumeUpdated'] = getTodaysDate();
+    await api.updateItem(api.EMPLOYEES, this.model);
+  }
 } // resumeReceived
 
 /**
@@ -390,10 +397,14 @@ async function created() {
   this.emitter.on('confirm-delete-resume', async () => {
     await this.deleteResume();
   });
-
   this.emitter.on('canceled-delete-resume', () => {
     this.midAction = false;
   });
+  this.emitter.on('resume', async (result) => {
+    await this.resumeReceived(result.newEmployeeForm, result.totalChanges);
+    this.midAction = false;
+  });
+
   this.storeIsPopulated ? await this.getProfileData() : (this.loading = true);
   if (!this.$store.getters.employees) await this.updateStoreEmployees();
 } // created
@@ -438,6 +449,7 @@ function beforeDestroy() {
   this.emitter.off('confirm-delete-resume');
   this.emitter.off('canceled-delete-resume');
   this.emitter.off('cancel-form');
+  this.emitter.off('resume');
   this.emitter.off('update');
   this.emitter.off('uploaded');
   this.emitter.off('tabChange');

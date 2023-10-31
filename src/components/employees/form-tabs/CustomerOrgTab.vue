@@ -84,6 +84,7 @@
 <script>
 import _ from 'lodash';
 import { getRequiredRules } from '@/shared/validationUtils.js';
+import { asyncForEach } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -136,12 +137,13 @@ function isDuplicate(custOrgName) {
 /**
  * Validate all input fields are valid. Emit to parent the error status.
  */
-function validateFields() {
+async function validateFields() {
   let errorCount = 0;
   //ensures that refs are put in an array so we can reuse forEach loop
   let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
-  _.forEach(components, (field) => {
-    if (field && !field.validate()) errorCount++;
+  await asyncForEach(components, async (field) => {
+    let errors = await field.validate();
+    if (field && errors.length > 0) errorCount++;
   });
   this.emitter.emit('doneValidating', { tab: 'customerOrgExp', data: this.editedCustomerOrgExp }); // emit done validating and send edited data to parent
   this.emitter.emit('customerOrgExpStatus', errorCount); // emit error status
@@ -158,10 +160,10 @@ function validateFields() {
  *
  * @param val - val prop that needs to exist before validating
  */
-function watchValidating(val) {
+async function watchValidating(val) {
   if (val) {
     // parent component triggers validation
-    this.validateFields();
+    await this.validateFields();
   }
 } // watchValidating
 
