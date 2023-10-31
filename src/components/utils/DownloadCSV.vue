@@ -1,9 +1,9 @@
 <template>
   <v-btn @click.stop="download" variant="text" icon>
     <v-tooltip activator="parent" location="top">{{ tooltip }}</v-tooltip>
-    <v-icon :class="{ 'white--text': color == 'white', 'gray-icon': color != 'white' }" scale="1.5"
-      >mdi-download</v-icon
-    >
+    <v-icon :class="{ 'white--text': color == 'white', 'gray-icon': color != 'white' }" scale="1.5">
+      mdi-download
+    </v-icon>
   </v-btn>
 </template>
 

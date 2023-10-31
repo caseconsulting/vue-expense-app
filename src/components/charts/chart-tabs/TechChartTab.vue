@@ -1,7 +1,7 @@
 <template>
-  <v-container fluid>
-    <v-row justify="center" class="pt-2">
-      <v-col xl="6" lg="8" sm="12" class="d-flex flex-column align-center">
+  <v-container fluid class="mt-0">
+    <v-row justify="center" class="pt-0">
+      <v-col xl="6" lg="6" md="6" sm="12" class="d-flex flex-column align-center justify-center">
         <span style="font-style: italic; font-size: 12px">*Click on a word to see employees</span>
         <vue-word-cloud
           style="height: 25vh; width: inherit"
@@ -12,18 +12,16 @@
           :font-size-ratio="0.2"
         >
           <template v-slot="props">
-            <v-tooltip top>
-              <template v-slot:activator="{ on }">
-                <div @click="wordClicked(props.text)" style="cursor: pointer" v-on="on">{{ props.text }}</div>
-              </template>
-              <div style="text-align: center">{{ props.weight }}</div>
-            </v-tooltip>
+            <div @click="wordClicked(props.text)" style="cursor: pointer">
+              <v-tooltip activator="parent" location="top">
+                <span style="text-align: center">{{ props.weight }}</span>
+              </v-tooltip>
+              {{ props.text }}
+            </div>
           </template>
         </vue-word-cloud>
       </v-col>
-    </v-row>
-    <v-row justify="center">
-      <v-col xl="6" lg="8" sm="12" class="mt-4">
+      <v-col xl="6" lg="6" md="6" sm="12" class="mt-4">
         <tech-bar-chart></tech-bar-chart>
       </v-col>
     </v-row>
@@ -112,7 +110,7 @@ export default {
   },
   data() {
     return {
-      colors: ['rgba(254, 147, 140, 1)', 'rgba(230, 184, 156, 1)', 'rgba(66, 129, 164, 1)'],
+      colors: ['#bc3825', '#415364', '#7F4645'],
       employees: null,
       technologies: {},
       words: []

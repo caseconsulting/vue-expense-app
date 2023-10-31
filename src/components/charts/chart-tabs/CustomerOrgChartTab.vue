@@ -1,17 +1,16 @@
 <template>
   <v-container fluid>
-    <v-row justify="center">
-      <v-col md="6" sm="12" class="mt-4">
+    <v-row justify="center" class="d-flex align-center">
+      <v-col cols="12" sm="12" md="6" lg="6" xl="6" xxl="6" class="mt-4">
         <i-c-table />
       </v-col>
     </v-row>
-    <v-row justify="center">
-      <v-col xl="6" lg="8" sm="12" class="mt-4">
+
+    <v-row justify="center" class="d-flex align-center">
+      <v-col cols="12" sm="12" md="6" lg="6" xl="6" xxl="6" class="mt-4">
         <customer-org-chart />
       </v-col>
-    </v-row>
-    <v-row justify="center">
-      <v-col xl="6" lg="8" sm="12" class="mt-4">
+      <v-col cols="12" sm="12" md="6" lg="6" xl="6" xxl="6" class="mt-4">
         <employees-customer-org-chart />
       </v-col>
     </v-row>

@@ -3,7 +3,7 @@
     <pie-chart ref="pieChart" :key="chartKey" chartId="cust-org" :options="options" :chartData="chartData"></pie-chart>
     <v-container class="ma-0">
       <v-row justify="center" no-gutters>
-        <v-radio-group row v-model="showCurrent">
+        <v-radio-group inline v-model="showCurrent" class="d-flex justify-center">
           <v-radio label="All" value="All"></v-radio>
           <v-radio label="Current" value="Current"></v-radio>
           <v-radio label="Past" value="Past"></v-radio>

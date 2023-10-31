@@ -1,41 +1,36 @@
 <template>
-  <v-card v-if="enoughData" class="pa-5">
+  <v-card elevation="1" v-if="enoughData" class="px-2 pb-2 pt-0">
     <v-container v-if="dataReceived" class="ma-0">
-      <div v-if="userRoleIsAdmin()" class="right">
-        <DownloadCSV
-          filename="technologies.csv"
-          :generateData="generateCsvData"
-          sortKey="Technology"
-          :tooltip="'Download ' + showCurrent + ' Technologies to CSV'"
-        ></DownloadCSV>
-      </div>
-      <v-row align="center" justify="end">
-        <v-col cols="4" class="text-right">
-          <v-tooltip top>
-            <template v-slot:activator="{ on }">
-              <v-btn v-on="on" v-if="!isMobile" :disabled="reachedMin" @click="oneLessColumn" small class="mr-2"
-                ><v-icon>mdi-minus</v-icon></v-btn
-              >
-            </template>
-            <span>Decrease Number of Columns Shown</span>
-          </v-tooltip>
-          <v-tooltip top>
-            <template v-slot:activator="{ on }">
-              <v-btn v-on="on" v-if="!isMobile" :disabled="reachedMax" @click="oneMoreColumn" small class="mr-2"
-                ><v-icon>mdi-plus</v-icon></v-btn
-              >
-            </template>
-            <span>Increase Number of Columns Shown</span>
-          </v-tooltip>
+      <v-row justify="end">
+        <v-col class="text-right">
+          <DownloadCSV
+            v-if="userRoleIsAdmin()"
+            filename="technologies.csv"
+            :generateData="generateCsvData"
+            sortKey="Technology"
+            :tooltip="'Download ' + showCurrent + ' Technologies to CSV'"
+          ></DownloadCSV>
         </v-col>
       </v-row>
       <bar-chart ref="barChart" :key="chartKey" chartId="tech" :options="options" :chartData="chartData"></bar-chart>
-      <v-row justify="center" no-gutters>
-        <v-radio-group row v-model="showCurrent" class="mt-8 mb-0 mx-0">
-          <v-radio label="All" value="All"></v-radio>
-          <v-radio label="Current" value="Current"></v-radio>
-          <v-radio label="Past" value="Past"></v-radio>
-        </v-radio-group>
+      <v-row no-gutters>
+        <v-col cols="12" xxl="6" xl="6" lg="6" md="6" sm="6">
+          <v-radio-group inline v-model="showCurrent" class="mt-5 mb-0 mx-0">
+            <v-radio label="All" value="All"></v-radio>
+            <v-radio label="Current" value="Current"></v-radio>
+            <v-radio label="Past" value="Past"></v-radio>
+          </v-radio-group>
+        </v-col>
+        <v-col cols="12" xxl="6" xl="6" lg="6" md="6" sm="6" :class="!isMobile ? 'text-right' : ''">
+          <v-btn v-if="!isMobile" :disabled="reachedMin" @click="oneLessColumn" size="small" class="mr-2">
+            <v-tooltip activator="parent" location="top">Decrease Number of Columns Shown</v-tooltip>
+            <v-icon>mdi-minus</v-icon>
+          </v-btn>
+          <v-btn v-if="!isMobile" :disabled="reachedMax" @click="oneMoreColumn" size="small" class="mr-2">
+            <v-tooltip activator="parent" location="top">Increase Number of Columns Shown</v-tooltip>
+            <v-icon>mdi-plus</v-icon>
+          </v-btn>
+        </v-col>
       </v-row>
     </v-container>
   </v-card>

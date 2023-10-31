@@ -9,14 +9,15 @@
       @click:row="clickedRow"
       class="elevation-1"
       id="clearancesTable"
-      hide-default-footer
-      hide-default-header
+      density="comfortable"
     >
       <template v-slot:top>
-        <v-toolbar flat>
-          <v-toolbar-title>Employee Clearances</v-toolbar-title>
+        <v-toolbar color="transparent">
+          <v-toolbar-title class="font-weight-bold">Employee Clearances</v-toolbar-title>
         </v-toolbar>
       </template>
+      <template v-slot:headers></template>
+      <template v-slot:bottom></template>
     </v-data-table>
   </div>
 </template>

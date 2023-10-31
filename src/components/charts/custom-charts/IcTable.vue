@@ -14,10 +14,12 @@
       hide-default-header
     >
       <template v-slot:top>
-        <v-toolbar flat>
-          <v-toolbar-title>Community Statistics</v-toolbar-title>
+        <v-toolbar color="transparent">
+          <v-toolbar-title class="font-weight-bold">Community Statistics</v-toolbar-title>
         </v-toolbar>
       </template>
+      <template v-slot:headers></template>
+      <template v-slot:bottom></template>
       <!-- Expanded slot in datatable -->
       <template v-slot:expanded-item="{ headers }">
         <td :colspan="headers.length" class="pa-2 pb-0">
@@ -28,10 +30,12 @@
         </td>
       </template>
     </v-data-table>
-    <v-radio-group row id="radioGroup" v-model="filterSelection" class="ma-0 text-center">
-      <v-radio v-for="item in filterItems" :key="item" :label="item" :value="item"></v-radio>
-      <v-checkbox v-model="showInterns" :label="`Show Interns`"></v-checkbox>
-    </v-radio-group>
+    <div class="d-flex justify-center align-center">
+      <v-radio-group inline hide-details v-model="filterSelection" class="d-inline-block ma-0 pa-0">
+        <v-radio v-for="item in filterItems" :key="item" :label="item" :value="item"></v-radio>
+      </v-radio-group>
+      <v-checkbox class="d-inline-block" v-model="showInterns" hide-details :label="`Show Interns`"></v-checkbox>
+    </div>
   </div>
 </template>
 
@@ -233,10 +237,6 @@ export default {
 </script>
 
 <style>
-#radioGroup {
-  justify-content: center;
-}
-
 #icTable tr:hover {
   background-color: transparent;
 }

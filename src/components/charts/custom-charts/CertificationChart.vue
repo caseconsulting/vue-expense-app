@@ -1,6 +1,6 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5">
-    <div v-if="userRoleIsAdmin()" class="right">
+    <div v-if="userRoleIsAdmin()" class="float-right">
       <DownloadCSV
         filename="certifications.csv"
         :generateData="generateCsvData"

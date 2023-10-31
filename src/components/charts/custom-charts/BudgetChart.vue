@@ -13,14 +13,14 @@
         :items="allBudgetNames"
         multiple
         v-model="selectedBudgets"
-        filled
+        variant="filled"
         chips
         v-if="!loading"
         :menu-props="{ bottom: true, offsetY: true }"
-        deletable-chips
+        closable-chips
         clearable
-        :search-input.sync="searchString"
-        @change="
+        :search="searchString"
+        @update:model-value="
           searchString = '';
           drawGraph();
         "

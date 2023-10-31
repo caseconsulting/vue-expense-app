@@ -1,5 +1,5 @@
 <template>
-  <v-card v-if="dataReceived" class="pa-5">
+  <v-card v-if="dataReceived" class="pa-7">
     <pie-chart ref="chart" :key="chartKey" chartId="majors-chart" :options="options" :chartData="chartData"></pie-chart>
   </v-card>
 </template>
@@ -158,3 +158,9 @@ export default {
   beforeDestroy
 };
 </script>
+
+<style scoped>
+.tmp {
+  height: 100%;
+}
+</style>
