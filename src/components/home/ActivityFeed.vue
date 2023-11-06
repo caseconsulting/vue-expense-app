@@ -39,10 +39,10 @@
                 @click:close="remove(item.raw)"
                 small
               >
-                <v-avatar :color="data.item.color" start>
-                  <v-icon size="small" color="white"> {{ data.item.icon }}</v-icon>
+                <v-avatar :color="item.raw.color">
+                  <v-icon size="small" color="white"> {{ item.raw.icon }}</v-icon>
                 </v-avatar>
-                {{ data.item.type }}
+                {{ item.raw.type }}
               </v-chip>
             </template>
             <template v-slot:chip="{ props, item }">

@@ -6,12 +6,15 @@
           <v-autocomplete
             id="employeesSearch"
             v-model="search"
-            :filter="customEmployeeFilter"
+            :customFilter="customEmployeeFilter"
             :items="employees"
             label="Search By Employee Name"
+            variant="underlined"
             auto-select-first
             clearable
-            @change="refreshDropdownItems()"
+            item-title="text"
+            item-value="value"
+            @update:model-value="refreshDropdownItems()"
             @click:clear="
               search = null;
               refreshDropdownItems();
@@ -23,38 +26,37 @@
             v-model="technologySearch"
             :items="technologies"
             label="Search By Technology"
+            variant="underlined"
             clearable
             auto-select-first
-            @change="refreshDropdownItems()"
+            @update:model-value="refreshDropdownItems()"
             @click:clear="technologySearch = null"
           ></v-autocomplete>
         </v-col>
         <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
           <v-autocomplete
-            class="d-inline-block"
             clearable
             label="Filter by Tag (click to flip)"
             v-model="selectedTags"
             :items="tags"
             multiple
-            variant="solo-filled"
-            item-color="gray"
-            item-text="tagName"
+            variant="underlined"
+            item-title="tagName"
             item-value="id"
-            @change="refreshDropdownItems()"
+            @update:model-value="refreshDropdownItems()"
             return-object
           >
-            <template v-slot:selection="data">
+            <template v-slot:selection="{ item }">
               <v-chip
                 small
-                close
+                closable
                 @click.stop
-                @click="negateTag(data.item)"
-                @click:close="removeTag(data.item)"
-                :color="chipColor(data.item.id)"
+                @click="negateTag(item.raw)"
+                @click:close="removeTag(item.raw)"
+                :color="chipColor(item.raw.id)"
               >
-                {{ tagFlip.includes(data.item.id) ? 'NOT ' : '' }}
-                {{ data.item.tagName }}
+                {{ tagFlip.includes(item.raw.id) ? 'NOT ' : '' }}
+                {{ item.raw.tagName }}
               </v-chip>
             </template>
           </v-autocomplete>
@@ -71,8 +73,7 @@
       <v-data-table
         :headers="headers"
         :items="filteredEmployees"
-        :sort-by.sync="sortBy"
-        :sort-desc.sync="sortDesc"
+        :sort-by="sortBy"
         :items-per-page="-1"
         class="elevation-1 row-pointer"
         @click:row="handleClick"
@@ -101,10 +102,6 @@
             {{ item.email }}
           </p>
         </template>
-        <!-- Alert for no search results -->
-        <v-alert slot="no-results" :value="true" color="error" icon="warning">
-          Your search for "{{ search }}" found no results.
-        </v-alert>
       </v-data-table>
       <!-- END EMPLOYEE TABLE -->
     </v-container>
@@ -126,8 +123,10 @@ import { customEmployeeFilter, getActive, getFullName, populateEmployeesDropdown
  * The created lifecycle hook.
  */
 function created() {
-  this.emitter.on('get-employees-to-contact', () => {
-    this.emitter.emit('list-of-employees-to-contact', this.filteredEmployees);
+  this.emitter.on('get-employees-to-contact', (tab) => {
+    if (tab === 'technologies') {
+      this.emitter.emit('list-of-employees-to-contact', this.filteredEmployees);
+    }
   });
 
   this.employeesInfo = this.getActive(this.$store.getters.employees); // default to filtered
@@ -184,7 +183,7 @@ function chipColor(id) {
  *
  * @param item - the employee
  */
-function handleClick(item) {
+function handleClick(_, { item }) {
   this.$router.push(`/employee/${item.employeeNumber}`);
 } //handleClick
 
@@ -205,6 +204,7 @@ function negateTag(item) {
  * Populates all technologies in the search dropdown.
  */
 function populateTechnologiesDropdown() {
+  this.technologies = [];
   _.forEach(this.filteredEmployees, (employee) =>
     _.forEach(employee.technologies, (tech) => {
       if (this.showAllTechnologies || tech.current) {
@@ -217,6 +217,7 @@ function populateTechnologiesDropdown() {
       }
     })
   );
+  this.technologies = new Set(this.technologies);
 } // populateTechnologiesDropdown
 
 /**
@@ -327,9 +328,9 @@ function watchShowAllTechnologies() {
   this.buildTechnologiesColumns();
   this.refreshDropdownItems();
   if (this.showAllTechnologies) {
-    this.headers[2].text = 'All Technologies';
+    this.headers[2].title = 'All Technologies';
   } else {
-    this.headers[2].text = 'Current Technologies';
+    this.headers[2].title = 'Current Technologies';
   }
 } // watchShowAllTechnologies
 
@@ -379,20 +380,20 @@ export default {
       filteredEmployees: [],
       headers: [
         {
-          text: 'Employee #',
-          value: 'employeeNumber'
+          title: 'Employee #',
+          key: 'employeeNumber'
         },
         {
-          text: 'Name',
-          value: 'fullName'
+          title: 'Name',
+          key: 'fullName'
         },
         {
-          text: 'All Technologies',
-          value: 'technologyNames'
+          title: 'All Technologies',
+          key: 'technologyNames'
         },
         {
-          text: 'Email',
-          value: 'email'
+          title: 'Email',
+          key: 'email'
         }
       ], // datatable headers
       technologySearch: null,
@@ -401,7 +402,7 @@ export default {
       selectedTags: [],
       showAllTechnologies: true,
       showInactiveEmployees: false,
-      sortBy: 'firstName', // sort datatable items
+      sortBy: [{ key: 'employeeNumber' }], // sort datatable items
       sortDesc: false,
       tags: [],
       tagFlip: [],
@@ -429,8 +430,8 @@ export default {
   watch: {
     showAllTechnologies: watchShowAllTechnologies,
     showInactiveEmployees: watchShowInactiveUsers,
-    tagFlip: watchTagFlip,
-    selectedTags: watchSelectedTags
+    tagFlip: { handler: watchTagFlip, deep: true },
+    selectedTags: { handler: watchSelectedTags, deep: true }
   }
 };
 </script>

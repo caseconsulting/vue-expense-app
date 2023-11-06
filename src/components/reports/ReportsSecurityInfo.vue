@@ -6,12 +6,15 @@
           <v-autocomplete
             id="employeesSearch"
             v-model="search"
-            :filter="customEmployeeFilter"
+            :customFilter="customEmployeeFilter"
             :items="employees"
             label="Search By Employee Name"
+            variant="underlined"
             auto-select-first
             clearable
-            @change="refreshDropdownItems()"
+            item-title="text"
+            item-value="value"
+            @update:model-value="refreshDropdownItems()"
             @click:clear="
               search = null;
               refreshDropdownItems();
@@ -23,9 +26,10 @@
             v-model="badgeExpirationDateSearch"
             :items="badgeExpirations"
             label="Search By Badge Expiration"
+            variant="underlined"
             clearable
             auto-select-first
-            @change="refreshDropdownItems()"
+            @update:model-value="refreshDropdownItems()"
             @click:clear="badgeExpirationDateSearch = null"
           ></v-autocomplete>
         </v-col>
@@ -34,38 +38,37 @@
             v-model="clearanceSearch"
             :items="clearances"
             label="Search By Clearance"
+            variant="underlined"
             clearable
             auto-select-first
-            @change="refreshDropdownItems()"
+            @update:model-value="refreshDropdownItems()"
             @click:clear="clearanceSearch = null"
           ></v-autocomplete>
         </v-col>
         <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
           <v-autocomplete
-            class="d-inline-block"
             clearable
             label="Filter by Tag (click to flip)"
             v-model="selectedTags"
             :items="tags"
             multiple
-            variant="solo-filled"
-            item-color="gray"
-            item-text="tagName"
+            variant="underlined"
+            item-title="tagName"
             item-value="id"
-            @change="refreshDropdownItems()"
+            @update:model-value="refreshDropdownItems()"
             return-object
           >
-            <template v-slot:selection="data">
+            <template v-slot:selection="{ item }">
               <v-chip
                 small
-                close
+                closable
                 @click.stop
-                @click="negateTag(data.item)"
-                @click:close="removeTag(data.item)"
-                :color="chipColor(data.item.id)"
+                @click="negateTag(item.raw)"
+                @click:close="removeTag(item.raw)"
+                :color="chipColor(item.raw.id)"
               >
-                {{ tagFlip.includes(data.item.id) ? 'NOT ' : '' }}
-                {{ data.item.tagName }}
+                {{ tagFlip.includes(item.raw.id) ? 'NOT ' : '' }}
+                {{ item.raw.tagName }}
               </v-chip>
             </template>
           </v-autocomplete>
@@ -79,8 +82,7 @@
       <v-data-table
         :headers="headers"
         :items="filteredEmployees"
-        :sort-by.sync="sortBy"
-        :sort-desc.sync="sortDesc"
+        :sort-by="sortBy"
         :items-per-page="-1"
         class="elevation-1"
         @click:row="handleClick"
@@ -115,10 +117,6 @@
             {{ item.email }}
           </p>
         </template>
-        <!-- Alert for no search results -->
-        <v-alert slot="no-results" :value="true" color="error" icon="warning">
-          Your search for "{{ search }}" found no results.
-        </v-alert>
       </v-data-table>
       <!-- END EMPLOYEE TABLE -->
     </v-container>
@@ -141,8 +139,10 @@ import { customEmployeeFilter, getActive, getFullName, populateEmployeesDropdown
  * The created lifecycle hook.
  */
 function created() {
-  this.emitter.on('get-employees-to-contact', () => {
-    this.emitter.emit('list-of-employees-to-contact', this.filteredEmployees);
+  this.emitter.on('get-employees-to-contact', (tab) => {
+    if (tab === 'securityInfo') {
+      this.emitter.emit('list-of-employees-to-contact', this.filteredEmployees);
+    }
   });
 
   this.employeesInfo = this.getActive(this.$store.getters.employees); // default to filtered list
@@ -231,7 +231,7 @@ function getClearanceType(clearances, item) {
  *
  * @param item - the employee
  */
-function handleClick(item) {
+function handleClick(_, { item }) {
   this.$router.push(`/employee/${item.employeeNumber}`);
 } //handleClick
 
@@ -253,6 +253,7 @@ function negateTag(item) {
  */
 function populateBadgeExpirationsDropdown() {
   // formats the badge exp dropdowns to include the date in the future
+  this.badgeExpirations = [];
   let dateRanges = ['30 Days', '60 Days', '90 Days', '180 Days', '365 Days'];
   _.forEach(dateRanges, (date) => {
     let search = date.split(' ');
@@ -271,6 +272,7 @@ function populateBadgeExpirationsDropdown() {
     });
   }
 
+  this.badgeExpirations = new Set(this.badgeExpirations);
   // refresh the employees autocomplete list to be those that match the query
   this.employees = this.populateEmployeesDropdown(this.filteredEmployees);
 } // populateBadgeExpirationsDropdown
@@ -321,7 +323,7 @@ function removeTag(item) {
   if (selIndex >= 0) {
     this.selectedTags.splice(selIndex, 1);
   }
-} // remove
+} // removeTag
 
 /**
  * If there is a desired badge expiration date, this will calculate what dates fall within the range.
@@ -390,7 +392,7 @@ function searchClearances(search) {
     }
     return false;
   });
-}
+} // searchClearances
 
 /**
  * helper function: return true if any selected tag has employee listed under it.
@@ -470,24 +472,24 @@ export default {
       filteredEmployees: [],
       headers: [
         {
-          text: 'Employee #',
-          value: 'employeeNumber'
+          title: 'Employee #',
+          key: 'employeeNumber'
         },
         {
-          text: 'Name',
-          value: 'fullName'
+          title: 'Name',
+          key: 'fullName'
         },
         {
-          text: 'Clearance Type',
-          value: 'clearanceType'
+          title: 'Clearance Type',
+          key: 'clearanceType'
         },
         {
-          text: 'Badge Expiration Date',
-          value: 'badgeExpiration'
+          title: 'Badge Expiration Date',
+          key: 'badgeExpiration'
         },
         {
-          text: 'Email',
-          value: 'email'
+          title: 'Email',
+          key: 'email'
         }
       ], // datatable headers
       badgeExpirationDateSearch: null,
@@ -497,7 +499,7 @@ export default {
       search: null, // query text for datatable search field
       selectedTags: [],
       showInactiveEmployees: false,
-      sortBy: 'firstName', // sort datatable items
+      sortBy: [{ key: 'employeeNumber' }], // sort datatable items
       sortDesc: false,
       tags: [],
       tagFlip: [],
@@ -526,8 +528,8 @@ export default {
   },
   watch: {
     showInactiveEmployees: watchShowInactiveUsers,
-    tagFlip: watchTagFlip,
-    selectedTags: watchSelectedTags
+    tagFlip: { handler: watchTagFlip, deep: true },
+    selectedTags: { handler: watchSelectedTags, deep: true }
   }
 };
 </script>

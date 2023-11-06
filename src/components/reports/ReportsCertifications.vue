@@ -6,12 +6,15 @@
           <v-autocomplete
             id="employeesSearch"
             v-model="search"
-            :filter="customEmployeeFilter"
+            :customFilter="customEmployeeFilter"
             :items="employees"
             label="Search By Employee Name"
+            variant="underlined"
             auto-select-first
             clearable
-            @change="refreshDropdownItems()"
+            item-title="text"
+            item-value="value"
+            @update:model-value="refreshDropdownItems()"
             @click:clear="
               search = null;
               refreshDropdownItems();
@@ -23,39 +26,38 @@
             v-model="certificationSearch"
             :items="certifications"
             label="Search By Certification"
+            variant="underlined"
             clearable
             auto-select-first
-            @change="refreshDropdownItems()"
+            @update:model-value="refreshDropdownItems()"
             @click:clear="certificationSearch = null"
           ></v-autocomplete>
         </v-col>
         <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
           <v-autocomplete
             v-if="userRoleIsAdmin() || userRoleIsManager()"
-            class="d-inline-block"
             clearable
             label="Filter by Tag (click to flip)"
+            variant="underlined"
             v-model="selectedTags"
             :items="tags"
             multiple
-            variant="solo-filled"
-            item-color="gray"
-            item-text="tagName"
+            item-title="tagName"
             item-value="id"
-            @change="refreshDropdownItems()"
+            @update:model-value="refreshDropdownItems()"
             return-object
           >
-            <template v-slot:selection="data">
+            <template v-slot:selection="{ item }">
               <v-chip
                 small
-                close
+                closable
                 @click.stop
-                @click="negateTag(data.item)"
-                @click:close="removeTag(data.item)"
-                :color="chipColor(data.item.id)"
+                @click="negateTag(item.raw)"
+                @click:close="removeTag(item.raw)"
+                :color="chipColor(item.raw.id)"
               >
-                {{ tagFlip.includes(data.item.id) ? 'NOT ' : '' }}
-                {{ data.item.tagName }}
+                {{ tagFlip.includes(item.raw.id) ? 'NOT ' : '' }}
+                {{ item.raw.tagName }}
               </v-chip>
             </template>
           </v-autocomplete>
@@ -69,8 +71,7 @@
       <v-data-table
         :headers="headers"
         :items="filteredEmployees"
-        :sort-by.sync="sortBy"
-        :sort-desc.sync="sortDesc"
+        :sort-by="sortBy"
         :items-per-page="-1"
         class="elevation-1 row-pointer"
         @click:row="handleClick"
@@ -99,10 +100,6 @@
             {{ item.email }}
           </p>
         </template>
-        <!-- Alert for no search results -->
-        <v-alert slot="no-results" :value="true" color="error" icon="warning">
-          Your search for "{{ search }}" found no results.
-        </v-alert>
       </v-data-table>
       <!-- END EMPLOYEE TABLE -->
     </v-container>
@@ -125,8 +122,10 @@ import { getTodaysDate, isSameOrBefore } from '@/shared/dateUtils';
  * The created lifecycle hook.
  */
 function created() {
-  this.emitter.on('get-employees-to-contact', () => {
-    this.emitter.emit('list-of-employees-to-contact', this.filteredEmployees);
+  this.emitter.on('get-employees-to-contact', (tab) => {
+    if (tab === 'certifications') {
+      this.emitter.emit('list-of-employees-to-contact', this.filteredEmployees);
+    }
   });
 
   this.employeesInfo = this.getActive(this.$store.getters.employees); // default to filtered
@@ -188,7 +187,7 @@ function chipColor(id) {
  *
  * @param item - the employee
  */
-function handleClick(item) {
+function handleClick(_, { item }) {
   this.$router.push(`/employee/${item.employeeNumber}`);
 } //handleClick
 
@@ -209,6 +208,7 @@ function negateTag(item) {
  * Populates all certifications in the search dropdown.
  */
 function populateCertificationsDropdown() {
+  this.certifications = [];
   _.forEach(this.filteredEmployees, (employee) =>
     _.forEach(employee.certifications, (cert) => {
       if (cert.expirationDate) {
@@ -221,6 +221,7 @@ function populateCertificationsDropdown() {
       }
     })
   );
+  this.certifications = new Set(this.certifications);
 } // populateCertificationsDropdown
 
 /**
@@ -359,20 +360,20 @@ export default {
       filteredEmployees: [],
       headers: [
         {
-          text: 'Employee #',
-          value: 'employeeNumber'
+          title: 'Employee #',
+          key: 'employeeNumber'
         },
         {
-          text: 'Name',
-          value: 'fullName'
+          title: 'Name',
+          key: 'fullName'
         },
         {
-          text: 'Active Certifications',
-          value: 'certificationNames'
+          title: 'Active Certifications',
+          key: 'certificationNames'
         },
         {
-          text: 'Email',
-          value: 'email'
+          title: 'Email',
+          key: 'email'
         }
       ], // datatable headers
       certificationSearch: null,
@@ -380,7 +381,7 @@ export default {
       search: null, // query text for datatable search field
       selectedTags: [],
       showInactiveEmployees: false,
-      sortBy: 'firstName', // sort datatable items
+      sortBy: [{ key: 'employeeNumber' }], // sort datatable items
       sortDesc: false,
       tags: [],
       tagFlip: [],
@@ -407,8 +408,8 @@ export default {
   },
   watch: {
     showInactiveEmployees: watchShowInactiveUsers,
-    tagFlip: watchTagFlip,
-    selectedTags: watchSelectedTags
+    tagFlip: { handler: watchTagFlip, deep: true },
+    selectedTags: { handler: watchSelectedTags, deep: true }
   }
 };
 </script>

@@ -25,6 +25,7 @@
           chips
           clearable
           closable-chips
+          variant="underlined"
           :label="employees.length == 1 ? `${employees.length} Employee` : `${employees.length} Employees`"
           :search.sync="employeeSearch"
           @update:model-value="employeeSearch = ''"

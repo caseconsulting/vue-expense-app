@@ -7,18 +7,24 @@
       elevation="2"
       @click="backClick()"
       :size="isMobile && 'x-small'"
-      ><v-icon class="pr-1">arrow_back</v-icon>Back</v-btn
     >
+      <template v-slot:prepend>
+        <v-icon class="pr-1">arrow-left-thin</v-icon>
+      </template>
+      Back
+    </v-btn>
     <v-card>
       <v-card color="#bc3825">
-        <v-card-title headline v-bind:class="{ 'justify-center': isMobile }">
+        <v-card-title class="d-flex align-center header_style" v-bind:class="{ 'justify-center': isMobile }">
           <h2 class="text-white">Reports</h2>
           <v-spacer></v-spacer>
           <v-tooltip location="bottom">
             <template v-slot:activator="{ on, attrs }">
               <v-btn id="contactEmployeesBtn" @click="renderContactEmployeesModal()" v-bind="attrs" v-on="on">
                 Contact
-                <v-icon end>email</v-icon>
+                <template v-slot:append>
+                  <v-icon>mdi-email</v-icon>
+                </template>
               </v-btn>
             </template>
             <span>Contact Active Employees In The Table Below</span>
@@ -26,47 +32,42 @@
         </v-card-title>
       </v-card>
       <v-container fluid>
-        <reports-page-loader v-if="loading"></reports-page-loader>
-        <!-- user is not mobile -->
-        <v-tabs
-          v-else
-          color="blue"
-          center-active
-          grow
-          show-arrows
-          :key="tabKey"
-          @update:model-value="changeTab"
-          v-model="currentTab"
-        >
-          <v-tab href="#contracts" :disabled="loading">Contracts</v-tab>
-          <v-tab href="#customerOrgs" :disabled="loading">Customer Orgs</v-tab>
-          <v-tab href="#certifications" :disabled="loading">Certifications</v-tab>
-          <v-tab href="#languages" :disabled="loading">Foreign Languages</v-tab>
-          <v-tab href="#jobRoles" :disabled="loading">Job Roles</v-tab>
-          <v-tab href="#technologies" :disabled="loading">Technologies</v-tab>
-          <v-tab href="#securityInfo" :disabled="loading">Security Info</v-tab>
-          <v-tab-item id="contracts" class="mx-2 my-6">
-            <ReportsContracts />
-          </v-tab-item>
-          <v-tab-item id="customerOrgs" class="mx-2 my-6">
-            <ReportsCustomerOrgs />
-          </v-tab-item>
-          <v-tab-item id="certifications" class="mx-2 my-6">
-            <ReportsCertifications />
-          </v-tab-item>
-          <v-tab-item id="languages" class="mx-2 my-6">
-            <ReportsForeignLanguages />
-          </v-tab-item>
-          <v-tab-item id="jobRoles" class="mx-2 my-6">
-            <ReportsJobRoles />
-          </v-tab-item>
-          <v-tab-item id="technologies" class="mx-2 my-6">
-            <ReportsTechnologies />
-          </v-tab-item>
-          <v-tab-item id="securityInfo" class="mx-2 my-6">
-            <ReportsSecurityInfo />
-          </v-tab-item>
-        </v-tabs>
+        <reports-page-loader v-if="this.loading"></reports-page-loader>
+        <div v-else>
+          <!-- user is not mobile -->
+          <v-tabs color="blue" center-active grow show-arrows @update:model-value="changeTab" v-model="currentTab">
+            <v-tab value="contracts" :disabled="loading">Contracts</v-tab>
+            <v-tab value="customerOrgs" :disabled="loading">Customer Orgs</v-tab>
+            <v-tab value="certifications" :disabled="loading">Certifications</v-tab>
+            <v-tab value="languages" :disabled="loading">Foreign Languages</v-tab>
+            <v-tab value="jobRoles" :disabled="loading">Job Roles</v-tab>
+            <v-tab value="technologies" :disabled="loading">Technologies</v-tab>
+            <v-tab value="securityInfo" :disabled="loading">Security Info</v-tab>
+          </v-tabs>
+          <v-window v-model="currentTab">
+            <v-window-item value="contracts" class="mx-2 my-6">
+              <ReportsContracts />
+            </v-window-item>
+            <v-window-item value="customerOrgs" class="mx-2 my-6">
+              <ReportsCustomerOrgs />
+            </v-window-item>
+            <v-window-item value="certifications" class="mx-2 my-6">
+              <ReportsCertifications />
+            </v-window-item>
+            <v-window-item value="languages" class="mx-2 my-6">
+              <ReportsForeignLanguages />
+            </v-window-item>
+            <v-window-item value="jobRoles" class="mx-2 my-6">
+              <ReportsJobRoles />
+            </v-window-item>
+            <v-window-item value="technologies" class="mx-2 my-6">
+              <ReportsTechnologies />
+            </v-window-item>
+            <v-window-item value="securityInfo" class="mx-2 my-6">
+              <ReportsSecurityInfo />
+            </v-window-item>
+          </v-window>
+        </div>
       </v-container>
     </v-card>
     <v-dialog v-model="toggleContactEmployeesModal" width="60%" persistent>
@@ -99,7 +100,6 @@ import { isMobile, userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
 async function created() {
   this.emitter.on('close-contact-employees-modal', () => (this.toggleContactEmployeesModal = false));
   this.emitter.on('list-of-employees-to-contact', (employees) => (this.employeesToContact = employees));
-
   if (this.$store.getters.storeIsPopulated) {
     await Promise.all([
       !this.$store.getters.employees ? this.updateStoreEmployees() : '',
@@ -138,13 +138,12 @@ function backClick() {
  * @param event - the new tab
  */
 function changeTab(event) {
-  this.tabKey++;
   this.currentTab = event;
 } // changeTab
 
 function renderContactEmployeesModal() {
   this.contactKey++;
-  this.emitter.emit('get-employees-to-contact');
+  this.emitter.emit('get-employees-to-contact', this.currentTab);
   this.toggleContactEmployeesModal = true;
 }
 
@@ -188,7 +187,6 @@ export default {
   },
   data() {
     return {
-      tabKey: 0,
       contactKey: 0,
       contracts: null,
       currentTab: null,
