@@ -1,6 +1,6 @@
 <template>
   <v-card v-if="expense" id="reimbursement-expense-details" class="mr-3 my-3 slide-in-blurred-right">
-    <v-card-title primary-title class="pb-0 headline"> Expense Details </v-card-title>
+    <v-card-title primary-title class="pb-0 text-h5"> Expense Details </v-card-title>
     <v-card-text>
       <v-container fluid class="pb-0">
         <v-row dense>

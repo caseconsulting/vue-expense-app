@@ -8,7 +8,6 @@
         order="1"
         :expand-on-hover="!isMobile"
         :permanent="isLoggedIn() && !isMobile"
-        class="fixed"
       >
         <main-nav></main-nav>
       </v-navigation-drawer>
@@ -534,9 +533,5 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.fixed {
-  position: fixed;
 }
 </style>

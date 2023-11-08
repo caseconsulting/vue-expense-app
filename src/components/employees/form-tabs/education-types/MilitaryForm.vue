@@ -30,7 +30,7 @@
                 hint="MM/YYYY format"
                 v-mask="'##/####'"
                 variant="underlined"
-                @blur="military.startDate = parseEventDate($event)"
+                @update:focused="military.startDate = parseEventDate($event)"
                 @click:prepend="military.showStartMenu = true"
                 @click:control="military.showStartMenu = false"
                 clearable
@@ -73,7 +73,7 @@
                 hint="MM/YYYY format"
                 v-mask="'##/####'"
                 variant="underlined"
-                @blur="military.completeDate = parseEventDate($event)"
+                @update:focused="military.completeDate = parseEventDate($event)"
                 @click:prepend="military.showCompleteMenu = true"
                 @click:control="military.showCompleteMenu = false"
                 clearable

@@ -105,7 +105,7 @@
         variant="underlined"
         data-vv-name="Email"
         :disabled="!admin"
-        @blur="combineEmailUsernameAndDomain"
+        @update:focused="combineEmailUsernameAndDomain"
       ></v-text-field>
 
       <!-- Job Role -->
@@ -155,7 +155,7 @@
         v-model="employeeRoleFormatted"
         label="Employee Role*"
         variant="underlined"
-        @blur="editedEmployee.employeeRole = formatKebabCase(employeeRoleFormatted)"
+        @update:focused="editedEmployee.employeeRole = formatKebabCase(employeeRoleFormatted)"
       ></v-autocomplete>
 
       <!-- Hire Date -->
@@ -178,7 +178,7 @@
             variant="underlined"
             hint="MM/DD/YYYY format"
             persistent-hint
-            @blur="editedEmployee.hireDate = format(hireDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
+            @update:focused="editedEmployee.hireDate = format(hireDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
             @click:prepend="hireMenu = true"
             @click:control="hireMenu = false"
           >
@@ -222,7 +222,7 @@
             v-mask="'##/##/####'"
             class="mt-1"
             persistent-hint
-            @blur="editedEmployee.deptDate = format(deptDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
+            @update:focused="editedEmployee.deptDate = format(deptDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
             @click:prepend="departureMenu = true"
             @click:control="departureMenu = false"
             :disabled="!admin"

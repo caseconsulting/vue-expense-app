@@ -5,7 +5,7 @@
         <!-- Expense Table -->
         <unreimbursed-expenses-table></unreimbursed-expenses-table>
       </v-col>
-      <v-col v-if="!isMobile" cols="3" class="followScroll">
+      <v-col v-if="!isMobile" cols="3" class="followScroll pr-7 pl-0">
         <!-- Expense Info -->
         <reimbursement-expense-details class="mb-3"></reimbursement-expense-details>
         <!-- Expenses Total -->
@@ -16,7 +16,7 @@
           :key="index"
           :type="alert.status"
           :color="alert.color"
-          dense
+          density="compact"
           class="mt-1"
           id="alert"
         >
@@ -34,7 +34,7 @@
           :key="index"
           :type="alert.status"
           :color="alert.color"
-          dense
+          density="compact"
           id="alert"
         >
           {{ alert.message }}

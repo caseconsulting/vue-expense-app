@@ -27,7 +27,7 @@
             v-mask="'##/####'"
             persistent-hint
             variant="underlined"
-            @blur="highSchool.gradDate = parseEventDate($event)"
+            @update:focused="highSchool.gradDate = parseEventDate($event)"
             clearable
             @click:prepend="highSchool.showReceivedMenu = true"
             @click:control="highSchool.showReceivedMenu = false"

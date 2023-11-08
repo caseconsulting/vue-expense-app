@@ -9,7 +9,7 @@
       :timeout="5000"
       :vertical="true"
     >
-      <v-card-title headline color="white">
+      <v-card-title color="white">
         <span class="text-h5">{{ status.statusMessage }}</span>
       </v-card-title>
       <v-btn color="white" variant="text" @click="clearStatus"> Close </v-btn>

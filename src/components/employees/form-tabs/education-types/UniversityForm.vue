@@ -50,7 +50,7 @@
               v-mask="'##/####'"
               variant="underlined"
               persistent-hint
-              @blur="degree.completionDate = parseEventDate($event)"
+              @update:focused="degree.completionDate = parseEventDate($event)"
               clearable
               @click:prepend="degree.showEducationMenu = true"
               @click:control="degree.showEducationMenu = false"

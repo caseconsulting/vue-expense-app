@@ -2,7 +2,7 @@
   <!--Totals Card-->
   <v-card v-if="totals.length" class="slide-in-blurred-right my-3 mr-3">
     <!--Total Card Title-->
-    <v-card-title class="pb-0 headline"> Totals </v-card-title>
+    <v-card-title class="pb-0 text-h5"> Totals </v-card-title>
     <!--End of Total Card Title-->
     <v-card-text>
       <v-container class="pb-0">
@@ -12,6 +12,18 @@
           <v-col> {{ convertToMoneyString(total.costTotal) }}</v-col>
         </v-row>
       </v-container>
+      <!-- Reimburse Button -->
+      <v-btn
+        @click="emitter.emit('reimburse-expenses')"
+        id="custom-button-color"
+        theme="dark"
+        class="reimburse_button mt-5"
+        variant="text"
+        block
+      >
+        <template v-slot:prepend><v-icon>mdi-currency-usd</v-icon></template>
+        Reimburse
+      </v-btn>
     </v-card-text>
   </v-card>
   <!--End of Totals Card-->
@@ -125,7 +137,8 @@ export default {
   },
   data() {
     return {
-      selected: []
+      selected: [],
+      reimbursing: false
     };
   },
   methods: {

@@ -3,18 +3,44 @@
     <v-container fluid>
       <!-- Title -->
       <v-card-title v-if="!isMobile()" class="pb-8">
-        <h3 v-if="(userRoleIsAdmin() || userRoleIsManager()) && unapprovedOnly && !loading">
-          Unapproved PTO Cash Outs
-        </h3>
+        <div
+          v-if="(userRoleIsAdmin() || userRoleIsManager()) && unapprovedOnly && !loading"
+          class="d-flex justify-space-between"
+        >
+          <h3 class="d-inline-block pa-1">Unapproved PTO Cash Outs</h3>
+          <v-btn
+            @click="toggleApproveModal = true"
+            id="custom-button-color"
+            :loading="isApproving"
+            :disabled="!showApproveButton"
+            class="reimburse_button"
+          >
+            <template v-slot:prepend>
+              <v-icon>mdi-currency-usd</v-icon>
+            </template>
+            Approve
+          </v-btn>
+        </div>
         <h3 v-else-if="(userRoleIsAdmin() || userRoleIsManager()) && !loading">All PTO Cash Outs</h3>
         <h3 v-else-if="!loading">My PTO Cash Outs</h3>
         <h3 v-else>Loading...</h3>
       </v-card-title>
       <div v-else>
         <v-card-title class="px-0">
-          <h3 v-if="(userRoleIsAdmin() || userRoleIsManager()) && unapprovedOnly && !loading">
-            Unapproved PTO Cash Outs
-          </h3>
+          <div v-if="(userRoleIsAdmin() || userRoleIsManager()) && unapprovedOnly && !loading">
+            <h3>Unapproved PTO Cash Outs</h3>
+            <v-btn
+              @click="toggleApproveModal = true"
+              id="custom-button-color"
+              :loading="isApproving"
+              v-show="showApproveButton"
+              size="large"
+              fixed
+              class="reimburse_button"
+            >
+              <v-icon>mdi-currency-usd</v-icon>
+            </v-btn>
+          </div>
           <h3 v-else-if="(userRoleIsAdmin() || userRoleIsManager()) && !loading">All PTO Cash Outs</h3>
           <h3 v-else-if="!loading">My PTO Cash Outs</h3>
           <h3 v-else>Loading...</h3>
@@ -163,18 +189,6 @@
         </template>
       </v-data-table>
     </v-container>
-    <v-btn
-      @click="toggleApproveModal = true"
-      id="custom-button-color"
-      :loading="isApproving"
-      v-show="showApproveButton"
-      theme="dark"
-      size="large"
-      fixed
-      class="reimburse_button"
-    >
-      <v-icon>mdi-currency-usd</v-icon>
-    </v-btn>
     <general-confirmation-modal
       title="Are you sure you want to approve selected PTO cash outs?"
       type="pto-cash-outs"
@@ -272,9 +286,9 @@ async function mounted() {
 async function approveSelectedPTOCashOuts() {
   let promises = [];
   this.selected.forEach((e) => {
-    let item = e;
-    item.approvedDate = dateUtils.getTodaysDate();
-    item.approvalWasSeen = false;
+    let item = _.find(this.filteredPtoCashOuts, (f) => f.id === e);
+    item['approvedDate'] = dateUtils.getTodaysDate();
+    item['approvalWasSeen'] = false;
     promises.push(api.updateItem(api.PTO_CASH_OUTS, item));
   });
   return await Promise.all(promises);
@@ -436,7 +450,7 @@ function removeTag(item) {
  *
  * @param item Object - The item from the row clicked
  */
-function rowClicked(item) {
+function rowClicked(_, { item }) {
   let employee = this.$store.getters.employees.find((e) => e.id === item.employeeId);
   this.emitter.emit('change-quickbooks-employee', employee);
 } // rowClicked
@@ -615,7 +629,7 @@ export default {
         { title: 'Approved Date', key: 'approvedDate' },
         { key: 'actions', sortable: false }
       ],
-      sortBy: [{ key: 'creationDate', order: 'asc' }],
+      sortBy: [{ key: 'creationDate', order: 'desc' }],
       sortDesc: true,
       selected: [],
       selectedTags: [],

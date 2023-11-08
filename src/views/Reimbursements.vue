@@ -9,23 +9,25 @@
       :timeout="5000"
       :vertical="true"
     >
-      <v-card-title headline color="white">
-        <span class="text-h5">{{ status.statusMessage }}</span>
-      </v-card-title>
+      <v-card-text color="white">
+        <span class="text-h6 font-weight-medium">{{ status.statusMessage }}</span>
+      </v-card-text>
       <v-btn color="white" variant="text" @click="clearStatus"> Close </v-btn>
     </v-snackbar>
     <v-card color="#bc3825">
-      <v-card-title headline v-bind:class="{ 'justify-center': isMobile }">
+      <v-card-title class="d-flex align-center header_style" v-bind:class="{ 'justify-center': isMobile }">
         <h2 class="text-center text-white">Reimbursements</h2>
       </v-card-title>
     </v-card>
     <v-tabs v-model="currentTab">
-      <v-tab class="ml-5" href="#expenses">Expenses</v-tab>
-      <v-tab href="#ptoCashOuts">PTO Cash Outs</v-tab>
-      <v-tab-item id="expenses" class="mx-2 mb-6">
+      <v-tab class="ml-5" value="expenses">Expenses</v-tab>
+      <v-tab value="ptoCashOuts">PTO Cash Outs</v-tab>
+    </v-tabs>
+    <v-window v-model="currentTab">
+      <v-window-item value="expenses" class="mx-2 mb-6">
         <UnreimbursedExpenses />
-      </v-tab-item>
-      <v-tab-item id="ptoCashOuts" class="mx-2 my-6">
+      </v-window-item>
+      <v-window-item value="ptoCashOuts" class="mx-2 my-6">
         <v-row>
           <v-col cols="12" xl="9" lg="8">
             <p-t-o-cash-outs-table :unapprovedOnly="true" />
@@ -35,8 +37,8 @@
             <v-skeleton-loader v-else class="mt-3" type="list-item@12"></v-skeleton-loader>
           </v-col>
         </v-row>
-      </v-tab-item>
-    </v-tabs>
+      </v-window-item>
+    </v-window>
   </v-card>
 </template>
 

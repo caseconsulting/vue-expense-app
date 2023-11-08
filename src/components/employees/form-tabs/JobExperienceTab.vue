@@ -153,7 +153,7 @@
                   v-mask="'##/####'"
                   :rules="[...getDateMonthYearRules(), dateOrderRule(compIndex, index)]"
                   variant="underlined"
-                  @blur="position.startDate = parseEventDate($event)"
+                  @update:focused="position.startDate = parseEventDate($event)"
                   @click:prepend="position.showStartMenu = true"
                   @click:control="position.showStartMenu = false"
                   @focus="setIndices(compIndex, index)"
@@ -198,7 +198,7 @@
                   v-mask="'##/####'"
                   clearable
                   @click:clear="position.endDate = null"
-                  @blur="position.endDate = parseEventDate($event)"
+                  @update:focused="position.endDate = parseEventDate($event)"
                   @click:prepend="position.showEndMenu = true"
                   @click:control="position.showEndMenu = false"
                   @focus="setIndices(compIndex, index)"

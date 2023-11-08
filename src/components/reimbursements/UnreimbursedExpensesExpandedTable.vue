@@ -1,29 +1,26 @@
 <template>
-  <v-container fluid class="grey-background">
+  <v-container fluid class="grey-background pa-3">
     <div>
       <v-data-table
         :headers="headers"
         :items="expenses"
         :sort-by.sync="sortBy"
-        :sort-desc.sync="sortDesc"
         :items-per-page="-1"
         class="text-center"
         item-key="id"
         id="subInfo"
+        select-strategy="single"
+        density="compact"
         show-select
-        hide-default-footer
         @click:row="expenseClicked"
       >
-        <!-- Remove Check Box in header -->
-        <template v-slot:[`header.data-table-select`]="{}"></template>
-
         <!-- Group Checkbox -->
         <template v-slot:[`item.data-table-select`]="{ item }">
           <v-checkbox
-            :input-value="item.selected"
+            :model-value="item.selected"
             @click.stop="
               expenseSelected(item);
-              expenseClicked(item);
+              expenseClicked(_, { item });
             "
             primary
             hide-details
@@ -55,11 +52,16 @@
         <!-- Show on Feed -->
         <template v-slot:[`item.showOnFeed`]="{ item }">
           <v-switch
-            :input-value="item.showOnFeed && item.selected"
-            @change="expenseToggle(item)"
+            :model-value="item.showOnFeed && item.selected"
+            @update:model-value="expenseToggle(item)"
             :disabled="!item.selected"
+            class="d-inline-block"
+            hide-details
+            :color="caseGray"
           ></v-switch>
         </template>
+
+        <template v-slot:bottom></template>
       </v-data-table>
     </div>
   </v-container>
@@ -79,8 +81,8 @@ import { convertToMoneyString, monthDayYearFormat } from '@/utils/utils';
  *
  * @param clickedExpense - expense clicked
  */
-function expenseClicked(clickedExpense) {
-  this.emitter.emit('expenseClicked', clickedExpense);
+function expenseClicked(_, { item }) {
+  this.emitter.emit('expenseClicked', item);
 } // expenseClicked
 
 /**
@@ -129,29 +131,29 @@ export default {
     return {
       headers: [
         {
-          text: 'Cost',
-          value: 'cost',
+          title: 'Cost',
+          key: 'cost',
           align: 'center'
         },
         {
-          text: 'Purchase Date',
-          value: 'purchaseDate',
+          title: 'Purchase Date',
+          key: 'purchaseDate',
           align: 'center'
         },
         {
-          text: 'Description',
-          value: 'description',
+          title: 'Description',
+          key: 'description',
           align: 'center'
         },
         {
-          text: 'Show on Feed',
-          value: 'showOnFeed',
+          title: 'Show on Feed',
+          key: 'showOnFeed',
           align: 'center',
-          width: '4px',
+          width: '10%',
           sortable: false
         }
       ], // data table headers
-      sortBy: 'purchaseDate', // sort data table by
+      sortBy: [{ key: 'purchaseDate' }], // sort data table by
       sortDesc: false // sort data table in descending order
     };
   },

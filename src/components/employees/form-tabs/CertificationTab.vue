@@ -27,7 +27,7 @@
                 hint="MM/DD/YYYY format"
                 v-mask="'##/##/####'"
                 variant="underlined"
-                @blur="certification.dateReceived = parseEventDate($event)"
+                @update:focused="certification.dateReceived = parseEventDate()"
                 @focus="certificationIndex = index"
                 @click:prepend="certification.showReceivedMenu = true"
                 @click:control="certification.showReceivedMenu = false"
@@ -66,7 +66,7 @@
                 v-mask="'##/##/####'"
                 variant="underlined"
                 clearable
-                @blur="certification.expirationDate = parseEventDate($event)"
+                @update:focused="certification.expirationDate = parseEventDate()"
                 @click:prepend="certification.showExpirationMenu = true"
                 @click:control="certification.showExpirationMenu = false"
                 @focus="certificationIndex = index"

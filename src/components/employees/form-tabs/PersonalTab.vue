@@ -127,7 +127,7 @@
           variant="underlined"
           hint="MM/DD/YYYY format"
           persistent-hint
-          @blur="editedPersonalInfo.birthday = format(birthdayFormat, 'MM/DD/YYYY', 'YYYY-MM-DD')"
+          @update:focused="editedPersonalInfo.birthday = format(birthdayFormat, 'MM/DD/YYYY', 'YYYY-MM-DD')"
           @click:prepend="BirthdayMenu = true"
           @click:control="BirthdayMenu = false"
         >

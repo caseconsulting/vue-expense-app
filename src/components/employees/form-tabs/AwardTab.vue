@@ -28,7 +28,7 @@
                 v-mask="'##/####'"
                 variant="underlined"
                 persistent-hint
-                @blur="award.dateReceived = parseEventDate($event)"
+                @update:focused="award.dateReceived = parseEventDate()"
                 clearable
                 @click:prepend="award.showReceivedMenu = true"
                 @click:control="award.showReceivedMenu = false"

@@ -55,11 +55,10 @@
                   }
                 "
                 @click:clear="clearance.grantedDate = null"
-                @blur="clearance.grantedDate = parseEventDate($event)"
+                @update:focused="clearance.grantedDate = parseEventDate()"
                 @update:model-value="clearance.showGrantedMenu = false"
                 @click:prepend="clearance.showGrantedMenu = true"
                 @click:control="clearance.showGrantedMenu = false"
-                @focus="clearanceElement = clearance"
               >
                 <template v-slot:prepend>
                   <div v-bind="props" class="pointer">
@@ -95,10 +94,9 @@
                 v-mask="'##/##/####'"
                 variant="underlined"
                 @click:clear="clearance.submissionDate = null"
-                @blur="clearance.submissionDate = parseEventDate($event)"
+                @update:focused="clearance.submissionDate = parseEventDate()"
                 @click:prepend="clearance.showSubmissionMenu = true"
                 @click:control="clearance.showSubmissionMenu = false"
-                @focus="clearanceElement = clearance"
               >
                 <template v-slot:prepend>
                   <div v-bind="props" class="pointer">
@@ -131,7 +129,7 @@
         variant="underlined"
         clearable
         :disabled="clearance.awaitingClearance"
-        @blur="capitalizeBadges(clearance)"
+        @update:focused="capitalizeBadges(clearance)"
       ></v-text-field>
       <!-- End Badge Number -->
 
@@ -149,11 +147,10 @@
             variant="underlined"
             :disabled="clearance.awaitingClearance"
             @click:clear="clearance.badgeExpirationDate = null"
-            @blur="clearance.badgeExpirationDate = parseEventDate($event)"
+            @update:focused="clearance.badgeExpirationDate = parseEventDate()"
             @update:model-value="clearance.showBadgeMenu = false"
             @click:prepend="clearance.showBadgeMenu = true"
             @click:control="clearance.showBadgeMenu = false"
-            @focus="clearanceElement = clearance"
           >
             <template v-slot:prepend>
               <div v-bind="props" class="pointer">
@@ -556,7 +553,6 @@ export default {
   created,
   data() {
     return {
-      clearanceElement: {},
       clearanceTypeDropDown: ['TS/SCI - Full Scope', 'TS/SCI - CI Poly', 'TS/SCI - No Poly', 'Top Secret', 'Secret'], // autocomplete clearance type options
       dateBadgeRules: (index) => {
         let currClearance = this.editedClearances[index];

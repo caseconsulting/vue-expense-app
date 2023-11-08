@@ -7,74 +7,91 @@
           <h3>Unreimbursed Expenses</h3>
           <v-spacer></v-spacer>
 
-          <!-- Search Filters -->
-          <v-autocomplete
-            :items="employees"
-            :filter="customFilter"
-            v-model="employee"
-            id="filterEmployee"
-            class="mr-3"
-            item-text="text"
-            label="Filter by Employee"
-            clearable
-          ></v-autocomplete>
-          <v-autocomplete
-            :items="expenseTypes"
-            v-model="expenseType"
-            id="filterExpense"
-            item-text="text"
-            class="mr-3"
-            label="Filter by Expense Type"
-            clearable
-          ></v-autocomplete>
-        </v-card-title>
-        <v-card-title v-if="userRoleIsAdmin() || userRoleIsManager()" class="pt-0">
-          <v-autocomplete
-            class="d-inline-block"
-            clearable
-            label="Filter by Tag (click to flip)"
-            v-model="selectedTags"
-            :items="tags"
-            multiple
-            variant="solo-filled"
-            item-color="gray"
-            item-text="tagName"
-            item-value="id"
-            return-object
-          >
-            <template v-slot:selection="data">
-              <v-chip
-                small
-                close
-                @click.stop
-                @click="negateTag(data.item)"
-                @click:close="removeTag(data.item)"
-                :color="chipColor(data.item.id)"
+          <v-row>
+            <v-col cols="12" md="4" lg="4" xl="4" xxl="4">
+              <!-- Search Filters -->
+              <v-autocomplete
+                :items="employees"
+                :customFilter="customFilter"
+                v-model="employee"
+                id="filterEmployee"
+                class="mr-3"
+                item-title="text"
+                label="Filter by Employee"
+                variant="underlined"
+                clearable
+              ></v-autocomplete>
+            </v-col>
+            <v-col cols="12" md="4" lg="4" xl="4" xxl="4">
+              <v-autocomplete
+                :items="expenseTypes"
+                v-model="expenseType"
+                id="filterExpense"
+                item-title="text"
+                item-value="value"
+                class="mr-3"
+                label="Filter by Expense Type"
+                variant="underlined"
+                clearable
+              ></v-autocomplete>
+            </v-col>
+            <v-col cols="12" md="4" lg="4" xl="4" xxl="4">
+              <v-autocomplete
+                clearable
+                label="Filter by Tag (click to flip)"
+                v-model="selectedTags"
+                :items="tags"
+                multiple
+                variant="underlined"
+                item-title="tagName"
+                item-value="id"
+                return-object
               >
-                {{ tagFlip.includes(data.item.id) ? 'NOT ' : '' }}
-                {{ data.item.tagName }}
-              </v-chip>
-            </template>
-          </v-autocomplete>
+                <template v-slot:selection="{ item }">
+                  <v-chip
+                    small
+                    closable
+                    @click.stop
+                    @click="negateTag(item.raw)"
+                    @click:close="removeTag(item.raw)"
+                    :color="chipColor(item.raw.id)"
+                  >
+                    {{ tagFlip.includes(item.raw.id) ? 'NOT ' : '' }}
+                    {{ item.raw.tagName }}
+                  </v-chip>
+                </template>
+              </v-autocomplete>
+            </v-col>
+          </v-row>
         </v-card-title>
 
         <!-- START DATA TABLE -->
         <v-data-table
           :headers="headers"
           :items="filteredItems"
-          :custom-sort="customSort"
-          :expanded.sync="expanded"
+          :expanded="expanded"
           :loading="loading"
           :items-per-page.sync="itemsPerPage"
           show-select
-          item-key="key"
+          expand-on-click
           class="text-center"
-          @click:row="clickedRow"
         >
+          <!-- Header select slot -->
+          <template v-slot:[`column.data-table-select`]>
+            <v-checkbox
+              class="ma-0"
+              :model-value="mainCheckBox.all"
+              :indeterminate="mainCheckBox.indeterminate"
+              :color="caseGray"
+              hide-details
+              @click="toggleAll"
+            >
+            </v-checkbox>
+          </template>
           <!-- Select item slot in data table -->
           <template v-slot:[`item.data-table-select`]="{ item }">
             <v-checkbox
-              :input-value="item.checkBox.all"
+              :model-value="item.checkBox.all"
               :indeterminate="item.checkBox.indeterminate"
               primary
               hide-details
@@ -91,9 +108,8 @@
             ><v-badge
               v-if="item.expenses.length > 1"
               :content="item.expenses.length"
-              :value="true"
-              :left="true"
-              :offset-x="-10"
+              location="left"
+              inline
               color="grey"
             ></v-badge>
             {{ item.employeeName }}</template
@@ -101,31 +117,22 @@
           <!-- Show on feed item slot -->
           <template v-slot:[`item.showOnFeed`]="{ item }">
             <v-switch
-              :input-value="item.showSwitch && item.selected"
+              :model-value="item.showSwitch && item.selected"
               @click.native.stop
-              @change="toggleShowOnFeedGroup(item)"
+              @update:model-value="toggleShowOnFeedGroup(item)"
               :disabled="!item.checkBox.all"
+              :color="caseGray"
+              class="d-inline-block"
+              hide-details
             ></v-switch>
           </template>
           <!-- Item cost slot -->
           <template v-slot:[`item.cost`]="{ item }">
             <p id="totalMoney-team" class="mb-0">{{ convertToMoneyString(getBudgetTotal(item.expenses)) }}</p>
           </template>
-          <!-- Header select slot -->
-          <template v-slot:[`header.data-table-select`]>
-            <v-checkbox
-              class="ma-0"
-              :input-value="mainCheckBox.all"
-              :indeterminate="mainCheckBox.indeterminate"
-              primary
-              hide-details
-              @click.stop="toggleAll"
-            >
-            </v-checkbox>
-          </template>
           <!-- Expanded slot -->
-          <template v-slot:expanded-item="{ headers, item }">
-            <td :colspan="headers.length" class="pa-0">
+          <template v-slot:expanded-row="{ columns, item }">
+            <td :colspan="columns.length" class="pa-0">
               <unreimbursed-expenses-expanded-table
                 :expenses="item.expenses"
                 @toggleExpense="toggleShowOnFeed"
@@ -135,22 +142,6 @@
           </template>
         </v-data-table>
         <!-- END DATA TABLE -->
-
-        <!-- Reimburse Button -->
-        <v-btn
-          @click="buttonClicked = !buttonClicked"
-          id="custom-button-color"
-          :loading="reimbursing"
-          v-show="showReimburseButton"
-          theme="dark"
-          large
-          bottom
-          left
-          fixed
-          class="reimburse_button"
-        >
-          <v-icon>mdi-currency-usd</v-icon>
-        </v-btn>
       </v-container>
 
       <!-- Reimburse Modal -->
@@ -286,20 +277,6 @@ function chipColor(id) {
 } // chipColor
 
 /**
- * Expands an expense. Adds the expense to expanded row when clicked.
- *
- * @param value - expense to expand
- */
-function clickedRow(value) {
-  if (_.isEmpty(this.expanded) || this.expanded[0].key != value.key) {
-    this.expanded = [];
-    this.expanded.push(value);
-  } else {
-    this.expanded = [];
-  }
-} // clickedRow
-
-/**
  * Constructs the auto complete lists for the employee and expense type filter.
  *
  * @param aggregatedData - expenses data
@@ -319,6 +296,7 @@ function constructAutoComplete(aggregatedData) {
   }).filter((data) => {
     return data != null;
   });
+  this.employees = _.uniqBy(this.employees, (e) => e.value);
   // set expense types
   this.expenseTypes = _.map(aggregatedData, (data) => {
     if (data && data.budgetName && data.expenseTypeId) {
@@ -330,6 +308,7 @@ function constructAutoComplete(aggregatedData) {
   }).filter((data) => {
     return data != null;
   });
+  this.expenseTypes = _.uniqBy(this.expenseTypes, (e) => e.value);
 } // constructAutoComplete
 
 /**
@@ -397,40 +376,6 @@ function customFilter(item, queryText) {
 
   return queryContainsNickName || queryContainsFirstName;
 } // customFilter
-
-/**
- * Custom sorter for each column in the table.
- *
- * @param items - a users buget item
- * @param index - the index name of the array
- * @param isDesc - true if the sorted is in descending order
- * @return Array - the sorted array
- */
-function customSort(items, index, isDesc) {
-  if (index[0] === 'employeeName') {
-    // sort by last name
-    if (!isDesc[0]) {
-      items.sort((a, b) => (a.lastName.toUpperCase() > b.lastName.toUpperCase() ? 1 : -1));
-    } else {
-      items.sort((a, b) => (b.lastName.toUpperCase() > a.lastName.toUpperCase() ? 1 : -1));
-    }
-  } else if (index[0] === 'cost') {
-    // sort by the total expenses per budget
-    if (!isDesc[0]) {
-      items.sort((a, b) => (this.getBudgetTotal(a.expenses) > this.getBudgetTotal(b.expenses) ? 1 : -1));
-    } else {
-      items.sort((a, b) => (this.getBudgetTotal(b.expenses) > this.getBudgetTotal(a.expenses) ? 1 : -1));
-    }
-  } else {
-    // sort alphabetically/numerically
-    if (!isDesc[0]) {
-      items.sort((a, b) => (a[index] > b[index] ? 1 : -1));
-    } else {
-      items.sort((a, b) => (b[index] > a[index] ? 1 : -1));
-    }
-  }
-  return items;
-} // customSort
 
 /**
  * Determine the state of the group check box based on expenses.
@@ -588,10 +533,10 @@ function removeTag(item) {
  * Reimburse the selected list of expenses.
  */
 async function reimburseExpenses() {
+  this.loading = true;
   // reimburse button is clicked
+  this.buttonClicked = false;
   let expensesToReimburse = [];
-  //this.buttonClicked = false;
-  this.reimbursing = true; // set reimbursing status to true
 
   // get selected expenses and set reimburse date
   this.empBudgets = _.forEach(this.empBudgets, (budget) => {
@@ -642,7 +587,8 @@ async function reimburseExpenses() {
   });
 
   this.refreshExpenses();
-  this.reimbursing = false; // set reimbursing status to false
+  this.emitter.emit('finished-reimbursing');
+  this.loading = false; // set reimbursing status to false
 } // reimburseExpenses
 
 /**
@@ -774,9 +720,10 @@ function toggleAll() {
     this.checkAllBoxes();
   } else if (this.mainCheckBox.all && !this.mainCheckBox.indeterminate) {
     // clear all checkboxes
+    this.mainCheckBox.all = false;
     this.unCheckAllBoxes();
   } else if (!this.mainCheckBox.all && this.mainCheckBox.indeterminate) {
-    this.unCheckAllBoxes();
+    this.checkAllBoxes();
   }
 } // toggleAll
 
@@ -868,9 +815,10 @@ function unCheckAllBoxes() {
 async function created() {
   this.emitter.on('selectExpense', this.selectExpense);
   this.emitter.on('toggleExpense', this.toggleShowOnFeed);
-
-  //this.emitter.on('canceled-reimburse', () => (this.buttonClicked = false));
   this.emitter.on('confirm-reimburse', async () => await this.reimburseExpenses());
+  this.emitter.on('cancel-reimburse', () => (this.buttonClicked = false));
+  this.emitter.on('reimburse-expenses', () => (this.buttonClicked = true));
+
   let unreimbursedExpenses;
   [unreimbursedExpenses, this.expenseTypes] = await Promise.all([
     api.getUnreimbursedExpenses(),
@@ -889,6 +837,8 @@ function beforeDestroy() {
   this.emitter.off('selectExpense');
   this.emitter.off('toggleExpense');
   this.emitter.off('confirm-reimburse');
+  this.emitter.off('cancel-reimburse');
+  this.emitter.off('reimburse-expenses');
 } //beforeDestroy
 
 // |--------------------------------------------------|
@@ -963,32 +913,31 @@ export default {
     expenseTypes: [], // expense type autocomplete options
     headers: [
       {
-        text: 'Employee',
-        value: 'employeeName',
+        title: 'Employee',
+        key: 'employeeName',
         align: 'center'
       },
       {
-        text: 'Expense Type',
-        value: 'budgetName',
+        title: 'Expense Type',
+        key: 'budgetName',
         align: 'center'
       },
       {
-        text: 'Total',
-        value: 'cost',
+        title: 'Total',
+        key: 'cost',
         align: 'center'
       },
       {
-        text: 'Show on Feed',
-        value: 'showOnFeed',
+        title: 'Show on Feed',
+        key: 'showOnFeed',
         align: 'center',
-        width: '4px',
+        width: '10%',
         sortable: false
       }
     ], // datatable headers
     itemsPerPage: -1, // data table elements per page
     loading: true, // is loading
     pendingExpenses: [], // pending expenses
-    reimbursing: false, // is reimbursing
     status: {
       statusType: undefined,
       statusMessage: '',
@@ -1002,12 +951,10 @@ export default {
     asyncForEach,
     checkAllBoxes,
     chipColor,
-    clickedRow,
     constructAutoComplete,
     convertToMoneyString,
     createExpenses,
     customFilter,
-    customSort,
     determineCheckBox,
     determineShowOnFeed,
     determineShowSwitch,
@@ -1043,3 +990,10 @@ export default {
   }
 };
 </script>
+
+<style>
+.v-data-table-header__content {
+  font-size: 13px;
+  font-weight: bold;
+}
+</style>

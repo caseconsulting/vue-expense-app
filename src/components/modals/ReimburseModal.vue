@@ -2,17 +2,25 @@
   <div>
     <v-dialog v-model="activate" persistent max-width="350">
       <v-card>
-        <v-card-title class="headline">Are you sure you want to reimburse these expenses?</v-card-title>
+        <v-card-text class="text-h6 font-weight-medium">Are you sure you want to reimburse these expenses?</v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="red" text @click.native="activate = false">No</v-btn>
+          <v-btn
+            color="red"
+            variant="text"
+            @click="
+              emitter.emit('cancel-reimburse');
+              activate = false;
+            "
+            >No</v-btn
+          >
           <v-spacer></v-spacer>
           <v-btn
             color="green"
             id="reimburse"
-            text
-            @click.native="
-              emit(`confirm-reimburse`);
+            variant="text"
+            @click="
+              emitter.emit('confirm-reimburse');
               activate = false;
             "
           >
@@ -32,15 +40,6 @@
 // |                                                  |
 // |--------------------------------------------------|
 
-/**
- * Emits a message and data if it exists.
- *
- * @param msg - Message to emit
- */
-function emit(msg) {
-  this.emitter.emit(msg);
-} // emit
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                    WATCHERS                      |
@@ -51,7 +50,7 @@ function emit(msg) {
  * watcher for toggleReimburseModal
  */
 function watchToggleReimburseModal() {
-  this.activate = true;
+  this.activate = this.toggleReimburseModal;
 } // watchToggleReimburseModal
 
 // |--------------------------------------------------|
@@ -65,9 +64,6 @@ export default {
     return {
       activate: false // dialog activator
     };
-  },
-  methods: {
-    emit
   },
   props: ['toggleReimburseModal'], // dialog activator
   watch: {

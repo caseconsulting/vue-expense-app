@@ -59,7 +59,9 @@
                     hint="MM/DD/YYYY format"
                     class="mb-4"
                     persistent-hint
-                    @blur="ptoCashOutObj.approvedDate = format(approvedDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
+                    @update:focused="
+                      ptoCashOutObj.approvedDate = format(approvedDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')
+                    "
                     @click:prepend="approvedDateMenu = true"
                     @click:control="approvedDateMenu = false"
                   >

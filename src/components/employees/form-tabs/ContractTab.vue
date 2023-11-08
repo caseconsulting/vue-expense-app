@@ -73,7 +73,7 @@
                   v-mask="'##/####'"
                   variant="underlined"
                   :rules="[...getRequiredRules(), ...getDateMonthYearRules(), dateOrderRule(index, projIndex)]"
-                  @blur="project.startDate = parseEventDate($event)"
+                  @update:focused="project.startDate = parseEventDate($event)"
                   clearable
                   @click:prepend="project.showStartMenu = true"
                   @click:control="project.showStartMenu = false"
@@ -116,7 +116,7 @@
                   v-mask="'##/####'"
                   clearable
                   @click:clear="project.endDate = null"
-                  @blur="project.endDate = parseEventDate($event)"
+                  @update:focused="project.endDate = parseEventDate($event)"
                   @click:prepend="project.showEndMenu = true"
                   @click:control="project.showEndMenu = false"
                   @update:model-value="
