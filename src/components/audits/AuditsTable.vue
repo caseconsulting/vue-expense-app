@@ -8,6 +8,7 @@
           v-model="search"
           append-icon="search"
           label="Search"
+          variant="underlined"
           single-line
           hide-details
         ></v-text-field>
@@ -79,26 +80,20 @@ export default {
     return {
       headers: [
         {
-          text: 'Event Date',
-          value: 'dateCreated'
+          title: 'Event Date',
+          key: 'dateCreated'
         },
         {
-          text: 'Employee Name',
-          value: 'employeeName'
+          title: 'Employee Name',
+          key: 'employeeName'
         },
         {
-          text: 'Description',
-          value: 'description'
-        },
-        {
-          text: '',
-          value: 'nickname',
-          width: 0,
-          cellClass: 'clear'
+          title: 'Description',
+          key: 'description'
         }
       ], // datatable headers
       search: null,
-      sortBy: 'dateCreated',
+      sortBy: [{ key: 'dateCreated' }],
       sortDesc: false
     };
   },

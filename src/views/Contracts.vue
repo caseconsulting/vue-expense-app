@@ -16,7 +16,7 @@
     </v-snackbar>
     <v-card>
       <v-card color="#bc3825">
-        <v-card-title headline><h2 class="text-white">Contracts</h2> </v-card-title>
+        <v-card-title class="d-flex align-center header_style"><h2 class="text-white">Contracts</h2> </v-card-title>
       </v-card>
       <v-container fluid>
         <v-btn @click="toggleContractForm = true" :disabled="!$store.getters.contracts" class="my-2"
