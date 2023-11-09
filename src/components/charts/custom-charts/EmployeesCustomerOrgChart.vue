@@ -135,10 +135,11 @@ function fillData() {
       if (_.first(y)) {
         let index = _.first(y).index;
         let labelClicked = this.chartData.labels[index];
+        localStorage.setItem('requestedDataType', 'customerOrgs');
+        localStorage.setItem('requestedFilter', labelClicked);
         this.$router.push({
           path: '/reports',
-          name: 'reports',
-          params: { requestedDataType: 'customerOrgs', requestedFilter: labelClicked }
+          name: 'reports'
         });
       }
     },

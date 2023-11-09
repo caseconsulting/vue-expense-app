@@ -1,13 +1,5 @@
 import { createVuetify } from 'vuetify';
 import * as components from 'vuetify/components';
-import {
-  VDataIterator,
-  VSkeletonLoader,
-  VDataTable,
-  VDataTableServer,
-  VDataTableVirtual,
-  VDatePicker
-} from 'vuetify/labs/components';
 import * as directives from 'vuetify/directives';
 import 'vuetify/styles';
 import '@mdi/font/css/materialdesignicons.css';
@@ -21,15 +13,7 @@ import { aliases, mdi } from 'vuetify/lib/iconsets/mdi';
 // import CaseIcon from '@/components/custom-icons/CaseIcon';
 
 const opts = {
-  components: {
-    ...components,
-    VDataIterator,
-    VSkeletonLoader,
-    VDataTable,
-    VDataTableServer,
-    VDataTableVirtual,
-    VDatePicker
-  },
+  components,
   directives,
   theme: {
     primary: '#68caa6',

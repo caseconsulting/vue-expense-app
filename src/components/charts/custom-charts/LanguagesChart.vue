@@ -128,10 +128,11 @@ function fillData() {
     onClick: (x, y) => {
       if (_.first(y)) {
         let index = _.first(y).index;
+        localStorage.setItem('requestedDataType', 'languages');
+        localStorage.setItem('requestedFilter', this.chartData.labels[index]);
         this.$router.push({
           path: '/reports',
-          name: 'reports',
-          params: { requestedDataType: 'languages', requestedFilter: this.chartData.labels[index] }
+          name: 'reports'
         });
       }
     },

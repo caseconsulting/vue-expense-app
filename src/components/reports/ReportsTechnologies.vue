@@ -134,10 +134,10 @@ function created() {
   this.filteredEmployees = this.employeesInfo; // this one is shown
   this.populateDropdowns(this.employeesInfo);
   this.buildTechnologiesColumns();
-  if (this.$route.params.requestedFilter) {
-    this.technologySearch = this.$route.params.requestedFilter;
+  if (localStorage.getItem('requestedFilter')) {
+    this.technologySearch = localStorage.getItem('requestedFilter');
     this.refreshDropdownItems();
-    this.$route.params.requestedFilter = null;
+    localStorage.removeItem('requestedFilter');
   }
 } // created
 

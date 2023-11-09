@@ -154,10 +154,14 @@ function fillCertData() {
     onClick: (x, y) => {
       if (_.first(y)) {
         let index = _.first(y).index;
+        let label = Array.isArray(this.chartData.labels[index])
+          ? this.chartData.labels[index].join(' ')
+          : this.chartData.labels[index];
+        localStorage.setItem('requestedDataType', 'certifications');
+        localStorage.setItem('requestedFilter', label);
         this.$router.push({
           path: '/reports',
-          name: 'reports',
-          params: { requestedDataType: 'certifications', requestedFilter: this.chartData.labels[index] }
+          name: 'reports'
         });
       }
     },

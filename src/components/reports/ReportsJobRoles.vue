@@ -130,10 +130,10 @@ function created() {
   this.tags = this.$store.getters.tags;
   this.filteredEmployees = this.employeesInfo; // this one is shown
   this.populateDropdowns(this.employeesInfo);
-  if (this.$route.params.requestedFilter) {
-    this.jobRoleSearch = this.$route.params.requestedFilter;
+  if (localStorage.getItem('requestedFilter')) {
+    this.jobRoleSearch = localStorage.getItem('requestedFilter');
     this.refreshDropdownItems();
-    this.$route.params.requestedFilter = null;
+    localStorage.removeItem('requestedFilter');
   }
 } // created
 

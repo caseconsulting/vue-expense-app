@@ -137,10 +137,10 @@ function created() {
   this.filteredEmployees = this.employeesInfo; // this one is shown
   this.populateDropdowns(this.employeesInfo);
   this.buildCustomerOrgColumns();
-  if (this.$route.params.requestedFilter) {
-    this.custOrgSearch = this.$route.params.requestedFilter;
+  if (localStorage.getItem('requestedFilter')) {
+    this.custOrgSearch = localStorage.getItem('requestedFilter');
     this.refreshDropdownItems();
-    this.$route.params.requestedFilter = null;
+    localStorage.removeItem('requestedFilter');
   }
 } // created
 

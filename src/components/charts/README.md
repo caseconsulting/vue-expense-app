@@ -60,10 +60,11 @@ Here is what goes into the chart's options object:
   onClick: (x, y) => {
     if (_.first(y)) {
       let index = _.first(y).index;
+      localStorage.setItem('requestedDataType', 'Job Roles');
+      localStorage.setItem('requestedFilter', this.chartData.labels[index]);
       this.$router.push({
         path: '/reports',
-        name: 'reports',
-        params: { requestedDataType: 'Job Roles', requestedFilter: this.chartData.labels[index] }
+        name: 'reports'
       });
     }
   };

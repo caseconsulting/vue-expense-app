@@ -50,11 +50,11 @@ async function mounted() {
  *
  * @param value - row clicked
  */
-function clickedRow(value) {
+function clickedRow(_, { item }) {
+  localStorage.setItem('requestedFilter', item.employeeNames.join(', '));
   this.$router.push({
     path: '/employees',
-    name: 'employees',
-    params: { requestedFilter: value.employeeNames.join(', ') }
+    name: 'employees'
   });
 } // clickedRow
 

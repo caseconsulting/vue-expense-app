@@ -133,13 +133,10 @@ function created() {
   this.filteredEmployees = this.employeesInfo; // this one is shown
   this.populateDropdowns(this.employeesInfo);
   this.buildCertificationsColumns();
-  if (this.$route.params.requestedFilter) {
-    if (Array.isArray(this.$route.params.requestedFilter)) {
-      this.$route.params.requestedFilter = this.$route.params.requestedFilter.join(' ');
-    }
-    this.certificationSearch = this.$route.params.requestedFilter;
+  if (localStorage.getItem('requestedFilter')) {
+    this.certificationSearch = localStorage.getItem('requestedFilter');
     this.refreshDropdownItems();
-    this.$route.params.requestedFilter = null;
+    localStorage.removeItem('requestedFilter');
   }
 } // created
 

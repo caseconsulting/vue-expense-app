@@ -1,15 +1,15 @@
 <template>
   <div>
     <v-btn
-      v-if="$route.params.requestedDataType"
+      v-if="requestedDataType"
       id="backBtn"
       class="mb-3"
       elevation="2"
       @click="backClick()"
-      :size="isMobile && 'x-small'"
+      :size="isMobile ? 'x-small' : 'default'"
     >
       <template v-slot:prepend>
-        <v-icon class="pr-1">arrow-left-thin</v-icon>
+        <v-icon size="large" class="pr-1">mdi-arrow-left-thin</v-icon>
       </template>
       Back
     </v-btn>
@@ -108,8 +108,8 @@ async function created() {
     ]);
     this.loading = false;
   }
-  if (this.$route.params.requestedDataType) {
-    this.currentTab = this.$route.params.requestedDataType;
+  if (localStorage.getItem('requestedDataType')) {
+    this.currentTab = localStorage.getItem('requestedDataType');
     this.wasRedirected = true;
     window.scrollTo(0, 0);
   }
@@ -125,10 +125,10 @@ async function created() {
  * Handler for back button click event.
  */
 function backClick() {
+  localStorage.setItem('requestedDataType', localStorage.getItem('requestedDataType'));
   this.$router.push({
     path: '/stats',
-    name: 'stats',
-    params: { requestedDataType: this.$route.params.requestedDataType }
+    name: 'stats'
   });
 } // backClick
 
@@ -193,7 +193,8 @@ export default {
       employeesToContact: [],
       loading: true,
       toggleContactEmployeesModal: false,
-      wasRedirected: false
+      wasRedirected: false,
+      requestedDataType: localStorage.getItem('requestedDataType')
     };
   },
   methods: {

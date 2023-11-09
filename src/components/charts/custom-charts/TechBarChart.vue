@@ -133,10 +133,11 @@ function fillData() {
     onClick: (x, y) => {
       if (_.first(y)) {
         let index = _.first(y).index;
+        localStorage.setItem('requestedDataType', 'technologies');
+        localStorage.setItem('requestedFilter', this.chartData.labels[index]);
         this.$router.push({
           path: '/reports',
-          name: 'reports',
-          params: { requestedDataType: 'technologies', requestedFilter: this.chartData.labels[index] }
+          name: 'reports'
         });
       }
     },

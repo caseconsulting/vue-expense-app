@@ -109,13 +109,14 @@ import { updateStoreEmployees, updateStoreContracts } from '@/utils/storeUtils';
  * Created lifecycle hook.
  */
 function created() {
-  if (this.$route.params.requestedDataType) {
+  let requestedDataType = localStorage.getItem('requestedDataType');
+  if (requestedDataType) {
     let mappings = {};
     mappings['jobRoles'] = 'employees';
     mappings['contracts'] = 'employees';
     mappings['certifications'] = 'employees';
     mappings['customerOrgs'] = 'customerOrg';
-    this.changeTab(mappings[this.$route.params.requestedDataType]);
+    this.changeTab(mappings[requestedDataType]);
   }
 } // created
 

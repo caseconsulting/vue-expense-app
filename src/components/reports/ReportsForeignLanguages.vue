@@ -131,10 +131,10 @@ function created() {
   this.filteredEmployees = this.employeesInfo; // this one is shown
   this.populateDropdowns(this.employeesInfo);
   this.buildLanguagesColumn();
-  if (this.$route.params.requestedFilter) {
-    this.languageSearch = this.$route.params.requestedFilter;
+  if (localStorage.getItem('requestedFilter')) {
+    this.languageSearch = localStorage.getItem('requestedFilter');
     this.refreshDropdownItems();
-    this.$route.params.requestedFilter = null;
+    localStorage.removeItem('requestedFilter');
   }
 } // created
 

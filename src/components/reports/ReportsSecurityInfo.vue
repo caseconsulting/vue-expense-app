@@ -151,10 +151,10 @@ function created() {
   this.populateDropdowns(this.employeesInfo);
 
   // fill in search boxes if routed from another page
-  if (this.$route.params.requestedFilter) {
-    this.clearanceSearch = this.$route.params.requestedFilter;
+  if (localStorage.getItem('requestedFilter')) {
+    this.clearanceSearch = localStorage.getItem('requestedFilter');
     this.refreshDropdownItems();
-    this.$route.params.requestedFilter = null;
+    localStorage.removeItem('requestedFilter');
   }
 } // created
 

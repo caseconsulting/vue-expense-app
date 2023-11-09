@@ -72,10 +72,11 @@ function parseEmployeeData() {
  * @param word String - The word clicked on
  */
 function wordClicked(word) {
+  localStorage.setItem('requestedDataType', 'technologies');
+  localStorage.setItem('requestedFilter', word);
   this.$router.push({
     path: '/reports',
-    name: 'reports',
-    params: { requestedDataType: 'technologies', requestedFilter: word }
+    name: 'reports'
   });
 } // wordClicked
 

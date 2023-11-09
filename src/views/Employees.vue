@@ -24,7 +24,7 @@
             <v-spacer></v-spacer>
             <v-text-field
               id="employeesSearch"
-              v-model="search"
+              v-model.trim="search"
               append-inner-icon="fa:fas fa-search"
               label="Search (comma separate terms)"
               variant="underlined"
@@ -152,7 +152,6 @@
           :items="filteredEmployees"
           :sort-by.sync="sortBy"
           :sort-desc.sync="sortDesc"
-          v-model:expanded="expanded"
           :loading="loading"
           :items-per-page.sync="itemsPerPage"
           :search="search"
@@ -209,53 +208,49 @@
 
           <!-- First Name Item Slot -->
           <template v-slot:[`item.firstName`]="{ item }">
-            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" class="mb-0">
+            <p :class="{ inactiveStyle: isInactive(item) }" class="mb-0">
               {{ item.firstName }}
             </p>
           </template>
 
           <!-- Middle Name Item Slot -->
           <template v-slot:[`item.middleName`]="{ item }">
-            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" class="mb-0">
+            <p :class="{ inactiveStyle: isInactive(item) }" class="mb-0">
               {{ item.middleName }}
             </p>
           </template>
 
           <!-- Last Name Item Slot -->
           <template v-slot:[`item.lastName`]="{ item }">
-            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" class="mb-0">
+            <p :class="{ inactiveStyle: isInactive(item) }" class="mb-0">
               {{ item.lastName }}
             </p>
           </template>
 
           <!-- Nickname Item Slot -->
           <template v-slot:[`item.nickname`]="{ item }">
-            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" class="mb-0">
+            <p :class="{ inactiveStyle: isInactive(item) }" class="mb-0">
               {{ item.nickname }}
             </p>
           </template>
 
           <!-- Last Login Item Slot -->
           <template v-slot:[`item.lastLoginSeconds`]="{ item }">
-            <p
-              v-if="userRoleIsAdmin()"
-              :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }"
-              class="mb-0"
-            >
+            <p v-if="userRoleIsAdmin()" :class="{ inactiveStyle: isInactive(item) }" class="mb-0">
               {{ getLoginDate(item) }}
             </p>
           </template>
 
           <!-- Date Item Slot -->
           <template v-slot:[`item.hireDate`]="{ item }">
-            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" class="mb-0">
+            <p :class="{ inactiveStyle: isInactive(item) }" class="mb-0">
               {{ monthDayYearFormat(item.hireDate) }}
             </p>
           </template>
 
           <!-- Email Item Slot -->
           <template v-slot:[`item.email`]="{ item }">
-            <p :class="{ inactiveStyle: isInactive(item), selectFocus: isFocus(item) }" class="mb-0">
+            <p :class="{ inactiveStyle: isInactive(item) }" class="mb-0">
               {{ item.email }}
             </p>
           </template>
@@ -539,17 +534,6 @@ function hasAdminPermissions() {
 } // hasAdminPermissions
 
 /**
- * Checks to see if an employee is expanded in the datatable.
- *
- * @param item - employee to check
- * @return boolean - the employee is expanded
- */
-function isFocus(item) {
-  let expanded = !_.isEmpty(this.expanded) && item.employeeNumber == this.expanded[0].employeeNumber;
-  return expanded || this.model.id == item.id;
-} // isFocus
-
-/**
  * negates a tag
  */
 function negateTag(item) {
@@ -576,7 +560,6 @@ async function refreshEmployees() {
   ]);
   this.employees = this.$store.getters.employees; // get all employees
   this.filterEmployees(); // filter employees
-  this.expanded = []; // collapse any expanded rows in the database
   let avatars = this.$store.getters.basecampAvatars;
   _.map(this.employees, (employee) => {
     let avatar = _.find(avatars, ['email_address', employee.email]);
@@ -756,9 +739,9 @@ async function created() {
   });
 
   // fill in search box if routed from another page
-  if (this.$route.params.requestedFilter) {
-    this.search = this.$route.params.requestedFilter;
-    this.$route.params.requestedFilter = null;
+  if (localStorage.getItem('requestedFilter')) {
+    this.search = localStorage.getItem('requestedFilter');
+    localStorage.removeItem('requestedFilter');
   }
 
   // only refresh employees if data is in store. Otherwise, set loading and wait in watcher
@@ -777,6 +760,7 @@ async function created() {
       return !adminSpecific.includes(header.value);
     });
   }
+  this.search = this.search ? this.search + ' ' : ''; // solution for redirecting from stats dashboard with a filter
 } // created
 
 /**
@@ -876,7 +860,6 @@ export default {
       deleting: false, // activate delete confirmation model
       employees: [], // employees
       employeeNumber: null,
-      expanded: [], // datatable expanded
       filter: {
         active: ['full', 'part'] // default only shows full and part time employees
       }, // datatable filter
@@ -989,7 +972,6 @@ export default {
     handleClick,
     hasAdminPermissions,
     isEmpty,
-    isFocus,
     isFullTime,
     isInactive,
     isPartTime,
