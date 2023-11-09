@@ -75,11 +75,11 @@
                   :rules="[...getRequiredRules(), ...getDateMonthYearRules(), dateOrderRule(index, projIndex)]"
                   @update:focused="project.startDate = parseEventDate($event)"
                   clearable
+                  v-bind="props"
                   @click:prepend="project.showStartMenu = true"
-                  @click:control="project.showStartMenu = false"
                 >
                   <template v-slot:prepend>
-                    <div v-bind="props" class="pointer">
+                    <div class="pointer">
                       <v-icon :color="caseGray">mdi-calendar</v-icon>
                     </div>
                   </template>
@@ -115,16 +115,16 @@
                   hint="MM/YYYY format"
                   v-mask="'##/####'"
                   clearable
+                  v-bind="props"
                   @click:clear="project.endDate = null"
                   @update:focused="project.endDate = parseEventDate($event)"
                   @click:prepend="project.showEndMenu = true"
-                  @click:control="project.showEndMenu = false"
                   @update:model-value="
                     project.endDate && project.endDate.length > 0 ? (project.presentDate = false) : ''
                   "
                 >
                   <template v-slot:prepend>
-                    <div v-bind="props" class="pointer">
+                    <div class="pointer">
                       <v-icon :color="caseGray">mdi-calendar</v-icon>
                     </div>
                   </template>

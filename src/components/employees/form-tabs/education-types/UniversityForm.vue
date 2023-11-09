@@ -52,11 +52,11 @@
               persistent-hint
               @update:focused="degree.completionDate = parseEventDate($event)"
               clearable
+              v-bind="props"
               @click:prepend="degree.showEducationMenu = true"
-              @click:control="degree.showEducationMenu = false"
             >
               <template v-slot:prepend>
-                <div v-bind="props" class="pointer">
+                <div class="pointer">
                   <v-icon :color="caseGray">mdi-calendar</v-icon>
                 </div>
               </template>

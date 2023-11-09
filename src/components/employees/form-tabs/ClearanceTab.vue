@@ -54,14 +54,14 @@
                     if (clearance.grantedDate) clearance.awaitingClearance = false;
                   }
                 "
+                v-bind="props"
                 @click:clear="clearance.grantedDate = null"
                 @update:focused="clearance.grantedDate = parseEventDate()"
                 @update:model-value="clearance.showGrantedMenu = false"
                 @click:prepend="clearance.showGrantedMenu = true"
-                @click:control="clearance.showGrantedMenu = false"
               >
                 <template v-slot:prepend>
-                  <div v-bind="props" class="pointer">
+                  <div class="pointer">
                     <v-icon :color="caseGray">mdi-calendar</v-icon>
                   </div>
                 </template>
@@ -93,13 +93,13 @@
                 hint="MM/DD/YYYY format"
                 v-mask="'##/##/####'"
                 variant="underlined"
+                v-bind="props"
                 @click:clear="clearance.submissionDate = null"
                 @update:focused="clearance.submissionDate = parseEventDate()"
                 @click:prepend="clearance.showSubmissionMenu = true"
-                @click:control="clearance.showSubmissionMenu = false"
               >
                 <template v-slot:prepend>
-                  <div v-bind="props" class="pointer">
+                  <div class="pointer">
                     <v-icon :color="caseGray">mdi-calendar</v-icon>
                   </div>
                 </template>
@@ -146,14 +146,14 @@
             v-mask="'##/##/####'"
             variant="underlined"
             :disabled="clearance.awaitingClearance"
+            v-bind="props"
             @click:clear="clearance.badgeExpirationDate = null"
             @update:focused="clearance.badgeExpirationDate = parseEventDate()"
             @update:model-value="clearance.showBadgeMenu = false"
             @click:prepend="clearance.showBadgeMenu = true"
-            @click:control="clearance.showBadgeMenu = false"
           >
             <template v-slot:prepend>
-              <div v-bind="props" class="pointer">
+              <div class="pointer">
                 <v-icon :color="caseGray">mdi-calendar</v-icon>
               </div>
             </template>
@@ -182,10 +182,11 @@
             variant="underlined"
             readonly
             clearable
+            v-bind="props"
             @click:clear="clearance.biDates = []"
           >
             <template v-slot:prepend>
-              <div v-bind="props" class="pointer">
+              <div class="pointer">
                 <v-icon :color="caseGray">mdi-calendar</v-icon>
               </div>
             </template>
@@ -223,12 +224,12 @@
             variant="underlined"
             clearable
             readonly
+            v-bind="props"
             @click:prepend="clearance.showAdjudicationMenu = true"
-            @click:control="clearance.showAdjudicationMenu = false"
             @click:clear="clearance.adjudicationDates = []"
           >
             <template v-slot:prepend>
-              <div v-bind="props" class="pointer">
+              <div class="pointer">
                 <v-icon :color="caseGray">mdi-calendar</v-icon>
               </div>
             </template>
@@ -261,12 +262,12 @@
             variant="underlined"
             clearable
             readonly
+            v-bind="props"
             @click:clear="clearance.polyDates = []"
             @click:prepend="clearance.showPolyMenu = true"
-            @click:control="clearance.showPolyMenu = false"
           >
             <template v-slot:prepend>
-              <div v-bind="props" class="pointer">
+              <div class="pointer">
                 <v-icon :color="caseGray">mdi-calendar</v-icon>
               </div>
             </template>

@@ -59,19 +59,18 @@
                     hint="MM/DD/YYYY format"
                     class="mb-4"
                     persistent-hint
+                    v-bind="props"
                     @update:focused="
                       ptoCashOutObj.approvedDate = format(approvedDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')
                     "
                     @click:prepend="approvedDateMenu = true"
-                    @click:control="approvedDateMenu = false"
                   >
                     <template v-slot:prepend>
-                      <div v-bind="props" class="pointer">
+                      <div class="pointer">
                         <v-icon color="grey-darken-1">mdi-calendar</v-icon>
                       </div>
                     </template>
                   </v-text-field>
-                  <span v-bind="props"></span>
                 </template>
                 <v-date-picker
                   v-model="ptoCashOutObj.approvedDate"

@@ -27,14 +27,14 @@
                 hint="MM/DD/YYYY format"
                 v-mask="'##/##/####'"
                 variant="underlined"
+                v-bind="props"
                 @update:focused="certification.dateReceived = parseEventDate()"
                 @focus="certificationIndex = index"
                 @click:prepend="certification.showReceivedMenu = true"
-                @click:control="certification.showReceivedMenu = false"
                 clearable
               >
                 <template v-slot:prepend>
-                  <div v-bind="props" class="pointer">
+                  <div class="pointer">
                     <v-icon :color="caseGray">mdi-calendar</v-icon>
                   </div>
                 </template>
@@ -66,13 +66,13 @@
                 v-mask="'##/##/####'"
                 variant="underlined"
                 clearable
+                v-bind="props"
                 @update:focused="certification.expirationDate = parseEventDate()"
                 @click:prepend="certification.showExpirationMenu = true"
-                @click:control="certification.showExpirationMenu = false"
                 @focus="certificationIndex = index"
               >
                 <template v-slot:prepend>
-                  <div v-bind="props" class="pointer">
+                  <div class="pointer">
                     <v-icon :color="caseGray">mdi-calendar</v-icon>
                   </div>
                 </template>
@@ -91,13 +91,6 @@
           </v-menu>
           <!-- End Expiration Date -->
         </v-col>
-        <!-- Hidden field to record the date the user submitted -->
-        <v-date-picker
-          v-show="false"
-          v-model="certification.dateInpoot"
-          no-title
-          @input="award.showReceivedMenu = false"
-        ></v-date-picker>
       </v-row>
       <v-row>
         <v-col cols="12" align="center" justify="center" class="pb-4 mb-2">

@@ -30,11 +30,11 @@
                 persistent-hint
                 @update:focused="award.dateReceived = parseEventDate()"
                 clearable
+                v-bind="props"
                 @click:prepend="award.showReceivedMenu = true"
-                @click:control="award.showReceivedMenu = false"
               >
                 <template v-slot:prepend>
-                  <div v-bind="props" class="pointer">
+                  <div class="pointer">
                     <v-icon :color="caseGray">mdi-calendar</v-icon>
                   </div>
                 </template>
@@ -48,13 +48,6 @@
               keyboard-icon=""
               color="#bc3825"
               title="Date Received"
-            ></v-date-picker>
-            <!-- Hidden field to record the date the user submitted -->
-            <v-date-picker
-              v-show="false"
-              v-model="award.dateInpoot"
-              no-title
-              @input="award.showReceivedMenu = false"
             ></v-date-picker>
           </v-menu>
           <!-- End Received Date -->

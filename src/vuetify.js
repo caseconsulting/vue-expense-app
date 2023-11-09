@@ -6,14 +6,26 @@ import '@mdi/font/css/materialdesignicons.css';
 import '@fortawesome/fontawesome-free/css/all.css';
 import { fa } from 'vuetify/iconsets/fa';
 import { aliases, mdi } from 'vuetify/lib/iconsets/mdi';
-// import TwitterIcon from '@/components/custom-icons/TwitterIcon';
-// import FacebookIcon from '@/components/custom-icons/FacebookIcon';
-// import AdpIcon from '@/components/custom-icons/AdpIcon';
-// import BambooIcon from '@/components/custom-icons/BambooIcon';
-// import CaseIcon from '@/components/custom-icons/CaseIcon';
+import { isSame } from './shared/dateUtils';
+import DayJsAdapter from '@date-io/dayjs';
+const adapter = new DayJsAdapter();
+
+// the library does not include these functions so manually set it to avoid date picker errors
+adapter.getNextYear = (date) => {
+  return date.add(1, 'year');
+};
+adapter.isSame = (date1, date2) => {
+  return isSame(date1, date2);
+};
+adapter.isSameDay = (date1, date2) => {
+  return isSame(date1, date2, 'day');
+};
 
 const opts = {
   components,
+  date: {
+    adapter
+  },
   directives,
   theme: {
     primary: '#68caa6',

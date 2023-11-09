@@ -178,12 +178,12 @@
             variant="underlined"
             hint="MM/DD/YYYY format"
             persistent-hint
+            v-bind="props"
             @update:focused="editedEmployee.hireDate = format(hireDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
             @click:prepend="hireMenu = true"
-            @click:control="hireMenu = false"
           >
             <template v-slot:prepend>
-              <div v-bind="props" class="pointer">
+              <div class="pointer">
                 <v-icon :color="caseGray">mdi-calendar</v-icon>
               </div>
             </template>
@@ -222,18 +222,17 @@
             v-mask="'##/##/####'"
             class="mt-1"
             persistent-hint
+            v-bind="props"
             @update:focused="editedEmployee.deptDate = format(deptDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
             @click:prepend="departureMenu = true"
-            @click:control="departureMenu = false"
             :disabled="!admin"
           >
             <template v-slot:prepend>
-              <div v-bind="props" class="pointer">
+              <div class="pointer">
                 <v-icon :color="caseGray">mdi-calendar</v-icon>
               </div>
             </template>
           </v-text-field>
-          <span v-bind="props"></span>
         </template>
         <v-date-picker
           v-model="editedEmployee.deptDate"

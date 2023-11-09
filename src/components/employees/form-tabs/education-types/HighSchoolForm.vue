@@ -29,11 +29,11 @@
             variant="underlined"
             @update:focused="highSchool.gradDate = parseEventDate($event)"
             clearable
+            v-bind="props"
             @click:prepend="highSchool.showReceivedMenu = true"
-            @click:control="highSchool.showReceivedMenu = false"
           >
             <template v-slot:prepend>
-              <div v-bind="props" class="pointer">
+              <div class="pointer">
                 <v-icon :color="caseGray">mdi-calendar</v-icon>
               </div>
             </template>

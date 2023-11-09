@@ -36,6 +36,7 @@
     "npm": ">=9.0.0"
   },
   "dependencies": {
+    "@date-io/dayjs": "2.17.0",
     "@fortawesome/fontawesome-free": "5.15.4",
     "@mdi/font": "6.9.96",
     "auth0-js": "9.23.0",

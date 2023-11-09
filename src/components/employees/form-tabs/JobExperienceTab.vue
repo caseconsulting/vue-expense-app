@@ -28,10 +28,9 @@
               v-bind="props"
               clearable
               @click:prepend="timeFrame.showRangeMenu = true"
-              @click:control="timeFrame.showRangeMenu = false"
             >
               <template v-slot:prepend>
-                <div v-bind="props" class="pointer">
+                <div class="pointer">
                   <v-icon :color="caseGray">mdi-calendar</v-icon>
                 </div>
               </template>
@@ -153,14 +152,14 @@
                   v-mask="'##/####'"
                   :rules="[...getDateMonthYearRules(), dateOrderRule(compIndex, index)]"
                   variant="underlined"
+                  v-bind="props"
                   @update:focused="position.startDate = parseEventDate($event)"
                   @click:prepend="position.showStartMenu = true"
-                  @click:control="position.showStartMenu = false"
                   @focus="setIndices(compIndex, index)"
                   clearable
                 >
                   <template v-slot:prepend>
-                    <div v-bind="props" class="pointer">
+                    <div class="pointer">
                       <v-icon :color="caseGray">mdi-calendar</v-icon>
                     </div>
                   </template>
@@ -197,17 +196,17 @@
                   hint="MM/YYYY format"
                   v-mask="'##/####'"
                   clearable
+                  v-bind="props"
                   @click:clear="position.endDate = null"
                   @update:focused="position.endDate = parseEventDate($event)"
                   @click:prepend="position.showEndMenu = true"
-                  @click:control="position.showEndMenu = false"
                   @focus="setIndices(compIndex, index)"
                   @update:model-value="
                     position.endDate && position.endDate.length > 0 ? (position.presentDate = false) : ''
                   "
                 >
                   <template v-slot:prepend>
-                    <div v-bind="props" class="pointer">
+                    <div class="pointer">
                       <v-icon :color="caseGray">mdi-calendar</v-icon>
                     </div>
                   </template>

@@ -127,12 +127,12 @@
           variant="underlined"
           hint="MM/DD/YYYY format"
           persistent-hint
-          @update:focused="editedPersonalInfo.birthday = format(birthdayFormat, 'MM/DD/YYYY', 'YYYY-MM-DD')"
+          v-bind="props"
+          @update:focused="editedPersonalInfo.birthday = format(birthdayFormat, null, 'YYYY-MM-DD')"
           @click:prepend="BirthdayMenu = true"
-          @click:control="BirthdayMenu = false"
         >
           <template v-slot:prepend>
-            <div v-bind="props" class="pointer">
+            <div class="pointer">
               <v-icon :color="caseGray">mdi-calendar</v-icon>
             </div>
           </template>
@@ -146,7 +146,8 @@
         keyboard-icon=""
         color="#bc3825"
         title="Birthday"
-      ></v-date-picker>
+      >
+      </v-date-picker>
     </v-menu>
 
     <!-- Show Birthday -->

@@ -30,14 +30,14 @@
                 hint="MM/YYYY format"
                 v-mask="'##/####'"
                 variant="underlined"
+                v-bind="props"
                 @update:focused="military.startDate = parseEventDate($event)"
                 @click:prepend="military.showStartMenu = true"
-                @click:control="military.showStartMenu = false"
                 clearable
                 persistent-hint
               >
                 <template v-slot:prepend>
-                  <div v-bind="props" class="pointer">
+                  <div class="pointer">
                     <v-icon :color="caseGray">mdi-calendar</v-icon>
                   </div>
                 </template>
@@ -73,14 +73,14 @@
                 hint="MM/YYYY format"
                 v-mask="'##/####'"
                 variant="underlined"
+                v-bind="props"
                 @update:focused="military.completeDate = parseEventDate($event)"
                 @click:prepend="military.showCompleteMenu = true"
-                @click:control="military.showCompleteMenu = false"
                 clearable
                 persistent-hint
               >
                 <template v-slot:prepend>
-                  <div v-bind="props" class="pointer">
+                  <div class="pointer">
                     <v-icon :color="caseGray">mdi-calendar</v-icon>
                   </div>
                 </template>
