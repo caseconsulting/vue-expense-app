@@ -44,7 +44,7 @@
     "chart.js": "4.4.0",
     "crypto-js": "4.2.0",
     "dayjs": "1.11.10",
-    "jwt-decode": "3.1.2",
+    "jwt-decode": "4.0.0",
     "lodash": "4.17.21",
     "mitt": "3.0.1",
     "mobile-detect": "1.4.5",
