@@ -1,4 +1,4 @@
-import decode from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 import auth0 from 'auth0-js';
 import router from '../router';
 import { AUTH_CONFIG } from './auth0-variables';
@@ -113,7 +113,7 @@ export function getRole() {
  * @return - the date from the decoded token
  */
 export function getTokenExpirationDate(encodedToken) {
-  const token = decode(encodedToken);
+  const token = jwtDecode(encodedToken);
   if (!token.exp) {
     return null;
   }
@@ -269,7 +269,7 @@ export function setIdToken() {
  * sets the profile in cookies
  */
 export function setProfile() {
-  let profile = decode(getIdToken());
+  let profile = jwtDecode(getIdToken());
   setCookie(IMG, profile.picture);
 } // setProfile
 

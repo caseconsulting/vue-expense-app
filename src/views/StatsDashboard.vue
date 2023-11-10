@@ -10,8 +10,8 @@
         <!-- user is mobile -->
         <div v-if="isMobile" class="text-center">
           <v-menu offset="y">
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn variant="text" color="#bc3825" theme="dark" class="font-weight-bold" v-bind="attrs" v-on="on"
+            <template v-slot:activator="{ props }">
+              <v-btn variant="text" color="#bc3825" theme="dark" class="font-weight-bold" v-bind="props"
                 >{{ statsTab.toUpperCase() }} <v-icon class="pb-1">expand_more</v-icon>
               </v-btn>
             </template>

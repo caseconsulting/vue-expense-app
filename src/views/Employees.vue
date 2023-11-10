@@ -88,7 +88,7 @@
               >
                 <template v-slot:chip="{ props, item }">
                   <v-chip
-                    small
+                    size="small"
                     closable
                     v-bind="props"
                     @click.stop
@@ -151,7 +151,6 @@
           :headers="headers"
           :items="filteredEmployees"
           :sort-by.sync="sortBy"
-          :sort-desc.sync="sortDesc"
           :loading="loading"
           :items-per-page.sync="itemsPerPage"
           :search="search"
@@ -943,8 +942,7 @@ export default {
       searchIndex: new Set(),
       searchCache: null,
       selectedTags: [], // tags to include or exclude in filter
-      sortBy: ['hireDate'], // sort datatable items
-      sortDesc: false, // sort datatable items
+      sortBy: [{ key: 'hireDate', order: 'asc' }], // sort datatable items
       status: {
         statusType: undefined,
         statusMessage: null,
