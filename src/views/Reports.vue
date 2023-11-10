@@ -19,8 +19,8 @@
           <h2 class="text-white">Reports</h2>
           <v-spacer></v-spacer>
           <v-tooltip location="bottom">
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn id="contactEmployeesBtn" @click="renderContactEmployeesModal()" v-bind="attrs" v-on="on">
+            <template v-slot:activator="{ props }">
+              <v-btn id="contactEmployeesBtn" @click="renderContactEmployeesModal()" v-bind="props">
                 Contact
                 <template v-slot:append>
                   <v-icon>mdi-email</v-icon>

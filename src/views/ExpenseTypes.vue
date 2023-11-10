@@ -54,8 +54,8 @@
                 <v-btn-toggle class="filter_color" v-model="filter.active" text mandatory>
                   <!-- Show Active -->
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ on }">
-                      <v-btn value="active" v-on="on" variant="text">
+                    <template v-slot:activator="{ props }">
+                      <v-btn value="active" v-bind="props" variant="text">
                         <v-icon class="mr-1">mdi-check-circle-outline</v-icon>
                       </v-btn>
                     </template>
@@ -64,8 +64,8 @@
 
                   <!-- Show Inactive -->
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ on }">
-                      <v-btn value="notActive" v-on="on" variant="text">
+                    <template v-slot:activator="{ props }">
+                      <v-btn value="notActive" v-bind="props" variant="text">
                         <v-icon>mdi-close-circle-outline</v-icon>
                       </v-btn>
                     </template>
@@ -74,8 +74,8 @@
 
                   <!-- Show Active and Inactive -->
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ on }">
-                      <v-btn value="both" v-on="on" variant="text">BOTH</v-btn>
+                    <template v-slot:activator="{ props }">
+                      <v-btn value="both" v-bind="props" variant="text">BOTH</v-btn>
                     </template>
                     <span>Show All</span>
                   </v-tooltip>
@@ -89,8 +89,8 @@
                 <v-btn-toggle class="filter_color" v-model="filter.overdraft" text mandatory>
                   <!-- Show Overdraft -->
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ on }">
-                      <v-btn value="overdraft" v-on="on" variant="text">
+                    <template v-slot:activator="{ props }">
+                      <v-btn value="overdraft" v-bind="props" variant="text">
                         <v-icon class="mr-1">mdi-check-circle-outline</v-icon>
                       </v-btn>
                     </template>
@@ -99,8 +99,8 @@
 
                   <!-- Show No Overdraft -->
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ on }">
-                      <v-btn value="noOverdraft" v-on="on" variant="text">
+                    <template v-slot:activator="{ props }">
+                      <v-btn value="noOverdraft" v-bind="props" variant="text">
                         <v-icon>mdi-close-circle-outline</v-icon>
                       </v-btn>
                     </template>
@@ -109,8 +109,8 @@
 
                   <!-- Show Overdraft and No Overdraft -->
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ on }">
-                      <v-btn value="both" v-on="on" variant="text">BOTH</v-btn>
+                    <template v-slot:activator="{ props }">
+                      <v-btn value="both" v-bind="props" variant="text">BOTH</v-btn>
                     </template>
                     <span>Show All</span>
                   </v-tooltip>
@@ -124,8 +124,8 @@
                 <v-btn-toggle class="filter_color" v-model="filter.recurring" text mandatory>
                   <!-- Show Recurring -->
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ on }">
-                      <v-btn value="recurring" v-on="on" variant="text">
+                    <template v-slot:activator="{ props }">
+                      <v-btn value="recurring" v-bind="props" variant="text">
                         <v-icon class="mr-1">mdi-check-circle-outline</v-icon>
                       </v-btn>
                     </template>
@@ -134,8 +134,8 @@
 
                   <!-- Show Non-Recurring -->
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ on }">
-                      <v-btn value="notRecurring" v-on="on" variant="text">
+                    <template v-slot:activator="{ props }">
+                      <v-btn value="notRecurring" v-bind="props" variant="text">
                         <v-icon>mdi-close-circle-outline</v-icon>
                       </v-btn>
                     </template>
@@ -144,8 +144,8 @@
 
                   <!-- Show Recurring and Non-Recurring -->
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ on }">
-                      <v-btn value="both" v-on="on" variant="text">BOTH</v-btn>
+                    <template v-slot:activator="{ props }">
+                      <v-btn value="both" v-bind="props" variant="text">BOTH</v-btn>
                     </template>
                     <span>Show All</span>
                   </v-tooltip>
@@ -161,7 +161,6 @@
               :headers="_headers"
               :items="expenseTypeList"
               :sort-by.sync="sortBy"
-              :sort-desc.sync="sortDesc"
               :expanded.sync="expanded"
               :loading="loading"
               :items-per-page.sync="itemsPerPage"
@@ -181,7 +180,7 @@
               <!-- Actions -->
               <template v-if="userRoleIsAdmin()" v-slot:[`item.actions`]="{ item }">
                 <v-tooltip location="top">
-                  <template v-slot:activator="{ on }">
+                  <template v-slot:activator="{ props }">
                     <v-btn
                       v-if="userRoleIsAdmin()"
                       :disabled="midAction"
@@ -191,7 +190,7 @@
                         toTopOfForm();
                         onSelect(item);
                       "
-                      v-on="on"
+                      v-bind="props"
                     >
                       <v-icon class="case-gray">edit</v-icon>
                     </v-btn>
@@ -199,7 +198,7 @@
                   <span>Edit</span>
                 </v-tooltip>
                 <v-tooltip location="top">
-                  <template v-slot:activator="{ on }">
+                  <template v-slot:activator="{ props }">
                     <v-btn
                       v-if="userRoleIsAdmin()"
                       id="delete"
@@ -207,7 +206,7 @@
                       variant="text"
                       icon
                       @click="validateDelete(item)"
-                      v-on="on"
+                      v-bind="props"
                     >
                       <v-icon class="case-gray">delete</v-icon>
                     </v-btn>
@@ -322,8 +321,8 @@
                           </div>
                           <!-- Button to view names of employees with access -->
                           <v-dialog v-model="showAccess" max-width="400px" scrollable>
-                            <template v-slot:activator="{ on }">
-                              <v-btn class="px-1 ml-3" size="x-small" variant="outlined" v-on="on">view</v-btn>
+                            <template v-slot:activator="{ props }">
+                              <v-btn class="px-1 ml-3" size="x-small" variant="outlined" v-bind="props">view</v-btn>
                             </template>
                             <v-card color="#bc3825">
                               <!-- Dialog Title -->
@@ -379,7 +378,7 @@
                               <div class="d-flex pr-3">
                                 <b>Tag(s):</b>
                                 <div class="d-flex flex-column">
-                                  <v-chip small v-for="tagID in item.tags" :key="tagID">
+                                  <v-chip size="small" v-for="tagID in item.tags" :key="tagID">
                                     <v-icon start>mdi-tag</v-icon>{{ getTagByID(tagID).tagName }}</v-chip
                                   >
                                 </div>
@@ -1199,8 +1198,7 @@ export default {
         tagBudgets: []
       }, // selected expense type
       search: '', // query text for datatable search field
-      sortBy: 'budgetName', // sort datatable items
-      sortDesc: false, // sort datatable items
+      sortBy: [{ key: 'budgetName', order: 'asc' }], // sort datatable items
       status: {
         statusType: undefined,
         statusMessage: '',

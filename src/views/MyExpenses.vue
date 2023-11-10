@@ -105,8 +105,8 @@
                 <v-btn-toggle class="filter_color" v-model="filter.active" text mandatory>
                   <!-- Show Active -->
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ on }">
-                      <v-btn value="active" v-on="on" variant="text">
+                    <template v-slot:activator="{ props }">
+                      <v-btn value="active" v-bind="props" variant="text">
                         <v-icon class="mr-1">mdi-check-circle-outline</v-icon>
                       </v-btn>
                     </template>
@@ -115,8 +115,8 @@
 
                   <!-- Show Inactive -->
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ on }">
-                      <v-btn value="notActive" v-on="on" variant="text">
+                    <template v-slot:activator="{ props }">
+                      <v-btn value="notActive" v-bind="props" variant="text">
                         <v-icon>mdi-close-circle-outline</v-icon>
                       </v-btn>
                     </template>
@@ -125,8 +125,8 @@
 
                   <!-- Show Active and Inactive -->
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ on }">
-                      <v-btn value="both" v-on="on" variant="text"> BOTH </v-btn>
+                    <template v-slot:activator="{ props }">
+                      <v-btn value="both" v-bind="props" variant="text"> BOTH </v-btn>
                     </template>
                     <span>Show All</span>
                   </v-tooltip>
@@ -140,8 +140,8 @@
                 <v-btn-toggle class="filter_color" v-model="filter.reimbursed" text mandatory>
                   <!-- Show Reimbursed -->
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ on }">
-                      <v-btn value="reimbursed" v-on="on" variant="text">
+                    <template v-slot:activator="{ props }">
+                      <v-btn value="reimbursed" v-bind="props" variant="text">
                         <v-icon id="showReimbursed" class="mr-1">mdi-check-circle-outline</v-icon>
                       </v-btn>
                     </template>
@@ -150,8 +150,8 @@
 
                   <!-- Show Pending -->
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ on }">
-                      <v-btn value="notReimbursed" v-on="on" variant="text">
+                    <template v-slot:activator="{ props }">
+                      <v-btn value="notReimbursed" v-bind="props" variant="text">
                         <v-icon id="showPending">mdi-close-circle-outline</v-icon>
                       </v-btn>
                     </template>
@@ -160,8 +160,8 @@
 
                   <!-- Show Reimbursed and Pending -->
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ on }">
-                      <v-btn id="bothReimbursed" value="both" v-on="on" variant="text"> BOTH </v-btn>
+                    <template v-slot:activator="{ props }">
+                      <v-btn id="bothReimbursed" value="both" v-bind="props" variant="text"> BOTH </v-btn>
                     </template>
                     <span>Show All</span>
                   </v-tooltip>
@@ -178,7 +178,6 @@
               :headers="roleHeaders"
               :items="filteredExpenses"
               :sort-by.sync="sortBy"
-              :sort-desc.sync="sortDesc"
               :expanded.sync="expanded"
               :loading="loading || initialPageLoading"
               :items-per-page="15"
@@ -220,7 +219,7 @@
 
                   <!-- Edit Button -->
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ on }">
+                    <template v-slot:activator="{ props }">
                       <v-btn
                         :disabled="
                           isEditing ||
@@ -235,7 +234,7 @@
                           toTopOfForm();
                           onSelect(item);
                         "
-                        v-on="on"
+                        v-bind="props"
                       >
                         <v-icon class="case-gray">edit</v-icon>
                       </v-btn>
@@ -244,7 +243,7 @@
                   </v-tooltip>
                   <!-- Delete Button -->
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ on }">
+                    <template v-slot:activator="{ props }">
                       <v-btn
                         :disabled="
                           isReimbursed(item) ||
@@ -260,7 +259,7 @@
                           midAction = true;
                           propExpense = item;
                         "
-                        v-on="on"
+                        v-bind="props"
                       >
                         <v-icon class="case-gray"> delete </v-icon>
                       </v-btn>
@@ -269,7 +268,7 @@
                   </v-tooltip>
                   <!-- Unreimburse Button -->
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ on }">
+                    <template v-slot:activator="{ props }">
                       <v-btn
                         v-if="userRoleIsAdmin() || userRoleIsManager()"
                         :disabled="!isReimbursed(item) || isEditing || midAction"
@@ -281,7 +280,7 @@
                           midAction = true;
                           propExpense = item;
                         "
-                        v-on="on"
+                        v-bind="props"
                       >
                         <v-icon class="case-gray"> money_off </v-icon>
                       </v-btn>
@@ -1038,8 +1037,7 @@ export default {
         showOnFeed: null
       }, // expense to edit
       search: this.$route.params.defaultSearch || '', // query text for datatable search field
-      sortBy: 'createdAt', // sort datatable items
-      sortDesc: true, // sort datatable items
+      sortBy: [{ key: 'createdAt', order: 'asc' }], // sort datatable items
       status: {
         statusType: undefined,
         statusMessage: '',
