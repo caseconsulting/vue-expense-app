@@ -48,7 +48,7 @@
                     hide-details
                     :items="employees"
                     :customFilter="customFilter"
-                    v-model="employee"
+                    v-model.trim="employee"
                     item-title="text"
                     id="employeeIdFilter"
                     class="mr-3"
@@ -62,7 +62,7 @@
                   <v-text-field
                     variant="underlined"
                     v-model="search"
-                    append-icon="search"
+                    append-inner-icon="mdi-magnify"
                     id="search"
                     label="Search"
                     single-line
@@ -85,7 +85,7 @@
                     hide-details
                     :items="employees"
                     :customFilter="customFilter"
-                    v-model="employee"
+                    v-model.trim="employee"
                     item-title="text"
                     id="employeeIdFilter"
                     label="Filter by Employee"
@@ -700,7 +700,7 @@ async function loadMyExpensesData() {
   this.initialPageLoading = true;
   this.loading = true;
   // get user info, defaulting to params if exists
-  this.userInfo = this.$route.params.defaultEmployee || this.$store.getters.user;
+  this.userInfo = localStorage.getItem('requestedFilter') || this.$store.getters.user; // TODO parse localstorage into string and then parse from string
   await Promise.all([
     !this.$store.getters.expenseTypes ? this.updateStoreExpenseTypes() : '',
     !this.$store.getters.employees ? this.updateStoreEmployees() : '',
@@ -892,7 +892,7 @@ async function created() {
   }
 
   // if coming from budgets chart scroll to top
-  if (this.$route.params.defaultEmployee) {
+  if (localStorage.getItem('requestedFilter')) {
     window.scrollTo(0, 0);
   }
 } // created
@@ -910,9 +910,10 @@ function beforeDestroy() {
 } // beforeDestroy
 
 function mounted() {
-  console.log(this.$route.params.defaultEmployee);
-  if (this.employee == null && this.$route.params.defaultEmployee != null) {
-    this.employee = this.$route.params.defaultEmployee.id;
+  if (this.employee == null && localStorage.getItem('requestedFilter')) {
+    this.employee = localStorage.getItem('requestedFilter').defaultEmployee;
+    this.employee = this.employee + ' ';
+    localStorage.removeItem('requestedFilter');
   }
 }
 
@@ -990,7 +991,7 @@ export default {
       expenseTypes: [], // expense types
       filter: {
         active: 'both',
-        reimbursed: this.$route.params.defaultFilterReimbursed || 'notReimbursed' //default only shows expenses that are not reimbursed
+        reimbursed: localStorage.getItem('requestedFilter')?.defaultFilterReimbursed || 'notReimbursed' //default only shows expenses that are not reimbursed
       }, // datatable filters
       filteredExpenses: [], // filtered expenses
       headers: [
@@ -1046,7 +1047,7 @@ export default {
         url: null,
         showOnFeed: null
       }, // expense to edit
-      search: this.$route.params.defaultSearch || '', // query text for datatable search field
+      search: localStorage.getItem('requestedFilter')?.defaultSearch || '', // query text for datatable search field
       toSort: [{ key: 'createdAt', order: 'desc' }], // default sort datatable items
       status: {
         statusType: undefined,

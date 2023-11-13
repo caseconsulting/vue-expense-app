@@ -21,7 +21,7 @@
           </v-card-title>
         </v-col>
         <v-col class="col-2 text-right" v-if="location != 'home'">
-          <v-icon @click="changingBudgetView = !changingBudgetView">history</v-icon>
+          <v-icon @click="changingBudgetView = !changingBudgetView" icon="mdi-history" />
         </v-col>
       </v-row>
     </v-card>

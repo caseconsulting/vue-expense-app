@@ -5,7 +5,7 @@
         <template v-slot:default="props">
           <v-row>
             <!-- Loop all budgets -->
-            <v-col v-for="item in props.items" :key="item.name" cols="12" sm="6" lg="6">
+            <v-col v-for="item in props.items" :key="item.expenseTypeId" cols="12" sm="6" lg="6">
               <v-card>
                 <!-- Budget Name -->
                 <v-card-title class="d-flex align-center header_style">
@@ -88,6 +88,7 @@ import _ from 'lodash';
  */
 function created() {
   this.refreshBudgets();
+  console.log(this.expenseTypeData);
 }
 
 // |--------------------------------------------------|

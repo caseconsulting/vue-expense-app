@@ -219,23 +219,22 @@ function drawGraph() {
     onClick: (x, y) => {
       if (_.first(y)) {
         let index = _.first(y).index;
-        let routeData = {
-          defaultEmployee: employee,
+        // redirect to expenses page
+        localStorage.setItem('requestedFilter', {
+          defaultEmployee: employee.id,
           defaultFilterReimbursed: 'both',
           defaultSearch: this.chartData.labels[index]
-        };
-        // redirect to expenses page
+        });
         router.push({
-          name: 'expenses',
-          params: routeData
+          name: 'expenses'
         });
       } else {
+        localStorage.setItem('requestedFilter', {
+          defaultEmployee: employee.id,
+          defaultFilterReimbursed: 'both'
+        });
         router.push({
-          name: 'expenses',
-          params: {
-            defaultEmployee: employee,
-            defaultFilterReimbursed: 'both'
-          }
+          name: 'expenses'
         });
       }
     },
