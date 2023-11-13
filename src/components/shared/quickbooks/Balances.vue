@@ -56,7 +56,7 @@
       </v-card-text>
     </div>
     <v-dialog v-model="showPTOCashOutFormModal" persistent max-width="500">
-      <p-t-o-cash-out-form :employee="passedEmployee" />
+      <p-t-o-cash-out-form :employee="passedEmployee" :pto="balanceData['PTO']" />
     </v-dialog>
   </div>
 </template>
@@ -156,10 +156,10 @@ function availableBalances() {
  * @returns Boolean - whether the employee was FireTeam or not
  */
 function isLegacyFireTeam() {
-  if (!this.passedEmployee) {
+  if (!this.passedEmployee.value) {
     return parseInt(this.employee.employeeNumber, 10) < 100;
   } else {
-    return parseInt(this.passedEmployee.employeeNumber, 10) < 100;
+    return parseInt(this.passedEmployee.value.employeeNumber, 10) < 100;
   }
 } // isLegacyFireTeam
 
@@ -193,7 +193,7 @@ function formatHours(hours) {
  * Sets the PTO balances for the employee (or user if no employee is specified)
  */
 async function setPTOBalances() {
-  this.employee = this.isEmployeeView ? this.passedEmployee : this.$store.getters.user;
+  this.employee = this.isEmployeeView ? this.passedEmployee.value : this.$store.getters.user;
   if (this.employee && !this.isEmpty(this.employee.id)) {
     // employee exists
     let ptoBalances;
@@ -257,7 +257,7 @@ function toFAQ() {
  * watcher for passedEmployee.id - if it is employee view it will set or reset PTOBalances
  */
 async function watchPassedEmployeeID() {
-  if (this.passedEmployee) {
+  if (this.passedEmployee && this.passedEmployee.value) {
     this.loadingBar = true;
     this.balancesError = false;
     this.refresh = true;
@@ -307,7 +307,7 @@ export default {
   mounted,
   props: ['passedEmployee', 'showMinutes'],
   watch: {
-    'passedEmployee.id': watchPassedEmployeeID
+    'passedEmployee.value': watchPassedEmployeeID
   }
 };
 </script>

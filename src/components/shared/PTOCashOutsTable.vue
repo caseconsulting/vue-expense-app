@@ -196,7 +196,7 @@
     />
     <delete-modal :toggleDeleteModal="toggleDeleteModal" type="PTO cash out" />
     <v-dialog v-model="toggleEditModal" persistent max-width="500">
-      <p-t-o-cash-out-form :item="clickedEditItem" />
+      <p-t-o-cash-out-form :item="clickedEditItem" :pto="userPto" :editing="true" />
     </v-dialog>
   </v-card>
 </template>
@@ -259,6 +259,7 @@ async function mounted() {
   this.emitter.on('close-pto-cash-out-form', () => {
     this.toggleEditModal = false;
     this.clickedEditItem = null;
+    this.userPto = null;
   });
   this.emitter.on('confirmed-pto-cash-outs', async () => {
     await this.clickedConfirmApprove();
@@ -477,9 +478,14 @@ function isApproved(ptoCashOut) {
  *
  * @param item PTO Cash Out item to edit
  */
-function clickedEdit(item) {
+async function clickedEdit(item) {
   this.clickedEditItem = item;
   this.toggleEditModal = true;
+  let employee = _.find(this.$store.getters.employees, (e) => e.id === item.employeeId);
+  let employeeBalances = await api.getPTOBalances(employee.employeeNumber);
+  if (employeeBalances.results && employeeBalances.results.users[employee.employeeNumber]) {
+    this.userPto = employeeBalances.results.users[employee.employeeNumber]['pto_balances']['PTO'];
+  }
 } // clickedEdit
 
 // |--------------------------------------------------|
@@ -642,7 +648,8 @@ export default {
       toggleApproveModal: false,
       toggleDeleteModal: false,
       toggleEditModal: false,
-      clickedEditItem: null
+      clickedEditItem: null,
+      userPto: null
     };
   },
   methods: {

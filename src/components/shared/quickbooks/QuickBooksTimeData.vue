@@ -1,57 +1,60 @@
 <template>
   <div id="t-sheets-data">
     <v-card density="compact">
-      <v-card-title class="d-flex align-center justify-space-between header_style">
-        <h3 v-if="!isMobile" class="d-inline-block">QuickBooks Time Data</h3>
-        <h5 v-else class="d-inline-block">QuickBooks Time Data</h5>
-        <div class="d-flex">
-          <!--Switch between minutes and hours-->
-          <v-tooltip :text="tooltipText" location="top">
-            <template v-slot:activator="{ props }">
-              <v-switch
-                v-model="showMinutes"
-                density="compact"
-                hide-details
-                color="gray"
-                class="mr-2 my-0 py-0"
-                v-bind="props"
-              >
-              </v-switch>
-            </template>
-          </v-tooltip>
-          <!--End of Switch-->
-          <!-- Start of Refresh Button -->
-          <v-btn @click="emitter.emit('refresh-quickbooks-data')" variant="text" icon="mdi-refresh">
-            <template v-slot:default>
-              <v-tooltip activator="parent" location="top">Refresh Quickbooks Time Data</v-tooltip>
-              <v-icon color="white" size="large">mdi-refresh</v-icon>
-            </template>
-          </v-btn>
-          <!-- End of Refresh Button -->
-        </div>
-      </v-card-title>
-      <v-card-subtitle
-        v-if="userRoleIsAdmin() || userRoleIsManager()"
-        class="pb-0 mt-0 subtitle"
-        :style="autocompleteWidth"
-      >
+      <v-card-title class="header_style py-0">
         <v-autocomplete
+          v-if="userRoleIsAdmin() || userRoleIsManager()"
+          class="pb-0 mt-0 nudge-up-autocomplete"
+          :style="autocompleteWidth"
           v-model="passedEmployee"
-          class="autocomplete"
           base-color="transparent"
           bg-color="transparent"
           density="compact"
           :items="filteredEmployees"
           :customFilter="customFilter"
+          hide-details
           variant="plain"
           item-title="text"
           item-value="value"
           return-object
-        ></v-autocomplete>
-      </v-card-subtitle>
+        >
+        </v-autocomplete>
+        <div
+          class="d-flex align-center justify-space-between"
+          :class="userRoleIsAdmin() || userRoleIsManager() ? 'nudge-up-title' : 'nudge-down-title'"
+        >
+          <h3 v-if="!isMobile" class="d-inline-block">QuickBooks Time Data</h3>
+          <h5 v-else class="d-inline-block">QuickBooks Time Data</h5>
+          <div class="d-flex">
+            <!--Switch between minutes and hours-->
+            <v-tooltip :text="tooltipText" location="top">
+              <template v-slot:activator="{ props }">
+                <v-switch
+                  v-model="showMinutes"
+                  density="compact"
+                  hide-details
+                  color="gray"
+                  class="mr-2 my-0 py-0"
+                  v-bind="props"
+                >
+                </v-switch>
+              </template>
+            </v-tooltip>
+            <!--End of Switch-->
+            <!-- Start of Refresh Button -->
+            <v-btn @click="emitter.emit('refresh-quickbooks-data')" variant="text" icon="mdi-refresh">
+              <template v-slot:default>
+                <v-tooltip activator="parent" location="top">Refresh Quickbooks Time Data</v-tooltip>
+                <v-icon color="white" size="large">mdi-refresh</v-icon>
+              </template>
+            </v-btn>
+            <!-- End of Refresh Button -->
+          </div>
+        </div>
+      </v-card-title>
       <v-card-text class="pt-0 pb-0 text-black" :class="userRoleIsAdmin() || userRoleIsManager() ? 'nudge-up' : 'mt-4'">
         <semi-monthly-charges
-          v-if="isLegacyFireTeam"
+          v-if="passedEmployee && isLegacyFireTeam"
           :passedEmployee="passedEmployee"
           :showMinutes="showMinutes"
         ></semi-monthly-charges>
@@ -93,7 +96,15 @@ function created() {
         lastName: employee.lastName
       };
     });
-    this.passedEmployee = _.find(this.$store.getters.employees, (e) => e.id === this.employee.id);
+    let employee = _.find(this.$store.getters.employees, (e) => e.id === this.employee.id);
+    this.passedEmployee = {
+      text: nicknameAndLastName(employee),
+      value: employee,
+      workStatus: employee.workStatus,
+      firstName: employee.firstName,
+      nickname: employee.nickname,
+      lastName: employee.lastName
+    };
   }
 } // created
 
@@ -115,9 +126,13 @@ function allEmployees() {
  */
 function autocompleteWidth() {
   switch (this.$vuetify.display.name) {
-    case 'xs' || 'sm':
+    case 'xs':
       return 'width: 50%';
-    case 'md' || 'lg':
+    case 'sm':
+      return 'width: 50%';
+    case 'md':
+      return 'width: 40%;';
+    case 'lg':
       return 'width: 40%';
     case 'xl':
       return 'width: 30%';
@@ -130,10 +145,10 @@ function autocompleteWidth() {
  * @returns Boolean - whether the employee was FireTeam or not
  */
 function isLegacyFireTeam() {
-  if (!this.passedEmployee) {
+  if (!this.passedEmployee.value) {
     return parseInt(this.employee.employeeNumber, 10) < 100;
   } else {
-    return parseInt(this.passedEmployee.employeeNumber, 10) < 100;
+    return parseInt(this.passedEmployee.value.employeeNumber, 10) < 100;
   }
 } // isLegacyFireTeam
 
@@ -239,13 +254,16 @@ export default {
 </script>
 
 <style scoped>
-.nudge-up {
+.nudge-up-title {
   position: relative;
-  top: -45px;
+  top: -18px;
 }
-.subtitle {
+.nudge-down-title {
   position: relative;
-  top: -85px;
-  width: 40%;
+  top: 12px;
+}
+.nudge-up-autocomplete {
+  position: relative;
+  top: -8px;
 }
 </style>

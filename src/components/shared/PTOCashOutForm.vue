@@ -11,8 +11,8 @@
         <div v-if="!isSubmitting">
           <v-card-text v-if="passedEmployee">
             <p>
-              <span v-if="getPtoBalance(passedEmployee.employeeNumber)">
-                <b>PTO:</b> {{ getPtoBalance(passedEmployee.employeeNumber) }}h
+              <span v-if="pto">
+                <b>PTO:</b> {{ pto }}h
                 <br />
               </span>
               <span v-else>PTO: Loading... <br /></span>
@@ -31,11 +31,12 @@
                   ...getNumberRules(),
                   ...getPTOCashOutRules(
                     ptoData.ptoBalance,
-                    passedEmployee ? passedEmployee.id : this.$store.getters.user.id
+                    passedEmployee ? passedEmployee.id : this.$store.getters.user.id,
+                    item ? Number(item.amount) : null
                   )
                 ]"
                 :hint="cashOutHint()"
-                v-model="ptoCashOutObj.amount"
+                v-model.number="ptoCashOutObj.amount"
                 label="Number of Hours Requested to be Paid Out"
                 required
               ></v-text-field>
@@ -157,11 +158,15 @@ async function created() {
     this.passedEmployee = _.find(this.$store.getters.employees, (e) => e.id === this.item.employeeId);
     this.ptoCashOutObj['id'] = editingItem.id;
     this.ptoCashOutObj['employeeId'] = editingItem.employeeId;
-    this.ptoCashOutObj['amount'] = editingItem.amount;
+    this.ptoCashOutObj['amount'] = Number(editingItem.amount);
     this.ptoCashOutObj['creationDate'] = editingItem.creationDate;
     this.ptoCashOutObj['approvedDate'] = editingItem.approvedDate;
   } else {
-    this.passedEmployee = _.cloneDeep(this.employee);
+    if (this.employee.value) {
+      this.passedEmployee = _.cloneDeep(this.employee.value);
+    } else {
+      this.passedEmployee = _.cloneDeep(this.employee);
+    }
   }
 } // created
 
@@ -281,19 +286,6 @@ function displaySuccess(msg) {
 } // displaySuccess
 
 /**
-/**
- * Gets the user's available PTO balance.
- * 
- * @param employeeNumber employee's employee number to get PTO balance for
- * @returns Number - The available PTO balance
- */
-function getPtoBalance(employeeNumber) {
-  return this.$store.getters.quickbooksPTO && this.$store.getters.quickbooksPTO.results.users[employeeNumber]
-    ? this.$store.getters.quickbooksPTO.results.users[employeeNumber].pto_balances.PTO
-    : null;
-} // getPtoBalance
-
-/**
  * Gets the user's pending PTO cash out amount
  *
  * @param employeeId employee's employee ID to get PTO balances for
@@ -312,19 +304,15 @@ function getPendingPtoCashoutAmount(employeeId) {
  * @returns String - The hint text
  */
 function cashOutHint() {
-  let employeeNumber;
   let employeeId;
   if (this.passedEmployee) {
-    employeeNumber = this.passedEmployee.employeeNumber;
     employeeId = this.passedEmployee.id;
   } else {
-    employeeNumber = this.$store.getters.user.employeeNumber;
     employeeId = this.$store.getters.user.id;
   }
   if (this.ptoCashOutObj.amount) {
-    return `Balance after cash out: ${
-      this.getPtoBalance(employeeNumber) - this.getPendingPtoCashoutAmount(employeeId) - this.ptoCashOutObj.amount
-    }h`;
+    let amount = this.editing ? this.ptoCashOutObj.amount - this.item.amount : Number(this.ptoCashOutObj.amount);
+    return `Balance after cash out: ${(this.pto - this.getPendingPtoCashoutAmount(employeeId) - amount).toFixed(2)}h`;
   }
 } // cashOutHint
 
@@ -335,7 +323,7 @@ async function createPTOCashOutRequest() {
   let newItem = _.cloneDeep(this.ptoCashOutObj);
   let ptoCashOut = await api.createItem(api.PTO_CASH_OUTS, {
     id: generateUUID(),
-    amount: newItem.amount,
+    amount: Number(newItem.amount),
     employeeId: this.passedEmployee.id,
     creationDate: dateUtils.getTodaysDate(),
     approvedDate: newItem.approvedDate ? newItem.approvedDate : null
@@ -377,7 +365,7 @@ function watchEditPTOCashOutItem() {
     this.passedEmployee = _.find(this.$store.getters.employees, (e) => e.id === this.item.employeeId);
     this.ptoCashOutObj['id'] = editingItem.id;
     this.ptoCashOutObj['employeeId'] = editingItem.employeeId;
-    this.ptoCashOutObj['amount'] = editingItem.amount;
+    this.ptoCashOutObj['amount'] = Number(editingItem.amount);
     this.ptoCashOutObj['creationDate'] = editingItem.creationDate;
     this.ptoCashOutObj['approvedDate'] = editingItem.approvedDate;
   }
@@ -387,7 +375,7 @@ function watchEditPTOCashOutItem() {
  * Watcher for employee prop.
  */
 function watchEmployee() {
-  this.passedEmployee = _.cloneDeep(this.employee);
+  this.passedEmployee = _.cloneDeep(this.employee.value);
 } // watchEmployee
 
 // |--------------------------------------------------|
@@ -397,19 +385,16 @@ function watchEmployee() {
 // |--------------------------------------------------|
 
 function ptoData() {
-  let employeeNumber;
   let employeeId;
   if (this.passedEmployee) {
-    employeeNumber = this.passedEmployee.employeeNumber;
     employeeId = this.passedEmployee.employeeId;
   } else {
-    employeeNumber = this.$store.getters.user.employeeNumber;
     employeeId = this.$store.getters.user.id;
   }
 
   return {
     pendingPtoCashOutAmount: this.getPendingPtoCashoutAmount(employeeId),
-    ptoBalance: this.getPtoBalance(employeeNumber)
+    ptoBalance: this.pto
   };
 }
 
@@ -457,7 +442,6 @@ export default {
     displaySuccess,
     displayError,
     getPendingPtoCashoutAmount,
-    getPtoBalance,
     nicknameAndLastName,
     createPTOCashOutRequest,
     openLink,
@@ -471,10 +455,10 @@ export default {
   watch: {
     'ptoCashOutObj.approvedDate': watchApprovedDate,
     item: watchEditPTOCashOutItem,
-    'employee.id': watchEmployee
+    'employee.value': watchEmployee
   },
   computed: { ptoData, isLegacyFireTeam },
-  props: ['item', 'employee']
+  props: ['item', 'employee', 'pto', 'editing']
 };
 </script>
 <style scoped>

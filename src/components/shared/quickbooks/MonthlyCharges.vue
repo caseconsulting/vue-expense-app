@@ -321,7 +321,8 @@ async function setData() {
  * Sets the monthly charges for the employee (or user if no employee is specified).
  */
 async function setMonthlyCharges() {
-  this.employee = this.passedEmployee ? this.passedEmployee : this.$store.getters.user;
+  this.employee =
+    this.passedEmployee && this.passedEmployee.value ? this.passedEmployee.value : this.$store.getters.user;
   if (this.employee && !this.isEmpty(this.employee.id)) {
     this.workDayHours *= this.employee.workStatus * 0.01;
     // make call to api to get data
@@ -391,7 +392,7 @@ function updateEstimate(event) {
  * watcher for passedEmployee.id
  */
 async function watchPassedEmployeeID() {
-  if (this.passedEmployee) {
+  if (this.passedEmployee && this.passedEmployee.value) {
     this.loading = true;
     this.isPrevMonth = false;
     this.monthlyHourError = false;
@@ -455,7 +456,7 @@ export default {
   mounted,
   props: ['passedEmployee', 'showMinutes'],
   watch: {
-    'passedEmployee.id': watchPassedEmployeeID
+    'passedEmployee.value': watchPassedEmployeeID
   }
 };
 </script>

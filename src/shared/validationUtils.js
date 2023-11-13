@@ -136,15 +136,21 @@ export function getValidateFalse() {
 /**
  * Gets the rules for validating employee PTO Cash Out request
  * @param ptoLimit employee's available PTO
+ * @param employeeId employee's ID
+ * @param originalAmount the cash out items original amount before editing
  * @returns Array - The array of rule functions
  */
-export function getPTOCashOutRules(ptoLimit, employeeId) {
+export function getPTOCashOutRules(ptoLimit, employeeId, originalAmount) {
   let pendingCashOuts = _.filter(store.getters.ptoCashOuts, (p) => !p.approvedDate && employeeId === p.employeeId);
   let pendingAmount = pendingCashOuts.reduce((n, { amount }) => n + amount, 0);
   return [
     (v) => (!isEmpty(v) && v > 0) || `PTO cash out amount must be greater than 0`,
-    (v) =>
-      (!isEmpty(v) && ptoLimit - v - pendingAmount >= 40) ||
-      'A minimum balance of 40h must be maintained after a cash out'
+    (v) => {
+      let amount = originalAmount ? v - originalAmount : Number(v);
+      return (
+        (!isEmpty(v) && ptoLimit - amount - pendingAmount >= 40) ||
+        'A minimum balance of 40h must be maintained after a cash out'
+      );
+    }
   ];
 } // getPTOCashOutRules
