@@ -25,7 +25,7 @@
               class="text-white"
               :disabled="!this.contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
               @click="clickedDelete()"
-              >Delete<v-icon end dark icon="fa:fas fa-trash" />
+              >Delete<v-icon end dark icon="mdi-delete" />
             </v-btn>
             <v-btn
               class="ml-4 font-weight-medium"
@@ -57,7 +57,7 @@
             :items="storeContracts"
             :items-per-page="-1"
             :search="search"
-            v-model:expanded="expanded"
+            :expanded="expanded"
             color="purple"
             class="contracts-table text-body-2"
             density="compact"
@@ -93,6 +93,7 @@
                 v-if="editingItem && editingItem.id == item.id"
                 v-model="editingItem.primeName"
                 label="Prime Name"
+                variant="underlined"
                 :rules="[(v) => !!v || 'Field is required', duplicateContractPrimeCombo()]"
                 required
                 @click.stop
@@ -107,6 +108,7 @@
                 v-if="editingItem && editingItem.id == item.id"
                 v-model="editingItem.contractName"
                 label="Contract Name"
+                variant="underlined"
                 :rules="[(v) => !!v || 'Field is required', duplicateContractPrimeCombo()]"
                 required
                 @click.stop
@@ -122,6 +124,7 @@
                 v-if="editingItem && editingItem.id == item.id"
                 v-model="editingItem.directorate"
                 label="Directorate"
+                variant="underlined"
                 @click.stop
               ></v-text-field>
               <span v-else :class="{ 'font-weight-bold': true }">{{ item.directorate }}</span>
@@ -133,6 +136,7 @@
                 v-if="editingItem && editingItem.id == item.id"
                 v-model="editingItem.popStartDate"
                 label="PoP Start Date"
+                variant="underlined"
                 @click.stop
               ></v-text-field>
               <!-- </v-form> -->
@@ -145,6 +149,7 @@
                 v-if="editingItem && editingItem.id == item.id"
                 v-model="editingItem.popEndDate"
                 label="PoP End Date"
+                variant="underlined"
                 @click.stop
               ></v-text-field>
               <span v-else :class="{ 'font-weight-bold': true }">{{ item.popEndDate }}</span>
@@ -158,6 +163,7 @@
                 name="description"
                 auto-grow
                 label="Description"
+                variant="underlined"
                 class="smaller-text description"
                 @click.stop
               ></v-textarea>
@@ -183,8 +189,8 @@
                   <!-- Save Contract -->
                   <v-tooltip location="top">
                     <template v-slot:activator="{ on }">
-                      <v-btn size="small" @click.stop="updateContractPrime()" icon variant="text" v-on="on">
-                        <v-icon class="case-gray" icon="fa:fas fa-save" />
+                      <v-btn @click.stop="updateContractPrime()" icon variant="text" v-on="on">
+                        <v-icon class="case-gray" icon="mdi-content-save" />
                       </v-btn>
                     </template>
                     <span>Save</span>
@@ -194,7 +200,6 @@
                   <v-tooltip location="top">
                     <template v-slot:activator="{ on }">
                       <v-btn
-                        size="small"
                         icon
                         variant="text"
                         @click.stop="
@@ -204,7 +209,7 @@
                         "
                         v-on="on"
                       >
-                        <v-icon class="case-gray" icon="fa:fas fa-times-circle" />
+                        <v-icon class="case-gray" icon="mdi-close-circle" />
                       </v-btn>
                     </template>
                     <span>Cancel</span>
@@ -220,7 +225,6 @@
                   <v-tooltip location="top">
                     <template v-slot:activator="{ on }">
                       <v-btn
-                        size="small"
                         :disabled="editingItem != null || isEditingProjectItem || contractLoading"
                         @click.stop="
                           () => {
@@ -232,7 +236,7 @@
                         variant="text"
                         v-on="on"
                       >
-                        <v-icon class="case-gray" icon="fa:fas fa-file-medical" />
+                        <v-icon class="case-gray" icon="mdi-file-document-plus" />
                       </v-btn>
                     </template>
                     <span>Add Project</span>
@@ -242,7 +246,6 @@
                   <v-tooltip location="top">
                     <template v-slot:activator="{ on }">
                       <v-btn
-                        size="small"
                         :disabled="editingItem != null || isEditingProjectItem || contractLoading"
                         @click.stop="
                           () => {
@@ -254,7 +257,7 @@
                         variant="text"
                         v-on="on"
                       >
-                        <v-icon class="case-gray" icon="fa:fas fa-user-friends"></v-icon> </v-btn
+                        <v-icon class="case-gray" icon="mdi-account-group"></v-icon> </v-btn
                     ></template>
                     <span>View Employees Assigned to Contract</span>
                   </v-tooltip>
@@ -263,14 +266,13 @@
                   <v-tooltip location="top">
                     <template v-slot:activator="{ on }">
                       <v-btn
-                        size="small"
                         icon
                         variant="text"
                         :disabled="editingItem != null || isEditingProjectItem || contractLoading"
                         v-on="on"
                         @click.stop="clickedEdit(item)"
                       >
-                        <v-icon class="case-gray" icon="fa:fas fa-edit" />
+                        <v-icon class="case-gray" icon="mdi-pencil" />
                       </v-btn>
                     </template>
                     <span>Edit</span>
@@ -1088,13 +1090,13 @@ export default {
 .contracts-table > div > table > tbody > tr > td {
   background: #f0f0f0 !important;
   opacity: 1;
+  padding-left: 0px !important;
 }
 
 .description textarea {
   line-height: 1.2;
   font-size: 11px;
-  padding-top: 8px !important;
-  padding-bottom: 8px !important;
+  padding-top: 18px !important;
 }
 
 .smaller-text {
@@ -1116,23 +1118,23 @@ td {
 }
 
 .contracts-table :deep(td:first-of-type) {
-  width: 1%;
+  width: 2%;
 }
 
 .contracts-table :deep(td:nth-child(n + 2):nth-child(-n + 6)) {
-  width: 9%;
+  width: 10%;
 }
 
 .contracts-table :deep(td:nth-of-type(7)) {
-  width: 19%;
+  width: 18%;
 }
 
 .contracts-table :deep(td:nth-of-type(8)) {
-  width: 19%;
+  width: 18%;
 }
 
 .contracts-table :deep(td:last-of-type) {
-  width: 10%;
+  width: 14%;
 }
 
 .contracts-table :deep(td:nth-child(n + 2):nth-child(-n + 6)) {

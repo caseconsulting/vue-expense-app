@@ -13,7 +13,7 @@
             v-model="search"
             hide-details
             single-line
-            append-inner-icon="fa:fas fa-search"
+            append-inner-icon="mdi-magnify"
             label="Search"
           ></v-text-field>
         </v-col>
@@ -32,7 +32,7 @@
               elevation="6"
               :rounded="isFocus(category.value)"
               theme="dark"
-              size="large"
+              size="x-large"
               color="#bc3825"
               icon
             >
@@ -265,27 +265,27 @@ export default {
       categories: [
         {
           value: 'Training',
-          icon: 'fa:fas fa-dumbbell'
+          icon: 'mdi-dumbbell'
         },
         {
           value: 'Conference',
-          icon: 'fa:fas fa-user-friends'
+          icon: 'mdi-account-group'
         },
         {
           value: 'Certifications',
-          icon: 'fa:fas fa-star'
+          icon: 'mdi-star'
         },
         {
           value: 'Lodging',
-          icon: 'fa:fas fa-bed'
+          icon: 'mdi-bed'
         },
         {
           value: 'Travel',
-          icon: 'fa:fas fa-plane'
+          icon: 'mdi-airplane'
         },
         {
           value: 'Meals',
-          icon: 'fa:fas fa-utensils'
+          icon: 'mdi-silverware'
         }
       ] // categories for button filters
     };

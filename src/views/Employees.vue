@@ -25,7 +25,7 @@
             <v-text-field
               id="employeesSearch"
               v-model.trim="search"
-              append-inner-icon="fa:fas fa-search"
+              append-inner-icon="mdi-magnify"
               label="Search (comma separate terms)"
               variant="underlined"
               single-line
@@ -118,7 +118,7 @@
           elevation="2"
           v-if="hasAdminPermissions()"
         >
-          Create an Employee <v-icon class="pl-2" size="small" icon="fa:fas fa-user-plus" />
+          Create an Employee <v-icon class="pl-2" icon="mdi-account-plus" />
         </v-btn>
 
         <!-- Tag Manager -->
@@ -179,9 +179,8 @@
                   :disabled="midAction"
                   @click.stop="validateDelete(item)"
                   v-on="props"
-                  size="small"
                   variant="text"
-                  icon="fa: fas fa-trash"
+                  icon="mdi-delete"
                 >
                 </v-btn>
               </span>

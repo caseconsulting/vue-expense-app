@@ -44,6 +44,7 @@
               v-if="editingProjectItem && editingProjectItem.id == item.id"
               v-model="editingProjectItem.projectName"
               label="Project Name"
+              variant="underlined"
             ></v-text-field>
             <span v-else>{{ item.projectName }}</span>
           </template>
@@ -54,6 +55,7 @@
               v-if="editingProjectItem && editingProjectItem.id == item.id"
               v-model="editingProjectItem.directorate"
               label="Directorate"
+              variant="underlined"
             ></v-text-field>
             <span v-else>{{ item.directorate }}</span>
           </template>
@@ -64,6 +66,7 @@
               v-if="editingProjectItem && editingProjectItem.id == item.id"
               v-model="editingProjectItem.popStartDate"
               label="PoP Start Date"
+              variant="underlined"
             ></v-text-field>
             <span v-else>{{ item.popStartDate }}</span>
           </template>
@@ -74,6 +77,7 @@
               v-if="editingProjectItem && editingProjectItem.id == item.id"
               v-model="editingProjectItem.popEndDate"
               label="PoP End Date"
+              variant="underlined"
             ></v-text-field>
             <span v-else>{{ item.popEndDate }}</span>
           </template>
@@ -86,8 +90,9 @@
               name="description"
               auto-grow
               label="Description"
+              variant="underlined"
               class="smaller-text description"
-              rows="1"
+              rows="2"
               @click.stop
             ></v-textarea>
             <span v-else class="smaller-text">{{ item.description }}</span>
@@ -100,7 +105,9 @@
                 v-for="(emp, i) in getProjectCurrentEmployees(contract.item, item, $store.getters.employees)"
                 :key="emp.employeeNumber"
               >
-                <a @click="$router.push(`/employee/${emp.employeeNumber}`)">{{ nicknameAndLastName(emp) }}</a>
+                <a @click="$router.push(`/employee/${emp.employeeNumber}`)" class="pointer">{{
+                  nicknameAndLastName(emp)
+                }}</a>
                 <span v-if="i != getProjectCurrentEmployees(contract.item, item, $store.getters.employees).length - 1"
                   >,
                 </span>
@@ -115,8 +122,8 @@
                 <!-- Save Project -->
                 <v-tooltip location="top">
                   <template v-slot:activator="{ on }">
-                    <v-btn size="small" @click.stop="updateProject(contract.item)" icon variant="text" v-on="on">
-                      <v-icon class="case-gray" icon="fa:fas fa-save" />
+                    <v-btn @click.stop="updateProject(contract.item)" icon variant="text" v-on="on">
+                      <v-icon class="case-gray" icon="mdi-content-save" />
                     </v-btn>
                   </template>
                   <span>Save</span>
@@ -125,8 +132,8 @@
                 <!-- Cancel Project Edit -->
                 <v-tooltip location="top">
                   <template v-slot:activator="{ on }">
-                    <v-btn size="small" icon variant="text" @click.stop="clickedCancel()" v-on="on">
-                      <v-icon class="case-gray" icon="fa:fas fa-times-circle" />
+                    <v-btn icon variant="text" @click.stop="clickedCancel()" v-on="on">
+                      <v-icon class="case-gray" icon="mdi-close-circle" />
                     </v-btn>
                   </template>
                   <span>Cancel</span>
@@ -140,7 +147,6 @@
                 <v-tooltip location="top">
                   <template v-slot:activator="{ on }">
                     <v-btn
-                      size="small"
                       :disabled="editingProjectItem != null || isEditingContractItem || projectLoading"
                       @click.stop="
                         () => {
@@ -153,7 +159,7 @@
                       variant="text"
                       v-on="on"
                     >
-                      <v-icon class="case-gray" icon="fa:fas fa-user-friends" />
+                      <v-icon class="case-gray" icon="mdi-account-group" />
                     </v-btn>
                   </template>
                   <span>View Employees Assigned to Project</span>
@@ -163,14 +169,13 @@
                 <v-tooltip location="top">
                   <template v-slot:activator="{ on }">
                     <v-btn
-                      size="small"
                       :disabled="editingProjectItem != null || isEditingContractItem || projectLoading"
                       icon
                       variant="text"
                       @click.stop="clickedEdit(item)"
                       v-on="on"
                     >
-                      <v-icon class="case-gray" icon="fa:fas fa-edit" />
+                      <v-icon class="case-gray" icon="mdi-pencil" />
                     </v-btn>
                   </template>
                   <span>Edit</span>
@@ -403,6 +408,10 @@ export default {
 <style lang="scss">
 @import 'src/assets/styles/styles';
 
+.projects-table > div > table > tbody > tr > td {
+  padding-left: 0px !important;
+}
+
 .highlight-project-row {
   background-color: rgb(255, 255, 255) !important;
 }
@@ -416,9 +425,12 @@ export default {
 .description textarea {
   line-height: 1.2;
   font-size: 11px;
-  padding-top: 8px !important;
-  padding-bottom: 8px !important;
+  padding-top: 18px !important;
 }
 </style>
 
-<style scoped></style>
+<style scoped>
+a {
+  color: #0000ee;
+}
+</style>
