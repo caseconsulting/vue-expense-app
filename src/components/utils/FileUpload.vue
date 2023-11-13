@@ -7,6 +7,7 @@
       :label="label"
       :accept="acceptedFileTypes"
       :disabled="disabled"
+      variant="underlined"
     ></v-file-input>
   </div>
 </template>
@@ -48,7 +49,7 @@ function fileTooBig() {
  * @return Number - file size in megabytes
  */
 function megabytes() {
-  return this.inputFile ? this.inputFile.size / 1000000 : 0;
+  return this.inputFile && this.inputFile[0] ? this.inputFile[0].size / 1000000 : 0;
 } // megabytes
 
 /**
@@ -95,17 +96,17 @@ function fileSizeRule() {
  * Set file data.
  */
 function receiptChange() {
-  if (this.inputFile) {
+  if (this.inputFile && this.inputFile[0]) {
     // file exists
-    if (this.inputFile.name.lastIndexOf('.') <= 0 || this.fileTooBig) {
+    if (this.inputFile[0].name.lastIndexOf('.') <= 0 || this.fileTooBig) {
       // end if file name is missing or file is too large
       return;
     }
     const fr = new FileReader();
-    fr.readAsDataURL(this.inputFile);
+    fr.readAsDataURL(this.inputFile[0]);
     fr.addEventListener('load', () => {
       this.previewURL = fr.result;
-      this.emitter.emit('fileSelected', this.inputFile);
+      this.emitter.emit('fileSelected', this.inputFile[0]);
     });
   } else {
     // file does not exist
@@ -132,7 +133,7 @@ function watchInputFile() {
  */
 function watchReceipt() {
   if (this.receipt == null) {
-    this.inputFile = null;
+    this.inputFile[0] = null;
   }
 } // watchReceipt
 
@@ -154,7 +155,7 @@ export default {
       fileSizeLimit: 3,
       previewURL: '',
       title: 'receipt upload',
-      inputFile: null,
+      inputFile: [],
       label: 'Select Receipt (3.0 MB limit)'
     };
   },
@@ -164,7 +165,7 @@ export default {
     receiptChange
   },
   watch: {
-    inputFile: watchInputFile,
+    inputFile: { handler: watchInputFile, deep: true },
     receipt: watchReceipt
   },
   props: ['passedRules', 'receipt', 'customLabel', 'customFileTypes', 'disabled'] // file text field rules

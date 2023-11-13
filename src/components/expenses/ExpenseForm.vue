@@ -1,6 +1,6 @@
 <template>
-  <v-card hover>
-    <v-card-title class="header_style">
+  <v-card>
+    <v-card-title class="d-flex align-center header_style">
       <!-- Editing an Expense -->
       <h3 v-if="expense.id && (userRoleIsAdmin() || userRoleIsManager() || !isReimbursed)">Edit Expense</h3>
       <!-- Creating an Expense -->
@@ -12,12 +12,13 @@
         <!-- Employee picker if admin -->
         <v-autocomplete
           v-if="!asUser"
+          variant="underlined"
           :items="activeEmployees"
           :rules="getRequiredRules()"
-          :filter="customFilter"
+          :custom-filter="customFilter"
           :disabled="isReimbursed || isEdit || isInactive"
           v-model="editedExpense.employeeId"
-          item-text="text"
+          item-title="text"
           label="Employee"
           id="employeeName"
           class="form_padding"
@@ -26,33 +27,40 @@
         <!-- Expense Type Picker if Admin -->
         <v-autocomplete
           v-if="!asUser"
+          variant="underlined"
           :items="filteredExpenseTypes()"
           :rules="getRequiredRules()"
           :disabled="isInactive"
           v-model="editedExpense.expenseTypeId"
+          item-title="text"
+          item-value="id"
           label="Expense Type"
           id="expenseType"
           :hint="hint"
           persistent-hint
-          @input="getExpenseTypeSelected"
+          @update:model-value="getExpenseTypeSelected"
         ></v-autocomplete>
 
         <!-- Expense Type Picker if User -->
         <v-autocomplete
           v-else
+          variant="underlined"
           :items="filteredExpenseTypes()"
           :disabled="isInactive"
           :rules="getRequiredRules()"
           v-model="editedExpense.expenseTypeId"
+          item-title="text"
+          item-value="id"
           label="Expense Type"
           :hint="hint"
           persistent-hint
-          @input="getExpenseTypeSelected"
+          @update:modelValue="getExpenseTypeSelected()"
           class="form_padding"
         ></v-autocomplete>
 
         <!-- Category -->
         <v-select
+          variant="underlined"
           v-if="getCategories() != null && getCategories().length >= 1"
           :rules="getRequiredRules()"
           :disabled="isInactive"
@@ -82,13 +90,12 @@
           <file-upload
             v-if="receiptRequired && ((allowReceipt && isEdit) || !isEdit || isEmpty(expense.receipt))"
             class="ml-1 mb-2 py-0 w-70"
-            @fileSelected="setFile"
             :passedRules="receiptRules"
             :receipt="expense.receipt"
             :disabled="isInactive"
           ></file-upload>
           <!-- Scan Receipt Button -->
-          <v-tooltip bottom>
+          <v-tooltip location="bottom">
             <template v-slot:activator="{ on, attrs }">
               <span v-on="on" class="d-flex align-center">
                 <v-btn
@@ -96,7 +103,7 @@
                   color="black"
                   @click="scanFile"
                   class="mx-3 mb-5"
-                  outlined
+                  variant="outlined"
                   elevation="1"
                   :disabled="isInactive || disableScan"
                   :loading="scanLoading"
@@ -116,6 +123,7 @@
         <!-- Cost -->
         <v-row class="mx-1">
           <v-text-field
+            variant="underlined"
             prefix="$"
             v-model="costFormatted"
             :rules="costRules"
@@ -128,15 +136,15 @@
             persistent-hint
             :hint="costHint()"
             @blur="editedExpense.cost = parseCost(costFormatted)"
-            @input="formatCost"
-            validate-on-blur
+            @update:model-value="formatCost"
+            validate-on="blur"
           >
             <template v-slot:message="{ message }">
               <span v-html="message"></span>
             </template>
           </v-text-field>
           <!-- Exchange Hours Calculator -->
-          <v-tooltip bottom>
+          <v-tooltip location="bottom">
             <template v-slot:activator="{ on }">
               <span v-on="on">
                 <v-btn
@@ -157,6 +165,7 @@
         <v-autocomplete
           v-if="reqRecipient"
           :items="recipientOptions"
+          variant="underlined"
           :rules="getRequiredRules()"
           :disabled="isInactive || isReimbursed"
           v-model="editedExpense.recipient"
@@ -164,10 +173,13 @@
           id="recipient"
           class="form_padding"
           :placeholder="recipientPlaceholder"
+          item-title="text"
+          item-value="id"
         ></v-autocomplete>
 
         <!-- Description -->
         <v-text-field
+          variant="underlined"
           v-if="!reqRecipient"
           v-model="editedExpense.description"
           :rules="descriptionRules"
@@ -189,10 +201,12 @@
           offset-y
           max-width="290px"
           min-width="290px"
+          location="start center"
         >
-          <template v-slot:activator="{ on }">
+          <template v-slot:activator="{ props }">
             <v-text-field
-              v-model="purchaseDateFormatted"
+              variant="underlined"
+              :model-value="purchaseDateFormatted"
               id="purchaseDate"
               :rules="[...getDateRules(), ...getNonFutureDateRules()]"
               :disabled="(isReimbursed && !isDifferentExpenseType) || isInactive"
@@ -200,13 +214,28 @@
               label="Purchase Date"
               hint="MM/DD/YYYY format"
               persistent-hint
-              prepend-icon="event"
+              @click:prepend="purchaseMenu = true"
+              @click:control="purchaseMenu = false"
               @blur="editedExpense.purchaseDate = format(purchaseDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
-              @input="purchaseMenu = false"
-              v-on="on"
-            ></v-text-field>
+              @update:model-value="purchaseMenu = false"
+              v-bind="props"
+            >
+              <template v-slot:prepend>
+                <div v-bind="props" class="pointer">
+                  <v-icon :color="caseGray">mdi-calendar</v-icon>
+                </div>
+              </template>
+            </v-text-field>
           </template>
-          <v-date-picker v-model="editedExpense.purchaseDate" no-title @input="purchaseMenu = false"></v-date-picker>
+          <v-date-picker
+            keyboard-icon=""
+            hide-actions
+            v-model="editedExpense.purchaseDate"
+            show-adjacent-months
+            no-title
+            color="#bc3825"
+            @update:model-value="purchaseMenu = false"
+          ></v-date-picker>
         </v-menu>
 
         <!-- Reimbursed Date -->
@@ -221,9 +250,11 @@
           offset-y
           max-width="290px"
           min-width="290px"
+          location="start center"
         >
-          <template v-slot:activator="{ on }">
+          <template v-slot:activator="{ props }">
             <v-text-field
+              variant="underlined"
               v-model="reimbursedDateFormatted"
               id="reimburseDate"
               :rules="getDateOptionalRules()"
@@ -232,17 +263,33 @@
               label="Reimburse Date (optional)"
               hint="MM/DD/YYYY format "
               persistent-hint
-              prepend-icon="event"
+              @click:prepend="reimburseMenu = true"
+              @click:control="reimburseMenu = false"
               @blur="editedExpense.reimbursedDate = format(reimbursedDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
-              @input="reimburseMenu = false"
-              v-on="on"
-            ></v-text-field>
+              @update:model-value="reimburseMenu = false"
+              v-bind="props"
+            >
+              <template v-slot:prepend>
+                <div v-bind="props" class="pointer">
+                  <v-icon :color="caseGray">mdi-calendar</v-icon>
+                </div>
+              </template>
+            </v-text-field>
           </template>
-          <v-date-picker v-model="editedExpense.reimbursedDate" no-title @input="reimburseMenu = false"></v-date-picker>
+          <v-date-picker
+            keyboard-icon=""
+            hide-actions
+            v-model="editedExpense.reimbursedDate"
+            show-adjacent-months
+            no-title
+            color="#bc3825"
+            @update:model-value="reimburseMenu = false"
+          ></v-date-picker>
         </v-menu>
 
         <!-- Notes -->
         <v-textarea
+          variant="underlined"
           v-model="editedExpense.note"
           :rules="notesRules"
           :label="notesLabel"
@@ -253,6 +300,7 @@
 
         <!-- URL -->
         <v-text-field
+          variant="underlined"
           v-model="editedExpense.url"
           :rules="[...getURLRules(), getRequireURL()]"
           :label="urlLabel"
@@ -265,6 +313,7 @@
           :disabled="isInactive"
           v-model="editedExpense.showOnFeed"
           label="Have expense show on company feed?"
+          :color="caseRed"
         ></v-switch>
 
         <!-- Buttons -->
@@ -277,12 +326,12 @@
           :disabled="isInactive"
           id="cancelButton"
         >
-          <v-icon class="mr-1">cancel</v-icon>Cancel
+          <v-icon class="mr-1" icon="mdi-close-circle" size="large" />Cancel
         </v-btn>
 
         <!-- Submit Button -->
         <v-btn
-          outlined
+          variant="outlined"
           color="success"
           @click="confirmingValid = true"
           :disabled="(!(userRoleIsAdmin() || userRoleIsManager()) && isReimbursed) || isInactive"
@@ -290,7 +339,7 @@
           :loading="loading"
           class="ma-2"
         >
-          <v-icon class="mr-1">save</v-icon>Submit
+          <v-icon class="mr-1" icon="mdi-content-save" size="large" />Submit
         </v-btn>
         <!-- End Buttons -->
       </v-form>
@@ -506,7 +555,7 @@ function calcAdjustedBudget(employee, expenseType) {
  */
 async function checkCoverage() {
   this.isInactive = true;
-  if (this.$refs.form.validate()) {
+  if (this.$refs.form && this.$refs.form.validate()) {
     this.emitter.emit('startAction');
     // form is validated
     this.loading = true; // set loading status to true
@@ -856,20 +905,24 @@ async function createNewEntry() {
 /**
  * Custom filter for employee autocomplete options.
  *
- * @param item - employee
+ * @param _ - unused
  * @param queryText - text used for filtering
+ * @param item - employee
  * @return string - filtered employee name
  */
-function customFilter(item, queryText) {
+function customFilter(_, queryText, item) {
+  item = item.raw;
+
   const query = queryText ? queryText : '';
   const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
   const firstNameFullName = `${item.firstName} ${item.lastName}`;
 
-  const queryContainsNickName = nickNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
-  const queryContainsFirstName =
-    firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
+  const queryNickName = nickNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase());
+  const queryFirstName = firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase());
 
-  return queryContainsNickName || queryContainsFirstName;
+  if (queryNickName >= 0) return queryNickName;
+  if (queryFirstName >= 0) return item.nickname ? true : queryFirstName;
+  return false;
 } // customFilter
 
 /**
@@ -939,8 +992,12 @@ function filteredExpenseTypes() {
  */
 function formatCost() {
   this.editedExpense.cost = this.parseCost(this.costFormatted);
-  if (Number(this.editedExpense.cost)) {
-    this.costFormatted = Number(this.editedExpense.cost).toLocaleString().toString();
+  let formatBlocker = this.editedExpense.cost.at(-1) == '.' || this.editedExpense.cost.at(-2) == '.';
+  let addDecimal = this.editedExpense.cost.at(-3) == '.';
+  if (!formatBlocker && Number(this.editedExpense.cost)) {
+    let cost = Number(this.editedExpense.cost);
+    if (addDecimal) cost = cost.toFixed(2);
+    this.costFormatted = cost.toLocaleString();
   }
 } // formatCost
 
@@ -967,7 +1024,7 @@ function getCategories() {
  * @return Object - expense type selected
  */
 function getExpenseTypeSelected(expenseTypeId) {
-  this.editedExpense.category = ''; // clear expense category (not type) to prevent it persisting
+  this.editedExpense.category = null; // clear expense category (not type) to prevent it persisting
   this.$refs.form.resetValidation(); // avoid validation errors after changing category
   return (this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
     if (expenseType.value === expenseTypeId) {
@@ -1125,7 +1182,7 @@ function parseCost(cost) {
   if (cost && !_.isEmpty(cost)) {
     return cost.replace(/[,\s]/g, '');
   } else {
-    return cost;
+    return cost || '';
   }
 } // parseCost
 
@@ -1500,6 +1557,9 @@ function created() {
   this.employeeRole = this.getRole();
   this.userInfo = this.$store.getters.user;
 
+  this.emitter.on('fileSelected', (file) => {
+    this.setFile(file);
+  });
   this.emitter.on('canceledSubmit', () => {
     this.loading = false; // set loading status to false
     this.emitter.emit('endAction');

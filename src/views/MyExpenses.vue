@@ -31,34 +31,45 @@
           <v-container fluid>
             <!-- Title -->
             <v-card-title v-if="!isMobile()">
-              <h3 v-if="(userRoleIsAdmin() || userRoleIsManager()) && !loading">All Expenses</h3>
-              <h3 v-else-if="!loading">My Expenses</h3>
-              <h3 v-else>Loading...</h3>
-              <v-spacer></v-spacer>
+              <v-row align="center" justify="center">
+                <v-col cols="2">
+                  <h3 v-if="(userRoleIsAdmin() || userRoleIsManager()) && !loading">All Expenses</h3>
+                  <h3 v-else-if="!loading">My Expenses</h3>
+                  <h3 v-else>Loading...</h3>
+                </v-col>
 
-              <!-- Employee Filter -->
-              <v-autocomplete
-                v-if="userRoleIsAdmin() || userRoleIsManager()"
-                hide-details
-                :items="employees"
-                :customFilter="customFilter"
-                v-model="employee"
-                item-title="text"
-                id="employeeIdFilter"
-                class="mr-3"
-                label="Filter by Employee"
-                clearable
-              ></v-autocomplete>
+                <v-col cols="2"></v-col>
 
-              <!-- Search Bar -->
-              <v-text-field
-                v-model="search"
-                append-icon="search"
-                id="search"
-                label="Search"
-                single-line
-                hide-details
-              ></v-text-field>
+                <!-- Employee Filter -->
+                <v-col align="end" cols="4">
+                  <v-autocomplete
+                    v-if="userRoleIsAdmin() || userRoleIsManager()"
+                    variant="underlined"
+                    hide-details
+                    :items="employees"
+                    :customFilter="customFilter"
+                    v-model="employee"
+                    item-title="text"
+                    id="employeeIdFilter"
+                    class="mr-3"
+                    label="Filter by Employee"
+                    clearable
+                  ></v-autocomplete
+                ></v-col>
+
+                <!-- Search Bar -->
+                <v-col align="end" cols="4">
+                  <v-text-field
+                    variant="underlined"
+                    v-model="search"
+                    append-icon="search"
+                    id="search"
+                    label="Search"
+                    single-line
+                    hide-details
+                  ></v-text-field>
+                </v-col>
+              </v-row>
             </v-card-title>
 
             <div v-else>
@@ -177,14 +188,16 @@
             <v-data-table
               :headers="roleHeaders"
               :items="filteredExpenses"
-              :sort-by.sync="sortBy"
-              :expanded.sync="expanded"
+              :sort-by.sync="toSort"
+              :expanded="expanded"
               :loading="loading || initialPageLoading"
               :items-per-page="15"
               :search="search"
-              item-key="id"
-              class="elevation-4"
+              item-value="id"
+              class="elevation-4 smaller-font"
               @click:row="clickedRow"
+              density="compact"
+              :no-data-text="`Your search for ${search} found no results.`"
             >
               <!-- Cost slot -->
               <template v-slot:[`item.cost`]="{ item }">
@@ -210,83 +223,71 @@
               <template v-slot:[`item.budgetName`]="{ item }">
                 <td>{{ item.budgetName }}</td>
               </template>
+
               <!--Action Items-->
               <template v-slot:[`item.actions`]="{ item }">
-                <!-- Download Button-->
                 <td class="datatable_btn layout mr-0" @click="clickedRow(item)">
                   <!-- Download Attachment Button -->
                   <attachment :midAction="midAction" :expense="item" :mode="'expenses'"></attachment>
 
                   <!-- Edit Button -->
-                  <v-tooltip location="top">
-                    <template v-slot:activator="{ props }">
-                      <v-btn
-                        :disabled="
-                          isEditing ||
-                          (!(userRoleIsAdmin() || userRoleIsManager()) && isReimbursed(item)) ||
-                          midAction ||
-                          (!(userRoleIsAdmin() || userRoleIsManager()) && !canDelete(item))
-                        "
-                        variant="text"
-                        icon
-                        id="edit"
-                        @click="
-                          toTopOfForm();
-                          onSelect(item);
-                        "
-                        v-bind="props"
-                      >
-                        <v-icon class="case-gray">edit</v-icon>
-                      </v-btn>
-                    </template>
-                    <span>Edit</span>
-                  </v-tooltip>
+                  <v-btn
+                    :disabled="
+                      isEditing ||
+                      (!(userRoleIsAdmin() || userRoleIsManager()) && isReimbursed(item)) ||
+                      midAction ||
+                      (!(userRoleIsAdmin() || userRoleIsManager()) && !canDelete(item))
+                    "
+                    variant="text"
+                    icon
+                    id="edit"
+                    @click="
+                      toTopOfForm();
+                      onSelect(item);
+                    "
+                    size="small"
+                  >
+                    <v-icon size="x-large" class="case-gray" icon="mdi-pencil" />
+                    <v-tooltip activator="parent" location="top">Edit</v-tooltip>
+                  </v-btn>
                   <!-- Delete Button -->
-                  <v-tooltip location="top">
-                    <template v-slot:activator="{ props }">
-                      <v-btn
-                        :disabled="
-                          isReimbursed(item) ||
-                          isEditing ||
-                          midAction ||
-                          (!(userRoleIsAdmin() || userRoleIsManager()) && !canDelete(item))
-                        "
-                        variant="text"
-                        icon
-                        id="delete"
-                        @click="
-                          deleting = true;
-                          midAction = true;
-                          propExpense = item;
-                        "
-                        v-bind="props"
-                      >
-                        <v-icon class="case-gray"> delete </v-icon>
-                      </v-btn>
-                    </template>
-                    <span>Delete</span>
-                  </v-tooltip>
+                  <v-btn
+                    :disabled="
+                      isReimbursed(item) ||
+                      isEditing ||
+                      midAction ||
+                      (!(userRoleIsAdmin() || userRoleIsManager()) && !canDelete(item))
+                    "
+                    variant="text"
+                    icon
+                    id="delete"
+                    @click="
+                      deleting = true;
+                      midAction = true;
+                      propExpense = item;
+                    "
+                    size="small"
+                  >
+                    <v-icon size="x-large" class="case-gray" icon="mdi-delete" />
+                    <v-tooltip activator="parent" location="top">Delete</v-tooltip>
+                  </v-btn>
                   <!-- Unreimburse Button -->
-                  <v-tooltip location="top">
-                    <template v-slot:activator="{ props }">
-                      <v-btn
-                        v-if="userRoleIsAdmin() || userRoleIsManager()"
-                        :disabled="!isReimbursed(item) || isEditing || midAction"
-                        variant="text"
-                        icon
-                        id="unreimburse"
-                        @click="
-                          unreimbursing = !unreimbursing;
-                          midAction = true;
-                          propExpense = item;
-                        "
-                        v-bind="props"
-                      >
-                        <v-icon class="case-gray"> money_off </v-icon>
-                      </v-btn>
-                    </template>
-                    <span>Unreimburse</span>
-                  </v-tooltip>
+                  <v-btn
+                    v-if="userRoleIsAdmin() || userRoleIsManager()"
+                    :disabled="!isReimbursed(item) || isEditing || midAction"
+                    variant="text"
+                    icon
+                    id="unreimburse"
+                    @click="
+                      unreimbursing = !unreimbursing;
+                      midAction = true;
+                      propExpense = item;
+                    "
+                    size="small"
+                  >
+                    <v-icon size="x-large" class="case-gray" icon="mdi-currency-usd-off" />
+                    <v-tooltip activator="parent" location="top">Unreimburse</v-tooltip>
+                  </v-btn>
                 </td>
               </template>
 
@@ -328,11 +329,11 @@
               </template>
               <!-- End expanded slot in datatable -->
 
-              <!-- Alert for no search results -->
+              <!-- Alert for no search results 
               <v-alert slot="no-results" :value="true" color="error" icon="warning">
                 Your search for "{{ search }}" found no results.
-              </v-alert>
-              <!-- End alert for no search results -->deleting
+              </v-alert>-->
+              <!-- End alert for no search results -->
             </v-data-table>
             <br />
 
@@ -523,11 +524,13 @@ function clickedRow(value) {
  * @param aggregatedData - aggregated expenses
  */
 function constructAutoComplete(aggregatedData) {
+  let seenEmployees = new Set(); // used to not add duplicates
   this.employees = _.sortBy(
     _.map(aggregatedData, (data) => {
-      if (data && data.employeeName && data.employeeId) {
+      if (data && data.employeeName && data.employeeId && !seenEmployees.has(data.employeeId)) {
+        seenEmployees.add(data.employeeId);
         return {
-          text: data.employeeName,
+          text: `${data.nickname || data.firstName} ${data.lastName}`,
           value: data.employeeId,
           nickname: data.nickname,
           firstName: data.firstName,
@@ -544,20 +547,24 @@ function constructAutoComplete(aggregatedData) {
 /**
  * Custom filter for employee autocomplete options.
  *
- * @param item - the employee
- * @param queryText - the query for the employee
- * @return boolean - whether the name or nickname contains the query
+ * @param _ - unused
+ * @param queryText - text used for filtering
+ * @param item - employee
+ * @return string - filtered employee name
  */
-function customFilter(item, queryText) {
+function customFilter(_, queryText, item) {
+  item = item.raw;
+
   const query = queryText ? queryText : '';
   const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
   const firstNameFullName = `${item.firstName} ${item.lastName}`;
 
-  const queryContainsNickName = nickNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
-  const queryContainsFirstName =
-    firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
+  const queryNickName = nickNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase());
+  const queryFirstName = firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase());
 
-  return queryContainsNickName || queryContainsFirstName;
+  if (queryNickName >= 0) return queryNickName;
+  if (queryFirstName >= 0) return item.nickname ? true : queryFirstName;
+  return false;
 } // customFilter
 
 /**
@@ -782,7 +789,8 @@ function startAction() {
  * Scrolls window back to the top of the form.
  */
 function toTopOfForm() {
-  this.$vuetify.goTo(this.$refs.form.$el.offsetTop + 50);
+  console.log(this.$refs.form.$el);
+  window.scrollTo(0, this.$refs.form.$el.offsetTop - 70);
 } // toTopOfForm
 
 /**
@@ -902,6 +910,7 @@ function beforeDestroy() {
 } // beforeDestroy
 
 function mounted() {
+  console.log(this.$route.params.defaultEmployee);
   if (this.employee == null && this.$route.params.defaultEmployee != null) {
     this.employee = this.$route.params.defaultEmployee.id;
   }
@@ -986,31 +995,32 @@ export default {
       filteredExpenses: [], // filtered expenses
       headers: [
         {
-          text: 'Creation Date',
-          value: 'createdAt'
+          title: 'Creation Date',
+          key: 'createdAt'
         },
         {
-          text: 'Employee',
-          value: 'employeeName'
+          title: 'Employee',
+          key: 'employeeName'
         },
         {
-          text: 'Expense Type',
-          value: 'budgetName'
+          title: 'Expense Type',
+          key: 'budgetName'
         },
         {
-          text: 'Cost',
-          value: 'cost'
+          title: 'Cost',
+          key: 'cost'
         },
         {
-          text: 'Purchase Date',
-          value: 'purchaseDate'
+          title: 'Purchase Date',
+          key: 'purchaseDate'
         },
         {
-          text: 'Reimburse Date',
-          value: 'reimbursedDate'
+          title: 'Reimburse Date',
+          key: 'reimbursedDate'
         },
         {
-          value: 'actions',
+          key: 'actions',
+          width: '25%',
           sortable: false
         }
       ], // datatable headers
@@ -1037,7 +1047,7 @@ export default {
         showOnFeed: null
       }, // expense to edit
       search: this.$route.params.defaultSearch || '', // query text for datatable search field
-      sortBy: [{ key: 'createdAt', order: 'asc' }], // sort datatable items
+      toSort: [{ key: 'createdAt', order: 'desc' }], // default sort datatable items
       status: {
         statusType: undefined,
         statusMessage: '',
@@ -1084,7 +1094,10 @@ export default {
     employee: watchFilterExpenses,
     'filter.active': watchFilterExpenses,
     'filter.reimbursed': watchFilterExpenses,
-    storeIsPopulated: watchStorePopulated
+    storeIsPopulated: watchStorePopulated,
+    toSort: function () {
+      console.log(this.toSort);
+    }
   }
 };
 </script>
@@ -1117,5 +1130,15 @@ export default {
 .flagExp p {
   font-weight: bold;
   display: inline-block;
+}
+
+td,
+v-data-table-header__content {
+  font-size: 0.93em !important;
+}
+
+.v-data-table-header__content {
+  font-size: 13px;
+  font-weight: bold;
 }
 </style>

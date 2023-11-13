@@ -210,7 +210,7 @@ function customFilter(_, queryText, item) {
   const queryFirstName = firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase());
 
   if (queryNickName >= 0) return queryNickName;
-  if (queryFirstName >= 0) return queryFirstName;
+  if (queryFirstName >= 0) return item.nickname ? true : queryFirstName;
   return false;
 } // customFilter
 
