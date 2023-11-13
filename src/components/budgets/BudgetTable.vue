@@ -1,72 +1,68 @@
 <template>
   <div id="budget-table">
     <div v-if="expenseTypeData">
-      <v-data-iterator :items="expenseTypeData" hide-default-footer>
-        <template v-slot:default="props">
-          <v-row>
-            <!-- Loop all budgets -->
-            <v-col v-for="item in props.items" :key="item.expenseTypeId" cols="12" sm="6" lg="6">
-              <v-card>
-                <!-- Budget Name -->
-                <v-card-title class="d-flex align-center header_style">
-                  <h3 class="text-white">{{ item.raw.expenseTypeName }}</h3>
-                </v-card-title>
-                <v-divider></v-divider>
-                <div class="pb-2 pt-4 px-4" density="compact">
-                  <!-- Display Budget Amount -->
-                  <div class="pb-5 d-flex justify-space-between">
-                    <div class="d-inline-block">Budget:</div>
-                    <div class="d-inline-block">
-                      {{ convertToMoneyString(getAmount(item)) }}
-                    </div>
-                  </div>
-
-                  <!-- Display Reimbursed Amount -->
-                  <div class="pb-5 d-flex justify-space-between">
-                    <div>Reimbursed:</div>
-                    <div class="text-right">
-                      <div>{{ convertToMoneyString(getReimbursed(item)) }}</div>
-                    </div>
-                  </div>
-
-                  <!-- Display Pending Amount -->
-                  <div class="pb-5 d-flex justify-space-between">
-                    <div>Pending:</div>
-                    <div class="text-right">
-                      <div>{{ convertToMoneyString(getPending(item)) }}</div>
-                    </div>
-                  </div>
-
-                  <!-- Display Remaining Amount -->
-                  <div class="pb-5 d-flex justify-space-between font-weight-bold">
-                    Remaining:
-                    <div :class="['text-right', noRemaining(item) ? 'text-red' : 'text-black']">
-                      <div>{{ convertToMoneyString(calcRemaining(item)) }}</div>
-                    </div>
-                  </div>
-
-                  <!-- Display Overdraft Permissions -->
-                  <div class="pb-5 d-flex justify-space-between">
-                    <div>Overdraft:</div>
-                    <div class="text-right">
-                      <div>{{ odFlagMessage(item) }}</div>
-                    </div>
-                  </div>
-
-                  <!-- Display when available -->
-                  <div class="pb-5 d-flex justify-space-between">
-                    <div>Available:</div>
-                    <div class="text-right">
-                      <div>{{ getDate(item) }}</div>
-                    </div>
-                  </div>
+      <v-row>
+        <!-- Loop all budgets -->
+        <v-col v-for="(item, i) in expenseTypeData" :key="i" cols="12" sm="6" lg="6">
+          <v-card>
+            <!-- Budget Name -->
+            <v-card-title class="d-flex align-center header_style">
+              <h3 class="text-white">{{ item.expenseTypeName }}</h3>
+            </v-card-title>
+            <v-divider></v-divider>
+            <div class="pb-2 pt-4 px-4" density="compact">
+              <!-- Display Budget Amount -->
+              <div class="pb-5 d-flex justify-space-between">
+                <div class="d-inline-block">Budget:</div>
+                <div class="d-inline-block">
+                  {{ convertToMoneyString(getAmount(item)) }}
                 </div>
-              </v-card>
-            </v-col>
-            <!-- End Loop all budgets -->
-          </v-row>
-        </template>
-      </v-data-iterator>
+              </div>
+
+              <!-- Display Reimbursed Amount -->
+              <div class="pb-5 d-flex justify-space-between">
+                <div>Reimbursed:</div>
+                <div class="text-right">
+                  <div>{{ convertToMoneyString(getReimbursed(item)) }}</div>
+                </div>
+              </div>
+
+              <!-- Display Pending Amount -->
+              <div class="pb-5 d-flex justify-space-between">
+                <div>Pending:</div>
+                <div class="text-right">
+                  <div>{{ convertToMoneyString(getPending(item)) }}</div>
+                </div>
+              </div>
+
+              <!-- Display Remaining Amount -->
+              <div class="pb-5 d-flex justify-space-between font-weight-bold">
+                Remaining:
+                <div :class="['text-right', noRemaining(item) ? 'text-red' : 'text-black']">
+                  <div>{{ convertToMoneyString(calcRemaining(item)) }}</div>
+                </div>
+              </div>
+
+              <!-- Display Overdraft Permissions -->
+              <div class="pb-5 d-flex justify-space-between">
+                <div>Overdraft:</div>
+                <div class="text-right">
+                  <div>{{ odFlagMessage(item) }}</div>
+                </div>
+              </div>
+
+              <!-- Display when available -->
+              <div class="pb-5 d-flex justify-space-between">
+                <div>Available:</div>
+                <div class="text-right">
+                  <div>{{ getDate(item) }}</div>
+                </div>
+              </div>
+            </div>
+          </v-card>
+        </v-col>
+        <!-- End Loop all budgets -->
+      </v-row>
     </div>
   </div>
 </template>
@@ -88,7 +84,6 @@ import _ from 'lodash';
  */
 function created() {
   this.refreshBudgets();
-  console.log(this.expenseTypeData);
 }
 
 // |--------------------------------------------------|
@@ -105,7 +100,6 @@ function created() {
  * @return int - remaining budget
  */
 function calcRemaining(budget) {
-  budget = budget.raw;
   if (budget.budgetObject) {
     // checks to see if the remaining is 0... there's a wierd float rounding issue with the subtraction
     if (
@@ -130,7 +124,7 @@ function calcRemaining(budget) {
  * @return int - budget amount
  */
 function getAmount(budget) {
-  return budget.raw.budgetObject ? budget.raw.budgetObject.amount : 0;
+  return budget.budgetObject ? budget.budgetObject.amount : 0;
 } // getAmount
 
 /**
@@ -140,7 +134,6 @@ function getAmount(budget) {
  * @return string - string formatted from item object dates
  */
 function getDate(item) {
-  item = item.raw;
   return (
     this.format(item.budgetObject.fiscalStartDate, DEFAULT_ISOFORMAT, FORMATTED_ISOFORMAT) +
     ' to ' +
@@ -156,7 +149,7 @@ function getDate(item) {
  * @return int - reimbursed amount
  */
 function getReimbursed(budget) {
-  return budget.raw.budgetObject ? budget.raw.budgetObject.reimbursedAmount : 0;
+  return budget.budgetObject ? budget.budgetObject.reimbursedAmount : 0;
 } // getReimbursed
 
 /**
@@ -167,7 +160,7 @@ function getReimbursed(budget) {
  * @return int - pending amount
  */
 function getPending(budget) {
-  return budget.raw.budgetObject ? budget.raw.budgetObject.pendingAmount : 0;
+  return budget.budgetObject ? budget.budgetObject.pendingAmount : 0;
 } // getPending
 
 /**
@@ -177,7 +170,6 @@ function getPending(budget) {
  * @return String - boolean that has been converted to human readable format
  */
 function odFlagMessage(expenseType) {
-  expenseType = expenseType.raw;
   return expenseType.odFlag ? 'Allowed' : 'Not Allowed';
 } // odFlagMessage
 
