@@ -3,8 +3,6 @@ import * as components from 'vuetify/components';
 import * as directives from 'vuetify/directives';
 import 'vuetify/styles';
 import '@mdi/font/css/materialdesignicons.css';
-import '@fortawesome/fontawesome-free/css/all.css';
-import { fa } from 'vuetify/iconsets/fa';
 import { aliases, mdi } from 'vuetify/lib/iconsets/mdi';
 import { isSame } from './shared/dateUtils';
 import DayJsAdapter from '@date-io/dayjs';
@@ -33,7 +31,6 @@ const opts = {
   },
   icons: {
     defaultSet: 'mdi',
-    iconfont: 'fa',
     aliases,
     sets: {
       mdi,
