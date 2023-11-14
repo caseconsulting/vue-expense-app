@@ -96,8 +96,8 @@
           ></file-upload>
           <!-- Scan Receipt Button -->
           <v-tooltip location="bottom">
-            <template v-slot:activator="{ on, attrs }">
-              <span v-on="on" class="d-flex align-center">
+            <template v-slot:activator="{ props }">
+              <span v-bind="props" class="d-flex align-center">
                 <v-btn
                   v-if="receiptRequired && ((allowReceipt && isEdit) || !isEdit || isEmpty(expense.receipt))"
                   color="black"
@@ -107,7 +107,6 @@
                   elevation="1"
                   :disabled="isInactive || disableScan"
                   :loading="scanLoading"
-                  v-bind="attrs"
                 >
                   <v-icon>mdi-barcode-scan</v-icon>
                 </v-btn>
@@ -135,7 +134,6 @@
             data-vv-name="Cost"
             persistent-hint
             :hint="costHint()"
-            @blur="editedExpense.cost = parseCost(costFormatted)"
             @update:model-value="formatCost"
             validate-on="blur"
           >
@@ -145,8 +143,8 @@
           </v-text-field>
           <!-- Exchange Hours Calculator -->
           <v-tooltip location="bottom">
-            <template v-slot:activator="{ on }">
-              <span v-on="on">
+            <template v-slot:activator="{ props }">
+              <span v-bind="props">
                 <v-btn
                   v-if="editedExpense.category && editedExpense.category === 'Exchange for training hours'"
                   class="ml-3"
@@ -195,10 +193,9 @@
           ref="purchaseMenu"
           :close-on-content-click="false"
           v-model="purchaseMenu"
-          :nudge-right="40"
+          :offset="40"
           :disabled="isReimbursed && !isDifferentExpenseType"
           transition="scale-transition"
-          offset-y
           max-width="290px"
           min-width="290px"
           location="start center"
@@ -244,10 +241,9 @@
           ref="reimburseMenu"
           :close-on-content-click="false"
           v-model="reimburseMenu"
-          :nudge-right="40"
+          :offset="40"
           :disabled="isReimbursed && !isDifferentExpenseType"
           transition="scale-transition"
-          offset-y
           max-width="290px"
           min-width="290px"
           location="start center"
@@ -991,13 +987,11 @@ function filteredExpenseTypes() {
  * Formats the cost on the form for a nicer display.
  */
 function formatCost() {
+  let [wholePart, fracPart] = this.parseCost(this.costFormatted).split('.');
   this.editedExpense.cost = this.parseCost(this.costFormatted);
-  let formatBlocker = this.editedExpense.cost.at(-1) == '.' || this.editedExpense.cost.at(-2) == '.';
-  let addDecimal = this.editedExpense.cost.at(-3) == '.';
-  if (!formatBlocker && Number(this.editedExpense.cost)) {
-    let cost = Number(this.editedExpense.cost);
-    if (addDecimal) cost = cost.toFixed(2);
-    this.costFormatted = cost.toLocaleString();
+  if (Number(this.editedExpense.cost)) {
+    this.costFormatted = Number(wholePart).toLocaleString().toString();
+    if (fracPart != undefined) this.costFormatted += `.${fracPart}`;
   }
 } // formatCost
 
