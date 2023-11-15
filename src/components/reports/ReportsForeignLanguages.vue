@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-container fluid>
+    <v-container fluid class="px-1 px-md-4">
       <v-row>
         <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
           <v-autocomplete
@@ -48,7 +48,7 @@
           >
             <template v-slot:selection="{ item }">
               <v-chip
-                small
+                size="small"
                 closable
                 @click.stop
                 @click="negateTag(item.raw)"

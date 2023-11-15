@@ -4,7 +4,7 @@
       <v-navigation-drawer
         theme="light"
         v-model="drawer"
-        rail
+        :rail="!isMobile"
         order="1"
         :expand-on-hover="!isMobile"
         :permanent="isLoggedIn() && !isMobile"
@@ -81,7 +81,7 @@
             </v-list-item>
           </v-list>
           <!--In MOBILE VIEW/Smaller Screen sizes display all links under the user image dropdown-->
-          <v-list class="scrollLink" v-else>
+          <v-list v-else class="scrollLink mx-1">
             <v-list-item>
               <v-btn variant="text" :disabled="onUserProfile" @click="handleProfile()">Profile</v-btn>
             </v-list-item>
@@ -92,16 +92,14 @@
               <v-btn variant="text" id="switchRoleBtn" @click="switchRole = true">Switch Role</v-btn>
             </v-list-item>
             <hr role="separator" aria-orientation="horizontal" class="v-divider theme--light" :inset="inset" vertical />
-            <div class="v-subheader theme--light">Company Links</div>
+            <div class="v-subheader theme--light case-red-text mt-2 ml-4">Company Links</div>
             <v-list-item v-for="(l, index) in links" :key="index" :href="l.link" target="_blank">
               <v-list-item-title>{{ l.name }}</v-list-item-title>
             </v-list-item>
             <v-list-item :href="floorPlan" target="_blank" id="floorPlan">MakeOffices Map</v-list-item>
             <hr role="separator" aria-orientation="horizontal" class="v-divider theme--light" :inset="inset" vertical />
-            <div class="v-subheader theme--light">Social</div>
+            <div class="v-subheader theme--light case-red-text mt-2 ml-4">Social</div>
             <v-list-item v-for="link in mediaLinks" :key="link.name" :href="link.link" icon target="_blank">
-              <v-icon size="large">{{ link.icon }}</v-icon>
-              <span class="mr-2"> </span>
               <v-list-item-title> {{ link.name }}</v-list-item-title>
             </v-list-item>
           </v-list>
@@ -109,7 +107,7 @@
         <!-- End user image and logout -->
       </v-app-bar>
       <v-main :style="{ padding: getMainPadding() }">
-        <v-container fluid grid-list-lg>
+        <v-container fluid grid-list-lg class="px-2 px-md-4">
           <notification-banners v-if="isLoggedIn() && storeIsPopulated" />
           <router-view></router-view>
         </v-container>
@@ -508,8 +506,8 @@ export default {
 }
 
 .scrollLink {
-  width: 150px;
-  max-height: 300px;
+  width: 250px;
+  max-height: 400px;
   overflow-y: scroll;
 }
 

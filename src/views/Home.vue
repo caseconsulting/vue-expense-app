@@ -75,7 +75,7 @@
           </div>
         </v-col>
         <!-- Activity Feed -->
-        <v-col cols="12" lg="6" class="pa-0 px-xl-4 px-lg-2 px-md-0">
+        <v-col cols="12" lg="6" class="pa-0 px-xl-4 px-lg-2 px-md-0 pt-3 pt-lg-0 pt-xl-0 pt-xxl-0">
           <activity-feed id="home-activity-feed" :events="events" :loading="loadingEvents"></activity-feed>
         </v-col>
       </v-row>

@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid>
+  <v-container fluid class="px-1 px-md-4">
     <v-row justify="center">
       <v-col xl="6" lg="8" sm="12" class="mt-4">
         <certification-chart />

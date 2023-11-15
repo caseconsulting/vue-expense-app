@@ -16,20 +16,25 @@
       <v-btn color="white" variant="text" @click="clearStatus"> Close </v-btn>
     </v-snackbar>
     <v-card>
-      <v-container fluid>
+      <v-container fluid class="px-0 px-md-4">
         <!-- Title -->
         <v-card-title class="">
           <v-row>
-            <h2 class="my-2">Employees</h2>
+            <v-col cols="12" md="4">
+              <h2 class="my-2">Employees</h2>
+            </v-col>
             <v-spacer></v-spacer>
-            <v-text-field
-              id="employeesSearch"
-              v-model.trim="search"
-              append-inner-icon="mdi-magnify"
-              label="Search (comma separate terms)"
-              variant="underlined"
-              single-line
-            ></v-text-field>
+            <v-col cols="12" md="4">
+              <v-text-field
+                id="employeesSearch"
+                v-model.trim="search"
+                :class="isMobile()"
+                append-inner-icon="mdi-magnify"
+                label="Search (comma separate terms)"
+                variant="underlined"
+                single-line
+              ></v-text-field>
+            </v-col>
           </v-row>
         </v-card-title>
 
@@ -897,11 +902,13 @@ export default {
               key: 'lastLoginSeconds'
             }
           : _,
-        {
-          title: 'Actions',
-          key: 'actions',
-          sortable: false
-        }
+        userRoleIsAdmin() || userRoleIsManager()
+          ? {
+              title: 'Actions',
+              key: 'actions',
+              sortable: false
+            }
+          : _
       ], // datatable headers
       midAction: false,
       invalidDelete: false, // invalid delete status

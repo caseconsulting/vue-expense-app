@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid>
+  <v-container fluid class="px-1 px-md-4">
     <v-row justify="center" class="d-flex align-center">
       <v-col cols="12" sm="12" md="6" lg="6" xl="6" xxl="6" class="mt-4">
         <i-c-table />

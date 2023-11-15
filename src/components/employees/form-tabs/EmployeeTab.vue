@@ -247,36 +247,36 @@
         ></v-date-picker>
       </v-menu>
       <!-- Full/Part/Inactive Status [MOBILE] -->
-      <v-radio-group v-if="isMobile()" v-model="statusRadio" inline mandatory :disabled="!admin">
-        <v-row class="ma-0">
-          <v-col cols="6" sm="3">
-            <v-radio label="Full Time" value="full"></v-radio>
-          </v-col>
-          <v-col cols="6" sm="3">
-            <v-radio label="Part Time" value="part" @update:model-value="viewStatus()"></v-radio>
-          </v-col>
-          <v-col cols="6" sm="3">
-            <v-radio label="Inactive" value="inactive"></v-radio>
-          </v-col>
-          <!-- Custom Input Field -->
-          <v-col v-if="isPartTime()" cols="6" sm="3">
-            <v-text-field
-              class="employeeStatusBox"
-              variant="outlined"
-              ref="formFields"
-              :rules="statusRules"
-              suffix="%"
-              v-mask="'##'"
-              v-model="status"
-            ></v-text-field>
-          </v-col>
-          <!-- End Custom Input Field -->
-        </v-row>
+      <v-radio-group
+        v-if="isMobile()"
+        v-model="statusRadio"
+        inline
+        direction
+        hide-details
+        density="compact"
+        class="my-4"
+        :disabled="!admin"
+      >
+        <v-radio label="Full Time" value="full"></v-radio>
+        <v-radio label="Part Time" value="part" class="mx-2" @update:model-value="viewStatus()"></v-radio>
+        <v-radio label="Inactive" value="inactive"></v-radio>
+        <!-- Custom Input Field -->
+        <v-text-field
+          v-if="isPartTime()"
+          class="employeeStatusBox"
+          variant="outlined"
+          ref="formFields"
+          :rules="statusRules"
+          suffix="%"
+          v-mask="'##'"
+          v-model="status"
+        ></v-text-field>
+        <!-- End Custom Input Field -->
       </v-radio-group>
       <!-- End [Full/Part/Inactive Status [MOBILE]] -->
 
       <!-- Full/Part/Inactive Status [DESKTOP] -->
-      <v-radio-group v-else v-model="statusRadio" inline mandatory hide-details :disabled="!admin" class="mt-5">
+      <v-radio-group v-else v-model="statusRadio" inline hide-details :disabled="!admin" class="mt-5">
         <v-radio label="Full Time" value="full"></v-radio>
         <v-radio label="Part Time" value="part" @update:model-value="viewStatus()"></v-radio>
         <v-radio label="Inactive" value="inactive"></v-radio>

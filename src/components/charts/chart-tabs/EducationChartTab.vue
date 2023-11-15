@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container class="px-1 px-md-4">
     <v-row class="my-4">
       <v-col md="6" sm="12">
         <highest-degree-chart></highest-degree-chart>

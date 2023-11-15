@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container class="px-1 px-md-4">
     <v-row>
       <v-col md="6" sm="12" class="mt-4 d-flex flex-column justify-center">
         <employees-table></employees-table>

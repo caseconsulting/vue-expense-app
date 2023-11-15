@@ -61,7 +61,7 @@
     <p class="mt-5">Phone Numbers</p>
     <div class="groove pr-0 pl-2 mb-4">
       <v-row v-for="(phoneNumber, index) in phoneNumbers" :key="index" class="d-flex align-center mt-0">
-        <v-col class="pt-0" cols="2" xl="2" lg="3" md="3" sm="3" xs="12">
+        <v-col class="pt-0" cols="12" xl="2" lg="3" md="3" sm="3">
           <v-autocomplete
             v-model="phoneNumber.type"
             label="Type"
@@ -73,7 +73,7 @@
             clearable
           ></v-autocomplete>
         </v-col>
-        <v-col class="pt-0" cols="6" xl="6" lg="4" md="3" sm="3" xs="12">
+        <v-col class="pt-0" cols="12" xl="6" lg="4" md="3" sm="3">
           <v-text-field
             v-model.trim="phoneNumber.number"
             v-mask="'###-###-####'"
@@ -86,11 +86,11 @@
           >
           </v-text-field>
         </v-col>
-        <v-col class="pt-0" cols="2" xl="2" lg="3" md="3" sm="3" xs="12">
+        <v-col class="pt-0" cols="12" xl="2" lg="3" md="3" sm="3">
           <v-text-field v-model="phoneNumber.ext" v-mask="'####'" label="Ext" variant="underlined" data-vv-name="Ext">
           </v-text-field>
         </v-col>
-        <v-col class="py-0 pr-0" cols="2" xl="2" lg="2" md="3" sm="3" xs="12">
+        <v-col class="py-0 pr-0" cols="12" xl="2" lg="2" md="3" sm="3">
           <v-btn class="mr-2" @click="deletePhoneInput(index)" variant="text" icon="">
             <v-tooltip activator="parent" location="bottom">Delete Number</v-tooltip>
             <v-icon class="case-gray">mdi-delete</v-icon>

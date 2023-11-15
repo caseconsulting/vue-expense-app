@@ -31,46 +31,75 @@
           </v-tooltip>
         </v-card-title>
       </v-card>
-      <v-container fluid>
-        <reports-page-loader v-if="this.loading"></reports-page-loader>
+      <v-container fluid class="px-0 px-md-4">
+        <reports-page-loader v-if="loading"></reports-page-loader>
         <div v-else>
-          <!-- user is not mobile -->
-          <v-tabs color="blue" center-active grow show-arrows @update:model-value="changeTab" v-model="currentTab">
-            <v-tab value="contracts" :disabled="loading">Contracts</v-tab>
-            <v-tab value="customerOrgs" :disabled="loading">Customer Orgs</v-tab>
-            <v-tab value="certifications" :disabled="loading">Certifications</v-tab>
-            <v-tab value="languages" :disabled="loading">Foreign Languages</v-tab>
-            <v-tab value="jobRoles" :disabled="loading">Job Roles</v-tab>
-            <v-tab value="technologies" :disabled="loading">Technologies</v-tab>
-            <v-tab value="securityInfo" :disabled="loading">Security Info</v-tab>
-          </v-tabs>
-          <v-window v-model="currentTab">
-            <v-window-item value="contracts" class="mx-2 my-6">
-              <ReportsContracts />
-            </v-window-item>
-            <v-window-item value="customerOrgs" class="mx-2 my-6">
-              <ReportsCustomerOrgs />
-            </v-window-item>
-            <v-window-item value="certifications" class="mx-2 my-6">
-              <ReportsCertifications />
-            </v-window-item>
-            <v-window-item value="languages" class="mx-2 my-6">
-              <ReportsForeignLanguages />
-            </v-window-item>
-            <v-window-item value="jobRoles" class="mx-2 my-6">
-              <ReportsJobRoles />
-            </v-window-item>
-            <v-window-item value="technologies" class="mx-2 my-6">
-              <ReportsTechnologies />
-            </v-window-item>
-            <v-window-item value="securityInfo" class="mx-2 my-6">
-              <ReportsSecurityInfo />
-            </v-window-item>
-          </v-window>
+          <!-- user is mobile -->
+          <div v-if="isMobile" class="text-center">
+            <v-menu offset="y">
+              <template v-slot:activator="{ props }">
+                <v-btn variant="text" color="#bc3825" theme="dark" class="font-weight-bold" v-bind="props"
+                  >{{ currentTab.toUpperCase() }} <v-icon class="pb-1">mdi-chevron-down</v-icon>
+                </v-btn>
+              </template>
+              <v-list>
+                <v-list-item @click="selectDropDown('contracts')">Contracts</v-list-item>
+                <v-list-item @click="selectDropDown('customer orgs')">Customer Orgs</v-list-item>
+                <v-list-item @click="selectDropDown('certifications')">Certifications</v-list-item>
+                <v-list-item @click="selectDropDown('languages')">Foreign Languages</v-list-item>
+                <v-list-item @click="selectDropDown('job roles')">Job Roles</v-list-item>
+                <v-list-item @click="selectDropDown('technologies')">Technologies</v-list-item>
+                <v-list-item @click="selectDropDown('security info')">Security Info</v-list-item>
+              </v-list>
+            </v-menu>
+            <hr class="my-1" />
+            <ReportsContracts v-if="currentTab === 'contracts'" />
+            <ReportsCustomerOrgs v-if="currentTab === 'customer orgs'" />
+            <ReportsCertifications v-if="currentTab === 'certifications'" />
+            <ReportsForeignLanguages v-if="currentTab === 'languages'" />
+            <ReportsJobRoles v-if="currentTab === 'job roles'" />
+            <ReportsTechnologies v-if="currentTab === 'technologies'" />
+            <ReportsSecurityInfo v-if="currentTab === 'security info'" />
+          </div>
+          <div v-else>
+            <!-- user is not mobile -->
+            <v-tabs color="blue" center-active grow show-arrows @update:model-value="changeTab" v-model="currentTab">
+              <v-tab value="contracts">Contracts</v-tab>
+              <v-tab value="customer orgs">Customer Orgs</v-tab>
+              <v-tab value="certifications">Certifications</v-tab>
+              <v-tab value="languages">Foreign Languages</v-tab>
+              <v-tab value="job roles">Job Roles</v-tab>
+              <v-tab value="technologies">Technologies</v-tab>
+              <v-tab value="security info">Security Info</v-tab>
+            </v-tabs>
+            <v-window v-model="currentTab">
+              <v-window-item value="contracts" class="mx-2 my-6">
+                <ReportsContracts />
+              </v-window-item>
+              <v-window-item value="customer orgs" class="mx-2 my-6">
+                <ReportsCustomerOrgs />
+              </v-window-item>
+              <v-window-item value="certifications" class="mx-2 my-6">
+                <ReportsCertifications />
+              </v-window-item>
+              <v-window-item value="languages" class="mx-2 my-6">
+                <ReportsForeignLanguages />
+              </v-window-item>
+              <v-window-item value="job roles" class="mx-2 my-6">
+                <ReportsJobRoles />
+              </v-window-item>
+              <v-window-item value="technologies" class="mx-2 my-6">
+                <ReportsTechnologies />
+              </v-window-item>
+              <v-window-item value="security info" class="mx-2 my-6">
+                <ReportsSecurityInfo />
+              </v-window-item>
+            </v-window>
+          </div>
         </div>
       </v-container>
     </v-card>
-    <v-dialog v-model="toggleContactEmployeesModal" width="60%" persistent>
+    <v-dialog v-model="toggleContactEmployeesModal" :width="isMobile ? '100%' : '60%'">
       <contact-employees-modal :passedEmployees="employeesToContact" :key="contactKey"></contact-employees-modal>
     </v-dialog>
   </div>
@@ -110,6 +139,7 @@ async function created() {
   }
   if (localStorage.getItem('requestedDataType')) {
     this.currentTab = localStorage.getItem('requestedDataType');
+    localStorage.removeItem('requestedDataType');
     this.wasRedirected = true;
     window.scrollTo(0, 0);
   }
@@ -141,11 +171,22 @@ function changeTab(event) {
   this.currentTab = event;
 } // changeTab
 
+/**
+ * This is used to select the correct tab on mobile devices.
+ * @param tabName - The name of the tab
+ */
+function selectDropDown(tabName) {
+  this.currentTab = tabName;
+} // selectDropDown
+
+/**
+ * Pops up the contacts employee modal
+ */
 function renderContactEmployeesModal() {
   this.contactKey++;
   this.emitter.emit('get-employees-to-contact', this.currentTab);
   this.toggleContactEmployeesModal = true;
-}
+} // renderContactEmployeesModal
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -189,7 +230,7 @@ export default {
     return {
       contactKey: 0,
       contracts: null,
-      currentTab: null,
+      currentTab: 'contracts',
       employeesToContact: [],
       loading: true,
       toggleContactEmployeesModal: false,
@@ -200,6 +241,7 @@ export default {
   methods: {
     backClick,
     changeTab,
+    selectDropDown,
     renderContactEmployeesModal,
     updateStoreContracts,
     updateStoreEmployees,

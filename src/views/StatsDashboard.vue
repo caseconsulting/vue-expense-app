@@ -6,13 +6,13 @@
           <h2 class="text-center text-white">Stats Dashboard</h2>
         </v-card-title>
       </v-card>
-      <v-container fluid>
+      <v-container fluid class="px-0 px-md-4">
         <!-- user is mobile -->
         <div v-if="isMobile" class="text-center">
           <v-menu offset="y">
             <template v-slot:activator="{ props }">
               <v-btn variant="text" color="#bc3825" theme="dark" class="font-weight-bold" v-bind="props"
-                >{{ statsTab.toUpperCase() }} <v-icon class="pb-1">expand_more</v-icon>
+                >{{ statsTab.toUpperCase() }} <v-icon class="pb-1">mdi-chevron-down</v-icon>
               </v-btn>
             </template>
             <v-list>
@@ -48,7 +48,7 @@
           <v-tab value="certifications" :disabled="!dataLoaded">Certifications</v-tab>
           <v-tab value="customerOrg" :disabled="!dataLoaded">Customer Org</v-tab>
         </v-tabs>
-        <v-window v-model="currentTab">
+        <v-window v-if="!isMobile" v-model="currentTab">
           <v-window-item value="employees" class="mx-2 my-6">
             <employees-chart-tab v-if="currentTab === 'employees' && dataLoaded"></employees-chart-tab>
           </v-window-item>
@@ -112,11 +112,12 @@ function created() {
   let requestedDataType = localStorage.getItem('requestedDataType');
   if (requestedDataType) {
     let mappings = {};
-    mappings['jobRoles'] = 'employees';
+    mappings['job roles'] = 'employees';
     mappings['contracts'] = 'employees';
     mappings['certifications'] = 'employees';
-    mappings['customerOrgs'] = 'customerOrg';
+    mappings['customer orgs'] = 'customer orgs';
     this.changeTab(mappings[requestedDataType]);
+    localStorage.removeItem('requestedDataType');
   }
 } // created
 

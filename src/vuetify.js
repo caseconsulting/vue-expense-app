@@ -33,8 +33,7 @@ const opts = {
     defaultSet: 'mdi',
     aliases,
     sets: {
-      mdi,
-      fa
+      mdi
     }
   }
 };

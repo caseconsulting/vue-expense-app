@@ -36,9 +36,9 @@
             <v-row>
               <v-col align="center" justify="center">
                 <v-menu align-center class="ma-4">
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-btn variant="text" size="x-large" class="pt-5 font-weight-bold" v-bind="attrs" v-on="on"
-                      >{{ parsedInfoTab }} <v-icon class="pb-1">expand_more</v-icon>
+                  <template v-slot:activator="{ props }">
+                    <v-btn variant="text" size="x-large" class="pt-5 font-weight-bold" v-bind="props"
+                      >{{ parsedInfoTab }} <v-icon class="pb-1">mdi-chevron-down</v-icon>
                     </v-btn>
                   </template>
                   <v-list>
@@ -244,7 +244,7 @@
             </v-tab>
           </v-tabs>
 
-          <v-window v-model="formTab">
+          <v-window v-if="!useDropDown" v-model="formTab">
             <!-- Employee -->
             <v-window-item value="employee" id="employee" class="mt-6 mb-4 px-3">
               <employee-tab

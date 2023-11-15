@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-container fluid>
+    <v-container fluid class="px-1 px-md-4">
       <v-row>
         <v-col cols="12" xl="3" lg="3" md="3" sm="12" class="my-0 py-0">
           <v-autocomplete
@@ -21,7 +21,7 @@
             "
           ></v-autocomplete>
         </v-col>
-        <v-col cols="12" xl="3" lg="3" md="3" sm="12" class="my-0 py-0">
+        <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
           <v-autocomplete
             v-model="badgeExpirationDateSearch"
             :items="badgeExpirations"
@@ -33,7 +33,7 @@
             @click:clear="badgeExpirationDateSearch = null"
           ></v-autocomplete>
         </v-col>
-        <v-col cols="12" xl="3" lg="3" md="3" sm="12" class="my-0 py-0">
+        <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
           <v-autocomplete
             v-model="clearanceSearch"
             :items="clearances"
@@ -60,7 +60,7 @@
           >
             <template v-slot:selection="{ item }">
               <v-chip
-                small
+                size="small"
                 closable
                 @click.stop
                 @click="negateTag(item.raw)"
@@ -140,7 +140,7 @@ import { customEmployeeFilter, getActive, getFullName, populateEmployeesDropdown
  */
 function created() {
   this.emitter.on('get-employees-to-contact', (tab) => {
-    if (tab === 'securityInfo') {
+    if (tab === 'security info') {
       this.emitter.emit('list-of-employees-to-contact', this.filteredEmployees);
     }
   });

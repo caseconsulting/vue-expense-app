@@ -18,7 +18,8 @@
           <v-checkbox
             v-model="clearance.awaitingClearance"
             density="compact"
-            class="mx-5"
+            class="mx-xs-0 mx-sm-0 mx-md-5"
+            direction=""
             hide-details
             label="Awaiting Clearance"
             @update:model-value="
@@ -30,7 +31,11 @@
                 }
               }
             "
-          ></v-checkbox>
+          >
+            <template v-slot:label v-if="this.$vuetify.display.name === 'xs' || this.$vuetify.display.name === 'sm'">
+              <span class="small-text">Awaiting Clearance</span>
+            </template>
+          </v-checkbox>
         </template>
       </v-autocomplete>
 
@@ -613,3 +618,9 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.small-text {
+  font-size: 8px;
+}
+</style>

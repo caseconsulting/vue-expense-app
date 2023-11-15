@@ -6,7 +6,7 @@
       alt="GIF of Kazoo Kid saying 'Wait a minute, who are you?'"
     />
   </div>
-  <v-container v-else class="my-3" fluid>
+  <v-container v-else class="my-3 mx-0 px-0" fluid>
     <v-row v-if="basicEmployeeDataLoading" class="pt-0">
       <employee-page-loader></employee-page-loader>
     </v-row>

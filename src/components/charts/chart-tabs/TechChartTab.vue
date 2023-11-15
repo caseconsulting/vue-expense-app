@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="mt-0">
+  <v-container fluid class="mt-0 px-1 px-md-4">
     <v-row justify="center" class="pt-0">
       <v-col xl="6" lg="6" md="6" sm="12" class="d-flex flex-column align-center justify-center">
         <span style="font-style: italic; font-size: 12px">*Click on a word to see employees</span>

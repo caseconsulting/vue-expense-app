@@ -123,7 +123,7 @@ function fillData() {
     onClick: (x, y) => {
       let index = _.first(y).index;
       let labelClicked = this.chartData.labels[index];
-      localStorage.setItem('requestedDataType', 'customerOrgs');
+      localStorage.setItem('requestedDataType', 'customer orgs');
       localStorage.setItem('requestedFilter', labelClicked);
       this.$router.push({
         path: '/reports',

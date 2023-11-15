@@ -7,20 +7,20 @@
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </v-card-title>
-      <v-card-text class="pa-5">
+      <v-card-text class="pa-3">
         <!-- File upload -->
         <v-form ref="submit" class="ma-3">
-          <v-container fluid>
+          <v-container fluid class="mx-0">
             <v-row>
               <v-col class="text-center">
                 <h1>Add Your Resume Here</h1>
               </v-col>
             </v-row>
-            <v-row justify="center" align="center">
-              <v-col cols="2" xl="10" lg="10" md="10" sm="10" class="pr-0">
+            <v-row class="d-flex align-center justify-center">
+              <v-col cols="9" xl="8" lg="8" md="8" sm="8" class="pr-0">
                 <v-file-input :rules="fileRules" variant="underlined" v-model="file" label="Resume"></v-file-input>
               </v-col>
-              <v-col cols="2" xl="2" lg="2" md="2" sm="2" class="text-center">
+              <v-col cols="2" xl="2" lg="2" md="2" sm="2" class="text-center mr-4">
                 <v-btn @click="submit" color="green" variant="outlined" :disabled="!validFile || loading">Upload</v-btn>
               </v-col>
             </v-row>
