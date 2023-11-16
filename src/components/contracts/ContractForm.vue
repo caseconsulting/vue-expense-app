@@ -4,7 +4,7 @@
       <v-dialog v-model="dialog" persistent max-width="700px">
         <v-card>
           <!-- Title -->
-          <v-card-title class="header_style">
+          <v-card-title class="d-flex align-center header_style">
             <v-icon color="white">mdi-file-document-plus</v-icon>
             <span class="text-h5">New Contract</span>
           </v-card-title>
@@ -47,7 +47,7 @@
                   <v-text-field
                     variant="underlined"
                     v-model="popStartDate"
-                    prepend-icon="event"
+                    prepend-icon="mdi-calendar"
                     label="PoP Start Date"
                   ></v-text-field>
                 </v-col>
@@ -56,7 +56,7 @@
                   <v-text-field
                     variant="underlined"
                     v-model="popEndDate"
-                    prepend-icon="event"
+                    prepend-icon="mdi-calendar"
                     label="PoP End Date"
                   ></v-text-field>
                 </v-col>

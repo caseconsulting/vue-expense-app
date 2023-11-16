@@ -121,8 +121,8 @@
               <div v-if="!projectLoading">
                 <!-- Save Project -->
                 <v-tooltip location="top">
-                  <template v-slot:activator="{ on }">
-                    <v-btn @click.stop="updateProject(contract.item)" icon variant="text" v-on="on">
+                  <template v-slot:activator="{ props }">
+                    <v-btn @click.stop="updateProject(contract.item)" icon variant="text" v-bind="props">
                       <v-icon class="case-gray" icon="mdi-content-save" />
                     </v-btn>
                   </template>
@@ -131,8 +131,8 @@
 
                 <!-- Cancel Project Edit -->
                 <v-tooltip location="top">
-                  <template v-slot:activator="{ on }">
-                    <v-btn icon variant="text" @click.stop="clickedCancel()" v-on="on">
+                  <template v-slot:activator="{ props }">
+                    <v-btn icon variant="text" @click.stop="clickedCancel()" v-bind="props">
                       <v-icon class="case-gray" icon="mdi-close-circle" />
                     </v-btn>
                   </template>
@@ -145,7 +145,7 @@
               <div>
                 <!-- Employees Assigned -->
                 <v-tooltip location="top">
-                  <template v-slot:activator="{ on }">
+                  <template v-slot:activator="{ props }">
                     <v-btn
                       :disabled="editingProjectItem != null || isEditingContractItem || projectLoading"
                       @click.stop="
@@ -157,7 +157,7 @@
                       "
                       icon
                       variant="text"
-                      v-on="on"
+                      v-bind="props"
                     >
                       <v-icon class="case-gray" icon="mdi-account-group" />
                     </v-btn>
@@ -167,13 +167,13 @@
 
                 <!-- Edit Project -->
                 <v-tooltip location="top">
-                  <template v-slot:activator="{ on }">
+                  <template v-slot:activator="{ props }">
                     <v-btn
                       :disabled="editingProjectItem != null || isEditingContractItem || projectLoading"
                       icon
                       variant="text"
                       @click.stop="clickedEdit(item)"
-                      v-on="on"
+                      v-bind="props"
                     >
                       <v-icon class="case-gray" icon="mdi-pencil" />
                     </v-btn>

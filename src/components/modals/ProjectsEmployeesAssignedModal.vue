@@ -3,42 +3,65 @@
     <v-dialog v-model="activate" persistent max-width="450">
       <v-card>
         <v-tabs v-model="tab" color="#bc3825" fixed-tabs>
-          <v-tabs-slider color="#bc3825"></v-tabs-slider> <v-tab v-for="tab in tabs" :key="tab">{{ tab }}</v-tab>
+          <v-tab value="current">Current</v-tab>
+          <v-tab value="past">Past</v-tab>
         </v-tabs>
-        <v-tabs-items v-model="tab">
-          <v-tab-item>
-            <v-card v-if="tab == 0">
+        <v-window v-model="tab">
+          <v-window-item value="current">
+            <v-card>
               <v-card-text>
+                <p
+                  v-if="currentEmployees.length != 0 && currentEmployees.some((e) => e.workStatus == 0)"
+                  class="text-center text-caption mb-1"
+                >
+                  <i>* Names in color red indicate inactive employees</i>
+                </p>
                 <span v-if="currentEmployees.length == 0"
                   >There are no employees currently working on {{ project.projectName }}.</span
                 >
-                <ul v-else>
+                <ul v-else class="pa-4">
                   <li v-for="e in currentEmployees" :key="e.id">
-                    <a @click="$router.push(`/employee/${e.employee.employeeNumber}`)">{{ nicknameAndLastName(e) }}</a>
+                    <a
+                      @click="$router.push(`/employee/${e.employeeNumber}`)"
+                      :class="e.workStatus == 0 ? 'inactive' : 'active'"
+                      class="pointer"
+                      >{{ nicknameAndLastName(e) }}</a
+                    >
                   </li>
                 </ul>
               </v-card-text></v-card
             >
-          </v-tab-item>
-          <v-tab-item>
-            <v-card v-if="tab == 1">
+          </v-window-item>
+          <v-window-item value="past">
+            <v-card>
               <v-card-text>
+                <p
+                  v-if="pastEmployees.length != 0 && pastEmployees.some((e) => e.workStatus == 0)"
+                  class="text-center text-caption mb-1"
+                >
+                  <i>* Names in color red indicate inactive employees</i>
+                </p>
                 <span v-if="pastEmployees.length == 0"
                   >There are no active employees who have worked on {{ project.projectName }} in the past.</span
                 >
-                <ul v-else>
+                <ul v-else class="pa-4">
                   <li v-for="e in pastEmployees" :key="e.id">
-                    <a @click="$router.push(`/employee/${e.employee.employeeNumber}`)">{{ nicknameAndLastName(e) }}</a>
+                    <a
+                      @click="$router.push(`/employee/${e.employeeNumber}`)"
+                      :class="e.workStatus == 0 ? 'inactive' : 'active'"
+                      class="pointer"
+                      >{{ nicknameAndLastName(e) }}</a
+                    >
                   </li>
                 </ul>
               </v-card-text></v-card
             >
-          </v-tab-item>
-        </v-tabs-items>
+          </v-window-item>
+        </v-window>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn
-            text
+            variant="text"
             @click.native="
               emit('closed-project-employees-assigned-modal');
               activate = false;
@@ -149,3 +172,11 @@ export default {
   props: ['toggleModal', 'contract', 'project']
 };
 </script>
+<style scoped>
+.active {
+  color: #0000ee;
+}
+.inactive {
+  color: red !important;
+}
+</style>

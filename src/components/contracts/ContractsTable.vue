@@ -259,7 +259,7 @@
                         "
                         icon
                         variant="text"
-                        v-props="props"
+                        v-bind="props"
                       >
                         <v-icon class="case-gray" icon="mdi-account-group"></v-icon> </v-btn
                     ></template>

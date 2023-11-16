@@ -2,7 +2,7 @@
   <v-form ref="form" v-model="valid" lazy-validation>
     <v-dialog v-model="dialog" persistent max-width="700px">
       <v-card>
-        <v-card-title class="header_style"
+        <v-card-title class="d-flex align-center header_style"
           ><v-icon color="white" class="mr-2">mdi-briefcase-outline</v-icon
           ><span class="text-h5">New Project</span></v-card-title
         >
@@ -14,6 +14,7 @@
                 <v-text-field
                   v-model="projectName"
                   label="Project Name*"
+                  variant="underlined"
                   prepend-icon="mdi-briefcase-outline"
                   required
                   :rules="[(v) => !!v || 'Field is required', duplicateProjects()]"
@@ -24,16 +25,27 @@
                 <v-text-field
                   v-model="directorate"
                   label="Directorate"
+                  variant="underlined"
                   prepend-icon="mdi-office-building-outline"
                 ></v-text-field>
               </v-col>
               <!-- PoP Start Date  -->
               <v-col cols="12" sm="6" md="6">
-                <v-text-field v-model="popStartDate" prepend-icon="event" label="PoP Start Date"></v-text-field>
+                <v-text-field
+                  v-model="popStartDate"
+                  prepend-icon="mdi-calendar"
+                  variant="underlined"
+                  label="PoP Start Date"
+                ></v-text-field>
               </v-col>
               <!-- Pop End Date -->
               <v-col cols="12" sm="6" md="6">
-                <v-text-field v-model="popEndDate" prepend-icon="event" label="PoP End Date"></v-text-field>
+                <v-text-field
+                  v-model="popEndDate"
+                  prepend-icon="mdi-calendar"
+                  variant="underlined"
+                  label="PoP End Date"
+                ></v-text-field>
               </v-col>
               <!-- Description -->
               <v-col cols="12">
@@ -41,6 +53,7 @@
                   v-model="description"
                   auto-grow
                   label="Description"
+                  variant="underlined"
                   prepend-icon="mdi-text"
                   rows="1"
                 ></v-textarea>
