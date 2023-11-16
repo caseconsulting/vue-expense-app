@@ -735,8 +735,8 @@ function filterExpenseTypes() {
     return this.filter.active == 'active'
       ? !expenseType.isInactive
       : this.filter.active == 'notActive'
-      ? expenseType.isInactive
-      : this.filteredExpenseTypes;
+        ? expenseType.isInactive
+        : this.filteredExpenseTypes;
   });
 
   // filter expense types by overdraft
@@ -744,8 +744,8 @@ function filterExpenseTypes() {
     return this.filter.overdraft == 'overdraft'
       ? expenseType.odFlag
       : this.filter.overdraft == 'noOverdraft'
-      ? !expenseType.odFlag
-      : this.filteredExpenseTypes;
+        ? !expenseType.odFlag
+        : this.filteredExpenseTypes;
   });
 
   // filter expense types by recurring
@@ -753,8 +753,8 @@ function filterExpenseTypes() {
     return this.filter.recurring == 'recurring'
       ? expenseType.recurringFlag
       : this.filter.recurring == 'notRecurring'
-      ? !expenseType.recurringFlag
-      : this.filteredExpenseTypes;
+        ? !expenseType.recurringFlag
+        : this.filteredExpenseTypes;
   });
 } // filterExpenseTypes
 
