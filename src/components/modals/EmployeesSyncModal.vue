@@ -12,7 +12,7 @@
         <div v-for="(records, empNum) in updatesToUsers" :key="empNum * Math.random()">
           <div class="text-subtitle-2">
             &nbsp;&nbsp;&nbsp;
-            <v-icon small class="mr-2" color="green">check</v-icon>
+            <v-icon size="small" class="mr-2" color="green">check</v-icon>
             <span>{{ getName(empNum) }}: </span>
             <span class="text-caption"> {{ Array.from(records).join(', ') }}</span>
           </div>
@@ -25,7 +25,7 @@
         <div v-for="empNum in creations" :key="empNum * Math.random()">
           <div class="text-subtitle-2">
             &nbsp;&nbsp;&nbsp;
-            <v-icon small class="mr-2" color="green">check</v-icon>
+            <v-icon size="small" class="mr-2" color="green">check</v-icon>
             <span>{{ getName(empNum) }}: </span>
             <span class="text-caption"> User was successfully created with employee number {{ empNum }}</span>
           </div>
@@ -36,19 +36,19 @@
       <div v-for="(failure, i) in failures" :key="failure * Math.random()">
         <div class="text-subtitle-2">
           &nbsp;&nbsp;&nbsp;
-          <v-icon small class="mr-2" color="red">close</v-icon>
+          <v-icon size="small" class="mr-2" color="red">close</v-icon>
           {{ Object.keys(failures[i])[0] }} - {{ Object.values(failures[i])[0] }}
         </div>
       </div>
 
       <div class="mt-5">
-        <v-btn v-if="!showMore" @click="showMore = true" class="ml-0 pl-0 mt-0" x-small plain
+        <v-btn v-if="!showMore" @click="showMore = true" class="ml-0 pl-0 mt-0" size="x-small" variant="plain"
           >Show More Details
-          <v-icon right> mdi-menu-down </v-icon>
+          <v-icon end> mdi-menu-down </v-icon>
         </v-btn>
-        <v-btn v-else @click="showMore = false" class="ml-0 pl-0 mt-0" x-small plain
+        <v-btn v-else @click="showMore = false" class="ml-0 pl-0 mt-0" size="x-small" variant="plain"
           >Show Less Details
-          <v-icon right> mdi-menu-up </v-icon>
+          <v-icon end> mdi-menu-up </v-icon>
         </v-btn>
         <v-divider></v-divider>
         <div v-if="showMore">
@@ -74,11 +74,11 @@
           </div>
           <!-- Icons -->
           <div class="mt-4">
-            <v-icon large>$case</v-icon>
-            <v-icon large class="mx-3">mdi-arrow-right-thin</v-icon>
-            <v-icon large>$bamboo</v-icon>
-            <v-icon large class="mx-3">mdi-arrow-right-thin</v-icon>
-            <v-icon x-large>$adp</v-icon>
+            <v-icon size="large">$case</v-icon>
+            <v-icon size="large" class="mx-3">mdi-arrow-right-thin</v-icon>
+            <v-icon size="large">$bamboo</v-icon>
+            <v-icon size="large" class="mx-3">mdi-arrow-right-thin</v-icon>
+            <v-icon size="x-large">$adp</v-icon>
           </div>
         </div>
       </div>
@@ -86,7 +86,7 @@
     <v-card-text v-else>Something went wrong... please refresh the page</v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
-      <v-btn color="gray darken-1" text @click="emit('close-data-sync-results-modal')"> Close </v-btn>
+      <v-btn color="gray darken-1" variant="text" @click="emit('close-data-sync-results-modal')"> Close </v-btn>
     </v-card-actions>
   </v-card>
 </template>

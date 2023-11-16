@@ -3,7 +3,7 @@
     <v-dialog v-model="activate" persistent max-width="330">
       <v-card>
         <!-- Errors across tabs -->
-        <v-card-title class="headline">Error(s) found across tabs</v-card-title>
+        <v-card-title class="text-h5">Error(s) found across tabs</v-card-title>
         <v-card-text>
           <ul>
             <li v-for="tab in Object.keys(errorTabs)" :key="tab">
@@ -14,7 +14,7 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn
-            text
+            variant="text"
             @click.native="
               emit('canceled-form');
               activate = false;

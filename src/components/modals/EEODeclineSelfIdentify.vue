@@ -2,7 +2,7 @@
   <div>
     <v-dialog v-model="activate" persistent max-width="500">
       <v-card>
-        <v-card-title class="headline">Are you sure you want to decline to self-identify?</v-card-title>
+        <v-card-title class="text-h5">Are you sure you want to decline to self-identify?</v-card-title>
         <v-card-text>
           EEOC prefers employees self-identify as to race and gender. If you refuses to identify, CASE will complete the
           information on your behalf based on other records or visual observation.
@@ -21,7 +21,7 @@
           <v-spacer></v-spacer>
           <v-btn
             color="red"
-            text
+            variant="text"
             @click.native="
               emit(`cancel-decline-self-identify`);
               activate = false;
@@ -31,8 +31,8 @@
           </v-btn>
           <v-spacer></v-spacer>
           <v-btn
-            color="green darken-1"
-            text
+            color="green-darken-1"
+            variant="text"
             @click.native="
               emit(`confirm-decline-self-identify`);
               activate = false;

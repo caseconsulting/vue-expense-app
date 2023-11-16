@@ -8,18 +8,16 @@
         </v-toolbar>
         <!-- End Anniversary Date -->
         <!-- Buttons -->
-        <v-list two-line>
+        <v-list lines="two">
           <!-- Budget List -->
           <div v-if="hasBudgets">
             <div v-for="(budgetYear, index) in budgetYears" :key="budgetYear">
               <v-list-item ripple @click.native="select(budgetYear)" class="pointer">
-                <v-list-item-content>
-                  <v-list-item-title>
-                    <h2 v-bind:class="{ 'text-center': true, 'text-decoration-underline': isCurrent(budgetYear) }">
-                      {{ budgetYear }} - {{ budgetYear + 1 }}
-                    </h2>
-                  </v-list-item-title>
-                </v-list-item-content>
+                <v-list-item-title>
+                  <h2 v-bind:class="{ 'text-center': true, 'text-decoration-underline': isCurrent(budgetYear) }">
+                    {{ budgetYear }} - {{ budgetYear + 1 }}
+                  </h2>
+                </v-list-item-title>
               </v-list-item>
               <v-divider :key="index"></v-divider>
             </div>
@@ -27,11 +25,9 @@
           <div v-else>
             <template>
               <v-list-item>
-                <v-list-item-content>
-                  <v-list-item-title>
-                    <h2 class="text-center">No Previous Years</h2>
-                  </v-list-item-title>
-                </v-list-item-content>
+                <v-list-item-title>
+                  <h2 class="text-center">No Previous Years</h2>
+                </v-list-item-title>
               </v-list-item>
               <v-divider></v-divider>
             </template>
@@ -41,9 +37,7 @@
           <!-- Cancel Button -->
           <template>
             <v-list-item ripple @click.native="activate = false" class="list-hover">
-              <v-list-item-content>
-                <v-list-item-title><h2 class="text-center">Cancel</h2></v-list-item-title>
-              </v-list-item-content>
+              <v-list-item-title><h2 class="text-center">Cancel</h2></v-list-item-title>
             </v-list-item>
           </template>
           <!-- End Cancel Button -->

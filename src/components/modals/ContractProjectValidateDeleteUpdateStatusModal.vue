@@ -3,34 +3,30 @@
     <v-dialog v-model="activate" persistent max-width="450">
       <v-card>
         <!-- Errors across tabs -->
-        <v-card-title class="headline">{{title}}</v-card-title>
+        <v-card-title class="text-h5">{{ title }}</v-card-title>
         <v-card-text>
-          <span>{{message}}</span>
-          <br/>
-          <br/>
-          <p v-for="r in relationships" :key="r.project.id">
-            <span><b>Contract:</b> {{ r.contract }}, <b>Prime:</b> {{ r.prime }}, <b>Project:</b> {{ r.project.projectName }}</span>
-            <ul> <li v-for="e in r.employees" :key="e.id">{{`${e.firstName} ${e.lastName}`}}</li></ul>
-          </p>
-
+          <span>{{ message }}</span>
+          <br />
+          <br />
+          <div v-for="r in relationships" :key="r.project.id">
+            <span
+              ><b>Contract:</b> {{ r.contract }}, <b>Prime:</b> {{ r.prime }}, <b>Project:</b>
+              {{ r.project.projectName }}</span
+            >
+            <ul>
+              <li v-for="e in r.employees" :key="e.id">{{ `${e.firstName} ${e.lastName}` }}</li>
+            </ul>
+          </div>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn
-            text
-            @click.native="
-              activate = false;
-            "
-          >
-            Ok
-          </v-btn>
+          <v-btn variant="text" @click.native="activate = false"> Ok </v-btn>
           <v-spacer></v-spacer>
         </v-card-actions> </v-card
     ></v-dialog>
   </div>
 </template>
 <script>
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -42,10 +38,9 @@
  *
  * @param msg - Message to emit
  */
- function emit(msg) {
+function emit(msg) {
   this.emitter.emit(msg);
 } // emit
-
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -69,11 +64,11 @@ function watchToggleContractProjectDeleteWarning() {
 export default {
   data() {
     return {
-      activate: false,
+      activate: false
     };
   },
   methods: {
-    emit,
+    emit
   },
   watch: {
     toggleModal: watchToggleContractProjectDeleteWarning

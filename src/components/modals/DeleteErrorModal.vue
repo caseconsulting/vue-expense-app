@@ -2,13 +2,13 @@
   <div>
     <v-dialog v-model="activate" persistent max-width="350">
       <v-card>
-        <v-card-title class="headline">Error: cannot delete {{ type }}</v-card-title>
+        <v-card-title class="text-h5">Error: cannot delete {{ type }}</v-card-title>
         <v-card-text>Cannot delete {{ type }}. Expenses for this {{ type }} exist.</v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn
             color="gray darken-1"
-            text
+            variant="text"
             @click.native="
               emit(`invalid-${type}-delete`);
               activate = false;

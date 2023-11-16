@@ -354,7 +354,7 @@
       ></general-confirmation-modal>
       <!-- Cancel Confirmation Modal -->
       <cancel-confirmation :toggleSubmissionConfirmation="confirmBackingOut" type="expense"> </cancel-confirmation>
-      <v-dialog v-model="showExchangeCalculator" width="50%" persistent>
+      <v-dialog v-model="showExchangeCalculator" :width="isMobile ? '100%' : '50%'" persistent>
         <ExchangeTrainingHoursCalculator />
       </v-dialog>
     </v-container>
@@ -380,6 +380,7 @@ import {
 import {
   isEmpty,
   isFullTime,
+  isMobile,
   convertToMoneyString,
   generateUUID,
   userRoleIsAdmin,
@@ -1912,6 +1913,7 @@ export default {
   computed: {
     isDifferentExpenseType,
     isReimbursed,
+    isMobile,
     receiptRequired,
     notesRules,
     notesLabel,

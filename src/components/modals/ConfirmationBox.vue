@@ -3,10 +3,10 @@
   <div>
     <v-dialog v-model="activate" persistent max-width="330">
       <v-card>
-        <v-card-title v-if="isCovered" class="headline"
+        <v-card-title v-if="isCovered" class="text-h5"
           >You've reached the budget limit for this expense type
         </v-card-title>
-        <v-card-title v-else class="headline">You've reached the overdraft limit for this expense type</v-card-title>
+        <v-card-title v-else class="text-h5">You've reached the overdraft limit for this expense type</v-card-title>
         <v-card-text>
           <!-- Overdraft Allowed start above overdraft and not going over overdraft limit -->
           <p v-if="isOverCovered">
@@ -37,8 +37,8 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <div>
-            <v-btn color="red" text @click="emit('canceledSubmit')">No, take me back</v-btn>
-            <v-btn color="green darken-1" text @click="emit('confirmSubmit', expense)">Yes, submit</v-btn>
+            <v-btn color="red" variant="text" @click="emit('canceledSubmit')">No, take me back</v-btn>
+            <v-btn color="green-darken-1" variant="text" @click="emit('confirmSubmit', expense)">Yes, submit</v-btn>
           </div>
         </v-card-actions>
       </v-card>

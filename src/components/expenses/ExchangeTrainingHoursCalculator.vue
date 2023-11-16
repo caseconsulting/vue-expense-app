@@ -3,7 +3,7 @@
     <!-- Modal Card -->
     <v-card>
       <!-- Modal Title -->
-      <v-card-title class="headline header_style">Exchange Training Hours Calculator</v-card-title>
+      <v-card-title class="text-h5 header_style">Exchange Training Hours Calculator</v-card-title>
       <!-- Modal Content -->
       <v-card-text class="mt-4">
         <v-row>
@@ -11,13 +11,14 @@
             <v-text-field
               label="Salary"
               v-model="salary"
-              @input="salary = formatNumber(salary)"
+              @update:model-value="salary = formatNumber(salary)"
+              variant="underlined"
               prefix="$"
               maxlength="7"
             ></v-text-field>
           </v-col>
           <v-col cols="6">
-            <v-text-field label="Hours" v-model="hours" prefix="#" maxlength="3"></v-text-field>
+            <v-text-field label="Hours" v-model="hours" prefix="#" variant="underlined" maxlength="3"></v-text-field>
           </v-col>
         </v-row>
         <p>
@@ -32,8 +33,8 @@
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn
-          color="grey darken-3"
-          text
+          color="grey-darken-3"
+          variant="text"
           @click.native="
             emit('close-exchange-training-hours-calculator');
             activate = false;
@@ -43,7 +44,7 @@
         </v-btn>
         <v-btn
           color="green "
-          text
+          variant="text"
           :disabled="isNaN(parseInt(salary)) || isNaN(parseFloat(hours))"
           @click.native="
             emit('insert-training-hours', getCost());

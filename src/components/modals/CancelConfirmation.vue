@@ -2,14 +2,14 @@
   <div>
     <v-dialog v-model="activate" persistent max-width="350">
       <v-card>
-        <v-card-title class="headline">Are you sure you want to cancel?</v-card-title>
+        <v-card-title class="text-h5">Are you sure you want to cancel?</v-card-title>
         <v-card-actions>
           <v-spacer></v-spacer>
           <!-- id needed for nigthwatch tests -->
           <v-btn
             id="submitNoBtn"
             color="red"
-            text
+            variant="text"
             @click.native="
               activate = false;
               loading = true;
@@ -24,8 +24,8 @@
           <!-- id needed for nigthwatch tests -->
           <v-btn
             id="submitYesBtn"
-            color="green darken-1"
-            text
+            color="green-darken-1"
+            variant="text"
             @click.native="
               emit(`backout-confirmed-${type}`);
               activate = false;

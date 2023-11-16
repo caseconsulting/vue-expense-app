@@ -30,21 +30,6 @@
             class="elevate"
             append-icon=""
           >
-            <template v-slot:selection="{ item, select, selected, attrs }">
-              <v-chip
-                v-bind="attrs"
-                :model-value="selected"
-                closable
-                @click="select"
-                @click:close="remove(item.raw)"
-                small
-              >
-                <v-avatar :color="item.raw.color">
-                  <v-icon size="small" color="white"> {{ item.raw.icon }}</v-icon>
-                </v-avatar>
-                {{ item.raw.type }}
-              </v-chip>
-            </template>
             <template v-slot:chip="{ props, item }">
               <v-chip v-bind="props" class="pl-2">
                 <v-avatar :color="item.raw.color" size="23" class="mr-1">

@@ -2,7 +2,7 @@
   <div>
     <v-dialog v-model="activate" persistent max-width="375">
       <v-card>
-        <v-card-title class="headline">Are you sure you want to unreimburse?</v-card-title>
+        <v-card-title class="text-h5">Are you sure you want to unreimburse?</v-card-title>
         <v-card-text>
           This will unreimburse the expense to pending and uncarry any overdrafts due to this expense
         </v-card-text>
@@ -10,7 +10,7 @@
           <v-spacer></v-spacer>
           <v-btn
             color="red"
-            text
+            variant="text"
             @click.native="
               emit(`canceled-unreimburse-expense`);
               activate = false;
@@ -20,9 +20,9 @@
           </v-btn>
           <v-spacer></v-spacer>
           <v-btn
-            color="green darken-1"
+            color="green-darken-1"
             id="confirmUnreimbursed"
-            text
+            variant="text"
             @click.native="
               emit(`confirm-unreimburse-expense`);
               activate = false;

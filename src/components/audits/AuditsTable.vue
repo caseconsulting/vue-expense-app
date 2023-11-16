@@ -21,7 +21,6 @@
           :items="audits"
           :custom-sort="customDateSort"
           :sort-by.sync="sortBy"
-          :sort-desc.sync="sortDesc"
           :search="search"
           class="elevation-1"
         ></v-data-table>
