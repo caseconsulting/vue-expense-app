@@ -292,13 +292,13 @@
         <!-- End Confirmation Modals -->
       </v-container>
     </v-card>
-    <v-dialog @click:outside="clearCreateEmployee" v-model="createEmployee" :width="isMobile ? '100%' : '70%'"
+    <v-dialog @click:outside="clearCreateEmployee" v-model="createEmployee" :width="isMobile() ? '100%' : '80%'"
       ><employee-form :contracts="contracts" :key="childKey" :model="this.model"></employee-form
     ></v-dialog>
-    <v-dialog v-model="manageTags" scrollable :width="isMobile ? '100%' : '70%'" persistent>
+    <v-dialog v-model="manageTags" scrollable :width="isMobile() ? '100%' : '70%'" persistent>
       <tag-manager :key="childKey"></tag-manager>
     </v-dialog>
-    <v-dialog v-model="toggleEmployeesSyncModal" :width="isMobile ? '100%' : '70%'" persistent>
+    <v-dialog v-model="toggleEmployeesSyncModal" :width="isMobile() ? '100%' : '70%'" persistent>
       <employees-sync-modal :syncData="applicationSyncData" :key="childKey"></employees-sync-modal>
     </v-dialog>
   </div>

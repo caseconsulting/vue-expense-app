@@ -21,7 +21,7 @@
           <v-col
             cols="12"
             md="4"
-            class="d-flex justify-center justify-sm-start align-center flex-wrap pa-0 pt-4 pt-md-0"
+            class="d-flex justify-center justify-sm-start justify-lg-center align-center flex-wrap pa-0 pt-4 pt-md-0"
           >
             <v-btn
               color="#bc3825"
