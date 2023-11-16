@@ -6,7 +6,7 @@
       <div v-for="(item, i) in visibleTiles" :key="i">
         <!-- Grouped Navigation Links -->
         <v-list-group v-if="item.subItems" color="red">
-          <template v-slot:activator="{ isOpen, props }">
+          <template v-slot:activator="{ props }">
             <v-list-item
               v-bind="props"
               active-class="case-red-text"
@@ -16,7 +16,7 @@
             >
               <!-- Parent Item Icon -->
               <template v-slot:prepend>
-                <v-icon :id="item.icon" :color="isOpen ? caseRed : caseGray" class="navbar-icons">
+                <v-icon :id="item.icon" :color="item.active ? caseRed : caseGray" class="navbar-icons">
                   {{ item.icon }}
                 </v-icon>
               </template>

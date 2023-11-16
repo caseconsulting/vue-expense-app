@@ -5,11 +5,12 @@
         theme="light"
         v-model="drawer"
         :rail="!isMobile"
+        @update:rail="mainNavReloadKey++"
         order="1"
         :expand-on-hover="!isMobile"
         :permanent="isLoggedIn() && !isMobile"
       >
-        <main-nav></main-nav>
+        <main-nav :key="mainNavReloadKey"></main-nav>
       </v-navigation-drawer>
       <v-app-bar class="nav-color" theme="dark">
         <v-app-bar-nav-icon v-show="isLoggedIn() && isMobile" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
@@ -448,6 +449,7 @@ export default {
       { name: 'X', link: 'https://x.com/consultwithcase?lang=en', img: x, size: 17 },
       { name: 'Facebook', link: 'https://www.facebook.com/ConsultwithCase/', img: facebook }
     ],
+    mainNavReloadKey: 0,
     version: null
   }),
   props: {
