@@ -49,8 +49,8 @@
       <!-- Employees Slot -->
       <template v-slot:[`item.employees`]="{ item }">
         <v-autocomplete
-          auto-select-first
           v-if="editedTag && item.id === editedTag.id"
+          auto-select-first
           v-model="editedTag.employees"
           :disabled="tagLoading"
           :items="filteredEmployees"
@@ -60,12 +60,14 @@
           chips
           clearable
           closable-chips
-          :search.sync="employeeSearch"
-          @update:modelValue="employeeSearch = ''"
+          :search="employeeSearch"
+          @update:search="updateSearch"
+          @update:model-value="employeeSearch = ''"
           label="Employees (optional)"
           item-title="employeeName"
           item-value="id"
-        ></v-autocomplete>
+        >
+        </v-autocomplete>
         <span v-else v-for="(emp, i) in getTagEmployees(item.employees)" :key="i">
           <a @click="$router.push(`/employee/${emp.employeeNumber}`)">{{ nicknameAndLastName(emp) }}</a>
           <span v-if="i != item.employees.length - 1">, </span>
@@ -360,6 +362,15 @@ function tableFilter(__, search, item) {
   return found;
 } // tableFilter
 
+/**
+ * Updates the employee search with the autocomplete value.
+ *
+ * @param value String - The autocompletes value
+ */
+function updateSearch(value) {
+  this.employeeSearch = value;
+} // updateSearch
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     COMPUTED                     |
@@ -466,7 +477,8 @@ export default {
     getTagEmployees,
     nicknameAndLastName,
     saveEditedTag,
-    tableFilter
+    tableFilter,
+    updateSearch
   },
   mounted,
   watch: {
