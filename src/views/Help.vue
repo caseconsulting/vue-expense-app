@@ -9,7 +9,7 @@
 
     <div class="mb-5">
       <div class="text-center mb-3"></div>
-      <v-expansion-panels variant="accordion" model-value="panel">
+      <v-expansion-panels variant="accordion" :model-value="panel">
         <v-expansion-panel v-for="section in sections" :key="section[0]">
           <!-- Header -->
           <v-expansion-panel-title :id="section[0]" v-if="canView(section[1])">
