@@ -31,18 +31,24 @@
           <v-container fluid>
             <!-- Title -->
             <v-card-title>
-              <h2>Expense Types</h2>
-              <v-spacer></v-spacer>
-
-              <!-- Search Bar -->
-              <v-text-field
-                v-model="search"
-                id="search"
-                append-icon="search"
-                label="Search"
-                single-line
-                hide-details
-              ></v-text-field>
+              <v-row>
+                <v-col cols="4">
+                  <h2>Expense Types</h2>
+                </v-col>
+                <v-col cols="2"></v-col>
+                <v-col cols="6">
+                  <!-- Search Bar -->
+                  <v-text-field
+                    v-model="search"
+                    id="search"
+                    variant="underlined"
+                    append-inner-icon="mdi-magnify"
+                    label="Search"
+                    single-line
+                    hide-details
+                  ></v-text-field>
+                </v-col>
+              </v-row>
             </v-card-title>
 
             <!-- Filters -->
@@ -56,7 +62,7 @@
                   <v-tooltip location="top">
                     <template v-slot:activator="{ props }">
                       <v-btn value="active" v-bind="props" variant="text">
-                        <v-icon class="mr-1">mdi-check-circle-outline</v-icon>
+                        <v-icon icon="mdi-check-circle-outline" class="mr-1" />
                       </v-btn>
                     </template>
                     <span>Show Active</span>
@@ -66,7 +72,7 @@
                   <v-tooltip location="top">
                     <template v-slot:activator="{ props }">
                       <v-btn value="notActive" v-bind="props" variant="text">
-                        <v-icon>mdi-close-circle-outline</v-icon>
+                        <v-icon icon="mdi-close-circle-outline" />
                       </v-btn>
                     </template>
                     <span>Hide Active</span>
@@ -91,7 +97,7 @@
                   <v-tooltip location="top">
                     <template v-slot:activator="{ props }">
                       <v-btn value="overdraft" v-bind="props" variant="text">
-                        <v-icon class="mr-1">mdi-check-circle-outline</v-icon>
+                        <v-icon icon="mdi-check-circle-outline" class="mr-1" />
                       </v-btn>
                     </template>
                     <span>Show Overdraft</span>
@@ -101,7 +107,7 @@
                   <v-tooltip location="top">
                     <template v-slot:activator="{ props }">
                       <v-btn value="noOverdraft" v-bind="props" variant="text">
-                        <v-icon>mdi-close-circle-outline</v-icon>
+                        <v-icon icon="mdi-close-circle-outline" />
                       </v-btn>
                     </template>
                     <span>Hide Overdraft</span>
@@ -126,7 +132,7 @@
                   <v-tooltip location="top">
                     <template v-slot:activator="{ props }">
                       <v-btn value="recurring" v-bind="props" variant="text">
-                        <v-icon class="mr-1">mdi-check-circle-outline</v-icon>
+                        <v-icon icon="mdi-check-circle-outline" class="mr-1" />
                       </v-btn>
                     </template>
                     <span>Show Recurring</span>
@@ -136,7 +142,7 @@
                   <v-tooltip location="top">
                     <template v-slot:activator="{ props }">
                       <v-btn value="notRecurring" v-bind="props" variant="text">
-                        <v-icon>mdi-close-circle-outline</v-icon>
+                        <v-icon icon="mdi-close-circle-outline" />
                       </v-btn>
                     </template>
                     <span>Hide Recurring</span>
@@ -161,13 +167,14 @@
               :headers="_headers"
               :items="expenseTypeList"
               :sort-by.sync="sortBy"
-              :expanded.sync="expanded"
+              :expanded="expanded"
+              expand-on-click
               :loading="loading"
               :items-per-page.sync="itemsPerPage"
               :search="search"
               item-key="id"
               class="elevation-4"
-              @click:row="clickedRow"
+              density="compact"
             >
               <!-- Budget Name slot -->
               <template v-slot:[`item.budgetName`]="{ item }">
@@ -192,7 +199,7 @@
                       "
                       v-bind="props"
                     >
-                      <v-icon class="case-gray">edit</v-icon>
+                      <v-icon icon="mdi-pencil" class="case-gray" />
                     </v-btn>
                   </template>
                   <span>Edit</span>
@@ -208,7 +215,7 @@
                       @click="validateDelete(item)"
                       v-bind="props"
                     >
-                      <v-icon class="case-gray">delete</v-icon>
+                      <v-icon icon="mdi-delete" class="case-gray" />
                     </v-btn>
                   </template>
                   <slot>Delete</slot>
@@ -216,8 +223,8 @@
               </template>
 
               <!-- Expanded slot item -->
-              <template v-slot:expanded-item="{ headers, item }">
-                <td :colspan="headers.length" class="pa-0">
+              <template v-slot:expanded-row="{ columns, item }">
+                <td :colspan="columns.length" class="pa-0">
                   <v-card text>
                     <v-card-text>
                       <div class="expandedInfo">
@@ -289,23 +296,23 @@
                         <v-row no-gutters>
                           <v-col cols="12" sm="6" md="3" class="flag">
                             <p>Pro-rated:</p>
-                            <v-icon v-if="item.proRated" id="marks" class="mr-1">mdi-check-circle-outline</v-icon>
-                            <v-icon v-else class="mr-1" id="marks">mdi-close-circle-outline</v-icon>
+                            <v-icon icon="mdi-check-circle-outline" v-if="item.proRated" id="marks" class="mr-1" />
+                            <v-icon icon="mdi-close-circle-outline" v-else class="mr-1" id="marks" />
                           </v-col>
                           <v-col cols="12" sm="6" md="3" class="flag">
                             <p>Overdraft Allowed:</p>
-                            <v-icon v-if="item.odFlag" id="marks" class="mr-1">mdi-check-circle-outline</v-icon>
-                            <v-icon v-else class="mr-1" id="marks">mdi-close-circle-outline</v-icon>
+                            <v-icon icon="mdi-check-circle-outline" v-if="item.odFlag" id="marks" class="mr-1" />
+                            <v-icon icon="mdi-close-circle-outline" v-else class="mr-1" id="marks" />
                           </v-col>
                           <v-col cols="12" sm="6" md="3" class="flag">
                             <p>Recurring:</p>
-                            <v-icon v-if="item.recurringFlag" id="marks" class="mr-1">mdi-check-circle-outline</v-icon>
-                            <v-icon v-else class="mr-1" id="marks">mdi-close-circle-outline</v-icon>
+                            <v-icon icon="mdi-check-circle-outline" v-if="item.recurringFlag" id="marks" class="mr-1" />
+                            <v-icon icon="mdi-close-circle-outline" v-else class="mr-1" id="marks" />
                           </v-col>
                           <v-col cols="12" sm="6" md="3" class="flag">
                             <p>Inactive:</p>
-                            <v-icon v-if="item.isInactive" id="marks" class="mr-1">mdi-check-circle-outline</v-icon>
-                            <v-icon v-else class="mr-1" id="marks">mdi-close-circle-outline</v-icon>
+                            <v-icon icon="mdi-check-circle-outline" v-if="item.isInactive" id="marks" class="mr-1" />
+                            <v-icon icon="mdi-close-circle-outline" v-else class="mr-1" id="marks" />
                           </v-col>
                         </v-row>
                         <!-- End Flags -->
@@ -343,7 +350,7 @@
                                             :src="employee.avatar"
                                             @error="changeAvatar(employee)"
                                           />
-                                          <v-icon class="user-circle" name="user-circle" v-else></v-icon>
+                                          <v-icon icon="mdi-user-circle" name="user-circle" />
                                         </v-list-item-media>
 
                                         <!-- Employee Name -->
@@ -379,7 +386,7 @@
                                 <b>Tag(s):</b>
                                 <div class="d-flex flex-column">
                                   <v-chip size="small" v-for="tagID in item.tags" :key="tagID">
-                                    <v-icon start>mdi-tag</v-icon>{{ getTagByID(tagID).tagName }}</v-chip
+                                    <v-icon icon="mdi-tag" start />{{ getTagByID(tagID).tagName }}</v-chip
                                   >
                                 </div>
                               </div>
@@ -728,8 +735,8 @@ function filterExpenseTypes() {
     return this.filter.active == 'active'
       ? !expenseType.isInactive
       : this.filter.active == 'notActive'
-        ? expenseType.isInactive
-        : this.filteredExpenseTypes;
+      ? expenseType.isInactive
+      : this.filteredExpenseTypes;
   });
 
   // filter expense types by overdraft
@@ -737,8 +744,8 @@ function filterExpenseTypes() {
     return this.filter.overdraft == 'overdraft'
       ? expenseType.odFlag
       : this.filter.overdraft == 'noOverdraft'
-        ? !expenseType.odFlag
-        : this.filteredExpenseTypes;
+      ? !expenseType.odFlag
+      : this.filteredExpenseTypes;
   });
 
   // filter expense types by recurring
@@ -746,8 +753,8 @@ function filterExpenseTypes() {
     return this.filter.recurring == 'recurring'
       ? expenseType.recurringFlag
       : this.filter.recurring == 'notRecurring'
-        ? !expenseType.recurringFlag
-        : this.filteredExpenseTypes;
+      ? !expenseType.recurringFlag
+      : this.filteredExpenseTypes;
   });
 } // filterExpenseTypes
 
@@ -984,7 +991,7 @@ function startAction() {
  * Scrolls window back to the top of the form.
  */
 function toTopOfForm() {
-  this.$vuetify.goTo(this.$refs.form.$el.offsetTop + 100);
+  window.scrollTo(0, this.$refs.form.$el.offsetTop - 70);
 } // toTopOfForm
 
 /**
@@ -1147,27 +1154,28 @@ export default {
       filteredExpenseTypes: [], // filtered expense types
       headers: [
         {
-          text: 'Expense Type',
-          value: 'budgetName',
+          title: 'Expense Type',
+          key: 'budgetName',
           show: true
         },
         {
-          text: 'Budget',
-          value: 'budget',
+          title: 'Budget',
+          key: 'budget',
           show: true
         },
         {
-          text: 'Start Date',
-          value: 'startDate',
+          title: 'Start Date',
+          key: 'startDate',
           show: true
         },
         {
-          text: 'End Date',
-          value: 'endDate',
+          title: 'End Date',
+          key: 'endDate',
           show: true
         },
         {
-          value: 'actions',
+          title: '',
+          key: 'actions',
           sortable: false,
           show: false
         }

@@ -1,7 +1,7 @@
 <template>
   <v-card class="mt-3" hover>
     <!-- Form Header -->
-    <v-card-title class="header_style">
+    <v-card-title class="d-flex align-center header_style">
       <h3 v-if="model.id">Edit Expense Type</h3>
       <h3 v-else>Create New Expense Type</h3>
     </v-card-title>
@@ -10,6 +10,7 @@
       <v-form ref="expenseTypeForm" v-model="valid" lazy-validation>
         <!-- Budget Name -->
         <v-text-field
+          variant="underlined"
           v-model="editedExpenseType.budgetName"
           id="budgetName"
           :rules="getRequiredRules()"
@@ -20,24 +21,20 @@
 
         <!-- Categories -->
         <v-combobox
+          variant="underlined"
           v-model="categories"
           hint="Maximum of 10 categories"
           label="Categories (optional)"
           multiple
-          small-chips
           append-icon
-          :search-input.sync="categoryInput"
+          chips
+          :search.sync="categoryInput"
         >
-          <template v-slot:selection="{ attrs, item }">
-            <v-chip :attrs="attrs" close outlined label color="gray" @click:close="removeCategory(item)">
-              <strong>{{ item }}</strong
-              >&nbsp;
-            </v-chip>
-          </template>
         </v-combobox>
 
         <!-- Budget Amount -->
         <v-text-field
+          variant="underlined"
           prefix="$"
           v-model="budgetFormatted"
           id="budgetAmount"
@@ -45,17 +42,21 @@
           label="Budget"
           data-vv-name="Budget"
           @blur="editedExpenseType.budget = parseBudget(budgetFormatted)"
-          @input="formatBudget(budgetFormatted)"
+          @update:model-value="formatBudget(budgetFormatted)"
         ></v-text-field>
 
         <!-- Employee Access -->
         <div class="form-text">
           Employee Access
-          <v-btn @click="toFAQ()" class="mb-4" x-small icon><v-icon color="#3f51b5">info</v-icon></v-btn>
+          <v-avatar @click="toFAQ()" class="mb-4" size="small">
+            <v-tooltip activator="parent" location="top">Click for FAQ</v-tooltip>
+            <v-icon icon="mdi-information" color="#3f51b5" size="small" />
+          </v-avatar>
         </div>
         <v-row no-gutters>
           <v-col cols="6" lg="3">
             <v-checkbox
+              :color="caseRed"
               label="Full-time"
               value="FullTime"
               v-model="editedExpenseType.accessibleBy"
@@ -64,6 +65,7 @@
           </v-col>
           <v-col cols="6" lg="3">
             <v-checkbox
+              :color="caseRed"
               label="Part-time"
               value="PartTime"
               v-model="editedExpenseType.accessibleBy"
@@ -72,6 +74,7 @@
           </v-col>
           <v-col cols="6" lg="3">
             <v-checkbox
+              :color="caseRed"
               label="Intern"
               value="Intern"
               v-model="editedExpenseType.accessibleBy"
@@ -80,6 +83,7 @@
           </v-col>
           <v-col cols="6" lg="3">
             <v-checkbox
+              :color="caseRed"
               label="Custom"
               value="Custom"
               v-model="editedExpenseType.accessibleBy"
@@ -91,25 +95,27 @@
 
         <!-- Custom Access: Employee List -->
         <v-autocomplete
+          variant="underlined"
           v-if="editedExpenseType.accessibleBy && editedExpenseType.accessibleBy.includes('Custom')"
           v-model="customAccess"
           :items="activeEmployees"
-          :filter="customFilter"
+          :customFilter="customFilter"
           no-data-text="No Employees Available"
-          item-color="gray"
+          item-props.color="gray"
           multiple
           :rules="customAccessRules"
           chips
           clearable
-          small-chips
-          deletable-chips
+          closable-chips
           class="mt-0 pt-0"
-          :search-input.sync="searchString"
-          @change="searchString = ''"
+          :search.sync="searchString"
+          @update:model-value="searchString = ''"
+          item-title="text"
+          item-value="value"
         >
           <template v-slot:label>
-            <span v-if="customAccess.length == 0" class="grey--text caption">No custom employee access</span>
-            <span v-else class="grey--text caption"
+            <span v-if="customAccess.length == 0" class="text-grey text-caption">No custom employee access</span>
+            <span v-else class="text-grey text-caption"
               >{{ customAccess.length }} employee(s) have custom access to this expense type</span
             >
           </template>
@@ -118,67 +124,67 @@
         <!-- Budget Tags -->
         <div class="form-text">
           Tag Budgets (optional)
-          <!-- <v-btn @click="toFAQ()" class="mb-4" x-small icon><v-icon color="#3f51b5">info</v-icon></v-btn> -->
+          <!-- <v-btn @click="toFAQ()" class="mb-4" x-small icon><v-icon icon="mdi-info" color="#3f51b5" /></v-btn> -->
         </div>
         <v-container>
           <v-row v-for="(tag, index) in editedExpenseType.tagBudgets" :key="index">
             <v-col class="d-flex flex-row justify-center align-center" cols="2">
-              <v-tooltip top>
-                <template v-slot:activator="{ on }">
+              <v-tooltip location="top">
+                <template v-slot:activator="{ props }">
                   <v-btn
                     :disabled="isLast(index, editedExpenseType.tagBudgets)"
-                    v-on="on"
+                    v-bind="props"
                     @click="moveTagBudgetDown(index)"
-                    x-small
+                    size="x-small"
                     class="mr-1"
-                    ><v-icon>mdi-arrow-down-thin</v-icon></v-btn
-                  >
+                    ><v-icon icon="mdi-arrow-down-thin"
+                  /></v-btn>
                 </template>
                 <span>Move Tag Budget Priority Down One</span>
               </v-tooltip>
-              <v-tooltip top>
-                <template v-slot:activator="{ on }">
-                  <v-btn :disabled="isFirst(index)" x-small @click="moveTagBudgetUp(index)" v-on="on"
-                    ><v-icon>mdi-arrow-up-thin</v-icon></v-btn
-                  >
+              <v-tooltip location="top">
+                <template v-slot:activator="{ props }">
+                  <v-btn :disabled="isFirst(index)" size="x-small" @click="moveTagBudgetUp(index)" v-bind="props"
+                    ><v-icon icon="mdi-arrow-up-thin"
+                  /></v-btn>
                 </template>
                 <span>Move Tag Budget Priority Up One</span>
               </v-tooltip>
             </v-col>
             <v-col cols="6">
               <v-autocomplete
+                variant="underlined"
                 v-model="tag.tags"
-                item-text="tagName"
+                item-title="tagName"
                 :rules="getRequiredRules()"
                 item-value="id"
-                small-chips
-                deletable-chips
+                closable-chips
                 multiple
                 chips
                 :items="tagOptions(tag.tags)"
               >
-                <template v-slot:selection="data">
+                <template v-slot:chip="data">
                   <v-chip
-                    small
+                    size="small"
                     v-bind="data.attrs"
-                    :input-value="data.selected"
-                    close
+                    :model-value="data.selected"
+                    closable
                     @click="data.select"
                     @click:close="remove(data.item, index)"
-                    ><v-icon left>mdi-tag</v-icon>{{ data.item.tagName }}</v-chip
+                    ><v-icon icon="tag" start />{{ data.item.tagName }}</v-chip
                   >
                 </template>
               </v-autocomplete>
             </v-col>
             <v-col cols="3">
-              <v-text-field v-model="tag.budget" prefix="$" :rules="tagBudgetRules" label="Amount"
+              <v-text-field variant="underlined" v-model="tag.budget" prefix="$" :rules="tagBudgetRules" label="Amount"
             /></v-col>
             <v-col cols="1" class="d-flex justify-center align-center">
-              <v-btn small @click="removeTagBudget(index)"><v-icon>mdi-trash-can</v-icon></v-btn>
+              <v-btn size="small" @click="removeTagBudget(index)"><v-icon icon="trash-can" /></v-btn>
             </v-col>
           </v-row>
           <v-row class="d-flex justify-center align-center">
-            <v-btn elevation="2" @click="addTagBudget()"><v-icon>add</v-icon>Tag Budget</v-btn></v-row
+            <v-btn elevation="2" @click="addTagBudget()"><v-icon icon="mdi-plus" />Tag Budget</v-btn></v-row
           >
         </v-container>
 
@@ -187,6 +193,7 @@
           <v-col cols="6">
             <!-- Overdraft Flag -->
             <v-checkbox
+              :color="caseRed"
               label="Overdraft Flag"
               :disabled="!!model.id && model.odFlag"
               v-model="editedExpenseType.odFlag"
@@ -194,18 +201,19 @@
               :hint="odFlagHint()"
             ></v-checkbox>
             <!-- Recurring Flag -->
-            <v-checkbox label="Recurring Flag" v-model="editedExpenseType.recurringFlag"></v-checkbox>
+            <v-checkbox :color="caseRed" label="Recurring Flag" v-model="editedExpenseType.recurringFlag"></v-checkbox>
           </v-col>
           <v-col cols="6">
             <!-- Receipt Required Flag -->
             <v-checkbox
+              :color="caseRed"
               label="Receipt Required"
               id="receiptRequired"
               v-model="editedExpenseType.requiredFlag"
-              @change="toggleRequireReceipt()"
+              @update:model-value="toggleRequireReceipt()"
             ></v-checkbox>
             <!-- Inactive Flag -->
-            <v-checkbox label="Mark as Inactive" v-model="editedExpenseType.isInactive"></v-checkbox>
+            <v-checkbox :color="caseRed" label="Mark as Inactive" v-model="editedExpenseType.isInactive"></v-checkbox>
           </v-col>
         </v-row>
 
@@ -215,14 +223,14 @@
           v-if="!editedExpenseType.recurringFlag"
           :rules="getRequiredRules()"
           :close-on-content-click="false"
-          :nudge-right="40"
+          :offset="40"
           transition="scale-transition"
-          offset-y
           max-width="290px"
           min-width="290px"
         >
-          <template v-slot:activator="{ on }">
+          <template v-slot:activator="{ props }">
             <v-text-field
+              variant="underlined"
               v-model="startDateFormatted"
               id="startDate"
               :rules="[...getDateRules(), ...startDateRules]"
@@ -230,10 +238,10 @@
               hint="MM/DD/YYYY format"
               v-mask="'##/##/####'"
               persistent-hint
-              prepend-icon="event"
+              prepend-icon="mdi-calendar"
               @blur="editedExpenseType.startDate = format(startDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
-              @input="showStartMenu = false"
-              v-on="on"
+              @update:model-value="showStartMenu = false"
+              v-bind="props"
             ></v-text-field>
           </template>
 
@@ -251,14 +259,14 @@
           v-if="!editedExpenseType.recurringFlag"
           :rules="getRequiredRules()"
           :close-on-content-click="false"
-          :nudge-right="40"
+          :offset="40"
           transition="scale-transition"
-          offset-y
           max-width="290px"
           min-width="290px"
         >
-          <template v-slot:activator="{ on }">
+          <template v-slot:activator="{ props }">
             <v-text-field
+              variant="underlined"
               v-model="endDateFormatted"
               id="endDate"
               :rules="[...getDateRules(), ...endDateRules]"
@@ -266,10 +274,10 @@
               hint="MM/DD/YYYY format"
               v-mask="'##/##/####'"
               persistent-hint
-              prepend-icon="event"
+              prepend-icon="mdi-calendar"
               @blur="editedExpenseType.endDate = format(endDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
-              @input="showEndMenu = false"
-              v-on="on"
+              @update:model-value="showEndMenu = false"
+              v-bind="props"
             ></v-text-field>
           </template>
 
@@ -283,6 +291,7 @@
 
         <!-- Description -->
         <v-textarea
+          variant="underlined"
           v-model="editedExpenseType.description"
           id="description"
           :rules="getRequiredRules()"
@@ -293,9 +302,10 @@
 
         <!-- Campfires Autocomplete -->
         <v-autocomplete
+          variant="underlined"
           :items="campfires"
           v-model="editedExpenseType.campfire"
-          item-text="name"
+          item-title="name"
           item-value="url"
           label="Basecamp Campfire (optional)"
           clearable
@@ -303,19 +313,29 @@
 
         <!-- Switches -->
         <!-- Pro-rated expense -->
-        <v-switch v-model="editedExpenseType.proRated" label="Should this expense be pro-rated?"></v-switch>
+        <v-switch
+          :color="caseRed"
+          v-model="editedExpenseType.proRated"
+          label="Should this expense be pro-rated?"
+        ></v-switch>
         <!-- Require Recipient -->
-        <v-switch v-model="editedExpenseType.hasRecipient" label="Does this expense type have a recipient?"></v-switch>
+        <v-switch
+          :color="caseRed"
+          v-model="editedExpenseType.hasRecipient"
+          label="Does this expense type have a recipient?"
+        ></v-switch>
         <!-- Always Show on Feed -->
         <v-switch
+          :color="caseRed"
           v-model="editedExpenseType.alwaysOnFeed"
-          @change="toggleShowAllCategories()"
+          @update:model-value="toggleShowAllCategories()"
           label="Have this expense type show on the company feed?"
         ></v-switch>
         <!-- Require URL -->
         <v-switch
+          :color="caseRed"
           v-model="editedExpenseType.requireURL"
-          @change="toggleRequireURL()"
+          @update:model-value="toggleRequireURL()"
           label="Require a url for this expense?"
         ></v-switch>
 
@@ -331,6 +351,7 @@
             <v-col cols="3">{{ category.name }}</v-col>
             <v-col cols="3">
               <v-checkbox
+                :color="caseRed"
                 v-if="!submitting"
                 light
                 v-model="category.showOnFeed"
@@ -339,6 +360,7 @@
             </v-col>
             <v-col cols="3">
               <v-checkbox
+                :color="caseRed"
                 v-if="!submitting"
                 light
                 v-model="category.requireURL"
@@ -347,6 +369,7 @@
             </v-col>
             <v-col cols="3">
               <v-checkbox
+                :color="caseRed"
                 v-if="!submitting"
                 light
                 v-model="category.requireReceipt"
@@ -359,11 +382,11 @@
         <!-- Buttons -->
         <!-- Cancel Button -->
         <v-btn color="white " @click="clearForm" class="ma-2" elevation="2">
-          <v-icon class="mr-1">cancel</v-icon>Cancel
+          <v-icon icon="mdi-close-circle" class="mr-1" />Cancel
         </v-btn>
         <!-- Submit Button -->
         <v-btn
-          outlined
+          variant="outlined"
           class="ma-2"
           color="success"
           id="submitButton"
@@ -371,7 +394,7 @@
           @click="submitForm = true"
           :disabled="!valid"
         >
-          <v-icon class="mr-1">save</v-icon>Submit
+          <v-icon icon="mdi-content-save" class="mr-1" />Submit
         </v-btn>
         <!-- End Buttons -->
       </v-form>
