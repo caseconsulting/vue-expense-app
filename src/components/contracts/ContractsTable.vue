@@ -3,13 +3,13 @@
     <v-card class="mt-3">
       <v-container fluid class="pa-0 pa-md-4">
         <v-row class="d-flex justify-space-between ma-1">
-          <v-col cols="12" md="4" class="my-0 pb-0">
+          <v-col cols="12" md="4" class="pa-0 my-0">
             <v-text-field
               id="contractsSearch"
               v-model="search"
               label="Search Table Contents"
               auto-select-first
-              append-icon="search"
+              append-inner-icon="mdi-magnify"
               variant="underlined"
               clearable
             ></v-text-field>
@@ -18,36 +18,40 @@
           <ContractFilter class="ml-3 ml-md-0" />
           <!-- End Active Filter -->
 
-          <v-col cols="12" class="d-flex justify-center justify-md-end align-center flex-wrap pa-0 pt-2 pa-md-2">
+          <v-col
+            cols="12"
+            md="4"
+            class="d-flex justify-center justify-sm-start align-center flex-wrap pa-0 pt-4 pt-md-0"
+          >
             <v-btn
               color="#bc3825"
               :loading="isDeleting"
-              :size="isMobile ? 'small' : 'default'"
+              size="small"
               class="text-white"
               :disabled="!this.contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
               @click="clickedDelete()"
               >Delete
             </v-btn>
             <v-btn
-              class="ml-1 ml-md-4 font-weight-medium"
+              class="ml-1 font-weight-medium"
               :loading="isActivating"
-              :size="isMobile ? 'small' : 'default'"
+              size="small"
               :disabled="!this.contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
               @click="clickedUpdateStatus(contractStatuses.ACTIVE)"
               >Activate</v-btn
             >
             <v-btn
-              class="ml-1 ml-md-4"
+              class="ml-1"
               :loading="isDeactivating"
-              :size="isMobile ? 'small' : 'default'"
+              size="small"
               :disabled="!this.contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
               @click="clickedUpdateStatus(contractStatuses.UNSTAFFED)"
               >Unstaffed</v-btn
             >
             <v-btn
-              class="ml-1 ml-md-4"
+              class="ml-1"
               :loading="isClosing"
-              :size="isMobile ? 'small' : 'default'"
+              size="small"
               :disabled="!this.contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
               @click="clickedUpdateStatus(contractStatuses.CLOSED)"
               >Close</v-btn
