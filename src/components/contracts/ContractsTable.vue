@@ -1,9 +1,9 @@
 <template>
   <div>
     <v-card class="mt-3">
-      <v-container fluid>
+      <v-container fluid class="pa-0 pa-md-4">
         <v-row class="d-flex justify-space-between ma-1">
-          <v-col cols="4" class="my-0 pb-0">
+          <v-col cols="12" md="4" class="my-0 pb-0">
             <v-text-field
               id="contractsSearch"
               v-model="search"
@@ -15,40 +15,44 @@
             ></v-text-field>
           </v-col>
           <!-- Active Filter -->
-          <ContractFilter />
+          <ContractFilter class="ml-3 ml-md-0" />
           <!-- End Active Filter -->
 
-          <div class="d-flex justify-end align-center flex-wrap">
+          <v-col cols="12" class="d-flex justify-center justify-md-end align-center flex-wrap pa-0 pt-2 pa-md-2">
             <v-btn
               color="#bc3825"
               :loading="isDeleting"
+              :size="isMobile ? 'small' : 'default'"
               class="text-white"
               :disabled="!this.contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
               @click="clickedDelete()"
-              >Delete<v-icon end dark icon="mdi-delete" />
+              >Delete
             </v-btn>
             <v-btn
-              class="ml-4 font-weight-medium"
+              class="ml-1 ml-md-4 font-weight-medium"
               :loading="isActivating"
+              :size="isMobile ? 'small' : 'default'"
               :disabled="!this.contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
               @click="clickedUpdateStatus(contractStatuses.ACTIVE)"
               >Activate</v-btn
             >
             <v-btn
-              class="ml-4"
+              class="ml-1 ml-md-4"
               :loading="isDeactivating"
+              :size="isMobile ? 'small' : 'default'"
               :disabled="!this.contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
               @click="clickedUpdateStatus(contractStatuses.UNSTAFFED)"
               >Unstaffed</v-btn
             >
             <v-btn
-              class="ml-4"
+              class="ml-1 ml-md-4"
               :loading="isClosing"
+              :size="isMobile ? 'small' : 'default'"
               :disabled="!this.contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
               @click="clickedUpdateStatus(contractStatuses.CLOSED)"
               >Close</v-btn
             >
-          </div>
+          </v-col>
         </v-row>
         <!-- START CONTRACTS DATA TABLE -->
         <v-form ref="form" lazy-validation>
@@ -188,8 +192,8 @@
                 <div v-if="!contractLoading">
                   <!-- Save Contract -->
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ on }">
-                      <v-btn @click.stop="updateContractPrime()" icon variant="text" v-on="on">
+                    <template v-slot:activator="{ props }">
+                      <v-btn @click.stop="updateContractPrime()" icon variant="text" v-bind="props">
                         <v-icon class="case-gray" icon="mdi-content-save" />
                       </v-btn>
                     </template>
@@ -198,7 +202,7 @@
 
                   <!-- Cancel Contract -->
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ on }">
+                    <template v-slot:activator="{ props }">
                       <v-btn
                         icon
                         variant="text"
@@ -207,7 +211,7 @@
                             editingItem = null;
                           }
                         "
-                        v-on="on"
+                        v-bind="props"
                       >
                         <v-icon class="case-gray" icon="mdi-close-circle" />
                       </v-btn>
@@ -223,7 +227,7 @@
                 <div v-if="!isDeletingOrUpdatingStatus(item)">
                   <!-- Add Project -->
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ on }">
+                    <template v-slot:activator="{ props }">
                       <v-btn
                         :disabled="editingItem != null || isEditingProjectItem || contractLoading"
                         @click.stop="
@@ -234,7 +238,7 @@
                         "
                         icon
                         variant="text"
-                        v-on="on"
+                        v-bind="props"
                       >
                         <v-icon class="case-gray" icon="mdi-file-document-plus" />
                       </v-btn>
@@ -244,7 +248,7 @@
 
                   <!-- Employees Assigned -->
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ on }">
+                    <template v-slot:activator="{ props }">
                       <v-btn
                         :disabled="editingItem != null || isEditingProjectItem || contractLoading"
                         @click.stop="
@@ -255,7 +259,7 @@
                         "
                         icon
                         variant="text"
-                        v-on="on"
+                        v-props="props"
                       >
                         <v-icon class="case-gray" icon="mdi-account-group"></v-icon> </v-btn
                     ></template>
@@ -264,12 +268,12 @@
 
                   <!-- Edit Contract -->
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ on }">
+                    <template v-slot:activator="{ props }">
                       <v-btn
                         icon
                         variant="text"
                         :disabled="editingItem != null || isEditingProjectItem || contractLoading"
-                        v-on="on"
+                        v-bind="props"
                         @click.stop="clickedEdit(item)"
                       >
                         <v-icon class="case-gray" icon="mdi-pencil" />
@@ -308,7 +312,7 @@
 import _ from 'lodash';
 import api from '@/shared/api';
 import { updateStoreContracts, updateStoreEmployees } from '@/utils/storeUtils';
-import { asyncForEach } from '@/utils/utils';
+import { asyncForEach, isMobile } from '@/utils/utils';
 import { getProject } from '@/shared/contractUtils';
 
 import DeleteModal from '../modals/DeleteModal.vue';
@@ -916,6 +920,7 @@ export default {
     ExpandedContractTableRow
   },
   computed: {
+    isMobile,
     storeContracts
   },
   methods: {

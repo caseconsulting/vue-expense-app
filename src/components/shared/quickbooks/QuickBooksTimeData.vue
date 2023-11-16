@@ -52,7 +52,10 @@
           </div>
         </div>
       </v-card-title>
-      <v-card-text class="pt-0 pb-0 text-black" :class="userRoleIsAdmin() || userRoleIsManager() ? 'nudge-up' : 'mt-4'">
+      <v-card-text
+        class="pt-0 pb-0 text-black"
+        :class="userRoleIsAdmin() || userRoleIsManager() ? 'nudge-down-title' : 'mt-4'"
+      >
         <semi-monthly-charges
           v-if="passedEmployee && isLegacyFireTeam"
           :passedEmployee="passedEmployee"

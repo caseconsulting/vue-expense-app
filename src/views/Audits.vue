@@ -6,10 +6,10 @@
         <h2 class="text-white">{{ selectedDropdown }} Audits</h2>
       </v-card-title>
     </v-card>
-    <v-container fluid>
+    <v-container fluid class="px-0 px-md-4">
       <!-- Drop down for selecting audit tabs -->
       <v-row>
-        <v-col cols="2" align-self="center">
+        <v-col cols="6" md="3" align-self="center">
           <v-menu>
             <template v-slot:activator="{ props }">
               <v-btn variant="text" color="#bc3825" theme="dark" class="font-weight-bold" v-bind="props">

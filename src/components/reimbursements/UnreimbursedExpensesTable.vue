@@ -1,14 +1,14 @@
 <template>
   <div>
     <v-card class="mt-3">
-      <v-container fluid>
+      <v-container fluid class="px-0 px-md-4">
         <!-- Table Header -->
         <v-card-title class="pb-0">
           <h3>Unreimbursed Expenses</h3>
           <v-spacer></v-spacer>
 
           <v-row>
-            <v-col cols="12" md="4" lg="4" xl="4" xxl="4">
+            <v-col cols="6" md="4" lg="4" xl="4" xxl="4">
               <!-- Search Filters -->
               <v-autocomplete
                 :items="employees"
@@ -19,10 +19,11 @@
                 item-title="text"
                 label="Filter by Employee"
                 variant="underlined"
+                hide-details
                 clearable
               ></v-autocomplete>
             </v-col>
-            <v-col cols="12" md="4" lg="4" xl="4" xxl="4">
+            <v-col cols="6" md="4" lg="4" xl="4" xxl="4">
               <v-autocomplete
                 :items="expenseTypes"
                 v-model="expenseType"
@@ -32,6 +33,7 @@
                 class="mr-3"
                 label="Filter by Expense Type"
                 variant="underlined"
+                hide-details
                 clearable
               ></v-autocomplete>
             </v-col>
@@ -49,7 +51,7 @@
               >
                 <template v-slot:selection="{ item }">
                   <v-chip
-                    small
+                    size="small"
                     closable
                     @click.stop
                     @click="negateTag(item.raw)"

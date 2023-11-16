@@ -79,7 +79,7 @@
                 <h3 v-else>Loading...</h3>
               </v-card-title>
               <v-row class="mb-5">
-                <v-col v-if="userRoleIsAdmin() || userRoleIsManager()">
+                <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="6">
                   <!-- Employee Filter -->
                   <v-autocomplete
                     hide-details
@@ -89,16 +89,18 @@
                     item-title="text"
                     id="employeeIdFilter"
                     label="Filter by Employee"
+                    variant="underlined"
                     clearable
                   ></v-autocomplete>
                 </v-col>
-                <v-col>
+                <v-col cols="6">
                   <!-- Search Bar -->
                   <v-text-field
                     v-model="search"
-                    append-icon="search"
+                    append-inner-icon="mdi-magnify"
                     id="search"
                     label="Search"
+                    variant="underlined"
                     single-line
                     hide-details
                   ></v-text-field>
@@ -789,7 +791,6 @@ function startAction() {
  * Scrolls window back to the top of the form.
  */
 function toTopOfForm() {
-  console.log(this.$refs.form.$el);
   window.scrollTo(0, this.$refs.form.$el.offsetTop - 70);
 } // toTopOfForm
 
@@ -1095,10 +1096,7 @@ export default {
     employee: watchFilterExpenses,
     'filter.active': watchFilterExpenses,
     'filter.reimbursed': watchFilterExpenses,
-    storeIsPopulated: watchStorePopulated,
-    toSort: function () {
-      console.log(this.toSort);
-    }
+    storeIsPopulated: watchStorePopulated
   }
 };
 </script>

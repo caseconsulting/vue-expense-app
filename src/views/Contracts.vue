@@ -18,8 +18,12 @@
       <v-card color="#bc3825">
         <v-card-title class="d-flex align-center header_style"><h2 class="text-white">Contracts</h2> </v-card-title>
       </v-card>
-      <v-container fluid>
-        <v-btn @click="toggleContractForm = true" :disabled="!$store.getters.contracts" class="my-2"
+      <v-container fluid class="px-0 px-md-4">
+        <v-btn
+          @click="toggleContractForm = true"
+          :disabled="!$store.getters.contracts"
+          :size="isMobile ? 'small' : 'default'"
+          class="my-2"
           >Create a contract <v-icon end> mdi-file-document-plus </v-icon></v-btn
         >
         <contracts-page-loader v-if="loading"></contracts-page-loader>
@@ -45,6 +49,7 @@ import ContractsTable from '@/components/contracts/ContractsTable.vue';
 import ContractForm from '@/components/contracts/ContractForm.vue';
 import ContractsPageLoader from '@/components/contracts/ContractsPageLoader.vue';
 
+import { isMobile } from '@/utils/utils';
 import { updateStoreContracts, updateStoreEmployees } from '@/utils/storeUtils';
 import ConvertContractsToCsv from '../components/contracts/ConvertContractsToCsv.vue';
 
@@ -100,6 +105,9 @@ function clearStatus() {
 
 export default {
   beforeDestroy,
+  computed: {
+    isMobile
+  },
   components: {
     ContractsTable,
     ContractForm,

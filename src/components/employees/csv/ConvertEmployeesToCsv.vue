@@ -1,6 +1,10 @@
 <template>
   <!-- Download CSV Button -->
-  <v-btn :disabled="midAction" @click="download()" elevation="2" :x-small="isMobile || isSmallScreen"
+  <v-btn
+    :disabled="midAction || loading"
+    @click="download()"
+    elevation="2"
+    :size="isMobile || isSmallScreen ? 'small' : 'default'"
     ><i class="material-icons">download</i>Download All</v-btn
   >
 </template>
@@ -35,7 +39,7 @@ export default {
   methods: {
     download
   },
-  props: ['contracts', 'employees', 'tags', 'midAction']
+  props: ['contracts', 'employees', 'tags', 'midAction', 'loading']
 };
 </script>
 

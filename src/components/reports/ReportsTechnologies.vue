@@ -2,7 +2,7 @@
   <div>
     <v-container fluid class="px-1 px-md-4">
       <v-row>
-        <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
+        <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-2 py-0">
           <v-autocomplete
             id="employeesSearch"
             v-model="search"
@@ -12,6 +12,7 @@
             variant="underlined"
             auto-select-first
             clearable
+            hide-details
             item-title="text"
             item-value="value"
             @update:model-value="refreshDropdownItems()"
@@ -21,25 +22,27 @@
             "
           ></v-autocomplete>
         </v-col>
-        <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
+        <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-2 py-0">
           <v-autocomplete
             v-model="technologySearch"
             :items="technologies"
             label="Search By Technology"
             variant="underlined"
             clearable
+            hide-details
             auto-select-first
             @update:model-value="refreshDropdownItems()"
             @click:clear="technologySearch = null"
           ></v-autocomplete>
         </v-col>
-        <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
+        <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="6" xl="3" lg="3" md="3" sm="6" class="my-2 py-0">
           <v-autocomplete
             clearable
             label="Filter by Tag (click to flip)"
             v-model="selectedTags"
             :items="tags"
             multiple
+            hide-details
             variant="underlined"
             item-title="tagName"
             item-value="id"
@@ -61,12 +64,12 @@
             </template>
           </v-autocomplete>
         </v-col>
-        <div class="mx-2">
-          <v-checkbox v-model="showAllTechnologies" label="Show All Technologies"></v-checkbox>
-        </div>
-        <div class="mx-3">
-          <v-checkbox v-model="showInactiveEmployees" label="Show Inactive Users"></v-checkbox>
-        </div>
+        <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-2 py-0">
+          <v-checkbox v-model="showAllTechnologies" hide-details label="Show All Technologies"></v-checkbox>
+        </v-col>
+        <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-2 py-0">
+          <v-checkbox v-model="showInactiveEmployees" hide-details label="Show Inactive Users"></v-checkbox>
+        </v-col>
       </v-row>
 
       <!-- START EMPLOYEE TABLE -->

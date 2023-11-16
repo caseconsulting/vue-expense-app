@@ -1,11 +1,13 @@
 <template>
   <v-form ref="form" v-model="valid" lazy-validation>
     <v-row class="mb-4">
-      <v-col cols="6">
+      <v-col cols="6" class="pt-4">
         <!-- Create Tag -->
-        <v-btn :disabled="creatingTag" @click="creatingTag = true">Create Tag <v-icon end>mdi-tag</v-icon></v-btn>
+        <v-btn :disabled="creatingTag" @click="creatingTag = true" :size="isMobile ? 'small' : 'default'"
+          >Create Tag <v-icon end>mdi-tag</v-icon></v-btn
+        >
       </v-col>
-      <v-col cols="6">
+      <v-col cols="6" class="pa-0 pa-md-2">
         <!-- Table Search Field -->
         <v-text-field
           variant="underlined"
@@ -121,7 +123,7 @@
 <script>
 import _ from 'lodash';
 import api from '@/shared/api';
-import { generateUUID } from '@/utils/utils';
+import { generateUUID, isMobile } from '@/utils/utils';
 import { firstAndLastName, fullName, nicknameAndLastName } from '@/shared/employeeUtils';
 import { getRequiredRules } from '@/shared/validationUtils';
 import { updateStoreExpenseTypes, updateStoreTags } from '@/utils/storeUtils';
@@ -409,6 +411,7 @@ export default {
   },
   created,
   computed: {
+    isMobile,
     filteredEmployees
   },
   data() {

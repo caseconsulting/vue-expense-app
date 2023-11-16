@@ -39,10 +39,10 @@
         </v-card-title>
 
         <!-- Filters -->
-        <v-card v-if="userRoleIsAdmin() || userRoleIsManager()" class="pa-4" variant="outlined">
-          <v-row color="black" class="mx-5 my-1">
+        <v-card v-if="userRoleIsAdmin() || userRoleIsManager()" class="pa-0 pa-md-4" variant="outlined">
+          <v-row color="black" class="mx-1 mx-md-5 my-1">
             <!-- Active Filter -->
-            <v-col :align="isMobile() ? 'center' : ''" cols="12" md="4" sm="6">
+            <v-col :align="isMobile() ? 'center' : ''" cols="7" md="4" sm="6">
               <h4 class="d-block mx-auto">Employee Status:</h4>
               <v-btn-toggle class="filter_color mx-auto" v-model="filter.active" text multiple>
                 <!-- Full Time -->
@@ -76,10 +76,10 @@
               </v-btn-toggle>
             </v-col>
             <!-- Tags filter -->
-            <v-col :align="isMobile() ? 'center' : ''" cols="12" md="5" sm="6">
+            <v-col :align="isMobile() ? 'center' : ''" cols="5" md="5" sm="6">
               <v-autocomplete
                 v-if="userRoleIsAdmin() || userRoleIsManager()"
-                class="mt-4 ml-4"
+                class="mt-2 mt-md-4 ml-1 ml-md-4"
                 variant="underlined"
                 clearable
                 label="Filter by Tag (click to flip)"
@@ -89,6 +89,7 @@
                 color="gray"
                 item-title="tagName"
                 item-value="id"
+                hide-details
                 return-object
               >
                 <template v-slot:chip="{ props, item }">
@@ -107,8 +108,6 @@
                 </template>
               </v-autocomplete>
             </v-col>
-            <!-- Blank space -->
-            <v-col></v-col>
             <!-- End Tags Filter -->
           </v-row>
         </v-card>
@@ -116,37 +115,44 @@
         <!-- End Filters -->
         <!-- Create an Employee -->
         <v-btn
+          v-if="hasAdminPermissions()"
           id="createEmployeeBtn"
           class="mb-5"
           :disabled="loading"
+          :size="isMobile() ? 'x-small' : 'default'"
           @click="renderCreateEmployee()"
           elevation="2"
-          v-if="hasAdminPermissions()"
         >
-          Create an Employee <v-icon class="pl-2" icon="mdi-account-plus" />
+          {{ isMobile() ? 'Create Employee' : 'Create an Employee' }}
+          <v-icon class="pl-2" icon="mdi-account-plus" />
         </v-btn>
 
         <!-- Tag Manager -->
         <v-btn
+          v-if="hasAdminPermissions()"
           id="manageTagsBtn"
-          class="mb-5 ml-4"
+          class="mb-5 ml-2 ml-md-4"
           :disabled="loading"
+          :size="isMobile() ? 'x-small' : 'default'"
           @click="renderManageTags()"
           elevation="2"
-          v-if="hasAdminPermissions()"
         >
-          Manage Tags<v-icon class="pl-2">mdi-tag-multiple</v-icon>
+          Manage Tags
+          <v-icon class="pl-2">mdi-tag-multiple</v-icon>
         </v-btn>
 
         <!-- Sync Applications -->
         <v-btn
+          v-if="hasAdminPermissions()"
           id="syncApplicationsBtn"
-          class="mb-5 ml-4"
+          class="mb-5 ml-2 ml-md-4"
           :disabled="loading || syncing"
           @click="syncApplications()"
           elevation="2"
-          v-if="hasAdminPermissions()"
-          >Sync Applications
+          :size="isMobile() ? 'x-small' : 'default'"
+        >
+          {{ isMobile() ? 'Sync Apps' : 'Sync Applications' }}
+
           <v-progress-circular v-if="syncing" class="ml-2" :size="25" indeterminate color="grey"></v-progress-circular>
           <v-icon v-else class="pl-2">mdi-web-sync</v-icon>
         </v-btn>
@@ -269,12 +275,14 @@
             :midAction="midAction"
             :contracts="contracts"
             :employees="filteredEmployees"
+            :loading="loading"
             :tags="tags"
           ></convert-employees-to-csv>
           <generate-csv-eeo-report
             v-if="userRoleIsAdmin()"
             :midAction="midAction"
             :employees="filteredEmployees"
+            :loading="loading"
           ></generate-csv-eeo-report>
         </v-card-actions>
 
@@ -284,13 +292,13 @@
         <!-- End Confirmation Modals -->
       </v-container>
     </v-card>
-    <v-dialog @click:outside="clearCreateEmployee" v-model="createEmployee"
+    <v-dialog @click:outside="clearCreateEmployee" v-model="createEmployee" :width="isMobile ? '100%' : '70%'"
       ><employee-form :contracts="contracts" :key="childKey" :model="this.model"></employee-form
     ></v-dialog>
-    <v-dialog v-model="manageTags" width="70%" persistent>
+    <v-dialog v-model="manageTags" scrollable :width="isMobile ? '100%' : '70%'" persistent>
       <tag-manager :key="childKey"></tag-manager>
     </v-dialog>
-    <v-dialog v-model="toggleEmployeesSyncModal" width="70%" persistent>
+    <v-dialog v-model="toggleEmployeesSyncModal" :width="isMobile ? '100%' : '70%'" persistent>
       <employees-sync-modal :syncData="applicationSyncData" :key="childKey"></employees-sync-modal>
     </v-dialog>
   </div>

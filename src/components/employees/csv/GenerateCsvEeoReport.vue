@@ -1,7 +1,12 @@
 <template>
   <!-- Download CSV Button -->
   <div>
-    <v-btn :disabled="midAction" @click="download()" elevation="2" class="ml-3" :x-small="isMobile || isSmallScreen"
+    <v-btn
+      :disabled="midAction || loading"
+      @click="download()"
+      elevation="2"
+      class="ml-3"
+      :size="isMobile || isSmallScreen ? 'small' : 'default'"
       ><i class="material-icons">file_download</i>
       Generate EEO Report
     </v-btn>
@@ -42,7 +47,7 @@ export default {
   methods: {
     download
   },
-  props: ['employees', 'midAction'] // employees to export
+  props: ['employees', 'midAction', 'loading'] // employees to export
 };
 </script>
 

@@ -5,7 +5,7 @@
     <v-card-title class="pb-0 text-h5"> Totals </v-card-title>
     <!--End of Total Card Title-->
     <v-card-text>
-      <v-container class="pb-0">
+      <v-container class="pb-0 px-0 px-md-4">
         <!--List of Expense Types and Totals-->
         <v-row v-for="total in totals" :key="total.id" dense>
           <v-col class="font-weight-bold">{{ total.name }}: </v-col>

@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="grey-background pa-3">
+  <v-container fluid class="grey-background pa-3 px-0 px-md-3">
     <div>
       <v-data-table
         :headers="headers"

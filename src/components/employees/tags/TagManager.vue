@@ -1,36 +1,41 @@
 <template>
-  <div>
+  <!-- Modal Card -->
+  <v-card>
     <!-- Status Alert -->
-    <v-snackbar v-model="status.statusType" :color="status.color" multi-line :timeout="5000" location="bottom" vertical>
+    <v-snackbar
+      v-model="status.statusType"
+      :color="status.color"
+      multi-line
+      :timeout="5000"
+      location="top right"
+      vertical
+    >
       <v-card-title headline color="white">
         <span class="text-h5">{{ status.statusMessage }}</span>
       </v-card-title>
       <v-btn color="white" variant="text" @click="clearStatus"> Close </v-btn>
     </v-snackbar>
-    <!-- Modal Card -->
-    <v-card>
-      <!-- Modal Title -->
-      <v-card-title class="text-h5 header_style">Tag Manager</v-card-title>
-      <!-- Modal Content -->
-      <v-card-text class="mt-4">
-        <tags-table></tags-table>
-      </v-card-text>
-      <!-- Action Button -->
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn
-          color="grey-darken-3"
-          variant="text"
-          @click.native="
-            emit(`close-tag-manager`);
-            activate = false;
-          "
-        >
-          Close
-        </v-btn>
-      </v-card-actions>
-    </v-card>
-  </div>
+    <!-- Modal Title -->
+    <v-card-title class="d-flex align-center text-h5 header_style">Tag Manager</v-card-title>
+    <!-- Modal Content -->
+    <v-card-text class="pa-1 pa-md-4 mt-4">
+      <tags-table></tags-table>
+    </v-card-text>
+    <!-- Action Button -->
+    <v-card-actions>
+      <v-spacer></v-spacer>
+      <v-btn
+        color="grey-darken-3"
+        variant="text"
+        @click.native="
+          emit(`close-tag-manager`);
+          activate = false;
+        "
+      >
+        Close
+      </v-btn>
+    </v-card-actions>
+  </v-card>
 </template>
 
 <script>

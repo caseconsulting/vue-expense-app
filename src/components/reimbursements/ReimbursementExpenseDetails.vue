@@ -2,7 +2,7 @@
   <v-card v-if="expense" id="reimbursement-expense-details" class="mr-3 my-3 slide-in-blurred-right">
     <v-card-title primary-title class="pb-0 text-h5"> Expense Details </v-card-title>
     <v-card-text>
-      <v-container fluid class="pb-0">
+      <v-container fluid class="px-0 px-md-4 pb-0">
         <v-row dense>
           <v-col> <b>Description:</b></v-col>
           <v-col> {{ expense.description }}</v-col>
