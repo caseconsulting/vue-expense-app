@@ -213,7 +213,7 @@
                   <template v-slot:append-inner>
                     <v-avatar
                       v-if="checkPositionStatus(position)"
-                      @click="position.presentDate = !position.presentDate"
+                      @click.stop="position.presentDate = !position.presentDate"
                       class="pointer"
                       size="x-small"
                     >

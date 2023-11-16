@@ -131,7 +131,7 @@
                   <template v-slot:append-inner>
                     <v-avatar
                       v-if="checkProjectStatus(project)"
-                      @click="project.presentDate = !project.presentDate"
+                      @click.stop="project.presentDate = !project.presentDate"
                       class="pointer"
                       size="x-small"
                     >
