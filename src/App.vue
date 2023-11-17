@@ -68,13 +68,7 @@
           <template v-slot:activator="{ props }">
             <v-avatar id="profile" class="pointer mx-3" :color="caseRed" size="40">
               <span style="position: absolute">{{ initials }}</span>
-              <v-img
-                style="position: absolute"
-                @click="console.log(profilePic)"
-                :src="profilePic"
-                alt="avatar"
-                v-bind="props"
-              />
+              <v-img style="position: absolute" :src="profilePic" alt="avatar" v-bind="props" />
             </v-avatar>
           </template>
           <v-list v-if="!(isMobile || isSmallScreen)">

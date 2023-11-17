@@ -220,19 +220,25 @@ function drawGraph() {
       if (_.first(y)) {
         let index = _.first(y).index;
         // redirect to expenses page
-        localStorage.setItem('requestedFilter', {
-          defaultEmployee: employee.id,
-          defaultFilterReimbursed: 'both',
-          defaultSearch: this.chartData.labels[index]
-        });
+        localStorage.setItem(
+          'requestedFilter',
+          JSON.stringify({
+            defaultEmployee: employee.id,
+            defaultFilterReimbursed: 'both',
+            defaultSearch: this.chartData.labels[index]
+          })
+        );
         router.push({
           name: 'expenses'
         });
       } else {
-        localStorage.setItem('requestedFilter', {
-          defaultEmployee: employee.id,
-          defaultFilterReimbursed: 'both'
-        });
+        localStorage.setItem(
+          'requestedFilter',
+          JSON.stringify({
+            defaultEmployee: employee.id,
+            defaultFilterReimbursed: 'both'
+          })
+        );
         router.push({
           name: 'expenses'
         });

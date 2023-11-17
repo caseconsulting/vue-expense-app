@@ -702,7 +702,7 @@ async function loadMyExpensesData() {
   this.initialPageLoading = true;
   this.loading = true;
   // get user info, defaulting to params if exists
-  this.userInfo = localStorage.getItem('requestedFilter') || this.$store.getters.user; // TODO parse localstorage into string and then parse from string
+  this.userInfo = JSON.parse(localStorage.getItem('requestedFilter')) || this.$store.getters.user; // TODO parse localstorage into string and then parse from string
   await Promise.all([
     !this.$store.getters.expenseTypes ? this.updateStoreExpenseTypes() : '',
     !this.$store.getters.employees ? this.updateStoreEmployees() : '',
@@ -892,9 +892,16 @@ async function created() {
     this.loadMyExpensesData();
   }
 
-  // if coming from budgets chart scroll to top
-  if (localStorage.getItem('requestedFilter')) {
+  // if coming from budgets chart scroll to top and fill in filter data
+  if (JSON.parse(localStorage.getItem('requestedFilter'))) {
     window.scrollTo(0, 0);
+    let storedInfo = JSON.parse(localStorage.getItem('requestedFilter'));
+    [this.search, this.filter.reimbursed, this.employee] = [
+      storedInfo.defaultSearch,
+      storedInfo.defaultFilterReimbursed,
+      storedInfo.defaultEmployee
+    ];
+    localStorage.removeItem('requestedFilter');
   }
 } // created
 
@@ -909,14 +916,6 @@ function beforeDestroy() {
   this.emitter.off('confirm-unreimburse-expense');
   this.emitter.off('canceled-unreimburse-expense');
 } // beforeDestroy
-
-function mounted() {
-  if (this.employee == null && localStorage.getItem('requestedFilter')) {
-    this.employee = localStorage.getItem('requestedFilter').defaultEmployee;
-    this.employee = this.employee + ' ';
-    localStorage.removeItem('requestedFilter');
-  }
-}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -963,7 +962,6 @@ export default {
     storeIsPopulated
   },
   created,
-  mounted,
   data() {
     return {
       deleting: false, // activate delete model
@@ -992,7 +990,7 @@ export default {
       expenseTypes: [], // expense types
       filter: {
         active: 'both',
-        reimbursed: localStorage.getItem('requestedFilter')?.defaultFilterReimbursed || 'notReimbursed' //default only shows expenses that are not reimbursed
+        reimbursed: 'notReimbursed' //default only shows expenses that are not reimbursed
       }, // datatable filters
       filteredExpenses: [], // filtered expenses
       headers: [
@@ -1048,7 +1046,7 @@ export default {
         url: null,
         showOnFeed: null
       }, // expense to edit
-      search: localStorage.getItem('requestedFilter')?.defaultSearch || '', // query text for datatable search field
+      search: null, // query text for datatable search field
       toSort: [{ key: 'createdAt', order: 'desc' }], // default sort datatable items
       status: {
         statusType: undefined,
