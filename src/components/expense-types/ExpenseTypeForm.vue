@@ -7,7 +7,7 @@
     </v-card-title>
 
     <v-container fluid>
-      <v-form ref="expenseTypeForm" v-model="valid" lazy-validation>
+      <v-form ref="expenseTypeForm" v-model="valid" @submit.prevent="valid ? (submitForm = true) : _" lazy-validation>
         <!-- Budget Name -->
         <v-text-field
           variant="underlined"
@@ -385,15 +385,7 @@
           <v-icon icon="mdi-close-circle" class="mr-1" />Cancel
         </v-btn>
         <!-- Submit Button -->
-        <v-btn
-          variant="outlined"
-          class="ma-2"
-          color="success"
-          id="submitButton"
-          :loading="submitting"
-          @click="submitForm = true"
-          :disabled="!valid"
-        >
+        <v-btn variant="outlined" type="submit" class="ma-2" color="success" id="submitButton" :loading="submitting">
           <v-icon icon="mdi-content-save" class="mr-1" />Submit
         </v-btn>
         <!-- End Buttons -->
