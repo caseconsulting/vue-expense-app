@@ -8,7 +8,7 @@
       <!-- Inactive Employee -->
     </v-card-title>
     <v-container fluid>
-      <v-form ref="form" v-model="valid" lazy-validation>
+      <v-form ref="form" v-model="valid" @submit.prevent="valid ? (confirmingValid = true) : _" lazy-validation>
         <!-- Employee picker if admin -->
         <v-autocomplete
           v-if="!asUser"
@@ -329,7 +329,7 @@
         <v-btn
           variant="outlined"
           color="success"
-          @click="confirmingValid = true"
+          type="submit"
           :disabled="(!(userRoleIsAdmin() || userRoleIsManager()) && isReimbursed) || isInactive"
           id="submitButton"
           :loading="loading"
@@ -552,7 +552,9 @@ function calcAdjustedBudget(employee, expenseType) {
  */
 async function checkCoverage() {
   this.isInactive = true;
-  if (this.$refs.form && this.$refs.form.validate()) {
+  if (this.$refs.form) {
+    this.valid = this.$refs.form.validate();
+    if (!this.valid) return;
     this.emitter.emit('startAction');
     // form is validated
     this.loading = true; // set loading status to true
