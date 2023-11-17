@@ -80,7 +80,14 @@
           <!-- Save Edited Tag -->
           <span>
             <v-tooltip activator="parent" text="Save" location="top"></v-tooltip>
-            <v-btn :disabled="tagLoading" :loading="tagLoading" variant="text" icon @click="saveEditedTag" v-on="on">
+            <v-btn
+              :disabled="tagLoading || !valid"
+              :loading="tagLoading"
+              variant="text"
+              icon
+              @click="saveEditedTag"
+              v-on="on"
+            >
               <v-icon>mdi-content-save</v-icon>
             </v-btn>
           </span>
