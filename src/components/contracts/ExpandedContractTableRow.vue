@@ -2,7 +2,7 @@
   <td :colspan="colspan" class="pa-0 ma-0">
     <v-container fluid class="pa-0 ma-0">
       <!-- START EXPANDED PROJECTS DATA TABLE-->
-      <v-form ref="projectForm" lazy-validation>
+      <v-form ref="projectForm" v-model="valid" lazy-validation>
         <v-data-table
           :headers="projectHeaders"
           :items="contract.item.projects"
@@ -122,7 +122,13 @@
                 <!-- Save Project -->
                 <v-tooltip location="top">
                   <template v-slot:activator="{ props }">
-                    <v-btn @click.stop="updateProject(contract.item)" icon variant="text" v-bind="props">
+                    <v-btn
+                      @click.stop="updateProject(contract.item)"
+                      :disabled="!valid"
+                      icon
+                      variant="text"
+                      v-bind="props"
+                    >
                       <v-icon class="case-gray" icon="mdi-content-save" />
                     </v-btn>
                   </template>
@@ -261,8 +267,8 @@ function clickedCancel() {
  * @param contract contract object that project is under
  */
 async function updateProject(contract) {
-  let valid = this.$refs.projectForm.validate();
-  if (!valid) return;
+  this.valid = this.$refs.projectForm.validate();
+  if (!this.valid) return;
   try {
     this.projectLoading = true;
     let contractObj = _.cloneDeep(contract);
@@ -364,6 +370,7 @@ export default {
       contractEmployeesAssigned: null,
       projectEmployeesAsseigned: null,
       contractStatuses: api.CONTRACT_STATUSES,
+      valid: true,
       projectHeaders: [
         {
           text: '',

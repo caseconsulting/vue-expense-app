@@ -59,7 +59,7 @@
           </v-col>
         </v-row>
         <!-- START CONTRACTS DATA TABLE -->
-        <v-form ref="form" lazy-validation>
+        <v-form ref="form" v-model="valid" lazy-validation>
           <v-data-table
             :headers="contractHeaders"
             :items="storeContracts"
@@ -197,7 +197,7 @@
                   <!-- Save Contract -->
                   <v-tooltip location="top">
                     <template v-slot:activator="{ props }">
-                      <v-btn @click.stop="updateContractPrime()" icon variant="text" v-bind="props">
+                      <v-btn @click.stop="updateContractPrime()" :disabled="!valid" icon variant="text" v-bind="props">
                         <v-icon class="case-gray" icon="mdi-content-save" />
                       </v-btn>
                     </template>
@@ -395,8 +395,8 @@ function beforeDestroy() {
  * Updates contract object in inline row edit
  */
 async function updateContractPrime() {
-  let valid = this.$refs.form.validate();
-  if (!valid) return;
+  this.valid = this.$refs.form.validate();
+  if (!this.valid) return;
   this.contractLoading = true;
   try {
     let response = await api.updateItem(api.CONTRACTS, this.editingItem);
@@ -981,6 +981,7 @@ export default {
       filter: [api.CONTRACT_STATUSES.ACTIVE],
       search: null,
       statusItemClicked: null,
+      valid: true,
       validateMessage: '',
       titleMessage: '',
       contractsCheckBoxes: [],
