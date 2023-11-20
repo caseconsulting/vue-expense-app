@@ -80,21 +80,14 @@
           <!-- Save Edited Tag -->
           <span>
             <v-tooltip activator="parent" text="Save" location="top"></v-tooltip>
-            <v-btn
-              :disabled="tagLoading || !valid"
-              :loading="tagLoading"
-              variant="text"
-              icon
-              @click="saveEditedTag"
-              v-on="on"
-            >
+            <v-btn :disabled="tagLoading || !valid" :loading="tagLoading" variant="text" icon @click="saveEditedTag">
               <v-icon>mdi-content-save</v-icon>
             </v-btn>
           </span>
           <!-- Cancel Edited Tag -->
           <span>
             <v-tooltip activator="parent" text="Cancel" location="top"></v-tooltip>
-            <v-btn :disabled="tagLoading" variant="text" icon @click="cancelEdit" v-on="on">
+            <v-btn :disabled="tagLoading" variant="text" icon @click="cancelEdit">
               <v-icon>mdi-cancel</v-icon>
             </v-btn>
           </span>
@@ -103,7 +96,7 @@
           <!-- Edit Tag -->
           <span>
             <v-tooltip activator="parent" text="Edit" location="top" />
-            <v-btn :disabled="!!editedTag || tagLoading" variant="text" icon @click="editTag(item)" v-on="on">
+            <v-btn :disabled="!!editedTag || tagLoading" variant="text" icon @click="editTag(item)">
               <v-icon>mdi-pencil</v-icon>
             </v-btn>
           </span>
@@ -116,7 +109,6 @@
               variant="text"
               icon
               @click="deletedTag = item"
-              v-on="on"
             >
               <v-icon>mdi-delete</v-icon>
             </v-btn>

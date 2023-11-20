@@ -10,49 +10,48 @@
           <v-tooltip activator="parent" location="bottom">
             Date ranges are inclusive. Overlapping months will add extended time to IC experience.
           </v-tooltip>
-          <v-icon v-on="on" class="pl-2 pb-2" size="x-small">mdi-information</v-icon>
+          <v-icon class="pl-2 pb-2" size="x-small">mdi-information</v-icon>
         </span>
       </div>
 
       <!-- Loop Time Frames -->
       <div v-for="(timeFrame, index) in editedJobExperienceInfo.icTimeFrames" :key="index">
         <!-- Range -->
-        <v-menu v-model="timeFrame.showRangeMenu" :close-on-content-click="false" location="start center">
-          <template v-slot:activator="{ props }">
-            <v-text-field
-              :model-value="formatRange(timeFrame.range)"
-              :rules="getRequiredRules()"
-              label="Date Range"
-              variant="underlined"
-              readonly
-              v-bind="props"
-              clearable
-              @click:prepend="timeFrame.showRangeMenu = true"
-            >
-              <template v-slot:prepend>
-                <div class="pointer">
-                  <v-icon :color="caseGray">mdi-calendar</v-icon>
-                </div>
-              </template>
-              <template v-slot:append>
-                <v-btn class="pb-3" icon="" density="comfortable" variant="text" @click="deleteICTimeFrame(index)">
-                  <v-tooltip activator="parent" location="top">Delete IC Time Frame</v-tooltip>
-                  <v-icon class="case-gray">mdi-delete</v-icon>
-                </v-btn>
-              </template>
-            </v-text-field>
+        <v-text-field
+          :model-value="formatRange(timeFrame.range)"
+          ref="formFields"
+          :rules="getRequiredRules()"
+          label="Date Range"
+          variant="underlined"
+          readonly
+          prepend-icon="mdi-calendar"
+          clearable
+          @click:prepend="timeFrame.showRangeMenu = true"
+        >
+          <v-menu
+            activator="parent"
+            v-model="timeFrame.showRangeMenu"
+            :close-on-content-click="false"
+            location="start center"
+          >
+            <v-date-picker
+              v-model="timeFrame.range"
+              multiple
+              :max="today"
+              show-adjacent-months
+              hide-actions
+              keyboard-icon=""
+              color="#bc3825"
+              title="Date Range"
+            ></v-date-picker>
+          </v-menu>
+          <template v-slot:append>
+            <v-btn class="pb-3" icon="" density="comfortable" variant="text" @click="deleteICTimeFrame(index)">
+              <v-tooltip activator="parent" location="top">Delete IC Time Frame</v-tooltip>
+              <v-icon class="case-gray">mdi-delete</v-icon>
+            </v-btn>
           </template>
-          <v-date-picker
-            v-model="timeFrame.range"
-            multiple
-            :max="today"
-            show-adjacent-months
-            hide-actions
-            keyboard-icon=""
-            color="#bc3825"
-            title="Date Range"
-          ></v-date-picker>
-        </v-menu>
+        </v-text-field>
         <!-- End Range -->
       </div>
       <!-- End Loop TimeFrames -->
@@ -141,105 +140,101 @@
         <v-row>
           <v-col cols="12" sm="6" md="12" lg="6" class="pt-3">
             <!-- Start Date -->
-            <v-menu v-model="position.showStartMenu" :close-on-content-click="false" location="start center">
-              <template v-slot:activator="{ props }">
-                <v-text-field
-                  :id="'start-field-' + compIndex + '-' + index"
-                  ref="formFields"
-                  :model-value="format(position.startDate, null, 'MM/YYYY')"
-                  label="Start Date"
-                  hint="MM/YYYY format"
-                  v-mask="'##/####'"
-                  :rules="[...getDateMonthYearRules(), dateOrderRule(compIndex, index)]"
-                  variant="underlined"
-                  v-bind="props"
-                  @update:focused="position.startDate = parseEventDate($event)"
-                  @click:prepend="position.showStartMenu = true"
-                  @focus="setIndices(compIndex, index)"
-                  clearable
-                >
-                  <template v-slot:prepend>
-                    <div class="pointer">
-                      <v-icon :color="caseGray">mdi-calendar</v-icon>
-                    </div>
-                  </template>
-                </v-text-field>
-              </template>
-              <v-date-picker
-                v-model="position.startDate"
-                @update:model-value="position.showStartMenu = false"
-                :max="position.endDate"
-                show-adjacent-months
-                hide-actions
-                keyboard-icon=""
-                color="#bc3825"
-                title="Start Date"
-              ></v-date-picker>
-            </v-menu>
+            <v-text-field
+              :id="'start-field-' + compIndex + '-' + index"
+              ref="formFields"
+              :model-value="format(position.startDate, null, 'MM/YYYY')"
+              label="Start Date"
+              hint="MM/YYYY format"
+              v-mask="'##/####'"
+              :rules="[...getDateMonthYearRules(), dateOrderRule(compIndex, index)]"
+              variant="underlined"
+              prepend-icon="mdi-calendar"
+              @update:focused="position.startDate = parseEventDate($event)"
+              @click:prepend="position.showStartMenu = true"
+              @focus="setIndices(compIndex, index)"
+              clearable
+            >
+              <v-menu
+                activator="parent"
+                v-model="position.showStartMenu"
+                :close-on-content-click="false"
+                location="start center"
+              >
+                <v-date-picker
+                  v-model="position.startDate"
+                  @update:model-value="position.showStartMenu = false"
+                  :max="position.endDate"
+                  show-adjacent-months
+                  hide-actions
+                  keyboard-icon=""
+                  color="#bc3825"
+                  title="Start Date"
+                ></v-date-picker>
+              </v-menu>
+            </v-text-field>
             <!-- End Start Date -->
           </v-col>
           <v-col cols="12" sm="6" md="12" lg="6" class="pt-3">
             <!-- End Date -->
-            <v-menu v-model="position.showEndMenu" :close-on-content-click="false" location="start center">
-              <template v-slot:activator="{ props }">
-                <v-text-field
-                  :id="'end-field-' + compIndex + '-' + index"
-                  ref="formFields"
-                  :model-value="format(position.endDate, null, 'MM/YYYY')"
-                  :label="position.presentDate ? 'Currently active' : 'End Date'"
-                  variant="underlined"
-                  :rules="[
-                    ...getDateMonthYearOptionalRules(),
-                    dateOrderRule(compIndex, index),
-                    endDatePresentRule(compIndex, index)
-                  ]"
-                  hint="MM/YYYY format"
-                  v-mask="'##/####'"
-                  clearable
-                  v-bind="props"
-                  @click:clear="position.endDate = null"
-                  @update:focused="position.endDate = parseEventDate($event)"
-                  @click:prepend="position.showEndMenu = true"
-                  @focus="setIndices(compIndex, index)"
-                  @update:model-value="
-                    position.endDate && position.endDate.length > 0 ? (position.presentDate = false) : ''
-                  "
+            <v-text-field
+              :id="'end-field-' + compIndex + '-' + index"
+              ref="formFields"
+              :model-value="format(position.endDate, null, 'MM/YYYY')"
+              :label="position.presentDate ? 'Currently active' : 'End Date'"
+              variant="underlined"
+              :rules="[
+                ...getDateMonthYearOptionalRules(),
+                dateOrderRule(compIndex, index),
+                endDatePresentRule(compIndex, index)
+              ]"
+              hint="MM/YYYY format"
+              v-mask="'##/####'"
+              clearable
+              prepend-icon="mdi-calendar"
+              @click:clear="position.endDate = null"
+              @update:focused="position.endDate = parseEventDate($event)"
+              @click:prepend="position.showEndMenu = true"
+              @focus="setIndices(compIndex, index)"
+              @update:model-value="
+                position.endDate && position.endDate.length > 0 ? (position.presentDate = false) : ''
+              "
+            >
+              <v-menu
+                activator="parent"
+                v-model="position.showEndMenu"
+                :close-on-content-click="false"
+                location="start center"
+              >
+                <v-date-picker
+                  v-model="position.endDate"
+                  :min="position.startDate"
+                  @update:model-value="position.showEndMenu = false"
+                  show-adjacent-months
+                  hide-actions
+                  keyboard-icon=""
+                  color="#bc3825"
+                  title="Starting Date"
+                ></v-date-picker>
+              </v-menu>
+              <template v-slot:append-inner>
+                <v-avatar
+                  v-if="checkPositionStatus(position)"
+                  @click.stop="position.presentDate = !position.presentDate"
+                  class="pointer"
+                  size="x-small"
                 >
-                  <template v-slot:prepend>
-                    <div class="pointer">
-                      <v-icon :color="caseGray">mdi-calendar</v-icon>
-                    </div>
-                  </template>
-                  <template v-slot:append-inner>
-                    <v-avatar
-                      v-if="checkPositionStatus(position)"
-                      @click.stop="position.presentDate = !position.presentDate"
-                      class="pointer"
-                      size="x-small"
-                    >
-                      <span v-if="!position.presentDate">
-                        <v-tooltip activator="parent">Click if active</v-tooltip>
-                        <v-icon color="black"> mdi-check-circle-outline </v-icon>
-                      </span>
-                      <span v-else>
-                        <v-tooltip activator="parent">Currently active</v-tooltip>
-                        <v-icon color="black"> mdi-check-circle </v-icon>
-                      </span>
-                    </v-avatar>
-                  </template>
-                </v-text-field>
+                  <span v-if="!position.presentDate">
+                    <v-tooltip activator="parent">Click if active</v-tooltip>
+                    <v-icon color="black"> mdi-check-circle-outline </v-icon>
+                  </span>
+                  <span v-else>
+                    <v-tooltip activator="parent">Currently active</v-tooltip>
+                    <v-icon color="black"> mdi-check-circle </v-icon>
+                  </span>
+                </v-avatar>
               </template>
-              <v-date-picker
-                v-model="position.endDate"
-                :min="position.startDate"
-                @update:model-value="position.showEndMenu = false"
-                show-adjacent-months
-                hide-actions
-                keyboard-icon=""
-                color="#bc3825"
-                title="Starting Date"
-              ></v-date-picker>
-            </v-menu>
+            </v-text-field>
             <!-- End End Date -->
           </v-col>
         </v-row>
@@ -272,7 +267,7 @@
 <script>
 import _ from 'lodash';
 import { getDateMonthYearRules, getDateMonthYearOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
-import { isEmpty, isMobile } from '@/utils/utils';
+import { asyncForEach, isEmpty, isMobile } from '@/utils/utils';
 import { add, format, getTodaysDate, isAfter } from '@/shared/dateUtils';
 import { mask } from 'vue-the-mask';
 import { getRole } from '@/utils/auth';
@@ -472,12 +467,12 @@ function setIndices(companyIndex, positionIndex) {
 /**
  * Validate all input fields are valid. Emit to parent the error status.
  */
-function validateFields() {
+async function validateFields() {
   let errorCount = 0;
   //ensures that refs are put in an array so we can reuse forEach loop
   let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
-  _.forEach(components, (field) => {
-    if (field && !field.validate()) errorCount++;
+  await asyncForEach(components, async (field) => {
+    if (field && (await field.validate()).length > 0) errorCount++;
   });
 
   // Fail safe in case users or inters somehow change their disabled info

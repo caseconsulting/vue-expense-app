@@ -89,6 +89,7 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
+import { asyncForEach } from '@/utils/utils';
 import { getRequiredRules } from '@/shared/validationUtils.js';
 
 // |--------------------------------------------------|
@@ -203,12 +204,12 @@ async function updateTechDropDown(query) {
 /**
  * Validate all input fields are valid. Emit to parent the error status.
  */
-function validateFields() {
+async function validateFields() {
   let errorCount = 0;
   //ensures that refs are put in an array so we can reuse forEach loop
   let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
-  _.forEach(components, (field) => {
-    if (field && !field.validate()) {
+  await asyncForEach(components, async (field) => {
+    if (field && (await field.validate()).length > 0) {
       errorCount++;
     }
   });

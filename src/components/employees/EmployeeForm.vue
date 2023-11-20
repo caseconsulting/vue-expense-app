@@ -627,7 +627,9 @@ async function confirm() {
   });
 
   //validates forms
-  if (this.$refs.form !== undefined && this.$refs.form.validate()) {
+  if (this.$refs.form !== undefined) {
+    await this.$refs.form.validate();
+    await this.$refs.form.validate(); // no idea why this needs to happen twice but it does
     //checks to see if there are any tabs with errors
     let hasErrors = this.hasTabError();
     if (!hasErrors) {

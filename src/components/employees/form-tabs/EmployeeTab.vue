@@ -159,93 +159,82 @@
       ></v-autocomplete>
 
       <!-- Hire Date -->
-      <v-menu
-        ref="hireMenu"
-        location="start center"
-        :close-on-content-click="false"
-        v-model="hireMenu"
-        :disabled="!admin"
+      <v-text-field
+        id="employeeHireDateField"
+        ref="formFields"
+        v-model="hireDateFormatted"
+        :rules="getDateRules()"
+        :disabled="hasExpenses || !admin"
+        v-mask="'##/##/####'"
+        prepend-icon="mdi-calendar"
+        label="Hire Date*"
+        variant="underlined"
+        hint="MM/DD/YYYY format"
+        persistent-hint
+        @update:focused="editedEmployee.hireDate = format(hireDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
+        @click:prepend="hireMenu = true"
       >
-        <template v-slot:activator="{ props }">
-          <v-text-field
-            id="employeeHireDateField"
-            ref="formFields"
-            v-model="hireDateFormatted"
-            :rules="getDateRules()"
-            :disabled="hasExpenses || !admin"
-            v-mask="'##/##/####'"
-            label="Hire Date*"
-            variant="underlined"
-            hint="MM/DD/YYYY format"
-            persistent-hint
-            v-bind="props"
-            @update:focused="editedEmployee.hireDate = format(hireDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
-            @click:prepend="hireMenu = true"
-          >
-            <template v-slot:prepend>
-              <div class="pointer">
-                <v-icon :color="caseGray">mdi-calendar</v-icon>
-              </div>
-            </template>
-          </v-text-field>
-        </template>
-        <v-date-picker
-          v-model="editedEmployee.hireDate"
-          @update:model-value="hireMenu = false"
-          :max="editedEmployee.deptDate"
+        <v-menu
+          activator="parent"
+          ref="hireMenu"
+          location="start center"
+          :close-on-content-click="false"
+          v-model="hireMenu"
           :disabled="!admin"
-          show-adjacent-months
-          hide-actions
-          keyboard-icon=""
-          color="#bc3825"
-          title="Hire Date"
-        ></v-date-picker>
-      </v-menu>
-      <!-- If inactive, set Departure Date -->
-      <v-menu
-        v-if="isInactive()"
-        ref="departureMenu"
-        :rules="getRequiredRules()"
-        :close-on-content-click="false"
-        v-model="departureMenu"
-        :disabled="!admin"
-        location="start center"
-      >
-        <template v-slot:activator="{ props }">
-          <v-text-field
-            ref="formFields"
-            v-model="deptDateFormatted"
-            :rules="[...getDateRules(), validateDates()]"
-            label="Departure Date"
-            variant="underlined"
-            hint="MM/DD/YYYY format"
-            v-mask="'##/##/####'"
-            class="mt-1"
-            persistent-hint
-            v-bind="props"
-            @update:focused="editedEmployee.deptDate = format(deptDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
-            @click:prepend="departureMenu = true"
+        >
+          <v-date-picker
+            v-model="editedEmployee.hireDate"
+            @update:model-value="hireMenu = false"
+            :max="editedEmployee.deptDate"
             :disabled="!admin"
-          >
-            <template v-slot:prepend>
-              <div class="pointer">
-                <v-icon :color="caseGray">mdi-calendar</v-icon>
-              </div>
-            </template>
-          </v-text-field>
-        </template>
-        <v-date-picker
-          v-model="editedEmployee.deptDate"
-          @update:model-value="departureMenu = false"
-          :min="editedEmployee.hireDate"
+            show-adjacent-months
+            hide-actions
+            keyboard-icon=""
+            color="#bc3825"
+            title="Hire Date"
+          ></v-date-picker>
+        </v-menu>
+      </v-text-field>
+
+      <!-- If inactive, set Departure Date -->
+      <v-text-field
+        v-if="isInactive()"
+        ref="formFields"
+        id="employeeDepartureDateField"
+        v-model="deptDateFormatted"
+        :rules="[...getDateRules(), validateDates()]"
+        label="Departure Date"
+        variant="underlined"
+        prepend-icon="mdi-calendar"
+        hint="MM/DD/YYYY format"
+        v-mask="'##/##/####'"
+        class="mt-1"
+        persistent-hint
+        @update:focused="editedEmployee.deptDate = format(deptDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
+        @click:prepend="departureMenu = true"
+        :disabled="!admin"
+      >
+        <v-menu
+          activator="parent"
+          :rules="getRequiredRules()"
+          :close-on-content-click="false"
+          v-model="departureMenu"
           :disabled="!admin"
-          show-adjacent-months
-          hide-actions
-          keyboard-icon=""
-          color="#bc3825"
-          title="Departure Date"
-        ></v-date-picker>
-      </v-menu>
+          location="start center"
+        >
+          <v-date-picker
+            v-model="editedEmployee.deptDate"
+            @update:model-value="departureMenu = false"
+            :min="editedEmployee.hireDate"
+            :disabled="!admin"
+            show-adjacent-months
+            hide-actions
+            keyboard-icon=""
+            color="#bc3825"
+            title="Departure Date"
+          ></v-date-picker>
+        </v-menu>
+      </v-text-field>
       <!-- Full/Part/Inactive Status [MOBILE] -->
       <v-radio-group
         v-if="isMobile()"
@@ -306,7 +295,7 @@
             reporting is required for companies with more than 50 employees. <b>Note:</b> options for the fields below
             are the same as the options listed in the paper format.
           </v-tooltip>
-          <v-icon v-on="on" class="case-gray">shield</v-icon>
+          <v-icon class="case-gray">shield</v-icon>
         </span>
       </p>
 
@@ -415,7 +404,15 @@
 import api from '@/shared/api.js';
 import _ from 'lodash';
 import { getDateRules, getNumberRules, getRequiredRules, getValidateFalse } from '@/shared/validationUtils.js';
-import { isEmpty, isMobile, userRoleIsAdmin, userRoleIsManager, userRoleIsUser, userRoleIsIntern } from '@/utils/utils';
+import {
+  asyncForEach,
+  isEmpty,
+  isMobile,
+  userRoleIsAdmin,
+  userRoleIsManager,
+  userRoleIsUser,
+  userRoleIsIntern
+} from '@/utils/utils';
 import { format } from '@/shared/dateUtils';
 import { mask } from 'vue-the-mask';
 import EEODeclineSelfIdentify from '../../modals/EEODeclineSelfIdentify.vue';
@@ -592,12 +589,12 @@ function thisIsMyProfile() {
 /**
  * Validate all input fields are valid. Emit to parent the error status.
  */
-function validateFields() {
+async function validateFields() {
   let errorCount = 0;
   //ensures that refs are put in an array so we can reuse forEach loop
   let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
-  _.forEach(components, (field) => {
-    if (field && !field.validate()) errorCount++;
+  await asyncForEach(components, async (field) => {
+    if (field && (await field.validate()).length > 0) errorCount++;
   });
 
   // get symmetric difference of tags to determine which tags need to update

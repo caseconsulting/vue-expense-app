@@ -11,44 +11,38 @@
         clearable
       ></v-text-field>
       <!-- Received Date -->
-      <v-menu
-        v-model="highSchool.showReceivedMenu"
-        :close-on-content-click="false"
-        :attach="isAttached"
-        location="start center"
+      <v-text-field
+        :model-value="format(highSchool.gradDate, null, 'MM/YYYY')"
+        ref="formFields"
+        :rules="getDateMonthYearOptionalRules()"
+        label="Graduation Date"
+        hint="MM/YYYY format"
+        v-mask="'##/####'"
+        persistent-hint
+        variant="underlined"
+        @update:focused="highSchool.gradDate = parseEventDate($event)"
+        clearable
+        prepend-icon="mdi-calendar"
+        @click:prepend="highSchool.showReceivedMenu = true"
       >
-        <template v-slot:activator="{ props }">
-          <v-text-field
-            :model-value="format(highSchool.gradDate, null, 'MM/YYYY')"
-            ref="formFields"
-            :rules="getDateMonthYearOptionalRules()"
-            label="Graduation Date"
-            hint="MM/YYYY format"
-            v-mask="'##/####'"
-            persistent-hint
-            variant="underlined"
-            @update:focused="highSchool.gradDate = parseEventDate($event)"
-            clearable
-            v-bind="props"
-            @click:prepend="highSchool.showReceivedMenu = true"
-          >
-            <template v-slot:prepend>
-              <div class="pointer">
-                <v-icon :color="caseGray">mdi-calendar</v-icon>
-              </div>
-            </template>
-          </v-text-field>
-        </template>
-        <v-date-picker
-          v-model="highSchool.gradDate"
-          @update:model-value="highSchool.showReceivedMenu = false"
-          show-adjacent-months
-          hide-actions
-          keyboard-icon=""
-          color="#bc3825"
-          title="Graduation Date"
-        ></v-date-picker>
-      </v-menu>
+        <v-menu
+          activator="parent"
+          v-model="highSchool.showReceivedMenu"
+          :close-on-content-click="false"
+          :attach="isAttached"
+          location="start center"
+        >
+          <v-date-picker
+            v-model="highSchool.gradDate"
+            @update:model-value="highSchool.showReceivedMenu = false"
+            show-adjacent-months
+            hide-actions
+            keyboard-icon=""
+            color="#bc3825"
+            title="Graduation Date"
+          ></v-date-picker>
+        </v-menu>
+      </v-text-field>
       <!-- End Received Date -->
       <!-- Resume Parser Buttons -->
       <div v-if="parser" class="center">
@@ -71,6 +65,7 @@ import _ from 'lodash';
 import { mask } from 'vue-the-mask';
 import { getDateMonthYearOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
 import { format } from '@/shared/dateUtils';
+import { asyncForEach } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -102,12 +97,12 @@ function parseEventDate() {
 /**
  * Validate all input fields are valid.
  */
-function validateFields() {
+async function validateFields() {
   let errorCount = 0;
   //ensures that refs are put in an array so we can reuse forEach loop
   let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
-  _.forEach(components, (field) => {
-    if (field && !field.validate()) errorCount++;
+  await asyncForEach(components, async (field) => {
+    if (field && (await field.validate()).length > 0) errorCount++;
   });
 
   this.emitter.emit('doneValidatingEducation', {

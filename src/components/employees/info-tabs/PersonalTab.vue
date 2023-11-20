@@ -31,7 +31,7 @@
       <v-list class="left-border">
         <v-list-item v-for="number in getPhoneNumbers()" :key="number.number">
           <template v-slot:prepend>
-            <v-avatar variant="text" icon v-bind="attrs" class="mr-2">
+            <v-avatar variant="text" icon class="mr-2">
               <v-tooltip activator="parent" location="bottom">
                 <span v-if="number.private"
                   >Based on user preference, this is only visible to You, Managers, and Admins</span

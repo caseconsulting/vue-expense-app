@@ -94,7 +94,7 @@
               </span>
               <span class="mr-3">
                 <v-tooltip v-if="hasAdminPermissions()" activator="parent" location="top">Next employee</v-tooltip>
-                <v-icon size="large" v-on="on" @click="navEmployee(1)" color="white">mdi-arrow-right-thin</v-icon>
+                <v-icon size="large" @click="navEmployee(1)" color="white">mdi-arrow-right-thin</v-icon>
               </span>
               <h3 id="employeeName" v-if="userIsEmployee()">My Profile</h3>
               <h3 id="employeeName" v-else>

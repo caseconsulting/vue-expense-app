@@ -116,39 +116,39 @@
     </div>
 
     <!-- Birthday Picker -->
-    <v-menu ref="BirthdayMenu" :close-on-content-click="false" v-model="BirthdayMenu" location="start center">
-      <template v-slot:activator="{ props }">
-        <v-text-field
-          ref="formFields"
-          v-mask="'##/##/####'"
-          v-model="birthdayFormat"
-          :rules="[...getDateOptionalRules(), ...getNonFutureDateRules()]"
-          label="Birthday"
-          variant="underlined"
-          hint="MM/DD/YYYY format"
-          persistent-hint
-          v-bind="props"
-          @update:focused="editedPersonalInfo.birthday = format(birthdayFormat, null, 'YYYY-MM-DD')"
-          @click:prepend="BirthdayMenu = true"
-        >
-          <template v-slot:prepend>
-            <div class="pointer">
-              <v-icon :color="caseGray">mdi-calendar</v-icon>
-            </div>
-          </template>
-        </v-text-field>
-      </template>
-      <v-date-picker
-        v-model="editedPersonalInfo.birthday"
-        @update:model-value="BirthdayMenu = false"
-        show-adjacent-months
-        hide-actions
-        keyboard-icon=""
-        color="#bc3825"
-        title="Birthday"
+    <v-text-field
+      ref="formFields"
+      v-mask="'##/##/####'"
+      v-model="birthdayFormat"
+      :rules="[...getDateOptionalRules(), ...getNonFutureDateRules()]"
+      label="Birthday"
+      variant="underlined"
+      hint="MM/DD/YYYY format"
+      prepend-icon="mdi-calendar"
+      persistent-hint
+      v-bind="props"
+      @update:focused="editedPersonalInfo.birthday = format(birthdayFormat, null, 'YYYY-MM-DD')"
+      @click:prepend="BirthdayMenu = true"
+    >
+      <v-menu
+        activator="parent"
+        ref="BirthdayMenu"
+        :close-on-content-click="false"
+        v-model="BirthdayMenu"
+        location="start center"
       >
-      </v-date-picker>
-    </v-menu>
+        <v-date-picker
+          v-model="editedPersonalInfo.birthday"
+          @update:model-value="BirthdayMenu = false"
+          show-adjacent-months
+          hide-actions
+          keyboard-icon=""
+          color="#bc3825"
+          title="Birthday"
+        >
+        </v-date-picker>
+      </v-menu>
+    </v-text-field>
 
     <!-- Show Birthday -->
     <v-switch
@@ -282,7 +282,7 @@ import {
   getPhoneNumberRules,
   getPhoneNumberTypeRules
 } from '@/shared/validationUtils.js';
-import { isEmpty, countryList } from '@/utils/utils';
+import { asyncForEach, isEmpty, countryList } from '@/utils/utils';
 import { format } from '@/shared/dateUtils';
 import { mask } from 'vue-the-mask';
 import { getRole } from '@/utils/auth';
@@ -428,7 +428,7 @@ function userIsEmployee() {
 /**
  * Validate all input fields are valid. Emit to parent the error status.
  */
-function validateFields() {
+async function validateFields() {
   this.sortPhoneNumbers();
 
   let errorCount = 0;
@@ -437,9 +437,17 @@ function validateFields() {
 
   // for some reason, this page didn't overwrote the elements as formFields like the other pages did so
   // we added individual refs and put them into the components list manually
-  components = [...components, this.$refs.twitter, this.$refs.github, this.$refs.linkedin, this.$refs.phoneNumbers];
-  _.forEach(components, (field) => {
-    if (field && !field.validate()) errorCount++;
+  components = [
+    ...components,
+    this.$refs.x,
+    this.$refs.github,
+    this.$refs.linkedin,
+    this.$refs.personalEmail,
+    ...this.$refs.phoneNum,
+    ...this.$refs.phoneType
+  ];
+  await asyncForEach(components, async (field) => {
+    if (field && (await field.validate()).length > 0) errorCount++;
   });
 
   this.emitter.emit('personalStatus', errorCount); // emit error status

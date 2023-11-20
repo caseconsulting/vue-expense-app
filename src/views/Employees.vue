@@ -180,7 +180,6 @@
                 :employee="item"
                 :contracts="contracts"
                 :tags="tags"
-                v-on="on"
               ></convert-employee-to-csv>
               <span>
                 <v-tooltip activator="parent" location="top" text="Delete" />
@@ -189,7 +188,6 @@
                   id="employeesDeleteBtn"
                   :disabled="midAction"
                   @click.stop="validateDelete(item)"
-                  v-on="props"
                   variant="text"
                   icon="mdi-delete"
                 >

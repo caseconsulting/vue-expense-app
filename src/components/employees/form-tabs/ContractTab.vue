@@ -62,102 +62,96 @@
         <v-row>
           <v-col cols="12" sm="6" md="12" lg="6" class="pt-3">
             <!-- Start Date -->
-            <v-menu v-model="project.showStartMenu" :close-on-content-click="false" location="start center">
-              <template v-slot:activator="{ props }">
-                <v-text-field
-                  :id="'start-field-' + index + '-' + projIndex"
-                  ref="formFields"
-                  :model-value="format(project.startDate, null, 'MM/YYYY')"
-                  label="Start Date"
-                  hint="MM/YYYY format"
-                  v-mask="'##/####'"
-                  variant="underlined"
-                  :rules="[...getRequiredRules(), ...getDateMonthYearRules(), dateOrderRule(index, projIndex)]"
-                  @update:focused="project.startDate = parseEventDate($event)"
-                  clearable
-                  v-bind="props"
-                  @click:prepend="project.showStartMenu = true"
-                >
-                  <template v-slot:prepend>
-                    <div class="pointer">
-                      <v-icon :color="caseGray">mdi-calendar</v-icon>
-                    </div>
-                  </template>
-                </v-text-field>
-              </template>
-              <v-date-picker
-                v-model="project.startDate"
-                @update:model-value="project.showStartMenu = false"
-                :max="project.endDate"
-                show-adjacent-months
-                hide-actions
-                keyboard-icon=""
-                color="#bc3825"
-                title="Start Date"
-              ></v-date-picker>
-            </v-menu>
+            <v-text-field
+              :id="'start-field-' + index + '-' + projIndex"
+              ref="formFields"
+              :model-value="format(project.startDate, null, 'MM/YYYY')"
+              label="Start Date"
+              hint="MM/YYYY format"
+              v-mask="'##/####'"
+              variant="underlined"
+              prepend-icon="mdi-calendar"
+              :rules="[...getRequiredRules(), ...getDateMonthYearRules(), dateOrderRule(index, projIndex)]"
+              @update:focused="project.startDate = parseEventDate($event)"
+              clearable
+              @click:prepend="project.showStartMenu = true"
+            >
+              <v-menu
+                activator="parent"
+                v-model="project.showStartMenu"
+                :close-on-content-click="false"
+                location="start center"
+              >
+                <v-date-picker
+                  v-model="project.startDate"
+                  @update:model-value="project.showStartMenu = false"
+                  :max="project.endDate"
+                  show-adjacent-months
+                  hide-actions
+                  keyboard-icon=""
+                  color="#bc3825"
+                  title="Start Date"
+                ></v-date-picker>
+              </v-menu>
+            </v-text-field>
           </v-col>
           <v-col cols="12" sm="6" md="12" lg="6" class="pt-3">
             <!-- End Date -->
-            <v-menu v-model="project.showEndMenu" :close-on-content-click="false" location="start center">
-              <template v-slot:activator="{ props }">
-                <v-text-field
-                  :id="'end-field-' + index + '-' + projIndex"
-                  ref="formFields"
-                  :model-value="format(project.endDate, null, 'MM/YYYY')"
-                  :label="project.presentDate ? 'Currently active' : 'End Date'"
-                  variant="underlined"
-                  :rules="[
-                    ...getDateMonthYearOptionalRules(),
-                    dateOrderRule(index, projIndex),
-                    endDatePresentRule(index, projIndex)
-                  ]"
-                  hint="MM/YYYY format"
-                  v-mask="'##/####'"
-                  clearable
-                  v-bind="props"
-                  @click:clear="project.endDate = null"
-                  @update:focused="project.endDate = parseEventDate($event)"
-                  @click:prepend="project.showEndMenu = true"
-                  @update:model-value="
-                    project.endDate && project.endDate.length > 0 ? (project.presentDate = false) : ''
-                  "
+            <v-text-field
+              :id="'end-field-' + index + '-' + projIndex"
+              ref="formFields"
+              :model-value="format(project.endDate, null, 'MM/YYYY')"
+              :label="project.presentDate ? 'Currently active' : 'End Date'"
+              variant="underlined"
+              :rules="[
+                ...getDateMonthYearOptionalRules(),
+                dateOrderRule(index, projIndex),
+                endDatePresentRule(index, projIndex)
+              ]"
+              hint="MM/YYYY format"
+              prepend-icon="mdi-calendar"
+              v-mask="'##/####'"
+              clearable
+              @click:clear="project.endDate = null"
+              @update:focused="project.endDate = parseEventDate($event)"
+              @click:prepend="project.showEndMenu = true"
+              @update:model-value="project.endDate && project.endDate.length > 0 ? (project.presentDate = false) : ''"
+            >
+              <template v-slot:append-inner>
+                <v-avatar
+                  v-if="checkProjectStatus(project)"
+                  @click.stop="project.presentDate = !project.presentDate"
+                  class="pointer"
+                  size="x-small"
                 >
-                  <template v-slot:prepend>
-                    <div class="pointer">
-                      <v-icon :color="caseGray">mdi-calendar</v-icon>
-                    </div>
-                  </template>
-                  <template v-slot:append-inner>
-                    <v-avatar
-                      v-if="checkProjectStatus(project)"
-                      @click.stop="project.presentDate = !project.presentDate"
-                      class="pointer"
-                      size="x-small"
-                    >
-                      <span v-if="!project.presentDate">
-                        <v-tooltip activator="parent">Click if active</v-tooltip>
-                        <v-icon color="black"> mdi-check-circle-outline </v-icon>
-                      </span>
-                      <span v-else>
-                        <v-tooltip activator="parent">Currently active</v-tooltip>
-                        <v-icon color="black"> mdi-check-circle </v-icon>
-                      </span>
-                    </v-avatar>
-                  </template>
-                </v-text-field>
+                  <span v-if="!project.presentDate">
+                    <v-tooltip activator="parent">Click if active</v-tooltip>
+                    <v-icon color="black"> mdi-check-circle-outline </v-icon>
+                  </span>
+                  <span v-else>
+                    <v-tooltip activator="parent">Currently active</v-tooltip>
+                    <v-icon color="black"> mdi-check-circle </v-icon>
+                  </span>
+                </v-avatar>
               </template>
-              <v-date-picker
-                v-model="project.endDate"
-                :min="project.startDate"
-                @update:model-value="project.showEndMenu = false"
-                show-adjacent-months
-                hide-actions
-                keyboard-icon=""
-                color="#bc3825"
-                title="End Date"
-              ></v-date-picker>
-            </v-menu>
+              <v-menu
+                activator="parent"
+                v-model="project.showEndMenu"
+                :close-on-content-click="false"
+                location="start center"
+              >
+                <v-date-picker
+                  v-model="project.endDate"
+                  :min="project.startDate"
+                  @update:model-value="project.showEndMenu = false"
+                  show-adjacent-months
+                  hide-actions
+                  keyboard-icon=""
+                  color="#bc3825"
+                  title="End Date"
+                ></v-date-picker>
+              </v-menu>
+            </v-text-field>
             <!-- End End Date -->
           </v-col>
         </v-row>
@@ -194,7 +188,7 @@
 import _ from 'lodash';
 import { mask } from 'vue-the-mask';
 import { getDateMonthYearRules, getDateMonthYearOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
-import { isEmpty, isMobile } from '@/utils/utils';
+import { asyncForEach, isEmpty, isMobile } from '@/utils/utils';
 import { add, format, isAfter } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
@@ -433,12 +427,12 @@ function parseEventDate() {
 /**
  * Validate all input fields are valid. Emit to parent the error status.
  */
-function validateFields() {
+async function validateFields() {
   let errorCount = 0;
   //ensures that refs are put in an array so we can reuse forEach loop
   let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
-  _.forEach(components, (field) => {
-    if (field && !field.validate()) errorCount++;
+  await asyncForEach(components, async (field) => {
+    if (field && (await field.validate()).length > 0) errorCount++;
   });
 
   // fail safe if someone tries to force a contract that's present and has an end date

@@ -4,7 +4,7 @@
     <v-snackbar v-model="copied" color="black" location="bottom" :timeout="3000">
       Copied email list to clipboard
       <template v-slot:actions>
-        <v-btn color="red" variant="text" @click="copied = false" v-bind="attrs"> Close </v-btn>
+        <v-btn color="red" variant="text" @click="copied = false"> Close </v-btn>
       </template>
     </v-snackbar>
     <!-- Modal Card -->

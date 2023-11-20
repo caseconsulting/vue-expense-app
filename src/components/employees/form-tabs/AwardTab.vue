@@ -17,39 +17,37 @@
       <v-row class="py-3">
         <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
           <!-- Received Date -->
-          <v-menu v-model="award.showReceivedMenu" :close-on-content-click="false" location="start center">
-            <template v-slot:activator="{ props }">
-              <v-text-field
-                ref="formFields"
-                :model-value="format(award.dateReceived, null, 'MM/YYYY')"
-                label="Date Received"
-                :rules="getDateMonthYearRules()"
-                hint="MM/YYYY format"
-                v-mask="'##/####'"
-                variant="underlined"
-                persistent-hint
-                @update:focused="award.dateReceived = parseEventDate()"
-                clearable
-                v-bind="props"
-                @click:prepend="award.showReceivedMenu = true"
-              >
-                <template v-slot:prepend>
-                  <div class="pointer">
-                    <v-icon :color="caseGray">mdi-calendar</v-icon>
-                  </div>
-                </template>
-              </v-text-field>
-            </template>
-            <v-date-picker
-              v-model="award.dateReceived"
-              @update:model-value="award.showReceivedMenu = false"
-              show-adjacent-months
-              hide-actions
-              keyboard-icon=""
-              color="#bc3825"
-              title="Date Received"
-            ></v-date-picker>
-          </v-menu>
+          <v-text-field
+            ref="formFields"
+            :model-value="format(award.dateReceived, null, 'MM/YYYY')"
+            label="Date Received"
+            :rules="getDateMonthYearRules()"
+            hint="MM/YYYY format"
+            v-mask="'##/####'"
+            variant="underlined"
+            persistent-hint
+            @update:focused="award.dateReceived = parseEventDate()"
+            clearable
+            prepend-icon="mdi-calendar"
+            @click:prepend="award.showReceivedMenu = true"
+          >
+            <v-menu
+              activator="parent"
+              v-model="award.showReceivedMenu"
+              :close-on-content-click="false"
+              location="start center"
+            >
+              <v-date-picker
+                v-model="award.dateReceived"
+                @update:model-value="award.showReceivedMenu = false"
+                show-adjacent-months
+                hide-actions
+                keyboard-icon=""
+                color="#bc3825"
+                title="Date Received"
+              ></v-date-picker>
+            </v-menu>
+          </v-text-field>
           <!-- End Received Date -->
         </v-col>
         <v-col class="pb-1" sm="6" md="12" lg="6" align="center">
@@ -76,6 +74,7 @@
 import _ from 'lodash';
 import { getDateMonthYearRules, getRequiredRules } from '@/shared/validationUtils.js';
 import { format, getTodaysDate } from '@/shared/dateUtils';
+import { asyncForEach } from '@/utils/utils';
 import { mask } from 'vue-the-mask';
 
 // |--------------------------------------------------|
@@ -134,12 +133,12 @@ function parseEventDate() {
 /**
  * Validate all input fields are valid. Emit to parent the error status.
  */
-function validateFields() {
+async function validateFields() {
   let errorCount = 0;
   //ensures that refs are put in an array so we can reuse forEach loop
   let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
-  _.forEach(components, (field) => {
-    if (field && !field.validate()) errorCount++;
+  await asyncForEach(components, async (field) => {
+    if (field && (await field.validate()).length > 0) errorCount++;
   });
   this.emitter.emit('doneValidating', { tab: 'awards', data: this.editedAwards }); // emit done validating and sends edited data back to parent
   this.emitter.emit('awardStatus', errorCount); // emit error status

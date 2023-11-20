@@ -17,78 +17,74 @@
       <v-row class="pt-3">
         <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
           <!-- Received Date -->
-          <v-menu v-model="certification.showReceivedMenu" :close-on-content-click="false" location="start center">
-            <template v-slot:activator="{ props }">
-              <v-text-field
-                ref="formFields"
-                :model-value="format(certification.dateReceived, null, 'MM/DD/YYYY')"
-                label="Date Received"
-                :rules="[...getDateRules()]"
-                hint="MM/DD/YYYY format"
-                v-mask="'##/##/####'"
-                variant="underlined"
-                v-bind="props"
-                @update:focused="certification.dateReceived = parseEventDate()"
-                @focus="certificationIndex = index"
-                @click:prepend="certification.showReceivedMenu = true"
-                clearable
-              >
-                <template v-slot:prepend>
-                  <div class="pointer">
-                    <v-icon :color="caseGray">mdi-calendar</v-icon>
-                  </div>
-                </template>
-              </v-text-field>
-            </template>
-            <v-date-picker
-              v-model="certification.dateReceived"
-              :max="certification.expirationDate"
-              @update:model-value="certification.showReceivedMenu = false"
-              show-adjacent-months
-              hide-actions
-              keyboard-icon=""
-              color="#bc3825"
-              title="Date Received"
-            ></v-date-picker>
-          </v-menu>
+          <v-text-field
+            ref="formFields"
+            :model-value="format(certification.dateReceived, null, 'MM/DD/YYYY')"
+            label="Date Received"
+            :rules="[...getDateRules()]"
+            hint="MM/DD/YYYY format"
+            v-mask="'##/##/####'"
+            variant="underlined"
+            prepend-icon="mdi-calendar"
+            @update:focused="certification.dateReceived = parseEventDate()"
+            @focus="certificationIndex = index"
+            @click:prepend="certification.showReceivedMenu = true"
+            clearable
+          >
+            <v-menu
+              activator="parent"
+              v-model="certification.showReceivedMenu"
+              :close-on-content-click="false"
+              location="start center"
+            >
+              <v-date-picker
+                v-model="certification.dateReceived"
+                :max="certification.expirationDate"
+                @update:model-value="certification.showReceivedMenu = false"
+                show-adjacent-months
+                hide-actions
+                keyboard-icon=""
+                color="#bc3825"
+                title="Date Received"
+              ></v-date-picker>
+            </v-menu>
+          </v-text-field>
           <!-- End Received Date -->
         </v-col>
         <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
           <!-- Expiration Date -->
-          <v-menu v-model="certification.showExpirationMenu" :close-on-content-click="false" location="start center">
-            <template v-slot:activator="{ props }">
-              <v-text-field
-                ref="formFields"
-                :model-value="format(certification.expirationDate, null, 'MM/DD/YYYY')"
-                label="Expiration Date (optional)"
-                :rules="[...getDateOptionalRules(), dateOrderRules(index)]"
-                hint="MM/DD/YYYY format"
-                v-mask="'##/##/####'"
-                variant="underlined"
-                clearable
-                v-bind="props"
-                @update:focused="certification.expirationDate = parseEventDate()"
-                @click:prepend="certification.showExpirationMenu = true"
-                @focus="certificationIndex = index"
-              >
-                <template v-slot:prepend>
-                  <div class="pointer">
-                    <v-icon :color="caseGray">mdi-calendar</v-icon>
-                  </div>
-                </template>
-              </v-text-field>
-            </template>
-            <v-date-picker
-              v-model="certification.expirationDate"
-              :min="certification.dateReceived"
-              @update:model-value="certification.showExpirationMenu = false"
-              show-adjacent-months
-              hide-actions
-              keyboard-icon=""
-              color="#bc3825"
-              title="Expiration Date"
-            ></v-date-picker>
-          </v-menu>
+          <v-text-field
+            ref="formFields"
+            :model-value="format(certification.expirationDate, null, 'MM/DD/YYYY')"
+            label="Expiration Date (optional)"
+            :rules="[...getDateOptionalRules(), dateOrderRules(index)]"
+            hint="MM/DD/YYYY format"
+            v-mask="'##/##/####'"
+            variant="underlined"
+            clearable
+            prepend-icon="mdi-calendar"
+            @update:focused="certification.expirationDate = parseEventDate()"
+            @click:prepend="certification.showExpirationMenu = true"
+            @focus="certificationIndex = index"
+          >
+            <v-menu
+              activator="parent"
+              v-model="certification.showExpirationMenu"
+              :close-on-content-click="false"
+              location="start center"
+            >
+              <v-date-picker
+                v-model="certification.expirationDate"
+                :min="certification.dateReceived"
+                @update:model-value="certification.showExpirationMenu = false"
+                show-adjacent-months
+                hide-actions
+                keyboard-icon=""
+                color="#bc3825"
+                title="Expiration Date"
+              ></v-date-picker>
+            </v-menu>
+          </v-text-field>
           <!-- End Expiration Date -->
         </v-col>
       </v-row>
@@ -116,7 +112,7 @@
 <script>
 import _ from 'lodash';
 import { getDateRules, getDateOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
-import { isEmpty, isMobile } from '@/utils/utils';
+import { asyncForEach, isEmpty, isMobile } from '@/utils/utils';
 import { add, format, getTodaysDate, isAfter } from '@/shared/dateUtils';
 import { mask } from 'vue-the-mask';
 
@@ -192,12 +188,12 @@ function populateDropDowns() {
 /**
  * Validate all input fields are valid. Emit to parent the error status.
  */
-function validateFields() {
+async function validateFields() {
   let errorCount = 0;
   //ensures that refs are put in an array so we can reuse forEach loop
   let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
-  _.forEach(components, (field) => {
-    if (field && !field.validate()) errorCount++;
+  await asyncForEach(components, async (field) => {
+    if (field && (await field.validate()).length > 0) errorCount++;
   });
   this.emitter.emit('doneValidating', { tab: 'certifications', data: this.editedCertifications }); // emit done validating and sends edited data back to parent
   this.emitter.emit('certificationsStatus', errorCount); // emit error status

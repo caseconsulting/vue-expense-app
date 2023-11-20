@@ -68,7 +68,7 @@
             </v-tooltip>
             <!-- Icon -->
             <template v-slot:icon v-if="item.icon">
-              <v-btn v-on="on" variant="text" icon :href="getURL(item)" target="blank">
+              <v-btn variant="text" icon :href="getURL(item)" target="blank">
                 <v-tooltip
                   v-if="
                     item.newCampfire ||

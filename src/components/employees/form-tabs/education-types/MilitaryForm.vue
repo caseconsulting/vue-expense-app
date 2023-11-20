@@ -15,87 +15,75 @@
       <v-row>
         <v-col cols="12" sm="6">
           <!-- Starting Date -->
-          <v-menu
-            v-model="military.showStartMenu"
-            :close-on-content-click="false"
-            :attach="isAttached"
-            location="start center"
+          <v-text-field
+            ref="formFields"
+            :model-value="format(military.startDate, null, 'MM/YYYY')"
+            :rules="getDateMonthYearOptionalRules()"
+            label="Starting Date"
+            hint="MM/YYYY format"
+            v-mask="'##/####'"
+            variant="underlined"
+            prepend-icon="mdi-calendar"
+            @update:focused="military.startDate = parseEventDate($event)"
+            @click:prepend="military.showStartMenu = true"
+            clearable
+            persistent-hint
           >
-            <template v-slot:activator="{ props }">
-              <v-text-field
-                ref="formFields"
-                :model-value="format(military.startDate, null, 'MM/YYYY')"
-                :rules="getDateMonthYearOptionalRules()"
-                label="Starting Date"
-                hint="MM/YYYY format"
-                v-mask="'##/####'"
-                variant="underlined"
-                v-bind="props"
-                @update:focused="military.startDate = parseEventDate($event)"
-                @click:prepend="military.showStartMenu = true"
-                clearable
-                persistent-hint
-              >
-                <template v-slot:prepend>
-                  <div class="pointer">
-                    <v-icon :color="caseGray">mdi-calendar</v-icon>
-                  </div>
-                </template>
-              </v-text-field>
-            </template>
-            <v-date-picker
-              v-model="military.startDate"
-              @update:model-value="military.showStartMenu = false"
-              show-adjacent-months
-              hide-actions
-              keyboard-icon=""
-              color="#bc3825"
-              title="Starting Date"
-            ></v-date-picker>
-          </v-menu>
+            <v-menu
+              activator="parent"
+              v-model="military.showStartMenu"
+              :close-on-content-click="false"
+              :attach="isAttached"
+              location="start center"
+            >
+              <v-date-picker
+                v-model="military.startDate"
+                @update:model-value="military.showStartMenu = false"
+                show-adjacent-months
+                hide-actions
+                keyboard-icon=""
+                color="#bc3825"
+                title="Starting Date"
+              ></v-date-picker>
+            </v-menu>
+          </v-text-field>
           <!-- End Starting Date -->
         </v-col>
 
         <!-- Completed Date -->
         <v-col cols="12" sm="6">
-          <v-menu
-            v-model="military.showCompleteMenu"
-            :close-on-content-click="false"
-            :attach="isAttached"
-            location="start center"
+          <v-text-field
+            ref="formFields"
+            :model-value="format(military.completeDate, null, 'MM/YYYY')"
+            :rules="getDateMonthYearOptionalRules()"
+            label="Completion Date"
+            hint="MM/YYYY format"
+            v-mask="'##/####'"
+            variant="underlined"
+            prepend-icon="mdi-calendar"
+            @update:focused="military.completeDate = parseEventDate($event)"
+            @click:prepend="military.showCompleteMenu = true"
+            clearable
+            persistent-hint
           >
-            <template v-slot:activator="{ props }">
-              <v-text-field
-                ref="formFields"
-                :model-value="format(military.completeDate, null, 'MM/YYYY')"
-                :rules="getDateMonthYearOptionalRules()"
-                label="Completion Date"
-                hint="MM/YYYY format"
-                v-mask="'##/####'"
-                variant="underlined"
-                v-bind="props"
-                @update:focused="military.completeDate = parseEventDate($event)"
-                @click:prepend="military.showCompleteMenu = true"
-                clearable
-                persistent-hint
-              >
-                <template v-slot:prepend>
-                  <div class="pointer">
-                    <v-icon :color="caseGray">mdi-calendar</v-icon>
-                  </div>
-                </template>
-              </v-text-field>
-            </template>
-            <v-date-picker
-              v-model="military.completeDate"
-              @update:model-value="military.showCompleteMenu = false"
-              show-adjacent-months
-              hide-actions
-              keyboard-icon=""
-              color="#bc3825"
-              title="Completion Date"
-            ></v-date-picker>
-          </v-menu>
+            <v-menu
+              activator="parent"
+              v-model="military.showCompleteMenu"
+              :close-on-content-click="false"
+              :attach="isAttached"
+              location="start center"
+            >
+              <v-date-picker
+                v-model="military.completeDate"
+                @update:model-value="military.showCompleteMenu = false"
+                show-adjacent-months
+                hide-actions
+                keyboard-icon=""
+                color="#bc3825"
+                title="Completion Date"
+              ></v-date-picker>
+            </v-menu>
+          </v-text-field>
         </v-col>
         <!-- End Completed Date -->
       </v-row>
@@ -108,7 +96,7 @@
       </v-btn>
       <v-btn icon="" variant="text">
         <v-tooltip activator="parent" location="top">Add Pending Change</v-tooltip>
-        <v-icon v-on="on" size="large" color="green" @click="emitToParser(true)">mdi-check</v-icon>
+        <v-icon size="large" color="green" @click="emitToParser(true)">mdi-check</v-icon>
       </v-btn>
     </div>
     <!-- End Resume Parser Buttons -->
@@ -120,6 +108,7 @@ import _ from 'lodash';
 import { mask } from 'vue-the-mask';
 import { getDateMonthYearOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
 import { format, isBefore } from '@/shared/dateUtils';
+import { asyncForEach } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -163,12 +152,12 @@ function parseEventDate() {
 /**
  * Validate all input fields are valid.
  */
-function validateFields() {
+async function validateFields() {
   let errorCount = 0;
   //ensures that refs are put in an array so we can reuse forEach loop
   let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
-  _.forEach(components, (field) => {
-    if (field && !field.validate()) errorCount++;
+  await asyncForEach(components, async (field) => {
+    if (field && (await field.validate()).length > 0) errorCount++;
   });
   this.emitter.emit('doneValidatingEducation', {
     content: this.military,

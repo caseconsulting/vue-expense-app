@@ -117,7 +117,6 @@
       <v-footer v-if="isLoggedIn()">
         <v-col class="text-right text-caption" cols="12">
           <a
-            v-on="on"
             id="P"
             class="text-black"
             target="_blank"

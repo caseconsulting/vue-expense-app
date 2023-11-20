@@ -2,7 +2,6 @@
   <span>
     <v-tooltip activator="parent" location="top" text="Download CSV" />
     <v-btn
-      v-on="on"
       @click.stop="download"
       variant="text"
       density="comfortable"
