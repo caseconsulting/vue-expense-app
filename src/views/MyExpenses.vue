@@ -13,10 +13,10 @@
     <v-row v-else>
       <!-- Status Alert -->
       <v-snackbar
-        v-model="status.statusType"
+        v-model="status.show"
         :color="status.color"
         :multi-line="true"
-        location="top right"
+        location="top end"
         :timeout="5000"
         :vertical="true"
       >
@@ -358,17 +358,7 @@
 
       <!-- Expense Form -->
       <v-col v-if="userRoleIsAdmin() || userRoleIsManager() || !userIsInactive" cols="12" lg="4">
-        <expense-form
-          v-if="!initialPageLoading"
-          ref="form"
-          :isEdit="isEditing"
-          :expense="expense"
-          v-on:add="addModelToTable"
-          v-on:delete="deleteModelFromTable"
-          v-on:startAction="startAction"
-          v-on:update="updateModelInTable"
-          v-on:error="displayError"
-        ></expense-form>
+        <expense-form v-if="!initialPageLoading" ref="form" :isEdit="isEditing" :expense="expense"></expense-form>
       </v-col>
     </v-row>
   </div>
@@ -470,6 +460,7 @@ function moneyFilter(value) {
 async function addModelToTable() {
   await this.refreshExpenses();
 
+  this.status['show'] = true;
   this.status['statusType'] = 'SUCCESS';
   this.status['statusMessage'] = 'Item was successfully submitted!';
   this.status['color'] = 'green';
@@ -498,6 +489,7 @@ function clearExpense() {
  * Clear the action status that is displayed in the snackbar.
  */
 function clearStatus() {
+  this.status['show'] = false;
   this.status['statusType'] = undefined;
   this.status['statusMessage'] = '';
   this.status['color'] = '';
@@ -608,6 +600,7 @@ async function deleteExpense() {
 async function deleteModelFromTable() {
   await this.refreshExpenses();
 
+  this.status['show'] = true;
   this.status['statusType'] = 'SUCCESS';
   this.status['statusMessage'] = 'Item was successfully deleted!';
   this.status['color'] = 'green';
@@ -619,6 +612,7 @@ async function deleteModelFromTable() {
  * @param err - String error message
  */
 function displayError(err) {
+  this.status['show'] = true;
   this.status['statusType'] = 'ERROR';
   this.status['statusMessage'] = err;
   this.status['color'] = 'red';
@@ -805,6 +799,7 @@ async function unreimburseExpense() {
 
   if (updatedExpense.id) {
     // successfully unreimburses expense
+    this.status['show'] = true;
     this.status['statusType'] = 'SUCCESS';
     this.status['statusMessage'] = 'Item was successfully unreimbursed!';
     this.status['color'] = 'green';
@@ -825,6 +820,7 @@ async function unreimburseExpense() {
 async function updateModelInTable() {
   await this.refreshExpenses();
 
+  this.status['show'] = true;
   this.status['statusType'] = 'SUCCESS';
   this.status['statusMessage'] = 'Item was successfully updated!';
   this.status['color'] = 'green';
@@ -857,6 +853,23 @@ function useInactiveStyle(expense) {
  *  Gets and sets user info, expense types, and expenses. Creates event listeners.
  */
 async function created() {
+  // expense form listeners
+  this.emitter.on('add', () => {
+    this.addModelToTable();
+  });
+  this.emitter.on('delete', () => {
+    this.deleteModelFromTable();
+  });
+  this.emitter.on('startAction', () => {
+    this.startAction();
+  });
+  this.emitter.on('update', () => {
+    this.updateModelInTable();
+  });
+  this.emitter.on('error', () => {
+    this.displayError();
+  });
+
   //no longer editing an expense (clear model and enable buttons)
   this.emitter.on('finished-editing-expense', () => {
     this.clearExpense();
@@ -909,6 +922,11 @@ async function created() {
  * destroy listeners
  */
 function beforeDestroy() {
+  this.emitter.off('add');
+  this.emitter.off('delete');
+  this.emitter.off('startAction');
+  this.emitter.off('update');
+  this.emitter.off('error');
   this.emitter.off('canceled-delete-expense');
   this.emitter.off('confirm-delete-expense');
   this.emitter.off('finished-editing-expense');
