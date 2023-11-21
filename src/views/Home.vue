@@ -225,13 +225,7 @@ async function createEvents() {
             if (anniversaries[monthDiff].events) {
               anniversaries[monthDiff].events.push(event);
             } else {
-              if (isSame(getTodaysDate(), anniversary, 'month')) {
-                anniversaries[monthDiff].date = "This Month's Anniversaries";
-              } else if (isAfter(getTodaysDate(), anniversary, 'month')) {
-                anniversaries[monthDiff].date = `${format(anniversary, DEFAULT_ISOFORMAT, 'MMMM')}'s Anniversaries`;
-              } else {
-                anniversaries[monthDiff].date = "Next Month's Anniversaries";
-              }
+              anniversaries[monthDiff].date = `Anniversaries in ${format(anniversary, DEFAULT_ISOFORMAT, 'MMM YYYY')}`;
               anniversaries[monthDiff].type = 'Anniversary';
               anniversaries[monthDiff].icon = 'mdi-party-popper';
               anniversaries[monthDiff].congratulateCampfire =

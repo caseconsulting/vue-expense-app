@@ -125,7 +125,7 @@
         </v-timeline>
       </div>
     </v-card>
-    <v-dialog v-model="toggleAnniversariesModal" max-width="700">
+    <v-dialog v-model="toggleAnniversariesModal" max-width="700" scrollable>
       <AnniversariesModal :item="item" />
     </v-dialog>
   </div>

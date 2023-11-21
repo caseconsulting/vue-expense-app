@@ -30,6 +30,7 @@
             clearable
             prepend-icon="mdi-calendar"
             @click:prepend="award.showReceivedMenu = true"
+            @keypress="award.showReceivedMenu = false"
           >
             <v-menu
               activator="parent"

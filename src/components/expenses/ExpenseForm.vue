@@ -212,9 +212,8 @@
               hint="MM/DD/YYYY format"
               persistent-hint
               @click:prepend="purchaseMenu = true"
-              @click:control="purchaseMenu = false"
+              @keypress="purchaseMenu = false"
               @blur="editedExpense.purchaseDate = format(purchaseDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
-              @update:model-value="purchaseMenu = false"
               v-bind="props"
             >
               <template v-slot:prepend>
@@ -259,8 +258,7 @@
               label="Reimburse Date (optional)"
               hint="MM/DD/YYYY format "
               persistent-hint
-              @click:prepend="reimburseMenu = true"
-              @click:control="reimburseMenu = false"
+              @click="reimburseMenu = false"
               @blur="editedExpense.reimbursedDate = format(reimbursedDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
               @update:model-value="reimburseMenu = false"
               v-bind="props"

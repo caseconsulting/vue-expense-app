@@ -29,6 +29,7 @@
             @update:focused="certification.dateReceived = parseEventDate()"
             @focus="certificationIndex = index"
             @click:prepend="certification.showReceivedMenu = true"
+            @keypress="certification.showReceivedMenu = false"
             clearable
           >
             <v-menu
@@ -65,6 +66,7 @@
             prepend-icon="mdi-calendar"
             @update:focused="certification.expirationDate = parseEventDate()"
             @click:prepend="certification.showExpirationMenu = true"
+            @keypress="certification.showExpirationMenu = false"
             @focus="certificationIndex = index"
           >
             <v-menu

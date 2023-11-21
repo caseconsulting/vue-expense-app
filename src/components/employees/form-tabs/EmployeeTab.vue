@@ -173,6 +173,7 @@
         persistent-hint
         @update:focused="editedEmployee.hireDate = format(hireDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
         @click:prepend="hireMenu = true"
+        @keypress="hireMenu = false"
       >
         <v-menu
           activator="parent"
@@ -212,6 +213,7 @@
         persistent-hint
         @update:focused="editedEmployee.deptDate = format(deptDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
         @click:prepend="departureMenu = true"
+        @keypress="departureMenu = false"
         :disabled="!admin"
       >
         <v-menu

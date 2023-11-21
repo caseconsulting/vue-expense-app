@@ -78,7 +78,7 @@
               prepend-icon="mdi-calendar"
               @click:clear="clearance.grantedDate = null"
               @update:focused="clearance.grantedDate = parseEventDate()"
-              @update:model-value="clearance.showGrantedMenu = false"
+              @keypress="clearance.showGrantedMenu = false"
             >
             </v-text-field>
           </div>
@@ -99,6 +99,7 @@
             @click:clear="clearance.submissionDate = null"
             @update:focused="clearance.submissionDate = parseEventDate()"
             @click:prepend="clearance.showSubmissionMenu = true"
+            @keypress="clearance.showSubmissionMenu = false"
           >
             <v-menu
               activator="parent"
@@ -149,7 +150,7 @@
         prepend-icon="mdi-calendar"
         @click:clear="clearance.badgeExpirationDate = null"
         @update:focused="clearance.badgeExpirationDate = parseEventDate()"
-        @update:model-value="clearance.showBadgeMenu = false"
+        @keypress="clearance.showBadgeMenu = false"
         @click:prepend="clearance.showBadgeMenu = true"
       >
         <v-menu
@@ -202,7 +203,6 @@
           clearable
           prepend-icon="mdi-calendar"
           @click:clear="clearance.biDates = []"
-          @update:model-value="clearance.showGrantedMenu = false"
         >
           <template #selection="{ item }">
             <v-chip variant="outlined" closable @click:close="removeBiDate(item, cIndex)">{{ item.raw }}</v-chip>

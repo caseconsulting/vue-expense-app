@@ -75,6 +75,7 @@
               @update:focused="project.startDate = parseEventDate($event)"
               clearable
               @click:prepend="project.showStartMenu = true"
+              @keypress="project.showStartMenu = false"
             >
               <v-menu
                 activator="parent"
@@ -115,6 +116,7 @@
               @click:clear="project.endDate = null"
               @update:focused="project.endDate = parseEventDate($event)"
               @click:prepend="project.showEndMenu = true"
+              @keypress="project.showEndMenu = false"
               @update:model-value="project.endDate && project.endDate.length > 0 ? (project.presentDate = false) : ''"
             >
               <template v-slot:append-inner>

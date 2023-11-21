@@ -47,7 +47,7 @@
                 ref="approvedDateMenu"
                 :close-on-content-click="false"
                 v-model="approvedDateMenu"
-                location="end center"
+                location="start center"
               >
                 <template v-slot:activator="{ props }">
                   <v-text-field
@@ -65,6 +65,7 @@
                       ptoCashOutObj.approvedDate = format(approvedDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')
                     "
                     @click:prepend="approvedDateMenu = true"
+                    @keypress="approvedDateMenu = false"
                   >
                     <template v-slot:prepend>
                       <div class="pointer">

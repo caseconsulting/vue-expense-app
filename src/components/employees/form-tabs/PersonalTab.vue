@@ -126,9 +126,9 @@
       hint="MM/DD/YYYY format"
       prepend-icon="mdi-calendar"
       persistent-hint
-      v-bind="props"
       @update:focused="editedPersonalInfo.birthday = format(birthdayFormat, null, 'YYYY-MM-DD')"
       @click:prepend="BirthdayMenu = true"
+      @keypress="BirthdayMenu = false"
     >
       <v-menu
         activator="parent"

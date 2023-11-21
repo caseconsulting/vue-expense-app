@@ -142,8 +142,7 @@ async function validateFields() {
   //ensures that refs are put in an array so we can reuse forEach loop
   let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
   await asyncForEach(components, async (field) => {
-    let errors = await field.validate();
-    if (field && errors.length > 0) errorCount++;
+    if (field && (await field.validate()).length > 0) errorCount++;
   });
   this.emitter.emit('doneValidating', { tab: 'customerOrgExp', data: this.editedCustomerOrgExp }); // emit done validating and send edited data to parent
   this.emitter.emit('customerOrgExpStatus', errorCount); // emit error status

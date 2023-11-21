@@ -26,6 +26,7 @@
             prepend-icon="mdi-calendar"
             @update:focused="military.startDate = parseEventDate($event)"
             @click:prepend="military.showStartMenu = true"
+            @keypress="military.showStartMenu = false"
             clearable
             persistent-hint
           >
@@ -63,6 +64,7 @@
             prepend-icon="mdi-calendar"
             @update:focused="military.completeDate = parseEventDate($event)"
             @click:prepend="military.showCompleteMenu = true"
+            @keypress="military.showCompleteMenu = false"
             clearable
             persistent-hint
           >

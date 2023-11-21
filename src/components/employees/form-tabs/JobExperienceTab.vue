@@ -152,6 +152,7 @@
               prepend-icon="mdi-calendar"
               @update:focused="position.startDate = parseEventDate($event)"
               @click:prepend="position.showStartMenu = true"
+              @keypress="position.showStartMenu = false"
               @focus="setIndices(compIndex, index)"
               clearable
             >
@@ -195,6 +196,7 @@
               @click:clear="position.endDate = null"
               @update:focused="position.endDate = parseEventDate($event)"
               @click:prepend="position.showEndMenu = true"
+              @keypress="position.showEndMenu = false"
               @focus="setIndices(compIndex, index)"
               @update:model-value="
                 position.endDate && position.endDate.length > 0 ? (position.presentDate = false) : ''
@@ -214,7 +216,7 @@
                   hide-actions
                   keyboard-icon=""
                   color="#bc3825"
-                  title="Starting Date"
+                  title="End Date"
                 ></v-date-picker>
               </v-menu>
               <template v-slot:append-inner>
