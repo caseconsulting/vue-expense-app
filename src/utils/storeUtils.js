@@ -52,6 +52,7 @@ export async function updateStoreAvatars() {
 export async function updateStoreCampfires() {
   try {
     let campfires = await api.getBasecampCampfires();
+    if (campfires instanceof Error) campfires = [];
     this.$store.dispatch('setBasecampCampfires', { basecampCampfires: campfires });
   } catch (err) {
     console.error(err);

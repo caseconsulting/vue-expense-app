@@ -629,6 +629,14 @@ async function submit() {
     this.editedExpenseType.proRated = false;
   }
 
+  // format dates
+  if (this.editedExpenseType.startDate) {
+    this.editedExpenseType.startDate = format(this.editedExpenseType.startDate, null, 'YYYY-MM-DD');
+  }
+  if (this.editedExpenseType.endDate) {
+    this.editedExpenseType.endDate = format(this.editedExpenseType.endDate, null, 'YYYY-MM-DD');
+  }
+
   if (this.$refs.expenseTypeForm && this.$refs.expenseTypeForm.validate()) {
     for (var i = 0; i < this.editedExpenseType.categories.length; i++) {
       this.editedExpenseType.categories[i] = JSON.stringify(this.editedExpenseType.categories[i]);
@@ -650,7 +658,7 @@ async function submit() {
         this.clearForm();
       } else {
         // emit error if fails to update expense type
-        this.emitter.emit('error', newExpenseType.response.data.message);
+        this.emitter.emit('error', JSON.stringify(newExpenseType.response.data.message));
       }
     } else {
       // creating a new expense type
@@ -661,11 +669,11 @@ async function submit() {
       if (newExpenseType.id) {
         // successfully creates an expense type
         this.editedExpenseType['id'] = newExpenseType.id;
-        this.emitter.emit('add', newExpenseType);
+        this.emitter.emit('add');
         this.clearForm();
       } else {
         // emit error if fails to create an expense type
-        this.emitter.emit('error', newExpenseType.response.data.message);
+        this.emitter.emit('error', JSON.stringify(newExpenseType.response.data.message));
         this.editedExpenseType['id'] = '';
       }
     }

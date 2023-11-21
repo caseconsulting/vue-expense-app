@@ -13,10 +13,10 @@
     <v-row v-else>
       <!-- Status Alert -->
       <v-snackbar
-        v-model="status.statusType"
+        v-model="status.show"
         :color="status.color"
         :multi-line="true"
-        location="right"
+        location="top end"
         :timeout="5000"
         :vertical="true"
       >
@@ -439,15 +439,7 @@
 
       <!-- Expense Type Form -->
       <v-col v-if="userRoleIsAdmin()" cols="12" lg="4">
-        <expense-type-form
-          ref="form"
-          :model="model"
-          v-on:add="addModelToTable"
-          v-on:startAction="startAction"
-          v-on:endAction="endAction"
-          v-on:update="updateModelInTable"
-          v-on:error="displayError"
-        ></expense-type-form>
+        <expense-type-form ref="form" :model="model"></expense-type-form>
       </v-col>
     </v-row>
   </div>
@@ -519,6 +511,7 @@ async function addModelToTable() {
   await this.updateStoreExpenseTypes();
   await this.refreshExpenseTypes();
 
+  this.status['show'] = true;
   this.status['statusType'] = 'SUCCESS';
   this.status['statusMessage'] = 'Item was successfully submitted!';
   this.status['color'] = 'green';
@@ -658,6 +651,7 @@ function clearModel() {
  * Clear the action status that is displayed in the snackbar.
  */
 function clearStatus() {
+  this.status['show'] = false;
   this.status['statusType'] = undefined;
   this.status['statusMessage'] = '';
   this.status['color'] = '';
@@ -701,6 +695,7 @@ async function deleteModelFromTable() {
   await this.updateStoreExpenseTypes();
   await this.refreshExpenseTypes();
 
+  this.status['show'] = true;
   this.status['statusType'] = 'SUCCESS';
   this.status['statusMessage'] = 'Item was successfully deleted!';
   this.status['color'] = 'green';
@@ -712,6 +707,7 @@ async function deleteModelFromTable() {
  * @param err - String error message
  */
 function displayError(err) {
+  this.status['show'] = true;
   this.status['statusType'] = 'ERROR';
   this.status['statusMessage'] = err;
   this.status['color'] = 'red';
@@ -723,6 +719,11 @@ function displayError(err) {
 function endAction() {
   this.midAction = false;
 } // endAction
+
+/** Display error from expense form */
+function expenseFormError(msg) {
+  this.displayError(JSON.parse(msg));
+}
 
 /**
  * Filters expense types based on filter selections.
@@ -1001,6 +1002,7 @@ async function updateModelInTable() {
   await this.updateStoreExpenseTypes();
   await this.refreshExpenseTypes();
 
+  this.status['show'] = true;
   this.status['statusType'] = 'SUCCESS';
   this.status['statusMessage'] = 'Item was successfully updated!';
   this.status['color'] = 'green';
@@ -1046,6 +1048,11 @@ function getTagByID(id) {
  * destroy listeners
  */
 function beforeDestroy() {
+  this.emitter.off('add');
+  this.emitter.off('startAction');
+  this.emitter.off('endAction');
+  this.emitter.off('update');
+  this.emitter.off('error');
   this.emitter.off('canceled-delete-expense-type');
   this.emitter.off('confirm-delete-expense-type');
   this.emitter.off('finished-editing-expense-type');
@@ -1057,6 +1064,23 @@ function beforeDestroy() {
  * Set user info, employees, and expense types. Creates event listeners.
  */
 async function created() {
+  // expenseTypeForm listeners
+  this.emitter.on('add', () => {
+    this.addModelToTable();
+  });
+  this.emitter.on('startAction', () => {
+    this.startAction();
+  });
+  this.emitter.on('endAction', () => {
+    this.endAction();
+  });
+  this.emitter.on('update', () => {
+    this.updateModelInTable();
+  });
+  this.emitter.on('error', () => {
+    this.expenseFormError();
+  });
+
   //no longer editing an expense (clear model and enable buttons)
   this.emitter.on('finished-editing-expense-type', () => {
     this.clearModel();
@@ -1208,6 +1232,7 @@ export default {
       search: '', // query text for datatable search field
       sortBy: [{ key: 'budgetName', order: 'asc' }], // sort datatable items
       status: {
+        show: false,
         statusType: undefined,
         statusMessage: '',
         color: ''
@@ -1232,6 +1257,7 @@ export default {
     deleteModelFromTable,
     displayError,
     endAction,
+    expenseFormError,
     limitedText,
     filterExpenseTypes,
     getAccess,

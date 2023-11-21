@@ -10,7 +10,6 @@
             <v-list-item
               v-bind="props"
               active-class="case-red-text"
-              active-color="#bc3825"
               :color="item.active ? caseRed : caseGray"
               :class="item.active ? 'case-red-text' : ''"
             >
