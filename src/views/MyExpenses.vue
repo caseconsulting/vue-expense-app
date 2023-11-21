@@ -197,9 +197,9 @@
               :search="search"
               item-value="id"
               class="elevation-4 smaller-font"
-              @click:row="clickedRow"
               density="compact"
               :no-data-text="`Your search for ${search} found no results.`"
+              expand-on-click
             >
               <!-- Cost slot -->
               <template v-slot:[`item.cost`]="{ item }">
@@ -228,7 +228,7 @@
 
               <!--Action Items-->
               <template v-slot:[`item.actions`]="{ item }">
-                <td class="datatable_btn layout mr-0" @click="clickedRow(item)">
+                <td class="datatable_btn layout mr-0">
                   <!-- Download Attachment Button -->
                   <attachment :midAction="midAction" :expense="item" :mode="'expenses'"></attachment>
 
@@ -494,22 +494,6 @@ function clearStatus() {
   this.status['statusMessage'] = '';
   this.status['color'] = '';
 } // clearStatus
-
-/**
- * Add expense to expanded row when clicked.
- *
- * @param value - expense to add
- */
-function clickedRow(value) {
-  if (_.isEmpty(this.expanded) || this.expanded[0].id != value.id) {
-    // expand the selected expense if the selected expense is not already expanded
-    this.expanded = [];
-    this.expanded.push(value);
-  } else {
-    // collapse the expense if the selected expense is already expanded
-    this.expanded = [];
-  }
-} // clickedRow
 
 /**
  * Sets a mapping of employee name to employee id of an expense for
@@ -1080,7 +1064,6 @@ export default {
     canDelete,
     clearExpense,
     clearStatus,
-    clickedRow,
     constructAutoComplete,
     convertToMoneyString,
     customFilter,

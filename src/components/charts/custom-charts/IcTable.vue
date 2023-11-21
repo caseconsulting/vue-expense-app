@@ -4,14 +4,13 @@
       v-if="dataReceived"
       :headers="headers"
       :items="tableContents"
-      :expanded.sync="expanded"
+      :expanded="expanded"
       item-key="title"
-      :single-expand="true"
-      @click:row="clickedRow"
       class="elevation-1"
       id="icTable"
       hide-default-footer
       hide-default-header
+      expand-on-click
     >
       <template v-slot:top>
         <v-toolbar color="transparent">
@@ -21,8 +20,8 @@
       <template v-slot:headers></template>
       <template v-slot:bottom></template>
       <!-- Expanded slot in datatable -->
-      <template v-slot:expanded-item="{ headers }">
-        <td :colspan="headers.length" class="pa-2 pb-0">
+      <template v-slot:expanded-row="{ columns, item }">
+        <td v-if="item.title === 'Total Employees'" :colspan="columns.length" class="pa-2 pb-0">
           <div class="roleRow px-16 pt-1" v-for="role in getRoleCounts()" :key="role.role">
             <p>{{ role[0] }}</p>
             <p>{{ role[1] }}</p>
@@ -62,20 +61,6 @@ async function mounted() {
 // |                      METHODS                     |
 // |                                                  |
 // |--------------------------------------------------|
-
-/**
- * Expands only the total employees row. Adds the row to expanded row when clicked.
- *
- * @param value - row to expand
- */
-function clickedRow(value) {
-  if (_.isEmpty(this.expanded) && value.title === 'Total Employees') {
-    this.expanded = [];
-    this.expanded.push(value);
-  } else {
-    this.expanded = [];
-  }
-} // clickedRow
 
 /**
  * Gets the IC data, and sets the chart formatting and data options.
@@ -211,7 +196,6 @@ export default {
     };
   },
   methods: {
-    clickedRow,
     difference, // dateUtils
     format, // dateUtils
     fillData,

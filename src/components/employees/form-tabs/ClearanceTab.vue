@@ -204,7 +204,7 @@
           prepend-icon="mdi-calendar"
           @click:clear="clearance.biDates = []"
         >
-          <template #selection="{ item }">
+          <template v-slot:selection="{ item }">
             <v-chip variant="outlined" closable @click:close="removeBiDate(item, cIndex)">{{ item.raw }}</v-chip>
           </template>
         </v-combobox>
@@ -471,6 +471,7 @@ function removeAdjDate(item, index) {
  * @param index - the clearance index
  */
 function removeBiDate(item, index) {
+  item = item.raw;
   const itemDate = format(item, null, FORMATTED_ISOFORMAT);
   this.editedClearances[index].biDates = this.editedClearances[index].biDates.filter((date) => {
     let dateConvert = format(date, null, FORMATTED_ISOFORMAT);
