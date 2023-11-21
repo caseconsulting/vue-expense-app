@@ -7,7 +7,9 @@ import _ from 'lodash';
  * @param queryText - query to use to filter
  * @return string - the filtered name
  */
-export function customEmployeeFilter(item, queryText) {
+export function customEmployeeFilter(_, queryText, item) {
+  item = item.raw;
+
   const query = queryText ? queryText.trim() : '';
   const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
   const firstNameFullName = `${item.firstName} ${item.lastName}`;

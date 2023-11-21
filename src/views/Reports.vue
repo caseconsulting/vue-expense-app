@@ -46,6 +46,7 @@
                 <v-list-item @click="selectDropDown('contracts')">Contracts</v-list-item>
                 <v-list-item @click="selectDropDown('customer orgs')">Customer Orgs</v-list-item>
                 <v-list-item @click="selectDropDown('certifications')">Certifications</v-list-item>
+                <v-list-item @click="selectDropDown('awards')">Awards</v-list-item>
                 <v-list-item @click="selectDropDown('languages')">Foreign Languages</v-list-item>
                 <v-list-item @click="selectDropDown('job roles')">Job Roles</v-list-item>
                 <v-list-item @click="selectDropDown('technologies')">Technologies</v-list-item>
@@ -56,6 +57,7 @@
             <ReportsContracts v-if="currentTab === 'contracts'" />
             <ReportsCustomerOrgs v-if="currentTab === 'customer orgs'" />
             <ReportsCertifications v-if="currentTab === 'certifications'" />
+            <ReportsAwards v-if="currentTab === 'awards'" />
             <ReportsForeignLanguages v-if="currentTab === 'languages'" />
             <ReportsJobRoles v-if="currentTab === 'job roles'" />
             <ReportsTechnologies v-if="currentTab === 'technologies'" />
@@ -67,6 +69,7 @@
               <v-tab value="contracts">Contracts</v-tab>
               <v-tab value="customer orgs">Customer Orgs</v-tab>
               <v-tab value="certifications">Certifications</v-tab>
+              <v-tab value="awards">Awards</v-tab>
               <v-tab value="languages">Foreign Languages</v-tab>
               <v-tab value="job roles">Job Roles</v-tab>
               <v-tab value="technologies">Technologies</v-tab>
@@ -81,6 +84,9 @@
               </v-window-item>
               <v-window-item value="certifications" class="mx-2 my-6">
                 <ReportsCertifications />
+              </v-window-item>
+              <v-window-item value="awards" class="mx-2 my-6">
+                <ReportsAwards />
               </v-window-item>
               <v-window-item value="languages" class="mx-2 my-6">
                 <ReportsForeignLanguages />
@@ -107,6 +113,7 @@
 <script>
 import ContactEmployeesModal from '@/components/shared/ContactEmployeesModal.vue';
 import ReportsPageLoader from '@/components/reports/ReportsPageLoader.vue';
+import ReportsAwards from '@/components/reports/ReportsAwards.vue';
 import ReportsContracts from '@/components/reports/ReportsContracts.vue';
 import ReportsCustomerOrgs from '@/components/reports/ReportsCustomerOrgs.vue';
 import ReportsCertifications from '@/components/reports/ReportsCertifications.vue';
@@ -213,6 +220,7 @@ export default {
   created,
   components: {
     ContactEmployeesModal,
+    ReportsAwards,
     ReportsContracts,
     ReportsCustomerOrgs,
     ReportsCertifications,
