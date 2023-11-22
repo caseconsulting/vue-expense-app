@@ -457,6 +457,7 @@ function parseEventDate() {
  * @param index - the clearance index
  */
 function removeAdjDate(item, index) {
+  item = item.raw;
   const itemDate = format(item, null, FORMATTED_ISOFORMAT);
   this.editedClearances[index].adjudicationDates = this.editedClearances[index].adjudicationDates.filter((date) => {
     let dateConvert = format(date, null, FORMATTED_ISOFORMAT);
@@ -486,6 +487,7 @@ function removeBiDate(item, index) {
  * @param index - the clearance index
  */
 function removePolyDate(item, index) {
+  item = item.raw;
   const itemDate = format(item, null, FORMATTED_ISOFORMAT);
   this.editedClearances[index].polyDates = this.editedClearances[index].polyDates.filter((date) => {
     let dateConvert = format(date, null, FORMATTED_ISOFORMAT);

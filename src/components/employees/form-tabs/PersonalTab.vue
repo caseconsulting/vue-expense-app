@@ -443,8 +443,8 @@ async function validateFields() {
     this.$refs.github,
     this.$refs.linkedin,
     this.$refs.personalEmail,
-    ...this.$refs.phoneNum,
-    ...this.$refs.phoneType
+    ...(this.$refs.phoneNum || []),
+    ...(this.$refs.phoneType || [])
   ];
   await asyncForEach(components, async (field) => {
     if (field && (await field.validate()).length > 0) errorCount++;
