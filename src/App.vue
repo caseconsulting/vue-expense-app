@@ -269,8 +269,8 @@ async function populateStore() {
  */
 function goToHome() {
   if (this.isLoggedIn()) {
-    this.$router.push({ path: '/' });
-    this.$vuetify.goTo(0);
+    this.$router.push({ path: '/home' });
+    window.scrollTo(0, 0);
   }
 } // goToHome
 
