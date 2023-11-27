@@ -267,6 +267,6 @@ export default {
 }
 .nudge-up-autocomplete {
   position: relative;
-  top: -8px;
+  top: -5px;
 }
 </style>
