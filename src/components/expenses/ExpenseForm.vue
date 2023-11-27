@@ -8,7 +8,7 @@
       <!-- Inactive Employee -->
     </v-card-title>
     <v-container fluid>
-      <v-form ref="form" v-model="valid" @submit.prevent="valid ? (confirmingValid = true) : _" lazy-validation>
+      <v-form ref="form" v-model="valid" @submit.prevent="valid ? (confirmingValid = true) : _">
         <!-- Employee picker if admin -->
         <v-autocomplete
           v-if="!asUser"
@@ -285,7 +285,7 @@
         <v-textarea
           variant="underlined"
           v-model="editedExpense.note"
-          :rules="notesRules"
+          :rules="notesRules()"
           :label="notesLabel"
           id="notes"
           data-vv-name="Description"
@@ -450,18 +450,6 @@ function receiptRequired() {
 } // receiptRequired
 
 /**
- * Creates the rules for the notes section based on whether or not the current expense type requires a recipient.
- *
- *  @return rule
- */
-function notesRules() {
-  if (this.reqRecipient) {
-    return [(v) => !this.isEmpty(v) || 'Notes is a required field'];
-  }
-  return [];
-} // notesRules
-
-/**
  * Creates the label for the notes section based on if it is optional.
  *
  * @return string - label
@@ -551,7 +539,7 @@ function calcAdjustedBudget(employee, expenseType) {
 async function checkCoverage() {
   this.isInactive = true;
   if (this.$refs.form) {
-    this.valid = this.$refs.form.validate();
+    this.valid = await this.$refs.form.validate();
     if (!this.valid) return;
     this.emitter.emit('startAction');
     // form is validated
@@ -1169,6 +1157,15 @@ function isReceiptRequired() {
 
   return false;
 } // receiptRequired
+
+/**
+ * Creates the rules for the notes section based on whether or not the current expense type requires a recipient.
+ *
+ *  @return rule
+ */
+function notesRules() {
+  return [(v) => (this.reqRecipient && !this.isEmpty(v)) || 'Notes is a required field'];
+} // notesRules
 
 /**
  * Parses the cost to get rid of commas.
@@ -1919,7 +1916,6 @@ export default {
     isReimbursed,
     isMobile,
     receiptRequired,
-    notesRules,
     notesLabel,
     urlLabel
   },
@@ -2017,6 +2013,7 @@ export default {
     isReceiptRequired,
     parseCost,
     preformatFloat,
+    notesRules,
     scanFile,
     setFile,
     setDefaultExpenseTypeData,
