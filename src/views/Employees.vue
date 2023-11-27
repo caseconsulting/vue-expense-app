@@ -3,7 +3,7 @@
   <div>
     <!-- Status Alert -->
     <v-snackbar
-      v-model="status.statusType"
+      v-model="status.show"
       :color="status.color"
       :multi-line="true"
       location="top end"
@@ -354,6 +354,7 @@ function changeAvatar(item) {
  * Clear the action status that is displayed in the snackbar.
  */
 function clearStatus() {
+  this.status['show'] = false;
   this.status['statusType'] = undefined;
   this.status['statusMessage'] = null;
   this.status['color'] = null;
@@ -469,6 +470,7 @@ async function deleteEmployee() {
 async function deleteModelFromTable() {
   await this.refreshEmployees();
 
+  this.status['show'] = true;
   this.status['statusType'] = 'SUCCESS';
   this.status['statusMessage'] = 'Employee was successfully deleted!';
   this.status['color'] = 'green';
@@ -480,6 +482,7 @@ async function deleteModelFromTable() {
  * @param err - String error message
  */
 function displayError(err) {
+  this.status['show'] = true;
   this.status['statusType'] = 'ERROR';
   this.status['statusMessage'] = err;
   this.status['color'] = 'red';
@@ -690,7 +693,7 @@ async function validateDelete(item) {
     if (valid) {
       // employee can be deleted
       this.deleteModel['id'] = item.id;
-      this.deleting = !this.deleting; // activate model to confirm delete
+      this.deleting = true; // activate model to confirm delete
     } else {
       // employee cannot be deleted
       this.invalidDelete = !this.invalidDelete;
@@ -725,9 +728,11 @@ async function created() {
     await this.clearCreateEmployee();
   });
   this.emitter.on('canceled-delete-employee', () => {
+    this.deleting = false;
     this.midAction = false;
   });
   this.emitter.on('confirm-delete-employee', async () => {
+    this.deleting = false;
     await this.deleteEmployee();
     await this.updateStoreEmployees();
     await this.refreshEmployees();
