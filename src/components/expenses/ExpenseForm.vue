@@ -283,9 +283,21 @@
 
         <!-- Notes -->
         <v-textarea
+          v-if="reqRecipient"
           variant="underlined"
           v-model="editedExpense.note"
           :rules="notesRules()"
+          :label="notesLabel"
+          id="notes"
+          data-vv-name="Description"
+          :disabled="isInactive"
+        ></v-textarea>
+        <!-- Separating optional and required notes field logic since
+        the rules cause issues with validation -->
+        <v-textarea
+          v-else
+          variant="underlined"
+          v-model="editedExpense.note"
           :label="notesLabel"
           id="notes"
           data-vv-name="Description"
@@ -1164,7 +1176,7 @@ function isReceiptRequired() {
  *  @return rule
  */
 function notesRules() {
-  return [(v) => (this.reqRecipient && !this.isEmpty(v)) || 'Notes is a required field'];
+  return [(v) => !this.isEmpty(v) || 'Notes is a required field'];
 } // notesRules
 
 /**
