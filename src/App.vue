@@ -2,6 +2,7 @@
   <div id="app" @mousedown="refreshSession()">
     <v-app>
       <v-navigation-drawer
+        v-if="isLoggedIn()"
         theme="light"
         v-model="drawer"
         :rail="!isMobile"
@@ -217,7 +218,9 @@ function badumbadumdodooodoo(index) {
  * @returns String - The padding value
  */
 function getMainPadding() {
-  if (!this.isMobile) {
+  if (!isLoggedIn()) {
+    return '64px 0px 0px 0px';
+  } else if (!this.isMobile && isLoggedIn()) {
     return '64px 0px 0px 56px';
   } else {
     return '56px 0px 0px 0px';
