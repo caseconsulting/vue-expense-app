@@ -54,7 +54,7 @@
       </v-card-title>
       <v-card-text
         class="pt-0 pb-0 text-black"
-        :class="userRoleIsAdmin() || userRoleIsManager() ? 'nudge-down-title' : 'mt-4'"
+        :class="userRoleIsAdmin() || userRoleIsManager() ? 'nudge-down-title mb-3' : 'mt-4'"
       >
         <semi-monthly-charges
           v-if="passedEmployee && isLegacyFireTeam"

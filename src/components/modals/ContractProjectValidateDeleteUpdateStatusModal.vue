@@ -3,7 +3,7 @@
     <v-dialog v-model="activate" persistent max-width="450">
       <v-card>
         <!-- Errors across tabs -->
-        <v-card-title class="text-h5">{{ title }}</v-card-title>
+        <v-card-text class="font-weight-medium text-h6">{{ title }}</v-card-text>
         <v-card-text>
           <span>{{ message }}</span>
           <br />
@@ -13,7 +13,7 @@
               ><b>Contract:</b> {{ r.contract }}, <b>Prime:</b> {{ r.prime }}, <b>Project:</b>
               {{ r.project.projectName }}</span
             >
-            <ul>
+            <ul class="ml-6">
               <li v-for="e in r.employees" :key="e.id">{{ `${e.firstName} ${e.lastName}` }}</li>
             </ul>
           </div>

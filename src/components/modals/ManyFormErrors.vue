@@ -3,7 +3,7 @@
     <v-dialog v-model="activate" persistent max-width="330">
       <v-card>
         <!-- Errors across tabs -->
-        <v-card-title class="text-h5">Error(s) found across tabs</v-card-title>
+        <v-card-text class="font-weight-medium text-h6">Error(s) found across tabs</v-card-text>
         <v-card-text>
           <ul>
             <li v-for="tab in Object.keys(errorTabs)" :key="tab">

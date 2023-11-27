@@ -2,7 +2,7 @@
   <div>
     <v-dialog v-model="activate" persistent max-width="350">
       <v-card>
-        <v-card-title class="text-h5">Session Timed Out</v-card-title>
+        <v-card-text class="font-weight-medium text-h6">Session Timed Out</v-card-text>
         <v-card-text>Your session has timed out. Please login again.</v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>

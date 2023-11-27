@@ -2,7 +2,7 @@
   <div>
     <v-dialog v-model="activate" persistent max-width="375">
       <v-card>
-        <v-card-title class="text-h5">Are you sure you want to unreimburse?</v-card-title>
+        <v-card-text class="font-weight-medium text-h6">Are you sure you want to unreimburse?</v-card-text>
         <v-card-text>
           This will unreimburse the expense to pending and uncarry any overdrafts due to this expense
         </v-card-text>

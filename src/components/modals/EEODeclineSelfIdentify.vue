@@ -2,7 +2,7 @@
   <div>
     <v-dialog v-model="activate" persistent max-width="500">
       <v-card>
-        <v-card-title class="text-h5">Are you sure you want to decline to self-identify?</v-card-title>
+        <v-card-text class="font-weight-medium text-h6">Are you sure you want to decline to self-identify?</v-card-text>
         <v-card-text>
           EEOC prefers employees self-identify as to race and gender. If you refuses to identify, CASE will complete the
           information on your behalf based on other records or visual observation.
