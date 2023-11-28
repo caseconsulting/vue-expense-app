@@ -24,7 +24,7 @@
             variant="text"
             @click.native="
               activate = false;
-              this.emitter.emit('contract-project-validate-error-aknowledged');
+              this.emitter.emit('contract-project-validate-error-acknowledged');
             "
           >
             Ok
