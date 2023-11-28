@@ -340,9 +340,11 @@ async function created() {
   this.emitter.on('confirm-delete-contract', async () => {
     await this.deleteItems(this.deletingItems);
     this.deletingItems = null;
+    this.toggleContractDeleteModal = false;
   });
   this.emitter.on('canceled-delete-contract', () => {
     this.deletingItems = null;
+    this.toggleContractDeleteModal = false;
   });
   this.emitter.on('confirmed-contract-status', () => {
     this.updateStatus(this.statusItemClicked);
@@ -351,7 +353,13 @@ async function created() {
   this.emitter.on('canceled-contract-status', () => {
     this.toggleContractStatusModal = false;
   });
+  this.emitter.on('contract-project-validate-error-acknowledged', () => {
+    this.toggleValidateModal = false;
+  });
   this.emitter.on('canceled-project-form', () => {
+    this.toggleProjectForm = false;
+  });
+  this.emitter.on('submitted-project-form', () => {
     this.toggleProjectForm = false;
   });
   this.emitter.on('closed-contract-employees-assigned-modal', () => {
@@ -379,7 +387,9 @@ function beforeDestroy() {
   this.emitter.off('confirmed-contract-status');
   this.emitter.off('canceled-contract-status');
   this.emitter.off('canceled-project-form');
+  this.emitter.off('submitted-project-form');
   this.emitter.off('closed-project-employees-assigned-modal');
+  this.emitter.off('contract-project-validate-error-acknowledged');
   this.emitter.off('filter');
   this.emitter.off('is-editing-project-item');
   this.emitter.off('toggle-project-checkbox');
@@ -518,11 +528,11 @@ async function clickedDelete() {
   if (relationships.length != 0) {
     this.titleMessage = 'Cannot delete item(s)';
     this.validateMessage = 'Please remove the following relationships before deleting selected item(s).';
-    this.toggleValidateModal = !this.toggleValidateModal;
+    this.toggleValidateModal = true;
     this.relationships = relationships;
   } else {
     this.deletingItems = selectedItems;
-    this.toggleContractDeleteModal = !this.toggleContractDeleteModal;
+    this.toggleContractDeleteModal = true;
   }
 } // clickedDelete
 

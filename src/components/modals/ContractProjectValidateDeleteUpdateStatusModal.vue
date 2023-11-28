@@ -20,7 +20,15 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn variant="text" @click.native="activate = false"> Ok </v-btn>
+          <v-btn
+            variant="text"
+            @click.native="
+              activate = false;
+              this.emitter.emit('contract-project-validate-error-aknowledged');
+            "
+          >
+            Ok
+          </v-btn>
           <v-spacer></v-spacer>
         </v-card-actions> </v-card
     ></v-dialog>
