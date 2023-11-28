@@ -79,7 +79,7 @@
           class="text-center"
         >
           <!-- Header select slot -->
-          <template v-slot:[`column.data-table-select`]>
+          <template v-slot:[`header.data-table-select`]>
             <v-checkbox
               class="ma-0"
               :model-value="mainCheckBox.all"
