@@ -1468,7 +1468,7 @@ async function submit() {
         // creating a new expense
         await this.createNewEntry();
       } else {
-        // editing a current expense
+        // editing a current expensef
         await this.updateExistingEntry();
       }
     }
@@ -1479,11 +1479,9 @@ async function submit() {
     this.reqRecipient = false;
     this.clearForm();
 
-    // update budgets in vuex store if needed
-    if (this.editedExpense.employeeId == this.$store.getters.user.id) {
-      await this.updateStoreBudgets();
-      this.emitter.emit('updateData');
-    }
+    // update budgets in store
+    await this.updateStoreBudgets();
+    this.emitter.emit('updateData');
   }
 } // submit
 
