@@ -1637,7 +1637,6 @@ function created() {
 
   // adjust costRules to prevent users from using negative expenses
   if (this.employeeRole && this.employeeRole == 'admin') {
-    console.log(this.costRules);
     this.costRules.splice(1, 0, (v) => (!this.isEmpty(v) && v != 0) || 'Cost cannot be zero');
   } else {
     this.costRules.splice(

@@ -1,6 +1,6 @@
 <template>
-  <v-card class="px-10 pt-5 my-7">
-    <div v-if="dataReceived" class="pointer">
+  <div v-if="dataReceived">
+    <v-card class="px-10 pt-5 my-7 pointer" v-if="chartData.labels.length > 0">
       <bar-chart
         ref="barChart"
         :key="chartKey"
@@ -25,8 +25,10 @@
           drawGraph();
         "
       />
-    </div>
-    <v-skeleton-loader v-else type="table-tbody"></v-skeleton-loader>
+    </v-card>
+  </div>
+  <v-card v-else class="px-10 pt-5 my-7">
+    <v-skeleton-loader type="table-tbody"></v-skeleton-loader>
   </v-card>
 </template>
 
@@ -322,6 +324,7 @@ async function refreshBudgets() {
   } else {
     // get existing budgets for the budget year being viewed
     let existingBudgets = await api.getFiscalDateViewBudgets(this.employee.id, this.fiscalDateView);
+    existingBudgets = _.filter(existingBudgets, (e) => !!e);
 
     budgetsVar = existingBudgets;
   }

@@ -1,6 +1,6 @@
 <template>
   <div id="budget-table">
-    <div v-if="expenseTypeData">
+    <div v-if="expenseTypeData && expenseTypeData.length > 0">
       <v-row>
         <!-- Loop all budgets -->
         <v-col v-for="(item, i) in expenseTypeData" :key="i" cols="12" sm="6" lg="6">
@@ -64,6 +64,7 @@
         <!-- End Loop all budgets -->
       </v-row>
     </div>
+    <div align="center" class="mt-3 text-h5" v-else>No budgets to display</div>
   </div>
 </template>
 
@@ -82,9 +83,9 @@ import _ from 'lodash';
 /**
  * Sets the data for the budgets given an employee id
  */
-function created() {
-  this.refreshBudgets();
-}
+async function created() {
+  await this.refreshBudgets();
+} // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -194,6 +195,7 @@ async function refreshBudgets() {
   } else {
     // get existing budgets for the budget year being viewed
     let existingBudgets = await api.getFiscalDateViewBudgets(this.employee.id, this.fiscalDateView);
+    existingBudgets = _.filter(existingBudgets, (e) => !!e);
 
     budgetsVar = existingBudgets;
   }

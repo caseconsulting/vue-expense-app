@@ -10,9 +10,9 @@
       location="top right"
       vertical
     >
-      <v-card-title headline color="white">
+      <v-card-text color="white">
         <span class="text-h5">{{ status.statusMessage }}</span>
-      </v-card-title>
+      </v-card-text>
       <v-btn color="white" variant="text" @click="clearStatus"> Close </v-btn>
     </v-snackbar>
     <!-- Modal Title -->

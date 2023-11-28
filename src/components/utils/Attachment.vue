@@ -2,8 +2,16 @@
   <!-- Reimbursements -->
   <span v-if="this.mode === 'adminExpenseInfo'">
     <!-- admin dashboard has attachment -->
-    <v-btn v-if="!isEmpty(this.expense.receipt)" :disabled="midAction" icon color="primary" @click="openDownloadTab">
-      <v-icon class="case-gray" icon="mdi-cloud-download" />
+    <v-btn
+      v-if="!isEmpty(this.expense.receipt)"
+      :disabled="midAction"
+      icon
+      :color="caseGray"
+      @click="openDownloadTab"
+      size="small"
+    >
+      <v-tooltip activator="parent" location="top">Download Attachment</v-tooltip>
+      <v-icon size="x-large" class="white-text" icon="mdi-cloud-download" />
     </v-btn>
   </span>
   <!-- End Reimbursements -->

@@ -94,7 +94,6 @@ function populateAnniversaries() {
       let hireDate = format(e.hireDate, null, DEFAULT_ISOFORMAT);
       let anniversary = setYear(hireDate, getYear(this.date));
       let yearsDiff = difference(anniversary, hireDate, 'year');
-      console.log(yearsDiff);
       let employeeAnniversaryObj = {
         text: `${e.nickname || e.firstName} ${e.lastName} is celebrating ${yearsDiff} ${
           yearsDiff > 1 ? 'years' : 'year'
