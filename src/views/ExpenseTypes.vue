@@ -417,7 +417,7 @@
 
               <!-- Alert slot for no search results -->
               <template v-slot:no-results>
-                <v-alert :value="true" color="error" icon="warning">
+                <v-alert :value="true" color="error" icon="mdi-alert">
                   Your search for "{{ search }}" found no results
                 </v-alert>
               </template>

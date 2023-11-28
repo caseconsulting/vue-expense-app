@@ -330,12 +330,6 @@
                 </td>
               </template>
               <!-- End expanded slot in datatable -->
-
-              <!-- Alert for no search results 
-              <v-alert slot="no-results" :value="true" color="error" icon="warning">
-                Your search for "{{ search }}" found no results.
-              </v-alert>-->
-              <!-- End alert for no search results -->
             </v-data-table>
             <br />
 

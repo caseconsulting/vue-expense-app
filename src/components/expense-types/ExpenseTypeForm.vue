@@ -158,21 +158,14 @@
                 item-title="tagName"
                 :rules="getRequiredRules()"
                 item-value="id"
-                closable-chips
                 multiple
-                chips
                 :items="tagOptions(tag.tags)"
               >
-                <template v-slot:chip="data">
-                  <v-chip
-                    size="small"
-                    v-bind="data.attrs"
-                    :model-value="data.selected"
-                    closable
-                    @click="data.select"
-                    @click:close="remove(data.item, index)"
-                    ><v-icon icon="tag" start />{{ data.item.tagName }}</v-chip
-                  >
+                <template v-slot:selection="{ item }">
+                  <v-chip size="small" v-bind="props" closable @click.stop @click:close="remove(item.raw, index)">
+                    <v-icon icon="mdi-tag" class="mr-1" />
+                    {{ item.raw.tagName }}
+                  </v-chip>
                 </template>
               </v-autocomplete>
             </v-col>
@@ -180,7 +173,7 @@
               <v-text-field variant="underlined" v-model="tag.budget" prefix="$" :rules="tagBudgetRules" label="Amount"
             /></v-col>
             <v-col cols="1" class="d-flex justify-center align-center">
-              <v-btn size="small" @click="removeTagBudget(index)"><v-icon icon="trash-can" /></v-btn>
+              <v-btn size="small" @click="removeTagBudget(index)"><v-icon icon="mdi-trash-can" /></v-btn>
             </v-col>
           </v-row>
           <v-row class="d-flex justify-center align-center">

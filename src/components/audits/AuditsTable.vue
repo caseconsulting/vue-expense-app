@@ -6,7 +6,7 @@
         <v-text-field
           id="employeesSearch"
           v-model="search"
-          append-icon="search"
+          append-icon="mdi-magnify"
           label="Search"
           variant="underlined"
           single-line
