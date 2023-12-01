@@ -23,7 +23,7 @@ const employeeCsv = require('@/utils/csv/employeeCsv.js');
  * Downloads employees as CSV
  */
 function download() {
-  employeeCsv.download(this.employee, this.contracts, this.tags);
+  employeeCsv.download(this.employee, this.contracts, this.tags, this.filename);
 } // download
 
 // |--------------------------------------------------|
@@ -36,7 +36,7 @@ export default {
   methods: {
     download
   },
-  props: ['contracts', 'employee', 'tags', 'midAction', 'color']
+  props: ['contracts', 'employee', 'tags', 'midAction', 'color', 'filename']
 };
 </script>
 

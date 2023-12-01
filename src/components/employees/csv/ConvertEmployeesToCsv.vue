@@ -5,8 +5,9 @@
     @click="download()"
     elevation="2"
     :size="isMobile || isSmallScreen ? 'small' : 'default'"
-    ><i class="material-icons">download</i>Download All</v-btn
   >
+    <i class="material-icons">download</i>{{ downloadText || 'Download All' }}
+  </v-btn>
 </template>
 
 <script>
@@ -39,7 +40,7 @@ export default {
   methods: {
     download
   },
-  props: ['contracts', 'employees', 'tags', 'midAction', 'loading']
+  props: ['contracts', 'employees', 'tags', 'midAction', 'loading', 'downloadText']
 };
 </script>
 

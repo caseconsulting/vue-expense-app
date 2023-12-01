@@ -11,8 +11,8 @@ const csvUtils = require('./baseCsv.js');
  * @param employees - array of employee objects
  * @param contracts - the contracts from DyanmoDB to connect employee contract IDs to
  */
-export function download(employees, contracts, tags) {
-  let filename = Array.isArray(employees) ? 'employees.csv' : 'employee.csv';
+export function download(employees, contracts, tags, filename = null) {
+  if (!filename) filename = Array.isArray(employees) ? 'employees.csv' : 'employee.csv';
   let convertedEmployees = convertEmployees(employees, contracts, tags); // convert employees into csv object
   let csvEmployees = csvUtils.sort(convertedEmployees, 'Employee #'); // sort by employee #
   let csvFileString = csvUtils.generate(csvEmployees); // convert to csv file string
@@ -41,13 +41,13 @@ export function convertEmployees(employees, contracts, tags) {
         'First Name': employee.firstName || '',
         'Middle Name': employee.middleName || '',
         'Last Name': employee.lastName || '',
-        'Birthday (yyyy-mm-dd)': employee.birthday || '',
+        'Birthday (yyyy-mm-dd)': format(employee.birthday, null, 'YYYY-MM-DD') || '',
         'Place of Birth': placeOfBirth || '',
         'State of Residence': employee.currentState || '',
-        'Hire Date': employee.hireDate || '',
+        'Hire Date': format(employee.hireDate, null, 'YYYY-MM-DD') || '',
         'Job Role': employee.jobRole || '',
         AIN: employee.agencyIdentificationNumber || '',
-        'Resume Updated': employee.resumeUpdated || '',
+        'Resume Updated': format(employee.resumeUpdated, null, 'YYYY-MM-DD') || '',
         Email: employee.email || '',
         Twitter: employee.twitter || '',
         Github: employee.github || '',
@@ -163,7 +163,7 @@ export function filterUndefined(data, func) {
 export function getAwards(awards) {
   let a = '';
   for (let i = 0; i < awards.length; i++) {
-    a += awards[i].name + ' - ' + awards[i].dateReceived;
+    a += awards[i].name + ' - ' + format(awards[i].dateReceived, null, 'YYYY-MM');
     if (i + 1 < awards.length) {
       a += ', ';
     }
@@ -180,7 +180,7 @@ export function getAwards(awards) {
 export function getCertifications(certification) {
   let a = '';
   for (let i = 0; i < certification.length; i++) {
-    a += certification[i].name + ' - ' + certification[i].dateReceived;
+    a += certification[i].name + ' - ' + format(certification[i].dateReceived, null, 'YYYY-MM-DD');
     if (certification[i].expirationDate) {
       a += ' to ' + certification[i].expirationDate;
     }
@@ -198,6 +198,19 @@ export function getCertifications(certification) {
  * @return Object - clearance data
  */
 export function getClearancesData(clearances) {
+  // formats dates when joining. assumes there is at least
+  // one date in the `items` array.
+  function joinAndFormat(items, glue = '', dateFormat = 'YYYY-MM-DD') {
+    let product = format(items[0], null, dateFormat);
+    let item;
+    for (let i in items) {
+      if (i == 0) continue;
+      item = format(items[i], null, dateFormat);
+      product += `${glue}${item}`;
+    }
+    return product;
+  }
+
   let data = {
     titles: '',
     submissionDates: '',
@@ -211,12 +224,16 @@ export function getClearancesData(clearances) {
   if (clearances) {
     for (let i = 0; i < clearances.length; i++) {
       data.titles += clearances[i].type + `${clearances[i].awaitingClearance ? ' (awaiting clearance)' : ''}`;
-      data.submissionDates += clearances[i].submissionDate ? clearances[i].submissionDate : 'No Date';
-      data.grantedDates += clearances[i].grantedDate ? clearances[i].grantedDate : 'No Date';
-      data.biDates += clearances[i].biDates.length > 0 ? clearances[i].biDates.join(' & ') : 'No Dates';
-      data.polyDates += clearances[i].polyDates.length > 0 ? clearances[i].polyDates.join(' & ') : 'No Dates';
+      data.submissionDates += clearances[i].submissionDate
+        ? format(clearances[i].submissionDate, null, 'YYYY-MM-DD')
+        : 'No Date';
+      data.grantedDates += clearances[i].grantedDate
+        ? format(clearances[i].grantedDate, null, 'YYYY-MM-DD')
+        : 'No Date';
+      data.biDates += clearances[i].biDates.length > 0 ? joinAndFormat(clearances[i].biDates, ' & ') : 'No Dates';
+      data.polyDates += clearances[i].polyDates.length > 0 ? joinAndFormat(clearances[i].polyDates, ' & ') : 'No Dates';
       data.adjudicationDates +=
-        clearances[i].adjudicationDates.length > 0 ? clearances[i].adjudicationDates.join(' & ') : 'No Dates';
+        clearances[i].adjudicationDates.length > 0 ? joinAndFormat(clearances[i].adjudicationDates, ' & ') : 'No Dates';
       data.badgeNum += clearances[i].badgeNum ? clearances[i].badgeNum : 'No Number';
       data.badgeExpDate += clearances[i].badgeExpirationDate ? clearances[i].badgeExpirationDate : 'No Date';
       if (i + 1 < clearances.length) {
@@ -286,7 +303,7 @@ export function getContractPrimeProject(employeeContracts, allContracts) {
       _.forEach(contract.projects, (project) => {
         let p = allProjects.find((p) => p.id === project.projectId);
         projects.push(`${p.projectName} - ${(getProjectLengthInYears(project) / 12).toFixed(1)} years`);
-        let endDate = format(project.endDate || getTodaysDate(), 'YYYY-MM-DD');
+        let endDate = format(project.endDate || getTodaysDate(), null, 'YYYY-MM-DD');
         earliestDate = minimum([earliestDate, endDate]);
       });
       // add current contract, attaching earliestDate for sorting
@@ -294,7 +311,7 @@ export function getContractPrimeProject(employeeContracts, allContracts) {
       result.push({
         contract: { name: c.contractName, prime: c.primeName },
         projects: projects,
-        d: format(earliestDate, 'YYYYMMDD')
+        d: format(earliestDate, null, 'YYYYMMDD')
       });
     });
     // sort contracts by their earliest project start date
@@ -386,24 +403,24 @@ export function getEducation(education) {
             str += ')';
           }
 
-          if (degree.completionDate) str += ' - Graduated ' + degree.completionDate;
+          if (degree.completionDate) str += ' - Graduated ' + format(degree.completionDate, null, 'YYYY-MM');
           university.push({ str, date: degree.completeDate }); // push each degree individually
         });
       }
 
       // military type
       if (edu.type === 'military') {
-        str = `${edu.branch}`;
-        if (edu.startDate) str += `${edu.startDate}`;
+        str = `${edu.branch}${edu.startDate || edu.endDate ? ' ' : ''}`;
+        if (edu.startDate) str += `${format(edu.startDate, null, 'YYYY-MM')}`;
         if (edu.startDate && edu.completeDate) str += ' - ';
-        if (edu.completeDate) str += `${edu.completeDate}`;
+        if (edu.completeDate) str += `${format(edu.completeDate, null, 'YYYY-MM')}`;
         military.push({ str, date: edu.completeDate });
       }
 
       // high school type
       if (edu.type === 'highSchool') {
         str = `${edu.name}`;
-        if (edu.gradDate) str += `: Graduated ${edu.gradDate}`;
+        if (edu.gradDate) str += `: Graduated ${format(edu.gradDate, null, 'YYYY-MM')}`;
         highSchool.push({ str, date: edu.gradDate });
       }
     });
@@ -442,8 +459,10 @@ export function getCompanies(companies) {
       let positions = companies[i].positions;
       let formattedPositions = [];
       for (let j = 0; j < positions.length; j++) {
-        let endDate = positions[j].endDate === null ? 'present' : positions[j].endDate;
-        formattedPositions.push(`${positions[j].title} (${positions[j].startDate} to ${endDate})`);
+        let endDate = positions[j].endDate === null ? 'present' : format(positions[j].endDate, null, 'YYYY-MM-DD');
+        formattedPositions.push(
+          `${positions[j].title} (${format(positions[j].startDate, null, 'YYYY-MM-DD')} to ${endDate})`
+        );
       }
       toPush += formattedPositions.join(', ');
       result.push(toPush);

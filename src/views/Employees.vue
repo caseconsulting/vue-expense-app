@@ -180,6 +180,7 @@
                 :employee="item"
                 :contracts="contracts"
                 :tags="tags"
+                :filename="`${item.nickname || item.firstName} ${item.lastName}`"
               ></convert-employee-to-csv>
               <span>
                 <v-tooltip activator="parent" location="top" text="Delete" />

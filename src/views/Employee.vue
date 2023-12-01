@@ -104,7 +104,8 @@
               <convert-employee-to-csv
                 v-if="userRoleIsAdmin()"
                 :contracts="contracts"
-                :employee="this.model"
+                :employee="model"
+                :filename="`${model.nickname || model.firstName} ${model.lastName}`"
                 :tags="$store.getters.tags"
                 color="white"
               />
