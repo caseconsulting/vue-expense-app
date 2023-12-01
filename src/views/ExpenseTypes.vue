@@ -184,6 +184,14 @@
               <template v-slot:[`item.budget`]="{ item }">
                 <p class="mb-0">{{ convertToMoneyString(item.budget) }}</p>
               </template>
+              <!-- Budget slot -->
+              <template v-slot:[`item.startDate`]="{ item }">
+                <p class="mb-0">{{ format(item.startDate, null, 'YYYY-MM-DD') }}</p>
+              </template>
+              <!-- Budget slot -->
+              <template v-slot:[`item.endDate`]="{ item }">
+                <p class="mb-0">{{ format(item.endDate, null, 'YYYY-MM-DD') }}</p>
+              </template>
               <!-- Actions -->
               <template v-if="userRoleIsAdmin()" v-slot:[`item.actions`]="{ item }">
                 <v-tooltip location="top">
@@ -460,6 +468,7 @@ import {
   updateStoreCampfires,
   updateStoreTags
 } from '@/utils/storeUtils';
+import { format } from '../shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -1260,6 +1269,7 @@ export default {
     expenseFormError,
     limitedText,
     filterExpenseTypes,
+    format,
     getAccess,
     getCampfire,
     getEmployeeList,
