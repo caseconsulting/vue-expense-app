@@ -3,7 +3,6 @@
     <v-app>
       <v-navigation-drawer
         v-if="isLoggedIn()"
-        theme="light"
         v-model="drawer"
         :rail="!isMobile"
         @update:rail="mainNavReloadKey++"
@@ -109,13 +108,13 @@
         </v-menu>
         <!-- End user image and logout -->
       </v-app-bar>
-      <v-main :style="{ padding: getMainPadding() }">
+      <v-main :style="{ padding: getMainPadding() }" class="app-bg-color">
         <v-container fluid grid-list-lg class="px-2 px-md-4">
           <notification-banners v-if="isLoggedIn() && storeIsPopulated" />
           <router-view></router-view>
         </v-container>
       </v-main>
-      <v-footer v-if="isLoggedIn()">
+      <v-footer v-if="isLoggedIn()" class="app-bg-color">
         <v-col class="text-right text-caption" cols="12">
           <a
             id="P"
@@ -509,7 +508,10 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #3f3f3c;
-  background: #f5f5f5;
+}
+
+.app-bg-color {
+  background-color: #f7f7f7 !important;
 }
 
 .logo-bar {
