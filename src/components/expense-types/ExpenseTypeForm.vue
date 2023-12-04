@@ -211,76 +211,76 @@
         </v-row>
 
         <!-- Start Date -->
-        <v-menu
-          v-model="showStartMenu"
-          v-if="!editedExpenseType.recurringFlag"
-          :rules="getRequiredRules()"
-          :close-on-content-click="false"
-          :offset="40"
-          transition="scale-transition"
-          max-width="290px"
-          min-width="290px"
-        >
-          <template v-slot:activator="{ props }">
-            <v-text-field
-              variant="underlined"
-              v-model="startDateFormatted"
-              id="startDate"
-              :rules="[...getDateRules(), ...startDateRules]"
-              label="Start Date"
-              hint="MM/DD/YYYY format"
-              v-mask="'##/##/####'"
-              persistent-hint
-              prepend-icon="mdi-calendar"
-              @blur="editedExpenseType.startDate = format(startDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
-              @update:model-value="showStartMenu = false"
-              v-bind="props"
-            ></v-text-field>
-          </template>
 
-          <v-date-picker
-            v-model="editedExpenseType.startDate"
-            @input="showStartMenu = false"
-            :max="editedExpenseType.endDate"
-            no-title
-          ></v-date-picker>
-        </v-menu>
+        <v-text-field
+          v-if="!editedExpenseType.recurringFlag"
+          variant="underlined"
+          v-model="startDateFormatted"
+          id="startDate"
+          :rules="[...getDateRules(), ...startDateRules]"
+          label="Start Date"
+          hint="MM/DD/YYYY format"
+          v-mask="'##/##/####'"
+          persistent-hint
+          prepend-icon="mdi-calendar"
+          @blur="editedExpenseType.startDate = format(startDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
+          @click:prepend="BirthdayMenu = true"
+          @keypress="BirthdayMenu = false"
+        >
+          <v-menu
+            activator="parent"
+            v-model="showStartMenu"
+            :rules="getRequiredRules()"
+            :close-on-content-click="false"
+            location="start center"
+          >
+            <v-date-picker
+              v-model="editedExpenseType.startDate"
+              @update:model-value="showStartMenu = false"
+              :max="editedExpenseType.endDate"
+              show-adjacent-months
+              hide-actions
+              keyboard-icon=""
+              color="#bc3825"
+              title="Birthday"
+            ></v-date-picker>
+          </v-menu>
+        </v-text-field>
 
         <!-- End Date -->
-        <v-menu
-          v-model="showEndMenu"
+        <v-text-field
           v-if="!editedExpenseType.recurringFlag"
-          :rules="getRequiredRules()"
-          :close-on-content-click="false"
-          :offset="40"
-          transition="scale-transition"
-          max-width="290px"
-          min-width="290px"
+          variant="underlined"
+          v-model="endDateFormatted"
+          id="endDate"
+          :rules="[...getDateRules(), ...endDateRules]"
+          label="End Date"
+          hint="MM/DD/YYYY format"
+          v-mask="'##/##/####'"
+          persistent-hint
+          prepend-icon="mdi-calendar"
+          @blur="editedExpenseType.endDate = format(endDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
+          @update:model-value="showEndMenu = false"
+          v-bind="props"
         >
-          <template v-slot:activator="{ props }">
-            <v-text-field
-              variant="underlined"
-              v-model="endDateFormatted"
-              id="endDate"
-              :rules="[...getDateRules(), ...endDateRules]"
-              label="End Date"
-              hint="MM/DD/YYYY format"
-              v-mask="'##/##/####'"
-              persistent-hint
-              prepend-icon="mdi-calendar"
-              @blur="editedExpenseType.endDate = format(endDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
+          <v-menu
+            activator="parent"
+            v-model="showEndMenu"
+            :rules="getRequiredRules()"
+            :close-on-content-click="false"
+            location="start center"
+          >
+            <v-date-picker
+              v-model="editedExpenseType.endDate"
               @update:model-value="showEndMenu = false"
-              v-bind="props"
-            ></v-text-field>
-          </template>
-
-          <v-date-picker
-            v-model="editedExpenseType.endDate"
-            @input="showEndMenu = false"
-            :min="editedExpenseType.startDate"
-            no-title
-          ></v-date-picker>
-        </v-menu>
+              :min="editedExpenseType.startDate"
+              show-adjacent-months
+              hide-actions
+              keyboard-icon=""
+              color="#bc3825"
+            ></v-date-picker>
+          </v-menu>
+        </v-text-field>
 
         <!-- Description -->
         <v-textarea
@@ -918,6 +918,8 @@ function watchModelID() {
       return category.name;
     });
   }
+  this.startDateFormatted = this.format(this.editedExpenseType.startDate, null, 'MM/DD/YYYY');
+  this.endDateFormatted = this.format(this.editedExpenseType.endDate, null, 'MM/DD/YYYY');
   this.editedExpenseType.budget = this.model.budget;
   this.budgetFormatted = this.editedExpenseType.budget;
   this.formatBudget();

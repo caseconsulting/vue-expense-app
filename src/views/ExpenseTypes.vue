@@ -178,7 +178,7 @@
             >
               <!-- Budget Name slot -->
               <template v-slot:[`item.budgetName`]="{ item }">
-                <td>{{ limitedText(item.budgetName) }}</td>
+                <p class="mb-0">{{ limitedText(item.budgetName) }}</p>
               </template>
               <!-- Budget slot -->
               <template v-slot:[`item.budget`]="{ item }">
@@ -194,40 +194,42 @@
               </template>
               <!-- Actions -->
               <template v-if="userRoleIsAdmin()" v-slot:[`item.actions`]="{ item }">
-                <v-tooltip location="top">
-                  <template v-slot:activator="{ props }">
-                    <v-btn
-                      v-if="userRoleIsAdmin()"
-                      :disabled="midAction"
-                      variant="text"
-                      icon
-                      @click="
-                        toTopOfForm();
-                        onSelect(item);
-                      "
-                      v-bind="props"
-                    >
-                      <v-icon icon="mdi-pencil" class="case-gray" />
-                    </v-btn>
-                  </template>
-                  <span>Edit</span>
-                </v-tooltip>
-                <v-tooltip location="top">
-                  <template v-slot:activator="{ props }">
-                    <v-btn
-                      v-if="userRoleIsAdmin()"
-                      id="delete"
-                      :disabled="midAction"
-                      variant="text"
-                      icon
-                      @click="validateDelete(item)"
-                      v-bind="props"
-                    >
-                      <v-icon icon="mdi-delete" class="case-gray" />
-                    </v-btn>
-                  </template>
-                  <slot>Delete</slot>
-                </v-tooltip>
+                <div class="mr-4">
+                  <v-tooltip location="top">
+                    <template v-slot:activator="{ props }">
+                      <v-btn
+                        v-if="userRoleIsAdmin()"
+                        :disabled="midAction"
+                        variant="text"
+                        icon
+                        @click="
+                          toTopOfForm();
+                          onSelect(item);
+                        "
+                        v-bind="props"
+                      >
+                        <v-icon icon="mdi-pencil" class="case-gray" />
+                      </v-btn>
+                    </template>
+                    <span>Edit</span>
+                  </v-tooltip>
+                  <v-tooltip location="top">
+                    <template v-slot:activator="{ props }">
+                      <v-btn
+                        v-if="userRoleIsAdmin()"
+                        id="delete"
+                        :disabled="midAction"
+                        variant="text"
+                        icon
+                        @click="validateDelete(item)"
+                        v-bind="props"
+                      >
+                        <v-icon icon="mdi-delete" class="case-gray" />
+                      </v-btn>
+                    </template>
+                    <slot>Delete</slot>
+                  </v-tooltip>
+                </div>
               </template>
 
               <!-- Expanded slot item -->
@@ -1210,7 +1212,8 @@ export default {
           title: '',
           key: 'actions',
           sortable: false,
-          show: false
+          show: false,
+          align: 'end'
         }
       ], // datatable headers
       initialPageLoading: true,
