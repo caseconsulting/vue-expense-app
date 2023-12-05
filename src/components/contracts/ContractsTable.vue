@@ -1008,42 +1008,43 @@ export default {
         {
           title: 'Prime',
           key: 'primeName',
-          align: 'start'
+          width: '11%'
         },
         {
           title: 'Contract',
           key: 'contractName',
-          align: 'start'
+          width: '11%'
         },
         {
           title: 'Directorate',
           key: 'directorate',
-          align: 'start'
+          width: '11%'
         },
         {
           title: 'PoP-Start Date',
           key: 'popStartDate',
-          align: 'start'
+          width: '11%'
         },
         {
           title: 'PoP-End Date',
           key: 'popEndDate',
-          align: 'start'
+          width: '11%'
         },
         {
           title: 'Description',
           key: 'description',
-          align: 'start'
+          width: '11%'
         },
         {
           title: 'Active Employees',
           key: 'spacer',
-          align: 'start'
+          width: '14%'
         },
         {
           key: 'actions',
           sortable: false,
-          align: 'right'
+          align: 'end',
+          width: '12%'
         }
       ]
     };
@@ -1110,7 +1111,6 @@ export default {
 .contracts-table > div > table > tbody > tr > td {
   background: #f0f0f0 !important;
   opacity: 1;
-  padding-left: 0px !important;
 }
 
 .description textarea {
@@ -1124,40 +1124,12 @@ export default {
   font-size: 11px;
   line-height: 1.2;
 }
-
-/*
-tr.v-data-table__tr--clickable > td {
-  background: red !important;
-  opacity: 1;
-}*/
 </style>
 
 <style scoped>
-td {
-  background-color: red;
-}
-
 .contracts-table :deep(td:first-of-type) {
   width: 2%;
-}
-
-.contracts-table :deep(td:nth-child(n + 2):nth-child(-n + 6)) {
-  width: 10%;
-}
-
-.contracts-table :deep(td:nth-of-type(7)) {
-  width: 18%;
-}
-
-.contracts-table :deep(td:nth-of-type(8)) {
-  width: 18%;
-}
-
-.contracts-table :deep(td:last-of-type) {
-  width: 14%;
-}
-
-.contracts-table :deep(td:nth-child(n + 2):nth-child(-n + 6)) {
-  width: 9%;
+  z-index: 999;
+  padding-left: 0px !important;
 }
 </style>

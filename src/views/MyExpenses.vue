@@ -228,7 +228,7 @@
 
               <!--Action Items-->
               <template v-slot:[`item.actions`]="{ item }">
-                <td class="datatable_btn layout mr-0">
+                <td class="d-flex justify-end mr-4">
                   <!-- Download Attachment Button -->
                   <attachment :midAction="midAction" :expense="item" :mode="'expenses'"></attachment>
 
@@ -1017,6 +1017,7 @@ export default {
         {
           key: 'actions',
           width: '25%',
+          align: 'end',
           sortable: false
         }
       ], // datatable headers
@@ -1095,10 +1096,6 @@ export default {
 </script>
 
 <style>
-.datatable_btn .v-btn {
-  margin: 6px -2px;
-}
-
 .expandedInfo {
   border: 1px solid black;
   background-color: #f0f0f0;
