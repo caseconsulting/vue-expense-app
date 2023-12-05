@@ -41,7 +41,7 @@
           :rules="budgetRules"
           label="Budget"
           data-vv-name="Budget"
-          @blur="editedExpenseType.budget = parseBudget(budgetFormatted)"
+          @update:focused="editedExpenseType.budget = parseBudget(budgetFormatted)"
           @update:model-value="formatBudget(budgetFormatted)"
         ></v-text-field>
 
@@ -211,7 +211,6 @@
         </v-row>
 
         <!-- Start Date -->
-
         <v-text-field
           v-if="!editedExpenseType.recurringFlag"
           variant="underlined"
