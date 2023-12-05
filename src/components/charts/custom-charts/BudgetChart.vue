@@ -374,6 +374,14 @@ async function watchFiscalDateView() {
   this.drawGraph();
 } // watchFiscalDateView
 
+/**
+ * Watcher for accessibleBudgets - refresh budgets and draw graph.
+ */
+async function watchAccessibleBudgets() {
+  await this.refreshBudgets();
+  this.drawGraph();
+} // watchAccessibleBudgets
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -412,7 +420,8 @@ export default {
   mounted,
   props: ['employee', 'accessibleBudgets', 'fiscalDateView', 'expenses', 'expenseTypes'],
   watch: {
-    fiscalDateView: watchFiscalDateView
+    fiscalDateView: watchFiscalDateView,
+    accessibleBudgets: { handler: watchAccessibleBudgets, deep: true }
   }
 };
 </script>
