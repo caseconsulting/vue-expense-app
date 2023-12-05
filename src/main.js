@@ -6,10 +6,14 @@ import vuetify from './vuetify';
 
 import(/* webpackMode: "eager" */ 'vuetify/dist/vuetify.min.css');
 
+// global custom components
+import UserAvatar from '@/components/shared/UserAvatar';
+
 import App from './App.vue';
 
 const emitter = mitt();
 const app = createApp(App).use(router).use(store).use(vuetify);
+app.component('UserAvatar', UserAvatar);
 window.emitter = emitter;
 app.config.globalProperties.emitter = emitter;
 app.config.globalProperties.caseRed = '#bc3825';

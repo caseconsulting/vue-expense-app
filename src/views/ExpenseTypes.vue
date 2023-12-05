@@ -341,10 +341,10 @@
                             <template v-slot:activator="{ props }">
                               <v-btn class="px-1 ml-3" size="x-small" variant="outlined" v-bind="props">view</v-btn>
                             </template>
-                            <v-card color="#bc3825">
+                            <v-card class="mt-3">
                               <!-- Dialog Title -->
-                              <v-card-title>
-                                <span class="text-h5 text-white">Accessible By</span>
+                              <v-card-title class="d-flex align-center header_style">
+                                <h3>Accessible By</h3>
                               </v-card-title>
                               <v-divider color="black"></v-divider>
                               <!-- List of employee names/ISSUES -->
@@ -354,17 +354,10 @@
                                     <div v-for="employee in getEmployeeList(item.accessibleBy)" :key="employee.id">
                                       <v-list-item>
                                         <!-- Employee Image -->
-                                        <v-list-item-media>
-                                          <img
-                                            v-if="employee.avatar"
-                                            :src="employee.avatar"
-                                            @error="changeAvatar(employee)"
-                                          />
-                                          <v-icon icon="mdi-user-circle" name="user-circle" />
-                                        </v-list-item-media>
-
+                                        <template v-slot:prepend>
+                                          <user-avatar :employee="employee" :image="employee.avatar" />
+                                        </template>
                                         <!-- Employee Name -->
-
                                         <v-list-item-title>{{ getEmployeeName(employee.id) }}</v-list-item-title>
                                       </v-list-item>
                                     </div>

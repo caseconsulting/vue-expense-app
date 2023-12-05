@@ -66,10 +66,7 @@
         <!-- User image and logout -->
         <v-menu location="bottom" theme="light" open-on-click v-if="isLoggedIn()">
           <template v-slot:activator="{ props }">
-            <v-avatar id="profile" class="pointer mx-3" :color="caseRed" size="40">
-              <span style="position: absolute">{{ initials }}</span>
-              <v-img style="position: absolute" :src="profilePic" alt="avatar" v-bind="props" />
-            </v-avatar>
+            <user-avatar class="pointer mx-3" v-bind="props" :employee="$store.getters.user" :image="profilePic" />
           </template>
           <v-list v-if="!(isMobile || isSmallScreen)">
             <v-list-item>
@@ -351,11 +348,6 @@ async function created() {
     //stores the employee number
     this.userId = this.$store.getters.employeeNumber;
 
-    // update user initials, used for if Google photo does not show
-    this.initials =
-      (this.$store.getters.user.nickname || this.$store.getters.user.firstName).charAt(0) +
-      this.$store.getters.user.lastName.charAt(0);
-
     this.$store.getters.loginTime ? this.updateEmployeeLogin(this.$store.getters.user) : '';
   }
 
@@ -472,9 +464,9 @@ export default {
   components: {
     MainNav,
     NotificationBanners,
+    SwitchRoleModal,
     TimeOutModal,
-    TimeOutWarningModal,
-    SwitchRoleModal
+    TimeOutWarningModal
   },
   methods: {
     badumbadumdodooodoo,

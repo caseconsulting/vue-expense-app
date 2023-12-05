@@ -199,19 +199,7 @@
 
           <!-- Avatar Item Slot -->
           <template v-slot:[`item.avatars`]="{ item }">
-            <!-- Valid Avatar -->
-            <v-avatar v-if="item.avatar" size="35">
-              <img :src="item.avatar" @error="changeAvatar(employee)" style="width: 100%" />
-            </v-avatar>
-            <!-- Invalid Avatar -->
-            <v-avatar v-else size="35" color="grey-darken-2">
-              <div class="text-white">
-                <b
-                  >{{ item.firstName.substring(0, 1).toUpperCase()
-                  }}{{ item.lastName.substring(0, 1).toUpperCase() }}</b
-                >
-              </div>
-            </v-avatar>
+            <user-avatar :employee="item" :image="item.avatar" :size="35" class="text-body-1" />
           </template>
 
           <!-- First Name Item Slot -->
