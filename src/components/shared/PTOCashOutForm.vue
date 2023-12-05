@@ -241,25 +241,6 @@ function clearForm() {
 } // clearForm
 
 /**
- * Custom filter for employee autocomplete options.
- *
- * @param item - employee
- * @param queryText - text used for filtering
- * @return string - filtered employee name
- */
-function customFilter(item, queryText) {
-  const query = queryText ? queryText : '';
-  const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
-  const firstNameFullName = `${item.firstName} ${item.lastName}`;
-
-  const queryContainsNickName = nickNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
-  const queryContainsFirstName =
-    firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
-
-  return queryContainsNickName || queryContainsFirstName;
-} // customFilter
-
-/**
  * Displays error snackbar
  *
  * @param err error message to display
@@ -439,7 +420,6 @@ export default {
     cancel,
     cashOutHint,
     clearForm,
-    customFilter,
     displaySuccess,
     displayError,
     getPendingPtoCashoutAmount,

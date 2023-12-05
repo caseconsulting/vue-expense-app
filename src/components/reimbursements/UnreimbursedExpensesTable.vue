@@ -106,8 +106,8 @@
             </v-checkbox>
           </template>
           <!-- Employee Name slot -->
-          <template v-slot:[`item.employeeName`]="{ item }"
-            ><v-badge
+          <template v-slot:[`item.employeeName`]="{ item }">
+            <v-badge
               v-if="item.expenses.length > 1"
               :content="item.expenses.length"
               location="left"
@@ -367,7 +367,8 @@ function createExpenses(aggregatedData) {
  * @param queryText - the text used for checking for query in the name of the employee
  * @return boolean - true if the query is in the name with or without nickname
  */
-function customFilter(item, queryText) {
+function customFilter(_, queryText, item) {
+  item = item.raw;
   const query = queryText ? queryText : '';
   const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
   const firstNameFullName = `${item.firstName} ${item.lastName}`;

@@ -104,7 +104,8 @@ function mounted() {
  * @param queryText - text used for filtering
  * @return string - filtered employee name
  */
-function customFilter(item, queryText) {
+function customFilter(_, queryText, item) {
+  item = item.raw;
   const query = queryText ? queryText : '';
   const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
   const firstNameFullName = `${item.firstName} ${item.lastName}`;
