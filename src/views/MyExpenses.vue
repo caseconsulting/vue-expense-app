@@ -294,8 +294,8 @@
               </template>
 
               <!-- Expanded slot in datatable -->
-              <template v-slot:expanded-item="{ headers, item }">
-                <td :colspan="headers.length" class="pa-0">
+              <template v-slot:expanded-row="{ columns, item }">
+                <td :colspan="columns.length" class="pa-0">
                   <v-card text>
                     <v-card-text>
                       <div class="expandedInfo">
