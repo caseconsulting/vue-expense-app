@@ -20,9 +20,9 @@
         :timeout="5000"
         :vertical="true"
       >
-        <v-card-title headline color="white">
-          <span class="text-h5">{{ status.statusMessage }}</span>
-        </v-card-title>
+        <v-card-text color="white">
+          <span class="text-h6 font-weight-medium">{{ status.statusMessage }}</span>
+        </v-card-text>
         <v-btn color="white" variant="text" @click="clearStatus">Close</v-btn>
       </v-snackbar>
 
@@ -1081,8 +1081,8 @@ async function created() {
   this.emitter.on('update', () => {
     this.updateModelInTable();
   });
-  this.emitter.on('error', () => {
-    this.expenseFormError();
+  this.emitter.on('error', (msg) => {
+    this.expenseFormError(msg);
   });
 
   //no longer editing an expense (clear model and enable buttons)

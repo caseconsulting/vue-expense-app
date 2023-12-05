@@ -19,9 +19,9 @@
         :vertical="true"
         location="top right"
       >
-        <v-card-title headline color="white">
-          <span class="text-h5">{{ uploadStatus.statusMessage }}</span>
-        </v-card-title>
+        <v-card-text color="white">
+          <span class="text-h6 font-weight-medium">{{ uploadStatus.statusMessage }}</span>
+        </v-card-text>
         <v-btn color="white" variant="text" @click="clearStatus"> Close </v-btn>
       </v-snackbar>
       <v-row class="pa-0">

@@ -11,7 +11,7 @@
       vertical
     >
       <v-card-text color="white">
-        <span class="text-h5">{{ status.statusMessage }}</span>
+        <span class="text-h6 font-weight-medium">{{ status.statusMessage }}</span>
       </v-card-text>
       <v-btn color="white" variant="text" @click="clearStatus"> Close </v-btn>
     </v-snackbar>

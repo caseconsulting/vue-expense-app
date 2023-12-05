@@ -10,9 +10,9 @@
         :timeout="5000"
         :vertical="true"
       >
-        <v-card-title headline color="white">
-          <span class="text-h5">{{ status.statusMessage }}</span>
-        </v-card-title>
+        <v-card-text headline color="white">
+          <span class="text-h6 font-weight-medium">{{ status.statusMessage }}</span>
+        </v-card-text>
         <v-btn color="white" variant="text" @click="clearStatus">Close</v-btn>
       </v-snackbar>
 
