@@ -63,7 +63,7 @@
           <v-skeleton-loader type="list-item@12"></v-skeleton-loader>
         </div>
         <div v-else-if="!loading && viewingCurrentBudgetYear">
-          <expense-form :expense="expense" v-on:error="displayError"></expense-form>
+          <expense-form :expense="expense"></expense-form>
         </div>
       </v-col>
     </v-row>
@@ -184,7 +184,9 @@ function showSuccessfulSubmit() {
 async function updateData() {
   this.displayChart = false;
   await this.refreshEmployee();
-  this.showSuccessfulSubmit();
+  if (this.status['statusType'] !== 'ERROR') {
+    this.showSuccessfulSubmit();
+  }
 } // updateData
 
 // |--------------------------------------------------|
@@ -201,6 +203,10 @@ async function created() {
     await this.refreshEmployee();
   }
 
+  this.emitter.on('error', (msg) => {
+    this.displayError(msg);
+  });
+
   this.emitter.on('updateData', async () => {
     await this.updateData();
   });
@@ -210,10 +216,6 @@ async function created() {
       this.fiscalDateView = date;
     }
   });
-
-  this.emitter.on('confirmSubmit', async () => {
-    // expense submitted, refresh budgets for page
-  });
 } // created
 
 /**
@@ -222,6 +224,7 @@ async function created() {
 function beforeDestroy() {
   this.emitter.off('updateData');
   this.emitter.off('selected-budget-year');
+  this.emitter.off('error');
 } // beforeDestroy
 
 // |--------------------------------------------------|
