@@ -61,11 +61,12 @@
       <v-row class="pt-0">
         <!-- QuickBooks Time and Budgets-->
         <v-col v-if="displayQuickBooksTimeAndBalances" cols="12" md="5" lg="4" class="pt-0">
-          <quick-books-time-data :employee="this.model" class="mb-4"></quick-books-time-data>
+          <quick-books-time-data :employee="model" :key="model.employeeNumber" class="mb-4"></quick-books-time-data>
           <available-budgets
             class="mb-4"
-            v-if="this.model.id && !loading"
-            :employee="this.model"
+            v-if="this.model.id"
+            :employee="model"
+            :key="model.employeeNumber"
             :expenses="expenses"
             :expenseTypes="expenseTypes"
             :accessibleBudgets="accessibleBudgets"
@@ -74,7 +75,8 @@
           ></available-budgets>
           <anniversary-card
             v-if="!loading"
-            :employee="this.model"
+            :employee="model"
+            :key="model.employeeNumber"
             :hasBudgets="this.hasAccessToBudgets"
             location="profile"
           ></anniversary-card>
@@ -276,14 +278,7 @@ async function getProfileData() {
   this.displayQuickBooksTimeAndBalances = this.userRoleIsAdmin() || this.userIsEmployee();
   this.basicEmployeeDataLoading = false;
   if (this.model) {
-    [this.expenses] = await Promise.all([
-      this.hasAdminPermissions() || this.userIsEmployee() ? api.getAllAggregateExpenses() : '', // only load if neededapi.getAllAggregateExpenses(),
-      !this.$store.getters.expenseTypes ? this.updateStoreExpenseTypes() : '',
-      this.checkForBudgetAccess()
-    ]);
-    this.expenseTypes = this.$store.getters.expenseTypes;
-    this.fiscalDateView = this.getCurrentBudgetYear(this.model.hireDate);
-    this.hasAccessToBudgets = this.accessibleBudgets && this.accessibleBudgets.length !== 0; // enable budget chart
+    this.refershExpenseData();
   }
   this.loading = false;
 } // getProfileData
@@ -372,19 +367,40 @@ async function checkForBudgetAccess() {
  * @input num - amount of employees to move fowards (may be negative for backwards)
  */
 async function navEmployee(num) {
-  // create the loop
-  let loop, pos;
+  // set vars
+  let loop, pos, res;
+  let currId = this.model.employeeNumber;
+
+  // create 'loop' of employees in order of their employee number
   loop = this.$store.getters.employees || (await this.updateStoreEmployees());
   loop = loop.filter((e) => e.workStatus !== 0);
-  loop = Array.from(loop, (e) => e.employeeNumber);
-  loop = _.sortBy(loop);
-  pos = loop.indexOf(Number(this.$route.params.id));
+  loop = _.sortBy(loop, ['employeeNumber']);
 
-  // route
-  let res = (pos + num) % loop.length;
+  // get the employee we're currently at and grab the employee `num` after in
+  // the loop (this can be negative to go backwards, and can be more than 1)
+  pos = _.findIndex(loop, (e) => e.employeeNumber == currId);
+  res = (pos + num) % loop.length;
   if (res < 0) res = loop.length - 1;
-  this.$router.push(`/employee/${loop[res]}`);
-} // navEmployee
+  this.model = loop[res]; // this updates everything
+
+  // budget information needs to be reloaded specifically as it does not update
+  // when the model does
+  this.refershExpenseData();
+}
+
+/**
+ * Refreshes expense data based on the model, including: accessibleBudgets, expenses, expenseTypes, and fiscalDateView
+ */
+async function refershExpenseData() {
+  [this.expenses] = await Promise.all([
+    this.hasAdminPermissions() || this.userIsEmployee() ? api.getAllAggregateExpenses() : '', // only load if needed
+    !this.$store.getters.expenseTypes ? this.updateStoreExpenseTypes() : '',
+    this.checkForBudgetAccess()
+  ]);
+  this.expenseTypes = this.$store.getters.expenseTypes;
+  this.fiscalDateView = this.getCurrentBudgetYear(this.model.hireDate);
+  this.hasAccessToBudgets = this.accessibleBudgets && this.accessibleBudgets.length !== 0; // enable budget chart
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -583,7 +599,8 @@ export default {
     userRoleIsManager,
     userIsEmployee,
     checkForBudgetAccess,
-    navEmployee
+    navEmployee,
+    refershExpenseData
   },
   computed: {
     isMobile,
