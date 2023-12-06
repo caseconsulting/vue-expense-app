@@ -374,44 +374,36 @@ export default {
       projectHeaders: [
         {
           text: '',
-          value: 'spacer',
-          width: '14%'
+          value: 'spacer'
         },
         {
           text: 'Project',
-          value: 'projectName',
-          width: '11%'
+          value: 'projectName'
         },
         {
           text: 'Directorate',
-          value: 'directorate',
-          width: '11%'
+          value: 'directorate'
         },
         {
           text: 'PoP-Start Date',
-          value: 'popStartDate',
-          width: '11%'
+          value: 'popStartDate'
         },
         {
           text: 'PoP-End Date',
-          value: 'popEndDate',
-          width: '11%'
+          value: 'popEndDate'
         },
         {
           text: 'Description',
-          value: 'description',
-          width: '11%'
+          value: 'description'
         },
         {
           text: 'Active Employees',
-          value: 'projectActiveEmployees',
-          width: '14%'
+          value: 'projectActiveEmployees'
         },
         {
           value: 'actions',
           sortable: false,
-          align: 'end',
-          width: '12%'
+          align: 'end'
         }
       ]
     };
@@ -423,12 +415,12 @@ export default {
 <style lang="scss">
 @import 'src/assets/styles/styles';
 
-.projects-table > div {
-  overflow-y: hidden;
+.projects-table > div > table > tbody > tr > td {
+  padding-left: 0px !important;
 }
 
-.projects-table > div > table > tbody > tr > td:first-of-type {
-  padding-left: 0px !important;
+.projects-table > div {
+  overflow-y: hidden !important;
 }
 
 .highlight-project-row {
