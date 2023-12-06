@@ -400,6 +400,7 @@ function $route(to, from) {
  */
 function watchSessionTimedOut() {
   if (this.timedOut) {
+    this.emitter.emit('user-session-expired');
     this.handleLogout();
   }
 } // watchSessionTimedOut

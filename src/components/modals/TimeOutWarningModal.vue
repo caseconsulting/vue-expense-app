@@ -3,7 +3,10 @@
     <v-dialog v-model="activate" persistent max-width="350">
       <v-card>
         <v-card-text class="font-weight-medium text-h6">Session Time Out Warning</v-card-text>
-        <v-card-text>Warning: Your session will time out in 5 minutes. Please complete any progress.</v-card-text>
+        <v-card-text>
+          Warning: Your session will time out in 5 minutes if you remain inactive. Click anywhere to refresh your
+          session.
+        </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="gray darken-1" variant="text" @click.native="activate = false">Ok</v-btn>
