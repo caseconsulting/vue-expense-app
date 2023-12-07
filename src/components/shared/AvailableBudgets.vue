@@ -52,8 +52,8 @@
 import _ from 'lodash';
 import api from '@/shared/api.js';
 import AvailableBudgetSummary from '@/components/shared/AvailableBudgetSummary.vue';
-import { convertToMoneyString, getCurrentBudgetYear } from '@/utils/utils';
-import { getTodaysDate, isBetween } from '@/shared/dateUtils';
+import { convertToMoneyString, getCurrentBudgetYear, isFullTime } from '@/utils/utils';
+import { getTodaysDate, getYear, isBetween } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -112,69 +112,50 @@ async function refreshBudget() {
   let budgetsVar;
   let existingBudgets;
 
-  if (this.date == this.getCurrentBudgetYear(this.hireDate)) {
+  if (this.fiscalDateView == this.getCurrentBudgetYear(this.hireDate)) {
     // viewing active budget year
     budgetsVar = this.accessibleBudgets;
   } else {
     // get existing budgets for the budget year being viewed
-    existingBudgets = await api.getFiscalDateViewBudgets(this.employee.id, this.date);
+    existingBudgets = await api.getFiscalDateViewBudgets(this.employee.id, this.fiscalDateView);
+    existingBudgets = _.filter(existingBudgets, (e) => !!e);
+    budgetsVar = existingBudgets;
   }
 
-  // append inactive tag to end of budget expense type name
-  // the existing budget duplicates will later be removed (order in array comes after active budgets)
-  _.forEach(existingBudgets, (budget) => {
-    budget.expenseTypeName += ' (Inactive)';
-  });
-
-  budgetsVar = _.union(budgetsVar, existingBudgets); // combine existing and active budgets
-  budgetsVar = _.uniqBy(budgetsVar, 'expenseTypeId'); // remove duplicate expense types
   // remove inactive budgets
   budgetsVar = _.filter(budgetsVar, (b) => {
     let budget = b.budgetObject;
     return !_.some(
       this.expenseTypes,
       (e) =>
-        e.id == budget.expenseTypeId &&
-        (e.isInactive || !isBetween(getTodaysDate(), budget.fiscalStartDate, budget.fiscalEndDate, 'days', '[]'))
+        e.id == b.expenseTypeId &&
+        (e.isInactive ||
+          !isBetween(
+            this.getYear(this.fiscalDateView),
+            getYear(budget.fiscalStartDate),
+            getYear(budget.fiscalEndDate),
+            'year',
+            '[]'
+          ))
     );
   });
   budgetsVar = _.sortBy(budgetsVar, (budget) => {
     return budget.expenseTypeName;
   }); // sort by expense type name
 
+  // prohibit overdraft if employee is not full time
+  _.forEach(budgetsVar, async (budget) => {
+    if (!this.isFullTime(this.employee)) {
+      budget.odFlag = false;
+    }
+  });
+
   // remove any budgets where budget amount is 0 and 0 total expenses
   this.budgets = _.filter(budgetsVar, (data) => {
     let budget = data.budgetObject;
     return budget.amount != 0 || budget.reimbursedAmount != 0 || budget.pendingAmount != 0;
   });
-
-  this.refreshBudgetYears(); // refresh the budget year view options
 } // refreshBudget
-
-/**
- * Refresh and sets the budget year view options for the employee.
- */
-function refreshBudgetYears() {
-  let budgetYears = [];
-
-  // push all employee budget years
-  let budgetDates = _.uniqBy(_.map(this.allUserBudgets, 'fiscalStartDate'));
-  budgetDates.forEach((date) => {
-    const [year] = date.split('-');
-    budgetYears.push(parseInt(year));
-  });
-
-  // push active budget year
-  let [currYear] = this.getCurrentBudgetYear(this.hireDate).split('-');
-  budgetYears.push(parseInt(currYear));
-
-  // remove duplicate years and filter to include only active and previous years
-  budgetYears = _.filter(_.uniqBy(budgetYears), (year) => {
-    return parseInt(year) <= parseInt(currYear);
-  });
-
-  this.budgetYears = _.reverse(_.sortBy(budgetYears)); // sort budgets from current to past
-} // refreshBudgetYears
 
 /**
  * Refresh and sets employee information.
@@ -227,6 +208,13 @@ async function watchAccessibleBudgets() {
   await this.refreshEmployee();
 } // watchAccessibleBudgets
 
+/**
+ * watcher for fiscalDateView - refresh budgets and draw graph
+ */
+async function watchFiscalDateView() {
+  await this.refreshBudget();
+} // watchFiscalDateView
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -263,14 +251,16 @@ export default {
     convertToMoneyString,
     getCurrentBudgetYear,
     getTodaysDate,
+    getYear,
+    isFullTime,
     refreshBudget,
-    refreshBudgetYears,
     refreshEmployee,
     selectBudget
   },
   props: ['employee', 'expenseTypes', 'accessibleBudgets', 'fiscalDateView', 'employeeDataLoading'],
   watch: {
-    accessibleBudgets: watchAccessibleBudgets
+    accessibleBudgets: watchAccessibleBudgets,
+    fiscalDateView: watchFiscalDateView
   }
 };
 </script>

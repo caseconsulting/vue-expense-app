@@ -223,8 +223,8 @@
           persistent-hint
           prepend-icon="mdi-calendar"
           @blur="editedExpenseType.startDate = format(startDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
-          @click:prepend="BirthdayMenu = true"
-          @keypress="BirthdayMenu = false"
+          @click:prepend="showStartMenu = true"
+          @keypress="showStartMenu = false"
         >
           <v-menu
             activator="parent"
@@ -241,7 +241,7 @@
               hide-actions
               keyboard-icon=""
               color="#bc3825"
-              title="Birthday"
+              title="Start Date"
             ></v-date-picker>
           </v-menu>
         </v-text-field>
@@ -277,6 +277,7 @@
               hide-actions
               keyboard-icon=""
               color="#bc3825"
+              title="End Date"
             ></v-date-picker>
           </v-menu>
         </v-text-field>

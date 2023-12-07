@@ -38,7 +38,7 @@ import pattern from 'patternomaly';
 import _ from 'lodash';
 import BarChart from '@/components/charts/base-charts/BarChart.vue';
 import { isFullTime, getCurrentBudgetYear } from '@/utils/utils';
-import { getTodaysDate, isBetween } from '@/shared/dateUtils';
+import { getTodaysDate, getYear, isBetween } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -336,7 +336,14 @@ async function refreshBudgets() {
         this.expenseTypes,
         (e) =>
           e.id == budget.expenseTypeId &&
-          (e.isInactive || !isBetween(this.getTodaysDate(), budget.fiscalStartDate, budget.fiscalEndDate, 'day', '[]'))
+          (e.isInactive ||
+            !isBetween(
+              this.getYear(this.fiscalDateView),
+              getYear(budget.fiscalStartDate),
+              getYear(budget.fiscalEndDate),
+              'year',
+              '[]'
+            ))
       ) || _.some(this.expenses, (e) => e.expenseTypeId == budget.expenseTypeId && _.isEmpty(e.reimbursedDate))
     );
   });
@@ -413,6 +420,7 @@ export default {
     getCurrentBudgetYear,
     getFinalBudgetsData,
     getTodaysDate,
+    getYear,
     isFullTime,
     refreshBudgets
   },

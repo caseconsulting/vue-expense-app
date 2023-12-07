@@ -70,7 +70,7 @@
 
 <script>
 import { convertToMoneyString, getCurrentBudgetYear, isFullTime } from '@/utils/utils';
-import { format, getTodaysDate, isBetween, DEFAULT_ISOFORMAT, FORMATTED_ISOFORMAT } from '../../shared/dateUtils';
+import { format, getYear, isBetween, DEFAULT_ISOFORMAT, FORMATTED_ISOFORMAT } from '../../shared/dateUtils';
 import api from '@/shared/api';
 import _ from 'lodash';
 
@@ -196,7 +196,6 @@ async function refreshBudgets() {
     // get existing budgets for the budget year being viewed
     let existingBudgets = await api.getFiscalDateViewBudgets(this.employee.id, this.fiscalDateView);
     existingBudgets = _.filter(existingBudgets, (e) => !!e);
-
     budgetsVar = existingBudgets;
   }
 
@@ -210,10 +209,10 @@ async function refreshBudgets() {
           e.id == budget.expenseTypeId &&
           (e.isInactive ||
             !isBetween(
-              getTodaysDate('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]'),
-              budget.fiscalStartDate,
-              budget.fiscalEndDate,
-              'day',
+              this.getYear(this.fiscalDateView),
+              getYear(budget.fiscalStartDate),
+              getYear(budget.fiscalEndDate),
+              'year',
               '[]'
             ))
       ) || _.some(this.expenses, (e) => e.expenseTypeId == budget.expenseTypeId && _.isEmpty(e.reimbursedDate))
@@ -271,6 +270,7 @@ export default {
     getDate,
     getReimbursed,
     getPending,
+    getYear,
     noRemaining,
     odFlagMessage
   },

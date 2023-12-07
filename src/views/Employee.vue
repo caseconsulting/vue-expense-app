@@ -64,12 +64,13 @@
           <quick-books-time-data :employee="this.model" class="mb-4"></quick-books-time-data>
           <available-budgets
             class="mb-4"
-            v-if="this.model.id"
+            v-if="this.model.id && !loading"
             :employee="this.model"
             :expenses="expenses"
             :expenseTypes="expenseTypes"
             :accessibleBudgets="accessibleBudgets"
             :employeeDataLoading="loading"
+            :fiscalDateView="fiscalDateView"
           ></available-budgets>
           <anniversary-card
             v-if="!loading"
