@@ -150,6 +150,8 @@ async function refreshBudget() {
     }
   });
 
+  budgetsVar = _.uniqBy(budgetsVar, 'expenseTypeId');
+
   // remove any budgets where budget amount is 0 and 0 total expenses
   this.budgets = _.filter(budgetsVar, (data) => {
     let budget = data.budgetObject;
