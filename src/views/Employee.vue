@@ -64,7 +64,7 @@
           <quick-books-time-data :employee="model" :key="model.employeeNumber" class="mb-4"></quick-books-time-data>
           <available-budgets
             class="mb-4"
-            v-if="this.model.id"
+            v-if="model.id"
             :employee="model"
             :key="model.employeeNumber"
             :expenses="expenses"
@@ -143,6 +143,7 @@
             </v-card-title>
             <employee-info
               :model="this.model"
+              :key="model"
               :contracts="this.contracts"
               :currentTab="this.currentTab"
               v-if="!editing"
@@ -381,7 +382,7 @@ async function navEmployee(num) {
   pos = _.findIndex(loop, (e) => e.employeeNumber == currId);
   res = (pos + num) % loop.length;
   if (res < 0) res = loop.length - 1;
-  this.model = loop[res]; // this updates everything
+  this.model = _.cloneDeep(loop[res]); // this updates everything
 
   // budget information needs to be reloaded specifically as it does not update
   // when the model does
