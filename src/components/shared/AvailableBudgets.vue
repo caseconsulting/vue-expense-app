@@ -148,8 +148,13 @@ async function refreshBudget() {
     if (!this.isFullTime(this.employee)) {
       budget.odFlag = false;
     }
+    let bObj = budget.budgetObject;
+    if (!isBetween(getTodaysDate(), bObj.fiscalStartDate, bObj.fiscalEndDate, 'day', '[]')) {
+      budget.expenseTypeName += ' (inactive)';
+    }
   });
 
+  // filter out diplicate expense types
   budgetsVar = _.uniqBy(budgetsVar, 'expenseTypeId');
 
   // remove any budgets where budget amount is 0 and 0 total expenses
