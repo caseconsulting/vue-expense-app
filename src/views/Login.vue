@@ -8,7 +8,7 @@
         <h1 class="my-4">CASE Portal</h1>
       </v-col>
       <v-col align="center" cols="12">
-        <v-btn @click="login()" id="custom-button-color" class="reimburse_button" elevation="1" size="large"
+        <v-btn @click="login()" id="custom-button-color" class="px-4 reimburse_button" elevation="1" size="large"
           >Login</v-btn
         >
       </v-col>
