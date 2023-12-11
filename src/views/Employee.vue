@@ -61,12 +61,12 @@
       <v-row class="pt-0">
         <!-- QuickBooks Time and Budgets-->
         <v-col v-if="displayQuickBooksTimeAndBalances" cols="12" md="5" lg="4" class="pt-0">
-          <quick-books-time-data :employee="model" :key="model.employeeNumber" class="mb-4"></quick-books-time-data>
+          <quick-books-time-data :employee="model" :key="refreshKey" class="mb-4"></quick-books-time-data>
           <available-budgets
             class="mb-4"
-            v-if="model.id"
+            v-if="model.id && !loading"
             :employee="model"
-            :key="model.employeeNumber"
+            :key="refreshKey"
             :expenses="expenses"
             :expenseTypes="expenseTypes"
             :accessibleBudgets="accessibleBudgets"
@@ -76,8 +76,8 @@
           <anniversary-card
             v-if="!loading"
             :employee="model"
-            :key="model.employeeNumber"
-            :hasBudgets="this.hasAccessToBudgets"
+            :key="refreshKey"
+            :hasBudgets="hasAccessToBudgets"
             location="profile"
           ></anniversary-card>
         </v-col>
@@ -91,22 +91,21 @@
         >
           <v-card>
             <v-card-title class="d-flex align-center header_style" v-if="!editing">
-              <span>
+              <v-btn :disabled="loading" icon variant="text" density="comfortable">
                 <v-tooltip v-if="hasAdminPermissions()" activator="parent" location="top">Previous employee</v-tooltip>
                 <v-icon size="large" @click="navEmployee(-1)" color="white">mdi-arrow-left-thin</v-icon>
-              </span>
-              <span class="mr-3">
+              </v-btn>
+              <v-btn :disabled="loading" icon variant="text" density="comfortable" class="mr-3">
                 <v-tooltip v-if="hasAdminPermissions()" activator="parent" location="top">Next employee</v-tooltip>
                 <v-icon size="large" @click="navEmployee(1)" color="white">mdi-arrow-right-thin</v-icon>
-              </span>
+              </v-btn>
               <h3 id="employeeName" v-if="userIsEmployee()">My Profile</h3>
-              <h3 id="employeeName" v-else>
-                {{ this.model.nickname || this.model.firstName }} {{ this.model.lastName }}
-              </h3>
+              <h3 id="employeeName" v-else>{{ model.nickname || model.firstName }} {{ model.lastName }}</h3>
               <v-spacer></v-spacer>
               <convert-employee-to-csv
                 v-if="userRoleIsAdmin()"
                 :contracts="contracts"
+                :key="refreshKey"
                 :employee="model"
                 :filename="`${model.nickname || model.firstName} ${model.lastName}`"
                 :tags="$store.getters.tags"
@@ -122,14 +121,10 @@
               >
                 <v-tooltip v-if="hasAdminPermissions() || userIsEmployee()" activator="parent" location="top"
                   ><p class="ma-0 pa-0">
-                    {{ this.model.resumeUpdated != null ? 'Download Resume' : 'No resume available' }}
+                    {{ model.resumeUpdated != null ? 'Download Resume' : 'No resume available' }}
                   </p>
                   <p class="ma-0 pa-0">
-                    {{
-                      this.model.resumeUpdated != null
-                        ? `Uploaded ${format(this.model.resumeUpdated, null, dateFormat)}`
-                        : ''
-                    }}
+                    {{ model.resumeUpdated != null ? `Uploaded ${format(model.resumeUpdated, null, dateFormat)}` : '' }}
                   </p>
                 </v-tooltip>
                 <v-icon color="white" id="resume-download">mdi-file-download</v-icon>
@@ -142,24 +137,25 @@
               </v-btn>
             </v-card-title>
             <employee-info
-              :model="this.model"
-              :key="model"
-              :contracts="this.contracts"
-              :currentTab="this.currentTab"
+              :model="model"
+              :key="refreshKey"
+              :contracts="contracts"
+              :currentTab="currentTab"
               v-if="!editing"
             ></employee-info>
           </v-card>
           <!-- Edit Info (Form) -->
           <employee-form
-            :employee="this.model"
-            :contracts="this.contracts"
-            :currentTab="this.currentTab"
+            :employee="model"
+            :contracts="contracts"
+            :currentTab="currentTab"
             v-if="editing"
           ></employee-form>
           <div class="mt-4">
             <budget-chart
               v-if="(userRoleIsAdmin() || userIsEmployee()) && hasAccessToBudgets"
-              :employee="this.model"
+              :employee="model"
+              :key="refreshKey"
               :accessibleBudgets="accessibleBudgets"
               :expenses="expenses"
               :expenseTypes="expenseTypes"
@@ -173,10 +169,11 @@
       </v-row>
       <resume-parser
         v-if="!loading && !editing"
-        :toggleResumeParser="this.toggleResumeParser"
-        :employee="this.model"
+        :toggleResumeParser="toggleResumeParser"
+        :employee="model"
+        :key="refreshKey"
       ></resume-parser>
-      <delete-modal :toggleDeleteModal="this.toggleDeleteModal" type="resume"></delete-modal>
+      <delete-modal :toggleDeleteModal="toggleDeleteModal" type="resume"></delete-modal>
     </div>
   </v-container>
 </template>
@@ -279,7 +276,7 @@ async function getProfileData() {
   this.displayQuickBooksTimeAndBalances = this.userRoleIsAdmin() || this.userIsEmployee();
   this.basicEmployeeDataLoading = false;
   if (this.model) {
-    this.refershExpenseData();
+    await this.refreshExpenseData(true);
   }
   this.loading = false;
 } // getProfileData
@@ -386,21 +383,29 @@ async function navEmployee(num) {
 
   // budget information needs to be reloaded specifically as it does not update
   // when the model does
-  this.refershExpenseData();
+  await this.refreshExpenseData();
+
+  // update the URL so that it makes sense
+  history.pushState({}, null, this.model.employeeNumber);
 }
 
 /**
  * Refreshes expense data based on the model, including: accessibleBudgets, expenses, expenseTypes, and fiscalDateView
  */
-async function refershExpenseData() {
-  [this.expenses] = await Promise.all([
-    this.hasAdminPermissions() || this.userIsEmployee() ? api.getAllAggregateExpenses() : '', // only load if needed
-    !this.$store.getters.expenseTypes ? this.updateStoreExpenseTypes() : '',
-    this.checkForBudgetAccess()
-  ]);
-  this.expenseTypes = this.$store.getters.expenseTypes;
+async function refreshExpenseData(full = false) {
+  this.loading = true;
+  // these are aggregated so it probably doesn't need to be updated
+  if (full) {
+    [this.expenses] = await Promise.all([
+      this.hasAdminPermissions() || this.userIsEmployee() ? api.getAllAggregateExpenses() : '', // only load if needed
+      !this.$store.getters.expenseTypes ? this.updateStoreExpenseTypes() : ''
+    ]);
+    this.expenseTypes = this.$store.getters.expenseTypes;
+  }
+  await this.checkForBudgetAccess();
   this.fiscalDateView = this.getCurrentBudgetYear(this.model.hireDate);
   this.hasAccessToBudgets = this.accessibleBudgets && this.accessibleBudgets.length !== 0; // enable budget chart
+  this.loading = false;
 }
 
 // |--------------------------------------------------|
@@ -474,6 +479,26 @@ function beforeDestroy() {
   this.emitter.off('tabChange');
   this.emitter.off('selected-budget-year');
 } // beforeDestroy
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                    COMPUTED                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Used to refresh components
+ */
+function refreshKey() {
+  return {
+    a: this.model,
+    b: this.expenses,
+    c: this.expenseTypes,
+    d: this.fiscalDateView,
+    e: this.accessibleBudgets,
+    f: this.fiscalDateView
+  };
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -601,11 +626,12 @@ export default {
     userIsEmployee,
     checkForBudgetAccess,
     navEmployee,
-    refershExpenseData
+    refreshExpenseData
   },
   computed: {
     isMobile,
     minimizeWindow,
+    refreshKey,
     storeIsPopulated
   },
   mounted,
