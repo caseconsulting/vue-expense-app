@@ -42,11 +42,11 @@
 import TagsTable from '@/components/employees/tags/TagsTable.vue';
 
 /**
- * beforeDestroy life cycle hook
+ * beforeUnmount life cycle hook
  */
-function beforeDestroy() {
+function beforeUnmount() {
   this.emitter.off('status-alert');
-} // beforeDestroy
+} // beforeUnmount
 
 /**
  * Mounted life cycle hook
@@ -97,7 +97,7 @@ function emit(msg, data) {
 // |--------------------------------------------------|
 
 export default {
-  beforeDestroy,
+  beforeUnmount,
   components: {
     TagsTable
   },

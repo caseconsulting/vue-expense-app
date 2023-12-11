@@ -193,11 +193,11 @@ async function created() {
 } // created
 
 /**
- * beforeDestroy lifecycle hook
+ * beforeUnmount lifecycle hook
  */
-function beforeDestroy() {
+function beforeUnmount() {
   this.emitter.off('selected-budget-year');
-} //beforeDestroy
+} //beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -226,7 +226,7 @@ export default {
     };
   },
   created,
-  beforeDestroy,
+  beforeUnmount,
   methods: {
     add, // dateUtils
     difference, // dateUtils

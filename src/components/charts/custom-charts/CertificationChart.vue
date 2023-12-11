@@ -35,13 +35,6 @@ async function mounted() {
   }
 } // mounted
 
-/**
- * Calls the destroy chart function in the base chart.
- */
-function beforeDestroy() {
-  this.$refs.barChart.destroyChart();
-} // beforeDestroy
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                      METHODS                     |
@@ -250,7 +243,6 @@ function breakSentence(s) {
 
 export default {
   components: { BarChart, DownloadCSV },
-  beforeDestroy,
   mounted,
   computed: {
     storeIsPopulated

@@ -1051,7 +1051,7 @@ function getTagByID(id) {
 /**
  * destroy listeners
  */
-function beforeDestroy() {
+function beforeUnmount() {
   this.emitter.off('add');
   this.emitter.off('startAction');
   this.emitter.off('endAction');
@@ -1062,7 +1062,7 @@ function beforeDestroy() {
   this.emitter.off('finished-editing-expense-type');
   this.emitter.off('editing-expense-type');
   this.emitter.off('invalid-expense type-delete');
-} // beforeDestroy
+} // beforeUnmount
 
 /**
  * Set user info, employees, and expense types. Creates event listeners.
@@ -1150,7 +1150,7 @@ function limitedText(val) {
 // |--------------------------------------------------|
 
 export default {
-  beforeDestroy,
+  beforeUnmount,
   components: {
     DeleteErrorModal,
     DeleteModal,

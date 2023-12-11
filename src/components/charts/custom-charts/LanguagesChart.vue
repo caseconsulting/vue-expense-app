@@ -16,13 +16,6 @@ import { storeIsPopulated, isEmpty } from '@/utils/utils';
 // |--------------------------------------------------|
 
 /**
- * Calls the destroy chart function in the base chart.
- */
-function beforeDestroy() {
-  this.$refs.barChart.destroyChart();
-} // beforeDestroy
-
-/**
  * Mounted lifecycle hook.
  */
 async function mounted() {
@@ -183,7 +176,6 @@ export default {
     };
   },
   methods: { fetchData, fillData },
-  beforeDestroy,
   mounted,
   watch: {
     storeIsPopulated: function () {

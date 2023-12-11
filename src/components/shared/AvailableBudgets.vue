@@ -99,11 +99,11 @@ function calcRemaining(budget) {
 } // calcRemaining
 
 /**
- * beforeDestroy lifecycle hook
+ * beforeUnmount lifecycle hook
  */
-function beforeDestroy() {
+function beforeUnmount() {
   this.emitter.off('close-summary');
-} //beforeDestroy
+} //beforeUnmount
 
 /**
  * Refresh and sets the aggregated budgets for the employee budget year view.
@@ -233,7 +233,7 @@ export default {
     AvailableBudgetSummary
   },
   created,
-  beforeDestroy,
+  beforeUnmount,
   data() {
     return {
       active: false,

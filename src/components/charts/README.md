@@ -44,8 +44,8 @@ Now you're ready to create a chart.
 - Once you have both these methods fleshed out, create the base chart child component in the template. Also import and include it in the export.
 - Pass the chartId prop, options, and chartData variables. **IMPORTANT** You also need to create a ref attribute in the tag. This will be used to destroy the chart like so...
   ```javascript
-  function beforeDestroy() {
-    this.$refs.barChart.destroyChart();
+  function beforeUnmount() {
+    // this.$refs.barChart.destroyChart();
   }
   ```
   This calls the destroyChart function found in the base chart which deletes the chart instance and prevents errors in the console.
@@ -121,4 +121,4 @@ if (this.$route.params.requestedDataType) {
 One last note is things we stumbled upon that created errors with the charts.
 
 - If the chart has a different animation after viewing a second time, make sure your fetchingData and drawing the chart are two separate functions and both async. This will ensure the data is completely loaded in before rendering the chart.
-- If a clickable chart is throwing errors in the console onClick, make sure you have a beforeDestroy hook that calls the destroyChart function in the base chart. If the chart instance is not properly destroyed sometimes vue looks for things that aren't there after leaving the chart.
+- If a clickable chart is throwing errors in the console onClick, make sure you have a beforeUnmount hook that calls the destroyChart function in the base chart. If the chart instance is not properly destroyed sometimes vue looks for things that aren't there after leaving the chart.

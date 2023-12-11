@@ -60,11 +60,6 @@
 
 <script>
 /**
- * beforeDestroy life cycle hook
- */
-function beforeDestroy() {} // beforeDestroy
-
-/**
  * Mounted life cycle hook
  */
 function mounted() {} // mounted
@@ -127,7 +122,6 @@ function parseNumber(number) {
 // |--------------------------------------------------|
 
 export default {
-  beforeDestroy,
   data() {
     return {
       activate: false, // dialog activator

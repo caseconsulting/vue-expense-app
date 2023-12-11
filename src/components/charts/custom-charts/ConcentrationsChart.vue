@@ -47,10 +47,9 @@ async function created() {
 /**
  * Before destroy lifecycle hook.
  */
-function beforeDestroy() {
+function beforeUnmount() {
   this.emitter.off('concentrations-update');
-  this.$refs.pieChart.destroyChart();
-} // beforeDestroy
+} // beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -168,6 +167,6 @@ export default {
   methods: { fetchData, fillData },
   mounted,
   created,
-  beforeDestroy
+  beforeUnmount
 };
 </script>

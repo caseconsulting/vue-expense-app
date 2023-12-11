@@ -32,13 +32,6 @@ async function mounted() {
 // |--------------------------------------------------|
 
 /**
- * Calls the destroy chart function in the base chart.
- */
-function beforeDestroy() {
-  this.$refs.barChart.destroyChart();
-} // beforeDestroy
-
-/**
  * Gets all of the current projects the user has.
  *
  * @param employee - the employee that we are getting the current projects for
@@ -206,7 +199,6 @@ function fillData() {
 
 export default {
   components: { BarChart },
-  beforeDestroy,
   mounted,
   computed: {
     storeIsPopulated

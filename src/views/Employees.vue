@@ -769,7 +769,7 @@ async function created() {
 /**
  * destroy listeners
  */
-function beforeDestroy() {
+function beforeUnmount() {
   this.emitter.off('cancel-form');
   this.emitter.off('canceled-delete-employee');
   this.emitter.off('confirm-delete-employee');
@@ -777,7 +777,7 @@ function beforeDestroy() {
   this.emitter.off('empNum');
   this.emitter.off('close-tag-manager');
   this.emitter.off('close-data-sync-results-modal');
-} // beforeDestroy
+} // beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -836,7 +836,7 @@ function watchSelectedTags() {
 // |--------------------------------------------------|
 
 export default {
-  beforeDestroy,
+  beforeUnmount,
   components: {
     ConvertEmployeesToCsv,
     DeleteErrorModal,

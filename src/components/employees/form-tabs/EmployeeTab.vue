@@ -432,10 +432,10 @@ const regex = /^[a-zA-Z]+$/;
 /**
  * Turn off listeners.
  */
-function beforeDestroy() {
+function beforeUnmount() {
   this.emitter.off('cancel-decline-self-identify');
   this.emitter.off('confirm-decline-self-identify');
-} // beforeDestroy
+} // beforeUnmount
 
 /**
  * Emits to parent the component was created and get data.
@@ -782,7 +782,7 @@ function watchEeoHispanicOrLatino() {
 // |--------------------------------------------------|
 
 export default {
-  beforeDestroy,
+  beforeUnmount,
   components: { EEODeclineSelfIdentify },
   created,
   data() {

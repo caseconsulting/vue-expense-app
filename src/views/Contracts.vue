@@ -60,13 +60,13 @@ import ConvertContractsToCsv from '../components/contracts/ConvertContractsToCsv
 // |--------------------------------------------------|
 
 /**
- * beforeDestroy life cycle hook
+ * beforeUnmount life cycle hook
  */
-function beforeDestroy() {
+function beforeUnmount() {
   this.emitter.off('canceled-contract-form');
   this.emitter.off('submitted-contract-form');
   this.emitter.off('status-alert');
-} // beforeDestroy
+} // beforeUnmount
 
 /**
  * created life cycle hook
@@ -104,7 +104,7 @@ function clearStatus() {
 // |--------------------------------------------------|
 
 export default {
-  beforeDestroy,
+  beforeUnmount,
   computed: {
     isMobile
   },

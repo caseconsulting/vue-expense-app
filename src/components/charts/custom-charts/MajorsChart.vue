@@ -41,10 +41,9 @@ async function created() {
 /**
  * Before destroy lifecycle hook.
  */
-function beforeDestroy() {
+function beforeUnmount() {
   this.emitter.off('majors-update');
-  this.$refs.chart.destroyChart();
-} //beforeDestroy
+} //beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -155,7 +154,7 @@ export default {
   },
   mounted,
   created,
-  beforeDestroy
+  beforeUnmount
 };
 </script>
 

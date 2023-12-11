@@ -364,14 +364,14 @@ async function created() {
 } // created
 
 /**
- * beforeDestroy lifecycle hook - close event listener
+ * beforeUnmount lifecycle hook - close event listener
  */
-function beforeDestroy() {
+function beforeUnmount() {
   this.emitter.off('close');
   this.emitter.off('relog');
   this.emitter.off('badgeExp');
   this.emitter.off('user-session-refreshed');
-} //beforeDestroy
+} //beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -489,7 +489,7 @@ export default {
     $route,
     timedOut: watchSessionTimedOut
   },
-  beforeDestroy,
+  beforeUnmount,
   created
 };
 </script>

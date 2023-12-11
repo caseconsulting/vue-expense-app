@@ -86,10 +86,10 @@ async function created() {
 /**
  * destroy listeners
  */
-function beforeDestroy() {
+function beforeUnmount() {
   this.emitter.off('refresh-quickbooks-data');
   this.emitter.off('close-pto-cash-out-form');
-} // beforeDestroy
+} // beforeUnmount
 
 /**
  * Mounted lifecycle hook.
@@ -279,7 +279,7 @@ export default {
     availableBalances,
     isLegacyFireTeam
   },
-  beforeDestroy,
+  beforeUnmount,
   created,
   data() {
     return {

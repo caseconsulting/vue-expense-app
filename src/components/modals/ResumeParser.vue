@@ -450,12 +450,12 @@ async function created() {
 /**
  * destroy listeners
  */
-function beforeDestroy() {
+function beforeUnmount() {
   this.emitter.off('confirmed-parser');
   this.emitter.off('canceled-parser');
   this.emitter.off('backout-canceled-parser');
   this.emitter.off('backout-confirmed-parser');
-} // beforeDestroy
+} // beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -1154,7 +1154,7 @@ function watchActivate() {
 // |--------------------------------------------------|
 
 export default {
-  beforeDestroy,
+  beforeUnmount,
   components: {
     CancelConfirmation,
     UniversityForm,

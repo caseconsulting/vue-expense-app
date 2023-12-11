@@ -574,9 +574,9 @@ async function created() {
 /**
  * Before destroy lifecycle hook. Destroys listeners.
  */
-function beforeDestroy() {
+function beforeUnmount() {
   this.emitter.off('status-alert');
-} // beforeDestroy
+} // beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -641,7 +641,7 @@ export default {
     };
   },
   methods: {
-    beforeDestroy,
+    beforeUnmount,
     clearStatus,
     createEvents,
     getAnniversary,

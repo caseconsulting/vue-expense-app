@@ -468,7 +468,7 @@ function mounted() {
 /**
  * destroy listeners
  */
-function beforeDestroy() {
+function beforeUnmount() {
   this.emitter.off('delete-resume');
   this.emitter.off('confirm-delete-resume');
   this.emitter.off('canceled-delete-resume');
@@ -478,7 +478,7 @@ function beforeDestroy() {
   this.emitter.off('uploaded');
   this.emitter.off('tabChange');
   this.emitter.off('selected-budget-year');
-} // beforeDestroy
+} // beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -520,7 +520,7 @@ async function watchStoreIsPopulated() {
 // |--------------------------------------------------|
 
 export default {
-  beforeDestroy,
+  beforeUnmount,
   components: {
     AvailableBudgets,
     DeleteModal,

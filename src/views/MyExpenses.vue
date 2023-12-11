@@ -899,7 +899,7 @@ async function created() {
 /**
  * destroy listeners
  */
-function beforeDestroy() {
+function beforeUnmount() {
   this.emitter.off('add');
   this.emitter.off('delete');
   this.emitter.off('startAction');
@@ -911,7 +911,7 @@ function beforeDestroy() {
   this.emitter.off('editing-expense');
   this.emitter.off('confirm-unreimburse-expense');
   this.emitter.off('canceled-unreimburse-expense');
-} // beforeDestroy
+} // beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -944,7 +944,7 @@ async function watchStorePopulated() {
 // |--------------------------------------------------|
 
 export default {
-  beforeDestroy,
+  beforeUnmount,
   components: {
     Attachment,
     ConvertExpensesToCsv,

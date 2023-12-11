@@ -47,13 +47,6 @@ import { getTodaysDate, getYear, isBetween } from '@/shared/dateUtils';
 // |--------------------------------------------------|
 
 /**
- * Calls the destroy chart function in the base chart.
- */
-function beforeDestroy() {
-  this.$refs.barChart.destroyChart();
-} // beforeDestroy
-
-/**
  * Mounted lifecycle hook.
  */
 async function mounted() {
@@ -424,7 +417,6 @@ export default {
     isFullTime,
     refreshBudgets
   },
-  beforeDestroy,
   mounted,
   props: ['employee', 'accessibleBudgets', 'fiscalDateView', 'expenses', 'expenseTypes'],
   watch: {

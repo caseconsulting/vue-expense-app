@@ -78,9 +78,9 @@ function mounted() {
 /**
  * before destroy lifecycle hook
  */
-function beforeDestroy() {
+function beforeUnmount() {
   this.emitter.off('status-alert');
-} // beforeDestroy
+} // beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -134,7 +134,7 @@ function clearStatus() {
 // |                                                  |
 // |--------------------------------------------------|
 export default {
-  beforeDestroy,
+  beforeUnmount,
   created,
   components: {
     PTOCashOutsTable,
