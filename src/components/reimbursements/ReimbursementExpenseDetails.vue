@@ -88,11 +88,11 @@ function created() {
 } // created
 
 /**
- * beforeDestroy lifecycle hook
+ * beforeUnmount lifecycle hook
  */
-function beforeDestroy() {
+function beforeUnmount() {
   this.emitter.off('expenseClicked');
-} //beforeDestroy
+} //beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -102,7 +102,7 @@ function beforeDestroy() {
 
 export default {
   created,
-  beforeDestroy,
+  beforeUnmount,
   components: {
     Attachment
   },

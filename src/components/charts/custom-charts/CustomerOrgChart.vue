@@ -34,13 +34,6 @@ async function created() {
   }
 } // created
 
-/**
- * Calls the destroy chart function in the base chart.
- */
-function beforeDestroy() {
-  this.$refs.pieChart.destroyChart();
-} // beforeDestroy
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -194,7 +187,6 @@ export default {
     };
   },
   methods: { fetchData, fillData },
-  beforeDestroy,
   created,
   watch: {
     showCurrent: watchShowCurrent,

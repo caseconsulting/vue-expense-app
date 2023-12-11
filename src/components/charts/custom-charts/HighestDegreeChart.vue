@@ -27,13 +27,6 @@ async function mounted() {
   }
 } // mounted
 
-/**
- * Calls the destroy chart function in the base chart.
- */
-function beforeDestroy() {
-  this.$refs.pieChart.destroyChart();
-} // beforeDestroy
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -486,7 +479,6 @@ export default {
     minorsEmit,
     concentrationsEmit
   },
-  beforeDestroy,
   mounted,
   watch: {
     storeIsPopulated: function () {

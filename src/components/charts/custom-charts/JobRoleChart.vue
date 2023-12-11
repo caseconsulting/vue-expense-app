@@ -25,13 +25,6 @@ async function mounted() {
   }
 } // mounted
 
-/**
- * Calls the destroy chart function in the base chart.
- */
-function beforeDestroy() {
-  this.$refs.barChart.destroyChart();
-} // beforeDestroy
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                      METHODS                     |
@@ -178,7 +171,6 @@ export default {
     };
   },
   methods: { fetchData, fillData },
-  beforeDestroy,
   mounted,
   watch: {
     storeIsPopulated: function () {

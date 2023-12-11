@@ -82,10 +82,10 @@ function mounted() {
 /**
  * before destroy lifecycle hook
  */
-function beforeDestroy() {
+function beforeUnmount() {
   this.emitter.off('status-alert');
   this.emitter.off('change-quickbooks-employee');
-} // beforeDestroy
+} // beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -141,7 +141,7 @@ async function watchStoreIsPopulated() {
 
 export default {
   created,
-  beforeDestroy,
+  beforeUnmount,
   components: {
     UnreimbursedExpenses,
     PTOCashOutsTable,

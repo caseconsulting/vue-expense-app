@@ -219,13 +219,13 @@ async function created() {
 } // created
 
 /**
- * beforeDestroy lifecycle hook.
+ * beforeUnmount lifecycle hook.
  */
-function beforeDestroy() {
+function beforeUnmount() {
   this.emitter.off('updateData');
   this.emitter.off('selected-budget-year');
   this.emitter.off('error');
-} // beforeDestroy
+} // beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -259,7 +259,7 @@ export default {
     viewingCurrentBudgetYear
   },
   created,
-  beforeDestroy,
+  beforeUnmount,
   data() {
     return {
       displayChart: false,

@@ -872,12 +872,12 @@ async function created() {
 } // created
 
 /**
- * beforeDestroy lifecycle hook
+ * beforeUnmount lifecycle hook
  */
-function beforeDestroy() {
+function beforeUnmount() {
   this.emitter.off('confirmed-type');
   this.emitter.off('canceled-type');
-} //beforeDestroy
+} //beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -996,7 +996,7 @@ export default {
     GeneralConfirmationModal
   },
   created,
-  beforeDestroy,
+  beforeUnmount,
   data() {
     return {
       activeEmployees: null, // list of active employees

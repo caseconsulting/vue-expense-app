@@ -23,10 +23,9 @@ import _ from 'lodash';
 /**
  * Before destroy lifecycle hook.
  */
-function beforeDestroy() {
+function beforeUnmount() {
   this.emitter.off('minors-update');
-  this.$refs.pieChart.destroyChart();
-} // beforeDestroy
+} // beforeUnmount
 
 /**
  * Mounted lifecycle hook.
@@ -166,6 +165,6 @@ export default {
   methods: { fetchData, fillData },
   mounted,
   created,
-  beforeDestroy
+  beforeUnmount
 };
 </script>

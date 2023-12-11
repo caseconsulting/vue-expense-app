@@ -309,13 +309,6 @@ function parseEmployeeData() {
 // |--------------------------------------------------|
 
 /**
- * Calls the destroy chart function in the base chart.
- */
-function beforeDestroy() {
-  this.$refs.barChart.destroyChart();
-} // beforeDestroy
-
-/**
  * Mounted lifecycle hook - get items, organize them and fill data.
  */
 async function mounted() {
@@ -392,7 +385,6 @@ export default {
     setNumOfColumns,
     userRoleIsAdmin
   },
-  beforeDestroy,
   mounted,
   watch: {
     showCurrent: watchShowCurrent,

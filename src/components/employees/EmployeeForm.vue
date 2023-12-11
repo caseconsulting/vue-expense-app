@@ -1047,7 +1047,7 @@ async function created() {
 /**
  * destroying all listeners
  */
-function beforeDestroy() {
+function beforeUnmount() {
   this.emitter.off('disableUpload');
   this.emitter.off('uploaded');
   this.emitter.off('confirmed');
@@ -1069,7 +1069,7 @@ function beforeDestroy() {
   this.emitter.off('personalStatus');
   this.emitter.off('technologiesStatus');
   this.emitter.off('resume');
-} // beforeDestroy
+} // beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -1133,7 +1133,7 @@ function watchFormTab(val) {
 // |--------------------------------------------------|
 
 export default {
-  beforeDestroy,
+  beforeUnmount,
   components: {
     AwardTab,
     CertificationTab,

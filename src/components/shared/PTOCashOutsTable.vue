@@ -242,15 +242,15 @@ async function created() {
 } // created¬
 
 /**
- * beforeDestroy lifecycle hook. Destroys all event listeners.
+ * beforeUnmount lifecycle hook. Destroys all event listeners.
  */
-function beforeDestroy() {
+function beforeUnmount() {
   this.emitter.off('confirm-pto-cash-outs');
   this.emitter.off('canceled-pto-cash-outs');
   this.emitter.off('confirm-delete-PTO cash out');
   this.emitter.off('canceled-delete-PTO cash out');
   this.emitter.off('close-pto-cash-out-form');
-} // beforeDestroy
+} // beforeUnmount
 
 /**
  * Mounted lifecycle hook
@@ -617,7 +617,7 @@ function watchSelectedTags() {
 // |--------------------------------------------------|
 
 export default {
-  beforeDestroy,
+  beforeUnmount,
   created,
   data() {
     return {

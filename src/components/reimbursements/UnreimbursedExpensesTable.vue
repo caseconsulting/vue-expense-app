@@ -834,15 +834,15 @@ async function created() {
 } // created
 
 /**
- * beforeDestroy lifecycle hook
+ * beforeUnmount lifecycle hook
  */
-function beforeDestroy() {
+function beforeUnmount() {
   this.emitter.off('selectExpense');
   this.emitter.off('toggleExpense');
   this.emitter.off('confirm-reimburse');
   this.emitter.off('cancel-reimburse');
   this.emitter.off('reimburse-expenses');
-} //beforeDestroy
+} //beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -892,7 +892,7 @@ function watchSelectedTags() {
 
 export default {
   created,
-  beforeDestroy,
+  beforeUnmount,
   components: {
     ReimburseModal,
     UnreimbursedExpensesExpandedTable

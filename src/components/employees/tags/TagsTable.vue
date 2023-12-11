@@ -158,12 +158,12 @@ async function mounted() {
 } // mounted
 
 /**
- * beforeDestroy lifecycle hook
+ * beforeUnmount lifecycle hook
  */
-async function beforeDestroy() {
+async function beforeUnmount() {
   this.emitter.off('canceled-delete-tag');
   this.emitter.off('confirm-delete-tag');
-} // beforeDestroy
+} // beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -415,7 +415,7 @@ function watchCreatingTag() {
 // |--------------------------------------------------|
 
 export default {
-  beforeDestroy,
+  beforeUnmount,
   components: {
     DeleteModal
   },

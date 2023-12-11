@@ -379,9 +379,9 @@ async function created() {
 } // created
 
 /**
- * beforeDestroy lifecycle hook - close event listeners
+ * beforeUnmount lifecycle hook - close event listeners
  */
-function beforeDestroy() {
+function beforeUnmount() {
   this.emitter.off('confirm-delete-contract');
   this.emitter.off('canceled-delete-contract');
   this.emitter.off('confirmed-contract-status');
@@ -393,7 +393,7 @@ function beforeDestroy() {
   this.emitter.off('filter');
   this.emitter.off('is-editing-project-item');
   this.emitter.off('toggle-project-checkbox');
-} // beforeDestroy
+} // beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -922,7 +922,7 @@ function storeContracts() {
 // |--------------------------------------------------|
 
 export default {
-  beforeDestroy,
+  beforeUnmount,
   created,
   components: {
     DeleteModal,

@@ -26,13 +26,6 @@ async function mounted() {
   }
 } // mounted
 
-/**
- * Calls the destroy chart function in the base chart.
- */
-function beforeDestroy() {
-  this.$refs.barChart.destroyChart();
-} // beforeDestroy
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                      METHODS                     |
@@ -182,7 +175,6 @@ export default {
     getTodaysDate // dateUtils
   },
   mounted,
-  beforeDestroy,
   watch: {
     storeIsPopulated: function () {
       if (this.storeIsPopulated) {

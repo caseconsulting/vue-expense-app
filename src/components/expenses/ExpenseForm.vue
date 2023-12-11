@@ -1647,14 +1647,14 @@ function created() {
 /**
  * destroy listeners
  */
-function beforeDestroy() {
+function beforeUnmount() {
   this.emitter.off('canceledSubmit');
   this.emitter.off('confirmSubmit');
   this.emitter.off('confirmed-expense');
   this.emitter.off('canceled-expense');
   this.emitter.off('backout-canceled-expense');
   this.emitter.off('backout-confirmed-expense');
-} // beforeDestroy
+} // beforeUnmount
 
 /**
  * Extends the Number object to populate a given size with zeros.
@@ -1909,7 +1909,7 @@ function watchFile() {
 
 export default {
   created,
-  beforeDestroy,
+  beforeUnmount,
   components: {
     CancelConfirmation,
     ConfirmationBox,

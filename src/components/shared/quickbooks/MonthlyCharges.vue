@@ -211,9 +211,9 @@ async function mounted() {
 /**
  * destroy listeners
  */
-function beforeDestroy() {
+function beforeUnmount() {
   this.emitter.off('refresh-quickbooks-data');
-} // beforeDestroy
+} // beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -410,7 +410,7 @@ export default {
   computed: {
     remainingWorkDays
   },
-  beforeDestroy,
+  beforeUnmount,
   created,
   data() {
     return {

@@ -66,11 +66,11 @@ async function created() {
 } // created
 
 /**
- * beforeDestroy lifecycle hook.
+ * beforeUnmount lifecycle hook.
  */
-function beforeDestroy() {
+function beforeUnmount() {
   this.emitter.off('reimburseAlert');
-} // beforeDestroy
+} // beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -88,7 +88,7 @@ export default {
     isMobile
   },
   created,
-  beforeDestroy,
+  beforeUnmount,
   data() {
     return {
       alerts: [], // status alerts
