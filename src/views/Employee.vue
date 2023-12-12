@@ -153,7 +153,7 @@
           ></employee-form>
           <div class="mt-4">
             <budget-chart
-              v-if="(userRoleIsAdmin() || userIsEmployee()) && hasAccessToBudgets"
+              v-if="(userRoleIsAdmin() || userIsEmployee()) && hasAccessToBudgets && !loading"
               :employee="model"
               :key="refreshKey"
               :accessibleBudgets="accessibleBudgets"
@@ -387,7 +387,7 @@ async function navEmployee(num) {
 
   // update the URL so that it makes sense
   history.pushState({}, null, this.model.employeeNumber);
-}
+} // navEmployee
 
 /**
  * Refreshes expense data based on the model, including: accessibleBudgets, expenses, expenseTypes, and fiscalDateView
@@ -406,7 +406,7 @@ async function refreshExpenseData(full = false) {
   this.fiscalDateView = this.getCurrentBudgetYear(this.model.hireDate);
   this.hasAccessToBudgets = this.accessibleBudgets && this.accessibleBudgets.length !== 0; // enable budget chart
   this.loading = false;
-}
+} // refreshExpenseData
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -494,11 +494,9 @@ function refreshKey() {
     a: this.model,
     b: this.expenses,
     c: this.expenseTypes,
-    d: this.fiscalDateView,
-    e: this.accessibleBudgets,
-    f: this.fiscalDateView
+    e: this.accessibleBudgets
   };
-}
+} // refreshKey
 
 // |--------------------------------------------------|
 // |                                                  |
