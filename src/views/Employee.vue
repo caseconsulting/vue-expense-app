@@ -91,12 +91,19 @@
         >
           <v-card>
             <v-card-title class="d-flex align-center header_style" v-if="!editing">
-              <v-btn :disabled="loading" icon variant="text" density="comfortable">
-                <v-tooltip v-if="hasAdminPermissions()" activator="parent" location="top">Previous employee</v-tooltip>
+              <v-btn v-if="hasAdminPermissions()" :disabled="loading" icon variant="text" density="comfortable">
+                <v-tooltip activator="parent" location="top">Previous employee</v-tooltip>
                 <v-icon size="large" @click="navEmployee(-1)" color="white">mdi-arrow-left-thin</v-icon>
               </v-btn>
-              <v-btn :disabled="loading" icon variant="text" density="comfortable" class="mr-3">
-                <v-tooltip v-if="hasAdminPermissions()" activator="parent" location="top">Next employee</v-tooltip>
+              <v-btn
+                v-if="hasAdminPermissions()"
+                :disabled="loading"
+                icon
+                variant="text"
+                density="comfortable"
+                class="mr-3"
+              >
+                <v-tooltip activator="parent" location="top">Next employee</v-tooltip>
                 <v-icon size="large" @click="navEmployee(1)" color="white">mdi-arrow-right-thin</v-icon>
               </v-btn>
               <h3 id="employeeName" v-if="userIsEmployee()">My Profile</h3>
