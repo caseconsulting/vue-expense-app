@@ -154,7 +154,8 @@
 import api from '@/shared/api.js';
 import _ from 'lodash';
 import { isEmpty } from '@/utils/utils';
-import { add, format, getIsoWeekday, getTodaysDate, setDay, subtract } from '@/shared/dateUtils';
+import { qbStorageLastUpdated } from './quickbooks-helpers';
+import { add, format, getIsoWeekday, getTodaysDate, now, setDay, subtract } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -327,17 +328,19 @@ async function setMonthlyCharges() {
     this.workDayHours *= this.employee.workStatus * 0.01;
     // make call to api to get data
     if (
-      !this.$store.getters.quickbooksMonthlyHours ||
-      this.$store.getters.user.id != this.employee.id ||
-      this.refresh
+      this.qbStorageLastUpdated('quickbooksData') &&
+      this.$store.getters.user.id == this.employee.id &&
+      !this.refresh
     ) {
+      let item = JSON.parse(localStorage.getItem('quickbooksData'));
+      this.quickBooksTimeData = item.data;
+    } else {
       this.quickBooksTimeData = await api.getMonthlyHours(this.employee.employeeNumber);
       if (!(this.quickBooksTimeData instanceof Error) && this.$store.getters.user.id == this.employee.id) {
-        // only set vuex store if the user is looking at their own quickbooks data
-        this.$store.dispatch('setQuickbooksMonthlyHours', { quickbooksMonthlyHours: this.quickBooksTimeData });
+        // only set local store if the user is looking at their own quickbooks data
+        let itemObj = { data: this.quickBooksTimeData, lastUpdated: this.now() };
+        localStorage.setItem('quickbooksData', JSON.stringify(itemObj));
       }
-    } else {
-      this.quickBooksTimeData = this.$store.getters.quickbooksMonthlyHours;
     }
 
     if (
@@ -445,6 +448,8 @@ export default {
     getIsoWeekday, // dateUtils
     getTodaysDate, // dateUtils
     isEmpty,
+    now, // dateUtils
+    qbStorageLastUpdated,
     roundHours,
     setDay, // dateUtils
     setData,

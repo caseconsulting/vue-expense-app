@@ -325,6 +325,16 @@ export function minimum(dates) {
 } // minimum
 
 /**
+ * Returns the current time in UTC format.
+ * Example: 2023-12-13T20:18:29Z
+ *
+ * @returns String - A UTC time format of now
+ */
+export function now() {
+  return dayjs.utc().tz(DEFAULT_TIME_ZONE);
+} // now
+
+/**
  * Returns the latest date from an array of dates.
  *
  * @param {Array} dates An array of string dates
@@ -413,6 +423,7 @@ export default {
   isValid,
   maximum,
   minimum,
+  now,
   setDay,
   setMonth,
   setYear,

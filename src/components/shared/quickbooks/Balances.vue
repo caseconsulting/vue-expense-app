@@ -64,6 +64,8 @@
 <script>
 import { isEmpty } from '@/utils/utils';
 import { updateStorePtoCashOuts, updateStoreEmployees, updateStoreTags } from '@/utils/storeUtils';
+import { qbStorageLastUpdated } from './quickbooks-helpers';
+import { now } from '@/shared/dateUtils';
 import _ from 'lodash';
 import api from '@/shared/api';
 import PTOCashOutForm from '@/components/shared/PTOCashOutForm.vue';
@@ -197,20 +199,27 @@ async function setPTOBalances() {
   if (this.employee && !this.isEmpty(this.employee.id)) {
     // employee exists
     let ptoBalances;
-    if (
-      !this.$store.getters.quickbooksPTO ||
-      !this.$store.getters.ptoCashOuts ||
-      this.$store.getters.user.id != this.employee.id ||
-      this.refresh
-    ) {
-      [ptoBalances] = await Promise.all([api.getPTOBalances(this.employee.employeeNumber), updateStorePtoCashOuts()]); // call api
-      if (!(ptoBalances instanceof Error) && this.$store.getters.user.id == this.employee.id) {
-        // only set vuex store if the user is looking at their own quickbooks data
-        this.$store.dispatch('setQuickbooksPTO', { quickbooksPTO: ptoBalances });
-      }
-    } else {
-      ptoBalances = this.$store.getters.quickbooksPTO;
+    // make call to api to get data
+    if (!this.$store.getters.ptoCashOuts) {
+      // no need for async since labels are computed
+      this.updateStorePtoCashOuts();
     }
+    if (
+      this.qbStorageLastUpdated('quickbooksPtoData') &&
+      this.$store.getters.user.id == this.employee.id &&
+      !this.refresh
+    ) {
+      let item = JSON.parse(localStorage.getItem('quickbooksPtoData'));
+      ptoBalances = item.data;
+    } else {
+      ptoBalances = await api.getPTOBalances(this.employee.employeeNumber);
+      if (!(ptoBalances instanceof Error) && this.$store.getters.user.id == this.employee.id) {
+        // only set local store if the user is looking at their own quickbooks data
+        let itemObj = { data: ptoBalances, lastUpdated: this.now() };
+        localStorage.setItem('quickbooksPtoData', JSON.stringify(itemObj));
+      }
+    }
+
     if (_.isNil(ptoBalances.results) || _.isNil(ptoBalances.results.users[this.employee.employeeNumber])) {
       // error getting pto balances
       this.balancesError = true;
@@ -299,9 +308,12 @@ export default {
   methods: {
     formatHours,
     isEmpty,
+    now,
+    qbStorageLastUpdated,
     setPTOBalances,
     toFAQ,
     updateStoreEmployees,
+    updateStorePtoCashOuts,
     updateStoreTags
   },
   mounted,
