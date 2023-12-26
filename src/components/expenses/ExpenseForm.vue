@@ -124,7 +124,6 @@
           <v-text-field
             variant="underlined"
             prefix="$"
-            v-model="costFormatted"
             :rules="costRules"
             :error="costError"
             :disabled="isReimbursed || isInactive || isHighFive"
@@ -135,7 +134,8 @@
             data-vv-name="Cost"
             persistent-hint
             :hint="costHint()"
-            @update:model-value="formatCost"
+            v-model="costFormatted"
+            @keyup="formatCost"
           >
             <template v-slot:message="{ message }">
               <span v-html="message"></span>
@@ -987,13 +987,27 @@ function filteredExpenseTypes() {
 /**
  * Formats the cost on the form for a nicer display.
  */
-function formatCost() {
+function formatCost(e) {
+  // log cursor position to put it back to where it was
+  let cursorStart = e.target.selectionStart;
+  let cursorEnd = e.target.selectionEnd;
+  let previousLength = this.costFormatted.length;
+
   let [wholePart, fracPart] = this.parseCost(this.costFormatted).split('.');
   this.editedExpense.cost = this.parseCost(this.costFormatted);
   if (Number(this.editedExpense.cost)) {
     this.costFormatted = Number(wholePart).toLocaleString().toString();
     if (fracPart != undefined) this.costFormatted += `.${fracPart}`;
   }
+
+  // set cursor back to where it was
+  // note: longer delay means bigger stutter in input (3ms is not very noticable) but also more
+  // assurance that it will update *after* the cursor is shifted to the end by Vuetify.
+  let delay = 3;
+  setTimeout(() => {
+    e.target.selectionStart = cursorStart + this.costFormatted.length - previousLength;
+    e.target.selectionEnd = cursorEnd + this.costFormatted.length - previousLength;
+  }, delay);
 } // formatCost
 
 /**
