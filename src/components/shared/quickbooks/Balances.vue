@@ -152,19 +152,6 @@ function availableBalances() {
   return avaibleBalances;
 } // availableBalances
 
-/**
- * Determines if an employee is a legacy FireTeam employee.
- *
- * @returns Boolean - whether the employee was FireTeam or not
- */
-function isLegacyFireTeam() {
-  if (!this.passedEmployee.value) {
-    return parseInt(this.employee.employeeNumber, 10) < 100;
-  } else {
-    return parseInt(this.passedEmployee.value.employeeNumber, 10) < 100;
-  }
-} // isLegacyFireTeam
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -250,9 +237,7 @@ async function setPTOBalances() {
  * Opens new tab when info icon is selected w/in Quickbooks time box
  */
 function toFAQ() {
-  let link = this.isLegacyFireTeam
-    ? 'https://3.basecamp.com/3097063/buckets/179119/messages/6450437179'
-    : 'https://3.basecamp.com/3097063/buckets/179119/messages/939259168';
+  let link = 'https://3.basecamp.com/3097063/buckets/179119/messages/939259168';
   window.open(link, '_blank');
 } // toFAQ
 
@@ -285,8 +270,7 @@ export default {
   components: { PTOCashOutForm },
   computed: {
     isInactive,
-    availableBalances,
-    isLegacyFireTeam
+    availableBalances
   },
   beforeUnmount,
   created,

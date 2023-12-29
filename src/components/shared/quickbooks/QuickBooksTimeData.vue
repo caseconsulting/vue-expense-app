@@ -64,12 +64,7 @@
         </div>
       </v-card-title>
       <v-card-text class="pt-0 pb-0 text-black nudge-down-title mb-3">
-        <semi-monthly-charges
-          v-if="passedEmployee && isLegacyFireTeam"
-          :passedEmployee="passedEmployee"
-          :showMinutes="showMinutes"
-        ></semi-monthly-charges>
-        <monthly-charges v-else :passedEmployee="passedEmployee" :showMinutes="showMinutes"></monthly-charges>
+        <monthly-charges :passedEmployee="passedEmployee" :showMinutes="showMinutes"></monthly-charges>
         <v-divider></v-divider>
         <balances :passedEmployee="passedEmployee" :showMinutes="showMinutes"></balances>
       </v-card-text>
@@ -80,7 +75,6 @@
 <script>
 import _ from 'lodash';
 import MonthlyCharges from '@/components/shared/quickbooks/MonthlyCharges.vue';
-import SemiMonthlyCharges from '@/components/shared/quickbooks/SemiMonthlyCharges.vue';
 import Balances from '@/components/shared/quickbooks/Balances.vue';
 import { nicknameAndLastName } from '@/shared/employeeUtils';
 import { isMobile, userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
@@ -133,19 +127,6 @@ function created() {
 function allEmployees() {
   return this.$store.getters.employees;
 } // allEmployees
-
-/**
- * Determines if an employee is a legacy FireTeam employee.
- *
- * @returns Boolean - whether the employee was FireTeam or not
- */
-function isLegacyFireTeam() {
-  if (!this.passedEmployee.value) {
-    return parseInt(this.employee.employeeNumber, 10) < 100;
-  } else {
-    return parseInt(this.passedEmployee.value.employeeNumber, 10) < 100;
-  }
-} // isLegacyFireTeam
 
 /**
  * Returns the last updated message
@@ -237,12 +218,10 @@ async function watchEmployees() {
 export default {
   components: {
     Balances,
-    MonthlyCharges,
-    SemiMonthlyCharges
+    MonthlyCharges
   },
   computed: {
     allEmployees,
-    isLegacyFireTeam,
     isMobile,
     lastUpdated,
     tooltipText

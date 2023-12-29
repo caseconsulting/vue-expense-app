@@ -89,13 +89,7 @@
             <small>
               *cash outs are paid during the normal payroll period
               <v-avatar
-                @click="
-                  openLink(
-                    isLegacyFireTeam
-                      ? 'https://3.basecamp.com/3097063/buckets/179119/messages/6450437179'
-                      : 'https://3.basecamp.com/3097063/buckets/179119/messages/939259168'
-                  )
-                "
+                @click="openLink('https://3.basecamp.com/3097063/buckets/179119/messages/939259168')"
                 class="mb-3"
                 size="small"
               >
@@ -380,19 +374,6 @@ function ptoData() {
   };
 }
 
-/**
- * Determines if an employee is a legacy FireTeam employee.
- *
- * @returns Boolean - whether the employee was FireTeam or not
- */
-function isLegacyFireTeam() {
-  if (!this.passedEmployee) {
-    return parseInt(this.employee.employeeNumber, 10) < 100;
-  } else {
-    return parseInt(this.passedEmployee.employeeNumber, 10) < 100;
-  }
-} // isLegacyFireTeam
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -438,7 +419,7 @@ export default {
     item: watchEditPTOCashOutItem,
     'employee.value': watchEmployee
   },
-  computed: { ptoData, isLegacyFireTeam },
+  computed: { ptoData },
   props: ['item', 'employee', 'pto', 'editing']
 };
 </script>
