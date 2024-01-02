@@ -125,7 +125,6 @@
             variant="underlined"
             prefix="$"
             :rules="costRules"
-            :error="costError"
             :disabled="isReimbursed || isInactive || isHighFive"
             label="Cost"
             id="cost"
@@ -805,7 +804,6 @@ function costHint() {
     if (this.remainingBudget <= 0) {
       str += `<span class="text-red">${this.convertToMoneyString(this.remainingBudget)}`;
     } else {
-      this.costError = false;
       str += this.convertToMoneyString(this.remainingBudget);
       return str;
     }
@@ -821,10 +819,8 @@ function costHint() {
     ) {
       str += ` (Overdraftable and within ${this.convertToMoneyString(this.overdraftBudget)} limit)`;
     } else if (this.remainingBudget < -this.overdraftBudget && this.selectedExpenseType.odFlag && isOverdraftable) {
-      this.costError = true;
       str += ` (Exceeds overdraftable amount of ${this.convertToMoneyString(this.overdraftBudget)})`;
     } else if (this.remainingBudget < 0 && !this.selectedExpenseType.odFlag) {
-      this.costError = true;
       str += ' (Not Overdraftable)';
     }
     str += '</span>';
@@ -1947,7 +1943,6 @@ export default {
       confirming: false, // budget overage confirmation box activator
       confirmingValid: false,
       confirmBackingOut: false,
-      costError: false,
       costFormatted: '',
       costRules: [
         (v) => !this.isEmpty(v) || 'Cost is a required field',
