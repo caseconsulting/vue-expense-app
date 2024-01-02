@@ -375,8 +375,8 @@ export function setMonth(date, month) {
  * @param {Number} year The year to set the date to
  * @returns String - The date at the given year
  */
-export function setYear(date, year) {
-  return dayjs(date).year(year).format(DEFAULT_ISOFORMAT);
+export function setYear(date, year, dateFormat = undefined) {
+  return dayjs(date, dateFormat).year(year).format(DEFAULT_ISOFORMAT);
 } // setYear
 
 /**
