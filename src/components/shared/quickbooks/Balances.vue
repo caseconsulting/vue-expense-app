@@ -33,10 +33,16 @@
           <!-- Employee Inactive -->
           <div v-if="!isInactive">
             <!-- Loop through and display all balances -->
-            <v-row v-for="balance in this.availableBalances" :key="balance" class="mb-2">
+            <v-row
+              v-for="(balance, i) in this.availableBalances"
+              :key="i"
+              :class="balanceData[balance] < 0 ? 'text-red font-weight-bold mb-2' : 'mb-2'"
+            >
               <p>{{ balance }}:</p>
               <v-spacer></v-spacer>
-              <p>{{ formatHours(balanceData[balance]) }}</p>
+              <p>
+                {{ formatHours(balanceData[balance]) }}
+              </p>
             </v-row>
           </div>
 
@@ -138,9 +144,7 @@ function availableBalances() {
   );
   let avaibleBalances = [];
   this.keysBalance.forEach((balance) => {
-    if (this.balanceData[balance] > 0 || this.showMore) {
-      avaibleBalances.push(balance);
-    }
+    avaibleBalances.push(balance);
   });
   if (this.pendingPtoCashOuts.length > 0) {
     let balance = 'Pending PTO Cash Out';
