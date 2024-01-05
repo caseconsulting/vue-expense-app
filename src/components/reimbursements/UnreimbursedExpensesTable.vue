@@ -557,7 +557,14 @@ async function reimburseExpenses() {
 
   // reimburse expense on back end
   await this.asyncForEach(expensesToReimburse, async (expense) => {
-    let reimbursedExpense = await api.updateItem(api.EXPENSES, expense);
+    let expenseType = _.find(this.expenseTypes, (et) => et.value === expense.expenseTypeId);
+    let isHighFive = !!expenseType && expenseType.text === 'High Five';
+    let reimbursedExpense;
+    if (isHighFive) {
+      reimbursedExpense = await api.processHighFive(expense);
+    } else {
+      reimbursedExpense = await api.updateItem(api.EXPENSES, expense);
+    }
     let msg;
     if (!reimbursedExpense.id) {
       // failed to reimburse expense
