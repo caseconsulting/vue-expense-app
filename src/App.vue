@@ -439,6 +439,7 @@ export default {
       { name: 'Medical (Health) Insurance', link: 'https://www.anthem.com/' },
       { name: 'Disability & Life Insurance', link: 'https://www.mutualofomaha.com/' },
       { name: 'Dental & Vision Insurance', link: 'https://www.sunlife.com/' },
+      { name: 'Dependent Care', link: 'https://www.wageworks.com/' },
       { name: 'ADP', link: 'https://workforcenow.adp.com/' },
       { name: 'Jira', link: 'https://consultwithcase.atlassian.net/jira/your-work' },
       {
