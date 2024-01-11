@@ -560,7 +560,7 @@ async function reimburseExpenses() {
     let expenseType = _.find(this.expenseTypes, (et) => et.value === expense.expenseTypeId);
     let isHighFive = !!expenseType && expenseType.text === 'High Five';
     let reimbursedExpense;
-    if (isHighFive) {
+    if (isHighFive && this.isGeneratingGiftCard) {
       reimbursedExpense = await api.processHighFive(expense);
     } else {
       reimbursedExpense = await api.updateItem(api.EXPENSES, expense);
@@ -573,7 +573,7 @@ async function reimburseExpenses() {
       let self = this;
       setTimeout(function () {
         self.alerts.shift();
-      }, 10000);
+      }, 20000);
 
       // revert reimburse date change
       let groupIndex = _.findIndex(this.empBudgets, {
@@ -587,11 +587,18 @@ async function reimburseExpenses() {
     } else {
       // successfully reimbursed expense
       msg = 'Successfully reimbursed expense';
+      if (isHighFive && this.isGeneratingGiftCard) {
+        msg += `, generated gift card, ${
+          reimbursedExpense.emailSent
+            ? 'and emailed recipient gift card information.'
+            : 'but FAILED to email recipient gift card information'
+        }`;
+      }
       this.alerts.push({ status: 'success', message: msg, color: 'green' });
       let self = this;
       setTimeout(function () {
         self.alerts.shift();
-      }, 10000);
+      }, 15000);
     }
     this.emitter.emit('reimburseAlert', this.alerts);
   });
@@ -827,7 +834,10 @@ async function created() {
   this.emitter.on('toggleExpense', this.toggleShowOnFeed);
   this.emitter.on('confirm-reimburse', async () => await this.reimburseExpenses());
   this.emitter.on('cancel-reimburse', () => (this.buttonClicked = false));
-  this.emitter.on('reimburse-expenses', () => (this.buttonClicked = true));
+  this.emitter.on('reimburse-expenses', (isGeneratingGiftCard) => {
+    this.buttonClicked = true;
+    this.isGeneratingGiftCard = isGeneratingGiftCard;
+  });
 
   let unreimbursedExpenses;
   [unreimbursedExpenses, this.expenseTypes] = await Promise.all([
@@ -945,6 +955,7 @@ export default {
         sortable: false
       }
     ], // datatable headers
+    isGeneratingGiftCard: false,
     itemsPerPage: -1, // data table elements per page
     loading: true, // is loading
     pendingExpenses: [], // pending expenses
