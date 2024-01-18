@@ -247,7 +247,7 @@ export function isBefore(date1, date2, granularity, format) {
  * @returns Boolean - True if date is between date range, false otherwise
  */
 export function isBetween(date, startDate, endDate, granularity, interval) {
-  if (!dayjs(date).isValid() || !dayjs(startDate).isValid() || !dayjs(endDate).isValid()) {
+  if (!date || !dayjs(date).isValid() || !dayjs(startDate).isValid() || !dayjs(endDate).isValid()) {
     return false;
   }
   if (granularity) {

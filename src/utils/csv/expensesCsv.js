@@ -4,6 +4,7 @@
  */
 import _ from 'lodash';
 import store from '/store/index.js';
+import { format, DEFAULT_ISOFORMAT } from '../../shared/dateUtils';
 const csvUtils = require('./baseCsv.js');
 
 /**
@@ -56,12 +57,31 @@ export function convertExpenses(expenses) {
       'Last Name': tempExpense.lastName || '',
       'Employee #': tempExpense.employeeNumber || '',
       'Expense Type': tempExpense.expenseType || '',
+      'Recipient Name': getRecipientName(tempExpense.recipient) || '',
       Cost: tempExpense.cost || '',
-      'Purchase Date': tempExpense.purchaseDate || '',
-      'Reimbused Date': tempExpense.reimbursedDate || '',
-      Category: tempExpense.category || ''
+      'Purchase Date': format(tempExpense.purchaseDate, null, DEFAULT_ISOFORMAT) || '',
+      'Reimbused Date': format(tempExpense.reimbursedDate, null, DEFAULT_ISOFORMAT) || '',
+      Category: tempExpense.category || '',
+      // some descriptions have weird formatting, particularly high fives
+      Description:
+        tempExpense.description
+          ?.replaceAll('\n', '')
+          ?.replaceAll(/\s{2,}/gi, ' ')
+          ?.trim() || '',
+      Note: tempExpense.note?.trim() || ''
     });
   });
 
   return tempExpenses;
 } // convertExpenses
+
+/**
+ * Gets the employee's preferred name.
+ *
+ * @param {String} employeeId - The employee ID
+ * @returns String - The employees preferred name
+ */
+function getRecipientName(employeeId) {
+  let employee = _.find(store.getters.employees, (e) => e.id === employeeId);
+  return employee ? `${employee.nickname || employee.firstName} ${employee.lastName}` : null;
+} // getRecipientName

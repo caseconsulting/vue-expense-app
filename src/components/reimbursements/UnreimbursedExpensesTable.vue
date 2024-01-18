@@ -351,9 +351,9 @@ function createExpenses(aggregatedData) {
         return e.id === expense.recipient;
       });
       if (giver && recipient) {
-        expense.description = `
-      ${employeeUtils.nicknameAndLastName(giver)} gave
-      ${employeeUtils.nicknameAndLastName(recipient)} a High Five`;
+        expense.description = `${employeeUtils.nicknameAndLastName(giver)} gave ${employeeUtils.nicknameAndLastName(
+          recipient
+        )} a High Five`;
       }
     }
     return _.merge(expense, additionalAttributes);

@@ -19,7 +19,7 @@ const expensesCsv = require('@/utils/csv/expensesCsv.js');
  */
 function download() {
   expensesCsv.download(this.expenses);
-}
+} // download
 
 // |--------------------------------------------------|
 // |                                                  |
