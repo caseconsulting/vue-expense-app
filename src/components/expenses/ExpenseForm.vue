@@ -763,6 +763,12 @@ async function checkCoverage() {
  * Clears the form and sets all fields to a default state.
  */
 function clearForm() {
+  // don't clear form if there was an error in submitting
+  if (this.errorSubmitting) {
+    this.errorSubmitting = false; // reset var
+    return;
+  }
+
   this.allowReceipt = false;
   if (this.$refs.form) {
     this.$refs.form.reset();
@@ -1475,7 +1481,7 @@ async function submit() {
         // creating a new expense
         await this.createNewEntry();
       } else {
-        // editing a current expensef
+        // editing a current expense
         await this.updateExistingEntry();
       }
     }
@@ -1569,6 +1575,9 @@ function created() {
   this.employeeRole = this.getRole();
   this.userInfo = this.$store.getters.user;
 
+  this.emitter.on('error', () => {
+    this.errorSubmitting = true;
+  });
   this.emitter.on('fileSelected', (file) => {
     this.setFile(file);
   });
@@ -1962,6 +1971,7 @@ export default {
       employeeBudgets: null, // selected employee's budgets
       employeeRole: '', // employee role
       employees: [], // employees
+      errorSubmitting: false, // avoid clearing fields if error exists
       expenseTypes: [], // expense types
       expenseTypeName: null, //expense type name for budget
       file: undefined, // receipt
