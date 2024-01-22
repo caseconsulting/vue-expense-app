@@ -76,11 +76,17 @@
             </v-row>
           </div>
           <!-- Average Hours per Day -->
-          <v-row v-if="!isPrevMonth" class="py-5">
+          <v-row v-if="!isPrevMonth" class="pt-5">
             Remaining Avg Hours/Day:
             <v-spacer></v-spacer>
             <p v-if="this.estimatedDailyHours < 24">{{ formatHours(this.estimatedDailyHours) }}</p>
             <p v-else class="text-red">{{ formatHours(this.estimatedDailyHours) }}</p>
+          </v-row>
+          <!-- Ahead/behind this month -->
+          <v-row v-if="!isPrevMonth" class="pt-2 pb-6">
+            You are {{ hoursAhead < 0 ? 'behind' : 'ahead' }} by:
+            <v-spacer></v-spacer>
+            <p>{{ formatHours(Math.abs(this.hoursAhead)) }}</p>
           </v-row>
           <!-- Button to Show More -->
           <div v-if="!showMore" @click="showMore = true" align="center">
@@ -155,7 +161,7 @@ import api from '@/shared/api.js';
 import _ from 'lodash';
 import { isEmpty } from '@/utils/utils';
 import { qbStorageLastUpdated } from './quickbooks-helpers';
-import { add, format, getIsoWeekday, getTodaysDate, now, setDay, subtract } from '@/shared/dateUtils';
+import { add, format, getIsoWeekday, getTodaysDate, now, setDay, subtract, isSameOrAfter } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -184,6 +190,21 @@ function remainingWorkDays() {
   }
   return remainingWorkDays;
 } // remainingWorkDays
+
+/**
+ * Calculates how many hours user is ahead by.
+ *  - greater than 0 means user is ahead of schedule
+ *  -    less than 0 means user is behind schedule
+ *  -      exactly 0 means user is perfectly on schedule
+ */
+function hoursAhead() {
+  // translating/computing variable names to make them make more sense
+  let hasWorked = this.totalHours;
+  let shouldHaveWorked = this.workHours - this.userWorkDays * this.workDayHours;
+  let hasWorkedToday = this.todaysHours; // negate any hours input for today
+
+  return hasWorked - shouldHaveWorked - hasWorkedToday;
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -231,8 +252,7 @@ function calcWorkHours() {
   let currMonth = day.split('-')[1];
   let month = day.split('-')[1];
   while (month === currMonth) {
-    // if day.isoWeekday() >= 1 && <= 5 then add user hours to workHours
-    if (getIsoWeekday(day) >= 1 && getIsoWeekday(day) <= 5) {
+    if (getIsoWeekday(day) >= 1 && getIsoWeekday(day) <= 5 && isSameOrAfter(day, this.employee.hireDate)) {
       workHours += this.workDayHours;
     }
     // increment to the next day
@@ -358,7 +378,8 @@ async function setMonthlyCharges() {
       this.calcWorkHours();
       this.remainingHours = this.workHours - this.totalHours;
       this.userWorkDays = this.remainingWorkDays;
-      this.estimatedDailyHours = this.userWorkDays === 0 ? 0 : this.remainingHours / this.userWorkDays;
+      this.estimatedDailyHours =
+        this.userWorkDays === 0 ? 0 : (this.remainingHours + this.todaysHours) / this.userWorkDays;
     }
     this.loading = false;
   }
@@ -411,7 +432,8 @@ async function watchPassedEmployeeID() {
 // |--------------------------------------------------|
 export default {
   computed: {
-    remainingWorkDays
+    remainingWorkDays,
+    hoursAhead
   },
   beforeUnmount,
   created,
@@ -448,6 +470,7 @@ export default {
     getIsoWeekday, // dateUtils
     getTodaysDate, // dateUtils
     isEmpty,
+    isSameOrAfter, // dateUtils
     now, // dateUtils
     qbStorageLastUpdated,
     roundHours,
