@@ -64,7 +64,7 @@
         </v-item-group>
 
         <!-- User image and logout -->
-        <v-menu location="bottom" theme="light" open-on-click v-if="isLoggedIn()">
+        <v-menu location="bottom" theme="light" open-on-click v-if="isLoggedIn() && $store.getters.user">
           <template v-slot:activator="{ props }">
             <user-avatar class="pointer mx-3" v-bind="props" :employee="$store.getters.user" :image="profilePic" />
           </template>

@@ -222,7 +222,7 @@
           </v-menu>
 
           <template v-slot:prepend>
-            <div v-bind="props" class="pointer">
+            <div class="pointer">
               <v-icon :color="caseGray">mdi-calendar</v-icon>
             </div>
           </template>

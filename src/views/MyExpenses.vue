@@ -236,7 +236,7 @@
                         </v-menu>
                         <!-- End Start Date Filter-->
 
-                        <!-- Start Date Filter -->
+                        <!-- End Date Filter -->
                         <v-menu :close-on-content-click="false" v-model="endDateFilterMenu" location="start center">
                           <template v-slot:activator="{ props }">
                             <v-text-field
