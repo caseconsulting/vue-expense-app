@@ -2,7 +2,7 @@
   <div id="t-sheets-data">
     <v-card density="compact">
       <v-card-title class="header_style py-0">
-        <v-row class="ma-0 nudge-up-row">
+        <v-row class="ma-0 nudge-up-row on-top">
           <v-col cols="6" class="pa-0 ma-0">
             <v-autocomplete
               v-if="userRoleIsAdmin() || userRoleIsManager()"
@@ -22,7 +22,9 @@
             </v-autocomplete>
           </v-col>
           <v-col cols="6" class="d-flex justify-end align-center pa-0 ma-0 mt-1">
-            <div v-if="lastUpdated" class="tiny-text">{{ lastUpdated }}</div>
+            <div v-if="lastUpdated && passedEmployee?.id === $store.getters.user?.id" class="tiny-text">
+              {{ lastUpdated }}
+            </div>
           </v-col>
         </v-row>
 
@@ -262,6 +264,9 @@ export default {
 .nudge-up-row {
   position: relative;
   top: -5px;
+}
+.on-top {
+  z-index: 999999 !important;
 }
 .tiny-text {
   font-size: 10px !important;
