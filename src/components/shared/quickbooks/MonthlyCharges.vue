@@ -200,10 +200,9 @@ function remainingWorkDays() {
 function hoursAhead() {
   // translating/computing variable names to make them make more sense
   let hasWorked = this.totalHours;
-  let shouldHaveWorked = this.workHours - this.userWorkDays * this.workDayHours;
-  let hasWorkedToday = this.todaysHours; // negate any hours input for today
+  let shouldHaveWorked = this.workHours - (this.userWorkDays - 1) * this.workDayHours;
 
-  return hasWorked - shouldHaveWorked - hasWorkedToday;
+  return hasWorked - shouldHaveWorked;
 }
 
 // |--------------------------------------------------|
@@ -378,8 +377,7 @@ async function setMonthlyCharges() {
       this.calcWorkHours();
       this.remainingHours = this.workHours - this.totalHours;
       this.userWorkDays = this.remainingWorkDays;
-      this.estimatedDailyHours =
-        this.userWorkDays === 0 ? 0 : (this.remainingHours + this.todaysHours) / this.userWorkDays;
+      this.estimatedDailyHours = this.userWorkDays === 0 ? 0 : this.remainingHours / this.userWorkDays; // FLAG
     }
     this.loading = false;
   }
