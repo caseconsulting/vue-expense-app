@@ -79,14 +79,13 @@
           <v-row v-if="!isPrevMonth" class="pt-5">
             Remaining Avg Hours/Day:
             <v-spacer></v-spacer>
-            <p v-if="this.estimatedDailyHours < 24">{{ formatHours(this.estimatedDailyHours) }}</p>
-            <p v-else class="text-red">{{ formatHours(this.estimatedDailyHours) }}</p>
+            <p :class="this.estimatedDailyHours >= 24 ? 'text-red' : ''">{{ formatHours(this.estimatedDailyHours) }}</p>
           </v-row>
           <!-- Ahead/behind this month -->
           <v-row v-if="!isPrevMonth" class="pt-2 pb-6">
             You are {{ hoursAhead < 0 ? 'behind' : 'ahead' }} by:
             <v-spacer></v-spacer>
-            <p>{{ formatHours(Math.abs(this.hoursAhead)) }}</p>
+            <p :class="hoursAhead < 0 ? 'text-red' : ''">{{ formatHours(Math.abs(this.hoursAhead)) }}</p>
           </v-row>
           <!-- Button to Show More -->
           <div v-if="!showMore" @click="showMore = true" align="center">
@@ -161,7 +160,12 @@ import api from '@/shared/api.js';
 import _ from 'lodash';
 import { isEmpty } from '@/utils/utils';
 import { qbStorageLastUpdated } from './quickbooks-helpers';
-import { add, format, getIsoWeekday, getTodaysDate, now, setDay, subtract, isSameOrAfter } from '@/shared/dateUtils';
+import { add, format, getIsoWeekday, now, setDay, subtract, isSameOrAfter } from '@/shared/dateUtils';
+
+// AJSOIPDHFJAPOIEWHJFAOIUEFJ
+function getTodaysDate() {
+  return '2024-01-29';
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -180,7 +184,7 @@ function remainingWorkDays() {
   let currMonth = day.split('-')[1];
   let month = day.split('-')[1];
   while (month === currMonth) {
-    if (getIsoWeekday(day) >= 1 && getIsoWeekday(day) <= 5) {
+    if (isWeekDay(day)) {
       // monday - friday
       remainingWorkDays += 1;
     }
@@ -200,7 +204,8 @@ function remainingWorkDays() {
 function hoursAhead() {
   // translating/computing variable names to make them make more sense
   let hasWorked = this.totalHours;
-  let shouldHaveWorked = this.workHours - (this.userWorkDays - 1) * this.workDayHours;
+  let daysToAdd = isWeekDay(getTodaysDate()) ? 1 : 0;
+  let shouldHaveWorked = this.workHours - (this.userWorkDays - daysToAdd) * this.workDayHours;
 
   return hasWorked - shouldHaveWorked;
 }
@@ -251,7 +256,7 @@ function calcWorkHours() {
   let currMonth = day.split('-')[1];
   let month = day.split('-')[1];
   while (month === currMonth) {
-    if (getIsoWeekday(day) >= 1 && getIsoWeekday(day) <= 5 && isSameOrAfter(day, this.employee.hireDate)) {
+    if (isWeekDay(day) && isSameOrAfter(day, this.employee.hireDate)) {
       workHours += this.workDayHours;
     }
     // increment to the next day
@@ -321,6 +326,13 @@ function formatHours(hours) {
 } // formatHours
 
 /**
+ * Returns true if `day` is a weekday
+ */
+function isWeekDay(day) {
+  return getIsoWeekday(day) >= 1 && getIsoWeekday(day) <= 5;
+}
+
+/**
  * Sets all of the fields on initial load or refresh.
  */
 async function setData() {
@@ -377,7 +389,7 @@ async function setMonthlyCharges() {
       this.calcWorkHours();
       this.remainingHours = this.workHours - this.totalHours;
       this.userWorkDays = this.remainingWorkDays;
-      this.estimatedDailyHours = this.userWorkDays === 0 ? 0 : this.remainingHours / this.userWorkDays; // FLAG
+      this.estimatedDailyHours = this.userWorkDays === 0 ? 0 : this.remainingHours / this.userWorkDays;
     }
     this.loading = false;
   }
@@ -469,6 +481,7 @@ export default {
     getTodaysDate, // dateUtils
     isEmpty,
     isSameOrAfter, // dateUtils
+    isWeekDay,
     now, // dateUtils
     qbStorageLastUpdated,
     roundHours,
