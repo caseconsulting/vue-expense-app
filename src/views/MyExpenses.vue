@@ -718,7 +718,9 @@ function filterExpenses() {
 
   if (this.search) {
     this.filteredExpenses = _.filter(this.filteredExpenses, (expense) => {
-      return _.some(Object.values(expense), (values) => _.includes(values, this.search));
+      return _.some(Object.values(expense), (value) =>
+        String(value)?.toLowerCase().includes(this.search?.toLowerCase())
+      );
     });
   }
 
