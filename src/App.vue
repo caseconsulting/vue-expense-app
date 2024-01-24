@@ -27,7 +27,7 @@
         <v-spacer></v-spacer>
         <!-- Display social media icons and links dropdown menu -->
         <v-item-group class="hidden-sm-and-down" v-show="isLoggedIn() && !isMobile">
-          <v-menu open-on-hover open-delay="0" close-delay="0" theme="light">
+          <v-menu open-on-hover open-delay="0" theme="light">
             <template v-slot:activator="{ props }">
               <v-btn id="links-btn" size="small" class="my-2" v-bind="props">Links &#9662; </v-btn>
             </template>
