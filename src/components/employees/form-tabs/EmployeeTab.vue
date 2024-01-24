@@ -523,12 +523,7 @@ async function created() {
  * @return boolean - True if an admin/manager can edit an EEO
  */
 function adminCanEditEeo() {
-  if (this.thisIsMyProfile()) {
-    return true;
-  } else if ((this.userRoleIsAdmin() || this.userRoleIsManager()) && this.editedEmployee.eeoDeclineSelfIdentify) {
-    return true;
-  }
-  return false;
+  return this.thisIsMyProfile() || this.userRoleIsAdmin() || this.userRoleIsManager();
 } //adminCanEditEeo
 
 /**
