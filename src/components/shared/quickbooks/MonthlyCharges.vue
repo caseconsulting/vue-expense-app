@@ -83,7 +83,7 @@
           </v-row>
           <!-- Ahead/behind this month -->
           <v-row v-if="!isPrevMonth" class="pt-2 pb-6">
-            You are {{ hoursAhead < 0 ? 'behind' : 'ahead' }} by:
+            {{ hoursAhead < 0 ? 'Behind' : 'Ahead' }} by:
             <v-spacer></v-spacer>
             <p :class="hoursAhead < 0 ? 'text-red' : ''">{{ formatHours(Math.abs(this.hoursAhead)) }}</p>
           </v-row>
@@ -160,12 +160,7 @@ import api from '@/shared/api.js';
 import _ from 'lodash';
 import { isEmpty } from '@/utils/utils';
 import { qbStorageLastUpdated } from './quickbooks-helpers';
-import { add, format, getIsoWeekday, now, setDay, subtract, isSameOrAfter } from '@/shared/dateUtils';
-
-// AJSOIPDHFJAPOIEWHJFAOIUEFJ
-function getTodaysDate() {
-  return '2024-01-29';
-}
+import { add, format, getIsoWeekday, getTodaysDate, now, setDay, subtract, isSameOrAfter } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
