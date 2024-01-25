@@ -119,6 +119,7 @@
                 color="white"
               />
               <v-btn
+                v-if="hasAdminPermissions() || userIsEmployee()"
                 @click="downloadResume()"
                 :disabled="!model.resumeUpdated"
                 density="comfortable"
@@ -126,7 +127,7 @@
                 icon=""
                 class="mx-1"
               >
-                <v-tooltip v-if="hasAdminPermissions() || userIsEmployee()" activator="parent" location="top"
+                <v-tooltip activator="parent" location="top"
                   ><p class="ma-0 pa-0">
                     {{ model.resumeUpdated != null ? 'Download Resume' : 'No resume available' }}
                   </p>
@@ -136,10 +137,14 @@
                 </v-tooltip>
                 <v-icon color="white" id="resume-download">mdi-file-download</v-icon>
               </v-btn>
-              <v-btn @click="editing = true" density="comfortable" variant="text" icon="">
-                <v-tooltip v-if="hasAdminPermissions() || userIsEmployee()" activator="parent" location="top">
-                  Edit Profile
-                </v-tooltip>
+              <v-btn
+                v-if="hasAdminPermissions() || userIsEmployee()"
+                @click="editing = true"
+                density="comfortable"
+                variant="text"
+                icon=""
+              >
+                <v-tooltip activator="parent" location="top"> Edit Profile </v-tooltip>
                 <v-icon color="white" id="edit">mdi-pencil</v-icon>
               </v-btn>
             </v-card-title>
