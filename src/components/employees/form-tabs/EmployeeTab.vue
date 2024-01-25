@@ -310,7 +310,8 @@
         item-title="text"
         item-value="value"
         return-object
-        :disabled="(editedEmployee.eeoDeclineSelfIdentify && thisIsMyProfile()) || !adminCanEditEeo()"
+        :disabled="editedEmployee.eeoDeclineSelfIdentify || !(thisIsMyProfile() || adminCanEditEeo())"
+        clearable
       >
       </v-select>
       <!-- Hispanic or Latino -->
@@ -322,7 +323,8 @@
         item-title="text"
         item-value="value"
         return-object
-        :disabled="(editedEmployee.eeoDeclineSelfIdentify && thisIsMyProfile()) || !adminCanEditEeo()"
+        :disabled="editedEmployee.eeoDeclineSelfIdentify || !(thisIsMyProfile() || adminCanEditEeo())"
+        clearable
       >
       </v-select>
       <!-- Race or Ethnicity -->
@@ -335,8 +337,9 @@
         item-value="value"
         return-object
         :disabled="
-          (editedEmployee.eeoDeclineSelfIdentify && thisIsMyProfile()) || disableRaceOrEthnicity || !adminCanEditEeo()
+          disableRaceOrEthnicity || editedEmployee.eeoDeclineSelfIdentify || !(thisIsMyProfile() || adminCanEditEeo())
         "
+        clearable
       >
       </v-select>
 
@@ -354,7 +357,8 @@
           item-title="text"
           item-value="value"
           return-object
-          :disabled="(editedEmployee.eeoDeclineSelfIdentify && thisIsMyProfile()) || !adminCanEditEeo()"
+          :disabled="editedEmployee.eeoDeclineSelfIdentify || !(thisIsMyProfile() || adminCanEditEeo())"
+          clearable
         >
         </v-select>
       </div>
@@ -362,10 +366,11 @@
       <!-- Disability -->
       <v-radio-group
         v-model="editedEmployee.eeoHasDisability"
-        :disabled="(editedEmployee.eeoDeclineSelfIdentify && thisIsMyProfile()) || !adminCanEditEeo()"
+        :disabled="editedEmployee.eeoDeclineSelfIdentify || !(thisIsMyProfile() || adminCanEditEeo())"
         inline
         hide-details
         class="mt-0"
+        clearable
       >
         <span class="mt-2 mr-4">Disability:</span>
         <v-radio label="Yes" :value="true"></v-radio>
@@ -375,10 +380,11 @@
       <!-- Protected Veteran -->
       <v-radio-group
         v-model="editedEmployee.eeoIsProtectedVeteran"
-        :disabled="(editedEmployee.eeoDeclineSelfIdentify && thisIsMyProfile()) || !adminCanEditEeo()"
+        :disabled="editedEmployee.eeoDeclineSelfIdentify || !(thisIsMyProfile() || adminCanEditEeo())"
         inline
         hide-details
         class="mt-2"
+        clearable
       >
         <span class="mt-2 mr-4">Protected Veteran:</span>
         <v-radio label="Yes" :value="true"></v-radio>
@@ -390,7 +396,7 @@
         class="my-1"
         label="Decline to self-identify"
         v-model="editedEmployee.eeoDeclineSelfIdentify"
-        :disabled="!thisIsMyProfile()"
+        :disabled="!adminCanEditEeo() && !thisIsMyProfile()"
         hide-details
       ></v-checkbox>
 
