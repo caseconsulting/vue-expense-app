@@ -8,7 +8,7 @@
         <h3 v-else class="text-white px-2">Available Budgets</h3>
       </v-card-title>
       <v-card-text class="px-7 pt-5 pb-1 text-black">
-        <div v-if="this.loading || employeeDataLoading" class="pb-4">
+        <div v-if="loading || employeeDataLoading" class="pb-4">
           <v-progress-linear :indeterminate="true"></v-progress-linear>
         </div>
         <div v-else>
@@ -109,6 +109,8 @@ function beforeUnmount() {
  * Refresh and sets the aggregated budgets for the employee budget year view.
  */
 async function refreshBudget() {
+  if (!this.fiscalDateView || !this.employee) return;
+
   let budgetsVar;
   let existingBudgets;
 
