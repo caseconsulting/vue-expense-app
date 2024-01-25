@@ -21,8 +21,12 @@
             >
             </v-autocomplete>
           </v-col>
-          <v-col cols="6" class="d-flex justify-end align-center pa-0 ma-0 mt-1">
-            <div v-if="lastUpdated && passedEmployee?.id === $store.getters.user?.id" class="tiny-text">
+          <v-col
+            v-if="lastUpdated && passedEmployee?.id === $store.getters.user?.id"
+            cols="6"
+            class="d-flex justify-end align-center pa-0 ma-0 mt-1"
+          >
+            <div class="tiny-text">
               {{ lastUpdated }}
             </div>
           </v-col>
