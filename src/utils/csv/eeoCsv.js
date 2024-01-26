@@ -226,7 +226,7 @@ export function convertEmployees(employees) {
       return item == undefined || item == null;
     }
     // make sure we have all fields first
-    let declined = employee.eeoDeclineSelfIdentify && !employee.eeoAdminHasFilledOutEeoForm;
+    // let declined = employee.eeoDeclineSelfIdentify && !employee.eeoAdminHasFilledOutEeoForm;
     let formCompleted =
       !nullOrUndefined(employee.eeoGender) &&
       !nullOrUndefined(employee.eeoJobCategory) &&
@@ -234,7 +234,7 @@ export function convertEmployees(employees) {
       !nullOrUndefined(employee.eeoHispanicOrLatino) &&
       !nullOrUndefined(employee.eeoHasDisability) &&
       !nullOrUndefined(employee.eeoIsProtectedVeteran);
-    if (!declined && formCompleted) {
+    if (formCompleted) {
       // extract value of race/ethnicity
       let raceEthnicity = HISPANIC_LATINO;
       if (!employee.eeoHispanicOrLatino.value) raceEthnicity = employee.eeoRaceOrEthnicity.text;

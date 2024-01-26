@@ -310,7 +310,7 @@
         item-title="text"
         item-value="value"
         return-object
-        :disabled="editedEmployee.eeoDeclineSelfIdentify || !(thisIsMyProfile() || adminCanEditEeo())"
+        :disabled="(editedEmployee.eeoDeclineSelfIdentify || !thisIsMyProfile()) && !adminCanEditEeo()"
         clearable
       >
       </v-select>
@@ -323,7 +323,7 @@
         item-title="text"
         item-value="value"
         return-object
-        :disabled="editedEmployee.eeoDeclineSelfIdentify || !(thisIsMyProfile() || adminCanEditEeo())"
+        :disabled="(editedEmployee.eeoDeclineSelfIdentify || !thisIsMyProfile()) && !adminCanEditEeo()"
         clearable
       >
       </v-select>
@@ -337,7 +337,8 @@
         item-value="value"
         return-object
         :disabled="
-          disableRaceOrEthnicity || editedEmployee.eeoDeclineSelfIdentify || !(thisIsMyProfile() || adminCanEditEeo())
+          disableRaceOrEthnicity ||
+          ((editedEmployee.eeoDeclineSelfIdentify || !thisIsMyProfile()) && !adminCanEditEeo())
         "
         clearable
       >
@@ -357,7 +358,7 @@
           item-title="text"
           item-value="value"
           return-object
-          :disabled="editedEmployee.eeoDeclineSelfIdentify || !(thisIsMyProfile() || adminCanEditEeo())"
+          :disabled="(editedEmployee.eeoDeclineSelfIdentify || !thisIsMyProfile()) && !adminCanEditEeo()"
           clearable
         >
         </v-select>
@@ -366,7 +367,7 @@
       <!-- Disability -->
       <v-radio-group
         v-model="editedEmployee.eeoHasDisability"
-        :disabled="editedEmployee.eeoDeclineSelfIdentify || !(thisIsMyProfile() || adminCanEditEeo())"
+        :disabled="(editedEmployee.eeoDeclineSelfIdentify || !thisIsMyProfile()) && !adminCanEditEeo()"
         inline
         hide-details
         class="mt-0"
@@ -380,7 +381,7 @@
       <!-- Protected Veteran -->
       <v-radio-group
         v-model="editedEmployee.eeoIsProtectedVeteran"
-        :disabled="editedEmployee.eeoDeclineSelfIdentify || !(thisIsMyProfile() || adminCanEditEeo())"
+        :disabled="(editedEmployee.eeoDeclineSelfIdentify || !thisIsMyProfile()) && !adminCanEditEeo()"
         inline
         hide-details
         class="mt-2"
@@ -454,12 +455,14 @@ async function created() {
   });
   this.emitter.on('confirm-decline-self-identify', () => {
     // clear fields
-    this.editedEmployee.eeoGender = null;
-    this.editedEmployee.eeoHispanicOrLatino = null;
-    this.editedEmployee.eeoRaceOrEthnicity = null;
-    this.editedEmployee.eeoJobCategory = null;
-    this.editedEmployee.eeoHasDisability = null;
-    this.editedEmployee.eeoIsProtectedVeteran = null;
+    if (!this.userRoleIsAdmin() && !this.userRoleIsManager()) {
+      this.editedEmployee.eeoGender = null;
+      this.editedEmployee.eeoHispanicOrLatino = null;
+      this.editedEmployee.eeoRaceOrEthnicity = null;
+      this.editedEmployee.eeoJobCategory = null;
+      this.editedEmployee.eeoHasDisability = null;
+      this.editedEmployee.eeoIsProtectedVeteran = null;
+    }
     // close modal
     this.toggleDeclineSelfIdentifyModal = false;
   });
@@ -529,7 +532,7 @@ async function created() {
  * @return boolean - True if an admin/manager can edit an EEO
  */
 function adminCanEditEeo() {
-  return this.thisIsMyProfile() || this.userRoleIsAdmin() || this.userRoleIsManager();
+  return this.userRoleIsAdmin() || this.userRoleIsManager();
 } //adminCanEditEeo
 
 /**
