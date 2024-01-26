@@ -73,7 +73,7 @@
         class="ml-2 mb-5"
         v-if="this.model.eeoDeclineSelfIdentify"
         label="Status"
-        value="Declined to self-identify."
+        :value="`Declined to self-identify${declinedExtraText}.`"
       />
       <div
         v-else-if="
@@ -123,6 +123,7 @@
 </template>
 
 <script>
+import { userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
 import employeeUtils from '@/shared/employeeUtils';
 import _ from 'lodash';
 import { isEmpty, monthDayYearFormat } from '@/utils/utils';
@@ -178,6 +179,35 @@ function getCurrentProjects() {
 
   return currentContracts;
 } // getCurrentProjects
+
+function declinedExtraText() {
+  if (!userRoleIsAdmin() && !userRoleIsManager()) return '';
+
+  // check if *all* items are complete
+  let eeoCompleteStatus =
+    this.model.eeoGender &&
+    this.model.eeoHispanicOrLatino &&
+    this.model.eeoRaceOrEthnicity &&
+    this.model.eeoJobCategory &&
+    this.model.eeoHasDisability &&
+    this.model.eeoIsProtectedVeteran
+      ? 'complete'
+      : 'incomplete';
+  // check if *any* parts of form are complete, if not all are
+  if (eeoCompleteStatus === 'incomplete') {
+    eeoCompleteStatus =
+      this.model.eeoGender ||
+      this.model.eeoHispanicOrLatino ||
+      this.model.eeoRaceOrEthnicity ||
+      this.model.eeoJobCategory ||
+      this.model.eeoHasDisability ||
+      this.model.eeoIsProtectedVeteran
+        ? 'partially complete'
+        : eeoCompleteStatus;
+  }
+
+  return `, form is ${eeoCompleteStatus}`;
+}
 
 /**
  * Gets all of an employee's tags they are included in.
@@ -248,7 +278,8 @@ export default {
   computed: {
     fullName,
     getCurrentProjects,
-    getEmployeeTags
+    getEmployeeTags,
+    declinedExtraText
   },
   methods: {
     startCase,
