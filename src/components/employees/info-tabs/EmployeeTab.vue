@@ -128,6 +128,7 @@ import employeeUtils from '@/shared/employeeUtils';
 import _ from 'lodash';
 import { isEmpty, monthDayYearFormat } from '@/utils/utils';
 import SensitiveDataField from '../SensitiveDataField.vue';
+import { type } from 'auth0-js';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -183,28 +184,42 @@ function getCurrentProjects() {
 function declinedExtraText() {
   if (!userRoleIsAdmin() && !userRoleIsManager()) return '';
 
-  // check if *all* items are complete
-  let eeoCompleteStatus =
-    this.model.eeoGender &&
-    this.model.eeoHispanicOrLatino &&
-    this.model.eeoRaceOrEthnicity &&
-    this.model.eeoJobCategory &&
-    this.model.eeoHasDisability &&
+  let eeoValues = [
+    this.model.eeoGender,
+    this.model.eeoHispanicOrLatino,
+    this.model.eeoRaceOrEthnicity,
+    this.model.eeoJobCategory,
+    this.model.eeoHasDisability,
     this.model.eeoIsProtectedVeteran
-      ? 'complete'
-      : 'incomplete';
-  // check if *any* parts of form are complete, if not all are
-  if (eeoCompleteStatus === 'incomplete') {
-    eeoCompleteStatus =
-      this.model.eeoGender ||
-      this.model.eeoHispanicOrLatino ||
-      this.model.eeoRaceOrEthnicity ||
-      this.model.eeoJobCategory ||
-      this.model.eeoHasDisability ||
-      this.model.eeoIsProtectedVeteran
-        ? 'partially complete'
-        : eeoCompleteStatus;
+  ];
+
+  /**
+   * Get the status of EEO. Check if all values are filled
+   * with AND, check if any values are filled with OR. Yes
+   * this function is overcomplicating things.
+   *
+   * @param values eeo values from model to check
+   * @param method method to check with, OR or AND
+   */
+  function eeoStatus(values, method = 'OR') {
+    // OR method
+    if (method.toLocaleLowerCase() === 'or' || method === '||') {
+      for (let v of values) if (v != null) return true;
+      return false;
+    }
+
+    // AND method
+    if (method.toLocaleLowerCase() === 'and' || method === '&&') {
+      for (let v of values) if (v == null) return false;
+      return true;
+    }
   }
+
+  // check if *all* items are complete
+  let eeoCompleteStatus = eeoStatus(eeoValues, 'AND') ? 'complete' : 'incomplete';
+
+  // check if *any* parts of form are complete, if not all are
+  if (eeoCompleteStatus === 'incomplete' && eeoStatus(eeoValues, 'OR')) eeoCompleteStatus = 'partially complete';
 
   return `, form is ${eeoCompleteStatus}`;
 }
