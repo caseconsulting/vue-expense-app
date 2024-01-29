@@ -455,7 +455,7 @@ async function created() {
   });
   this.emitter.on('confirm-decline-self-identify', () => {
     // clear fields
-    if (!this.userRoleIsAdmin() && !this.userRoleIsManager()) {
+    if (this.thisIsMyProfile()) {
       this.editedEmployee.eeoGender = null;
       this.editedEmployee.eeoHispanicOrLatino = null;
       this.editedEmployee.eeoRaceOrEthnicity = null;
