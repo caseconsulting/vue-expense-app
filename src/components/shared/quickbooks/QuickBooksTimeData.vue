@@ -22,7 +22,10 @@
             </v-autocomplete>
           </v-col>
           <v-col
-            v-if="lastUpdated && passedEmployee?.id === $store.getters.user?.id"
+            v-if="
+              lastUpdated &&
+              (passedEmployee?.id === $store.getters.user?.id || passedEmployee?.value?.id === $store.getters.user?.id)
+            "
             cols="6"
             class="d-flex justify-end align-center pa-0 ma-0 mt-1"
           >
@@ -32,7 +35,17 @@
           </v-col>
         </v-row>
 
-        <div class="d-flex align-center justify-space-between nudge-up-title">
+        <div
+          class="d-flex align-center justify-space-between"
+          :class="
+            userRoleIsAdmin() ||
+            userRoleIsManager() ||
+            (lastUpdated &&
+              (passedEmployee?.id === $store.getters.user?.id || passedEmployee?.value?.id === $store.getters.user?.id))
+              ? 'nudge-up-title-more'
+              : 'nudge-up-title-less'
+          "
+        >
           <h3 v-if="!isMobile" class="d-inline-block">QuickBooks Time Data</h3>
           <h5 v-else class="d-inline-block">QuickBooks Time Data</h5>
           <div class="d-flex">
@@ -257,9 +270,13 @@ export default {
 </script>
 
 <style scoped>
-.nudge-up-title {
+.nudge-up-title-more {
   position: relative;
   top: -18px;
+}
+.nudge-up-title-less {
+  position: relative;
+  top: 9px;
 }
 .nudge-down-title {
   position: relative;
