@@ -717,10 +717,11 @@ function filterExpenses() {
   }
 
   if (this.search) {
+    let headerKeys = _.map(this.headers, (object) => object.key);
     this.filteredExpenses = _.filter(this.filteredExpenses, (expense) => {
-      return _.some(Object.values(expense), (value) =>
-        String(value)?.toLowerCase().includes(this.search?.toLowerCase())
-      );
+      return _.some(Object.entries(expense), ([key, value]) => {
+        return String(value)?.toLowerCase().includes(this.search?.toLowerCase()) && headerKeys?.includes(key);
+      });
     });
   }
 
