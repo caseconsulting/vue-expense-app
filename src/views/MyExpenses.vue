@@ -113,9 +113,9 @@
               <legend class="legend_style">Filters</legend>
               <v-container fluid class="px-2 pt-1 pb-4">
                 <v-row dense>
-                  <v-col cols="12" md="3">
+                  <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="12" md="3">
                     <!-- Active Filter -->
-                    <div v-if="userRoleIsAdmin() || userRoleIsManager()" class="d-inline-block mr-4">
+                    <div class="d-inline-block mr-4">
                       <h4>Active Expense Type:</h4>
                       <v-btn-toggle
                         class="filter_color"
@@ -156,7 +156,7 @@
                   </v-col>
                   <v-col cols="12" md="3">
                     <!-- Reimbursed Filter -->
-                    <div class="d-inline-block">
+                    <div class="d-inline-block" :class="!userRoleIsAdmin() && !userRoleIsManager() ? 'ml-3' : ''">
                       <h4>Reimbursed:</h4>
                       <v-btn-toggle
                         class="filter_color"
@@ -196,7 +196,7 @@
                     <!-- End Reimbursed Filter -->
                   </v-col>
                   <v-col cols="12" md="6" class="d-flex pa-1">
-                    <v-container fluid class="pa-0">
+                    <v-container fluid class="pa-0" :class="!userRoleIsAdmin() && !userRoleIsManager() ? 'ml-3' : ''">
                       <h4 class="ml-0 pl-0 mb-1">Reimbursed Date Range:</h4>
                       <v-row class="ml-1">
                         <!-- Start Date Filter -->
