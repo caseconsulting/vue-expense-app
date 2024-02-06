@@ -68,36 +68,6 @@ import _ from 'lodash';
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     COMPUTED                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Filter items by user permissions.
- *
- * @return Array - Filtered items
- */
-function visibleTiles() {
-  return _.filter(this.items, (item) => {
-    if (item.subItems) {
-      if (_.includes(item.permission, this.permissions)) {
-        item.subItems = _.filter(item.subItems, (subItem) => {
-          {
-            return _.includes(subItem.permission, this.permissions);
-          }
-        });
-        return true;
-      } else {
-        return false;
-      }
-    } else {
-      return _.includes(item.permission, this.permissions);
-    }
-  });
-} // visibleTiles
-
-// |--------------------------------------------------|
-// |                                                  |
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -140,6 +110,30 @@ function handleNavigation(item) {
   window.scrollTo(0, 0);
 } // scrollUp
 
+/**
+ * Filter items by user permissions.
+ *
+ * @return Array - Filtered items
+ */
+function getVisibleTiles() {
+  return _.filter(this.items, (item) => {
+    if (item.subItems) {
+      if (_.includes(item.permission, this.permissions)) {
+        item.subItems = _.filter(item.subItems, (subItem) => {
+          {
+            return _.includes(subItem.permission, this.permissions);
+          }
+        });
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return _.includes(item.permission, this.permissions);
+    }
+  });
+} // visibleTiles
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -152,6 +146,7 @@ function handleNavigation(item) {
 function created() {
   this.permissions = this.getRole();
   this.route = this.$route.name;
+  this.visibleTiles = this.getVisibleTiles();
 } // created
 
 // |--------------------------------------------------|
@@ -174,9 +169,7 @@ function watchRouteHandler() {
 // |--------------------------------------------------|
 
 export default {
-  computed: {
-    visibleTiles
-  },
+  computed: {},
   created,
   data() {
     return {
@@ -292,6 +285,7 @@ export default {
   methods: {
     checkActive,
     getRole,
+    getVisibleTiles,
     handleNavigation
   },
   watch: {

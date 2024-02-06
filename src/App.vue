@@ -27,7 +27,7 @@
         <v-spacer></v-spacer>
         <!-- Display social media icons and links dropdown menu -->
         <v-item-group class="hidden-sm-and-down" v-show="isLoggedIn() && !isMobile">
-          <v-menu open-on-hover open-delay="0" close-delay="0" theme="light">
+          <v-menu open-on-hover open-delay="0" theme="light">
             <template v-slot:activator="{ props }">
               <v-btn id="links-btn" size="small" class="my-2" v-bind="props">Links &#9662; </v-btn>
             </template>
@@ -64,7 +64,7 @@
         </v-item-group>
 
         <!-- User image and logout -->
-        <v-menu location="bottom" theme="light" open-on-click v-if="isLoggedIn()">
+        <v-menu location="bottom" theme="light" open-on-click v-if="isLoggedIn() && $store.getters.user">
           <template v-slot:activator="{ props }">
             <user-avatar class="pointer mx-3" v-bind="props" :employee="$store.getters.user" :image="profilePic" />
           </template>
@@ -117,7 +117,7 @@
             id="P"
             class="text-black"
             target="_blank"
-            href="https://3.basecamp.com/3097063/buckets/4708396/documents/6782211247"
+            href="https://3.basecamp.com/3097063/buckets/4708396/documents/7010313431"
           >
             <v-tooltip activator="parent" location="top">View Release Notes</v-tooltip>
             <strong>Version</strong> {{ version }}
@@ -430,6 +430,7 @@ export default {
     date: null,
     links: [
       { name: 'CASE Website', link: 'https://www.consultwithcase.com/' },
+      { name: 'Submit New Referral', link: 'https://www.consultwithcase.com/apply-form' },
       { name: 'CASE Information', link: 'https://3.basecamp.com/3097063/buckets/4708396/messages/650777910' },
       { name: 'Basecamp', link: 'https://3.basecamp.com/3097063' },
       { name: 'QuickBooks Time', link: 'https://tsheets.intuit.com/page/login_oii' },
@@ -438,6 +439,7 @@ export default {
       { name: 'Medical (Health) Insurance', link: 'https://www.anthem.com/' },
       { name: 'Disability & Life Insurance', link: 'https://www.mutualofomaha.com/' },
       { name: 'Dental & Vision Insurance', link: 'https://www.sunlife.com/' },
+      { name: 'Dependent Care', link: 'https://www.wageworks.com/' },
       { name: 'ADP', link: 'https://workforcenow.adp.com/' },
       { name: 'Jira', link: 'https://consultwithcase.atlassian.net/jira/your-work' },
       {

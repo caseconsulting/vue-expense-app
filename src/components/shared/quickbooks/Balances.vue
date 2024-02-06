@@ -33,10 +33,16 @@
           <!-- Employee Inactive -->
           <div v-if="!isInactive">
             <!-- Loop through and display all balances -->
-            <v-row v-for="balance in this.availableBalances" :key="balance" class="mb-2">
+            <v-row
+              v-for="(balance, i) in this.availableBalances"
+              :key="i"
+              :class="balanceData[balance] < 0 ? 'text-red font-weight-bold mb-2' : 'mb-2'"
+            >
               <p>{{ balance }}:</p>
               <v-spacer></v-spacer>
-              <p>{{ formatHours(balanceData[balance]) }}</p>
+              <p>
+                {{ formatHours(balanceData[balance]) }}
+              </p>
             </v-row>
           </div>
 
@@ -64,6 +70,8 @@
 <script>
 import { isEmpty } from '@/utils/utils';
 import { updateStorePtoCashOuts, updateStoreEmployees, updateStoreTags } from '@/utils/storeUtils';
+import { qbStorageLastUpdated } from './quickbooks-helpers';
+import { now } from '@/shared/dateUtils';
 import _ from 'lodash';
 import api from '@/shared/api';
 import PTOCashOutForm from '@/components/shared/PTOCashOutForm.vue';
@@ -136,9 +144,7 @@ function availableBalances() {
   );
   let avaibleBalances = [];
   this.keysBalance.forEach((balance) => {
-    if (this.balanceData[balance] > 0 || this.showMore) {
-      avaibleBalances.push(balance);
-    }
+    avaibleBalances.push(balance);
   });
   if (this.pendingPtoCashOuts.length > 0) {
     let balance = 'Pending PTO Cash Out';
@@ -149,19 +155,6 @@ function availableBalances() {
   }
   return avaibleBalances;
 } // availableBalances
-
-/**
- * Determines if an employee is a legacy FireTeam employee.
- *
- * @returns Boolean - whether the employee was FireTeam or not
- */
-function isLegacyFireTeam() {
-  if (!this.passedEmployee.value) {
-    return parseInt(this.employee.employeeNumber, 10) < 100;
-  } else {
-    return parseInt(this.passedEmployee.value.employeeNumber, 10) < 100;
-  }
-} // isLegacyFireTeam
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -197,20 +190,27 @@ async function setPTOBalances() {
   if (this.employee && !this.isEmpty(this.employee.id)) {
     // employee exists
     let ptoBalances;
-    if (
-      !this.$store.getters.quickbooksPTO ||
-      !this.$store.getters.ptoCashOuts ||
-      this.$store.getters.user.id != this.employee.id ||
-      this.refresh
-    ) {
-      [ptoBalances] = await Promise.all([api.getPTOBalances(this.employee.employeeNumber), updateStorePtoCashOuts()]); // call api
-      if (!(ptoBalances instanceof Error) && this.$store.getters.user.id == this.employee.id) {
-        // only set vuex store if the user is looking at their own quickbooks data
-        this.$store.dispatch('setQuickbooksPTO', { quickbooksPTO: ptoBalances });
-      }
-    } else {
-      ptoBalances = this.$store.getters.quickbooksPTO;
+    // make call to api to get data
+    if (!this.$store.getters.ptoCashOuts) {
+      // no need for async since labels are computed
+      this.updateStorePtoCashOuts();
     }
+    if (
+      this.qbStorageLastUpdated('quickbooksPtoData') &&
+      this.$store.getters.user.id == this.employee.id &&
+      !this.refresh
+    ) {
+      let item = JSON.parse(localStorage.getItem('quickbooksPtoData'));
+      ptoBalances = item.data;
+    } else {
+      ptoBalances = await api.getPTOBalances(this.employee.employeeNumber);
+      if (!(ptoBalances instanceof Error) && this.$store.getters.user.id == this.employee.id) {
+        // only set local store if the user is looking at their own quickbooks data
+        let itemObj = { data: ptoBalances, lastUpdated: this.now() };
+        localStorage.setItem('quickbooksPtoData', JSON.stringify(itemObj));
+      }
+    }
+
     if (_.isNil(ptoBalances.results) || _.isNil(ptoBalances.results.users[this.employee.employeeNumber])) {
       // error getting pto balances
       this.balancesError = true;
@@ -241,9 +241,7 @@ async function setPTOBalances() {
  * Opens new tab when info icon is selected w/in Quickbooks time box
  */
 function toFAQ() {
-  let link = this.isLegacyFireTeam
-    ? 'https://3.basecamp.com/3097063/buckets/179119/messages/6450437179'
-    : 'https://3.basecamp.com/3097063/buckets/179119/messages/939259168';
+  let link = 'https://3.basecamp.com/3097063/buckets/179119/messages/939259168';
   window.open(link, '_blank');
 } // toFAQ
 
@@ -276,8 +274,7 @@ export default {
   components: { PTOCashOutForm },
   computed: {
     isInactive,
-    availableBalances,
-    isLegacyFireTeam
+    availableBalances
   },
   beforeUnmount,
   created,
@@ -299,9 +296,12 @@ export default {
   methods: {
     formatHours,
     isEmpty,
+    now,
+    qbStorageLastUpdated,
     setPTOBalances,
     toFAQ,
     updateStoreEmployees,
+    updateStorePtoCashOuts,
     updateStoreTags
   },
   mounted,

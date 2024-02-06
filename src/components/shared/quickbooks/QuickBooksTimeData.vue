@@ -2,26 +2,49 @@
   <div id="t-sheets-data">
     <v-card density="compact">
       <v-card-title class="header_style py-0">
-        <v-autocomplete
-          v-if="userRoleIsAdmin() || userRoleIsManager()"
-          class="pb-0 mt-0 nudge-up-autocomplete"
-          :style="autocompleteWidth"
-          v-model="passedEmployee"
-          base-color="transparent"
-          bg-color="transparent"
-          density="compact"
-          :items="filteredEmployees"
-          :customFilter="customFilter"
-          hide-details
-          variant="plain"
-          item-title="text"
-          item-value="value"
-          return-object
-        >
-        </v-autocomplete>
+        <v-row class="ma-0 nudge-up-row on-top">
+          <v-col cols="6" class="pa-0 ma-0">
+            <v-autocomplete
+              v-if="userRoleIsAdmin() || userRoleIsManager()"
+              v-model="passedEmployee"
+              class="pt-0 mt-0"
+              base-color="transparent"
+              bg-color="transparent"
+              density="compact"
+              :items="filteredEmployees"
+              :customFilter="customFilter"
+              hide-details
+              variant="plain"
+              item-title="text"
+              item-value="value"
+              return-object
+            >
+            </v-autocomplete>
+          </v-col>
+          <v-col
+            v-if="
+              lastUpdated &&
+              (passedEmployee?.id === $store.getters.user?.id || passedEmployee?.value?.id === $store.getters.user?.id)
+            "
+            cols="6"
+            class="d-flex justify-end align-center pa-0 ma-0 mt-1"
+          >
+            <div class="tiny-text">
+              {{ lastUpdated }}
+            </div>
+          </v-col>
+        </v-row>
+
         <div
           class="d-flex align-center justify-space-between"
-          :class="userRoleIsAdmin() || userRoleIsManager() ? 'nudge-up-title' : 'nudge-down-title'"
+          :class="
+            userRoleIsAdmin() ||
+            userRoleIsManager() ||
+            (lastUpdated &&
+              (passedEmployee?.id === $store.getters.user?.id || passedEmployee?.value?.id === $store.getters.user?.id))
+              ? 'nudge-up-title-more'
+              : 'nudge-up-title-less'
+          "
         >
           <h3 v-if="!isMobile" class="d-inline-block">QuickBooks Time Data</h3>
           <h5 v-else class="d-inline-block">QuickBooks Time Data</h5>
@@ -42,7 +65,14 @@
             </v-tooltip>
             <!--End of Switch-->
             <!-- Start of Refresh Button -->
-            <v-btn @click="emitter.emit('refresh-quickbooks-data')" variant="text" icon="mdi-refresh">
+            <v-btn
+              @click="
+                emitter.emit('refresh-quickbooks-data');
+                refreshed = true;
+              "
+              variant="text"
+              icon="mdi-refresh"
+            >
               <template v-slot:default>
                 <v-tooltip activator="parent" location="top">Refresh Quickbooks Time Data</v-tooltip>
                 <v-icon color="white" size="large">mdi-refresh</v-icon>
@@ -52,16 +82,8 @@
           </div>
         </div>
       </v-card-title>
-      <v-card-text
-        class="pt-0 pb-0 text-black"
-        :class="userRoleIsAdmin() || userRoleIsManager() ? 'nudge-down-title mb-3' : 'mt-4'"
-      >
-        <semi-monthly-charges
-          v-if="passedEmployee && isLegacyFireTeam"
-          :passedEmployee="passedEmployee"
-          :showMinutes="showMinutes"
-        ></semi-monthly-charges>
-        <monthly-charges v-else :passedEmployee="passedEmployee" :showMinutes="showMinutes"></monthly-charges>
+      <v-card-text class="pt-0 pb-0 text-black nudge-down-title mb-3">
+        <monthly-charges :passedEmployee="passedEmployee" :showMinutes="showMinutes"></monthly-charges>
         <v-divider></v-divider>
         <balances :passedEmployee="passedEmployee" :showMinutes="showMinutes"></balances>
       </v-card-text>
@@ -72,10 +94,11 @@
 <script>
 import _ from 'lodash';
 import MonthlyCharges from '@/components/shared/quickbooks/MonthlyCharges.vue';
-import SemiMonthlyCharges from '@/components/shared/quickbooks/SemiMonthlyCharges.vue';
 import Balances from '@/components/shared/quickbooks/Balances.vue';
 import { nicknameAndLastName } from '@/shared/employeeUtils';
 import { isMobile, userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
+import { qbStorageLastUpdated } from './quickbooks-helpers';
+import { now } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -125,35 +148,24 @@ function allEmployees() {
 } // allEmployees
 
 /**
- * Gets the width for the autocomplete component based on screen size.
+ * Returns the last updated message
  */
-function autocompleteWidth() {
-  switch (this.$vuetify.display.name) {
-    case 'xs':
-      return 'width: 50%';
-    case 'sm':
-      return 'width: 50%';
-    case 'md':
-      return 'width: 40%;';
-    case 'lg':
-      return 'width: 40%';
-    case 'xl':
-      return 'width: 30%';
+function lastUpdated() {
+  if (!this.refreshed && this.employee.id == this.$store.getters.user.id) {
+    let lastUpdated = this.qbStorageLastUpdated('quickbooksData');
+    if (lastUpdated) {
+      if (lastUpdated < 1) {
+        let minutes = parseInt(lastUpdated * 60);
+        if (minutes > 0) {
+          return `Last updated ${minutes} ${minutes == 1 ? 'minute' : 'minutes'} ago`;
+        }
+      } else {
+        let hours = parseInt(lastUpdated);
+        return `Last updated ${hours} ${hours == 1 ? 'hour' : 'hours'} ago`;
+      }
+    }
   }
-} // autocompleteWidth
-
-/**
- * Determines if an employee is a legacy FireTeam employee.
- *
- * @returns Boolean - whether the employee was FireTeam or not
- */
-function isLegacyFireTeam() {
-  if (!this.passedEmployee.value) {
-    return parseInt(this.employee.employeeNumber, 10) < 100;
-  } else {
-    return parseInt(this.passedEmployee.value.employeeNumber, 10) < 100;
-  }
-} // isLegacyFireTeam
+} // lastUpdated
 
 /**
  * Calculates the tooltip text to display on v-switch based on value of showMinutes.
@@ -225,14 +237,12 @@ async function watchEmployees() {
 export default {
   components: {
     Balances,
-    MonthlyCharges,
-    SemiMonthlyCharges
+    MonthlyCharges
   },
   computed: {
     allEmployees,
-    autocompleteWidth,
-    isLegacyFireTeam,
     isMobile,
+    lastUpdated,
     tooltipText
   },
   created,
@@ -240,12 +250,15 @@ export default {
     return {
       filteredEmployees: [],
       passedEmployee: null,
+      refreshed: false,
       showMinutes: false
     };
   },
   methods: {
     customFilter,
+    qbStorageLastUpdated,
     nicknameAndLastName,
+    now,
     userRoleIsAdmin,
     userRoleIsManager
   },
@@ -257,16 +270,26 @@ export default {
 </script>
 
 <style scoped>
-.nudge-up-title {
+.nudge-up-title-more {
   position: relative;
   top: -18px;
+}
+.nudge-up-title-less {
+  position: relative;
+  top: 9px;
 }
 .nudge-down-title {
   position: relative;
   top: 12px;
 }
-.nudge-up-autocomplete {
+.nudge-up-row {
   position: relative;
   top: -5px;
+}
+.on-top {
+  z-index: 999999 !important;
+}
+.tiny-text {
+  font-size: 10px !important;
 }
 </style>

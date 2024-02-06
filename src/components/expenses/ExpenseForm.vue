@@ -124,9 +124,7 @@
           <v-text-field
             variant="underlined"
             prefix="$"
-            v-model="costFormatted"
             :rules="costRules"
-            :error="costError"
             :disabled="isReimbursed || isInactive || isHighFive"
             label="Cost"
             id="cost"
@@ -135,7 +133,8 @@
             data-vv-name="Cost"
             persistent-hint
             :hint="costHint()"
-            @update:model-value="formatCost"
+            v-model="costFormatted"
+            @keyup="formatCost"
           >
             <template v-slot:message="{ message }">
               <span v-html="message"></span>
@@ -223,7 +222,7 @@
           </v-menu>
 
           <template v-slot:prepend>
-            <div v-bind="props" class="pointer">
+            <div class="pointer">
               <v-icon :color="caseGray">mdi-calendar</v-icon>
             </div>
           </template>
@@ -764,6 +763,12 @@ async function checkCoverage() {
  * Clears the form and sets all fields to a default state.
  */
 function clearForm() {
+  // don't clear form if there was an error in submitting
+  if (this.errorSubmitting) {
+    this.errorSubmitting = false; // reset var
+    return;
+  }
+
   this.allowReceipt = false;
   if (this.$refs.form) {
     this.$refs.form.reset();
@@ -805,7 +810,6 @@ function costHint() {
     if (this.remainingBudget <= 0) {
       str += `<span class="text-red">${this.convertToMoneyString(this.remainingBudget)}`;
     } else {
-      this.costError = false;
       str += this.convertToMoneyString(this.remainingBudget);
       return str;
     }
@@ -821,10 +825,8 @@ function costHint() {
     ) {
       str += ` (Overdraftable and within ${this.convertToMoneyString(this.overdraftBudget)} limit)`;
     } else if (this.remainingBudget < -this.overdraftBudget && this.selectedExpenseType.odFlag && isOverdraftable) {
-      this.costError = true;
       str += ` (Exceeds overdraftable amount of ${this.convertToMoneyString(this.overdraftBudget)})`;
     } else if (this.remainingBudget < 0 && !this.selectedExpenseType.odFlag) {
-      this.costError = true;
       str += ' (Not Overdraftable)';
     }
     str += '</span>';
@@ -987,13 +989,27 @@ function filteredExpenseTypes() {
 /**
  * Formats the cost on the form for a nicer display.
  */
-function formatCost() {
+function formatCost(e) {
+  // log cursor position to put it back to where it was
+  let cursorStart = e.target.selectionStart;
+  let cursorEnd = e.target.selectionEnd;
+  let previousLength = this.costFormatted.length;
+
   let [wholePart, fracPart] = this.parseCost(this.costFormatted).split('.');
   this.editedExpense.cost = this.parseCost(this.costFormatted);
   if (Number(this.editedExpense.cost)) {
     this.costFormatted = Number(wholePart).toLocaleString().toString();
     if (fracPart != undefined) this.costFormatted += `.${fracPart}`;
   }
+
+  // set cursor back to where it was
+  // note: longer delay means bigger stutter in input (3ms is not very noticable) but also more
+  // assurance that it will update *after* the cursor is shifted to the end by Vuetify.
+  let delay = 3;
+  setTimeout(() => {
+    e.target.selectionStart = cursorStart + this.costFormatted.length - previousLength;
+    e.target.selectionEnd = cursorEnd + this.costFormatted.length - previousLength;
+  }, delay);
 } // formatCost
 
 /**
@@ -1465,7 +1481,7 @@ async function submit() {
         // creating a new expense
         await this.createNewEntry();
       } else {
-        // editing a current expensef
+        // editing a current expense
         await this.updateExistingEntry();
       }
     }
@@ -1559,6 +1575,9 @@ function created() {
   this.employeeRole = this.getRole();
   this.userInfo = this.$store.getters.user;
 
+  this.emitter.on('error', () => {
+    this.errorSubmitting = true;
+  });
   this.emitter.on('fileSelected', (file) => {
     this.setFile(file);
   });
@@ -1933,7 +1952,6 @@ export default {
       confirming: false, // budget overage confirmation box activator
       confirmingValid: false,
       confirmBackingOut: false,
-      costError: false,
       costFormatted: '',
       costRules: [
         (v) => !this.isEmpty(v) || 'Cost is a required field',
@@ -1953,6 +1971,7 @@ export default {
       employeeBudgets: null, // selected employee's budgets
       employeeRole: '', // employee role
       employees: [], // employees
+      errorSubmitting: false, // avoid clearing fields if error exists
       expenseTypes: [], // expense types
       expenseTypeName: null, //expense type name for budget
       file: undefined, // receipt

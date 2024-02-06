@@ -309,6 +309,8 @@ function getFinalBudgetsData(budgets) {
  * Refresh and sets the aggregated budgets to draw the graph
  */
 async function refreshBudgets() {
+  if (!this.accessibleBudgets || !this.fiscalDateView) return;
+
   this.loading = true; // set loading status to true
   let budgetsVar;
   if (this.fiscalDateView == this.getCurrentBudgetYear(this.employee.hireDate)) {

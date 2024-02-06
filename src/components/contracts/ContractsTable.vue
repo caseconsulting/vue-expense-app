@@ -900,7 +900,6 @@ function storeContracts() {
   let mergedCheckBoxContractsData = _.merge(this.$store.getters.contracts, this.contractsCheckBoxes);
   mergedCheckBoxContractsData.forEach((c) => {
     c.projects = _.merge(c.projects, c.projectsCheckBoxes);
-    delete c.projectsCheckBoxes;
   });
   return mergedCheckBoxContractsData
     .filter((c) => this.filter.includes(c.status))

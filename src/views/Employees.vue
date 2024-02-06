@@ -535,6 +535,20 @@ function hasAdminPermissions() {
 } // hasAdminPermissions
 
 /**
+ * Loads in basecamp avatars, setting them when finished
+ */
+async function loadBasecampAvatars() {
+  await this.updateStoreAvatars();
+  let avatars = this.$store.getters.basecampAvatars;
+  _.map(this.employees, (employee) => {
+    let avatar = _.find(avatars, ['email_address', employee.email]);
+    let avatarUrl = avatar ? avatar.avatar_url : null;
+    employee.avatar = avatarUrl;
+    return employee;
+  });
+}
+
+/**
  * negates a tag
  */
 function negateTag(item) {
@@ -553,21 +567,19 @@ function negateTag(item) {
  */
 async function refreshEmployees() {
   this.loading = true; // set loading status to true
+
+  // assets to wait for load
   await Promise.all([
     !this.$store.getters.employees ? this.updateStoreEmployees() : '',
-    !this.$store.getters.basecampAvatars ? this.updateStoreAvatars() : '',
     !this.$store.getters.contracts && (userRoleIsAdmin() || userRoleIsManager()) ? this.updateStoreContracts() : '',
     !this.$store.getters.tags && (userRoleIsAdmin() || userRoleIsManager()) ? this.updateStoreTags() : ''
   ]);
+
+  // assets that don't need to be awaited on, but need data that is awaited on
+  Promise.all([!this.$store.getters.basecampAvatars ? this.loadBasecampAvatars() : '']);
+
   this.employees = this.$store.getters.employees; // get all employees
   this.filterEmployees(); // filter employees
-  let avatars = this.$store.getters.basecampAvatars;
-  _.map(this.employees, (employee) => {
-    let avatar = _.find(avatars, ['email_address', employee.email]);
-    let avatarUrl = avatar ? avatar.avatar_url : null;
-    employee.avatar = avatarUrl;
-    return employee;
-  });
   this.contracts = this.$store.getters.contracts;
   this.tags = this.$store.getters.tags;
   this.loading = false; // set loading status to false
@@ -980,6 +992,7 @@ export default {
     isInactive,
     isPartTime,
     isMobile,
+    loadBasecampAvatars,
     monthDayYearFormat,
     negateTag,
     refreshEmployees,

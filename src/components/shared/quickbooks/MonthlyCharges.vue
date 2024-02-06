@@ -76,11 +76,16 @@
             </v-row>
           </div>
           <!-- Average Hours per Day -->
-          <v-row v-if="!isPrevMonth" class="py-5">
+          <v-row v-if="!isPrevMonth" class="pt-5">
             Remaining Avg Hours/Day:
             <v-spacer></v-spacer>
-            <p v-if="this.estimatedDailyHours < 24">{{ formatHours(this.estimatedDailyHours) }}</p>
-            <p v-else class="text-red">{{ formatHours(this.estimatedDailyHours) }}</p>
+            <p :class="this.estimatedDailyHours >= 24 ? 'text-red' : ''">{{ formatHours(this.estimatedDailyHours) }}</p>
+          </v-row>
+          <!-- Ahead/behind this month -->
+          <v-row v-if="!isPrevMonth" class="pt-2 pb-6">
+            {{ hoursAhead < 0 ? 'Behind' : 'Ahead' }} by:
+            <v-spacer></v-spacer>
+            <p :class="hoursAhead < 0 ? 'text-red' : ''">{{ formatHours(Math.abs(this.hoursAhead)) }}</p>
           </v-row>
           <!-- Button to Show More -->
           <div v-if="!showMore" @click="showMore = true" align="center">
@@ -154,7 +159,8 @@
 import api from '@/shared/api.js';
 import _ from 'lodash';
 import { isEmpty } from '@/utils/utils';
-import { add, format, getIsoWeekday, getTodaysDate, setDay, subtract } from '@/shared/dateUtils';
+import { qbStorageLastUpdated } from './quickbooks-helpers';
+import { add, format, getIsoWeekday, getTodaysDate, now, setDay, subtract, isSameOrAfter } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -173,7 +179,7 @@ function remainingWorkDays() {
   let currMonth = day.split('-')[1];
   let month = day.split('-')[1];
   while (month === currMonth) {
-    if (getIsoWeekday(day) >= 1 && getIsoWeekday(day) <= 5) {
+    if (isWeekDay(day)) {
       // monday - friday
       remainingWorkDays += 1;
     }
@@ -183,6 +189,21 @@ function remainingWorkDays() {
   }
   return remainingWorkDays;
 } // remainingWorkDays
+
+/**
+ * Calculates how many hours user is ahead by.
+ *  - greater than 0 means user is ahead of schedule
+ *  -    less than 0 means user is behind schedule
+ *  -      exactly 0 means user is perfectly on schedule
+ */
+function hoursAhead() {
+  // translating/computing variable names to make them make more sense
+  let hasWorked = this.totalHours;
+  let daysToAdd = isWeekDay(getTodaysDate()) ? 1 : 0;
+  let shouldHaveWorked = this.workHours - (this.userWorkDays - daysToAdd) * this.workDayHours;
+
+  return hasWorked - shouldHaveWorked;
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -230,8 +251,7 @@ function calcWorkHours() {
   let currMonth = day.split('-')[1];
   let month = day.split('-')[1];
   while (month === currMonth) {
-    // if day.isoWeekday() >= 1 && <= 5 then add user hours to workHours
-    if (getIsoWeekday(day) >= 1 && getIsoWeekday(day) <= 5) {
+    if (isWeekDay(day) && isSameOrAfter(day, this.employee.hireDate)) {
       workHours += this.workDayHours;
     }
     // increment to the next day
@@ -301,6 +321,13 @@ function formatHours(hours) {
 } // formatHours
 
 /**
+ * Returns true if `day` is a weekday
+ */
+function isWeekDay(day) {
+  return getIsoWeekday(day) >= 1 && getIsoWeekday(day) <= 5;
+}
+
+/**
  * Sets all of the fields on initial load or refresh.
  */
 async function setData() {
@@ -327,17 +354,19 @@ async function setMonthlyCharges() {
     this.workDayHours *= this.employee.workStatus * 0.01;
     // make call to api to get data
     if (
-      !this.$store.getters.quickbooksMonthlyHours ||
-      this.$store.getters.user.id != this.employee.id ||
-      this.refresh
+      this.qbStorageLastUpdated('quickbooksData') &&
+      this.$store.getters.user.id == this.employee.id &&
+      !this.refresh
     ) {
+      let item = JSON.parse(localStorage.getItem('quickbooksData'));
+      this.quickBooksTimeData = item.data;
+    } else {
       this.quickBooksTimeData = await api.getMonthlyHours(this.employee.employeeNumber);
       if (!(this.quickBooksTimeData instanceof Error) && this.$store.getters.user.id == this.employee.id) {
-        // only set vuex store if the user is looking at their own quickbooks data
-        this.$store.dispatch('setQuickbooksMonthlyHours', { quickbooksMonthlyHours: this.quickBooksTimeData });
+        // only set local store if the user is looking at their own quickbooks data
+        let itemObj = { data: this.quickBooksTimeData, lastUpdated: this.now() };
+        localStorage.setItem('quickbooksData', JSON.stringify(itemObj));
       }
-    } else {
-      this.quickBooksTimeData = this.$store.getters.quickbooksMonthlyHours;
     }
 
     if (
@@ -408,7 +437,8 @@ async function watchPassedEmployeeID() {
 // |--------------------------------------------------|
 export default {
   computed: {
-    remainingWorkDays
+    remainingWorkDays,
+    hoursAhead
   },
   beforeUnmount,
   created,
@@ -445,6 +475,10 @@ export default {
     getIsoWeekday, // dateUtils
     getTodaysDate, // dateUtils
     isEmpty,
+    isSameOrAfter, // dateUtils
+    isWeekDay,
+    now, // dateUtils
+    qbStorageLastUpdated,
     roundHours,
     setDay, // dateUtils
     setData,

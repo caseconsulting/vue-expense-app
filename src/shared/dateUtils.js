@@ -31,6 +31,7 @@ dayjs.tz.setDefault(DEFAULT_TIME_ZONE);
 export const DEFAULT_ISOFORMAT = 'YYYY-MM-DD';
 export const FORMATTED_ISOFORMAT = 'MM/DD/YYYY';
 export const PARSED_ISOFORMAT = 'YYYY-MM-DD';
+export const ISO8601 = 'YYYY-MM-DDTHH:mm:ssZ';
 
 /**
  * Adds an amount to the given date.
@@ -246,7 +247,7 @@ export function isBefore(date1, date2, granularity, format) {
  * @returns Boolean - True if date is between date range, false otherwise
  */
 export function isBetween(date, startDate, endDate, granularity, interval) {
-  if (!dayjs(date).isValid() || !dayjs(startDate).isValid() || !dayjs(endDate).isValid()) {
+  if (!date || !dayjs(date).isValid() || !dayjs(startDate).isValid() || !dayjs(endDate).isValid()) {
     return false;
   }
   if (granularity) {
@@ -325,6 +326,16 @@ export function minimum(dates) {
 } // minimum
 
 /**
+ * Returns the current time in UTC format.
+ * Example: 2023-12-13T20:18:29Z
+ *
+ * @returns String - A UTC time format of now
+ */
+export function now() {
+  return dayjs.utc().tz(DEFAULT_TIME_ZONE);
+} // now
+
+/**
  * Returns the latest date from an array of dates.
  *
  * @param {Array} dates An array of string dates
@@ -364,8 +375,8 @@ export function setMonth(date, month) {
  * @param {Number} year The year to set the date to
  * @returns String - The date at the given year
  */
-export function setYear(date, year) {
-  return dayjs(date).year(year).format(DEFAULT_ISOFORMAT);
+export function setYear(date, year, dateFormat = undefined) {
+  return dayjs(date, dateFormat).year(year).format(DEFAULT_ISOFORMAT);
 } // setYear
 
 /**
@@ -413,6 +424,7 @@ export default {
   isValid,
   maximum,
   minimum,
+  now,
   setDay,
   setMonth,
   setYear,

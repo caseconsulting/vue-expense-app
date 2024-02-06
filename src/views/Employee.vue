@@ -61,10 +61,9 @@
       <v-row class="pt-0">
         <!-- QuickBooks Time and Budgets-->
         <v-col v-if="displayQuickBooksTimeAndBalances" cols="12" md="5" lg="4" class="pt-0">
-          <quick-books-time-data :employee="model" :key="refreshKey" class="mb-4"></quick-books-time-data>
+          <quick-books-time-data :employee="model" :key="model" class="mb-4"></quick-books-time-data>
           <available-budgets
             class="mb-4"
-            v-if="model.id && !loading"
             :employee="model"
             :key="refreshKey"
             :expenses="expenses"
@@ -73,13 +72,7 @@
             :employeeDataLoading="loading"
             :fiscalDateView="fiscalDateView"
           ></available-budgets>
-          <anniversary-card
-            v-if="!loading"
-            :employee="model"
-            :key="refreshKey"
-            :hasBudgets="hasAccessToBudgets"
-            location="profile"
-          ></anniversary-card>
+          <anniversary-card :employee="model" :key="refreshKey" location="profile"></anniversary-card>
         </v-col>
 
         <!-- Employee Form -->
@@ -158,14 +151,14 @@
           </v-card>
           <!-- Edit Info (Form) -->
           <employee-form
+            v-if="editing"
             :employee="model"
             :contracts="contracts"
             :currentTab="currentTab"
-            v-if="editing"
           ></employee-form>
-          <div class="mt-4">
+          <div v-if="userRoleIsAdmin() || userIsEmployee()" class="mt-4">
             <budget-chart
-              v-if="(userRoleIsAdmin() || userIsEmployee()) && hasAccessToBudgets && !loading"
+              v-if="!loading"
               :employee="model"
               :key="refreshKey"
               :accessibleBudgets="accessibleBudgets"
@@ -173,6 +166,11 @@
               :expenseTypes="expenseTypes"
               :fiscalDateView="fiscalDateView"
             ></budget-chart>
+            <v-card v-else class="pa-6">
+              <v-skeleton-loader width="40%" class="px-5 mx-auto" type="heading"></v-skeleton-loader>
+              <v-skeleton-loader type="image"></v-skeleton-loader>
+              <v-skeleton-loader width="60%" class="px-5" type="text"></v-skeleton-loader>
+            </v-card>
           </div>
         </v-col>
       </v-row>
@@ -372,7 +370,7 @@ async function checkForBudgetAccess() {
 
 /**
  * Navigates to an employee
- * TODO: support custom loops
+ * future: support custom loops
  *
  * @input num - amount of employees to move fowards (may be negative for backwards)
  */
@@ -416,7 +414,6 @@ async function refreshExpenseData(full = false) {
   }
   await this.checkForBudgetAccess();
   this.fiscalDateView = this.getCurrentBudgetYear(this.model.hireDate);
-  this.hasAccessToBudgets = this.accessibleBudgets && this.accessibleBudgets.length !== 0; // enable budget chart
   this.loading = false;
 } // refreshExpenseData
 
@@ -610,8 +607,7 @@ export default {
         statusMessage: null,
         color: null
       },
-      user: null,
-      hasAccessToBudgets: false
+      user: null
     };
   },
   methods: {

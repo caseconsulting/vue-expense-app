@@ -253,13 +253,13 @@ async function createEvents() {
       let now = getTodaysDate();
       let cutOff = startOf(subtract(now, 6, 'months'), 'day');
       let birthday = format(b.birthday, 'MM-DD', 'MM-DD');
-      birthday = setYear(birthday, getYear(now));
+      birthday = setYear(birthday, getYear(now), 'MM-DD');
       let diff = difference(startOf(now, 'day'), startOf(birthday, 'day'), 'day');
       // Get event date text
       event.date = this.getEventDateMessage(birthday);
       if (diff < -6) {
         birthday = subtract(birthday, 1, 'years');
-        event.date = format(birthday, null, 'll');
+        event.date = format(birthday, null, 'MMM D, YYYY');
       }
       if (isAfter(cutOff, startOf(birthday, 'day'))) {
         return null;

@@ -12,9 +12,22 @@
           <v-col> {{ convertToMoneyString(total.costTotal) }}</v-col>
         </v-row>
       </v-container>
+      <!-- Generate gift card checkbox -->
+      <v-checkbox
+        v-if="totals && totals.find((t) => t.name === 'High Five')"
+        v-model="isGeneratingGiftCard"
+        label="Generate Amazon Gift Card(s)"
+        :color="caseGray"
+        density="comfortable"
+        hide-details
+      >
+        <template v-slot:label="{ label }">
+          <span class="checkbox-label">{{ label }}</span>
+        </template>
+      </v-checkbox>
       <!-- Reimburse Button -->
       <v-btn
-        @click="emitter.emit('reimburse-expenses')"
+        @click="emitter.emit('reimburse-expenses', isGeneratingGiftCard)"
         id="custom-button-color"
         theme="dark"
         class="reimburse_button mt-5"
@@ -137,6 +150,7 @@ export default {
   },
   data() {
     return {
+      isGeneratingGiftCard: true,
       selected: [],
       reimbursing: false
     };
@@ -149,6 +163,11 @@ export default {
 </script>
 
 <style scoped>
+.checkbox-label {
+  font-size: 14px !important;
+  font-weight: bold !important;
+  color: black !important;
+}
 .slide-in-blurred-right {
   animation: slide-in-blurred-right 0.5s ease-in forwards;
 }

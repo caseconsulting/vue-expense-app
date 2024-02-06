@@ -202,6 +202,9 @@
                 position.endDate && position.endDate.length > 0 ? (position.presentDate = false) : ''
               "
             >
+              <template v-if="endDatePresentRule(compIndex, index) !== true" v-slot:message>
+                End Date is required (click <v-icon color="black" icon="mdi-check-circle-outline" /> to mark active)
+              </template>
               <v-menu
                 activator="parent"
                 v-model="position.showEndMenu"

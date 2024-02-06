@@ -119,6 +119,9 @@
               @keypress="project.showEndMenu = false"
               @update:model-value="project.endDate && project.endDate.length > 0 ? (project.presentDate = false) : ''"
             >
+              <template v-if="endDatePresentRule(index, projIndex) !== true" v-slot:message>
+                End Date is required (click <v-icon color="black" icon="mdi-check-circle-outline" /> to mark active)
+              </template>
               <template v-slot:append-inner>
                 <v-avatar
                   v-if="checkProjectStatus(project)"

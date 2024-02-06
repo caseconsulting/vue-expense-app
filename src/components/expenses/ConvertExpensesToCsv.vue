@@ -1,7 +1,7 @@
 <template>
   <!-- Download CSV Button -->
   <v-btn :disabled="midAction" @click="download" elevation="2">
-    <i class="material-icons">file_download</i> Download All</v-btn
+    <i class="material-icons">file_download</i> Download Items</v-btn
   >
 </template>
 
@@ -19,7 +19,7 @@ const expensesCsv = require('@/utils/csv/expensesCsv.js');
  */
 function download() {
   expensesCsv.download(this.expenses);
-}
+} // download
 
 // |--------------------------------------------------|
 // |                                                  |

@@ -13,6 +13,7 @@ const GOOGLE_MAPS = 'googleMaps';
 const AUDIT = 'audits';
 const RESUME = 'resume';
 const CONTRACTS = 'contracts';
+const HIGH_FIVES = 'highFives';
 const PTO_CASH_OUTS = 'ptoCashOuts';
 const TAGS = 'tags';
 const API_HOSTNAME = API_CONFIG.apiHostname;
@@ -55,7 +56,7 @@ async function execute(method, resource, data) {
   } catch (err) {
     return err;
   }
-}
+} // execute
 
 /**
  * gets list of tech skills from emsi
@@ -433,6 +434,17 @@ async function getFeedEvents() {
 } // getFeedEvents
 
 /**
+ * Reimburses a high five, generates a gift card, emails the recipeint
+ * gift card information, then stores the gift card information.
+ *
+ * @params - A high five expense
+ * @returns - The reimbursed high five if successful
+ */
+async function processHighFive(highFive) {
+  return await execute('post', `/${HIGH_FIVES}/process`, highFive);
+} // processHighFive
+
+/**
  * uploads the resume file for an employee
  *
  * @param employeeId - the id of the employee
@@ -491,6 +503,7 @@ export default {
   getUser,
   updateItem,
   uploadResume,
+  processHighFive,
   syncApplications,
   EXPENSE_TYPES,
   EXPENSES,
