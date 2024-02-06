@@ -144,7 +144,11 @@ function availableBalances() {
   );
   let avaibleBalances = [];
   this.keysBalance.forEach((balance) => {
-    avaibleBalances.push(balance);
+    // don't push to availableBalances if it is 0 and in the zeroBalanceExclude array
+    let excludeBalance = this.balanceData[balance] == 0 && this.zeroBalanceExclude.includes(balance);
+    if (!excludeBalance) {
+      avaibleBalances.push(balance);
+    }
   });
   if (this.pendingPtoCashOuts.length > 0) {
     let balance = 'Pending PTO Cash Out';
@@ -290,7 +294,8 @@ export default {
       refresh: false, // if the data has been refreshed
       showAll: true, // show all balances
       showMore: false, // toggle to show hidden balances
-      showPTOCashOutFormModal: false // toggle to show PTO Cash Out form
+      showPTOCashOutFormModal: false, // toggle to show PTO Cash Out form
+      zeroBalanceExclude: ['Jury Duty', 'Maternity/Paternity Time Off'] // names of balances to not show if they are 0
     };
   },
   methods: {
