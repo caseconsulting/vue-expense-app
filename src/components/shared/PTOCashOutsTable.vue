@@ -13,7 +13,7 @@
             id="custom-button-color"
             :loading="isApproving"
             :disabled="!showApproveButton"
-            class="reimburse_button"
+            class="reimburse_button px-4"
           >
             <template v-slot:prepend>
               <v-icon>mdi-currency-usd</v-icon>
