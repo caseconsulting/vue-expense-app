@@ -21,7 +21,9 @@
         </v-progress-linear> -->
       </v-col>
       <v-col :order="$vuetify.display.mdAndUp ? 2 : 3" cols="12" sm="12" md="6" lg="6" xl="6" xxl="6">
-        <h3 class="d-flex align-center mb-3"><v-icon class="mr-2">mdi-book-open-variant-outline</v-icon>Details</h3>
+        <h3 class="d-flex align-center mb-3 mt-1">
+          <v-icon class="mr-2">mdi-book-open-variant-outline</v-icon>Details
+        </h3>
         <div class="d-flex justify-space-between my-3">
           <div>
             <span>Remaining</span>

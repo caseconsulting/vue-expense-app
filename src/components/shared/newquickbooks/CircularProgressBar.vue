@@ -14,7 +14,7 @@
  * Mounted lifecycle hook.
  */
 function mounted() {
-  document.querySelector('.circle').style.backgroundImage = `conic-gradient(#415364 ${this.percent}%, #eaeaea 0)`;
+  document.querySelector('.circle').style.backgroundImage = `conic-gradient(green ${this.percent}%, #f3f3f3 0)`;
 } // mounted
 
 export default {
