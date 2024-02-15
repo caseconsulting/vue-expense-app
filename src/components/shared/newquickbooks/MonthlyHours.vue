@@ -13,51 +13,51 @@
             <v-icon size="x-large"> mdi-arrow-right-thin </v-icon>
           </v-btn>
         </div>
-        <circular-progress-bar :percent="77.9"></circular-progress-bar>
-        <!-- <v-progress-linear model-value="70" :color="this.caseGray" height="30">
-          <template v-slot:default>
-            <span class="text-white font-weight-black">130h / 168h</span>
-          </template>
-        </v-progress-linear> -->
+        <timesheets-chart></timesheets-chart>
       </v-col>
-      <v-col :order="$vuetify.display.mdAndUp ? 2 : 3" cols="12" sm="12" md="6" lg="6" xl="6" xxl="6">
+      <v-col :order="$vuetify.display.mdAndUp ? 2 : 3" cols="12" md="6" lg="6" xl="6" xxl="6">
         <h3 class="d-flex align-center mb-3 mt-1">
-          <v-icon class="mr-2">mdi-book-open-variant-outline</v-icon>Details
+          <v-icon class="mr-2">mdi-book-open-variant-outline</v-icon>
+          Monthly Details
         </h3>
+
         <div class="d-flex justify-space-between my-3">
-          <div>
-            <span>Remaining</span>
-          </div>
-          <div>38h</div>
+          <div class="mr-3">Remaining</div>
+          <div class="dotted-line"></div>
+          <div class="ml-3">38h</div>
         </div>
         <div class="d-flex justify-space-between my-3">
-          <div>
-            <span>Remaining Avg/Day</span>
-          </div>
-          <div class="text-red">10.5h</div>
+          <div class="mr-3">Remaining Avg/Day</div>
+          <div class="dotted-line"></div>
+          <div class="text-red font-weight-bold ml-3">10.5h</div>
         </div>
         <div class="d-flex justify-space-between my-3">
-          <div>Behind By</div>
-          <div class="text-red">8h</div>
+          <div class="mr-3">Behind By</div>
+          <div class="dotted-line"></div>
+          <div class="text-red font-weight-bold ml-3">8h</div>
         </div>
         <div class="d-flex justify-space-between my-3">
-          <div>Days Remaining</div>
-          <div>16</div>
+          <div class="mr-3">Days Remaining</div>
+          <div class="dotted-line"></div>
+          <div class="ml-3">16</div>
         </div>
       </v-col>
       <v-col :order="$vuetify.display.mdAndUp ? 3 : 2" cols="12">
-        <h3 class="d-flex align-center"><v-icon class="mr-2">mdi-briefcase-outline</v-icon>Job Codes</h3>
+        <h3 class="d-flex align-center"><v-icon class="mr-2">mdi-briefcase-outline</v-icon>Monthly Job Codes</h3>
         <div class="d-flex justify-space-between my-3">
-          <div>Case Portal/Expense App/Website</div>
-          <div>100h</div>
+          <div class="mr-3">Case Portal/Expense App/Website</div>
+          <div class="dotted-line"></div>
+          <div class="ml-3">100h</div>
         </div>
         <div class="d-flex justify-space-between my-3">
-          <div>R&D - Delphi</div>
-          <div>22h</div>
+          <div class="mr-3">R&D - Delphi</div>
+          <div class="dotted-line"></div>
+          <div class="ml-3">22h</div>
         </div>
         <div class="d-flex justify-space-between my-3">
-          <div>Holiday</div>
-          <div>8h</div>
+          <div class="mr-3">Holiday</div>
+          <div class="dotted-line"></div>
+          <div class="ml-3">8h</div>
         </div>
       </v-col>
     </v-row>
@@ -65,11 +65,22 @@
 </template>
 
 <script>
-import CircularProgressBar from '@/components/shared/newquickbooks/CircularProgressBar.vue';
+import TimesheetsChart from '@/components/charts/custom-charts/TimesheetsChart.vue';
 
 export default {
   components: {
-    CircularProgressBar
+    TimesheetsChart
   }
 };
 </script>
+
+<style scoped>
+.dotted-line {
+  height: 0.8em;
+  background-image: linear-gradient(to right, rgb(210, 210, 210) 33%, rgba(184, 184, 184, 0) 0%);
+  background-position: bottom;
+  background-size: 7px 1px;
+  background-repeat: repeat-x;
+  flex-grow: 2;
+}
+</style>

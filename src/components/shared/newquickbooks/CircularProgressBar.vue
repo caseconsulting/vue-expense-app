@@ -2,8 +2,8 @@
   <div class="wrap-circles">
     <div class="circle">
       <div class="inner">
-        <div class="divider pb-1">130h</div>
-        <div class="pt-1">168h</div>
+        <div class="divider pb-1 font-weight-medium">130h</div>
+        <div class="pt-1 font-weight-medium">168h</div>
       </div>
     </div>
   </div>
@@ -33,8 +33,8 @@ export default {
 
 .circle {
   position: relative;
-  width: 125px;
-  height: 125px;
+  width: 115px;
+  height: 115px;
   border-radius: 50%;
   overflow: hidden;
 }
@@ -47,14 +47,14 @@ export default {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 100px;
-  height: 100px;
+  width: 97px;
+  height: 97px;
   background: white;
   border-radius: 50%;
   font-size: 16px;
   font-weight: 300;
 }
 .divider {
-  border-bottom: 1px solid gray;
+  border-bottom: 1px solid rgb(28, 28, 28);
 }
 </style>
