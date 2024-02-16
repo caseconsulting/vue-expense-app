@@ -7,7 +7,7 @@ const EMPLOYEES = 'employees';
 const EMSI = 'emsi';
 const TRAINING_URLS = 'training-urls';
 const UTILITY = 'utility';
-const QUICK_BOOKS_TIME = 'tSheets';
+const TIMESHEETS = 'timesheets';
 const BASECAMP = 'basecamp';
 const GOOGLE_MAPS = 'googleMaps';
 const AUDIT = 'audits';
@@ -405,24 +405,16 @@ async function deleteAttachment(expense) {
 } // deleteAttachment
 
 /**
- * gets the PTO balances for a specific employee
+ * gets the timesheets and PTO balances data for the specified timeframe for an employee
  *
  * @param employeeNumber - the number for the employee
- * @return - the pto balance
+ * @param startDate - The start date (YYYY-MM format)
+ * @param endDate - The end date (YYYY-MM format)
+ * @return - the timesheets data
  */
-async function getPTOBalances(employeeNumber) {
-  return await execute('get', `/${QUICK_BOOKS_TIME}/getPTOBalances/${employeeNumber}`);
-} // getPTOBalances
-
-/**
- * gets the monthly hours for an employee
- *
- * @param employeeNumber - the number for the employee
- * @return - the monthly hours
- */
-async function getMonthlyHours(employeeNumber) {
-  return await execute('get', `/${QUICK_BOOKS_TIME}/getMonthlyHours/${employeeNumber}`);
-} // getMonthlyHours
+async function getTimesheetsData(employeeNumber, startDate, endDate) {
+  return await execute('get', `/${TIMESHEETS}/${employeeNumber}/${startDate}/${endDate}`);
+} // getTimesheetsData
 
 /**
  * get the feed events for basecamp
@@ -494,9 +486,8 @@ export default {
   getItem,
   getItems,
   getLocation,
-  getPTOBalances,
   getResume,
-  getMonthlyHours,
+  getTimesheetsData,
   getTechSkills,
   getURLInfo,
   getZipCode,
@@ -512,7 +503,7 @@ export default {
   PTO_CASH_OUTS,
   TAGS,
   UTILITY,
-  QUICK_BOOKS_TIME,
+  TIMESHEETS,
   TRAINING_URLS,
   AUDIT,
   CONTRACT_STATUSES

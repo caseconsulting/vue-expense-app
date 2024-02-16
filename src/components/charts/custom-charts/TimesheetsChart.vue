@@ -8,8 +8,8 @@
       :chartData="chartData"
     >
       <div name="middle-text">
-        <div class="divider pb-1 font-weight-medium">130h</div>
-        <div class="pt-1 font-weight-medium">168h</div>
+        <div class="divider pb-1 font-weight-medium">{{ completed }}h</div>
+        <div class="pt-1 font-weight-medium">{{ needed }}h</div>
       </div>
     </doughnut-chart>
   </div>
@@ -92,7 +92,8 @@ export default {
     };
   },
   methods: { fetchData, fillData },
-  mounted
+  mounted,
+  props: ['completed', 'needed']
 };
 </script>
 

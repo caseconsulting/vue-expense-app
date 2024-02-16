@@ -11,9 +11,12 @@
         </v-btn>
       </v-card-title>
       <v-card-text class="mt-3 px-7">
-        <monthly-hours></monthly-hours>
-        <hr class="my-5 mx-7" />
-        <p-t-o-hours></p-t-o-hours>
+        <v-progress-linear v-if="loading" indeterminate></v-progress-linear>
+        <div v-else>
+          <monthly-hours :timesheets="timesheets"></monthly-hours>
+          <hr class="my-5 mx-7" />
+          <p-t-o-hours :ptoBalances="ptoBalances"></p-t-o-hours>
+        </div>
       </v-card-text>
     </v-card>
   </div>
@@ -22,11 +25,27 @@
 <script>
 import MonthlyHours from '@/components/shared/newquickbooks/MonthlyHours.vue';
 import PTOHours from '@/components/shared/newquickbooks/PTOHours.vue';
+import api from '@/shared/api';
+
+async function created() {
+  let timesheetsData = await api.getTimesheetsData(10066, '2024-01', '2024-02');
+  this.ptoBalances = timesheetsData.ptoBalances;
+  this.timesheets = timesheetsData.timesheets;
+  this.loading = false;
+}
 
 export default {
   components: {
     MonthlyHours,
     PTOHours
+  },
+  created,
+  data() {
+    return {
+      loading: true,
+      ptoBalances: null,
+      timesheets: null
+    };
   }
 };
 </script>
