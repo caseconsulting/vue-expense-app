@@ -17,6 +17,7 @@
 
 <script>
 import DoughnutChart from '../base-charts/DoughnutChart.vue';
+import _ from 'lodash';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -49,13 +50,25 @@ function fetchData() {} // fetchData
  * Sets the chart formatting and options data.
  */
 function fillData() {
-  let colors = ['#1A237E', '#5C6BC0', '#9FA8DA', '#EAEAEA'];
+  let colors = ['#1A237E', '#5C6BC0', '#9FA8DA'];
+  let colorsOptions = ['#1A237E', '#5C6BC0', '#9FA8DA'];
+  let jobCodeValues = _.map(Object.values(this.jobcodes), (duration) =>
+    Number(duration / 60 / 60)
+      ?.toFixed(2)
+      ?.replace(/[.,]00$/, '')
+  ); // removes decimals if a whole number);
+
+  for (let i = 0; i < jobCodeValues?.length / colorsOptions.length; i++) {
+    colors = [...colors, ...colorsOptions];
+  }
+  colors = _.slice(colors, 0, jobCodeValues?.length);
+  colors.push('#EAEAEA');
 
   this.chartData = {
-    labels: ['Case Portal/Expens...', 'R&D - Delphi', 'Holiday', 'Remaining'],
+    labels: [...Object.keys(this.jobcodes), 'Remaining'],
     datasets: [
       {
-        data: [100, 22, 8, 38],
+        data: [...jobCodeValues, this.remainingHours],
         backgroundColor: colors,
         borderWidth: 2
       }
@@ -93,7 +106,7 @@ export default {
   },
   methods: { fetchData, fillData },
   mounted,
-  props: ['completed', 'needed']
+  props: ['completed', 'needed', 'jobcodes', 'remainingHours']
 };
 </script>
 

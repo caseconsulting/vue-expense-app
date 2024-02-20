@@ -8,7 +8,7 @@ import FacebookIcon from '@/components/custom-icons/FacebookIcon';
 import AdpIcon from '@/components/custom-icons/AdpIcon';
 import BambooIcon from '@/components/custom-icons/BambooIcon';
 import CaseIcon from '@/components/custom-icons/CaseIcon';
-import { aliases, mdi } from 'vuetify/lib/iconsets/mdi';
+import { aliases, mdi } from 'vuetify/iconsets/mdi';
 import { isSame } from './shared/dateUtils';
 import DayJsAdapter from '@date-io/dayjs';
 const adapter = new DayJsAdapter();

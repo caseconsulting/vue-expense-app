@@ -60,7 +60,7 @@
       </v-row>
       <v-row class="pt-0">
         <!-- QuickBooks Time and Budgets-->
-        <v-col v-if="displayQuickBooksTimeAndBalances" cols="12" md="5" lg="4" class="pt-0">
+        <v-col v-if="displayQuickBooksTimeAndBalances" cols="12" md="5" lg="5" class="pt-0">
           <quick-books-time-data :employee="model" :key="model" class="mb-4"></quick-books-time-data>
           <available-budgets
             class="mb-4"
@@ -79,7 +79,7 @@
         <v-col
           cols="12"
           :md="displayQuickBooksTimeAndBalances ? 7 : 12"
-          :lg="displayQuickBooksTimeAndBalances ? 8 : 12"
+          :lg="displayQuickBooksTimeAndBalances ? 7 : 12"
           class="pt-0"
         >
           <v-card>

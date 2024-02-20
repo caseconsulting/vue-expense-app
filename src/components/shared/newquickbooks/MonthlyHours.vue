@@ -3,70 +3,115 @@
     <v-row>
       <v-col order="1" cols="12" sm="12" md="6" lg="6" xl="6" xxl="6">
         <div class="d-flex justify-space-evenly align-center mb-1">
-          <!-- JS % operator is remainder, not mod. Needed a workaround for negative numbers in @click -->
+          <div>
+            <v-btn
+              :disabled="!isMonthly || (isMonthly && getMonth(date) !== getMonth(today))"
+              icon=""
+              variant="text"
+              size="large"
+              density="compact"
+              @click="date = subtract(date, 1, 'month')"
+            >
+              <v-tooltip activator="parent" location="top">Previous Month</v-tooltip>
+              <v-icon size="x-large"> mdi-arrow-left-thin </v-icon>
+            </v-btn>
+            <v-btn
+              :disabled="!isMonthly || (isMonthly && getMonth(date) === getMonth(today))"
+              icon=""
+              variant="text"
+              size="large"
+              density="compact"
+              @click="date = add(date, 1, 'month')"
+            >
+              <v-tooltip activator="parent" location="top">Next Month</v-tooltip>
+              <v-icon size="x-large"> mdi-arrow-right-thin </v-icon>
+            </v-btn>
+          </div>
+          <h3>{{ isMonthly ? format(date, null, 'MMMM') : format(today, null, 'YYYY') }}</h3>
           <v-btn
-            :disabled="isMonthly && month !== getMonth(getTodaysDate())"
             icon=""
             variant="text"
             size="large"
             density="compact"
-            @click="month = (((month - 1) % 12) + 12) % 12"
+            :disabled="timePeriodLoading"
+            @click="
+              isMonthly = !isMonthly;
+              timePeriodLoading = true;
+            "
           >
-            <v-tooltip activator="parent" location="top">Previous Month</v-tooltip>
-            <v-icon size="x-large"> mdi-arrow-left-thin </v-icon>
-          </v-btn>
-          <h3>{{ format(String(month + 1), 'M', 'MMMM') }}</h3>
-          <v-btn
-            :disabled="isMonthly && month === getMonth(getTodaysDate())"
-            icon=""
-            variant="text"
-            size="large"
-            density="compact"
-            @click="month = (month + 1) % 12"
-          >
-            <v-tooltip activator="parent" location="top">Next Month</v-tooltip>
-            <v-icon size="x-large"> mdi-arrow-right-thin </v-icon>
+            <v-tooltip activator="parent" location="top">{{ isMonthly ? 'Show yearly' : 'Show monthly' }}</v-tooltip>
+            <v-icon size="x-large">
+              {{ isMonthly ? 'mdi-calendar-expand-horizontal' : 'mdi-calendar-collapse-horizontal' }}
+            </v-icon>
           </v-btn>
         </div>
-        <timesheets-chart :completed="periodCompleted" :needed="periodTotalNeeded"></timesheets-chart>
+        <v-progress-circular
+          v-if="timePeriodLoading"
+          size="120"
+          width="10"
+          class="mx-auto w-100"
+          color="#AEAEAE"
+          indeterminate="disable-shrink"
+        ></v-progress-circular>
+        <timesheets-chart
+          v-else
+          :key="getTimeData"
+          :completed="formatNum(periodHoursCompleted)"
+          :needed="totalPeriodHours"
+          :jobcodes="getTimeData"
+          :remainingHours="formatNum(remainingHours)"
+        ></timesheets-chart>
       </v-col>
       <v-col :order="$vuetify.display.mdAndUp ? 2 : 3" cols="12" md="6" lg="6" xl="6" xxl="6">
-        <h3 class="d-flex align-center mb-3 mt-1">
-          <v-icon class="mr-2">mdi-book-open-variant-outline</v-icon>
-          Monthly Details
-        </h3>
+        <v-skeleton-loader v-if="timePeriodLoading" type="list-item@4"></v-skeleton-loader>
+        <div v-else>
+          <h3 class="d-flex align-center mb-3 mt-1">
+            <v-icon class="mr-2">mdi-book-open-outline</v-icon>
+            Monthly Details
+          </h3>
 
-        <div class="d-flex justify-space-between my-3">
-          <div class="mr-3">Remaining</div>
-          <div class="dotted-line"></div>
-          <div class="ml-3">38h</div>
-        </div>
-        <div class="d-flex justify-space-between my-3">
-          <div class="mr-3">Remaining Avg/Day</div>
-          <div class="dotted-line"></div>
-          <div class="text-red font-weight-bold ml-3">10.5h</div>
-        </div>
-        <div class="d-flex justify-space-between my-3">
-          <div class="mr-3">Behind By</div>
-          <div class="dotted-line"></div>
-          <div class="text-red font-weight-bold ml-3">8h</div>
-        </div>
-        <div class="d-flex justify-space-between my-3">
-          <div class="mr-3">Days Remaining</div>
-          <div class="dotted-line"></div>
-          <div class="ml-3">16</div>
+          <div class="d-flex justify-space-between my-3">
+            <div class="mr-2">Remaining</div>
+            <div class="dotted-line"></div>
+            <div class="ml-2">{{ formatNum(remainingHours) }}h</div>
+          </div>
+          <div class="d-flex justify-space-between my-3">
+            <div class="mr-2">Remaining Avg/Day</div>
+            <div class="dotted-line"></div>
+            <div :class="getRemainingAverageHoursPerDay > 8 ? 'text-red font-weight-bold' : ''" class="ml-2">
+              {{ formatNum(getRemainingAverageHoursPerDay) }}h
+            </div>
+          </div>
+          <div class="d-flex justify-space-between my-3">
+            <div class="mr-2">{{ getHoursBehindBy > 0 ? 'Behind By' : 'Ahead By' }}</div>
+            <div class="dotted-line"></div>
+            <div :class="getHoursBehindBy > 0 ? 'text-red font-weight-bold' : ''" class="ml-2">
+              {{ Math.abs(formatNum(getHoursBehindBy)) }}h
+            </div>
+          </div>
+          <div class="d-flex justify-space-between my-3">
+            <div class="mr-3">Days Remaining</div>
+            <div class="dotted-line"></div>
+            <div class="ml-3">{{ formatNum(getRemainingWorkDays) }}</div>
+          </div>
         </div>
       </v-col>
       <v-col :order="$vuetify.display.mdAndUp ? 3 : 2" cols="12">
-        <h3 class="d-flex align-center"><v-icon class="mr-2">mdi-briefcase-outline</v-icon>Monthly Job Codes</h3>
-        <div
-          v-for="[name, hoursWorked] in Object.entries(getTimeData)"
-          :key="name"
-          class="d-flex justify-space-between my-3"
-        >
-          <div class="mr-3">{{ name }}</div>
-          <div class="dotted-line"></div>
-          <div class="ml-3">{{ convertToHours(hoursWorked) }}h</div>
+        <v-skeleton-loader v-if="timePeriodLoading" type="list-item@4"></v-skeleton-loader>
+        <div v-else>
+          <h3 class="d-flex align-center"><v-icon class="mr-2">mdi-briefcase-outline</v-icon>Monthly Job Codes</h3>
+          <div v-if="Object.entries(getTimeData)?.length === 0" class="my-3">No job codes for this time period</div>
+          <div v-else>
+            <div
+              v-for="[name, duration] in Object.entries(getTimeData)"
+              :key="name"
+              class="d-flex justify-space-between my-3"
+            >
+              <div class="mr-3">{{ name }}</div>
+              <div class="dotted-line"></div>
+              <div class="ml-3">{{ formatNum(convertToHours(duration)) }}h</div>
+            </div>
+          </div>
         </div>
       </v-col>
     </v-row>
@@ -76,22 +121,39 @@
 <script>
 import TimesheetsChart from '@/components/charts/custom-charts/TimesheetsChart.vue';
 import _ from 'lodash';
-import { getMonth, getTodaysDate, format } from '@/shared/dateUtils';
+import {
+  add,
+  subtract,
+  getIsoWeekday,
+  getMonth,
+  getTodaysDate,
+  isAfter,
+  isSame,
+  isSameOrAfter,
+  format,
+  startOf,
+  endOf,
+  DEFAULT_ISOFORMAT
+} from '@/shared/dateUtils';
 
 function created() {
-  console.log(this.month);
-  console.log(this.format(this.month.toString(), 'M', 'MMMM'));
+  this.emitter.on('reset-data', () => {
+    this.isMonthly = true;
+    format(this.today, null, DEFAULT_ISOFORMAT);
+  });
+}
+
+function formatNum(value) {
+  return value?.toFixed(2)?.replace(/[.,]00$/, ''); // removes decimals if a whole number
 }
 
 function convertToHours(seconds) {
-  return Number(seconds / 60 / 60)
-    ?.toFixed(2)
-    ?.replace(/[.,]00$/, ''); // removes decimals if a whole number
+  return Number(seconds / 60 / 60);
 }
 
 function getTimeData() {
   if (this.isMonthly) {
-    return this.timesheets[this.month];
+    return this.timesheets[getMonth(this.date)];
   } else {
     let timesheets = {};
     _.forEach(this.timesheets, (monthTimesheets) => {
@@ -104,20 +166,109 @@ function getTimeData() {
   }
 }
 
-function periodCompleted() {
+function periodHoursCompleted() {
+  let total = 0;
   if (this.isMonthly) {
-    return 160;
+    _.forEach(this.timesheets[getMonth(this.date)], (duration) => {
+      total += duration;
+    });
   } else {
-    return 1508;
+    _.forEach(this.timesheets, (monthTimesheets) => {
+      _.forEach(monthTimesheets, (duration) => {
+        total += duration;
+      });
+    });
+  }
+  return convertToHours(total);
+}
+
+function totalPeriodHours() {
+  return this.getTotalWorkDays * this.getProRatedHours;
+}
+
+function remainingHours() {
+  return this.totalPeriodHours - this.periodHoursCompleted;
+}
+
+/**
+ * Calculates and returns the work days between start and end dates provided
+ *
+ * @return int - number of remaining working days
+ */
+function getWorkDays(startDate, endDate) {
+  let workDays = 0;
+  let hireDate = this.$store.getters.user.hireDate;
+  startDate = format(startDate, null, DEFAULT_ISOFORMAT);
+  endDate = format(endDate, null, DEFAULT_ISOFORMAT);
+  if (isAfter(hireDate, startDate, 'day') && isSameOrAfter(endDate, hireDate, 'day')) {
+    startDate = hireDate;
+  }
+  let date = startDate;
+  while (!isAfter(date, endDate, 'day')) {
+    if (isWeekDay(date)) {
+      workDays += 1;
+    }
+    // increment to the next day
+    date = add(date, 1, 'day', DEFAULT_ISOFORMAT);
+  }
+  return workDays;
+} // getWorkDays
+
+function getRemainingWorkDays() {
+  if (this.isMonthly) {
+    if (this.dateIsCurrentMonth()) {
+      return this.getWorkDays(this.date, endOf(this.date, 'month')) - 1;
+    } else {
+      return 0;
+    }
+  } else {
+    return this.getWorkDays(this.date, endOf(this.date, 'year')) - 1;
   }
 }
 
-function periodTotalNeeded() {
+function getTotalWorkDays() {
   if (this.isMonthly) {
-    return 176;
+    return this.getWorkDays(startOf(this.date, 'month'), endOf(this.date, 'month'));
   } else {
-    return 2080;
+    return this.getWorkDays(startOf(this.date, 'year'), endOf(this.date, 'year'));
   }
+}
+
+function dateIsCurrentMonth() {
+  return isSame(getMonth(this.date), getMonth(this.today));
+}
+
+function getRemainingAverageHoursPerDay() {
+  if (Number(this.getRemainingWorkDays) > 0) {
+    return this.remainingHours / this.getRemainingWorkDays;
+  } else {
+    return this.dateIsCurrentMonth() ? this.remainingHours : 0;
+  }
+}
+
+function getHoursBehindBy() {
+  if (this.isMonthly) {
+    if (this.dateIsCurrentMonth()) {
+      return (
+        this.getWorkDays(startOf(this.date, 'month'), this.date) * this.getProRatedHours - this.periodHoursCompleted
+      );
+    } else {
+      return this.getTotalWorkDays * this.getProRatedHours - this.periodHoursCompleted;
+    }
+  } else {
+    return this.getWorkDays(startOf(this.date, 'year'), this.date) * this.getProRatedHours - this.periodHoursCompleted;
+  }
+}
+
+function getProRatedHours() {
+  return 8 * (this.$store.getters.user.workStatus / 100);
+}
+
+/**
+ * Returns true if `day` is a weekday
+ */
+function isWeekDay(day) {
+  return getIsoWeekday(day) >= 1 && getIsoWeekday(day) <= 5;
 }
 
 export default {
@@ -126,23 +277,58 @@ export default {
   },
   computed: {
     getTimeData,
-    periodCompleted,
-    periodTotalNeeded
+    getHoursBehindBy,
+    getProRatedHours,
+    getRemainingAverageHoursPerDay,
+    getRemainingWorkDays,
+    getTotalWorkDays,
+    periodHoursCompleted,
+    totalPeriodHours,
+    remainingHours
   },
   created,
   data() {
     return {
       isMonthly: true,
-      month: getMonth(getTodaysDate())
+      date: format(getTodaysDate(), null, DEFAULT_ISOFORMAT),
+      today: format(getTodaysDate(), null, DEFAULT_ISOFORMAT),
+      timePeriodLoading: false
     };
   },
   methods: {
+    add,
+    subtract,
     convertToHours,
+    dateIsCurrentMonth,
     getMonth,
+    getWorkDays,
     getTodaysDate,
-    format
+    format,
+    formatNum
   },
-  props: ['timesheets']
+  props: ['timesheets'],
+  watch: {
+    timePeriodLoading: function () {
+      if (this.timePeriodLoading) {
+        if (this.isMonthly) {
+          this.emitter.emit('get-period-data', {
+            startDate: format(startOf(subtract(this.today, 1, 'month'), 'month'), null, 'YYYY-MM'),
+            endDate: format(endOf(this.today, 'month'), null, 'YYYY-MM'),
+            isMonthly: this.isMonthly
+          });
+        } else {
+          this.emitter.emit('get-period-data', {
+            startDate: format(startOf(this.today, 'year'), null, 'YYYY-MM'),
+            endDate: format(endOf(this.today, 'year'), null, 'YYYY-MM'),
+            isMonthly: this.isMonthly
+          });
+        }
+      }
+    },
+    timesheets: function () {
+      this.timePeriodLoading = false;
+    }
+  }
 };
 </script>
 

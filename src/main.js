@@ -18,17 +18,4 @@ window.emitter = emitter;
 app.config.globalProperties.emitter = emitter;
 app.config.globalProperties.caseRed = '#bc3825';
 app.config.globalProperties.caseGray = '#415364';
-// TEMPORARY FIX TO THIS ISSUE
-window.addEventListener('error', (e) => {
-  if (e.message.includes("Cannot read properties of undefined (reading 'includes')")) {
-    const resizeObserverErrDiv = document.getElementById('webpack-dev-server-client-overlay-div');
-    const resizeObserverErr = document.getElementById('webpack-dev-server-client-overlay');
-    if (resizeObserverErr) {
-      resizeObserverErr.setAttribute('style', 'display: none');
-    }
-    if (resizeObserverErrDiv) {
-      resizeObserverErrDiv.setAttribute('style', 'display: none');
-    }
-  }
-});
 app.mount('#app');
