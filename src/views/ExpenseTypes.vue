@@ -57,7 +57,7 @@
               <!-- Active Filter -->
               <div class="flagFilter">
                 <h4>Active Expense Type:</h4>
-                <v-btn-toggle class="filter_color" v-model="filter.active" text mandatory>
+                <v-btn-toggle color="primary" class="filter_color" v-model="filter.active" text mandatory>
                   <!-- Show Active -->
                   <v-tooltip location="top">
                     <template v-slot:activator="{ props }">
@@ -92,7 +92,7 @@
               <!-- Overdraft Filter -->
               <div class="flagFilter">
                 <h4>Overdraft:</h4>
-                <v-btn-toggle class="filter_color" v-model="filter.overdraft" text mandatory>
+                <v-btn-toggle color="primary" class="filter_color" v-model="filter.overdraft" text mandatory>
                   <!-- Show Overdraft -->
                   <v-tooltip location="top">
                     <template v-slot:activator="{ props }">
@@ -127,7 +127,7 @@
               <!-- Recurring Filter -->
               <div class="flagFilter">
                 <h4>Recurring:</h4>
-                <v-btn-toggle class="filter_color" v-model="filter.recurring" text mandatory>
+                <v-btn-toggle color="primary" class="filter_color" v-model="filter.recurring" text mandatory>
                   <!-- Show Recurring -->
                   <v-tooltip location="top">
                     <template v-slot:activator="{ props }">

@@ -1,6 +1,7 @@
 <template>
   <div id="app" @mousedown="refreshSession()">
     <v-app>
+      <v-icon color="purple-lighten-4" id="jellyfish">mdi-jellyfish</v-icon>
       <v-navigation-drawer
         v-if="isLoggedIn()"
         v-model="drawer"
@@ -555,5 +556,12 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+#jellyfish {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  z-index: -1;
 }
 </style>

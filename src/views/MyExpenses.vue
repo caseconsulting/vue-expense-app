@@ -118,6 +118,7 @@
                     <div class="d-inline-block mr-4">
                       <h4>Active Expense Type:</h4>
                       <v-btn-toggle
+                        color="primary"
                         class="filter_color"
                         v-model="filter.active"
                         :density="isMobile() ? 'compact' : 'comfortable'"
@@ -159,6 +160,7 @@
                     <div class="d-inline-block" :class="!userRoleIsAdmin() && !userRoleIsManager() ? 'ml-3' : ''">
                       <h4>Reimbursed:</h4>
                       <v-btn-toggle
+                        color="primary"
                         class="filter_color"
                         v-model="filter.reimbursed"
                         :density="isMobile() ? 'compact' : 'comfortable'"

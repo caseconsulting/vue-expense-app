@@ -44,12 +44,12 @@
             <!-- Active Filter -->
             <v-col :align="isMobile() ? 'center' : ''" cols="7" md="4" sm="6">
               <h4 class="d-block mx-auto">Employee Status:</h4>
-              <v-btn-toggle class="filter_color mx-auto" v-model="filter.active" text multiple>
+              <v-btn-toggle color="primary" class="filter_color mx-auto" v-model="filter.active" text multiple>
                 <!-- Full Time -->
                 <v-tooltip location="top" text="Full Time">
                   <template v-slot:activator="{ props }">
                     <v-btn value="full" id="full" v-bind="props" variant="text">
-                      <v-icon class="mr-1" color="black">mdi-clock-outline</v-icon>
+                      <v-icon class="mr-1">mdi-clock-outline</v-icon>
                     </v-btn>
                   </template>
                 </v-tooltip>
@@ -58,7 +58,7 @@
                 <v-tooltip location="top">
                   <template v-slot:activator="{ props }">
                     <v-btn value="part" id="part" v-bind="props" variant="text">
-                      <v-icon color="black">mdi-progress-clock</v-icon>
+                      <v-icon>mdi-progress-clock</v-icon>
                     </v-btn>
                   </template>
                   <span>Part Time</span>
@@ -68,7 +68,7 @@
                 <v-tooltip location="top">
                   <template v-slot:activator="{ props }">
                     <v-btn value="inactive" id="inactive" v-bind="props" variant="text">
-                      <v-icon color="black">mdi-stop-circle-outline</v-icon>
+                      <v-icon>mdi-stop-circle-outline</v-icon>
                     </v-btn>
                   </template>
                   <span>Inactive</span>
