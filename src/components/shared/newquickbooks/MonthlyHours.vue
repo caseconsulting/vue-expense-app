@@ -27,7 +27,7 @@
               <v-icon size="x-large"> mdi-arrow-right-thin </v-icon>
             </v-btn>
           </div>
-          <h3>{{ isMonthly ? format(date, null, 'MMMM') : format(today, null, 'YYYY') }}</h3>
+          <h3 class="pr-10">{{ isMonthly ? format(date, null, 'MMMM') : format(today, null, 'YYYY') }}</h3>
           <v-btn
             icon=""
             variant="text"
@@ -40,7 +40,7 @@
             "
           >
             <v-tooltip activator="parent" location="top">{{ isMonthly ? 'Show yearly' : 'Show monthly' }}</v-tooltip>
-            <v-icon size="x-large">
+            <v-icon size="large">
               {{ isMonthly ? 'mdi-calendar-expand-horizontal' : 'mdi-calendar-collapse-horizontal' }}
             </v-icon>
           </v-btn>
@@ -67,7 +67,7 @@
         <div v-else>
           <h3 class="d-flex align-center mb-3 mt-1">
             <v-icon class="mr-2">mdi-book-open-outline</v-icon>
-            Monthly Details
+            {{ isMonthly ? 'Monthly' : 'Yearly' }} Details
           </h3>
 
           <div class="d-flex justify-space-between my-3">
@@ -99,7 +99,9 @@
       <v-col :order="$vuetify.display.mdAndUp ? 3 : 2" cols="12">
         <v-skeleton-loader v-if="timePeriodLoading" type="list-item@4"></v-skeleton-loader>
         <div v-else>
-          <h3 class="d-flex align-center"><v-icon class="mr-2">mdi-briefcase-outline</v-icon>Monthly Job Codes</h3>
+          <h3 class="d-flex align-center">
+            <v-icon class="mr-2">mdi-briefcase-outline</v-icon> {{ isMonthly ? 'Monthly' : 'Yearly' }} Job Codes
+          </h3>
           <div v-if="Object.entries(getTimeData)?.length === 0" class="my-3">No job codes for this time period</div>
           <div v-else>
             <div
@@ -153,7 +155,7 @@ function convertToHours(seconds) {
 
 function getTimeData() {
   if (this.isMonthly) {
-    return this.timesheets[getMonth(this.date)];
+    return this.timesheets[format(this.date, null, 'YYYY-MM')];
   } else {
     let timesheets = {};
     _.forEach(this.timesheets, (monthTimesheets) => {
@@ -169,7 +171,7 @@ function getTimeData() {
 function periodHoursCompleted() {
   let total = 0;
   if (this.isMonthly) {
-    _.forEach(this.timesheets[getMonth(this.date)], (duration) => {
+    _.forEach(this.timesheets[format(this.date, null, 'YYYY-MM')], (duration) => {
       total += duration;
     });
   } else {
@@ -183,7 +185,7 @@ function periodHoursCompleted() {
 }
 
 function totalPeriodHours() {
-  return this.getTotalWorkDays * this.getProRatedHours;
+  return this.isMonthly ? this.getTotalWorkDays * this.getProRatedHours : this.BONUS_YEAR_TOTAL;
 }
 
 function remainingHours() {
@@ -292,7 +294,8 @@ export default {
       isMonthly: true,
       date: format(getTodaysDate(), null, DEFAULT_ISOFORMAT),
       today: format(getTodaysDate(), null, DEFAULT_ISOFORMAT),
-      timePeriodLoading: false
+      timePeriodLoading: false,
+      BONUS_YEAR_TOTAL: 1860
     };
   },
   methods: {

@@ -57,6 +57,7 @@ async function created() {
   });
 
   await this.setInitialData();
+  console.log(this.timesheets);
   this.loading = false;
 }
 
