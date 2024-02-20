@@ -58,7 +58,7 @@
           :key="getTimeData"
           :completed="formatNum(periodHoursCompleted)"
           :needed="totalPeriodHours"
-          :jobcodes="getTimeData"
+          :jobcodes="getTimeData || {}"
           :remainingHours="formatNum(remainingHours)"
         ></timesheets-chart>
       </v-col>
@@ -102,17 +102,19 @@
           <h3 class="d-flex align-center">
             <v-icon class="mr-2">mdi-briefcase-outline</v-icon> {{ isMonthly ? 'Monthly' : 'Yearly' }} Job Codes
           </h3>
-          <div v-if="Object.entries(getTimeData)?.length === 0" class="my-3">No job codes for this time period</div>
+          <div v-if="Object.entries(getTimeData || {})?.length === 0" class="my-3">
+            No job codes for this time period
+          </div>
           <div v-else>
-            <div
-              v-for="[name, duration] in Object.entries(getTimeData)"
-              :key="name"
-              class="d-flex justify-space-between my-3"
-            >
-              <div class="mr-3">{{ name }}</div>
+            <div v-for="jobcode in sortedJobcodesByDuration" :key="jobcode" class="d-flex justify-space-between my-3">
+              <div class="mr-3">{{ jobcode }}</div>
               <div class="dotted-line"></div>
-              <div class="ml-3">{{ formatNum(convertToHours(duration)) }}h</div>
+              <div class="ml-3">{{ formatNum(convertToHours(getTimeData[jobcode])) }}h</div>
             </div>
+            <v-span v-if="!isMonthly" @click="showPtoJobCodes = !showPtoJobCodes" class="pointer text-blue">
+              {{ showPtoJobCodes ? 'Hide PTO jobcodes' : 'Show PTO job codes' }}
+              <v-icon>{{ showPtoJobCodes ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+            </v-span>
           </div>
         </div>
       </v-col>
@@ -160,8 +162,10 @@ function getTimeData() {
     let timesheets = {};
     _.forEach(this.timesheets, (monthTimesheets) => {
       _.forEach(monthTimesheets, (duration, jobName) => {
-        if (!timesheets[jobName]) timesheets[jobName] = 0;
-        timesheets[jobName] += duration;
+        if (this.showPtoJobCodes || !this.ptoJobcodes?.includes(jobName)) {
+          if (!timesheets[jobName]) timesheets[jobName] = 0;
+          timesheets[jobName] += duration;
+        }
       });
     });
     return timesheets;
@@ -170,22 +174,18 @@ function getTimeData() {
 
 function periodHoursCompleted() {
   let total = 0;
-  if (this.isMonthly) {
-    _.forEach(this.timesheets[format(this.date, null, 'YYYY-MM')], (duration) => {
-      total += duration;
-    });
-  } else {
-    _.forEach(this.timesheets, (monthTimesheets) => {
-      _.forEach(monthTimesheets, (duration) => {
-        total += duration;
-      });
-    });
-  }
+  _.forEach(this.getTimeData, (duration) => {
+    total += duration;
+  });
   return convertToHours(total);
 }
 
 function totalPeriodHours() {
-  return this.isMonthly ? this.getTotalWorkDays * this.getProRatedHours : this.BONUS_YEAR_TOTAL;
+  if (this.isMonthly || this.showPtoJobCodes) {
+    return this.getTotalWorkDays * this.getProRatedHours;
+  } else {
+    return this.BONUS_YEAR_TOTAL * (this.$store.getters.user.workStatus / 100);
+  }
 }
 
 function remainingHours() {
@@ -263,7 +263,19 @@ function getHoursBehindBy() {
 }
 
 function getProRatedHours() {
-  return 8 * (this.$store.getters.user.workStatus / 100);
+  if (this.isMonthly || this.showPtoJobCodes) {
+    return 8 * (this.$store.getters.user.workStatus / 100);
+  } else {
+    return (this.totalPeriodHours / this.getTotalWorkDays) * (this.$store.getters.user.workStatus / 100);
+  }
+}
+
+function sortedJobcodesByDuration() {
+  let timeData = this.getTimeData;
+  let orderedKeys = Object.keys(timeData).sort(function (a, b) {
+    return timeData[b] - timeData[a];
+  });
+  return orderedKeys;
 }
 
 /**
@@ -286,15 +298,18 @@ export default {
     getTotalWorkDays,
     periodHoursCompleted,
     totalPeriodHours,
-    remainingHours
+    remainingHours,
+    sortedJobcodesByDuration
   },
   created,
   data() {
     return {
       isMonthly: true,
       date: format(getTodaysDate(), null, DEFAULT_ISOFORMAT),
+      showPtoJobCodes: false,
       today: format(getTodaysDate(), null, DEFAULT_ISOFORMAT),
       timePeriodLoading: false,
+      ptoJobcodes: Object.keys(this.ptoBalances),
       BONUS_YEAR_TOTAL: 1860
     };
   },
@@ -309,7 +324,7 @@ export default {
     format,
     formatNum
   },
-  props: ['timesheets'],
+  props: ['ptoBalances', 'timesheets'],
   watch: {
     timePeriodLoading: function () {
       if (this.timePeriodLoading) {

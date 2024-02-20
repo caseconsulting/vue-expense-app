@@ -5,7 +5,7 @@
         <h3>QuickBooks Time Data</h3>
         <v-btn variant="text" icon="mdi-refresh" @click="resetData()">
           <template v-slot:default>
-            <v-tooltip activator="parent" location="top">Refresh Quickbooks Timesheet Data</v-tooltip>
+            <v-tooltip activator="parent" location="top">Refresh Quickbooks data</v-tooltip>
             <v-icon color="white" size="large">mdi-refresh</v-icon>
           </template>
         </v-btn>
@@ -18,9 +18,9 @@
             <span>{{ errorMessage }}</span>
           </div>
           <div v-else>
-            <monthly-hours :timesheets="timesheets"></monthly-hours>
+            <monthly-hours :timesheets="timesheets || {}" :ptoBalances="ptoBalances || {}"></monthly-hours>
             <hr class="my-5 mx-7" />
-            <p-t-o-hours :ptoBalances="ptoBalances"></p-t-o-hours>
+            <p-t-o-hours :ptoBalances="ptoBalances || {}"></p-t-o-hours>
           </div>
         </div>
       </v-card-text>
@@ -57,7 +57,6 @@ async function created() {
   });
 
   await this.setInitialData();
-  console.log(this.timesheets);
   this.loading = false;
 }
 

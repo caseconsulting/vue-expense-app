@@ -2,16 +2,27 @@
   <div>
     <div class="d-flex justify-space-between">
       <h3 class="d-flex align-center"><v-icon class="mr-2">mdi-palm-tree</v-icon> PTO Balances</h3>
-      <v-btn variant="outlined" density="compact" class="px-2" :color="this.caseRed"> Cash Out PTO </v-btn>
+      <v-btn
+        v-if="Object.keys(ptoBalances || {}).length !== 0"
+        variant="outlined"
+        density="compact"
+        class="px-2"
+        :color="this.caseRed"
+      >
+        Cash Out PTO
+      </v-btn>
     </div>
-    <div v-for="[name, balance] in Object.entries(ptoBalances)" :key="name">
+    <div v-if="Object.keys(ptoBalances || {}).length === 0" class="my-4">No balances to display</div>
+    <div v-for="jobcode in sortedBalancesByDuration" :key="jobcode">
       <div
-        v-if="!excludeIfZero.includes(name) || (excludeIfZero.includes(name) && Number(balance) !== 0)"
+        v-if="
+          !excludeIfZero.includes(jobcode) || (excludeIfZero.includes(jobcode) && Number(ptoBalances[jobcode]) !== 0)
+        "
         class="d-flex justify-space-between my-3"
       >
-        <div class="mr-3">{{ name }}</div>
+        <div class="mr-3">{{ jobcode }}</div>
         <div class="dotted-line"></div>
-        <div class="ml-3">{{ convertToHours(balance) }}h</div>
+        <div class="ml-3">{{ convertToHours(ptoBalances[jobcode]) }}h</div>
       </div>
     </div>
   </div>
@@ -24,7 +35,18 @@ function convertToHours(seconds) {
     ?.replace(/[.,]00$/, ''); // removes decimals if a whole number
 }
 
+function sortedBalancesByDuration() {
+  let balances = this.ptoBalances;
+  let orderedKeys = Object.keys(balances || {}).sort(function (a, b) {
+    return balances[b] - balances[a];
+  });
+  return orderedKeys;
+}
+
 export default {
+  computed: {
+    sortedBalancesByDuration
+  },
   data() {
     return {
       excludeIfZero: ['Jury Duty', 'Maternity/Paternity Time Off']
