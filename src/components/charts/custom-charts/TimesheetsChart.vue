@@ -68,7 +68,7 @@ function fillData() {
     labels: [...Object.keys(this.jobcodes), 'Remaining'],
     datasets: [
       {
-        data: [...jobCodeValues, this.remainingHours],
+        data: [...jobCodeValues, this.remainingHours >= 0 ? this.remainingHours : 0],
         backgroundColor: colors,
         borderWidth: 2
       }

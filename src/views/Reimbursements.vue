@@ -29,10 +29,10 @@
       </v-window-item>
       <v-window-item value="ptoCashOuts" class="mx-2 my-6">
         <v-row>
-          <v-col cols="12" xl="9" lg="8">
+          <v-col cols="12" xl="9" lg="7">
             <p-t-o-cash-outs-table :unapprovedOnly="true" />
           </v-col>
-          <v-col cols="12" xl="3" lg="4" class="pl-lg-1 pl-sm-2">
+          <v-col cols="12" xl="3" lg="5" class="pl-lg-1 pl-sm-2">
             <quick-books-time-data v-if="employee" :employee="employee"></quick-books-time-data>
             <v-skeleton-loader v-else class="mt-3" type="list-item@12"></v-skeleton-loader>
           </v-col>
@@ -46,7 +46,7 @@
 import UnreimbursedExpenses from '@/components/reimbursements/UnreimbursedExpenses.vue';
 import { isMobile } from '@/utils/utils';
 import PTOCashOutsTable from '../components/shared/PTOCashOutsTable.vue';
-import QuickBooksTimeData from '@/components/shared/quickbooks/QuickBooksTimeData';
+import QuickBooksTimeData from '@/components/shared/newquickbooks/QuickBooksTimeData';
 
 // |--------------------------------------------------|
 // |                                                  |

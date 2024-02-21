@@ -184,12 +184,13 @@ function totalPeriodHours() {
   if (this.isMonthly || this.showPtoJobCodes) {
     return this.getTotalWorkDays * this.getProRatedHours;
   } else {
-    return this.BONUS_YEAR_TOTAL * (this.$store.getters.user.workStatus / 100);
+    return this.BONUS_YEAR_TOTAL * (this.employee.workStatus / 100);
   }
 }
 
 function remainingHours() {
-  return this.totalPeriodHours - this.periodHoursCompleted;
+  let remaining = this.totalPeriodHours - this.periodHoursCompleted;
+  return remaining > 0 ? remaining : 0;
 }
 
 /**
@@ -199,7 +200,7 @@ function remainingHours() {
  */
 function getWorkDays(startDate, endDate) {
   let workDays = 0;
-  let hireDate = this.$store.getters.user.hireDate;
+  let hireDate = this.employee.hireDate;
   startDate = format(startDate, null, DEFAULT_ISOFORMAT);
   endDate = format(endDate, null, DEFAULT_ISOFORMAT);
   if (isAfter(hireDate, startDate, 'day') && isSameOrAfter(endDate, hireDate, 'day')) {
@@ -224,7 +225,7 @@ function getRemainingWorkDays() {
       return 0;
     }
   } else {
-    return this.getWorkDays(this.date, endOf(this.date, 'year')) - 1;
+    return this.getWorkDays(this.today, endOf(this.today, 'year')) - 1;
   }
 }
 
@@ -232,7 +233,7 @@ function getTotalWorkDays() {
   if (this.isMonthly) {
     return this.getWorkDays(startOf(this.date, 'month'), endOf(this.date, 'month'));
   } else {
-    return this.getWorkDays(startOf(this.date, 'year'), endOf(this.date, 'year'));
+    return this.getWorkDays(startOf(this.today, 'year'), endOf(this.today, 'year'));
   }
 }
 
@@ -258,15 +259,17 @@ function getHoursBehindBy() {
       return this.getTotalWorkDays * this.getProRatedHours - this.periodHoursCompleted;
     }
   } else {
-    return this.getWorkDays(startOf(this.date, 'year'), this.date) * this.getProRatedHours - this.periodHoursCompleted;
+    return (
+      this.getWorkDays(startOf(this.today, 'year'), this.today) * this.getProRatedHours - this.periodHoursCompleted
+    );
   }
 }
 
 function getProRatedHours() {
   if (this.isMonthly || this.showPtoJobCodes) {
-    return 8 * (this.$store.getters.user.workStatus / 100);
+    return 8 * (this.employee.workStatus / 100);
   } else {
-    return (this.totalPeriodHours / this.getTotalWorkDays) * (this.$store.getters.user.workStatus / 100);
+    return (this.totalPeriodHours / this.getTotalWorkDays) * (this.employee.workStatus / 100);
   }
 }
 
@@ -324,7 +327,7 @@ export default {
     format,
     formatNum
   },
-  props: ['ptoBalances', 'timesheets'],
+  props: ['employee', 'ptoBalances', 'timesheets'],
   watch: {
     timePeriodLoading: function () {
       if (this.timePeriodLoading) {

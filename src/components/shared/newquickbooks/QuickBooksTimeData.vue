@@ -18,9 +18,13 @@
             <span>{{ errorMessage }}</span>
           </div>
           <div v-else>
-            <monthly-hours :timesheets="timesheets || {}" :ptoBalances="ptoBalances || {}"></monthly-hours>
+            <monthly-hours
+              :employee="employee"
+              :timesheets="timesheets || {}"
+              :ptoBalances="ptoBalances || {}"
+            ></monthly-hours>
             <hr class="my-5 mx-7" />
-            <p-t-o-hours :ptoBalances="ptoBalances || {}"></p-t-o-hours>
+            <p-t-o-hours :employee="employee" :ptoBalances="ptoBalances || {}"></p-t-o-hours>
           </div>
         </div>
       </v-card-text>
@@ -45,7 +49,7 @@ async function created() {
     } else {
       let yearlyTimesheetsStorage = localStorage.getItem('timesheetsYearly');
       if (!yearlyTimesheetsStorage) {
-        let timesheetsData = await api.getTimesheetsData(this.$store.getters.user.employeeNumber, startDate, endDate);
+        let timesheetsData = await api.getTimesheetsData(this.employee.employeeNumber, startDate, endDate);
         this.timesheets = timesheetsData.timesheets;
         if (this.timesheets) {
           localStorage.setItem('timesheetsYearly', JSON.stringify(this.timesheets));
@@ -63,7 +67,7 @@ async function created() {
 async function setInitialData() {
   let today = getTodaysDate();
   let timesheetsData = await api.getTimesheetsData(
-    this.$store.getters.user.employeeNumber,
+    this.employee.employeeNumber,
     format(startOf(subtract(today, 1, 'month'), 'month'), null, 'YYYY-MM'),
     format(today, null, 'YYYY-MM')
   );
@@ -110,6 +114,7 @@ export default {
   methods: {
     setInitialData,
     resetData
-  }
+  },
+  props: ['employee']
 };
 </script>

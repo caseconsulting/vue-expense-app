@@ -1,13 +1,26 @@
 <template>
   <div>
     <div class="d-flex justify-space-between">
-      <h3 class="d-flex align-center"><v-icon class="mr-2">mdi-palm-tree</v-icon> PTO Balances</h3>
+      <h3 class="d-flex align-center">
+        <v-icon class="mr-2">mdi-palm-tree</v-icon>
+        PTO Balances
+        <v-avatar
+          @click="openLink('https://3.basecamp.com/3097063/buckets/179119/messages/6950289713')"
+          class="ml-2 nudge-up"
+          size="x-small"
+          density="compact"
+        >
+          <v-tooltip activator="parent" location="top">Click for more information</v-tooltip>
+          <v-icon size="x-small" color="#3f51b5">mdi-information</v-icon>
+        </v-avatar>
+      </h3>
       <v-btn
         v-if="Object.keys(ptoBalances || {}).length !== 0"
+        @click="showPTOCashOutFormModal = true"
         variant="outlined"
         density="compact"
         class="px-2"
-        :color="this.caseRed"
+        :color="caseRed"
       >
         Cash Out PTO
       </v-btn>
@@ -25,10 +38,25 @@
         <div class="ml-3">{{ convertToHours(ptoBalances[jobcode]) }}h</div>
       </div>
     </div>
+    <v-dialog v-model="showPTOCashOutFormModal" persistent max-width="500">
+      <p-t-o-cash-out-form :employee="employee" :pto="convertToHours(ptoBalances['PTO'])" />
+    </v-dialog>
   </div>
 </template>
 
 <script>
+import PTOCashOutForm from '@/components/shared/PTOCashOutForm.vue';
+
+function mounted() {
+  this.emitter.on('close-pto-cash-out-form', () => {
+    this.showPTOCashOutFormModal = false;
+  });
+}
+
+function openLink(link) {
+  window.open(link, '_blank');
+}
+
 function convertToHours(seconds) {
   return Number(seconds / 60 / 60)
     ?.toFixed(2)
@@ -44,18 +72,24 @@ function sortedBalancesByDuration() {
 }
 
 export default {
+  components: {
+    PTOCashOutForm
+  },
   computed: {
     sortedBalancesByDuration
   },
   data() {
     return {
-      excludeIfZero: ['Jury Duty', 'Maternity/Paternity Time Off']
+      excludeIfZero: ['Jury Duty', 'Maternity/Paternity Time Off'],
+      showPTOCashOutFormModal: false
     };
   },
   methods: {
-    convertToHours
+    convertToHours,
+    openLink
   },
-  props: ['ptoBalances']
+  mounted,
+  props: ['ptoBalances', 'employee']
 };
 </script>
 
@@ -67,5 +101,8 @@ export default {
   background-size: 7px 1px;
   background-repeat: repeat-x;
   flex-grow: 2;
+}
+.nudge-up {
+  top: -7px;
 }
 </style>
