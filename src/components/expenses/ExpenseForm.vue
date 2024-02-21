@@ -692,7 +692,7 @@ async function checkCoverage() {
           } else {
             // BRANCH 2.2 selected expense type does not allow overdraft or employee is not full time
             this.editedExpense['od'] = false;
-            if (newCommittedAmount <= budgetAmount) {
+            if (newCommittedAmount < budgetAmount) {
               // BRANCH 6.1 starts under initial budget
               if (newCommittedAmount + cost <= budgetAmount) {
                 // BRANCH 7.1 doesnt go over budget
