@@ -2,14 +2,13 @@
   <div>
     <v-row>
       <v-col order="1" cols="12" sm="12" md="6" lg="6" xl="6" xxl="6">
-        <div class="d-flex justify-space-evenly align-center mb-1">
-          <div>
+        <v-row class="mb-1" dense>
+          <v-col cols="3" class="d-flex align-center justify-center pa-0">
             <v-btn
               :disabled="!isMonthly || (isMonthly && getMonth(date) !== getMonth(today))"
               icon=""
               variant="text"
-              size="large"
-              density="compact"
+              density="comfortable"
               @click="date = subtract(date, 1, 'month')"
             >
               <v-tooltip activator="parent" location="top">Previous Month</v-tooltip>
@@ -19,32 +18,37 @@
               :disabled="!isMonthly || (isMonthly && getMonth(date) === getMonth(today))"
               icon=""
               variant="text"
-              size="large"
-              density="compact"
+              density="comfortable"
               @click="date = add(date, 1, 'month')"
             >
               <v-tooltip activator="parent" location="top">Next Month</v-tooltip>
               <v-icon size="x-large"> mdi-arrow-right-thin </v-icon>
             </v-btn>
-          </div>
-          <h3 class="pr-10">{{ isMonthly ? format(date, null, 'MMMM') : format(today, null, 'YYYY') }}</h3>
-          <v-btn
-            icon=""
-            variant="text"
-            size="large"
-            density="compact"
-            :disabled="timePeriodLoading"
-            @click="
-              isMonthly = !isMonthly;
-              timePeriodLoading = true;
-            "
-          >
-            <v-tooltip activator="parent" location="top">{{ isMonthly ? 'Show yearly' : 'Show monthly' }}</v-tooltip>
-            <v-icon size="large">
-              {{ isMonthly ? 'mdi-calendar-expand-horizontal' : 'mdi-calendar-collapse-horizontal' }}
-            </v-icon>
-          </v-btn>
-        </div>
+          </v-col>
+          <v-col cols="6" class="d-flex align-center justify-center pa-0">
+            <h3 class="text-center">
+              {{ isMonthly ? format(date, null, 'MMMM') : format(today, null, 'YYYY') }}
+            </h3>
+          </v-col>
+          <v-col cols="3" class="d-flex align-center justify-center pa-0">
+            <v-btn
+              icon=""
+              variant="text"
+              size="large"
+              density="compact"
+              :disabled="timePeriodLoading"
+              @click="
+                isMonthly = !isMonthly;
+                timePeriodLoading = true;
+              "
+            >
+              <v-tooltip activator="parent" location="top">{{ isMonthly ? 'Show yearly' : 'Show monthly' }}</v-tooltip>
+              <v-icon size="large">
+                {{ isMonthly ? 'mdi-calendar-expand-horizontal' : 'mdi-calendar-collapse-horizontal' }}
+              </v-icon>
+            </v-btn>
+          </v-col>
+        </v-row>
         <v-progress-circular
           v-if="timePeriodLoading"
           size="120"
