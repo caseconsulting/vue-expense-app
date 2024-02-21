@@ -1,118 +1,116 @@
 <template>
-  <div v-if="$store.getters.ptoCashOuts">
-    <v-form ref="form" v-model="valid" lazy-validation>
-      <v-card>
-        <v-card-title class="d-flex align-center header_style text-h6">
-          <h6 class="subtitle" v-if="userRoleIsAdmin() || userRoleIsManager()">
-            Employee: {{ nicknameAndLastName(employee) }}
-          </h6>
-          <h3>Cash Out PTO</h3>
-        </v-card-title>
-        <div v-if="!isSubmitting">
-          <v-card-text v-if="employee">
-            <p>
-              <span v-if="pto">
-                <b>PTO:</b> {{ pto }}h
-                <br />
-              </span>
-              <span v-else>PTO: Loading... <br /></span>
-              <span v-if="Number(getPendingPtoCashoutAmount(employee.id)) > 0">
-                <b>Pending PTO Cash Out:</b> {{ Number(getPendingPtoCashoutAmount(employee.id)) }}h
-              </span>
-            </p>
-            <div>
-              <!-- PTO Cash Out Amount -->
-              <v-text-field
-                prepend-icon="mdi-clock-outline"
-                variant="underlined"
-                class="py-2"
-                :rules="[
-                  (v) => !!v || 'Field is required',
-                  ...getNumberRules(),
-                  ...getPTOCashOutRules(ptoData.ptoBalance, employee.id, item ? Number(item.amount) : null)
-                ]"
-                :hint="cashOutHint()"
-                v-model.number="ptoCashOutObj.amount"
-                label="Number of Hours Requested to be Paid Out"
-                required
-              ></v-text-field>
+  <v-form ref="form" v-model="valid" lazy-validation>
+    <v-card>
+      <v-card-title class="d-flex align-center header_style text-h6">
+        <h6 class="subtitle" v-if="userRoleIsAdmin() || userRoleIsManager()">
+          Employee: {{ nicknameAndLastName(employee) }}
+        </h6>
+        <h3>Cash Out PTO</h3>
+      </v-card-title>
+      <div v-if="!isSubmitting && $store.getters.ptoCashOuts">
+        <v-card-text v-if="employee">
+          <p>
+            <span v-if="pto">
+              <b>PTO:</b> {{ pto }}h
+              <br />
+            </span>
+            <span v-else>PTO: Loading... <br /></span>
+            <span v-if="Number(getPendingPtoCashoutAmount(employee.id)) > 0">
+              <b>Pending PTO Cash Out:</b> {{ Number(getPendingPtoCashoutAmount(employee.id)) }}h
+            </span>
+          </p>
+          <div>
+            <!-- PTO Cash Out Amount -->
+            <v-text-field
+              prepend-icon="mdi-clock-outline"
+              variant="underlined"
+              class="py-2"
+              :rules="[
+                (v) => !!v || 'Field is required',
+                ...getNumberRules(),
+                ...getPTOCashOutRules(ptoData.ptoBalance, employee.id, item ? Number(item.amount) : null)
+              ]"
+              :hint="cashOutHint()"
+              v-model.number="ptoCashOutObj.amount"
+              label="Number of Hours Requested to be Paid Out"
+              required
+            ></v-text-field>
 
-              <!-- Approved Date for PTO Cash Out (Optional) -->
-              <v-menu
-                v-if="userRoleIsAdmin() || userRoleIsManager()"
-                ref="approvedDateMenu"
-                :close-on-content-click="false"
-                v-model="approvedDateMenu"
-                location="start center"
-              >
-                <template v-slot:activator="{ props }">
-                  <v-text-field
-                    v-model="approvedDateFormatted"
-                    id="approvedDate"
-                    :rules="getDateOptionalRules()"
-                    v-mask="'##/##/####'"
-                    variant="underlined"
-                    label="Approved Date (optional)"
-                    hint="MM/DD/YYYY format"
-                    class="mb-4"
-                    persistent-hint
-                    v-bind="props"
-                    @update:focused="
-                      ptoCashOutObj.approvedDate = format(approvedDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')
-                    "
-                    @click:prepend="approvedDateMenu = true"
-                    @keypress="approvedDateMenu = false"
-                  >
-                    <template v-slot:prepend>
-                      <div class="pointer">
-                        <v-icon color="grey-darken-1">mdi-calendar</v-icon>
-                      </div>
-                    </template>
-                  </v-text-field>
-                </template>
-                <v-date-picker
-                  v-model="ptoCashOutObj.approvedDate"
-                  @update:model-value="approvedDateMenu = false"
-                  hide-actions
-                  show-adjacent-months
-                  keyboard-icon=""
-                  color="#bc3825"
-                  title="Approved Date"
+            <!-- Approved Date for PTO Cash Out (Optional) -->
+            <v-menu
+              v-if="userRoleIsAdmin() || userRoleIsManager()"
+              ref="approvedDateMenu"
+              :close-on-content-click="false"
+              v-model="approvedDateMenu"
+              location="start center"
+            >
+              <template v-slot:activator="{ props }">
+                <v-text-field
+                  v-model="approvedDateFormatted"
+                  id="approvedDate"
+                  :rules="getDateOptionalRules()"
+                  v-mask="'##/##/####'"
+                  variant="underlined"
+                  label="Approved Date (optional)"
+                  hint="MM/DD/YYYY format"
+                  class="mb-4"
+                  persistent-hint
+                  v-bind="props"
+                  @update:focused="
+                    ptoCashOutObj.approvedDate = format(approvedDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')
+                  "
+                  @click:prepend="approvedDateMenu = true"
+                  @keypress="approvedDateMenu = false"
                 >
-                </v-date-picker>
-              </v-menu>
-            </div>
-            <small>
-              *cash outs are paid during the normal payroll period
-              <v-avatar
-                @click="openLink('https://3.basecamp.com/3097063/buckets/179119/messages/6950289713')"
-                class="mb-3"
-                size="small"
-              >
-                <v-tooltip activator="parent" location="top">Click for more information</v-tooltip>
-                <v-icon color="#3f51b5">mdi-information</v-icon>
-              </v-avatar>
-            </small>
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <!-- Cancel Button -->
-            <v-btn color="black" @click="cancel()" variant="text" class="mx-2"> Cancel </v-btn>
-            <!-- Submit Button -->
-            <v-btn variant="text" class="mx-2" color="success" :disabled="!valid" @click="submit()">
-              <template v-slot:prepend>
-                <v-icon>mdi-content-save</v-icon>
+                  <template v-slot:prepend>
+                    <div class="pointer">
+                      <v-icon color="grey-darken-1">mdi-calendar</v-icon>
+                    </div>
+                  </template>
+                </v-text-field>
               </template>
-              Submit
-            </v-btn>
-          </v-card-actions>
-        </div>
-        <div v-else class="py-10 px-6">
-          <v-progress-linear :indeterminate="true"></v-progress-linear>
-        </div>
-      </v-card>
-    </v-form>
-  </div>
+              <v-date-picker
+                v-model="ptoCashOutObj.approvedDate"
+                @update:model-value="approvedDateMenu = false"
+                hide-actions
+                show-adjacent-months
+                keyboard-icon=""
+                color="#bc3825"
+                title="Approved Date"
+              >
+              </v-date-picker>
+            </v-menu>
+          </div>
+          <small>
+            *cash outs are paid during the normal payroll period
+            <v-avatar
+              @click="openLink('https://3.basecamp.com/3097063/buckets/179119/messages/6950289713')"
+              class="mb-3"
+              size="small"
+            >
+              <v-tooltip activator="parent" location="top">Click for more information</v-tooltip>
+              <v-icon color="#3f51b5">mdi-information</v-icon>
+            </v-avatar>
+          </small>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <!-- Cancel Button -->
+          <v-btn color="black" @click="cancel()" variant="text" class="mx-2"> Cancel </v-btn>
+          <!-- Submit Button -->
+          <v-btn variant="text" class="mx-2" color="success" :disabled="!valid" @click="submit()">
+            <template v-slot:prepend>
+              <v-icon>mdi-content-save</v-icon>
+            </template>
+            Submit
+          </v-btn>
+        </v-card-actions>
+      </div>
+      <div v-else class="py-10 px-6">
+        <v-progress-linear :indeterminate="true"></v-progress-linear>
+      </div>
+    </v-card>
+  </v-form>
 </template>
 <script>
 import {

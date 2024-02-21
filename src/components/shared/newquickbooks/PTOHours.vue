@@ -25,19 +25,18 @@
         Cash Out PTO
       </v-btn>
     </div>
-    <div v-if="Object.keys(ptoBalances || {}).length === 0" class="my-4">No balances to display</div>
+    <div v-if="Object.keys(ptoBalances || []).length === 0" class="my-4">No balances to display</div>
     <div v-for="jobcode in sortedBalancesByDuration" :key="jobcode">
-      <div
-        v-if="
-          !excludeIfZero.includes(jobcode) || (excludeIfZero.includes(jobcode) && Number(ptoBalances[jobcode]) !== 0)
-        "
-        class="d-flex justify-space-between my-3"
-      >
+      <div v-if="showMore || ptoBalances[jobcode] !== 0" class="d-flex justify-space-between my-3">
         <div class="mr-3">{{ jobcode }}</div>
         <div class="dotted-line"></div>
         <div class="ml-3">{{ convertToHours(ptoBalances[jobcode]) }}h</div>
       </div>
     </div>
+    <v-span v-if="Object.values(ptoBalances || []).includes(0)" @click="showMore = !showMore" class="pointer text-blue">
+      {{ showMore ? 'Show less' : 'Show more' }}
+      <v-icon>{{ showMore ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+    </v-span>
     <v-dialog v-model="showPTOCashOutFormModal" persistent max-width="500">
       <p-t-o-cash-out-form :employee="employee" :pto="convertToHours(ptoBalances['PTO'])" />
     </v-dialog>
@@ -81,7 +80,8 @@ export default {
   data() {
     return {
       excludeIfZero: ['Jury Duty', 'Maternity/Paternity Time Off'],
-      showPTOCashOutFormModal: false
+      showPTOCashOutFormModal: false,
+      showMore: false
     };
   },
   methods: {

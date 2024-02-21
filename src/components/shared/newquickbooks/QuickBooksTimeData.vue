@@ -48,7 +48,7 @@ async function created() {
       }
     } else {
       let yearlyTimesheetsStorage = localStorage.getItem('timesheetsYearly');
-      if (!yearlyTimesheetsStorage) {
+      if (!yearlyTimesheetsStorage || this.$store.getters.user.id !== this.employee.id) {
         let timesheetsData = await api.getTimesheetsData(this.employee.employeeNumber, startDate, endDate);
         this.timesheets = timesheetsData.timesheets;
         if (this.timesheets) {
@@ -75,6 +75,8 @@ async function setInitialData() {
     this.errorMessage = null;
     this.ptoBalances = timesheetsData.ptoBalances;
     this.timesheets = timesheetsData.timesheets;
+    if (this.ptoBalances['Jury Duty'] <= 0) delete this.ptoBalances['Jury Duty'];
+    if (this.ptoBalances['Maternity/Paternity Time Off'] <= 0) delete this.ptoBalances['Maternity/Paternity Time Off'];
     if (this.ptoBalances && this.timesheets) {
       localStorage.setItem('ptoBalances', JSON.stringify(this.ptoBalances));
       localStorage.setItem('timesheetsMonthly', JSON.stringify(this.timesheets));
