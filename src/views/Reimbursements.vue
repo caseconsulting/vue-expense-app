@@ -29,12 +29,11 @@
       </v-window-item>
       <v-window-item value="ptoCashOuts" class="mx-2 my-6">
         <v-row>
-          <v-col cols="12" xl="9" lg="7">
+          <v-col cols="12" xl="8" lg="7">
             <p-t-o-cash-outs-table :unapprovedOnly="true" />
           </v-col>
-          <v-col cols="12" xl="3" lg="5" class="pl-lg-1 pl-sm-2">
-            <quick-books-time-data v-if="employee" :employee="employee"></quick-books-time-data>
-            <v-skeleton-loader v-else class="mt-3" type="list-item@12"></v-skeleton-loader>
+          <v-col cols="12" xl="4" lg="5" class="pl-lg-1 pl-sm-2">
+            <quick-books-time-data :employee="employee" :key="employee.id"></quick-books-time-data>
           </v-col>
         </v-row>
       </v-window-item>
