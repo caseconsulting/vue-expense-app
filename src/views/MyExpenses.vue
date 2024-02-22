@@ -118,7 +118,6 @@
                     <div class="d-inline-block mr-4">
                       <h4>Active Expense Type:</h4>
                       <v-btn-toggle
-                        color="primary"
                         class="filter_color"
                         v-model="filter.active"
                         :density="isMobile() ? 'compact' : 'comfortable'"
@@ -128,7 +127,9 @@
                         <v-tooltip location="top">
                           <template v-slot:activator="{ props }">
                             <v-btn value="active" v-bind="props" variant="text">
-                              <v-icon class="mr-1">mdi-check-circle-outline</v-icon>
+                              <v-icon class="mr-1"
+                                >mdi-check-circle{{ filter.active.includes('active') ? '' : '-outline' }}</v-icon
+                              >
                             </v-btn>
                           </template>
                           <span>Show Active</span>
@@ -138,7 +139,9 @@
                         <v-tooltip location="top">
                           <template v-slot:activator="{ props }">
                             <v-btn value="notActive" v-bind="props" variant="text">
-                              <v-icon>mdi-close-circle-outline</v-icon>
+                              <v-icon
+                                >mdi-close-circle{{ filter.active.includes('notActive') ? '' : '-outline' }}</v-icon
+                              >
                             </v-btn>
                           </template>
                           <span>Show Inactive</span>
@@ -147,7 +150,14 @@
                         <!-- Show Active and Inactive -->
                         <v-tooltip location="top">
                           <template v-slot:activator="{ props }">
-                            <v-btn value="both" v-bind="props" variant="text"> BOTH </v-btn>
+                            <v-btn
+                              value="both"
+                              v-bind="props"
+                              variant="text"
+                              :class="filter.active.includes('both') ? 'font-weight-black' : ''"
+                            >
+                              BOTH
+                            </v-btn>
                           </template>
                           <span>Show All</span>
                         </v-tooltip>
@@ -160,7 +170,6 @@
                     <div class="d-inline-block" :class="!userRoleIsAdmin() && !userRoleIsManager() ? 'ml-3' : ''">
                       <h4>Reimbursed:</h4>
                       <v-btn-toggle
-                        color="primary"
                         class="filter_color"
                         v-model="filter.reimbursed"
                         :density="isMobile() ? 'compact' : 'comfortable'"
@@ -170,7 +179,11 @@
                         <v-tooltip location="top">
                           <template v-slot:activator="{ props }">
                             <v-btn value="reimbursed" v-bind="props" variant="text" density="comfortable">
-                              <v-icon id="showReimbursed" class="mr-1">mdi-check-circle-outline</v-icon>
+                              <v-icon id="showReimbursed" class="mr-1"
+                                >mdi-check-circle{{
+                                  filter.reimbursed.includes('reimbursed') ? '' : '-outline'
+                                }}</v-icon
+                              >
                             </v-btn>
                           </template>
                           <span>Show Reimbursed</span>
@@ -180,7 +193,11 @@
                         <v-tooltip location="top">
                           <template v-slot:activator="{ props }">
                             <v-btn value="notReimbursed" v-bind="props" variant="text">
-                              <v-icon id="showPending">mdi-close-circle-outline</v-icon>
+                              <v-icon id="showPending"
+                                >mdi-close-circle{{
+                                  filter.reimbursed.includes('notReimbursed') ? '' : '-outline'
+                                }}</v-icon
+                              >
                             </v-btn>
                           </template>
                           <span>Show Pending</span>
@@ -189,7 +206,15 @@
                         <!-- Show Reimbursed and Pending -->
                         <v-tooltip location="top">
                           <template v-slot:activator="{ props }">
-                            <v-btn id="bothReimbursed" value="both" v-bind="props" variant="text"> BOTH </v-btn>
+                            <v-btn
+                              id="bothReimbursed"
+                              value="both"
+                              v-bind="props"
+                              variant="text"
+                              :class="filter.reimbursed.includes('both') ? 'font-weight-black' : ''"
+                            >
+                              BOTH
+                            </v-btn>
                           </template>
                           <span>Show All</span>
                         </v-tooltip>

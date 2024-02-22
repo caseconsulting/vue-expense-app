@@ -55,23 +55,27 @@
             <!-- Approved Filter -->
             <div class="px-4 pt-4 pb-md-4 pb-lg-4 pb-xl-4 pb-xxl-4">
               <h4>Status:</h4>
-              <v-btn-toggle color="primary" class="filter_color" v-model="filter.approved" text mandatory>
+              <v-btn-toggle class="filter_color" v-model="filter.approved" text mandatory>
                 <!-- Show Approved -->
                 <v-btn value="approved" variant="text">
                   <v-tooltip activator="parent" location="top">Show Approved</v-tooltip>
-                  <v-icon size="x-large" id="showApproved" class="mr-1">mdi-check-circle-outline</v-icon>
+                  <v-icon size="x-large" id="showApproved" class="mr-1">
+                    mdi-check-circle{{ filter.approved.includes('approved') ? '' : '-outline' }}
+                  </v-icon>
                 </v-btn>
 
                 <!-- Show Pending -->
                 <v-btn value="notApproved" variant="text">
                   <v-tooltip activator="parent" location="top">Show Pending</v-tooltip>
-                  <v-icon size="x-large" id="showPending">mdi-close-circle-outline</v-icon>
+                  <v-icon size="x-large" id="showPending">
+                    mdi-close-circle{{ filter.approved.includes('notApproved') ? '' : '-outline' }}
+                  </v-icon>
                 </v-btn>
 
                 <!-- Show Reimbursed and Pending -->
                 <v-btn id="bothApproved" value="both" variant="text">
                   <v-tooltip activator="parent" location="top">Show All</v-tooltip>
-                  BOTH
+                  <p class="ma-0" :class="filter.approved.includes('both') ? 'font-weight-black' : ''">BOTH</p>
                 </v-btn>
               </v-btn-toggle>
             </div>

@@ -1,7 +1,7 @@
 <template>
   <div id="app" @mousedown="refreshSession()">
     <v-app>
-      <v-icon color="purple-lighten-4" id="jellyfish">mdi-jellyfish</v-icon>
+      <v-icon color="purple-lighten-5" id="jellyfish">mdi-jellyfish</v-icon>
       <v-navigation-drawer
         v-if="isLoggedIn()"
         v-model="drawer"
@@ -560,7 +560,7 @@ export default {
 
 #jellyfish {
   position: fixed;
-  bottom: 0;
+  bottom: 7px;
   left: 50%;
   z-index: -1;
 }
