@@ -15,7 +15,7 @@
         </v-avatar>
       </h3>
       <v-btn
-        v-if="Object.keys(ptoBalances || {}).length !== 0"
+        v-if="ptoBalances['PTO'] || ptoBalances['PTO'] === 0"
         @click="showPTOCashOutFormModal = true"
         variant="outlined"
         density="compact"

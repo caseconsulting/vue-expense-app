@@ -548,11 +548,11 @@ function filteredPtoCashOuts() {
 function roleHeaders() {
   let headers = _.cloneDeep(this.headers);
   if (!(userRoleIsAdmin() || userRoleIsManager())) {
-    headers = _.filter(headers, (h) => h.text != 'Employee');
+    headers = _.filter(headers, (h) => h.title != 'Employee');
   }
 
   if (this.unapprovedOnly) {
-    headers = _.filter(headers, (h) => h.text != 'actions');
+    headers = _.filter(headers, (h) => h.title != 'actions');
   }
   return headers;
 } // roleHeaders
