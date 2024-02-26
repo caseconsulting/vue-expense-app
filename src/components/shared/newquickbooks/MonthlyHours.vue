@@ -63,13 +63,14 @@
           :completed="formatNum(periodHoursCompleted)"
           :needed="totalPeriodHours"
           :jobcodes="getTimeData || {}"
+          :sortedJobcodeKeys="sortedJobcodesByDuration"
           :remainingHours="formatNum(remainingHours)"
         ></timesheets-chart>
       </v-col>
       <v-col :order="$vuetify.display.mdAndUp ? 2 : 3" cols="12" md="6" lg="6" xl="6" xxl="6">
         <v-skeleton-loader v-if="timePeriodLoading" type="list-item@4"></v-skeleton-loader>
         <div v-else>
-          <h3 class="d-flex align-center mb-3 mt-1">
+          <h3 class="d-flex align-center mb-3">
             <v-icon class="mr-2">mdi-book-open-outline</v-icon>
             {{ isMonthly ? 'Monthly' : 'Yearly' }} Details
           </h3>

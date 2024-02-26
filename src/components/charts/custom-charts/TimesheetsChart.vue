@@ -29,7 +29,6 @@ import _ from 'lodash';
  * Mounted lifecycle hook.
  */
 async function mounted() {
-  await this.fetchData();
   await this.fillData();
   this.dataReceived = true;
 } // mounted
@@ -41,31 +40,26 @@ async function mounted() {
 // |--------------------------------------------------|
 
 /**
- * Extracts the job role from each employee and tallies up
- * each role for active employees.
- */
-function fetchData() {} // fetchData
-
-/**
  * Sets the chart formatting and options data.
  */
 function fillData() {
   let colors = ['#1A237E', '#5C6BC0', '#9FA8DA'];
   let colorsOptions = ['#1A237E', '#5C6BC0', '#9FA8DA'];
-  let jobCodeValues = _.map(Object.values(this.jobcodes), (duration) =>
-    Number(duration / 60 / 60)
+  let jobCodeValues = _.map(Object.values(this.sortedJobcodeKeys), (jobcodeName) => {
+    let duration = this.jobcodes[jobcodeName];
+    return Number(duration / 60 / 60)
       ?.toFixed(2)
-      ?.replace(/[.,]00$/, '')
-  ); // removes decimals if a whole number);
+      ?.replace(/[.,]00$/, '');
+  }); // removes decimals if a whole number);
 
   for (let i = 0; i < jobCodeValues?.length / colorsOptions.length; i++) {
     colors = [...colors, ...colorsOptions];
   }
   colors = _.slice(colors, 0, jobCodeValues?.length);
-  colors.push('#EAEAEA');
+  colors.push('#EAEAEA'); // push grey for remaining hours
 
   this.chartData = {
-    labels: [...Object.keys(this.jobcodes), 'Remaining'],
+    labels: [...Object.values(this.sortedJobcodeKeys || []), 'Remaining'],
     datasets: [
       {
         data: [...jobCodeValues, this.remainingHours >= 0 ? this.remainingHours : 0],
@@ -104,9 +98,9 @@ export default {
       dataReceived: false
     };
   },
-  methods: { fetchData, fillData },
+  methods: { fillData },
   mounted,
-  props: ['completed', 'needed', 'jobcodes', 'remainingHours']
+  props: ['completed', 'needed', 'jobcodes', 'sortedJobcodeKeys', 'remainingHours']
 };
 </script>
 

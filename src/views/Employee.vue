@@ -743,5 +743,6 @@ export default {
   display: flex !important;
   align-items: center !important;
   font-size: 20px !important;
+  opacity: 1 !important;
 }
 </style>
