@@ -8,19 +8,19 @@
           <legend class="legend_style">Sort By</legend>
           <v-col cols="12">
             <v-btn-toggle v-model="sortFunction" density="compact">
-              <v-btn @click="sortByCurrent">
+              <v-btn value="current" @click="sortByCurrent">
                 <v-tooltip activator="parent" location="top">Current</v-tooltip>
-                <v-icon size="x-large">mdi-check</v-icon>
+                <v-icon size="x-large">mdi-check{{ sortFunction === 'current' ? '-bold' : '' }}</v-icon>
               </v-btn>
 
-              <v-btn @click="sortByDate">
+              <v-btn value="date" @click="sortByDate">
                 <v-tooltip activator="parent" location="top">Years of Experience</v-tooltip>
-                <v-icon size="x-large">mdi-calendar-multiple</v-icon>
+                <v-icon size="x-large">mdi-calendar-multiple{{ sortFunction === 'date' ? '-check' : '' }}</v-icon>
               </v-btn>
 
-              <v-btn @click="sortByName">
+              <v-btn value="name" @click="sortByName">
                 <v-tooltip activator="parent" location="top">Alphabetical</v-tooltip>
-                <v-icon size="x-large">mdi-sort-alphabetical-descending-variant </v-icon>
+                <v-icon size="x-large">mdi-sort-alphabetical-descending-variant</v-icon>
               </v-btn>
             </v-btn-toggle>
           </v-col>
@@ -170,7 +170,7 @@ export default {
     return {
       page: 1,
       pageList: [],
-      sortFunction: null,
+      sortFunction: undefined,
       sortedTech: this.model.technologies
     };
   },
