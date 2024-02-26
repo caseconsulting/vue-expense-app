@@ -34,9 +34,9 @@
             <p><b>Technology: </b>{{ technology.name }}</p>
           </v-col>
           <v-col>
-            <span>
+            <span v-if="technology.current">
               <v-icon>mdi-check</v-icon>
-              <v-tooltip v-if="technology.current" activator="parent" location="right">Current Skill</v-tooltip>
+              <v-tooltip activator="parent" location="right">Current Skill</v-tooltip>
             </span>
           </v-col>
         </v-row>
