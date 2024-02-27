@@ -44,7 +44,7 @@
             <!-- Active Filter -->
             <v-col :align="isMobile() ? 'center' : ''" cols="7" md="4" sm="6">
               <h4 class="d-block mx-auto">Employee Status:</h4>
-              <v-btn-toggle class="filter_color mx-auto" v-model="filter.active" text multiple>
+              <v-btn-toggle color="primary" class="filter_color mx-auto" v-model="filter.active" text multiple>
                 <!-- Full Time -->
                 <v-tooltip location="top" text="Full Time">
                   <template v-slot:activator="{ props }">

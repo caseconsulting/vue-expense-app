@@ -7,7 +7,7 @@
         <fieldset class="filter_border">
           <legend class="legend_style">Sort By</legend>
           <v-col cols="12">
-            <v-btn-toggle v-model="sortFunction" density="compact">
+            <v-btn-toggle color="primary" v-model="sortFunction" density="compact">
               <v-btn value="current" @click="sortByCurrent">
                 <v-tooltip activator="parent" location="top">Current</v-tooltip>
                 <v-icon size="x-large">mdi-check{{ sortFunction === 'current' ? '-bold' : '' }}</v-icon>

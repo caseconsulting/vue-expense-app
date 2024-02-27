@@ -2,7 +2,7 @@
   <!-- Active Filter -->
   <div class="d-flex justify-end align-center my-0 pb-0">
     <span class="fieldset-title mr-3">Status:</span>
-    <v-btn-toggle class="filter_color" v-model="filter" text multiple>
+    <v-btn-toggle color="primary" class="filter_color" v-model="filter" text multiple>
       <!-- Active -->
       <v-tooltip location="top" text="Active">
         <template v-slot:activator="{ props }">

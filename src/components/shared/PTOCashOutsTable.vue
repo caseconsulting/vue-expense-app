@@ -55,7 +55,7 @@
             <!-- Approved Filter -->
             <div class="px-4 pt-4 pb-md-4 pb-lg-4 pb-xl-4 pb-xxl-4">
               <h4>Status:</h4>
-              <v-btn-toggle class="filter_color" v-model="filter.approved" text mandatory>
+              <v-btn-toggle color="primary" class="filter_color" v-model="filter.approved" text mandatory>
                 <!-- Show Approved -->
                 <v-btn value="approved" variant="text">
                   <v-tooltip activator="parent" location="top">Show Approved</v-tooltip>
