@@ -156,7 +156,7 @@ import {
   refreshUserSession
 } from '@/utils/auth';
 import { isMobile, isSmallScreen, storeIsPopulated, updateEmployeeLogin } from '@/utils/utils';
-import { updateStoreUser } from '@/utils/storeUtils';
+import { updateStoreUser, updateStoreEmployees } from '@/utils/storeUtils';
 import floorPlan from '@/assets/img/MakeOfficesfloorplan.jpg';
 import facebook from '@/assets/img/trademarks/facebook.png';
 import github from '@/assets/img/trademarks/github.png';
@@ -373,6 +373,9 @@ async function created() {
   this.version = require('../package.json').version;
 
   this.loadingCreated = false;
+
+  // run API calls in background
+  Promise.all([this.updateStoreEmployees()]);
 } // created
 
 /**
@@ -500,6 +503,7 @@ export default {
     refreshSession,
     setSessionTimeouts,
     updateStoreUser,
+    updateStoreEmployees,
     updateEmployeeLogin
   },
   watch: {
