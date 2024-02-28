@@ -53,7 +53,7 @@
         <v-progress-circular
           v-if="timePeriodLoading"
           size="120"
-          width="10"
+          width="15"
           class="mx-auto w-100"
           color="#AEAEAE"
           indeterminate="disable-shrink"
@@ -64,7 +64,7 @@
           :completed="formatNum(periodHoursCompleted)"
           :needed="totalPeriodHours"
           :jobcodes="getTimeData || {}"
-          :sortedJobcodeKeys="sortedJobcodesByDuration"
+          :ptoJobcodes="!isMonthly ? ptoJobcodes : null"
           :remainingHours="formatNum(remainingHours)"
         ></timesheets-chart>
       </v-col>
@@ -142,14 +142,14 @@
             No job codes for this time period
           </div>
           <div v-else>
-            <div v-for="jobcode in sortedJobcodesByDuration" :key="jobcode">
+            <div v-for="(duration, jobcode) in getTimeData" :key="jobcode">
               <div
                 v-if="isMonthly || showPtoJobCodes || (!showPtoJobCodes && !ptoJobcodes.includes(jobcode))"
                 class="d-flex justify-space-between my-3"
               >
                 <div class="mr-3">{{ jobcode }}</div>
                 <div class="dotted-line"></div>
-                <div class="ml-3">{{ formatNum(convertToHours(getTimeData[jobcode])) }}h</div>
+                <div class="ml-3">{{ formatNum(convertToHours(duration)) }}h</div>
               </div>
             </div>
             <v-span
@@ -202,25 +202,37 @@ function convertToHours(seconds) {
 
 function hasPtoJobCodes() {
   let hasPtoJobCode = false;
-  for (let i = 0; i < this.sortedJobcodesByDuration?.length && !hasPtoJobCode; i++) {
-    if (this.ptoJobcodes?.includes(this.sortedJobcodesByDuration[i])) hasPtoJobCode = true;
+  let jobcodes = Object.keys(this.getTimeData || {});
+  for (let i = 0; i < jobcodes.length && !hasPtoJobCode; i++) {
+    if (this.ptoJobcodes?.includes(jobcodes[i])) hasPtoJobCode = true;
   }
   return hasPtoJobCode;
 }
 
 function getTimeData() {
+  let timeData = {};
   if (this.isMonthly) {
-    return this.timesheets[format(this.date, null, 'YYYY-MM')];
+    timeData = this.timesheets[format(this.date, null, 'YYYY-MM')];
   } else {
-    let timesheets = {};
+    let timeData = {};
     _.forEach(this.timesheets, (monthTimesheets) => {
       _.forEach(monthTimesheets, (duration, jobName) => {
-        if (!timesheets[jobName]) timesheets[jobName] = 0;
-        timesheets[jobName] += duration;
+        if (!timeData[jobName]) timeData[jobName] = 0;
+        timeData[jobName] += duration;
       });
     });
-    return timesheets;
+    return timeData;
   }
+  // sort by duration
+  let orderedKeys = Object.keys(timeData).sort(function (a, b) {
+    return timeData[b] - timeData[a];
+  });
+  // reassign object in sorted key value pairs
+  let orderedTimeData = {};
+  _.forEach(orderedKeys, (jobcode) => {
+    orderedTimeData[jobcode] = timeData[jobcode];
+  });
+  return orderedTimeData;
 }
 
 function periodHoursCompleted() {
@@ -341,14 +353,6 @@ function getProRatedHours() {
   }
 }
 
-function sortedJobcodesByDuration() {
-  let timeData = this.getTimeData;
-  let orderedKeys = Object.keys(timeData).sort(function (a, b) {
-    return timeData[b] - timeData[a];
-  });
-  return orderedKeys;
-}
-
 /**
  * Returns true if `day` is a weekday
  */
@@ -371,8 +375,7 @@ export default {
     getTotalWorkDays,
     periodHoursCompleted,
     totalPeriodHours,
-    remainingHours,
-    sortedJobcodesByDuration
+    remainingHours
   },
   created,
   data() {

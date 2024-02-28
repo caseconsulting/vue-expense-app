@@ -65,7 +65,7 @@ function setDataFromStorage(qbStorage, key) {
 
 function setStorage(isMonthly) {
   let storage = this.hasQbStorage();
-  let key = isMonthly ? 'monthly' : 'yearly';
+  let key = isMonthly ? this.KEYS.MONTHLY : this.KEYS.YEARLY;
   let data = {
     [key]: {
       timesheets: this.timesheets,
@@ -76,7 +76,7 @@ function setStorage(isMonthly) {
   };
 
   // overwrite storage
-  localStorage.setItem('qbData', JSON.stringify({ ...storage, ...data }));
+  localStorage.setItem(this.KEYS.QB, JSON.stringify({ ...storage, ...data }));
 }
 
 async function setDataFromApi(startDate, endDate, isMonthly) {
@@ -105,7 +105,7 @@ function employeeIsUser() {
 
 async function setData(startDate, endDate, isMonthly) {
   let storage = this.hasQbStorage();
-  let key = isMonthly ? 'monthly' : 'yearly';
+  let key = isMonthly ? this.KEYS.MONTHLY : this.KEYS.YEARLY;
   if (storage && storage[key] && this.employeeIsUser() && !this.isStorageExpired()) {
     this.setDataFromStorage(storage, key);
   } else {
@@ -126,7 +126,7 @@ function hasError(timesheetsData) {
 }
 
 function hasQbStorage() {
-  return localStorage.getItem('qbData') ? JSON.parse(localStorage.getItem('qbData')) : null;
+  return localStorage.getItem(this.KEYS.QB) ? JSON.parse(localStorage.getItem(this.KEYS.QB)) : null;
 }
 
 async function setInitialData() {
@@ -143,7 +143,7 @@ async function resetData() {
   this.supplementalData = null;
   this.lastUpdated = null;
   if (this.employeeIsUser()) {
-    localStorage.removeItem('qbData');
+    localStorage.removeItem(this.KEYS.QB);
   }
   this.emitter.emit('reset-data');
   await this.setInitialData();
@@ -187,7 +187,12 @@ export default {
       loading: true,
       ptoBalances: null,
       timesheets: null,
-      supplementalData: null
+      supplementalData: null,
+      KEYS: {
+        QB: 'qbData',
+        MONTHLY: 'monthly',
+        YEARLY: 'yearly'
+      }
     };
   },
   methods: {
