@@ -103,8 +103,14 @@
           <div class="d-flex justify-space-between my-3">
             <div class="mr-3">
               Work Days Remaining
-              <span v-if="getFutureDays > 0" class="text-blue">*</span>
-              <v-tooltip v-if="getFutureDays > 0" activator="parent" location="top">
+              <span v-if="(getFutureDays > 0 && isMonthly && dateIsCurrentMonth()) || !isMonthly" class="text-blue">
+                *
+              </span>
+              <v-tooltip
+                v-if="(getFutureDays > 0 && isMonthly && dateIsCurrentMonth()) || !isMonthly"
+                activator="parent"
+                location="top"
+              >
                 {{ getFutureDays }} {{ getFutureDays > 1 ? 'days' : 'day' }} subtracted to account for future timesheets
               </v-tooltip>
             </div>
@@ -118,7 +124,7 @@
                 v-model="customWorkDayInput"
                 autofocus
                 type="text"
-                class="text-right"
+                class="ma-0 pa-0 custom-input"
                 @blur="showCustomWorkDayInput = false"
                 hide-details
               ></v-text-field>
@@ -146,7 +152,11 @@
                 <div class="ml-3">{{ formatNum(convertToHours(getTimeData[jobcode])) }}h</div>
               </div>
             </div>
-            <v-span v-if="!isMonthly" @click="showPtoJobCodes = !showPtoJobCodes" class="pointer text-blue">
+            <v-span
+              v-if="!isMonthly && hasPtoJobCodes()"
+              @click="showPtoJobCodes = !showPtoJobCodes"
+              class="pointer text-blue"
+            >
               {{ showPtoJobCodes ? 'Hide PTO jobcodes' : 'Show PTO job codes' }}
               <v-icon>{{ showPtoJobCodes ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
             </v-span>
@@ -188,6 +198,14 @@ function formatNum(value) {
 
 function convertToHours(seconds) {
   return Number(seconds / 60 / 60);
+}
+
+function hasPtoJobCodes() {
+  let hasPtoJobCode = false;
+  for (let i = 0; i < this.sortedJobcodesByDuration?.length && !hasPtoJobCode; i++) {
+    if (this.ptoJobcodes?.includes(this.sortedJobcodesByDuration[i])) hasPtoJobCode = true;
+  }
+  return hasPtoJobCode;
 }
 
 function getTimeData() {
@@ -378,6 +396,7 @@ export default {
     getMonth,
     getWorkDays,
     getTodaysDate,
+    hasPtoJobCodes,
     format,
     formatNum
   },
@@ -415,5 +434,8 @@ export default {
   background-size: 7px 1px;
   background-repeat: repeat-x;
   flex-grow: 2;
+}
+.custom-input {
+  width: 60px;
 }
 </style>

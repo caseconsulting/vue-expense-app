@@ -1,8 +1,11 @@
 <template>
   <div id="t-sheets-data">
     <v-card density="compact">
-      <v-card-title class="header_style d-flex align-center justify-space-between py-0">
+      <v-card-title class="header_style d-flex align-center justify-space-between py-0 relative">
         <h3>QuickBooks Time Data</h3>
+        <span v-if="getLastUpdatedText && employeeIsUser()" class="last-updated">
+          {{ getLastUpdatedText }}
+        </span>
         <v-btn variant="text" icon="mdi-refresh" @click="resetData()">
           <template v-slot:default>
             <v-tooltip activator="parent" location="top">Refresh Quickbooks data</v-tooltip>
@@ -38,87 +41,149 @@ import MonthlyHours from '@/components/shared/newquickbooks/MonthlyHours.vue';
 import PTOHours from '@/components/shared/newquickbooks/PTOHours.vue';
 import _ from 'lodash';
 import api from '@/shared/api';
-import { format, getTodaysDate, startOf, subtract } from '@/shared/dateUtils';
+import { difference, format, getTodaysDate, now, startOf, subtract } from '@/shared/dateUtils';
 
 async function created() {
   this.emitter.on('get-period-data', async ({ startDate, endDate, isMonthly }) => {
-    if (isMonthly) {
-      let monthlyTimesheetsStorage = localStorage.getItem('timesheetsMonthly');
-      let monthlySupplementalStorage = localStorage.getItem('supplementalDataMonthly');
-      if (monthlyTimesheetsStorage && monthlySupplementalStorage) {
-        this.timesheets = JSON.parse(monthlyTimesheetsStorage);
-        this.supplementalData = JSON.parse(monthlySupplementalStorage);
-      }
-    } else {
-      let yearlyTimesheetsStorage = localStorage.getItem('timesheetsYearly');
-      let yearlySupplementalStorage = localStorage.getItem('supplementalDataYearly');
-      if (!yearlyTimesheetsStorage || !yearlySupplementalStorage || this.$store.getters.user.id !== this.employee.id) {
-        let timesheetsData = await api.getTimesheetsData(this.employee.employeeNumber, startDate, endDate);
-        this.timesheets = timesheetsData.timesheets;
-        this.supplementalData = timesheetsData.supplementalData;
-        if (this.timesheets && this.supplementalData) {
-          localStorage.setItem('timesheetsYearly', JSON.stringify(this.timesheets));
-          localStorage.setItem('supplementalDataYearly', JSON.stringify(this.supplementalData));
-        }
-      } else {
-        this.timesheets = JSON.parse(yearlyTimesheetsStorage);
-        this.supplementalData = JSON.parse(yearlySupplementalStorage);
-      }
-    }
+    await this.setData(startDate, endDate, isMonthly);
   });
 
   await this.setInitialData();
   this.loading = false;
 }
 
-async function setInitialData() {
-  let today = getTodaysDate();
-  let timesheetsData = await api.getTimesheetsData(
-    this.employee.employeeNumber,
-    format(startOf(subtract(today, 1, 'month'), 'month'), null, 'YYYY-MM'),
-    format(today, null, 'YYYY-MM')
-  );
-  if (timesheetsData?.name !== 'AxiosError') {
-    this.errorMessage = null;
-    this.ptoBalances = timesheetsData.ptoBalances;
+function beforeUnmount() {
+  this.emitter.off('get-period-data');
+}
+
+function setDataFromStorage(qbStorage, key) {
+  this.timesheets = qbStorage[key]?.timesheets;
+  this.supplementalData = qbStorage[key]?.supplementalData;
+  this.lastUpdated = qbStorage[key]?.lastUpdated;
+  this.ptoBalances = qbStorage?.ptoBalances;
+}
+
+function setStorage(isMonthly) {
+  let storage = this.hasQbStorage();
+  let key = isMonthly ? 'monthly' : 'yearly';
+  let data = {
+    [key]: {
+      timesheets: this.timesheets,
+      supplementalData: this.supplementalData,
+      lastUpdated: this.lastUpdated
+    },
+    ptoBalances: this.ptoBalances
+  };
+
+  // overwrite storage
+  localStorage.setItem('qbData', JSON.stringify({ ...storage, ...data }));
+}
+
+async function setDataFromApi(startDate, endDate, isMonthly) {
+  let timesheetsData = await api.getTimesheetsData(this.employee.employeeNumber, startDate, endDate);
+  if (!this.hasError(timesheetsData)) {
     this.timesheets = timesheetsData.timesheets;
+    this.ptoBalances = timesheetsData.ptoBalances;
     this.supplementalData = timesheetsData.supplementalData;
-    if (this.ptoBalances['Jury Duty'] <= 0) delete this.ptoBalances['Jury Duty'];
-    if (this.ptoBalances['Maternity/Paternity Time Off'] <= 0) delete this.ptoBalances['Maternity/Paternity Time Off'];
-    if (this.ptoBalances && this.timesheets && this.supplementalData) {
-      localStorage.setItem('ptoBalances', JSON.stringify(this.ptoBalances));
-      localStorage.setItem('timesheetsMonthly', JSON.stringify(this.timesheets));
-      localStorage.setItem('supplementalDataMonthly', JSON.stringify(this.supplementalData));
-    }
-  } else {
-    this.errorMessage = timesheetsData?.response?.data?.message;
-    if (_.isEmpty(this.errorMessage)) {
-      this.errorMessage = 'An error has occurred';
+    this.lastUpdated = now();
+    this.removeExcludedPtoBalances();
+    if (this.employeeIsUser()) {
+      this.setStorage(isMonthly);
     }
   }
 }
 
+function removeExcludedPtoBalances() {
+  _.forEach(this.ptoBalances, (balance, jobcode) => {
+    if (this.excludeIfZero.includes(jobcode) && balance === 0) delete this.ptoBalances[jobcode];
+  });
+}
+
+function employeeIsUser() {
+  return this.employee.id === this.$store.getters.user.id;
+}
+
+async function setData(startDate, endDate, isMonthly) {
+  let storage = this.hasQbStorage();
+  let key = isMonthly ? 'monthly' : 'yearly';
+  if (storage && storage[key] && this.employeeIsUser() && !this.isStorageExpired()) {
+    this.setDataFromStorage(storage, key);
+  } else {
+    await this.setDataFromApi(startDate, endDate, isMonthly);
+  }
+}
+
+function hasError(timesheetsData) {
+  if (timesheetsData?.name === 'AxiosError') {
+    this.errorMessage = timesheetsData?.response?.data?.message;
+    if (_.isEmpty(this.errorMessage)) {
+      this.errorMessage = 'An error has occurred';
+    }
+    return true;
+  } else {
+    return false;
+  }
+}
+
+function hasQbStorage() {
+  return localStorage.getItem('qbData') ? JSON.parse(localStorage.getItem('qbData')) : null;
+}
+
+async function setInitialData() {
+  let today = getTodaysDate();
+  let startDate = format(startOf(subtract(today, 1, 'month'), 'month'), null, 'YYYY-MM');
+  let endDate = format(today, null, 'YYYY-MM');
+  await this.setData(startDate, endDate, true);
+}
+
 async function resetData() {
   this.loading = true;
-  localStorage.removeItem('ptoBalances');
-  localStorage.removeItem('timesheetsMonthly');
-  localStorage.removeItem('timesheetsYearly');
-  localStorage.removeItem('supplementalDataMonthly');
-  localStorage.removeItem('supplementalDataYearly');
+  this.timesheets = null;
+  this.ptoBalances = null;
+  this.supplementalData = null;
+  this.lastUpdated = null;
+  if (this.employeeIsUser()) {
+    localStorage.removeItem('qbData');
+  }
   this.emitter.emit('reset-data');
   await this.setInitialData();
   this.loading = false;
 }
 
+function isStorageExpired() {
+  // last updated will either be now, or retrived from local storage
+  return difference(now(), this.lastUpdated, 'hour') >= 24;
+}
+
+function getLastUpdatedText() {
+  let now = this.now();
+  let lastUpdated = this.lastUpdated;
+  let minutes = parseInt(difference(now, lastUpdated, 'minute') || 0);
+  let hours = parseInt(minutes / 60);
+  if (hours < 1 && minutes > 0) {
+    return `Last updated ${minutes} ${minutes > 1 ? 'minutes' : 'minute'} ago`;
+  } else if (hours > 0) {
+    return `${hours} ${hours > 1 ? 'hours' : 'hour'} ago`;
+  } else {
+    return null;
+  }
+}
+
 export default {
+  beforeUnmount,
   components: {
     MonthlyHours,
     PTOHours
   },
+  computed: {
+    getLastUpdatedText
+  },
   created,
   data() {
     return {
+      excludeIfZero: ['Jury Duty', 'Maternity/Paternity Time Off'],
       errorMessage: null,
+      lastUpdated: null,
       loading: true,
       ptoBalances: null,
       timesheets: null,
@@ -126,9 +191,32 @@ export default {
     };
   },
   methods: {
+    employeeIsUser,
+    hasError,
+    hasQbStorage,
+    isStorageExpired,
+    now,
+    removeExcludedPtoBalances,
     setInitialData,
+    setData,
+    setDataFromApi,
+    setDataFromStorage,
+    setStorage,
     resetData
   },
   props: ['employee']
 };
 </script>
+
+<style scoped>
+.last-updated {
+  position: absolute !important;
+  font-size: 10px;
+  top: 0px;
+  right: 0px;
+  margin-right: 10px;
+}
+.relative {
+  position: relative !important;
+}
+</style>
