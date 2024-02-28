@@ -68,7 +68,7 @@ export default {
 <style>
 .chart-wrapper {
   width: 100%;
-  height: 125px !important;
+  height: 135px !important;
   position: relative;
 }
 

@@ -72,7 +72,12 @@
             :employeeDataLoading="loading"
             :fiscalDateView="fiscalDateView"
           ></available-budgets>
-          <anniversary-card :employee="model" :key="refreshKey" location="profile"></anniversary-card>
+          <anniversary-card
+            :employee="model"
+            :key="refreshKey"
+            :hasBudgets="accessibleBudgets?.length > 0"
+            location="profile"
+          ></anniversary-card>
         </v-col>
 
         <!-- Employee Form -->

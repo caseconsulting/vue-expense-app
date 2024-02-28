@@ -5,7 +5,7 @@
         <v-row class="mb-1" dense>
           <v-col cols="3" class="d-flex align-center justify-center pa-0">
             <v-btn
-              :disabled="!isMonthly || (isMonthly && getMonth(date) !== getMonth(today))"
+              :disabled="!isMonthly || (isMonthly && !dateIsCurrentMonth())"
               icon=""
               variant="text"
               density="comfortable"
@@ -15,7 +15,7 @@
               <v-icon size="x-large"> mdi-arrow-left-thin </v-icon>
             </v-btn>
             <v-btn
-              :disabled="!isMonthly || (isMonthly && getMonth(date) === getMonth(today))"
+              :disabled="!isMonthly || (isMonthly && dateIsCurrentMonth())"
               icon=""
               variant="text"
               density="comfortable"
@@ -38,6 +38,7 @@
               density="compact"
               :disabled="timePeriodLoading"
               @click="
+                customWorkDayInput = null;
                 isMonthly = !isMonthly;
                 timePeriodLoading = true;
               "
@@ -94,10 +95,34 @@
               {{ Math.abs(formatNum(getHoursBehindBy)) }}h
             </div>
           </div>
-          <div class="d-flex justify-space-between my-3">
-            <div class="mr-3">Days Remaining</div>
+          <div v-if="(isMonthly && dateIsCurrentMonth()) || !isMonthly" class="d-flex justify-space-between my-3">
+            <div class="mr-2">Future</div>
             <div class="dotted-line"></div>
-            <div class="ml-3">{{ formatNum(getRemainingWorkDays) }}</div>
+            <div class="ml-2">{{ formatNum(getFutureHours) }}h</div>
+          </div>
+          <div class="d-flex justify-space-between my-3">
+            <div class="mr-3">
+              Work Days Remaining
+              <span v-if="getFutureDays > 0" class="text-blue">*</span>
+              <v-tooltip v-if="getFutureDays > 0" activator="parent" location="top">
+                {{ getFutureDays }} {{ getFutureDays > 1 ? 'days' : 'day' }} subtracted to account for future timesheets
+              </v-tooltip>
+            </div>
+            <div class="dotted-line"></div>
+            <div class="ml-3">
+              <div v-if="!showCustomWorkDayInput" @click="showCustomWorkDayInput = true">
+                {{ formatNum(getRemainingWorkDays) }}
+              </div>
+              <v-text-field
+                v-else
+                v-model="customWorkDayInput"
+                autofocus
+                type="text"
+                class="text-right"
+                @blur="showCustomWorkDayInput = false"
+                hide-details
+              ></v-text-field>
+            </div>
           </div>
         </div>
       </v-col>
@@ -111,10 +136,15 @@
             No job codes for this time period
           </div>
           <div v-else>
-            <div v-for="jobcode in sortedJobcodesByDuration" :key="jobcode" class="d-flex justify-space-between my-3">
-              <div class="mr-3">{{ jobcode }}</div>
-              <div class="dotted-line"></div>
-              <div class="ml-3">{{ formatNum(convertToHours(getTimeData[jobcode])) }}h</div>
+            <div v-for="jobcode in sortedJobcodesByDuration" :key="jobcode">
+              <div
+                v-if="isMonthly || showPtoJobCodes || (!showPtoJobCodes && !ptoJobcodes.includes(jobcode))"
+                class="d-flex justify-space-between my-3"
+              >
+                <div class="mr-3">{{ jobcode }}</div>
+                <div class="dotted-line"></div>
+                <div class="ml-3">{{ formatNum(convertToHours(getTimeData[jobcode])) }}h</div>
+              </div>
             </div>
             <v-span v-if="!isMonthly" @click="showPtoJobCodes = !showPtoJobCodes" class="pointer text-blue">
               {{ showPtoJobCodes ? 'Hide PTO jobcodes' : 'Show PTO job codes' }}
@@ -167,10 +197,8 @@ function getTimeData() {
     let timesheets = {};
     _.forEach(this.timesheets, (monthTimesheets) => {
       _.forEach(monthTimesheets, (duration, jobName) => {
-        if (this.showPtoJobCodes || !this.ptoJobcodes?.includes(jobName)) {
-          if (!timesheets[jobName]) timesheets[jobName] = 0;
-          timesheets[jobName] += duration;
-        }
+        if (!timesheets[jobName]) timesheets[jobName] = 0;
+        timesheets[jobName] += duration;
       });
     });
     return timesheets;
@@ -179,14 +207,16 @@ function getTimeData() {
 
 function periodHoursCompleted() {
   let total = 0;
-  _.forEach(this.getTimeData, (duration) => {
-    total += duration;
+  _.forEach(this.getTimeData, (duration, jobName) => {
+    if (this.isMonthly || (!this.isMonthly && !this.ptoJobcodes?.includes(jobName))) {
+      total += duration;
+    }
   });
   return convertToHours(total);
 }
 
 function totalPeriodHours() {
-  if (this.isMonthly || this.showPtoJobCodes) {
+  if (this.isMonthly) {
     return this.getTotalWorkDays * this.getProRatedHours;
   } else {
     return this.BONUS_YEAR_TOTAL * (this.employee.workStatus / 100);
@@ -223,14 +253,17 @@ function getWorkDays(startDate, endDate) {
 } // getWorkDays
 
 function getRemainingWorkDays() {
-  if (this.isMonthly) {
+  if (this.customWorkDayInput && Number(this.customWorkDayInput)) {
+    this.customWorkDayInput = Number(this.customWorkDayInput) ?? null;
+    return this.customWorkDayInput || this.getRemainingWorkDays;
+  } else if (this.isMonthly) {
     if (this.dateIsCurrentMonth()) {
-      return this.getWorkDays(this.date, endOf(this.date, 'month')) - 1;
+      return this.getWorkDays(this.date, endOf(this.date, 'month')) - this.getFutureDays - 1;
     } else {
       return 0;
     }
   } else {
-    return this.getWorkDays(this.today, endOf(this.today, 'year')) - 1;
+    return this.getWorkDays(this.today, endOf(this.today, 'year')) - this.getFutureDays - 1;
   }
 }
 
@@ -240,6 +273,14 @@ function getTotalWorkDays() {
   } else {
     return this.getWorkDays(startOf(this.today, 'year'), endOf(this.today, 'year'));
   }
+}
+
+function getFutureDays() {
+  return this.supplementalData?.future?.days || 0;
+}
+
+function getFutureHours() {
+  return this.convertToHours(this.supplementalData?.future?.duration || 0);
 }
 
 function dateIsCurrentMonth() {
@@ -258,20 +299,24 @@ function getHoursBehindBy() {
   if (this.isMonthly) {
     if (this.dateIsCurrentMonth()) {
       return (
-        this.getWorkDays(startOf(this.date, 'month'), this.date) * this.getProRatedHours - this.periodHoursCompleted
+        this.getWorkDays(startOf(this.today, 'month'), this.today) * this.getProRatedHours -
+        this.periodHoursCompleted +
+        this.getFutureHours
       );
     } else {
       return this.getTotalWorkDays * this.getProRatedHours - this.periodHoursCompleted;
     }
   } else {
     return (
-      this.getWorkDays(startOf(this.today, 'year'), this.today) * this.getProRatedHours - this.periodHoursCompleted
+      this.getWorkDays(startOf(this.today, 'year'), this.today) * this.getProRatedHours -
+      this.periodHoursCompleted +
+      this.getFutureHours
     );
   }
 }
 
 function getProRatedHours() {
-  if (this.isMonthly || this.showPtoJobCodes) {
+  if (this.isMonthly) {
     return 8 * (this.employee.workStatus / 100);
   } else {
     return (this.totalPeriodHours / this.getTotalWorkDays) * (this.employee.workStatus / 100);
@@ -299,6 +344,8 @@ export default {
   },
   computed: {
     getTimeData,
+    getFutureDays,
+    getFutureHours,
     getHoursBehindBy,
     getProRatedHours,
     getRemainingAverageHoursPerDay,
@@ -313,7 +360,9 @@ export default {
   data() {
     return {
       isMonthly: true,
+      customWorkDayInput: null,
       date: format(getTodaysDate(), null, DEFAULT_ISOFORMAT),
+      showCustomWorkDayInput: false,
       showPtoJobCodes: false,
       today: format(getTodaysDate(), null, DEFAULT_ISOFORMAT),
       timePeriodLoading: false,
@@ -332,7 +381,7 @@ export default {
     format,
     formatNum
   },
-  props: ['employee', 'ptoBalances', 'timesheets'],
+  props: ['employee', 'ptoBalances', 'timesheets', 'supplementalData'],
   watch: {
     timePeriodLoading: function () {
       if (this.timePeriodLoading) {

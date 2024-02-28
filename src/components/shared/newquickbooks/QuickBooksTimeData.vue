@@ -22,6 +22,7 @@
               :employee="employee"
               :timesheets="timesheets || {}"
               :ptoBalances="ptoBalances || {}"
+              :supplementalData="supplementalData || {}"
             ></monthly-hours>
             <hr class="my-5 mx-7" />
             <p-t-o-hours :employee="employee" :ptoBalances="ptoBalances || {}"></p-t-o-hours>
@@ -43,19 +44,25 @@ async function created() {
   this.emitter.on('get-period-data', async ({ startDate, endDate, isMonthly }) => {
     if (isMonthly) {
       let monthlyTimesheetsStorage = localStorage.getItem('timesheetsMonthly');
-      if (monthlyTimesheetsStorage) {
+      let monthlySupplementalStorage = localStorage.getItem('supplementalDataMonthly');
+      if (monthlyTimesheetsStorage && monthlySupplementalStorage) {
         this.timesheets = JSON.parse(monthlyTimesheetsStorage);
+        this.supplementalData = JSON.parse(monthlySupplementalStorage);
       }
     } else {
       let yearlyTimesheetsStorage = localStorage.getItem('timesheetsYearly');
-      if (!yearlyTimesheetsStorage || this.$store.getters.user.id !== this.employee.id) {
+      let yearlySupplementalStorage = localStorage.getItem('supplementalDataYearly');
+      if (!yearlyTimesheetsStorage || !yearlySupplementalStorage || this.$store.getters.user.id !== this.employee.id) {
         let timesheetsData = await api.getTimesheetsData(this.employee.employeeNumber, startDate, endDate);
         this.timesheets = timesheetsData.timesheets;
-        if (this.timesheets) {
+        this.supplementalData = timesheetsData.supplementalData;
+        if (this.timesheets && this.supplementalData) {
           localStorage.setItem('timesheetsYearly', JSON.stringify(this.timesheets));
+          localStorage.setItem('supplementalDataYearly', JSON.stringify(this.supplementalData));
         }
       } else {
         this.timesheets = JSON.parse(yearlyTimesheetsStorage);
+        this.supplementalData = JSON.parse(yearlySupplementalStorage);
       }
     }
   });
@@ -75,11 +82,13 @@ async function setInitialData() {
     this.errorMessage = null;
     this.ptoBalances = timesheetsData.ptoBalances;
     this.timesheets = timesheetsData.timesheets;
+    this.supplementalData = timesheetsData.supplementalData;
     if (this.ptoBalances['Jury Duty'] <= 0) delete this.ptoBalances['Jury Duty'];
     if (this.ptoBalances['Maternity/Paternity Time Off'] <= 0) delete this.ptoBalances['Maternity/Paternity Time Off'];
-    if (this.ptoBalances && this.timesheets) {
+    if (this.ptoBalances && this.timesheets && this.supplementalData) {
       localStorage.setItem('ptoBalances', JSON.stringify(this.ptoBalances));
       localStorage.setItem('timesheetsMonthly', JSON.stringify(this.timesheets));
+      localStorage.setItem('supplementalDataMonthly', JSON.stringify(this.supplementalData));
     }
   } else {
     this.errorMessage = timesheetsData?.response?.data?.message;
@@ -94,6 +103,8 @@ async function resetData() {
   localStorage.removeItem('ptoBalances');
   localStorage.removeItem('timesheetsMonthly');
   localStorage.removeItem('timesheetsYearly');
+  localStorage.removeItem('supplementalDataMonthly');
+  localStorage.removeItem('supplementalDataYearly');
   this.emitter.emit('reset-data');
   await this.setInitialData();
   this.loading = false;
@@ -110,7 +121,8 @@ export default {
       errorMessage: null,
       loading: true,
       ptoBalances: null,
-      timesheets: null
+      timesheets: null,
+      supplementalData: null
     };
   },
   methods: {

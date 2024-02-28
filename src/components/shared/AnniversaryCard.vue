@@ -146,7 +146,7 @@ function getFiscalYearView() {
  * load the data and api call to get budgets
  */
 async function loadData() {
-  this.hireDate = this.employee.hireDate;
+  this.hireDate = format(this.employee.hireDate, null, DEFAULT_ISOFORMAT);
   this.fiscalDateView = this.getCurrentBudgetYear(this.hireDate);
   this.allUserBudgets = await api.getEmployeeBudgets(this.employee.id);
   this.refreshBudgetYears();
