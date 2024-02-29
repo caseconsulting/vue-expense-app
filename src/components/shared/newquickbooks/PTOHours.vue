@@ -46,29 +46,71 @@
 <script>
 import PTOCashOutForm from '@/components/shared/PTOCashOutForm.vue';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * The Mounted lifecycle hook.
+ */
 function mounted() {
   this.emitter.on('close-pto-cash-out-form', () => {
     this.showPTOCashOutFormModal = false;
   });
-}
+} // mounted
 
-function openLink(link) {
-  window.open(link, '_blank');
-}
+// |--------------------------------------------------|
+// |                                                  |
+// |                 COMPUTED                         |
+// |                                                  |
+// |--------------------------------------------------|
 
-function convertToHours(seconds) {
-  return Number(seconds / 60 / 60)
-    ?.toFixed(2)
-    ?.replace(/[.,]00$/, ''); // removes decimals if a whole number
-}
-
+/**
+ * Sorts the pto balances by duration.
+ *
+ * @returns Array - The array of pto jobcodes in sorted order
+ */
 function sortedBalancesByDuration() {
   let balances = this.ptoBalances;
   let orderedKeys = Object.keys(balances || {}).sort(function (a, b) {
     return balances[b] - balances[a];
   });
   return orderedKeys;
-}
+} // sortedBalancesByDuration
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Opens a link in a new tab.
+ *
+ * @param {String} link
+ */
+function openLink(link) {
+  window.open(link, '_blank');
+} // openLink
+
+/**
+ * Converts seconds to hours with 2 decimal places if needed.
+ *
+ * @param {Number} seconds - The number of seconds
+ */
+function convertToHours(seconds) {
+  return Number(seconds / 60 / 60)
+    ?.toFixed(2)
+    ?.replace(/[.,]00$/, ''); // removes decimals if a whole number
+} // convertToHours
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   components: {

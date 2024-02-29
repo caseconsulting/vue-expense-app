@@ -41,78 +41,78 @@ import MonthlyHours from '@/components/shared/newquickbooks/MonthlyHours.vue';
 import PTOHours from '@/components/shared/newquickbooks/PTOHours.vue';
 import _ from 'lodash';
 import api from '@/shared/api';
-import { difference, format, getTodaysDate, now, startOf, subtract } from '@/shared/dateUtils';
+import { difference, format, getTodaysDate, isBefore, now, startOf, subtract } from '@/shared/dateUtils';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * The Before Unmount lifesycle hook.
+ */
+function beforeUnmount() {
+  this.emitter.off('get-period-data');
+} // beforeUnmount
+
+/**
+ * The Created lifecycle hook.
+ */
 async function created() {
   this.emitter.on('get-period-data', async ({ startDate, endDate, isMonthly }) => {
     await this.setData(startDate, endDate, isMonthly);
   });
-
   await this.setInitialData();
   this.loading = false;
-}
+} // created
 
-function beforeUnmount() {
-  this.emitter.off('get-period-data');
-}
+// |--------------------------------------------------|
+// |                                                  |
+// |                 COMPUTED                         |
+// |                                                  |
+// |--------------------------------------------------|
 
-function setDataFromStorage(qbStorage, key) {
-  this.timesheets = qbStorage[key]?.timesheets;
-  this.supplementalData = qbStorage[key]?.supplementalData;
-  this.lastUpdated = qbStorage[key]?.lastUpdated;
-  this.ptoBalances = qbStorage?.ptoBalances;
-}
-
-function setStorage(isMonthly) {
-  let storage = this.hasQbStorage();
-  let key = isMonthly ? this.KEYS.MONTHLY : this.KEYS.YEARLY;
-  let data = {
-    [key]: {
-      timesheets: this.timesheets,
-      supplementalData: this.supplementalData,
-      lastUpdated: this.lastUpdated
-    },
-    ptoBalances: this.ptoBalances
-  };
-
-  // overwrite storage
-  localStorage.setItem(this.KEYS.QB, JSON.stringify({ ...storage, ...data }));
-}
-
-async function setDataFromApi(startDate, endDate, isMonthly) {
-  let timesheetsData = await api.getTimesheetsData(this.employee.employeeNumber, startDate, endDate);
-  if (!this.hasError(timesheetsData)) {
-    this.timesheets = timesheetsData.timesheets;
-    this.ptoBalances = timesheetsData.ptoBalances;
-    this.supplementalData = timesheetsData.supplementalData;
-    this.lastUpdated = now();
-    this.removeExcludedPtoBalances();
-    if (this.employeeIsUser()) {
-      this.setStorage(isMonthly);
-    }
+/**
+ * Gets the text for when timesheets data was last updated.
+ *
+ * @returns String - The string to display for last updated
+ */
+function getLastUpdatedText() {
+  let now = this.now();
+  let lastUpdated = this.lastUpdated;
+  let minutes = parseInt(difference(now, lastUpdated, 'minute') || 0);
+  let hours = parseInt(minutes / 60);
+  if (hours < 1 && minutes > 0) {
+    return `Last updated ${minutes} ${minutes > 1 ? 'minutes' : 'minute'} ago`;
+  } else if (hours > 0) {
+    return `Last updated ${hours} ${hours > 1 ? 'hours' : 'hour'} ago`;
+  } else {
+    return null;
   }
-}
+} // getLastUpdatedText
 
-function removeExcludedPtoBalances() {
-  _.forEach(this.ptoBalances, (balance, jobcode) => {
-    if (this.excludeIfZero.includes(jobcode) && balance === 0) delete this.ptoBalances[jobcode];
-  });
-}
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
 
+/**
+ * True if the user is the employee from props
+ *
+ * @returns Boolean - Whether or not the employee prop is the user
+ */
 function employeeIsUser() {
   return this.employee.id === this.$store.getters.user.id;
-}
+} // employeeIsUser
 
-async function setData(startDate, endDate, isMonthly) {
-  let storage = this.hasQbStorage();
-  let key = isMonthly ? this.KEYS.MONTHLY : this.KEYS.YEARLY;
-  if (storage && storage[key] && this.employeeIsUser() && !this.isStorageExpired()) {
-    this.setDataFromStorage(storage, key);
-  } else {
-    await this.setDataFromApi(startDate, endDate, isMonthly);
-  }
-}
-
+/**
+ * Sets an error message if the API returned an error.
+ *
+ * @param {Object} timesheetsData - The timesheets data object
+ * @returns Boolean - Whether or not the API returned an error
+ */
 function hasError(timesheetsData) {
   if (timesheetsData?.name === 'AxiosError') {
     this.errorMessage = timesheetsData?.response?.data?.message;
@@ -123,19 +123,39 @@ function hasError(timesheetsData) {
   } else {
     return false;
   }
-}
+} // hasError
 
-function hasQbStorage() {
+/**
+ * Timesheets local storage expires if the storage is from a previous day.
+ *
+ * @returns Boolean - Whether or not timesheets local storage has expired
+ */
+function isStorageExpired() {
+  // last updated will either be now, or retrived from local storage
+  return isBefore(this.lastUpdated, now(), 'day');
+} // isStorageExpired
+
+/**
+ * True if timesheets exists in local storage.
+ *
+ * @returns Boolean - Whether or not timesheets exists in lcoal storage
+ */
+function qbStorageExists() {
   return localStorage.getItem(this.KEYS.QB) ? JSON.parse(localStorage.getItem(this.KEYS.QB)) : null;
-}
+} // qbStorageExists
 
-async function setInitialData() {
-  let today = getTodaysDate();
-  let startDate = format(startOf(subtract(today, 1, 'month'), 'month'), null, 'YYYY-MM');
-  let endDate = format(today, null, 'YYYY-MM');
-  await this.setData(startDate, endDate, true);
-}
+/**
+ * Removes a jobcode key value pair from PTO balances object if it is not relevant to a user.
+ */
+function removeExcludedPtoBalances() {
+  _.forEach(this.ptoBalances, (balance, jobcode) => {
+    if (this.excludeIfZero.includes(jobcode) && balance === 0) delete this.ptoBalances[jobcode];
+  });
+} // removeExcludedPtoBalances
 
+/**
+ * Resets components data and removes timesheets local storage.
+ */
 async function resetData() {
   this.loading = true;
   this.timesheets = null;
@@ -148,26 +168,96 @@ async function resetData() {
   this.emitter.emit('reset-data');
   await this.setInitialData();
   this.loading = false;
-}
+} // resetData
 
-function isStorageExpired() {
-  // last updated will either be now, or retrived from local storage
-  return difference(now(), this.lastUpdated, 'hour') >= 24;
-}
-
-function getLastUpdatedText() {
-  let now = this.now();
-  let lastUpdated = this.lastUpdated;
-  let minutes = parseInt(difference(now, lastUpdated, 'minute') || 0);
-  let hours = parseInt(minutes / 60);
-  if (hours < 1 && minutes > 0) {
-    return `Last updated ${minutes} ${minutes > 1 ? 'minutes' : 'minute'} ago`;
-  } else if (hours > 0) {
-    return `${hours} ${hours > 1 ? 'hours' : 'hour'} ago`;
-  } else {
-    return null;
+/**
+ * Retrieves, sets, and stores components data from API.
+ *
+ * @param {String} startDate - The time period start date (YYYY-MM) format
+ * @param {String} endDate - The time period end date (YYYY-MM) format
+ * @param {Boolean} isMonthly - Whether or not the time period is monthly
+ */
+async function setDataFromApi(startDate, endDate, isMonthly) {
+  let timesheetsData = await api.getTimesheetsData(this.employee.employeeNumber, startDate, endDate);
+  if (!this.hasError(timesheetsData)) {
+    this.timesheets = timesheetsData.timesheets;
+    this.ptoBalances = timesheetsData.ptoBalances;
+    this.supplementalData = timesheetsData.supplementalData;
+    this.lastUpdated = now();
+    this.removeExcludedPtoBalances();
+    if (this.employeeIsUser()) {
+      // only set local storage if user is looking at their own data
+      this.setStorage(isMonthly);
+    }
   }
-}
+} // setDataFromApi
+
+/**
+ * Sets the main components data used throughout child components.
+ *
+ * @param {Object} qbStorage - The local storage timesheets object
+ * @param {String} key - The monthly or yearly object key
+ */
+function setDataFromStorage(qbStorage, key) {
+  this.timesheets = qbStorage[key]?.timesheets;
+  this.supplementalData = qbStorage[key]?.supplementalData;
+  this.lastUpdated = qbStorage[key]?.lastUpdated;
+  this.ptoBalances = qbStorage?.ptoBalances;
+} // setDataFromStorage
+
+/**
+ * Sets local storage for Quickbooks data.
+ *
+ * @param {Boolean} isMonthly - Whether or not the time period is monthly
+ */
+function setStorage(isMonthly) {
+  let storage = this.qbStorageExists();
+  let key = isMonthly ? this.KEYS.MONTHLY : this.KEYS.YEARLY;
+  let data = {
+    [key]: {
+      timesheets: this.timesheets,
+      supplementalData: this.supplementalData,
+      lastUpdated: this.lastUpdated
+    },
+    ptoBalances: this.ptoBalances
+  };
+
+  // overwrite storage
+  localStorage.setItem(this.KEYS.QB, JSON.stringify({ ...storage, ...data }));
+} // setStorage
+
+/**
+ * Retrieves and sets timesheets data from API or local storage.
+ *
+ * @param {String} startDate - The time period start date (YYYY-MM) format
+ * @param {String} endDate - The time period end date (YYYY-MM) format
+ * @param {Boolean} isMonthly - Whether or not the time period is monthly
+ */
+async function setData(startDate, endDate, isMonthly) {
+  let storage = this.qbStorageExists();
+  let key = isMonthly ? this.KEYS.MONTHLY : this.KEYS.YEARLY;
+  if (storage && storage[key] && this.employeeIsUser() && !this.isStorageExpired()) {
+    this.setDataFromStorage(storage, key);
+  } else {
+    await this.setDataFromApi(startDate, endDate, isMonthly);
+  }
+} // setData
+
+/**
+ * Sets the timesheets data on initial load based on a monthly time period (current and previous month displayed).
+ */
+async function setInitialData() {
+  let today = getTodaysDate();
+  let startDate = format(startOf(subtract(today, 1, 'month'), 'month'), null, 'YYYY-MM');
+  let endDate = format(today, null, 'YYYY-MM');
+  await this.setData(startDate, endDate, true);
+} // setInitialData
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   beforeUnmount,
@@ -186,8 +276,8 @@ export default {
       lastUpdated: null,
       loading: true,
       ptoBalances: null,
-      timesheets: null,
       supplementalData: null,
+      timesheets: null,
       KEYS: {
         QB: 'qbData',
         MONTHLY: 'monthly',
@@ -198,16 +288,16 @@ export default {
   methods: {
     employeeIsUser,
     hasError,
-    hasQbStorage,
     isStorageExpired,
     now,
+    qbStorageExists,
     removeExcludedPtoBalances,
+    resetData,
     setInitialData,
     setData,
     setDataFromApi,
     setDataFromStorage,
-    setStorage,
-    resetData
+    setStorage
   },
   props: ['employee']
 };

@@ -3,9 +3,10 @@
     <v-row>
       <v-col order="1" cols="12" sm="12" md="6" lg="6" xl="6" xxl="6">
         <v-row class="mb-1" dense>
+          <!-- Next and Previous Months, Title, and Expand/Collapse Time Period -->
           <v-col cols="3" class="d-flex align-center justify-center pa-0">
             <v-btn
-              :disabled="!isMonthly || (isMonthly && !dateIsCurrentMonth())"
+              :disabled="!isMonthly || (isMonthly && !dateIsCurrentMonth)"
               icon=""
               variant="text"
               density="comfortable"
@@ -15,7 +16,7 @@
               <v-icon size="x-large"> mdi-arrow-left-thin </v-icon>
             </v-btn>
             <v-btn
-              :disabled="!isMonthly || (isMonthly && dateIsCurrentMonth())"
+              :disabled="!isMonthly || (isMonthly && dateIsCurrentMonth)"
               icon=""
               variant="text"
               density="comfortable"
@@ -49,7 +50,9 @@
               </v-icon>
             </v-btn>
           </v-col>
+          <!-- End Next and Previous Months, Title, and Expand/Collapse Time Period -->
         </v-row>
+        <!-- Timesheets Donut Chart -->
         <v-progress-circular
           v-if="timePeriodLoading"
           size="120"
@@ -60,14 +63,16 @@
         ></v-progress-circular>
         <timesheets-chart
           v-else
-          :key="getTimeData"
+          :key="timeData"
           :completed="formatNum(periodHoursCompleted)"
           :needed="totalPeriodHours"
-          :jobcodes="getTimeData || {}"
+          :jobcodes="timeData || {}"
           :ptoJobcodes="!isMonthly ? ptoJobcodes : null"
           :remainingHours="formatNum(remainingHours)"
         ></timesheets-chart>
+        <!-- End Timesheets Donut Chart -->
       </v-col>
+      <!-- Time Period Details -->
       <v-col :order="$vuetify.display.mdAndUp ? 2 : 3" cols="12" md="6" lg="6" xl="6" xxl="6">
         <v-skeleton-loader v-if="timePeriodLoading" type="list-item@4"></v-skeleton-loader>
         <div v-else>
@@ -84,40 +89,40 @@
           <div class="d-flex justify-space-between my-3">
             <div class="mr-2">Remaining Avg/Day</div>
             <div class="dotted-line"></div>
-            <div :class="getRemainingAverageHoursPerDay > 8 ? 'text-red font-weight-bold' : ''" class="ml-2">
-              {{ formatNum(getRemainingAverageHoursPerDay) }}h
+            <div :class="remainingAverageHoursPerDay > 8 ? 'text-red font-weight-bold' : ''" class="ml-2">
+              {{ formatNum(remainingAverageHoursPerDay) }}h
             </div>
           </div>
           <div class="d-flex justify-space-between my-3">
-            <div class="mr-2">{{ getHoursBehindBy > 0 ? 'Behind By' : 'Ahead By' }}</div>
+            <div class="mr-2">{{ hoursBehindBy > 0 ? 'Behind By' : 'Ahead By' }}</div>
             <div class="dotted-line"></div>
-            <div :class="getHoursBehindBy > 0 ? 'text-red font-weight-bold' : ''" class="ml-2">
-              {{ Math.abs(formatNum(getHoursBehindBy)) }}h
+            <div :class="hoursBehindBy > 0 ? 'text-red font-weight-bold' : ''" class="ml-2">
+              {{ Math.abs(formatNum(hoursBehindBy)) }}h
             </div>
           </div>
-          <div v-if="(isMonthly && dateIsCurrentMonth()) || !isMonthly" class="d-flex justify-space-between my-3">
+          <div v-if="(isMonthly && dateIsCurrentMonth) || !isMonthly" class="d-flex justify-space-between my-3">
             <div class="mr-2">Future</div>
             <div class="dotted-line"></div>
-            <div class="ml-2">{{ formatNum(getFutureHours) }}h</div>
+            <div class="ml-2">{{ formatNum(futureHours) }}h</div>
           </div>
           <div class="d-flex justify-space-between my-3">
             <div class="mr-3">
               Work Days Remaining
-              <span v-if="(getFutureDays > 0 && isMonthly && dateIsCurrentMonth()) || !isMonthly" class="text-blue">
+              <span v-if="(futureDays > 0 && isMonthly && dateIsCurrentMonth) || !isMonthly" class="text-blue">
                 *
               </span>
               <v-tooltip
-                v-if="(getFutureDays > 0 && isMonthly && dateIsCurrentMonth()) || !isMonthly"
+                v-if="(futureDays > 0 && isMonthly && dateIsCurrentMonth) || !isMonthly"
                 activator="parent"
                 location="top"
               >
-                {{ getFutureDays }} {{ getFutureDays > 1 ? 'days' : 'day' }} subtracted to account for future timesheets
+                {{ futureDays }} {{ futureDays > 1 ? 'days' : 'day' }} subtracted to account for future timesheets
               </v-tooltip>
             </div>
             <div class="dotted-line"></div>
             <div class="ml-3">
               <div v-if="!showCustomWorkDayInput" @click="showCustomWorkDayInput = true">
-                {{ formatNum(getRemainingWorkDays) }}
+                {{ formatNum(remainingWorkDays) }}
               </div>
               <v-text-field
                 v-else
@@ -132,17 +137,17 @@
           </div>
         </div>
       </v-col>
+      <!-- End Time Period Details -->
+      <!-- Time Period Job Codes -->
       <v-col :order="$vuetify.display.mdAndUp ? 3 : 2" cols="12">
         <v-skeleton-loader v-if="timePeriodLoading" type="list-item@4"></v-skeleton-loader>
         <div v-else>
           <h3 class="d-flex align-center">
             <v-icon class="mr-2">mdi-briefcase-outline</v-icon> {{ isMonthly ? 'Monthly' : 'Yearly' }} Job Codes
           </h3>
-          <div v-if="Object.entries(getTimeData || {})?.length === 0" class="my-3">
-            No job codes for this time period
-          </div>
+          <div v-if="Object.entries(timeData || {})?.length === 0" class="my-3">No job codes for this time period</div>
           <div v-else>
-            <div v-for="(duration, jobcode) in getTimeData" :key="jobcode">
+            <div v-for="(duration, jobcode) in timeData" :key="jobcode">
               <div
                 v-if="isMonthly || showPtoJobCodes || (!showPtoJobCodes && !ptoJobcodes.includes(jobcode))"
                 class="d-flex justify-space-between my-3"
@@ -163,6 +168,7 @@
           </div>
         </div>
       </v-col>
+      <!-- End Time Period Job Codes -->
     </v-row>
   </div>
 </template>
@@ -185,31 +191,172 @@ import {
   DEFAULT_ISOFORMAT
 } from '@/shared/dateUtils';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * The Created lifecycle hook.
+ */
 function created() {
   this.emitter.on('reset-data', () => {
     this.isMonthly = true;
     format(this.today, null, DEFAULT_ISOFORMAT);
   });
-}
+} // created
 
-function formatNum(value) {
-  return value?.toFixed(2)?.replace(/[.,]00$/, ''); // removes decimals if a whole number
-}
+// |--------------------------------------------------|
+// |                                                  |
+// |                 COMPUTED                         |
+// |                                                  |
+// |--------------------------------------------------|
 
-function convertToHours(seconds) {
-  return Number(seconds / 60 / 60);
-}
+/**
+ * Checks if the date is in the current month.
+ *
+ * @returns Boolean - Whether or not the date is in the current month
+ */
+function dateIsCurrentMonth() {
+  return isSame(getMonth(this.date), getMonth(this.today));
+} // dateIsCurrentMonth
 
+/**
+ * The amount of different days timesheets were entered in the future.
+ *
+ * @returns Number - The amount of entered future days
+ */
+function futureDays() {
+  return this.supplementalData?.future?.days || 0;
+} // futureDays
+
+/**
+ * The amount of timesheets hours that are in the future.
+ *
+ * @returns Integer - The amount of hours entered in the future
+ */
+function futureHours() {
+  return this.convertToHours(this.supplementalData?.future?.duration || 0);
+} // futureHours
+
+/**
+ * Whether or not the employee has PTO jobcodes entered in their timesheets within the set time period.
+ *
+ * @returns Boolean - True if the employee has PTO jobcodes in their timesheets within the time period
+ */
 function hasPtoJobCodes() {
   let hasPtoJobCode = false;
-  let jobcodes = Object.keys(this.getTimeData || {});
+  let jobcodes = Object.keys(this.timeData || {});
   for (let i = 0; i < jobcodes.length && !hasPtoJobCode; i++) {
     if (this.ptoJobcodes?.includes(jobcodes[i])) hasPtoJobCode = true;
   }
   return hasPtoJobCode;
-}
+} // hasPtoJobCodes
 
-function getTimeData() {
+/**
+ * The amount of hours an employee is behind schedule by. If there has been 3 work days so far, then a full time employee
+ * should have 24 hours entered. If the number is negative, then the user is ahead in hours.
+ *
+ * @returns Number - The number of hours an employee is behind schedule by
+ */
+function hoursBehindBy() {
+  if (this.isMonthly) {
+    if (this.dateIsCurrentMonth) {
+      return (
+        this.getWorkDays(startOf(this.today, 'month'), this.today) * this.proRatedHours -
+        this.periodHoursCompleted +
+        this.futureHours
+      );
+    } else {
+      return this.totalWorkDays * this.proRatedHours - this.periodHoursCompleted;
+    }
+  } else {
+    return (
+      this.getWorkDays(startOf(this.today, 'year'), this.today) * this.proRatedHours -
+      this.periodHoursCompleted +
+      this.futureHours
+    );
+  }
+} // hoursBehindBy
+
+/**
+ * The amount of hours an employee has completed in the current time period.
+ *
+ * @returns Number - The time period hours an employee has completed
+ */
+function periodHoursCompleted() {
+  let total = 0;
+  _.forEach(this.timeData, (duration, jobName) => {
+    if (this.isMonthly || (!this.isMonthly && !this.ptoJobcodes?.includes(jobName))) {
+      total += duration;
+    }
+  });
+  return convertToHours(total);
+} // periodHoursCompleted
+
+/**
+ * The amount of hours an employee should ideally enter per day. Full-time = 8, part-time (75%) = 6, part-time (50%) = 4.
+ *
+ * @returns The employees pro-rated hours needed per day
+ */
+function proRatedHours() {
+  if (this.isMonthly) {
+    return 8 * (this.employee.workStatus / 100);
+  } else {
+    return (this.totalPeriodHours / this.totalWorkDays) * (this.employee.workStatus / 100);
+  }
+} // proRatedHours
+
+/**
+ * The remaining hours needed for the time period.
+ *
+ * @returns Number - The reimaining hours needed
+ */
+function remainingHours() {
+  let remaining = this.totalPeriodHours - this.periodHoursCompleted;
+  return remaining > 0 ? remaining : 0;
+} // remainingHours
+
+/**
+ * The remaining work days for the time period. Future hours will affect the number of work days remaining.
+ *
+ * @returns Number - The remaining work days for the time period.
+ */
+function remainingWorkDays() {
+  if (this.customWorkDayInput && Number(this.customWorkDayInput)) {
+    this.customWorkDayInput = Number(this.customWorkDayInput) ?? null;
+    return this.customWorkDayInput || this.remainingWorkDays;
+  } else if (this.isMonthly) {
+    if (this.dateIsCurrentMonth) {
+      return this.getWorkDays(this.date, endOf(this.date, 'month')) - this.futureDays - 1;
+    } else {
+      return 0;
+    }
+  } else {
+    return this.getWorkDays(this.today, endOf(this.today, 'year')) - this.futureDays - 1;
+  }
+} // remainingWorkDays
+
+/**
+ * The remaining average hours needed per day.
+ *
+ * @returns Number - The remaining average number of hours needed per day
+ */
+function remainingAverageHoursPerDay() {
+  if (Number(this.remainingWorkDays) > 0) {
+    return this.remainingHours / this.remainingWorkDays;
+  } else {
+    return this.dateIsCurrentMonth ? this.remainingHours : 0;
+  }
+} // remainingAverageHoursPerDay
+
+/**
+ * The jobcodes and their durations all sorted by duration within the time period.
+ *
+ * @returns Object - Key Value pairs of jobcodes and their durations
+ */
+function timeData() {
   let timeData = {};
   if (this.isMonthly) {
     timeData = this.timesheets[format(this.date, null, 'YYYY-MM')];
@@ -233,34 +380,65 @@ function getTimeData() {
     orderedTimeData[jobcode] = timeData[jobcode];
   });
   return orderedTimeData;
-}
+} // timeData
 
-function periodHoursCompleted() {
-  let total = 0;
-  _.forEach(this.getTimeData, (duration, jobName) => {
-    if (this.isMonthly || (!this.isMonthly && !this.ptoJobcodes?.includes(jobName))) {
-      total += duration;
-    }
-  });
-  return convertToHours(total);
-}
-
+/**
+ * The total number of hours needed for a time period.
+ *
+ * @returns Number - The total number of hours needed
+ */
 function totalPeriodHours() {
   if (this.isMonthly) {
-    return this.getTotalWorkDays * this.getProRatedHours;
+    return this.totalWorkDays * this.proRatedHours;
   } else {
     return this.BONUS_YEAR_TOTAL * (this.employee.workStatus / 100);
   }
-}
+} // totalPeriodHours
 
-function remainingHours() {
-  let remaining = this.totalPeriodHours - this.periodHoursCompleted;
-  return remaining > 0 ? remaining : 0;
-}
+/**
+ * The total number of work days for a time period.
+ *
+ * @returns Number - The total number of works days
+ */
+function totalWorkDays() {
+  if (this.isMonthly) {
+    return this.getWorkDays(startOf(this.date, 'month'), endOf(this.date, 'month'));
+  } else {
+    return this.getWorkDays(startOf(this.today, 'year'), endOf(this.today, 'year'));
+  }
+} // totalWorkDays
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Converts seconds to hours.
+ *
+ * @param {Number} seconds - The number of seconds to convert
+ * @returns Number - The number of hours
+ */
+function convertToHours(seconds) {
+  return Number(seconds / 60 / 60);
+} // convertToHours
+
+/**
+ * Formats the given value. 3.05245 -> 3.05, 2.00 -> 3.1 -> 3.10.
+ *
+ * @param {Number} value - The number to format
+ * @returns String - The formatted value
+ */
+function formatNum(value) {
+  return value?.toFixed(2)?.replace(/[.,]00$/, ''); // removes decimals if a whole number
+} // formatNum
 
 /**
  * Calculates and returns the work days between start and end dates provided
  *
+ * @param {String} startDate - The start date (in YYYY-MM format)
+ * @param {String} endDate - The end date (in YYYY-MM format)
  * @return int - number of remaining working days
  */
 function getWorkDays(startDate, endDate) {
@@ -273,7 +451,7 @@ function getWorkDays(startDate, endDate) {
   }
   let date = startDate;
   while (!isAfter(date, endDate, 'day')) {
-    if (isWeekDay(date)) {
+    if (this.isWeekDay(date)) {
       workDays += 1;
     }
     // increment to the next day
@@ -282,149 +460,104 @@ function getWorkDays(startDate, endDate) {
   return workDays;
 } // getWorkDays
 
-function getRemainingWorkDays() {
-  if (this.customWorkDayInput && Number(this.customWorkDayInput)) {
-    this.customWorkDayInput = Number(this.customWorkDayInput) ?? null;
-    return this.customWorkDayInput || this.getRemainingWorkDays;
-  } else if (this.isMonthly) {
-    if (this.dateIsCurrentMonth()) {
-      return this.getWorkDays(this.date, endOf(this.date, 'month')) - this.getFutureDays - 1;
-    } else {
-      return 0;
-    }
-  } else {
-    return this.getWorkDays(this.today, endOf(this.today, 'year')) - this.getFutureDays - 1;
-  }
-}
-
-function getTotalWorkDays() {
-  if (this.isMonthly) {
-    return this.getWorkDays(startOf(this.date, 'month'), endOf(this.date, 'month'));
-  } else {
-    return this.getWorkDays(startOf(this.today, 'year'), endOf(this.today, 'year'));
-  }
-}
-
-function getFutureDays() {
-  return this.supplementalData?.future?.days || 0;
-}
-
-function getFutureHours() {
-  return this.convertToHours(this.supplementalData?.future?.duration || 0);
-}
-
-function dateIsCurrentMonth() {
-  return isSame(getMonth(this.date), getMonth(this.today));
-}
-
-function getRemainingAverageHoursPerDay() {
-  if (Number(this.getRemainingWorkDays) > 0) {
-    return this.remainingHours / this.getRemainingWorkDays;
-  } else {
-    return this.dateIsCurrentMonth() ? this.remainingHours : 0;
-  }
-}
-
-function getHoursBehindBy() {
-  if (this.isMonthly) {
-    if (this.dateIsCurrentMonth()) {
-      return (
-        this.getWorkDays(startOf(this.today, 'month'), this.today) * this.getProRatedHours -
-        this.periodHoursCompleted +
-        this.getFutureHours
-      );
-    } else {
-      return this.getTotalWorkDays * this.getProRatedHours - this.periodHoursCompleted;
-    }
-  } else {
-    return (
-      this.getWorkDays(startOf(this.today, 'year'), this.today) * this.getProRatedHours -
-      this.periodHoursCompleted +
-      this.getFutureHours
-    );
-  }
-}
-
-function getProRatedHours() {
-  if (this.isMonthly) {
-    return 8 * (this.employee.workStatus / 100);
-  } else {
-    return (this.totalPeriodHours / this.getTotalWorkDays) * (this.employee.workStatus / 100);
-  }
-}
-
 /**
- * Returns true if `day` is a weekday
+ * Returns true if day is a weekday.
+ *
+ * @param {Number} day - The day of the week as an integer
+ * @returns Boolean - Whether or not the day is a weekday
  */
 function isWeekDay(day) {
   return getIsoWeekday(day) >= 1 && getIsoWeekday(day) <= 5;
-}
+} // isWeekDay
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * The watcher for the time period loader.
+ */
+function watchTimePeriodLoading() {
+  if (this.timePeriodLoading) {
+    if (this.isMonthly) {
+      this.emitter.emit('get-period-data', {
+        startDate: format(startOf(subtract(this.today, 1, 'month'), 'month'), null, 'YYYY-MM'),
+        endDate: format(endOf(this.today, 'month'), null, 'YYYY-MM'),
+        isMonthly: this.isMonthly
+      });
+    } else {
+      this.emitter.emit('get-period-data', {
+        startDate: format(startOf(this.today, 'year'), null, 'YYYY-MM'),
+        endDate: format(endOf(this.today, 'year'), null, 'YYYY-MM'),
+        isMonthly: this.isMonthly
+      });
+    }
+  }
+} // watchTimePeriodLoading
+
+/**
+ * The watcher for the timesheets prop
+ */
+function watchTimesheets() {
+  this.timePeriodLoading = false;
+} // watchTimesheets
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   components: {
     TimesheetsChart
   },
   computed: {
-    getTimeData,
-    getFutureDays,
-    getFutureHours,
-    getHoursBehindBy,
-    getProRatedHours,
-    getRemainingAverageHoursPerDay,
-    getRemainingWorkDays,
-    getTotalWorkDays,
+    dateIsCurrentMonth,
+    futureDays,
+    futureHours,
+    hoursBehindBy,
     periodHoursCompleted,
+    proRatedHours,
+    remainingAverageHoursPerDay,
+    remainingHours,
+    remainingWorkDays,
+    timeData,
     totalPeriodHours,
-    remainingHours
+    totalWorkDays
   },
   created,
   data() {
     return {
-      isMonthly: true,
       customWorkDayInput: null,
       date: format(getTodaysDate(), null, DEFAULT_ISOFORMAT),
+      isMonthly: true,
+      ptoJobcodes: Object.keys(this.ptoBalances),
       showCustomWorkDayInput: false,
       showPtoJobCodes: false,
-      today: format(getTodaysDate(), null, DEFAULT_ISOFORMAT),
       timePeriodLoading: false,
-      ptoJobcodes: Object.keys(this.ptoBalances),
+      today: format(getTodaysDate(), null, DEFAULT_ISOFORMAT),
       BONUS_YEAR_TOTAL: 1860
     };
   },
   methods: {
     add,
-    subtract,
     convertToHours,
-    dateIsCurrentMonth,
+    format,
+    formatNum,
     getMonth,
     getWorkDays,
     getTodaysDate,
     hasPtoJobCodes,
-    format,
-    formatNum
+    isWeekDay,
+    subtract
   },
-  props: ['employee', 'ptoBalances', 'timesheets', 'supplementalData'],
+  props: ['employee', 'ptoBalances', 'supplementalData', 'timesheets'],
   watch: {
-    timePeriodLoading: function () {
-      if (this.timePeriodLoading) {
-        if (this.isMonthly) {
-          this.emitter.emit('get-period-data', {
-            startDate: format(startOf(subtract(this.today, 1, 'month'), 'month'), null, 'YYYY-MM'),
-            endDate: format(endOf(this.today, 'month'), null, 'YYYY-MM'),
-            isMonthly: this.isMonthly
-          });
-        } else {
-          this.emitter.emit('get-period-data', {
-            startDate: format(startOf(this.today, 'year'), null, 'YYYY-MM'),
-            endDate: format(endOf(this.today, 'year'), null, 'YYYY-MM'),
-            isMonthly: this.isMonthly
-          });
-        }
-      }
-    },
-    timesheets: function () {
-      this.timePeriodLoading = false;
-    }
+    timePeriodLoading: watchTimePeriodLoading,
+    timesheets: watchTimesheets
   }
 };
 </script>
