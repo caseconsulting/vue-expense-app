@@ -74,8 +74,8 @@
           ></available-budgets>
           <anniversary-card
             :employee="model"
+            emitCatcher="employee-page"
             :key="refreshKey"
-            :hasBudgets="accessibleBudgets?.length > 0"
             location="profile"
           ></anniversary-card>
         </v-col>
@@ -524,7 +524,7 @@ function mounted() {
     this.currentTab = tab;
   });
 
-  this.emitter.on('selected-budget-year', (date) => {
+  this.emitter.on('change-budget-year-employee-page', (date) => {
     if (date != this.fiscalDateView) {
       this.fiscalDateView = date;
     }
@@ -543,7 +543,7 @@ function beforeUnmount() {
   this.emitter.off('update');
   this.emitter.off('uploaded');
   this.emitter.off('tabChange');
-  this.emitter.off('selected-budget-year');
+  this.emitter.off('change-budget-year-employee-page');
 } // beforeUnmount
 
 // |--------------------------------------------------|

@@ -188,6 +188,7 @@ async function created() {
   this.emitter.on('selected-budget-year', (date) => {
     if (date != this.fiscalDateView) {
       this.fiscalDateView = date;
+      this.emitter.emit(`change-budget-year-${this.emitCatcher}`, date);
     }
   });
 } // created
@@ -240,6 +241,6 @@ export default {
     refreshBudgetYears,
     setYear // dateUtils
   },
-  props: ['employee', 'hasBudgets', 'location']
+  props: ['employee', 'hasBudgets', 'location', 'emitCatcher']
 };
 </script>
