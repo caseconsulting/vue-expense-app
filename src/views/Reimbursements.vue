@@ -45,7 +45,7 @@
 import UnreimbursedExpenses from '@/components/reimbursements/UnreimbursedExpenses.vue';
 import { isMobile } from '@/utils/utils';
 import PTOCashOutsTable from '../components/shared/PTOCashOutsTable.vue';
-import QuickBooksTimeData from '@/components/shared/newquickbooks/QuickBooksTimeData';
+import QuickBooksTimeData from '@/components/shared/quickbooks/QuickBooksTimeData';
 
 // |--------------------------------------------------|
 // |                                                  |

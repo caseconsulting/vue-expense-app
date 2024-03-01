@@ -37,7 +37,7 @@
 </template>
 <script>
 import PTOCashOutsTable from '@/components/shared/PTOCashOutsTable.vue';
-import QuickBooksTimeData from '@/components/shared/newquickbooks/QuickBooksTimeData';
+import QuickBooksTimeData from '@/components/shared/quickbooks/QuickBooksTimeData';
 
 // |--------------------------------------------------|
 // |                                                  |

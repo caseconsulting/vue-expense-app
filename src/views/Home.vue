@@ -90,7 +90,7 @@ import AvailableBudgets from '@/components/shared/AvailableBudgets.vue';
 import _ from 'lodash';
 import { isEmpty, isMobile, getCurrentBudgetYear } from '@/utils/utils';
 import { updateStoreExpenseTypes, updateStoreBudgets } from '@/utils/storeUtils';
-import QuickBooksTimeData from '@/components/shared/newquickbooks/QuickBooksTimeData';
+import QuickBooksTimeData from '@/components/shared/quickbooks/QuickBooksTimeData';
 import AnniversaryCard from '@/components/shared/AnniversaryCard';
 import {
   format,

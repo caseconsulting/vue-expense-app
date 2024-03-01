@@ -221,7 +221,7 @@ import api from '@/shared/api.js';
 import AvailableBudgets from '@/components/shared/AvailableBudgets.vue';
 import EmployeeForm from '@/components/employees/EmployeeForm.vue';
 import EmployeeInfo from '@/components/employees/EmployeeInfo.vue';
-import QuickBooksTimeData from '@/components/shared/newquickbooks/QuickBooksTimeData.vue';
+import QuickBooksTimeData from '@/components/shared/quickbooks/QuickBooksTimeData.vue';
 import {
   getCurrentBudgetYear,
   isEmpty,
