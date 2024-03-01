@@ -172,6 +172,7 @@
               variant="text"
               icon=""
               id="edit"
+              @click.stop
               @click="clickedEdit(item)"
             >
               <v-tooltip activator="parent" location="top">Edit</v-tooltip>
@@ -200,12 +201,17 @@
     />
     <delete-modal :toggleDeleteModal="toggleDeleteModal" type="PTO cash out" />
     <v-dialog v-model="toggleEditModal" persistent max-width="500">
-      <p-t-o-cash-out-form :item="clickedEditItem" :pto="userPto" :editing="true" />
+      <p-t-o-cash-out-form
+        :employeeId="clickedEditItem?.employeeId"
+        :item="clickedEditItem"
+        :pto="userPto"
+        :editing="true"
+      />
     </v-dialog>
   </v-card>
 </template>
 <script>
-import { isMobile, userRoleIsAdmin, userRoleIsManager, monthDayYearFormat, isEmpty } from '@/utils/utils';
+import { formatNumber, isMobile, userRoleIsAdmin, userRoleIsManager, monthDayYearFormat, isEmpty } from '@/utils/utils';
 import { getEmployeeByID, nicknameAndLastName } from '@/shared/employeeUtils';
 import api from '@/shared/api.js';
 import { updateStoreUser, updateStoreEmployees, updateStorePtoCashOuts, updateStoreTags } from '@/utils/storeUtils';
@@ -486,10 +492,9 @@ async function clickedEdit(item) {
   this.clickedEditItem = item;
   this.toggleEditModal = true;
   let employee = _.find(this.$store.getters.employees, (e) => e.id === item.employeeId);
-  let employeeBalances = await api.getPTOBalances(employee.employeeNumber);
-  if (employeeBalances.results && employeeBalances.results.users[employee.employeeNumber]) {
-    this.userPto = employeeBalances.results.users[employee.employeeNumber]['pto_balances']['PTO'];
-  }
+  let employeeBalances = await api.getTimesheetsData(employee.employeeNumber, null, null, true);
+  let pto = employeeBalances?.ptoBalances?.PTO / 60 / 60 || 0;
+  this.userPto = this.formatNumber(pto);
 } // clickedEdit
 
 // |--------------------------------------------------|
@@ -668,6 +673,7 @@ export default {
     deletePTOCashOut,
     displayError,
     displaySuccess,
+    formatNumber,
     isApproved,
     isMobile,
     isEmpty,

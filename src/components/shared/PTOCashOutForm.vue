@@ -2,12 +2,12 @@
   <v-form ref="form" v-model="valid" lazy-validation>
     <v-card>
       <v-card-title class="d-flex align-center header_style text-h6">
-        <h6 class="subtitle" v-if="userRoleIsAdmin() || userRoleIsManager()">
+        <h6 class="subtitle" v-if="employee && (userRoleIsAdmin() || userRoleIsManager())">
           Employee: {{ nicknameAndLastName(employee) }}
         </h6>
         <h3>Cash Out PTO</h3>
       </v-card-title>
-      <div v-if="!isSubmitting && $store.getters.ptoCashOuts">
+      <div v-if="!isSubmitting && $store.getters.ptoCashOuts && pto">
         <v-card-text v-if="employee">
           <p>
             <span v-if="pto">
@@ -143,6 +143,7 @@ async function created() {
     !this.$store.getters.employees ? this.updateStoreEmployees() : '',
     !this.$store.getters.ptoCashOuts ? this.updateStorePtoCashOuts() : ''
   ]);
+  this.employee = _.find(this.$store.getters.employees, (e) => e.id === this.employeeId);
   if (this.item) {
     let editingItem = _.cloneDeep(this.item);
     this.ptoCashOutObj['id'] = editingItem.id;
@@ -351,6 +352,7 @@ export default {
   data() {
     return {
       show: false,
+      employee: null,
       ptoCashOutObj: { approvedDate: null },
       valid: false,
       isSubmitting: false,
@@ -387,7 +389,7 @@ export default {
     item: watchEditPTOCashOutItem
   },
   computed: { ptoData },
-  props: ['item', 'employee', 'pto', 'editing']
+  props: ['item', 'employeeId', 'pto', 'editing']
 };
 </script>
 <style scoped>

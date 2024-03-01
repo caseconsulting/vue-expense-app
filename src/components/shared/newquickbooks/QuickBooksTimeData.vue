@@ -130,9 +130,9 @@ function hasError(timesheetsData) {
  *
  * @returns Boolean - Whether or not timesheets local storage has expired
  */
-function isStorageExpired() {
+function isStorageExpired(lastUpdated) {
   // last updated will either be now, or retrived from local storage
-  return isBefore(this.lastUpdated, now(), 'day');
+  return isBefore(lastUpdated, now(), 'day');
 } // isStorageExpired
 
 /**
@@ -236,7 +236,7 @@ function setStorage(isMonthly) {
 async function setData(startDate, endDate, isMonthly) {
   let storage = this.qbStorageExists();
   let key = isMonthly ? this.KEYS.MONTHLY : this.KEYS.YEARLY;
-  if (storage && storage[key] && this.employeeIsUser() && !this.isStorageExpired()) {
+  if (storage && storage[key] && this.employeeIsUser() && !this.isStorageExpired(storage[key].lastUpdated)) {
     this.setDataFromStorage(storage, key);
   } else {
     await this.setDataFromApi(startDate, endDate, isMonthly);
@@ -248,7 +248,9 @@ async function setData(startDate, endDate, isMonthly) {
  */
 async function setInitialData() {
   let today = getTodaysDate();
+  // last month
   let startDate = format(startOf(subtract(today, 1, 'month'), 'month'), null, 'YYYY-MM');
+  // this month
   let endDate = format(today, null, 'YYYY-MM');
   await this.setData(startDate, endDate, true);
 } // setInitialData

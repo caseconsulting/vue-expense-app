@@ -412,8 +412,12 @@ async function deleteAttachment(expense) {
  * @param endDate - The end date (YYYY-MM format)
  * @return - the timesheets data
  */
-async function getTimesheetsData(employeeNumber, startDate, endDate) {
-  return await execute('get', `/${TIMESHEETS}/${employeeNumber}/${startDate}/${endDate}`);
+async function getTimesheetsData(employeeNumber, startDate, endDate, onlyPto) {
+  if (onlyPto) {
+    return await execute('get', `/${TIMESHEETS}/pto/${employeeNumber}`);
+  } else {
+    return await execute('get', `/${TIMESHEETS}/${employeeNumber}/${startDate}/${endDate}`);
+  }
 } // getTimesheetsData
 
 /**

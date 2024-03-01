@@ -64,11 +64,11 @@
         <timesheets-chart
           v-else
           :key="timeData"
-          :completed="formatNum(periodHoursCompleted)"
+          :completed="formatNumber(periodHoursCompleted)"
           :needed="totalPeriodHours"
           :jobcodes="timeData || {}"
           :ptoJobcodes="!isMonthly ? ptoJobcodes : null"
-          :remainingHours="formatNum(remainingHours)"
+          :remainingHours="formatNumber(remainingHours)"
         ></timesheets-chart>
         <!-- End Timesheets Donut Chart -->
       </v-col>
@@ -84,35 +84,38 @@
           <div class="d-flex justify-space-between my-3">
             <div class="mr-2">Remaining</div>
             <div class="dotted-line"></div>
-            <div class="ml-2">{{ formatNum(remainingHours) }}h</div>
+            <div class="ml-2">{{ formatNumber(remainingHours) }}h</div>
           </div>
           <div class="d-flex justify-space-between my-3">
             <div class="mr-2">Remaining Avg/Day</div>
             <div class="dotted-line"></div>
             <div :class="remainingAverageHoursPerDay > 8 ? 'text-red font-weight-bold' : ''" class="ml-2">
-              {{ formatNum(remainingAverageHoursPerDay) }}h
+              {{ formatNumber(remainingAverageHoursPerDay) }}h
             </div>
           </div>
           <div class="d-flex justify-space-between my-3">
             <div class="mr-2">{{ hoursBehindBy > 0 ? 'Behind By' : 'Ahead By' }}</div>
             <div class="dotted-line"></div>
             <div :class="hoursBehindBy > 0 ? 'text-red font-weight-bold' : ''" class="ml-2">
-              {{ Math.abs(formatNum(hoursBehindBy)) }}h
+              {{ Math.abs(formatNumber(hoursBehindBy)) }}h
             </div>
           </div>
           <div v-if="(isMonthly && dateIsCurrentMonth) || !isMonthly" class="d-flex justify-space-between my-3">
             <div class="mr-2">Future</div>
             <div class="dotted-line"></div>
-            <div class="ml-2">{{ formatNum(futureHours) }}h</div>
+            <div class="ml-2">{{ formatNumber(futureHours) }}h</div>
           </div>
           <div class="d-flex justify-space-between my-3">
             <div class="mr-3">
               Work Days Remaining
-              <span v-if="(futureDays > 0 && isMonthly && dateIsCurrentMonth) || !isMonthly" class="text-blue">
+              <span
+                v-if="(futureDays > 0 && isMonthly && dateIsCurrentMonth) || (futureDays > 0 && !isMonthly)"
+                class="text-blue"
+              >
                 *
               </span>
               <v-tooltip
-                v-if="(futureDays > 0 && isMonthly && dateIsCurrentMonth) || !isMonthly"
+                v-if="(futureDays > 0 && isMonthly && dateIsCurrentMonth) || (futureDays > 0 && !isMonthly)"
                 activator="parent"
                 location="top"
               >
@@ -122,7 +125,7 @@
             <div class="dotted-line"></div>
             <div class="ml-3">
               <div v-if="!showCustomWorkDayInput" @click="showCustomWorkDayInput = true">
-                {{ formatNum(remainingWorkDays) }}
+                {{ formatNumber(remainingWorkDays) }}
               </div>
               <v-text-field
                 v-else
@@ -154,7 +157,7 @@
               >
                 <div class="mr-3">{{ jobcode }}</div>
                 <div class="dotted-line"></div>
-                <div class="ml-3">{{ formatNum(convertToHours(duration)) }}h</div>
+                <div class="ml-3">{{ formatNumber(convertToHours(duration)) }}h</div>
               </div>
             </div>
             <v-span
@@ -176,6 +179,7 @@
 <script>
 import TimesheetsChart from '@/components/charts/custom-charts/TimesheetsChart.vue';
 import _ from 'lodash';
+import { formatNumber } from '@/utils/utils';
 import {
   add,
   subtract,
@@ -361,14 +365,12 @@ function timeData() {
   if (this.isMonthly) {
     timeData = this.timesheets[format(this.date, null, 'YYYY-MM')];
   } else {
-    let timeData = {};
     _.forEach(this.timesheets, (monthTimesheets) => {
       _.forEach(monthTimesheets, (duration, jobName) => {
         if (!timeData[jobName]) timeData[jobName] = 0;
         timeData[jobName] += duration;
       });
     });
-    return timeData;
   }
   // sort by duration
   let orderedKeys = Object.keys(timeData).sort(function (a, b) {
@@ -425,16 +427,6 @@ function convertToHours(seconds) {
 } // convertToHours
 
 /**
- * Formats the given value. 3.05245 -> 3.05, 2.00 -> 3.1 -> 3.10.
- *
- * @param {Number} value - The number to format
- * @returns String - The formatted value
- */
-function formatNum(value) {
-  return value?.toFixed(2)?.replace(/[.,]00$/, ''); // removes decimals if a whole number
-} // formatNum
-
-/**
  * Calculates and returns the work days between start and end dates provided
  *
  * @param {String} startDate - The start date (in YYYY-MM format)
@@ -477,7 +469,8 @@ function isWeekDay(day) {
 // |--------------------------------------------------|
 
 /**
- * The watcher for the time period loader.
+ * The watcher for the time period loader. If a user expands or collapses time period, emit the
+ * new start and end dates.
  */
 function watchTimePeriodLoading() {
   if (this.timePeriodLoading) {
@@ -546,7 +539,7 @@ export default {
     add,
     convertToHours,
     format,
-    formatNum,
+    formatNumber,
     getMonth,
     getWorkDays,
     getTodaysDate,

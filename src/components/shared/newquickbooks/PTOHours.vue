@@ -38,7 +38,7 @@
       <v-icon>{{ showMore ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
     </v-span>
     <v-dialog v-model="showPTOCashOutFormModal" persistent max-width="500">
-      <p-t-o-cash-out-form :employee="employee" :pto="convertToHours(ptoBalances['PTO'])" />
+      <p-t-o-cash-out-form :employeeId="employee.id" :pto="convertToHours(ptoBalances['PTO'])" />
     </v-dialog>
   </div>
 </template>
