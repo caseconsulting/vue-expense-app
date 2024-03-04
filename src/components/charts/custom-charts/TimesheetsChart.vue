@@ -31,6 +31,23 @@ import _ from 'lodash';
 async function mounted() {
   await this.fillData();
   this.dataReceived = true;
+
+  // create tooltip
+  let tooltipEl = document.createElement('div');
+  tooltipEl.id = 'chartjs-tooltip';
+  // set fade in/out animation
+  tooltipEl.style.transition = `all 0.15s ease-in-out`;
+  tooltipEl.style.opacity = 0;
+  // Set manual styling
+  tooltipEl.style.position = 'fixed';
+  tooltipEl.style.pointerEvents = 'none';
+  tooltipEl.style.color = '#EEEEEE';
+  tooltipEl.style.backgroundColor = '#424242';
+  tooltipEl.style.borderRadius = '0.4em';
+  tooltipEl.style.fontSize = '0.9em';
+  // Set vuetify class styling
+  tooltipEl.classList.add('px-4', 'py-2');
+  document.body.appendChild(tooltipEl);
 } // mounted
 
 // |--------------------------------------------------|
@@ -70,6 +87,36 @@ function fillData() {
     ]
   };
 
+  // external tooltip helper function
+  function externalTooltipHandler(context) {
+    // Tooltip Element in HTML and model from ChartJS
+    let tooltipEl = document.getElementById('chartjs-tooltip');
+    const tooltipModel = context.tooltip;
+
+    // Hide/show tooltip
+    if (tooltipModel.opacity === 0) {
+      tooltipEl.style.opacity = 0;
+      return;
+    } else {
+      tooltipEl.style.opacity = 1;
+    }
+
+    // Set text
+    if (tooltipModel.body) {
+      const title = tooltipModel.title[0] || '';
+      const value = tooltipModel.dataPoints[0].raw;
+      tooltipEl.innerHTML = `
+        <p class='ma-0 font-weight-bold'>${title}</p>
+        <p class='ma-0'>${value}</p>
+      `;
+    }
+
+    // Set position
+    const position = context.chart.canvas.getBoundingClientRect();
+    tooltipEl.style.left = position.left + window.pageXOffset + tooltipModel.caretX + 'px';
+    tooltipEl.style.top = position.top + window.pageYOffset + tooltipModel.caretX + 'px';
+  } // externalTooltipHandler
+
   this.options = {
     cutout: '70%',
     plugins: {
@@ -77,7 +124,10 @@ function fillData() {
         display: false
       },
       tooltip: {
-        displayColors: false
+        displayColors: false,
+        enabled: false,
+        position: 'nearest',
+        external: externalTooltipHandler
       }
     }
   };
