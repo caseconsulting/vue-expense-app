@@ -45,6 +45,7 @@
 
 <script>
 import PTOCashOutForm from '@/components/shared/PTOCashOutForm.vue';
+import { openLink } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -85,15 +86,6 @@ function sortedBalancesByDuration() {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
-
-/**
- * Opens a link in a new tab.
- *
- * @param {String} link
- */
-function openLink(link) {
-  window.open(link, '_blank');
-} // openLink
 
 /**
  * Converts seconds to hours with 2 decimal places if needed.

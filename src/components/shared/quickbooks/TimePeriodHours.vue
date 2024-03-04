@@ -147,6 +147,20 @@
         <div v-else>
           <h3 class="d-flex align-center">
             <v-icon class="mr-2">mdi-briefcase-outline</v-icon> {{ isMonthly ? 'Monthly' : 'Yearly' }} Job Codes
+            <v-avatar
+              v-if="!isMonthly"
+              @click="
+                openLink(
+                  'https://3.basecamp.com/3097063/buckets/4708396/messages/7069270310#:~:text=New%20Bonus%20Opportunity'
+                )
+              "
+              class="ml-2 nudge-up"
+              size="x-small"
+              density="compact"
+            >
+              <v-tooltip activator="parent" location="top">Click for more information</v-tooltip>
+              <v-icon size="x-small" color="#3f51b5">mdi-information</v-icon>
+            </v-avatar>
           </h3>
           <div v-if="Object.entries(timeData || {})?.length === 0" class="my-3">No job codes for this time period</div>
           <div v-else>
@@ -191,7 +205,7 @@
 <script>
 import TimesheetsChart from '@/components/charts/custom-charts/TimesheetsChart.vue';
 import _ from 'lodash';
-import { formatNumber } from '@/utils/utils';
+import { formatNumber, openLink } from '@/utils/utils';
 import {
   add,
   subtract,
@@ -540,6 +554,7 @@ export default {
     getTodaysDate,
     hasNonBillables,
     isWeekDay,
+    openLink,
     subtract
   },
   props: ['employee', 'ptoBalances', 'supplementalData', 'timesheets'],

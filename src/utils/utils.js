@@ -147,6 +147,15 @@ export function monthYearFormat(date) {
 } // monthYearFormat
 
 /**
+ * Opens a link in a new tab.
+ *
+ * @param link String - the link to open
+ */
+export function openLink(link) {
+  window.open(link, '_blank');
+} // openLink
+
+/**
  * Updates the login date and creates audit for the employee.
  * @param {employee} employee the employee to update
  */

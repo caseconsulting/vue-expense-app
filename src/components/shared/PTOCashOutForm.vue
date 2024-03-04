@@ -121,7 +121,7 @@ import {
 } from '@/shared/validationUtils.js';
 import api from '@/shared/api.js';
 import dateUtils from '@/shared/dateUtils.js';
-import { generateUUID, userRoleIsAdmin, userRoleIsManager } from '../../utils/utils';
+import { generateUUID, openLink, userRoleIsAdmin, userRoleIsManager } from '../../utils/utils';
 import { updateStoreEmployees, updateStorePtoCashOuts } from '../../utils/storeUtils';
 import { format } from '../../shared/dateUtils';
 import { mask } from 'vue-the-mask';
@@ -190,15 +190,6 @@ async function submit() {
     this.displayError(err);
   }
 } // submit
-
-/**
- * Opens a link in a new tab.
- *
- * @param link String - the link to open
- */
-function openLink(link) {
-  window.open(link, '_blank');
-} // openLink
 
 /**
  * Cancel event handler
