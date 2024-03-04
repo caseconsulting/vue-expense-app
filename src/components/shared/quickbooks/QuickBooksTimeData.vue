@@ -21,12 +21,12 @@
             <span>{{ errorMessage }}</span>
           </div>
           <div v-else>
-            <monthly-hours
+            <time-period-hours
               :employee="employee"
               :timesheets="timesheets || {}"
               :ptoBalances="ptoBalances || {}"
               :supplementalData="supplementalData || {}"
-            ></monthly-hours>
+            ></time-period-hours>
             <hr class="my-5 mx-7" />
             <p-t-o-hours :employee="employee" :ptoBalances="ptoBalances || {}"></p-t-o-hours>
           </div>
@@ -37,7 +37,7 @@
 </template>
 
 <script>
-import MonthlyHours from '@/components/shared/quickbooks/MonthlyHours.vue';
+import TimePeriodHours from '@/components/shared/quickbooks/TimePeriodHours.vue';
 import PTOHours from '@/components/shared/quickbooks/PTOHours.vue';
 import _ from 'lodash';
 import api from '@/shared/api';
@@ -264,7 +264,7 @@ async function setInitialData() {
 export default {
   beforeUnmount,
   components: {
-    MonthlyHours,
+    TimePeriodHours,
     PTOHours
   },
   computed: {
