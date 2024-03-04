@@ -265,23 +265,7 @@ function hasPtoJobCodes() {
  * @returns Number - The number of hours an employee is behind schedule by
  */
 function hoursBehindBy() {
-  if (this.isMonthly) {
-    if (this.dateIsCurrentMonth) {
-      return (
-        this.getWorkDays(startOf(this.today, 'month'), this.today) * this.proRatedHours -
-        this.periodHoursCompleted +
-        this.futureHours
-      );
-    } else {
-      return this.totalWorkDays * this.proRatedHours - this.periodHoursCompleted;
-    }
-  } else {
-    return (
-      this.getWorkDays(startOf(this.today, 'year'), this.today) * this.proRatedHours -
-      this.periodHoursCompleted +
-      this.futureHours
-    );
-  }
+  return this.totalPeriodHours - this.remainingWorkDays * this.proRatedHours - this.periodHoursCompleted;
 } // hoursBehindBy
 
 /**
