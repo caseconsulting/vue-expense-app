@@ -67,7 +67,7 @@
           :completed="formatNumber(periodHoursCompleted)"
           :needed="totalPeriodHours"
           :jobcodes="timeData || {}"
-          :ptoJobcodes="!isMonthly ? ptoJobcodes : null"
+          :nonBillables="!isMonthly ? supplementalData.nonBillables : null"
           :remainingHours="formatNumber(remainingHours)"
         ></timesheets-chart>
         <!-- End Timesheets Donut Chart -->
@@ -152,21 +152,33 @@
           <div v-else>
             <div v-for="(duration, jobcode) in timeData" :key="jobcode">
               <div
-                v-if="isMonthly || showPtoJobCodes || (!showPtoJobCodes && !ptoJobcodes.includes(jobcode))"
+                v-if="
+                  isMonthly ||
+                  showNonBillables ||
+                  (!showNonBillables && !supplementalData.nonBillables.includes(jobcode))
+                "
+                :class="!isMonthly && supplementalData.nonBillables.includes(jobcode) ? 'text-grey' : ''"
                 class="d-flex justify-space-between my-3"
               >
+                <v-tooltip
+                  v-if="!isMonthly && supplementalData.nonBillables.includes(jobcode)"
+                  activator="parent"
+                  location="top"
+                >
+                  Non-billable job codes are not counted towards yearly bonus
+                </v-tooltip>
                 <div class="mr-3">{{ jobcode }}</div>
                 <div class="dotted-line"></div>
                 <div class="ml-3">{{ formatNumber(convertToHours(duration)) }}h</div>
               </div>
             </div>
             <v-span
-              v-if="!isMonthly && hasPtoJobCodes()"
-              @click="showPtoJobCodes = !showPtoJobCodes"
+              v-if="!isMonthly && hasNonBillables()"
+              @click="showNonBillables = !showNonBillables"
               class="pointer text-blue"
             >
-              {{ showPtoJobCodes ? 'Hide PTO jobcodes' : 'Show PTO job codes' }}
-              <v-icon>{{ showPtoJobCodes ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+              {{ showNonBillables ? 'Hide non-billables' : 'Show non-billables' }}
+              <v-icon>{{ showNonBillables ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
             </v-span>
           </div>
         </div>
@@ -245,18 +257,18 @@ function futureHours() {
 } // futureHours
 
 /**
- * Whether or not the employee has PTO jobcodes entered in their timesheets within the set time period.
+ * Whether or not the employee has non-billables entered in their timesheets within the set time period.
  *
- * @returns Boolean - True if the employee has PTO jobcodes in their timesheets within the time period
+ * @returns Boolean - True if the employee has non-billable jobcodes in their timesheets within the time period
  */
-function hasPtoJobCodes() {
-  let hasPtoJobCode = false;
+function hasNonBillables() {
+  let hasNonBillable = false;
   let jobcodes = Object.keys(this.timeData || {});
-  for (let i = 0; i < jobcodes.length && !hasPtoJobCode; i++) {
-    if (this.ptoJobcodes?.includes(jobcodes[i])) hasPtoJobCode = true;
+  for (let i = 0; i < jobcodes.length && !hasNonBillable; i++) {
+    if (this.supplementalData.nonBillables?.includes(jobcodes[i])) hasNonBillable = true;
   }
-  return hasPtoJobCode;
-} // hasPtoJobCodes
+  return hasNonBillable;
+} // hasNonBillables
 
 /**
  * The amount of hours an employee is behind schedule by. If there has been 3 work days so far, then a full time employee
@@ -276,7 +288,7 @@ function hoursBehindBy() {
 function periodHoursCompleted() {
   let total = 0;
   _.forEach(this.timeData, (duration, jobName) => {
-    if (this.isMonthly || (!this.isMonthly && !this.ptoJobcodes?.includes(jobName))) {
+    if (this.isMonthly || (!this.isMonthly && !this.supplementalData.nonBillables?.includes(jobName))) {
       total += duration;
     }
   });
@@ -511,9 +523,8 @@ export default {
       customWorkDayInput: null,
       date: format(getTodaysDate(), null, DEFAULT_ISOFORMAT),
       isMonthly: true,
-      ptoJobcodes: Object.keys(this.ptoBalances),
       showCustomWorkDayInput: false,
-      showPtoJobCodes: false,
+      showNonBillables: false,
       timePeriodLoading: false,
       today: format(getTodaysDate(), null, DEFAULT_ISOFORMAT),
       BONUS_YEAR_TOTAL: 1860
@@ -527,7 +538,7 @@ export default {
     getMonth,
     getWorkDays,
     getTodaysDate,
-    hasPtoJobCodes,
+    hasNonBillables,
     isWeekDay,
     subtract
   },

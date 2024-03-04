@@ -46,7 +46,7 @@ function fillData() {
   let colors = ['#1A237E', '#5C6BC0', '#9FA8DA'];
   let colorsOptions = ['#1A237E', '#5C6BC0', '#9FA8DA'];
   // remove pto jobcodes from chart for yearly data
-  let jobcodes = _.pickBy(this.jobcodes, (value, key) => !this.ptoJobcodes?.includes(key));
+  let jobcodes = _.pickBy(this.jobcodes, (value, key) => !this.nonBillables?.includes(key));
   let jobCodeValues = _.map(Object.values(jobcodes), (duration) => {
     return Number(duration / 60 / 60)
       ?.toFixed(2)
@@ -101,7 +101,7 @@ export default {
   },
   methods: { fillData },
   mounted,
-  props: ['completed', 'needed', 'jobcodes', 'ptoJobcodes', 'remainingHours']
+  props: ['completed', 'needed', 'jobcodes', 'nonBillables', 'remainingHours']
 };
 </script>
 
