@@ -65,7 +65,7 @@
           v-else
           :key="timeData"
           :completed="formatNumber(periodHoursCompleted)"
-          :needed="totalPeriodHours"
+          :needed="formatNumber(totalPeriodHours)"
           :jobcodes="timeData || {}"
           :nonBillables="!isMonthly ? supplementalData.nonBillables : null"
           :remainingHours="formatNumber(remainingHours)"
@@ -312,7 +312,7 @@ function proRatedHours() {
   if (this.isMonthly) {
     return 8 * (this.employee.workStatus / 100);
   } else {
-    return (this.totalPeriodHours / this.totalWorkDays) * (this.employee.workStatus / 100);
+    return this.BONUS_YEAR_TOTAL / this.getWorkDays(startOf(this.today, 'year'), endOf(this.today, 'year'), true);
   }
 } // proRatedHours
 
@@ -394,11 +394,7 @@ function timeData() {
  * @returns Number - The total number of hours needed
  */
 function totalPeriodHours() {
-  if (this.isMonthly) {
-    return this.totalWorkDays * this.proRatedHours;
-  } else {
-    return this.BONUS_YEAR_TOTAL * (this.employee.workStatus / 100);
-  }
+  return this.totalWorkDays * this.proRatedHours;
 } // totalPeriodHours
 
 /**
@@ -435,14 +431,15 @@ function convertToHours(seconds) {
  *
  * @param {String} startDate - The start date (in YYYY-MM format)
  * @param {String} endDate - The end date (in YYYY-MM format)
+ * @param {Boolean} excludeProRated - Whether or not to pro-rate based on hire date (default is to pro-rate)
  * @return int - number of remaining working days
  */
-function getWorkDays(startDate, endDate) {
+function getWorkDays(startDate, endDate, excludeProRated = false) {
   let workDays = 0;
   let hireDate = this.employee.hireDate;
   startDate = format(startDate, null, DEFAULT_ISOFORMAT);
   endDate = format(endDate, null, DEFAULT_ISOFORMAT);
-  if (isAfter(hireDate, startDate, 'day') && isSameOrAfter(endDate, hireDate, 'day')) {
+  if (!excludeProRated && isAfter(hireDate, startDate, 'day') && isSameOrAfter(endDate, hireDate, 'day')) {
     startDate = hireDate;
   }
   let date = startDate;
