@@ -46,7 +46,7 @@
             >
               <v-tooltip activator="parent" location="top">{{ isMonthly ? 'Show yearly' : 'Show monthly' }}</v-tooltip>
               <v-icon size="large">
-                {{ isMonthly ? 'mdi-calendar-expand-horizontal' : 'mdi-calendar-collapse-horizontal' }}
+                {{ isMonthly ? 'mdi-calendar-multiple' : 'mdi-calendar' }}
               </v-icon>
             </v-btn>
           </v-col>
