@@ -562,10 +562,10 @@ export default {
 <style>
 .custom-input input {
   padding: 5px 10px 3px 9px;
-  width: 45px !important;
-  height: 10px !important;
+  width: 45px;
+  height: 10px;
   min-height: 30px;
-  font-size: 12px !important;
+  font-size: 12px;
 }
 </style>
 
