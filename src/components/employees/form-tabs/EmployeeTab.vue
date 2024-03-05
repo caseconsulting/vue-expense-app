@@ -577,6 +577,7 @@ function populateJobRoleDropdown() {
   let employeeJobTitles = _.map(this.employees, (e) => e.jobRole);
   employeeJobTitles = _.compact(employeeJobTitles);
   _.forEach(employeeJobTitles, (jobTitle) => this.jobTitles.push(jobTitle));
+  this.jobTitles = Array.from(new Set(this.jobTitles)); // remove duplicates
 } // populateJobRoleDropdown
 
 /**
