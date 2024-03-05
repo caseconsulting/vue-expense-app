@@ -105,7 +105,7 @@
             <div class="dotted-line"></div>
             <div class="ml-2">{{ formatNumber(futureHours) }}h</div>
           </div>
-          <div class="d-flex justify-space-between my-3">
+          <div class="d-flex justify-space-between pointer my-3" @click="showCustomWorkDayInput = true">
             <div class="mr-3">
               Work Days Remaining
               <span
@@ -124,7 +124,7 @@
             </div>
             <div class="dotted-line"></div>
             <div class="ml-3">
-              <div v-if="!showCustomWorkDayInput" @click="showCustomWorkDayInput = true">
+              <div v-if="!showCustomWorkDayInput" class="work-days-box">
                 {{ formatNumber(remainingWorkDays) }}
               </div>
               <v-text-field
@@ -132,6 +132,7 @@
                 v-model="customWorkDayInput"
                 autofocus
                 type="text"
+                variant="outlined"
                 class="ma-0 pa-0 custom-input"
                 @blur="showCustomWorkDayInput = false"
                 hide-details
@@ -174,13 +175,6 @@
                 :class="!isMonthly && supplementalData.nonBillables.includes(jobcode) ? 'text-grey' : ''"
                 class="d-flex justify-space-between my-3"
               >
-                <v-tooltip
-                  v-if="!isMonthly && supplementalData.nonBillables.includes(jobcode)"
-                  activator="parent"
-                  location="top"
-                >
-                  Non-billable job codes are not counted towards yearly bonus
-                </v-tooltip>
                 <div class="mr-3">{{ jobcode }}</div>
                 <div class="dotted-line"></div>
                 <div class="ml-3">{{ formatNumber(convertToHours(duration)) }}h</div>
@@ -565,7 +559,23 @@ export default {
 };
 </script>
 
+<style>
+.custom-input input {
+  padding: 5px 10px 3px 9px;
+  width: 45px !important;
+  height: 10px !important;
+  min-height: 30px;
+  font-size: 12px !important;
+}
+</style>
+
 <style scoped>
+.work-days-box {
+  border-radius: 5px;
+  color: black;
+  background-color: rgba(0, 0, 0, 0.08);
+  padding: 5px 10px 3px 9px;
+}
 .dotted-line {
   height: 0.8em;
   background-image: linear-gradient(to right, rgb(210, 210, 210) 33%, rgba(184, 184, 184, 0) 0%);
@@ -573,8 +583,5 @@ export default {
   background-size: 7px 1px;
   background-repeat: repeat-x;
   flex-grow: 2;
-}
-.custom-input {
-  width: 60px;
 }
 </style>
