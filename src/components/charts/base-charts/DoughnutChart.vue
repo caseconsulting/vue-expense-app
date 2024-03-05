@@ -1,5 +1,5 @@
 <template>
-  <div class="chart-wrapper">
+  <div class="donut-chart-wrapper">
     <canvas :id="chartId"></canvas>
     <div class="middle-text">
       <slot slot="middle-text"></slot>
@@ -66,10 +66,13 @@ export default {
 </script>
 
 <style>
-.chart-wrapper {
+.donut-chart-wrapper {
   width: 100%;
   height: 135px !important;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .middle-text {
