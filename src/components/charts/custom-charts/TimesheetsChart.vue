@@ -59,7 +59,7 @@ async function mounted() {
 /**
  * Sets the chart formatting and options data.
  */
-function fillData() {
+async function fillData() {
   let colors = ['#1A237E', '#5C6BC0', '#9FA8DA'];
   let colorsOptions = ['#1A237E', '#5C6BC0', '#9FA8DA'];
   // remove pto jobcodes from chart for yearly data
@@ -129,7 +129,8 @@ function fillData() {
         position: 'nearest',
         external: externalTooltipHandler
       }
-    }
+    },
+    maintainAspectRatio: false
   };
   this.dataReceived = true;
 } // fillData
