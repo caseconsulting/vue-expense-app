@@ -159,6 +159,33 @@
           <v-icon v-else class="pl-2">mdi-web-sync</v-icon>
         </v-btn>
 
+        <!-- Download employee csv button -->
+        <!-- <convert-employees-to-csv
+            v-if="userRoleIsAdmin()"
+            :midAction="midAction"
+            :contracts="contracts"
+            :employees="filteredEmployees"
+            :loading="loading"
+            :tags="tags"
+          ></convert-employees-to-csv>
+          <generate-csv-eeo-report
+            v-if="userRoleIsAdmin()"
+            :midAction="midAction"
+            :employees="filteredEmployees"
+            :loading="loading"
+          ></generate-csv-eeo-report> -->
+
+        <v-btn
+          v-if="hasAdminPermissions()"
+          :midAction="midAction"
+          :disabled="loading || syncing"
+          elevation="2"
+          class="mb-5 ml-2 ml-md-4"
+          @click.stop="showExportDataModal = !showExportDataModal"
+        >
+          Export Data <v-icon class="pl-2">mdi-table-arrow-down</v-icon>
+        </v-btn>
+
         <!-- NEW DATA TABLE -->
         <v-data-table
           :headers="headers"
@@ -253,42 +280,24 @@
             </p>
           </template>
         </v-data-table>
-        <!-- NEW DATA TABLE -->
-
-        <br />
-
-        <!-- Download employee csv button -->
-        <v-card-actions class="justify-end">
-          <convert-employees-to-csv
-            v-if="userRoleIsAdmin()"
-            :midAction="midAction"
-            :contracts="contracts"
-            :employees="filteredEmployees"
-            :loading="loading"
-            :tags="tags"
-          ></convert-employees-to-csv>
-          <generate-csv-eeo-report
-            v-if="userRoleIsAdmin()"
-            :midAction="midAction"
-            :employees="filteredEmployees"
-            :loading="loading"
-          ></generate-csv-eeo-report>
-        </v-card-actions>
+        <!-- END NEW DATA TABLE -->
 
         <!-- Confirmation Modals -->
         <delete-modal :toggleDeleteModal="deleting" :type="'employee'"></delete-modal>
         <delete-error-modal :toggleDeleteErrorModal="invalidDelete" type="employee"></delete-error-modal>
-        <!-- End Confirmation Modals -->
       </v-container>
     </v-card>
-    <v-dialog @click:outside="clearCreateEmployee" v-model="createEmployee" :width="isMobile() ? '100%' : '80%'"
-      ><employee-form :contracts="contracts" :key="childKey" :model="this.model"></employee-form
-    ></v-dialog>
+    <v-dialog @click:outside="clearCreateEmployee" v-model="createEmployee" :width="isMobile() ? '100%' : '80%'">
+      <employee-form :contracts="contracts" :key="childKey" :model="this.model" />
+    </v-dialog>
     <v-dialog v-model="manageTags" scrollable :width="isMobile() ? '100%' : '70%'" persistent>
-      <tag-manager :key="childKey"></tag-manager>
+      <tag-manager :key="childKey" />
     </v-dialog>
     <v-dialog v-model="toggleEmployeesSyncModal" :width="isMobile() ? '100%' : '70%'" persistent>
-      <employees-sync-modal :syncData="applicationSyncData" :key="childKey"></employees-sync-modal>
+      <employees-sync-modal :syncData="applicationSyncData" :key="childKey" />
+    </v-dialog>
+    <v-dialog v-model="showExportDataModal" :width="isMobile() ? '100%' : '50%'" persistent>
+      <export-employee-data :employees="filteredEmployees" :contracts="contracts" :tags="tags" :key="childKey" />
     </v-dialog>
   </div>
 </template>
@@ -296,13 +305,14 @@
 <script>
 import api from '@/shared/api.js';
 import { updateStoreEmployees, updateStoreAvatars, updateStoreContracts, updateStoreTags } from '@/utils/storeUtils';
-import ConvertEmployeesToCsv from '@/components/employees/csv/ConvertEmployeesToCsv.vue';
+// import ConvertEmployeesToCsv from '@/components/employees/csv/ConvertEmployeesToCsv.vue';
+import ExportEmployeeData from '@/components/employees/csv/ExportEmployeeData.vue';
 import DeleteErrorModal from '@/components/modals/DeleteErrorModal.vue';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
 import EmployeeForm from '@/components/employees/EmployeeForm.vue';
 import _ from 'lodash';
 import ConvertEmployeeToCsv from '@/components/employees/csv/ConvertEmployeeToCsv.vue';
-import GenerateCsvEeoReport from '@/components/employees/csv/GenerateCsvEeoReport.vue';
+// import GenerateCsvEeoReport from '@/components/employees/csv/GenerateCsvEeoReport.vue';
 import TagManager from '@/components/employees/tags/TagManager.vue';
 import EmployeesSyncModal from '@/components/modals/EmployeesSyncModal.vue';
 import {
@@ -754,6 +764,9 @@ async function created() {
     this.applicationSyncData = null;
     this.childKey++;
   });
+  this.emitter.on('close-employee-export', () => {
+    this.showExportDataModal = false;
+  });
 
   // fill in search box if routed from another page
   if (localStorage.getItem('requestedFilter')) {
@@ -791,6 +804,7 @@ function beforeUnmount() {
   this.emitter.off('empNum');
   this.emitter.off('close-tag-manager');
   this.emitter.off('close-data-sync-results-modal');
+  this.emitter.off('close-employee-export');
 } // beforeUnmount
 
 // |--------------------------------------------------|
@@ -852,13 +866,14 @@ function watchSelectedTags() {
 export default {
   beforeUnmount,
   components: {
-    ConvertEmployeesToCsv,
+    // ConvertEmployeesToCsv,
     DeleteErrorModal,
     DeleteModal,
     EmployeeForm,
     EmployeesSyncModal,
+    ExportEmployeeData,
     ConvertEmployeeToCsv,
-    GenerateCsvEeoReport,
+    // GenerateCsvEeoReport,
     TagManager
   },
   computed: {
@@ -968,6 +983,7 @@ export default {
         statusMessage: null,
         color: null
       }, // snackbar action status
+      showExportDataModal: false,
       syncing: false,
       tags: [],
       tagFlip: [],
