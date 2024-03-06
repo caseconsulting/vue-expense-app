@@ -69,8 +69,9 @@ async function created() {
     this.showDialog = false;
   });
   this.currentUser = this.$store.getters.user;
-  if (this.accessibleBudgets) {
+  if (this.accessibleBudgets && this.expenseTypes) {
     await this.refreshEmployee();
+    await this.refreshBudget();
   }
   this.loading = false;
 } // created
