@@ -27,7 +27,9 @@
       <!-- Action Button (Close) -->
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="primary" @click="download()">Download <v-icon size="x-large">mdi-download</v-icon></v-btn>
+        <v-btn color="primary" variant="outlined" @click="download()"
+          >Download <v-icon size="large">mdi-download</v-icon></v-btn
+        >
         <v-btn color="grey-darken-3" variant="text" @click="close()"> Close </v-btn>
       </v-card-actions>
     </v-card-text>
