@@ -394,7 +394,8 @@ function timeData() {
  * @returns Number - The total number of hours needed
  */
 function totalPeriodHours() {
-  return this.totalWorkDays * this.proRatedHours;
+  let total = this.totalWorkDays * this.proRatedHours;
+  return this.isMonthly ? total : Math.round(total);
 } // totalPeriodHours
 
 /**
