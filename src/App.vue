@@ -450,6 +450,7 @@ export default {
       { name: 'Basecamp', link: 'https://3.basecamp.com/3097063' },
       { name: 'QuickBooks Time', link: 'https://tsheets.intuit.com/page/login_oii' },
       { name: 'ADP', link: 'https://workforcenow.adp.com/' },
+      { name: 'BambooHR', link: 'https://consultwithcase.bamboohr.com/home/' },
       { name: 'Jira', link: 'https://consultwithcase.atlassian.net/jira/your-work' },
       {
         name: 'Portal & Basecamp How-Tos',
