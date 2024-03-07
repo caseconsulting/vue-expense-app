@@ -185,6 +185,7 @@
           class="mt-4"
           label="Description"
           data-vv-name="Description"
+          @click="showExchangeTrainingDesc = true"
         ></v-text-field>
 
         <!-- Purchase Date -->
@@ -363,6 +364,9 @@
       <v-dialog v-model="showExchangeCalculator" :width="isMobile ? '100%' : '50%'" persistent>
         <ExchangeTrainingHoursCalculator />
       </v-dialog>
+      <v-dialog v-model="showExchangeTrainingDesc" :width="isMobile ? '100%' : '50%'" persistent>
+        <ExchangeTrainingDescription :previousDesc="editedExpense.description" />
+      </v-dialog>
     </v-container>
   </v-card>
 </template>
@@ -373,6 +377,7 @@ import ConfirmationBox from '@/components/modals/ConfirmationBox.vue';
 import FileUpload from '@/components/utils/FileUpload.vue';
 import GeneralConfirmationModal from '@/components/modals/GeneralConfirmationModal.vue';
 import ExchangeTrainingHoursCalculator from '@/components/expenses/ExchangeTrainingHoursCalculator.vue';
+import ExchangeTrainingDescription from '@/components/expenses/ExchangeTrainingDescription.vue';
 
 import api from '@/shared/api.js';
 import employeeUtils from '@/shared/employeeUtils';
@@ -1603,7 +1608,14 @@ function created() {
     this.clearForm();
   });
   this.emitter.on('close-exchange-training-hours-calculator', () => {
-    this.showExchangeCalculator = false;
+    this.showExchangeTrainingDesc = false;
+  });
+  this.emitter.on('insert-training-desc', (desc) => {
+    this.showExchangeTrainingDesc = false;
+    this.editedExpense.description = desc;
+  });
+  this.emitter.on('close-exchange-training-desc', () => {
+    this.showExchangeTrainingDesc = false;
   });
   this.emitter.on('insert-training-hours', (amount) => {
     this.showExchangeCalculator = false;
@@ -1671,6 +1683,7 @@ function beforeUnmount() {
   this.emitter.off('confirmSubmit');
   this.emitter.off('confirmed-expense');
   this.emitter.off('canceled-expense');
+  this.emitter.off('close-exchange-training-desc');
   this.emitter.off('backout-canceled-expense');
   this.emitter.off('backout-confirmed-expense');
 } // beforeUnmount
@@ -1934,7 +1947,8 @@ export default {
     ConfirmationBox,
     FileUpload,
     GeneralConfirmationModal,
-    ExchangeTrainingHoursCalculator
+    ExchangeTrainingHoursCalculator,
+    ExchangeTrainingDescription
   },
   computed: {
     isDifferentExpenseType,
@@ -1997,6 +2011,7 @@ export default {
       selectedEmployee: {}, // selected employees
       selectedExpenseType: {}, // selected expense types
       showExchangeCalculator: false,
+      showExchangeTrainingDesc: false,
       submittedReceipt: null, // the receipt to show when editing an expense
       urlInfo: {
         id: null,
