@@ -14,7 +14,7 @@
         </v-btn>
       </v-card-title>
       <v-card-text class="mt-3 px-7">
-        <v-progress-linear v-if="loading" indeterminate></v-progress-linear>
+        <v-progress-linear class="mb-3 mt-7" v-if="loading" indeterminate></v-progress-linear>
         <div v-else>
           <div class="d-flex flex-column justify-center align-center py-3 font-weight-bold" v-if="errorMessage">
             <v-icon class="mb-2">mdi-alert</v-icon>
