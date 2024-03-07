@@ -79,10 +79,13 @@ function download() {
   console.log(csvInfo);
 
   // download from proper csv util
+  let filename = `Download (${this.year})`;
   if (this.exportType == 'employee') {
-    employeeCsv.download(csvInfo, this.contracts, this.tags);
+    filename = `Employee Export - ${this.year}`;
+    employeeCsv.download(csvInfo, this.contracts, this.tags, filename);
   } else if (this.exportType == 'eeo') {
-    eeoCsv.download(csvInfo);
+    filename = `EEO Compliance Report - ${this.year}`;
+    eeoCsv.download(csvInfo, filename);
   }
 
   // close the modal

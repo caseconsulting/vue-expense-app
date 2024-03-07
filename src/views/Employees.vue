@@ -159,22 +159,7 @@
           <v-icon v-else class="pl-2">mdi-web-sync</v-icon>
         </v-btn>
 
-        <!-- Download employee csv button -->
-        <!-- <convert-employees-to-csv
-            v-if="userRoleIsAdmin()"
-            :midAction="midAction"
-            :contracts="contracts"
-            :employees="filteredEmployees"
-            :loading="loading"
-            :tags="tags"
-          ></convert-employees-to-csv>
-          <generate-csv-eeo-report
-            v-if="userRoleIsAdmin()"
-            :midAction="midAction"
-            :employees="filteredEmployees"
-            :loading="loading"
-          ></generate-csv-eeo-report> -->
-
+        <!-- CSV Downloads modal -->
         <v-btn
           v-if="hasAdminPermissions()"
           :midAction="midAction"
@@ -297,7 +282,7 @@
       <employees-sync-modal :syncData="applicationSyncData" :key="childKey" />
     </v-dialog>
     <v-dialog v-model="showExportDataModal" :width="isMobile() ? '100%' : '50%'" persistent>
-      <export-employee-data :employees="filteredEmployees" :contracts="contracts" :tags="tags" :key="childKey" />
+      <export-employee-data :employees="employees" :contracts="contracts" :tags="tags" :key="childKey" />
     </v-dialog>
   </div>
 </template>

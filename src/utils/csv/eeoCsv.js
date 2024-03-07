@@ -9,7 +9,6 @@
  */
 const csvUtils = require('./baseCsv.js');
 import _ from 'lodash';
-import { getTodaysDate } from '@/shared/dateUtils';
 
 // some useful constants as the exact strings might change
 const HISPANIC_LATINO = 'Hispanic or Latino';
@@ -25,13 +24,13 @@ const COLUMNS_AFTER_RACE_ETHNICITY = 2;
  * Downloads array of employees EEO information as csv file.
  * @param employees - array of employees objects
  */
-export function download(employees) {
+export function download(employees, filename = null) {
   let convertedEmployees = convertEmployees(employees); // convert employees into csv object (returns two arrays)
   let csvFileStringA = csvUtils.generateFrom2dArray(convertedEmployees[0]); // convert to csv file string
   let csvFileStringB = csvUtils.generateFrom2dArray(convertedEmployees[1]); // convert to csv file string
   let csvFileStringFinal = csvUtils.combine(csvFileStringA, csvFileStringB, 1);
-  let year = getTodaysDate('YYYY');
-  csvUtils.download(csvFileStringFinal, `EEO Compliance Report - ${year}.csv`); // download csv file string as .csv
+  if (!filename) filename = `EEO Compliance Report`;
+  csvUtils.download(csvFileStringFinal, filename); // download csv file string as .csv
 } // download
 
 /**
