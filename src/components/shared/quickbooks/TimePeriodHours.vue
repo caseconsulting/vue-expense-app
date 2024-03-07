@@ -74,6 +74,7 @@
         <v-skeleton-loader v-if="timePeriodLoading" type="list-item@4"></v-skeleton-loader>
         <time-period-details
           v-else
+          :key="timeData"
           :date="date"
           :dateIsCurrentMonth="dateIsCurrentMonth"
           :employee="employee"
@@ -87,51 +88,12 @@
       <!-- Time Period Job Codes -->
       <v-col :order="$vuetify.display.mdAndUp ? 3 : 2" cols="12">
         <v-skeleton-loader v-if="timePeriodLoading" type="list-item@4"></v-skeleton-loader>
-        <div v-else>
-          <h3 class="d-flex align-center">
-            <v-icon class="mr-2">mdi-briefcase-outline</v-icon> {{ isMonthly ? 'Monthly' : 'Yearly' }} Job Codes
-            <v-avatar
-              v-if="!isMonthly"
-              @click="
-                openLink(
-                  'https://3.basecamp.com/3097063/buckets/4708396/messages/7069270310#:~:text=New%20Bonus%20Opportunity'
-                )
-              "
-              class="ml-2 nudge-up"
-              size="x-small"
-              density="compact"
-            >
-              <v-tooltip activator="parent" location="top">Click for more information</v-tooltip>
-              <v-icon size="x-small" color="#3f51b5">mdi-information</v-icon>
-            </v-avatar>
-          </h3>
-          <div v-if="Object.entries(timeData || {})?.length === 0" class="my-3">No job codes for this time period</div>
-          <div v-else>
-            <div v-for="(duration, jobcode) in timeData" :key="jobcode">
-              <div
-                v-if="
-                  isMonthly ||
-                  showNonBillables ||
-                  (!showNonBillables && !supplementalData.nonBillables.includes(jobcode))
-                "
-                :class="!isMonthly && supplementalData.nonBillables.includes(jobcode) ? 'text-grey' : ''"
-                class="d-flex justify-space-between my-3"
-              >
-                <div class="mr-3">{{ jobcode }}</div>
-                <div class="dotted-line"></div>
-                <div class="ml-3">{{ formatNumber(convertToHours(duration)) }}h</div>
-              </div>
-            </div>
-            <v-span
-              v-if="!isMonthly && hasNonBillables()"
-              @click="showNonBillables = !showNonBillables"
-              class="pointer text-blue"
-            >
-              {{ showNonBillables ? 'Hide non-billables' : 'Show non-billables' }}
-              <v-icon>{{ showNonBillables ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-            </v-span>
-          </div>
-        </div>
+        <time-period-job-codes
+          v-else
+          :isMonthly="isMonthly"
+          :supplementalData="supplementalData"
+          :timeData="timeData"
+        ></time-period-job-codes>
       </v-col>
       <!-- End Time Period Job Codes -->
     </v-row>
@@ -140,9 +102,9 @@
 
 <script>
 import TimesheetsChart from '@/components/charts/custom-charts/TimesheetsChart.vue';
-import TimePeriodDetails from '@/components/shared/quickbooks/TimePeriodDetails';
+import TimePeriodDetails from '@/components/shared/quickbooks/TimePeriodDetails.vue';
+import TimePeriodJobCodes from '@/components/shared/quickbooks/TimePeriodJobCodes.vue';
 import _ from 'lodash';
-import { formatNumber, openLink } from '@/utils/utils';
 import {
   add,
   subtract,
@@ -160,6 +122,13 @@ import {
 // |                 LIFECYCLE HOOKS                  |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * The Before Unmount lifecycle hook
+ */
+function beforeUnmount() {
+  this.emitter.off('reset-data');
+} // beforeUnmount
 
 /**
  * The Created lifecycle hook.
@@ -185,20 +154,6 @@ function created() {
 function dateIsCurrentMonth() {
   return isSame(getMonth(this.date), getMonth(this.today));
 } // dateIsCurrentMonth
-
-/**
- * Whether or not the employee has non-billables entered in their timesheets within the set time period.
- *
- * @returns Boolean - True if the employee has non-billable jobcodes in their timesheets within the time period
- */
-function hasNonBillables() {
-  let hasNonBillable = false;
-  let jobcodes = Object.keys(this.timeData || {});
-  for (let i = 0; i < jobcodes.length && !hasNonBillable; i++) {
-    if (this.supplementalData.nonBillables?.includes(jobcodes[i])) hasNonBillable = true;
-  }
-  return hasNonBillable;
-} // hasNonBillables
 
 /**
  * The jobcodes and their durations all sorted by duration within the time period.
@@ -228,22 +183,6 @@ function timeData() {
   });
   return orderedTimeData;
 } // timeData
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     METHODS                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Converts seconds to hours.
- *
- * @param {Number} seconds - The number of seconds to convert
- * @returns Number - The number of hours
- */
-function convertToHours(seconds) {
-  return Number(seconds / 60 / 60);
-} // convertToHours
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -287,9 +226,11 @@ function watchTimesheets() {
 // |--------------------------------------------------|
 
 export default {
+  beforeUnmount,
   components: {
     TimesheetsChart,
-    TimePeriodDetails
+    TimePeriodDetails,
+    TimePeriodJobCodes
   },
   computed: {
     dateIsCurrentMonth,
@@ -300,20 +241,15 @@ export default {
     return {
       date: format(getTodaysDate(), null, DEFAULT_ISOFORMAT),
       isMonthly: true,
-      showNonBillables: false,
       timePeriodLoading: false,
       today: format(getTodaysDate(), null, DEFAULT_ISOFORMAT)
     };
   },
   methods: {
     add,
-    convertToHours,
     format,
-    formatNumber,
     getMonth,
     getTodaysDate,
-    hasNonBillables,
-    openLink,
     subtract
   },
   props: ['employee', 'ptoBalances', 'supplementalData', 'timesheets'],

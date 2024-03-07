@@ -29,7 +29,7 @@
       <div class="dotted-line"></div>
       <div class="ml-2">{{ formatNumber(futureHours) }}h</div>
     </div>
-    <div class="d-flex justify-space-between my-3">
+    <div class="d-flex justify-space-between my-3 pointer" @click="showCustomWorkDayInput = true">
       <div class="mr-3">
         Work Days Remaining
         <span
@@ -48,7 +48,7 @@
       </div>
       <div class="dotted-line"></div>
       <div class="ml-3">
-        <div v-if="!showCustomWorkDayInput" @click="showCustomWorkDayInput = true">
+        <div v-if="!showCustomWorkDayInput" class="work-days-box">
           {{ formatNumber(remainingWorkDays) }}
         </div>
         <v-text-field
@@ -57,7 +57,7 @@
           autofocus
           type="text"
           variant="outlined"
-          class="ma-0 pa-0 work-days-box"
+          class="ma-0 pa-0 custom-input"
           @blur="showCustomWorkDayInput = false"
           hide-details
         ></v-text-field>
@@ -80,6 +80,14 @@ import {
   DEFAULT_ISOFORMAT
 } from '@/shared/dateUtils';
 
+function mounted() {
+  this.emitter.emit('timesheets-chart-data', {
+    completed: this.periodHoursCompleted,
+    needed: this.totalPeriodHours,
+    remainingHours: this.remainingHours
+  });
+}
+
 /**
  * The amount of different days timesheets were entered in the future.
  *
@@ -95,7 +103,7 @@ function futureDays() {
  * @returns Integer - The amount of hours entered in the future
  */
 function futureHours() {
-  return Number(this.supplementalData?.future?.duration || 0 / 60 / 60);
+  return Number((this.supplementalData?.future?.duration || 0) / 60 / 60);
 } // futureHours
 
 /**
@@ -267,9 +275,20 @@ export default {
     getWorkDays,
     isWeekDay
   },
+  mounted,
   props: ['date', 'dateIsCurrentMonth', 'employee', 'isMonthly', 'supplementalData', 'timeData', 'today']
 };
 </script>
+
+<style>
+.custom-input input {
+  padding: 5px 10px 3px 9px;
+  width: 45px;
+  height: 10px;
+  min-height: 30px;
+  font-size: 12px;
+}
+</style>
 
 <style scoped>
 .dotted-line {

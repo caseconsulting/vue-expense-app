@@ -12,6 +12,7 @@
         <div class="pt-1 font-weight-medium">{{ needed }}h</div>
       </div>
     </doughnut-chart>
+    <div v-else class="d-flex justify-center align-center mt-15">Error loading chart data...</div>
   </div>
 </template>
 
@@ -26,11 +27,23 @@ import _ from 'lodash';
 // |--------------------------------------------------|
 
 /**
+ * The Before Unmount lifecycle hook
+ */
+function beforeUnmount() {
+  this.emitter.off('timesheets-chart-data');
+} // beforeUnmount
+
+/**
  * Mounted lifecycle hook.
  */
 async function mounted() {
-  await this.fillData();
-  this.dataReceived = true;
+  this.emitter.on('timesheets-chart-data', async ({ completed, needed, remainingHours }) => {
+    this.completed = completed;
+    this.needed = needed;
+    this.remainingHours = remainingHours;
+    await this.fillData();
+    this.dataReceived = true;
+  });
 
   // create tooltip
   let tooltipEl = document.createElement('div');
@@ -142,9 +155,13 @@ async function fillData() {
 // |--------------------------------------------------|
 
 export default {
+  beforeUnmount,
   components: { DoughnutChart },
   data() {
     return {
+      completed: 0,
+      needed: 0,
+      remainingHours: 0,
       options: null,
       chartData: null,
       dataReceived: false
@@ -152,7 +169,7 @@ export default {
   },
   methods: { fillData },
   mounted,
-  props: ['completed', 'needed', 'jobcodes', 'nonBillables', 'remainingHours']
+  props: ['jobcodes', 'nonBillables']
 };
 </script>
 
