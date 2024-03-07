@@ -47,6 +47,12 @@
 <script>
 import { formatNumber, openLink } from '@/utils/utils';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * Whether or not the employee has non-billables entered in their timesheets within the set time period.
  *
@@ -60,6 +66,12 @@ function hasNonBillables() {
   }
   return hasNonBillable;
 } // hasNonBillables
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   data() {

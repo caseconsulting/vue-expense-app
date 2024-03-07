@@ -80,13 +80,28 @@ import {
   DEFAULT_ISOFORMAT
 } from '@/shared/dateUtils';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * The Mounted lifecycle hook
+ */
 function mounted() {
   this.emitter.emit('timesheets-chart-data', {
     completed: this.periodHoursCompleted,
     needed: this.totalPeriodHours,
     remainingHours: this.remainingHours
   });
-}
+} // mounted
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 COMPUTED                         |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * The amount of different days timesheets were entered in the future.
@@ -249,6 +264,12 @@ function getWorkDays(startDate, endDate) {
 function isWeekDay(day) {
   return getIsoWeekday(day) >= 1 && getIsoWeekday(day) <= 5;
 } // isWeekDay
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 export default {
   computed: {
