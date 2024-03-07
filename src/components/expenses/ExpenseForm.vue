@@ -185,8 +185,16 @@
           class="mt-4"
           label="Description"
           data-vv-name="Description"
-          @click="showExchangeTrainingDesc = true"
-        ></v-text-field>
+          @update:focused="descRedirect()"
+          :hint="editedExpense.category === 'Exchange for training hours' ? 'Will open in a modal' : ''"
+          persistent-hint
+        >
+          <template v-if="editedExpense.category === 'Exchange for training hours'" v-slot:prepend>
+            <div @click="descRedirect()" class="pointer">
+              <v-icon :color="caseGray">mdi-open-in-new</v-icon>
+            </div>
+          </template>
+        </v-text-field>
 
         <!-- Purchase Date -->
         <v-text-field
@@ -928,6 +936,13 @@ function customFilter(_, queryText, item) {
   if (queryFirstName >= 0) return item.nickname ? true : queryFirstName;
   return false;
 } // customFilter
+
+/**
+ * Redirects description field to modal if needed (only for exchange for training hours)
+ */
+function descRedirect() {
+  if (this.editedExpense.category == 'Exchange for training hours') this.showExchangeTrainingDesc = true;
+}
 
 /**
  * Encodes a url from binary to ascii. Returns the encoded url.
@@ -2032,6 +2047,7 @@ export default {
     convertToMoneyString,
     costHint,
     customFilter,
+    descRedirect,
     encodeUrl,
     filteredExpenseTypes,
     formatCost,
