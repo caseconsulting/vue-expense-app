@@ -1991,7 +1991,8 @@ export default {
       ], // rules for cost
       descriptionRules: [
         (v) => !this.isEmpty(v) || 'Description is a required field',
-        (v) => (!this.isEmpty(v) && v.replace(/\s/g, '').length > 0) || 'Description is a required field'
+        (v) =>
+          (!this.isEmpty(v) && v.replaceAll(/\s/g, '').length >= 150) || 'Description must be at least 150 characters'
       ], // rules for description
       disableScan: true, // receipt scanned disabled
       //editedExpense: {}, // data being edited --
