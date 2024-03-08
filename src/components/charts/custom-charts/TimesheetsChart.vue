@@ -126,8 +126,8 @@ async function fillData() {
 
     // Set position
     const position = context.chart.canvas.getBoundingClientRect();
-    tooltipEl.style.left = position.left + window.pageXOffset + tooltipModel.caretX + 'px';
-    tooltipEl.style.top = position.top + window.pageYOffset + tooltipModel.caretX + 'px';
+    tooltipEl.style.left = position.left + tooltipModel.caretX + 'px';
+    tooltipEl.style.top = position.top + tooltipModel.caretY + 'px';
   } // externalTooltipHandler
 
   this.options = {
