@@ -89,12 +89,20 @@
         >
           <v-card>
             <v-card-title class="d-flex align-center header_style" v-if="!editing">
-              <v-btn v-if="hasAdminPermissions()" :disabled="loading" icon variant="text" density="comfortable">
+              <v-btn
+                v-if="hasAdminPermissions()"
+                @click="navEmployee(-1)"
+                :disabled="loading"
+                icon
+                variant="text"
+                density="comfortable"
+              >
                 <v-tooltip activator="parent" location="top">Previous employee</v-tooltip>
-                <v-icon size="large" @click="navEmployee(-1)" color="white">mdi-arrow-left-thin</v-icon>
+                <v-icon size="large" color="white">mdi-arrow-left-thin</v-icon>
               </v-btn>
               <v-btn
                 v-if="hasAdminPermissions()"
+                @click="navEmployee(1)"
                 :disabled="loading"
                 icon
                 variant="text"
@@ -102,7 +110,7 @@
                 class="mr-3"
               >
                 <v-tooltip activator="parent" location="top">Next employee</v-tooltip>
-                <v-icon size="large" @click="navEmployee(1)" color="white">mdi-arrow-right-thin</v-icon>
+                <v-icon size="large" color="white">mdi-arrow-right-thin</v-icon>
               </v-btn>
               <div v-if="hasAdminPermissions()">
                 <v-autocomplete
@@ -121,6 +129,7 @@
                   @update:model-value="
                     dropdownEmployee ? (model = dropdownEmployee) : _;
                     pushHistoryState(model.employeeNumber);
+                    this.refreshExpenseData();
                   "
                 >
                 </v-autocomplete>
