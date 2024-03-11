@@ -45,9 +45,8 @@
 
 <script>
 import _ from 'lodash';
-import { DEFAULT_ISOFORMAT, add, difference, format, getMonth, getYear, subtract } from '@/shared/dateUtils';
-import { isMobile } from '../../utils/utils';
-import { setYear } from '../../shared/dateUtils';
+import { DEFAULT_ISOFORMAT, add, difference, format, getMonth, getYear, setYear, subtract } from '@/shared/dateUtils';
+import { isMobile } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -130,6 +129,7 @@ export default {
   data() {
     return {
       date: null,
+      DEFAULT_ISOFORMAT,
       anniversaries: null
     };
   },

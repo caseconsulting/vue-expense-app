@@ -28,7 +28,11 @@
       <!-- Anniversary Date -->
       <v-col cols="12" lg="4">
         <div v-if="!loading && !isMobile">
-          <anniversary-card :employee="employee" :hasBudgets="hasAccessToBudgets"></anniversary-card>
+          <anniversary-card
+            :employee="employee"
+            emitCatcher="my-budgets"
+            :hasBudgets="hasAccessToBudgets"
+          ></anniversary-card>
         </div>
         <div v-else-if="loading && !isMobile">
           <!-- This has to be in a v-col because of padding that comes from the anniversary card v-col. Without the v-col, the loader is off-->
@@ -211,7 +215,7 @@ async function created() {
     await this.updateData();
   });
 
-  this.emitter.on('selected-budget-year', (date) => {
+  this.emitter.on('change-budget-year-my-budgets', (date) => {
     if (date != this.fiscalDateView) {
       this.fiscalDateView = date;
     }
@@ -223,7 +227,7 @@ async function created() {
  */
 function beforeUnmount() {
   this.emitter.off('updateData');
-  this.emitter.off('selected-budget-year');
+  this.emitter.off('change-budget-year-my-budgets');
   this.emitter.off('error');
 } // beforeUnmount
 

@@ -13,7 +13,7 @@
         </div>
         <div v-else>
           <!-- If no avaible budgets -->
-          <div v-if="budgets.length == 0">
+          <div v-if="budgets.length == 0" class="my-4">
             <v-row justify="center">
               <p>No available budgets</p>
             </v-row>
@@ -69,8 +69,9 @@ async function created() {
     this.showDialog = false;
   });
   this.currentUser = this.$store.getters.user;
-  if (this.accessibleBudgets) {
+  if (this.accessibleBudgets && this.expenseTypes) {
     await this.refreshEmployee();
+    await this.refreshBudget();
   }
   this.loading = false;
 } // created

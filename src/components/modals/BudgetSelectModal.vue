@@ -8,9 +8,9 @@
         </v-toolbar>
         <!-- End Anniversary Date -->
         <!-- Buttons -->
-        <v-list lines="two">
+        <v-list lines="two" class="pb-0">
           <!-- Budget List -->
-          <div v-if="hasBudgets">
+          <div v-if="budgetYears.length > 0">
             <div v-for="(budgetYear, index) in budgetYears" :key="budgetYear">
               <v-list-item ripple @click.native="select(budgetYear)" class="pointer">
                 <v-list-item-title>
@@ -23,23 +23,15 @@
             </div>
           </div>
           <div v-else>
-            <template>
-              <v-list-item>
-                <v-list-item-title>
-                  <h2 class="text-center">No Previous Years</h2>
-                </v-list-item-title>
-              </v-list-item>
-              <v-divider></v-divider>
-            </template>
+            <p class="text-center my-3 font-italic">No Previous Years</p>
           </div>
           <!-- End Budget List -->
 
           <!-- Cancel Button -->
-          <template>
-            <v-list-item ripple @click.native="activate = false" class="list-hover">
-              <v-list-item-title><h2 class="text-center">Cancel</h2></v-list-item-title>
-            </v-list-item>
-          </template>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="grey-darken-3" variant="text" @click.native="activate = false"> Close </v-btn>
+          </v-card-actions>
           <!-- End Cancel Button -->
         </v-list>
         <!-- End Buttons -->

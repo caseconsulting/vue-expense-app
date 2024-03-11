@@ -1,122 +1,116 @@
 <template>
-  <div v-if="$store.getters.ptoCashOuts">
-    <v-form ref="form" v-model="valid" lazy-validation>
-      <v-card>
-        <v-card-title class="d-flex align-center header_style text-h6">
-          <h6 class="subtitle" v-if="userRoleIsAdmin() || userRoleIsManager()">
-            Employee: {{ nicknameAndLastName(passedEmployee) }}
-          </h6>
-          <h3>Cash Out PTO</h3>
-        </v-card-title>
-        <div v-if="!isSubmitting">
-          <v-card-text v-if="passedEmployee">
-            <p>
-              <span v-if="pto">
-                <b>PTO:</b> {{ pto }}h
-                <br />
-              </span>
-              <span v-else>PTO: Loading... <br /></span>
-              <span v-if="Number(getPendingPtoCashoutAmount(passedEmployee.id)) > 0">
-                <b>Pending PTO Cash Out:</b> {{ Number(getPendingPtoCashoutAmount(passedEmployee.id)) }}h
-              </span>
-            </p>
-            <div>
-              <!-- PTO Cash Out Amount -->
-              <v-text-field
-                prepend-icon="mdi-clock-outline"
-                variant="underlined"
-                class="py-2"
-                :rules="[
-                  (v) => !!v || 'Field is required',
-                  ...getNumberRules(),
-                  ...getPTOCashOutRules(
-                    ptoData.ptoBalance,
-                    passedEmployee ? passedEmployee.id : this.$store.getters.user.id,
-                    item ? Number(item.amount) : null
-                  )
-                ]"
-                :hint="cashOutHint()"
-                v-model.number="ptoCashOutObj.amount"
-                label="Number of Hours Requested to be Paid Out"
-                required
-              ></v-text-field>
+  <v-form ref="form" v-model="valid" lazy-validation>
+    <v-card>
+      <v-card-title class="d-flex align-center header_style text-h6">
+        <h6 class="subtitle" v-if="employee && (userRoleIsAdmin() || userRoleIsManager())">
+          Employee: {{ nicknameAndLastName(employee) }}
+        </h6>
+        <h3>Cash Out PTO</h3>
+      </v-card-title>
+      <div v-if="!isSubmitting && $store.getters.ptoCashOuts && pto">
+        <v-card-text v-if="employee">
+          <p>
+            <span v-if="pto">
+              <b>PTO:</b> {{ pto }}h
+              <br />
+            </span>
+            <span v-else>PTO: Loading... <br /></span>
+            <span v-if="Number(getPendingPtoCashoutAmount(employee.id)) > 0">
+              <b>Pending PTO Cash Out:</b> {{ Number(getPendingPtoCashoutAmount(employee.id)) }}h
+            </span>
+          </p>
+          <div>
+            <!-- PTO Cash Out Amount -->
+            <v-text-field
+              prepend-icon="mdi-clock-outline"
+              variant="underlined"
+              class="py-2"
+              :rules="[
+                (v) => !!v || 'Field is required',
+                ...getNumberRules(),
+                ...getPTOCashOutRules(ptoData.ptoBalance, employee.id, item ? Number(item.amount) : null)
+              ]"
+              :hint="cashOutHint()"
+              v-model.number="ptoCashOutObj.amount"
+              label="Number of Hours Requested to be Paid Out"
+              required
+            ></v-text-field>
 
-              <!-- Approved Date for PTO Cash Out (Optional) -->
-              <v-menu
-                v-if="userRoleIsAdmin() || userRoleIsManager()"
-                ref="approvedDateMenu"
-                :close-on-content-click="false"
-                v-model="approvedDateMenu"
-                location="start center"
-              >
-                <template v-slot:activator="{ props }">
-                  <v-text-field
-                    v-model="approvedDateFormatted"
-                    id="approvedDate"
-                    :rules="getDateOptionalRules()"
-                    v-mask="'##/##/####'"
-                    variant="underlined"
-                    label="Approved Date (optional)"
-                    hint="MM/DD/YYYY format"
-                    class="mb-4"
-                    persistent-hint
-                    v-bind="props"
-                    @update:focused="
-                      ptoCashOutObj.approvedDate = format(approvedDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')
-                    "
-                    @click:prepend="approvedDateMenu = true"
-                    @keypress="approvedDateMenu = false"
-                  >
-                    <template v-slot:prepend>
-                      <div class="pointer">
-                        <v-icon color="grey-darken-1">mdi-calendar</v-icon>
-                      </div>
-                    </template>
-                  </v-text-field>
-                </template>
-                <v-date-picker
-                  v-model="ptoCashOutObj.approvedDate"
-                  @update:model-value="approvedDateMenu = false"
-                  hide-actions
-                  show-adjacent-months
-                  keyboard-icon=""
-                  color="#bc3825"
-                  title="Approved Date"
+            <!-- Approved Date for PTO Cash Out (Optional) -->
+            <v-menu
+              v-if="userRoleIsAdmin() || userRoleIsManager()"
+              ref="approvedDateMenu"
+              :close-on-content-click="false"
+              v-model="approvedDateMenu"
+              location="start center"
+            >
+              <template v-slot:activator="{ props }">
+                <v-text-field
+                  v-model="approvedDateFormatted"
+                  id="approvedDate"
+                  :rules="getDateOptionalRules()"
+                  v-mask="'##/##/####'"
+                  variant="underlined"
+                  label="Approved Date (optional)"
+                  hint="MM/DD/YYYY format"
+                  class="mb-4"
+                  persistent-hint
+                  v-bind="props"
+                  @update:focused="
+                    ptoCashOutObj.approvedDate = format(approvedDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')
+                  "
+                  @click:prepend="approvedDateMenu = true"
+                  @keypress="approvedDateMenu = false"
                 >
-                </v-date-picker>
-              </v-menu>
-            </div>
-            <small>
-              *cash outs are paid during the normal payroll period
-              <v-avatar
-                @click="openLink('https://3.basecamp.com/3097063/buckets/179119/messages/939259168')"
-                class="mb-3"
-                size="small"
-              >
-                <v-tooltip activator="parent" location="top">Click for more information</v-tooltip>
-                <v-icon size="small" color="#3f51b5">mdi-information</v-icon>
-              </v-avatar>
-            </small>
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <!-- Cancel Button -->
-            <v-btn color="black" @click="cancel()" variant="text" class="mx-2"> Cancel </v-btn>
-            <!-- Submit Button -->
-            <v-btn variant="text" class="mx-2" color="success" :disabled="!valid" @click="submit()">
-              <template v-slot:prepend>
-                <v-icon>mdi-content-save</v-icon>
+                  <template v-slot:prepend>
+                    <div class="pointer">
+                      <v-icon color="grey-darken-1">mdi-calendar</v-icon>
+                    </div>
+                  </template>
+                </v-text-field>
               </template>
-              Submit
-            </v-btn>
-          </v-card-actions>
-        </div>
-        <div v-else class="py-10 px-6">
-          <v-progress-linear :indeterminate="true"></v-progress-linear>
-        </div>
-      </v-card>
-    </v-form>
-  </div>
+              <v-date-picker
+                v-model="ptoCashOutObj.approvedDate"
+                @update:model-value="approvedDateMenu = false"
+                hide-actions
+                show-adjacent-months
+                keyboard-icon=""
+                color="#bc3825"
+                title="Approved Date"
+              >
+              </v-date-picker>
+            </v-menu>
+          </div>
+          <small>
+            *cash outs are paid during the normal payroll period
+            <v-avatar
+              @click="openLink('https://3.basecamp.com/3097063/buckets/179119/messages/6950289713')"
+              class="mb-3"
+              size="small"
+            >
+              <v-tooltip activator="parent" location="top">Click for more information</v-tooltip>
+              <v-icon color="#3f51b5">mdi-information</v-icon>
+            </v-avatar>
+          </small>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <!-- Cancel Button -->
+          <v-btn color="black" @click="cancel()" variant="text" class="mx-2"> Cancel </v-btn>
+          <!-- Submit Button -->
+          <v-btn variant="text" class="mx-2" color="success" :disabled="!valid" @click="submit()">
+            <template v-slot:prepend>
+              <v-icon>mdi-content-save</v-icon>
+            </template>
+            Submit
+          </v-btn>
+        </v-card-actions>
+      </div>
+      <div v-else class="py-10 px-6">
+        <v-progress-linear :indeterminate="true"></v-progress-linear>
+      </div>
+    </v-card>
+  </v-form>
 </template>
 <script>
 import {
@@ -127,8 +121,8 @@ import {
 } from '@/shared/validationUtils.js';
 import api from '@/shared/api.js';
 import dateUtils from '@/shared/dateUtils.js';
-import { generateUUID, userRoleIsAdmin, userRoleIsManager } from '../../utils/utils';
-import { updateStoreEmployees } from '../../utils/storeUtils';
+import { generateUUID, openLink, userRoleIsAdmin, userRoleIsManager } from '../../utils/utils';
+import { updateStoreEmployees, updateStorePtoCashOuts } from '../../utils/storeUtils';
 import { format } from '../../shared/dateUtils';
 import { mask } from 'vue-the-mask';
 import { getEmployeeByID, nicknameAndLastName } from '../../shared/employeeUtils';
@@ -145,23 +139,18 @@ import _ from 'lodash';
  * Created lifecycle hook
  */
 async function created() {
-  if (!this.$store.getters.employees) {
-    await this.updateStoreEmployees();
-  }
+  await Promise.all([
+    !this.$store.getters.employees ? this.updateStoreEmployees() : '',
+    !this.$store.getters.ptoCashOuts ? this.updateStorePtoCashOuts() : ''
+  ]);
+  this.employee = _.find(this.$store.getters.employees, (e) => e.id === this.employeeId);
   if (this.item) {
     let editingItem = _.cloneDeep(this.item);
-    this.passedEmployee = _.find(this.$store.getters.employees, (e) => e.id === this.item.employeeId);
     this.ptoCashOutObj['id'] = editingItem.id;
     this.ptoCashOutObj['employeeId'] = editingItem.employeeId;
     this.ptoCashOutObj['amount'] = Number(editingItem.amount);
     this.ptoCashOutObj['creationDate'] = editingItem.creationDate;
     this.ptoCashOutObj['approvedDate'] = editingItem.approvedDate;
-  } else {
-    if (this.employee.value) {
-      this.passedEmployee = _.cloneDeep(this.employee.value);
-    } else {
-      this.passedEmployee = _.cloneDeep(this.employee);
-    }
   }
 } // created
 
@@ -201,15 +190,6 @@ async function submit() {
     this.displayError(err);
   }
 } // submit
-
-/**
- * Opens a link in a new tab.
- *
- * @param link String - the link to open
- */
-function openLink(link) {
-  window.open(link, '_blank');
-} // openLink
 
 /**
  * Cancel event handler
@@ -280,15 +260,9 @@ function getPendingPtoCashoutAmount(employeeId) {
  * @returns String - The hint text
  */
 function cashOutHint() {
-  let employeeId;
-  if (this.passedEmployee) {
-    employeeId = this.passedEmployee.id;
-  } else {
-    employeeId = this.$store.getters.user.id;
-  }
   if (this.ptoCashOutObj.amount) {
     let amount = this.editing ? this.ptoCashOutObj.amount - this.item.amount : Number(this.ptoCashOutObj.amount);
-    return `Balance after cash out: ${(this.pto - this.getPendingPtoCashoutAmount(employeeId) - amount).toFixed(2)}h`;
+    return `Balance after cash out: ${(this.pto - this.getPendingPtoCashoutAmount(this.employee.id) - amount).toFixed(2)}h`;
   }
 } // cashOutHint
 
@@ -300,7 +274,7 @@ async function createPTOCashOutRequest() {
   let ptoCashOut = await api.createItem(api.PTO_CASH_OUTS, {
     id: generateUUID(),
     amount: Number(newItem.amount),
-    employeeId: this.passedEmployee.id,
+    employeeId: this.employee.id,
     creationDate: dateUtils.getTodaysDate(),
     approvedDate: newItem.approvedDate ? newItem.approvedDate : null
   });
@@ -338,7 +312,6 @@ function watchApprovedDate() {
 function watchEditPTOCashOutItem() {
   if (this.item) {
     let editingItem = _.cloneDeep(this.item);
-    this.passedEmployee = _.find(this.$store.getters.employees, (e) => e.id === this.item.employeeId);
     this.ptoCashOutObj['id'] = editingItem.id;
     this.ptoCashOutObj['employeeId'] = editingItem.employeeId;
     this.ptoCashOutObj['amount'] = Number(editingItem.amount);
@@ -347,13 +320,6 @@ function watchEditPTOCashOutItem() {
   }
 } // watchEditPTOCashOutItem
 
-/**
- * Watcher for employee prop.
- */
-function watchEmployee() {
-  this.passedEmployee = _.cloneDeep(this.employee.value);
-} // watchEmployee
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                     COMPUTED                     |
@@ -361,15 +327,8 @@ function watchEmployee() {
 // |--------------------------------------------------|
 
 function ptoData() {
-  let employeeId;
-  if (this.passedEmployee) {
-    employeeId = this.passedEmployee.employeeId;
-  } else {
-    employeeId = this.$store.getters.user.id;
-  }
-
   return {
-    pendingPtoCashOutAmount: this.getPendingPtoCashoutAmount(employeeId),
+    pendingPtoCashOutAmount: this.getPendingPtoCashoutAmount(this.employee.id),
     ptoBalance: this.pto
   };
 }
@@ -384,6 +343,7 @@ export default {
   data() {
     return {
       show: false,
+      employee: null,
       ptoCashOutObj: { approvedDate: null },
       valid: false,
       isSubmitting: false,
@@ -410,17 +370,17 @@ export default {
     userRoleIsAdmin,
     userRoleIsManager,
     updateStoreEmployees,
+    updateStorePtoCashOuts,
     updatePTOCashOutRequest,
     getEmployeeByID,
     format
   },
   watch: {
     'ptoCashOutObj.approvedDate': watchApprovedDate,
-    item: watchEditPTOCashOutItem,
-    'employee.value': watchEmployee
+    item: watchEditPTOCashOutItem
   },
   computed: { ptoData },
-  props: ['item', 'employee', 'pto', 'editing']
+  props: ['item', 'employeeId', 'pto', 'editing']
 };
 </script>
 <style scoped>

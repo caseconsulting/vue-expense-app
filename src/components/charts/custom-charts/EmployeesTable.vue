@@ -72,7 +72,6 @@ function fillData() {
   let overheadCount = 0;
   let overheadAwaitingClearanceCount = 0;
   let internsAwaitingClearanceCount = 0;
-  let nonPeopleCount = 1; // info account
   let [billableEmployeeNames, internEmployeeNames] = [[], []];
   let overheadEmployeeNames = _.map(this.employees, (e) => {
     return { name: `${e.nickname || e.firstName} ${e.lastName}` };
@@ -106,8 +105,7 @@ function fillData() {
     }
   });
 
-  overheadCount = this.employees.length - billableCount - internCount - nonPeopleCount;
-  _.remove(overheadEmployeeNames, (x) => x.name === 'Info Account');
+  overheadCount = this.employees.length - billableCount - internCount;
   overheadEmployeeNames = _.map(overheadEmployeeNames, (x) => {
     return x.name;
   });
@@ -128,7 +126,7 @@ function fillData() {
       } awaiting clearance)`,
       employeeNames: internEmployeeNames
     },
-    { title: 'Total Employees', value: this.employees.length - nonPeopleCount, employeeNames: [] } // -1 for the info account on prod
+    { title: 'Total Employees', value: this.employees.length, employeeNames: [] }
   ];
 
   this.headers = [

@@ -17,6 +17,15 @@ export async function asyncForEach(array, callback) {
 } // asyncForEach
 
 /**
+ * Converts seconds to hours with 2 decimal places if needed.
+ *
+ * @param {Number} seconds - The number of seconds
+ */
+export function formatNumber(number) {
+  return number?.toFixed(2)?.replace(/[.,]00$/, '') || null; // removes decimals if a whole number
+} // convertToHours
+
+/**
  * Gets the current active anniversary budget year starting date in isoformat.
  *
  * @param hireDate - The hire date of an employee (YYYY-MM-DD)
@@ -136,6 +145,15 @@ export function monthDayYearFormat(date) {
 export function monthYearFormat(date) {
   return !isEmpty(date) ? format(date, null, 'MMM YYYY') : '';
 } // monthYearFormat
+
+/**
+ * Opens a link in a new tab.
+ *
+ * @param link String - the link to open
+ */
+export function openLink(link) {
+  window.open(link, '_blank');
+} // openLink
 
 /**
  * Updates the login date and creates audit for the employee.

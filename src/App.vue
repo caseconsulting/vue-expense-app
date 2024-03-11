@@ -1,6 +1,7 @@
 <template>
   <div id="app" @mousedown="refreshSession()">
     <v-app>
+      <v-icon color="purple-lighten-5" id="jellyfish">mdi-jellyfish</v-icon>
       <v-navigation-drawer
         v-if="isLoggedIn()"
         v-model="drawer"
@@ -31,21 +32,32 @@
             <template v-slot:activator="{ props }">
               <v-btn id="links-btn" size="small" class="my-2" v-bind="props">Links &#9662; </v-btn>
             </template>
-
             <v-list>
+              <!-- Misc links -->
               <v-list-item
-                v-for="(l, index) in links"
-                @click="badumbadumdodooodoo(index)"
-                :key="index"
-                :id="l.link"
-                :href="l.link"
+                v-for="({ name, link }, i) in links"
+                @click="badumbadumdodooodoo(i)"
+                :title="name"
+                :key="i"
+                :id="link"
+                :href="link"
                 target="_blank"
-              >
-                <v-list-item-title>{{ l.name }}</v-list-item-title>
-              </v-list-item>
-              <v-list-item :href="floorPlan" target="_blank" id="floorPlan"
-                >Workspace at Reston Town Center Map</v-list-item
-              >
+              ></v-list-item>
+              <!-- Benefits links -->
+              <v-list-group value="Benefits">
+                <template v-slot:activator="{ props }">
+                  <v-list-item v-bind="props" @click.stop.prevent title="Benefits"></v-list-item>
+                </template>
+                <v-list-item
+                  v-for="({ name, link }, i) in benefitsLinks"
+                  @click="badumbadumdodooodoo(i)"
+                  :title="name"
+                  :key="i"
+                  :id="link"
+                  :href="link"
+                  target="_blank"
+                ></v-list-item>
+              </v-list-group>
             </v-list>
           </v-menu>
           <v-btn
@@ -117,7 +129,7 @@
             id="P"
             class="text-black"
             target="_blank"
-            href="https://3.basecamp.com/3097063/buckets/4708396/documents/7010313431"
+            href="https://3.basecamp.com/3097063/buckets/4708396/documents/7173352000"
           >
             <v-tooltip activator="parent" location="top">View Release Notes</v-tooltip>
             <strong>Version</strong> {{ version }}
@@ -144,7 +156,7 @@ import {
   refreshUserSession
 } from '@/utils/auth';
 import { isMobile, isSmallScreen, storeIsPopulated, updateEmployeeLogin } from '@/utils/utils';
-import { updateStoreUser } from '@/utils/storeUtils';
+import { updateStoreUser, updateStoreEmployees } from '@/utils/storeUtils';
 import floorPlan from '@/assets/img/MakeOfficesfloorplan.jpg';
 import facebook from '@/assets/img/trademarks/facebook.png';
 import github from '@/assets/img/trademarks/github.png';
@@ -361,6 +373,9 @@ async function created() {
   this.version = require('../package.json').version;
 
   this.loadingCreated = false;
+
+  // run API calls in background
+  Promise.all([this.updateStoreEmployees()]);
 } // created
 
 /**
@@ -434,18 +449,22 @@ export default {
       { name: 'CASE Information', link: 'https://3.basecamp.com/3097063/buckets/4708396/messages/650777910' },
       { name: 'Basecamp', link: 'https://3.basecamp.com/3097063' },
       { name: 'QuickBooks Time', link: 'https://tsheets.intuit.com/page/login_oii' },
+      { name: 'ADP', link: 'https://workforcenow.adp.com/' },
+      { name: 'BambooHR', link: 'https://consultwithcase.bamboohr.com/home/' },
+      { name: 'Jira', link: 'https://consultwithcase.atlassian.net/jira/your-work' },
+      {
+        name: 'Portal & Basecamp How-Tos',
+        link: 'https://3.basecamp.com/3097063/buckets/34631168/message_boards/6620373851'
+      },
+      { name: 'Workspace at Reston Town Center Map', link: floorPlan }
+    ],
+    benefitsLinks: [
       { name: 'Net Benefits/Fidelity', link: 'https://nb.fidelity.com/public/nb/default/home' },
       { name: 'Benefits Booklet', link: 'https://3.basecamp.com/3097063/buckets/4708396/uploads/6746972426' },
       { name: 'Medical (Health) Insurance', link: 'https://www.anthem.com/' },
       { name: 'Disability & Life Insurance', link: 'https://www.mutualofomaha.com/' },
       { name: 'Dental & Vision Insurance', link: 'https://www.sunlife.com/' },
-      { name: 'Dependent Care', link: 'https://www.wageworks.com/' },
-      { name: 'ADP', link: 'https://workforcenow.adp.com/' },
-      { name: 'Jira', link: 'https://consultwithcase.atlassian.net/jira/your-work' },
-      {
-        name: 'Portal & Basecamp How-Tos',
-        link: 'https://3.basecamp.com/3097063/buckets/34631168/message_boards/6620373851'
-      }
+      { name: 'Dependent Care', link: 'https://www.wageworks.com/' }
     ],
     mediaLinks: [
       { name: 'Github', link: 'https://github.com/caseconsulting', img: github },
@@ -485,6 +504,7 @@ export default {
     refreshSession,
     setSessionTimeouts,
     updateStoreUser,
+    updateStoreEmployees,
     updateEmployeeLogin
   },
   watch: {
@@ -541,5 +561,12 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+#jellyfish {
+  position: fixed;
+  bottom: 7px;
+  left: 50%;
+  z-index: -1;
 }
 </style>

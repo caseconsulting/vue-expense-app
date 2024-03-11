@@ -60,7 +60,7 @@
       </v-row>
       <v-row class="pt-0">
         <!-- QuickBooks Time and Budgets-->
-        <v-col v-if="displayQuickBooksTimeAndBalances" cols="12" md="5" lg="4" class="pt-0">
+        <v-col v-if="displayQuickBooksTimeAndBalances" cols="12" md="5" lg="5" class="pt-0">
           <quick-books-time-data :employee="model" :key="model" class="mb-4"></quick-books-time-data>
           <available-budgets
             class="mb-4"
@@ -72,24 +72,37 @@
             :employeeDataLoading="loading"
             :fiscalDateView="fiscalDateView"
           ></available-budgets>
-          <anniversary-card :employee="model" :key="refreshKey" location="profile"></anniversary-card>
+          <anniversary-card
+            :employee="model"
+            emitCatcher="employee-page"
+            :key="refreshKey"
+            location="profile"
+          ></anniversary-card>
         </v-col>
 
         <!-- Employee Form -->
         <v-col
           cols="12"
           :md="displayQuickBooksTimeAndBalances ? 7 : 12"
-          :lg="displayQuickBooksTimeAndBalances ? 8 : 12"
+          :lg="displayQuickBooksTimeAndBalances ? 7 : 12"
           class="pt-0"
         >
           <v-card>
             <v-card-title class="d-flex align-center header_style" v-if="!editing">
-              <v-btn v-if="hasAdminPermissions()" :disabled="loading" icon variant="text" density="comfortable">
+              <v-btn
+                v-if="hasAdminPermissions()"
+                @click="navEmployee(-1)"
+                :disabled="loading"
+                icon
+                variant="text"
+                density="comfortable"
+              >
                 <v-tooltip activator="parent" location="top">Previous employee</v-tooltip>
-                <v-icon size="large" @click="navEmployee(-1)" color="white">mdi-arrow-left-thin</v-icon>
+                <v-icon size="large" color="white">mdi-arrow-left-thin</v-icon>
               </v-btn>
               <v-btn
                 v-if="hasAdminPermissions()"
+                @click="navEmployee(1)"
                 :disabled="loading"
                 icon
                 variant="text"
@@ -97,10 +110,34 @@
                 class="mr-3"
               >
                 <v-tooltip activator="parent" location="top">Next employee</v-tooltip>
-                <v-icon size="large" @click="navEmployee(1)" color="white">mdi-arrow-right-thin</v-icon>
+                <v-icon size="large" color="white">mdi-arrow-right-thin</v-icon>
               </v-btn>
-              <h3 id="employeeName" v-if="userIsEmployee()">My Profile</h3>
-              <h3 id="employeeName" v-else>{{ model.nickname || model.firstName }} {{ model.lastName }}</h3>
+              <div v-if="hasAdminPermissions()">
+                <v-autocomplete
+                  v-model="dropdownEmployee"
+                  class="employee-dropdown"
+                  density="compact"
+                  :items="dropdownEmployees"
+                  :customFilter="customFilter"
+                  hide-details
+                  :focused="employeeDropdownFocused"
+                  item-title="itemTitle"
+                  return-object
+                  rounded
+                  bg-color="rgba(255,255,255,0.075)"
+                  variant="plain"
+                  @update:model-value="
+                    dropdownEmployee ? (model = dropdownEmployee) : _;
+                    pushHistoryState(model.employeeNumber);
+                    this.refreshExpenseData();
+                  "
+                >
+                </v-autocomplete>
+              </div>
+              <div v-else>
+                <h3 id="employeeName" v-if="userIsEmployee()">My Profile</h3>
+                <h3 id="employeeName" v-else>{{ model.nickname || model.firstName }} {{ model.lastName }}</h3>
+              </div>
               <v-spacer></v-spacer>
               <convert-employee-to-csv
                 v-if="userRoleIsAdmin()"
@@ -243,6 +280,26 @@ async function resumeReceived(newEmployeeForm, changes) {
 } // resumeReceived
 
 /**
+ * Custom filter for employee autocomplete options.
+ *
+ * @param item - employee
+ * @param queryText - text used for filtering
+ * @return string - filtered employee name
+ */
+function customFilter(itemValue, queryText, itemObject) {
+  const item = itemObject.raw;
+  const query = queryText ? queryText : '';
+  const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
+  const firstNameFullName = `${item.firstName} ${item.lastName}`;
+
+  const queryContainsNickName = nickNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
+  const queryContainsFirstName =
+    firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
+
+  return queryContainsNickName || queryContainsFirstName;
+} // customFilter
+
+/**
  * Clears the status message of the uploadStatus
  */
 function clearStatus() {
@@ -369,6 +426,15 @@ async function checkForBudgetAccess() {
 } // checkForBudgetAccess
 
 /**
+ * Replaces the new employee number in the url.
+ *
+ * @param employeeNumber - The employee number
+ */
+function pushHistoryState(employeeNumber) {
+  history.pushState({}, null, employeeNumber);
+} // pushHistoryState
+
+/**
  * Navigates to an employee
  * future: support custom loops
  *
@@ -396,7 +462,7 @@ async function navEmployee(num) {
   await this.refreshExpenseData();
 
   // update the URL so that it makes sense
-  history.pushState({}, null, this.model.employeeNumber);
+  this.pushHistoryState(this.model.employeeNumber);
 } // navEmployee
 
 /**
@@ -467,7 +533,7 @@ function mounted() {
     this.currentTab = tab;
   });
 
-  this.emitter.on('selected-budget-year', (date) => {
+  this.emitter.on('change-budget-year-employee-page', (date) => {
     if (date != this.fiscalDateView) {
       this.fiscalDateView = date;
     }
@@ -486,7 +552,7 @@ function beforeUnmount() {
   this.emitter.off('update');
   this.emitter.off('uploaded');
   this.emitter.off('tabChange');
-  this.emitter.off('selected-budget-year');
+  this.emitter.off('change-budget-year-employee-page');
 } // beforeUnmount
 
 // |--------------------------------------------------|
@@ -494,6 +560,18 @@ function beforeUnmount() {
 // |                    COMPUTED                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Returns all employees with an item title for the autocomplete
+ */
+function dropdownEmployees() {
+  return _.map(this.$store.getters.employees, (e) => {
+    return {
+      ...e,
+      itemTitle: `${e.nickname || e.firstName} ${e.lastName}`
+    };
+  });
+} // dropdownEmployees
 
 /**
  * Used to refresh components
@@ -512,6 +590,16 @@ function refreshKey() {
 // |                    WATCHERS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Updates the dropdown employee when the employee model changes.
+ */
+function watchModel() {
+  this.dropdownEmployee = {
+    ..._.cloneDeep(this.model),
+    itemTitle: `${this.model.nickname || this.model.firstName} ${this.model.lastName}`
+  };
+} // watchModel
 
 /**
  * Load the profile data if the page is refreshed.
@@ -549,6 +637,7 @@ export default {
       dateFormat: FORMATTED_ISOFORMAT,
       deleteLoading: false,
       displayQuickBooksTimeAndBalances: false,
+      dropdownEmployee: null,
       editing: false,
       expenses: null,
       expenseTypes: null,
@@ -612,6 +701,7 @@ export default {
   },
   methods: {
     clearStatus,
+    customFilter,
     deleteResume,
     displayMessage,
     downloadResume,
@@ -620,6 +710,7 @@ export default {
     getProfileData,
     getCurrentBudgetYear,
     isEmpty,
+    pushHistoryState,
     resumeReceived,
     updateStoreBudgets,
     updateStoreContracts,
@@ -635,6 +726,7 @@ export default {
     refreshExpenseData
   },
   computed: {
+    dropdownEmployees,
     isMobile,
     minimizeWindow,
     refreshKey,
@@ -642,7 +734,29 @@ export default {
   },
   mounted,
   watch: {
+    'model.id': watchModel,
     storeIsPopulated: watchStoreIsPopulated
   }
 };
 </script>
+
+<style>
+.employee-dropdown {
+  width: 300px;
+}
+
+.employee-dropdown > * {
+  font-family: 'Avenir', Helvetica, Arial, sans-serif !important;
+  font-weight: bolder !important;
+}
+
+.employee-dropdown .v-field__input,
+.employee-dropdown .v-field__append-inner {
+  padding-left: 15px !important;
+  padding-top: 2px !important;
+  display: flex !important;
+  align-items: center !important;
+  font-size: 20px !important;
+  opacity: 1 !important;
+}
+</style>

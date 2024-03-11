@@ -577,6 +577,8 @@ function populateJobRoleDropdown() {
   let employeeJobTitles = _.map(this.employees, (e) => e.jobRole);
   employeeJobTitles = _.compact(employeeJobTitles);
   _.forEach(employeeJobTitles, (jobTitle) => this.jobTitles.push(jobTitle));
+  this.jobTitles = Array.from(new Set(this.jobTitles)); // remove duplicates
+  this.jobTitles?.sort();
 } // populateJobRoleDropdown
 
 /**
@@ -808,20 +810,32 @@ export default {
       hireDateFormatted: null, // formatted hire date
       hireMenu: false, // display hire menu
       jobTitles: [
-        'Software Developer',
-        'Project Manager',
-        'System Engineer',
-        'Systems Administrator',
+        'Accountant',
         'Cloud Architect',
-        'Cloud Engineer',
         'Cloud Cost Engineer',
+        'Cloud Developer',
+        'Cloud Engineer',
+        'Configuration Manager',
+        'Cyber Security Architect',
+        'Cyber Security Engineer',
+        'Data Architect',
+        'Data Engineer',
         'Data Scientist',
-        'Storage Engineer',
+        'Devops Engineer',
+        'HR Manager',
+        'IT Support',
         'Network Engineer',
-        'Windows Engineer',
-        'QA/Tester',
+        'Office Manager',
+        'Project Integrator',
+        'Project Manager',
+        'Software Architect',
+        'Software Developer',
+        'Storage Engineer',
+        'Systems Administrator',
+        'System Engineer',
+        'Test Engineer',
         'QA Automated Test Engineer',
-        'Accountant'
+        'Windows Engineer'
       ], // job title options
       loading: true,
       duplicateEmployeeNumberRule: [

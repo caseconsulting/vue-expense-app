@@ -13,7 +13,7 @@
             id="custom-button-color"
             :loading="isApproving"
             :disabled="!showApproveButton"
-            class="reimburse_button"
+            class="reimburse_button px-4"
           >
             <template v-slot:prepend>
               <v-icon>mdi-currency-usd</v-icon>
@@ -55,23 +55,27 @@
             <!-- Approved Filter -->
             <div class="px-4 pt-4 pb-md-4 pb-lg-4 pb-xl-4 pb-xxl-4">
               <h4>Status:</h4>
-              <v-btn-toggle class="filter_color" v-model="filter.approved" text mandatory>
+              <v-btn-toggle color="primary" class="filter_color" v-model="filter.approved" text mandatory>
                 <!-- Show Approved -->
                 <v-btn value="approved" variant="text">
                   <v-tooltip activator="parent" location="top">Show Approved</v-tooltip>
-                  <v-icon size="x-large" id="showApproved" class="mr-1">mdi-check-circle-outline</v-icon>
+                  <v-icon size="x-large" id="showApproved" class="mr-1">
+                    mdi-check-circle{{ filter.approved.includes('approved') ? '' : '-outline' }}
+                  </v-icon>
                 </v-btn>
 
                 <!-- Show Pending -->
                 <v-btn value="notApproved" variant="text">
                   <v-tooltip activator="parent" location="top">Show Pending</v-tooltip>
-                  <v-icon size="x-large" id="showPending">mdi-close-circle-outline</v-icon>
+                  <v-icon size="x-large" id="showPending">
+                    mdi-close-circle{{ filter.approved.includes('notApproved') ? '' : '-outline' }}
+                  </v-icon>
                 </v-btn>
 
                 <!-- Show Reimbursed and Pending -->
                 <v-btn id="bothApproved" value="both" variant="text">
                   <v-tooltip activator="parent" location="top">Show All</v-tooltip>
-                  BOTH
+                  <p class="ma-0" :class="filter.approved.includes('both') ? 'font-weight-black' : ''">BOTH</p>
                 </v-btn>
               </v-btn-toggle>
             </div>
@@ -168,6 +172,7 @@
               variant="text"
               icon=""
               id="edit"
+              @click.stop
               @click="clickedEdit(item)"
             >
               <v-tooltip activator="parent" location="top">Edit</v-tooltip>
@@ -196,12 +201,17 @@
     />
     <delete-modal :toggleDeleteModal="toggleDeleteModal" type="PTO cash out" />
     <v-dialog v-model="toggleEditModal" persistent max-width="500">
-      <p-t-o-cash-out-form :item="clickedEditItem" :pto="userPto" :editing="true" />
+      <p-t-o-cash-out-form
+        :employeeId="clickedEditItem?.employeeId"
+        :item="clickedEditItem"
+        :pto="userPto"
+        :editing="true"
+      />
     </v-dialog>
   </v-card>
 </template>
 <script>
-import { isMobile, userRoleIsAdmin, userRoleIsManager, monthDayYearFormat, isEmpty } from '@/utils/utils';
+import { formatNumber, isMobile, userRoleIsAdmin, userRoleIsManager, monthDayYearFormat, isEmpty } from '@/utils/utils';
 import { getEmployeeByID, nicknameAndLastName } from '@/shared/employeeUtils';
 import api from '@/shared/api.js';
 import { updateStoreUser, updateStoreEmployees, updateStorePtoCashOuts, updateStoreTags } from '@/utils/storeUtils';
@@ -482,10 +492,9 @@ async function clickedEdit(item) {
   this.clickedEditItem = item;
   this.toggleEditModal = true;
   let employee = _.find(this.$store.getters.employees, (e) => e.id === item.employeeId);
-  let employeeBalances = await api.getPTOBalances(employee.employeeNumber);
-  if (employeeBalances.results && employeeBalances.results.users[employee.employeeNumber]) {
-    this.userPto = employeeBalances.results.users[employee.employeeNumber]['pto_balances']['PTO'];
-  }
+  let employeeBalances = await api.getTimesheetsData(employee.employeeNumber, null, null, true);
+  let pto = employeeBalances?.ptoBalances?.PTO / 60 / 60 || 0;
+  this.userPto = this.formatNumber(pto);
 } // clickedEdit
 
 // |--------------------------------------------------|
@@ -544,11 +553,11 @@ function filteredPtoCashOuts() {
 function roleHeaders() {
   let headers = _.cloneDeep(this.headers);
   if (!(userRoleIsAdmin() || userRoleIsManager())) {
-    headers = _.filter(headers, (h) => h.text != 'Employee');
+    headers = _.filter(headers, (h) => h.title != 'Employee');
   }
 
   if (this.unapprovedOnly) {
-    headers = _.filter(headers, (h) => h.text != 'actions');
+    headers = _.filter(headers, (h) => h.title != 'actions');
   }
   return headers;
 } // roleHeaders
@@ -664,6 +673,7 @@ export default {
     deletePTOCashOut,
     displayError,
     displaySuccess,
+    formatNumber,
     isApproved,
     isMobile,
     isEmpty,

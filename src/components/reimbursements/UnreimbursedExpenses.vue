@@ -1,15 +1,15 @@
 <template>
   <v-container fluid class="px-0 px-md-4">
     <v-row>
-      <v-col cols="12" md="9">
+      <v-col cols="12" md="8">
         <!-- Expense Table -->
         <unreimbursed-expenses-table></unreimbursed-expenses-table>
       </v-col>
-      <v-col v-if="!isMobile" cols="3" class="followScroll pr-7 pl-0">
-        <!-- Expense Info -->
-        <reimbursement-expense-details class="mb-3"></reimbursement-expense-details>
+      <v-col v-if="!isMobile" cols="4" class="followScroll pr-7 pl-0">
         <!-- Expenses Total -->
         <reimbursement-totals></reimbursement-totals>
+        <!-- Expense Info -->
+        <reimbursement-expense-details class="mb-3"></reimbursement-expense-details>
         <!-- Status Alert -->
         <v-alert
           v-for="(alert, index) in alerts"
@@ -24,10 +24,10 @@
         </v-alert>
       </v-col>
       <v-col v-else cols="12">
-        <!-- Expense Info -->
-        <reimbursement-expense-details class="mb-3"></reimbursement-expense-details>
         <!-- Expenses Total -->
         <expense-type-totals></expense-type-totals>
+        <!-- Expense Info -->
+        <reimbursement-expense-details></reimbursement-expense-details>
         <!-- Status Alert -->
         <v-alert
           v-for="(alert, index) in alerts"
@@ -101,6 +101,7 @@ export default {
 <style>
 .followScroll {
   position: fixed;
-  left: 75%;
+  left: 67.3%;
+  z-index: 999999 !important;
 }
 </style>

@@ -285,8 +285,8 @@ export default {
 }
 
 .timeline {
-  height: 600px;
-  max-height: 600px;
+  height: 100vh !important;
+  max-height: 100vh !important;
   overflow-y: scroll;
 }
 
