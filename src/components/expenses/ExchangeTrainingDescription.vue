@@ -8,7 +8,7 @@
       <v-card-text class="mt-4 px-6 pb-0">
         <p class="font-body-1">
           Please provide details on how you will utilize your training, listing the specific courses, conferences, and
-          topics you'll be learning during this training.
+          topics you'll be learning during this training. Your description must be at least 150 characters.
         </p>
 
         <div>
@@ -22,7 +22,9 @@
             data-vv-name="Description"
             validate-on="blur"
           ></v-textarea>
-          <p class="text-right mt-0">{{ charCount }} / {{ CHAR_MINIMUM }}</p>
+          <p class="text-right mt-0">
+            <span :class="`${charCountClass}`">{{ charCount }}</span> / {{ CHAR_MINIMUM }}
+          </p>
         </div>
       </v-card-text>
       <!-- Action Button -->
@@ -71,6 +73,12 @@ function charMinMet() {
   return this.charCount >= this.CHAR_MINIMUM;
 }
 
+function charCountClass() {
+  let goodClasses = ['text-green', 'font-weight-black'];
+  let badClasses = ['text-red'];
+  return this.charMinMet ? goodClasses.join(' ') : badClasses.join(' ');
+}
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -91,7 +99,8 @@ export default {
   props: ['previousDesc'],
   computed: {
     charCount,
-    charMinMet
+    charMinMet,
+    charCountClass
   },
   mounted
 };
