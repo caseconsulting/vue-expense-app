@@ -97,4 +97,7 @@ export default {
   background-repeat: repeat-x;
   flex-grow: 2;
 }
+.nudge-up {
+  top: -7px;
+}
 </style>
