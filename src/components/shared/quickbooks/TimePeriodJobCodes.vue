@@ -87,3 +87,14 @@ export default {
   props: ['isMonthly', 'supplementalData', 'timeData']
 };
 </script>
+
+<style scoped>
+.dotted-line {
+  height: 0.8em;
+  background-image: linear-gradient(to right, rgb(210, 210, 210) 33%, rgba(184, 184, 184, 0) 0%);
+  background-position: bottom;
+  background-size: 7px 1px;
+  background-repeat: repeat-x;
+  flex-grow: 2;
+}
+</style>
