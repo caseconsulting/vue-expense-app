@@ -18,6 +18,7 @@
 
 <script>
 import DoughnutChart from '../base-charts/DoughnutChart.vue';
+import { formatNumber } from '@/utils/utils.js';
 import _ from 'lodash';
 
 // |--------------------------------------------------|
@@ -78,9 +79,7 @@ async function fillData() {
   // remove pto jobcodes from chart for yearly data
   let jobcodes = _.pickBy(this.jobcodes, (value, key) => !this.nonBillables?.includes(key));
   let jobCodeValues = _.map(Object.values(jobcodes), (duration) => {
-    return Number(duration / 60 / 60)
-      ?.toFixed(2)
-      ?.replace(/[.,]00$/, '');
+    return formatNumber(Number(duration / 60 / 60));
   }); // removes decimals if a whole number
 
   for (let i = 0; i < jobCodeValues?.length / colorsOptions.length; i++) {
@@ -116,8 +115,9 @@ async function fillData() {
 
     // Set text
     if (tooltipModel.body) {
-      const title = tooltipModel.title[0] || '';
-      const value = tooltipModel.dataPoints[0].raw;
+      let title = tooltipModel.title[0] || '';
+      let value = tooltipModel.dataPoints[0].raw;
+      value = formatNumber(Number(value));
       tooltipEl.innerHTML = `
         <p class='ma-0 font-weight-bold'>${title}</p>
         <p class='ma-0'>${value}</p>
