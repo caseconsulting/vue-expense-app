@@ -7,20 +7,20 @@
         <fieldset class="filter_border">
           <legend class="legend_style">Sort By</legend>
           <v-col cols="12">
-            <v-btn-toggle v-model="sortFunction" density="compact">
-              <v-btn @click="sortByCurrent">
+            <v-btn-toggle color="primary" v-model="sortFunction" density="compact">
+              <v-btn value="current" @click="sortByCurrent">
                 <v-tooltip activator="parent" location="top">Current</v-tooltip>
-                <v-icon size="x-large">mdi-check</v-icon>
+                <v-icon size="x-large">mdi-check{{ sortFunction === 'current' ? '-bold' : '' }}</v-icon>
               </v-btn>
 
-              <v-btn @click="sortByDate">
+              <v-btn value="date" @click="sortByDate">
                 <v-tooltip activator="parent" location="top">Years of Experience</v-tooltip>
-                <v-icon size="x-large">mdi-calendar-multiple</v-icon>
+                <v-icon size="x-large">mdi-calendar-multiple{{ sortFunction === 'date' ? '-check' : '' }}</v-icon>
               </v-btn>
 
-              <v-btn @click="sortByName">
+              <v-btn value="name" @click="sortByName">
                 <v-tooltip activator="parent" location="top">Alphabetical</v-tooltip>
-                <v-icon size="x-large">mdi-sort-alphabetical-descending-variant </v-icon>
+                <v-icon size="x-large">mdi-sort-alphabetical-descending-variant</v-icon>
               </v-btn>
             </v-btn-toggle>
           </v-col>
@@ -34,9 +34,9 @@
             <p><b>Technology: </b>{{ technology.name }}</p>
           </v-col>
           <v-col>
-            <span>
+            <span v-if="technology.current">
               <v-icon>mdi-check</v-icon>
-              <v-tooltip v-if="technology.current" activator="parent" location="right">Current Skill</v-tooltip>
+              <v-tooltip activator="parent" location="right">Current Skill</v-tooltip>
             </span>
           </v-col>
         </v-row>
@@ -170,7 +170,7 @@ export default {
     return {
       page: 1,
       pageList: [],
-      sortFunction: null,
+      sortFunction: undefined,
       sortedTech: this.model.technologies
     };
   },

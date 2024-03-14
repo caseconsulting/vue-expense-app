@@ -146,7 +146,7 @@ function getFiscalYearView() {
  * load the data and api call to get budgets
  */
 async function loadData() {
-  this.hireDate = this.employee.hireDate;
+  this.hireDate = format(this.employee.hireDate, null, DEFAULT_ISOFORMAT);
   this.fiscalDateView = this.getCurrentBudgetYear(this.hireDate);
   this.allUserBudgets = await api.getEmployeeBudgets(this.employee.id);
   this.refreshBudgetYears();
@@ -188,6 +188,7 @@ async function created() {
   this.emitter.on('selected-budget-year', (date) => {
     if (date != this.fiscalDateView) {
       this.fiscalDateView = date;
+      this.emitter.emit(`change-budget-year-${this.emitCatcher}`, date);
     }
   });
 } // created
@@ -240,6 +241,6 @@ export default {
     refreshBudgetYears,
     setYear // dateUtils
   },
-  props: ['employee', 'hasBudgets', 'location']
+  props: ['employee', 'hasBudgets', 'location', 'emitCatcher']
 };
 </script>

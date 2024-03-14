@@ -2,46 +2,46 @@
   <v-card v-if="expense" id="reimbursement-expense-details" class="mr-3 my-3 slide-in-blurred-right">
     <v-card-title primary-title class="pb-0 text-h5"> Expense Details </v-card-title>
     <v-card-text>
-      <v-container fluid class="px-0 px-md-4 pb-0">
+      <v-container fluid class="px-0 px-md-2 pb-0">
         <v-row dense>
-          <v-col> <b>Description:</b></v-col>
-          <v-col> {{ expense.description }}</v-col>
+          <v-col cols="5"> <b>Description:</b></v-col>
+          <v-col cols="7"> {{ expense.description }}</v-col>
         </v-row>
         <v-row dense>
-          <v-col> <b>Employee:</b></v-col>
-          <v-col>{{ expense.employeeName }}</v-col>
+          <v-col cols="5"> <b>Employee:</b></v-col>
+          <v-col cols="7">{{ expense.employeeName }}</v-col>
         </v-row>
         <v-row dense>
-          <v-col><b>Budget:</b></v-col>
-          <v-col>{{ expense.budgetName }}</v-col>
+          <v-col cols="5"><b>Budget:</b></v-col>
+          <v-col cols="7">{{ expense.budgetName }}</v-col>
         </v-row>
         <v-row dense>
-          <v-col><b>Cost:</b></v-col>
-          <v-col>{{ convertToMoneyString(expense.cost) }}</v-col>
+          <v-col cols="5"><b>Cost:</b></v-col>
+          <v-col cols="7">{{ convertToMoneyString(expense.cost) }}</v-col>
         </v-row>
         <v-row dense>
-          <v-col><b>Purchased On:</b></v-col>
-          <v-col> {{ monthDayYearFormat(expense.purchaseDate) }} </v-col>
+          <v-col cols="5"><b>Purchased On:</b></v-col>
+          <v-col cols="7"> {{ monthDayYearFormat(expense.purchaseDate) }} </v-col>
         </v-row>
         <v-row dense v-if="!isEmpty(expense.reimbursedDate)">
-          <v-col><b>Reimbursed On:</b></v-col>
-          <v-col> {{ monthDayYearForm(expense.reimbursedDate) }}</v-col>
+          <v-col cols="5"><b>Reimbursed On:</b></v-col>
+          <v-col cols="7"> {{ monthDayYearForm(expense.reimbursedDate) }}</v-col>
         </v-row>
         <v-row dense v-if="!isEmpty(expense.note)">
-          <v-col><b>Notes:</b></v-col>
-          <v-col> {{ expense.note }}</v-col>
+          <v-col cols="5"><b>Notes:</b></v-col>
+          <v-col cols="7" class="notes"> {{ expense.note }}</v-col>
         </v-row>
         <v-row dense v-else>
-          <v-col><b>Notes:</b></v-col>
-          <v-col>N/A</v-col>
+          <v-col cols="5"><b>Notes:</b></v-col>
+          <v-col cols="7">N/A</v-col>
         </v-row>
         <v-row dense v-if="!isEmpty(expense.category)">
-          <v-col><b>Category:</b></v-col>
-          <v-col> {{ expense.category }}</v-col>
+          <v-col cols="5"><b>Category:</b></v-col>
+          <v-col cols="7"> {{ expense.category }}</v-col>
         </v-row>
         <v-row dense v-else>
-          <v-col><b>Category:</b></v-col>
-          <v-col>N/A</v-col>
+          <v-col cols="5"><b>Category:</b></v-col>
+          <v-col cols="7">N/A</v-col>
         </v-row>
         <v-row dense>
           <attachment :expense="expense" :mode="'adminExpenseInfo'"></attachment>
@@ -121,6 +121,12 @@ export default {
 </script>
 
 <style scoped>
+.notes {
+  height: 125px;
+  max-height: 125px;
+  overflow-y: auto;
+}
+
 .slide-in-blurred-right {
   animation: slide-in-blurred-right 0.5s ease-in forwards;
 }

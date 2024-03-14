@@ -11,7 +11,7 @@
       <v-combobox
         ref="formFields"
         v-model="languages.name"
-        :rules="getRequiredRules()"
+        :rules="[...getRequiredRules(), ...duplicateRules, ...noEnglishRules]"
         :items="languagesList"
         label="Language"
         variant="underlined"
@@ -149,6 +149,7 @@ function populateDropDowns() {
       this.languageDropDown.push(languages.name); // add language name
     });
   });
+  this.languageDropDown = Array.from(new Set(this.languageDropDown));
 } // populateDropDowns
 
 /**
@@ -215,7 +216,6 @@ export default {
         'Afrikaans',
         'Arabic',
         'Bengali',
-        'Bulgarian',
         'Catalan',
         'Cantonese',
         'Croatian',
@@ -295,9 +295,9 @@ export default {
         'Native-like - ability to use the language like a native speaker',
         'Literacy - fluency and broad vocabulary associated with high levels of education'
       ], // job title options
-      requiredRules: [
-        (v) => !this.isEmpty(v) || 'This field is required. You must enter information or delete the field if possible'
-      ], // rules for a required field
+      noEnglishRules: [
+        (v) => (!this.isEmpty(v) && v.toLowerCase() !== 'english') || 'English is not a foreign language'
+      ],
       duplicateRules: [
         (lang) => {
           let duplicates = this.duplicateLangEntries();

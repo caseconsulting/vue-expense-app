@@ -57,12 +57,14 @@
               <!-- Active Filter -->
               <div class="flagFilter">
                 <h4>Active Expense Type:</h4>
-                <v-btn-toggle class="filter_color" v-model="filter.active" text mandatory>
+                <v-btn-toggle color="primary" class="filter_color" v-model="filter.active" text mandatory>
                   <!-- Show Active -->
                   <v-tooltip location="top">
                     <template v-slot:activator="{ props }">
                       <v-btn value="active" v-bind="props" variant="text">
-                        <v-icon icon="mdi-check-circle-outline" class="mr-1" />
+                        <v-icon class="mr-1">
+                          mdi-check-circle{{ filter.active.includes('active') ? '' : '-outline' }}
+                        </v-icon>
                       </v-btn>
                     </template>
                     <span>Show Active</span>
@@ -72,7 +74,7 @@
                   <v-tooltip location="top">
                     <template v-slot:activator="{ props }">
                       <v-btn value="notActive" v-bind="props" variant="text">
-                        <v-icon icon="mdi-close-circle-outline" />
+                        <v-icon> mdi-close-circle{{ filter.active.includes('notActive') ? '' : '-outline' }} </v-icon>
                       </v-btn>
                     </template>
                     <span>Hide Active</span>
@@ -81,7 +83,14 @@
                   <!-- Show Active and Inactive -->
                   <v-tooltip location="top">
                     <template v-slot:activator="{ props }">
-                      <v-btn value="both" v-bind="props" variant="text">BOTH</v-btn>
+                      <v-btn
+                        value="both"
+                        v-bind="props"
+                        variant="text"
+                        :class="filter.active.includes('both') ? 'font-weight-black' : ''"
+                      >
+                        BOTH
+                      </v-btn>
                     </template>
                     <span>Show All</span>
                   </v-tooltip>
@@ -92,12 +101,14 @@
               <!-- Overdraft Filter -->
               <div class="flagFilter">
                 <h4>Overdraft:</h4>
-                <v-btn-toggle class="filter_color" v-model="filter.overdraft" text mandatory>
+                <v-btn-toggle color="primary" class="filter_color" v-model="filter.overdraft" text mandatory>
                   <!-- Show Overdraft -->
                   <v-tooltip location="top">
                     <template v-slot:activator="{ props }">
                       <v-btn value="overdraft" v-bind="props" variant="text">
-                        <v-icon icon="mdi-check-circle-outline" class="mr-1" />
+                        <v-icon class="mr-1">
+                          mdi-check-circle{{ filter.overdraft.includes('overdraft') ? '' : '-outline' }}
+                        </v-icon>
                       </v-btn>
                     </template>
                     <span>Show Overdraft</span>
@@ -107,7 +118,9 @@
                   <v-tooltip location="top">
                     <template v-slot:activator="{ props }">
                       <v-btn value="noOverdraft" v-bind="props" variant="text">
-                        <v-icon icon="mdi-close-circle-outline" />
+                        <v-icon>
+                          mdi-close-circle{{ filter.overdraft.includes('noOverdraft') ? '' : '-outline' }}
+                        </v-icon>
                       </v-btn>
                     </template>
                     <span>Hide Overdraft</span>
@@ -116,7 +129,14 @@
                   <!-- Show Overdraft and No Overdraft -->
                   <v-tooltip location="top">
                     <template v-slot:activator="{ props }">
-                      <v-btn value="both" v-bind="props" variant="text">BOTH</v-btn>
+                      <v-btn
+                        value="both"
+                        v-bind="props"
+                        variant="text"
+                        :class="filter.overdraft.includes('both') ? 'font-weight-black' : ''"
+                      >
+                        BOTH
+                      </v-btn>
                     </template>
                     <span>Show All</span>
                   </v-tooltip>
@@ -127,12 +147,14 @@
               <!-- Recurring Filter -->
               <div class="flagFilter">
                 <h4>Recurring:</h4>
-                <v-btn-toggle class="filter_color" v-model="filter.recurring" text mandatory>
+                <v-btn-toggle color="primary" class="filter_color" v-model="filter.recurring" text mandatory>
                   <!-- Show Recurring -->
                   <v-tooltip location="top">
                     <template v-slot:activator="{ props }">
                       <v-btn value="recurring" v-bind="props" variant="text">
-                        <v-icon icon="mdi-check-circle-outline" class="mr-1" />
+                        <v-icon class="mr-1">
+                          mdi-check-circle{{ filter.recurring.includes('recurring') ? '' : '-outline' }}
+                        </v-icon>
                       </v-btn>
                     </template>
                     <span>Show Recurring</span>
@@ -142,7 +164,9 @@
                   <v-tooltip location="top">
                     <template v-slot:activator="{ props }">
                       <v-btn value="notRecurring" v-bind="props" variant="text">
-                        <v-icon icon="mdi-close-circle-outline" />
+                        <v-icon>
+                          mdi-close-circle{{ filter.recurring.includes('notRecurring') ? '' : '-outline' }}
+                        </v-icon>
                       </v-btn>
                     </template>
                     <span>Hide Recurring</span>
@@ -151,7 +175,14 @@
                   <!-- Show Recurring and Non-Recurring -->
                   <v-tooltip location="top">
                     <template v-slot:activator="{ props }">
-                      <v-btn value="both" v-bind="props" variant="text">BOTH</v-btn>
+                      <v-btn
+                        value="both"
+                        v-bind="props"
+                        variant="text"
+                        :class="filter.recurring.includes('both') ? 'font-weight-black' : ''"
+                      >
+                        BOTH
+                      </v-btn>
                     </template>
                     <span>Show All</span>
                   </v-tooltip>

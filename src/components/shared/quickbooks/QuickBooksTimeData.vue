@@ -1,180 +1,96 @@
 <template>
   <div id="t-sheets-data">
     <v-card density="compact">
-      <v-card-title class="header_style py-0">
-        <v-row class="ma-0 nudge-up-row on-top">
-          <v-col cols="6" class="pa-0 ma-0">
-            <v-autocomplete
-              v-if="userRoleIsAdmin() || userRoleIsManager()"
-              v-model="passedEmployee"
-              class="pt-0 mt-0"
-              base-color="transparent"
-              bg-color="transparent"
-              density="compact"
-              :items="filteredEmployees"
-              :customFilter="customFilter"
-              hide-details
-              variant="plain"
-              item-title="text"
-              item-value="value"
-              return-object
-            >
-            </v-autocomplete>
-          </v-col>
-          <v-col
-            v-if="
-              lastUpdated &&
-              (passedEmployee?.id === $store.getters.user?.id || passedEmployee?.value?.id === $store.getters.user?.id)
-            "
-            cols="6"
-            class="d-flex justify-end align-center pa-0 ma-0 mt-1"
-          >
-            <div class="tiny-text">
-              {{ lastUpdated }}
-            </div>
-          </v-col>
-        </v-row>
-
-        <div
-          class="d-flex align-center justify-space-between"
-          :class="
-            userRoleIsAdmin() ||
-            userRoleIsManager() ||
-            (lastUpdated &&
-              (passedEmployee?.id === $store.getters.user?.id || passedEmployee?.value?.id === $store.getters.user?.id))
-              ? 'nudge-up-title-more'
-              : 'nudge-up-title-less'
-          "
-        >
-          <h3 v-if="!isMobile" class="d-inline-block">QuickBooks Time Data</h3>
-          <h5 v-else class="d-inline-block">QuickBooks Time Data</h5>
-          <div class="d-flex">
-            <!--Switch between minutes and hours-->
-            <v-tooltip :text="tooltipText" location="top">
-              <template v-slot:activator="{ props }">
-                <v-switch
-                  v-model="showMinutes"
-                  density="compact"
-                  hide-details
-                  color="gray"
-                  class="mr-2 my-0 py-0"
-                  v-bind="props"
-                >
-                </v-switch>
-              </template>
-            </v-tooltip>
-            <!--End of Switch-->
-            <!-- Start of Refresh Button -->
-            <v-btn
-              @click="
-                emitter.emit('refresh-quickbooks-data');
-                refreshed = true;
-              "
-              variant="text"
-              icon="mdi-refresh"
-            >
-              <template v-slot:default>
-                <v-tooltip activator="parent" location="top">Refresh Quickbooks Time Data</v-tooltip>
-                <v-icon color="white" size="large">mdi-refresh</v-icon>
-              </template>
-            </v-btn>
-            <!-- End of Refresh Button -->
+      <v-card-title class="header_style d-flex align-center justify-space-between py-0 relative">
+        <h3>QuickBooks Time Data</h3>
+        <span v-if="getLastUpdatedText && employeeIsUser()" class="last-updated">
+          {{ getLastUpdatedText }}
+        </span>
+        <v-btn variant="text" icon="mdi-refresh" @click="resetData()">
+          <template v-slot:default>
+            <v-tooltip activator="parent" location="top">Refresh Quickbooks data</v-tooltip>
+            <v-icon color="white" size="large">mdi-refresh</v-icon>
+          </template>
+        </v-btn>
+      </v-card-title>
+      <v-card-text class="mt-3 px-7">
+        <v-progress-linear class="mb-3 mt-7" v-if="loading" indeterminate></v-progress-linear>
+        <div v-else>
+          <div class="d-flex flex-column justify-center align-center py-3 font-weight-bold" v-if="errorMessage">
+            <v-icon class="mb-2">mdi-alert</v-icon>
+            <span>{{ errorMessage }}</span>
+          </div>
+          <div v-else>
+            <time-period-hours
+              :employee="employee"
+              :timesheets="timesheets || {}"
+              :ptoBalances="ptoBalances || {}"
+              :supplementalData="supplementalData || {}"
+            ></time-period-hours>
+            <hr class="my-5 mx-7" />
+            <p-t-o-hours :employee="employee" :ptoBalances="ptoBalances || {}"></p-t-o-hours>
           </div>
         </div>
-      </v-card-title>
-      <v-card-text class="pt-0 pb-0 text-black nudge-down-title mb-3">
-        <monthly-charges :passedEmployee="passedEmployee" :showMinutes="showMinutes"></monthly-charges>
-        <v-divider></v-divider>
-        <balances :passedEmployee="passedEmployee" :showMinutes="showMinutes"></balances>
       </v-card-text>
     </v-card>
   </div>
 </template>
 
 <script>
+import TimePeriodHours from '@/components/shared/quickbooks/TimePeriodHours.vue';
+import PTOHours from '@/components/shared/quickbooks/PTOHours.vue';
 import _ from 'lodash';
-import MonthlyCharges from '@/components/shared/quickbooks/MonthlyCharges.vue';
-import Balances from '@/components/shared/quickbooks/Balances.vue';
-import { nicknameAndLastName } from '@/shared/employeeUtils';
-import { isMobile, userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
-import { qbStorageLastUpdated } from './quickbooks-helpers';
-import { now } from '@/shared/dateUtils';
+import api from '@/shared/api';
+import { difference, format, getTodaysDate, isBefore, now, startOf, subtract } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                LIFECYCLE HOOKS                   |
+// |                 LIFECYCLE HOOKS                  |
 // |                                                  |
 // |--------------------------------------------------|
 
 /**
- * The created lifecycle hook.
+ * The Before Unmount lifesycle hook.
  */
-function created() {
-  if (this.$store.getters.employees) {
-    this.filteredEmployees = this.filteredEmployees.filter((e) => e.workStatus > 0);
-    this.filteredEmployees = this.$store.getters.employees.map((employee) => {
-      return {
-        text: nicknameAndLastName(employee),
-        value: employee,
-        workStatus: employee.workStatus,
-        firstName: employee.firstName,
-        nickname: employee.nickname,
-        lastName: employee.lastName
-      };
-    });
-    let employee = _.find(this.$store.getters.employees, (e) => e.id === this.employee.id);
-    this.passedEmployee = {
-      text: nicknameAndLastName(employee),
-      value: employee,
-      workStatus: employee.workStatus,
-      firstName: employee.firstName,
-      nickname: employee.nickname,
-      lastName: employee.lastName
-    };
-  }
+function beforeUnmount() {
+  this.emitter.off('get-period-data');
+} // beforeUnmount
+
+/**
+ * The Created lifecycle hook.
+ */
+async function created() {
+  this.emitter.on('get-period-data', async ({ startDate, endDate, isMonthly }) => {
+    await this.setData(startDate, endDate, isMonthly);
+  });
+  await this.setInitialData();
+  this.loading = false;
 } // created
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     COMPUTED                     |
+// |                 COMPUTED                         |
 // |                                                  |
 // |--------------------------------------------------|
 
 /**
- * Computed function for the vuex store employees
- */
-function allEmployees() {
-  return this.$store.getters.employees;
-} // allEmployees
-
-/**
- * Returns the last updated message
- */
-function lastUpdated() {
-  if (!this.refreshed && this.employee.id == this.$store.getters.user.id) {
-    let lastUpdated = this.qbStorageLastUpdated('quickbooksData');
-    if (lastUpdated) {
-      if (lastUpdated < 1) {
-        let minutes = parseInt(lastUpdated * 60);
-        if (minutes > 0) {
-          return `Last updated ${minutes} ${minutes == 1 ? 'minute' : 'minutes'} ago`;
-        }
-      } else {
-        let hours = parseInt(lastUpdated);
-        return `Last updated ${hours} ${hours == 1 ? 'hour' : 'hours'} ago`;
-      }
-    }
-  }
-} // lastUpdated
-
-/**
- * Calculates the tooltip text to display on v-switch based on value of showMinutes.
+ * Gets the text for when timesheets data was last updated.
  *
- * @return String - the tooltip text to display based on if showMinutes is true
+ * @returns String - The string to display for last updated
  */
-function tooltipText() {
-  return this.showMinutes ? 'Hours <- Minutes' : 'Hours -> Minutes';
-} //tooltipText
+function getLastUpdatedText() {
+  let now = this.now();
+  let lastUpdated = this.lastUpdated;
+  let minutes = parseInt(difference(now, lastUpdated, 'minute') || 0);
+  let hours = parseInt(minutes / 60);
+  if (hours < 1 && minutes > 0) {
+    return `Last updated ${minutes} ${minutes > 1 ? 'minutes' : 'minute'} ago`;
+  } else if (hours > 0) {
+    return `Last updated ${hours} ${hours > 1 ? 'hours' : 'hour'} ago`;
+  } else {
+    return null;
+  }
+} // getLastUpdatedText
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -183,50 +99,161 @@ function tooltipText() {
 // |--------------------------------------------------|
 
 /**
- * Custom filter for employee autocomplete options.
+ * True if the user is the employee from props
  *
- * @param item - employee
- * @param queryText - text used for filtering
- * @return string - filtered employee name
+ * @returns Boolean - Whether or not the employee prop is the user
  */
-function customFilter(itemValue, queryText, itemObject) {
-  const item = itemObject.raw;
-  const query = queryText ? queryText : '';
-  const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
-  const firstNameFullName = `${item.firstName} ${item.lastName}`;
-
-  const queryContainsNickName = nickNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
-  const queryContainsFirstName =
-    firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
-
-  return queryContainsNickName || queryContainsFirstName;
-} // customFilter
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     WATCHERS                     |
-// |                                                  |
-// |--------------------------------------------------|
+function employeeIsUser() {
+  return this.employee.id === this.$store.getters.user.id;
+} // employeeIsUser
 
 /**
- * A watcher for when the vuex store is populated with necessary data.
+ * Sets an error message if the API returned an error.
+ *
+ * @param {Object} timesheetsData - The timesheets data object
+ * @returns Boolean - Whether or not the API returned an error
  */
-async function watchEmployees() {
-  if (this.$store.getters.employees) {
-    this.filteredEmployees = this.$store.getters.employees.filter((employee) => employee.workStatus > 0);
-    this.filteredEmployees = this.$store.getters.employees.map((employee) => {
-      return {
-        text: nicknameAndLastName(employee),
-        value: employee,
-        workStatus: employee.workStatus,
-        firstName: employee.firstName,
-        nickname: employee.nickname,
-        lastName: employee.lastName
-      };
-    });
-    this.passedEmployee = _.find(this.$store.getters.employees, (e) => e.id === this.employee.id);
+function hasError(timesheetsData) {
+  if (timesheetsData?.name === 'AxiosError') {
+    this.errorMessage = timesheetsData?.response?.data?.message;
+    if (_.isEmpty(this.errorMessage)) {
+      this.errorMessage = 'An error has occurred';
+    }
+    return true;
+  } else {
+    return false;
   }
-} // watchStoreIsPopulated
+} // hasError
+
+/**
+ * Timesheets local storage expires if the storage is from a previous day.
+ *
+ * @returns Boolean - Whether or not timesheets local storage has expired
+ */
+function isStorageExpired(lastUpdated) {
+  // last updated will either be now, or retrived from local storage
+  return isBefore(lastUpdated, now(), 'day');
+} // isStorageExpired
+
+/**
+ * True if timesheets exists in local storage.
+ *
+ * @returns Boolean - Whether or not timesheets exists in lcoal storage
+ */
+function qbStorageExists() {
+  return localStorage.getItem(this.KEYS.QB) ? JSON.parse(localStorage.getItem(this.KEYS.QB)) : null;
+} // qbStorageExists
+
+/**
+ * Removes a jobcode key value pair from PTO balances object if it is not relevant to a user.
+ */
+function removeExcludedPtoBalances() {
+  _.forEach(this.ptoBalances, (balance, jobcode) => {
+    if (this.excludeIfZero.includes(jobcode) && balance === 0) delete this.ptoBalances[jobcode];
+  });
+} // removeExcludedPtoBalances
+
+/**
+ * Resets components data and removes timesheets local storage.
+ */
+async function resetData() {
+  this.loading = true;
+  this.timesheets = null;
+  this.ptoBalances = null;
+  this.supplementalData = null;
+  this.lastUpdated = null;
+  if (this.employeeIsUser()) {
+    localStorage.removeItem(this.KEYS.QB);
+  }
+  this.emitter.emit('reset-data');
+  await this.setInitialData();
+  this.loading = false;
+} // resetData
+
+/**
+ * Retrieves, sets, and stores components data from API.
+ *
+ * @param {String} startDate - The time period start date (YYYY-MM) format
+ * @param {String} endDate - The time period end date (YYYY-MM) format
+ * @param {Boolean} isMonthly - Whether or not the time period is monthly
+ */
+async function setDataFromApi(startDate, endDate, isMonthly) {
+  let timesheetsData = await api.getTimesheetsData(this.employee.employeeNumber, startDate, endDate);
+  if (!this.hasError(timesheetsData)) {
+    this.timesheets = timesheetsData.timesheets;
+    this.ptoBalances = timesheetsData.ptoBalances;
+    this.supplementalData = timesheetsData.supplementalData;
+    this.lastUpdated = now();
+    this.removeExcludedPtoBalances();
+    if (this.employeeIsUser()) {
+      // only set local storage if user is looking at their own data
+      this.setStorage(isMonthly);
+    }
+  }
+} // setDataFromApi
+
+/**
+ * Sets the main components data used throughout child components.
+ *
+ * @param {Object} qbStorage - The local storage timesheets object
+ * @param {String} key - The monthly or yearly object key
+ */
+function setDataFromStorage(qbStorage, key) {
+  this.timesheets = qbStorage[key]?.timesheets;
+  this.supplementalData = qbStorage[key]?.supplementalData;
+  this.lastUpdated = qbStorage[key]?.lastUpdated;
+  this.ptoBalances = qbStorage?.ptoBalances;
+} // setDataFromStorage
+
+/**
+ * Sets local storage for Quickbooks data.
+ *
+ * @param {Boolean} isMonthly - Whether or not the time period is monthly
+ */
+function setStorage(isMonthly) {
+  let storage = this.qbStorageExists();
+  let key = isMonthly ? this.KEYS.MONTHLY : this.KEYS.YEARLY;
+  let data = {
+    [key]: {
+      timesheets: this.timesheets,
+      supplementalData: this.supplementalData,
+      lastUpdated: this.lastUpdated
+    },
+    ptoBalances: this.ptoBalances
+  };
+
+  // overwrite storage
+  localStorage.setItem(this.KEYS.QB, JSON.stringify({ ...storage, ...data }));
+} // setStorage
+
+/**
+ * Retrieves and sets timesheets data from API or local storage.
+ *
+ * @param {String} startDate - The time period start date (YYYY-MM) format
+ * @param {String} endDate - The time period end date (YYYY-MM) format
+ * @param {Boolean} isMonthly - Whether or not the time period is monthly
+ */
+async function setData(startDate, endDate, isMonthly) {
+  let storage = this.qbStorageExists();
+  let key = isMonthly ? this.KEYS.MONTHLY : this.KEYS.YEARLY;
+  if (storage && storage[key] && this.employeeIsUser() && !this.isStorageExpired(storage[key].lastUpdated)) {
+    this.setDataFromStorage(storage, key);
+  } else {
+    await this.setDataFromApi(startDate, endDate, isMonthly);
+  }
+} // setData
+
+/**
+ * Sets the timesheets data on initial load based on a monthly time period (current and previous month displayed).
+ */
+async function setInitialData() {
+  let today = getTodaysDate();
+  // last month
+  let startDate = format(startOf(subtract(today, 1, 'month'), 'month'), null, 'YYYY-MM');
+  // this month
+  let endDate = format(today, null, 'YYYY-MM');
+  await this.setData(startDate, endDate, true);
+} // setInitialData
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -235,61 +262,58 @@ async function watchEmployees() {
 // |--------------------------------------------------|
 
 export default {
+  beforeUnmount,
   components: {
-    Balances,
-    MonthlyCharges
+    TimePeriodHours,
+    PTOHours
   },
   computed: {
-    allEmployees,
-    isMobile,
-    lastUpdated,
-    tooltipText
+    getLastUpdatedText
   },
   created,
   data() {
     return {
-      filteredEmployees: [],
-      passedEmployee: null,
-      refreshed: false,
-      showMinutes: false
+      excludeIfZero: ['Jury Duty', 'Maternity/Paternity Time Off'],
+      errorMessage: null,
+      lastUpdated: null,
+      loading: true,
+      ptoBalances: null,
+      supplementalData: null,
+      timesheets: null,
+      KEYS: {
+        QB: 'qbData',
+        MONTHLY: 'monthly',
+        YEARLY: 'yearly'
+      }
     };
   },
   methods: {
-    customFilter,
-    qbStorageLastUpdated,
-    nicknameAndLastName,
+    employeeIsUser,
+    hasError,
+    isStorageExpired,
     now,
-    userRoleIsAdmin,
-    userRoleIsManager
+    qbStorageExists,
+    removeExcludedPtoBalances,
+    resetData,
+    setInitialData,
+    setData,
+    setDataFromApi,
+    setDataFromStorage,
+    setStorage
   },
-  props: ['employee'],
-  watch: {
-    allEmployees: watchEmployees
-  }
+  props: ['employee']
 };
 </script>
 
 <style scoped>
-.nudge-up-title-more {
-  position: relative;
-  top: -18px;
+.last-updated {
+  position: absolute !important;
+  font-size: 10px;
+  top: 0px;
+  right: 0px;
+  margin-right: 10px;
 }
-.nudge-up-title-less {
-  position: relative;
-  top: 9px;
-}
-.nudge-down-title {
-  position: relative;
-  top: 12px;
-}
-.nudge-up-row {
-  position: relative;
-  top: -5px;
-}
-.on-top {
-  z-index: 999999 !important;
-}
-.tiny-text {
-  font-size: 10px !important;
+.relative {
+  position: relative !important;
 }
 </style>

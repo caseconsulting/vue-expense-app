@@ -1,6 +1,6 @@
 {
   "name": "vue-expense-app",
-  "version": "4.1.0",
+  "version": "4.2.0",
   "private": true,
   "scripts": {
     "build": "export NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service build",
@@ -54,7 +54,7 @@
     "vue-router": "4.2.5",
     "vue-router-multiguard": "1.0.3",
     "vue-the-mask": "0.11.1",
-    "vuetify": "3.5.1",
+    "vuetify": "3.5.4",
     "vuewordcloud": "19.0.0",
     "vuex": "4.1.0"
   },

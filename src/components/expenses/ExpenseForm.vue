@@ -185,7 +185,16 @@
           class="mt-4"
           label="Description"
           data-vv-name="Description"
-        ></v-text-field>
+          @update:focused="descRedirect()"
+          :hint="editedExpense.category === 'Exchange for training hours' ? 'Will open in a modal' : ''"
+          persistent-hint
+        >
+          <template v-if="editedExpense.category === 'Exchange for training hours'" v-slot:prepend>
+            <div @click="descRedirect()" class="pointer">
+              <v-icon :color="caseGray">mdi-open-in-new</v-icon>
+            </div>
+          </template>
+        </v-text-field>
 
         <!-- Purchase Date -->
         <v-text-field
@@ -363,6 +372,9 @@
       <v-dialog v-model="showExchangeCalculator" :width="isMobile ? '100%' : '50%'" persistent>
         <ExchangeTrainingHoursCalculator />
       </v-dialog>
+      <v-dialog v-model="showExchangeTrainingDesc" :width="isMobile ? '100%' : '50%'" persistent>
+        <ExchangeTrainingDescription :previousDesc="editedExpense.description" />
+      </v-dialog>
     </v-container>
   </v-card>
 </template>
@@ -373,6 +385,7 @@ import ConfirmationBox from '@/components/modals/ConfirmationBox.vue';
 import FileUpload from '@/components/utils/FileUpload.vue';
 import GeneralConfirmationModal from '@/components/modals/GeneralConfirmationModal.vue';
 import ExchangeTrainingHoursCalculator from '@/components/expenses/ExchangeTrainingHoursCalculator.vue';
+import ExchangeTrainingDescription from '@/components/expenses/ExchangeTrainingDescription.vue';
 
 import api from '@/shared/api.js';
 import employeeUtils from '@/shared/employeeUtils';
@@ -692,7 +705,7 @@ async function checkCoverage() {
           } else {
             // BRANCH 2.2 selected expense type does not allow overdraft or employee is not full time
             this.editedExpense['od'] = false;
-            if (newCommittedAmount <= budgetAmount) {
+            if (newCommittedAmount < budgetAmount) {
               // BRANCH 6.1 starts under initial budget
               if (newCommittedAmount + cost <= budgetAmount) {
                 // BRANCH 7.1 doesnt go over budget
@@ -923,6 +936,13 @@ function customFilter(_, queryText, item) {
   if (queryFirstName >= 0) return item.nickname ? true : queryFirstName;
   return false;
 } // customFilter
+
+/**
+ * Redirects description field to modal if needed (only for exchange for training hours)
+ */
+function descRedirect() {
+  if (this.editedExpense.category == 'Exchange for training hours') this.showExchangeTrainingDesc = true;
+}
 
 /**
  * Encodes a url from binary to ascii. Returns the encoded url.
@@ -1603,7 +1623,14 @@ function created() {
     this.clearForm();
   });
   this.emitter.on('close-exchange-training-hours-calculator', () => {
-    this.showExchangeCalculator = false;
+    this.showExchangeTrainingDesc = false;
+  });
+  this.emitter.on('insert-training-desc', (desc) => {
+    this.showExchangeTrainingDesc = false;
+    this.editedExpense.description = desc;
+  });
+  this.emitter.on('close-exchange-training-desc', () => {
+    this.showExchangeTrainingDesc = false;
   });
   this.emitter.on('insert-training-hours', (amount) => {
     this.showExchangeCalculator = false;
@@ -1671,6 +1698,7 @@ function beforeUnmount() {
   this.emitter.off('confirmSubmit');
   this.emitter.off('confirmed-expense');
   this.emitter.off('canceled-expense');
+  this.emitter.off('close-exchange-training-desc');
   this.emitter.off('backout-canceled-expense');
   this.emitter.off('backout-confirmed-expense');
 } // beforeUnmount
@@ -1934,7 +1962,8 @@ export default {
     ConfirmationBox,
     FileUpload,
     GeneralConfirmationModal,
-    ExchangeTrainingHoursCalculator
+    ExchangeTrainingHoursCalculator,
+    ExchangeTrainingDescription
   },
   computed: {
     isDifferentExpenseType,
@@ -1962,7 +1991,8 @@ export default {
       ], // rules for cost
       descriptionRules: [
         (v) => !this.isEmpty(v) || 'Description is a required field',
-        (v) => (!this.isEmpty(v) && v.replace(/\s/g, '').length > 0) || 'Description is a required field'
+        (v) =>
+          (!this.isEmpty(v) && v.replaceAll(/\s/g, '').length >= 150) || 'Description must be at least 150 characters'
       ], // rules for description
       disableScan: true, // receipt scanned disabled
       //editedExpense: {}, // data being edited --
@@ -1997,6 +2027,7 @@ export default {
       selectedEmployee: {}, // selected employees
       selectedExpenseType: {}, // selected expense types
       showExchangeCalculator: false,
+      showExchangeTrainingDesc: false,
       submittedReceipt: null, // the receipt to show when editing an expense
       urlInfo: {
         id: null,
@@ -2017,6 +2048,7 @@ export default {
     convertToMoneyString,
     costHint,
     customFilter,
+    descRedirect,
     encodeUrl,
     filteredExpenseTypes,
     formatCost,

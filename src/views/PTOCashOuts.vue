@@ -25,19 +25,12 @@
         </v-card-text>
         <v-btn color="white" variant="text" @click="clearStatus"> Close </v-btn>
       </v-snackbar>
-      <v-col cols="12" xl="9" lg="8"><p-t-o-cash-outs-table /> </v-col>
-      <v-col cols="12" xl="3" lg="4" class="pl-lg-1 pl-sm-2">
-        <!-- Skeleton Loader-->
-        <div v-if="loading">
-          <v-card>
-            <v-card-title class="header_style py-6">
-              <h3>QuickBooks Time Data</h3>
-            </v-card-title>
-            <v-skeleton-loader type="article,divider,article"></v-skeleton-loader>
-          </v-card>
-        </div>
+      <v-col cols="12" xl="8" lg="7">
+        <p-t-o-cash-outs-table />
+      </v-col>
+      <v-col cols="12" xl="4" lg="5" class="pl-lg-1 pl-sm-2">
         <!-- QuickBooksTime -->
-        <quick-books-time-data v-else :employee="employee"></quick-books-time-data>
+        <quick-books-time-data :employee="employee" :key="employee.id"></quick-books-time-data>
       </v-col>
     </v-row>
   </div>
