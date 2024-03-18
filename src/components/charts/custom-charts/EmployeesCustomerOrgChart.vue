@@ -39,7 +39,7 @@ function fetchData() {
   employees.forEach((e) => {
     if (e.customerOrgExp && e.workStatus != 0) {
       _.forEach(e.customerOrgExp, (org) => {
-        if (org.years && org.current) {
+        if ((org.years || org.years == 0) && org.current) {
           let orgName = org.name;
           if (employeesCustOrg[orgName]) {
             employeesCustOrg[orgName] += 1;
