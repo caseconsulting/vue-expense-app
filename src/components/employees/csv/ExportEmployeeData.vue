@@ -5,22 +5,44 @@
     <v-card-title class="d-flex align-center text-h5 header_style">Employee Export</v-card-title>
     <!-- Modal Content -->
     <v-card-text class="px-5 pa-md-4 mt-4">
-      <!-- EEO vs Employee export type -->
-      <h3>Export Type</h3>
-      <v-radio-group v-model="exportType" inline>
-        <v-radio label="Employee Data" value="employee"></v-radio>
-        <v-radio label="EEO Data" value="eeo"></v-radio>
-      </v-radio-group>
+      <v-row>
+        <v-col>
+          <!-- EEO vs Employee export type -->
+          <h3>Export Type</h3>
+          <v-radio-group v-model="exportType" inline>
+            <v-radio label="Employee Data" value="employee"></v-radio>
+            <v-radio label="EEO Data" value="eeo"></v-radio>
+          </v-radio-group>
 
-      <!-- Year selector -->
-      <h3>Report Year</h3>
-      <v-select
-        class="d-inline-block w-25"
-        label="Year"
-        v-model="year"
-        :items="yearOptions"
-        variant="underlined"
-      ></v-select>
+          <!-- Year selector -->
+          <h3>Report Year</h3>
+          <v-select
+            class="d-inline-block w-25"
+            label="Year"
+            v-model="year"
+            :items="yearOptions"
+            variant="underlined"
+          ></v-select>
+        </v-col>
+        <v-col>
+          <!-- EEO vs Employee export type -->
+          <h3>Filter by tag</h3>
+          <v-radio-group v-model="exportType" inline>
+            <v-radio label="Employee Data" value="employee"></v-radio>
+            <v-radio label="EEO Data" value="eeo"></v-radio>
+          </v-radio-group>
+
+          <!-- Year selector -->
+          <h3>Filter by status</h3>
+          <v-select
+            class="d-inline-block w-25"
+            label="Year"
+            v-model="year"
+            :items="yearOptions"
+            variant="underlined"
+          ></v-select
+        ></v-col>
+      </v-row>
 
       <br />
 
