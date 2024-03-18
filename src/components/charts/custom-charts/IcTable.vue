@@ -154,21 +154,32 @@ function fillData() {
  */
 function getRoleCounts() {
   let roles = [];
+  let unknownJobRoles = 0;
+  let unknownJRText = 'Unknown Job Role';
 
   this.employees.forEach((emp) => {
-    if (emp.jobRole && emp.workStatus != 0) {
-      if (roles[emp.jobRole]) {
-        roles[emp.jobRole] += 1;
+    if (emp.workStatus != 0) {
+      if (emp.jobRole) {
+        if (roles[emp.jobRole]) roles[emp.jobRole] += 1;
+        else roles[emp.jobRole] = 1;
       } else {
-        roles[emp.jobRole] = 1;
+        // -1 to sort at the end of list, real num is added later
+        roles[unknownJRText] = -1;
+        unknownJobRoles++;
       }
     }
   });
+
   //sorts contents from most common roles to least
   let sortedRoles = Object.entries(roles);
   sortedRoles = sortedRoles.sort((a, b) => {
     return b[1] - a[1];
   });
+
+  // add unknown jobs roles
+  if (unknownJobRoles > 0) {
+    sortedRoles[sortedRoles.length - 1] = [unknownJRText, unknownJobRoles];
+  }
 
   return sortedRoles;
 } // getRoleCounts
