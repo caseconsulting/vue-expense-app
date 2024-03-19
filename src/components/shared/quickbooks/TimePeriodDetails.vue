@@ -176,21 +176,24 @@ function remainingHours() {
  * @returns Number - The remaining work days for the time period.
  */
 function remainingWorkDays() {
+  let remainingDays;
   let daysToSubtract = this.futureDays;
   if (this.isWeekDay(this.today)) daysToSubtract += 1;
 
   if (this.customWorkDayInput && Number(this.customWorkDayInput)) {
     this.customWorkDayInput = Number(this.customWorkDayInput) ?? null;
-    return this.customWorkDayInput || this.remainingWorkDays;
+    remainingDays = this.customWorkDayInput || this.remainingWorkDays;
   } else if (this.isMonthly) {
     if (this.dateIsCurrentMonth) {
-      return this.getWorkDays(this.date, endOf(this.date, 'month')) - daysToSubtract;
+      remainingDays = this.getWorkDays(this.date, endOf(this.date, 'month')) - daysToSubtract;
     } else {
-      return 0;
+      remainingDays = 0;
     }
   } else {
-    return this.getWorkDays(this.today, endOf(this.today, 'year')) - daysToSubtract;
+    remainingDays = this.getWorkDays(this.today, endOf(this.today, 'year')) - daysToSubtract;
   }
+
+  return Math.max(remainingDays, 0);
 } // remainingWorkDays
 
 /**
