@@ -129,6 +129,14 @@ function fillData() {
     { title: 'Total Employees', value: this.employees.length, employeeNames: [] }
   ];
 
+  // remove 'awaiting clerance' parens if value is zero
+  if (overheadCount == 0) {
+    this.tableContents[1].value = `${overheadCount}`;
+  }
+  if (internCount == 0) {
+    this.tableContents[2].value = `${internCount}`;
+  }
+
   this.headers = [
     {
       text: 'topic',
