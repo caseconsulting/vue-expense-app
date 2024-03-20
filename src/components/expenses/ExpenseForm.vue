@@ -188,6 +188,7 @@
           @update:focused="descRedirect()"
           :hint="editedExpense.category === 'Exchange for training hours' ? 'Will open in a modal' : ''"
           persistent-hint
+          :key="editedExpense.category"
         >
           <template v-if="editedExpense.category === 'Exchange for training hours'" v-slot:prepend>
             <div @click="descRedirect()" class="pointer">
