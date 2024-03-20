@@ -419,6 +419,26 @@ import _ from 'lodash';
 // |--------------------------------------------------|
 
 /**
+ * Get rules for the description field. Adds some rules based on conditions.
+ *
+ * @return array - the rules to use for the description field
+ */
+function descriptionRules() {
+  // set base rules
+  let rules = [(v) => !this.isEmpty(v) || 'Description is a required field'];
+
+  // add rules based on form condition (eg expense type)
+  if (this.editedExpense.category == 'Exchange for training hours') {
+    rules.push(
+      (v) =>
+        (!this.isEmpty(v) && v.replaceAll(/\s/g, '').length >= 150) || 'Description must be at least 150 characters'
+    );
+  }
+
+  return rules;
+} // isDifferentExpenseType
+
+/**
  * Check if expense type is changed. Returns true if the expense type is different, otherwise returns false.
  *
  * @return boolean - expense type is changed
@@ -1966,6 +1986,7 @@ export default {
     ExchangeTrainingDescription
   },
   computed: {
+    descriptionRules,
     isDifferentExpenseType,
     isReimbursed,
     isMobile,
@@ -1989,11 +2010,6 @@ export default {
           'Expense amount must be a number with two decimal digits',
         (v) => this.parseCost(v) < 1000000000 || 'Nice try' //when a user tries to fill out expense that is over a million
       ], // rules for cost
-      descriptionRules: [
-        (v) => !this.isEmpty(v) || 'Description is a required field',
-        (v) =>
-          (!this.isEmpty(v) && v.replaceAll(/\s/g, '').length >= 150) || 'Description must be at least 150 characters'
-      ], // rules for description
       disableScan: true, // receipt scanned disabled
       //editedExpense: {}, // data being edited --
       editedExpense: _.cloneDeep(this.expense),
