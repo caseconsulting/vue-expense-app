@@ -7,15 +7,27 @@ import { difference, format, getTodaysDate, minimum } from '@/shared/dateUtils';
 const csvUtils = require('./baseCsv.js');
 
 /**
+ * Returns the CSV filestring as a string.
+ *
+ * @param employees - array of employee objects
+ * @param contracts - contracts from DynamoDB to connect employee contract IDs to
+ * @param tags - tags to connect employee tag IDs to
+ * @return csv as a string
+ */
+export function fileString(employees, contracts, tags) {
+  let convertedEmployees = convertEmployees(employees, contracts, tags); // convert employees into csv object
+  let csvEmployees = csvUtils.sort(convertedEmployees, 'Employee #'); // sort by employee #
+  return csvUtils.generate(csvEmployees); // convert to csv file string
+}
+
+/**
  * Downloads array of employees as csv file.
  * @param employees - array of employee objects
  * @param contracts - the contracts from DyanmoDB to connect employee contract IDs to
  */
 export function download(employees, contracts, tags, filename = null) {
   if (!filename) filename = Array.isArray(employees) ? 'employees.csv' : 'employee.csv';
-  let convertedEmployees = convertEmployees(employees, contracts, tags); // convert employees into csv object
-  let csvEmployees = csvUtils.sort(convertedEmployees, 'Employee #'); // sort by employee #
-  let csvFileString = csvUtils.generate(csvEmployees); // convert to csv file string
+  let csvFileString = fileString(employees, contracts, tags);
   csvUtils.download(csvFileString, filename); // download csv file string as .csv
 } // download
 

@@ -21,16 +21,26 @@ const V_HEADERS = 1; // vertical/left headers count
 const COLUMNS_AFTER_RACE_ETHNICITY = 2;
 
 /**
+ * Returns the CSV filestring as a string.
+ *
+ * @param employees - array of employee objects
+ * @return csv as a string
+ */
+export function fileString(employees) {
+  let convertedEmployees = convertEmployees(employees); // convert employees into csv object (returns two arrays)
+  let csvFileStringA = csvUtils.generateFrom2dArray(convertedEmployees[0]); // convert to csv file string
+  let csvFileStringB = csvUtils.generateFrom2dArray(convertedEmployees[1]); // convert to csv file string
+  return csvUtils.combine(csvFileStringA, csvFileStringB, 1); // combine and return results
+}
+
+/**
  * Downloads array of employees EEO information as csv file.
  * @param employees - array of employees objects
  */
 export function download(employees, filename = null) {
-  let convertedEmployees = convertEmployees(employees); // convert employees into csv object (returns two arrays)
-  let csvFileStringA = csvUtils.generateFrom2dArray(convertedEmployees[0]); // convert to csv file string
-  let csvFileStringB = csvUtils.generateFrom2dArray(convertedEmployees[1]); // convert to csv file string
-  let csvFileStringFinal = csvUtils.combine(csvFileStringA, csvFileStringB, 1);
   if (!filename) filename = `EEO Compliance Report`;
-  csvUtils.download(csvFileStringFinal, filename); // download csv file string as .csv
+  let csvFileString = fileString(employees);
+  csvUtils.download(csvFileString, filename); // download csv file string as .csv
 } // download
 
 /**
