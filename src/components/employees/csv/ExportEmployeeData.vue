@@ -12,6 +12,7 @@
           <v-radio-group v-model="exportType" inline>
             <v-radio label="Employee Data" value="employee"></v-radio>
             <v-radio label="EEO Data" value="eeo"></v-radio>
+            <v-radio label="Both" value="both"></v-radio>
           </v-radio-group>
 
           <!-- Year selector -->
@@ -90,6 +91,7 @@ import dateUtils from '@/shared/dateUtils';
 import _ from 'lodash';
 const employeeCsv = require('@/utils/csv/employeeCsv.js');
 const eeoCsv = require('@/utils/csv/eeoCsv.js');
+const baseCsv = require('@/utils/csv/baseCsv.js');
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -107,7 +109,7 @@ function created() {
   // fill in year options
   let years = _.uniq(_.map(this.employees, (e) => dateUtils.format(e.hireDate, null, 'YYYY'))); // get unique hire dates
   years = _.orderBy(years, null, ['desc']); // sort
-  years.unshift('All'); // add "All" to beginning
+  years.unshift(this.filters.year); // default value shouldn't have changed yet
   this.filterOptions.years = years;
 }
 
@@ -141,15 +143,33 @@ function download() {
   // filter CSV info
   let csvInfo = this.employees;
   csvInfo = this.filterEmployees(csvInfo);
+  let yearText = this.filters.year;
+  if (yearText == this.filterOptions.years[0]) yearText = dateUtils.getTodaysDate('YYYY');
 
   // download from proper csv util
-  let filename = `Download (${this.filters.year})`;
+  let filename;
   if (this.exportType == 'employee') {
     filename = `Employee Export - ${this.filters.year}`;
     employeeCsv.download(csvInfo, this.contracts, this.filterOptions.tags, filename);
   } else if (this.exportType == 'eeo') {
     filename = `EEO Compliance Report - ${this.filters.year}`;
     eeoCsv.download(csvInfo, filename);
+  } else {
+    // get EEO and Employee CSV strings
+    let emp = employeeCsv.fileString(csvInfo, this.contracts, this.filterOptions.tags, filename);
+    let eeo = eeoCsv.fileString(csvInfo, filename);
+    let csvText = [
+      {
+        name: 'Employee Export',
+        csv: emp
+      },
+      {
+        name: 'EEO Compliance Report',
+        csv: eeo
+      }
+    ];
+    filename = `CASE employee and EEO report (${this.filters.year})`;
+    baseCsv.download(csvText, filename);
   }
 
   // close the modal
@@ -170,7 +190,7 @@ function filterEmployees(employees) {
   return _.filter(employees, (e) => {
     // - YEAR FILTER -
     // remove employees that were hired after given year, or departed before given year
-    if (f.year != 'All') {
+    if (f.year != this.filterOptions.years[0]) {
       let hireYearValid = !!e.hireDate && dateUtils.isSameOrBefore(e.hireDate, f.year, 'year');
       let deptYearValid = !this.deptDate || dateUtils.isSameOrAfter(e.deptDate, f.year, 'year');
       if (!hireYearValid || !deptYearValid) return false;
@@ -269,7 +289,7 @@ export default {
       filters: {
         statuses: ['Active'],
         tags: [],
-        year: 'All'
+        year: 'Current'
       }
     };
   },
