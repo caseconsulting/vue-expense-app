@@ -143,12 +143,12 @@ function download() {
   csvInfo = this.filterEmployees(csvInfo);
 
   // download from proper csv util
-  let filename = `Download (${this.year})`;
+  let filename = `Download (${this.filters.year})`;
   if (this.exportType == 'employee') {
-    filename = `Employee Export - ${this.year}`;
+    filename = `Employee Export - ${this.filters.year}`;
     employeeCsv.download(csvInfo, this.contracts, this.filterOptions.tags, filename);
   } else if (this.exportType == 'eeo') {
-    filename = `EEO Compliance Report - ${this.year}`;
+    filename = `EEO Compliance Report - ${this.filters.year}`;
     eeoCsv.download(csvInfo, filename);
   }
 
