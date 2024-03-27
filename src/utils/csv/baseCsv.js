@@ -61,13 +61,13 @@ export function download(csvText, filename = null, asXlsx = true) {
     let text;
     for (let i = 0; i < csvText.length; i++) {
       text = csvText[i].csv;
-      csvData.push(Papa.parse(text, { header: true }));
+      csvData.push(Papa.parse(text, { header: false }));
     }
 
     // convert parsed CSV data to XLSX sheets
     let worksheets = [];
     for (let item of csvData) {
-      worksheets.push(XLSX.utils.json_to_sheet(item.data));
+      worksheets.push(XLSX.utils.json_to_sheet(item.data, { skipHeader: true }));
     }
 
     // create workbook and fill it with sheets
