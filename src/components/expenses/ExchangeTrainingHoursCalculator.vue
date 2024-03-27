@@ -3,7 +3,7 @@
     <!-- Modal Card -->
     <v-card>
       <!-- Modal Title -->
-      <v-card-title class="text-h5 header_style">Exchange Training Hours Calculator</v-card-title>
+      <v-card-title class="text-h5 header_style d-flex align-center">Exchange Training Hours Calculator</v-card-title>
       <!-- Modal Content -->
       <v-card-text class="mt-4">
         <v-row>
