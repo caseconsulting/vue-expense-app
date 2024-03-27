@@ -1032,9 +1032,12 @@ function filteredExpenseTypes() {
  */
 function formatCost(e) {
   // log cursor position to put it back to where it was
-  let cursorStart = e.target.selectionStart;
-  let cursorEnd = e.target.selectionEnd;
-  let previousLength = this.costFormatted.length;
+  let cursorStart, cursorEnd, previousLength;
+  if (e) {
+    cursorStart = e.target.selectionStart;
+    cursorEnd = e.target.selectionEnd;
+    previousLength = this.costFormatted.length;
+  }
 
   let [wholePart, fracPart] = this.parseCost(this.costFormatted).split('.');
   this.editedExpense.cost = this.parseCost(this.costFormatted);
@@ -1044,13 +1047,15 @@ function formatCost(e) {
   }
 
   // set cursor back to where it was
-  // note: longer delay means bigger stutter in input (3ms is not very noticable) but also more
-  // assurance that it will update *after* the cursor is shifted to the end by Vuetify.
-  let delay = 3;
-  setTimeout(() => {
-    e.target.selectionStart = cursorStart + this.costFormatted.length - previousLength;
-    e.target.selectionEnd = cursorEnd + this.costFormatted.length - previousLength;
-  }, delay);
+  if (e) {
+    // note: longer delay means bigger stutter in input (3ms is not very noticable) but also more
+    // assurance that it will update *after* the cursor is shifted to the end by Vuetify.
+    let delay = 3;
+    setTimeout(() => {
+      e.target.selectionStart = cursorStart + this.costFormatted.length - previousLength;
+      e.target.selectionEnd = cursorEnd + this.costFormatted.length - previousLength;
+    }, delay);
+  }
 } // formatCost
 
 /**
