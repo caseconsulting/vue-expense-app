@@ -1644,7 +1644,7 @@ function created() {
     this.clearForm();
   });
   this.emitter.on('close-exchange-training-hours-calculator', () => {
-    this.showExchangeTrainingDesc = false;
+    this.showExchangeCalculator = false;
   });
   this.emitter.on('insert-training-desc', (desc) => {
     this.showExchangeTrainingDesc = false;
@@ -1722,6 +1722,7 @@ function beforeUnmount() {
   this.emitter.off('close-exchange-training-desc');
   this.emitter.off('backout-canceled-expense');
   this.emitter.off('backout-confirmed-expense');
+  this.emitter.off('close-exchange-training-hours-calculator');
 } // beforeUnmount
 
 /**
