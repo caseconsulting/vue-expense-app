@@ -180,6 +180,7 @@
           :items-per-page.sync="itemsPerPage"
           :search="search"
           :custom-filter="customFilter"
+          :key="dataTableKey"
           mobile-breakpoint="800"
           item-key="employeeNumber"
           class="elevation-1 employees-table text-body-2"
@@ -315,6 +316,20 @@ import { format } from '../shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Key for data table, also has implications for custom search
+ * of data table
+ */
+function dataTableKey() {
+  return { a: this.filter, b: this.selectedTags };
+} // dataTableKey
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -359,18 +374,19 @@ function chipColor(id) {
 /**
  * Custom filter for employee table searching
  *
- * @param value - unused value
+ * @param _ - unused value (in theory the current item of employee to search)
  * @param search - The search value in the search bar
  * @param item - The item in the table
  * @returns Boolean - True if the item matches the search criteria
  */
-function customFilter(value, search, item) {
+function customFilter(_, search, item) {
   item = item.raw;
 
   // reset index if search is different than before
-  if (this.searchCache != search) {
+  if (this.searchCache.search != search || this.searchCache.tableKey != this.dataTableKey) {
     this.searchIndex = new Set();
-    this.searchCache = search;
+    this.searchCache.search = search;
+    this.searchCache.tableKey = this.dataTableKey;
   }
 
   /**
@@ -382,7 +398,7 @@ function customFilter(value, search, item) {
    */
   let terms = search.split(','); // used for searching later, search is split by comma
   if (search == null || (terms.length == 1 && terms[0].length < 2)) return true;
-  if (typeof value !== 'object' || this.searchIndex.has(item.email)) return false;
+  if (this.searchIndex.has(item.email)) return false;
 
   // mark employee as searched
   this.searchIndex.add(item.email);
@@ -432,6 +448,7 @@ function customFilter(value, search, item) {
       }
     }
   }
+
   return false;
 } // customFilter
 
@@ -862,6 +879,7 @@ export default {
     TagManager
   },
   computed: {
+    dataTableKey,
     storeIsPopulated
   },
   created,
@@ -960,7 +978,10 @@ export default {
       }, // selected employee
       search: null, // query text for datatable search field
       searchIndex: new Set(),
-      searchCache: null,
+      searchCache: {
+        search: null,
+        tableKey: null
+      },
       selectedTags: [], // tags to include or exclude in filter
       sortBy: [{ key: 'hireDate', order: 'asc' }], // sort datatable items
       status: {
