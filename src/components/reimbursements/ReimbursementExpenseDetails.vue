@@ -19,6 +19,15 @@
           <v-col cols="5"><b>Cost:</b></v-col>
           <v-col cols="7">{{ convertToMoneyString(expense.cost) }}</v-col>
         </v-row>
+        <v-dialog v-model="showExchangeCalculator" :width="isMobile ? '100%' : '50%'" persistent>
+          <ExchangeTrainingHoursCalculatorReverse :cost="expense.cost" />
+        </v-dialog>
+        <v-row dense v-if="expense.category === 'Exchange for training hours'">
+          <v-col cols="5"><b>Hours exchange:</b></v-col>
+          <v-col cols="7"
+            ><a class="text-blue-darken-2 pointer" @click.stop="showExchangeCalculator = true">Calculate</a></v-col
+          >
+        </v-row>
         <v-row dense>
           <v-col cols="5"><b>Purchased On:</b></v-col>
           <v-col cols="7"> {{ monthDayYearFormat(expense.purchaseDate) }} </v-col>
@@ -53,6 +62,7 @@
 
 <script>
 import Attachment from '@/components/utils/Attachment.vue';
+import ExchangeTrainingHoursCalculatorReverse from '@/components/expenses/ExchangeTrainingHoursCalculatorReverse.vue';
 import { isEmpty, convertToMoneyString, monthDayYearFormat } from '@/utils/utils';
 
 // |--------------------------------------------------|
@@ -85,6 +95,12 @@ function displayExpense(clickedExpense) {
  */
 function created() {
   this.emitter.on('expenseClicked', this.displayExpense);
+  this.emitter.on('close-exchange-training-hours-calculator-reverse', () => {
+    this.showExchangeCalculator = false;
+  });
+  this.emitter.on('insert-training-hours-cost', () => {
+    this.showExchangeCalculator = false;
+  });
 } // created
 
 /**
@@ -92,6 +108,7 @@ function created() {
  */
 function beforeUnmount() {
   this.emitter.off('expenseClicked');
+  this.emitter.off('close-exchange-training-hours-calculator-reverse');
 } //beforeUnmount
 
 // |--------------------------------------------------|
@@ -104,11 +121,13 @@ export default {
   created,
   beforeUnmount,
   components: {
-    Attachment
+    Attachment,
+    ExchangeTrainingHoursCalculatorReverse
   },
   data() {
     return {
-      expense: undefined // expense info
+      expense: undefined, // expense info
+      showExchangeCalculator: false
     };
   },
   methods: {
