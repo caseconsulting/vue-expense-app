@@ -12,7 +12,6 @@
           <v-radio-group v-model="exportType" inline>
             <v-radio label="Employee Data" value="employee"></v-radio>
             <v-radio label="EEO Data" value="eeo"></v-radio>
-            <v-radio label="Both" value="both"></v-radio>
           </v-radio-group>
 
           <!-- Year selector -->
@@ -152,29 +151,51 @@ function download() {
     filename = `Employee Export - ${this.filters.year}`;
     employeeCsv.download(csvInfo, this.contracts, this.filterOptions.tags, filename);
   } else if (this.exportType == 'eeo') {
-    filename = `EEO Compliance Report - ${this.filters.year}`;
-    eeoCsv.download(csvInfo, filename);
-  } else {
-    // get EEO and Employee CSV strings
-    let emp = employeeCsv.fileString(csvInfo, this.contracts, this.filterOptions.tags, filename);
+    // generate CSVs for eeo and employee data (only for those who did not decline to self-identify)
     let eeo = eeoCsv.fileString(csvInfo, filename);
+    csvInfo = this.filterDeclined(csvInfo);
+    let emp = employeeCsv.fileString(csvInfo, this.contracts, this.filterOptions.tags, true);
+
+    // fill in xlsx info and download
     let csvText = [
-      {
-        name: 'Employee Export',
-        csv: emp
-      },
       {
         name: 'EEO Compliance Report',
         csv: eeo
+      },
+      {
+        name: 'Employee Info',
+        csv: emp
       }
     ];
-    filename = `CASE employee and EEO report (${this.filters.year})`;
+    filename = `EEO Compliance Report - ${this.filters.year}`;
     baseCsv.download(csvText, filename);
   }
 
   // close the modal
   this.close();
 } // download
+
+/**
+ * Filters through given employees, removing employees that have incomplete
+ * data in their EEO form
+ *
+ * @param employees employees to filter through
+ */
+function filterDeclined(employees) {
+  function nullOrUndefined(item) {
+    return item == undefined || item == null;
+  }
+  return _.filter(employees, (e) => {
+    return (
+      !nullOrUndefined(e.eeoGender) &&
+      !nullOrUndefined(e.eeoJobCategory) &&
+      !nullOrUndefined(e.eeoRaceOrEthnicity) &&
+      !nullOrUndefined(e.eeoHispanicOrLatino) &&
+      !nullOrUndefined(e.eeoHasDisability) &&
+      !nullOrUndefined(e.eeoIsProtectedVeteran)
+    );
+  });
+}
 
 /**
  * Filters employees based on the form's information
@@ -300,6 +321,7 @@ export default {
     close,
     chipColor,
     download,
+    filterDeclined,
     filterEmployees,
     negateTag,
     removeTag
