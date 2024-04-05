@@ -11,11 +11,13 @@
 </template>
 
 <script>
+import api from '@/shared/api.js';
 const _ = require('lodash');
 
-function save() {
+async function save() {
   let employee = _.find(this.$store.getters.employees, (e) => e.id === this.item.id);
   employee[this.field.key] = this.model;
+  console.log(await api.updateAttribute(api.EMPLOYEES, employee, this.field.key));
 }
 
 export default {

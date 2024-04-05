@@ -16,13 +16,13 @@ function selectedFields() {
 }
 
 function orderedFields() {
-  // always have first and last name as first fields, then selected alphabetized, then unselected alphabetized
+  // always have name as first field, then selected alphabetized, then unselected alphabetized
   return [
-    ..._.filter(this.fields, (f) => f.key === 'firstName' || f.key === 'lastName'),
-    ..._.filter(this.fields, (f) => f.key !== 'firstName' && f.key !== 'lastName' && f.selected).sort((a, b) =>
+    this.fields[0],
+    ..._.filter(this.fields, (f) => f.title !== 'Name' && f.selected).sort((a, b) =>
       a.title > b.title ? 1 : b.title > a.title ? -1 : 0
     ),
-    ..._.filter(this.fields, (f) => f.key !== 'firstName' && f.key !== 'lastName' && !f.selected).sort((a, b) =>
+    ..._.filter(this.fields, (f) => f.title !== 'Name' && !f.selected).sort((a, b) =>
       a.title > b.title ? 1 : b.title > a.title ? -1 : 0
     )
   ];

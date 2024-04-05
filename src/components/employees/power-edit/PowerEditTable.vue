@@ -12,8 +12,8 @@
   >
     <template v-for="field in fields" v-slot:[`item.${field.key}`]="{ item }">
       <power-edit-table-item
-        :key="field"
-        @click="editItem = { item, field }"
+        :key="field.key"
+        @click="field.editType ? (editItem = { item, field }) : ''"
         class="d-flex align-center w-100 h-100 pointer"
         :editing="editItem?.item.id === item.id && editItem?.field.key === field.key"
         :field="field"
@@ -25,9 +25,12 @@
 
 <script>
 import PowerEditTableItem from '@/components/employees/power-edit/PowerEditTableItem.vue';
+const _ = require('lodash');
 
 function employees() {
-  return this.$store.getters.employees;
+  return _.map(this.$store.getters.employees, (e) => {
+    return { ...e, name: `${e.nickname || e.firstName} ${e.lastName}` };
+  });
 }
 
 function watchEmployees() {

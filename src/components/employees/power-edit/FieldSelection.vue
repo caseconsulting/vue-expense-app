@@ -35,7 +35,10 @@
 const _ = require('lodash');
 
 function localFields() {
-  return _.filter(this.fields, (f) => !this.fieldSearch || f.title.includes(this.fieldSearch));
+  return _.filter(
+    this.fields,
+    (f) => (!this.fieldSearch || f.title.includes(this.fieldSearch)) && (f.editType || f.group)
+  );
 }
 
 export default {
