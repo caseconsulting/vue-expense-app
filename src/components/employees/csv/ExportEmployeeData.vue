@@ -4,93 +4,86 @@
     <!-- Modal Title -->
     <v-card-title class="d-flex align-center text-h5 header_style">Employee Export</v-card-title>
     <!-- Modal Content -->
-    <v-card-text class="px-5 pa-md-4 mt-4">
-      <v-row justify="center">
-        <v-col>
-          <!-- EEO vs Employee export type -->
-          <h3>Export Type</h3>
-          <v-radio-group v-model="exportType" inline>
-            <v-radio label="Employee Data" value="employee"></v-radio>
-            <v-radio label="EEO Data" value="eeo"></v-radio>
-          </v-radio-group>
+    <v-card-text class="d-flex justify-center">
+      <div class="w-75">
+        <!-- EEO vs Employee export type -->
+        <h3 class="mt-4">Export Type</h3>
+        <v-radio-group hide-details v-model="exportType">
+          <v-radio v-for="(t, i) in exportTypes" :key="i" :label="t.title" :value="t"></v-radio>
+        </v-radio-group>
 
-          <!-- Year selector -->
-          <h3>Report Year</h3>
-          <v-select
-            class="d-inline-block w-75"
-            label="Year"
-            v-model="filters.year"
-            :items="filterOptions.years"
-            variant="underlined"
-          ></v-select>
-        </v-col>
-        <v-col>
-          <!-- EEO vs Employee export type -->
-          <h3>Filter by tag</h3>
-          <v-autocomplete
-            clearable
-            class="w-75"
-            label="Filter by Tag (click to flip)"
-            v-model="filters.tags"
-            :items="filterOptions.tags"
-            multiple
-            variant="underlined"
-            item-title="tagName"
-            item-value="id"
-            return-object
-          >
-            <template v-slot:selection="{ item }">
-              <v-chip
-                size="small"
-                closable
-                @click.stop
-                @click="negateTag(item.raw)"
-                @click:close="removeTag(item.raw)"
-                :color="chipColor(item.raw.id)"
-              >
-                {{ tagFlip.includes(item.raw.id) ? 'NOT ' : '' }}
-                {{ item.raw.tagName }}
-              </v-chip>
-            </template>
-          </v-autocomplete>
+        <!-- Period selector -->
+        <h3 class="cap-first mt-4">Report {{ exportType.periodType }}</h3>
+        <v-select
+          class="d-inline-block w-100"
+          v-model="filters.period"
+          :items="filterOptions[exportType.periodType]"
+          item-title="text"
+          item-value="value"
+          variant="underlined"
+        />
 
-          <!-- Year selector -->
-          <h3>Filter by status</h3>
-          <v-autocomplete
-            class="w-75"
-            label="Filter by status"
-            v-model="filters.statuses"
-            :items="filterOptions.statuses"
-            multiple
-            variant="underlined"
-            chips
-            closable-chips
-          >
-          </v-autocomplete>
-        </v-col>
-      </v-row>
-
-      <br />
-
-      <!-- Action Button (Close) -->
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn color="primary" variant="outlined" @click="download()"
-          >Download <v-icon size="large">mdi-download</v-icon></v-btn
+        <!-- Year selector -->
+        <h3 class="mt-4">Filter by status</h3>
+        <v-autocomplete
+          label="Filter by status"
+          v-model="filters.statuses"
+          :items="filterOptions.statuses"
+          multiple
+          variant="underlined"
+          chips
+          closable-chips
         >
-        <v-btn color="grey-darken-3" variant="text" @click="close()"> Close </v-btn>
-      </v-card-actions>
+        </v-autocomplete>
+
+        <!-- Tag selector -->
+        <h3 class="mt-4">Filter by tag</h3>
+        <v-autocomplete
+          clearable
+          label="Filter by Tag (click to flip)"
+          v-model="filters.tags"
+          :items="filterOptions.tags"
+          multiple
+          variant="underlined"
+          item-title="tagName"
+          item-value="id"
+          return-object
+        >
+          <template v-slot:selection="{ item }">
+            <v-chip
+              size="small"
+              closable
+              @click.stop
+              @click="negateTag(item.raw)"
+              @click:close="removeTag(item.raw)"
+              :color="chipColor(item.raw.id)"
+            >
+              {{ tagFlip.includes(item.raw.id) ? 'NOT ' : '' }}
+              {{ item.raw.tagName }}
+            </v-chip>
+          </template>
+        </v-autocomplete>
+      </div>
     </v-card-text>
+
+    <!-- Action Button (Close) -->
+    <v-card-actions class="mb-2 mr-4">
+      <v-spacer></v-spacer>
+      <v-btn color="primary" variant="outlined" @click="download()">
+        Download <v-icon size="large">mdi-download</v-icon>
+      </v-btn>
+      <v-btn color="grey-darken-3" variant="text" @click="close()"> Close </v-btn>
+    </v-card-actions>
   </v-card>
 </template>
 
 <script>
 import { isMobile, isSmallScreen } from '@/utils/utils';
-import dateUtils from '@/shared/dateUtils';
+import { getTodaysDate, format, subtract, isSameOrBefore, isSameOrAfter } from '../../../shared/dateUtils';
 import _ from 'lodash';
 const employeeCsv = require('@/utils/csv/employeeCsv.js');
 const eeoCsv = require('@/utils/csv/eeoCsv.js');
-const baseCsv = require('@/utils/csv/baseCsv.js');
+const qbCsv = require('@/utils/csv/qbCsv.js');
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -105,11 +98,22 @@ function created() {
   // fill in tag options
   this.filterOptions.tags = this.$store.getters.tags;
 
+  // default export type
+  this.exportType = this.exportTypes[0];
+
   // fill in year options
-  let years = _.uniq(_.map(this.employees, (e) => dateUtils.format(e.hireDate, null, 'YYYY'))); // get unique hire dates
+  let years = _.uniq(_.map(this.employees, (e) => format(e.hireDate, null, 'YYYY'))); // get unique hire dates
   years = _.orderBy(years, null, ['desc']); // sort
-  years.unshift(this.filters.year); // default value shouldn't have changed yet
-  this.filterOptions.years = years;
+  years.push('All'); // add "All" to beginning
+  this.filterOptions.year = years;
+
+  // fill in month options (only current and previous)
+  let lastMonth = subtract(getTodaysDate(), 1, 'month');
+  let thisMonth = getTodaysDate();
+  lastMonth = { text: format(lastMonth, null, 'MMMM'), value: format(lastMonth, null, 'YYYY-MM') };
+  thisMonth = { text: format(thisMonth, null, 'MMMM'), value: format(thisMonth, null, 'YYYY-MM') };
+  this.filterOptions.month.push(lastMonth);
+  this.filterOptions.month.push(thisMonth);
 }
 
 // |--------------------------------------------------|
@@ -143,32 +147,25 @@ function download() {
   let csvInfo = this.employees;
   csvInfo = this.filterEmployees(csvInfo);
   let yearText = this.filters.year;
-  if (yearText == this.filterOptions.years[0]) yearText = dateUtils.getTodaysDate('YYYY');
+  if (yearText == this.filterOptions.years[0]) yearText = getTodaysDate('YYYY');
 
   // download from proper csv util
-  let filename;
-  if (this.exportType == 'employee') {
-    filename = `Employee Export - ${this.filters.year}`;
-    employeeCsv.download(csvInfo, this.contracts, this.filterOptions.tags, filename);
-  } else if (this.exportType == 'eeo') {
-    // generate CSVs for eeo and employee data (only for those who did not decline to self-identify)
-    let eeo = eeoCsv.fileString(csvInfo, filename);
-    csvInfo = this.filterDeclined(csvInfo);
-    let emp = employeeCsv.fileString(csvInfo, this.contracts, this.filterOptions.tags, true);
-
-    // fill in xlsx info and download
-    let csvText = [
-      {
-        name: 'EEO Compliance Report',
-        csv: eeo
-      },
-      {
-        name: 'Employee Info',
-        csv: emp
-      }
-    ];
-    filename = `EEO Compliance Report - ${this.filters.year}`;
-    baseCsv.download(csvText, filename);
+  let filename = `Download (${this.filters.period})`;
+  switch (this.exportType.value) {
+    case 'emp':
+      filename = `Employee Export - ${this.filters.period}`;
+      employeeCsv.download(csvInfo, this.contracts, this.filterOptions.tags, filename);
+      break;
+    case 'eeo':
+      filename = `EEO Compliance Report - ${this.filters.period}`;
+      eeoCsv.download(csvInfo, filename);
+      break;
+    case 'qb':
+      filename = `Timesheet Report - ${this.filters.period}`;
+      qbCsv.download(csvInfo, filename);
+      break;
+    default:
+      console.log('ERROR: No export type selected');
   }
 
   // close the modal
@@ -211,9 +208,9 @@ function filterEmployees(employees) {
   return _.filter(employees, (e) => {
     // - YEAR FILTER -
     // remove employees that were hired after given year, or departed before given year
-    if (f.year != this.filterOptions.years[0]) {
-      let hireYearValid = !!e.hireDate && dateUtils.isSameOrBefore(e.hireDate, f.year, 'year');
-      let deptYearValid = !this.deptDate || dateUtils.isSameOrAfter(e.deptDate, f.year, 'year');
+    if (f.period != 'All') {
+      let hireYearValid = !!e.hireDate && isSameOrBefore(e.hireDate, f.period, 'year');
+      let deptYearValid = !this.deptDate || isSameOrAfter(e.deptDate, f.period, 'year');
       if (!hireYearValid || !deptYearValid) return false;
     }
 
@@ -279,12 +276,18 @@ function removeTag(item) {
 // |--------------------------------------------------|
 
 /**
- * In the case that the page has been force reloaded (and the store cleared)
- * this watcher will be activated when the store is populated again.
+ * Changes the default report year to be whatever makes sense for
+ * the report type
  */
-function watchTagFlip() {
-  this.refreshDropdownItems();
-} // watchTagFlip
+function updatePeriodDefault() {
+  // set default period value based on type of export
+  let defaults = {
+    emp: this.filterOptions.year[0],
+    eeo: this.filterOptions.year[0],
+    qb: this.filterOptions.month[0]
+  };
+  this.filters.period = defaults[this.exportType.value];
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -300,22 +303,28 @@ export default {
   },
   data() {
     return {
-      exportType: 'employee',
+      exportType: null,
+      exportTypes: [
+        { title: 'Employee Data', value: 'emp', periodType: 'year' },
+        { title: 'EEO Data', value: 'eeo', periodType: 'year' },
+        { title: 'Timesheet Data', value: 'qb', periodType: 'month' }
+      ],
       tagFlip: [],
       filterOptions: {
         statuses: ['Active', 'Part Time', 'Inactive'], // order matters to filterEmployees() > status filter
         tags: null,
-        years: []
+        year: [],
+        month: []
       },
       filters: {
-        statuses: ['Active'],
+        statuses: ['Active', 'Part Time'],
         tags: [],
-        year: 'Current'
+        period: 'All'
       }
     };
   },
-  watchers: {
-    tagFlip: { handler: watchTagFlip, deep: true }
+  watch: {
+    exportType: { handler: updatePeriodDefault, deep: true }
   },
   methods: {
     close,
@@ -334,5 +343,9 @@ export default {
 .download {
   font-size: 20px;
   cursor: pointer;
+}
+.cap-first,
+.cap-first-children * {
+  text-transform: capitalize;
 }
 </style>
