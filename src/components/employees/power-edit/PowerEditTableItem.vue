@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!this.editing" class="d-flex align-center w-100 h-100 pointer">
+  <div v-if="!this.editing" class="d-flex align-center w-100 h-100 pointer info-item">
     <default-info-item v-if="field.infoType === TYPES.DEFAULT" :field="field" :item="item"></default-info-item>
     <date-info-item
       v-else-if="field.infoType === TYPES.DATE_MMYYYY || field.infoType === TYPES.DATE_MMDDYYYY"

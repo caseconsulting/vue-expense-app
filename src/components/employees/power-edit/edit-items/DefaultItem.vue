@@ -2,6 +2,9 @@
   <v-form v-model="valid" class="w-100 h-100">
     <v-text-field v-model="model" autofocus class="power-edit-field" :rules="field.rules" variant="underlined">
       <template v-slot:append>
+        <v-btn density="comfortable" icon variant="text" @click.stop="cancel()">
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
         <v-btn density="comfortable" :disabled="!valid" icon variant="text" @click.stop="save()">
           <v-icon>mdi-content-save</v-icon>
         </v-btn>
@@ -11,13 +14,12 @@
 </template>
 
 <script>
-import api from '@/shared/api.js';
-const _ = require('lodash');
+function save() {
+  this.emitter.emit('save-item', { field: this.field, item: this.item, value: this.model });
+}
 
-async function save() {
-  let employee = _.find(this.$store.getters.employees, (e) => e.id === this.item.id);
-  employee[this.field.key] = this.model;
-  console.log(await api.updateAttribute(api.EMPLOYEES, employee, this.field.key));
+function cancel() {
+  this.emitter.emit('cancel-item');
 }
 
 export default {
@@ -28,6 +30,7 @@ export default {
     };
   },
   methods: {
+    cancel,
     save
   },
   props: ['field', 'item']
