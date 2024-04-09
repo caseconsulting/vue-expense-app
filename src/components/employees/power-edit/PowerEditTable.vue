@@ -3,12 +3,11 @@
     :items="employees"
     :headers="fields"
     :search="search"
+    density="comfortable"
     fixed-header
     fixed-footer
-    height="80vh"
-    width="100%"
     items-per-page="-1"
-    class="sticky-columns mt-1"
+    class="power-edit-table mt-1"
   >
     <template v-for="field in fields" v-slot:[`item.${field.key}`]="{ item }">
       <power-edit-table-item
@@ -49,10 +48,6 @@ async function created() {
       delete employee[tmpField];
     }, 2000);
   });
-
-  this.emitter.on('cancel-item', () => {
-    this.editItem = null;
-  });
 }
 
 function employees() {
@@ -89,7 +84,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .item-saving {
   font-weight: bold;
   color: darkgray;
@@ -106,16 +101,7 @@ export default {
   transition: color 2s ease-out !important;
   -webkit-transition: color 2s ease-out !important;
 }
-.sticky-columns tbody > tr > td:nth-child(1),
-.sticky-columns thead > tr > th:nth-child(1) {
-  position: sticky !important;
-  position: -webkit-sticky !important;
-  left: 0;
-  top: 0;
-  z-index: 9998;
-  background-color: white;
-}
-.sticky-columns thead > tr > th:nth-child(1) {
-  z-index: 9999;
+.power-edit-table {
+  max-height: 80vh;
 }
 </style>

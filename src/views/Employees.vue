@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/no-v-model-argument -->
 <template>
-  <div :class="powerEdit ? 'power-edit-mode' : ''">
+  <div>
     <!-- Status Alert -->
     <v-snackbar
       v-model="status.show"
@@ -1060,14 +1060,10 @@ export default {
 .employees-table > div > table > tbody {
   cursor: pointer;
 }
-.power-edit-mode {
-  position: relative;
-  background: linear-gradient(to right, purple, red);
-  padding: 3px;
-}
 .power-edit-text {
   font-size: 26px;
   background: -webkit-linear-gradient(45deg, purple, red);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }

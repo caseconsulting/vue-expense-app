@@ -3,7 +3,6 @@
     <v-text-field
       ref="formFields"
       :model-value="format(model, null, 'MM/DD/YYYY')"
-      :label="field.title"
       class="power-edit-field"
       hint="MM/DD/YYYY format"
       v-mask="'##/##/####'"
@@ -24,9 +23,6 @@
         ></v-date-picker>
       </v-menu>
       <template v-slot:append>
-        <v-btn density="comfortable" icon variant="text" @click.stop="cancel()">
-          <v-icon>mdi-close</v-icon>
-        </v-btn>
         <v-btn density="comfortable" :disabled="!valid" icon variant="text" @click.stop="save()">
           <v-icon>mdi-content-save</v-icon>
         </v-btn>
@@ -41,10 +37,6 @@ import { mask } from 'vue-the-mask';
 
 function save() {
   this.emitter.emit('save-item', { field: this.field, item: this.item, value: this.model });
-}
-
-function cancel() {
-  this.emitter.emit('cancel-item');
 }
 
 /**
@@ -66,7 +58,6 @@ export default {
   },
   directives: { mask },
   methods: {
-    cancel,
     format,
     parseEventDate,
     save

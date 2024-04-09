@@ -1,6 +1,6 @@
 <template>
   <div>
-    <field-selection :fields="orderedFields"></field-selection>
+    <field-selection :fields="fields"></field-selection>
     <power-edit-table :fields="selectedFields" :search="search"></power-edit-table>
   </div>
 </template>
@@ -15,27 +15,13 @@ function selectedFields() {
   return _.filter(this.fields, (f) => f.selected);
 }
 
-function orderedFields() {
-  // always have name as first field, then selected alphabetized, then unselected alphabetized
-  return [
-    this.fields[0],
-    ..._.filter(this.fields, (f) => f.title !== 'Name' && f.selected).sort((a, b) =>
-      a.title > b.title ? 1 : b.title > a.title ? -1 : 0
-    ),
-    ..._.filter(this.fields, (f) => f.title !== 'Name' && !f.selected).sort((a, b) =>
-      a.title > b.title ? 1 : b.title > a.title ? -1 : 0
-    )
-  ];
-}
-
 export default {
   components: {
     FieldSelection,
     PowerEditTable
   },
   computed: {
-    selectedFields,
-    orderedFields
+    selectedFields
   },
   data() {
     return {
