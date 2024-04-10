@@ -133,6 +133,18 @@ export function getValidateFalse() {
   return [(v) => isEmpty(v) || 'Departure date must be after hire date'];
 } // getValidateRules
 
+export function duplicateEmployeeNumberRule() {
+  return [
+    (v, employee) => {
+      let duplicate = _.some(
+        store.getters.employees,
+        (e) => e.employeeNumber === Number(v) && employee.employeeNumber !== Number(v)
+      );
+      return !duplicate || 'This employee id is already in use';
+    }
+  ];
+}
+
 /**
  * Gets the rules for validating employee PTO Cash Out request
  * @param ptoLimit employee's available PTO

@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import { TYPES } from '@/components/employees/power-edit/fields.js';
+import { TYPES } from '@/components/employees/power-edit/js/fieldTypes.js';
 import {
   format,
   DEFAULT_ISOFORMAT,

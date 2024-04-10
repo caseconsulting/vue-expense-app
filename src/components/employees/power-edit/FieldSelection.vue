@@ -4,14 +4,14 @@
       <fieldset class="pr-1">
         <legend class="pa-0">Selected</legend>
         <v-chip
-          v-for="field of selectedFields"
+          v-for="field of localSelectedFields"
           :key="field.key"
-          class="ml-1 mb-1 pointer"
+          class="ml-1 mb-1 font-weight-bold pointer"
           color="blue"
           prepend-icon="mdi-check"
           size="x-small"
           variant="elevated"
-          @click="field.selected = !field.selected"
+          @click="removeField(field)"
         >
           {{ field.title }}
         </v-chip>
@@ -23,11 +23,11 @@
         <v-chip
           v-for="field of nonSelectedFields"
           :key="field.key"
-          class="ml-1 mb-1 pointer"
+          class="ml-1 mb-1 font-weight-bold pointer"
           color="black"
           size="x-small"
           variant="outlined"
-          @click="field.selected = !field.selected"
+          @click="addField(field)"
         >
           {{ field.title }}
         </v-chip>
@@ -39,46 +39,32 @@
 <script>
 const _ = require('lodash');
 
+function addField(field) {
+  this.localSelectedFields.splice(this.localSelectedFields.length, 0, field);
+}
+
+function removeField(field) {
+  let i = _.findIndex(this.localSelectedFields, (f) => f.title === field.title);
+  this.localSelectedFields.splice(i, 1);
+}
+
 function nonSelectedFields() {
-  return _.filter(this.localFields, (f) => !f.selected);
-}
-
-function selectedFields() {
-  return _.filter(this.localFields, (f) => f.selected);
-}
-
-// function orderedFields() {
-//   // always have name as first field, then selected alphabetized, then unselected alphabetized
-//   return [
-//     this.fields[0],
-//     ..._.filter(this.fields, (f) => f.title !== 'Name' && f.selected).sort((a, b) =>
-//       a.title > b.title ? 1 : b.title > a.title ? -1 : 0
-//     ),
-//     ..._.filter(this.fields, (f) => f.title !== 'Name' && !f.selected).sort((a, b) =>
-//       a.title > b.title ? 1 : b.title > a.title ? -1 : 0
-//     )
-//   ];
-// }
-
-function localFields() {
-  return _.filter(
-    this.fields,
-    (f) => (!this.fieldSearch || f.title.includes(this.fieldSearch)) && (f.editType || f.group)
-  );
+  let unselectedFields = _.xorBy(this.fields, this.localSelectedFields, 'title');
+  let editableUnselectedFields = _.filter(unselectedFields, (f) => f.editType);
+  return editableUnselectedFields;
 }
 
 export default {
   computed: {
-    localFields,
-    nonSelectedFields,
-    selectedFields
+    nonSelectedFields
   },
   data() {
     return {
-      fieldSearch: null
+      localSelectedFields: this.selectedFields
     };
   },
-  props: ['fields']
+  methods: { addField, removeField },
+  props: ['fields', 'selectedFields']
 };
 </script>
 

@@ -1,13 +1,17 @@
 <template>
-  <v-form v-model="valid" class="w-100 h-100">
-    <v-text-field v-model="model" autofocus class="power-edit-field" :rules="field.rules" variant="underlined">
-      <template v-slot:append>
-        <v-btn density="comfortable" :disabled="!valid" icon variant="text" @click.stop="save()">
-          <v-icon>mdi-content-save</v-icon>
-        </v-btn>
-      </template>
-    </v-text-field>
-  </v-form>
+  <v-text-field
+    v-model="model"
+    autofocus
+    class="power-edit-field"
+    :rules="field.rules?.map((func) => func(model, item))"
+    variant="underlined"
+  >
+    <template v-slot:append>
+      <v-btn density="comfortable" :disabled="!valid" icon variant="text" @click.stop="save()">
+        <v-icon>mdi-content-save</v-icon>
+      </v-btn>
+    </template>
+  </v-text-field>
 </template>
 
 <script>
@@ -18,14 +22,13 @@ function save() {
 export default {
   data() {
     return {
-      model: this.item[this.field.key],
-      valid: true
+      model: this.item[this.field.key]
     };
   },
   methods: {
     save
   },
-  props: ['field', 'item']
+  props: ['field', 'item', 'valid']
 };
 </script>
 

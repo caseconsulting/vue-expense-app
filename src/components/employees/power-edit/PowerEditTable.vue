@@ -12,7 +12,7 @@
     <template v-for="field in fields" v-slot:[`item.${field.key}`]="{ item }">
       <power-edit-table-item
         :key="field"
-        @click="field.editType ? (editItem = { item, field }) : ''"
+        @click="field.editType ? (editItem = { item, field }) : $router.push(`employee/${item.employeeNumber}`)"
         :class="saveColor(item, field)"
         class="d-flex align-center w-100 h-100 pointer"
         :editing="editItem?.item.id === item.id && editItem?.field.key === field.key"

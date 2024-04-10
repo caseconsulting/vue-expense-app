@@ -8,15 +8,21 @@
     ></date-info-item>
     <custom-info-item v-else :field="field" :item="item"></custom-info-item>
   </div>
-  <div v-else class="d-flex align-center w-100 h-100 pointer">
-    <default-edit-item v-if="field.editType === TYPES.DEFAULT" :field="field" :item="item"></default-edit-item>
+  <v-form v-else v-model="valid" class="d-flex align-center w-100 h-100 pointer">
+    <default-edit-item
+      v-if="field.editType === TYPES.DEFAULT"
+      :field="field"
+      :item="item"
+      :valid="valid"
+    ></default-edit-item>
     <date-edit-item
       v-else-if="field.editType === TYPES.DATE_MMYYYY || field.infoType === TYPES.DATE_MMDDYYYY"
       :field="field"
       :item="item"
+      :valid="valid"
     ></date-edit-item>
-    <custom-edit-item v-else :field="field" :item="item"></custom-edit-item>
-  </div>
+    <custom-edit-item v-else :field="field" :item="item" :valid="valid"></custom-edit-item>
+  </v-form>
 </template>
 
 <script>
@@ -26,7 +32,7 @@ import DateInfoItem from '@/components/employees/power-edit/info-items/DateItem.
 import DateEditItem from '@/components/employees/power-edit/edit-items/DateItem.vue';
 import CustomInfoItem from '@/components/employees/power-edit/info-items/CustomItem.vue';
 import CustomEditItem from '@/components/employees/power-edit/edit-items/CustomItem.vue';
-import { TYPES } from '@/components/employees/power-edit/fields.js';
+import { TYPES } from '@/components/employees/power-edit/js/fieldTypes.js';
 
 export default {
   components: {
@@ -39,7 +45,8 @@ export default {
   },
   data() {
     return {
-      TYPES: TYPES
+      TYPES: TYPES,
+      valid: true
     };
   },
   props: ['editing', 'field', 'item']

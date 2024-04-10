@@ -1,3 +1,3 @@
 <template>
-  <div>Editing Custom</div>
+  <div>Edit functionality not implemented</div>
 </template>
