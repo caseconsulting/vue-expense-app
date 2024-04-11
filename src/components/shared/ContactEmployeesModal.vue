@@ -36,7 +36,7 @@
             <v-chip
               v-bind="props"
               class="mb-1"
-              :size="isMobile || employees.length > 40 ? 'x-small' : employees.length > 10 ? 'small' : 'default'"
+              :size="isMobile() || employees.length > 40 ? 'x-small' : employees.length > 10 ? 'small' : 'default'"
               >{{ item.raw.employeeName }}</v-chip
             >
           </template>
@@ -44,7 +44,7 @@
       </v-card-text>
       <!-- Action Button -->
       <v-card-actions>
-        <v-btn @click="copyEmailList()" :size="isMobile ? 'x-small' : 'small'" variant="text" color="grey-darken-1">
+        <v-btn @click="copyEmailList()" :size="isMobile() ? 'x-small' : 'small'" variant="text" color="grey-darken-1">
           Copy to Clipboard
           <v-icon v-if="copied" end color="green">mdi-check</v-icon>
           <v-icon v-else end>mdi-content-copy</v-icon>
@@ -52,7 +52,7 @@
         <v-spacer></v-spacer>
         <v-btn
           @click="emailEmployees()"
-          :size="isMobile ? 'x-small' : 'default'"
+          :size="isMobile() ? 'x-small' : 'default'"
           variant="text"
           color="light-blue"
           class="mr-1"
@@ -63,7 +63,7 @@
         <v-btn
           color="grey-darken-3"
           variant="text"
-          :size="isMobile ? 'x-small' : 'default'"
+          :size="isMobile() ? 'x-small' : 'default'"
           @click.native="
             emit('close-contact-employees-modal');
             activate = false;
