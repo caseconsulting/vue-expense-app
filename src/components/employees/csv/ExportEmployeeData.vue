@@ -69,7 +69,8 @@
     <!-- Action Button (Close) -->
     <v-card-actions class="mb-2 mr-4">
       <v-spacer></v-spacer>
-      <v-btn color="primary" variant="outlined" @click="download()">
+      <p class="mb-0 mr-1 text-caption text-grey font-italic" v-if="typeof loading == 'string'">{{ loading }}</p>
+      <v-btn :disabled="loading" color="primary" variant="outlined" @click="download()">
         Download <v-icon size="large">mdi-download</v-icon>
       </v-btn>
       <v-btn color="grey-darken-3" variant="text" @click="close()"> Close </v-btn>
@@ -114,6 +115,18 @@ function created() {
   thisMonth = { text: format(thisMonth, null, 'MMMM'), value: format(thisMonth, null, 'YYYY-MM') };
   this.filterOptions.month.push(lastMonth);
   this.filterOptions.month.push(thisMonth);
+
+  // allow loading messages
+  this.emitter.on('update-export-employee-data-loading', (s) => {
+    this.loading = s;
+  });
+}
+
+/**
+ * beforeUnmount lifecycle hook - close event listener
+ */
+function beforeUnmount() {
+  this.emitter.off('update-export-employee-data-loading');
 }
 
 // |--------------------------------------------------|
@@ -142,7 +155,9 @@ function chipColor(id) {
 /**
  * Downloads employees as CSV
  */
-function download() {
+async function download() {
+  this.loading = true; // disable download button
+
   // filter CSV info
   let csvInfo = this.employees;
   csvInfo = this.filterEmployees(csvInfo);
@@ -151,6 +166,7 @@ function download() {
 
   // download from proper csv util
   let filename = `Download (${this.filters.period})`;
+  let startDate, endDate;
   switch (this.exportType.value) {
     case 'emp':
       filename = `Employee Export - ${this.filters.period}`;
@@ -162,13 +178,17 @@ function download() {
       break;
     case 'qb':
       filename = `Timesheet Report - ${this.filters.period}`;
-      qbCsv.download(csvInfo, filename);
+      startDate = this.filters.period; //subtract(this.filters.period, 1, 'month', 'YYYY-MM');
+      endDate = this.filters.period;
+      this.loading = 'Downloading timesheets from QuickBooks...';
+      await qbCsv.download(csvInfo, { filename, startDate, endDate });
       break;
     default:
       console.log('ERROR: No export type selected');
   }
 
   // close the modal
+  this.loading = false;
   this.close();
 } // download
 
@@ -208,9 +228,10 @@ function filterEmployees(employees) {
   return _.filter(employees, (e) => {
     // - YEAR FILTER -
     // remove employees that were hired after given year, or departed before given year
+    if (f.period.value) f.period = f.period.value; // convert objects into normal
     if (f.period != 'All') {
-      let hireYearValid = !!e.hireDate && isSameOrBefore(e.hireDate, f.period, 'year');
-      let deptYearValid = !this.deptDate || isSameOrAfter(e.deptDate, f.period, 'year');
+      let hireYearValid = !!e.hireDate && isSameOrBefore(e.hireDate, f.period, this.exportType.periodType);
+      let deptYearValid = !this.deptDate || isSameOrAfter(e.deptDate, f.period, this.exportType.periodType);
       if (!hireYearValid || !deptYearValid) return false;
     }
 
@@ -297,6 +318,7 @@ function updatePeriodDefault() {
 
 export default {
   created,
+  beforeUnmount,
   computed: {
     isMobile,
     isSmallScreen
@@ -320,7 +342,8 @@ export default {
         statuses: ['Active', 'Part Time'],
         tags: [],
         period: 'All'
-      }
+      },
+      loading: false
     };
   },
   watch: {
