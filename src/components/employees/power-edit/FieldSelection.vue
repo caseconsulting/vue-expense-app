@@ -1,7 +1,7 @@
 <template>
   <v-row class="pa-4">
     <v-col cols="4">
-      <fieldset class="pr-1">
+      <fieldset class="pa-1">
         <legend class="pa-0">Selected</legend>
         <v-chip
           v-for="field of localSelectedFields"
@@ -9,7 +9,7 @@
           class="ml-1 mb-1 font-weight-bold pointer"
           color="blue"
           prepend-icon="mdi-check"
-          size="x-small"
+          size="small"
           variant="elevated"
           @click="removeField(field)"
         >
@@ -18,14 +18,14 @@
       </fieldset>
     </v-col>
     <v-col cols="8">
-      <fieldset class="pr-1">
+      <fieldset class="pa-1">
         <legend class="pa-0">Unselected</legend>
         <v-chip
           v-for="field of nonSelectedFields"
           :key="field.key"
-          class="ml-1 mb-1 font-weight-bold pointer"
+          class="ml-1 mb-1 pointer"
           color="black"
-          size="x-small"
+          size="small"
           variant="outlined"
           @click="addField(field)"
         >
