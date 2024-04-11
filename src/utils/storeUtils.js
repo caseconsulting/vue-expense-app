@@ -16,7 +16,7 @@ export async function updateStoreUser() {
   // getUser
   try {
     let user = await api.getUser();
-    this.$store.dispatch('setUser', { user });
+    store.dispatch('setUser', { user });
   } catch (err) {
     console.error(err);
   }
@@ -30,7 +30,7 @@ export async function updateStoreEmployees() {
     // getEmployees
     let employees = await api.getItems(api.EMPLOYEES);
     employees = _.filter(employees, (e) => e.email !== 'info@consultwithcase.com');
-    this.$store.dispatch('setEmployees', { employees });
+    store.dispatch('setEmployees', { employees });
   } catch (err) {
     console.error(err);
   }
@@ -42,7 +42,7 @@ export async function updateStoreEmployees() {
 export async function updateStoreAvatars() {
   try {
     let avatars = await api.getBasecampAvatars();
-    this.$store.dispatch('setBasecampAvatars', { basecampAvatars: avatars });
+    store.dispatch('setBasecampAvatars', { basecampAvatars: avatars });
   } catch (err) {
     console.error(err);
   }
@@ -55,7 +55,7 @@ export async function updateStoreCampfires() {
   try {
     let campfires = await api.getBasecampCampfires();
     if (campfires instanceof Error) campfires = [];
-    this.$store.dispatch('setBasecampCampfires', { basecampCampfires: campfires });
+    store.dispatch('setBasecampCampfires', { basecampCampfires: campfires });
   } catch (err) {
     console.error(err);
   }
@@ -67,7 +67,7 @@ export async function updateStoreCampfires() {
 export async function updateStoreContracts() {
   try {
     let contracts = await api.getItems(api.CONTRACTS);
-    this.$store.dispatch('setContracts', { contracts });
+    store.dispatch('setContracts', { contracts });
   } catch (err) {
     console.error(err);
   }
@@ -78,9 +78,9 @@ export async function updateStoreContracts() {
  */
 export async function updateStoreBudgets() {
   try {
-    let user = this.$store.getters.user;
+    let user = store.getters.user;
     let budgets = await api.getAllActiveEmployeeBudgets(user.id);
-    this.$store.dispatch('setBudgets', { budgets: budgets });
+    store.dispatch('setBudgets', { budgets: budgets });
   } catch (err) {
     console.error(err);
   }
