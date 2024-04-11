@@ -100,8 +100,7 @@ export async function convertEmployees(employees, startDate, endDate) {
       batch = [];
       batch_employees = [];
     }
-  }
-  console.log(INFO);
+  
   if (singleMonth) startDate = add(startDate, 1, 'month', 'YYYY-MM');
 
   // build out one row per employee
