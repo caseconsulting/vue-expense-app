@@ -8,13 +8,14 @@
       <div class="w-75">
         <!-- EEO vs Employee export type -->
         <h3 class="mt-4">Export Type</h3>
-        <v-radio-group hide-details v-model="exportType">
+        <v-radio-group :disabled="loading" hide-details v-model="exportType">
           <v-radio v-for="(t, i) in exportTypes" :key="i" :label="t.title" :value="t"></v-radio>
         </v-radio-group>
 
         <!-- Period selector -->
         <h3 class="cap-first mt-4">Report {{ exportType.periodType }}</h3>
         <v-select
+          :disabled="loading"
           class="d-inline-block w-100"
           v-model="filters.period"
           :items="filterOptions[exportType.periodType]"
@@ -26,6 +27,7 @@
         <!-- Year selector -->
         <h3 class="mt-4">Filter by status</h3>
         <v-autocomplete
+          :disabled="loading"
           label="Filter by status"
           v-model="filters.statuses"
           :items="filterOptions.statuses"
@@ -39,6 +41,7 @@
         <!-- Tag selector -->
         <h3 class="mt-4">Filter by tag</h3>
         <v-autocomplete
+          :disabled="loading"
           clearable
           label="Filter by Tag (click to flip)"
           v-model="filters.tags"
@@ -69,7 +72,12 @@
     <!-- Action Button (Close) -->
     <v-card-actions class="mb-2 mr-4">
       <v-spacer></v-spacer>
-      <p class="mb-0 mr-1 text-caption text-grey font-italic" v-if="typeof loading == 'string'">{{ loading }}</p>
+      <p class="mb-0 mr-2 w-50 text-end text-caption text-grey font-italic" v-if="typeof loading == 'string'">
+        {{ loading }}
+      </p>
+      <p class="mb-0 mr-2 w-50 text-end text-caption text-red font-italic" v-else-if="typeof status == 'string'">
+        {{ status }}
+      </p>
       <v-btn :disabled="loading" color="primary" variant="outlined" @click="download()">
         Download <v-icon size="large">mdi-download</v-icon>
       </v-btn>
@@ -117,8 +125,8 @@ function created() {
   this.filterOptions.month.push(thisMonth);
 
   // allow loading messages
-  this.emitter.on('update-export-employee-data-loading', (s) => {
-    this.loading = s;
+  this.emitter.on('update-export-employee-data-loading', (msg) => {
+    this.loading = msg;
   });
 }
 
@@ -161,8 +169,16 @@ async function download() {
   // filter CSV info
   let csvInfo = this.employees;
   csvInfo = this.filterEmployees(csvInfo);
+<<<<<<< HEAD
   let yearText = this.filters.year;
   if (yearText == this.filterOptions.years[0]) yearText = getTodaysDate('YYYY');
+=======
+  if (csvInfo.length === 0) {
+    this.status = 'Filters produce no employees. Operation cancelled.';
+    this.loading = false;
+    return;
+  }
+>>>>>>> 1de5d8d9 (POR-2537: qb csv download)
 
   // download from proper csv util
   let filename = `Download (${this.filters.period})`;
@@ -178,7 +194,7 @@ async function download() {
       break;
     case 'qb':
       filename = `Timesheet Report - ${this.filters.period}`;
-      startDate = this.filters.period; //subtract(this.filters.period, 1, 'month', 'YYYY-MM');
+      startDate = this.filters.period;
       endDate = this.filters.period;
       this.loading = 'Downloading timesheets from QuickBooks...';
       await qbCsv.download(csvInfo, { filename, startDate, endDate });
@@ -250,7 +266,7 @@ function filterEmployees(employees) {
 
     // - STATUS FILTER -
     // remove employees that do not have the status
-    let statusOpts = this.filterOptions.statuses; // ['Active', 'Part Time', 'Inactive']
+    let statusOpts = this.filterOptions.statuses; // ['Full Time', 'Part Time', 'Inactive']
     // mini function to map employee status (integer) to text used in form (string)
     let statusString = (s) => {
       if (s == 0) return statusOpts[2];
@@ -333,16 +349,17 @@ export default {
       ],
       tagFlip: [],
       filterOptions: {
-        statuses: ['Active', 'Part Time', 'Inactive'], // order matters to filterEmployees() > status filter
+        statuses: ['Full Time', 'Part Time', 'Inactive'], // order matters to filterEmployees() > status filter
         tags: null,
         year: [],
         month: []
       },
       filters: {
-        statuses: ['Active', 'Part Time'],
+        statuses: ['Full Time', 'Part Time'],
         tags: [],
         period: 'All'
       },
+      status: false,
       loading: false
     };
   },
