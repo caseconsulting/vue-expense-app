@@ -2,7 +2,7 @@
   <v-text-field
     ref="formFields"
     :model-value="format(model, null, 'MM/DD/YYYY')"
-    :rules="field.rules"
+    :rules="props.field.rules"
     class="power-edit-field"
     hint="MM/DD/YYYY format"
     v-mask="'##/##/####'"
@@ -19,24 +19,33 @@
         hide-actions
         keyboard-icon=""
         color="#bc3825"
-        :title="field.title"
+        :title="props.field.title"
       ></v-date-picker>
     </v-menu>
-    <template v-slot:append>
-      <v-btn density="comfortable" :disabled="!valid" icon variant="text" @click.stop="save()">
-        <v-icon>mdi-content-save</v-icon>
-      </v-btn>
-    </template>
   </v-text-field>
 </template>
 
-<script>
-import { format } from '@/shared/dateUtils';
+<script setup>
+import { ref } from 'vue';
+import { format, DEFAULT_ISOFORMAT, FORMATTED_ISOFORMAT } from '@/shared/dateUtils';
 import { mask } from 'vue-the-mask';
 
-function save() {
-  this.emitter.emit('save-item', { field: this.field, item: this.item, value: this.model });
-}
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const props = defineProps(['field', 'item']);
+const model = ref(props.item[props.field.key]);
+const showMenu = ref(false);
+const vMask = (a, b) => mask(a, b);
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * Parse the date after losing focus.
@@ -44,22 +53,6 @@ function save() {
  * @return String - The date in YYYY-MM-DD format
  */
 function parseEventDate() {
-  return this.format(event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD');
+  return this.format(event.target.value, FORMATTED_ISOFORMAT, DEFAULT_ISOFORMAT);
 } //parseEventDate
-
-export default {
-  data() {
-    return {
-      model: this.item[this.field.key],
-      showMenu: false
-    };
-  },
-  directives: { mask },
-  methods: {
-    format,
-    parseEventDate,
-    save
-  },
-  props: ['field', 'item', 'valid']
-};
 </script>

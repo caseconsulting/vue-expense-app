@@ -3,8 +3,8 @@
     <v-data-table
       :expanded="expanded"
       :items="employees"
-      :headers="fields"
-      :search="search"
+      :headers="props.fields"
+      :search="props.search"
       density="comfortable"
       fixed-header
       fixed-footer
@@ -12,13 +12,14 @@
       @click:row="handleRowClick"
       class="power-edit-table mt-1"
     >
-      <template v-for="field in fields" v-slot:[`item.${field.key}`]="{ item }">
+      <template v-for="field in props.fields" v-slot:[`item.${field.key}`]="{ item }">
         <power-edit-table-edit-item
           v-if="editItem?.item.id === item.id && editItem?.field.key === field.key"
           :key="field"
           :field="field"
           :item="item"
           :valid="valid"
+          :showInfo="field.group"
         ></power-edit-table-edit-item>
         <power-edit-table-info-item
           v-else-if="field.infoType"
@@ -27,50 +28,78 @@
           :class="saveColor(item, field)"
           :field="field"
           :item="item"
+          class="d-flex align-center w-100 h-100"
         ></power-edit-table-info-item>
       </template>
       <template v-slot:expanded-row>
         <tr>
-          <power-edit-table-edit-item
-            :expanded="true"
-            :field="editItem.field"
-            :item="editItem.item"
-            :valid="valid"
-          ></power-edit-table-edit-item>
+          <td colspan="12">
+            <power-edit-table-edit-item
+              :field="editItem.field"
+              :item="editItem.item"
+              :valid="valid"
+              class="d-flex align-center pa-2"
+            ></power-edit-table-edit-item>
+          </td>
         </tr>
       </template>
     </v-data-table>
   </v-form>
 </template>
 
-<script>
+<script setup>
 import PowerEditTableInfoItem from '@/components/employees/power-edit/PowerEditTableInfoItem.vue';
 import PowerEditTableEditItem from '@/components/employees/power-edit/PowerEditTableEditItem.vue';
+import _ from 'lodash';
 import api from '@/shared/api.js';
-const _ = require('lodash');
+import { computed, ref, inject } from 'vue';
+import { useStore } from 'vuex';
 
-async function created() {
-  this.emitter.on('save-item', async ({ item, field, value }) => {
-    await this.saveItem(item, field, value);
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const props = defineProps(['fields', 'search']);
+const store = useStore();
+const emitter = inject('emitter');
+const editItem = ref(null);
+const expanded = ref([]);
+const valid = ref(true);
+
+emitter.on('save-item', async ({ item, field }) => {
+  await saveItem(item, field);
+});
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+const employees = computed(() => {
+  return _.map(store.getters.employees, (e) => {
+    return { ...e, name: `${e.nickname || e.firstName} ${e.lastName}` };
   });
-}
+});
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 function handleItemClick(item, field) {
-  if (field.editType) this.editItem = { item, field };
+  if (field.editType) editItem.value = { item, field };
   else if (field.fixed) this.$router.push(`employee/${item.employeeNumber}`);
 }
 
 function handleRowClick() {
-  if (this.editItem?.field?.group) {
-    if (!this.expanded.includes(this.editItem?.item?.id)) this.expanded.push(this.editItem?.item?.id);
-    console.log(this.expanded);
+  expanded.value = [];
+  if (editItem.value?.field?.group) {
+    if (!expanded.value.includes(editItem.value?.item?.id)) expanded.value.push(editItem.value?.item?.id);
   }
-}
-
-function employees() {
-  return _.map(this.$store.getters.employees, (e) => {
-    return { ...e, name: `${e.nickname || e.firstName} ${e.lastName}` };
-  });
 }
 
 function saveColor(item, field) {
@@ -82,9 +111,10 @@ function saveColor(item, field) {
   return itemClass;
 }
 
-async function saveItem(item, field, value) {
-  this.editItem = null;
-  let employee = _.find(this.$store.getters.employees, (e) => e.id === item.id);
+async function saveItem(item, field) {
+  editItem.value = null;
+  let value = item[field.key];
+  let employee = _.find(store.getters.employees, (e) => e.id === item.id);
   let originalEmployee = _.cloneDeep(employee);
   let tmpField = field.key + 'tmp';
   employee[tmpField] = { field, saving: true };
@@ -101,29 +131,6 @@ async function saveItem(item, field, value) {
     delete employee[tmpField];
   }, 2000);
 }
-
-export default {
-  components: { PowerEditTableInfoItem, PowerEditTableEditItem },
-  computed: {
-    employees
-  },
-  created,
-  data() {
-    return {
-      editItem: null,
-      expanded: [],
-      itemsSaving: [],
-      valid: true
-    };
-  },
-  methods: {
-    handleItemClick,
-    handleRowClick,
-    saveColor,
-    saveItem
-  },
-  props: ['fields', 'search']
-};
 </script>
 
 <style scoped>

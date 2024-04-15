@@ -1,9 +1,16 @@
 <template>
-  <div>{{ item.city ? `${item.city}, ` : '' }} {{ item.st ? `${item.st}, ` : '' }} {{ item.country }}</div>
+  <div>
+    {{ props.item.city ? `${props.item.city}, ` : '' }} {{ props.item.st ? `${props.item.st}, ` : '' }}
+    {{ props.item.country }}
+  </div>
 </template>
 
-<script>
-export default {
-  props: ['field', 'item']
-};
+<script setup>
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const props = defineProps(['field', 'item']);
 </script>

@@ -36,36 +36,45 @@
   </v-row>
 </template>
 
-<script>
-const _ = require('lodash');
+<script setup>
+import _ from 'lodash';
+import { computed, ref } from 'vue';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const props = defineProps(['fields', 'selectedFields']);
+const localSelectedFields = ref(props.selectedFields);
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+const nonSelectedFields = computed(() => {
+  let unselectedFields = _.xorBy(props.fields, localSelectedFields.value, 'title');
+  let editableUnselectedFields = _.filter(unselectedFields, (f) => f.editType);
+  return editableUnselectedFields;
+});
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 function addField(field) {
-  this.localSelectedFields.splice(this.localSelectedFields.length, 0, field);
+  localSelectedFields.value.splice(localSelectedFields.value.length, 0, field);
 }
 
 function removeField(field) {
-  let i = _.findIndex(this.localSelectedFields, (f) => f.title === field.title);
-  this.localSelectedFields.splice(i, 1);
+  let i = _.findIndex(localSelectedFields.value, (f) => f.title === field.title);
+  localSelectedFields.value.splice(i, 1);
 }
-
-function nonSelectedFields() {
-  let unselectedFields = _.xorBy(this.fields, this.localSelectedFields, 'title');
-  let editableUnselectedFields = _.filter(unselectedFields, (f) => f.editType);
-  return editableUnselectedFields;
-}
-
-export default {
-  computed: {
-    nonSelectedFields
-  },
-  data() {
-    return {
-      localSelectedFields: this.selectedFields
-    };
-  },
-  methods: { addField, removeField },
-  props: ['fields', 'selectedFields']
-};
 </script>
 
 <style scoped>

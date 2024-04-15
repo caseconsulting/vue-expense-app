@@ -1,9 +1,13 @@
 <template>
-  <div>{{ item[field.key] }}</div>
+  <div>{{ props.item[props.field.key] }}</div>
 </template>
 
-<script>
-export default {
-  props: ['field', 'item']
-};
+<script setup>
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const props = defineProps(['field', 'item']);
 </script>
