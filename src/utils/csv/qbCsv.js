@@ -122,10 +122,7 @@ async function fillTimesheetData(employees, startDate, endDate) {
         // get response and map to employee
         resp = resps[k].timesheets;
         empNum = batch_employees[k];
-        if (!resp) {
-          console.log(`No timesheet found for employee #${empNum}`);
-          continue;
-        }
+        if (!resp) continue;
         // add any non-billables we don't have
         SUPP_DATA.nonBillables.add(...resps[k].supplementalData.nonBillables);
         // get rid of month we don't actually care about
@@ -160,7 +157,7 @@ function getCaseId(employee) {
  */
 function getEmployeeName(employee) {
   // get first and last name, append nickname if it exists
-  let name = `${employee.firstName} ${employee.lastName}`;
+  let name = `${employee.lastName}, ${employee.firstName}`;
   if (employee.nickname) name += ` (${employee.nickname})`;
 
   return name;

@@ -200,7 +200,7 @@ async function download() {
       await qbCsv.download(csvInfo, { filename, startDate, endDate });
       break;
     default:
-      console.log('ERROR: No export type selected');
+      break;
   }
 
   // close the modal
