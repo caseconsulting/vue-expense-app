@@ -9,13 +9,13 @@
 
         <v-col class="mb-1" cols="12" sm="8">
           <v-text-field
-            variant="underlined"
             v-model="search"
+            variant="underlined"
             hide-details
             single-line
             append-inner-icon="mdi-magnify"
             label="Search"
-          ></v-text-field>
+          />
         </v-col>
       </v-row>
 
@@ -25,7 +25,6 @@
           <!-- Training Button -->
           <div v-for="category in categories" :key="category.value">
             <v-btn
-              @click="filterByCategory(category.value)"
               class="mx-3"
               height="90"
               width="90"
@@ -35,6 +34,7 @@
               size="x-large"
               color="#bc3825"
               icon
+              @click="filterByCategory(category.value)"
             >
               <v-icon size="x-large" :icon="category.icon" />
             </v-btn>
@@ -49,7 +49,7 @@
 
       <v-col class="py-3" cols="12">
         <!-- List all url info -->
-        <div v-for="url in this.urls" :key="url.id">
+        <div v-for="url in urls" :key="url.id">
           <v-row class="pb-1" dense>
             <v-col cols="12">
               <v-card color="#565651" dark :href="url.id" target="_blank">
@@ -58,7 +58,9 @@
                     <v-avatar class="ma-1 iconImage" size="80">
                       <v-img :src="url.display" :class="{ caseImage: url.isCaseLogo }" @error="changeDisplay(url)" />
                     </v-avatar>
-                    <h3 v-if="url.publisher">{{ url.publisher }}</h3>
+                    <h3 v-if="url.publisher">
+                      {{ url.publisher }}
+                    </h3>
                   </v-col>
 
                   <v-col cols="12" sm="9" md="10" xl="11" class="py-0">
@@ -66,19 +68,23 @@
                       <v-col cols="12">
                         <!-- Title and Description -->
                         <div v-if="!isEmpty(url.title)">
-                          <v-card-title class="text-h5">{{ url.title }}</v-card-title>
+                          <v-card-title class="text-h5">
+                            {{ url.title }}
+                          </v-card-title>
                           <v-card-subtitle>{{ url.description }}</v-card-subtitle>
                         </div>
 
                         <!-- No title or Description -->
-                        <div v-else class="urlBox pt-4">{{ url.id }}</div>
+                        <div v-else class="urlBox pt-4">
+                          {{ url.id }}
+                        </div>
                       </v-col>
                       <v-col cols="12" align-self="end">
                         <!-- Hit Count -->
-                        <v-spacer></v-spacer>
+                        <v-spacer />
                         <div class="mr-2">
                           <span class="subheading hitText">{{ url.hits }}</span>
-                          <v-icon class="hitIcon" scale="1">mdi-target</v-icon>
+                          <v-icon class="hitIcon" scale="1"> mdi-target </v-icon>
                         </div>
                       </v-col>
                     </v-row>
@@ -88,7 +94,7 @@
             </v-col>
           </v-row>
         </div>
-        <div v-if="this.urls.length === 0" class="text-center">No Training URL with Category: {{ categoryFilter }}</div>
+        <div v-if="urls.length === 0" class="text-center">No Training URL with Category: {{ categoryFilter }}</div>
       </v-col>
     </v-container>
   </v-row>
@@ -251,10 +257,6 @@ async function created() {
 // |--------------------------------------------------|
 
 export default {
-  computed: {
-    urls
-  },
-  created,
   data() {
     return {
       caseLogo, // default case logo
@@ -290,6 +292,10 @@ export default {
       ] // categories for button filters
     };
   },
+  computed: {
+    urls
+  },
+  created,
   methods: {
     changeDisplay,
     filterByCategory,

@@ -17,26 +17,26 @@
     <span v-if="loading">
       <v-row>
         <v-col cols="12" md="6" class="px-xl-4 px-lg-2 px-md-0 d-flex justify-center align-center">
-          <v-skeleton-loader type="text" width="80%"></v-skeleton-loader>
+          <v-skeleton-loader type="text" width="80%" />
         </v-col>
         <v-col cols="12" md="6" class="px-xl-4 px-lg-2 px-md-0">
-          <v-skeleton-loader type="list-item@2"></v-skeleton-loader>
+          <v-skeleton-loader type="list-item@2" />
         </v-col>
       </v-row>
       <v-row>
         <v-col cols="6" class="px-xl-4 px-lg-2 px-md-0">
-          <v-skeleton-loader type="list-item@5"></v-skeleton-loader>
+          <v-skeleton-loader type="list-item@5" />
         </v-col>
         <v-col cols="6" class="px-xl-4 px-lg-2 px-md-0">
-          <v-skeleton-loader type="list-item@5"></v-skeleton-loader>
+          <v-skeleton-loader type="list-item@5" />
         </v-col>
         <v-col cols="12" class="pb-3 px-xl-4 px-lg-2 px-md-0">
-          <v-skeleton-loader type="list-item@14"></v-skeleton-loader>
+          <v-skeleton-loader type="list-item@14" />
         </v-col>
       </v-row>
       <v-row>
         <v-col mt-0 class="pa-0 px-xl-4 px-lg-2 px-md-0">
-          <v-skeleton-loader type="list-item@14"></v-skeleton-loader>
+          <v-skeleton-loader type="list-item@14" />
         </v-col>
       </v-row>
     </span>
@@ -46,20 +46,20 @@
         <v-col cols="12" md="6">
           <h1 align="center" justify="center" id="home-greeting">Hello, {{ getEmployeePreferredName(employee) }}!</h1>
           <div class="text-center">
-            <v-btn @click="handleProfile()" color="#bc3825" theme="dark">View Profile</v-btn>
+            <v-btn color="#bc3825" @click="handleProfile()" theme="dark">View Profile</v-btn>
           </div>
         </v-col>
 
         <!-- Anniversary Date -->
         <v-col cols="12" md="6" class="px-xl-4 px-lg-2 px-md-0">
-          <anniversary-card v-if="!loading" :employee="employee" :hasBudgets="true" location="home"></anniversary-card>
+          <anniversary-card v-if="!loading" :employee="employee" :has-budgets="true" location="home" />
         </v-col>
       </v-row>
       <v-row class="pb-3">
         <v-col wrap cols="12" lg="6" class="pa-0 px-xl-4 px-lg-2 px-md-0">
           <!-- QuickBooksTime -->
           <div class="pb-3">
-            <quick-books-time-data :employee="employee" cols="12" lg="6"></quick-books-time-data>
+            <quick-books-time-data :employee="employee" cols="12" lg="6" />
           </div>
           <!-- Available Budgets -->
           <div>
@@ -67,16 +67,16 @@
               id="home-available-budgets"
               :employee="employee"
               :expenses="expenses"
-              :expenseTypes="expenseTypes"
-              :employeeDataLoading="loadingBudgets"
-              :fiscalDateView="fiscalDateView"
-              :accessibleBudgets="accessibleBudgets"
-            ></available-budgets>
+              :expense-types="expenseTypes"
+              :employee-data-loading="loadingBudgets"
+              :fiscal-date-view="fiscalDateView"
+              :accessible-budgets="accessibleBudgets"
+            />
           </div>
         </v-col>
         <!-- Activity Feed -->
         <v-col cols="12" lg="6" class="pa-0 px-xl-4 px-lg-2 px-md-0 pt-3 pt-lg-0 pt-xl-0 pt-xxl-0">
-          <activity-feed id="home-activity-feed" :events="events" :loading="loadingEvents"></activity-feed>
+          <activity-feed id="home-activity-feed" :events="events" :loading="loadingEvents" />
         </v-col>
       </v-row>
     </span>
@@ -607,10 +607,6 @@ export default {
     QuickBooksTimeData,
     AnniversaryCard
   },
-  computed: {
-    storeIsPopulated
-  },
-  created,
   data() {
     return {
       accessibleBudgets: null,
@@ -640,6 +636,13 @@ export default {
       }
     };
   },
+  computed: {
+    storeIsPopulated
+  },
+  watch: {
+    storeIsPopulated: watchStoreIsPopulated
+  },
+  created,
   methods: {
     beforeUnmount,
     clearStatus,
@@ -657,9 +660,6 @@ export default {
     handleProfile,
     updateStoreExpenseTypes,
     updateStoreBudgets
-  },
-  watch: {
-    storeIsPopulated: watchStoreIsPopulated
   }
 };
 </script>

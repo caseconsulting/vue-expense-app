@@ -7,7 +7,7 @@
 import api from '@/shared/api.js';
 import store from '../../store/index.js';
 import { userRoleIsAdmin, userRoleIsManager, userRoleIsUser } from '@/utils/utils';
-const _ = require('lodash');
+import _ from 'lodash';
 
 /**
  * Update store with latest user data
@@ -135,3 +135,15 @@ export async function updateStoreTags() {
     console.error(err);
   }
 } // updateStoreTags
+
+export default {
+  updateStoreUser,
+  updateStoreEmployees,
+  updateStoreAvatars,
+  updateStoreCampfires,
+  updateStoreContracts,
+  updateStoreBudgets,
+  updateStorePtoCashOuts,
+  updateStoreExpenseTypes,
+  updateStoreTags
+};

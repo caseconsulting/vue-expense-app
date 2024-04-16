@@ -21,15 +21,15 @@ npm ci
 
 In order to use **Auth0** authentication, you will need to define some environment variables:
 
-- **VUE_APP_AUTH0_API_ID**
-- **VUE_APP_AUTH0_CALLBACK**
-- **VUE_APP_AUTH0_CLIENT_ID**
-- **VUE_APP_AUTH0_DOMAIN**
+- **VITE_AUTH0_API_ID**
+- **VITE_AUTH0_CALLBACK**
+- **VITE_AUTH0_CLIENT_ID**
+- **VITE_AUTH0_DOMAIN**
 
 The following environment variables are required to support multiple environments:
 
-- **VUE_APP_API_HOSTNAME**
-- **VUE_APP_API_PORT**
+- **VITE_API_HOSTNAME**
+- **VITE_API_PORT**
 - **NODE_ENV**
 
 **vue-cli** automatically picks up environment variables in `.env` files. Any variables that begin with **VUE*APP***

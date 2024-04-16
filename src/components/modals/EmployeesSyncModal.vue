@@ -93,7 +93,7 @@
 
 <script>
 import { nicknameAndLastName } from '@/shared/employeeUtils';
-const _ = require('lodash');
+import _ from 'lodash';
 
 // |--------------------------------------------------|
 // |                                                  |

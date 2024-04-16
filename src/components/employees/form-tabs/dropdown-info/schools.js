@@ -9947,3 +9947,7 @@ export let SCHOOLS = [
   'Ecole Hassania des Travaux Publics',
   'Island Drafting & Technical Institute'
 ];
+
+export default {
+  SCHOOLS
+};

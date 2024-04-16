@@ -8,7 +8,7 @@
   </div>
   <v-container v-else class="my-3 mx-0 px-0" fluid>
     <v-row v-if="basicEmployeeDataLoading" class="pt-0">
-      <employee-page-loader></employee-page-loader>
+      <employee-page-loader />
     </v-row>
     <div v-else>
       <v-snackbar
@@ -26,58 +26,55 @@
       </v-snackbar>
       <v-row class="pa-0">
         <v-col cols="3" align="left" justify="left">
-          <v-btn id="backBtn" elevation="2" @click="$router.back()" :size="isMobile ? 'x-small' : 'default'">
-            <v-icon size="large" class="pr-1">mdi-arrow-left-thin</v-icon>
+          <v-btn id="backBtn" elevation="2" :size="isMobile ? 'x-small' : 'default'" @click="$router.back()">
+            <v-icon size="large" class="pr-1"> mdi-arrow-left-thin </v-icon>
             Back
           </v-btn>
         </v-col>
         <v-col
-          cols="9"
           v-if="hasAdminPermissions() || userIsEmployee()"
+          cols="9"
           align="right"
           justify="right"
           class="px-0 pr-3 ma-0"
         >
           <v-btn
-            @click="toggleResumeParser = !toggleResumeParser"
             v-if="!editing"
             :size="isMobile ? 'x-small' : 'default'"
             color="#bc3825"
             class="text-white mr-1"
-            ><b>Upload Resume</b></v-btn
+            @click="toggleResumeParser = !toggleResumeParser"
           >
+            <b>Upload Resume</b>
+          </v-btn>
           <v-btn
-            class="text-white"
             v-if="!editing"
+            class="text-white"
             color="#bc3825"
-            @click="toggleDeleteModal = !toggleDeleteModal"
             :size="isMobile ? 'x-small' : 'default'"
             :disabled="model.resumeUpdated == null"
             :loading="deleteLoading"
-            ><b>Delete Resume</b></v-btn
+            @click="toggleDeleteModal = !toggleDeleteModal"
           >
+            <b>Delete Resume</b>
+          </v-btn>
         </v-col>
       </v-row>
       <v-row class="pt-0">
         <!-- QuickBooks Time and Budgets-->
         <v-col v-if="displayQuickBooksTimeAndBalances" cols="12" md="5" lg="5" class="pt-0">
-          <quick-books-time-data :employee="model" :key="model" class="mb-4"></quick-books-time-data>
+          <quick-books-time-data :key="model" :employee="model" class="mb-4" />
           <available-budgets
+            :key="refreshKey"
             class="mb-4"
             :employee="model"
-            :key="refreshKey"
             :expenses="expenses"
-            :expenseTypes="expenseTypes"
-            :accessibleBudgets="accessibleBudgets"
-            :employeeDataLoading="loading"
-            :fiscalDateView="fiscalDateView"
-          ></available-budgets>
-          <anniversary-card
-            :employee="model"
-            emitCatcher="employee-page"
-            :key="refreshKey"
-            location="profile"
-          ></anniversary-card>
+            :expense-types="expenseTypes"
+            :accessible-budgets="accessibleBudgets"
+            :employee-data-loading="loading"
+            :fiscal-date-view="fiscalDateView"
+          />
+          <anniversary-card :employee="model" emit-catcher="employee-page" :key="refreshKey" location="profile" />
         </v-col>
 
         <!-- Employee Form -->
@@ -88,29 +85,29 @@
           class="pt-0"
         >
           <v-card>
-            <v-card-title class="d-flex align-center header_style" v-if="!editing">
+            <v-card-title v-if="!editing" class="d-flex align-center header_style">
               <v-btn
                 v-if="hasAdminPermissions()"
-                @click="navEmployee(-1)"
                 :disabled="loading"
                 icon
                 variant="text"
                 density="comfortable"
+                @click="navEmployee(-1)"
               >
-                <v-tooltip activator="parent" location="top">Previous employee</v-tooltip>
-                <v-icon size="large" color="white">mdi-arrow-left-thin</v-icon>
+                <v-tooltip activator="parent" location="top"> Previous employee </v-tooltip>
+                <v-icon size="large" color="white"> mdi-arrow-left-thin </v-icon>
               </v-btn>
               <v-btn
                 v-if="hasAdminPermissions()"
-                @click="navEmployee(1)"
                 :disabled="loading"
                 icon
                 variant="text"
                 density="comfortable"
                 class="mr-3"
+                @click="navEmployee(1)"
               >
-                <v-tooltip activator="parent" location="top">Next employee</v-tooltip>
-                <v-icon size="large" color="white">mdi-arrow-right-thin</v-icon>
+                <v-tooltip activator="parent" location="top"> Next employee </v-tooltip>
+                <v-icon size="large" color="white"> mdi-arrow-right-thin </v-icon>
               </v-btn>
               <div v-if="hasAdminPermissions()">
                 <v-autocomplete
@@ -118,7 +115,7 @@
                   class="employee-dropdown"
                   density="compact"
                   :items="dropdownEmployees"
-                  :customFilter="customFilter"
+                  :custom-filter="customFilter"
                   hide-details
                   :focused="employeeDropdownFocused"
                   item-title="itemTitle"
@@ -129,20 +126,19 @@
                   @update:model-value="
                     dropdownEmployee ? (model = dropdownEmployee) : _;
                     pushHistoryState(model.employeeNumber);
-                    this.refreshExpenseData();
+                    refreshExpenseData();
                   "
-                >
-                </v-autocomplete>
+                />
               </div>
               <div v-else>
-                <h3 id="employeeName" v-if="userIsEmployee()">My Profile</h3>
-                <h3 id="employeeName" v-else>{{ model.nickname || model.firstName }} {{ model.lastName }}</h3>
+                <h3 v-if="userIsEmployee()" id="employeeName">My Profile</h3>
+                <h3 v-else id="employeeName">{{ model.nickname || model.firstName }} {{ model.lastName }}</h3>
               </div>
-              <v-spacer></v-spacer>
+              <v-spacer />
               <convert-employee-to-csv
                 v-if="userRoleIsAdmin()"
-                :contracts="contracts"
                 :key="refreshKey"
+                :contracts="contracts"
                 :employee="model"
                 :filename="`${model.nickname || model.firstName} ${model.lastName}`"
                 :tags="$store.getters.tags"
@@ -150,77 +146,72 @@
               />
               <v-btn
                 v-if="hasAdminPermissions() || userIsEmployee()"
-                @click="downloadResume()"
                 :disabled="!model.resumeUpdated"
                 density="comfortable"
                 variant="text"
                 icon=""
                 class="mx-1"
+                @click="downloadResume()"
               >
-                <v-tooltip activator="parent" location="top"
-                  ><p class="ma-0 pa-0">
+                <v-tooltip activator="parent" location="top">
+                  <p class="ma-0 pa-0">
                     {{ model.resumeUpdated != null ? 'Download Resume' : 'No resume available' }}
                   </p>
                   <p class="ma-0 pa-0">
                     {{ model.resumeUpdated != null ? `Uploaded ${format(model.resumeUpdated, null, dateFormat)}` : '' }}
                   </p>
                 </v-tooltip>
-                <v-icon color="white" id="resume-download">mdi-file-download</v-icon>
+                <v-icon id="resume-download" color="white"> mdi-file-download </v-icon>
               </v-btn>
               <v-btn
                 v-if="hasAdminPermissions() || userIsEmployee()"
-                @click="editing = true"
                 density="comfortable"
                 variant="text"
                 icon=""
+                @click="editing = true"
               >
                 <v-tooltip activator="parent" location="top"> Edit Profile </v-tooltip>
-                <v-icon color="white" id="edit">mdi-pencil</v-icon>
+                <v-icon id="edit" color="white"> mdi-pencil </v-icon>
               </v-btn>
             </v-card-title>
             <employee-info
-              :model="model"
-              :key="refreshKey"
-              :contracts="contracts"
-              :currentTab="currentTab"
               v-if="!editing"
-            ></employee-info>
+              :key="refreshKey"
+              :model="model"
+              :contracts="contracts"
+              :current-tab="currentTab"
+            />
           </v-card>
           <!-- Edit Info (Form) -->
-          <employee-form
-            v-if="editing"
-            :employee="model"
-            :contracts="contracts"
-            :currentTab="currentTab"
-          ></employee-form>
+          <employee-form v-if="editing" :employee="model" :contracts="contracts" :current-tab="currentTab" />
           <div v-if="userRoleIsAdmin() || userIsEmployee()" class="mt-4">
             <budget-chart
               v-if="!loading"
-              :employee="model"
               :key="refreshKey"
-              :accessibleBudgets="accessibleBudgets"
+              :employee="model"
+              :accessible-budgets="accessibleBudgets"
               :expenses="expenses"
-              :expenseTypes="expenseTypes"
-              :fiscalDateView="fiscalDateView"
-            ></budget-chart>
+              :expense-types="expenseTypes"
+              :fiscal-date-view="fiscalDateView"
+            />
             <v-card v-else class="pa-6">
-              <v-skeleton-loader width="40%" class="px-5 mx-auto" type="heading"></v-skeleton-loader>
-              <v-skeleton-loader type="image"></v-skeleton-loader>
-              <v-skeleton-loader width="60%" class="px-5" type="text"></v-skeleton-loader>
+              <v-skeleton-loader width="40%" class="px-5 mx-auto" type="heading" />
+              <v-skeleton-loader type="image" />
+              <v-skeleton-loader width="60%" class="px-5" type="text" />
             </v-card>
           </div>
         </v-col>
       </v-row>
       <v-row>
-        <v-col cols="12"> </v-col>
+        <v-col cols="12" />
       </v-row>
       <resume-parser
         v-if="!loading && !editing"
-        :toggleResumeParser="toggleResumeParser"
-        :employee="model"
         :key="refreshKey"
-      ></resume-parser>
-      <delete-modal :toggleDeleteModal="toggleDeleteModal" type="resume"></delete-modal>
+        :toggle-resume-parser="toggleResumeParser"
+        :employee="model"
+      />
+      <delete-modal :toggle-delete-modal="toggleDeleteModal" type="resume" />
     </div>
   </v-container>
 </template>
@@ -615,7 +606,6 @@ async function watchStoreIsPopulated() {
 // |--------------------------------------------------|
 
 export default {
-  beforeUnmount,
   components: {
     AvailableBudgets,
     DeleteModal,
@@ -628,7 +618,6 @@ export default {
     ResumeParser,
     EmployeePageLoader
   },
-  created,
   data() {
     return {
       basicEmployeeDataLoading: true,
@@ -699,6 +688,20 @@ export default {
       user: null
     };
   },
+  computed: {
+    dropdownEmployees,
+    isMobile,
+    minimizeWindow,
+    refreshKey,
+    storeIsPopulated
+  },
+  watch: {
+    'model.id': watchModel,
+    storeIsPopulated: watchStoreIsPopulated
+  },
+  beforeUnmount,
+  created,
+  mounted,
   methods: {
     clearStatus,
     customFilter,
@@ -724,18 +727,6 @@ export default {
     checkForBudgetAccess,
     navEmployee,
     refreshExpenseData
-  },
-  computed: {
-    dropdownEmployees,
-    isMobile,
-    minimizeWindow,
-    refreshKey,
-    storeIsPopulated
-  },
-  mounted,
-  watch: {
-    'model.id': watchModel,
-    storeIsPopulated: watchStoreIsPopulated
   }
 };
 </script>

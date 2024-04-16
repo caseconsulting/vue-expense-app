@@ -7,7 +7,7 @@
 /**
  * Utilities to download EEO reports of employees
  */
-const csvUtils = require('./baseCsv.js');
+import csvUtils from './baseCsv.js';
 import _ from 'lodash';
 
 // some useful constants as the exact strings might change
@@ -273,3 +273,8 @@ export function convertEmployees(employees) {
 
   return [eeoData, eeoDeclinedData];
 } // convertEmployees
+
+export default {
+  download,
+  convertEmployees
+};

@@ -16,32 +16,35 @@
     </v-snackbar>
     <v-card>
       <v-card color="#bc3825">
-        <v-card-title class="d-flex align-center header_style"><h2 class="text-white">Contracts</h2> </v-card-title>
+        <v-card-title class="d-flex align-center header_style">
+          <h2 class="text-white">Contracts</h2>
+        </v-card-title>
       </v-card>
       <v-container fluid class="px-0 px-md-4">
         <v-btn
-          @click="toggleContractForm = true"
           :disabled="!$store.getters.contracts"
           :size="isMobile ? 'small' : 'default'"
           class="my-2"
-          >Create a contract <v-icon end> mdi-file-document-plus </v-icon></v-btn
+          @click="toggleContractForm = true"
         >
-        <contracts-page-loader v-if="loading"></contracts-page-loader>
-        <contracts-table v-else></contracts-table>
+          Create a contract <v-icon end> mdi-file-document-plus </v-icon>
+        </v-btn>
+        <contracts-page-loader v-if="loading" />
+        <contracts-table v-else />
 
         <br />
 
         <!-- Download contracts CSV button -->
         <v-card-actions class="justify-end">
           <convert-contracts-to-csv
-            :midAction="midAction"
+            :mid-action="midAction"
             :contracts="$store.getters.contracts"
             :employees="$store.getters.employees"
-          ></convert-contracts-to-csv>
+          />
         </v-card-actions>
       </v-container>
     </v-card>
-    <ContractForm :toggleContractForm="toggleContractForm" />
+    <ContractForm :toggle-contract-form="toggleContractForm" />
   </div>
 </template>
 <script>
@@ -104,17 +107,12 @@ function clearStatus() {
 // |--------------------------------------------------|
 
 export default {
-  beforeUnmount,
-  computed: {
-    isMobile
-  },
   components: {
     ContractsTable,
     ContractForm,
     ContractsPageLoader,
     ConvertContractsToCsv
   },
-  created,
   data() {
     return {
       midAction: false,
@@ -127,6 +125,11 @@ export default {
       }
     };
   },
+  computed: {
+    isMobile
+  },
+  beforeUnmount,
+  created,
   methods: {
     updateStoreContracts,
     updateStoreEmployees,

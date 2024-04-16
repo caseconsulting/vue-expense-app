@@ -3,11 +3,11 @@
     <v-row v-if="initialPageLoading">
       <v-col cols="12" lg="8">
         <div class="mt-3">
-          <v-skeleton-loader type="table-heading, list-item@6"></v-skeleton-loader>
+          <v-skeleton-loader type="table-heading, list-item@6" />
         </div>
       </v-col>
       <v-col cols="12" lg="4">
-        <v-skeleton-loader class="mt-3" type="list-item@12"></v-skeleton-loader>
+        <v-skeleton-loader class="mt-3" type="list-item@12" />
       </v-col>
     </v-row>
     <v-row v-else>
@@ -38,36 +38,36 @@
                   <h3 v-else>Loading...</h3>
                 </v-col>
 
-                <v-col cols="2"></v-col>
+                <v-col cols="2" />
 
                 <!-- Employee Filter -->
                 <v-col align="end" cols="4">
                   <v-autocomplete
                     v-if="userRoleIsAdmin() || userRoleIsManager()"
+                    id="employeeIdFilter"
+                    v-model.trim="employee"
                     variant="underlined"
                     hide-details
                     :items="employees"
-                    :customFilter="customFilter"
-                    v-model.trim="employee"
+                    :custom-filter="customFilter"
                     item-title="text"
-                    id="employeeIdFilter"
                     class="mr-3"
                     label="Filter by Employee"
                     clearable
-                  ></v-autocomplete
-                ></v-col>
+                  />
+                </v-col>
 
                 <!-- Search Bar -->
                 <v-col align="end" cols="4">
                   <v-text-field
-                    variant="underlined"
-                    v-model="search"
-                    append-inner-icon="mdi-magnify"
                     id="search"
+                    v-model="search"
+                    variant="underlined"
+                    append-inner-icon="mdi-magnify"
                     label="Search"
                     single-line
                     hide-details
-                  ></v-text-field>
+                  />
                 </v-col>
               </v-row>
             </v-card-title>
@@ -82,28 +82,28 @@
                 <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="6">
                   <!-- Employee Filter -->
                   <v-autocomplete
+                    id="employeeIdFilter"
+                    v-model.trim="employee"
                     hide-details
                     :items="employees"
-                    :customFilter="customFilter"
-                    v-model.trim="employee"
+                    :custom-filter="customFilter"
                     item-title="text"
-                    id="employeeIdFilter"
                     label="Filter by Employee"
                     variant="underlined"
                     clearable
-                  ></v-autocomplete>
+                  />
                 </v-col>
                 <v-col cols="6">
                   <!-- Search Bar -->
                   <v-text-field
+                    id="search"
                     v-model="search"
                     append-inner-icon="mdi-magnify"
-                    id="search"
                     label="Search"
                     variant="underlined"
                     single-line
                     hide-details
-                  ></v-text-field>
+                  />
                 </v-col>
               </v-row>
             </div>
@@ -118,19 +118,19 @@
                     <div class="d-inline-block mr-4">
                       <h4>Active Expense Type:</h4>
                       <v-btn-toggle
+                        v-model="filter.active"
                         color="primary"
                         class="filter_color"
-                        v-model="filter.active"
                         :density="isMobile() ? 'compact' : 'comfortable'"
                         mandatory
                       >
                         <!-- Show Active -->
                         <v-tooltip location="top">
-                          <template v-slot:activator="{ props }">
+                          <template #activator="{ props }">
                             <v-btn value="active" v-bind="props" variant="text">
-                              <v-icon class="mr-1"
-                                >mdi-check-circle{{ filter.active.includes('active') ? '' : '-outline' }}</v-icon
-                              >
+                              <v-icon class="mr-1">
+                                mdi-check-circle{{ filter.active.includes('active') ? '' : '-outline' }}
+                              </v-icon>
                             </v-btn>
                           </template>
                           <span>Show Active</span>
@@ -138,11 +138,11 @@
 
                         <!-- Show Inactive -->
                         <v-tooltip location="top">
-                          <template v-slot:activator="{ props }">
+                          <template #activator="{ props }">
                             <v-btn value="notActive" v-bind="props" variant="text">
-                              <v-icon
-                                >mdi-close-circle{{ filter.active.includes('notActive') ? '' : '-outline' }}</v-icon
-                              >
+                              <v-icon>
+                                mdi-close-circle{{ filter.active.includes('notActive') ? '' : '-outline' }}
+                              </v-icon>
                             </v-btn>
                           </template>
                           <span>Show Inactive</span>
@@ -150,7 +150,7 @@
 
                         <!-- Show Active and Inactive -->
                         <v-tooltip location="top">
-                          <template v-slot:activator="{ props }">
+                          <template #activator="{ props }">
                             <v-btn
                               value="both"
                               v-bind="props"
@@ -171,21 +171,19 @@
                     <div class="d-inline-block" :class="!userRoleIsAdmin() && !userRoleIsManager() ? 'ml-3' : ''">
                       <h4>Reimbursed:</h4>
                       <v-btn-toggle
+                        v-model="filter.reimbursed"
                         color="primary"
                         class="filter_color"
-                        v-model="filter.reimbursed"
                         :density="isMobile() ? 'compact' : 'comfortable'"
                         mandatory
                       >
                         <!-- Show Reimbursed -->
                         <v-tooltip location="top">
-                          <template v-slot:activator="{ props }">
+                          <template #activator="{ props }">
                             <v-btn value="reimbursed" v-bind="props" variant="text" density="comfortable">
-                              <v-icon id="showReimbursed" class="mr-1"
-                                >mdi-check-circle{{
-                                  filter.reimbursed.includes('reimbursed') ? '' : '-outline'
-                                }}</v-icon
-                              >
+                              <v-icon id="showReimbursed" class="mr-1">
+                                mdi-check-circle{{ filter.reimbursed.includes('reimbursed') ? '' : '-outline' }}
+                              </v-icon>
                             </v-btn>
                           </template>
                           <span>Show Reimbursed</span>
@@ -193,13 +191,11 @@
 
                         <!-- Show Pending -->
                         <v-tooltip location="top">
-                          <template v-slot:activator="{ props }">
+                          <template #activator="{ props }">
                             <v-btn value="notReimbursed" v-bind="props" variant="text">
-                              <v-icon id="showPending"
-                                >mdi-close-circle{{
-                                  filter.reimbursed.includes('notReimbursed') ? '' : '-outline'
-                                }}</v-icon
-                              >
+                              <v-icon id="showPending">
+                                mdi-close-circle{{ filter.reimbursed.includes('notReimbursed') ? '' : '-outline' }}
+                              </v-icon>
                             </v-btn>
                           </template>
                           <span>Show Pending</span>
@@ -207,7 +203,7 @@
 
                         <!-- Show Reimbursed and Pending -->
                         <v-tooltip location="top">
-                          <template v-slot:activator="{ props }">
+                          <template #activator="{ props }">
                             <v-btn
                               id="bothReimbursed"
                               value="both"
@@ -229,8 +225,8 @@
                       <h4 class="ml-0 pl-0 mb-1">Reimbursed Date Range:</h4>
                       <v-row class="ml-1">
                         <!-- Start Date Filter -->
-                        <v-menu :close-on-content-click="false" v-model="startDateFilterMenu" location="start center">
-                          <template v-slot:activator="{ props }">
+                        <v-menu v-model="startDateFilterMenu" :close-on-content-click="false" location="start center">
+                          <template #activator="{ props }">
                             <v-text-field
                               ref="formFields"
                               v-mask="'##/##/####'"
@@ -246,28 +242,26 @@
                               @update:focused="startDateFilter = parseEventDate()"
                               @click:prepend="startDateFilterMenu = true"
                               @keypress="startDateFilterMenu = false"
-                            >
-                            </v-text-field>
+                            />
                           </template>
                           <v-date-picker
                             v-model="startDateFilter"
-                            @update:model-value="
-                              startDateFilterMenu = false;
-                              startDateFilter = format(startDateFilter, null, 'MM/DD/YYYY');
-                            "
                             show-adjacent-months
                             hide-actions
                             keyboard-icon=""
                             color="#bc3825"
                             title="Start Date Filter"
-                          >
-                          </v-date-picker>
+                            @update:model-value="
+                              startDateFilterMenu = false;
+                              startDateFilter = format(startDateFilter, null, 'MM/DD/YYYY');
+                            "
+                          />
                         </v-menu>
                         <!-- End Start Date Filter-->
 
                         <!-- End Date Filter -->
-                        <v-menu :close-on-content-click="false" v-model="endDateFilterMenu" location="start center">
-                          <template v-slot:activator="{ props }">
+                        <v-menu v-model="endDateFilterMenu" :close-on-content-click="false" location="start center">
+                          <template #activator="{ props }">
                             <v-text-field
                               ref="formFields"
                               v-mask="'##/##/####'"
@@ -283,22 +277,20 @@
                               @update:focused="endDateFilter = parseEventDate()"
                               @click:prepend="endDateFilterMenu = true"
                               @keypress="endDateFilterMenu = false"
-                            >
-                            </v-text-field>
+                            />
                           </template>
                           <v-date-picker
                             v-model="endDateFilter"
-                            @update:model-value="
-                              endDateFilterMenu = false;
-                              endDateFilter = format(endDateFilter, null, 'MM/DD/YYYY');
-                            "
                             show-adjacent-months
                             hide-actions
                             keyboard-icon=""
                             color="#bc3825"
                             title="Start Date Filter"
-                          >
-                          </v-date-picker>
+                            @update:model-value="
+                              endDateFilterMenu = false;
+                              endDateFilter = format(endDateFilter, null, 'MM/DD/YYYY');
+                            "
+                          />
                         </v-menu>
                         <!-- End End Date Filter-->
                       </v-row>
@@ -312,9 +304,9 @@
 
             <!-- My Expenses Data Table-->
             <v-data-table
+              :sort-by="toSort"
               :headers="roleHeaders"
               :items="filteredExpenses"
-              :sort-by.sync="toSort"
               :expanded="expanded"
               :loading="loading || initialPageLoading"
               :items-per-page="15"
@@ -326,38 +318,41 @@
               expand-on-click
             >
               <!-- Cost slot -->
-              <template v-slot:[`item.cost`]="{ item }">
+              <template #[`item.cost`]="{ item }">
                 <td>{{ convertToMoneyString(item.cost) }}</td>
               </template>
               <!-- Purchase date slot -->
-              <template v-slot:[`item.purchaseDate`]="{ item }">
+              <template #[`item.purchaseDate`]="{ item }">
                 <td>{{ monthDayYearFormat(item.purchaseDate) }}</td>
               </template>
               <!-- Reimburse date Slot -->
-              <template v-slot:[`item.reimbursedDate`]="{ item }">
+              <template #[`item.reimbursedDate`]="{ item }">
                 <td>{{ monthDayYearFormat(item.reimbursedDate) }}</td>
               </template>
               <!-- Creation date slot -->
-              <template v-slot:[`item.createdAt`]="{ item }">
+              <template #[`item.createdAt`]="{ item }">
                 <td>{{ monthDayYearFormat(item.createdAt) }}</td>
               </template>
               <!-- Employee name slot-->
-              <template v-slot:[`item.employeeName`]="{ item }">
-                <td v-if="userRoleIsAdmin() || userRoleIsManager()">{{ item.employeeName }}</td>
+              <template #[`item.employeeName`]="{ item }">
+                <td v-if="userRoleIsAdmin() || userRoleIsManager()">
+                  {{ item.employeeName }}
+                </td>
               </template>
               <!-- Budget Name Slot -->
-              <template v-slot:[`item.budgetName`]="{ item }">
+              <template #[`item.budgetName`]="{ item }">
                 <td>{{ item.budgetName }}</td>
               </template>
 
               <!--Action Items-->
-              <template v-slot:[`item.actions`]="{ item }">
+              <template #[`item.actions`]="{ item }">
                 <td class="d-flex justify-end mr-4">
                   <!-- Download Attachment Button -->
-                  <attachment :midAction="midAction" :expense="item" :mode="'expenses'"></attachment>
+                  <attachment :mid-action="midAction" :expense="item" :mode="'expenses'" />
 
                   <!-- Edit Button -->
                   <v-btn
+                    id="edit"
                     :disabled="
                       isEditing ||
                       (!(userRoleIsAdmin() || userRoleIsManager()) && isReimbursed(item)) ||
@@ -366,18 +361,18 @@
                     "
                     variant="text"
                     icon
-                    id="edit"
+                    size="small"
                     @click="
                       toTopOfForm();
                       onSelect(item);
                     "
-                    size="small"
                   >
                     <v-icon size="x-large" class="case-gray" icon="mdi-pencil" />
-                    <v-tooltip activator="parent" location="top">Edit</v-tooltip>
+                    <v-tooltip activator="parent" location="top"> Edit </v-tooltip>
                   </v-btn>
                   <!-- Delete Button -->
                   <v-btn
+                    id="delete"
                     :disabled="
                       isReimbursed(item) ||
                       isEditing ||
@@ -386,39 +381,38 @@
                     "
                     variant="text"
                     icon
-                    id="delete"
+                    size="small"
                     @click="
                       deleting = true;
                       midAction = true;
                       propExpense = item;
                     "
-                    size="small"
                   >
                     <v-icon size="x-large" class="case-gray" icon="mdi-delete" />
-                    <v-tooltip activator="parent" location="top">Delete</v-tooltip>
+                    <v-tooltip activator="parent" location="top"> Delete </v-tooltip>
                   </v-btn>
                   <!-- Unreimburse Button -->
                   <v-btn
                     v-if="userRoleIsAdmin() || userRoleIsManager()"
+                    id="unreimburse"
                     :disabled="!isReimbursed(item) || isEditing || midAction"
                     variant="text"
                     icon
-                    id="unreimburse"
+                    size="small"
                     @click="
                       unreimbursing = !unreimbursing;
                       midAction = true;
                       propExpense = item;
                     "
-                    size="small"
                   >
                     <v-icon size="x-large" class="case-gray" icon="mdi-currency-usd-off" />
-                    <v-tooltip activator="parent" location="top">Unreimburse</v-tooltip>
+                    <v-tooltip activator="parent" location="top"> Unreimburse </v-tooltip>
                   </v-btn>
                 </td>
               </template>
 
               <!-- Expanded slot in datatable -->
-              <template v-slot:expanded-row="{ columns, item }">
+              <template #expanded-row="{ columns, item }">
                 <td :colspan="columns.length" class="pa-0">
                   <v-card>
                     <v-card-text>
@@ -439,14 +433,16 @@
                         <p v-if="!isEmpty(item.category)"><b>Category: </b>{{ item.category }}</p>
                         <div v-if="userRoleIsAdmin() || userRoleIsManager()" class="flagExp">
                           <p>Inactive:</p>
-                          <v-icon v-if="useInactiveStyle(item)" id="marks" class="mr-1 mx-3"
-                            >mdi-check-circle-outline</v-icon
-                          >
-                          <v-icon v-else class="mr-1 mx-3" id="marks">mdi-close-circle-outline</v-icon>
+                          <v-icon v-if="useInactiveStyle(item)" id="marks" class="mr-1 mx-3">
+                            mdi-check-circle-outline
+                          </v-icon>
+                          <v-icon v-else class="mr-1 mx-3" id="marks"> mdi-close-circle-outline </v-icon>
                           <br />
                           <p>Show On Feed:</p>
-                          <v-icon v-if="item.showOnFeed" id="marks" class="mr-1 mx-3">mdi-check-circle-outline</v-icon>
-                          <v-icon v-else class="mr-1 mx-3" id="marks">mdi-close-circle-outline</v-icon>
+                          <v-icon v-if="item.showOnFeed" id="marks" class="mr-1 mx-3">
+                            mdi-check-circle-outline
+                          </v-icon>
+                          <v-icon v-else class="mr-1 mx-3" id="marks"> mdi-close-circle-outline </v-icon>
                         </div>
                       </div>
                     </v-card-text>
@@ -461,14 +457,14 @@
             <v-card-actions>
               <convert-expenses-to-csv
                 v-if="userRoleIsAdmin() || userRoleIsManager()"
-                :midAction="midAction"
+                :mid-action="midAction"
                 :expenses="filteredExpenses"
-              ></convert-expenses-to-csv>
+              />
             </v-card-actions>
 
             <!-- Confirmation Modals -->
-            <unreimburse-modal :toggleUnreimburseModal="unreimbursing"></unreimburse-modal>
-            <delete-modal :toggleDeleteModal="deleting" :type="'expense'"></delete-modal>
+            <unreimburse-modal :toggle-unreimburse-modal="unreimbursing" />
+            <delete-modal :toggle-delete-modal="deleting" :type="'expense'" />
             <!-- End Confirmation Modals -->
           </v-container>
         </v-card>
@@ -476,7 +472,7 @@
 
       <!-- Expense Form -->
       <v-col v-if="userRoleIsAdmin() || userRoleIsManager() || !userIsInactive" cols="12" lg="4">
-        <expense-form v-if="!initialPageLoading" ref="form" :isEdit="isEditing" :expense="expense"></expense-form>
+        <expense-form v-if="!initialPageLoading" ref="form" :is-edit="isEditing" :expense="expense" />
       </v-col>
     </v-row>
   </div>
@@ -1095,7 +1091,6 @@ async function watchStorePopulated() {
 // |--------------------------------------------------|
 
 export default {
-  beforeUnmount,
   components: {
     Attachment,
     ConvertExpensesToCsv,
@@ -1103,12 +1098,7 @@ export default {
     ExpenseForm,
     UnreimburseModal
   },
-  computed: {
-    roleHeaders,
-    userIsInactive,
-    storeIsPopulated
-  },
-  created,
+  directives: { mask },
   data() {
     return {
       deleting: false, // activate delete model
@@ -1209,7 +1199,22 @@ export default {
       userInfo: null // user information
     };
   },
-  directives: { mask },
+  computed: {
+    roleHeaders,
+    userIsInactive,
+    storeIsPopulated
+  },
+  watch: {
+    employee: watchFilterExpenses,
+    endDateFilter: watchFilterExpenses,
+    startDateFilter: watchFilterExpenses,
+    search: watchFilterExpenses,
+    'filter.active': watchFilterExpenses,
+    'filter.reimbursed': watchFilterExpenses,
+    storeIsPopulated: watchStorePopulated
+  },
+  beforeUnmount,
+  created,
   methods: {
     addModelToTable,
     canDelete,
@@ -1246,15 +1251,6 @@ export default {
     updateStoreBudgets,
     updateStoreExpenseTypes,
     useInactiveStyle
-  },
-  watch: {
-    employee: watchFilterExpenses,
-    endDateFilter: watchFilterExpenses,
-    startDateFilter: watchFilterExpenses,
-    search: watchFilterExpenses,
-    'filter.active': watchFilterExpenses,
-    'filter.reimbursed': watchFilterExpenses,
-    storeIsPopulated: watchStorePopulated
   }
 };
 </script>

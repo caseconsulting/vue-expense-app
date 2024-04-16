@@ -20,8 +20,8 @@
       </v-card-title>
     </v-card>
     <v-tabs v-model="currentTab">
-      <v-tab class="ml-5" value="expenses">Expenses</v-tab>
-      <v-tab value="ptoCashOuts">PTO Cash Outs</v-tab>
+      <v-tab class="ml-5" value="expenses"> Expenses </v-tab>
+      <v-tab value="ptoCashOuts"> PTO Cash Outs </v-tab>
     </v-tabs>
     <v-window v-model="currentTab">
       <v-window-item value="expenses" class="mx-2 mb-6">
@@ -30,10 +30,10 @@
       <v-window-item value="ptoCashOuts" class="mx-2 my-6">
         <v-row>
           <v-col cols="12" xl="8" lg="7">
-            <p-t-o-cash-outs-table :unapprovedOnly="true" />
+            <p-t-o-cash-outs-table :unapproved-only="true" />
           </v-col>
           <v-col cols="12" xl="4" lg="5" class="pl-lg-1 pl-sm-2">
-            <quick-books-time-data :employee="employee" :key="employee.id"></quick-books-time-data>
+            <quick-books-time-data :key="employee.id" :employee="employee" />
           </v-col>
         </v-row>
       </v-window-item>
@@ -139,19 +139,10 @@ async function watchStoreIsPopulated() {
 // |--------------------------------------------------|
 
 export default {
-  created,
-  beforeUnmount,
   components: {
     UnreimbursedExpenses,
     PTOCashOutsTable,
     QuickBooksTimeData
-  },
-  computed: {
-    isMobile,
-    storeIsPopulated
-  },
-  methods: {
-    clearStatus
   },
   data() {
     return {
@@ -164,9 +155,18 @@ export default {
       }
     };
   },
-  mounted,
+  computed: {
+    isMobile,
+    storeIsPopulated
+  },
   watch: {
     storeIsPopulated: watchStoreIsPopulated
+  },
+  created,
+  beforeUnmount,
+  mounted,
+  methods: {
+    clearStatus
   }
 };
 </script>

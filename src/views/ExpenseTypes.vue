@@ -3,11 +3,11 @@
     <v-row v-if="initialPageLoading">
       <v-col cols="12" :lg="userRoleIsAdmin() ? 8 : 12">
         <div class="mt-3">
-          <v-skeleton-loader type="table-heading, list-item@6"></v-skeleton-loader>
+          <v-skeleton-loader type="table-heading, list-item@6" />
         </div>
       </v-col>
       <v-col v-if="userRoleIsAdmin()" cols="12" lg="4">
-        <v-skeleton-loader class="mt-3" type="list-item@12"></v-skeleton-loader>
+        <v-skeleton-loader class="mt-3" type="list-item@12" />
       </v-col>
     </v-row>
     <v-row v-else>
@@ -23,7 +23,7 @@
         <v-card-text color="white">
           <span class="text-h6 font-weight-medium">{{ status.statusMessage }}</span>
         </v-card-text>
-        <v-btn color="white" variant="text" @click="clearStatus">Close</v-btn>
+        <v-btn color="white" variant="text" @click="clearStatus"> Close </v-btn>
       </v-snackbar>
 
       <v-col cols="12" :lg="userRoleIsAdmin() ? 8 : 12">
@@ -35,18 +35,18 @@
                 <v-col cols="4">
                   <h2>Expense Types</h2>
                 </v-col>
-                <v-col cols="2"></v-col>
+                <v-col cols="2" />
                 <v-col cols="6">
                   <!-- Search Bar -->
                   <v-text-field
-                    v-model="search"
                     id="search"
+                    v-model="search"
                     variant="underlined"
                     append-inner-icon="mdi-magnify"
                     label="Search"
                     single-line
                     hide-details
-                  ></v-text-field>
+                  />
                 </v-col>
               </v-row>
             </v-card-title>
@@ -60,7 +60,7 @@
                 <v-btn-toggle color="primary" class="filter_color" v-model="filter.active" text mandatory>
                   <!-- Show Active -->
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ props }">
+                    <template #activator="{ props }">
                       <v-btn value="active" v-bind="props" variant="text">
                         <v-icon class="mr-1">
                           mdi-check-circle{{ filter.active.includes('active') ? '' : '-outline' }}
@@ -72,7 +72,7 @@
 
                   <!-- Show Inactive -->
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ props }">
+                    <template #activator="{ props }">
                       <v-btn value="notActive" v-bind="props" variant="text">
                         <v-icon> mdi-close-circle{{ filter.active.includes('notActive') ? '' : '-outline' }} </v-icon>
                       </v-btn>
@@ -82,7 +82,7 @@
 
                   <!-- Show Active and Inactive -->
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ props }">
+                    <template #activator="{ props }">
                       <v-btn
                         value="both"
                         v-bind="props"
@@ -104,7 +104,7 @@
                 <v-btn-toggle color="primary" class="filter_color" v-model="filter.overdraft" text mandatory>
                   <!-- Show Overdraft -->
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ props }">
+                    <template #activator="{ props }">
                       <v-btn value="overdraft" v-bind="props" variant="text">
                         <v-icon class="mr-1">
                           mdi-check-circle{{ filter.overdraft.includes('overdraft') ? '' : '-outline' }}
@@ -116,7 +116,7 @@
 
                   <!-- Show No Overdraft -->
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ props }">
+                    <template #activator="{ props }">
                       <v-btn value="noOverdraft" v-bind="props" variant="text">
                         <v-icon>
                           mdi-close-circle{{ filter.overdraft.includes('noOverdraft') ? '' : '-outline' }}
@@ -128,7 +128,7 @@
 
                   <!-- Show Overdraft and No Overdraft -->
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ props }">
+                    <template #activator="{ props }">
                       <v-btn
                         value="both"
                         v-bind="props"
@@ -150,7 +150,7 @@
                 <v-btn-toggle color="primary" class="filter_color" v-model="filter.recurring" text mandatory>
                   <!-- Show Recurring -->
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ props }">
+                    <template #activator="{ props }">
                       <v-btn value="recurring" v-bind="props" variant="text">
                         <v-icon class="mr-1">
                           mdi-check-circle{{ filter.recurring.includes('recurring') ? '' : '-outline' }}
@@ -162,7 +162,7 @@
 
                   <!-- Show Non-Recurring -->
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ props }">
+                    <template #activator="{ props }">
                       <v-btn value="notRecurring" v-bind="props" variant="text">
                         <v-icon>
                           mdi-close-circle{{ filter.recurring.includes('notRecurring') ? '' : '-outline' }}
@@ -174,7 +174,7 @@
 
                   <!-- Show Recurring and Non-Recurring -->
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ props }">
+                    <template #activator="{ props }">
                       <v-btn
                         value="both"
                         v-bind="props"
@@ -195,49 +195,57 @@
 
             <!--EXPENSE TYPE DATA TABLE -->
             <v-data-table
+              :sort-by="sortBy"
+              :items-per-page="itemsPerPage"
               :headers="_headers"
               :items="expenseTypeList"
-              :sort-by.sync="sortBy"
               :expanded="expanded"
               expand-on-click
               :loading="loading"
-              :items-per-page.sync="itemsPerPage"
               :search="search"
               item-key="id"
               class="elevation-4"
               density="compact"
             >
               <!-- Budget Name slot -->
-              <template v-slot:[`item.budgetName`]="{ item }">
-                <p class="mb-0">{{ limitedText(item.budgetName) }}</p>
+              <template #[`item.budgetName`]="{ item }">
+                <p class="mb-0">
+                  {{ limitedText(item.budgetName) }}
+                </p>
               </template>
               <!-- Budget slot -->
-              <template v-slot:[`item.budget`]="{ item }">
-                <p class="mb-0">{{ convertToMoneyString(item.budget) }}</p>
+              <template #[`item.budget`]="{ item }">
+                <p class="mb-0">
+                  {{ convertToMoneyString(item.budget) }}
+                </p>
               </template>
               <!-- Budget slot -->
-              <template v-slot:[`item.startDate`]="{ item }">
-                <p class="mb-0">{{ format(item.startDate, null, 'YYYY-MM-DD') }}</p>
+              <template #[`item.startDate`]="{ item }">
+                <p class="mb-0">
+                  {{ format(item.startDate, null, 'YYYY-MM-DD') }}
+                </p>
               </template>
               <!-- Budget slot -->
-              <template v-slot:[`item.endDate`]="{ item }">
-                <p class="mb-0">{{ format(item.endDate, null, 'YYYY-MM-DD') }}</p>
+              <template #[`item.endDate`]="{ item }">
+                <p class="mb-0">
+                  {{ format(item.endDate, null, 'YYYY-MM-DD') }}
+                </p>
               </template>
               <!-- Actions -->
               <template v-if="userRoleIsAdmin()" v-slot:[`item.actions`]="{ item }">
                 <div class="mr-4">
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ props }">
+                    <template #activator="{ props }">
                       <v-btn
                         v-if="userRoleIsAdmin()"
                         :disabled="midAction"
                         variant="text"
                         icon
+                        v-bind="props"
                         @click="
                           toTopOfForm();
                           onSelect(item);
                         "
-                        v-bind="props"
                       >
                         <v-icon icon="mdi-pencil" class="case-gray" />
                       </v-btn>
@@ -245,15 +253,15 @@
                     <span>Edit</span>
                   </v-tooltip>
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ props }">
+                    <template #activator="{ props }">
                       <v-btn
                         v-if="userRoleIsAdmin()"
                         id="delete"
                         :disabled="midAction"
                         variant="text"
                         icon
-                        @click="validateDelete(item)"
                         v-bind="props"
+                        @click="validateDelete(item)"
                       >
                         <v-icon icon="mdi-delete" class="case-gray" />
                       </v-btn>
@@ -264,7 +272,7 @@
               </template>
 
               <!-- Expanded slot item -->
-              <template v-slot:expanded-row="{ columns, item }">
+              <template #expanded-row="{ columns, item }">
                 <td :colspan="columns.length" class="pa-0">
                   <v-card>
                     <v-card-text>
@@ -337,29 +345,29 @@
                         <v-row no-gutters>
                           <v-col cols="12" sm="6" md="3" class="flag">
                             <p>Pro-rated:</p>
-                            <v-icon icon="mdi-check-circle-outline" v-if="item.proRated" id="marks" class="mr-1" />
-                            <v-icon icon="mdi-close-circle-outline" v-else class="mr-1" id="marks" />
+                            <v-icon v-if="item.proRated" icon="mdi-check-circle-outline" id="marks" class="mr-1" />
+                            <v-icon v-else icon="mdi-close-circle-outline" id="marks" class="mr-1" />
                           </v-col>
                           <v-col cols="12" sm="6" md="3" class="flag">
                             <p>Overdraft Allowed:</p>
-                            <v-icon icon="mdi-check-circle-outline" v-if="item.odFlag" id="marks" class="mr-1" />
-                            <v-icon icon="mdi-close-circle-outline" v-else class="mr-1" id="marks" />
+                            <v-icon v-if="item.odFlag" icon="mdi-check-circle-outline" id="marks" class="mr-1" />
+                            <v-icon v-else icon="mdi-close-circle-outline" id="marks" class="mr-1" />
                           </v-col>
                           <v-col cols="12" sm="6" md="3" class="flag">
                             <p>Recurring:</p>
-                            <v-icon icon="mdi-check-circle-outline" v-if="item.recurringFlag" id="marks" class="mr-1" />
-                            <v-icon icon="mdi-close-circle-outline" v-else class="mr-1" id="marks" />
+                            <v-icon v-if="item.recurringFlag" icon="mdi-check-circle-outline" id="marks" class="mr-1" />
+                            <v-icon v-else icon="mdi-close-circle-outline" id="marks" class="mr-1" />
                           </v-col>
                           <v-col cols="12" sm="6" md="3" class="flag">
                             <p>Inactive:</p>
-                            <v-icon icon="mdi-check-circle-outline" v-if="item.isInactive" id="marks" class="mr-1" />
-                            <v-icon icon="mdi-close-circle-outline" v-else class="mr-1" id="marks" />
+                            <v-icon v-if="item.isInactive" icon="mdi-check-circle-outline" id="marks" class="mr-1" />
+                            <v-icon v-else icon="mdi-close-circle-outline" id="marks" class="mr-1" />
                           </v-col>
                         </v-row>
                         <!-- End Flags -->
 
                         <!-- Accessible By -->
-                        <v-row no-gutters v-if="userRoleIsAdmin()">
+                        <v-row v-if="userRoleIsAdmin()" no-gutters>
                           <!-- Display number of employees accessed by -->
                           <div>
                             <p>
@@ -369,15 +377,15 @@
                           </div>
                           <!-- Button to view names of employees with access -->
                           <v-dialog v-model="showAccess" max-width="400px" scrollable>
-                            <template v-slot:activator="{ props }">
-                              <v-btn class="px-1 ml-3" size="x-small" variant="outlined" v-bind="props">view</v-btn>
+                            <template #activator="{ props }">
+                              <v-btn class="px-1 ml-3" size="x-small" variant="outlined" v-bind="props"> view </v-btn>
                             </template>
                             <v-card class="mt-3">
                               <!-- Dialog Title -->
                               <v-card-title class="d-flex align-center header_style">
                                 <h3>Accessible By</h3>
                               </v-card-title>
-                              <v-divider color="black"></v-divider>
+                              <v-divider color="black" />
                               <!-- List of employee names/ISSUES -->
                               <v-card-text class="pb-0">
                                 <v-row>
@@ -385,7 +393,7 @@
                                     <div v-for="employee in getEmployeeList(item.accessibleBy)" :key="employee.id">
                                       <v-list-item>
                                         <!-- Employee Image -->
-                                        <template v-slot:prepend>
+                                        <template #prepend>
                                           <user-avatar :employee="employee" :image="employee.avatar" />
                                         </template>
                                         <!-- Employee Name -->
@@ -396,11 +404,11 @@
                                 </v-row>
                               </v-card-text>
 
-                              <v-divider color="black"></v-divider>
+                              <v-divider color="black" />
                               <!-- Close dialog button -->
                               <v-card-actions>
-                                <v-spacer></v-spacer>
-                                <v-btn theme="dark" variant="text" @click="showAccess = false">Close</v-btn>
+                                <v-spacer />
+                                <v-btn theme="dark" variant="text" @click="showAccess = false"> Close </v-btn>
                               </v-card-actions>
                             </v-card>
                           </v-dialog>
@@ -408,7 +416,7 @@
                         <!-- End Accessible By -->
 
                         <!-- Tag Budgets -->
-                        <v-row no-gutters v-if="userRoleIsAdmin() && item.tagBudgets && item.tagBudgets.length > 0">
+                        <v-row v-if="userRoleIsAdmin() && item.tagBudgets && item.tagBudgets.length > 0" no-gutters>
                           <v-col cols="12" sm="6" md="3">
                             <div>
                               <p><b>Tag Budgets:</b></p>
@@ -419,9 +427,9 @@
                               <div class="d-flex pr-3">
                                 <b>Tag(s):</b>
                                 <div class="d-flex flex-column">
-                                  <v-chip size="small" v-for="tagID in item.tags" :key="tagID">
-                                    <v-icon icon="mdi-tag" start />{{ getTagByID(tagID).tagName }}</v-chip
-                                  >
+                                  <v-chip v-for="tagID in item.tags" size="small" :key="tagID">
+                                    <v-icon icon="mdi-tag" start />{{ getTagByID(tagID).tagName }}
+                                  </v-chip>
                                 </div>
                               </div>
                               <div class="d-flex flex-nowrap">
@@ -450,7 +458,7 @@
               </template>
 
               <!-- Alert slot for no search results -->
-              <template v-slot:no-results>
+              <template #no-results>
                 <v-alert :value="true" color="error" icon="mdi-alert">
                   Your search for "{{ search }}" found no results
                 </v-alert>
@@ -461,11 +469,11 @@
 
             <!-- Confirmation Modals -->
             <delete-modal
-              :toggleDeleteModal="deleting"
-              :deleteInfo="'(' + deleteType + ')'"
+              :toggle-delete-modal="deleting"
+              :delete-info="'(' + deleteType + ')'"
               :type="'expense-type'"
-            ></delete-modal>
-            <delete-error-modal :toggleDeleteErrorModal="invalidDelete" type="expense type"></delete-error-modal>
+            />
+            <delete-error-modal :toggle-delete-error-modal="invalidDelete" type="expense type" />
             <!-- End Confirmation Modals -->
           </v-container>
         </v-card>
@@ -473,7 +481,7 @@
 
       <!-- Expense Type Form -->
       <v-col v-if="userRoleIsAdmin()" cols="12" lg="4">
-        <expense-type-form ref="form" :model="model"></expense-type-form>
+        <expense-type-form ref="form" :model="model" />
       </v-col>
     </v-row>
   </div>
@@ -1181,18 +1189,11 @@ function limitedText(val) {
 // |--------------------------------------------------|
 
 export default {
-  beforeUnmount,
   components: {
     DeleteErrorModal,
     DeleteModal,
     ExpenseTypeForm
   },
-  computed: {
-    expenseTypeList,
-    storeIsPopulated,
-    _headers
-  },
-  created,
   data() {
     return {
       campfires: [], // basecamp campfires
@@ -1278,6 +1279,19 @@ export default {
       deleteType: '' //item.budgetName for when item is deleted
     };
   },
+  computed: {
+    expenseTypeList,
+    storeIsPopulated,
+    _headers
+  },
+  watch: {
+    'filter.active': watchFilterExpenseTypes,
+    'filter.recurring': watchFilterExpenseTypes,
+    'filter.overdraft': watchFilterExpenseTypes,
+    storeIsPopulated: loadExpenseTypesData
+  },
+  beforeUnmount,
+  created,
   methods: {
     addModelToTable,
     categoriesToString,
@@ -1319,12 +1333,6 @@ export default {
     updateStoreExpenseTypes,
     updateStoreCampfires,
     updateStoreTags
-  },
-  watch: {
-    'filter.active': watchFilterExpenseTypes,
-    'filter.recurring': watchFilterExpenseTypes,
-    'filter.overdraft': watchFilterExpenseTypes,
-    storeIsPopulated: loadExpenseTypesData
   }
 };
 </script>

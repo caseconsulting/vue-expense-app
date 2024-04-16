@@ -26,7 +26,7 @@
                 <span v-if="powerEdit" class="ml-3 power-edit-text">Power Edit Mode</span>
               </h2>
             </v-col>
-            <v-spacer></v-spacer>
+            <v-spacer />
             <v-col cols="12" md="4">
               <v-text-field
                 id="employeesSearch"
@@ -35,12 +35,12 @@
                 label="Search (comma separate terms)"
                 variant="underlined"
                 single-line
-              ></v-text-field>
+              />
             </v-col>
           </v-row>
         </v-card-title>
 
-        <power-edit-container v-if="powerEdit" :search="search"></power-edit-container>
+        <power-edit-container v-if="powerEdit" :search="search" />
         <div v-else>
           <!-- Filters -->
           <v-card v-if="userRoleIsAdmin() || userRoleIsManager()" class="pa-0 pa-md-4" variant="outlined">
@@ -51,8 +51,8 @@
                 <v-btn-toggle color="primary" class="filter_color mx-auto" v-model="filter.active" text multiple>
                   <!-- Full Time -->
                   <v-tooltip location="top" text="Full Time">
-                    <template v-slot:activator="{ props }">
-                      <v-btn value="full" id="full" v-bind="props" variant="text">
+                    <template #activator="{ props }">
+                      <v-btn id="full" value="full" v-bind="props" variant="text">
                         <v-icon class="mr-1"> mdi-clock{{ filter.active.includes('full') ? '' : '-outline' }} </v-icon>
                       </v-btn>
                     </template>
@@ -60,8 +60,8 @@
 
                   <!-- Part Time -->
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ props }">
-                      <v-btn value="part" id="part" v-bind="props" variant="text">
+                    <template #activator="{ props }">
+                      <v-btn id="part" value="part" v-bind="props" variant="text">
                         <v-icon>
                           {{ filter.active.includes('part') ? 'mdi-clock-time-four' : 'mdi-progress-clock' }}
                         </v-icon>
@@ -72,8 +72,8 @@
 
                   <!-- Inactive -->
                   <v-tooltip location="top">
-                    <template v-slot:activator="{ props }">
-                      <v-btn value="inactive" id="inactive" v-bind="props" variant="text">
+                    <template #activator="{ props }">
+                      <v-btn id="inactive" value="inactive" v-bind="props" variant="text">
                         <v-icon> mdi-stop-circle{{ filter.active.includes('inactive') ? '' : '-outline' }} </v-icon>
                       </v-btn>
                     </template>
@@ -85,11 +85,11 @@
               <v-col :align="isMobile() ? 'center' : ''" cols="5" md="5" sm="6">
                 <v-autocomplete
                   v-if="userRoleIsAdmin() || userRoleIsManager()"
+                  v-model="selectedTags"
                   class="mt-2 mt-md-4 ml-1 ml-md-4"
                   variant="underlined"
                   clearable
                   label="Filter by Tag (click to flip)"
-                  v-model="selectedTags"
                   :items="tags"
                   multiple
                   color="gray"
@@ -98,15 +98,15 @@
                   hide-details
                   return-object
                 >
-                  <template v-slot:chip="{ props, item }">
+                  <template #chip="{ props, item }">
                     <v-chip
                       size="small"
                       closable
                       v-bind="props"
+                      :color="chipColor(item.raw.id)"
                       @click.stop
                       @click="negateTag(item.raw)"
                       @click:close="removeTag(item.raw)"
-                      :color="chipColor(item.raw.id)"
                     >
                       {{ tagFlip.includes(item.raw.id) ? 'NOT ' : '' }}
                       {{ item.raw.tagName }}
@@ -126,8 +126,8 @@
             class="mb-5"
             :disabled="loading"
             :size="isMobile() ? 'x-small' : 'default'"
-            @click="renderCreateEmployee()"
             elevation="2"
+            @click="renderCreateEmployee()"
           >
             {{ isMobile() ? 'Create Employee' : 'Create an Employee' }}
             <v-icon class="pl-2" icon="mdi-account-plus" />
@@ -140,11 +140,11 @@
             class="mb-5 ml-2 ml-md-4"
             :disabled="loading"
             :size="isMobile() ? 'x-small' : 'default'"
-            @click="renderManageTags()"
             elevation="2"
+            @click="renderManageTags()"
           >
             Manage Tags
-            <v-icon class="pl-2">mdi-tag-multiple</v-icon>
+            <v-icon class="pl-2"> mdi-tag-multiple </v-icon>
           </v-btn>
 
           <!-- Sync Applications -->
@@ -153,45 +153,39 @@
             id="syncApplicationsBtn"
             class="mb-5 ml-2 ml-md-4"
             :disabled="loading || syncing"
-            @click="syncApplications()"
             elevation="2"
             :size="isMobile() ? 'x-small' : 'default'"
+            @click="syncApplications()"
           >
             {{ isMobile() ? 'Sync Apps' : 'Sync Applications' }}
 
-            <v-progress-circular
-              v-if="syncing"
-              class="ml-2"
-              :size="25"
-              indeterminate
-              color="grey"
-            ></v-progress-circular>
-            <v-icon v-else class="pl-2">mdi-web-sync</v-icon>
+            <v-progress-circular v-if="syncing" class="ml-2" :size="25" indeterminate color="grey" />
+            <v-icon v-else class="pl-2"> mdi-web-sync </v-icon>
           </v-btn>
 
           <!-- CSV Downloads modal -->
           <v-btn
             v-if="hasAdminPermissions()"
-            :midAction="midAction"
+            :mid-action="midAction"
             :disabled="loading || syncing"
             elevation="2"
             class="mb-5 ml-2 ml-md-4"
             @click.stop="showExportDataModal = !showExportDataModal"
           >
-            Export Data <v-icon class="pl-2">mdi-table-arrow-down</v-icon>
+            Export Data <v-icon class="pl-2"> mdi-table-arrow-down </v-icon>
           </v-btn>
 
-          <v-btn @click="powerEdit = true" class="mb-5 ml-2 ml-md-4 float-right" variant="flat">
-            <v-icon size="x-large">mdi-pencil</v-icon>
+          <v-btn class="mb-5 ml-2 ml-md-4 float-right" @click="powerEdit = true" variant="flat">
+            <v-icon size="x-large"> mdi-pencil </v-icon>
           </v-btn>
 
           <!-- NEW DATA TABLE -->
           <v-data-table
+            v-model:sort-by="sortBy"
+            v-model:items-per-page="itemsPerPage"
             :headers="headers"
             :items="filteredEmployees"
-            :sort-by.sync="sortBy"
             :loading="loading"
-            :items-per-page.sync="itemsPerPage"
             :search="search"
             :custom-filter="customFilter"
             mobile-breakpoint="800"
@@ -200,80 +194,79 @@
             @click:row="handleClick"
           >
             <!-- Delete Action Item Slot -->
-            <template v-slot:[`item.actions`]="{ item }">
+            <template #[`item.actions`]="{ item }">
               <div class="datatable_btn layout">
                 <convert-employee-to-csv
                   v-if="userRoleIsAdmin()"
-                  :midAction="midAction"
+                  :mid-action="midAction"
                   :employee="item"
                   :contracts="contracts"
                   :tags="tags"
                   :filename="`${item.nickname || item.firstName} ${item.lastName}`"
-                ></convert-employee-to-csv>
+                />
                 <span>
                   <v-tooltip activator="parent" location="top" text="Delete" />
                   <v-btn
                     v-if="hasAdminPermissions()"
                     id="employeesDeleteBtn"
                     :disabled="midAction"
-                    @click.stop="validateDelete(item)"
                     variant="text"
                     icon="mdi-delete"
-                  >
-                  </v-btn>
+                    @click.stop="validateDelete(item)"
+                  />
                 </span>
               </div>
             </template>
 
             <!-- Avatar Item Slot -->
-            <template v-slot:[`item.avatars`]="{ item }">
+            <template #[`item.avatars`]="{ item }">
               <user-avatar :employee="item" :image="item.avatar" :size="35" class="text-body-1" />
             </template>
 
             <!-- First Name Item Slot -->
-            <template v-slot:[`item.firstName`]="{ item }">
+            <template #[`item.firstName`]="{ item }">
               <p :class="{ inactiveStyle: isInactive(item) }" class="mb-0">
                 {{ item.firstName }}
               </p>
             </template>
 
             <!-- Middle Name Item Slot -->
-            <template v-slot:[`item.middleName`]="{ item }">
+            <template #[`item.middleName`]="{ item }">
               <p :class="{ inactiveStyle: isInactive(item) }" class="mb-0">
                 {{ item.middleName }}
               </p>
             </template>
 
             <!-- Last Name Item Slot -->
-            <template v-slot:[`item.lastName`]="{ item }">
+            <template #[`item.lastName`]="{ item }">
               <p :class="{ inactiveStyle: isInactive(item) }" class="mb-0">
                 {{ item.lastName }}
               </p>
             </template>
 
             <!-- Nickname Item Slot -->
-            <template v-slot:[`item.nickname`]="{ item }">
+            <template #[`item.nickname`]="{ item }">
               <p :class="{ inactiveStyle: isInactive(item) }" class="mb-0">
                 {{ item.nickname }}
               </p>
             </template>
 
             <!-- Last Login Item Slot -->
-            <template v-slot:[`item.lastLoginSeconds`]="{ item }">
+            <template #[`item.lastLoginSeconds`]="{ item }">
               <p v-if="userRoleIsAdmin()" :class="{ inactiveStyle: isInactive(item) }" class="mb-0">
                 {{ getLoginDate(item) }}
               </p>
             </template>
 
             <!-- Date Item Slot -->
-            <template v-slot:[`item.hireDate`]="{ item }">
+            <template #[`item.hireDate`]="{ item }">
               <p :class="{ inactiveStyle: isInactive(item) }" class="mb-0">
                 {{ monthDayYearFormat(item.hireDate) }}
               </p>
             </template>
 
             <!-- Email Item Slot -->
-            <template v-slot:[`item.email`]="{ item }">
+            <template #[`item.email`]="{ item }">
               <p :class="{ inactiveStyle: isInactive(item) }" class="mb-0">
                 {{ item.email }}
               </p>
@@ -282,22 +275,22 @@
           <!-- END NEW DATA TABLE -->
 
           <!-- Confirmation Modals -->
-          <delete-modal :toggleDeleteModal="deleting" :type="'employee'"></delete-modal>
-          <delete-error-modal :toggleDeleteErrorModal="invalidDelete" type="employee"></delete-error-modal>
+          <delete-modal :toggle-delete-modal="deleting" :type="'employee'" />
+          <delete-error-modal :toggle-delete-error-modal="invalidDelete" type="employee" />
         </div>
       </v-container>
     </v-card>
-    <v-dialog @click:outside="clearCreateEmployee" v-model="createEmployee" :width="isMobile() ? '100%' : '80%'">
-      <employee-form :contracts="contracts" :key="childKey" :model="this.model" />
+    <v-dialog v-model="createEmployee" @click:outside="clearCreateEmployee" :width="isMobile() ? '100%' : '80%'">
+      <employee-form :key="childKey" :contracts="contracts" :model="model" />
     </v-dialog>
     <v-dialog v-model="manageTags" scrollable :width="isMobile() ? '100%' : '70%'" persistent>
       <tag-manager :key="childKey" />
     </v-dialog>
     <v-dialog v-model="toggleEmployeesSyncModal" :width="isMobile() ? '100%' : '70%'" persistent>
-      <employees-sync-modal :syncData="applicationSyncData" :key="childKey" />
+      <employees-sync-modal :key="childKey" :sync-data="applicationSyncData" />
     </v-dialog>
     <v-dialog v-model="showExportDataModal" :width="isMobile() ? '100%' : '50%'" persistent>
-      <export-employee-data :employees="employees" :contracts="contracts" :tags="tags" :key="childKey" />
+      <export-employee-data :employees="employees" :contracts="contracts" :key="childKey" :tags="tags" />
     </v-dialog>
   </div>
 </template>
@@ -879,7 +872,6 @@ function watchSelectedTags() {
 // |--------------------------------------------------|
 
 export default {
-  beforeUnmount,
   components: {
     DeleteErrorModal,
     DeleteModal,
@@ -890,11 +882,14 @@ export default {
     PowerEditContainer,
     TagManager
   },
+<<<<<<< HEAD
   computed: {
     dataTableKey,
     storeIsPopulated
   },
   created,
+=======
+>>>>>>> f35a7dc6 (POR-2533: use vite instead of vue cli)
   data() {
     return {
       applicationSyncData: null,
@@ -1010,6 +1005,17 @@ export default {
       toggleEmployeesSyncModal: false
     };
   },
+  computed: {
+    storeIsPopulated
+  },
+  watch: {
+    'filter.active': watchFilterActive,
+    storeIsPopulated: watchStoreIsPopulated,
+    tagFlip: watchTagFlip,
+    selectedTags: watchSelectedTags
+  },
+  beforeUnmount,
+  created,
   methods: {
     changeAvatar,
     clearCreateEmployee,
@@ -1046,12 +1052,6 @@ export default {
     updateStoreContracts,
     updateStoreEmployees,
     updateStoreTags
-  },
-  watch: {
-    'filter.active': watchFilterActive,
-    storeIsPopulated: watchStoreIsPopulated,
-    tagFlip: watchTagFlip,
-    selectedTags: watchSelectedTags
   }
 };
 </script>

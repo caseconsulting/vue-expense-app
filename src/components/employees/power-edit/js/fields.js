@@ -1,4 +1,4 @@
-const v = require('@/shared/validationUtils.js');
+import v from '@/shared/validationUtils.js';
 const groupWidth = { width: '300', minWidth: '300', maxWidth: '300' };
 const nonGroupWidth = { width: '180', minWidth: '180', maxWidth: '180' };
 import { TYPES } from './fieldTypes.js';
@@ -204,7 +204,6 @@ export const SOCIAL = {
   group: true,
   editType: TYPES.CUSTOM,
   infoType: TYPES.CUSTOM,
-  subkeys: ['city', 'country', 'st'],
   ...groupWidth
 };
 
@@ -215,7 +214,7 @@ export const PLACE_OF_BIRTH = {
   group: true,
   editType: TYPES.CUSTOM,
   infoType: TYPES.CUSTOM,
-  subkeys: ['currentStreet', 'currentStreet2', 'currentCity', 'currentState', 'currentZIP'],
+  subkeys: ['city', 'country', 'st'],
   ...groupWidth
 };
 
@@ -226,6 +225,7 @@ export const ADDRESS = {
   group: true,
   editType: TYPES.CUSTOM,
   infoType: TYPES.CUSTOM,
+  subkeys: ['currentStreet', 'currentStreet2', 'currentCity', 'currentState', 'currentZIP'],
   ...groupWidth
 };
 
@@ -246,3 +246,30 @@ export const PHONE_NUMBERS = {
 // |--------------------------------------------------|
 
 export const BLANK = { title: '', key: '', width: '100%' };
+
+export default {
+  NAME,
+  EMPLOYEE_NUMBER,
+  AIN,
+  WORK_STATUS,
+  HIRE_DATE,
+  DEPARTURE_DATE,
+  BIRTHDAY,
+  JOB_ROLE,
+  EMPLOYEE_ROLE,
+  AWARDS,
+  CERTIFICATIONS,
+  CLEARANCES,
+  COMPANIES,
+  CONTRACTS,
+  CUSTOMER_ORG_EXP,
+  EDUCATION,
+  IC_TIME_FRAMES,
+  LANGUAGES,
+  TECHNOLOGIES,
+  SOCIAL,
+  PLACE_OF_BIRTH,
+  ADDRESS,
+  PHONE_NUMBERS,
+  BLANK
+};

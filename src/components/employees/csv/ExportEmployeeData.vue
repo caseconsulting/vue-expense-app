@@ -88,12 +88,11 @@
 
 <script>
 import { isMobile, isSmallScreen } from '@/utils/utils';
-import api from '@/shared/api';
 import { getTodaysDate, format, subtract, isSameOrBefore, isSameOrAfter } from '@/shared/dateUtils';
 import _ from 'lodash';
-const employeeCsv = require('@/utils/csv/employeeCsv.js');
-const eeoCsv = require('@/utils/csv/eeoCsv.js');
-const qbCsv = require('@/utils/csv/qbCsv.js');
+import employeeCsv from '@/utils/csv/employeeCsv.js';
+import eeoCsv from '@/utils/csv/eeoCsv.js';
+import qbCsv from '@/utils/csv/qbCsv.js';
 
 // |--------------------------------------------------|
 // |                                                  |

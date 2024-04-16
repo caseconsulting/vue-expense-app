@@ -13,7 +13,7 @@
         <v-card-text headline color="white">
           <span class="text-h6 font-weight-medium">{{ status.statusMessage }}</span>
         </v-card-text>
-        <v-btn color="white" variant="text" @click="clearStatus">Close</v-btn>
+        <v-btn color="white" variant="text" @click="clearStatus"> Close </v-btn>
       </v-snackbar>
 
       <!-- Title -->
@@ -22,21 +22,17 @@
           <h1 v-if="hasAccessToBudgets">My Budgets</h1>
           <h1 v-else>No Budgets Available for {{ employee.nickname || employee.firstName }} {{ employee.lastName }}</h1>
         </div>
-        <v-skeleton-loader v-else-if="loading && !isMobile" type="text" width="90%"></v-skeleton-loader>
+        <v-skeleton-loader v-else-if="loading && !isMobile" type="text" width="90%" />
       </v-col>
 
       <!-- Anniversary Date -->
       <v-col cols="12" lg="4">
         <div v-if="!loading && !isMobile">
-          <anniversary-card
-            :employee="employee"
-            emitCatcher="my-budgets"
-            :hasBudgets="hasAccessToBudgets"
-          ></anniversary-card>
+          <anniversary-card :employee="employee" emit-catcher="my-budgets" :has-budgets="hasAccessToBudgets" />
         </div>
         <div v-else-if="loading && !isMobile">
           <!-- This has to be in a v-col because of padding that comes from the anniversary card v-col. Without the v-col, the loader is off-->
-          <v-skeleton-loader type="list-item"></v-skeleton-loader>
+          <v-skeleton-loader type="list-item" />
         </div>
       </v-col>
     </v-row>
@@ -47,43 +43,43 @@
         <div v-if="loading">
           <v-row>
             <v-col v-for="index in 4" :key="index" cols="12" sm="6" lg="6">
-              <v-skeleton-loader type="list-item@6"></v-skeleton-loader>
+              <v-skeleton-loader type="list-item@6" />
             </v-col>
           </v-row>
         </div>
         <div v-if="!loading" text-center class="pt-0 font-13">
           <budget-table
             :employee="employee"
-            :accessibleBudgets="accessibleBudgets"
+            :accessible-budgets="accessibleBudgets"
             :expenses="expenses"
-            :expenseTypes="expenseTypes"
-            :fiscalDateView="fiscalDateView"
-          ></budget-table>
+            :expense-types="expenseTypes"
+            :fiscal-date-view="fiscalDateView"
+          />
         </div>
       </v-col>
       <!-- Expense Form-->
       <v-col cols="12" lg="4">
         <div v-if="loading">
-          <v-skeleton-loader type="list-item@12"></v-skeleton-loader>
+          <v-skeleton-loader type="list-item@12" />
         </div>
         <div v-else-if="!loading && viewingCurrentBudgetYear">
-          <expense-form :expense="expense"></expense-form>
+          <expense-form :expense="expense" />
         </div>
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="12">
         <div v-if="loading">
-          <v-skeleton-loader type="list-item@3"></v-skeleton-loader>
+          <v-skeleton-loader type="list-item@3" />
         </div>
         <div v-if="!isMobile && hasAccessToBudgets">
           <budget-chart
-            :accessibleBudgets="accessibleBudgets"
+            :accessible-budgets="accessibleBudgets"
             :employee="employee"
             :expenses="expenses"
-            :expenseTypes="expenseTypes"
-            :fiscalDateView="fiscalDateView"
-          ></budget-chart>
+            :expense-types="expenseTypes"
+            :fiscal-date-view="fiscalDateView"
+          />
         </div>
       </v-col>
     </v-row>
@@ -257,13 +253,11 @@ export default {
     ExpenseForm,
     AnniversaryCard
   },
-  computed: {
-    isMobile,
-    storeIsPopulated,
-    viewingCurrentBudgetYear
+  props: {
+    employ: {
+      default: null
+    } // employee (admin employee view)
   },
-  created,
-  beforeUnmount,
   data() {
     return {
       displayChart: false,
@@ -299,6 +293,21 @@ export default {
       } // snackbar action status
     };
   },
+  computed: {
+    isMobile,
+    storeIsPopulated,
+    viewingCurrentBudgetYear
+  },
+  watch: {
+    employ: watchEmploy,
+    async storeIsPopulated() {
+      if (this.$store.getters.storeIsPopulated) {
+        await this.refreshEmployee();
+      }
+    }
+  },
+  created,
+  beforeUnmount,
   methods: {
     clearStatus,
     displayError,
@@ -310,19 +319,6 @@ export default {
     updateStoreEmployees,
     updateStoreExpenseTypes,
     updateStoreUser
-  },
-  props: {
-    employ: {
-      default: null
-    } // employee (admin employee view)
-  },
-  watch: {
-    employ: watchEmploy,
-    async storeIsPopulated() {
-      if (this.$store.getters.storeIsPopulated) {
-        await this.refreshEmployee();
-      }
-    }
   }
 };
 </script>

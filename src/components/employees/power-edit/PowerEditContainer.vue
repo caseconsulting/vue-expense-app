@@ -12,7 +12,7 @@
 import FieldSelection from '@/components/employees/power-edit/FieldSelection.vue';
 import PowerEditTable from '@/components/employees/power-edit/PowerEditTable.vue';
 import { ref } from 'vue';
-const FIELDS = require('@/components/employees/power-edit/js/fields.js');
+import FIELDS from '@/components/employees/power-edit/js/fields.js';
 
 // |--------------------------------------------------|
 // |                                                  |

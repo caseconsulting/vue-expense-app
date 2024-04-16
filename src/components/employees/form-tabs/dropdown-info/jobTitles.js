@@ -26,3 +26,5 @@ export const JOB_TITLES = [
   'QA Automated Test Engineer',
   'Windows Engineer'
 ];
+
+export default { JOB_TITLES };

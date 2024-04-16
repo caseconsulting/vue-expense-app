@@ -1,7 +1,14 @@
 <template>
-  <v-row class="pa-4">
+  <div>
     <!-- Place of Birth: City text field -->
-    <v-text-field v-model="cityModel" hide-details label="City" variant="underlined"></v-text-field>
+    <v-text-field
+      v-model="cityModel"
+      autofocus
+      hide-details
+      label="City"
+      variant="underlined"
+      class="d-inline-block field"
+    ></v-text-field>
     <!-- Place of Birth: Country autocomplete -->
     <v-autocomplete
       :items="COUNTRIES"
@@ -9,7 +16,7 @@
       hide-details
       label="Country"
       variant="underlined"
-      class="mx-8"
+      class="d-inline-block field mx-8"
     ></v-autocomplete>
     <!-- Place of Birth: State autocomplete -->
     <v-autocomplete
@@ -19,13 +26,14 @@
       hide-details
       label="State"
       variant="underlined"
+      class="d-inline-block field"
     ></v-autocomplete>
-  </v-row>
+  </div>
 </template>
 
 <script setup>
 import { STATES, COUNTRIES } from '@/utils/utils';
-import { ref } from 'vue';
+import { inject, ref, watch } from 'vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -34,9 +42,26 @@ import { ref } from 'vue';
 // |--------------------------------------------------|
 
 const props = defineProps(['field', 'item']);
+const emitter = inject('emitter');
 const cityModel = ref(props.item['city']);
 const countryModel = ref(props.item['country']);
 const stateModel = ref(props.item['st']);
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      WATCH                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+watch(
+  () => [cityModel.value, countryModel.value, stateModel.value],
+  () => {
+    emitter.emit('update-item', {
+      field: props.field,
+      item: { ...props.item, city: cityModel.value, country: countryModel.value, st: stateModel.value }
+    });
+  }
+);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -53,3 +78,11 @@ function isUSA() {
   }
 }
 </script>
+
+<style>
+.field {
+  width: 200px !important;
+  min-width: 200px !important;
+  max-width: 200px !important;
+}
+</style>

@@ -3,11 +3,11 @@
     <v-row v-if="loading">
       <v-col cols="12" xl="9" lg="8">
         <div class="mt-3">
-          <v-skeleton-loader type="table-heading, list-item@6"></v-skeleton-loader>
+          <v-skeleton-loader type="table-heading, list-item@6" />
         </div>
       </v-col>
       <v-col cols="12" xl="3" lg="4" class="pl-lg-1 pl-sm-2">
-        <v-skeleton-loader class="mt-3" type="list-item@12"></v-skeleton-loader>
+        <v-skeleton-loader class="mt-3" type="list-item@12" />
       </v-col>
     </v-row>
     <v-row v-else>
@@ -30,7 +30,7 @@
       </v-col>
       <v-col cols="12" xl="4" lg="5" class="pl-lg-1 pl-sm-2">
         <!-- QuickBooksTime -->
-        <quick-books-time-data :employee="employee" :key="employee.id"></quick-books-time-data>
+        <quick-books-time-data :key="employee.id" :employee="employee" />
       </v-col>
     </v-row>
   </div>
@@ -127,14 +127,9 @@ function clearStatus() {
 // |                                                  |
 // |--------------------------------------------------|
 export default {
-  beforeUnmount,
-  created,
   components: {
     PTOCashOutsTable,
     QuickBooksTimeData
-  },
-  computed: {
-    storeIsPopulated
   },
   data() {
     return {
@@ -147,10 +142,15 @@ export default {
       employee: null
     };
   },
-  mounted,
+  computed: {
+    storeIsPopulated
+  },
   watch: {
     storeIsPopulated: watchStoreIsPopulated
   },
+  beforeUnmount,
+  created,
+  mounted,
   methods: {
     clearStatus
   }

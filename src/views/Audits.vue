@@ -11,19 +11,19 @@
       <v-row>
         <v-col cols="6" md="3" align-self="center">
           <v-menu>
-            <template v-slot:activator="{ props }">
+            <template #activator="{ props }">
               <v-btn variant="text" color="#bc3825" theme="dark" class="font-weight-bold" v-bind="props">
                 {{ selectedDropdown }}
                 <v-icon>mdi-chevron-down</v-icon>
               </v-btn>
             </template>
             <v-list>
-              <v-list-item v-if="selectedDropdown !== 'User Logins'" @click="selectDropDown('User Logins')"
-                >User Logins</v-list-item
-              >
-              <v-list-item v-if="selectedDropdown !== 'Resume Parser'" @click="selectDropDown('Resume Parser')"
-                >Resume Parser</v-list-item
-              >
+              <v-list-item v-if="selectedDropdown !== 'User Logins'" @click="selectDropDown('User Logins')">
+                User Logins
+              </v-list-item>
+              <v-list-item v-if="selectedDropdown !== 'Resume Parser'" @click="selectDropDown('Resume Parser')">
+                Resume Parser
+              </v-list-item>
             </v-list>
           </v-menu>
         </v-col>
@@ -33,7 +33,7 @@
         <v-col cols="8" xl="2" lg="2">
           <v-form ref="dateRange">
             <v-menu v-model="auditsQuery.showRangeMenu" :close-on-content-click="false">
-              <template v-slot:activator="{ props }">
+              <template #activator="{ props }">
                 <v-text-field
                   class="mt-0 ml-1 pt-0 pointer"
                   :model-value="formatRange(auditsQuery.range)"
@@ -43,10 +43,9 @@
                   clearable
                   prepend-icon="mdi-calendar"
                   v-bind="props"
-                  @click:clear="auditsQuery.range = []"
                   :rules="requiredRules"
-                >
-                </v-text-field>
+                  @click:clear="auditsQuery.range = []"
+                />
               </template>
               <v-date-picker
                 v-model="auditsQuery.range"
@@ -57,7 +56,7 @@
                 keyboard-icon=""
                 color="#bc3825"
                 title="Date Range"
-              ></v-date-picker>
+              />
             </v-menu>
           </v-form>
         </v-col>
@@ -74,17 +73,17 @@
       <!-- Displays of Audit Data -->
       <login-audits
         v-if="selectedDropdown === 'User Logins'"
-        :queryStartDate="queryA"
-        :queryEndDate="queryB"
-        :show24HourTitle="firstLoad"
-      ></login-audits>
+        :query-start-date="queryA"
+        :query-end-date="queryB"
+        :show24-hour-title="firstLoad"
+      />
       <resume-parser-audits
         v-if="selectedDropdown === 'Resume Parser'"
-        :queryStartDate="queryA"
-        :queryEndDate="queryB"
-        :show24HourTitle="firstLoad"
         :key="reloader"
-      ></resume-parser-audits>
+        :query-start-date="queryA"
+        :query-end-date="queryB"
+        :show24-hour-title="firstLoad"
+      />
     </v-container>
   </v-card>
 </template>
@@ -216,10 +215,6 @@ export default {
     LoginAudits,
     ResumeParserAudits
   },
-  computed: {
-    storeIsPopulated
-  },
-  created,
   data() {
     return {
       auditsQuery: {
@@ -235,14 +230,18 @@ export default {
       today: getTodaysDate()
     };
   },
+  computed: {
+    storeIsPopulated
+  },
+  watch: {
+    storeIsPopulated: watchStoreIsPopulated
+  },
+  created,
   methods: {
     setDateRange,
     formatRange,
     selectDropDown,
     updateStoreEmployees
-  },
-  watch: {
-    storeIsPopulated: watchStoreIsPopulated
   }
 };
 </script>

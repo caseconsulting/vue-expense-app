@@ -157,6 +157,7 @@ import {
 } from '@/utils/auth';
 import { isMobile, isSmallScreen, storeIsPopulated, updateEmployeeLogin } from '@/utils/utils';
 import { updateStoreUser, updateStoreEmployees } from '@/utils/storeUtils';
+import p from '../package.json';
 import floorPlan from '@/assets/img/MakeOfficesfloorplan.jpg';
 import facebook from '@/assets/img/trademarks/facebook.png';
 import github from '@/assets/img/trademarks/github.png';
@@ -337,7 +338,7 @@ function setSessionTimeouts() {
 async function created() {
   this.loadingCreated = true;
 
-  this.environment = process.env.VUE_APP_AUTH0_CALLBACK;
+  this.environment = import.meta.env.VITE_AUTH0_CALLBACK;
 
   this.emitter.on('timeout-acknowledged', () => (this.timedOut = false)); // Session end - log out
   this.emitter.on('close', () => (this.switchRole = false));
@@ -369,8 +370,7 @@ async function created() {
     this.profilePic = pic;
   }
 
-  //This has some security implications
-  this.version = require('../package.json').version;
+  this.version = p.version;
 
   this.loadingCreated = false;
 

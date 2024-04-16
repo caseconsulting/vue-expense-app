@@ -10,8 +10,8 @@ module.exports = {
 
   // Nightwatch "Owl" Tester user info
   tester: {
-    username: process.env.VUE_APP_AUTH0_EMAIL,
-    password: process.env.VUE_APP_AUTH0_PASSWORD,
+    username: import.meta.env.VITE_AUTH0_EMAIL,
+    password: import.meta.env.VITE_AUTH0_PASSWORD,
     firstName: 'Nightwatch',
     middleName: null, // set to null if no middle name
     lastName: 'Tester',

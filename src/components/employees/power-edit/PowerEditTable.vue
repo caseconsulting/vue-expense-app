@@ -14,11 +14,10 @@
     >
       <template v-for="field in props.fields" v-slot:[`item.${field.key}`]="{ item }">
         <power-edit-table-edit-item
-          v-if="editItem?.item.id === item.id && editItem?.field.key === field.key"
+          v-if="editItem?.item?.id === item.id && editItem?.field?.key === field.key"
           :key="field"
           :field="field"
           :item="item"
-          :valid="valid"
           :showInfo="field.group"
         ></power-edit-table-edit-item>
         <power-edit-table-info-item
@@ -32,14 +31,11 @@
         ></power-edit-table-info-item>
       </template>
       <template v-slot:expanded-row>
-        <tr>
+        <tr v-if="editItem?.field && editItem?.item">
           <td colspan="12">
-            <power-edit-table-edit-item
-              :field="editItem.field"
-              :item="editItem.item"
-              :valid="valid"
-              class="d-flex align-center pa-2"
-            ></power-edit-table-edit-item>
+            <div>
+              <power-edit-table-edit-item :field="editItem.field" :item="editItem.item"></power-edit-table-edit-item>
+            </div>
           </td>
         </tr>
       </template>
@@ -113,13 +109,26 @@ function saveColor(item, field) {
 
 async function saveItem(item, field) {
   editItem.value = null;
-  let value = item[field.key];
   let employee = _.find(store.getters.employees, (e) => e.id === item.id);
   let originalEmployee = _.cloneDeep(employee);
   let tmpField = field.key + 'tmp';
   employee[tmpField] = { field, saving: true };
-  employee[field.key] = value;
-  let resp = await api.updateAttribute(api.EMPLOYEES, { ...originalEmployee, [`${field.key}`]: value }, field.key);
+  let resp;
+  if (field.group && field.subkeys) {
+    let promises = [];
+    _.forEach(field.subkeys, (key) => {
+      employee[key] = item[key];
+      originalEmployee[key] = item[key];
+      promises.push(api.updateAttribute(api.EMPLOYEES, { ...originalEmployee }, key));
+    });
+    console.log(field);
+    resp = await Promise.all(promises);
+    console.log(field);
+  } else {
+    employee[field.key] = item[field.key];
+    originalEmployee[field.key] = item[field.key];
+    resp = await api.updateAttribute(api.EMPLOYEES, { ...originalEmployee }, field.key);
+  }
   if (resp.name !== 'AxiosError') {
     employee[tmpField] = { ...employee[tmpField], success: true, saving: false };
   } else {

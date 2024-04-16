@@ -216,3 +216,13 @@ export function sort(objects, key) {
   if (!Array.isArray(key)) key = [key];
   return _.sortBy(objects, key);
 } // sort
+
+export default {
+  combine,
+  download,
+  escape,
+  filterHeaders,
+  generate,
+  generateFrom2dArray,
+  sort
+};

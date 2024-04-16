@@ -1,10 +1,10 @@
 <template>
-  <v-combobox :items="jobTitles" v-model="model" variant="underlined"></v-combobox>
+  <v-combobox :items="jobTitles" v-model="model" autofocus variant="underlined"></v-combobox>
 </template>
 
 <script setup>
 import _ from 'lodash';
-import { computed, ref } from 'vue';
+import { computed, inject, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 import { JOB_TITLES } from '@/components/employees/form-tabs/dropdown-info/jobTitles.js';
 
@@ -15,8 +15,25 @@ import { JOB_TITLES } from '@/components/employees/form-tabs/dropdown-info/jobTi
 // |--------------------------------------------------|
 
 const props = defineProps(['field', 'item']);
+const emitter = inject('emitter');
 const model = ref(props.item[props.field.key]);
 const store = useStore();
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      WATCH                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+watch(
+  () => [model.value],
+  () => {
+    emitter.emit('update-item', {
+      field: props.field,
+      item: { ...props.item, [`${props.field.key}`]: model.value }
+    });
+  }
+);
 
 // |--------------------------------------------------|
 // |                                                  |

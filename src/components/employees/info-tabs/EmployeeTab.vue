@@ -128,7 +128,6 @@ import employeeUtils from '@/shared/employeeUtils';
 import _ from 'lodash';
 import { isEmpty, monthDayYearFormat } from '@/utils/utils';
 import SensitiveDataField from '../SensitiveDataField.vue';
-import { type } from 'auth0-js';
 
 // |--------------------------------------------------|
 // |                                                  |

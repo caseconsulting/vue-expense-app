@@ -8,7 +8,7 @@
 </template>
 
 <script>
-const baseCsv = require('@/utils/csv/baseCsv.js');
+import baseCsv from '@/utils/csv/baseCsv.js';
 
 // |--------------------------------------------------|
 // |                                                  |

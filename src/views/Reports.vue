@@ -5,11 +5,11 @@
       id="backBtn"
       class="mb-3"
       elevation="2"
-      @click="backClick()"
       :size="isMobile() ? 'x-small' : 'default'"
+      @click="backClick()"
     >
-      <template v-slot:prepend>
-        <v-icon size="large" class="pr-1">mdi-arrow-left-thin</v-icon>
+      <template #prepend>
+        <v-icon size="large" class="pr-1"> mdi-arrow-left-thin </v-icon>
       </template>
       Back
     </v-btn>
@@ -17,12 +17,12 @@
       <v-card color="#bc3825">
         <v-card-title class="d-flex align-center header_style" v-bind:class="{ 'justify-center': isMobile() }">
           <h2 class="text-white">Reports</h2>
-          <v-spacer></v-spacer>
+          <v-spacer />
           <v-tooltip location="bottom">
-            <template v-slot:activator="{ props }">
+            <template #activator="{ props }">
               <v-btn id="contactEmployeesBtn" @click="renderContactEmployeesModal()" v-bind="props">
                 Contact
-                <template v-slot:append>
+                <template #append>
                   <v-icon>mdi-email</v-icon>
                 </template>
               </v-btn>
@@ -32,25 +32,25 @@
         </v-card-title>
       </v-card>
       <v-container fluid class="px-0 px-md-4">
-        <reports-page-loader v-if="loading"></reports-page-loader>
+        <reports-page-loader v-if="loading" />
         <div v-else>
           <!-- user is mobile -->
           <div v-if="isMobile()" class="text-center">
             <v-menu offset="y">
-              <template v-slot:activator="{ props }">
-                <v-btn variant="text" color="#bc3825" theme="dark" class="font-weight-bold" v-bind="props"
-                  >{{ currentTab.toUpperCase() }} <v-icon class="pb-1">mdi-chevron-down</v-icon>
+              <template #activator="{ props }">
+                <v-btn variant="text" color="#bc3825" theme="dark" class="font-weight-bold" v-bind="props">
+                  {{ currentTab.toUpperCase() }} <v-icon class="pb-1"> mdi-chevron-down </v-icon>
                 </v-btn>
               </template>
               <v-list>
-                <v-list-item @click="selectDropDown('contracts')">Contracts</v-list-item>
-                <v-list-item @click="selectDropDown('customer orgs')">Customer Orgs</v-list-item>
-                <v-list-item @click="selectDropDown('certifications')">Certifications</v-list-item>
-                <v-list-item @click="selectDropDown('awards')">Awards</v-list-item>
-                <v-list-item @click="selectDropDown('languages')">Foreign Languages</v-list-item>
-                <v-list-item @click="selectDropDown('job roles')">Job Roles</v-list-item>
-                <v-list-item @click="selectDropDown('technologies')">Technologies</v-list-item>
-                <v-list-item @click="selectDropDown('security info')">Security Info</v-list-item>
+                <v-list-item @click="selectDropDown('contracts')"> Contracts </v-list-item>
+                <v-list-item @click="selectDropDown('customer orgs')"> Customer Orgs </v-list-item>
+                <v-list-item @click="selectDropDown('certifications')"> Certifications </v-list-item>
+                <v-list-item @click="selectDropDown('awards')"> Awards </v-list-item>
+                <v-list-item @click="selectDropDown('languages')"> Foreign Languages </v-list-item>
+                <v-list-item @click="selectDropDown('job roles')"> Job Roles </v-list-item>
+                <v-list-item @click="selectDropDown('technologies')"> Technologies </v-list-item>
+                <v-list-item @click="selectDropDown('security info')"> Security Info </v-list-item>
               </v-list>
             </v-menu>
             <hr class="my-1" />
@@ -65,15 +65,15 @@
           </div>
           <div v-else>
             <!-- user is not mobile -->
-            <v-tabs color="blue" center-active grow show-arrows @update:model-value="changeTab" v-model="currentTab">
-              <v-tab value="contracts">Contracts</v-tab>
-              <v-tab value="customer orgs">Customer Orgs</v-tab>
-              <v-tab value="certifications">Certifications</v-tab>
-              <v-tab value="awards">Awards</v-tab>
-              <v-tab value="languages">Foreign Languages</v-tab>
-              <v-tab value="job roles">Job Roles</v-tab>
-              <v-tab value="technologies">Technologies</v-tab>
-              <v-tab value="security info">Security Info</v-tab>
+            <v-tabs color="blue" center-active v-model="currentTab" grow show-arrows @update:model-value="changeTab">
+              <v-tab value="contracts"> Contracts </v-tab>
+              <v-tab value="customer orgs"> Customer Orgs </v-tab>
+              <v-tab value="certifications"> Certifications </v-tab>
+              <v-tab value="awards"> Awards </v-tab>
+              <v-tab value="languages"> Foreign Languages </v-tab>
+              <v-tab value="job roles"> Job Roles </v-tab>
+              <v-tab value="technologies"> Technologies </v-tab>
+              <v-tab value="security info"> Security Info </v-tab>
             </v-tabs>
             <v-window v-model="currentTab">
               <v-window-item value="contracts" class="mx-2 my-6">
@@ -106,7 +106,7 @@
       </v-container>
     </v-card>
     <v-dialog v-model="toggleContactEmployeesModal" :width="isMobile() ? '100%' : '60%'">
-      <contact-employees-modal :passedEmployees="employeesToContact" :key="contactKey"></contact-employees-modal>
+      <contact-employees-modal :passed-employees="employeesToContact" :key="contactKey" />
     </v-dialog>
   </div>
 </template>

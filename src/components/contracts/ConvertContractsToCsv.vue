@@ -6,7 +6,7 @@
 </template>
 <script>
 import { isMobile, isSmallScreen } from '@/utils/utils';
-const contractsCsv = require('@/utils/csv/contractsCsv.js');
+import contractsCsv from '@/utils/csv/contractsCsv.js';
 // |--------------------------------------------------|
 // |                                                  |
 // |                      METHODS                     |

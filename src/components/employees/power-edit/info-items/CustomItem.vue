@@ -7,7 +7,7 @@
 <script setup>
 import PlaceOfBirth from '@/components/employees/power-edit/info-items/custom-items/PlaceOfBirth.vue';
 import WorkStatus from '@/components/employees/power-edit/info-items/custom-items/WorkStatus.vue';
-const FIELDS = require('@/components/employees/power-edit/js/fields.js');
+import FIELDS from '@/components/employees/power-edit/js/fields.js';
 
 // |--------------------------------------------------|
 // |                                                  |

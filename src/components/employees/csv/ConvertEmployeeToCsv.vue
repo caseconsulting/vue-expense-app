@@ -12,7 +12,7 @@
 </template>
 
 <script>
-const employeeCsv = require('@/utils/csv/employeeCsv.js');
+import employeeCsv from '@/utils/csv/employeeCsv.js';
 
 // |--------------------------------------------------|
 // |                                                  |

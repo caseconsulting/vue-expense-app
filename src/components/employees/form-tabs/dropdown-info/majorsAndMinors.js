@@ -2137,3 +2137,7 @@ export let majorsAndMinors = [
   'Zootomy',
   'Zoroastrianism'
 ];
+
+export default {
+  majorsAndMinors
+};

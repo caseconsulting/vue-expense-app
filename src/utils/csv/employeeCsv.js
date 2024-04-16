@@ -4,7 +4,7 @@
  */
 import _ from 'lodash';
 import { difference, format, getTodaysDate, minimum } from '@/shared/dateUtils';
-const csvUtils = require('./baseCsv.js');
+import csvUtils from './baseCsv.js';
 
 /**
  * Returns the CSV filestring as a string.
@@ -545,3 +545,21 @@ export function getTags(employeeID, tags) {
   });
   return employeeTags && employeeTags.length > 0 ? employeeTags.map((t) => t.tagName).join(', ') : null;
 } // getTags
+
+export default {
+  download,
+  convertEmployees,
+  getWorkStatus,
+  filterUndefined,
+  getAwards,
+  getCertifications,
+  getClearancesData,
+  getContractLengthInYears,
+  getProjectLengthInYears,
+  getContractPrimeProject,
+  getCustomerOrgExp,
+  getCompanies,
+  getEducation,
+  getTechnologies,
+  getTags
+};

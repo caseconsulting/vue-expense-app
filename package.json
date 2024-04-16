@@ -3,7 +3,7 @@
   "version": "4.2.0",
   "private": true,
   "scripts": {
-    "build": "export NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service build",
+    "build": "export NODE_OPTIONS=--openssl-legacy-provider && vite build",
     "clean": "rm -rf dist tests_output",
     "cli": "vue-cli-service",
     "predeploy:dev": "npm run download:dev:env",
@@ -24,7 +24,7 @@
     "lint": "npm run eslint && npm run stylelint",
     "precommit": "npm run validate && npm run eslint && npm run stylelint && npm run test",
     "reinstall": "npm run install && npm ci",
-    "serve": "export NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service serve",
+    "serve": "export NODE_OPTIONS=--openssl-legacy-provider && vite --port 8080",
     "start": "npm run serve",
     "stylelint": "stylelint src/**/*.{css,scss,vue}",
     "test": "npm run test:unit",
@@ -64,10 +64,8 @@
   "devDependencies": {
     "@babel/core": "7.24.4",
     "@babel/eslint-parser": "7.24.1",
-    "@vue/cli-plugin-babel": "5.0.8",
-    "@vue/cli-plugin-unit-jest": "5.0.8",
-    "@vue/cli-service": "5.0.8",
-    "@vue/compiler-sfc": "3.4.24",
+    "@vitejs/plugin-vue": "5.0.4",
+    "@vue/compiler-sfc": "3.4.21",
     "@vue/eslint-config-prettier": "9.0.0",
     "@vue/test-utils": "2.4.5",
     "@vue/vue3-jest": "27.0.0",
@@ -82,12 +80,11 @@
     "postcss-loader": "8.1.1",
     "precommit-hook": "3.0.0",
     "prettier": "3.2.5",
-    "sass": "1.75.0",
-    "sass-loader": "14.2.1",
-    "stylelint": "16.4.0",
+    "sass": "1.72.0",
+    "stylelint": "16.2.1",
     "stylelint-config-recommended-scss": "14.0.0",
     "stylelint-config-recommended-vue": "1.5.0",
-    "vue-template-compiler": "2.7.16"
+    "vite": "5.2.8"
   },
   "browserslist": [
     "> 1%",

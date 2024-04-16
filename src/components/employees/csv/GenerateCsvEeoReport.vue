@@ -16,7 +16,7 @@
 <script>
 import _ from 'lodash';
 import { isMobile, isSmallScreen } from '@/utils/utils';
-const eeoCsv = require('@/utils/csv/eeoCsv.js');
+import eeoCsv from '@/utils/csv/eeoCsv.js';
 
 // Keston wrote all this crap. Please don't ask me about it.
 // I don't know how it works either.

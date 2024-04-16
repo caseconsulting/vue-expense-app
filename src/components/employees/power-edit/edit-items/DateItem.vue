@@ -1,9 +1,8 @@
 <template>
   <v-text-field
-    ref="formFields"
     :model-value="format(model, null, 'MM/DD/YYYY')"
     :rules="props.field.rules"
-    class="power-edit-field"
+    autofocus
     hint="MM/DD/YYYY format"
     v-mask="'##/##/####'"
     variant="underlined"
@@ -26,7 +25,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { inject, ref, watch } from 'vue';
 import { format, DEFAULT_ISOFORMAT, FORMATTED_ISOFORMAT } from '@/shared/dateUtils';
 import { mask } from 'vue-the-mask';
 
@@ -37,9 +36,26 @@ import { mask } from 'vue-the-mask';
 // |--------------------------------------------------|
 
 const props = defineProps(['field', 'item']);
+const emitter = inject('emitter');
 const model = ref(props.item[props.field.key]);
 const showMenu = ref(false);
 const vMask = (a, b) => mask(a, b);
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      WATCH                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+watch(
+  () => model.value,
+  () => {
+    emitter.emit('update-item', {
+      field: props.field,
+      item: { ...props.item, [`${props.field.key}`]: model.value }
+    });
+  }
+);
 
 // |--------------------------------------------------|
 // |                                                  |

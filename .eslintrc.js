@@ -1,17 +1,12 @@
 module.exports = {
   root: true,
-  parserOptions: {
-    parser: '@babel/eslint-parser',
-    requireConfigFile: false,
-    ecmaVersion: 9,
-    sourceType: 'module'
-  },
   globals: { before: false },
   env: {
     browser: true,
     es6: true,
     jest: true,
-    node: true
+    node: true,
+    es2022: true
   },
   extends: [
     'eslint:recommended',

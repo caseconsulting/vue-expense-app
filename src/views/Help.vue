@@ -8,11 +8,11 @@
     <br />
 
     <div class="mb-5">
-      <div class="text-center mb-3"></div>
+      <div class="text-center mb-3" />
       <v-expansion-panels variant="accordion" :model-value="panel">
         <v-expansion-panel v-for="section in sections" :key="section[0]">
           <!-- Header -->
-          <v-expansion-panel-title :id="section[0]" v-if="canView(section[1])">
+          <v-expansion-panel-title v-if="canView(section[1])" :id="section[0]">
             {{ section[0] }}
           </v-expansion-panel-title>
 
@@ -27,7 +27,7 @@
               mobile-breakpoint="0"
               hide-default-footer
             >
-              <template v-slot:bottom></template>
+              <template #bottom />
             </v-data-table>
             <v-data-table
               v-else
@@ -38,15 +38,15 @@
               mobile-breakpoint="0"
               hide-default-footer
             >
-              <template v-slot:bottom></template
-            ></v-data-table>
+              <template #bottom />
+            </v-data-table>
           </v-expansion-panel-text>
           <v-expansion-panel-text v-else-if="canView(section[1])">
             <v-card>
               <v-card-text class="bg-grey-lighten-3">
                 <li v-for="(ques, index) in section" :key="ques.title">
                   <div v-if="ques.title && (!ques.employeeRole || canView(ques.employeeRole))" class="pb-1">
-                    <body class="italics" :id="section[0] + '-' + index">
+                    <body :id="section[0] + '-' + index" class="italics">
                       <v-icon>mdi-motion</v-icon> {{ ques.title }}
                     </body>
                     {{ ques.body }}
@@ -108,7 +108,6 @@ function canView(qRole) {
 // |--------------------------------------------------|
 
 export default {
-  created,
   data() {
     return {
       panel: null,
@@ -357,6 +356,7 @@ export default {
   computed: {
     isMobile
   },
+  created,
   methods: {
     canView,
     getRole
