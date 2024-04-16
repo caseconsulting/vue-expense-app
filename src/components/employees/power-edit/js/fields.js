@@ -204,6 +204,7 @@ export const SOCIAL = {
   group: true,
   editType: TYPES.CUSTOM,
   infoType: TYPES.CUSTOM,
+  subkeys: ['city', 'country', 'st'],
   ...groupWidth
 };
 
@@ -214,6 +215,7 @@ export const PLACE_OF_BIRTH = {
   group: true,
   editType: TYPES.CUSTOM,
   infoType: TYPES.CUSTOM,
+  subkeys: ['currentStreet', 'currentStreet2', 'currentCity', 'currentState', 'currentZIP'],
   ...groupWidth
 };
 
