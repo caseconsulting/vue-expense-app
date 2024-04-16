@@ -181,8 +181,8 @@
 
           <!-- NEW DATA TABLE -->
           <v-data-table
-            v-model:sort-by="sortBy"
-            v-model:items-per-page="itemsPerPage"
+            :sort-by="sortBy"
+            :items-per-page="itemsPerPage"
             :headers="headers"
             :items="filteredEmployees"
             :loading="loading"
@@ -882,14 +882,11 @@ export default {
     PowerEditContainer,
     TagManager
   },
-<<<<<<< HEAD
   computed: {
     dataTableKey,
     storeIsPopulated
   },
   created,
-=======
->>>>>>> f35a7dc6 (POR-2533: use vite instead of vue cli)
   data() {
     return {
       applicationSyncData: null,
@@ -1005,9 +1002,6 @@ export default {
       toggleEmployeesSyncModal: false
     };
   },
-  computed: {
-    storeIsPopulated
-  },
   watch: {
     'filter.active': watchFilterActive,
     storeIsPopulated: watchStoreIsPopulated,
@@ -1015,7 +1009,6 @@ export default {
     selectedTags: watchSelectedTags
   },
   beforeUnmount,
-  created,
   methods: {
     changeAvatar,
     clearCreateEmployee,

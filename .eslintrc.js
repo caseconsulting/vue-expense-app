@@ -1,6 +1,12 @@
 module.exports = {
   root: true,
-  globals: { before: false },
+  globals: {
+    before: false,
+    defineProps: 'readonly',
+    defineEmits: 'readonly',
+    defineExpose: 'readonly',
+    withDefaults: 'readonly'
+  },
   env: {
     browser: true,
     es6: true,
