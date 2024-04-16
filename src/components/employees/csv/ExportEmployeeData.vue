@@ -169,16 +169,11 @@ async function download() {
   // filter CSV info
   let csvInfo = this.employees;
   csvInfo = this.filterEmployees(csvInfo);
-<<<<<<< HEAD
-  let yearText = this.filters.year;
-  if (yearText == this.filterOptions.years[0]) yearText = getTodaysDate('YYYY');
-=======
   if (csvInfo.length === 0) {
     this.status = 'Filters produce no employees. Operation cancelled.';
     this.loading = false;
     return;
   }
->>>>>>> 1de5d8d9 (POR-2537: qb csv download)
 
   // download from proper csv util
   let filename = `Download (${this.filters.period})`;
