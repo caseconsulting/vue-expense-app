@@ -176,6 +176,7 @@
           </v-btn>
 
           <v-btn class="mb-5 ml-2 ml-md-4 float-right" @click="powerEdit = true" variant="flat">
+            <v-tooltip activator="parent">Enter power edit mode</v-tooltip>
             <v-icon size="x-large"> mdi-pencil </v-icon>
           </v-btn>
 
@@ -775,6 +776,9 @@ async function created() {
   this.emitter.on('close-employee-export', () => {
     this.showExportDataModal = false;
   });
+  this.emitter.on('cancel-power-edit', () => {
+    this.powerEdit = false;
+  });
 
   // fill in search box if routed from another page
   if (localStorage.getItem('requestedFilter')) {
@@ -813,6 +817,7 @@ function beforeUnmount() {
   this.emitter.off('close-tag-manager');
   this.emitter.off('close-data-sync-results-modal');
   this.emitter.off('close-employee-export');
+  this.emitter.off('cancel-power-edit');
 } // beforeUnmount
 
 // |--------------------------------------------------|

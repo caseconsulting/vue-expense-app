@@ -4,15 +4,24 @@
     <v-text-field
       v-model.trim="streetModel"
       autofocus
+      hide-details
       label="Street 1"
       variant="underlined"
-      hint="Search address and select option to auto-fill fields"
       class="d-inline-block field mr-4"
       @update:modelValue="searchAddress($event)"
     >
       <v-menu target="parent" v-model="showMenu" location="bottom">
-        <v-list v-if="predictions.length > 0" :items="predictions" @click:select="predictionSelected"></v-list
-      ></v-menu>
+        <v-list
+          v-if="predictions.length > 0"
+          :items="predictions"
+          @click:select="predictionSelected"
+          rounded="0"
+        ></v-list>
+        <v-list v-if="predictions.length > 0" @click.stop rounded="0" class="d-flex align-center">
+          <span class="text-caption text-grey ml-2">powered by</span>
+          <v-img :src="google" width="50" alt="Github icon" inline class="ml-1" />
+        </v-list>
+      </v-menu>
     </v-text-field>
     <!-- Current Address: Street 2 -->
     <v-text-field
@@ -52,6 +61,7 @@
 </template>
 
 <script setup>
+import google from '@/assets/img/trademarks/google.png';
 import { STATES } from '@/utils/utils';
 import { inject, ref, watch } from 'vue';
 import { mask } from 'vue-the-mask';

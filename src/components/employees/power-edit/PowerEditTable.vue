@@ -55,6 +55,7 @@ import _ from 'lodash';
 import api from '@/shared/api.js';
 import { computed, ref, inject } from 'vue';
 import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -65,6 +66,7 @@ import { useStore } from 'vuex';
 const props = defineProps(['fields', 'search']);
 const store = useStore();
 const emitter = inject('emitter');
+const router = useRouter();
 const editItem = ref(null);
 const expanded = ref([]);
 const valid = ref(true);
@@ -93,7 +95,7 @@ const employees = computed(() => {
 
 function handleItemClick(item, field) {
   if (field.editType) editItem.value = { item, field };
-  else if (field.fixed) this.$router.push(`employee/${item.employeeNumber}`);
+  else if (field.fixed) router.push(`employee/${item.employeeNumber}`);
 }
 
 function handleRowClick() {
@@ -115,7 +117,6 @@ function saveColor(item, field) {
 async function saveItem(item, field) {
   editItem.value = null;
   let employee = _.find(store.getters.employees, (e) => e.id === item.id);
-  let originalEmployee = _.cloneDeep(employee);
   let tmpField = field.key + 'tmp';
   employee[tmpField] = { field, saving: true };
   let resp;
@@ -123,19 +124,16 @@ async function saveItem(item, field) {
     let promises = [];
     _.forEach(field.subkeys, (key) => {
       employee[key] = item[key];
-      originalEmployee[key] = item[key];
-      promises.push(api.updateAttribute(api.EMPLOYEES, { ...originalEmployee }, key));
+      promises.push(api.updateAttribute(api.EMPLOYEES, item, key));
     });
     resp = await Promise.all(promises);
   } else {
     employee[field.key] = item[field.key];
-    originalEmployee[field.key] = item[field.key];
-    resp = await api.updateAttribute(api.EMPLOYEES, { ...originalEmployee }, field.key);
+    resp = await api.updateAttribute(api.EMPLOYEES, item, field.key);
   }
   if (resp.name !== 'AxiosError') {
     employee[tmpField] = { ...employee[tmpField], success: true, saving: false };
   } else {
-    employee[field.key] = originalEmployee[field.key];
     employee[tmpField] = { ...employee[tmpField], fail: true, saving: false };
   }
 

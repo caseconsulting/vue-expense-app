@@ -136,10 +136,10 @@ export function getValidateFalse() {
 export function duplicateEmployeeNumberRule() {
   return [
     (v, employee) => {
-      let duplicate = _.some(
-        store.getters.employees,
-        (e) => e.employeeNumber === Number(v) && employee.employeeNumber !== Number(v)
-      );
+      let emp = _.find(store.getters.employees, (e) => e.id === employee.id);
+      let duplicate = _.some(store.getters.employees, (e) => {
+        return Number(e.employeeNumber) === Number(v) && Number(emp.employeeNumber) !== Number(v);
+      });
       return !duplicate || 'This employee id is already in use';
     }
   ];

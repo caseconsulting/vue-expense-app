@@ -1,5 +1,5 @@
 <template>
-  <v-row class="pa-4">
+  <v-row>
     <v-col cols="4">
       <fieldset class="pa-1">
         <legend class="pa-0">Selected</legend>
