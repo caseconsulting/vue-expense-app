@@ -463,6 +463,15 @@ async function syncApplications() {
   return await execute('post', `/${UTILITY}/syncApplications`, {});
 } // syncApplications
 
+/**
+ * Gets employee's ADP info
+ *
+ * @return - The response from the ADP get function
+ */
+async function getEmployeesFromAdp() {
+  return await execute('get', `/${UTILITY}/getEmployeesFromAdp`);
+}
+
 export default {
   createAttachment,
   createItem,
@@ -500,6 +509,7 @@ export default {
   uploadResume,
   processHighFive,
   syncApplications,
+  getEmployeesFromAdp,
   EXPENSE_TYPES,
   EXPENSES,
   EMPLOYEES,

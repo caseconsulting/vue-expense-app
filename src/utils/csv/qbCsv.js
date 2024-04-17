@@ -50,6 +50,10 @@ export async function convertEmployees(employees, startDate, endDate) {
       getter: getCaseId
     },
     {
+      title: 'ADP ID',
+      getter: getAdpId
+    },
+    {
       title: 'Employee Name',
       getter: getEmployeeName
     },
@@ -72,7 +76,9 @@ export async function convertEmployees(employees, startDate, endDate) {
   ];
 
   // fill in INFO data
+  let adpPromise = api.getEmployeesFromAdp(); // run in background while qb runs
   await fillTimesheetData(employees, startDate, endDate);
+  fillAdpData(employees, await adpPromise); // fill in ADP response into INFO var
 
   // build out one row per employee
   let rows = [];
@@ -140,6 +146,30 @@ async function fillTimesheetData(employees, startDate, endDate) {
 }
 
 /**
+ * Fills in INFO with data from ADP, namely the ADP ID
+ *
+ * @param employees - employees to look for
+ * @param adpInfo - raw ADP info from API call
+ */
+function fillAdpData(employees, adpInfo) {
+  // make set of employee numbers from `employees`
+  let employeeNums = new Set();
+  for (let e of employees) employeeNums.add(e.employeeNumber);
+
+  // fill in info from ADP
+  let empNum, adpId;
+  for (let e of adpInfo) {
+    empNum = e?.customFieldGroup?.stringFields[0]?.stringValue;
+    if (!empNum) continue; // skip if employee num wasn't found in adpInfo
+    // fill in data to INFO
+    if (!INFO[empNum]) INFO[empNum] = {};
+    adpId = e.workAssignments[0]?.payrollFileNumber;
+    if (adpId) adpId = Number(adpId); // remove leading 0s
+    INFO[empNum]['adpId'] = adpId;
+  }
+}
+
+/**
  * Gets employee CASE ID
  *
  * @param employee
@@ -147,6 +177,16 @@ async function fillTimesheetData(employees, startDate, endDate) {
  */
 function getCaseId(employee) {
   return employee.employeeNumber;
+}
+
+/**
+ * Gets employee ADP ID, based on INFO global var
+ *
+ * @param employee
+ * @returns {String} employee CASE ID
+ */
+function getAdpId(employee) {
+  return INFO[employee.employeeNumber]?.adpId || '---';
 }
 
 /**
