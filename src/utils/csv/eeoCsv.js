@@ -275,6 +275,7 @@ export function convertEmployees(employees) {
 } // convertEmployees
 
 export default {
+  fileString,
   download,
   convertEmployees
 };

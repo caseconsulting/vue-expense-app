@@ -204,6 +204,7 @@ export const SOCIAL = {
   group: true,
   editType: TYPES.CUSTOM,
   infoType: TYPES.CUSTOM,
+  subkeys: ['twitter', 'linkedIn', 'github'],
   ...groupWidth
 };
 

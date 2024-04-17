@@ -19,6 +19,7 @@
           :field="field"
           :item="item"
           :showInfo="field.group"
+          :valid="valid"
         ></power-edit-table-edit-item>
         <power-edit-table-info-item
           v-else-if="field.infoType"
@@ -34,7 +35,11 @@
         <tr v-if="editItem?.field && editItem?.item">
           <td colspan="12">
             <div>
-              <power-edit-table-edit-item :field="editItem.field" :item="editItem.item"></power-edit-table-edit-item>
+              <power-edit-table-edit-item
+                :field="editItem.field"
+                :item="editItem.item"
+                :valid="valid"
+              ></power-edit-table-edit-item>
             </div>
           </td>
         </tr>
@@ -121,9 +126,7 @@ async function saveItem(item, field) {
       originalEmployee[key] = item[key];
       promises.push(api.updateAttribute(api.EMPLOYEES, { ...originalEmployee }, key));
     });
-    console.log(field);
     resp = await Promise.all(promises);
-    console.log(field);
   } else {
     employee[field.key] = item[field.key];
     originalEmployee[field.key] = item[field.key];

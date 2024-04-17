@@ -79,7 +79,7 @@ function isUSA() {
 }
 </script>
 
-<style>
+<style scoped>
 .field {
   width: 200px !important;
   min-width: 200px !important;

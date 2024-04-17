@@ -212,7 +212,7 @@
         v-model="searchString"
         hide-no-data
         variant="outlined"
-        hint="Search address and select option to auto-fill fields below."
+        persitent-hint="Search address and select option to auto-fill fields below."
         persistent-hint
       >
         <template v-slot:item="{ item, props }">

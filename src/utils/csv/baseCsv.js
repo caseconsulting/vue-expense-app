@@ -8,8 +8,8 @@
 
 // Imports and constants for all functions
 import _ from 'lodash';
-const Papa = require('papaparse');
-const XLSX = require('xlsx');
+import { parse as papaParse } from 'papaparse';
+import { utils, write } from 'xlsx';
 const NEW_LINE = '\n';
 
 /**
@@ -61,25 +61,25 @@ export function download(csvText, filename = null, asXlsx = true) {
     let text;
     for (let i = 0; i < csvText.length; i++) {
       text = csvText[i].csv;
-      csvData.push(Papa.parse(text, { header: false }));
+      csvData.push(papaParse(text, { header: false }));
     }
 
     // convert parsed CSV data to XLSX sheets
     let worksheets = [];
     for (let item of csvData) {
-      worksheets.push(XLSX.utils.json_to_sheet(item.data, { skipHeader: true }));
+      worksheets.push(utils.json_to_sheet(item.data, { skipHeader: true }));
     }
 
     // create workbook and fill it with sheets
-    const workbook = XLSX.utils.book_new();
+    const workbook = utils.book_new();
     let sheet;
     for (let i = 0; i < worksheets.length; i++) {
       sheet = worksheets[i];
-      XLSX.utils.book_append_sheet(workbook, sheet, csvText[i].name);
+      utils.book_append_sheet(workbook, sheet, csvText[i].name);
     }
 
     // convert workbook to blob
-    const xlsx = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const xlsx = write(workbook, { bookType: 'xlsx', type: 'array' });
     blob = new Blob([xlsx], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
   }
 

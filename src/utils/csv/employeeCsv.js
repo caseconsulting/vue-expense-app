@@ -548,6 +548,7 @@ export function getTags(employeeID, tags) {
 
 export default {
   download,
+  fileString,
   convertEmployees,
   getWorkStatus,
   filterUndefined,
