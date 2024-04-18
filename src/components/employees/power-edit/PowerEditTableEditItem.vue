@@ -12,18 +12,21 @@
         v-if="props.field.editType === TYPES.DEFAULT"
         :field="props.field"
         :item="props.item"
+        :valid="props.valid"
         class="single-field"
       ></default-edit-item>
       <date-edit-item
         v-else-if="props.field.editType === TYPES.DATE_MMYYYY || props.field.infoType === TYPES.DATE_MMDDYYYY"
         :field="props.field"
         :item="props.item"
+        :valid="props.valid"
         class="single-field"
       ></date-edit-item>
       <custom-edit-item
         v-else
         :field="props.field"
         :item="props.item"
+        :valid="props.valid"
         :class="field.group ? 'group-row' : 'single-field'"
       ></custom-edit-item>
       <v-btn density="comfortable" :disabled="!props.valid" icon variant="text" @click.stop="save()">

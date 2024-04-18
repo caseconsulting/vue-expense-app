@@ -145,6 +145,15 @@ export function duplicateEmployeeNumberRule() {
   ];
 }
 
+export function duplicateTechnologyRules() {
+  return [
+    (v, employee, technologies) => {
+      let duplicates = _.filter(technologies, (t) => t.name === v);
+      return duplicates.length === 0 || 'Duplicate technology found';
+    }
+  ];
+}
+
 /**
  * Gets the rules for validating employee PTO Cash Out request
  * @param ptoLimit employee's available PTO
@@ -181,5 +190,6 @@ export default {
   getURLRules,
   getValidateFalse,
   duplicateEmployeeNumberRule,
+  duplicateTechnologyRules,
   getPTOCashOutRules
 };

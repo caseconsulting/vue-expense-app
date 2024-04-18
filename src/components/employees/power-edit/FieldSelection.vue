@@ -21,7 +21,7 @@
       <fieldset class="pa-1">
         <legend class="pa-0">Unselected</legend>
         <v-chip
-          v-for="field of nonSelectedFields"
+          v-for="field of unSelectedFields"
           :key="field.key"
           class="ml-1 mb-1 pointer"
           color="black"
@@ -55,9 +55,10 @@ const localSelectedFields = ref(props.selectedFields);
 // |                                                  |
 // |--------------------------------------------------|
 
-const nonSelectedFields = computed(() => {
+const unSelectedFields = computed(() => {
   let unselectedFields = _.xorBy(props.fields, localSelectedFields.value, 'title');
   let editableUnselectedFields = _.filter(unselectedFields, (f) => f.editType);
+  editableUnselectedFields = _.sortBy(editableUnselectedFields, (f) => f.title);
   return editableUnselectedFields;
 });
 

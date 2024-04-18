@@ -1,6 +1,6 @@
 import v from '@/shared/validationUtils.js';
-const groupWidth = { width: '300', minWidth: '300', maxWidth: '300' };
-const nonGroupWidth = { width: '180', minWidth: '180', maxWidth: '180' };
+const groupWidth = { width: '350px', minWidth: '350px', maxWidth: '350px' };
+const nonGroupWidth = { width: '180px', minWidth: '180px', maxWidth: '180px' };
 import { TYPES } from './fieldTypes.js';
 
 // |--------------------------------------------------|
