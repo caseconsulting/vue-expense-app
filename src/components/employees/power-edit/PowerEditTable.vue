@@ -53,6 +53,7 @@ import PowerEditTableInfoItem from '@/components/employees/power-edit/PowerEditT
 import PowerEditTableEditItem from '@/components/employees/power-edit/PowerEditTableEditItem.vue';
 import _ from 'lodash';
 import api from '@/shared/api.js';
+import { openLink } from '@/utils/utils.js';
 import { computed, ref, inject } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
@@ -95,7 +96,7 @@ const employees = computed(() => {
 
 function handleItemClick(item, field) {
   if (field.editType) editItem.value = { item, field };
-  else if (field.fixed) router.push(`employee/${item.employeeNumber}`);
+  else if (field.fixed) openLink(router.resolve({ path: `employee/${item.employeeNumber}` })?.href);
 }
 
 function handleRowClick() {

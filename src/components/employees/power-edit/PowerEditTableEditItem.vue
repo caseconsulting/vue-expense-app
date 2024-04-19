@@ -30,6 +30,7 @@
         :class="field.group ? 'group-row' : 'single-field'"
       ></custom-edit-item>
       <v-btn density="comfortable" :disabled="!props.valid" icon variant="text" @click.stop="save()">
+        <v-tooltip activator="parent">Save {{ props.field.title }}</v-tooltip>
         <v-icon>mdi-content-save</v-icon>
       </v-btn>
     </v-row>
@@ -42,7 +43,7 @@ import DateEditItem from '@/components/employees/power-edit/edit-items/DateItem.
 import CustomEditItem from '@/components/employees/power-edit/edit-items/CustomItem.vue';
 import PowerEditTableInfoItem from '@/components/employees/power-edit/PowerEditTableInfoItem.vue';
 import _ from 'lodash';
-import { inject, ref, onBeforeUnmount } from 'vue';
+import { inject, ref, onBeforeUnmount, onMounted } from 'vue';
 import { TYPES } from '@/components/employees/power-edit/js/fieldTypes.js';
 
 // |--------------------------------------------------|
@@ -54,21 +55,24 @@ import { TYPES } from '@/components/employees/power-edit/js/fieldTypes.js';
 const props = defineProps(['field', 'item', 'showInfo', 'valid']);
 const emitter = inject('emitter');
 const clonedItem = ref(props.item);
-emitter.on('update-item', ({ item, field }) => {
-  if (field.group && field.subkeys) {
-    _.forEach(field.subkeys, (key) => {
-      clonedItem.value[key] = item[key];
-    });
-  } else {
-    clonedItem.value[field.key] = item[field.key];
-  }
-});
 
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
 // |                                                  |
 // |--------------------------------------------------|
+
+onMounted(() => {
+  emitter.on('update-item', ({ item, field }) => {
+    if (field.group && field.subkeys) {
+      _.forEach(field.subkeys, (key) => {
+        clonedItem.value[key] = item[key];
+      });
+    } else {
+      clonedItem.value[field.key] = item[field.key];
+    }
+  });
+});
 
 onBeforeUnmount(() => {
   emitter.off('update-item');

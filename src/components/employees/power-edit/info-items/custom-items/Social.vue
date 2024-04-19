@@ -1,6 +1,6 @@
 <template>
   <v-row class="pa-0 ma-0">
-    <v-col class="d-flex justify-center">
+    <v-col cols="3">
       <v-avatar
         v-if="props.item['github']"
         rounded="0"
@@ -10,7 +10,7 @@
         <v-img class="grayImage" :src="github" alt="Github icon"></v-img>
       </v-avatar>
     </v-col>
-    <v-col class="d-flex justify-center">
+    <v-col cols="3">
       <v-avatar
         v-if="props.item['twitter']"
         rounded="0"
@@ -20,7 +20,7 @@
         <v-img class="grayImage" :src="x" alt="X icon"></v-img>
       </v-avatar>
     </v-col>
-    <v-col class="d-flex justify-center">
+    <v-col cols="3">
       <v-avatar v-if="props.item['linkedIn']" rounded="0" size="25" @click="openLink(props.item['linkedIn'])">
         <v-img class="grayImage" :src="linkedin" alt="LinkedIn icon"></v-img>
       </v-avatar>

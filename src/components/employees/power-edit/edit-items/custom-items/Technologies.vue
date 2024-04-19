@@ -1,23 +1,32 @@
 <template>
   <div class="d-flex align-center">
-    <v-form v-if="isAdding" v-model="valid" class="d-flex d-inline-block align-center">
+    <v-form v-model="valid" ref="form" class="d-flex d-inline-block align-center">
       <!-- Name of Technology -->
       <v-autocomplete
         v-model="model.name"
+        autofocus
         @update:search="updateTechDropDown($event)"
         :rules="[
           ...duplicateTechnologyRules().map((func) => func(model.name, props.item, technologies)),
           ...getRequiredRules()
         ]"
         :items="techDropdown"
-        autofocus
         hide-no-data
-        class="d-inline-block field mr-4"
+        class="d-inline-block field"
         label="Technology or Skill*"
         variant="underlined"
       >
       </v-autocomplete>
-
+      <!-- Years With Technology -->
+      <v-text-field
+        v-model.number="model.years"
+        :rules="[...getRequiredRules(), ...technologyExperienceRules().map((func) => func(model.years, model))]"
+        label="Years"
+        variant="underlined"
+        class="small-field mx-6"
+      >
+      </v-text-field>
+      <!-- Current Switch -->
       <v-tooltip text="Enabling this will auto-increment the years of experience every month" location="top">
         <template v-slot:activator="{ props }">
           <v-switch
@@ -27,23 +36,26 @@
             :color="caseGray"
             label="Current"
             density="compact"
-            class="d-inline-block field mr-4"
+            class="d-inline-block field"
           >
           </v-switch>
         </template>
       </v-tooltip>
     </v-form>
-    <v-btn @click="addTech" :disabled="!valid" :color="isAdding ? (valid ? 'green' : '') : 'blue'" class="ma-2 ml-0">
-      <span>{{ isAdding ? 'Insert' : 'Add' }}</span>
-      <v-icon v-if="(isAdding && valid) || !isAdding">{{ isAdding ? (valid ? 'mdi-check' : '') : 'mdi-plus' }}</v-icon>
+    <div v-if="unsavedTechnologies">Unsaved Technologies: {{ unsavedTechnologies }}</div>
+    <v-btn @click="addTech" size="small" :disabled="!valid" :color="valid ? 'green' : ''">
+      <span>Add</span>
+      <template v-slot:append>
+        <v-icon>mdi-plus</v-icon>
+      </template>
     </v-btn>
   </div>
 </template>
 
 <script setup>
-import { inject, ref, watch } from 'vue';
+import { computed, inject, ref, watch } from 'vue';
 import { useStore } from 'vuex';
-import { duplicateTechnologyRules, getRequiredRules } from '@/shared/validationUtils.js';
+import { duplicateTechnologyRules, getRequiredRules, technologyExperienceRules } from '@/shared/validationUtils.js';
 import _ from 'lodash';
 import api from '@/shared/api.js';
 
@@ -56,16 +68,28 @@ import api from '@/shared/api.js';
 const props = defineProps(['field', 'item']);
 const emitter = inject('emitter');
 const store = useStore();
+const form = ref(null);
 const model = ref({
-  name: '',
+  name: null,
   current: true,
   years: 0
 });
-const isAdding = ref(false);
-const valid = ref(true);
+const valid = ref(false);
 const technologies = ref(_.cloneDeep(props.item[props.field.key]));
 const techDropdown = ref([]);
 populateDropDown();
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+const unsavedTechnologies = computed(() => {
+  let originalEmp = _.find(store.getters.employees, (e) => e.id === props.item.id);
+  let addedTechs = _.xorBy(originalEmp[props.field.key], technologies.value, 'name');
+  return _.map(addedTechs, (t) => t.name)?.join(' & ');
+});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -75,7 +99,9 @@ populateDropDown();
 
 watch(
   () => [model.value],
-  () => {
+  async () => {
+    // validate model when values are not default
+    if (model.value.name !== null || !model.value.current || !!model.value.years) await form.value.validate();
     emitter.emit('update-item', {
       field: props.field,
       item: { ...props.item, [`${props.field.key}`]: technologies }
@@ -90,18 +116,16 @@ watch(
 // |                                                  |
 // |--------------------------------------------------|
 
-function addTech() {
-  if (isAdding.value) {
-    technologies.value.push(model.value);
+async function addTech() {
+  await form.value.validate();
+  if (valid.value) {
+    technologies.value ? technologies.value.push(model.value) : (technologies.value = [model.value]);
     model.value = {
-      name: '',
+      name: null,
       current: true,
       years: 0
     };
-    isAdding.value = false;
-    valid.value = true;
-  } else {
-    isAdding.value = true;
+    valid.value = false;
   }
 }
 
@@ -140,5 +164,10 @@ async function updateTechDropDown(query) {
   width: 200px !important;
   min-width: 200px !important;
   max-width: 200px !important;
+}
+.small-field {
+  width: 150px !important;
+  min-width: 150px !important;
+  max-width: 150px !important;
 }
 </style>

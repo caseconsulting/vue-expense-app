@@ -154,6 +154,15 @@ export function duplicateTechnologyRules() {
   ];
 }
 
+export function technologyExperienceRules() {
+  return [
+    (v) => v === Number(v) || 'Value must be a number',
+    (v) => (String(v).split('.')[1]?.length || 0) <= 2 || 'Value must be 2 decimal places or less',
+    (v, techObj) => v > 0 || techObj.current || 'Value must be greater than 0',
+    (v) => v < 100 || 'Value must be less than 100'
+  ];
+}
+
 /**
  * Gets the rules for validating employee PTO Cash Out request
  * @param ptoLimit employee's available PTO
@@ -191,5 +200,6 @@ export default {
   getValidateFalse,
   duplicateEmployeeNumberRule,
   duplicateTechnologyRules,
+  technologyExperienceRules,
   getPTOCashOutRules
 };
