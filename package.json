@@ -59,7 +59,7 @@
     "vuetify": "3.5.16",
     "vuewordcloud": "19.0.0",
     "vuex": "4.1.0",
-    "xlsx": "0.18.5"
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz"
   },
   "devDependencies": {
     "@babel/core": "7.24.4",
