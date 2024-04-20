@@ -3,7 +3,7 @@
  * csv.js
  */
 import _ from 'lodash';
-import store from '/store/index.js';
+import store from '../../../store/index.js';
 import { format, DEFAULT_ISOFORMAT } from '../../shared/dateUtils';
 const csvUtils = require('./baseCsv.js');
 
