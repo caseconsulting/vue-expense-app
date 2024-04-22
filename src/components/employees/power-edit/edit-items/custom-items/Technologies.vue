@@ -27,7 +27,7 @@
       >
       </v-text-field>
       <!-- Current Switch -->
-      <v-tooltip text="Enabling this will auto-increment the years of experience every month" location="top">
+      <v-tooltip text="Enabling will auto-increment the years of experience every month" location="top">
         <template v-slot:activator="{ props }">
           <v-switch
             v-model="model.current"

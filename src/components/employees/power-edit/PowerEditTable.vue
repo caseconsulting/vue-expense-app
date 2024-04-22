@@ -1,51 +1,56 @@
 <template>
-  <v-form v-model="valid">
-    <v-data-table
-      :expanded="expanded"
-      :items="employees"
-      :headers="props.fields"
-      :search="props.search"
-      density="comfortable"
-      fixed-header
-      fixed-footer
-      items-per-page="-1"
-      @click:row="handleRowClick"
-      class="power-edit-table mt-1"
-    >
-      <template v-for="field in props.fields" v-slot:[`item.${field.key}`]="{ item }">
-        <power-edit-table-edit-item
-          v-if="editItem?.item?.id === item.id && editItem?.field?.key === field.key"
-          :key="field"
-          :field="field"
-          :item="item"
-          :showInfo="field.group"
-          :valid="valid"
-        ></power-edit-table-edit-item>
-        <power-edit-table-info-item
-          v-else-if="field.infoType"
-          :key="field + 1"
-          @click="handleItemClick(item, field)"
-          :class="saveColor(item, field)"
-          :field="field"
-          :item="item"
-          class="d-flex align-center w-100 h-100"
-        ></power-edit-table-info-item>
-      </template>
-      <template v-slot:expanded-row>
-        <tr v-if="editItem?.field && editItem?.item">
-          <td colspan="12">
-            <div>
-              <power-edit-table-edit-item
-                :field="editItem.field"
-                :item="editItem.item"
-                :valid="valid"
-              ></power-edit-table-edit-item>
-            </div>
-          </td>
-        </tr>
-      </template>
-    </v-data-table>
-  </v-form>
+  <div>
+    <v-snackbar v-model="error.status" multi-line color="red" location="top" :timeout="8000" :vertical="true">
+      <span class="font-weight-bold text-body-2 pa-3">{{ error.message }}</span>
+    </v-snackbar>
+    <v-form v-model="valid">
+      <v-data-table
+        :expanded="expanded"
+        :items="employees"
+        :headers="props.fields"
+        :search="props.search"
+        density="comfortable"
+        fixed-header
+        fixed-footer
+        items-per-page="-1"
+        @click:row="handleRowClick"
+        class="power-edit-table mt-1"
+      >
+        <template v-for="field in props.fields" v-slot:[`item.${field.key}`]="{ item }">
+          <power-edit-table-edit-item
+            v-if="editItem?.item?.id === item.id && editItem?.field?.key === field.key"
+            :key="field"
+            :field="field"
+            :item="item"
+            :showInfo="field.group"
+            :valid="valid"
+          ></power-edit-table-edit-item>
+          <power-edit-table-info-item
+            v-else-if="field.infoType"
+            :key="field + 1"
+            @click="handleItemClick(item, field)"
+            :class="saveColor(item, field)"
+            :field="field"
+            :item="item"
+            class="d-flex align-center w-100 h-100"
+          ></power-edit-table-info-item>
+        </template>
+        <template v-slot:expanded-row>
+          <tr v-if="editItem?.field && editItem?.item">
+            <td colspan="12">
+              <div>
+                <power-edit-table-edit-item
+                  :field="editItem.field"
+                  :item="editItem.item"
+                  :valid="valid"
+                ></power-edit-table-edit-item>
+              </div>
+            </td>
+          </tr>
+        </template>
+      </v-data-table>
+    </v-form>
+  </div>
 </template>
 
 <script setup>
@@ -71,6 +76,7 @@ const router = useRouter();
 const editItem = ref(null);
 const expanded = ref([]);
 const valid = ref(true);
+const error = ref({ status: false, message: null });
 
 emitter.on('save-item', async ({ item, field }) => {
   await saveItem(item, field);
@@ -85,7 +91,7 @@ emitter.on('save-item', async ({ item, field }) => {
 watch(
   () => props.fields,
   () => {
-    if (expanded.value.length > 0 && !_.find(props.fields, (f) => f.key === editItem.value?.field?.key)) {
+    if (!_.find(props.fields, (f) => f.key === editItem.value?.field?.key)) {
       expanded.value = [];
       editItem.value = null;
     }
@@ -151,6 +157,10 @@ async function saveItem(item, field) {
   if (resp.name !== 'AxiosError') {
     employee[tmpField] = { ...employee[tmpField], success: true, saving: false };
   } else {
+    error.value = {
+      status: true,
+      message: resp?.response?.data?.message || 'An unknown error has occurred'
+    };
     employee[tmpField] = { ...employee[tmpField], fail: true, saving: false };
   }
 

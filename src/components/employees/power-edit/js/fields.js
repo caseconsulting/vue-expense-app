@@ -138,15 +138,15 @@ export const CONTRACTS = {
   ...groupWidth
 };
 
-export const CUSTOMER_ORG_EXP = {
-  title: 'Customer Org Exp',
-  key: 'customerOrgExp',
-  selected: false,
-  group: true,
-  editType: TYPES.CUSTOM,
-  infoType: TYPES.CUSTOM,
-  ...groupWidth
-};
+// export const CUSTOMER_ORG_EXP = {
+//   title: 'Customer Org Exp',
+//   key: 'customerOrgExp',
+//   selected: false,
+//   group: true,
+//   editType: TYPES.CUSTOM,
+//   infoType: TYPES.CUSTOM,
+//   ...groupWidth
+// };
 
 export const EDUCATION = {
   title: 'Education',
@@ -158,15 +158,15 @@ export const EDUCATION = {
   ...groupWidth
 };
 
-export const IC_TIME_FRAMES = {
-  title: 'IC Time Frames',
-  key: 'icTimeFrames',
-  selected: false,
-  group: true,
-  editType: TYPES.CUSTOM,
-  infoType: TYPES.CUSTOM,
-  ...groupWidth
-};
+// export const IC_TIME_FRAMES = {
+//   title: 'IC Time Frames',
+//   key: 'icTimeFrames',
+//   selected: false,
+//   group: true,
+//   editType: TYPES.CUSTOM,
+//   infoType: TYPES.CUSTOM,
+//   ...groupWidth
+// };
 
 export const LANGUAGES = {
   title: 'Languages',
@@ -264,9 +264,9 @@ export default {
   CLEARANCES,
   COMPANIES,
   CONTRACTS,
-  CUSTOMER_ORG_EXP,
+  // CUSTOMER_ORG_EXP,
   EDUCATION,
-  IC_TIME_FRAMES,
+  // IC_TIME_FRAMES,
   LANGUAGES,
   TECHNOLOGIES,
   SOCIAL,
