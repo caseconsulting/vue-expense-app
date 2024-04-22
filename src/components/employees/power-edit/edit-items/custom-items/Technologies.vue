@@ -53,7 +53,7 @@
 </template>
 
 <script setup>
-import { computed, inject, ref, watch } from 'vue';
+import { inject, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 import { duplicateTechnologyRules, getRequiredRules, technologyExperienceRules } from '@/shared/validationUtils.js';
 import _ from 'lodash';
@@ -85,11 +85,11 @@ populateDropDown();
 // |                                                  |
 // |--------------------------------------------------|
 
-const unsavedTechnologies = computed(() => {
-  let originalEmp = _.find(store.getters.employees, (e) => e.id === props.item.id);
-  let addedTechs = _.xorBy(originalEmp[props.field.key], technologies.value, 'name');
-  return _.map(addedTechs, (t) => t.name)?.join(' & ');
-});
+// const unsavedTechnologies = computed(() => {
+//   let originalEmp = _.find(store.getters.employees, (e) => e.id === props.item.id);
+//   let addedTechs = _.xorBy(originalEmp[props.field.key], technologies.value, 'name');
+//   return _.map(addedTechs, (t) => t.name)?.join(' & ');
+// });
 
 // |--------------------------------------------------|
 // |                                                  |
