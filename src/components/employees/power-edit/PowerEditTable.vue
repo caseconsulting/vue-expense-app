@@ -54,7 +54,7 @@ import PowerEditTableEditItem from '@/components/employees/power-edit/PowerEditT
 import _ from 'lodash';
 import api from '@/shared/api.js';
 import { openLink } from '@/utils/utils.js';
-import { computed, ref, inject } from 'vue';
+import { computed, ref, inject, watch } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 
@@ -75,6 +75,22 @@ const valid = ref(true);
 emitter.on('save-item', async ({ item, field }) => {
   await saveItem(item, field);
 });
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+watch(
+  () => props.fields,
+  () => {
+    if (expanded.value.length > 0 && !_.find(props.fields, (f) => f.key === editItem.value?.field?.key)) {
+      expanded.value = [];
+      editItem.value = null;
+    }
+  }
+);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -152,14 +168,14 @@ async function saveItem(item, field) {
 .item-success {
   font-weight: bold;
   color: green !important;
-  transition: color 2s ease-out !important;
-  -webkit-transition: color 2s ease-out !important;
+  transition: color 1s ease-in !important;
+  -webkit-transition: color 1s ease-in !important;
 }
 .item-fail {
   font-weight: bold;
   color: red !important;
-  transition: color 2s ease-out !important;
-  -webkit-transition: color 2s ease-out !important;
+  transition: color 1s ease-out !important;
+  -webkit-transition: color 1s ease-out !important;
 }
 .power-edit-table {
   max-height: 80vh;

@@ -63,15 +63,18 @@ const clonedItem = ref(props.item);
 // |--------------------------------------------------|
 
 onMounted(() => {
-  emitter.on('update-item', ({ item, field }) => {
-    if (field.group && field.subkeys) {
-      _.forEach(field.subkeys, (key) => {
-        clonedItem.value[key] = item[key];
-      });
-    } else {
-      clonedItem.value[field.key] = item[field.key];
-    }
-  });
+  // setting timeout prevents bug with turning off emitter before unmounting component
+  window.setTimeout(() => {
+    emitter.on('update-item', ({ item, field }) => {
+      if (field.group && field.subkeys) {
+        _.forEach(field.subkeys, (key) => {
+          clonedItem.value[key] = item[key];
+        });
+      } else {
+        clonedItem.value[field.key] = item[field.key];
+      }
+    });
+  }, 1);
 });
 
 onBeforeUnmount(() => {

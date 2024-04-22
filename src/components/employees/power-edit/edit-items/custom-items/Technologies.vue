@@ -42,7 +42,7 @@
         </template>
       </v-tooltip>
     </v-form>
-    <div v-if="unsavedTechnologies">Unsaved Technologies: {{ unsavedTechnologies }}</div>
+    <!-- <div v-if="unsavedTechnologies">Unsaved Technologies: {{ unsavedTechnologies }}</div> -->
     <v-btn @click="addTech" size="small" :disabled="!valid" :color="valid ? 'green' : ''">
       <span>Add</span>
       <template v-slot:append>

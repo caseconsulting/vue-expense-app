@@ -36,15 +36,6 @@ export const AIN = {
   ...nonGroupWidth
 };
 
-export const WORK_STATUS = {
-  title: 'Work Status',
-  key: 'workStatus',
-  selected: true,
-  editType: TYPES.CUSTOM,
-  infoType: TYPES.CUSTOM,
-  ...nonGroupWidth
-};
-
 export const HIRE_DATE = {
   title: 'Hire Date',
   key: 'hireDate',
@@ -55,14 +46,14 @@ export const HIRE_DATE = {
   ...nonGroupWidth
 };
 
-export const DEPARTURE_DATE = {
-  title: 'Departure Date',
-  key: 'deptDate',
-  selected: false,
-  editType: TYPES.DATE_MMDDYYYY,
-  infoType: TYPES.DATE_MMDDYYYY,
-  ...nonGroupWidth
-};
+// export const DEPARTURE_DATE = {
+//   title: 'Departure Date',
+//   key: 'deptDate',
+//   selected: false,
+//   editType: TYPES.DATE_MMDDYYYY,
+//   infoType: TYPES.DATE_MMDDYYYY,
+//   ...nonGroupWidth
+// };
 
 export const BIRTHDAY = {
   title: 'Birthday',
@@ -230,6 +221,17 @@ export const ADDRESS = {
   ...groupWidth
 };
 
+export const WORK_STATUS = {
+  title: 'Work Status',
+  key: 'workStatus',
+  selected: true,
+  group: true,
+  editType: TYPES.CUSTOM,
+  infoType: TYPES.CUSTOM,
+  subkeys: ['deptDate'],
+  ...nonGroupWidth
+};
+
 export const PHONE_NUMBERS = {
   title: 'Phone Numbers',
   key: 'phoneNumbers',
@@ -254,7 +256,6 @@ export default {
   AIN,
   WORK_STATUS,
   HIRE_DATE,
-  DEPARTURE_DATE,
   BIRTHDAY,
   JOB_ROLE,
   EMPLOYEE_ROLE,
