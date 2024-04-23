@@ -1,9 +1,8 @@
 <template>
-  <div class="d-flex small-text">
+  <div class="d-flex clearance-power-edit">
     <!-- Type -->
     <v-autocomplete
-      v-model="model['type']"
-      autofocus
+      v-model="model.type"
       :rules="getRequiredRules()"
       :items="clearanceTypes"
       label="Type"
@@ -68,6 +67,7 @@
       label="Badge Number"
       variant="underlined"
       class="small-field mx-4"
+      :disabled="model.awaitingClearance"
       @update:model-value="model.badgeNum = model.badgeNum ? model.badgeNum.toUpperCase() : undefined"
     ></v-text-field>
     <!-- Badge Expiration Date -->
@@ -102,6 +102,23 @@
     <v-text-field v-model="cityModel" label="Adjudication Dates" variant="underlined" class="field"></v-text-field>
     <!-- Polygraph Dates -->
     <v-text-field v-model="cityModel" label="Poly Dates" variant="underlined" class="field mx-4"></v-text-field>
+    <!-- Awaiting Clearance -->
+    <v-checkbox
+      v-model="model.awaitingClearance"
+      hide-details
+      class="field"
+      label="Awaiting Clearance"
+      @update:model-value="
+        () => {
+          if (model.awaitingClearance) {
+            model.grantedDate = null;
+            model.badgeExpirationDate = null;
+            model.badgeNum = null;
+          }
+        }
+      "
+    >
+    </v-checkbox>
   </div>
 </template>
 
@@ -190,7 +207,16 @@ function parseEventDate() {
   min-width: 120px !important;
   max-width: 120px !important;
 }
-.small-text * {
+.small-text .v-field__input {
+  font-size: 10px !important;
+}
+</style>
+
+<style>
+.clearance-power-edit .v-field__input {
   font-size: 14px !important;
+}
+.clearance-power-edit .v-label {
+  font-size: 13px !important;
 }
 </style>

@@ -4,7 +4,6 @@
       <!-- Name of Technology -->
       <v-autocomplete
         v-model="model.name"
-        autofocus
         @update:search="updateTechDropDown($event)"
         :rules="[
           ...duplicateTechnologyRules().map((func) => func(model.name, props.item, technologies)),
