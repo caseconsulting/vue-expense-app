@@ -1,13 +1,17 @@
 <template>
   <div>
-    <div v-if="props.showInfo">
+    <div v-if="props.showInfo" class="d-flex align-center">
       <power-edit-table-info-item
         :field="props.field"
         :item="props.item"
         class="text-blue"
       ></power-edit-table-info-item>
+      <v-btn density="comfortable" :disabled="!props.valid" icon variant="text" @click.stop="save()">
+        <v-tooltip activator="parent">Save {{ props.field.title }}</v-tooltip>
+        <v-icon>mdi-content-save</v-icon>
+      </v-btn>
     </div>
-    <v-row v-else class="d-flex align-center py-4">
+    <v-row v-else class="d-flex align-center py-6">
       <default-edit-item
         v-if="props.field.editType === TYPES.DEFAULT"
         :field="props.field"
@@ -29,7 +33,14 @@
         :valid="props.valid"
         :class="field.group ? 'group-row' : 'single-field'"
       ></custom-edit-item>
-      <v-btn density="comfortable" :disabled="!props.valid" icon variant="text" @click.stop="save()">
+      <v-btn
+        v-if="!props.field.group"
+        density="comfortable"
+        :disabled="!props.valid"
+        icon
+        variant="text"
+        @click.stop="save()"
+      >
         <v-tooltip activator="parent">Save {{ props.field.title }}</v-tooltip>
         <v-icon>mdi-content-save</v-icon>
       </v-btn>

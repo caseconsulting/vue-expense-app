@@ -27,5 +27,5 @@ import FIELDS from '@/components/employees/power-edit/js/fields.js';
 const props = defineProps(['search']);
 const emitter = inject('emitter');
 const fields = ref(Object.values(FIELDS));
-const selectedFields = ref([FIELDS.EMPLOYEE_NUMBER, FIELDS.WORK_STATUS, FIELDS.JOB_ROLE]);
+const selectedFields = ref([FIELDS.EMPLOYEE_NUMBER, FIELDS.JOB_ROLE]);
 </script>

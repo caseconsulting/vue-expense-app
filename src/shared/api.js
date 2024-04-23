@@ -247,12 +247,12 @@ async function createItem(type, data) {
 /**
  * updates the attribute of the data object in the database based on the type
  * @param type - the route denoting the dynamodb database to change
- * @param data - the data object
+ * @param value - the attribute value
  * @param attribute - the attribute to update
  * @return - if it was a successful update
  */
-async function updateAttribute(type, data, attribute) {
-  return await execute('patch', `/${type}/${attribute}`, data);
+async function updateAttribute(type, value, attribute) {
+  return await execute('patch', `/${type}/${attribute}`, value);
 } // updateAttribute
 
 /**

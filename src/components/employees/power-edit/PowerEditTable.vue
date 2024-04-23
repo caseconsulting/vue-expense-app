@@ -147,12 +147,12 @@ async function saveItem(item, field) {
     let promises = [];
     _.forEach(field.subkeys, (key) => {
       employee[key] = item[key];
-      promises.push(api.updateAttribute(api.EMPLOYEES, item, key));
+      promises.push(api.updateAttribute(api.EMPLOYEES, { id: item.id, [`${field.key}`]: item[field.key] }, key));
     });
     resp = await Promise.all(promises);
   } else {
     employee[field.key] = item[field.key];
-    resp = await api.updateAttribute(api.EMPLOYEES, item, field.key);
+    resp = await api.updateAttribute(api.EMPLOYEES, { id: item.id, [`${field.key}`]: item[field.key] }, field.key);
   }
   if (resp.name !== 'AxiosError') {
     employee[tmpField] = { ...employee[tmpField], success: true, saving: false };

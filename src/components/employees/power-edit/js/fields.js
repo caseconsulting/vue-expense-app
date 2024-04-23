@@ -1,6 +1,7 @@
 import v from '@/shared/validationUtils.js';
-const groupWidth = { width: '350px', minWidth: '350px', maxWidth: '350px' };
-const nonGroupWidth = { width: '180px', minWidth: '180px', maxWidth: '180px' };
+const smallWidth = { width: '180px', minWidth: '180px', maxWidth: '180px' };
+const mediumWidth = { width: '250px', minWidth: '250px', maxWidth: '250px' };
+const largeWidth = { width: '350px', minWidth: '350px', maxWidth: '350px' };
 import { TYPES } from './fieldTypes.js';
 
 // |--------------------------------------------------|
@@ -14,7 +15,7 @@ export const NAME = {
   key: 'name',
   fixed: true,
   infoType: TYPES.DEFAULT,
-  ...nonGroupWidth
+  ...smallWidth
 };
 
 export const EMPLOYEE_NUMBER = {
@@ -24,7 +25,7 @@ export const EMPLOYEE_NUMBER = {
   editType: TYPES.DEFAULT,
   infoType: TYPES.DEFAULT,
   rules: [v.getRequiredRules(), v.getNumberRules(), v.duplicateEmployeeNumberRule()].flat(),
-  ...nonGroupWidth
+  ...smallWidth
 };
 
 export const AIN = {
@@ -33,7 +34,7 @@ export const AIN = {
   selected: false,
   editType: TYPES.DEFAULT,
   infoType: TYPES.DEFAULT,
-  ...nonGroupWidth
+  ...smallWidth
 };
 
 export const HIRE_DATE = {
@@ -43,7 +44,7 @@ export const HIRE_DATE = {
   editType: TYPES.DATE_MMDDYYYY,
   infoType: TYPES.DATE_MMDDYYYY,
   rules: [v.getDateRules()].flat(),
-  ...nonGroupWidth
+  ...smallWidth
 };
 
 // export const DEPARTURE_DATE = {
@@ -61,7 +62,7 @@ export const BIRTHDAY = {
   selected: false,
   editType: TYPES.DATE_MMDDYYYY,
   infoType: TYPES.DATE_MMDDYYYY,
-  ...nonGroupWidth
+  ...smallWidth
 };
 
 export const JOB_ROLE = {
@@ -70,17 +71,17 @@ export const JOB_ROLE = {
   selected: true,
   editType: TYPES.CUSTOM,
   infoType: TYPES.DEFAULT,
-  ...nonGroupWidth
+  ...smallWidth
 };
 
-export const EMPLOYEE_ROLE = {
-  title: 'Employee Role',
-  key: 'employeeRole',
-  selected: false,
-  editType: TYPES.CUSTOM,
-  infoType: TYPES.DEFAULT,
-  ...nonGroupWidth
-};
+// export const EMPLOYEE_ROLE = {
+//   title: 'Employee Role',
+//   key: 'employeeRole',
+//   selected: false,
+//   editType: TYPES.CUSTOM,
+//   infoType: TYPES.DEFAULT,
+//   ...nonGroupWidth
+// };
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -88,25 +89,25 @@ export const EMPLOYEE_ROLE = {
 // |                                                  |
 // |--------------------------------------------------|
 
-export const AWARDS = {
-  title: 'Awards',
-  key: 'awards',
-  selected: false,
-  group: true,
-  editType: TYPES.CUSTOM,
-  infoType: TYPES.CUSTOM,
-  ...groupWidth
-};
+// export const AWARDS = {
+//   title: 'Awards',
+//   key: 'awards',
+//   selected: false,
+//   group: true,
+//   editType: TYPES.CUSTOM,
+//   infoType: TYPES.CUSTOM,
+//   ...groupWidth
+// };
 
-export const CERTIFICATIONS = {
-  title: 'Certifications',
-  key: 'certifications',
-  selected: false,
-  group: true,
-  editType: TYPES.CUSTOM,
-  infoType: TYPES.CUSTOM,
-  ...groupWidth
-};
+// export const CERTIFICATIONS = {
+//   title: 'Certifications',
+//   key: 'certifications',
+//   selected: false,
+//   group: true,
+//   editType: TYPES.CUSTOM,
+//   infoType: TYPES.CUSTOM,
+//   ...groupWidth
+// };
 
 export const CLEARANCES = {
   title: 'Clearances',
@@ -115,28 +116,28 @@ export const CLEARANCES = {
   group: true,
   editType: TYPES.CUSTOM,
   infoType: TYPES.CUSTOM,
-  ...groupWidth
+  ...smallWidth
 };
 
-export const COMPANIES = {
-  title: 'Companies',
-  key: 'companies',
-  selected: false,
-  group: true,
-  editType: TYPES.CUSTOM,
-  infoType: TYPES.CUSTOM,
-  ...groupWidth
-};
+// export const COMPANIES = {
+//   title: 'Companies',
+//   key: 'companies',
+//   selected: false,
+//   group: true,
+//   editType: TYPES.CUSTOM,
+//   infoType: TYPES.CUSTOM,
+//   ...groupWidth
+// };
 
-export const CONTRACTS = {
-  title: 'Contracts',
-  key: 'contracts',
-  selected: false,
-  group: true,
-  editType: TYPES.CUSTOM,
-  infoType: TYPES.CUSTOM,
-  ...groupWidth
-};
+// export const CONTRACTS = {
+//   title: 'Contracts',
+//   key: 'contracts',
+//   selected: false,
+//   group: true,
+//   editType: TYPES.CUSTOM,
+//   infoType: TYPES.CUSTOM,
+//   ...groupWidth
+// };
 
 // export const CUSTOMER_ORG_EXP = {
 //   title: 'Customer Org Exp',
@@ -148,15 +149,15 @@ export const CONTRACTS = {
 //   ...groupWidth
 // };
 
-export const EDUCATION = {
-  title: 'Education',
-  key: 'educations',
-  selected: false,
-  group: true,
-  editType: TYPES.CUSTOM,
-  infoType: TYPES.CUSTOM,
-  ...groupWidth
-};
+// export const EDUCATION = {
+//   title: 'Education',
+//   key: 'educations',
+//   selected: false,
+//   group: true,
+//   editType: TYPES.CUSTOM,
+//   infoType: TYPES.CUSTOM,
+//   ...groupWidth
+// };
 
 // export const IC_TIME_FRAMES = {
 //   title: 'IC Time Frames',
@@ -168,15 +169,15 @@ export const EDUCATION = {
 //   ...groupWidth
 // };
 
-export const LANGUAGES = {
-  title: 'Languages',
-  key: 'languages',
-  selected: false,
-  group: true,
-  editType: TYPES.CUSTOM,
-  infoType: TYPES.CUSTOM,
-  ...groupWidth
-};
+// export const LANGUAGES = {
+//   title: 'Languages',
+//   key: 'languages',
+//   selected: false,
+//   group: true,
+//   editType: TYPES.CUSTOM,
+//   infoType: TYPES.CUSTOM,
+//   ...groupWidth
+// };
 
 export const TECHNOLOGIES = {
   title: 'Technologies',
@@ -185,7 +186,7 @@ export const TECHNOLOGIES = {
   group: true,
   editType: TYPES.CUSTOM,
   infoType: TYPES.CUSTOM,
-  ...groupWidth
+  ...largeWidth
 };
 
 export const SOCIAL = {
@@ -196,7 +197,7 @@ export const SOCIAL = {
   editType: TYPES.CUSTOM,
   infoType: TYPES.CUSTOM,
   subkeys: ['twitter', 'linkedIn', 'github'],
-  ...groupWidth
+  ...mediumWidth
 };
 
 export const PLACE_OF_BIRTH = {
@@ -207,7 +208,7 @@ export const PLACE_OF_BIRTH = {
   editType: TYPES.CUSTOM,
   infoType: TYPES.CUSTOM,
   subkeys: ['city', 'country', 'st'],
-  ...groupWidth
+  ...mediumWidth
 };
 
 export const ADDRESS = {
@@ -218,29 +219,29 @@ export const ADDRESS = {
   editType: TYPES.CUSTOM,
   infoType: TYPES.CUSTOM,
   subkeys: ['currentStreet', 'currentStreet2', 'currentCity', 'currentState', 'currentZIP'],
-  ...groupWidth
+  ...largeWidth
 };
 
-export const WORK_STATUS = {
-  title: 'Work Status',
-  key: 'workStatus',
-  selected: true,
-  group: true,
-  editType: TYPES.CUSTOM,
-  infoType: TYPES.CUSTOM,
-  subkeys: ['deptDate'],
-  ...nonGroupWidth
-};
+// export const WORK_STATUS = {
+//   title: 'Work Status',
+//   key: 'workStatus',
+//   selected: true,
+//   group: true,
+//   editType: TYPES.CUSTOM,
+//   infoType: TYPES.CUSTOM,
+//   subkeys: ['deptDate'],
+//   ...nonGroupWidth
+// };
 
-export const PHONE_NUMBERS = {
-  title: 'Phone Numbers',
-  key: 'phoneNumbers',
-  selected: false,
-  group: true,
-  editType: TYPES.CUSTOM,
-  infoType: TYPES.CUSTOM,
-  ...groupWidth
-};
+// export const PHONE_NUMBERS = {
+//   title: 'Phone Numbers',
+//   key: 'phoneNumbers',
+//   selected: false,
+//   group: true,
+//   editType: TYPES.CUSTOM,
+//   infoType: TYPES.CUSTOM,
+//   ...groupWidth
+// };
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -254,24 +255,24 @@ export default {
   NAME,
   EMPLOYEE_NUMBER,
   AIN,
-  WORK_STATUS,
+  // WORK_STATUS,
   HIRE_DATE,
   BIRTHDAY,
   JOB_ROLE,
-  EMPLOYEE_ROLE,
-  AWARDS,
-  CERTIFICATIONS,
+  // EMPLOYEE_ROLE,
+  // AWARDS,
+  // CERTIFICATIONS,
   CLEARANCES,
-  COMPANIES,
-  CONTRACTS,
+  // COMPANIES,
+  // CONTRACTS,
   // CUSTOMER_ORG_EXP,
-  EDUCATION,
+  // EDUCATION,
   // IC_TIME_FRAMES,
-  LANGUAGES,
+  // LANGUAGES,
   TECHNOLOGIES,
   SOCIAL,
   PLACE_OF_BIRTH,
   ADDRESS,
-  PHONE_NUMBERS,
+  // PHONE_NUMBERS,
   BLANK
 };

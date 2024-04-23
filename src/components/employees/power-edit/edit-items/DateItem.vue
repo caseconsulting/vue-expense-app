@@ -69,6 +69,6 @@ watch(
  * @return String - The date in YYYY-MM-DD format
  */
 function parseEventDate() {
-  return this.format(event.target.value, FORMATTED_ISOFORMAT, DEFAULT_ISOFORMAT);
+  return format(event.target.value, FORMATTED_ISOFORMAT, DEFAULT_ISOFORMAT);
 } //parseEventDate
 </script>
