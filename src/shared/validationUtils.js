@@ -1,5 +1,5 @@
 import { isEmpty } from '@/utils/utils';
-import { getTodaysDate, isSameOrBefore, isValid } from '@/shared/dateUtils';
+import { getTodaysDate, isAfter, isBefore, isSameOrBefore, isValid } from '@/shared/dateUtils';
 import store from '../../store/index';
 import _ from 'lodash';
 
@@ -13,6 +13,19 @@ export function getDateOptionalRules() {
       return !isEmpty(v)
         ? (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) && isValid(v, 'MM/DD/YYYY')) || 'Date must be valid. Format: MM/DD/YYYY'
         : true;
+    }
+  ]; // rules for an optional date
+} // getDateOptionalRules
+
+/**
+ * Gets the optional dates rules for an array in MM/DD/YYYY format.
+ * @return Array - The array of rule functions
+ */
+export function getDatesArrayOptionalRules() {
+  return [
+    (v) => {
+      let allValid = _.some(v, (date) => /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(date) && isValid(date, 'MM/DD/YYYY'));
+      return !isEmpty(v) ? allValid || 'All Dates must be valid. Format: MM/DD/YYYY' : true;
     }
   ]; // rules for an optional date
 } // getDateOptionalRules
@@ -163,6 +176,44 @@ export function technologyExperienceRules() {
   ];
 }
 
+export function getDateBadgeRules(clearance) {
+  return [
+    (v) => {
+      return v && clearance.grantedDate && clearance.submissionDate
+        ? (isAfter(v, clearance.grantedDate) && isAfter(v, clearance.submissionDate)) ||
+            'Badge expiration date must come after grant and submission date'
+        : true;
+    }
+  ];
+}
+
+export function getDateSubmissionRules(clearance) {
+  return [
+    (v) =>
+      v && clearance.grantedDate
+        ? isBefore(v, clearance.grantedDate) || 'Submission date must be before grant date'
+        : true
+  ];
+}
+
+export function getDateGrantedRules(clearance) {
+  return [
+    (v) =>
+      v && clearance.submissionDate
+        ? isAfter(clearance.grantedDate, clearance.submissionDate) || 'Grant date must be after the submission date'
+        : true
+  ];
+}
+
+export function getAfterSubmissionRules(clearance) {
+  return [
+    (v) =>
+      !isEmpty(v)
+        ? !_.some(v, (date) => isBefore(date, clearance.submissionDate)) || 'Dates must come after submission date'
+        : true
+  ];
+}
+
 /**
  * Gets the rules for validating employee PTO Cash Out request
  * @param ptoLimit employee's available PTO
@@ -187,9 +238,11 @@ export function getPTOCashOutRules(ptoLimit, employeeId, originalAmount) {
 
 export default {
   getDateOptionalRules,
+  getDatesArrayOptionalRules,
   getDateMonthYearOptionalRules,
   getDateRules,
   getDateMonthYearRules,
+  getDateBadgeRules,
   getEmailRules,
   getNonFutureDateRules,
   getNumberRules,
@@ -198,6 +251,9 @@ export default {
   getRequiredRules,
   getURLRules,
   getValidateFalse,
+  getDateSubmissionRules,
+  getDateGrantedRules,
+  getAfterSubmissionRules,
   duplicateEmployeeNumberRule,
   duplicateTechnologyRules,
   technologyExperienceRules,

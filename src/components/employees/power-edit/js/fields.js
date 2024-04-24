@@ -71,7 +71,7 @@ export const JOB_ROLE = {
   selected: true,
   editType: TYPES.CUSTOM,
   infoType: TYPES.DEFAULT,
-  ...smallWidth
+  ...mediumWidth
 };
 
 // export const EMPLOYEE_ROLE = {

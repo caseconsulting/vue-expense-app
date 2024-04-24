@@ -11,7 +11,7 @@
         <v-icon>mdi-content-save</v-icon>
       </v-btn>
     </div>
-    <v-row v-else class="d-flex align-center py-6">
+    <v-row v-else class="d-flex align-center py-4">
       <default-edit-item
         v-if="props.field.editType === TYPES.DEFAULT"
         :field="props.field"
@@ -31,7 +31,7 @@
         :field="props.field"
         :item="props.item"
         :valid="props.valid"
-        :class="field.group ? 'group-row' : 'single-field'"
+        :class="field.group ? 'group-row py-2' : 'single-field'"
       ></custom-edit-item>
       <v-btn
         v-if="!props.field.group"
@@ -108,8 +108,8 @@ function save() {
   margin-left: 195px;
 }
 .single-field {
-  min-width: 135px !important;
-  width: 135px !important;
-  max-width: 135px !important;
+  min-width: 105px !important;
+  width: 105px !important;
+  max-width: 105px !important;
 }
 </style>

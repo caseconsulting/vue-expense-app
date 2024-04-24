@@ -1,5 +1,5 @@
 <template>
-  <v-combobox :items="jobTitles" v-model="model" autofocus variant="underlined"></v-combobox>
+  <v-combobox :items="jobTitles" v-model="model" autofocus variant="underlined" class="job-role-field"></v-combobox>
 </template>
 
 <script setup>
@@ -50,3 +50,14 @@ const jobTitles = computed(() => {
   return jobTitles.sort();
 });
 </script>
+
+<style>
+.job-role-field {
+  width: 180px !important;
+  min-width: 180px !important;
+  max-width: 180px !important;
+}
+.job-role-field .v-field__input {
+  font-size: 14px;
+}
+</style>
