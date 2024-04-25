@@ -589,7 +589,7 @@ function refreshKey() {
 function watchModel() {
   this.dropdownEmployee = {
     ..._.cloneDeep(this.model),
-    itemTitle: `${this.model.nickname || this.model.firstName} ${this.model.lastName}`
+    itemTitle: `${this.model.lastName}, ${this.model.nickname || this.model.firstName}`
   };
 } // watchModel
 
