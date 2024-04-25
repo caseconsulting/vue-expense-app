@@ -556,10 +556,11 @@ function beforeUnmount() {
  * Returns all employees with an item title for the autocomplete
  */
 function dropdownEmployees() {
-  return _.map(this.$store.getters.employees, (e) => {
+  let employees = _.filter(this.$store.getters.employees, (e) => e.workStatus > 0);
+  return _.map(employees, (e) => {
     return {
       ...e,
-      itemTitle: `${e.nickname || e.firstName} ${e.lastName}`
+      itemTitle: `${e.lastName}, ${e.nickname || e.firstName}`
     };
   });
 } // dropdownEmployees
