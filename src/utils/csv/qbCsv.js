@@ -1,7 +1,7 @@
 /**
  * Utilities to download EEO reports of employees
  */
-const csvUtils = require('./baseCsv.js');
+import csvUtils from './baseCsv.js';
 import {
   subtract,
   add,
@@ -307,4 +307,8 @@ function getEmployeeHoursOver(employee, startDate, endDate) {
   return Math.max(0, hoursOver);
 }
 
+export default {
+  download,
+  convertEmployees
+};
 // :)
