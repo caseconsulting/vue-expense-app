@@ -147,7 +147,7 @@ async function saveItem(item, field) {
     let promises = [];
     _.forEach(field.subkeys, (key) => {
       employee[key] = item[key];
-      promises.push(api.updateAttribute(api.EMPLOYEES, { id: item.id, [`${field.key}`]: item[field.key] }, key));
+      promises.push(api.updateAttribute(api.EMPLOYEES, { id: item.id, [`${key}`]: item[key] }, key));
     });
     resp = await Promise.all(promises);
   } else {
