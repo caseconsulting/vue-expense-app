@@ -362,6 +362,8 @@ async function created() {
     this.userId = this.$store.getters.employeeNumber;
 
     this.$store.getters.loginTime ? this.updateEmployeeLogin(this.$store.getters.user) : '';
+    // run API calls in background
+    Promise.all([this.updateStoreEmployees()]);
   }
 
   let pic = getProfile();
@@ -373,9 +375,6 @@ async function created() {
   this.version = p.version;
 
   this.loadingCreated = false;
-
-  // run API calls in background
-  Promise.all([this.updateStoreEmployees()]);
 } // created
 
 /**
