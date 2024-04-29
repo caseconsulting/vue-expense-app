@@ -106,7 +106,7 @@
       </v-container>
     </v-card>
     <v-dialog v-model="toggleContactEmployeesModal" :width="isMobile() ? '100%' : '60%'">
-      <contact-employees-modal :passed-employees="employeesToContact" :key="contactKey" />
+      <contact-employees-modal :passedEmployees="employeesToContact" :key="contactKey" />
     </v-dialog>
   </div>
 </template>
@@ -208,7 +208,7 @@ function selectDropDown(tabName) {
  */
 function renderContactEmployeesModal() {
   contactKey.value++;
-  emitter.emit('get-employees-to-contact', currentTab);
+  emitter.emit('get-employees-to-contact', currentTab.value);
   toggleContactEmployeesModal.value = true;
 } // renderContactEmployeesModal
 
