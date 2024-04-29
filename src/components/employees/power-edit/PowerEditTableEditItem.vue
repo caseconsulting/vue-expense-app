@@ -3,7 +3,7 @@
     <div v-if="props.showInfo" class="d-flex align-center">
       <power-edit-table-info-item
         :field="props.field"
-        :item="props.item"
+        :item="clonedItem"
         class="text-blue"
       ></power-edit-table-info-item>
       <v-btn density="comfortable" :disabled="!props.valid" icon variant="text" @click.stop="save()">

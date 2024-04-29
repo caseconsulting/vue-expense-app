@@ -103,7 +103,7 @@ watch(
     if (model.value.name !== null || !model.value.current || !!model.value.years) await form.value.validate();
     emitter.emit('update-item', {
       field: props.field,
-      item: { ...props.item, [`${props.field.key}`]: technologies }
+      item: { ...props.item, [`${props.field.key}`]: technologies.value }
     });
   },
   { deep: true }
