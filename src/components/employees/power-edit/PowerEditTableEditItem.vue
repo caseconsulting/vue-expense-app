@@ -11,27 +11,25 @@
         <v-icon>mdi-content-save</v-icon>
       </v-btn>
     </div>
-    <v-row v-else class="d-flex align-center py-4">
+    <v-row v-else class="d-flex align-center py-4 px-1">
       <default-edit-item
         v-if="props.field.editType === TYPES.DEFAULT"
         :field="props.field"
         :item="props.item"
         :valid="props.valid"
-        class="single-field"
       ></default-edit-item>
       <date-edit-item
         v-else-if="props.field.editType === TYPES.DATE_MMYYYY || props.field.infoType === TYPES.DATE_MMDDYYYY"
         :field="props.field"
         :item="props.item"
         :valid="props.valid"
-        class="single-field"
       ></date-edit-item>
       <custom-edit-item
         v-else
         :field="props.field"
         :item="props.item"
         :valid="props.valid"
-        :class="field.group ? 'group-row py-2' : 'single-field'"
+        :class="field.group ? 'group-row py-2' : ''"
       ></custom-edit-item>
       <v-btn
         v-if="!props.field.group"
@@ -106,10 +104,5 @@ function save() {
 <style>
 .group-row {
   margin-left: 195px;
-}
-.single-field {
-  min-width: 105px !important;
-  width: 105px !important;
-  max-width: 105px !important;
 }
 </style>
