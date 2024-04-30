@@ -2,7 +2,7 @@ import { jwtDecode } from 'jwt-decode';
 import auth0 from 'auth0-js';
 import router from '../router';
 import { AUTH_CONFIG } from './auth0-variables';
-let CryptoJS = require('crypto-js');
+import CryptoJS from 'crypto-js';
 
 const AUDIENCE = AUTH_CONFIG.audience;
 const CALLBACK = AUTH_CONFIG.callbackUrl;
@@ -101,7 +101,7 @@ export function getProfile() {
 export function getRole() {
   const encryptedRole = getCookie(ROLE);
   if (encryptedRole) {
-    const decryptedRole = CryptoJS.AES.decrypt(encryptedRole, process.env.VUE_APP_AES_KEY);
+    const decryptedRole = CryptoJS.AES.decrypt(encryptedRole, import.meta.env.VITE_AES_KEY);
     return decryptedRole.toString(CryptoJS.enc.Utf8);
   }
 } // getRole
@@ -279,8 +279,28 @@ export function setProfile() {
 export async function setRole(role) {
   const employeeRole = role;
   if (employeeRole) {
-    const encryptedRole = CryptoJS.AES.encrypt(employeeRole, process.env.VUE_APP_AES_KEY);
+    const encryptedRole = CryptoJS.AES.encrypt(employeeRole, import.meta.env.VITE_AES_KEY);
     setCookie(ROLE, encryptedRole);
     return employeeRole;
   }
 } // setRole
+
+export default {
+  getAccessToken,
+  getIdToken,
+  getProfile,
+  getRole,
+  getTokenExpirationDate,
+  isAdmin,
+  isAdminOrManager,
+  isLoggedIn,
+  isTokenExpired,
+  login,
+  logout,
+  requireAuth,
+  setAccessToken,
+  refreshUserSession,
+  setIdToken,
+  setProfile,
+  setRole
+};

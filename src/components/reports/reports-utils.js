@@ -66,3 +66,10 @@ export function populateEmployeesDropdown(empData) {
     (employee) => employee.text.toLowerCase()
   );
 } // constructAutoComplete
+
+export default {
+  customEmployeeFilter,
+  getActive,
+  getFullName,
+  populateEmployeesDropdown
+};

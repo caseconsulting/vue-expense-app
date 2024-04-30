@@ -129,7 +129,7 @@
             id="P"
             class="text-black"
             target="_blank"
-            href="https://3.basecamp.com/3097063/buckets/4708396/documents/7173352000"
+            href="https://3.basecamp.com/3097063/buckets/4708396/documents/7349866492"
           >
             <v-tooltip activator="parent" location="top">View Release Notes</v-tooltip>
             <strong>Version</strong> {{ version }}
@@ -157,6 +157,7 @@ import {
 } from '@/utils/auth';
 import { isMobile, isSmallScreen, storeIsPopulated, updateEmployeeLogin } from '@/utils/utils';
 import { updateStoreUser, updateStoreEmployees } from '@/utils/storeUtils';
+import p from '../package.json';
 import floorPlan from '@/assets/img/MakeOfficesfloorplan.jpg';
 import facebook from '@/assets/img/trademarks/facebook.png';
 import github from '@/assets/img/trademarks/github.png';
@@ -337,7 +338,7 @@ function setSessionTimeouts() {
 async function created() {
   this.loadingCreated = true;
 
-  this.environment = process.env.VUE_APP_AUTH0_CALLBACK;
+  this.environment = import.meta.env.VITE_AUTH0_CALLBACK;
 
   this.emitter.on('timeout-acknowledged', () => (this.timedOut = false)); // Session end - log out
   this.emitter.on('close', () => (this.switchRole = false));
@@ -361,6 +362,8 @@ async function created() {
     this.userId = this.$store.getters.employeeNumber;
 
     this.$store.getters.loginTime ? this.updateEmployeeLogin(this.$store.getters.user) : '';
+    // run API calls in background
+    Promise.all([this.updateStoreEmployees()]);
   }
 
   let pic = getProfile();
@@ -369,13 +372,9 @@ async function created() {
     this.profilePic = pic;
   }
 
-  //This has some security implications
-  this.version = require('../package.json').version;
+  this.version = p.version;
 
   this.loadingCreated = false;
-
-  // run API calls in background
-  Promise.all([this.updateStoreEmployees()]);
 } // created
 
 /**

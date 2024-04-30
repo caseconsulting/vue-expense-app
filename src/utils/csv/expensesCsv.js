@@ -3,9 +3,9 @@
  * csv.js
  */
 import _ from 'lodash';
-import store from '/store/index.js';
+import store from '../../../store/index.js';
 import { format, DEFAULT_ISOFORMAT } from '../../shared/dateUtils';
-const csvUtils = require('./baseCsv.js');
+import csvUtils from './baseCsv.js';
 
 /**
  * Downloads array of expenses as csv file.
@@ -85,3 +85,8 @@ function getRecipientName(employeeId) {
   let employee = _.find(store.getters.employees, (e) => e.id === employeeId);
   return employee ? `${employee.nickname || employee.firstName} ${employee.lastName}` : null;
 } // getRecipientName
+
+export default {
+  download,
+  convertExpenses
+};

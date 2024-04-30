@@ -8,9 +8,9 @@
 
 ## Setup
 
-The **Expense Application** is written in **Vue.js** and relies on **Node.js** v18.x+ and the **npm** package management system. UI is enhanced with **Vuetify.js**.
+The **Expense Application** is written in **Vue.js** and relies on **Node.js** v20.x+ and the **npm** package management system. UI is enhanced with **Vuetify.js**.
 
-- Download and install Node.js v18.x from: https://nodejs.org/en/ or https://nodejs.org/dist/latest-v18.x/
+- Download and install Node.js v20.x from: https://nodejs.org/en/ or https://nodejs.org/dist/latest-v20.x/
 - Install required Node.js modules:
 
 ```
@@ -21,15 +21,15 @@ npm ci
 
 In order to use **Auth0** authentication, you will need to define some environment variables:
 
-- **VUE_APP_AUTH0_API_ID**
-- **VUE_APP_AUTH0_CALLBACK**
-- **VUE_APP_AUTH0_CLIENT_ID**
-- **VUE_APP_AUTH0_DOMAIN**
+- **VITE_AUTH0_API_ID**
+- **VITE_AUTH0_CALLBACK**
+- **VITE_AUTH0_CLIENT_ID**
+- **VITE_AUTH0_DOMAIN**
 
 The following environment variables are required to support multiple environments:
 
-- **VUE_APP_API_HOSTNAME**
-- **VUE_APP_API_PORT**
+- **VITE_API_HOSTNAME**
+- **VITE_API_PORT**
 - **NODE_ENV**
 
 **vue-cli** automatically picks up environment variables in `.env` files. Any variables that begin with **VUE*APP***

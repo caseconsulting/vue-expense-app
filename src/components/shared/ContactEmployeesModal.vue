@@ -36,7 +36,7 @@
             <v-chip
               v-bind="props"
               class="mb-1"
-              :size="isMobile || employees.length > 40 ? 'x-small' : employees.length > 10 ? 'small' : 'default'"
+              :size="isMobile() || employees.length > 40 ? 'x-small' : employees.length > 10 ? 'small' : 'default'"
               >{{ item.raw.employeeName }}</v-chip
             >
           </template>
@@ -44,7 +44,7 @@
       </v-card-text>
       <!-- Action Button -->
       <v-card-actions>
-        <v-btn @click="copyEmailList()" :size="isMobile ? 'x-small' : 'small'" variant="text" color="grey-darken-1">
+        <v-btn @click="copyEmailList()" :size="isMobile() ? 'x-small' : 'small'" variant="text" color="grey-darken-1">
           Copy to Clipboard
           <v-icon v-if="copied" end color="green">mdi-check</v-icon>
           <v-icon v-else end>mdi-content-copy</v-icon>
@@ -52,7 +52,7 @@
         <v-spacer></v-spacer>
         <v-btn
           @click="emailEmployees()"
-          :size="isMobile ? 'x-small' : 'default'"
+          :size="isMobile() ? 'x-small' : 'default'"
           variant="text"
           color="light-blue"
           class="mr-1"
@@ -63,7 +63,7 @@
         <v-btn
           color="grey-darken-3"
           variant="text"
-          :size="isMobile ? 'x-small' : 'default'"
+          :size="isMobile() ? 'x-small' : 'default'"
           @click.native="
             emit('close-contact-employees-modal');
             activate = false;
@@ -76,20 +76,55 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import _ from 'lodash';
+import { computed, ref, onMounted, inject } from 'vue';
+import { useStore } from 'vuex';
 import { nicknameAndLastName } from '@/shared/employeeUtils';
 import { isMobile } from '@/utils/utils';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                       DATA                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const props = defineProps(['passedEmployees']);
+const store = useStore();
+const emitter = inject('emitter');
+const activate = ref(false);
+const copied = ref(false);
+const employees = ref([]);
+const employeeSearch = ref('');
+const listLimit = ref(2000);
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+const filteredEmployees = computed(() => {
+  let employees = _.filter(store.getters.employees, (e) => {
+    return e.workStatus > 0;
+  });
+  return _.map(employees, (e) => {
+    return {
+      ...e,
+      employeeName: nicknameAndLastName(e)
+    };
+  });
+});
 
 /**
  * Mounted life cycle hook
  */
-function mounted() {
-  this.employees = _.cloneDeep(this.passedEmployees);
-  this.employees = _.map(this.employees, (e) => {
+onMounted(() => {
+  employees.value = _.cloneDeep(props.passedEmployees);
+  employees.value = _.map(employees.value, (e) => {
     return { ...e, employeeName: nicknameAndLastName(e) };
   });
-} // mounted
+}); // mounted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -123,7 +158,7 @@ function customFilter(_, queryText, item) {
 async function copyEmailList() {
   let list = this.getList();
   await navigator.clipboard.writeText(list);
-  this.copied = true;
+  copied.value = true;
 } // copyEmailList
 
 /**
@@ -143,10 +178,10 @@ function emailEmployees() {
 function emit(msg, data) {
   if (data) {
     // data exists
-    this.emitter.emit(msg, data);
+    emitter.emit(msg, data);
   } else {
     // data does not exist
-    this.emitter.emit(msg);
+    emitter.emit(msg);
   }
 } // emit
 
@@ -155,7 +190,7 @@ function emit(msg, data) {
  */
 function getList() {
   let list = 'mailto:';
-  _.forEach(this.employees, (e) => {
+  _.forEach(employees.value, (e) => {
     if (e.employeeNumber < 90000) {
       // do not include fake employee emails
       list += e.email ? `${e.email},` : '';
@@ -163,58 +198,6 @@ function getList() {
   });
   return list;
 } // getList
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     COMPUTED                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Gets the active list of employees.
- */
-function filteredEmployees() {
-  let employees = _.filter(this.$store.getters.employees, (e) => {
-    return e.workStatus > 0;
-  });
-  return _.map(employees, (e) => {
-    return {
-      ...e,
-      employeeName: nicknameAndLastName(e)
-    };
-  });
-} // filterdEmployees
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  computed: {
-    filteredEmployees,
-    isMobile
-  },
-  data() {
-    return {
-      activate: false, // dialog activator
-      copied: false,
-      employees: [],
-      employeeSearch: '',
-      listLimit: 2000
-    };
-  },
-  methods: {
-    copyEmailList,
-    customFilter,
-    emailEmployees,
-    emit,
-    getList
-  },
-  mounted,
-  props: ['passedEmployees']
-};
 </script>
 
 <style scoped>

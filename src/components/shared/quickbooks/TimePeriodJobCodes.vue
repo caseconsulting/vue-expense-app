@@ -6,7 +6,7 @@
         v-if="!isMonthly"
         @click="
           openLink(
-            'https://3.basecamp.com/3097063/buckets/4708396/messages/7069270310#:~:text=New%20Bonus%20Opportunity'
+            'https://3.basecamp.com/3097063/buckets/179119/messages/1426517066#:~:text=1860%20Hours%20target%20bonus'
           )
         "
         class="ml-2 nudge-up"

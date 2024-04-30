@@ -116,6 +116,15 @@
             ></v-badge>
             {{ item.employeeName }}</template
           >
+          <!-- Employee Name slot -->
+          <template v-slot:[`item.budgetName`]="{ item }">
+            {{ item.budgetName }}
+            {{
+              item.expenses?.some((e) => e.category === 'Exchange for training hours')
+                ? '(Exchange for training hours)'
+                : ''
+            }}</template
+          >
           <!-- Show on feed item slot -->
           <template v-slot:[`item.showOnFeed`]="{ item }">
             <v-switch

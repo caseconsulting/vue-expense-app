@@ -422,6 +422,7 @@ import {
   userRoleIsUser,
   userRoleIsIntern
 } from '@/utils/utils';
+import { JOB_TITLES } from './dropdown-info/jobTitles';
 import { format } from '@/shared/dateUtils';
 import { mask } from 'vue-the-mask';
 import EEODeclineSelfIdentify from '../../modals/EEODeclineSelfIdentify.vue';
@@ -809,34 +810,7 @@ export default {
       hasExpenses: false, // employee has expenses
       hireDateFormatted: null, // formatted hire date
       hireMenu: false, // display hire menu
-      jobTitles: [
-        'Accountant',
-        'Cloud Architect',
-        'Cloud Cost Engineer',
-        'Cloud Developer',
-        'Cloud Engineer',
-        'Configuration Manager',
-        'Cyber Security Architect',
-        'Cyber Security Engineer',
-        'Data Architect',
-        'Data Engineer',
-        'Data Scientist',
-        'Devops Engineer',
-        'HR Manager',
-        'IT Support',
-        'Network Engineer',
-        'Office Manager',
-        'Project Integrator',
-        'Project Manager',
-        'Software Architect',
-        'Software Developer',
-        'Storage Engineer',
-        'Systems Administrator',
-        'System Engineer',
-        'Test Engineer',
-        'QA Automated Test Engineer',
-        'Windows Engineer'
-      ], // job title options
+      jobTitles: JOB_TITLES,
       loading: true,
       duplicateEmployeeNumberRule: [
         (v) => {

@@ -12,7 +12,7 @@
 
 <script>
 import { isMobile, isSmallScreen } from '@/utils/utils';
-const employeeCsv = require('@/utils/csv/employeeCsv.js');
+import employeeCsv from '@/utils/csv/employeeCsv.js';
 
 // |--------------------------------------------------|
 // |                                                  |

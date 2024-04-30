@@ -1,4 +1,8 @@
 export const API_CONFIG = {
-  apiHostname: process.env.VUE_APP_API_HOSTNAME || '{localhost}:',
-  apiPort: process.env.VUE_APP_API_PORT || 3005
+  apiHostname: import.meta.env.VITE_API_HOSTNAME || '{localhost}:',
+  apiPort: import.meta.env.VITE_API_PORT || 3005
+};
+
+export default {
+  API_CONFIG
 };

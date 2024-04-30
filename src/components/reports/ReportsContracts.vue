@@ -346,7 +346,7 @@ function removeTag(item) {
   if (selIndex >= 0) {
     this.selectedTags.splice(selIndex, 1);
   }
-} // remove
+} // removeTag
 
 /**
  * Clears the other search forms and searches the table by contract

@@ -5,24 +5,24 @@
       id="backBtn"
       class="mb-3"
       elevation="2"
+      :size="isMobile() ? 'x-small' : 'default'"
       @click="backClick()"
-      :size="isMobile ? 'x-small' : 'default'"
     >
-      <template v-slot:prepend>
-        <v-icon size="large" class="pr-1">mdi-arrow-left-thin</v-icon>
+      <template #prepend>
+        <v-icon size="large" class="pr-1"> mdi-arrow-left-thin </v-icon>
       </template>
       Back
     </v-btn>
     <v-card>
       <v-card color="#bc3825">
-        <v-card-title class="d-flex align-center header_style" v-bind:class="{ 'justify-center': isMobile }">
+        <v-card-title class="d-flex align-center header_style" v-bind:class="{ 'justify-center': isMobile() }">
           <h2 class="text-white">Reports</h2>
-          <v-spacer></v-spacer>
+          <v-spacer />
           <v-tooltip location="bottom">
-            <template v-slot:activator="{ props }">
+            <template #activator="{ props }">
               <v-btn id="contactEmployeesBtn" @click="renderContactEmployeesModal()" v-bind="props">
                 Contact
-                <template v-slot:append>
+                <template #append>
                   <v-icon>mdi-email</v-icon>
                 </template>
               </v-btn>
@@ -32,25 +32,25 @@
         </v-card-title>
       </v-card>
       <v-container fluid class="px-0 px-md-4">
-        <reports-page-loader v-if="loading"></reports-page-loader>
+        <reports-page-loader v-if="loading" />
         <div v-else>
           <!-- user is mobile -->
-          <div v-if="isMobile" class="text-center">
+          <div v-if="isMobile()" class="text-center">
             <v-menu offset="y">
-              <template v-slot:activator="{ props }">
-                <v-btn variant="text" color="#bc3825" theme="dark" class="font-weight-bold" v-bind="props"
-                  >{{ currentTab.toUpperCase() }} <v-icon class="pb-1">mdi-chevron-down</v-icon>
+              <template #activator="{ props }">
+                <v-btn variant="text" color="#bc3825" theme="dark" class="font-weight-bold" v-bind="props">
+                  {{ currentTab.toUpperCase() }} <v-icon class="pb-1"> mdi-chevron-down </v-icon>
                 </v-btn>
               </template>
               <v-list>
-                <v-list-item @click="selectDropDown('contracts')">Contracts</v-list-item>
-                <v-list-item @click="selectDropDown('customer orgs')">Customer Orgs</v-list-item>
-                <v-list-item @click="selectDropDown('certifications')">Certifications</v-list-item>
-                <v-list-item @click="selectDropDown('awards')">Awards</v-list-item>
-                <v-list-item @click="selectDropDown('languages')">Foreign Languages</v-list-item>
-                <v-list-item @click="selectDropDown('job roles')">Job Roles</v-list-item>
-                <v-list-item @click="selectDropDown('technologies')">Technologies</v-list-item>
-                <v-list-item @click="selectDropDown('security info')">Security Info</v-list-item>
+                <v-list-item @click="selectDropDown('contracts')"> Contracts </v-list-item>
+                <v-list-item @click="selectDropDown('customer orgs')"> Customer Orgs </v-list-item>
+                <v-list-item @click="selectDropDown('certifications')"> Certifications </v-list-item>
+                <v-list-item @click="selectDropDown('awards')"> Awards </v-list-item>
+                <v-list-item @click="selectDropDown('languages')"> Foreign Languages </v-list-item>
+                <v-list-item @click="selectDropDown('job roles')"> Job Roles </v-list-item>
+                <v-list-item @click="selectDropDown('technologies')"> Technologies </v-list-item>
+                <v-list-item @click="selectDropDown('security info')"> Security Info </v-list-item>
               </v-list>
             </v-menu>
             <hr class="my-1" />
@@ -65,15 +65,15 @@
           </div>
           <div v-else>
             <!-- user is not mobile -->
-            <v-tabs color="blue" center-active grow show-arrows @update:model-value="changeTab" v-model="currentTab">
-              <v-tab value="contracts">Contracts</v-tab>
-              <v-tab value="customer orgs">Customer Orgs</v-tab>
-              <v-tab value="certifications">Certifications</v-tab>
-              <v-tab value="awards">Awards</v-tab>
-              <v-tab value="languages">Foreign Languages</v-tab>
-              <v-tab value="job roles">Job Roles</v-tab>
-              <v-tab value="technologies">Technologies</v-tab>
-              <v-tab value="security info">Security Info</v-tab>
+            <v-tabs color="blue" center-active v-model="currentTab" grow show-arrows @update:model-value="changeTab">
+              <v-tab value="contracts"> Contracts </v-tab>
+              <v-tab value="customer orgs"> Customer Orgs </v-tab>
+              <v-tab value="certifications"> Certifications </v-tab>
+              <v-tab value="awards"> Awards </v-tab>
+              <v-tab value="languages"> Foreign Languages </v-tab>
+              <v-tab value="job roles"> Job Roles </v-tab>
+              <v-tab value="technologies"> Technologies </v-tab>
+              <v-tab value="security info"> Security Info </v-tab>
             </v-tabs>
             <v-window v-model="currentTab">
               <v-window-item value="contracts" class="mx-2 my-6">
@@ -105,12 +105,14 @@
         </div>
       </v-container>
     </v-card>
-    <v-dialog v-model="toggleContactEmployeesModal" :width="isMobile ? '100%' : '60%'">
-      <contact-employees-modal :passedEmployees="employeesToContact" :key="contactKey"></contact-employees-modal>
+    <v-dialog v-model="toggleContactEmployeesModal" :width="isMobile() ? '100%' : '60%'">
+      <contact-employees-modal :passedEmployees="employeesToContact" :key="contactKey" />
     </v-dialog>
   </div>
 </template>
-<script>
+<script setup>
+import { watch, onMounted, computed, ref, inject } from 'vue';
+import { useStore } from 'vuex';
 import ContactEmployeesModal from '@/components/shared/ContactEmployeesModal.vue';
 import ReportsPageLoader from '@/components/reports/ReportsPageLoader.vue';
 import ReportsAwards from '@/components/reports/ReportsAwards.vue';
@@ -126,6 +128,21 @@ import { isMobile, userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                       DATA                       |
+// |                                                  |
+// |--------------------------------------------------|
+const contactKey = ref(0);
+const currentTab = ref('contracts');
+const employeesToContact = ref([]);
+const loading = ref(true);
+const toggleContactEmployeesModal = ref(false);
+const wasRedirected = ref(false);
+const requestedDataType = ref(localStorage.getItem('requestedDataType'));
+const store = useStore();
+const emitter = inject('emitter');
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                 LIFECYCLE HOOKS                  |
 // |                                                  |
 // |--------------------------------------------------|
@@ -133,24 +150,24 @@ import { isMobile, userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
 /**
  * Created lifecycle hook.
  */
-async function created() {
-  this.emitter.on('close-contact-employees-modal', () => (this.toggleContactEmployeesModal = false));
-  this.emitter.on('list-of-employees-to-contact', (employees) => (this.employeesToContact = employees));
-  if (this.$store.getters.storeIsPopulated) {
+onMounted(async () => {
+  emitter.on('close-contact-employees-modal', () => (toggleContactEmployeesModal.value = false));
+  emitter.on('list-of-employees-to-contact', (employees) => (employeesToContact.value = employees));
+  if (store.getters.storeIsPopulated) {
     await Promise.all([
-      !this.$store.getters.employees ? this.updateStoreEmployees() : '',
-      !this.$store.getters.contracts ? this.updateStoreContracts() : '',
-      !this.$store.getters.tags && (userRoleIsAdmin() || userRoleIsManager()) ? this.updateStoreTags() : ''
+      !store.getters.employees ? updateStoreEmployees() : '',
+      !store.getters.contracts ? updateStoreContracts() : '',
+      !store.getters.tags && (userRoleIsAdmin() || userRoleIsManager()) ? updateStoreTags() : ''
     ]);
-    this.loading = false;
+    loading.value = false;
   }
   if (localStorage.getItem('requestedDataType')) {
-    this.currentTab = localStorage.getItem('requestedDataType');
+    currentTab.value = localStorage.getItem('requestedDataType');
     localStorage.removeItem('requestedDataType');
-    this.wasRedirected = true;
+    wasRedirected.value = true;
     window.scrollTo(0, 0);
   }
-} // created
+});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -175,7 +192,7 @@ function backClick() {
  * @param event - the new tab
  */
 function changeTab(event) {
-  this.currentTab = event;
+  currentTab.value = event;
 } // changeTab
 
 /**
@@ -183,16 +200,16 @@ function changeTab(event) {
  * @param tabName - The name of the tab
  */
 function selectDropDown(tabName) {
-  this.currentTab = tabName;
+  currentTab.value = tabName;
 } // selectDropDown
 
 /**
  * Pops up the contacts employee modal
  */
 function renderContactEmployeesModal() {
-  this.contactKey++;
-  this.emitter.emit('get-employees-to-contact', this.currentTab);
-  this.toggleContactEmployeesModal = true;
+  contactKey.value++;
+  emitter.emit('get-employees-to-contact', currentTab.value);
+  toggleContactEmployeesModal.value = true;
 } // renderContactEmployeesModal
 
 // |--------------------------------------------------|
@@ -206,66 +223,24 @@ function renderContactEmployeesModal() {
  *
  * @returns boolean - True if the store is populated
  */
-function storeIsPopulated() {
-  return this.$store.getters.storeIsPopulated;
-} // storeIsPopulated
+const storeIsPopulated = computed(() => {
+  return store.getters.storeIsPopulated;
+});
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                      EXPORT                      |
+// |                     WATCHERS                     |
 // |                                                  |
 // |--------------------------------------------------|
 
-export default {
-  created,
-  components: {
-    ContactEmployeesModal,
-    ReportsAwards,
-    ReportsContracts,
-    ReportsCustomerOrgs,
-    ReportsCertifications,
-    ReportsForeignLanguages,
-    ReportsJobRoles,
-    ReportsTechnologies,
-    ReportsSecurityInfo,
-    ReportsPageLoader
-  },
-  computed: {
-    isMobile,
-    storeIsPopulated
-  },
-  data() {
-    return {
-      contactKey: 0,
-      contracts: null,
-      currentTab: 'contracts',
-      employeesToContact: [],
-      loading: true,
-      toggleContactEmployeesModal: false,
-      wasRedirected: false,
-      requestedDataType: localStorage.getItem('requestedDataType')
-    };
-  },
-  methods: {
-    backClick,
-    changeTab,
-    selectDropDown,
-    renderContactEmployeesModal,
-    updateStoreContracts,
-    updateStoreEmployees,
-    updateStoreTags
-  },
-  watch: {
-    async storeIsPopulated() {
-      if (this.$store.getters.storeIsPopulated) {
-        await Promise.all([
-          !this.$store.getters.employees ? this.updateStoreEmployees() : '',
-          !this.$store.getters.contracts ? this.updateStoreContracts() : '',
-          !this.$store.getters.tags && (userRoleIsAdmin() || userRoleIsManager()) ? this.updateStoreTags() : ''
-        ]);
-        this.loading = false;
-      }
-    }
+watch(storeIsPopulated, async () => {
+  if (store.getters.storeIsPopulated) {
+    await Promise.all([
+      !store.getters.employees ? updateStoreEmployees() : '',
+      !store.getters.contracts ? updateStoreContracts() : '',
+      !store.getters.tags && (userRoleIsAdmin() || userRoleIsManager()) ? updateStoreTags() : ''
+    ]);
+    loading.value = false;
   }
-};
+});
 </script>

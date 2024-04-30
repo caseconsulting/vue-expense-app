@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { nicknameAndLastName } from '@/shared/employeeUtils.js';
 import { getProjectCurrentEmployees, getProjectPastEmployees } from '@/shared/contractUtils.js';
-const csvUtils = require('./baseCsv.js');
+import csvUtils from './baseCsv.js';
 
 export function download(contracts, employees) {
   let filename = 'contracts.csv';
@@ -77,3 +77,8 @@ function getPassedProjectEmployees(contract, project, employees) {
   });
   return employeesList.join(', ');
 } // getPassedProjectEmployees
+
+export default {
+  download,
+  convertContracts
+};

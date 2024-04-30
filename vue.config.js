@@ -1,5 +1,5 @@
 module.exports = {
-  lintOnSave: process.env.NODE_ENV !== 'production',
+  lintOnSave: import.meta.env.NODE_ENV !== 'production',
   parallel: false,
   devServer: {
     client: {

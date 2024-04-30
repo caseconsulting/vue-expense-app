@@ -14,7 +14,7 @@ import App from './App.vue';
 const emitter = mitt();
 const app = createApp(App).use(router).use(store).use(vuetify);
 app.component('UserAvatar', UserAvatar);
-window.emitter = emitter;
+app.provide('emitter', emitter);
 app.config.globalProperties.emitter = emitter;
 app.config.globalProperties.caseRed = '#bc3825';
 app.config.globalProperties.caseGray = '#415364';

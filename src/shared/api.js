@@ -245,6 +245,17 @@ async function createItem(type, data) {
 } // createItem
 
 /**
+ * updates the attribute of the data object in the database based on the type
+ * @param type - the route denoting the dynamodb database to change
+ * @param value - the attribute value
+ * @param attribute - the attribute to update
+ * @return - if it was a successful update
+ */
+async function updateAttribute(type, value, attribute) {
+  return await execute('patch', `/${type}/${attribute}`, value);
+} // updateAttribute
+
+/**
  * updates the item in the database based on the type
  * @param type - the route denoting the dynamodb database to change
  * @param data - the new data
@@ -463,6 +474,15 @@ async function syncApplications() {
   return await execute('post', `/${UTILITY}/syncApplications`, {});
 } // syncApplications
 
+/**
+ * Gets employee's ADP info
+ *
+ * @return - The response from the ADP get function
+ */
+async function getEmployeesFromAdp() {
+  return await execute('get', `/${UTILITY}/getEmployeesFromAdp`);
+}
+
 export default {
   createAttachment,
   createItem,
@@ -496,10 +516,12 @@ export default {
   getURLInfo,
   getZipCode,
   getUser,
+  updateAttribute,
   updateItem,
   uploadResume,
   processHighFive,
   syncApplications,
+  getEmployeesFromAdp,
   EXPENSE_TYPES,
   EXPENSES,
   EMPLOYEES,

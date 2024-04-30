@@ -212,7 +212,7 @@
         v-model="searchString"
         hide-no-data
         variant="outlined"
-        hint="Search address and select option to auto-fill fields below."
+        persitent-hint="Search address and select option to auto-fill fields below."
         persistent-hint
       >
         <template v-slot:item="{ item, props }">
@@ -282,7 +282,7 @@ import {
   getPhoneNumberRules,
   getPhoneNumberTypeRules
 } from '@/shared/validationUtils.js';
-import { asyncForEach, isEmpty, countryList } from '@/utils/utils';
+import { asyncForEach, isEmpty, COUNTRIES, STATES } from '@/utils/utils';
 import { format } from '@/shared/dateUtils';
 import { mask } from 'vue-the-mask';
 import { getRole } from '@/utils/auth';
@@ -299,7 +299,7 @@ import { getRole } from '@/utils/auth';
 async function created() {
   this.emitter.emit('created', 'personal'); // emit personal tab was created
   // get countries
-  this.countries = countryList;
+  this.countries = COUNTRIES;
   // set formatted birthday date
   this.birthdayFormat = this.format(this.editedPersonalInfo.birthday, null, 'MM/DD/YYYY') || this.birthdayFormat;
   // fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
@@ -562,67 +562,7 @@ export default {
       github,
       linkedin,
       x,
-      states: {
-        AL: 'Alabama',
-        AK: 'Alaska',
-        AS: 'American Samoa',
-        AZ: 'Arizona',
-        AR: 'Arkansas',
-        CA: 'California',
-        CO: 'Colorado',
-        CT: 'Connecticut',
-        DE: 'Delaware',
-        DC: 'District Of Columbia',
-        FM: 'Federated States Of Micronesia',
-        FL: 'Florida',
-        GA: 'Georgia',
-        GU: 'Guam',
-        HI: 'Hawaii',
-        ID: 'Idaho',
-        IL: 'Illinois',
-        IN: 'Indiana',
-        IA: 'Iowa',
-        KS: 'Kansas',
-        KY: 'Kentucky',
-        LA: 'Louisiana',
-        ME: 'Maine',
-        MH: 'Marshall Islands',
-        MD: 'Maryland',
-        MA: 'Massachusetts',
-        MI: 'Michigan',
-        MN: 'Minnesota',
-        MS: 'Mississippi',
-        MO: 'Missouri',
-        MT: 'Montana',
-        NE: 'Nebraska',
-        NV: 'Nevada',
-        NH: 'New Hampshire',
-        NJ: 'New Jersey',
-        NM: 'New Mexico',
-        NY: 'New York',
-        NC: 'North Carolina',
-        ND: 'North Dakota',
-        MP: 'Northern Mariana Islands',
-        OH: 'Ohio',
-        OK: 'Oklahoma',
-        OR: 'Oregon',
-        PW: 'Palau',
-        PA: 'Pennsylvania',
-        PR: 'Puerto Rico',
-        RI: 'Rhode Island',
-        SC: 'South Carolina',
-        SD: 'South Dakota',
-        TN: 'Tennessee',
-        TX: 'Texas',
-        UT: 'Utah',
-        VT: 'Vermont',
-        VI: 'Virgin Islands',
-        VA: 'Virginia',
-        WA: 'Washington',
-        WV: 'West Virginia',
-        WI: 'Wisconsin',
-        WY: 'Wyoming'
-      } //states
+      states: STATES
     };
   },
   directives: { mask },

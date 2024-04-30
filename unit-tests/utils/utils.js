@@ -1,5 +1,5 @@
-const vars = require('./constants.js');
-const dateUtils = require('@/shared/dateUtils');
+import vars from './constants.js';
+import dateUtils from '@/shared/dateUtils';
 
 /**
  * Utilities for automation
@@ -83,8 +83,8 @@ function getName(type) {
  * login to Google with auth0
  * @param browser - The browser object. Required.
  * @param maxWindow - Whether or not to maximize the window. Default: true
- * @param username - Username/email to input at login. Default: VUE_APP_AUTH0_EMAIL from env
- * @param password - Password to input at login. Default: VUE_APP_AUTH0_PASSWORD from env
+ * @param username - Username/email to input at login. Default: VITE_AUTH0_EMAIL from env
+ * @param password - Password to input at login. Default: VITE_AUTH0_PASSWORD from env
  */
 function login(browser, username = null, password = null) {
   // get defaults for unset vars

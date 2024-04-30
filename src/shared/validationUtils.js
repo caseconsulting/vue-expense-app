@@ -1,5 +1,5 @@
 import { isEmpty } from '@/utils/utils';
-import { getTodaysDate, isSameOrBefore, isValid } from '@/shared/dateUtils';
+import { getTodaysDate, isAfter, isBefore, isSameOrBefore, isValid } from '@/shared/dateUtils';
 import store from '../../store/index';
 import _ from 'lodash';
 
@@ -13,6 +13,19 @@ export function getDateOptionalRules() {
       return !isEmpty(v)
         ? (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) && isValid(v, 'MM/DD/YYYY')) || 'Date must be valid. Format: MM/DD/YYYY'
         : true;
+    }
+  ]; // rules for an optional date
+} // getDateOptionalRules
+
+/**
+ * Gets the optional dates rules for an array in MM/DD/YYYY format.
+ * @return Array - The array of rule functions
+ */
+export function getDatesArrayOptionalRules() {
+  return [
+    (v) => {
+      let allValid = _.some(v, (date) => /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(date) && isValid(date, 'MM/DD/YYYY'));
+      return !isEmpty(v) ? allValid || 'All Dates must be valid. Format: MM/DD/YYYY' : true;
     }
   ]; // rules for an optional date
 } // getDateOptionalRules
@@ -133,6 +146,74 @@ export function getValidateFalse() {
   return [(v) => isEmpty(v) || 'Departure date must be after hire date'];
 } // getValidateRules
 
+export function duplicateEmployeeNumberRule() {
+  return [
+    (v, employee) => {
+      let emp = _.find(store.getters.employees, (e) => e.id === employee.id);
+      let duplicate = _.some(store.getters.employees, (e) => {
+        return Number(e.employeeNumber) === Number(v) && Number(emp.employeeNumber) !== Number(v);
+      });
+      return !duplicate || 'This employee id is already in use';
+    }
+  ];
+}
+
+export function duplicateTechnologyRules() {
+  return [
+    (v, employee, technologies) => {
+      let duplicates = _.filter(technologies, (t) => t.name === v);
+      return duplicates.length === 0 || 'Duplicate technology found';
+    }
+  ];
+}
+
+export function technologyExperienceRules() {
+  return [
+    (v) => v === Number(v) || 'Value must be a number',
+    (v) => (String(v).split('.')[1]?.length || 0) <= 2 || 'Value must be 2 decimal places or less',
+    (v, techObj) => v > 0 || techObj.current || 'Value must be greater than 0',
+    (v) => v < 100 || 'Value must be less than 100'
+  ];
+}
+
+export function getDateBadgeRules(clearance) {
+  return [
+    (v) => {
+      return v && clearance.grantedDate && clearance.submissionDate
+        ? (isAfter(v, clearance.grantedDate) && isAfter(v, clearance.submissionDate)) ||
+            'Badge expiration date must come after grant and submission date'
+        : true;
+    }
+  ];
+}
+
+export function getDateSubmissionRules(clearance) {
+  return [
+    (v) =>
+      v && clearance.grantedDate
+        ? isBefore(v, clearance.grantedDate) || 'Submission date must be before grant date'
+        : true
+  ];
+}
+
+export function getDateGrantedRules(clearance) {
+  return [
+    (v) =>
+      v && clearance.submissionDate
+        ? isAfter(clearance.grantedDate, clearance.submissionDate) || 'Grant date must be after the submission date'
+        : true
+  ];
+}
+
+export function getAfterSubmissionRules(clearance) {
+  return [
+    (v) =>
+      !isEmpty(v)
+        ? !_.some(v, (date) => isBefore(date, clearance.submissionDate)) || 'Dates must come after submission date'
+        : true
+  ];
+}
+
 /**
  * Gets the rules for validating employee PTO Cash Out request
  * @param ptoLimit employee's available PTO
@@ -154,3 +235,27 @@ export function getPTOCashOutRules(ptoLimit, employeeId, originalAmount) {
     }
   ];
 } // getPTOCashOutRules
+
+export default {
+  getDateOptionalRules,
+  getDatesArrayOptionalRules,
+  getDateMonthYearOptionalRules,
+  getDateRules,
+  getDateMonthYearRules,
+  getDateBadgeRules,
+  getEmailRules,
+  getNonFutureDateRules,
+  getNumberRules,
+  getPhoneNumberRules,
+  getPhoneNumberTypeRules,
+  getRequiredRules,
+  getURLRules,
+  getValidateFalse,
+  getDateSubmissionRules,
+  getDateGrantedRules,
+  getAfterSubmissionRules,
+  duplicateEmployeeNumberRule,
+  duplicateTechnologyRules,
+  technologyExperienceRules,
+  getPTOCashOutRules
+};

@@ -8,6 +8,8 @@
 
 // Imports and constants for all functions
 import _ from 'lodash';
+import { parse as papaParse } from 'papaparse';
+import { utils, write } from 'xlsx';
 const NEW_LINE = '\n';
 
 /**
@@ -22,18 +24,65 @@ export function combine(csvA, csvB, spaceBetween = 0) {
 } // combine
 
 /**
- * Downloads a given CSV string as a .csv file
+ * Downloads a given CSV string as a .csv file. Multiple CSV strings are supported
+ * if downloading as xlsx (default). Multiple CSV strings must be in the following format:
+ * [
+ *   {
+ *     name: 'Worksheet 1',
+ *     csv: csvFileString1
+ *   },
+ *   {
+ *     name: 'Worksheet 2',
+ *     csv: csvFileString2
+ *   },
+ * ]
  *
- * @param csv - csv text to create as file, eg output of generate
+ * @param csvText - csv text(s) to create as file, eg output of generate
  * @param filename (optional) - file name with which to download file
+ * @param asXlsx (optional) - download file as xlsx? default is true, alternative is CSV
  */
-export function download(csv, filename = null) {
+export function download(csvText, filename = null, asXlsx = true) {
   // build filename
-  if (filename == undefined || filename == null) filename = 'export.csv';
-  if (filename.substring(filename.length - 4) != '.csv') filename += '.csv';
+  let ext = asXlsx ? '.xlsx' : '.csv';
+  if (filename == undefined || filename == null) filename = 'export';
+  if (filename.substring(ext.length - 4) != ext) filename += ext;
 
-  // build file contents
-  let blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  // build file contents (aka blob)
+  let blob;
+  if (!asXlsx) {
+    // just chuck text contents into Blob
+    blob = new Blob([csvText], { type: 'text/csv;charset=utf-8;' });
+  } else {
+    // standardize structure of CSV to array structure
+    if (typeof csvText === typeof 'string') csvText = [{ name: 'Sheet 1', csv: csvText }];
+
+    // parse CSV data for xlsx
+    let csvData = [];
+    let text;
+    for (let i = 0; i < csvText.length; i++) {
+      text = csvText[i].csv;
+      csvData.push(papaParse(text, { header: false }));
+    }
+
+    // convert parsed CSV data to XLSX sheets
+    let worksheets = [];
+    for (let item of csvData) {
+      worksheets.push(utils.json_to_sheet(item.data, { skipHeader: true }));
+    }
+
+    // create workbook and fill it with sheets
+    const workbook = utils.book_new();
+    let sheet;
+    for (let i = 0; i < worksheets.length; i++) {
+      sheet = worksheets[i];
+      utils.book_append_sheet(workbook, sheet, csvText[i].name);
+    }
+
+    // convert workbook to blob
+    const xlsx = write(workbook, { bookType: 'xlsx', type: 'array' });
+    blob = new Blob([xlsx], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  }
+
   // build link to "click"
   var link = document.createElement('a');
   var url = URL.createObjectURL(blob);
@@ -167,3 +216,13 @@ export function sort(objects, key) {
   if (!Array.isArray(key)) key = [key];
   return _.sortBy(objects, key);
 } // sort
+
+export default {
+  combine,
+  download,
+  escape,
+  filterHeaders,
+  generate,
+  generateFrom2dArray,
+  sort
+};

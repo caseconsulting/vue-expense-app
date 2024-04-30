@@ -2,18 +2,18 @@
 // WARNING: Be careful making edits to these functions as they are used all throughout the code base
 
 const DEFAULT_TIME_ZONE = 'America/New_York';
-const dayjs = require('dayjs');
-var utc = require('dayjs/plugin/utc');
-var timezone = require('dayjs/plugin/timezone');
-var customParseFormat = require('dayjs/plugin/customParseFormat');
-var localizedFormat = require('dayjs/plugin/localizedFormat');
-var advancedFormat = require('dayjs/plugin/advancedFormat');
-var minMax = require('dayjs/plugin/minMax');
-var isoWeek = require('dayjs/plugin/isoWeek');
-var isSameOrAfter_ = require('dayjs/plugin/isSameOrAfter');
-var isSameOrBefore_ = require('dayjs/plugin/isSameOrBefore');
-var isBetween_ = require('dayjs/plugin/isBetween');
-var duration = require('dayjs/plugin/duration');
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+import localizedFormat from 'dayjs/plugin/localizedFormat';
+import advancedFormat from 'dayjs/plugin/advancedFormat';
+import minMax from 'dayjs/plugin/minMax';
+import isoWeek from 'dayjs/plugin/isoWeek';
+import isSameOrAfter_ from 'dayjs/plugin/isSameOrAfter';
+import isSameOrBefore_ from 'dayjs/plugin/isSameOrBefore';
+import isBetween_ from 'dayjs/plugin/isBetween';
+import duration from 'dayjs/plugin/duration';
 dayjs.extend(duration);
 dayjs.extend(isBetween_);
 dayjs.extend(isSameOrBefore_);
@@ -31,6 +31,8 @@ dayjs.tz.setDefault(DEFAULT_TIME_ZONE);
 export const DEFAULT_ISOFORMAT = 'YYYY-MM-DD';
 export const FORMATTED_ISOFORMAT = 'MM/DD/YYYY';
 export const PARSED_ISOFORMAT = 'YYYY-MM-DD';
+export const MONTH_YEAR_PARSED_ISOFORMAT = 'YYYY-MM';
+export const MONTH_YEAR_FORMATTED_ISOFORMAT = 'MM/YYYY';
 export const ISO8601 = 'YYYY-MM-DDTHH:mm:ssZ';
 
 /**

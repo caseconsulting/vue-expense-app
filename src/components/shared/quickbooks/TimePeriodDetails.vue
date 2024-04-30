@@ -262,7 +262,7 @@ function getWorkDays(startDate, endDate, excludeProRated = false) {
 /**
  * Returns true if day is a weekday.
  *
- * @param {Number} day - The day of the week as an integer
+ * @param {String} day - The day
  * @returns Boolean - Whether or not the day is a weekday
  */
 function isWeekDay(day) {

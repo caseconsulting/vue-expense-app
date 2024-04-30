@@ -4,7 +4,21 @@
  */
 import _ from 'lodash';
 import { difference, format, getTodaysDate, minimum } from '@/shared/dateUtils';
-const csvUtils = require('./baseCsv.js');
+import csvUtils from './baseCsv.js';
+
+/**
+ * Returns the CSV filestring as a string.
+ *
+ * @param employees - array of employee objects
+ * @param contracts - contracts from DynamoDB to connect employee contract IDs to
+ * @param tags - tags to connect employee tag IDs to
+ * @return csv as a string
+ */
+export function fileString(employees, contracts, tags, includeEeoData = false) {
+  let convertedEmployees = convertEmployees(employees, contracts, tags, includeEeoData); // convert employees into csv object
+  let csvEmployees = csvUtils.sort(convertedEmployees, 'Employee #'); // sort by employee #
+  return csvUtils.generate(csvEmployees); // convert to csv file string
+}
 
 /**
  * Downloads array of employees as csv file.
@@ -13,9 +27,7 @@ const csvUtils = require('./baseCsv.js');
  */
 export function download(employees, contracts, tags, filename = null) {
   if (!filename) filename = Array.isArray(employees) ? 'employees.csv' : 'employee.csv';
-  let convertedEmployees = convertEmployees(employees, contracts, tags); // convert employees into csv object
-  let csvEmployees = csvUtils.sort(convertedEmployees, 'Employee #'); // sort by employee #
-  let csvFileString = csvUtils.generate(csvEmployees); // convert to csv file string
+  let csvFileString = fileString(employees, contracts, tags);
   csvUtils.download(csvFileString, filename); // download csv file string as .csv
 } // download
 
@@ -27,7 +39,7 @@ export function download(employees, contracts, tags, filename = null) {
  * @param tags - tags attached to employees
  * @return a new object passable to csv.js
  */
-export function convertEmployees(employees, contracts, tags) {
+export function convertEmployees(employees, contracts, tags, includeEeoData = false) {
   if (!Array.isArray(employees)) employees = [employees];
   let tempEmployees = [];
   _.forEach(employees, (employee) => {
@@ -35,7 +47,7 @@ export function convertEmployees(employees, contracts, tags) {
       let placeOfBirth = [employee.city, employee.st, employee.country];
       let contractsPrimesProjects = getContractPrimeProject(employee.contracts, contracts);
       let clearanceData = getClearancesData(employee.clearances);
-      tempEmployees.push({
+      let data = {
         // NOTE: if you change this, please also change in the catch{} below
         'Employee #': employee.employeeNumber || '',
         'First Name': employee.firstName || '',
@@ -73,13 +85,27 @@ export function convertEmployees(employees, contracts, tags) {
         Technology: filterUndefined(employee.technologies, getTechnologies) || '',
         Tags: getTags(employee.id, tags) || '',
         id: employee.id || ''
-      });
+      };
+      if (includeEeoData) {
+        data = {
+          ...data,
+          'Admin filled out form?': employee.eeoAdminHasFilledOutEeoForm ? 'Yes' : 'No',
+          'Declined to self-identify?': employee.declinedToSelfIdentify ? 'Yes' : 'No',
+          Gender: employee.eeoGender?.text,
+          'Has Disability?': employee.eeoHasDisability ? 'Yes' : 'No',
+          'Hispanic or Latino?': employee.eeoHispanicOrLatino ? 'Yes' : 'No',
+          'Protected Veteran?': employee.eeoProtectedVeteran ? 'Yes' : 'No',
+          'Job Category': employee.eeoJobCategory?.text,
+          'Race/Ethnicity': employee.eeoRaceOrEthnicity?.text
+        };
+      }
+      tempEmployees.push(data);
     } catch (e) {
       console.log(
         `Error converting employee ${employee.firstName} ${employee.lastName} to CSV, skipping. Error message:`
       );
       console.log(e);
-      tempEmployees.push({
+      let data = {
         'Employee #': `(ERROR) ${employee.employeeNumber}` || '',
         'First Name': '---',
         'Middle Name': '---',
@@ -116,7 +142,23 @@ export function convertEmployees(employees, contracts, tags) {
         Technology: '---',
         Tags: '---',
         id: '---'
-      });
+      };
+
+      if (includeEeoData) {
+        data = {
+          ...data,
+          'Admin filled out form?': '---',
+          'Declined to self-identify?': '---',
+          Gender: '---',
+          'Has Disability?': '---',
+          'Hispanic or Latino?': '---',
+          'Protected Veteran?': '---',
+          'Job Category': '---',
+          'Race/Ethnicity': '---'
+        };
+      }
+
+      tempEmployees.push(data);
     }
   });
   return tempEmployees;
@@ -503,3 +545,22 @@ export function getTags(employeeID, tags) {
   });
   return employeeTags && employeeTags.length > 0 ? employeeTags.map((t) => t.tagName).join(', ') : null;
 } // getTags
+
+export default {
+  download,
+  fileString,
+  convertEmployees,
+  getWorkStatus,
+  filterUndefined,
+  getAwards,
+  getCertifications,
+  getClearancesData,
+  getContractLengthInYears,
+  getProjectLengthInYears,
+  getContractPrimeProject,
+  getCustomerOrgExp,
+  getCompanies,
+  getEducation,
+  getTechnologies,
+  getTags
+};

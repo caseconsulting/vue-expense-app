@@ -6,7 +6,7 @@
 </template>
 
 <script>
-const expensesCsv = require('@/utils/csv/expensesCsv.js');
+import expensesCsv from '@/utils/csv/expensesCsv.js';
 
 // |--------------------------------------------------|
 // |                                                  |

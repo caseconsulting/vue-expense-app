@@ -10,79 +10,73 @@
         <!-- user is mobile -->
         <div v-if="isMobile" class="text-center">
           <v-menu offset="y">
-            <template v-slot:activator="{ props }">
-              <v-btn variant="text" color="#bc3825" theme="dark" class="font-weight-bold" v-bind="props"
-                >{{ statsTab.toUpperCase() }} <v-icon class="pb-1">mdi-chevron-down</v-icon>
+            <template #activator="{ props }">
+              <v-btn variant="text" color="#bc3825" theme="dark" class="font-weight-bold" v-bind="props">
+                {{ statsTab.toUpperCase() }} <v-icon class="pb-1"> mdi-chevron-down </v-icon>
               </v-btn>
             </template>
             <v-list>
-              <v-list-item @click="selectDropDown('employees')" :disabled="!dataLoaded">Employees</v-list-item>
-              <v-list-item @click="selectDropDown('education')" :disabled="!dataLoaded">Education</v-list-item>
-              <v-list-item @click="selectDropDown('certifications')" :disabled="!dataLoaded"
-                >Certifications</v-list-item
-              >
-              <v-list-item @click="selectDropDown('technology')" :disabled="!dataLoaded">Technology</v-list-item>
-              <v-list-item @click="selectDropDown('customer Org')" :disabled="!dataLoaded">Customer Org</v-list-item>
+              <v-list-item :disabled="!dataLoaded" @click="selectDropDown('employees')"> Employees </v-list-item>
+              <v-list-item :disabled="!dataLoaded" @click="selectDropDown('education')"> Education </v-list-item>
+              <v-list-item :disabled="!dataLoaded" @click="selectDropDown('certifications')">
+                Certifications
+              </v-list-item>
+              <v-list-item :disabled="!dataLoaded" @click="selectDropDown('technology')"> Technology </v-list-item>
+              <v-list-item :disabled="!dataLoaded" @click="selectDropDown('customer Org')"> Customer Org </v-list-item>
             </v-list>
           </v-menu>
           <hr class="my-1" />
-          <employees-chart-tab v-if="statsTab === 'employees' && dataLoaded"></employees-chart-tab>
-          <education-chart-tab v-if="statsTab === 'education' && dataLoaded"></education-chart-tab>
-          <tech-chart-tab v-if="statsTab === 'technology' && dataLoaded"></tech-chart-tab>
-          <certifications-chart-tab v-if="statsTab === 'certifications' && dataLoaded"></certifications-chart-tab>
-          <customer-org-chart-tab v-if="statsTab === 'customer Org' && dataLoaded"></customer-org-chart-tab>
+          <employees-chart-tab v-if="statsTab === 'employees' && dataLoaded" />
+          <education-chart-tab v-if="statsTab === 'education' && dataLoaded" />
+          <tech-chart-tab v-if="statsTab === 'technology' && dataLoaded" />
+          <certifications-chart-tab v-if="statsTab === 'certifications' && dataLoaded" />
+          <customer-org-chart-tab v-if="statsTab === 'customer Org' && dataLoaded" />
         </div>
         <!-- user is not mobile -->
         <v-tabs
           v-else
-          color="basil"
           v-model="currentTab"
+          color="basil"
           center-active
           grow
           show-arrows
           @update:model-value="changeTab"
         >
-          <v-tab value="employees">Employees</v-tab>
-          <v-tab value="education" :disabled="!dataLoaded">Education</v-tab>
-          <v-tab value="technologies" :disabled="!dataLoaded">Technology</v-tab>
-          <v-tab value="certifications" :disabled="!dataLoaded">Certifications</v-tab>
-          <v-tab value="customerOrg" :disabled="!dataLoaded">Customer Org</v-tab>
+          <v-tab value="employees"> Employees </v-tab>
+          <v-tab value="education" :disabled="!dataLoaded"> Education </v-tab>
+          <v-tab value="technologies" :disabled="!dataLoaded"> Technology </v-tab>
+          <v-tab value="certifications" :disabled="!dataLoaded"> Certifications </v-tab>
+          <v-tab value="customerOrg" :disabled="!dataLoaded"> Customer Org </v-tab>
         </v-tabs>
         <v-window v-if="!isMobile" v-model="currentTab">
           <v-window-item value="employees" class="mx-2 my-6">
-            <employees-chart-tab v-if="currentTab === 'employees' && dataLoaded"></employees-chart-tab>
+            <employees-chart-tab v-if="currentTab === 'employees' && dataLoaded" />
           </v-window-item>
           <v-window-item value="education" class="mx-2 my-6">
-            <education-chart-tab v-if="currentTab === 'education' && dataLoaded"></education-chart-tab>
+            <education-chart-tab v-if="currentTab === 'education' && dataLoaded" />
           </v-window-item>
           <v-window-item value="technologies" class="mx-2 mb-6 mt-0">
-            <tech-chart-tab v-if="currentTab === 'technologies' && dataLoaded"></tech-chart-tab>
+            <tech-chart-tab v-if="currentTab === 'technologies' && dataLoaded" />
           </v-window-item>
           <v-window-item value="certifications" class="mx-2 my-6">
-            <certifications-chart-tab v-if="currentTab === 'certifications' && dataLoaded"></certifications-chart-tab>
+            <certifications-chart-tab v-if="currentTab === 'certifications' && dataLoaded" />
           </v-window-item>
           <v-window-item value="customerOrg" class="mx-2 my-6">
-            <customer-org-chart-tab v-if="currentTab === 'customerOrg' && dataLoaded"></customer-org-chart-tab>
+            <customer-org-chart-tab v-if="currentTab === 'customerOrg' && dataLoaded" />
           </v-window-item>
         </v-window>
         <!-- loading -->
         <div v-if="!dataLoaded">
           <v-row class="flex justify-center">
             <v-col md="6" sm="12" class="mt-4">
-              <v-skeleton-loader type="list-item@5" class="mx-auto" width="70%"></v-skeleton-loader>
+              <v-skeleton-loader type="list-item@5" class="mx-auto" width="70%" />
             </v-col>
             <v-col md="6" sm="12" class="mt-4">
-              <v-skeleton-loader type="list-item@5" class="mx-auto" width="70%"></v-skeleton-loader>
+              <v-skeleton-loader type="list-item@5" class="mx-auto" width="70%" />
             </v-col>
           </v-row>
           <div v-for="i in 2" :key="i" class="mx-auto my-6" style="width: 80%">
-            <v-skeleton-loader
-              v-for="i in 2"
-              :key="i"
-              type="text, image"
-              class="mx-2 d-inline-block"
-              width="48%"
-            ></v-skeleton-loader>
+            <v-skeleton-loader v-for="i in 2" :key="i" type="text, image" class="mx-2 d-inline-block" width="48%" />
           </div>
         </div>
       </v-container>
@@ -164,7 +158,6 @@ function selectDropDown(tabName) {
 // |--------------------------------------------------|
 
 export default {
-  created,
   components: {
     CertificationsChartTab,
     EmployeesChartTab,
@@ -172,11 +165,6 @@ export default {
     EducationChartTab,
     CustomerOrgChartTab
   },
-  computed: {
-    isMobile,
-    storeIsPopulated
-  },
-  mounted,
   data() {
     return {
       currentTab: '',
@@ -184,11 +172,9 @@ export default {
       statsTab: 'employees'
     };
   },
-  methods: {
-    changeTab,
-    selectDropDown,
-    updateStoreEmployees,
-    updateStoreContracts
+  computed: {
+    isMobile,
+    storeIsPopulated
   },
   watch: {
     storeIsPopulated: async function () {
@@ -198,6 +184,14 @@ export default {
       ]);
       if (this.storeIsPopulated) this.dataLoaded = true;
     }
+  },
+  created,
+  mounted,
+  methods: {
+    changeTab,
+    selectDropDown,
+    updateStoreEmployees,
+    updateStoreContracts
   }
 };
 </script>

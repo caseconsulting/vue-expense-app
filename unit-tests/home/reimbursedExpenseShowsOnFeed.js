@@ -1,5 +1,5 @@
-const utils = require('../utils/utils.js');
-const vars = require('../utils/constants.js');
+import utils from '../utils/utils.js';
+import vars from '../utils/constants.js';
 
 describe('testing expense type to show on feed', () => {
   const expense = {

@@ -50,14 +50,14 @@ function mounted() {
 // |--------------------------------------------------|
 
 export default {
+  name: 'Callback',
   mounted,
   methods: {
     setAccessToken,
     setIdToken,
     setProfile,
     setRole
-  },
-  name: 'callback'
+  }
 };
 </script>
 

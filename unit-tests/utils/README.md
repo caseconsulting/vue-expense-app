@@ -10,8 +10,8 @@ The `utils.js` functions will be referred to as "utils" and the `constants.js` v
 Add the below to the beginning of your Nightwatch test and you should be all set to use the utils and vars as per the examples:
 
 ```
-const utils = require('../utils/utils.js');
-const vars = require('../utils/constants.js');
+import utils from '../utils/utils.js';
+import vars from '../utils/constants.js';
 ```
 
 Change the relative path if your Nightwatch test is not in a subfolder of `unit-tests`.
@@ -120,14 +120,14 @@ The following are the definitions of the first set of constants:
 
 You may also access variables from the test user's information:
 
-| var                 | value                                |
-| ------------------- | ------------------------------------ |
-| `tester.username`   | `process.env.VUE_APP_AUTH0_EMAIL`    |
-| `tester.password`   | `process.env.VUE_APP_AUTH0_PASSWORD` |
-| `tester.firstName`  | `'Nightwatch'`                       |
-| `tester.middleName` | `null`                               |
-| `tester.lastName`   | `'Tester'`                           |
-| `tester.nickName`   | `'Owl'`                              |
+| var                 | value                                 |
+| ------------------- | ------------------------------------- |
+| `tester.username`   | `import.meta.env.VITE_AUTH0_EMAIL`    |
+| `tester.password`   | `import.meta.env.VITE_AUTH0_PASSWORD` |
+| `tester.firstName`  | `'Nightwatch'`                        |
+| `tester.middleName` | `null`                                |
+| `tester.lastName`   | `'Tester'`                            |
+| `tester.nickName`   | `'Owl'`                               |
 
 ### Site navigation constants
 
