@@ -22,7 +22,7 @@ let INFO = {};
 let SUPP_DATA = {
   nonBillables: new Set(['PTO'])
 };
-let BATCH_SIZE = 5;
+let BATCH_SIZE = 50; // batch size for QB API parallel calls
 let WORK_HOURS_PER_DAY = 8;
 
 /**
@@ -263,7 +263,10 @@ function getEmployeePotentialHours(employee, startDate, endDate) {
   let totalWorkDays = getWorkDays(employee, startOf(startDate, 'month'), endOf(endDate, 'month'));
   let proRatedHours = WORK_HOURS_PER_DAY * (employee.workStatus / 100);
 
-  return totalWorkDays * proRatedHours;
+  let result = totalWorkDays * proRatedHours;
+  result = result.toFixed(2).replace(/[.,]00$/, '') || null;
+
+  return result;
 }
 
 /**
@@ -287,6 +290,9 @@ function getEmployeeWorkedHours(employee) {
     }
   }
 
+  // format
+  total = total.toFixed(2).replace(/[.,]00$/, '') || null;
+
   return total;
 }
 
@@ -304,7 +310,11 @@ function getEmployeeHoursOver(employee, startDate, endDate) {
   let hoursOver =
     getEmployeeWorkedHours(employee, startDate, endDate) - getEmployeePotentialHours(employee, startDate, endDate);
 
-  return Math.max(0, hoursOver);
+  // set min to 0 and format
+  hoursOver = Math.max(0, hoursOver);
+  hoursOver = hoursOver.toFixed(2).replace(/[.,]00$/, '') || null;
+
+  return hoursOver;
 }
 
 export default {

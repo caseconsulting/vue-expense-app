@@ -90,6 +90,7 @@
 import { isMobile, isSmallScreen } from '@/utils/utils';
 import { getTodaysDate, format, subtract, isSameOrBefore, isSameOrAfter } from '@/shared/dateUtils';
 import _ from 'lodash';
+import baseCsv from '@/utils/csv/baseCsv.js';
 import employeeCsv from '@/utils/csv/employeeCsv.js';
 import eeoCsv from '@/utils/csv/eeoCsv.js';
 import qbCsv from '@/utils/csv/qbCsv.js';
@@ -178,24 +179,31 @@ async function download() {
   // download from proper csv util
   let filename = `Download (${this.filters.period})`;
   let startDate, endDate;
-  switch (this.exportType.value) {
-    case 'emp':
-      filename = `Employee Export - ${this.filters.period}`;
-      employeeCsv.download(csvInfo, this.contracts, this.filterOptions.tags, filename);
-      break;
-    case 'eeo':
-      filename = `EEO Compliance Report - ${this.filters.period}`;
-      eeoCsv.download(csvInfo, filename);
-      break;
-    case 'qb':
-      filename = `Timesheet Report - ${this.filters.period}`;
-      startDate = this.filters.period;
-      endDate = this.filters.period;
-      this.loading = 'Downloading timesheets from QuickBooks...';
-      await qbCsv.download(csvInfo, { filename, startDate, endDate });
-      break;
-    default:
-      break;
+  if (this.exportType.value === 'emp') {
+    filename = `Employee Export - ${this.filters.period}`;
+    employeeCsv.download(csvInfo, this.contracts, this.filterOptions.tags, filename);
+  } else if (this.exportType.value === 'eeo') {
+    let eeo = eeoCsv.fileString(csvInfo);
+    csvInfo = this.filterDeclined(csvInfo);
+    let emp = employeeCsv.fileString(csvInfo, this.contracts, this.filterOptions.tags, true);
+    let csvText = [
+      {
+        name: 'EEO Compliance Report',
+        csv: eeo
+      },
+      {
+        name: 'Employee Info',
+        csv: emp
+      }
+    ];
+    filename = `EEO Compliance Report - ${this.filters.year}`;
+    baseCsv.download(csvText, filename);
+  } else if (this.exportType.value === 'qb') {
+    filename = `Timesheet Report - ${this.filters.period}`;
+    startDate = this.filters.period;
+    endDate = this.filters.period;
+    this.loading = 'Downloading timesheets from QuickBooks...';
+    await qbCsv.download(csvInfo, { filename, startDate, endDate });
   }
 
   // close the modal
