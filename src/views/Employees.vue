@@ -23,7 +23,7 @@
             <v-col cols="12" md="4">
               <h2 class="my-2">
                 Employees
-                <span v-if="powerEdit" class="ml-3 power-edit-text">Power Edit Mode</span>
+                <span v-if="powerEdit && hasAdminPermissions()" class="ml-3 power-edit-text">Power Edit Mode</span>
               </h2>
             </v-col>
             <v-spacer />
@@ -40,10 +40,10 @@
           </v-row>
         </v-card-title>
 
-        <power-edit-container v-if="powerEdit" :search="search" />
+        <power-edit-container v-if="powerEdit && hasAdminPermissions()" :search="search" />
         <div v-else>
           <!-- Filters -->
-          <v-card v-if="userRoleIsAdmin() || userRoleIsManager()" class="pa-0 pa-md-4" variant="outlined">
+          <v-card v-if="hasAdminPermissions()" class="pa-0 pa-md-4" variant="outlined">
             <v-row color="black" class="mx-1 mx-md-5 my-1">
               <!-- Active Filter -->
               <v-col :align="isMobile() ? 'center' : ''" cols="7" md="4" sm="6">
@@ -84,7 +84,7 @@
               <!-- Tags filter -->
               <v-col :align="isMobile() ? 'center' : ''" cols="5" md="5" sm="6">
                 <v-autocomplete
-                  v-if="userRoleIsAdmin() || userRoleIsManager()"
+                  v-if="hasAdminPermissions()"
                   v-model="selectedTags"
                   class="mt-2 mt-md-4 ml-1 ml-md-4"
                   variant="underlined"
@@ -175,7 +175,12 @@
             Export Data <v-icon class="pl-2"> mdi-table-arrow-down </v-icon>
           </v-btn>
 
-          <v-btn class="mb-5 ml-2 ml-md-4 float-right" @click="powerEdit = true" variant="flat">
+          <v-btn
+            v-if="hasAdminPermissions()"
+            class="mb-5 ml-2 ml-md-4 float-right"
+            @click="powerEdit = true"
+            variant="flat"
+          >
             <v-tooltip activator="parent">Enter power edit mode</v-tooltip>
             <v-icon size="x-large"> mdi-pencil </v-icon>
           </v-btn>
