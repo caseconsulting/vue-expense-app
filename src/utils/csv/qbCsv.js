@@ -9,6 +9,7 @@ import {
   endOf,
   format,
   getIsoWeekday,
+  getTodaysDate,
   isSameOrAfter,
   isAfter,
   DEFAULT_ISOFORMAT
@@ -212,6 +213,9 @@ function getEmployeeName(employee) {
  * @return int - number of remaining working days
  */
 function getWorkDays(employee, startDate, endDate) {
+  // allow for employee to be null and just get total workdays in the month
+  if (!employee) employee = { hireDate: subtract(getTodaysDate(), 1, 'month', 'YYYY-MM-DD') };
+
   function isWeekDay(day) {
     return getIsoWeekday(day) >= 1 && getIsoWeekday(day) <= 5;
   }
@@ -241,7 +245,7 @@ function getWorkDays(employee, startDate, endDate) {
  * @returns {String} monthly hours for full-time CASE employees in MONTH
  */
 function getMonthHours(employee, startDate) {
-  let totalWorkDays = getWorkDays(employee, startOf(startDate, 'month'), endOf(startDate, 'month'));
+  let totalWorkDays = getWorkDays(null, startOf(startDate, 'month'), endOf(startDate, 'month'));
   return totalWorkDays * WORK_HOURS_PER_DAY;
 }
 

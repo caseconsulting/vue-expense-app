@@ -196,7 +196,7 @@ async function download() {
         csv: emp
       }
     ];
-    filename = `EEO Compliance Report - ${this.filters.year}`;
+    filename = `EEO Compliance Report - ${this.filters.period}`;
     baseCsv.download(csvText, filename);
   } else if (this.exportType.value === 'qb') {
     filename = `Timesheet Report - ${this.filters.period}`;
