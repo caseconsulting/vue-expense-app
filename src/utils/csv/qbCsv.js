@@ -115,7 +115,7 @@ async function fillTimesheetData(employees, startDate, endDate) {
   let promise, resps, resp, empNum;
   for (let i in employees) {
     // build promises
-    promise = api.getTimesheetsData(employees[i].employeeNumber, startDate, endDate, false);
+    promise = api.getTimesheetsData(employees[i].employeeNumber, { startDate, endDate });
     batch.push(promise);
     batch_employees.push(employees[i].employeeNumber);
 

@@ -41,7 +41,7 @@ import TimePeriodHours from '@/components/shared/quickbooks/TimePeriodHours.vue'
 import PTOHours from '@/components/shared/quickbooks/PTOHours.vue';
 import _ from 'lodash';
 import api from '@/shared/api';
-import { difference, format, getTodaysDate, isBefore, now, startOf, subtract } from '@/shared/dateUtils';
+import { difference, isBefore, now } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -60,8 +60,8 @@ function beforeUnmount() {
  * The Created lifecycle hook.
  */
 async function created() {
-  this.emitter.on('get-period-data', async ({ startDate, endDate, isMonthly }) => {
-    await this.setData(startDate, endDate, isMonthly);
+  this.emitter.on('get-period-data', async ({ isYearly }) => {
+    await this.setData(isYearly);
   });
   await this.setInitialData();
   this.loading = false;
@@ -166,19 +166,17 @@ async function resetData() {
     localStorage.removeItem(this.KEYS.QB);
   }
   this.emitter.emit('reset-data');
-  await this.setInitialData();
+  await this.setInitialData(false);
   this.loading = false;
 } // resetData
 
 /**
  * Retrieves, sets, and stores components data from API.
  *
- * @param {String} startDate - The time period start date (YYYY-MM) format
- * @param {String} endDate - The time period end date (YYYY-MM) format
- * @param {Boolean} isMonthly - Whether or not the time period is monthly
+ * @param {Boolean} isYearly - Whether or not the time period is yearly
  */
-async function setDataFromApi(startDate, endDate, isMonthly) {
-  let timesheetsData = await api.getTimesheetsData(this.employee.employeeNumber, startDate, endDate);
+async function setDataFromApi(isYearly) {
+  let timesheetsData = await api.getTimesheetsData(this.employee.employeeNumber, { code: isYearly ? 3 : 2 });
   if (!this.hasError(timesheetsData)) {
     this.timesheets = timesheetsData.timesheets;
     this.ptoBalances = timesheetsData.ptoBalances;
@@ -187,7 +185,7 @@ async function setDataFromApi(startDate, endDate, isMonthly) {
     this.removeExcludedPtoBalances();
     if (this.employeeIsUser()) {
       // only set local storage if user is looking at their own data
-      this.setStorage(isMonthly);
+      this.setStorage(isYearly);
     }
   }
 } // setDataFromApi
@@ -196,7 +194,7 @@ async function setDataFromApi(startDate, endDate, isMonthly) {
  * Sets the main components data used throughout child components.
  *
  * @param {Object} qbStorage - The local storage timesheets object
- * @param {String} key - The monthly or yearly object key
+ * @param {String} key - The pay periods or yearly object key
  */
 function setDataFromStorage(qbStorage, key) {
   this.timesheets = qbStorage[key]?.timesheets;
@@ -208,11 +206,11 @@ function setDataFromStorage(qbStorage, key) {
 /**
  * Sets local storage for Quickbooks data.
  *
- * @param {Boolean} isMonthly - Whether or not the time period is monthly
+ * @param {Boolean} isYearly - Whether or not the time period is yearly
  */
-function setStorage(isMonthly) {
+function setStorage(isYearly) {
   let storage = this.qbStorageExists();
-  let key = isMonthly ? this.KEYS.MONTHLY : this.KEYS.YEARLY;
+  let key = isYearly ? this.KEYS.YEARLY : this.KEYS.PAY_PERIODS;
   let data = {
     [key]: {
       timesheets: this.timesheets,
@@ -229,30 +227,23 @@ function setStorage(isMonthly) {
 /**
  * Retrieves and sets timesheets data from API or local storage.
  *
- * @param {String} startDate - The time period start date (YYYY-MM) format
- * @param {String} endDate - The time period end date (YYYY-MM) format
- * @param {Boolean} isMonthly - Whether or not the time period is monthly
+ * @param {Boolean} isYearly - Whether or not the time period is yearly
  */
-async function setData(startDate, endDate, isMonthly) {
+async function setData(isYearly) {
   let storage = this.qbStorageExists();
-  let key = isMonthly ? this.KEYS.MONTHLY : this.KEYS.YEARLY;
+  let key = isYearly ? this.KEYS.YEARLY : this.KEYS.PAY_PERIODS;
   if (storage && storage[key] && this.employeeIsUser() && !this.isStorageExpired(storage[key].lastUpdated)) {
     this.setDataFromStorage(storage, key);
   } else {
-    await this.setDataFromApi(startDate, endDate, isMonthly);
+    await this.setDataFromApi(isYearly);
   }
 } // setData
 
 /**
- * Sets the timesheets data on initial load based on a monthly time period (current and previous month displayed).
+ * Sets the timesheets data on initial load based on a time period (current and previous pay period displayed).
  */
 async function setInitialData() {
-  let today = getTodaysDate();
-  // last month
-  let startDate = format(startOf(subtract(today, 1, 'month'), 'month'), null, 'YYYY-MM');
-  // this month
-  let endDate = format(today, null, 'YYYY-MM');
-  await this.setData(startDate, endDate, true);
+  await this.setData();
 } // setInitialData
 
 // |--------------------------------------------------|
@@ -282,7 +273,7 @@ export default {
       timesheets: null,
       KEYS: {
         QB: 'qbData',
-        MONTHLY: 'monthly',
+        PAY_PERIODS: 'payPeriods',
         YEARLY: 'yearly'
       }
     };

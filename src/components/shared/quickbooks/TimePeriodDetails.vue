@@ -2,7 +2,7 @@
   <div>
     <h3 class="d-flex align-center mb-3">
       <v-icon class="mr-2">mdi-book-open-outline</v-icon>
-      {{ isMonthly ? 'Monthly' : 'Yearly' }} Details
+      {{ isYearly ? 'Yearly' : 'Pay Period' }} Details
     </h3>
 
     <div class="d-flex justify-space-between my-3">
@@ -24,7 +24,7 @@
         {{ Math.abs(formatNumber(hoursBehindBy)) }}h
       </div>
     </div>
-    <div v-if="(isMonthly && dateIsCurrentMonth) || !isMonthly" class="d-flex justify-space-between my-3">
+    <div v-if="(!isYearly && dateIsCurrentPeriod) || isYearly" class="d-flex justify-space-between my-3">
       <div class="mr-2">Future</div>
       <div class="dotted-line"></div>
       <div class="ml-2">{{ formatNumber(futureHours) }}h</div>
@@ -33,13 +33,13 @@
       <div class="mr-3">
         Work Days Remaining
         <span
-          v-if="(futureDays > 0 && isMonthly && dateIsCurrentMonth) || (futureDays > 0 && !isMonthly)"
+          v-if="(futureDays > 0 && !isYearly && dateIsCurrentPeriod) || (futureDays > 0 && isYearly)"
           class="text-blue"
         >
           *
         </span>
         <v-tooltip
-          v-if="(futureDays > 0 && isMonthly && dateIsCurrentMonth) || (futureDays > 0 && !isMonthly)"
+          v-if="(futureDays > 0 && !isYearly && dateIsCurrentPeriod) || (futureDays > 0 && isYearly)"
           activator="parent"
           location="top"
         >
@@ -75,8 +75,7 @@ import {
   isAfter,
   isSameOrAfter,
   format,
-  startOf,
-  endOf,
+  getTodaysDate,
   DEFAULT_ISOFORMAT
 } from '@/shared/dateUtils';
 
@@ -139,7 +138,7 @@ function hoursBehindBy() {
 function periodHoursCompleted() {
   let total = 0;
   _.forEach(this.timeData, (duration, jobName) => {
-    if (this.isMonthly || (!this.isMonthly && !this.supplementalData.nonBillables?.includes(jobName))) {
+    if (!this.isYearly || (this.isYearly && !this.supplementalData.nonBillables?.includes(jobName))) {
       total += duration;
     }
   });
@@ -153,10 +152,10 @@ function periodHoursCompleted() {
  * @returns The employees pro-rated hours needed per day
  */
 function proRatedHours() {
-  if (this.isMonthly) {
-    return 8 * (this.employee.workStatus / 100);
+  if (this.isYearly) {
+    return this.BONUS_YEAR_TOTAL / this.getWorkDays(this.period.startDate, this.period.endDate, true);
   } else {
-    return this.BONUS_YEAR_TOTAL / this.getWorkDays(startOf(this.today, 'year'), endOf(this.today, 'year'), true);
+    return 8 * (this.employee.workStatus / 100);
   }
 } // proRatedHours
 
@@ -183,16 +182,12 @@ function remainingWorkDays() {
   if (this.customWorkDayInput && Number(this.customWorkDayInput)) {
     this.customWorkDayInput = Number(this.customWorkDayInput) ?? null;
     remainingDays = this.customWorkDayInput || this.remainingWorkDays;
-  } else if (this.isMonthly) {
-    if (this.dateIsCurrentMonth) {
-      remainingDays = this.getWorkDays(this.date, endOf(this.date, 'month')) - daysToSubtract;
-    } else {
+  } else {
+    remainingDays = this.getWorkDays(this.today, this.period.endDate) - daysToSubtract;
+    if (!this.dateIsCurrentPeriod) {
       remainingDays = 0;
     }
-  } else {
-    remainingDays = this.getWorkDays(this.today, endOf(this.today, 'year')) - daysToSubtract;
   }
-
   return Math.max(remainingDays, 0);
 } // remainingWorkDays
 
@@ -205,7 +200,7 @@ function remainingAverageHoursPerDay() {
   if (Number(this.remainingWorkDays) > 0) {
     return this.remainingHours / this.remainingWorkDays;
   } else {
-    return this.dateIsCurrentMonth ? this.remainingHours : 0;
+    return this.dateIsCurrentPeriod ? this.remainingHours : 0;
   }
 } // remainingAverageHoursPerDay
 
@@ -216,7 +211,7 @@ function remainingAverageHoursPerDay() {
  */
 function totalPeriodHours() {
   let total = this.totalWorkDays * this.proRatedHours;
-  return this.isMonthly ? total : Math.round(total);
+  return !this.isYearly ? total : Math.round(total);
 } // totalPeriodHours
 
 /**
@@ -225,26 +220,20 @@ function totalPeriodHours() {
  * @returns Number - The total number of works days
  */
 function totalWorkDays() {
-  if (this.isMonthly) {
-    return this.getWorkDays(startOf(this.date, 'month'), endOf(this.date, 'month'));
-  } else {
-    return this.getWorkDays(startOf(this.today, 'year'), endOf(this.today, 'year'));
-  }
+  return this.getWorkDays(this.period.startDate, this.period.endDate);
 } // totalWorkDays
 
 /**
  * Calculates and returns the work days between start and end dates provided
  *
- * @param {String} startDate - The start date (in YYYY-MM format)
- * @param {String} endDate - The end date (in YYYY-MM format)
+ * @param {String} startDate - The start date
+ * @param {String} endDate - The end date
  * @param {Boolean} excludeProRated - Whether or not to pro-rate based on hire date (default is to pro-rate)
  * @return int - number of remaining working days
  */
 function getWorkDays(startDate, endDate, excludeProRated = false) {
   let workDays = 0;
   let hireDate = this.employee.hireDate;
-  startDate = format(startDate, null, DEFAULT_ISOFORMAT);
-  endDate = format(endDate, null, DEFAULT_ISOFORMAT);
   if (!excludeProRated && isAfter(hireDate, startDate, 'day') && isSameOrAfter(endDate, hireDate, 'day')) {
     startDate = hireDate;
   }
@@ -292,7 +281,8 @@ export default {
     return {
       BONUS_YEAR_TOTAL: 1860,
       customWorkDayInput: null,
-      showCustomWorkDayInput: false
+      showCustomWorkDayInput: false,
+      today: format(getTodaysDate(), null, DEFAULT_ISOFORMAT)
     };
   },
   methods: {
@@ -301,7 +291,7 @@ export default {
     isWeekDay
   },
   mounted,
-  props: ['date', 'dateIsCurrentMonth', 'employee', 'isMonthly', 'supplementalData', 'timeData', 'today']
+  props: ['dateIsCurrentPeriod', 'employee', 'isYearly', 'period', 'supplementalData', 'timeData']
 };
 </script>
 

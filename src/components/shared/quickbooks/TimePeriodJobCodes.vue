@@ -1,9 +1,9 @@
 <template>
   <div>
     <h3 class="d-flex align-center">
-      <v-icon class="mr-2">mdi-briefcase-outline</v-icon> {{ isMonthly ? 'Monthly' : 'Yearly' }} Job Codes
+      <v-icon class="mr-2">mdi-briefcase-outline</v-icon> {{ isYearly ? 'Yearly' : 'Monthly' }} Job Codes
       <v-avatar
-        v-if="!isMonthly"
+        v-if="isYearly"
         @click="
           openLink(
             'https://3.basecamp.com/3097063/buckets/179119/messages/1426517066#:~:text=1860%20Hours%20target%20bonus'
@@ -22,9 +22,9 @@
       <div v-for="(duration, jobcode) in timeData" :key="jobcode">
         <div
           v-if="
-            isMonthly || showNonBillables || (!showNonBillables && !supplementalData.nonBillables.includes(jobcode))
+            !isYearly || showNonBillables || (!showNonBillables && !supplementalData.nonBillables.includes(jobcode))
           "
-          :class="!isMonthly && supplementalData.nonBillables.includes(jobcode) ? 'text-grey' : ''"
+          :class="isYearly && supplementalData.nonBillables.includes(jobcode) ? 'text-grey' : ''"
           class="d-flex justify-space-between my-3"
         >
           <div class="mr-3">{{ jobcode }}</div>
@@ -33,7 +33,7 @@
         </div>
       </div>
       <v-span
-        v-if="!isMonthly && hasNonBillables()"
+        v-if="isYearly && hasNonBillables()"
         @click="showNonBillables = !showNonBillables"
         class="pointer text-blue"
       >
@@ -84,7 +84,7 @@ export default {
     hasNonBillables,
     openLink
   },
-  props: ['isMonthly', 'supplementalData', 'timeData']
+  props: ['isYearly', 'supplementalData', 'timeData']
 };
 </script>
 

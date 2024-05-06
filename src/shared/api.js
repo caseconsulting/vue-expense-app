@@ -37,9 +37,10 @@ const CONTRACT_STATUSES = {
  * @param method - the type of the api method E.G. get, put, etc.
  * @param resource - the URL for the api route to the specific function
  * @param data - data to be passed to the api function
+ * @param params - params to be passed to the api function
  * @return * - the data from the response or an error
  */
-async function execute(method, resource, data) {
+async function execute(method, resource, data, params) {
   // inject the accessToken for each request
   let accessToken = getAccessToken();
 
@@ -48,6 +49,7 @@ async function execute(method, resource, data) {
       method,
       url: resource,
       data,
+      params,
       headers: {
         Authorization: `Bearer ${accessToken}`
       }
@@ -419,16 +421,10 @@ async function deleteAttachment(expense) {
  * gets the timesheets and PTO balances data for the specified timeframe for an employee
  *
  * @param employeeNumber - the number for the employee
- * @param startDate - The start date (YYYY-MM format)
- * @param endDate - The end date (YYYY-MM format)
  * @return - the timesheets data
  */
-async function getTimesheetsData(employeeNumber, startDate, endDate, onlyPto) {
-  if (onlyPto) {
-    return await execute('get', `/${TIMESHEETS}/pto/${employeeNumber}`);
-  } else {
-    return await execute('get', `/${TIMESHEETS}/${employeeNumber}/${startDate}/${endDate}`);
-  }
+async function getTimesheetsData(employeeNumber, params) {
+  return await execute('get', `/${TIMESHEETS}/${employeeNumber}`, null, params);
 } // getTimesheetsData
 
 /**

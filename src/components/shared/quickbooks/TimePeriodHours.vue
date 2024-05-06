@@ -6,29 +6,29 @@
           <!-- Next and Previous Months, Title, and Expand/Collapse Time Period -->
           <v-col cols="3" class="d-flex align-center justify-center pa-0">
             <v-btn
-              :disabled="!isMonthly || (isMonthly && !dateIsCurrentMonth)"
+              :disabled="isYearly || (!isYearly && !dateIsCurrentPeriod)"
               icon=""
               variant="text"
               density="comfortable"
-              @click="date = subtract(date, 1, 'month')"
+              @click="periodIndex -= 1"
             >
-              <v-tooltip activator="parent" location="top">Previous Month</v-tooltip>
+              <v-tooltip activator="parent" location="top">Previous Pay Period</v-tooltip>
               <v-icon size="x-large"> mdi-arrow-left-thin </v-icon>
             </v-btn>
             <v-btn
-              :disabled="!isMonthly || (isMonthly && dateIsCurrentMonth)"
+              :disabled="isYearly || (!isYearly && dateIsCurrentPeriod)"
               icon=""
               variant="text"
               density="comfortable"
-              @click="date = add(date, 1, 'month')"
+              @click="periodIndex -= 1"
             >
-              <v-tooltip activator="parent" location="top">Next Month</v-tooltip>
+              <v-tooltip activator="parent" location="top">Next Pay Period</v-tooltip>
               <v-icon size="x-large"> mdi-arrow-right-thin </v-icon>
             </v-btn>
           </v-col>
           <v-col cols="6" class="d-flex align-center justify-center pa-0">
             <h3 class="text-center">
-              {{ isMonthly ? format(date, null, 'MMMM') : format(today, null, 'YYYY') }}
+              {{ timesheets[periodIndex]?.title }}
             </h3>
           </v-col>
           <v-col cols="3" class="d-flex align-center justify-center pa-0">
@@ -40,13 +40,15 @@
               :disabled="timePeriodLoading"
               @click="
                 customWorkDayInput = null;
-                isMonthly = !isMonthly;
+                isYearly = !isYearly;
                 timePeriodLoading = true;
               "
             >
-              <v-tooltip activator="parent" location="top">{{ isMonthly ? 'Show yearly' : 'Show monthly' }}</v-tooltip>
+              <v-tooltip activator="parent" location="top">
+                {{ isYearly ? 'Show Pay Periods' : 'Show yearly' }}
+              </v-tooltip>
               <v-icon size="large">
-                {{ isMonthly ? 'mdi-calendar-multiple' : 'mdi-calendar' }}
+                {{ isYearly ? 'mdi-calendar' : 'mdi-calendar-multiple' }}
               </v-icon>
             </v-btn>
           </v-col>
@@ -65,7 +67,7 @@
           v-else
           :key="timeData"
           :jobcodes="timeData || {}"
-          :nonBillables="!isMonthly ? supplementalData.nonBillables : null"
+          :nonBillables="isYearly ? supplementalData.nonBillables : null"
         ></timesheets-chart>
         <!-- End Timesheets Donut Chart -->
       </v-col>
@@ -75,13 +77,12 @@
         <time-period-details
           v-else
           :key="timeData"
-          :date="date"
-          :dateIsCurrentMonth="dateIsCurrentMonth"
+          :dateIsCurrentPeriod="dateIsCurrentPeriod"
           :employee="employee"
-          :isMonthly="isMonthly"
+          :isYearly="isYearly"
+          :period="timesheets[periodIndex]"
           :supplementalData="supplementalData"
           :timeData="timeData"
-          :today="today"
         ></time-period-details>
       </v-col>
       <!-- End Time Period Details -->
@@ -90,7 +91,7 @@
         <v-skeleton-loader v-if="timePeriodLoading" type="list-item@4"></v-skeleton-loader>
         <time-period-job-codes
           v-else
-          :isMonthly="isMonthly"
+          :isYearly="isYearly"
           :supplementalData="supplementalData"
           :timeData="timeData"
         ></time-period-job-codes>
@@ -105,17 +106,6 @@ import TimesheetsChart from '@/components/charts/custom-charts/TimesheetsChart.v
 import TimePeriodDetails from '@/components/shared/quickbooks/TimePeriodDetails.vue';
 import TimePeriodJobCodes from '@/components/shared/quickbooks/TimePeriodJobCodes.vue';
 import _ from 'lodash';
-import {
-  add,
-  subtract,
-  getMonth,
-  getTodaysDate,
-  isSame,
-  format,
-  startOf,
-  endOf,
-  DEFAULT_ISOFORMAT
-} from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -135,8 +125,7 @@ function beforeUnmount() {
  */
 function created() {
   this.emitter.on('reset-data', () => {
-    this.isMonthly = true;
-    format(this.today, null, DEFAULT_ISOFORMAT);
+    this.isYearly = false;
   });
 } // created
 
@@ -151,9 +140,9 @@ function created() {
  *
  * @returns Boolean - Whether or not the date is in the current month
  */
-function dateIsCurrentMonth() {
-  return isSame(getMonth(this.date), getMonth(this.today));
-} // dateIsCurrentMonth
+function dateIsCurrentPeriod() {
+  return this.periodIndex === this.timesheets.length - 1;
+} // dateIsCurrentPeriod
 
 /**
  * The jobcodes and their durations all sorted by duration within the time period.
@@ -161,17 +150,7 @@ function dateIsCurrentMonth() {
  * @returns Object - Key Value pairs of jobcodes and their durations
  */
 function timeData() {
-  let timeData = {};
-  if (this.isMonthly) {
-    timeData = this.timesheets[format(this.date, null, 'YYYY-MM')];
-  } else {
-    _.forEach(this.timesheets, (monthTimesheets) => {
-      _.forEach(monthTimesheets, (duration, jobName) => {
-        if (!timeData[jobName]) timeData[jobName] = 0;
-        timeData[jobName] += duration;
-      });
-    });
-  }
+  let timeData = this.timesheets[this.periodIndex].timesheets;
   // sort by duration
   let orderedKeys = Object.keys(timeData).sort(function (a, b) {
     return timeData[b] - timeData[a];
@@ -196,19 +175,10 @@ function timeData() {
  */
 function watchTimePeriodLoading() {
   if (this.timePeriodLoading) {
-    if (this.isMonthly) {
-      this.emitter.emit('get-period-data', {
-        startDate: format(startOf(subtract(this.today, 1, 'month'), 'month'), null, 'YYYY-MM'),
-        endDate: format(endOf(this.today, 'month'), null, 'YYYY-MM'),
-        isMonthly: this.isMonthly
-      });
-    } else {
-      this.emitter.emit('get-period-data', {
-        startDate: format(startOf(this.today, 'year'), null, 'YYYY-MM'),
-        endDate: format(endOf(this.today, 'year'), null, 'YYYY-MM'),
-        isMonthly: this.isMonthly
-      });
-    }
+    if (this.isYearly) this.periodIndex = 0;
+    this.emitter.emit('get-period-data', {
+      isYearly: this.isYearly
+    });
   }
 } // watchTimePeriodLoading
 
@@ -233,24 +203,16 @@ export default {
     TimePeriodJobCodes
   },
   computed: {
-    dateIsCurrentMonth,
+    dateIsCurrentPeriod,
     timeData
   },
   created,
   data() {
     return {
-      date: format(getTodaysDate(), null, DEFAULT_ISOFORMAT),
-      isMonthly: true,
-      timePeriodLoading: false,
-      today: format(getTodaysDate(), null, DEFAULT_ISOFORMAT)
+      periodIndex: this.timesheets.length - 1,
+      isYearly: false,
+      timePeriodLoading: false
     };
-  },
-  methods: {
-    add,
-    format,
-    getMonth,
-    getTodaysDate,
-    subtract
   },
   props: ['employee', 'ptoBalances', 'supplementalData', 'timesheets'],
   watch: {
