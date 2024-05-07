@@ -6,7 +6,7 @@
           <!-- Next and Previous Months, Title, and Expand/Collapse Time Period -->
           <v-col cols="3" class="d-flex align-center justify-center pa-0">
             <v-btn
-              :disabled="isYearly || (!isYearly && !dateIsCurrentPeriod)"
+              :disabled="isYearly || (!isYearly && periodIndex === 0)"
               icon=""
               variant="text"
               density="comfortable"
@@ -20,14 +20,15 @@
               icon=""
               variant="text"
               density="comfortable"
-              @click="periodIndex -= 1"
+              @click="periodIndex += 1"
             >
               <v-tooltip activator="parent" location="top">Next Pay Period</v-tooltip>
               <v-icon size="x-large"> mdi-arrow-right-thin </v-icon>
             </v-btn>
           </v-col>
           <v-col cols="6" class="d-flex align-center justify-center pa-0">
-            <h3 class="text-center">
+            <v-skeleton-loader v-if="timePeriodLoading" type="text" width="100"></v-skeleton-loader>
+            <h3 v-else class="text-center">
               {{ timesheets[periodIndex]?.title }}
             </h3>
           </v-col>
@@ -175,7 +176,6 @@ function timeData() {
  */
 function watchTimePeriodLoading() {
   if (this.timePeriodLoading) {
-    if (this.isYearly) this.periodIndex = 0;
     this.emitter.emit('get-period-data', {
       isYearly: this.isYearly
     });
@@ -186,6 +186,8 @@ function watchTimePeriodLoading() {
  * The watcher for the timesheets prop
  */
 function watchTimesheets() {
+  if (this.isYearly) this.periodIndex = 0;
+  else this.periodIndex = this.timesheets.length - 1;
   this.timePeriodLoading = false;
 } // watchTimesheets
 

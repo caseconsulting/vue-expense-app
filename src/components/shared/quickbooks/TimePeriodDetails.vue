@@ -211,7 +211,7 @@ function remainingAverageHoursPerDay() {
  */
 function totalPeriodHours() {
   let total = this.totalWorkDays * this.proRatedHours;
-  return !this.isYearly ? total : Math.round(total);
+  return this.isYearly ? Math.round(total) : total;
 } // totalPeriodHours
 
 /**
