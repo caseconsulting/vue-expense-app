@@ -1,10 +1,43 @@
 <template>
   <div>
-    <v-row>
-      <v-col order="1" cols="12" sm="12" md="6" lg="6" xl="6" xxl="6">
-        <v-row class="mb-1" dense>
-          <!-- Next and Previous Months, Title, and Expand/Collapse Time Period -->
-          <v-col cols="3" class="d-flex align-center justify-center pa-0">
+    <v-row class="tmp d-flex justify-space-evenly pa-0 pb-2 my-1 mx-7">
+      <v-btn
+        variant="text"
+        :class="!isYearly ? 'text-blue-darken-2 bg-blue-lighten-5' : ''"
+        :disabled="timePeriodLoading"
+        @click="
+          customWorkDayInput = null;
+          isYearly = false;
+          timePeriodLoading = true;
+        "
+      >
+        <v-icon size="x-large">mdi-calendar</v-icon>
+        <v-tooltip activator="parent" location="top">Pay Period</v-tooltip>
+      </v-btn>
+      <v-btn
+        variant="text"
+        class="mx-2"
+        :class="isYearly ? 'text-blue-darken-2 bg-blue-lighten-5' : ''"
+        :disabled="timePeriodLoading"
+        @click="
+          customWorkDayInput = null;
+          isYearly = true;
+          timePeriodLoading = true;
+        "
+      >
+        <v-icon size="x-large">mdi-calendar-multiple</v-icon>
+        <v-tooltip activator="parent" location="top">Calendar Year</v-tooltip>
+      </v-btn>
+      <v-btn variant="text">
+        <v-icon size="x-large">mdi-calendar-weekend</v-icon>
+        <v-tooltip activator="parent" location="top">Contract Year</v-tooltip>
+      </v-btn>
+    </v-row>
+    <v-row class="pa=0 ma-0">
+      <v-col order="1" cols="12" sm="12" md="6" lg="6" xl="6" xxl="6" class="pa-1">
+        <!-- Title -->
+        <v-row dense>
+          <v-col cols="3" class="d-flex align-center justify-end pa-0">
             <v-btn
               :disabled="isYearly || (!isYearly && periodIndex === 0)"
               icon=""
@@ -15,6 +48,14 @@
               <v-tooltip activator="parent" location="top">Previous Pay Period</v-tooltip>
               <v-icon size="x-large"> mdi-arrow-left-thin </v-icon>
             </v-btn>
+          </v-col>
+          <v-col class="d-flex align-center justify-center pa-0">
+            <v-skeleton-loader v-if="timePeriodLoading" type="text" width="100"></v-skeleton-loader>
+            <h3 v-else class="text-center">
+              {{ timesheets[periodIndex]?.title }}
+            </h3>
+          </v-col>
+          <v-col cols="3" class="d-flex align-center justify-start pa-0">
             <v-btn
               :disabled="isYearly || (!isYearly && dateIsCurrentPeriod)"
               icon=""
@@ -26,14 +67,26 @@
               <v-icon size="x-large"> mdi-arrow-right-thin </v-icon>
             </v-btn>
           </v-col>
-          <v-col cols="6" class="d-flex align-center justify-center pa-0">
-            <v-skeleton-loader v-if="timePeriodLoading" type="text" width="100"></v-skeleton-loader>
-            <h3 v-else class="text-center">
-              {{ timesheets[periodIndex]?.title }}
-            </h3>
-          </v-col>
-          <v-col cols="3" class="d-flex align-center justify-center pa-0">
-            <v-btn
+        </v-row>
+        <!-- End Title -->
+        <!-- Timesheets Donut Chart -->
+        <v-progress-circular
+          v-if="timePeriodLoading"
+          size="120"
+          width="15"
+          class="mx-auto w-100 mt-2"
+          color="#AEAEAE"
+          indeterminate="disable-shrink"
+        ></v-progress-circular>
+        <timesheets-chart
+          v-else
+          class="mt-2"
+          :key="timeData"
+          :jobcodes="timeData || {}"
+          :nonBillables="isYearly ? supplementalData.nonBillables : null"
+        ></timesheets-chart>
+        <v-row>
+          <!-- <v-btn
               icon=""
               variant="text"
               size="large"
@@ -51,29 +104,12 @@
               <v-icon size="large">
                 {{ isYearly ? 'mdi-calendar' : 'mdi-calendar-multiple' }}
               </v-icon>
-            </v-btn>
-          </v-col>
-          <!-- End Next and Previous Months, Title, and Expand/Collapse Time Period -->
+            </v-btn> -->
         </v-row>
-        <!-- Timesheets Donut Chart -->
-        <v-progress-circular
-          v-if="timePeriodLoading"
-          size="120"
-          width="15"
-          class="mx-auto w-100"
-          color="#AEAEAE"
-          indeterminate="disable-shrink"
-        ></v-progress-circular>
-        <timesheets-chart
-          v-else
-          :key="timeData"
-          :jobcodes="timeData || {}"
-          :nonBillables="isYearly ? supplementalData.nonBillables : null"
-        ></timesheets-chart>
         <!-- End Timesheets Donut Chart -->
       </v-col>
       <!-- Time Period Details -->
-      <v-col :order="$vuetify.display.mdAndUp ? 2 : 3" cols="12" md="6" lg="6" xl="6" xxl="6">
+      <v-col :order="$vuetify.display.mdAndUp ? 2 : 3" cols="12" md="6" lg="6" xl="6" xxl="6" class="pa-1">
         <v-skeleton-loader v-if="timePeriodLoading" type="list-item@4"></v-skeleton-loader>
         <time-period-details
           v-else
@@ -88,7 +124,11 @@
       </v-col>
       <!-- End Time Period Details -->
       <!-- Time Period Job Codes -->
-      <v-col :order="$vuetify.display.mdAndUp ? 3 : 2" cols="12">
+      <v-col
+        :order="$vuetify.display.mdAndUp ? 3 : 2"
+        cols="12"
+        :class="$vuetify.display.mdAndUp ? 'pa-0 mt-4' : 'pa-0 mt-8 mb-2'"
+      >
         <v-skeleton-loader v-if="timePeriodLoading" type="list-item@4"></v-skeleton-loader>
         <time-period-job-codes
           v-else
@@ -223,3 +263,9 @@ export default {
   }
 };
 </script>
+
+<style>
+.tmp {
+  border-bottom: 1px solid rgb(234, 234, 234);
+}
+</style>

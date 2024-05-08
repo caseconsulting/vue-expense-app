@@ -27,7 +27,7 @@
               :ptoBalances="ptoBalances || {}"
               :supplementalData="supplementalData || {}"
             ></time-period-hours>
-            <hr class="my-5 mx-7" />
+            <hr class="mt-3 mb-5 mx-7" />
             <p-t-o-hours :employee="employee" :ptoBalances="ptoBalances || {}"></p-t-o-hours>
           </div>
         </div>
