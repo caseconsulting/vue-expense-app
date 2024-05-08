@@ -65,13 +65,13 @@
             <v-text-field
               :id="'start-field-' + index + '-' + projIndex"
               ref="formFields"
-              :model-value="format(project.startDate, null, 'MM/YYYY')"
+              :model-value="format(project.startDate, null, 'MM/DD/YYYY')"
               label="Start Date"
-              hint="MM/YYYY format"
-              v-mask="'##/####'"
+              hint="MM/DD/YYYY format"
+              v-mask="'##/##/####'"
               variant="underlined"
               prepend-icon="mdi-calendar"
-              :rules="[...getRequiredRules(), ...getDateMonthYearRules(), dateOrderRule(index, projIndex)]"
+              :rules="[...getRequiredRules(), ...getDateRules(), dateOrderRule(index, projIndex)]"
               @update:focused="project.startDate = parseEventDate($event)"
               clearable
               @click:prepend="project.showStartMenu = true"
@@ -101,17 +101,17 @@
             <v-text-field
               :id="'end-field-' + index + '-' + projIndex"
               ref="formFields"
-              :model-value="format(project.endDate, null, 'MM/YYYY')"
+              :model-value="format(project.endDate, null, 'MM/DD/YYYY')"
               :label="project.presentDate ? 'Currently active' : 'End Date'"
               variant="underlined"
               :rules="[
-                ...getDateMonthYearOptionalRules(),
+                ...getDateOptionalRules(),
                 dateOrderRule(index, projIndex),
                 endDatePresentRule(index, projIndex)
               ]"
-              hint="MM/YYYY format"
+              hint="MM/DD/YYYY format"
               prepend-icon="mdi-calendar"
-              v-mask="'##/####'"
+              v-mask="'##/##/####'"
               clearable
               @click:clear="project.endDate = null"
               @update:focused="project.endDate = parseEventDate($event)"
@@ -159,6 +159,16 @@
             </v-text-field>
             <!-- End End Date -->
           </v-col>
+          <v-col>
+            <v-switch
+              v-if="userRoleIsAdmin() || userRoleIsManager()"
+              v-model="project.bonusCalculationDate"
+              @click="isolate1860CalcOption(project.projectId)"
+              label="Use for 1860 calculation?"
+              color="primary"
+              class="ma-0 pa-0"
+            />
+          </v-col>
         </v-row>
       </div>
       <!-- End of project loop -->
@@ -192,8 +202,8 @@
 <script>
 import _ from 'lodash';
 import { mask } from 'vue-the-mask';
-import { getDateMonthYearRules, getDateMonthYearOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
-import { asyncForEach, isEmpty, isMobile } from '@/utils/utils';
+import { getDateRules, getDateOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
+import { asyncForEach, isEmpty, isMobile, userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
 import { add, format, isAfter } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
@@ -421,12 +431,26 @@ function hasEndDatesFilled(index) {
 } // hasEndDatesFilled
 
 /**
+ * Allows admin to select a project as the 1860 calculation without manually
+ * unselected the other ones. Also checks to see if the project is current.
+ *
+ * @param project ID of project to be selected, all others will be unselected
+ */
+function isolate1860CalcOption(projectId) {
+  for (let c of this.editedContracts) {
+    for (let p of c.projects) {
+      if (p.projectId !== projectId || p.presentDate !== true) p.bonusCalculationDate = false;
+    }
+  }
+} // isolate1860CalcOption
+
+/**
  * Parse the date after losing focus.
  *
  * @return String - The date in YYYY-MM format
  */
 function parseEventDate() {
-  return this.format(event.target.value, 'MM/YYYY', 'YYYY-MM');
+  return this.format(event.target.value, null, 'YYYY-MM-DD');
 } //parseEventDate
 
 /**
@@ -547,13 +571,16 @@ export default {
     deleteContract,
     deleteProject,
     format, // dateUtils
-    getDateMonthYearRules,
-    getDateMonthYearOptionalRules,
+    getDateRules,
+    getDateOptionalRules,
     getRequiredRules,
     hasEndDatesFilled,
+    isolate1860CalcOption,
     isAfter, // dateUtils
     isEmpty,
     parseEventDate,
+    userRoleIsAdmin,
+    userRoleIsManager,
     validateFields
   },
   props: ['contracts', 'model', 'validating'],
