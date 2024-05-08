@@ -198,45 +198,46 @@
         </v-text-field>
 
         <!-- Purchase Date -->
-        <v-text-field
-          variant="underlined"
-          v-model="purchaseDateFormatted"
-          id="purchaseDate"
-          :rules="[...getDateRules(), ...getNonFutureDateRules()]"
-          :disabled="(isReimbursed && !isDifferentExpenseType) || isInactive"
-          v-mask="'##/##/####'"
-          label="Purchase Date"
-          hint="MM/DD/YYYY format"
-          persistent-hint
-          @click:prepend="purchaseMenu = true"
-          @keypress="purchaseMenu = false"
-          @update:focused="editedExpense.purchaseDate = format(purchaseDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
+        <v-menu
+          ref="purchaseMenu"
+          :close-on-content-click="false"
+          v-model="purchaseMenu"
+          :disabled="isReimbursed && !isDifferentExpenseType"
+          location="start center"
         >
-          <v-menu
-            activator="parent"
-            ref="purchaseMenu"
-            :close-on-content-click="false"
-            v-model="purchaseMenu"
-            :disabled="isReimbursed && !isDifferentExpenseType"
-            location="start center"
-          >
-            <v-date-picker
-              keyboard-icon=""
-              hide-actions
-              v-model="editedExpense.purchaseDate"
-              show-adjacent-months
-              no-title
-              color="#bc3825"
-              @update:model-value="purchaseMenu = false"
-            ></v-date-picker>
-          </v-menu>
-
-          <template v-slot:prepend>
-            <div class="pointer">
-              <v-icon :color="caseGray">mdi-calendar</v-icon>
-            </div>
+          <template v-slot:activator="{ props }">
+            <v-text-field
+              variant="underlined"
+              v-model="purchaseDateFormatted"
+              id="purchaseDate"
+              :rules="[...getDateRules(), ...getNonFutureDateRules()]"
+              :disabled="(isReimbursed && !isDifferentExpenseType) || isInactive"
+              v-mask="'##/##/####'"
+              label="Purchase Date"
+              hint="MM/DD/YYYY format"
+              persistent-hint
+              v-bind="props"
+              @click:prepend="purchaseMenu = true"
+              @keypress="purchaseMenu = false"
+              @update:focused="editedExpense.purchaseDate = format(purchaseDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
+            >
+              <template v-slot:prepend>
+                <div v-bind="props" class="pointer">
+                  <v-icon :color="caseGray">mdi-calendar</v-icon>
+                </div>
+              </template>
+            </v-text-field>
           </template>
-        </v-text-field>
+          <v-date-picker
+            keyboard-icon=""
+            hide-actions
+            v-model="editedExpense.purchaseDate"
+            show-adjacent-months
+            no-title
+            color="#bc3825"
+            @update:model-value="purchaseMenu = false"
+          ></v-date-picker>
+        </v-menu>
 
         <!-- Reimbursed Date -->
         <v-menu
