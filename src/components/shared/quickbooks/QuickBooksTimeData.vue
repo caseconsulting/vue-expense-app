@@ -60,8 +60,8 @@ function beforeUnmount() {
  * The Created lifecycle hook.
  */
 async function created() {
-  this.emitter.on('get-period-data', async ({ isYearly }) => {
-    await this.setData(isYearly);
+  this.emitter.on('get-period-data', async ({ isCalendarYear, isYearly }) => {
+    await this.setData(isCalendarYear, isYearly);
   });
   await this.setInitialData();
   this.loading = false;
@@ -173,10 +173,15 @@ async function resetData() {
 /**
  * Retrieves, sets, and stores components data from API.
  *
+ * @param {Boolean} isCalendarYear - Whether or not the time period is the calendar year
  * @param {Boolean} isYearly - Whether or not the time period is yearly
  */
-async function setDataFromApi(isYearly) {
-  let timesheetsData = await api.getTimesheetsData(this.employee.employeeNumber, { code: isYearly ? 3 : 2 });
+async function setDataFromApi(isCalendarYear, isYearly) {
+  let code = isYearly ? (isCalendarYear ? 3 : 4) : 2;
+  let timesheetsData = await api.getTimesheetsData(this.employee.employeeNumber, {
+    code,
+    employeeId: this.employee.id
+  });
   if (!this.hasError(timesheetsData)) {
     this.timesheets = timesheetsData.timesheets;
     this.ptoBalances = timesheetsData.ptoBalances;
@@ -185,7 +190,7 @@ async function setDataFromApi(isYearly) {
     this.removeExcludedPtoBalances();
     if (this.employeeIsUser()) {
       // only set local storage if user is looking at their own data
-      this.setStorage(isYearly);
+      this.setStorage(isCalendarYear, isYearly);
     }
   }
 } // setDataFromApi
@@ -206,11 +211,12 @@ function setDataFromStorage(qbStorage, key) {
 /**
  * Sets local storage for Quickbooks data.
  *
+ * @param {Boolean} isCalendarYear - Whether or not the time period is the calendar year
  * @param {Boolean} isYearly - Whether or not the time period is yearly
  */
-function setStorage(isYearly) {
+function setStorage(isCalendarYear, isYearly) {
   let storage = this.qbStorageExists();
-  let key = isYearly ? this.KEYS.YEARLY : this.KEYS.PAY_PERIODS;
+  let key = isYearly ? (isCalendarYear ? this.KEYS.CALENDAR_YEAR : this.KEYS.CONTRACT_YEAR) : this.KEYS.PAY_PERIODS;
   let data = {
     [key]: {
       timesheets: this.timesheets,
@@ -227,15 +233,16 @@ function setStorage(isYearly) {
 /**
  * Retrieves and sets timesheets data from API or local storage.
  *
+ * @param {Boolean} isCalendarYear - Whether or not the time period is the calendar year
  * @param {Boolean} isYearly - Whether or not the time period is yearly
  */
-async function setData(isYearly) {
+async function setData(isCalendarYear, isYearly) {
   let storage = this.qbStorageExists();
-  let key = isYearly ? this.KEYS.YEARLY : this.KEYS.PAY_PERIODS;
+  let key = isYearly ? (isCalendarYear ? this.KEYS.CALENDAR_YEAR : this.KEYS.CONTRACT_YEAR) : this.KEYS.PAY_PERIODS;
   if (storage && storage[key] && this.employeeIsUser() && !this.isStorageExpired(storage[key].lastUpdated)) {
     this.setDataFromStorage(storage, key);
   } else {
-    await this.setDataFromApi(isYearly);
+    await this.setDataFromApi(isCalendarYear, isYearly);
   }
 } // setData
 
@@ -274,7 +281,8 @@ export default {
       KEYS: {
         QB: 'qbData',
         PAY_PERIODS: 'payPeriods',
-        YEARLY: 'yearly'
+        CALENDAR_YEAR: 'calendarYear',
+        CONTRACT_YEAR: 'contractYear'
       }
     };
   },

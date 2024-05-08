@@ -2,7 +2,7 @@
   <div>
     <h3 class="d-flex align-center mb-3">
       <v-icon class="mr-2">mdi-book-open-outline</v-icon>
-      {{ isYearly ? 'Yearly' : 'Pay Period' }} Details
+      {{ isYearly ? (isCalendarYear ? 'Calendar Year' : 'Contract Year') : 'Pay Period' }} Details
     </h3>
 
     <div class="d-flex justify-space-between my-3">
@@ -291,7 +291,7 @@ export default {
     isWeekDay
   },
   mounted,
-  props: ['dateIsCurrentPeriod', 'employee', 'isYearly', 'period', 'supplementalData', 'timeData']
+  props: ['dateIsCurrentPeriod', 'employee', 'isCalendarYear', 'isYearly', 'period', 'supplementalData', 'timeData']
 };
 </script>
 

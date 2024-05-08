@@ -17,18 +17,29 @@
       <v-btn
         variant="text"
         class="mx-2"
-        :class="isYearly ? 'text-blue-darken-2 bg-blue-lighten-5' : ''"
+        :class="isYearly ? (isCalendarYear ? 'text-blue-darken-2 bg-blue-lighten-5' : '') : ''"
         :disabled="timePeriodLoading"
         @click="
           customWorkDayInput = null;
           isYearly = true;
+          isCalendarYear = true;
           timePeriodLoading = true;
         "
       >
         <v-icon size="x-large">mdi-calendar-multiple</v-icon>
         <v-tooltip activator="parent" location="top">Calendar Year</v-tooltip>
       </v-btn>
-      <v-btn variant="text">
+      <v-btn
+        variant="text"
+        :class="isYearly ? (!isCalendarYear ? 'text-blue-darken-2 bg-blue-lighten-5' : '') : ''"
+        :disabled="timePeriodLoading || !hasActiveContract()"
+        @click="
+          customWorkDayInput = null;
+          isYearly = true;
+          isCalendarYear = false;
+          timePeriodLoading = true;
+        "
+      >
         <v-icon size="x-large">mdi-calendar-weekend</v-icon>
         <v-tooltip activator="parent" location="top">Contract Year</v-tooltip>
       </v-btn>
@@ -37,7 +48,7 @@
       <v-col order="1" cols="12" sm="12" md="6" lg="6" xl="6" xxl="6" class="pa-1">
         <!-- Title -->
         <v-row dense>
-          <v-col cols="3" class="d-flex align-center justify-end pa-0">
+          <v-col cols="3" class="d-flex align-center justify-center pa-0">
             <v-btn
               :disabled="isYearly || (!isYearly && periodIndex === 0)"
               icon=""
@@ -51,11 +62,17 @@
           </v-col>
           <v-col class="d-flex align-center justify-center pa-0">
             <v-skeleton-loader v-if="timePeriodLoading" type="text" width="100"></v-skeleton-loader>
-            <h3 v-else class="text-center">
-              {{ timesheets[periodIndex]?.title }}
-            </h3>
+            <div v-else class="text-center">
+              <div v-if="timesheets[periodIndex]?.title.includes('-')" class="text-center">
+                <h3>{{ timesheets[periodIndex]?.title.split('-')[0] }} -</h3>
+                <h3>{{ timesheets[periodIndex]?.title.split('-')[1] }}</h3>
+              </div>
+              <h3 v-else>
+                {{ timesheets[periodIndex]?.title }}
+              </h3>
+            </div>
           </v-col>
-          <v-col cols="3" class="d-flex align-center justify-start pa-0">
+          <v-col cols="3" class="d-flex align-center justify-center pa-0">
             <v-btn
               :disabled="isYearly || (!isYearly && dateIsCurrentPeriod)"
               icon=""
@@ -85,27 +102,6 @@
           :jobcodes="timeData || {}"
           :nonBillables="isYearly ? supplementalData.nonBillables : null"
         ></timesheets-chart>
-        <v-row>
-          <!-- <v-btn
-              icon=""
-              variant="text"
-              size="large"
-              density="compact"
-              :disabled="timePeriodLoading"
-              @click="
-                customWorkDayInput = null;
-                isYearly = !isYearly;
-                timePeriodLoading = true;
-              "
-            >
-              <v-tooltip activator="parent" location="top">
-                {{ isYearly ? 'Show Pay Periods' : 'Show yearly' }}
-              </v-tooltip>
-              <v-icon size="large">
-                {{ isYearly ? 'mdi-calendar' : 'mdi-calendar-multiple' }}
-              </v-icon>
-            </v-btn> -->
-        </v-row>
         <!-- End Timesheets Donut Chart -->
       </v-col>
       <!-- Time Period Details -->
@@ -116,6 +112,7 @@
           :key="timeData"
           :dateIsCurrentPeriod="dateIsCurrentPeriod"
           :employee="employee"
+          :isCalendarYear="isCalendarYear"
           :isYearly="isYearly"
           :period="timesheets[periodIndex]"
           :supplementalData="supplementalData"
@@ -204,6 +201,18 @@ function timeData() {
   return orderedTimeData;
 } // timeData
 
+function hasActiveContract() {
+  let active = false;
+  _.forEach(this.employee.contracts, (c) => {
+    let currentProject = _.find(c.projects, (p) => !p.endDate);
+    if (currentProject) {
+      active = true;
+      return;
+    }
+  });
+  return active;
+}
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     WATCHERS                     |
@@ -217,6 +226,7 @@ function timeData() {
 function watchTimePeriodLoading() {
   if (this.timePeriodLoading) {
     this.emitter.emit('get-period-data', {
+      isCalendarYear: this.isCalendarYear,
       isYearly: this.isYearly
     });
   }
@@ -253,8 +263,12 @@ export default {
     return {
       periodIndex: this.timesheets.length - 1,
       isYearly: false,
+      isCalendarYear: false,
       timePeriodLoading: false
     };
+  },
+  methods: {
+    hasActiveContract
   },
   props: ['employee', 'ptoBalances', 'supplementalData', 'timesheets'],
   watch: {
@@ -266,6 +280,6 @@ export default {
 
 <style>
 .tmp {
-  border-bottom: 1px solid rgb(234, 234, 234);
+  border-bottom: 1px solid rgb(225, 225, 225);
 }
 </style>
