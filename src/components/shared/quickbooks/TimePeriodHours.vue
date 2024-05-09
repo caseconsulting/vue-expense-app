@@ -66,10 +66,10 @@
           </v-col>
           <v-col class="d-flex align-center justify-center pa-0">
             <v-skeleton-loader v-if="timePeriodLoading" type="text" width="100"></v-skeleton-loader>
-            <div v-else class="text-center">
-              <div v-if="timesheets[periodIndex]?.title.includes('-')" class="text-center">
-                <h3>{{ timesheets[periodIndex]?.title.split('-')[0] }} -</h3>
-                <h3>{{ timesheets[periodIndex]?.title.split('-')[1] }}</h3>
+            <div v-else class="d-flex justify-center">
+              <div v-if="timesheets[periodIndex]?.title.includes('-')" class="d-flex flex-column justify-start w-100">
+                <h4>{{ timesheets[periodIndex]?.title.split('-')[0] }} -</h4>
+                <h4>{{ timesheets[periodIndex]?.title.split('-')[1] }}</h4>
               </div>
               <h3 v-else>
                 {{ timesheets[periodIndex]?.title }}
