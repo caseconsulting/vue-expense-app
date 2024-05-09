@@ -10,7 +10,7 @@
             'https://3.basecamp.com/3097063/buckets/179119/messages/1426517066#:~:text=1860%20Hours%20target%20bonus'
           )
         "
-        class="ml-2 nudge-up"
+        class="ml-2 nudge-up pointer"
         size="x-small"
         density="compact"
       >

@@ -6,7 +6,7 @@
         PTO Balances
         <v-avatar
           @click="openLink('https://3.basecamp.com/3097063/buckets/179119/messages/6950289713')"
-          class="ml-2 nudge-up"
+          class="ml-2 nudge-up pointer"
           size="x-small"
           density="compact"
         >
