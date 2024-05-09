@@ -33,14 +33,14 @@
           <div class="ml-3">{{ formatNumber(duration / 60 / 60) }}h</div>
         </div>
       </div>
-      <v-span
+      <span
         v-if="isYearly && hasNonBillables()"
         @click="showNonBillables = !showNonBillables"
         class="pointer text-blue"
       >
         {{ showNonBillables ? 'Hide non-billables' : 'Show non-billables' }}
         <v-icon>{{ showNonBillables ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-      </v-span>
+      </span>
     </div>
   </div>
 </template>

@@ -33,10 +33,10 @@
         <div class="ml-3">{{ convertToHours(ptoBalances[jobcode]) }}h</div>
       </div>
     </div>
-    <v-span v-if="Object.values(ptoBalances || []).includes(0)" @click="showMore = !showMore" class="pointer text-blue">
+    <span v-if="Object.values(ptoBalances || []).includes(0)" @click="showMore = !showMore" class="pointer text-blue">
       {{ showMore ? 'Show less' : 'Show more' }}
       <v-icon>{{ showMore ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-    </v-span>
+    </span>
     <v-dialog v-model="showPTOCashOutFormModal" persistent max-width="500">
       <p-t-o-cash-out-form :employeeId="employee.id" :pto="convertToHours(ptoBalances['PTO'])" />
     </v-dialog>
