@@ -96,7 +96,7 @@
               </v-menu>
             </v-text-field>
           </v-col>
-          <v-col cols="12" sm="6" md="12" lg="6" class="pt-3">
+          <v-col cols="12" sm="6" md="12" lg="6" class="pt-3 pb-0">
             <!-- End Date -->
             <v-text-field
               :id="'end-field-' + index + '-' + projIndex"
@@ -159,14 +159,15 @@
             </v-text-field>
             <!-- End End Date -->
           </v-col>
-          <v-col>
+          <v-col class="pt-0">
             <v-switch
-              v-if="userRoleIsAdmin() || userRoleIsManager()"
+              v-if="(userRoleIsAdmin() || userRoleIsManager()) && show1860Switch(project)"
               v-model="project.bonusCalculationDate"
               @click="isolate1860CalcOption(project.projectId)"
               label="Use for 1860 calculation?"
               color="primary"
               class="ma-0 pa-0"
+              hide-details
             />
           </v-col>
         </v-row>
@@ -204,7 +205,7 @@ import _ from 'lodash';
 import { mask } from 'vue-the-mask';
 import { getDateRules, getDateOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
 import { asyncForEach, isEmpty, isMobile, userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
-import { add, format, isAfter } from '@/shared/dateUtils';
+import { add, format, isAfter, isBefore, getTodaysDate } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -445,13 +446,27 @@ function isolate1860CalcOption(projectId) {
 } // isolate1860CalcOption
 
 /**
+ * Whether or not to show the 1860 bonus calculation switch. If false, it will also
+ * set the bonusCalculationDate to false for the project.
+ *
+ * @param project project to decide for
+ * @return if project should show 1860 calculation
+ */
+
+function show1860Switch(project) {
+  let toShow = !project.endDate || isBefore(getTodaysDate(), project.endDate, 'day');
+  if (!toShow) project.bonusCalculationDate = false;
+  return toShow;
+} // show1860Switch
+
+/**
  * Parse the date after losing focus.
  *
  * @return String - The date in YYYY-MM format
  */
 function parseEventDate() {
   return this.format(event.target.value, null, 'YYYY-MM-DD');
-} //parseEventDate
+} // parseEventDate
 
 /**
  * Validate all input fields are valid. Emit to parent the error status.
@@ -574,9 +589,12 @@ export default {
     getDateRules,
     getDateOptionalRules,
     getRequiredRules,
+    getTodaysDate, // dateUtils
     hasEndDatesFilled,
     isolate1860CalcOption,
+    show1860Switch,
     isAfter, // dateUtils
+    isBefore, // dateUtils
     isEmpty,
     parseEventDate,
     userRoleIsAdmin,
