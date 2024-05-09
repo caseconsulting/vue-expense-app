@@ -283,6 +283,7 @@ function getEmployeeWorkedHours(employee) {
   let n = employee.employeeNumber;
   if (!INFO[n]) return '---';
   let timesheets = INFO[n].timesheets;
+  console.log(timesheets);
 
   // tally up hours
   let total = 0;
