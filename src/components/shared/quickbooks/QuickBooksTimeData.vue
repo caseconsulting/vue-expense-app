@@ -16,7 +16,7 @@
       <v-card-text class="mt-3 px-7">
         <v-progress-linear class="mb-3 mt-7" v-if="loading" indeterminate></v-progress-linear>
         <div v-else>
-          <div class="d-flex flex-column justify-center align-center py-3 font-weight-bold" v-if="errorMessage">
+          <div v-if="errorMessage" class="d-flex flex-column justify-center align-center py-3 font-weight-bold">
             <v-icon class="mb-2">mdi-alert</v-icon>
             <span>{{ errorMessage }}</span>
           </div>
@@ -162,6 +162,7 @@ async function resetData() {
   this.ptoBalances = null;
   this.supplementalData = null;
   this.lastUpdated = null;
+  this.errorMessage = null;
   if (this.employeeIsUser()) {
     localStorage.removeItem(this.KEYS.QB);
   }
