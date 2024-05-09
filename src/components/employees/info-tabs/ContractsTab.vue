@@ -39,7 +39,7 @@
                 <v-col class="pt-0">
                   <span v-if="project.bonusCalculationDate">
                     <v-tooltip activator="parent" location="right">Used for 1860 calculation</v-tooltip>
-                    <v-icon>mdi-calendar</v-icon>
+                    <v-icon>mdi-calendar-weekend</v-icon>
                   </span>
                 </v-col>
               </v-row>
