@@ -102,13 +102,13 @@ export async function convertEmployees(employees, startDate, endDate) {
  * Fills in INFO with employee timesheet information
  *
  * @param employees list of employees to get data for
- * @param startDate YYYY-MM to get timsheet data from
- * @param endDate YYYY-MM to get timesheet data until
+ * @param startDate YYYY-MM-DD to get timsheet data from
+ * @param endDate YYYY-MM-DD to get timesheet data until
  */
 async function fillTimesheetData(employees, startDate, endDate) {
   // single month logic conversion
   let singleMonth = startDate === endDate ? startDate : null;
-  if (singleMonth) startDate = subtract(startDate, 1, 'month', 'YYYY-MM');
+  if (singleMonth) startDate = subtract(startDate, 1, 'month', 'YYYY-MM-DD');
 
   // run API calls for each employee first (for easy batching)
   let batch = [];
@@ -127,7 +127,7 @@ async function fillTimesheetData(employees, startDate, endDate) {
       // parse responses into INFO
       for (let k in resps) {
         // get response and map to employee
-        resp = resps[k].timesheets;
+        resp = resps[k].timesheets?.[0]?.timesheets;
         empNum = batch_employees[k];
         if (!resp) continue;
         // add any non-billables we don't have
@@ -207,14 +207,14 @@ function getEmployeeName(employee) {
 /**
  * Calculates and returns the work days between start and end dates provided
  *
- * @param {String} startDate - The start date (in YYYY-MM format)
- * @param {String} endDate - The end date (in YYYY-MM format)
+ * @param {String} startDate - The start date (in YYYY-MM-DD format)
+ * @param {String} endDate - The end date (in YYYY-MM-DD format)
  * @param {Boolean} excludeProRated - Whether or not to pro-rate based on hire date (default is to pro-rate)
  * @return int - number of remaining working days
  */
 function getWorkDays(employee, startDate, endDate) {
   // allow for employee to be null and just get total workdays in the month
-  if (!employee) employee = { hireDate: subtract(getTodaysDate(), 1, 'month', 'YYYY-MM-DD') };
+  if (!employee) employee = { hireDate: subtract(getTodaysDate(), 100, 'year', 'YYYY-MM-DD') };
 
   function isWeekDay(day) {
     return getIsoWeekday(day) >= 1 && getIsoWeekday(day) <= 5;
@@ -228,9 +228,8 @@ function getWorkDays(employee, startDate, endDate) {
   }
   let date = startDate;
   while (!isAfter(date, endDate, 'day')) {
-    if (isWeekDay(date)) {
-      workDays += 1;
-    }
+    // add day if it is a weekday
+    if (isWeekDay(date)) workDays += 1;
     // increment to the next day
     date = add(date, 1, 'day', DEFAULT_ISOFORMAT);
   }
@@ -283,15 +282,12 @@ function getEmployeeWorkedHours(employee) {
   let n = employee.employeeNumber;
   if (!INFO[n]) return '---';
   let timesheets = INFO[n].timesheets;
-  console.log(timesheets);
 
   // tally up hours
   let total = 0;
-  for (let month in timesheets) {
-    for (let jobcode in timesheets[month]) {
-      if (!SUPP_DATA.nonBillables.has(jobcode)) {
-        total += timesheets[month][jobcode] / 3600; // seconds to hours
-      }
+  for (let jobcode in timesheets) {
+    if (!SUPP_DATA.nonBillables.has(jobcode)) {
+      total += timesheets[jobcode] / 3600; // seconds to hours
     }
   }
 
