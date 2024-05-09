@@ -29,20 +29,24 @@
         <v-icon size="x-large">mdi-calendar-multiple</v-icon>
         <v-tooltip activator="parent" location="top">Calendar Year</v-tooltip>
       </v-btn>
-      <v-btn
-        variant="text"
-        :class="isYearly ? (!isCalendarYear ? 'text-blue-darken-2 bg-blue-lighten-5' : '') : ''"
-        :disabled="timePeriodLoading || !showContractYear()"
-        @click="
-          customWorkDayInput = null;
-          isYearly = true;
-          isCalendarYear = false;
-          timePeriodLoading = true;
-        "
-      >
-        <v-icon size="x-large">mdi-calendar-weekend</v-icon>
-        <v-tooltip activator="parent" location="top">Contract Year</v-tooltip>
-      </v-btn>
+      <div>
+        <v-btn
+          variant="text"
+          :class="isYearly ? (!isCalendarYear ? 'text-blue-darken-2 bg-blue-lighten-5' : '') : ''"
+          :disabled="timePeriodLoading || !showContractYear()"
+          @click="
+            customWorkDayInput = null;
+            isYearly = true;
+            isCalendarYear = false;
+            timePeriodLoading = true;
+          "
+        >
+          <v-icon size="x-large">mdi-calendar-weekend</v-icon>
+        </v-btn>
+        <v-tooltip v-if="!timePeriodLoading" activator="parent" location="top">
+          <span>{{ showContractYear() ? 'Contract Year' : 'Coming soon: contract year view' }}</span>
+        </v-tooltip>
+      </div>
     </v-row>
     <v-row class="pa=0 ma-0">
       <v-col order="1" cols="12" sm="12" md="6" lg="6" xl="6" xxl="6" class="pa-1">
