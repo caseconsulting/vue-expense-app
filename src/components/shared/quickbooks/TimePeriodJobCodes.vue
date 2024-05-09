@@ -1,7 +1,8 @@
 <template>
   <div>
     <h3 class="d-flex align-center">
-      <v-icon class="mr-2">mdi-briefcase-outline</v-icon> {{ isYearly ? 'Yearly' : 'Monthly' }} Job Codes
+      <v-icon class="mr-2">mdi-briefcase-outline</v-icon>
+      {{ isYearly ? (isCalendarYear ? 'Calendar Year' : 'Contract Year') : 'Pay Period' }} Job Codes
       <v-avatar
         v-if="isYearly"
         @click="
@@ -84,7 +85,7 @@ export default {
     hasNonBillables,
     openLink
   },
-  props: ['isYearly', 'supplementalData', 'timeData']
+  props: ['isCalendarYear', 'isYearly', 'supplementalData', 'timeData']
 };
 </script>
 

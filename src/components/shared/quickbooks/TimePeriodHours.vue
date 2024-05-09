@@ -32,7 +32,7 @@
       <v-btn
         variant="text"
         :class="isYearly ? (!isCalendarYear ? 'text-blue-darken-2 bg-blue-lighten-5' : '') : ''"
-        :disabled="timePeriodLoading || !hasActiveContract()"
+        :disabled="timePeriodLoading || !showContractYear()"
         @click="
           customWorkDayInput = null;
           isYearly = true;
@@ -129,6 +129,7 @@
         <v-skeleton-loader v-if="timePeriodLoading" type="list-item@4"></v-skeleton-loader>
         <time-period-job-codes
           v-else
+          :isCalendarYear="isCalendarYear"
           :isYearly="isYearly"
           :supplementalData="supplementalData"
           :timeData="timeData"
@@ -144,28 +145,6 @@ import TimesheetsChart from '@/components/charts/custom-charts/TimesheetsChart.v
 import TimePeriodDetails from '@/components/shared/quickbooks/TimePeriodDetails.vue';
 import TimePeriodJobCodes from '@/components/shared/quickbooks/TimePeriodJobCodes.vue';
 import _ from 'lodash';
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                 LIFECYCLE HOOKS                  |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * The Before Unmount lifecycle hook
- */
-function beforeUnmount() {
-  this.emitter.off('reset-data');
-} // beforeUnmount
-
-/**
- * The Created lifecycle hook.
- */
-function created() {
-  this.emitter.on('reset-data', () => {
-    this.isYearly = false;
-  });
-} // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -201,17 +180,20 @@ function timeData() {
   return orderedTimeData;
 } // timeData
 
-function hasActiveContract() {
-  let active = false;
-  _.forEach(this.employee.contracts, (c) => {
-    let currentProject = _.find(c.projects, (p) => !p.endDate);
-    if (currentProject) {
-      active = true;
-      return;
-    }
-  });
-  return active;
-}
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Whether or not to allow a user/admin to see a contract year view.
+ *
+ * @returns Boolean - True if an admin has selected to show a users contract year for a project.
+ */
+function showContractYear() {
+  return _.some(this.employee.contracts, (c) => _.find(c.projects, (p) => p.bonusCalculationDate));
+} // showContractYear
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -248,7 +230,6 @@ function watchTimesheets() {
 // |--------------------------------------------------|
 
 export default {
-  beforeUnmount,
   components: {
     TimesheetsChart,
     TimePeriodDetails,
@@ -258,7 +239,6 @@ export default {
     dateIsCurrentPeriod,
     timeData
   },
-  created,
   data() {
     return {
       periodIndex: this.timesheets.length - 1,
@@ -268,7 +248,7 @@ export default {
     };
   },
   methods: {
-    hasActiveContract
+    showContractYear
   },
   props: ['employee', 'ptoBalances', 'supplementalData', 'timesheets'],
   watch: {
