@@ -4,7 +4,7 @@
       <v-icon class="mr-2">mdi-briefcase-outline</v-icon>
       {{ isYearly ? (isCalendarYear ? 'Calendar Year' : 'Contract Year') : 'Pay Period' }} Job Codes
       <v-avatar
-        v-if="isYearly"
+        v-if="isYearly && isCalendarYear"
         @click="
           openLink(
             'https://3.basecamp.com/3097063/buckets/179119/messages/1426517066#:~:text=1860%20Hours%20target%20bonus'
