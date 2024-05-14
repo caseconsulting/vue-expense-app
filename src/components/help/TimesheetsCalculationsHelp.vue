@@ -1,0 +1,70 @@
+<template>
+  <v-card>
+    <v-card-text class="bg-grey-lighten-3">
+      <div class="mb-3">Total Work Days (<span>TWD</span>) = week days from period start date TO period end date</div>
+      <div class="mb-3">
+        Total Work Days Pro Rated (<span>TWDPR</span>) =
+        <ul>
+          <li>
+            Employee hire date OR contract start date falls after period start date —> hire date/contract start date TO
+            period end date
+          </li>
+          <li>Otherwise —> <span>TWD</span></li>
+        </ul>
+      </div>
+      <div class="mb-3">Employee Work Status (<span>EWS</span>) = 0-100 (100 being full-time)</div>
+      <div class="mb-3">
+        Pro Rated Hours (<span>PRH</span>) =
+        <ul>
+          <li>Pay Period —> 8 * (<span>EWS</span> / 100)</li>
+          <li>Calendar/Contract Period —> 1860 / <span>TWD</span></li>
+        </ul>
+      </div>
+      <div class="my-4">
+        <div class="text-h6 text-decoration-underline">Donut Chart</div>
+        <div class="mb-3">
+          <div class="font-weight-bold d-inline-block">Total Hours Completed (<span>THC</span>)</div>
+          = Hours inputted in QuickBooks during the displayed time period
+        </div>
+        <div>
+          <div class="font-weight-bold d-inline-block">Total Hours Needed (<span>THN</span>)</div>
+          =
+          <ul>
+            <li>Pay Period —> <span>TWDPR</span> * <span>PRH</span></li>
+            <li>Calendar/Contract Period —> ROUND(<span>TWDPR</span> * <span>PRH</span>)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="my-4">
+        <div class="text-h6 text-decoration-underline">Period Details</div>
+        <div class="mb-3">
+          <div class="font-weight-bold d-inline-block">Remaining (<span>R</span>)</div>
+          = <span>THN</span> - <span>THC</span> (minimum of 0)
+        </div>
+        <div class="mb-3">
+          <div class="font-weight-bold d-inline-block">Remaining Avg/Day</div>
+          = <span>R</span> / <span>WDR</span>
+        </div>
+        <div class="mb-3">
+          <div class="font-weight-bold d-inline-block">Behind By / Ahead By</div>
+          = <span>THN</span> - <span>WDR</span> * <span>PRH</span> - <span>THC</span>
+        </div>
+        <div class="mb-3">
+          <div class="font-weight-bold d-inline-block">Work Days Remaining (<span>WDR</span>)</div>
+          = week days from today to the period end date - future days inputted in QuickBooks - 1 IF today is a week day
+        </div>
+      </div>
+      <div>Note: You can edit Work Days Remaining field by clicking on it</div>
+    </v-card-text>
+  </v-card>
+</template>
+
+<style scoped>
+ul {
+  margin-left: 40px;
+}
+span {
+  font-style: italic;
+  font-weight: bold;
+}
+</style>

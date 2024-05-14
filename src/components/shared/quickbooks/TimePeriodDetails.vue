@@ -3,6 +3,15 @@
     <h3 class="d-flex align-center mb-3">
       <v-icon class="mr-2">mdi-book-open-outline</v-icon>
       {{ isYearly ? (isCalendarYear ? 'Calendar Year' : 'Contract Year') : 'Pay Period' }} Details
+      <v-avatar
+        @click="openLink($router.resolve({ path: '/help/timesheetCalculations' })?.href)"
+        class="ml-2 nudge-up pointer"
+        size="x-small"
+        density="compact"
+      >
+        <v-tooltip activator="parent" location="top">Click to see calculations</v-tooltip>
+        <v-icon icon="mdi-information" color="#3f51b5" size="x-small" />
+      </v-avatar>
     </h3>
 
     <div class="d-flex justify-space-between my-3">
@@ -68,7 +77,7 @@
 
 <script>
 import _ from 'lodash';
-import { formatNumber } from '@/utils/utils';
+import { formatNumber, openLink } from '@/utils/utils';
 import {
   add,
   getIsoWeekday,
@@ -288,7 +297,8 @@ export default {
   methods: {
     formatNumber,
     getWorkDays,
-    isWeekDay
+    isWeekDay,
+    openLink
   },
   mounted,
   props: ['dateIsCurrentPeriod', 'employee', 'isCalendarYear', 'isYearly', 'period', 'supplementalData', 'timeData']
@@ -313,6 +323,9 @@ export default {
   background-size: 7px 1px;
   background-repeat: repeat-x;
   flex-grow: 2;
+}
+.nudge-up {
+  top: -7px;
 }
 .work-days-box {
   border-radius: 5px;

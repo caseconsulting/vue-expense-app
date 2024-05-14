@@ -94,7 +94,7 @@ const router = createRouter({
       beforeEnter: requireAuth
     },
     {
-      path: '/help/HoursInfo',
+      path: '/help/timesheetCalculations',
       name: 'help2',
       component: Help,
       beforeEnter: requireAuth
