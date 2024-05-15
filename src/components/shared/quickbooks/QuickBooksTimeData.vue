@@ -8,7 +8,7 @@
         </span>
         <v-btn variant="text" icon="mdi-refresh" @click="resetData()">
           <template v-slot:default>
-            <v-tooltip activator="parent" location="top">Refresh Quickbooks data</v-tooltip>
+            <v-tooltip activator="parent" location="top">Refresh QuickBooks data</v-tooltip>
             <v-icon color="white" size="large">mdi-refresh</v-icon>
           </template>
         </v-btn>

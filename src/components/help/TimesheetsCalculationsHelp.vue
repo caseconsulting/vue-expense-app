@@ -4,6 +4,7 @@
       <!-- Other Variables -->
       <div>
         <div class="text-h6 text-decoration-underline">Variables</div>
+        <div class="mb-3">Employee Work Status (<span class="var">EWS</span>) = 0-100 (100 being full-time)</div>
         <div class="mb-3">
           Period Work Days (<span class="var">PWD</span>) = week days from period start date TO period end date
         </div>
@@ -17,7 +18,6 @@
             <li>Otherwise —> <span>PWD</span></li>
           </ul>
         </div>
-        <div class="mb-3">Employee Work Status (<span class="var">EWS</span>) = 0-100 (100 being full-time)</div>
         <div class="mb-3">
           Pro Rated Hours (<span class="var">PRH</span>) =
           <ul>
@@ -31,7 +31,11 @@
         <div class="text-h6 text-decoration-underline">Donut Chart</div>
         <div class="mb-3">
           <div class="font-weight-bold d-inline-block">Period Hours Completed (<span class="var">PHC</span>)</div>
-          = Hours inputted in QuickBooks during the displayed time period
+          =
+          <ul>
+            <li>Pay Period —> All hours inputted in QuickBooks during the displayed time period</li>
+            <li>Calendar/Contract Period —> Billable hours inputted in QuickBooks during the displayed time period</li>
+          </ul>
         </div>
         <div>
           <div class="font-weight-bold d-inline-block">Period Hours Needed (<span class="var">PHN</span>)</div>
