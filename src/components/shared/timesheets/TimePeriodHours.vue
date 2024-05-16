@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-row class="tmp d-flex justify-space-evenly pa-0 pb-2 my-1 mx-7">
+    <v-row class="bottom-border d-flex justify-space-evenly pa-0 pb-2 my-1 mx-7">
       <v-btn
         variant="text"
         :class="!isYearly ? 'text-blue-darken-2 bg-blue-lighten-5' : ''"
@@ -14,21 +14,29 @@
         <v-icon size="x-large">mdi-calendar</v-icon>
         <v-tooltip activator="parent" location="top">Pay Period</v-tooltip>
       </v-btn>
-      <v-btn
-        variant="text"
-        class="mx-2"
-        :class="isYearly ? (isCalendarYear ? 'text-blue-darken-2 bg-blue-lighten-5' : '') : ''"
-        :disabled="timePeriodLoading"
-        @click="
-          customWorkDayInput = null;
-          isYearly = true;
-          isCalendarYear = true;
-          timePeriodLoading = true;
-        "
-      >
-        <v-icon size="x-large">mdi-calendar-multiple</v-icon>
-        <v-tooltip activator="parent" location="top">Calendar Year</v-tooltip>
-      </v-btn>
+      <div class="wrapper">
+        <div v-if="isYearly && isCalendarYear && !timePeriodLoading">
+          <v-icon size="x-small" class="top-left" color="green">mdi-currency-usd</v-icon>
+          <v-icon size="x-small" class="top-right" color="green">mdi-currency-usd</v-icon>
+          <v-icon size="x-small" class="bottom-left" color="green">mdi-currency-usd</v-icon>
+          <v-icon size="x-small" class="bottom-right" color="green">mdi-currency-usd</v-icon>
+        </div>
+        <v-btn
+          variant="text"
+          class="mx-2"
+          :class="isYearly ? (isCalendarYear ? 'text-green-darken-2 bg-green-lighten-5' : '') : ''"
+          :disabled="timePeriodLoading"
+          @click="
+            customWorkDayInput = null;
+            isYearly = true;
+            isCalendarYear = true;
+            timePeriodLoading = true;
+          "
+        >
+          <v-icon size="x-large">mdi-calendar-multiple</v-icon>
+          <v-tooltip activator="parent" location="top"> Calendar Year </v-tooltip>
+        </v-btn>
+      </div>
       <div>
         <v-btn
           variant="text"
@@ -250,7 +258,38 @@ watch(
 </script>
 
 <style>
-.tmp {
+.bottom-border {
   border-bottom: 1px solid rgb(225, 225, 225);
+}
+.top-left {
+  position: absolute !important;
+  top: 1px;
+  left: 7px;
+  font-size: 12px !important;
+  z-index: 9999;
+}
+.top-right {
+  position: absolute !important;
+  top: 1px;
+  right: 7px;
+  font-size: 12px !important;
+  z-index: 9999;
+}
+.bottom-left {
+  position: absolute !important;
+  bottom: 1px;
+  left: 7px;
+  font-size: 12px !important;
+  z-index: 9999;
+}
+.bottom-right {
+  position: absolute !important;
+  bottom: 1px;
+  right: 7px;
+  font-size: 12px !important;
+  z-index: 9999;
+}
+.wrapper {
+  position: relative !important;
 }
 </style>
