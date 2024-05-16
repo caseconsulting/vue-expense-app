@@ -78,10 +78,10 @@ ul {
 span {
   font-style: italic;
   font-weight: bold;
-  color: rgb(68, 158, 255);
+  color: #c44601;
 }
 
 .var {
-  color: rgb(0, 55, 255);
+  color: #0073e6;
 }
 </style>
