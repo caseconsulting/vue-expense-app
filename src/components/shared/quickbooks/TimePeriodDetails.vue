@@ -22,7 +22,7 @@
     <div class="d-flex justify-space-between my-3">
       <div class="mr-2">Remaining Avg/Day</div>
       <div class="dotted-line"></div>
-      <div :class="remainingAverageHoursPerDay > 8 ? 'text-red font-weight-bold' : ''" class="ml-2">
+      <div :class="remainingAverageHoursPerDay > WORK_HOURS_PER_DAY ? 'text-red font-weight-bold' : ''" class="ml-2">
         {{ formatNumber(remainingAverageHoursPerDay) }}h
       </div>
     </div>
@@ -83,6 +83,7 @@ import {
   getIsoWeekday,
   isAfter,
   isSameOrAfter,
+  isSameOrBefore,
   format,
   getTodaysDate,
   DEFAULT_ISOFORMAT
@@ -103,7 +104,18 @@ function mounted() {
     needed: this.totalPeriodHours,
     remainingHours: this.remainingHours
   });
+  this.emitter.on('update-planned-pto-results-time-period', (data) => {
+    this.employee.plannedPto = data;
+  });
 } // mounted
+
+/**
+ * The beforeUnmount lifecycle hook
+ */
+function beforeUnmount() {
+  this.emitter.off('timesheets-chart-data');
+  this.emitter.off('update-planned-pto-results-time-period');
+} // beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -112,12 +124,43 @@ function mounted() {
 // |--------------------------------------------------|
 
 /**
+ * HELPER
+ * Gets number of days that PTO is planned for. Rounds based on hours
+ * in work day. Rounds up because 50% of a day planned means that you've
+ * planned that day.
+ *
+ * @param convertToDays boolean - whether or not to convert to days
+ */
+function getPlannedPTO(convertToDays) {
+  // early exit conditions
+  let ptoPlan = this.employee.plannedPto?.plan;
+  if (!ptoPlan) return 0;
+  // get start and end dates
+  let startDate = this.period.startDate;
+  let endDate = this.period.endDate;
+  // go through plan and tally up hours that fall between startDate and endDate
+  let hoursPlanned = 0;
+  for (let item of ptoPlan) {
+    if (isSameOrAfter(item.date, startDate) && isSameOrBefore(item.date, endDate)) {
+      hoursPlanned += Number(item.ptoHours) + Number(item.holidayHours);
+    }
+  }
+  // convert hours to days (rounding up) and return result
+  if (convertToDays) hoursPlanned = Math.ceil(hoursPlanned / this.WORK_HOURS_PER_DAY);
+  return hoursPlanned;
+} // getPlannedPTO
+
+/**
  * The amount of different days timesheets were entered in the future.
  *
  * @returns Number - The amount of entered future days
  */
 function futureDays() {
-  return this.supplementalData?.future?.days || 0;
+  // future work days planned
+  let days = this.supplementalData?.future?.days || 0;
+  // future PTO days planned
+  days += this.getPlannedPTO(true);
+  return days;
 } // futureDays
 
 /**
@@ -126,7 +169,11 @@ function futureDays() {
  * @returns Integer - The amount of hours entered in the future
  */
 function futureHours() {
-  return Number((this.supplementalData?.future?.duration || 0) / 60 / 60);
+  // future work hours planned
+  let hours = Number((this.supplementalData?.future?.duration || 0) / 60 / 60);
+  // future PTO hours planned
+  hours += this.getPlannedPTO(false);
+  return hours;
 } // futureHours
 
 /**
@@ -164,7 +211,7 @@ function proRatedHours() {
   if (this.isYearly) {
     return this.BONUS_YEAR_TOTAL / this.getWorkDays(this.period.startDate, this.period.endDate, true);
   } else {
-    return 8 * (this.employee.workStatus / 100);
+    return this.WORK_HOURS_PER_DAY * (this.employee.workStatus / 100);
   }
 } // proRatedHours
 
@@ -289,6 +336,7 @@ export default {
   data() {
     return {
       BONUS_YEAR_TOTAL: 1860,
+      WORK_HOURS_PER_DAY: 8, // normal hours per day for full time employees
       customWorkDayInput: null,
       showCustomWorkDayInput: false,
       today: format(getTodaysDate(), null, DEFAULT_ISOFORMAT)
@@ -296,11 +344,13 @@ export default {
   },
   methods: {
     formatNumber,
+    getPlannedPTO,
     getWorkDays,
     isWeekDay,
     openLink
   },
   mounted,
+  beforeUnmount,
   props: ['dateIsCurrentPeriod', 'employee', 'isCalendarYear', 'isYearly', 'period', 'supplementalData', 'timeData']
 };
 </script>

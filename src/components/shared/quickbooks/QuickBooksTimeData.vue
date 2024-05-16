@@ -64,6 +64,15 @@ async function created() {
     await this.setData(isCalendarYear, isYearly);
   });
   await this.setInitialData();
+
+  // add planned PTO and Holiday to ptoBalances
+  this.refreshPlannedPto();
+  // listen for planned PTO results
+  this.emitter.on('update-planned-pto-results-time-data', (data) => {
+    this.employee.plannedPto = data;
+    this.refreshPlannedPto();
+  });
+
   this.loading = false;
 } // created
 
@@ -152,6 +161,53 @@ function removeExcludedPtoBalances() {
     if (this.excludeIfZero.includes(jobcode) && balance === 0) delete this.ptoBalances[jobcode];
   });
 } // removeExcludedPtoBalances
+
+/**
+ * Converts hours to seconds with 2 decimal places if needed.
+ *
+ * @param {Number} hours - The number of hours
+ */
+function convertToSeconds(hours) {
+  return Number(hours * 60 * 60)
+    ?.toFixed(2)
+    ?.replace(/[.,]00$/, ''); // removes decimals if a whole number
+} // convertToSeconds
+/**
+ * Helper to add items to the ptoBalances object
+ * @param balanceKey key in ptoBalances to modify
+ * @param itemsKey key in ptoBalances[balanceKey].items object to add
+ * @param planResults object of results of planned PTO
+ * @param planKey key in planResults to grab from
+ */
+function addPlanToBalances(balanceKey, itemsKey, planResults, planKey) {
+  let balanceItem = this.ptoBalances[balanceKey];
+  if (!balanceItem.value) this.ptoBalances[balanceKey] = { value: balanceItem, items: {} };
+  this.ptoBalances[balanceKey].items[itemsKey] = this.convertToSeconds(planResults[planKey]);
+} // addPlanToBalances
+/**
+ * Refreshes the PTO plan to put in the ptoBalances object, based on the
+ * employee's plannedPto in their employee object by default.
+ *
+ * @param planResults (optional) object of results of planned PTO
+ */
+function refreshPlannedPto() {
+  // set plan to employee object
+  let plan = {
+    pto: this.employee.plannedPto?.results?.pto,
+    holiday: this.employee.plannedPto?.results?.holiday
+  };
+  // yeet outta here if there is no planned PTO
+  if (!plan.pto && !plan.holiday) return;
+  // set planned PTO and Holiday balances
+  let ptoBal = this.ptoBalances.PTO?.value || this.ptoBalances.PTO;
+  let holidayBal = this.ptoBalances.Holiday?.value || this.ptoBalances.Holiday;
+  if (this.convertToSeconds(plan.pto) != ptoBal) {
+    this.addPlanToBalances('PTO', 'Post-plan PTO', plan, 'pto');
+  }
+  if (this.convertToSeconds(plan.holiday) != holidayBal) {
+    this.addPlanToBalances('Holiday', 'Post-plan Holiday', plan, 'holiday');
+  }
+} // refreshPlannedPto
 
 /**
  * Resets components data and removes timesheets local storage.
@@ -245,6 +301,7 @@ async function setData(isCalendarYear, isYearly) {
   } else {
     await this.setDataFromApi(isCalendarYear, isYearly);
   }
+  this.refreshPlannedPto();
 } // setData
 
 /**
@@ -288,11 +345,14 @@ export default {
     };
   },
   methods: {
+    addPlanToBalances,
+    convertToSeconds,
     employeeIsUser,
     hasError,
     isStorageExpired,
     now,
     qbStorageExists,
+    refreshPlannedPto,
     removeExcludedPtoBalances,
     resetData,
     setInitialData,
