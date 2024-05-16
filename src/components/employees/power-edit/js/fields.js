@@ -13,6 +13,7 @@ import { TYPES } from './fieldTypes.js';
 export const NAME = {
   title: 'Name',
   key: 'name',
+  sortRaw: (a, b) => ('' + a.lastName).localeCompare(b.lastName),
   fixed: true,
   infoType: TYPES.DEFAULT,
   ...smallWidth
@@ -112,6 +113,7 @@ export const JOB_ROLE = {
 export const CLEARANCES = {
   title: 'Clearances',
   key: 'clearances',
+  sortRaw: (a, b) => ('' + a.clearances?.[0]?.type).localeCompare(b.clearances?.[0]?.type),
   selected: false,
   group: true,
   editType: TYPES.CUSTOM,
@@ -192,6 +194,10 @@ export const TECHNOLOGIES = {
 export const SOCIAL = {
   title: 'Social',
   key: 'social',
+  sortRaw: (a, b) =>
+    ('' + String(!!a.github) + String(!!a.linkedIn) + String(!!a.twitter)).localeCompare(
+      String(!!b.github) + String(!!b.linkedIn) + String(!!b.twitter)
+    ),
   selected: false,
   group: true,
   editType: TYPES.CUSTOM,
@@ -203,6 +209,8 @@ export const SOCIAL = {
 export const PLACE_OF_BIRTH = {
   title: 'Place of Birth',
   key: 'placeOfBirth',
+  sortRaw: (a, b) =>
+    ('' + a.city || '' + a.country || '' + a.st || '').localeCompare(b.city || '' + b.country || '' + b.st || ''),
   selected: false,
   group: true,
   editType: TYPES.CUSTOM,
@@ -214,6 +222,7 @@ export const PLACE_OF_BIRTH = {
 export const ADDRESS = {
   title: 'Address',
   key: 'address',
+  sortRaw: (a, b) => ('' + a.currentStreet).localeCompare(b.currentStreet),
   selected: false,
   group: true,
   editType: TYPES.CUSTOM,
