@@ -51,8 +51,13 @@
           v-if="(futureDays > 0 && !isYearly && dateIsCurrentPeriod) || (futureDays > 0 && isYearly)"
           activator="parent"
           location="top"
+          class="text-center"
         >
-          {{ futureDays }} {{ futureDays > 1 ? 'days' : 'day' }} subtracted to account for future timesheets
+          {{ futureDays }} {{ futureDays > 1 ? 'days' : 'day' }} subtracted to account for future timesheets<span
+            v-if="getPlannedPTO() > 0"
+            >,<br />including {{ getPlannedPTO(true) }} {{ getPlannedPTO(true) > 1 ? 'days' : 'day' }} of planned
+            PTO/Holiday</span
+          >
         </v-tooltip>
       </div>
       <div class="dotted-line"></div>
@@ -132,6 +137,9 @@ function beforeUnmount() {
  * @param convertToDays boolean - whether or not to convert to days
  */
 function getPlannedPTO(convertToDays) {
+  // do not include this value in the month view
+  if (!this.isYearly) return 0;
+
   // early exit conditions
   let ptoPlan = this.employee.plannedPto?.plan;
   if (!ptoPlan) return 0;
@@ -141,7 +149,7 @@ function getPlannedPTO(convertToDays) {
   // go through plan and tally up hours that fall between startDate and endDate
   let hoursPlanned = 0;
   for (let item of ptoPlan) {
-    if (isSameOrAfter(item.date, startDate) && isSameOrBefore(item.date, endDate)) {
+    if (isSameOrAfter(item.date, startDate, 'month') && isSameOrBefore(item.date, endDate, 'month')) {
       hoursPlanned += Number(item.ptoHours) + Number(item.holidayHours);
     }
   }

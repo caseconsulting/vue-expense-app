@@ -165,8 +165,17 @@ const months = ref([]); // months in year for chips
 const hoursRules = [(v) => canEval(v) !== false || v === '' || 'Enter number or equation'];
 
 // data table
+let getDateFormat = (date) => {
+  return isSame(getTodaysDate(), date, 'year') ? 'MMMM' : 'MMMM YYYY';
+};
 const headers = ref([
-  { title: 'Month', sortable: false, width: '17%', key: 'date', value: (item) => format(item.date, null, 'MMMM') },
+  {
+    title: 'Month',
+    sortable: false,
+    width: '17%',
+    key: 'date',
+    value: (item) => format(item.date, null, getDateFormat(item.date))
+  },
   { title: 'PTO', sortable: false, width: '15%', value: 'ptoHours' },
   { title: 'Holiday', sortable: false, width: '15%', value: 'holidayHours' },
   { title: 'PTO Balance', sortable: false, width: '20%', key: 'ptoBalance' },
@@ -279,6 +288,7 @@ function removeMonthFromPlan(month, i = null) {
   if (i === null) i = plannedMonths.value.findIndex((item) => item.date === month.date);
   // remove from plan
   plannedMonths.value.splice(i, 1);
+  // HERE
 } // removeMonthFromPlan
 
 const pendingPtoCashouts = ref(0);
@@ -328,7 +338,9 @@ async function save() {
   setTimeout(() => {
     saveButtonText.value = 'Save';
   }, 2500);
-} /**
+}
+
+/**
  * Gets proper class for chip by deciding whether or not it is selected
  * @param chip chip to get class for
  */
@@ -390,36 +402,33 @@ function getPtoBalance(date = null) {
   // quick helper to max out PTO value
   const maxedPTO = (pto) => Math.min(pto, maxPTO.value);
 
+  // calculate and update this month's cache values
+  if (!ptoCache[date]) ptoCache[date] = {};
+  ptoCache[date].count = plannedMonths.value.length; // update count
+  let sum = 0;
+  for (let m of plannedMonths.value) {
+    if (isAfter(m.date, date, 'month')) break;
+    sum += Number(m.ptoHours);
+  }
+  ptoCache[date].sum = sum; // update sum
+
   // base case: date is current month
   if (isSame(date, getTodaysDate('YYYY-MM'))) {
     ptoBalance -= plannedMonthsBalance(date, 'ptoHours');
+    ptoCache[date].balance = ptoBalance;
     return Number(maxedPTO(ptoBalance).toFixed(2));
   }
 
-  // decide whether or not to use the cache by calculating what 'we' think the
-  // current PTO sum above us is and comparing to what the cell above thinks the
-  // PTO balance is
-  let sum = 0;
-  if (!ptoCache[date]) {
-    ptoCache[date] = { count: plannedMonths.value.length };
-  } else {
-    for (let m of plannedMonths.value) {
-      if (isAfter(m.date, date, 'month')) break;
-      sum += Number(m.ptoHours);
-    }
-    sum -= plannedMonthsBalance(date, 'ptoHours');
-  }
-
-  // get last month's PTO, using cache if possible
+  // check last month's cache values compares to this month's, use cache if
+  // they match. if false, recursively calculate it.
   let lastMonth = subtract(date, 1, 'month', 'YYYY-MM');
-  let lastMonthSum = ptoCache[lastMonth]?.sum;
-  let lastMonthCount = ptoCache[lastMonth]?.count;
-  if (lastMonthSum === sum && lastMonthCount === ptoCache[date].count) {
+  let sumCheck = ptoCache[lastMonth]?.sum === ptoCache[date].sum - plannedMonthsBalance(date, 'ptoHours');
+  let countCheck = ptoCache[lastMonth]?.count === ptoCache[date].count;
+  let undefinedCheck = ptoCache[lastMonth]?.sum && ptoCache[lastMonth]?.count;
+  if (sumCheck && countCheck && undefinedCheck) {
     ptoBalance = ptoCache[lastMonth].balance;
   } else {
     ptoBalance = getPtoBalance(lastMonth);
-    // update cache sum
-    ptoCache[date].sum = sum;
   }
 
   // factor in this month's PTO accrual and PTO taken, staying below max
@@ -488,45 +497,40 @@ function plannedMonthsBalance(date, attr) {
  */
 let holidayCache = {};
 function getHolidayBalance(date = null) {
-  // return default of current PTO balance if no planned months
+  // return default of current Holiday balance if no planned months
   if (plannedMonths.value.length == 0) return props.holiday;
   // default date value to last planned month
   date = date || plannedMonths.value[plannedMonths.value.length - 1].date;
   // start with current holiday balance
   let holidayBalance = props.holiday;
 
+  // calculate and update this month's cache values
+  if (!holidayCache[date]) holidayCache[date] = {};
+  holidayCache[date].count = plannedMonths.value.length; // update count
+  let sum = 0;
+  for (let m of plannedMonths.value) {
+    if (isAfter(m.date, date, 'month')) break;
+    sum += Number(m.holidayHours);
+  }
+  holidayCache[date].sum = sum; // update sum
+
   // base case: date is current month
   if (isSame(date, getTodaysDate('YYYY-MM'))) {
     holidayBalance -= plannedMonthsBalance(date, 'holidayHours');
+    holidayCache[date.balance] = holidayBalance;
     return Number(holidayBalance.toFixed(2));
   }
 
-  // decide weather🌦️ or not to use the cache by calculating what 'we' think the
-  // current holiday sum above us is and comparing to what the cell above thinks the
-  // holiday balance is
-  let sum = 0;
-  if (!holidayCache[date]) {
-    holidayCache[date] = { count: plannedMonths.value.length };
-  } else {
-    for (let m of plannedMonths.value) {
-      if (isAfter(m.date, date, 'month')) break;
-      if (!isSame(m.date, date, 'year')) continue;
-      sum += Number(m.holidayHours);
-    }
-    sum -= plannedMonthsBalance(date, 'holidayHours');
-  }
-
-  // get previous month's balance
-  // get last month's holiday, using cache if possible
+  // check last month's cache values compares to this month's, use cache if
+  // they match. if false, recursively calculate it.
   let lastMonth = subtract(date, 1, 'month', 'YYYY-MM');
-  let lastMonthSum = holidayCache[lastMonth]?.sum;
-  let lastMonthCount = holidayCache[lastMonth]?.count;
-  if (lastMonthSum === sum && lastMonthCount === holidayCache[date].count) {
+  let sumCheck = holidayCache[lastMonth]?.sum === holidayCache[date].sum - plannedMonthsBalance(date, 'holidayHours');
+  let countCheck = holidayCache[lastMonth]?.count === holidayCache[date].count;
+  let undefinedCheck = holidayCache[lastMonth]?.sum && holidayCache[lastMonth]?.count;
+  if (sumCheck && countCheck && undefinedCheck) {
     holidayBalance = holidayCache[lastMonth].balance;
   } else {
     holidayBalance = getHolidayBalance(lastMonth);
-    // update cache sum
-    holidayCache[date].sum = sum;
   }
 
   // reset to yearly holiday balance if this month is January

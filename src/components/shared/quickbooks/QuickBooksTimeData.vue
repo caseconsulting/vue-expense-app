@@ -202,10 +202,10 @@ function refreshPlannedPto() {
   let ptoBal = this.ptoBalances.PTO?.value || this.ptoBalances.PTO;
   let holidayBal = this.ptoBalances.Holiday?.value || this.ptoBalances.Holiday;
   if (this.convertToSeconds(plan.pto) != ptoBal) {
-    this.addPlanToBalances('PTO', 'Post-plan PTO', plan, 'pto');
+    this.addPlanToBalances('PTO', 'PTO after plan', plan, 'pto');
   }
   if (this.convertToSeconds(plan.holiday) != holidayBal) {
-    this.addPlanToBalances('Holiday', 'Post-plan Holiday', plan, 'holiday');
+    this.addPlanToBalances('Holiday', 'Holiday after plan', plan, 'holiday');
   }
 } // refreshPlannedPto
 
