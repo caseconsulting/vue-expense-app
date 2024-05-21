@@ -90,7 +90,7 @@ import {
  */
 function mounted() {
   this.emitter.emit('timesheets-chart-data', {
-    completed: this.periodHoursCompleted,
+    completed: this.formatNumber(this.periodHoursCompleted),
     needed: this.totalPeriodHours,
     remainingHours: this.remainingHours
   });
