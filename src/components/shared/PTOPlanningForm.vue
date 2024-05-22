@@ -128,7 +128,7 @@
 
 import { onMounted, ref, inject } from 'vue';
 import { useStore } from 'vuex';
-import { updateStoreUser, updateStoreEmployees, updateStorePtoCashOuts } from '../../utils/storeUtils';
+import { updateStoreUser, updateStorePtoCashOuts } from '../../utils/storeUtils';
 import {
   format,
   startOf,
@@ -191,8 +191,8 @@ const headers = ref([
  * Created lifecycle hook
  */
 onMounted(async () => {
-  // update PTO cashouts and get employee from store
-  if (!store.getters.ptoCashOuts) updateStorePtoCashOuts();
+  // get the employee and PTO cashout amounts
+  if (!store.getters.ptoCashOuts) await updateStorePtoCashOuts();
   employee.value = store.getters.user;
 
   // get plannedMonths from database if user has a saved plan
