@@ -66,7 +66,10 @@
       />
     </v-dialog>
     <v-dialog v-model="showPTOCashOutFormModal" persistent max-width="500">
-      <p-t-o-cash-out-form :employeeId="employee.id" :pto="convertToHours(ptoBalances['PTO'])" />
+      <p-t-o-cash-out-form
+        :employeeId="employee.id"
+        :pto="convertToHours(ptoBalances.PTO?.value || ptoBalances['PTO'])"
+      />
     </v-dialog>
   </div>
 </template>
