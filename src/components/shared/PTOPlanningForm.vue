@@ -164,6 +164,7 @@ const months = ref([]); // months in year for chips
 const hoursRules = [(v) => canEval(v) !== false || v === '' || 'Enter number or equation'];
 
 // data table
+// helper to add year if needed (also used in save() function)
 let getDateFormat = (date) => {
   return isSame(getTodaysDate(), date, 'year') ? 'MMMM' : 'MMMM YYYY';
 };
@@ -310,13 +311,15 @@ async function save() {
   this.loading = true;
 
   // save planned months to database
+  let endDate = plannedMonths.value.at(-1)?.date;
   let data = {
     id: employee.value.id,
     plannedPto: {
       plan: plannedMonths.value,
       results: {
         pto: getPtoBalance(),
-        holiday: getHolidayBalance()
+        holiday: getHolidayBalance(),
+        endDate: format(endDate, null, getDateFormat(endDate)) || undefined
       }
     }
   };

@@ -172,6 +172,7 @@ function convertToSeconds(hours) {
     ?.toFixed(2)
     ?.replace(/[.,]00$/, ''); // removes decimals if a whole number
 } // convertToSeconds
+
 /**
  * Helper to add items to the ptoBalances object
  * @param balanceKey key in ptoBalances to modify
@@ -184,6 +185,7 @@ function addPlanToBalances(balanceKey, itemsKey, planResults, planKey) {
   if (!balanceItem.value) this.ptoBalances[balanceKey] = { value: balanceItem, items: {} };
   this.ptoBalances[balanceKey].items[itemsKey] = this.convertToSeconds(planResults[planKey]);
 } // addPlanToBalances
+
 /**
  * Refreshes the PTO plan to put in the ptoBalances object, based on the
  * employee's plannedPto in their employee object by default.
@@ -194,19 +196,18 @@ function refreshPlannedPto() {
   // set plan to employee object
   let plan = {
     pto: this.employee.plannedPto?.results?.pto,
-    holiday: this.employee.plannedPto?.results?.holiday
+    holiday: this.employee.plannedPto?.results?.holiday,
+    endDate: this.employee.plannedPto?.results?.endDate
   };
   // yeet outta here if there is no planned PTO
-  if (!plan.pto && !plan.holiday) return;
+  if (!plan.endDate) {
+    delete this.ptoBalances['PTO']?.items?.['PTO after plan'];
+    delete this.ptoBalances['Holiday']?.items?.['Holiday after plan'];
+    return;
+  }
   // set planned PTO and Holiday balances
-  let ptoBal = this.ptoBalances.PTO?.value || this.ptoBalances.PTO;
-  let holidayBal = this.ptoBalances.Holiday?.value || this.ptoBalances.Holiday;
-  if (this.convertToSeconds(plan.pto) != ptoBal) {
-    this.addPlanToBalances('PTO', 'PTO after plan', plan, 'pto');
-  }
-  if (this.convertToSeconds(plan.holiday) != holidayBal) {
-    this.addPlanToBalances('Holiday', 'Holiday after plan', plan, 'holiday');
-  }
+  this.addPlanToBalances('PTO', 'PTO after plan', plan, 'pto');
+  this.addPlanToBalances('Holiday', 'Holiday after plan', plan, 'holiday');
 } // refreshPlannedPto
 
 /**
