@@ -308,7 +308,7 @@ function cancel() {
  */
 async function save() {
   // set loading status
-  this.loading = true;
+  loading.value = true;
 
   // save planned months to database
   let endDate = plannedMonths.value.at(-1)?.date;
@@ -331,7 +331,7 @@ async function save() {
   emitter.emit('update-planned-pto-results-time-period', data.plannedPto);
 
   // set loading status
-  this.loading = false;
+  loading.value = false;
 
   // inform user that plan was saved successfully
   saveButtonText.value = 'Saved!';
