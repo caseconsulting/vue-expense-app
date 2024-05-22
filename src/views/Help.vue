@@ -41,6 +41,9 @@
               <template #bottom />
             </v-data-table>
           </v-expansion-panel-text>
+          <v-expansion-panel-text v-else-if="section[0] === 'Timesheet Calculations'">
+            <timesheets-calculations-help></timesheets-calculations-help>
+          </v-expansion-panel-text>
           <v-expansion-panel-text v-else-if="canView(section[1])">
             <v-card>
               <v-card-text class="bg-grey-lighten-3">
@@ -62,6 +65,7 @@
 </template>
 
 <script>
+import TimesheetsCalculationsHelp from '@/components/help/TimesheetsCalculationsHelp.vue';
 import { getRole } from '@/utils/auth';
 import { isMobile } from '@/utils/utils';
 
@@ -108,21 +112,24 @@ function canView(qRole) {
 // |--------------------------------------------------|
 
 export default {
+  components: {
+    TimesheetsCalculationsHelp
+  },
   data() {
     return {
       panel: null,
       role: '', // employee role
       sections: {
         quickBooksTimeHours: [
-          'Hours',
+          'Timesheet Calculations',
           'user',
           {
-            title: 'What information is displayed in the box?',
-            body: 'Hours worked for each job ending with the total hours for the month at the bottom in bold.'
+            title: 'Total Work Days (TWD) = week days from period start date to period end date',
+            body: ''
           },
           {
-            title: 'How is the Avg Hours/Day calculated?',
-            body: 'The Remaining hours for the month divided by the Days Remaining. This can be changed by editing the Days Remaining. Days Remaining includes today.'
+            title: 'Total Work Days Pro Rated (TWDPR) = ',
+            body: '1. Employee hire date OR contract start date falls after normal start date ? —> hire date/contract start date to period end date \n2. Otherwise —> TWD'
           },
           {
             title: 'What hours fall under Completed, Today, and Future?',

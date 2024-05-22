@@ -88,7 +88,7 @@
 
 <script>
 import { isMobile, isSmallScreen } from '@/utils/utils';
-import { getTodaysDate, format, subtract, isSameOrBefore, isSameOrAfter } from '@/shared/dateUtils';
+import { getTodaysDate, format, startOf, endOf, subtract, isSameOrBefore, isSameOrAfter } from '@/shared/dateUtils';
 import _ from 'lodash';
 import baseCsv from '@/utils/csv/baseCsv.js';
 import employeeCsv from '@/utils/csv/employeeCsv.js';
@@ -196,12 +196,14 @@ async function download() {
         csv: emp
       }
     ];
-    filename = `EEO Compliance Report - ${this.filters.year}`;
+    filename = `EEO Compliance Report - ${this.filters.period}`;
     baseCsv.download(csvText, filename);
   } else if (this.exportType.value === 'qb') {
     filename = `Timesheet Report - ${this.filters.period}`;
-    startDate = this.filters.period;
-    endDate = this.filters.period;
+    startDate = startOf(this.filters.period, 'month');
+    endDate = endOf(this.filters.period, 'month');
+    startDate = format(startDate, null, 'YYYY-MM-DD');
+    endDate = format(endDate, null, 'YYYY-MM-DD');
     this.loading = 'Downloading timesheets from QuickBooks...';
     await qbCsv.download(csvInfo, { filename, startDate, endDate });
   }

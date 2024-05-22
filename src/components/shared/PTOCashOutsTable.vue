@@ -492,7 +492,7 @@ async function clickedEdit(item) {
   this.clickedEditItem = item;
   this.toggleEditModal = true;
   let employee = _.find(this.$store.getters.employees, (e) => e.id === item.employeeId);
-  let employeeBalances = await api.getTimesheetsData(employee.employeeNumber, null, null, true);
+  let employeeBalances = await api.getTimesheetsData(employee.employeeNumber, { code: 1 });
   let pto = employeeBalances?.ptoBalances?.PTO / 60 / 60 || 0;
   this.userPto = this.formatNumber(pto);
 } // clickedEdit

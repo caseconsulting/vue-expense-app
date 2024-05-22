@@ -1,15 +1,16 @@
 <template>
   <div>
     <h3 class="d-flex align-center">
-      <v-icon class="mr-2">mdi-briefcase-outline</v-icon> {{ isMonthly ? 'Monthly' : 'Yearly' }} Job Codes
+      <v-icon class="mr-2">mdi-briefcase-outline</v-icon>
+      {{ isYearly ? (isCalendarYear ? 'Calendar Year' : 'Contract Year') : 'Pay Period' }} Job Codes
       <v-avatar
-        v-if="!isMonthly"
+        v-if="isYearly && isCalendarYear"
         @click="
           openLink(
             'https://3.basecamp.com/3097063/buckets/179119/messages/1426517066#:~:text=1860%20Hours%20target%20bonus'
           )
         "
-        class="ml-2 nudge-up"
+        class="ml-2 nudge-up pointer"
         size="x-small"
         density="compact"
       >
@@ -22,9 +23,9 @@
       <div v-for="(duration, jobcode) in timeData" :key="jobcode">
         <div
           v-if="
-            isMonthly || showNonBillables || (!showNonBillables && !supplementalData.nonBillables.includes(jobcode))
+            !isYearly || showNonBillables || (!showNonBillables && !supplementalData.nonBillables.includes(jobcode))
           "
-          :class="!isMonthly && supplementalData.nonBillables.includes(jobcode) ? 'text-grey' : ''"
+          :class="isYearly && supplementalData.nonBillables.includes(jobcode) ? 'text-grey' : ''"
           class="d-flex justify-space-between my-3"
         >
           <div class="mr-3">{{ jobcode }}</div>
@@ -32,14 +33,14 @@
           <div class="ml-3">{{ formatNumber(duration / 60 / 60) }}h</div>
         </div>
       </div>
-      <v-span
-        v-if="!isMonthly && hasNonBillables()"
+      <span
+        v-if="isYearly && hasNonBillables()"
         @click="showNonBillables = !showNonBillables"
         class="pointer text-blue"
       >
         {{ showNonBillables ? 'Hide non-billables' : 'Show non-billables' }}
         <v-icon>{{ showNonBillables ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-      </v-span>
+      </span>
     </div>
   </div>
 </template>
@@ -84,7 +85,7 @@ export default {
     hasNonBillables,
     openLink
   },
-  props: ['isMonthly', 'supplementalData', 'timeData']
+  props: ['isCalendarYear', 'isYearly', 'supplementalData', 'timeData']
 };
 </script>
 

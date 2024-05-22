@@ -8,7 +8,7 @@
         </span>
         <v-btn variant="text" icon="mdi-refresh" @click="resetData()">
           <template v-slot:default>
-            <v-tooltip activator="parent" location="top">Refresh Quickbooks data</v-tooltip>
+            <v-tooltip activator="parent" location="top">Refresh QuickBooks data</v-tooltip>
             <v-icon color="white" size="large">mdi-refresh</v-icon>
           </template>
         </v-btn>
@@ -16,7 +16,7 @@
       <v-card-text class="mt-3 px-7">
         <v-progress-linear class="mb-3 mt-7" v-if="loading" indeterminate></v-progress-linear>
         <div v-else>
-          <div class="d-flex flex-column justify-center align-center py-3 font-weight-bold" v-if="errorMessage">
+          <div v-if="errorMessage" class="d-flex flex-column justify-center align-center py-3 font-weight-bold">
             <v-icon class="mb-2">mdi-alert</v-icon>
             <span>{{ errorMessage }}</span>
           </div>
@@ -27,7 +27,7 @@
               :ptoBalances="ptoBalances || {}"
               :supplementalData="supplementalData || {}"
             ></time-period-hours>
-            <hr class="my-5 mx-7" />
+            <hr class="mt-3 mb-5 mx-7" />
             <p-t-o-hours :employee="employee" :ptoBalances="ptoBalances || {}"></p-t-o-hours>
           </div>
         </div>
@@ -41,7 +41,7 @@ import TimePeriodHours from '@/components/shared/quickbooks/TimePeriodHours.vue'
 import PTOHours from '@/components/shared/quickbooks/PTOHours.vue';
 import _ from 'lodash';
 import api from '@/shared/api';
-import { difference, format, getTodaysDate, isBefore, now, startOf, subtract } from '@/shared/dateUtils';
+import { difference, isBefore, now } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -60,10 +60,19 @@ function beforeUnmount() {
  * The Created lifecycle hook.
  */
 async function created() {
-  this.emitter.on('get-period-data', async ({ startDate, endDate, isMonthly }) => {
-    await this.setData(startDate, endDate, isMonthly);
+  this.emitter.on('get-period-data', async ({ isCalendarYear, isYearly }) => {
+    await this.setData(isCalendarYear, isYearly);
   });
   await this.setInitialData();
+
+  // add planned PTO and Holiday to ptoBalances
+  this.refreshPlannedPto();
+  // listen for planned PTO results
+  this.emitter.on('update-planned-pto-results-time-data', (data) => {
+    this.employee.plannedPto = data;
+    this.refreshPlannedPto();
+  });
+
   this.loading = false;
 } // created
 
@@ -154,6 +163,54 @@ function removeExcludedPtoBalances() {
 } // removeExcludedPtoBalances
 
 /**
+ * Converts hours to seconds with 2 decimal places if needed.
+ *
+ * @param {Number} hours - The number of hours
+ */
+function convertToSeconds(hours) {
+  return Number(hours * 60 * 60)
+    ?.toFixed(2)
+    ?.replace(/[.,]00$/, ''); // removes decimals if a whole number
+} // convertToSeconds
+
+/**
+ * Helper to add items to the ptoBalances object
+ * @param balanceKey key in ptoBalances to modify
+ * @param itemsKey key in ptoBalances[balanceKey].items object to add
+ * @param planResults object of results of planned PTO
+ * @param planKey key in planResults to grab from
+ */
+function addPlanToBalances(balanceKey, itemsKey, planResults, planKey) {
+  let balanceItem = this.ptoBalances[balanceKey];
+  if (!balanceItem.value) this.ptoBalances[balanceKey] = { value: balanceItem, items: {} };
+  this.ptoBalances[balanceKey].items[itemsKey] = this.convertToSeconds(planResults[planKey]);
+} // addPlanToBalances
+
+/**
+ * Refreshes the PTO plan to put in the ptoBalances object, based on the
+ * employee's plannedPto in their employee object by default.
+ *
+ * @param planResults (optional) object of results of planned PTO
+ */
+function refreshPlannedPto() {
+  // set plan to employee object
+  let plan = {
+    pto: this.employee.plannedPto?.results?.pto,
+    holiday: this.employee.plannedPto?.results?.holiday,
+    endDate: this.employee.plannedPto?.results?.endDate
+  };
+  // yeet outta here if there is no planned PTO
+  if (!plan.endDate) {
+    delete this.ptoBalances['PTO']?.items?.['PTO after plan'];
+    delete this.ptoBalances['Holiday']?.items?.['Holiday after plan'];
+    return;
+  }
+  // set planned PTO and Holiday balances
+  this.addPlanToBalances('PTO', 'PTO after plan', plan, 'pto');
+  this.addPlanToBalances('Holiday', 'Holiday after plan', plan, 'holiday');
+} // refreshPlannedPto
+
+/**
  * Resets components data and removes timesheets local storage.
  */
 async function resetData() {
@@ -162,23 +219,27 @@ async function resetData() {
   this.ptoBalances = null;
   this.supplementalData = null;
   this.lastUpdated = null;
+  this.errorMessage = null;
   if (this.employeeIsUser()) {
     localStorage.removeItem(this.KEYS.QB);
   }
   this.emitter.emit('reset-data');
-  await this.setInitialData();
+  await this.setInitialData(false);
   this.loading = false;
 } // resetData
 
 /**
  * Retrieves, sets, and stores components data from API.
  *
- * @param {String} startDate - The time period start date (YYYY-MM) format
- * @param {String} endDate - The time period end date (YYYY-MM) format
- * @param {Boolean} isMonthly - Whether or not the time period is monthly
+ * @param {Boolean} isCalendarYear - Whether or not the time period is the calendar year
+ * @param {Boolean} isYearly - Whether or not the time period is yearly
  */
-async function setDataFromApi(startDate, endDate, isMonthly) {
-  let timesheetsData = await api.getTimesheetsData(this.employee.employeeNumber, startDate, endDate);
+async function setDataFromApi(isCalendarYear, isYearly) {
+  let code = isYearly ? (isCalendarYear ? 3 : 4) : 2;
+  let timesheetsData = await api.getTimesheetsData(this.employee.employeeNumber, {
+    code,
+    employeeId: this.employee.id
+  });
   if (!this.hasError(timesheetsData)) {
     this.timesheets = timesheetsData.timesheets;
     this.ptoBalances = timesheetsData.ptoBalances;
@@ -187,7 +248,7 @@ async function setDataFromApi(startDate, endDate, isMonthly) {
     this.removeExcludedPtoBalances();
     if (this.employeeIsUser()) {
       // only set local storage if user is looking at their own data
-      this.setStorage(isMonthly);
+      this.setStorage(isCalendarYear, isYearly);
     }
   }
 } // setDataFromApi
@@ -196,7 +257,7 @@ async function setDataFromApi(startDate, endDate, isMonthly) {
  * Sets the main components data used throughout child components.
  *
  * @param {Object} qbStorage - The local storage timesheets object
- * @param {String} key - The monthly or yearly object key
+ * @param {String} key - The pay periods or yearly object key
  */
 function setDataFromStorage(qbStorage, key) {
   this.timesheets = qbStorage[key]?.timesheets;
@@ -208,11 +269,12 @@ function setDataFromStorage(qbStorage, key) {
 /**
  * Sets local storage for Quickbooks data.
  *
- * @param {Boolean} isMonthly - Whether or not the time period is monthly
+ * @param {Boolean} isCalendarYear - Whether or not the time period is the calendar year
+ * @param {Boolean} isYearly - Whether or not the time period is yearly
  */
-function setStorage(isMonthly) {
+function setStorage(isCalendarYear, isYearly) {
   let storage = this.qbStorageExists();
-  let key = isMonthly ? this.KEYS.MONTHLY : this.KEYS.YEARLY;
+  let key = isYearly ? (isCalendarYear ? this.KEYS.CALENDAR_YEAR : this.KEYS.CONTRACT_YEAR) : this.KEYS.PAY_PERIODS;
   let data = {
     [key]: {
       timesheets: this.timesheets,
@@ -229,30 +291,25 @@ function setStorage(isMonthly) {
 /**
  * Retrieves and sets timesheets data from API or local storage.
  *
- * @param {String} startDate - The time period start date (YYYY-MM) format
- * @param {String} endDate - The time period end date (YYYY-MM) format
- * @param {Boolean} isMonthly - Whether or not the time period is monthly
+ * @param {Boolean} isCalendarYear - Whether or not the time period is the calendar year
+ * @param {Boolean} isYearly - Whether or not the time period is yearly
  */
-async function setData(startDate, endDate, isMonthly) {
+async function setData(isCalendarYear, isYearly) {
   let storage = this.qbStorageExists();
-  let key = isMonthly ? this.KEYS.MONTHLY : this.KEYS.YEARLY;
+  let key = isYearly ? (isCalendarYear ? this.KEYS.CALENDAR_YEAR : this.KEYS.CONTRACT_YEAR) : this.KEYS.PAY_PERIODS;
   if (storage && storage[key] && this.employeeIsUser() && !this.isStorageExpired(storage[key].lastUpdated)) {
     this.setDataFromStorage(storage, key);
   } else {
-    await this.setDataFromApi(startDate, endDate, isMonthly);
+    await this.setDataFromApi(isCalendarYear, isYearly);
   }
+  this.refreshPlannedPto();
 } // setData
 
 /**
- * Sets the timesheets data on initial load based on a monthly time period (current and previous month displayed).
+ * Sets the timesheets data on initial load based on a time period (current and previous pay period displayed).
  */
 async function setInitialData() {
-  let today = getTodaysDate();
-  // last month
-  let startDate = format(startOf(subtract(today, 1, 'month'), 'month'), null, 'YYYY-MM');
-  // this month
-  let endDate = format(today, null, 'YYYY-MM');
-  await this.setData(startDate, endDate, true);
+  await this.setData();
 } // setInitialData
 
 // |--------------------------------------------------|
@@ -282,17 +339,21 @@ export default {
       timesheets: null,
       KEYS: {
         QB: 'qbData',
-        MONTHLY: 'monthly',
-        YEARLY: 'yearly'
+        PAY_PERIODS: 'payPeriods',
+        CALENDAR_YEAR: 'calendarYear',
+        CONTRACT_YEAR: 'contractYear'
       }
     };
   },
   methods: {
+    addPlanToBalances,
+    convertToSeconds,
     employeeIsUser,
     hasError,
     isStorageExpired,
     now,
     qbStorageExists,
+    refreshPlannedPto,
     removeExcludedPtoBalances,
     resetData,
     setInitialData,

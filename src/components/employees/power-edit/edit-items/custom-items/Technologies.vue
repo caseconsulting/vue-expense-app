@@ -10,7 +10,6 @@
           ...getRequiredRules()
         ]"
         :items="techDropdown"
-        hide-no-data
         class="d-inline-block field"
         label="Technology or Skill*"
         variant="underlined"
@@ -153,6 +152,9 @@ async function updateTechDropDown(query) {
     populateDropDown();
   } else if (techDropdown.value.length >= 0) {
     techDropdown.value = [];
+    populateDropDown();
+  }
+  if (query.length === 0) {
     populateDropDown();
   }
 } //updateTechDropDown
