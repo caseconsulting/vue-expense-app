@@ -142,7 +142,6 @@ import {
   isSame
 } from '../../shared/dateUtils';
 import { formatNumber } from '@/utils/utils.js';
-import _ from 'lodash';
 import api from '@/shared/api.js';
 
 // |--------------------------------------------------|
@@ -192,12 +191,9 @@ const headers = ref([
  * Created lifecycle hook
  */
 onMounted(async () => {
-  // get the employee and PTO cashout amounts
-  await Promise.all([
-    !store.getters.employees ? updateStoreEmployees() : '',
-    !store.getters.ptoCashOuts ? updateStorePtoCashOuts() : ''
-  ]);
-  employee.value = _.find(store.getters.employees, (e) => e.id === props.employeeId);
+  // update PTO cashouts and get employee from store
+  if (!store.getters.ptoCashOuts) updateStorePtoCashOuts();
+  employee.value = store.getters.user;
 
   // get plannedMonths from database if user has a saved plan
   if (employee.value.plannedPto?.plan) {
@@ -313,7 +309,7 @@ async function save() {
   // set loading status
   this.loading = true;
 
-  // save planned months via api
+  // save planned months to database
   let data = {
     id: employee.value.id,
     plannedPto: {
@@ -325,6 +321,7 @@ async function save() {
     }
   };
   await api.updateAttribute(api.EMPLOYEES, data, 'plannedPto');
+
   // refresh store user from DB and reset emitter
   await updateStoreUser();
   emitter.emit('update-planned-pto-results-time-data', data.plannedPto);
