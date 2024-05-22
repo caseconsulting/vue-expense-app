@@ -6,7 +6,7 @@
     <div v-if="months.length === monthsPlannable">
       <v-card-text v-if="employee">
         <!-- PTO BALANCES -->
-        <v-row class="text-center">
+        <v-row class="text-center balances">
           <!-- Current PTO balance -->
           <v-col>
             <p class="mb-0 font-weight-bold">{{ pto }}h</p>
@@ -24,6 +24,8 @@
             <p class="mb-0 font-weight-bold">{{ holiday }}h</p>
             <p class="mt-0">Current<br />Holiday Balance</p>
           </v-col>
+
+          <span class="left-line"></span>
 
           <!-- PTO after all months of plan (includes accrued from last month of plan) -->
           <v-col>
@@ -557,5 +559,15 @@ h3 {
 .monthSelector {
   min-width: 50%;
   max-width: 50%;
+}
+.balances {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.left-line {
+  height: 30px;
+  border-left: 1px solid gray;
+  margin-bottom: 20px;
 }
 </style>
