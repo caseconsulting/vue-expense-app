@@ -117,7 +117,6 @@
                   :items="dropdownEmployees"
                   :custom-filter="customFilter"
                   hide-details
-                  :focused="employeeDropdownFocused"
                   item-title="itemTitle"
                   return-object
                   rounded

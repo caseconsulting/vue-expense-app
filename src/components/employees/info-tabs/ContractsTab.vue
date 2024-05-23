@@ -33,9 +33,19 @@
                 </v-col>
               </v-row>
             </p>
-            <p><b>Start Date: </b>{{ monthYearFormat(project.startDate) }}</p>
+            <p>
+              <v-row>
+                <v-col class="pt-0"> <b>Start Date: </b>{{ monthDayYearFormat(project.startDate) }} </v-col>
+                <v-col class="pt-0">
+                  <span v-if="project.bonusCalculationDate">
+                    <v-tooltip activator="parent" location="right">Used for 1860 calculation</v-tooltip>
+                    <v-icon>mdi-calendar-weekend</v-icon>
+                  </span>
+                </v-col>
+              </v-row>
+            </p>
             <div v-if="project.endDate">
-              <p><b>End Date: </b>{{ monthYearFormat(project.endDate) }}</p>
+              <p><b>End Date: </b>{{ monthDayYearFormat(project.endDate) }}</p>
             </div>
             <p><b>Time on Project: </b>{{ getProjectLengthInYearsReadable(project) }}</p>
             <hr v-if="projIndex < contract.projects.length - 1" class="horizontalBar mb-3" />
@@ -60,7 +70,7 @@
 </template>
 
 <script>
-import { isEmpty, monthYearFormat } from '@/utils/utils';
+import { isEmpty, monthDayYearFormat } from '@/utils/utils';
 import { difference, getTodaysDate } from '@/shared/dateUtils';
 import _ from 'lodash';
 
@@ -247,7 +257,7 @@ export default {
     dateReadable,
     isEmpty,
     onPageChange,
-    monthYearFormat
+    monthDayYearFormat
   },
   props: ['contracts', 'model']
 };

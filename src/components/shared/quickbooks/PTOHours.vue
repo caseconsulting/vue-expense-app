@@ -6,7 +6,7 @@
         PTO Balances
         <v-avatar
           @click="openLink('https://3.basecamp.com/3097063/buckets/179119/messages/6950289713')"
-          class="ml-2 nudge-up"
+          class="ml-2 nudge-up pointer"
           size="x-small"
           density="compact"
         >
@@ -14,6 +14,16 @@
           <v-icon size="x-small" color="#3f51b5">mdi-information</v-icon>
         </v-avatar>
       </h3>
+      <v-btn
+        v-if="ptoBalances['PTO'] || ptoBalances['PTO'] === 0"
+        @click="showPTOPlanningFormModal = true"
+        variant="outlined"
+        density="compact"
+        class="px-2 mr-2 ml-auto"
+        :color="caseRed"
+      >
+        Plan PTO
+      </v-btn>
       <v-btn
         v-if="ptoBalances['PTO'] || ptoBalances['PTO'] === 0"
         @click="showPTOCashOutFormModal = true"
@@ -30,21 +40,43 @@
       <div v-if="showMore || ptoBalances[jobcode] !== 0" class="d-flex justify-space-between my-3">
         <div class="mr-3">{{ jobcode }}</div>
         <div class="dotted-line"></div>
-        <div class="ml-3">{{ convertToHours(ptoBalances[jobcode]) }}h</div>
+        <div class="ml-3">{{ convertToHours(ptoBalances[jobcode].value || ptoBalances[jobcode]) }}h</div>
+      </div>
+      <div v-if="(showMore || ptoBalances[jobcode] !== 0) && ptoBalances[jobcode].items">
+        <div
+          v-for="subcode in Object.keys(ptoBalances[jobcode].items)"
+          :key="subcode"
+          class="d-flex justify-space-between ml-6 my-3"
+        >
+          <div class="mr-3 font-italic">{{ subcode }}</div>
+          <div class="dotted-line"></div>
+          <div class="ml-3 mr-1 font-italic">{{ convertToHours(ptoBalances[jobcode].items[subcode]) }}h</div>
+        </div>
       </div>
     </div>
-    <v-span v-if="Object.values(ptoBalances || []).includes(0)" @click="showMore = !showMore" class="pointer text-blue">
+    <span v-if="Object.values(ptoBalances || []).includes(0)" @click="showMore = !showMore" class="pointer text-blue">
       {{ showMore ? 'Show less' : 'Show more' }}
       <v-icon>{{ showMore ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-    </v-span>
+    </span>
+    <v-dialog v-model="showPTOPlanningFormModal" persistent max-width="800">
+      <p-t-o-planning-form
+        :employeeId="employee.id"
+        :pto="convertToHours(ptoBalances['PTO'].value || ptoBalances['PTO'])"
+        :holiday="convertToHours(ptoBalances['Holiday'].value || ptoBalances['Holiday'])"
+      />
+    </v-dialog>
     <v-dialog v-model="showPTOCashOutFormModal" persistent max-width="500">
-      <p-t-o-cash-out-form :employeeId="employee.id" :pto="convertToHours(ptoBalances['PTO'])" />
+      <p-t-o-cash-out-form
+        :employeeId="employee.id"
+        :pto="convertToHours(ptoBalances.PTO?.value || ptoBalances['PTO'])"
+      />
     </v-dialog>
   </div>
 </template>
 
 <script>
 import PTOCashOutForm from '@/components/shared/PTOCashOutForm.vue';
+import PTOPlanningForm from '@/components/shared/PTOPlanningForm.vue';
 import { openLink } from '@/utils/utils';
 
 // |--------------------------------------------------|
@@ -59,6 +91,9 @@ import { openLink } from '@/utils/utils';
 function mounted() {
   this.emitter.on('close-pto-cash-out-form', () => {
     this.showPTOCashOutFormModal = false;
+  });
+  this.emitter.on('close-pto-planning-form', () => {
+    this.showPTOPlanningFormModal = false;
   });
 } // mounted
 
@@ -106,7 +141,8 @@ function convertToHours(seconds) {
 
 export default {
   components: {
-    PTOCashOutForm
+    PTOCashOutForm,
+    PTOPlanningForm
   },
   computed: {
     sortedBalancesByDuration
@@ -115,6 +151,7 @@ export default {
     return {
       excludeIfZero: ['Jury Duty', 'Maternity/Paternity Time Off'],
       showPTOCashOutFormModal: false,
+      showPTOPlanningFormModal: false,
       showMore: false
     };
   },

@@ -2,7 +2,16 @@
   <div>
     <h3 class="d-flex align-center mb-3">
       <v-icon class="mr-2">mdi-book-open-outline</v-icon>
-      {{ isMonthly ? 'Monthly' : 'Yearly' }} Details
+      {{ isYearly ? (isCalendarYear ? 'Calendar Year' : 'Contract Year') : 'Pay Period' }} Details
+      <v-avatar
+        @click="openLink($router.resolve({ path: '/help/timesheetCalculations' })?.href)"
+        class="ml-2 nudge-up pointer"
+        size="x-small"
+        density="compact"
+      >
+        <v-tooltip activator="parent" location="top">Click to see calculations</v-tooltip>
+        <v-icon icon="mdi-information" color="#3f51b5" size="x-small" />
+      </v-avatar>
     </h3>
 
     <div class="d-flex justify-space-between my-3">
@@ -13,7 +22,7 @@
     <div class="d-flex justify-space-between my-3">
       <div class="mr-2">Remaining Avg/Day</div>
       <div class="dotted-line"></div>
-      <div :class="remainingAverageHoursPerDay > 8 ? 'text-red font-weight-bold' : ''" class="ml-2">
+      <div :class="remainingAverageHoursPerDay > WORK_HOURS_PER_DAY ? 'text-red font-weight-bold' : ''" class="ml-2">
         {{ formatNumber(remainingAverageHoursPerDay) }}h
       </div>
     </div>
@@ -24,7 +33,7 @@
         {{ Math.abs(formatNumber(hoursBehindBy)) }}h
       </div>
     </div>
-    <div v-if="(isMonthly && dateIsCurrentMonth) || !isMonthly" class="d-flex justify-space-between my-3">
+    <div v-if="(!isYearly && dateIsCurrentPeriod) || isYearly" class="d-flex justify-space-between my-3">
       <div class="mr-2">Future</div>
       <div class="dotted-line"></div>
       <div class="ml-2">{{ formatNumber(futureHours) }}h</div>
@@ -33,17 +42,22 @@
       <div class="mr-3">
         Work Days Remaining
         <span
-          v-if="(futureDays > 0 && isMonthly && dateIsCurrentMonth) || (futureDays > 0 && !isMonthly)"
+          v-if="(futureDays > 0 && !isYearly && dateIsCurrentPeriod) || (futureDays > 0 && isYearly)"
           class="text-blue"
         >
           *
         </span>
         <v-tooltip
-          v-if="(futureDays > 0 && isMonthly && dateIsCurrentMonth) || (futureDays > 0 && !isMonthly)"
+          v-if="(futureDays > 0 && !isYearly && dateIsCurrentPeriod) || (futureDays > 0 && isYearly)"
           activator="parent"
           location="top"
+          class="text-center"
         >
-          {{ futureDays }} {{ futureDays > 1 ? 'days' : 'day' }} subtracted to account for future timesheets
+          {{ futureDays }} {{ futureDays > 1 ? 'days' : 'day' }} subtracted to account for future timesheets<span
+            v-if="getPlannedPTO() > 0"
+            >,<br />including {{ getPlannedPTO(true) }} {{ getPlannedPTO(true) > 1 ? 'days' : 'day' }} of planned
+            PTO/Holiday</span
+          >
         </v-tooltip>
       </div>
       <div class="dotted-line"></div>
@@ -68,15 +82,15 @@
 
 <script>
 import _ from 'lodash';
-import { formatNumber } from '@/utils/utils';
+import { formatNumber, openLink } from '@/utils/utils';
 import {
   add,
   getIsoWeekday,
   isAfter,
   isSameOrAfter,
+  isSameOrBefore,
   format,
-  startOf,
-  endOf,
+  getTodaysDate,
   DEFAULT_ISOFORMAT
 } from '@/shared/dateUtils';
 
@@ -91,11 +105,22 @@ import {
  */
 function mounted() {
   this.emitter.emit('timesheets-chart-data', {
-    completed: this.periodHoursCompleted,
+    completed: this.formatNumber(this.periodHoursCompleted),
     needed: this.totalPeriodHours,
     remainingHours: this.remainingHours
   });
+  this.emitter.on('update-planned-pto-results-time-period', (data) => {
+    this.employee.plannedPto = data;
+  });
 } // mounted
+
+/**
+ * The beforeUnmount lifecycle hook
+ */
+function beforeUnmount() {
+  this.emitter.off('timesheets-chart-data');
+  this.emitter.off('update-planned-pto-results-time-period');
+} // beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -104,12 +129,46 @@ function mounted() {
 // |--------------------------------------------------|
 
 /**
+ * HELPER
+ * Gets number of days that PTO is planned for. Rounds based on hours
+ * in work day. Rounds up because 50% of a day planned means that you've
+ * planned that day.
+ *
+ * @param convertToDays boolean - whether or not to convert to days
+ */
+function getPlannedPTO(convertToDays) {
+  // do not include this value in the month view
+  if (!this.isYearly) return 0;
+
+  // early exit conditions
+  let ptoPlan = this.employee.plannedPto?.plan;
+  if (!ptoPlan) return 0;
+  // get start and end dates
+  let startDate = this.period.startDate;
+  let endDate = this.period.endDate;
+  // go through plan and tally up hours that fall between startDate and endDate
+  let hoursPlanned = 0;
+  for (let item of ptoPlan) {
+    if (isSameOrAfter(item.date, startDate, 'month') && isSameOrBefore(item.date, endDate, 'month')) {
+      hoursPlanned += Number(item.ptoHours) + Number(item.holidayHours);
+    }
+  }
+  // convert hours to days (rounding up) and return result
+  if (convertToDays) hoursPlanned = Math.ceil(hoursPlanned / this.WORK_HOURS_PER_DAY);
+  return hoursPlanned;
+} // getPlannedPTO
+
+/**
  * The amount of different days timesheets were entered in the future.
  *
  * @returns Number - The amount of entered future days
  */
 function futureDays() {
-  return this.supplementalData?.future?.days || 0;
+  // future work days planned
+  let days = this.supplementalData?.future?.days || 0;
+  // future PTO days planned
+  days += this.getPlannedPTO(true);
+  return days;
 } // futureDays
 
 /**
@@ -118,7 +177,11 @@ function futureDays() {
  * @returns Integer - The amount of hours entered in the future
  */
 function futureHours() {
-  return Number((this.supplementalData?.future?.duration || 0) / 60 / 60);
+  // future work hours planned
+  let hours = Number((this.supplementalData?.future?.duration || 0) / 60 / 60);
+  // future PTO hours planned
+  hours += this.getPlannedPTO(false);
+  return hours;
 } // futureHours
 
 /**
@@ -139,7 +202,7 @@ function hoursBehindBy() {
 function periodHoursCompleted() {
   let total = 0;
   _.forEach(this.timeData, (duration, jobName) => {
-    if (this.isMonthly || (!this.isMonthly && !this.supplementalData.nonBillables?.includes(jobName))) {
+    if (!this.isYearly || (this.isYearly && !this.supplementalData.nonBillables?.includes(jobName))) {
       total += duration;
     }
   });
@@ -153,10 +216,10 @@ function periodHoursCompleted() {
  * @returns The employees pro-rated hours needed per day
  */
 function proRatedHours() {
-  if (this.isMonthly) {
-    return 8 * (this.employee.workStatus / 100);
+  if (this.isYearly) {
+    return this.BONUS_YEAR_TOTAL / this.getWorkDays(this.period.startDate, this.period.endDate, true);
   } else {
-    return this.BONUS_YEAR_TOTAL / this.getWorkDays(startOf(this.today, 'year'), endOf(this.today, 'year'), true);
+    return this.WORK_HOURS_PER_DAY * (this.employee.workStatus / 100);
   }
 } // proRatedHours
 
@@ -183,16 +246,12 @@ function remainingWorkDays() {
   if (this.customWorkDayInput && Number(this.customWorkDayInput)) {
     this.customWorkDayInput = Number(this.customWorkDayInput) ?? null;
     remainingDays = this.customWorkDayInput || this.remainingWorkDays;
-  } else if (this.isMonthly) {
-    if (this.dateIsCurrentMonth) {
-      remainingDays = this.getWorkDays(this.date, endOf(this.date, 'month')) - daysToSubtract;
-    } else {
+  } else {
+    remainingDays = this.getWorkDays(this.today, this.period.endDate) - daysToSubtract;
+    if (!this.dateIsCurrentPeriod) {
       remainingDays = 0;
     }
-  } else {
-    remainingDays = this.getWorkDays(this.today, endOf(this.today, 'year')) - daysToSubtract;
   }
-
   return Math.max(remainingDays, 0);
 } // remainingWorkDays
 
@@ -205,7 +264,7 @@ function remainingAverageHoursPerDay() {
   if (Number(this.remainingWorkDays) > 0) {
     return this.remainingHours / this.remainingWorkDays;
   } else {
-    return this.dateIsCurrentMonth ? this.remainingHours : 0;
+    return this.dateIsCurrentPeriod ? this.remainingHours : 0;
   }
 } // remainingAverageHoursPerDay
 
@@ -216,7 +275,7 @@ function remainingAverageHoursPerDay() {
  */
 function totalPeriodHours() {
   let total = this.totalWorkDays * this.proRatedHours;
-  return this.isMonthly ? total : Math.round(total);
+  return this.isYearly ? Math.round(total) : total;
 } // totalPeriodHours
 
 /**
@@ -225,26 +284,20 @@ function totalPeriodHours() {
  * @returns Number - The total number of works days
  */
 function totalWorkDays() {
-  if (this.isMonthly) {
-    return this.getWorkDays(startOf(this.date, 'month'), endOf(this.date, 'month'));
-  } else {
-    return this.getWorkDays(startOf(this.today, 'year'), endOf(this.today, 'year'));
-  }
+  return this.getWorkDays(this.period.startDate, this.period.endDate);
 } // totalWorkDays
 
 /**
  * Calculates and returns the work days between start and end dates provided
  *
- * @param {String} startDate - The start date (in YYYY-MM format)
- * @param {String} endDate - The end date (in YYYY-MM format)
+ * @param {String} startDate - The start date
+ * @param {String} endDate - The end date
  * @param {Boolean} excludeProRated - Whether or not to pro-rate based on hire date (default is to pro-rate)
  * @return int - number of remaining working days
  */
 function getWorkDays(startDate, endDate, excludeProRated = false) {
   let workDays = 0;
   let hireDate = this.employee.hireDate;
-  startDate = format(startDate, null, DEFAULT_ISOFORMAT);
-  endDate = format(endDate, null, DEFAULT_ISOFORMAT);
   if (!excludeProRated && isAfter(hireDate, startDate, 'day') && isSameOrAfter(endDate, hireDate, 'day')) {
     startDate = hireDate;
   }
@@ -291,17 +344,22 @@ export default {
   data() {
     return {
       BONUS_YEAR_TOTAL: 1860,
+      WORK_HOURS_PER_DAY: 8, // normal hours per day for full time employees
       customWorkDayInput: null,
-      showCustomWorkDayInput: false
+      showCustomWorkDayInput: false,
+      today: format(getTodaysDate(), null, DEFAULT_ISOFORMAT)
     };
   },
   methods: {
     formatNumber,
+    getPlannedPTO,
     getWorkDays,
-    isWeekDay
+    isWeekDay,
+    openLink
   },
   mounted,
-  props: ['date', 'dateIsCurrentMonth', 'employee', 'isMonthly', 'supplementalData', 'timeData', 'today']
+  beforeUnmount,
+  props: ['dateIsCurrentPeriod', 'employee', 'isCalendarYear', 'isYearly', 'period', 'supplementalData', 'timeData']
 };
 </script>
 
@@ -323,6 +381,9 @@ export default {
   background-size: 7px 1px;
   background-repeat: repeat-x;
   flex-grow: 2;
+}
+.nudge-up {
+  top: -7px;
 }
 .work-days-box {
   border-radius: 5px;

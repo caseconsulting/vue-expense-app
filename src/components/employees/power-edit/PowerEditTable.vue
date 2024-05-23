@@ -105,7 +105,8 @@ watch(
 // |--------------------------------------------------|
 
 const employees = computed(() => {
-  return _.map(store.getters.employees, (e) => {
+  let employees = _.filter(store.getters.employees, (e) => e.workStatus > 0 && e.workStatus <= 100);
+  return _.map(employees, (e) => {
     return { ...e, name: `${e.nickname || e.firstName} ${e.lastName}` };
   });
 });

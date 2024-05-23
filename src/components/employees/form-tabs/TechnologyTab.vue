@@ -19,7 +19,6 @@
         @update:search="updateTechDropDown($event)"
         :rules="[duplicateRules(technology.name), ...getRequiredRules()]"
         :items="technologyDropDown"
-        hide-no-data
         label="Technology or Skill*"
         variant="underlined"
         data-vv-name="Technology"
@@ -198,6 +197,9 @@ async function updateTechDropDown(query) {
     this.populateDropDowns();
   } else if (this.technologyDropDown.length >= 0) {
     this.technologyDropDown = [];
+  }
+  if (query.length === 0) {
+    this.populateDropDowns();
   }
 } //updateTechDropDown
 

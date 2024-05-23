@@ -32,10 +32,10 @@ The following environment variables are required to support multiple environment
 - **VITE_API_PORT**
 - **NODE_ENV**
 
-**vue-cli** automatically picks up environment variables in `.env` files. Any variables that begin with **VUE*APP***
-will be included in the client bundle created by webpack. They will be accessible from your code using **process.env**.
-At build time, webpack will replace these references with their corresponding values. For more information, go to:
-https://cli.vuejs.org/guide/mode-and-env.html#using-env-variables-in-client-side-code.
+**Vite** automatically picks up environment variables in `.env` files. Any variables that begin with **VITE**
+will be included in the client bundle created by webpack. They will be accessible from your code using **import.meta.env.**.
+At build time, Vite will replace these references with their corresponding values. For more information, go to:
+https://vitejs.dev/guide/env-and-mode.
 The `.env` file in the **case-expense-app** S3 bucket in the company AWS account has up-to-date values to run locally.
 Download this file to the project root directory:
 
@@ -77,12 +77,6 @@ To run unit tests (with Jest):
 npm run test
 ```
 
-To inspect internal webpack config:
-
-```
-npm run inspect
-```
-
 To upgrade to the latest version of a specific Node.js module:
 
 ```
@@ -116,9 +110,10 @@ npm run deploy:test
 make a pull request from master to release in git hub
 
 ```
+export AWS_PROFILE=prod
 git checkout release
 git pull
-npm ci
+npm run reintall
 npm run deploy:prod
 git checkout master
 ```
@@ -126,6 +121,7 @@ git checkout master
 To reset for local development, after a deployment:
 
 ```
+export AWS_PROFILE=dev
 npm run download:local:env
 ```
 
