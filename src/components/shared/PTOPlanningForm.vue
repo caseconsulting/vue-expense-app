@@ -25,6 +25,7 @@
             <p class="mt-0">Current<br />Holiday Balance</p>
           </v-col>
 
+          <!-- Divider between current and calculated values -->
           <span class="left-line"></span>
 
           <!-- PTO after all months of plan (includes accrued from last month of plan) -->
@@ -56,6 +57,14 @@
 
         <!-- PLANNING TABLE -->
         <v-data-table :headers="headers" :items="plannedMonths" :items-per-page="24" :hide-default-footer="true">
+          <!-- Month title slot -->
+          <template #[`item.date`]="{ item }">
+            <p>{{ item }}</p>
+            <div class="months-filler-parent">
+              <span class="months-filler">hello</span>
+            </div>
+          </template>
+
           <!-- edit PTO hours slot -->
           <template #[`item.ptoHours`]="{ item }">
             <v-text-field
@@ -167,9 +176,6 @@ const hoursRules = [(v) => canEval(v) !== false || v === '' || 'Enter number or 
 
 // data table
 // helper to add year if needed (also used in save() function)
-let getDateFormat = (date) => {
-  return isSame(getTodaysDate(), date, 'year') ? 'MMMM' : 'MMMM YYYY';
-};
 const headers = ref([
   {
     title: 'Month',
@@ -341,6 +347,14 @@ async function save() {
     saveButtonText.value = 'Save';
   }, 2500);
 }
+
+/**
+ * Returns the format that a date should be in in the table.
+ * @param date
+ */
+let getDateFormat = (date) => {
+  return isSame(getTodaysDate(), date, 'year') ? 'MMMM' : 'MMMM YYYY';
+};
 
 /**
  * Gets proper class for chip by deciding whether or not it is selected
@@ -569,5 +583,12 @@ h3 {
   height: 30px;
   border-left: 1px solid gray;
   margin-bottom: 20px;
+}
+.months-filler-parent {
+  position: relative;
+}
+.months-filler {
+  position: absolute;
+  top: 0;
 }
 </style>
