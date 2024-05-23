@@ -517,7 +517,7 @@ function getHolidayBalance(date = null) {
   // base case: date is current month
   if (isSame(date, getTodaysDate('YYYY-MM'))) {
     holidayBalance -= plannedMonthsBalance(date, 'holidayHours');
-    holidayCache[date.balance] = holidayBalance;
+    holidayCache[date].balance = holidayBalance;
     return Number(holidayBalance.toFixed(2));
   }
 
