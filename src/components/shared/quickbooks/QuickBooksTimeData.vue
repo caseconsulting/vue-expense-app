@@ -266,7 +266,7 @@ function setDataFromStorage(qbStorage, key) {
   this.supplementalData = qbStorage[key]?.supplementalData;
   this.lastUpdated = qbStorage[key]?.lastUpdated;
   this.ptoBalances = qbStorage?.ptoBalances;
-  this.syetem = qbStorage?.system;
+  this.system = qbStorage?.system;
 } // setDataFromStorage
 
 /**
