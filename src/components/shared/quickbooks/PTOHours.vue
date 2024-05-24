@@ -25,7 +25,7 @@
         Plan PTO
       </v-btn>
       <v-btn
-        v-if="ptoBalances['PTO'] || ptoBalances['PTO'] === 0"
+        v-if="(ptoBalances['PTO'] || ptoBalances['PTO'] === 0) && system === 'QuickBooks'"
         @click="showPTOCashOutFormModal = true"
         variant="outlined"
         density="compact"
@@ -160,7 +160,7 @@ export default {
     openLink
   },
   mounted,
-  props: ['ptoBalances', 'employee']
+  props: ['ptoBalances', 'employee', 'system']
 };
 </script>
 

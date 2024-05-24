@@ -2,7 +2,7 @@
   <div id="t-sheets-data">
     <v-card density="compact">
       <v-card-title class="header_style d-flex align-center justify-space-between py-0 relative">
-        <h3>QuickBooks Time Data</h3>
+        <h3>{{ system }} Time Data</h3>
         <span v-if="getLastUpdatedText && employeeIsUser()" class="last-updated">
           {{ getLastUpdatedText }}
         </span>
@@ -28,7 +28,7 @@
               :supplementalData="supplementalData || {}"
             ></time-period-hours>
             <hr class="mt-3 mb-5 mx-7" />
-            <p-t-o-hours :employee="employee" :ptoBalances="ptoBalances || {}"></p-t-o-hours>
+            <p-t-o-hours :employee="employee" :ptoBalances="ptoBalances || {}" :system="system"></p-t-o-hours>
           </div>
         </div>
       </v-card-text>
@@ -123,10 +123,10 @@ function employeeIsUser() {
  * @returns Boolean - Whether or not the API returned an error
  */
 function hasError(timesheetsData) {
-  if (timesheetsData?.name === 'AxiosError') {
+  if (timesheetsData?.name === 'AxiosError' || timesheetsData.code >= 400) {
     this.errorMessage = timesheetsData?.response?.data?.message;
-    if (_.isEmpty(this.errorMessage)) {
-      this.errorMessage = 'An error has occurred';
+    if (_.isEmpty(this.errorMessage) || typeof this.errorMessage === 'object') {
+      this.errorMessage = 'An error has occurred, try refreshing the widget';
     }
     return true;
   } else {
@@ -201,8 +201,8 @@ function refreshPlannedPto() {
   };
   // yeet outta here if there is no planned PTO
   if (!plan.endDate) {
-    delete this.ptoBalances['PTO']?.items?.['PTO after plan'];
-    delete this.ptoBalances['Holiday']?.items?.['Holiday after plan'];
+    delete this.ptoBalances?.['PTO']?.items?.['PTO after plan'];
+    delete this.ptoBalances?.['Holiday']?.items?.['Holiday after plan'];
     return;
   }
   // set planned PTO and Holiday balances
@@ -218,6 +218,7 @@ async function resetData() {
   this.timesheets = null;
   this.ptoBalances = null;
   this.supplementalData = null;
+  this.system = null;
   this.lastUpdated = null;
   this.errorMessage = null;
   if (this.employeeIsUser()) {
@@ -244,6 +245,7 @@ async function setDataFromApi(isCalendarYear, isYearly) {
     this.timesheets = timesheetsData.timesheets;
     this.ptoBalances = timesheetsData.ptoBalances;
     this.supplementalData = timesheetsData.supplementalData;
+    this.system = timesheetsData.system;
     this.lastUpdated = now();
     this.removeExcludedPtoBalances();
     if (this.employeeIsUser()) {
@@ -264,6 +266,7 @@ function setDataFromStorage(qbStorage, key) {
   this.supplementalData = qbStorage[key]?.supplementalData;
   this.lastUpdated = qbStorage[key]?.lastUpdated;
   this.ptoBalances = qbStorage?.ptoBalances;
+  this.syetem = qbStorage?.system;
 } // setDataFromStorage
 
 /**
@@ -281,7 +284,8 @@ function setStorage(isCalendarYear, isYearly) {
       supplementalData: this.supplementalData,
       lastUpdated: this.lastUpdated
     },
-    ptoBalances: this.ptoBalances
+    ptoBalances: this.ptoBalances,
+    system: this.system
   };
 
   // overwrite storage
@@ -336,6 +340,7 @@ export default {
       loading: true,
       ptoBalances: null,
       supplementalData: null,
+      system: null,
       timesheets: null,
       KEYS: {
         QB: 'qbData',
