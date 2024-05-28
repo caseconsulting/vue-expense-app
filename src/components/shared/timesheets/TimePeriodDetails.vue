@@ -106,7 +106,7 @@ import {
 function mounted() {
   this.emitter.emit('timesheets-chart-data', {
     completed: this.formatNumber(this.periodHoursCompleted),
-    needed: this.totalPeriodHours,
+    needed: this.formatNumber(this.totalPeriodHours),
     remainingHours: this.remainingHours
   });
   this.emitter.on('update-planned-pto-results-time-period', (data) => {
