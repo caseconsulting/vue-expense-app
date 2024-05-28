@@ -57,9 +57,9 @@
       </v-row>
       <v-row class="pb-3">
         <v-col wrap cols="12" lg="6" class="pa-0 px-xl-4 px-lg-2 px-md-0">
-          <!-- QuickBooksTime -->
+          <!-- Timesheets -->
           <div class="pb-3">
-            <quick-books-time-data :employee="employee" cols="12" lg="6" />
+            <time-data :employee="employee" cols="12" lg="6" />
           </div>
           <!-- Available Budgets -->
           <div>
@@ -90,7 +90,7 @@ import AvailableBudgets from '@/components/shared/AvailableBudgets.vue';
 import _ from 'lodash';
 import { isEmpty, isMobile, getCurrentBudgetYear } from '@/utils/utils';
 import { updateStoreExpenseTypes, updateStoreBudgets } from '@/utils/storeUtils';
-import QuickBooksTimeData from '@/components/shared/quickbooks/QuickBooksTimeData';
+import TimeData from '@/components/shared/timesheets/TimeData';
 import AnniversaryCard from '@/components/shared/AnniversaryCard';
 import {
   format,
@@ -604,7 +604,7 @@ export default {
   components: {
     ActivityFeed,
     AvailableBudgets,
-    QuickBooksTimeData,
+    TimeData,
     AnniversaryCard
   },
   data() {

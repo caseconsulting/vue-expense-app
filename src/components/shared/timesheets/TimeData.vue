@@ -8,7 +8,7 @@
         </span>
         <v-btn variant="text" icon="mdi-refresh" @click="resetData()">
           <template v-slot:default>
-            <v-tooltip activator="parent" location="top">Refresh QuickBooks data</v-tooltip>
+            <v-tooltip activator="parent" location="top">Refresh {{ system }} data</v-tooltip>
             <v-icon color="white" size="large">mdi-refresh</v-icon>
           </template>
         </v-btn>
@@ -37,8 +37,8 @@
 </template>
 
 <script>
-import TimePeriodHours from '@/components/shared/quickbooks/TimePeriodHours.vue';
-import PTOHours from '@/components/shared/quickbooks/PTOHours.vue';
+import TimePeriodHours from '@/components/shared/timesheets/TimePeriodHours.vue';
+import PTOHours from '@/components/shared/timesheets/PTOHours.vue';
 import _ from 'lodash';
 import api from '@/shared/api';
 import { difference, isBefore, now } from '@/shared/dateUtils';

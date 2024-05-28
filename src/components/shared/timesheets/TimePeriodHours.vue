@@ -146,8 +146,8 @@
 
 <script>
 import TimesheetsChart from '@/components/charts/custom-charts/TimesheetsChart.vue';
-import TimePeriodDetails from '@/components/shared/quickbooks/TimePeriodDetails.vue';
-import TimePeriodJobCodes from '@/components/shared/quickbooks/TimePeriodJobCodes.vue';
+import TimePeriodDetails from '@/components/shared/timesheets/TimePeriodDetails.vue';
+import TimePeriodJobCodes from '@/components/shared/timesheets/TimePeriodJobCodes.vue';
 import _ from 'lodash';
 
 // |--------------------------------------------------|

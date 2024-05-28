@@ -29,15 +29,15 @@
         <p-t-o-cash-outs-table />
       </v-col>
       <v-col cols="12" xl="4" lg="5" class="pl-lg-1 pl-sm-2">
-        <!-- QuickBooksTime -->
-        <quick-books-time-data :key="employee.id" :employee="employee" />
+        <!-- Timesheets -->
+        <time-data :key="employee.id" :employee="employee" />
       </v-col>
     </v-row>
   </div>
 </template>
 <script>
 import PTOCashOutsTable from '@/components/shared/PTOCashOutsTable.vue';
-import QuickBooksTimeData from '@/components/shared/quickbooks/QuickBooksTimeData';
+import TimeData from '@/components/shared/timesheets/TimeData';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -63,7 +63,7 @@ function mounted() {
     this.status['statusMessage'] = status.statusMessage;
     this.status['color'] = status.color;
   });
-  this.emitter.on('change-quickbooks-employee', (employee) => {
+  this.emitter.on('change-timesheets-employee', (employee) => {
     this.employee = employee;
   });
 } // mounted
@@ -129,7 +129,7 @@ function clearStatus() {
 export default {
   components: {
     PTOCashOutsTable,
-    QuickBooksTimeData
+    TimeData
   },
   data() {
     return {

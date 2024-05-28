@@ -33,7 +33,7 @@
             <p-t-o-cash-outs-table :unapproved-only="true" />
           </v-col>
           <v-col cols="12" xl="4" lg="5" class="pl-lg-1 pl-sm-2">
-            <quick-books-time-data :key="employee.id" :employee="employee" />
+            <time-data :key="employee.id" :employee="employee" />
           </v-col>
         </v-row>
       </v-window-item>
@@ -45,7 +45,7 @@
 import UnreimbursedExpenses from '@/components/reimbursements/UnreimbursedExpenses.vue';
 import { isMobile } from '@/utils/utils';
 import PTOCashOutsTable from '../components/shared/PTOCashOutsTable.vue';
-import QuickBooksTimeData from '@/components/shared/quickbooks/QuickBooksTimeData';
+import TimeData from '@/components/shared/timesheets/TimeData';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -73,7 +73,7 @@ function mounted() {
     this.status['color'] = status.color;
   });
 
-  this.emitter.on('change-quickbooks-employee', (employee) => {
+  this.emitter.on('change-timesheets-employee', (employee) => {
     this.employee = employee;
   });
 } // mounted
@@ -83,7 +83,7 @@ function mounted() {
  */
 function beforeUnmount() {
   this.emitter.off('status-alert');
-  this.emitter.off('change-quickbooks-employee');
+  this.emitter.off('change-timesheets-employee');
 } // beforeUnmount
 
 // |--------------------------------------------------|
@@ -142,7 +142,7 @@ export default {
   components: {
     UnreimbursedExpenses,
     PTOCashOutsTable,
-    QuickBooksTimeData
+    TimeData
   },
   data() {
     return {
