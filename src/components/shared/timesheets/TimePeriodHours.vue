@@ -156,6 +156,7 @@
 import TimesheetsChart from '@/components/charts/custom-charts/TimesheetsChart.vue';
 import TimePeriodDetails from '@/components/shared/timesheets/TimePeriodDetails.vue';
 import TimePeriodJobCodes from '@/components/shared/timesheets/TimePeriodJobCodes.vue';
+import { isAfter, isBefore } from '@/shared/dateUtils';
 import _ from 'lodash';
 import { computed, inject, ref, watch } from 'vue';
 
@@ -172,10 +173,40 @@ const periodIndex = ref(props.timesheets.length - 1);
 const isYearly = ref(false);
 const isCalendarYear = ref(false);
 const timePeriodLoading = ref(false);
+const plannedTimeData = {};
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                 COMPUTED                         |
+// |                    LIFECYCLE                     |
+// |                                                  |
+// |--------------------------------------------------|
+function mounted() {
+  this.emitter.on('update-planned-pto-results-job-codes', (data) => {
+    console.log('caught');
+
+    // sum up and save the results of plan within time range
+    let startDate = props.timesheets[this.periodIndex].startDate;
+    let endDate = props.timesheets[this.periodIndex].endDate;
+    if (!plannedTimeData.PTO) plannedTimeData.PTO = 0;
+    if (!plannedTimeData.Holiday) plannedTimeData.Holiday = 0;
+    for (let plan of data.plan) {
+      // skip if past, stop if future
+      if (isBefore(plan.date, startDate, 'month')) continue;
+      if (isAfter(plan.date, endDate, 'month')) break;
+      // else, add it
+      plannedTimeData.PTO += Number(plan.ptoHours);
+      plannedTimeData.Holiday += Number(plan.holidayHours);
+    }
+  });
+}
+
+function beforeUnmount() {
+  this.emitter.off('update-planned-pto-results-job-codes');
+}
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     COMPUTED                     |
 // |                                                  |
 // |--------------------------------------------------|
 
@@ -195,6 +226,17 @@ const dateIsCurrentPeriod = computed(() => {
  */
 const timeData = computed(() => {
   let timeData = props.timesheets[periodIndex.value].timesheets;
+  // add in planned pto/holiday
+  if (isYearly.value) {
+    if (plannedTimeData.PTO) {
+      if (!timeData.PTO) timeData.PTO = 0;
+      this.timeData.PTO += this.plannedTimeData.PTO;
+    }
+    if (this.plannedTimeData.Holiday) {
+      if (!timeData.Holiday) timeData.Holiday = 0;
+      this.timeData.Holiday += this.plannedTimeData.Holiday;
+    }
+  }
   // sort by duration
   let orderedKeys = Object.keys(timeData).sort(function (a, b) {
     return timeData[b] - timeData[a];

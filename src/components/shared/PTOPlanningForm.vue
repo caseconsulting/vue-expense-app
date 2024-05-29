@@ -227,6 +227,9 @@ onMounted(async () => {
   if (!store.getters.ptoCashOuts) await updateStorePtoCashOuts();
   employee.value = store.getters.user;
 
+  // update employee specific information
+  PTOPerMonth.value *= employee.value.workStatus / 100;
+
   // get plannedMonths from database if user has a saved plan
   if (employee.value.plannedPto?.plan) {
     plannedMonths.value = employee.value.plannedPto.plan;
@@ -396,6 +399,7 @@ async function save() {
   await updateStoreUser();
   emitter.emit('update-planned-pto-results-time-data', data.plannedPto);
   emitter.emit('update-planned-pto-results-time-period', data.plannedPto);
+  emitter.emit('update-planned-pto-results-job-codes', data.plannedPto);
 
   // set loading status
   loading.value = false;
