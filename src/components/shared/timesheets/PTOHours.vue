@@ -61,8 +61,8 @@
     <v-dialog v-model="showPTOPlanningFormModal" persistent max-width="800">
       <p-t-o-planning-form
         :employeeId="employee.id"
-        :pto="convertToHours(ptoBalances['PTO'].value || ptoBalances['PTO'])"
-        :holiday="convertToHours(ptoBalances['Holiday'].value || ptoBalances['Holiday'])"
+        :pto="convertToHours(ptoBalances['PTO']?.value || ptoBalances['PTO'] || 0)"
+        :holiday="convertToHours(ptoBalances['Holiday']?.value || ptoBalances['Holiday'] || 0)"
       />
     </v-dialog>
     <v-dialog v-model="showPTOCashOutFormModal" persistent max-width="500">
