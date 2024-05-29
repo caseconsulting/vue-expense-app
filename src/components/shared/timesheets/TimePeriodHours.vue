@@ -34,7 +34,7 @@
           "
         >
           <v-icon size="x-large">mdi-calendar-multiple</v-icon>
-          <v-tooltip activator="parent" location="top"> Calendar Year </v-tooltip>
+          <v-tooltip activator="parent" location="top"> Calendar Year (towards bonus) </v-tooltip>
         </v-btn>
       </div>
       <div>
