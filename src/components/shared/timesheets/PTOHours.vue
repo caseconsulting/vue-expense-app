@@ -74,10 +74,24 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import PTOCashOutForm from '@/components/shared/PTOCashOutForm.vue';
 import PTOPlanningForm from '@/components/shared/PTOPlanningForm.vue';
+import { computed, inject, ref, onMounted, onBeforeUnmount } from 'vue';
 import { openLink } from '@/utils/utils';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const props = defineProps(['ptoBalances', 'employee', 'system']);
+const emitter = inject('emitter');
+
+const showPTOCashOutFormModal = ref(false);
+const showPTOPlanningFormModal = ref(false);
+const showMore = ref(false);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -88,14 +102,22 @@ import { openLink } from '@/utils/utils';
 /**
  * The Mounted lifecycle hook.
  */
-function mounted() {
-  this.emitter.on('close-pto-cash-out-form', () => {
-    this.showPTOCashOutFormModal = false;
+onMounted(() => {
+  emitter.on('close-pto-cash-out-form', () => {
+    showPTOCashOutFormModal.value = false;
   });
-  this.emitter.on('close-pto-planning-form', () => {
-    this.showPTOPlanningFormModal = false;
+  emitter.on('close-pto-planning-form', () => {
+    showPTOPlanningFormModal.value = false;
   });
-} // mounted
+}); // mounted
+
+/**
+ * The Mounted lifecycle hook.
+ */
+onBeforeUnmount(() => {
+  emitter.off('close-pto-cash-out-form');
+  emitter.off('close-pto-planning-form');
+}); // mounted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -108,13 +130,13 @@ function mounted() {
  *
  * @returns Array - The array of pto jobcodes in sorted order
  */
-function sortedBalancesByDuration() {
-  let balances = this.ptoBalances;
+const sortedBalancesByDuration = computed(() => {
+  let balances = props.ptoBalances;
   let orderedKeys = Object.keys(balances || {}).sort(function (a, b) {
     return balances[b] - balances[a];
   });
   return orderedKeys;
-} // sortedBalancesByDuration
+}); // sortedBalancesByDuration
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -132,36 +154,6 @@ function convertToHours(seconds) {
     ?.toFixed(2)
     ?.replace(/[.,]00$/, ''); // removes decimals if a whole number
 } // convertToHours
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  components: {
-    PTOCashOutForm,
-    PTOPlanningForm
-  },
-  computed: {
-    sortedBalancesByDuration
-  },
-  data() {
-    return {
-      excludeIfZero: ['Jury Duty', 'Maternity/Paternity Time Off'],
-      showPTOCashOutFormModal: false,
-      showPTOPlanningFormModal: false,
-      showMore: false
-    };
-  },
-  methods: {
-    convertToHours,
-    openLink
-  },
-  mounted,
-  props: ['ptoBalances', 'employee', 'system']
-};
 </script>
 
 <style scoped>

@@ -45,8 +45,18 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref } from 'vue';
 import { formatNumber, openLink } from '@/utils/utils';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const props = defineProps(['isCalendarYear', 'isYearly', 'supplementalData', 'timeData']);
+const showNonBillables = ref(false);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -61,32 +71,12 @@ import { formatNumber, openLink } from '@/utils/utils';
  */
 function hasNonBillables() {
   let hasNonBillable = false;
-  let jobcodes = Object.keys(this.timeData || {});
+  let jobcodes = Object.keys(props.timeData || {});
   for (let i = 0; i < jobcodes.length && !hasNonBillable; i++) {
-    if (this.supplementalData.nonBillables?.includes(jobcodes[i])) hasNonBillable = true;
+    if (props.supplementalData.nonBillables?.includes(jobcodes[i])) hasNonBillable = true;
   }
   return hasNonBillable;
 } // hasNonBillables
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  data() {
-    return {
-      showNonBillables: false
-    };
-  },
-  methods: {
-    formatNumber,
-    hasNonBillables,
-    openLink
-  },
-  props: ['isCalendarYear', 'isYearly', 'supplementalData', 'timeData']
-};
 </script>
 
 <style scoped>

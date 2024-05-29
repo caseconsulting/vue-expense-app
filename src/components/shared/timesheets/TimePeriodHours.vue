@@ -144,11 +144,26 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import TimesheetsChart from '@/components/charts/custom-charts/TimesheetsChart.vue';
 import TimePeriodDetails from '@/components/shared/timesheets/TimePeriodDetails.vue';
 import TimePeriodJobCodes from '@/components/shared/timesheets/TimePeriodJobCodes.vue';
 import _ from 'lodash';
+import { computed, inject, ref, watch } from 'vue';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const props = defineProps(['employee', 'ptoBalances', 'supplementalData', 'timesheets']);
+const emitter = inject('emitter');
+
+const periodIndex = ref(props.timesheets.length - 1);
+const isYearly = ref(false);
+const isCalendarYear = ref(false);
+const timePeriodLoading = ref(false);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -161,17 +176,17 @@ import _ from 'lodash';
  *
  * @returns Boolean - Whether or not the date is in the current month
  */
-function dateIsCurrentPeriod() {
-  return this.periodIndex === this.timesheets.length - 1;
-} // dateIsCurrentPeriod
+const dateIsCurrentPeriod = computed(() => {
+  return periodIndex.value === props.timesheets.length - 1;
+}); // dateIsCurrentPeriod
 
 /**
  * The jobcodes and their durations all sorted by duration within the time period.
  *
  * @returns Object - Key Value pairs of jobcodes and their durations
  */
-function timeData() {
-  let timeData = this.timesheets[this.periodIndex].timesheets;
+const timeData = computed(() => {
+  let timeData = props.timesheets[periodIndex.value].timesheets;
   // sort by duration
   let orderedKeys = Object.keys(timeData).sort(function (a, b) {
     return timeData[b] - timeData[a];
@@ -182,11 +197,11 @@ function timeData() {
     orderedTimeData[jobcode] = timeData[jobcode];
   });
   return orderedTimeData;
-} // timeData
+}); // timeData
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     WATCHERS                     |
+// |                      METHODS                     |
 // |                                                  |
 // |--------------------------------------------------|
 
@@ -196,7 +211,7 @@ function timeData() {
  * @returns Boolean - True if an admin has selected to show a users contract year for a project.
  */
 function showContractYear() {
-  return _.some(this.employee.contracts, (c) => _.find(c.projects, (p) => p.bonusCalculationDate));
+  return _.some(props.employee.contracts, (c) => _.find(c.projects, (p) => p.bonusCalculationDate));
 } // showContractYear
 
 // |--------------------------------------------------|
@@ -209,57 +224,29 @@ function showContractYear() {
  * The watcher for the time period loader. If a user expands or collapses time period, emit the
  * new start and end dates.
  */
-function watchTimePeriodLoading() {
-  if (this.timePeriodLoading) {
-    this.emitter.emit('get-period-data', {
-      isCalendarYear: this.isCalendarYear,
-      isYearly: this.isYearly
-    });
+watch(
+  () => timePeriodLoading.value,
+  () => {
+    if (timePeriodLoading.value) {
+      emitter.emit('get-period-data', {
+        isCalendarYear: isCalendarYear.value,
+        isYearly: isYearly.value
+      });
+    }
   }
-} // watchTimePeriodLoading
+); // watchTimePeriodLoading
 
 /**
  * The watcher for the timesheets prop
  */
-function watchTimesheets() {
-  if (this.isYearly) this.periodIndex = 0;
-  else this.periodIndex = this.timesheets.length - 1;
-  this.timePeriodLoading = false;
-} // watchTimesheets
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  components: {
-    TimesheetsChart,
-    TimePeriodDetails,
-    TimePeriodJobCodes
-  },
-  computed: {
-    dateIsCurrentPeriod,
-    timeData
-  },
-  data() {
-    return {
-      periodIndex: this.timesheets.length - 1,
-      isYearly: false,
-      isCalendarYear: false,
-      timePeriodLoading: false
-    };
-  },
-  methods: {
-    showContractYear
-  },
-  props: ['employee', 'ptoBalances', 'supplementalData', 'timesheets'],
-  watch: {
-    timePeriodLoading: watchTimePeriodLoading,
-    timesheets: watchTimesheets
+watch(
+  () => props.timesheets,
+  () => {
+    if (isYearly.value) periodIndex.value = 0;
+    else periodIndex.value = props.timesheets.length - 1;
+    timePeriodLoading.value = false;
   }
-};
+); // watchTimesheets
 </script>
 
 <style>
