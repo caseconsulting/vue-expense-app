@@ -25,7 +25,7 @@
         Plan PTO
       </v-btn>
       <v-btn
-        v-if="(ptoBalances['PTO'] || ptoBalances['PTO'] === 0) && system === 'QuickBooks'"
+        v-if="(ptoBalances['PTO'] || ptoBalances['PTO'] === 0) && system !== 'ADP'"
         @click="showPTOCashOutFormModal = true"
         variant="outlined"
         density="compact"
