@@ -201,7 +201,8 @@ function convertToSeconds(hours) {
 } // convertToSeconds
 
 /**
- * Helper to add items to the ptoBalances object
+ * Helper to add items to the ptoBalances object.
+ *
  * @param balanceKey key in ptoBalances to modify
  * @param itemsKey key in ptoBalances[balanceKey].items object to add
  * @param planResults object of results of planned PTO
