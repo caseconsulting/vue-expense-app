@@ -14,7 +14,7 @@
         size="x-small"
         density="compact"
       >
-        <v-tooltip activator="parent" location="top">Click for more information</v-tooltip>
+        <v-tooltip activator="parent" location="top">Click to see yearly bonus information</v-tooltip>
         <v-icon size="x-small" color="#3f51b5">mdi-information</v-icon>
       </v-avatar>
     </h3>
