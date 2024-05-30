@@ -245,7 +245,7 @@ watch(
 ); // watchTimePeriodLoading
 
 /**
- * The watcher for the timesheets prop
+ * The watcher for the timesheets prop.
  */
 watch(
   () => props.timesheets,
