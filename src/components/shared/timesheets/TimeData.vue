@@ -135,7 +135,7 @@ const getLastUpdatedText = computed(() => {
 // |--------------------------------------------------|
 
 /**
- * True if the user is the employee from props
+ * True if the user is the employee from props.
  *
  * @returns Boolean - Whether or not the employee prop is the user
  */
