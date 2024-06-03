@@ -43,16 +43,8 @@
           </v-col>
         </v-row>
 
-        <!-- CHIPS TO ADD MONTH -->
+        <!-- RANGES TO SELECT FOR PLANNING -->
         <div class="my-2 d-flex justify-center">
-          <!-- <v-chip
-            :class="'mr-1 mb-1 ' + selectedClass(month)"
-            v-for="month in months"
-            :key="month.value"
-            @click="toggleMonthInPlan(month)"
-          >
-            {{ month.title }}
-          </v-chip> -->
           <v-btn-toggle v-model="selectedRanges" color="primary mx-auto" class="filter_color" text multiple>
             <v-btn v-for="range in ranges" :key="range" variant="text">
               {{ getRangeTitle(range) }}
@@ -94,7 +86,7 @@
             <p>{{ getHolidayBalance(item.date) }}</p>
           </template>
 
-          <!-- No data slot, encourage adding a month -->
+          <!-- No data slot, encourage adding a date range -->
           <template #no-data>
             <p class="text-center">Select a date range to start planning PTO</p>
           </template>
@@ -129,7 +121,7 @@
 // |                                                  |
 // |--------------------------------------------------|
 
-import { onMounted, ref, watch, inject } from 'vue';
+import { onMounted, ref, reactive, watch, inject } from 'vue';
 import { useStore } from 'vuex';
 import { updateStoreUser, updateStorePtoCashOuts } from '../../utils/storeUtils';
 import {
@@ -214,6 +206,23 @@ const headers = ref([
   { title: 'Holiday Balance', sortable: false, width: '25%', key: 'holidayBalance' }
 ]);
 
+/**
+ * CYK variables: delete this section and any logic specific to this section once
+ *                the merge is completed.
+ */
+const CYK = reactive({
+  USE: false, // whether or not current emp is CYK
+  ACCRUAL_AMOUNT: 6 + 1 / 3, // Brandon Lally: "For CYK we accrue PTO currently at a bi-weekly rate of 6.67 hours"
+  ACCRUAL_MONTHS: {
+    '2024-07': 2,
+    '2024-08': 3,
+    '2024-09': 2,
+    '2024-10': 2,
+    '2024-11': 2,
+    '2024-12': 2
+  }
+});
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                    LIFECYCLES                    |
@@ -246,8 +255,6 @@ onMounted(async () => {
     let range = ranges.value[i];
     if (monthsInPlan.has(range[0]) && monthsInPlan.has(range[1])) {
       selectedRanges.value.push(i);
-    } else {
-      console.log(range);
     }
   }
 
@@ -267,26 +274,16 @@ onMounted(async () => {
   }
 
   // fill in PTO cashout amounts
-  fillInCashoutAmounts(props.employeeId);
+  for (let cashout of store.getters.ptoCashOuts) {
+    // skip other employees
+    if (cashout.employeeId != props.employeeId) continue;
+    // fill in pending amount
+    if (!cashout.approvedDate) pendingPtoCashouts.value += cashout.amount;
+  }
 
   // set loading stage
   loading.value = false;
-});
-
-/**
- * Gets the user's pending PTO cash out amount
- *
- * @param employeeId employee's employee ID to get PTO balances for
- * @returns Number - The pending cash out amount
- */
-function fillInCashoutAmounts(employeeId) {
-  for (let cashout of store.getters.ptoCashOuts) {
-    // skip other employees
-    if (cashout.employeeId != employeeId) continue;
-    // fill in both pending and non-pending amounts
-    if (!cashout.approvedDate) pendingPtoCashouts.value += cashout.amount;
-  }
-} // getPendingPtoCashoutAmount
+}); // onMounted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -324,7 +321,8 @@ function removeMonthFromPlan(month, i = null) {
 } // removeMonthFromPlan
 
 /**
- * Sets dates to be dates selected based on selectedRanges
+ * Sets dates to be dates selected based on selectedRanges. Finds the earliest and
+ * latest dates and fills in everything in between.
  */
 function refreshDates() {
   // get what start and end dates should be
@@ -354,11 +352,14 @@ function refreshDates() {
     if (!monthsInPlan.has(curr)) addMonthToPlan(curr);
     curr = add(curr, 1, 'month', 'YYYY-MM');
   }
-}
+} // refreshDates
 
+/**
+ * Watch user (un)selecting ranges, refresh table when they do
+ */
 watch(selectedRanges, () => {
   refreshDates();
-});
+}); // watchSelectedRanges
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -367,14 +368,14 @@ watch(selectedRanges, () => {
 // |--------------------------------------------------|
 
 /**
- * Cancel event handler
+ * Cancel button handler
  */
 function cancel() {
   emitter.emit('close-pto-planning-form');
 } // cancel
 
 /**
- * Saves user's plan to database
+ * Save button: save info to database and emit to other components
  */
 async function save() {
   // set loading status
@@ -409,15 +410,15 @@ async function save() {
   setTimeout(() => {
     saveButtonText.value = 'Save';
   }, 2500);
-}
+} // save
 
 /**
  * Returns the format that a date should be in in the table.
  * @param date
  */
-let getDateFormat = (date) => {
+function getDateFormat(date) {
   return isSame(getTodaysDate(), date, 'year') ? 'MMMM' : 'MMMM YYYY';
-};
+} // getDateFormat
 
 function getRangeTitle(range) {
   // return YYYY for exact year ranges
@@ -427,7 +428,7 @@ function getRangeTitle(range) {
   let start = format(range[0], null, 'MMMM YYYY');
   let end = format(range[1], null, 'MMMM YYYY');
   return `${start} - ${end}`;
-}
+} // getRangeTitle
 
 /**
  * Get class for PTO balance
@@ -443,7 +444,7 @@ function ptoBalanceClass(balance) {
   switch (true) {
     case balance < 0: // negative balance
       return `${danger} ${bold}`;
-    case balance < 40: // low balance (should have at least 1 week of PTO)
+    case balance < 40: // low balance, should have at least 1 full week of PTO
       return `${warning} ${bold}`;
     case balance == maxPTO.value: // max balance, won't accrue ANY PTO next month
       return `${danger} ${bold}`;
@@ -466,10 +467,55 @@ const holidayPerYear = ref(88); // 11 days per year
 const pendingPtoCashouts = ref(0);
 
 /**
- * Returns PTO amount after given date
+ * Helper function to check if eval() works on a given string. Returns the result
+ * if it does, otherwise returns false
  *
- * @param date date of desired PTO balance (inclusive). if null, defaults to last planned date.
- * if no date and no planned months, defaults to today.
+ * @param equation string to evaluate
+ */
+function canEval(equation) {
+  try {
+    let result = eval(equation);
+    return result;
+  } catch {
+    return false;
+  }
+} // canEval
+
+/**
+ * Helper function to replace an item from plannedMonths with its eval'd result
+ *
+ * @param item item from the data table
+ */
+function evalReplace(item, attr) {
+  let index = plannedMonths?.value?.findIndex((curr) => curr.date == item.date);
+  if (index >= 0) {
+    let oldValue = plannedMonths.value[index][attr];
+    plannedMonths.value[index][attr] = canEval(item[attr]) || oldValue;
+  }
+} // evalReplace
+
+/**
+ * Helper to get the PTO or holiday balance for a given month. Also resolves equations.
+ *
+ * @param date YYYY-MM value to get balance for
+ * @param attr which balance to get (ptoHours or holidayHours)
+ */
+function plannedMonthsBalance(date, attr) {
+  // find raw value
+  let value = plannedMonths?.value?.find((item) => item.date == date)?.[attr] || 0;
+
+  // resolve equations
+  value = canEval(value) || 0;
+
+  // return raw number (no rounding), min at 0
+  value = Math.max(value, 0);
+  return Number(value);
+} // plannedMonthsBalance
+
+/**
+ * Returns PTO amount at the end of a given month
+ *
+ * @param date YYYY-MM to get PTO for. if null, defaults to last date in plannedMonths.
  */
 let ptoCache = {};
 function getPtoBalance(date = null) {
@@ -524,59 +570,12 @@ function getPtoBalance(date = null) {
   // update cache balance and return
   ptoCache[date].balance = ptoBalance;
   return ptoBalance;
-}
+} // getPtoBalance
 
 /**
- * Helper function to check if eval() works on a given string. Returns the result
- * if it does, otherwise returns false
+ * Returns Holiday amount at the end of a given month
  *
- * @param equation string to evaluate
- */
-function canEval(equation) {
-  try {
-    let result = eval(equation);
-    return result;
-  } catch {
-    return false;
-  }
-}
-
-/**
- * Replaces the item with the evaluated version of the item
- *
- * @param item item from the data table
- */
-function evalReplace(item, attr) {
-  let index = plannedMonths?.value?.findIndex((curr) => curr.date == item.date);
-  if (index >= 0) {
-    let oldValue = plannedMonths.value[index][attr];
-    plannedMonths.value[index][attr] = canEval(item[attr]) || oldValue;
-  }
-}
-
-/**
- * Helper to get the PTO or holiday balance for a given month. Also resolves equations.
- *
- * @param date YYYY-MM value to get balance for
- * @param attr which balance to get (ptoHours or holidayHours)
- */
-function plannedMonthsBalance(date, attr) {
-  // find raw value
-  let value = plannedMonths?.value?.find((item) => item.date == date)?.[attr] || 0;
-
-  // resolve equations
-  value = canEval(value) || 0;
-
-  // return raw number (no rounding), min at 0
-  value = Math.max(value, 0);
-  return Number(value);
-}
-
-/**
- * Returns PTO amount after given date
- *
- * @param date date of desired PTO balance (inclusive). if null, defaults to last planned date.
- * if no date and no planned months, defaults to today.
+ * @param date YYYY-MM to get Holiday for. if null, defaults to last date in plannedMonths.
  */
 let holidayCache = {};
 function getHolidayBalance(date = null) {
@@ -629,19 +628,12 @@ function getHolidayBalance(date = null) {
   // update cache balance and return
   holidayCache[date].balance = holidayBalance;
   return holidayBalance;
-}
+} // getHolidayBalance
 </script>
 
 <style scoped>
 h3 {
   line-height: 20px;
-}
-.title {
-  position: relative;
-}
-.monthSelector {
-  min-width: 50%;
-  max-width: 50%;
 }
 .balances {
   display: flex;
@@ -652,12 +644,5 @@ h3 {
   height: 30px;
   border-left: 1px solid gray;
   margin-bottom: 20px;
-}
-.months-filler-parent {
-  position: relative;
-}
-.months-filler {
-  position: absolute;
-  top: 0;
 }
 </style>
