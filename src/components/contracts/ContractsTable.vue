@@ -267,7 +267,7 @@
                         variant="text"
                         v-bind="props"
                       >
-                        <v-icon class="case-gray" icon="mdi-cog-outline"></v-icon> </v-btn
+                        <v-icon class="case-gray" icon="mdi-cog"></v-icon> </v-btn
                     ></template>
                     <span>Contract Settings</span>
                   </v-tooltip>
