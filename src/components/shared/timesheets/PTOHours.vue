@@ -61,6 +61,7 @@
     <v-dialog v-model="showPTOPlanningFormModal" persistent max-width="800">
       <p-t-o-planning-form
         :employeeId="employee.id"
+        :isCyk="system === 'ADP'"
         :pto="convertToHours(ptoBalances['PTO']?.value || ptoBalances['PTO'] || 0)"
         :holiday="convertToHours(ptoBalances['Holiday']?.value || ptoBalances['Holiday'] || 0)"
       />

@@ -146,7 +146,7 @@ import api from '@/shared/api.js';
 // |                                                  |
 // |--------------------------------------------------|
 
-const props = defineProps(['employeeId', 'pto', 'holiday']);
+const props = defineProps(['employeeId', 'pto', 'holiday', 'isCyk']);
 const store = useStore();
 const emitter = inject('emitter');
 
@@ -211,7 +211,7 @@ const headers = ref([
  *                the merge is completed.
  */
 const CYK = reactive({
-  USE: false, // whether or not current emp is CYK
+  USE: props.isCyk, // whether or not current employee is CYK
   ACCRUAL_AMOUNT: 6 + 1 / 3, // Brandon Lally: "For CYK we accrue PTO currently at a bi-weekly rate of 6.67 hours"
   ACCRUAL_MONTHS: {
     '2024-07': 2,
@@ -222,6 +222,10 @@ const CYK = reactive({
     '2024-12': 2
   }
 });
+let cykPTO = (date) => {
+  if (!CYK.ACCRUAL_MONTHS[date]) return PTOPerMonth.value;
+  return CYK.ACCRUAL_AMOUNT * CYK.ACCRUAL_MONTHS[date] * (employee.value.workStatus / 100);
+};
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -239,8 +243,8 @@ onMounted(async () => {
   // update employee specific information
   PTOPerMonth.value *= employee.value.workStatus / 100;
 
-  // get plannedMonths from database if user has a saved plan
   if (employee.value.plannedPto?.plan) {
+    // get plannedMonths from database if user has a saved plan
     plannedMonths.value = employee.value.plannedPto.plan;
     // remove any months that are in the past
     for (var i = 0; i < plannedMonths.value; i++) {
@@ -527,7 +531,7 @@ function getPtoBalance(date = null) {
   let ptoBalance = (props.pto ?? 0) - pendingPtoCashouts.value;
 
   // quick helper to max out PTO value
-  const maxedPTO = (pto) => Math.min(pto, maxPTO.value);
+  const maxedPTO = (pto) => (CYK.USE ? pto : Math.min(pto, maxPTO.value));
 
   // calculate and update this month's cache values
   if (!ptoCache[date]) ptoCache[date] = {};
@@ -561,7 +565,7 @@ function getPtoBalance(date = null) {
   }
 
   // factor in this month's PTO accrual and PTO taken, staying below max
-  ptoBalance += PTOPerMonth.value;
+  ptoBalance += CYK.USE ? cykPTO(date) : PTOPerMonth.value;
   ptoBalance = maxedPTO(ptoBalance);
   ptoBalance -= plannedMonthsBalance(date, 'ptoHours');
   ptoBalance = maxedPTO(ptoBalance);
