@@ -165,7 +165,7 @@ async function copyEmailList() {
  * Generate the list of emails and separate by comma for the mail service.
  */
 function emailEmployees() {
-  let list = getList();
+  let list = 'mailto:' + getList();
   window.open(list, '_blank');
 } // emailEmployees
 
@@ -189,7 +189,7 @@ function emit(msg, data) {
  * Gets the formatted list of employee emails for the email client.
  */
 function getList() {
-  let list = 'mailto:';
+  let list = '';
   _.forEach(employees.value, (e) => {
     if (e.employeeNumber < 90000) {
       // do not include fake employee emails
