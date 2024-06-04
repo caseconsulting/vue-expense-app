@@ -129,27 +129,24 @@
         <v-container>
           <v-row v-for="(tag, index) in editedExpenseType.tagBudgets" :key="index">
             <v-col class="d-flex flex-row justify-center align-center" cols="2">
-              <v-tooltip location="top">
-                <template v-slot:activator="{ props }">
-                  <v-btn
-                    :disabled="isLast(index, editedExpenseType.tagBudgets)"
-                    v-bind="props"
-                    @click="moveTagBudgetDown(index)"
-                    size="x-small"
-                    class="mr-1"
-                    ><v-icon icon="mdi-arrow-down-thin"
-                  /></v-btn>
-                </template>
-                <span>Move Tag Budget Priority Down One</span>
-              </v-tooltip>
-              <v-tooltip location="top">
-                <template v-slot:activator="{ props }">
-                  <v-btn :disabled="isFirst(index)" size="x-small" @click="moveTagBudgetUp(index)" v-bind="props"
-                    ><v-icon icon="mdi-arrow-up-thin"
-                  /></v-btn>
-                </template>
-                <span>Move Tag Budget Priority Up One</span>
-              </v-tooltip>
+              <div>
+                <v-tooltip activator="parent" location="top">Move Tag Budget Priority Down One</v-tooltip>
+                <v-btn
+                  :disabled="isLast(index, editedExpenseType.tagBudgets)"
+                  v-bind="props"
+                  @click="moveTagBudgetDown(index)"
+                  size="x-small"
+                  class="mr-1"
+                >
+                  <v-icon icon="mdi-arrow-down-thin" />
+                </v-btn>
+              </div>
+              <div>
+                <v-tooltip activator="parent" location="top">Move Tag Budget Priority Up One</v-tooltip>
+                <v-btn :disabled="isFirst(index)" size="x-small" @click="moveTagBudgetUp(index)">
+                  <v-icon icon="mdi-arrow-up-thin" />
+                </v-btn>
+              </div>
             </v-col>
             <v-col cols="6">
               <v-autocomplete
