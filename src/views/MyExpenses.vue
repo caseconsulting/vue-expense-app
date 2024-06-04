@@ -38,10 +38,10 @@
                   <h3 v-else>Loading...</h3>
                 </v-col>
 
-                <v-col cols="2" />
+                <v-spacer></v-spacer>
 
                 <!-- Employee Filter -->
-                <v-col align="end" cols="4">
+                <v-col align="end" cols="3">
                   <v-autocomplete
                     v-if="userRoleIsAdmin() || userRoleIsManager()"
                     id="employeeIdFilter"
@@ -51,14 +51,47 @@
                     :items="employees"
                     :custom-filter="customFilter"
                     item-title="text"
-                    class="mr-3"
                     label="Filter by Employee"
                     clearable
                   />
                 </v-col>
 
+                <!-- Tags filter -->
+                <v-col cols="12" md="3">
+                  <v-autocomplete
+                    v-if="userRoleIsAdmin() || userRoleIsManager()"
+                    v-model="selectedTags"
+                    variant="underlined"
+                    clearable
+                    label="Filter by Tag (click to flip)"
+                    :items="tags"
+                    multiple
+                    hide-details
+                    color="gray"
+                    item-title="tagName"
+                    item-value="id"
+                    return-object
+                  >
+                    <template #chip="{ props, item }">
+                      <v-chip
+                        size="small"
+                        closable
+                        v-bind="props"
+                        :color="tagFlip.includes(item.raw.id) ? 'red' : 'gray'"
+                        @click.stop
+                        @click="negateTag(item.raw)"
+                        @click:close="removeTag(item.raw)"
+                      >
+                        {{ tagFlip.includes(item.raw.id) ? 'NOT ' : '' }}
+                        {{ item.raw.tagName }}
+                      </v-chip>
+                    </template>
+                  </v-autocomplete>
+                </v-col>
+                <!-- End Tags Filter -->
+
                 <!-- Search Bar -->
-                <v-col align="end" cols="4">
+                <v-col align="end" cols="3">
                   <v-text-field
                     id="search"
                     v-model="search"
@@ -79,6 +112,18 @@
                 <h3 v-else>Loading...</h3>
               </v-card-title>
               <v-row class="mb-5">
+                <v-col cols="12">
+                  <!-- Search Bar -->
+                  <v-text-field
+                    id="search"
+                    v-model="search"
+                    append-inner-icon="mdi-magnify"
+                    label="Search"
+                    variant="underlined"
+                    single-line
+                    hide-details
+                  />
+                </v-col>
                 <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="6">
                   <!-- Employee Filter -->
                   <v-autocomplete
@@ -93,17 +138,37 @@
                     clearable
                   />
                 </v-col>
+                <!-- Tags filter -->
                 <v-col cols="6">
-                  <!-- Search Bar -->
-                  <v-text-field
-                    id="search"
-                    v-model="search"
-                    append-inner-icon="mdi-magnify"
-                    label="Search"
+                  <v-autocomplete
+                    v-if="userRoleIsAdmin() || userRoleIsManager()"
+                    v-model="selectedTags"
                     variant="underlined"
-                    single-line
+                    clearable
+                    label="Filter by Tag (click to flip)"
+                    :items="[]"
+                    multiple
                     hide-details
-                  />
+                    color="gray"
+                    item-title="tagName"
+                    item-value="id"
+                    return-object
+                  >
+                    <template #chip="{ props, item }">
+                      <v-chip
+                        size="small"
+                        closable
+                        v-bind="props"
+                        :color="tagFlip.includes(item.raw.id) ? 'red' : 'gray'"
+                        @click.stop
+                        @click="negateTag(item.raw)"
+                        @click:close="removeTag(item.raw)"
+                      >
+                        {{ tagFlip.includes(item.raw.id) ? 'NOT ' : '' }}
+                        {{ item.raw.tagName }}
+                      </v-chip>
+                    </template>
+                  </v-autocomplete>
                 </v-col>
               </v-row>
             </div>
@@ -113,7 +178,7 @@
               <legend class="legend_style">Filters</legend>
               <v-container fluid class="px-2 pt-1 pb-4">
                 <v-row dense>
-                  <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="12" md="3">
+                  <v-col cols="12" md="3">
                     <!-- Active Filter -->
                     <div class="d-inline-block mr-4">
                       <h4>Active Expense Type:</h4>
@@ -497,7 +562,7 @@ import {
 } from '@/utils/utils';
 import { format, isBetween } from '@/shared/dateUtils';
 import { getDateOptionalRules, getNonFutureDateRules } from '@/shared/validationUtils.js';
-import { updateStoreBudgets, updateStoreExpenseTypes, updateStoreEmployees } from '@/utils/storeUtils';
+import { updateStoreBudgets, updateStoreExpenseTypes, updateStoreEmployees, updateStoreTags } from '@/utils/storeUtils';
 import { mask } from 'vue-the-mask';
 
 // |--------------------------------------------------|
@@ -729,6 +794,24 @@ function displayError(err) {
 } // displayError
 
 /**
+ * helper function: return true if any selected tag has employee listed under it.
+ *
+ * @param employeeId - the employee ID
+ * @return true if the employee has a tag selected in filters
+ */
+function selectedTagsHasEmployee(employeeId) {
+  let inTag, tagFlipped;
+  for (let i = 0; i < this.selectedTags.length; i++) {
+    inTag = this.selectedTags[i].employees.includes(employeeId);
+    tagFlipped = this.tagFlip.includes(this.selectedTags[i].id);
+    if (inTag != tagFlipped) {
+      return true;
+    }
+  }
+  return false;
+} // selectedTagsHasEmployee
+
+/**
  * Filters expenses based on filter selections.
  */
 function filterExpenses() {
@@ -738,6 +821,12 @@ function filterExpenses() {
     // filter expenses by employee
     this.filteredExpenses = _.filter(this.filteredExpenses, (expense) => {
       return expense.employeeId === this.employee;
+    });
+  }
+
+  if (this.selectedTags?.length > 0) {
+    this.filteredExpenses = _.filter(this.filteredExpenses, (expense) => {
+      return this.selectedTagsHasEmployee(expense.employeeId);
     });
   }
 
@@ -826,8 +915,11 @@ async function loadMyExpensesData() {
     !this.$store.getters.expenseTypes ? this.updateStoreExpenseTypes() : '',
     !this.$store.getters.employees ? this.updateStoreEmployees() : '',
     !this.$store.getters.budgets ? this.updateStoreBudgets() : '',
+    !this.$store.getters.tags ? this.updateStoreTags() : '',
     this.refreshExpenses()
   ]);
+
+  this.tags = this.$store.getters.tags;
 
   // get expense types
   let expenseTypes = this.$store.getters.expenseTypes;
@@ -884,6 +976,32 @@ function onSelect(item) {
   this.expense.edit = true;
   this.expense['cost'] = moneyFilter(item.cost);
 } // onSelect
+
+/**
+ * negates a tag
+ */
+function negateTag(item) {
+  // try to find the id in the tagFlip array, if it is there then remove it else add it
+  const index = this.tagFlip.indexOf(item.id);
+  if (index >= 0) {
+    this.tagFlip.splice(index, 1);
+  } else {
+    this.tagFlip.push(item.id);
+  }
+  this.refreshExpenses();
+} // negateTag
+
+/**
+ * Removes an item from the tag filters's active filters
+ *
+ * @param item - The filter to remove
+ */
+function removeTag(item) {
+  const selIndex = this.selectedTags.findIndex((t) => t.id === item.id);
+  if (selIndex >= 0) {
+    this.selectedTags.splice(selIndex, 1);
+  }
+} // removeTag
 
 /**
  * Refresh expense data and filters expenses.
@@ -1084,6 +1202,26 @@ async function watchStorePopulated() {
   }
 } // watchStorePopulated
 
+/**
+ * Remove items from tagFlip array when they are removed from the selected
+ * tags
+ */
+function watchSelectedTags() {
+  let negatedTagRemoved = true;
+  // use normal for loop to have the index
+  for (let i = 0; i < this.tagFlip.length; i++) {
+    // try to find the current tag in the selectedTags
+    _.forEach(this.selectedTags, (t) => {
+      if (t.id === this.tagFlip[i]) negatedTagRemoved = false;
+    });
+    // if it isn't there, remove it from tagFlip too
+    if (negatedTagRemoved) {
+      this.tagFlip.splice(i, 1);
+    }
+  }
+  this.filterExpenses();
+} // watchSelectedTags
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -1187,6 +1325,7 @@ export default {
         showOnFeed: null
       }, // expense to edit
       search: null, // query text for datatable search field
+      selectedTags: [], // tags to include or exclude in filter
       toSort: [{ key: 'createdAt', order: 'desc' }], // default sort datatable items
       startDateFilter: null,
       startDateFilterMenu: null,
@@ -1195,6 +1334,8 @@ export default {
         statusMessage: '',
         color: ''
       }, // snackbar action status
+      tags: [],
+      tagFlip: [],
       unreimbursing: false, // activate unreimburse model when value changes
       userInfo: null // user information
     };
@@ -1209,6 +1350,8 @@ export default {
     endDateFilter: watchFilterExpenses,
     startDateFilter: watchFilterExpenses,
     search: watchFilterExpenses,
+    selectedTags: watchSelectedTags,
+    tagFlip: watchFilterExpenses,
     'filter.active': watchFilterExpenses,
     'filter.reimbursed': watchFilterExpenses,
     storeIsPopulated: watchStorePopulated
@@ -1234,6 +1377,7 @@ export default {
     hasRecipient,
     isBetween,
     isEmpty,
+    negateTag,
     userRoleIsAdmin,
     userRoleIsManager,
     isMobile,
@@ -1242,7 +1386,9 @@ export default {
     monthDayYearFormat,
     onSelect,
     parseEventDate,
+    removeTag,
     refreshExpenses,
+    selectedTagsHasEmployee,
     startAction,
     toTopOfForm,
     unreimburseExpense,
@@ -1250,6 +1396,7 @@ export default {
     updateStoreEmployees,
     updateStoreBudgets,
     updateStoreExpenseTypes,
+    updateStoreTags,
     useInactiveStyle
   }
 };
