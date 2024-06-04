@@ -179,7 +179,7 @@ const ranges = ref([
 for (let contract of store.getters.user.contracts) {
   for (let project of contract.projects) {
     // skip conditions: project is not current or endDate has passed
-    if (!project.presentDate || isSameOrBefore(project.endDate, getTodaysDate(), 'month')) continue;
+    if (project.endDate) continue;
     // get YYYY-MM format of start and end dates, cutting off anything this month or before
     let [projectStart, projectEnd] = [project.startDate, project.endDate];
     if (isSameOrBefore(projectStart, getTodaysDate(), 'month')) projectStart = add(getTodaysDate(), 1, 'month');
@@ -212,7 +212,7 @@ const headers = ref([
  */
 const CYK = reactive({
   USE: props.isCyk, // whether or not current employee is CYK
-  ACCRUAL_AMOUNT: 6 + 1 / 3, // Brandon Lally: "For CYK we accrue PTO currently at a bi-weekly rate of 6.67 hours"
+  ACCRUAL_AMOUNT: 6.67, // Brandon Lally: "For CYK we accrue PTO currently at a bi-weekly rate of [exactly] 6.67 hours"
   ACCRUAL_MONTHS: {
     '2024-07': 2,
     '2024-08': 3,
