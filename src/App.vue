@@ -129,7 +129,7 @@
             id="P"
             class="text-black"
             target="_blank"
-            href="https://3.basecamp.com/3097063/buckets/4708396/documents/7426735174"
+            href="https://3.basecamp.com/3097063/buckets/4708396/documents/7470285528"
           >
             <v-tooltip activator="parent" location="top">View Release Notes</v-tooltip>
             <strong>Version</strong> {{ version }}
