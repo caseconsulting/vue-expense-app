@@ -36,12 +36,6 @@
             <p>
               <v-row>
                 <v-col class="pt-0"> <b>Start Date: </b>{{ monthDayYearFormat(project.startDate) }} </v-col>
-                <v-col class="pt-0">
-                  <span v-if="project.bonusCalculationDate">
-                    <v-tooltip activator="parent" location="right">Used for 1860 calculation</v-tooltip>
-                    <v-icon>mdi-calendar-weekend</v-icon>
-                  </span>
-                </v-col>
               </v-row>
             </p>
             <div v-if="project.endDate">

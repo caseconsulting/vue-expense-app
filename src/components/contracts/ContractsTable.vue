@@ -240,6 +240,7 @@
                             toggleProjectForm = !toggleProjectForm;
                           }
                         "
+                        density="comfortable"
                         icon
                         variant="text"
                         v-bind="props"
@@ -250,6 +251,27 @@
                     <span>Add Project</span>
                   </v-tooltip>
 
+                  <!-- Contract Settings -->
+                  <v-tooltip location="top">
+                    <template v-slot:activator="{ props }">
+                      <v-btn
+                        :disabled="editingItem != null || isEditingProjectItem || contractLoading"
+                        @click.stop="
+                          () => {
+                            toggleContractSettingsModal = true;
+                            clickedContract = item;
+                          }
+                        "
+                        density="comfortable"
+                        icon
+                        variant="text"
+                        v-bind="props"
+                      >
+                        <v-icon class="case-gray" icon="mdi-cog"></v-icon> </v-btn
+                    ></template>
+                    <span>Contract Settings</span>
+                  </v-tooltip>
+
                   <!-- Employees Assigned -->
                   <v-tooltip location="top">
                     <template v-slot:activator="{ props }">
@@ -258,10 +280,11 @@
                         @click.stop="
                           () => {
                             toggleContractEmployeesModal = true;
-                            contractEmployeesAssigned = item;
+                            clickedContract = item;
                           }
                         "
                         icon
+                        density="comfortable"
                         variant="text"
                         v-bind="props"
                       >
@@ -278,6 +301,7 @@
                         variant="text"
                         :disabled="editingItem != null || isEditingProjectItem || contractLoading"
                         v-bind="props"
+                        density="comfortable"
                         @click.stop="clickedEdit(item)"
                       >
                         <v-icon class="case-gray" icon="mdi-pencil" />
@@ -293,10 +317,11 @@
         </v-form>
       </v-container>
     </v-card>
-    <contract-employees-assigned-modal
-      :contract="contractEmployeesAssigned"
-      :toggleModal="toggleContractEmployeesModal"
-    />
+    <contract-employees-assigned-modal :contract="clickedContract" :toggleModal="toggleContractEmployeesModal" />
+    <contract-settings-modal
+      :contract="clickedContract"
+      :toggleModal="toggleContractSettingsModal"
+    ></contract-settings-modal>
     <delete-modal :toggleDeleteModal="toggleContractDeleteModal" :type="'contract'"></delete-modal>
     <contract-project-validate-delete-update-status-modal
       :toggleModal="toggleValidateModal"
@@ -321,6 +346,7 @@ import { getProject } from '@/shared/contractUtils';
 
 import DeleteModal from '../modals/DeleteModal.vue';
 import ContractFilter from './ContractFilter.vue';
+import ContractSettingsModal from '../modals/ContractSettingsModal.vue';
 import ContractProjectValidateDeleteUpdateStatusModal from '../modals/ContractProjectValidateDeleteUpdateStatusModal.vue';
 import ProjectForm from './ProjectForm.vue';
 import GeneralConfirmationModal from '@/components/modals/GeneralConfirmationModal.vue';
@@ -365,6 +391,9 @@ async function created() {
   this.emitter.on('closed-contract-employees-assigned-modal', () => {
     this.toggleContractEmployeesModal = false;
   });
+  this.emitter.on('closed-contract-settings-modal', () => {
+    this.toggleContractSettingsModal = false;
+  });
   this.emitter.on('filter', (filter) => {
     this.filter = filter;
   });
@@ -389,6 +418,7 @@ function beforeUnmount() {
   this.emitter.off('canceled-project-form');
   this.emitter.off('submitted-project-form');
   this.emitter.off('closed-project-employees-assigned-modal');
+  this.emitter.off('closed-contract-settings-modal');
   this.emitter.off('contract-project-validate-error-acknowledged');
   this.emitter.off('filter');
   this.emitter.off('is-editing-project-item');
@@ -910,12 +940,6 @@ function storeContracts() {
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     WATCHERS                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-// |--------------------------------------------------|
-// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -926,6 +950,7 @@ export default {
   components: {
     DeleteModal,
     ContractFilter,
+    ContractSettingsModal,
     ContractProjectValidateDeleteUpdateStatusModal,
     GeneralConfirmationModal,
     ProjectForm,
@@ -970,7 +995,7 @@ export default {
       },
       contractStatuses: api.CONTRACT_STATUSES,
       contracts: this.$store.getters.contracts,
-      contractEmployeesAssigned: null,
+      clickedContract: null,
       contractStatusItem: null,
       contractValid: true,
       addProjectUnderContract: null,
@@ -981,6 +1006,7 @@ export default {
       expanded: [],
       toggleContractEmployeesModal: false,
       toggleValidateModal: false,
+      toggleContractSettingsModal: false,
       toggleContractDeleteModal: false,
       toggleContractStatusModal: false,
       contractLoading: false,
@@ -1145,7 +1171,7 @@ td {
 }
 
 .contracts-table :deep(td:nth-child(n + 2):nth-child(-n + 6)) {
-  width: 10%;
+  width: 9%;
 }
 
 .contracts-table :deep(td:nth-of-type(7)) {
