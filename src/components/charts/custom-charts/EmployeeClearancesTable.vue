@@ -51,7 +51,7 @@ async function mounted() {
  * @param value - item clicked
  */
 function clickedRow(_, { item }) {
-  localStorage.setItem('requestedDataType', 'security info');
+  localStorage.setItem('requestedDataType', 'securityInfo');
   localStorage.setItem('requestedFilter', item.title);
   this.$router.push({
     path: '/reports',

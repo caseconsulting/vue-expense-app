@@ -43,62 +43,24 @@
                 </v-btn>
               </template>
               <v-list>
-                <v-list-item @click="selectDropDown('contracts')"> Contracts </v-list-item>
-                <v-list-item @click="selectDropDown('customer orgs')"> Customer Orgs </v-list-item>
-                <v-list-item @click="selectDropDown('certifications')"> Certifications </v-list-item>
-                <v-list-item @click="selectDropDown('awards')"> Awards </v-list-item>
-                <v-list-item @click="selectDropDown('languages')"> Foreign Languages </v-list-item>
-                <v-list-item @click="selectDropDown('job roles')"> Job Roles </v-list-item>
-                <v-list-item @click="selectDropDown('technologies')"> Technologies </v-list-item>
-                <v-list-item @click="selectDropDown('security info')"> Security Info </v-list-item>
+                <v-list-item v-for="tab in tabs" :key="tab" @click="changeTab(tab)">
+                  {{ tab.title }}
+                </v-list-item>
               </v-list>
             </v-menu>
             <hr class="my-1" />
-            <ReportsContracts v-if="currentTab === 'contracts'" />
-            <ReportsCustomerOrgs v-if="currentTab === 'customer orgs'" />
-            <ReportsCertifications v-if="currentTab === 'certifications'" />
-            <ReportsAwards v-if="currentTab === 'awards'" />
-            <ReportsForeignLanguages v-if="currentTab === 'languages'" />
-            <ReportsJobRoles v-if="currentTab === 'job roles'" />
-            <ReportsTechnologies v-if="currentTab === 'technologies'" />
-            <ReportsSecurityInfo v-if="currentTab === 'security info'" />
+            <div v-for="tab in tabs" :key="tab">
+              <component v-if="currentTab.key === tab.key" :is="tab.component" />
+            </div>
           </div>
           <div v-else>
             <!-- user is not mobile -->
-            <v-tabs color="blue" center-active v-model="currentTab" grow show-arrows @update:model-value="changeTab">
-              <v-tab value="contracts"> Contracts </v-tab>
-              <v-tab value="customer orgs"> Customer Orgs </v-tab>
-              <v-tab value="certifications"> Certifications </v-tab>
-              <v-tab value="awards"> Awards </v-tab>
-              <v-tab value="languages"> Foreign Languages </v-tab>
-              <v-tab value="job roles"> Job Roles </v-tab>
-              <v-tab value="technologies"> Technologies </v-tab>
-              <v-tab value="security info"> Security Info </v-tab>
+            <v-tabs color="blue" center-active grow show-arrows @update:model-value="changeTab">
+              <v-tab v-for="tab in tabs" :key="tab" :value="tab.value">{{ tab.title }}</v-tab>
             </v-tabs>
             <v-window v-model="currentTab">
-              <v-window-item value="contracts" class="mx-2 my-6">
-                <ReportsContracts />
-              </v-window-item>
-              <v-window-item value="customer orgs" class="mx-2 my-6">
-                <ReportsCustomerOrgs />
-              </v-window-item>
-              <v-window-item value="certifications" class="mx-2 my-6">
-                <ReportsCertifications />
-              </v-window-item>
-              <v-window-item value="awards" class="mx-2 my-6">
-                <ReportsAwards />
-              </v-window-item>
-              <v-window-item value="languages" class="mx-2 my-6">
-                <ReportsForeignLanguages />
-              </v-window-item>
-              <v-window-item value="job roles" class="mx-2 my-6">
-                <ReportsJobRoles />
-              </v-window-item>
-              <v-window-item value="technologies" class="mx-2 my-6">
-                <ReportsTechnologies />
-              </v-window-item>
-              <v-window-item value="security info" class="mx-2 my-6">
-                <ReportsSecurityInfo />
+              <v-window-item v-for="tab in tabs" :key="tab" :value="tab.key" class="mx-2 my-6">
+                <component :is="tab.component" />
               </v-window-item>
             </v-window>
           </div>
@@ -133,7 +95,6 @@ import { useRouter } from 'vue-router';
 // |                                                  |
 // |--------------------------------------------------|
 const contactKey = ref(0);
-const currentTab = ref('contracts');
 const employeesToContact = ref([]);
 const loading = ref(true);
 const toggleContactEmployeesModal = ref(false);
@@ -142,6 +103,49 @@ const requestedDataType = ref(localStorage.getItem('requestedDataType'));
 const store = useStore();
 const emitter = inject('emitter');
 const router = useRouter();
+const tabs = ref([
+  {
+    key: 'contracts',
+    title: 'Contracts',
+    component: ReportsContracts
+  },
+  {
+    key: 'customerOrgs',
+    title: 'Customer Orgs',
+    component: ReportsCustomerOrgs
+  },
+  {
+    key: 'certifications',
+    title: 'Certifications',
+    component: ReportsCertifications
+  },
+  {
+    key: 'awards',
+    title: 'Awards',
+    component: ReportsAwards
+  },
+  {
+    key: 'foreignLanguages',
+    title: 'Foreign Languages',
+    component: ReportsForeignLanguages
+  },
+  {
+    key: 'jobRoles',
+    title: 'Job Roles',
+    component: ReportsJobRoles
+  },
+  {
+    key: 'technologies',
+    title: 'Technologies',
+    component: ReportsTechnologies
+  },
+  {
+    key: 'securityInfo',
+    title: 'Security Info',
+    component: ReportsSecurityInfo
+  }
+]);
+const currentTab = ref(tabs.value[0]);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -164,7 +168,7 @@ onMounted(async () => {
     loading.value = false;
   }
   if (localStorage.getItem('requestedDataType')) {
-    currentTab.value = localStorage.getItem('requestedDataType');
+    currentTab.value = tabs.value.find((item) => item.key === localStorage.getItem('requestedDataType'));
     localStorage.removeItem('requestedDataType');
     wasRedirected.value = true;
     window.scrollTo(0, 0);
@@ -193,24 +197,16 @@ function backClick() {
  *
  * @param event - the new tab
  */
-function changeTab(event) {
-  currentTab.value = event;
+function changeTab(newTab) {
+  currentTab.value = newTab;
 } // changeTab
-
-/**
- * This is used to select the correct tab on mobile devices.
- * @param tabName - The name of the tab
- */
-function selectDropDown(tabName) {
-  currentTab.value = tabName;
-} // selectDropDown
 
 /**
  * Pops up the contacts employee modal
  */
 function renderContactEmployeesModal() {
   contactKey.value++;
-  emitter.emit('get-employees-to-contact', currentTab.value);
+  emitter.emit('get-employees-to-contact', currentTab.value.value);
   toggleContactEmployeesModal.value = true;
 } // renderContactEmployeesModal
 
