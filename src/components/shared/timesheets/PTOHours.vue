@@ -40,7 +40,7 @@
       <div v-if="showMore || ptoBalances[jobcode] !== 0" class="d-flex justify-space-between my-3">
         <div class="mr-3">{{ jobcode }}</div>
         <div class="dotted-line"></div>
-        <div class="ml-3">{{ convertToHours(ptoBalances[jobcode].value || ptoBalances[jobcode]) }}h</div>
+        <div class="ml-3">{{ convertToHours(ptoBalances[jobcode].value ?? ptoBalances[jobcode]) }}h</div>
       </div>
       <div v-if="(showMore || ptoBalances[jobcode] !== 0) && ptoBalances[jobcode].items">
         <div
@@ -62,8 +62,8 @@
       <p-t-o-planning-form
         :employeeId="employee.id"
         :isCyk="system === 'ADP'"
-        :pto="convertToHours(ptoBalances['PTO']?.value || ptoBalances['PTO'] || 0)"
-        :holiday="convertToHours(ptoBalances['Holiday']?.value || ptoBalances['Holiday'] || 0)"
+        :pto="convertToHours(ptoBalances['PTO']?.value ?? ptoBalances['PTO'] ?? 0)"
+        :holiday="convertToHours(ptoBalances['Holiday']?.value ?? ptoBalances['Holiday'] ?? 0)"
       />
     </v-dialog>
     <v-dialog v-model="showPTOCashOutFormModal" persistent max-width="500">
