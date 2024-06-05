@@ -162,6 +162,7 @@
                         }
                       "
                       icon
+                      density="comfortable"
                       variant="text"
                       v-bind="props"
                     >
@@ -178,6 +179,7 @@
                       :disabled="editingProjectItem != null || isEditingContractItem || projectLoading"
                       icon
                       variant="text"
+                      density="comfortable"
                       @click.stop="clickedEdit(item)"
                       v-bind="props"
                     >

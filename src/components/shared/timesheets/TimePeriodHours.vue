@@ -159,6 +159,7 @@ import TimePeriodJobCodes from '@/components/shared/timesheets/TimePeriodJobCode
 import { isAfter, isBefore } from '@/shared/dateUtils';
 import _ from 'lodash';
 import { computed, inject, ref, reactive, watch, onMounted, onBeforeUnmount } from 'vue';
+import { useStore } from 'vuex';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -168,6 +169,7 @@ import { computed, inject, ref, reactive, watch, onMounted, onBeforeUnmount } fr
 
 const props = defineProps(['employee', 'ptoBalances', 'supplementalData', 'timesheets']);
 const emitter = inject('emitter');
+const store = useStore();
 
 const periodIndex = ref(props.timesheets.length - 1);
 const isYearly = ref(false);
@@ -260,7 +262,9 @@ const supplementalDataWithPlan = computed(() => {
  * @returns Boolean - True if an admin has selected to show a users contract year for a project.
  */
 function showContractYear() {
-  return _.some(props.employee.contracts, (c) => _.find(c.projects, (p) => p.bonusCalculationDate));
+  let empCurContract = _.find(props.employee.contracts, (c) => _.find(c.projects, (p) => !p.endDate));
+  let contract = _.find(store.getters.contracts, (c) => c.id === empCurContract?.contractId);
+  return contract?.contractViewEnabled;
 } // showContractYear
 
 /**

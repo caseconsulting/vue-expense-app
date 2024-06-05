@@ -44,6 +44,7 @@ import api from '@/shared/api';
 import { computed, inject, ref, onBeforeMount, onBeforeUnmount } from 'vue';
 import { useStore } from 'vuex';
 import { difference, isBefore, now } from '@/shared/dateUtils';
+import { updateStoreContracts } from '@/utils/storeUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -340,7 +341,7 @@ async function setData(isCalendarYear, isYearly) {
  * Sets the timesheets data on initial load based on a time period (current and previous pay period displayed).
  */
 async function setInitialData() {
-  await setData();
+  await Promise.all([setData(), !store.getters.contracts ? updateStoreContracts() : _]);
 } // setInitialData
 </script>
 
