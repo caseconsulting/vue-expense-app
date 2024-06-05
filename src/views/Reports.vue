@@ -18,23 +18,20 @@
         <v-card-title class="d-flex align-center header_style" v-bind:class="{ 'justify-center': isMobile() }">
           <h2 class="text-white">Reports</h2>
           <v-spacer />
-          <v-tooltip location="bottom">
-            <template #activator="{ props }">
-              <v-btn @click="downloadTab()" v-bind="props" class="mr-4">
-                Download
-                <template #append>
-                  <v-icon>mdi-download</v-icon>
-                </template>
-              </v-btn>
-              <v-btn @click="renderContactEmployeesModal()" v-bind="props">
-                Contact
-                <template #append>
-                  <v-icon>mdi-email</v-icon>
-                </template>
-              </v-btn>
+          <v-btn @click="downloadTab()" v-bind="props" class="mr-4">
+            Download
+            <template #append>
+              <v-icon>mdi-download</v-icon>
             </template>
-            <span>Contact Active Employees In The Table Below</span>
-          </v-tooltip>
+            <v-tooltip activator="parent" location="bottom">Download current table as XLSX</v-tooltip>
+          </v-btn>
+          <v-btn @click="renderContactEmployeesModal()" v-bind="props">
+            Contact
+            <template #append>
+              <v-icon>mdi-email</v-icon>
+            </template>
+            <v-tooltip activator="parent" location="bottom">Contact Active Employees In The Table Below</v-tooltip>
+          </v-btn>
         </v-card-title>
       </v-card>
       <v-container fluid class="px-0 px-md-4">
