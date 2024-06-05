@@ -89,6 +89,7 @@
         :items-per-page="itemsPerPage"
         class="elevation-1 row-pointer"
         @click:row="handleClick"
+        @update:current-items="quamp($event)"
       >
         <!-- Employee Number Slot -->
         <template v-slot:[`item.employeeNumber`]="{ item }">
@@ -418,6 +419,10 @@ function selectedTagsHasEmployee(e) {
   return false;
 } // selectedTagsHasEmployee
 
+function quamp(event) {
+  console.log(event);
+}
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     WATCHERS                     |
@@ -533,7 +538,8 @@ export default {
     searchPrimes,
     selectedTagsHasEmployee,
     userRoleIsAdmin,
-    userRoleIsManager
+    userRoleIsManager,
+    quamp
   },
   watch: {
     showInactiveEmployees: watchShowInactiveUsers,
