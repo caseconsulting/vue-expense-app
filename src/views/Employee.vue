@@ -61,9 +61,9 @@
         </v-col>
       </v-row>
       <v-row class="pt-0">
-        <!-- QuickBooks Time and Budgets-->
-        <v-col v-if="displayQuickBooksTimeAndBalances" cols="12" md="5" lg="5" class="pt-0">
-          <quick-books-time-data :key="model" :employee="model" class="mb-4" />
+        <!-- Timesheets and Budgets-->
+        <v-col v-if="displayTimeAndBalances" cols="12" md="5" lg="5" class="pt-0">
+          <time-data :key="model" :employee="model" class="mb-4" />
           <available-budgets
             :key="refreshKey"
             class="mb-4"
@@ -78,12 +78,7 @@
         </v-col>
 
         <!-- Employee Form -->
-        <v-col
-          cols="12"
-          :md="displayQuickBooksTimeAndBalances ? 7 : 12"
-          :lg="displayQuickBooksTimeAndBalances ? 7 : 12"
-          class="pt-0"
-        >
+        <v-col cols="12" :md="displayTimeAndBalances ? 7 : 12" :lg="displayTimeAndBalances ? 7 : 12" class="pt-0">
           <v-card>
             <v-card-title v-if="!editing" class="d-flex align-center header_style">
               <v-btn
@@ -220,7 +215,7 @@ import api from '@/shared/api.js';
 import AvailableBudgets from '@/components/shared/AvailableBudgets.vue';
 import EmployeeForm from '@/components/employees/EmployeeForm.vue';
 import EmployeeInfo from '@/components/employees/EmployeeInfo.vue';
-import QuickBooksTimeData from '@/components/shared/quickbooks/QuickBooksTimeData.vue';
+import TimeData from '@/components/shared/timesheets/TimeData.vue';
 import {
   getCurrentBudgetYear,
   isEmpty,
@@ -330,7 +325,7 @@ async function getProfileData() {
   }
   this.user = this.$store.getters.user;
   this.contracts = this.$store.getters.contracts;
-  this.displayQuickBooksTimeAndBalances = this.userRoleIsAdmin() || this.userIsEmployee();
+  this.displayTimeAndBalances = this.userRoleIsAdmin() || this.userIsEmployee();
   this.basicEmployeeDataLoading = false;
   if (this.model) {
     await this.refreshExpenseData(true);
@@ -611,7 +606,7 @@ export default {
     DeleteModal,
     EmployeeForm,
     EmployeeInfo,
-    QuickBooksTimeData,
+    TimeData,
     ConvertEmployeeToCsv,
     AnniversaryCard,
     BudgetChart,
@@ -625,7 +620,7 @@ export default {
       contracts: null,
       dateFormat: FORMATTED_ISOFORMAT,
       deleteLoading: false,
-      displayQuickBooksTimeAndBalances: false,
+      displayTimeAndBalances: false,
       dropdownEmployee: null,
       editing: false,
       expenses: null,

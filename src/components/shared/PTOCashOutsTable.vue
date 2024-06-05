@@ -457,13 +457,13 @@ function removeTag(item) {
 } // removeTag
 
 /**
- * Changes the QuickBooks Time employee when a row is clicked
+ * Changes the timesheets employee when a row is clicked
  *
  * @param item Object - The item from the row clicked
  */
 function rowClicked(_, { item }) {
   let employee = this.$store.getters.employees.find((e) => e.id === item.employeeId);
-  this.emitter.emit('change-quickbooks-employee', employee);
+  this.emitter.emit('change-timesheets-employee', employee);
 } // rowClicked
 
 /**

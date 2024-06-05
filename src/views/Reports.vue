@@ -105,7 +105,7 @@
         </div>
       </v-container>
     </v-card>
-    <v-dialog v-model="toggleContactEmployeesModal" :width="isMobile() ? '100%' : '60%'">
+    <v-dialog v-model="toggleContactEmployeesModal" :width="isMobile() ? '100%' : '60%'" scrollable>
       <contact-employees-modal :passedEmployees="employeesToContact" :key="contactKey" />
     </v-dialog>
   </div>

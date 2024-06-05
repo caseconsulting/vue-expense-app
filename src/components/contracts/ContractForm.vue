@@ -5,7 +5,7 @@
         <v-card>
           <!-- Title -->
           <v-card-title class="d-flex align-center header_style">
-            <v-icon color="white">mdi-file-document-plus</v-icon>
+            <v-icon class="mr-1" color="white">mdi-file-document-plus</v-icon>
             <span class="text-h5">New Contract</span>
           </v-card-title>
           <v-card-text>

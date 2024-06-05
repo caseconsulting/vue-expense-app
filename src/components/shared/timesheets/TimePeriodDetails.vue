@@ -80,8 +80,9 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import _ from 'lodash';
+import { computed, inject, ref, onMounted, onBeforeUnmount } from 'vue';
 import { formatNumber, openLink } from '@/utils/utils';
 import {
   add,
@@ -96,6 +97,30 @@ import {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const props = defineProps([
+  'dateIsCurrentPeriod',
+  'employee',
+  'isCalendarYear',
+  'isYearly',
+  'period',
+  'supplementalData',
+  'timeData'
+]);
+const emitter = inject('emitter');
+
+const clonedEmployee = ref(props.employee);
+const BONUS_YEAR_TOTAL = ref(1860);
+const WORK_HOURS_PER_DAY = ref(8); // normal hours per day for full time employees
+const customWorkDayInput = ref(null);
+const showCustomWorkDayInput = ref(false);
+const today = ref(format(getTodaysDate(), null, DEFAULT_ISOFORMAT));
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                 LIFECYCLE HOOKS                  |
 // |                                                  |
 // |--------------------------------------------------|
@@ -103,28 +128,162 @@ import {
 /**
  * The Mounted lifecycle hook
  */
-function mounted() {
-  this.emitter.emit('timesheets-chart-data', {
-    completed: this.formatNumber(this.periodHoursCompleted),
-    needed: this.totalPeriodHours,
-    remainingHours: this.remainingHours
+onMounted(() => {
+  emitter.emit('timesheets-chart-data', {
+    completed: formatNumber(periodHoursCompleted.value),
+    needed: formatNumber(totalPeriodHours.value),
+    remainingHours: remainingHours.value
   });
-  this.emitter.on('update-planned-pto-results-time-period', (data) => {
-    this.employee.plannedPto = data;
+  emitter.on('update-planned-pto-results-time-period', (data) => {
+    clonedEmployee.value.plannedPto = data;
   });
-} // mounted
+}); // mounted
 
 /**
  * The beforeUnmount lifecycle hook
  */
-function beforeUnmount() {
-  this.emitter.off('timesheets-chart-data');
-  this.emitter.off('update-planned-pto-results-time-period');
-} // beforeUnmount
+onBeforeUnmount(() => {
+  emitter.off('timesheets-chart-data');
+  emitter.off('update-planned-pto-results-time-period');
+}); // beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                 COMPUTED                         |
+// |                    COMPUTED                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * The amount of different days timesheets were entered in the future.
+ *
+ * @returns Number - The amount of entered future days
+ */
+const futureDays = computed(() => {
+  // future work days planned
+  let days = props.supplementalData?.future?.days || 0;
+  // future PTO days planned
+  days += getPlannedPTO(true);
+  return days;
+}); // futureDays
+
+/**
+ * The amount of timesheets hours that are in the future.
+ *
+ * @returns Integer - The amount of hours entered in the future
+ */
+const futureHours = computed(() => {
+  // future work hours planned
+  let hours = Number((props.supplementalData?.future?.duration || 0) / 60 / 60);
+  // future PTO hours planned
+  hours += getPlannedPTO(false);
+  return hours;
+}); // futureHours
+
+/**
+ * The amount of hours an employee is behind schedule by. If there has been 3 work days so far, then a full time employee
+ * should have 24 hours entered. If the number is negative, then the user is ahead in hours.
+ *
+ * @returns Number - The number of hours an employee is behind schedule by
+ */
+const hoursBehindBy = computed(() => {
+  return totalPeriodHours.value - remainingWorkDays.value * proRatedHours.value - periodHoursCompleted.value;
+}); // hoursBehindBy
+
+/**
+ * The amount of hours an employee has completed in the current time period.
+ *
+ * @returns Number - The time period hours an employee has completed
+ */
+const periodHoursCompleted = computed(() => {
+  let total = 0;
+  _.forEach(props.timeData, (duration, jobName) => {
+    if (!props.isYearly || (props.isYearly && !props.supplementalData.nonBillables?.includes(jobName))) {
+      total += duration;
+    }
+  });
+  // convert to hours
+  return Number(total / 60 / 60);
+}); // periodHoursCompleted
+
+/**
+ * The amount of hours an employee should ideally enter per day. Full-time = 8, part-time (75%) = 6, part-time (50%) = 4.
+ *
+ * @returns The employees pro-rated hours needed per day
+ */
+const proRatedHours = computed(() => {
+  if (props.isYearly) {
+    return BONUS_YEAR_TOTAL.value / getWorkDays(props.period.startDate, props.period.endDate, true);
+  } else {
+    return WORK_HOURS_PER_DAY.value * (props.employee.workStatus / 100);
+  }
+}); // proRatedHours
+
+/**
+ * The remaining hours needed for the time period.
+ *
+ * @returns Number - The reimaining hours needed
+ */
+const remainingHours = computed(() => {
+  let remaining = totalPeriodHours.value - periodHoursCompleted.value;
+  return remaining > 0 ? remaining : 0;
+}); // remainingHours
+
+/**
+ * The remaining work days for the time period. Future hours will affect the number of work days remaining.
+ *
+ * @returns Number - The remaining work days for the time period.
+ */
+const remainingWorkDays = computed(() => {
+  let remainingDays;
+  let daysToSubtract = futureDays.value;
+  if (isWeekDay(today.value)) daysToSubtract += 1;
+
+  if (customWorkDayInput.value && Number(customWorkDayInput.value)) {
+    remainingDays = customWorkDayInput.value || remainingWorkDays.value;
+  } else {
+    remainingDays = getWorkDays(today.value, props.period.endDate) - daysToSubtract;
+    if (!props.dateIsCurrentPeriod) {
+      remainingDays = 0;
+    }
+  }
+  return Math.max(remainingDays, 0);
+}); // remainingWorkDays
+
+/**
+ * The remaining average hours needed per day.
+ *
+ * @returns Number - The remaining average number of hours needed per day
+ */
+const remainingAverageHoursPerDay = computed(() => {
+  if (Number(remainingWorkDays.value) > 0) {
+    return remainingHours.value / remainingWorkDays.value;
+  } else {
+    return props.dateIsCurrentPeriod ? remainingHours.value : 0;
+  }
+}); // remainingAverageHoursPerDay
+
+/**
+ * The total number of hours needed for a time period.
+ *
+ * @returns Number - The total number of hours needed
+ */
+const totalPeriodHours = computed(() => {
+  let total = totalWorkDays.value * proRatedHours.value;
+  return props.isYearly ? Math.round(total) : total;
+}); // totalPeriodHours
+
+/**
+ * The total number of work days for a time period.
+ *
+ * @returns Number - The total number of works days
+ */
+const totalWorkDays = computed(() => {
+  return getWorkDays(props.period.startDate, props.period.endDate);
+}); // totalWorkDays
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      METHODS                     |
 // |                                                  |
 // |--------------------------------------------------|
 
@@ -138,14 +297,14 @@ function beforeUnmount() {
  */
 function getPlannedPTO(convertToDays) {
   // do not include this value in the month view
-  if (!this.isYearly) return 0;
+  if (!props.isYearly) return 0;
 
   // early exit conditions
-  let ptoPlan = this.employee.plannedPto?.plan;
+  let ptoPlan = props.employee.plannedPto?.plan;
   if (!ptoPlan) return 0;
   // get start and end dates
-  let startDate = this.period.startDate;
-  let endDate = this.period.endDate;
+  let startDate = props.period.startDate;
+  let endDate = props.period.endDate;
   // go through plan and tally up hours that fall between startDate and endDate
   let hoursPlanned = 0;
   for (let item of ptoPlan) {
@@ -154,138 +313,9 @@ function getPlannedPTO(convertToDays) {
     }
   }
   // convert hours to days (rounding up) and return result
-  if (convertToDays) hoursPlanned = Math.ceil(hoursPlanned / this.WORK_HOURS_PER_DAY);
+  if (convertToDays) hoursPlanned = Math.ceil(hoursPlanned / WORK_HOURS_PER_DAY.value);
   return hoursPlanned;
 } // getPlannedPTO
-
-/**
- * The amount of different days timesheets were entered in the future.
- *
- * @returns Number - The amount of entered future days
- */
-function futureDays() {
-  // future work days planned
-  let days = this.supplementalData?.future?.days || 0;
-  // future PTO days planned
-  days += this.getPlannedPTO(true);
-  return days;
-} // futureDays
-
-/**
- * The amount of timesheets hours that are in the future.
- *
- * @returns Integer - The amount of hours entered in the future
- */
-function futureHours() {
-  // future work hours planned
-  let hours = Number((this.supplementalData?.future?.duration || 0) / 60 / 60);
-  // future PTO hours planned
-  hours += this.getPlannedPTO(false);
-  return hours;
-} // futureHours
-
-/**
- * The amount of hours an employee is behind schedule by. If there has been 3 work days so far, then a full time employee
- * should have 24 hours entered. If the number is negative, then the user is ahead in hours.
- *
- * @returns Number - The number of hours an employee is behind schedule by
- */
-function hoursBehindBy() {
-  return this.totalPeriodHours - this.remainingWorkDays * this.proRatedHours - this.periodHoursCompleted;
-} // hoursBehindBy
-
-/**
- * The amount of hours an employee has completed in the current time period.
- *
- * @returns Number - The time period hours an employee has completed
- */
-function periodHoursCompleted() {
-  let total = 0;
-  _.forEach(this.timeData, (duration, jobName) => {
-    if (!this.isYearly || (this.isYearly && !this.supplementalData.nonBillables?.includes(jobName))) {
-      total += duration;
-    }
-  });
-  // convert to hours
-  return Number(total / 60 / 60);
-} // periodHoursCompleted
-
-/**
- * The amount of hours an employee should ideally enter per day. Full-time = 8, part-time (75%) = 6, part-time (50%) = 4.
- *
- * @returns The employees pro-rated hours needed per day
- */
-function proRatedHours() {
-  if (this.isYearly) {
-    return this.BONUS_YEAR_TOTAL / this.getWorkDays(this.period.startDate, this.period.endDate, true);
-  } else {
-    return this.WORK_HOURS_PER_DAY * (this.employee.workStatus / 100);
-  }
-} // proRatedHours
-
-/**
- * The remaining hours needed for the time period.
- *
- * @returns Number - The reimaining hours needed
- */
-function remainingHours() {
-  let remaining = this.totalPeriodHours - this.periodHoursCompleted;
-  return remaining > 0 ? remaining : 0;
-} // remainingHours
-
-/**
- * The remaining work days for the time period. Future hours will affect the number of work days remaining.
- *
- * @returns Number - The remaining work days for the time period.
- */
-function remainingWorkDays() {
-  let remainingDays;
-  let daysToSubtract = this.futureDays;
-  if (this.isWeekDay(this.today)) daysToSubtract += 1;
-
-  if (this.customWorkDayInput && Number(this.customWorkDayInput)) {
-    this.customWorkDayInput = Number(this.customWorkDayInput) ?? null;
-    remainingDays = this.customWorkDayInput || this.remainingWorkDays;
-  } else {
-    remainingDays = this.getWorkDays(this.today, this.period.endDate) - daysToSubtract;
-    if (!this.dateIsCurrentPeriod) {
-      remainingDays = 0;
-    }
-  }
-  return Math.max(remainingDays, 0);
-} // remainingWorkDays
-
-/**
- * The remaining average hours needed per day.
- *
- * @returns Number - The remaining average number of hours needed per day
- */
-function remainingAverageHoursPerDay() {
-  if (Number(this.remainingWorkDays) > 0) {
-    return this.remainingHours / this.remainingWorkDays;
-  } else {
-    return this.dateIsCurrentPeriod ? this.remainingHours : 0;
-  }
-} // remainingAverageHoursPerDay
-
-/**
- * The total number of hours needed for a time period.
- *
- * @returns Number - The total number of hours needed
- */
-function totalPeriodHours() {
-  let total = this.totalWorkDays * this.proRatedHours;
-  return this.isYearly ? Math.round(total) : total;
-} // totalPeriodHours
-
-/**
- * The total number of work days for a time period.
- *
- * @returns Number - The total number of works days
- */
-function totalWorkDays() {
-  return this.getWorkDays(this.period.startDate, this.period.endDate);
-} // totalWorkDays
 
 /**
  * Calculates and returns the work days between start and end dates provided
@@ -297,13 +327,13 @@ function totalWorkDays() {
  */
 function getWorkDays(startDate, endDate, excludeProRated = false) {
   let workDays = 0;
-  let hireDate = this.employee.hireDate;
+  let hireDate = props.employee.hireDate;
   if (!excludeProRated && isAfter(hireDate, startDate, 'day') && isSameOrAfter(endDate, hireDate, 'day')) {
     startDate = hireDate;
   }
   let date = startDate;
   while (!isAfter(date, endDate, 'day')) {
-    if (this.isWeekDay(date)) {
+    if (isWeekDay(date)) {
       workDays += 1;
     }
     // increment to the next day
@@ -321,46 +351,6 @@ function getWorkDays(startDate, endDate, excludeProRated = false) {
 function isWeekDay(day) {
   return getIsoWeekday(day) >= 1 && getIsoWeekday(day) <= 5;
 } // isWeekDay
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  computed: {
-    futureDays,
-    futureHours,
-    hoursBehindBy,
-    periodHoursCompleted,
-    proRatedHours,
-    remainingHours,
-    remainingWorkDays,
-    remainingAverageHoursPerDay,
-    totalPeriodHours,
-    totalWorkDays
-  },
-  data() {
-    return {
-      BONUS_YEAR_TOTAL: 1860,
-      WORK_HOURS_PER_DAY: 8, // normal hours per day for full time employees
-      customWorkDayInput: null,
-      showCustomWorkDayInput: false,
-      today: format(getTodaysDate(), null, DEFAULT_ISOFORMAT)
-    };
-  },
-  methods: {
-    formatNumber,
-    getPlannedPTO,
-    getWorkDays,
-    isWeekDay,
-    openLink
-  },
-  mounted,
-  beforeUnmount,
-  props: ['dateIsCurrentPeriod', 'employee', 'isCalendarYear', 'isYearly', 'period', 'supplementalData', 'timeData']
-};
 </script>
 
 <style>

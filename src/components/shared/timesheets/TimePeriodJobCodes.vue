@@ -14,7 +14,7 @@
         size="x-small"
         density="compact"
       >
-        <v-tooltip activator="parent" location="top">Click for more information</v-tooltip>
+        <v-tooltip activator="parent" location="top">Click to see yearly bonus information</v-tooltip>
         <v-icon size="x-small" color="#3f51b5">mdi-information</v-icon>
       </v-avatar>
     </h3>
@@ -45,8 +45,18 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref } from 'vue';
 import { formatNumber, openLink } from '@/utils/utils';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const props = defineProps(['isCalendarYear', 'isYearly', 'supplementalData', 'timeData']);
+const showNonBillables = ref(false);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -61,32 +71,12 @@ import { formatNumber, openLink } from '@/utils/utils';
  */
 function hasNonBillables() {
   let hasNonBillable = false;
-  let jobcodes = Object.keys(this.timeData || {});
+  let jobcodes = Object.keys(props.timeData || {});
   for (let i = 0; i < jobcodes.length && !hasNonBillable; i++) {
-    if (this.supplementalData.nonBillables?.includes(jobcodes[i])) hasNonBillable = true;
+    if (props.supplementalData.nonBillables?.includes(jobcodes[i])) hasNonBillable = true;
   }
   return hasNonBillable;
 } // hasNonBillables
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  data() {
-    return {
-      showNonBillables: false
-    };
-  },
-  methods: {
-    formatNumber,
-    hasNonBillables,
-    openLink
-  },
-  props: ['isCalendarYear', 'isYearly', 'supplementalData', 'timeData']
-};
 </script>
 
 <style scoped>

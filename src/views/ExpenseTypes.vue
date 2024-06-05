@@ -974,6 +974,17 @@ function twoDecimals(value) {
 } // twoDecimals
 
 /**
+ * limits the length of the text
+ *
+ * @param val - the string to be shortened
+ * @return string - the shortened string
+ */
+function limitedText(val) {
+  // limits text displayed to 50 characters on table view
+  return val.length > 50 ? `${val.substring(0, 50)}...` : val;
+} // limitedText
+
+/**
  * Store the attributes of a selected expense type.
  *
  * @param item - expense type selected
@@ -1164,23 +1175,6 @@ async function created() {
 function watchFilterExpenseTypes() {
   this.filterExpenseTypes();
 } // watchFilterExpenseTypes
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     FILTERS                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * limits the length of the text
- *
- * @param val - the string to be shortened
- * @return string - the shortened string
- */
-function limitedText(val) {
-  // limits text displayed to 50 characters on table view
-  return val.length > 50 ? `${val.substring(0, 50)}...` : val;
-} // limitedText
 
 // |--------------------------------------------------|
 // |                                                  |

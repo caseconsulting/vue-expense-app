@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-row class="tmp d-flex justify-space-evenly pa-0 pb-2 my-1 mx-7">
+    <v-row class="bottom-border d-flex justify-space-evenly pa-0 pb-2 my-1 mx-7">
       <v-btn
         variant="text"
         :class="!isYearly ? 'text-blue-darken-2 bg-blue-lighten-5' : ''"
@@ -14,21 +14,29 @@
         <v-icon size="x-large">mdi-calendar</v-icon>
         <v-tooltip activator="parent" location="top">Pay Period</v-tooltip>
       </v-btn>
-      <v-btn
-        variant="text"
-        class="mx-2"
-        :class="isYearly ? (isCalendarYear ? 'text-blue-darken-2 bg-blue-lighten-5' : '') : ''"
-        :disabled="timePeriodLoading"
-        @click="
-          customWorkDayInput = null;
-          isYearly = true;
-          isCalendarYear = true;
-          timePeriodLoading = true;
-        "
-      >
-        <v-icon size="x-large">mdi-calendar-multiple</v-icon>
-        <v-tooltip activator="parent" location="top">Calendar Year</v-tooltip>
-      </v-btn>
+      <div class="wrapper">
+        <div v-if="isYearly && isCalendarYear && !timePeriodLoading">
+          <v-icon size="x-small" class="top-left" color="green">mdi-currency-usd</v-icon>
+          <v-icon size="x-small" class="top-right" color="green">mdi-currency-usd</v-icon>
+          <v-icon size="x-small" class="bottom-left" color="green">mdi-currency-usd</v-icon>
+          <v-icon size="x-small" class="bottom-right" color="green">mdi-currency-usd</v-icon>
+        </div>
+        <v-btn
+          variant="text"
+          class="mx-2"
+          :class="isYearly ? (isCalendarYear ? 'text-green-darken-2 bg-green-lighten-5' : '') : ''"
+          :disabled="timePeriodLoading"
+          @click="
+            customWorkDayInput = null;
+            isYearly = true;
+            isCalendarYear = true;
+            timePeriodLoading = true;
+          "
+        >
+          <v-icon size="x-large">mdi-calendar-multiple</v-icon>
+          <v-tooltip activator="parent" location="top"> Calendar Year (towards bonus) </v-tooltip>
+        </v-btn>
+      </div>
       <div>
         <v-btn
           variant="text"
@@ -104,7 +112,7 @@
           class="mt-2"
           :key="timeData"
           :jobcodes="timeData || {}"
-          :nonBillables="isYearly ? supplementalData.nonBillables : null"
+          :nonBillables="isYearly ? supplementalDataWithPlan.nonBillables : null"
         ></timesheets-chart>
         <!-- End Timesheets Donut Chart -->
       </v-col>
@@ -119,7 +127,7 @@
           :isCalendarYear="isCalendarYear"
           :isYearly="isYearly"
           :period="timesheets[periodIndex]"
-          :supplementalData="supplementalData"
+          :supplementalData="supplementalDataWithPlan"
           :timeData="timeData"
         ></time-period-details>
       </v-col>
@@ -135,7 +143,7 @@
           v-else
           :isCalendarYear="isCalendarYear"
           :isYearly="isYearly"
-          :supplementalData="supplementalData"
+          :supplementalData="supplementalDataWithPlan"
           :timeData="timeData"
         ></time-period-job-codes>
       </v-col>
@@ -144,15 +152,53 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import TimesheetsChart from '@/components/charts/custom-charts/TimesheetsChart.vue';
-import TimePeriodDetails from '@/components/shared/quickbooks/TimePeriodDetails.vue';
-import TimePeriodJobCodes from '@/components/shared/quickbooks/TimePeriodJobCodes.vue';
+import TimePeriodDetails from '@/components/shared/timesheets/TimePeriodDetails.vue';
+import TimePeriodJobCodes from '@/components/shared/timesheets/TimePeriodJobCodes.vue';
+import { isAfter, isBefore } from '@/shared/dateUtils';
 import _ from 'lodash';
+import { computed, inject, ref, reactive, watch, onMounted, onBeforeUnmount } from 'vue';
+import { useStore } from 'vuex';
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                 COMPUTED                         |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const props = defineProps(['employee', 'ptoBalances', 'supplementalData', 'timesheets']);
+const emitter = inject('emitter');
+const store = useStore();
+
+const periodIndex = ref(props.timesheets.length - 1);
+const isYearly = ref(false);
+const isCalendarYear = ref(false);
+const timePeriodLoading = ref(false);
+let plannedTimeData = reactive({});
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                    LIFECYCLE                     |
+// |                                                  |
+// |--------------------------------------------------|
+onMounted(() => {
+  // init PTO plan from employee object
+  refreshPtoPlan();
+
+  // get employee plan when updated
+  emitter.on('update-planned-pto-results-job-codes', () => {
+    refreshPtoPlan();
+  });
+});
+
+onBeforeUnmount(() => {
+  emitter.off('update-planned-pto-results-job-codes');
+});
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     COMPUTED                     |
 // |                                                  |
 // |--------------------------------------------------|
 
@@ -161,32 +207,52 @@ import _ from 'lodash';
  *
  * @returns Boolean - Whether or not the date is in the current month
  */
-function dateIsCurrentPeriod() {
-  return this.periodIndex === this.timesheets.length - 1;
-} // dateIsCurrentPeriod
+const dateIsCurrentPeriod = computed(() => {
+  return periodIndex.value === props.timesheets.length - 1;
+}); // dateIsCurrentPeriod
 
 /**
  * The jobcodes and their durations all sorted by duration within the time period.
  *
  * @returns Object - Key Value pairs of jobcodes and their durations
  */
-function timeData() {
-  let timeData = this.timesheets[this.periodIndex].timesheets;
+const timeData = computed(() => {
+  let timesheets = { ...props.timesheets[periodIndex.value].timesheets };
+  // add in planned pto/holiday
+  if (plannedTimeData) {
+    if (plannedTimeData.PTO) {
+      if (!timesheets['Planned PTO']) timesheets['Planned PTO'] = 0;
+      timesheets['Planned PTO'] += plannedTimeData.PTO;
+    }
+    if (plannedTimeData.Holiday) {
+      if (!timesheets['Planned Holiday']) timesheets['Planned Holiday'] = 0;
+      timesheets['Planned Holiday'] += plannedTimeData.Holiday;
+    }
+  }
   // sort by duration
-  let orderedKeys = Object.keys(timeData).sort(function (a, b) {
-    return timeData[b] - timeData[a];
+  let orderedKeys = Object.keys(timesheets).sort(function (a, b) {
+    return timesheets[b] - timesheets[a];
   });
   // reassign object in sorted key value pairs
   let orderedTimeData = {};
   _.forEach(orderedKeys, (jobcode) => {
-    orderedTimeData[jobcode] = timeData[jobcode];
+    orderedTimeData[jobcode] = timesheets[jobcode];
   });
   return orderedTimeData;
-} // timeData
+}); // timeData
+
+/**
+ * Adds Planned PTO/Holiday to non-billables
+ */
+const supplementalDataWithPlan = computed(() => {
+  let data = { ...props.supplementalData };
+  data.nonBillables = [...data.nonBillables, 'Planned PTO', 'Planned Holiday'];
+  return data;
+});
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     WATCHERS                     |
+// |                      METHODS                     |
 // |                                                  |
 // |--------------------------------------------------|
 
@@ -196,8 +262,29 @@ function timeData() {
  * @returns Boolean - True if an admin has selected to show a users contract year for a project.
  */
 function showContractYear() {
-  return _.some(this.employee.contracts, (c) => _.find(c.projects, (p) => p.bonusCalculationDate));
+  let empCurContract = _.find(props.employee.contracts, (c) => _.find(c.projects, (p) => !p.endDate));
+  let contract = _.find(store.getters.contracts, (c) => c.id === empCurContract?.contractId);
+  return contract?.contractViewEnabled;
 } // showContractYear
+
+/**
+ * Refreshes PTO plan data
+ */
+function refreshPtoPlan() {
+  // sum up and save the results of plan within time range
+  let startDate = props.timesheets[periodIndex.value].startDate;
+  let endDate = props.timesheets[periodIndex.value].endDate;
+  plannedTimeData.PTO = 0;
+  plannedTimeData.Holiday = 0;
+  for (let plan of props.employee.plannedPto?.plan ?? []) {
+    // skip if past, stop if future
+    if (isBefore(plan.date, startDate, 'month')) continue;
+    if (isAfter(plan.date, endDate, 'month')) break;
+    // else, add it (* 3600 to convert hours to seconds)
+    plannedTimeData.PTO += Number(plan.ptoHours) * 3600;
+    plannedTimeData.Holiday += Number(plan.holidayHours) * 3600;
+  }
+} // refreshPtoPlan
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -209,61 +296,65 @@ function showContractYear() {
  * The watcher for the time period loader. If a user expands or collapses time period, emit the
  * new start and end dates.
  */
-function watchTimePeriodLoading() {
-  if (this.timePeriodLoading) {
-    this.emitter.emit('get-period-data', {
-      isCalendarYear: this.isCalendarYear,
-      isYearly: this.isYearly
-    });
+watch(
+  () => timePeriodLoading.value,
+  () => {
+    if (timePeriodLoading.value) {
+      emitter.emit('get-period-data', {
+        isCalendarYear: isCalendarYear.value,
+        isYearly: isYearly.value
+      });
+    }
   }
-} // watchTimePeriodLoading
+); // watchTimePeriodLoading
 
 /**
- * The watcher for the timesheets prop
+ * The watcher for the timesheets prop.
  */
-function watchTimesheets() {
-  if (this.isYearly) this.periodIndex = 0;
-  else this.periodIndex = this.timesheets.length - 1;
-  this.timePeriodLoading = false;
-} // watchTimesheets
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  components: {
-    TimesheetsChart,
-    TimePeriodDetails,
-    TimePeriodJobCodes
-  },
-  computed: {
-    dateIsCurrentPeriod,
-    timeData
-  },
-  data() {
-    return {
-      periodIndex: this.timesheets.length - 1,
-      isYearly: false,
-      isCalendarYear: false,
-      timePeriodLoading: false
-    };
-  },
-  methods: {
-    showContractYear
-  },
-  props: ['employee', 'ptoBalances', 'supplementalData', 'timesheets'],
-  watch: {
-    timePeriodLoading: watchTimePeriodLoading,
-    timesheets: watchTimesheets
+watch(
+  () => props.timesheets,
+  () => {
+    if (isYearly.value) periodIndex.value = 0;
+    else periodIndex.value = props.timesheets.length - 1;
+    refreshPtoPlan();
+    timePeriodLoading.value = false;
   }
-};
+); // watchTimesheets
 </script>
 
 <style>
-.tmp {
+.bottom-border {
   border-bottom: 1px solid rgb(225, 225, 225);
+}
+.top-left {
+  position: absolute !important;
+  top: 1px;
+  left: 7px;
+  font-size: 12px !important;
+  z-index: 9999;
+}
+.top-right {
+  position: absolute !important;
+  top: 1px;
+  right: 7px;
+  font-size: 12px !important;
+  z-index: 9999;
+}
+.bottom-left {
+  position: absolute !important;
+  bottom: 1px;
+  left: 7px;
+  font-size: 12px !important;
+  z-index: 9999;
+}
+.bottom-right {
+  position: absolute !important;
+  bottom: 1px;
+  right: 7px;
+  font-size: 12px !important;
+  z-index: 9999;
+}
+.wrapper {
+  position: relative !important;
 }
 </style>
