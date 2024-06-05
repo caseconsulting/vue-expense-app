@@ -150,7 +150,7 @@ const props = defineProps(['employeeId', 'pto', 'holiday', 'isCyk']);
 const store = useStore();
 const emitter = inject('emitter');
 
-const employee = ref(null);
+const employee = ref(store.getters.employees.find((e) => e.id == props.employeeId));
 const monthsPlannable = ref(13); // how many months can be planned (including current month)
 const loading = ref(true);
 const saveButtonText = ref('Save');
@@ -176,7 +176,7 @@ const ranges = ref([
   ]
 ]);
 // add current projects to `ranges`
-for (let contract of store.getters.user.contracts) {
+for (let contract of employee.value.contracts ?? []) {
   for (let project of contract.projects) {
     // skip conditions: project is not current or endDate has passed
     if (project.endDate) continue;
@@ -238,7 +238,6 @@ let cykPTO = (date) => {
 onMounted(async () => {
   // get the employee and PTO cashout amounts
   if (!store.getters.ptoCashOuts) await updateStorePtoCashOuts();
-  employee.value = store.getters.user;
 
   // update employee specific information
   PTOPerMonth.value *= employee.value.workStatus / 100;
