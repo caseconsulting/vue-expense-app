@@ -112,7 +112,7 @@
           class="mt-2"
           :key="timeData"
           :jobcodes="timeData || {}"
-          :nonBillables="isYearly ? supplementalData.nonBillables : null"
+          :nonBillables="isYearly ? supplementalDataWithPlan.nonBillables : null"
         ></timesheets-chart>
         <!-- End Timesheets Donut Chart -->
       </v-col>
@@ -127,7 +127,7 @@
           :isCalendarYear="isCalendarYear"
           :isYearly="isYearly"
           :period="timesheets[periodIndex]"
-          :supplementalData="supplementalData"
+          :supplementalData="supplementalDataWithPlan"
           :timeData="timeData"
         ></time-period-details>
       </v-col>
@@ -143,7 +143,7 @@
           v-else
           :isCalendarYear="isCalendarYear"
           :isYearly="isYearly"
-          :supplementalData="supplementalData"
+          :supplementalData="supplementalDataWithPlan"
           :timeData="timeData"
         ></time-period-job-codes>
       </v-col>
@@ -156,8 +156,9 @@
 import TimesheetsChart from '@/components/charts/custom-charts/TimesheetsChart.vue';
 import TimePeriodDetails from '@/components/shared/timesheets/TimePeriodDetails.vue';
 import TimePeriodJobCodes from '@/components/shared/timesheets/TimePeriodJobCodes.vue';
+import { isAfter, isBefore } from '@/shared/dateUtils';
 import _ from 'lodash';
-import { computed, inject, ref, watch } from 'vue';
+import { computed, inject, ref, reactive, watch, onMounted, onBeforeUnmount } from 'vue';
 import { useStore } from 'vuex';
 
 // |--------------------------------------------------|
@@ -174,10 +175,30 @@ const periodIndex = ref(props.timesheets.length - 1);
 const isYearly = ref(false);
 const isCalendarYear = ref(false);
 const timePeriodLoading = ref(false);
+let plannedTimeData = reactive({});
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                 COMPUTED                         |
+// |                    LIFECYCLE                     |
+// |                                                  |
+// |--------------------------------------------------|
+onMounted(() => {
+  // init PTO plan from employee object
+  refreshPtoPlan();
+
+  // get employee plan when updated
+  emitter.on('update-planned-pto-results-job-codes', () => {
+    refreshPtoPlan();
+  });
+});
+
+onBeforeUnmount(() => {
+  emitter.off('update-planned-pto-results-job-codes');
+});
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     COMPUTED                     |
 // |                                                  |
 // |--------------------------------------------------|
 
@@ -196,18 +217,38 @@ const dateIsCurrentPeriod = computed(() => {
  * @returns Object - Key Value pairs of jobcodes and their durations
  */
 const timeData = computed(() => {
-  let timeData = props.timesheets[periodIndex.value].timesheets;
+  let timesheets = { ...props.timesheets[periodIndex.value].timesheets };
+  // add in planned pto/holiday
+  if (plannedTimeData) {
+    if (plannedTimeData.PTO) {
+      if (!timesheets['Planned PTO']) timesheets['Planned PTO'] = 0;
+      timesheets['Planned PTO'] += plannedTimeData.PTO;
+    }
+    if (plannedTimeData.Holiday) {
+      if (!timesheets['Planned Holiday']) timesheets['Planned Holiday'] = 0;
+      timesheets['Planned Holiday'] += plannedTimeData.Holiday;
+    }
+  }
   // sort by duration
-  let orderedKeys = Object.keys(timeData).sort(function (a, b) {
-    return timeData[b] - timeData[a];
+  let orderedKeys = Object.keys(timesheets).sort(function (a, b) {
+    return timesheets[b] - timesheets[a];
   });
   // reassign object in sorted key value pairs
   let orderedTimeData = {};
   _.forEach(orderedKeys, (jobcode) => {
-    orderedTimeData[jobcode] = timeData[jobcode];
+    orderedTimeData[jobcode] = timesheets[jobcode];
   });
   return orderedTimeData;
 }); // timeData
+
+/**
+ * Adds Planned PTO/Holiday to non-billables
+ */
+const supplementalDataWithPlan = computed(() => {
+  let data = { ...props.supplementalData };
+  data.nonBillables = [...data.nonBillables, 'Planned PTO', 'Planned Holiday'];
+  return data;
+});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -225,6 +266,25 @@ function showContractYear() {
   let contract = _.find(store.getters.contracts, (c) => c.id === empCurContract?.contractId);
   return contract?.contractViewEnabled;
 } // showContractYear
+
+/**
+ * Refreshes PTO plan data
+ */
+function refreshPtoPlan() {
+  // sum up and save the results of plan within time range
+  let startDate = props.timesheets[periodIndex.value].startDate;
+  let endDate = props.timesheets[periodIndex.value].endDate;
+  plannedTimeData.PTO = 0;
+  plannedTimeData.Holiday = 0;
+  for (let plan of props.employee.plannedPto?.plan ?? []) {
+    // skip if past, stop if future
+    if (isBefore(plan.date, startDate, 'month')) continue;
+    if (isAfter(plan.date, endDate, 'month')) break;
+    // else, add it (* 3600 to convert hours to seconds)
+    plannedTimeData.PTO += Number(plan.ptoHours) * 3600;
+    plannedTimeData.Holiday += Number(plan.holidayHours) * 3600;
+  }
+} // refreshPtoPlan
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -256,6 +316,7 @@ watch(
   () => {
     if (isYearly.value) periodIndex.value = 0;
     else periodIndex.value = props.timesheets.length - 1;
+    refreshPtoPlan();
     timePeriodLoading.value = false;
   }
 ); // watchTimesheets

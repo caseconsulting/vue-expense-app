@@ -6,10 +6,10 @@
     <div v-if="months.length === monthsPlannable">
       <v-card-text v-if="employee">
         <!-- PTO BALANCES -->
-        <v-row class="text-center">
+        <v-row class="text-center balances">
           <!-- Current PTO balance -->
           <v-col>
-            <p class="mb-0 font-weight-bold">{{ pto }}h</p>
+            <p class="mb-0 font-weight-bold">{{ pto ?? 0 }}h</p>
             <p class="mt-0">Current<br />PTO Balance</p>
           </v-col>
 
@@ -21,9 +21,12 @@
 
           <!-- Current Holiday balance -->
           <v-col>
-            <p class="mb-0 font-weight-bold">{{ holiday }}h</p>
+            <p class="mb-0 font-weight-bold">{{ holiday ?? 0 }}h</p>
             <p class="mt-0">Current<br />Holiday Balance</p>
           </v-col>
+
+          <!-- Divider between current and calculated values -->
+          <span class="left-line"></span>
 
           <!-- PTO after all months of plan (includes accrued from last month of plan) -->
           <v-col>
@@ -40,16 +43,13 @@
           </v-col>
         </v-row>
 
-        <!-- CHIPS TO ADD MONTH -->
-        <div class="my-2">
-          <v-chip
-            :class="'mr-1 mb-1 ' + selectedClass(month)"
-            v-for="month in months"
-            :key="month.value"
-            @click="toggleMonthInPlan(month)"
-          >
-            {{ month.title }}
-          </v-chip>
+        <!-- RANGES TO SELECT FOR PLANNING -->
+        <div class="my-2 d-flex justify-center">
+          <v-btn-toggle v-model="selectedRanges" color="primary mx-auto" class="filter_color" text multiple>
+            <v-btn v-for="range in ranges" :key="range" variant="text">
+              {{ getRangeTitle(range) }}
+            </v-btn>
+          </v-btn-toggle>
         </div>
 
         <!-- PLANNING TABLE -->
@@ -86,14 +86,9 @@
             <p>{{ getHolidayBalance(item.date) }}</p>
           </template>
 
-          <!-- Action buttons -->
-          <template #[`item.actions`]="{ item }">
-            <v-btn icon="mdi-delete" variant="text" @click="removeMonthFromPlan(item)"></v-btn>
-          </template>
-
-          <!-- No data slot, encourage adding a month -->
+          <!-- No data slot, encourage adding a date range -->
           <template #no-data>
-            <p class="text-center">Add a month to start planning PTO</p>
+            <p class="text-center">Select a date range to start planning PTO</p>
           </template>
 
           <!-- Remove footer by replacing it with nothing -->
@@ -126,7 +121,7 @@
 // |                                                  |
 // |--------------------------------------------------|
 
-import { onMounted, ref, inject } from 'vue';
+import { onMounted, ref, reactive, watch, inject } from 'vue';
 import { useStore } from 'vuex';
 import { updateStoreUser, updateStorePtoCashOuts } from '../../utils/storeUtils';
 import {
@@ -139,7 +134,8 @@ import {
   setMonth,
   isAfter,
   isBefore,
-  isSame
+  isSame,
+  isSameOrBefore
 } from '../../shared/dateUtils';
 import { formatNumber } from '@/utils/utils.js';
 import api from '@/shared/api.js';
@@ -150,7 +146,7 @@ import api from '@/shared/api.js';
 // |                                                  |
 // |--------------------------------------------------|
 
-const props = defineProps(['employeeId', 'pto', 'holiday']);
+const props = defineProps(['employeeId', 'pto', 'holiday', 'isCyk']);
 const store = useStore();
 const emitter = inject('emitter');
 
@@ -163,25 +159,73 @@ const saveButtonText = ref('Save');
 const months = ref([]); // months in year for chips
 const hoursRules = [(v) => canEval(v) !== false || v === '' || 'Enter number or equation'];
 
+// year ranges
+const selectedRanges = ref([]);
+const ranges = ref([
+  // current year
+  [
+    format(add(getTodaysDate(), 1, 'month'), null, 'YYYY-MM'),
+    format(endOf(getTodaysDate('YYYY-MM'), 'year'), null, 'YYYY-MM'),
+    { isYear: true }
+  ],
+  // next year
+  [
+    format(startOf(add(getTodaysDate(), 1, 'year'), 'year'), null, 'YYYY-MM'),
+    format(endOf(add(getTodaysDate(), 1, 'year'), 'year'), null, 'YYYY-MM'),
+    { isYear: true }
+  ]
+]);
+// add current projects to `ranges`
+for (let contract of store.getters.user.contracts) {
+  for (let project of contract.projects) {
+    // skip conditions: project is not current or endDate has passed
+    if (project.endDate) continue;
+    // get YYYY-MM format of start and end dates, cutting off anything this month or before
+    let [projectStart, projectEnd] = [project.startDate, project.endDate];
+    if (isSameOrBefore(projectStart, getTodaysDate(), 'month')) projectStart = add(getTodaysDate(), 1, 'month');
+    if (!projectEnd) projectEnd = add(project.startDate, 11, 'month');
+    projectStart = format(projectStart, null, 'YYYY-MM');
+    projectEnd = format(projectEnd, null, 'YYYY-MM');
+    // finally, add to ranges
+    ranges.value.push([projectStart, projectEnd]);
+  }
+}
+
 // data table
-// helper to add year if needed (also used in save() function)
-let getDateFormat = (date) => {
-  return isSame(getTodaysDate(), date, 'year') ? 'MMMM' : 'MMMM YYYY';
-};
 const headers = ref([
   {
     title: 'Month',
     sortable: false,
-    width: '17%',
+    width: '20%',
     key: 'date',
     value: (item) => format(item.date, null, getDateFormat(item.date))
   },
   { title: 'PTO', sortable: false, width: '15%', value: 'ptoHours' },
   { title: 'Holiday', sortable: false, width: '15%', value: 'holidayHours' },
-  { title: 'PTO Balance', sortable: false, width: '20%', key: 'ptoBalance' },
-  { title: 'Holiday Balance', sortable: false, width: '20%', key: 'holidayBalance' },
-  { title: '', sortable: false, width: '13%', key: 'actions' }
+  { title: 'PTO Balance', sortable: false, width: '25%', key: 'ptoBalance' },
+  { title: 'Holiday Balance', sortable: false, width: '25%', key: 'holidayBalance' }
 ]);
+
+/**
+ * CYK variables: delete this section and any logic specific to this section once
+ *                the merge is completed.
+ */
+const CYK = reactive({
+  USE: props.isCyk, // whether or not current employee is CYK
+  ACCRUAL_AMOUNT: 6.67, // Brandon Lally: "For CYK we accrue PTO currently at a bi-weekly rate of [exactly] 6.67 hours"
+  ACCRUAL_MONTHS: {
+    '2024-07': 2,
+    '2024-08': 3,
+    '2024-09': 2,
+    '2024-10': 2,
+    '2024-11': 2,
+    '2024-12': 2
+  }
+});
+let cykPTO = (date) => {
+  if (!CYK.ACCRUAL_MONTHS[date]) return PTOPerMonth.value;
+  return CYK.ACCRUAL_AMOUNT * CYK.ACCRUAL_MONTHS[date] * (employee.value.workStatus / 100);
+};
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -196,13 +240,25 @@ onMounted(async () => {
   if (!store.getters.ptoCashOuts) await updateStorePtoCashOuts();
   employee.value = store.getters.user;
 
-  // get plannedMonths from database if user has a saved plan
+  // update employee specific information
+  PTOPerMonth.value *= employee.value.workStatus / 100;
+
   if (employee.value.plannedPto?.plan) {
+    // get plannedMonths from database if user has a saved plan
     plannedMonths.value = employee.value.plannedPto.plan;
     // remove any months that are in the past
     for (var i = 0; i < plannedMonths.value; i++) {
       if (isBefore(plannedMonths.value[i].date, getTodaysDate(), 'month')) delete plannedMonths.value[i];
       else break; // months are in order, can just break if current month is today or future
+    }
+  }
+
+  // auto-select any ranges that are in the plan
+  let monthsInPlan = new Set(plannedMonths.value.map((item) => item.date));
+  for (let i in ranges.value) {
+    let range = ranges.value[i];
+    if (monthsInPlan.has(range[0]) && monthsInPlan.has(range[1])) {
+      selectedRanges.value.push(i);
     }
   }
 
@@ -222,26 +278,16 @@ onMounted(async () => {
   }
 
   // fill in PTO cashout amounts
-  fillInCashoutAmounts(props.employeeId);
+  for (let cashout of store.getters.ptoCashOuts) {
+    // skip other employees
+    if (cashout.employeeId != props.employeeId) continue;
+    // fill in pending amount
+    if (!cashout.approvedDate) pendingPtoCashouts.value += cashout.amount;
+  }
 
   // set loading stage
   loading.value = false;
-});
-
-/**
- * Gets the user's pending PTO cash out amount
- *
- * @param employeeId employee's employee ID to get PTO balances for
- * @returns Number - The pending cash out amount
- */
-function fillInCashoutAmounts(employeeId) {
-  for (let cashout of store.getters.ptoCashOuts) {
-    // skip other employees
-    if (cashout.employeeId != employeeId) continue;
-    // fill in both pending and non-pending amounts
-    if (!cashout.approvedDate) pendingPtoCashouts.value += cashout.amount;
-  }
-} // getPendingPtoCashoutAmount
+}); // onMounted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -251,16 +297,7 @@ function fillInCashoutAmounts(employeeId) {
 const plannedMonths = ref([]); // months that are planned
 
 /**
- * Removes or adds a month to the plan, used by chips
- */
-function toggleMonthInPlan(chip) {
-  let i = plannedMonths.value.findIndex((item) => item.date == chip.value);
-  if (i >= 0) removeMonthFromPlan(null, i);
-  else addMonthToPlan(chip.value);
-}
-
-/**
- * Add a month to the plan. Used by chips by proxy of toggleMonthInPlan()
+ * Add a month to the plan. Used by chips by proxy of toggleMonthInPlan().
  *
  * @param date the YYYY-MM to add
  */
@@ -285,10 +322,48 @@ function removeMonthFromPlan(month, i = null) {
   if (i === null) i = plannedMonths.value.findIndex((item) => item.date === month.date);
   // remove from plan
   plannedMonths.value.splice(i, 1);
-  // HERE
 } // removeMonthFromPlan
 
-const pendingPtoCashouts = ref(0);
+/**
+ * Sets dates to be dates selected based on selectedRanges. Finds the earliest and
+ * latest dates and fills in everything in between.
+ */
+function refreshDates() {
+  // get what start and end dates should be
+  let startDate = '9999-01-01';
+  let endDate = '0000-01-01';
+  let range;
+  for (let i of selectedRanges.value) {
+    range = ranges.value[i];
+    if (isBefore(range[0], startDate)) startDate = range[0];
+    if (isAfter(range[1], endDate)) endDate = range[1];
+  }
+
+  // make sure date is in future
+  if (isSameOrBefore(startDate, getTodaysDate(), 'month')) startDate = add(getTodaysDate(), 1, 'month', 'YYYY-MM');
+
+  // loop through plannedMonths and remove any bad dates
+  let month;
+  for (let i = 0; i < plannedMonths.value.length; i++) {
+    month = plannedMonths.value[i].date;
+    if (isBefore(month, startDate) || isAfter(month, endDate)) removeMonthFromPlan(null, i--);
+  }
+
+  // loop through start/end dates and add any missing ones
+  let monthsInPlan = new Set(plannedMonths.value.map((item) => item.date));
+  let curr = format(startDate, null, 'YYYY-MM');
+  while (!isAfter(curr, endDate, 'month')) {
+    if (!monthsInPlan.has(curr)) addMonthToPlan(curr);
+    curr = add(curr, 1, 'month', 'YYYY-MM');
+  }
+} // refreshDates
+
+/**
+ * Watch user (un)selecting ranges, refresh table when they do
+ */
+watch(selectedRanges, () => {
+  refreshDates();
+}); // watchSelectedRanges
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -297,14 +372,14 @@ const pendingPtoCashouts = ref(0);
 // |--------------------------------------------------|
 
 /**
- * Cancel event handler
+ * Cancel button handler
  */
 function cancel() {
   emitter.emit('close-pto-planning-form');
 } // cancel
 
 /**
- * Saves user's plan to database
+ * Save button: save info to database and emit to other components
  */
 async function save() {
   // set loading status
@@ -329,6 +404,7 @@ async function save() {
   await updateStoreUser();
   emitter.emit('update-planned-pto-results-time-data', data.plannedPto);
   emitter.emit('update-planned-pto-results-time-period', data.plannedPto);
+  emitter.emit('update-planned-pto-results-job-codes', data.plannedPto);
 
   // set loading status
   loading.value = false;
@@ -338,17 +414,25 @@ async function save() {
   setTimeout(() => {
     saveButtonText.value = 'Save';
   }, 2500);
-}
+} // save
 
 /**
- * Gets proper class for chip by deciding whether or not it is selected
- * @param chip chip to get class for
+ * Returns the format that a date should be in in the table.
+ * @param date
  */
-function selectedClass(chip) {
-  let i = plannedMonths.value.findIndex((item) => item.date == chip.value);
-  if (i >= 0) return 'text-primary';
-  return '';
-} //
+function getDateFormat(date) {
+  return isSame(getTodaysDate(), date, 'year') ? 'MMMM' : 'MMMM YYYY';
+} // getDateFormat
+
+function getRangeTitle(range) {
+  // return YYYY for exact year ranges
+  if (range.at(-1).isYear) return format(range[0], null, 'YYYY');
+
+  // otherwise return month, year ranged format
+  let start = format(range[0], null, 'MMMM YYYY');
+  let end = format(range[1], null, 'MMMM YYYY');
+  return `${start} - ${end}`;
+} // getRangeTitle
 
 /**
  * Get class for PTO balance
@@ -364,7 +448,7 @@ function ptoBalanceClass(balance) {
   switch (true) {
     case balance < 0: // negative balance
       return `${danger} ${bold}`;
-    case balance < 40: // low balance (should have at least 1 week of PTO)
+    case balance < 40: // low balance, should have at least 1 full week of PTO
       return `${warning} ${bold}`;
     case balance == maxPTO.value: // max balance, won't accrue ANY PTO next month
       return `${danger} ${bold}`;
@@ -384,64 +468,7 @@ const PTOPerMonth = ref(14); // 14 hours per pay period (month), equals 21 days 
 const maxPTO = ref(208); // maximum PTO hours you can have at one time
 const holidayPerYear = ref(88); // 11 days per year
 
-/**
- * Returns PTO amount after given date
- *
- * @param date date of desired PTO balance (inclusive). if null, defaults to last planned date.
- * if no date and no planned months, defaults to today.
- */
-let ptoCache = {};
-function getPtoBalance(date = null) {
-  // return default of current PTO balance if no planned months
-  if (plannedMonths.value.length == 0) return formatNumber(props.pto - pendingPtoCashouts.value);
-  // default date value to last planned month
-  date = date || plannedMonths.value[plannedMonths.value.length - 1].date;
-  // start with current PTO balance minus pending cashouts
-  let ptoBalance = props.pto - pendingPtoCashouts.value;
-
-  // quick helper to max out PTO value
-  const maxedPTO = (pto) => Math.min(pto, maxPTO.value);
-
-  // calculate and update this month's cache values
-  if (!ptoCache[date]) ptoCache[date] = {};
-  ptoCache[date].count = plannedMonths.value.length; // update count
-  let sum = 0;
-  for (let m of plannedMonths.value) {
-    if (isAfter(m.date, date, 'month')) break;
-    sum += Number(m.ptoHours);
-  }
-  ptoCache[date].sum = sum; // update sum
-
-  // base case: date is current month
-  if (isSame(date, getTodaysDate('YYYY-MM'))) {
-    ptoBalance -= plannedMonthsBalance(date, 'ptoHours');
-    ptoCache[date].balance = ptoBalance;
-    return Number(maxedPTO(ptoBalance).toFixed(2));
-  }
-
-  // check last month's cache values compares to this month's, use cache if
-  // they match. if false, recursively calculate it.
-  let lastMonth = subtract(date, 1, 'month', 'YYYY-MM');
-  let sumCheck = ptoCache[lastMonth]?.sum === ptoCache[date].sum - plannedMonthsBalance(date, 'ptoHours');
-  let countCheck = ptoCache[lastMonth]?.count === ptoCache[date].count;
-  let undefinedCheck = ptoCache[lastMonth]?.sum && ptoCache[lastMonth]?.count;
-  if (sumCheck && countCheck && undefinedCheck) {
-    ptoBalance = ptoCache[lastMonth].balance;
-  } else {
-    ptoBalance = getPtoBalance(lastMonth);
-  }
-
-  // factor in this month's PTO accrual and PTO taken, staying below max
-  ptoBalance += PTOPerMonth.value;
-  ptoBalance = maxedPTO(ptoBalance);
-  ptoBalance -= plannedMonthsBalance(date, 'ptoHours');
-  ptoBalance = maxedPTO(ptoBalance);
-  ptoBalance = Number(ptoBalance.toFixed(2)); // round for floating-point precision
-
-  // update cache balance and return
-  ptoCache[date].balance = ptoBalance;
-  return ptoBalance;
-}
+const pendingPtoCashouts = ref(0);
 
 /**
  * Helper function to check if eval() works on a given string. Returns the result
@@ -456,10 +483,10 @@ function canEval(equation) {
   } catch {
     return false;
   }
-}
+} // canEval
 
 /**
- * Replaces the item with the evaluated version of the item
+ * Helper function to replace an item from plannedMonths with its eval'd result
  *
  * @param item item from the data table
  */
@@ -469,7 +496,7 @@ function evalReplace(item, attr) {
     let oldValue = plannedMonths.value[index][attr];
     plannedMonths.value[index][attr] = canEval(item[attr]) || oldValue;
   }
-}
+} // evalReplace
 
 /**
  * Helper to get the PTO or holiday balance for a given month. Also resolves equations.
@@ -487,22 +514,81 @@ function plannedMonthsBalance(date, attr) {
   // return raw number (no rounding), min at 0
   value = Math.max(value, 0);
   return Number(value);
-}
+} // plannedMonthsBalance
 
 /**
- * Returns PTO amount after given date
+ * Returns PTO amount at the end of a given month
  *
- * @param date date of desired PTO balance (inclusive). if null, defaults to last planned date.
- * if no date and no planned months, defaults to today.
+ * @param date YYYY-MM to get PTO for. if null, defaults to last date in plannedMonths.
+ */
+let ptoCache = {};
+function getPtoBalance(date = null) {
+  // return default of current PTO balance if no planned months
+  if (plannedMonths.value.length == 0) return formatNumber((props.pto ?? 0) - pendingPtoCashouts.value);
+  // default date value to last planned month
+  date = date || plannedMonths.value[plannedMonths.value.length - 1].date;
+  // start with current PTO balance minus pending cashouts
+  let ptoBalance = (props.pto ?? 0) - pendingPtoCashouts.value;
+
+  // quick helper to max out PTO value
+  const maxedPTO = (pto) => (CYK.USE ? pto : Math.min(pto, maxPTO.value));
+
+  // calculate and update this month's cache values
+  if (!ptoCache[date]) ptoCache[date] = {};
+  ptoCache[date].count = plannedMonths.value.length; // update count
+  let sum = 0;
+  for (let m of plannedMonths.value) {
+    if (isAfter(m.date, date, 'month')) break;
+    sum += Number(m.ptoHours);
+  }
+  ptoCache[date].sum = sum; // update sum
+
+  // base cases: date is current month, date is in past
+  if (isSame(date, getTodaysDate('YYYY-MM'), 'month')) {
+    ptoBalance -= plannedMonthsBalance(date, 'ptoHours');
+    ptoCache[date].balance = ptoBalance;
+    return Number(maxedPTO(ptoBalance).toFixed(2));
+  } else if (isBefore(date, getTodaysDate('YYYY-MM'), 'month')) {
+    return 0;
+  }
+
+  // check last month's cache values compares to this month's, use cache if
+  // they match. if false, recursively calculate it.
+  let lastMonth = subtract(date, 1, 'month', 'YYYY-MM');
+  let sumCheck = ptoCache[lastMonth]?.sum === ptoCache[date].sum - plannedMonthsBalance(date, 'ptoHours');
+  let countCheck = ptoCache[lastMonth]?.count === ptoCache[date].count;
+  let undefinedCheck = ptoCache[lastMonth]?.sum && ptoCache[lastMonth]?.count;
+  if (sumCheck && countCheck && undefinedCheck) {
+    ptoBalance = ptoCache[lastMonth].balance;
+  } else {
+    ptoBalance = getPtoBalance(lastMonth);
+  }
+
+  // factor in this month's PTO accrual and PTO taken, staying below max
+  ptoBalance += CYK.USE ? cykPTO(date) : PTOPerMonth.value;
+  ptoBalance = maxedPTO(ptoBalance);
+  ptoBalance -= plannedMonthsBalance(date, 'ptoHours');
+  ptoBalance = maxedPTO(ptoBalance);
+  ptoBalance = Number(ptoBalance.toFixed(2)); // round for floating-point precision
+
+  // update cache balance and return
+  ptoCache[date].balance = ptoBalance;
+  return ptoBalance;
+} // getPtoBalance
+
+/**
+ * Returns Holiday amount at the end of a given month
+ *
+ * @param date YYYY-MM to get Holiday for. if null, defaults to last date in plannedMonths.
  */
 let holidayCache = {};
 function getHolidayBalance(date = null) {
   // return default of current Holiday balance if no planned months
-  if (plannedMonths.value.length == 0) return props.holiday;
+  if (plannedMonths.value.length == 0) return props.holiday ?? 0;
   // default date value to last planned month
   date = date || plannedMonths.value[plannedMonths.value.length - 1].date;
   // start with current holiday balance
-  let holidayBalance = props.holiday;
+  let holidayBalance = props.holiday ?? 0;
 
   // calculate and update this month's cache values
   if (!holidayCache[date]) holidayCache[date] = {};
@@ -515,10 +601,12 @@ function getHolidayBalance(date = null) {
   holidayCache[date].sum = sum; // update sum
 
   // base case: date is current month
-  if (isSame(date, getTodaysDate('YYYY-MM'))) {
+  if (isSame(date, getTodaysDate('YYYY-MM'), 'month')) {
     holidayBalance -= plannedMonthsBalance(date, 'holidayHours');
     holidayCache[date].balance = holidayBalance;
     return Number(holidayBalance.toFixed(2));
+  } else if (isBefore(date, getTodaysDate('YYYY-MM'), 'month')) {
+    return 0;
   }
 
   // check last month's cache values compares to this month's, use cache if
@@ -544,18 +632,21 @@ function getHolidayBalance(date = null) {
   // update cache balance and return
   holidayCache[date].balance = holidayBalance;
   return holidayBalance;
-}
+} // getHolidayBalance
 </script>
 
 <style scoped>
 h3 {
   line-height: 20px;
 }
-.title {
-  position: relative;
+.balances {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
-.monthSelector {
-  min-width: 50%;
-  max-width: 50%;
+.left-line {
+  height: 30px;
+  border-left: 1px solid gray;
+  margin-bottom: 20px;
 }
 </style>
