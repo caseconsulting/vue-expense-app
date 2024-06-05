@@ -18,7 +18,7 @@
         <v-card-title class="d-flex align-center header_style" v-bind:class="{ 'justify-center': isMobile() }">
           <h2 class="text-white">Reports</h2>
           <v-spacer />
-          <v-btn @click="downloadTab()" v-bind="props" class="mr-4">
+          <v-btn @click="downloadTable()" v-bind="props" class="mr-4">
             Download
             <template #append>
               <v-icon>mdi-download</v-icon>
@@ -58,10 +58,12 @@
           </div>
           <div v-else>
             <!-- user is not mobile -->
-            <v-tabs color="blue" center-active grow show-arrows @update:model-value="changeTab">
-              <v-tab v-for="tab in tabs" :key="tab" :value="tab.value">{{ tab.title }}</v-tab>
+            <v-tabs color="blue" center-active grow show-arrows>
+              <v-tab v-for="(tab, i) in tabs" :key="tab" :value="tab.value" @click="changeTab(tab, i)">
+                {{ tab.title }}
+              </v-tab>
             </v-tabs>
-            <v-window v-model="currentTab">
+            <v-window v-model="currentWindow">
               <v-window-item v-for="tab in tabs" :key="tab" :value="tab.key" class="mx-2 my-6">
                 <component :is="tab.component" />
               </v-window-item>
@@ -76,7 +78,7 @@
   </div>
 </template>
 <script setup>
-import { watch, onMounted, computed, ref, inject } from 'vue';
+import { watch, onMounted, computed, ref, reactive, inject } from 'vue';
 import { useStore } from 'vuex';
 import ContactEmployeesModal from '@/components/shared/ContactEmployeesModal.vue';
 import ReportsPageLoader from '@/components/reports/ReportsPageLoader.vue';
@@ -90,7 +92,11 @@ import ReportsTechnologies from '@/components/reports/ReportsTechnologies.vue';
 import ReportsSecurityInfo from '../components/reports/ReportsSecurityInfo.vue';
 import { updateStoreEmployees, updateStoreContracts, updateStoreTags } from '@/utils/storeUtils';
 import { isMobile, userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
+<<<<<<< HEAD
 import { useRouter } from 'vue-router';
+=======
+import employeeCsv from '@/utils/csv/employeeCsv.js';
+>>>>>>> 12bdde05 (POR-2608: filled in download button data from tabs)
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -103,6 +109,7 @@ const loading = ref(true);
 const toggleContactEmployeesModal = ref(false);
 const wasRedirected = ref(false);
 const requestedDataType = ref(localStorage.getItem('requestedDataType'));
+const tableData = reactive({});
 const store = useStore();
 const emitter = inject('emitter');
 const router = useRouter();
@@ -149,6 +156,7 @@ const tabs = ref([
   }
 ]);
 const currentTab = ref(tabs.value[0]);
+const currentWindow = ref(0);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -176,6 +184,11 @@ onMounted(async () => {
     wasRedirected.value = true;
     window.scrollTo(0, 0);
   }
+
+  // update table download for tab that emitted
+  emitter.on('reports-table-update', (data) => {
+    tableData[data.tab] = data.table;
+  });
 });
 
 // |--------------------------------------------------|
@@ -198,10 +211,12 @@ function backClick() {
 /**
  * Changes the tab display.
  *
- * @param event - the new tab
+ * @param newTab - the new tab object
+ * @param index - index of tab to update v-window to
  */
-function changeTab(newTab) {
+function changeTab(newTab, index) {
   currentTab.value = newTab;
+  if (![null, undefined].includes(index)) currentWindow.value = index;
 } // changeTab
 
 /**
@@ -209,9 +224,24 @@ function changeTab(newTab) {
  */
 function renderContactEmployeesModal() {
   contactKey.value++;
-  emitter.emit('get-employees-to-contact', currentTab.value.value);
+  emitter.emit('get-employees-to-contact', currentTab.value.key);
   toggleContactEmployeesModal.value = true;
 } // renderContactEmployeesModal
+
+/**
+ * Downloads the current tab's table based on tableData
+ */
+function downloadTable() {
+  let tab = currentTab.value.key;
+  let data = tableData[tab];
+  let title = `${currentTab.value.title} Download`;
+  // rebuild the employee object based on items from table
+  let employees = [];
+  let tableIds = new Set(data.map((item) => item.key || item.id));
+  for (let e of store.getters.employees) if (tableIds.has(e.id)) employees.push(e);
+  // download
+  employeeCsv.download(employees, store.getters.contracts, store.getters.tags, title);
+}
 
 // |--------------------------------------------------|
 // |                                                  |

@@ -74,6 +74,7 @@
         :items-per-page="-1"
         class="elevation-1 row-pointer"
         @click:row="handleClick"
+        @update:current-items="updateTableDownload($event)"
       >
         <!-- Employee Number Slot -->
         <template v-slot:[`item.employeeNumber`]="{ item }">
@@ -138,6 +139,9 @@ function created() {
     this.refreshDropdownItems();
     localStorage.removeItem('requestedFilter');
   }
+
+  // initial set of table download data
+  this.updateTableDownload(this.filteredEmployees);
 } // created
 
 // |--------------------------------------------------|
@@ -297,6 +301,15 @@ function selectedTagsHasEmployee(e) {
   return false;
 } // selectedTagsHasEmployee
 
+/**
+ * Emit new data for this tab
+ *
+ * @param event the event data containing the table information
+ */
+function updateTableDownload(event) {
+  this.emitter.emit('reports-table-update', { tab: 'certifications', table: event });
+}
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     WATCHERS                     |
@@ -400,6 +413,7 @@ export default {
     removeTag,
     searchCertifications,
     selectedTagsHasEmployee,
+    updateTableDownload,
     userRoleIsAdmin,
     userRoleIsManager
   },
