@@ -20,7 +20,13 @@
           <v-spacer />
           <v-tooltip location="bottom">
             <template #activator="{ props }">
-              <v-btn id="contactEmployeesBtn" @click="renderContactEmployeesModal()" v-bind="props">
+              <v-btn @click="downloadTab()" v-bind="props" class="mr-4">
+                Download
+                <template #append>
+                  <v-icon>mdi-download</v-icon>
+                </template>
+              </v-btn>
+              <v-btn @click="renderContactEmployeesModal()" v-bind="props">
                 Contact
                 <template #append>
                   <v-icon>mdi-email</v-icon>
