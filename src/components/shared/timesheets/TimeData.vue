@@ -2,13 +2,13 @@
   <div id="t-sheets-data">
     <v-card density="compact">
       <v-card-title class="header_style d-flex align-center justify-space-between py-0 relative">
-        <h3>QuickBooks Time Data</h3>
+        <h3>{{ system }} Time Data</h3>
         <span v-if="getLastUpdatedText && employeeIsUser()" class="last-updated">
           {{ getLastUpdatedText }}
         </span>
         <v-btn variant="text" icon="mdi-refresh" @click="resetData()">
           <template v-slot:default>
-            <v-tooltip activator="parent" location="top">Refresh QuickBooks data</v-tooltip>
+            <v-tooltip activator="parent" location="top">Refresh {{ system }} data</v-tooltip>
             <v-icon color="white" size="large">mdi-refresh</v-icon>
           </template>
         </v-btn>
@@ -28,7 +28,7 @@
               :supplementalData="supplementalData || {}"
             ></time-period-hours>
             <hr class="mt-3 mb-5 mx-7" />
-            <p-t-o-hours :employee="employee" :ptoBalances="ptoBalances || {}"></p-t-o-hours>
+            <p-t-o-hours :employee="employee" :ptoBalances="ptoBalances || {}" :system="system"></p-t-o-hours>
           </div>
         </div>
       </v-card-text>
@@ -36,12 +36,41 @@
   </div>
 </template>
 
-<script>
-import TimePeriodHours from '@/components/shared/quickbooks/TimePeriodHours.vue';
-import PTOHours from '@/components/shared/quickbooks/PTOHours.vue';
+<script setup>
+import TimePeriodHours from '@/components/shared/timesheets/TimePeriodHours.vue';
+import PTOHours from '@/components/shared/timesheets/PTOHours.vue';
 import _ from 'lodash';
 import api from '@/shared/api';
+import { computed, inject, ref, onBeforeMount, onBeforeUnmount } from 'vue';
+import { useStore } from 'vuex';
 import { difference, isBefore, now } from '@/shared/dateUtils';
+import { updateStoreContracts } from '@/utils/storeUtils';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const props = defineProps(['employee']);
+const emitter = inject('emitter');
+const store = useStore();
+
+const clonedEmployee = ref(props.employee);
+const excludeIfZero = ref(['Jury Duty', 'Maternity/Paternity Time Off']);
+const errorMessage = ref(null);
+const lastUpdated = ref(null);
+const loading = ref(true);
+const ptoBalances = ref({});
+const supplementalData = ref(null);
+const system = ref(null);
+const timesheets = ref(null);
+const KEYS = ref({
+  QB: 'qbData',
+  PAY_PERIODS: 'payPeriods',
+  CALENDAR_YEAR: 'calendarYear',
+  CONTRACT_YEAR: 'contractYear'
+});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -52,29 +81,30 @@ import { difference, isBefore, now } from '@/shared/dateUtils';
 /**
  * The Before Unmount lifesycle hook.
  */
-function beforeUnmount() {
-  this.emitter.off('get-period-data');
-} // beforeUnmount
+onBeforeUnmount(() => {
+  emitter.off('get-period-data');
+}); // beforeUnmount
 
 /**
  * The Created lifecycle hook.
  */
-async function created() {
-  this.emitter.on('get-period-data', async ({ isCalendarYear, isYearly }) => {
-    await this.setData(isCalendarYear, isYearly);
+onBeforeMount(async () => {
+  emitter.on('get-period-data', async ({ isCalendarYear, isYearly }) => {
+    await setData(isCalendarYear, isYearly);
   });
-  await this.setInitialData();
+  await setInitialData();
 
   // add planned PTO and Holiday to ptoBalances
-  this.refreshPlannedPto();
+  refreshPlannedPto();
+
   // listen for planned PTO results
-  this.emitter.on('update-planned-pto-results-time-data', (data) => {
-    this.employee.plannedPto = data;
-    this.refreshPlannedPto();
+  emitter.on('update-planned-pto-results-time-data', (data) => {
+    clonedEmployee.value.plannedPto = data;
+    refreshPlannedPto();
   });
 
-  this.loading = false;
-} // created
+  loading.value = false;
+}); // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -87,10 +117,8 @@ async function created() {
  *
  * @returns String - The string to display for last updated
  */
-function getLastUpdatedText() {
-  let now = this.now();
-  let lastUpdated = this.lastUpdated;
-  let minutes = parseInt(difference(now, lastUpdated, 'minute') || 0);
+const getLastUpdatedText = computed(() => {
+  let minutes = parseInt(difference(now(), lastUpdated.value, 'minute') || 0);
   let hours = parseInt(minutes / 60);
   if (hours < 1 && minutes > 0) {
     return `Last updated ${minutes} ${minutes > 1 ? 'minutes' : 'minute'} ago`;
@@ -99,7 +127,7 @@ function getLastUpdatedText() {
   } else {
     return null;
   }
-} // getLastUpdatedText
+}); // getLastUpdatedText
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -108,12 +136,12 @@ function getLastUpdatedText() {
 // |--------------------------------------------------|
 
 /**
- * True if the user is the employee from props
+ * True if the user is the employee from props.
  *
  * @returns Boolean - Whether or not the employee prop is the user
  */
 function employeeIsUser() {
-  return this.employee.id === this.$store.getters.user.id;
+  return props.employee.id === store.getters.user.id;
 } // employeeIsUser
 
 /**
@@ -123,10 +151,10 @@ function employeeIsUser() {
  * @returns Boolean - Whether or not the API returned an error
  */
 function hasError(timesheetsData) {
-  if (timesheetsData?.name === 'AxiosError') {
-    this.errorMessage = timesheetsData?.response?.data?.message;
-    if (_.isEmpty(this.errorMessage)) {
-      this.errorMessage = 'An error has occurred';
+  if (timesheetsData?.name === 'AxiosError' || timesheetsData.code >= 400) {
+    errorMessage.value = timesheetsData?.response?.data?.message;
+    if (_.isEmpty(errorMessage.value) || typeof errorMessage.value === 'object') {
+      errorMessage.value = 'An error has occurred, try refreshing the widget';
     }
     return true;
   } else {
@@ -150,15 +178,15 @@ function isStorageExpired(lastUpdated) {
  * @returns Boolean - Whether or not timesheets exists in lcoal storage
  */
 function qbStorageExists() {
-  return localStorage.getItem(this.KEYS.QB) ? JSON.parse(localStorage.getItem(this.KEYS.QB)) : null;
+  return localStorage.getItem(KEYS.value.QB) ? JSON.parse(localStorage.getItem(KEYS.value.QB)) : null;
 } // qbStorageExists
 
 /**
  * Removes a jobcode key value pair from PTO balances object if it is not relevant to a user.
  */
 function removeExcludedPtoBalances() {
-  _.forEach(this.ptoBalances, (balance, jobcode) => {
-    if (this.excludeIfZero.includes(jobcode) && balance === 0) delete this.ptoBalances[jobcode];
+  _.forEach(ptoBalances.value, (balance, jobcode) => {
+    if (excludeIfZero.value.includes(jobcode) && balance === 0) delete ptoBalances.value[jobcode];
   });
 } // removeExcludedPtoBalances
 
@@ -181,9 +209,11 @@ function convertToSeconds(hours) {
  * @param planKey key in planResults to grab from
  */
 function addPlanToBalances(balanceKey, itemsKey, planResults, planKey) {
-  let balanceItem = this.ptoBalances[balanceKey];
-  if (!balanceItem.value) this.ptoBalances[balanceKey] = { value: balanceItem, items: {} };
-  this.ptoBalances[balanceKey].items[itemsKey] = this.convertToSeconds(planResults[planKey]);
+  if (!ptoBalances.value[balanceKey]?.items) {
+    let oldBalance = ptoBalances.value[balanceKey]?.value || ptoBalances.value[balanceKey] || 0;
+    ptoBalances.value[balanceKey] = { value: oldBalance, items: {} };
+  }
+  ptoBalances.value[balanceKey].items[itemsKey] = convertToSeconds(planResults[planKey]);
 } // addPlanToBalances
 
 /**
@@ -195,37 +225,38 @@ function addPlanToBalances(balanceKey, itemsKey, planResults, planKey) {
 function refreshPlannedPto() {
   // set plan to employee object
   let plan = {
-    pto: this.employee.plannedPto?.results?.pto,
-    holiday: this.employee.plannedPto?.results?.holiday,
-    endDate: this.employee.plannedPto?.results?.endDate
+    pto: props.employee.plannedPto?.results?.pto,
+    holiday: props.employee.plannedPto?.results?.holiday,
+    endDate: props.employee.plannedPto?.results?.endDate
   };
   // yeet outta here if there is no planned PTO
   if (!plan.endDate) {
-    delete this.ptoBalances['PTO']?.items?.['PTO after plan'];
-    delete this.ptoBalances['Holiday']?.items?.['Holiday after plan'];
+    delete ptoBalances.value?.['PTO']?.items?.['PTO after plan'];
+    delete ptoBalances.value?.['Holiday']?.items?.['Holiday after plan'];
     return;
   }
   // set planned PTO and Holiday balances
-  this.addPlanToBalances('PTO', 'PTO after plan', plan, 'pto');
-  this.addPlanToBalances('Holiday', 'Holiday after plan', plan, 'holiday');
+  addPlanToBalances('PTO', 'PTO after plan', plan, 'pto');
+  addPlanToBalances('Holiday', 'Holiday after plan', plan, 'holiday');
 } // refreshPlannedPto
 
 /**
  * Resets components data and removes timesheets local storage.
  */
 async function resetData() {
-  this.loading = true;
-  this.timesheets = null;
-  this.ptoBalances = null;
-  this.supplementalData = null;
-  this.lastUpdated = null;
-  this.errorMessage = null;
-  if (this.employeeIsUser()) {
-    localStorage.removeItem(this.KEYS.QB);
+  loading.value = true;
+  timesheets.value = null;
+  ptoBalances.value = null;
+  supplementalData.value = null;
+  system.value = null;
+  lastUpdated.value = null;
+  errorMessage.value = null;
+  if (employeeIsUser()) {
+    localStorage.removeItem(KEYS.value.QB);
   }
-  this.emitter.emit('reset-data');
-  await this.setInitialData(false);
-  this.loading = false;
+  emitter.emit('reset-data');
+  await setInitialData(false);
+  loading.value = false;
 } // resetData
 
 /**
@@ -236,19 +267,20 @@ async function resetData() {
  */
 async function setDataFromApi(isCalendarYear, isYearly) {
   let code = isYearly ? (isCalendarYear ? 3 : 4) : 2;
-  let timesheetsData = await api.getTimesheetsData(this.employee.employeeNumber, {
+  let timesheetsData = await api.getTimesheetsData(props.employee.employeeNumber, {
     code,
-    employeeId: this.employee.id
+    employeeId: props.employee.id
   });
-  if (!this.hasError(timesheetsData)) {
-    this.timesheets = timesheetsData.timesheets;
-    this.ptoBalances = timesheetsData.ptoBalances;
-    this.supplementalData = timesheetsData.supplementalData;
-    this.lastUpdated = now();
-    this.removeExcludedPtoBalances();
-    if (this.employeeIsUser()) {
+  if (!hasError(timesheetsData)) {
+    timesheets.value = timesheetsData.timesheets;
+    ptoBalances.value = timesheetsData.ptoBalances;
+    supplementalData.value = timesheetsData.supplementalData;
+    system.value = timesheetsData.system;
+    lastUpdated.value = now();
+    removeExcludedPtoBalances();
+    if (employeeIsUser()) {
       // only set local storage if user is looking at their own data
-      this.setStorage(isCalendarYear, isYearly);
+      setStorage(isCalendarYear, isYearly);
     }
   }
 } // setDataFromApi
@@ -260,10 +292,11 @@ async function setDataFromApi(isCalendarYear, isYearly) {
  * @param {String} key - The pay periods or yearly object key
  */
 function setDataFromStorage(qbStorage, key) {
-  this.timesheets = qbStorage[key]?.timesheets;
-  this.supplementalData = qbStorage[key]?.supplementalData;
-  this.lastUpdated = qbStorage[key]?.lastUpdated;
-  this.ptoBalances = qbStorage?.ptoBalances;
+  timesheets.value = qbStorage[key]?.timesheets;
+  supplementalData.value = qbStorage[key]?.supplementalData;
+  lastUpdated.value = qbStorage[key]?.lastUpdated;
+  ptoBalances.value = qbStorage?.ptoBalances;
+  system.value = qbStorage?.system;
 } // setDataFromStorage
 
 /**
@@ -273,19 +306,20 @@ function setDataFromStorage(qbStorage, key) {
  * @param {Boolean} isYearly - Whether or not the time period is yearly
  */
 function setStorage(isCalendarYear, isYearly) {
-  let storage = this.qbStorageExists();
-  let key = isYearly ? (isCalendarYear ? this.KEYS.CALENDAR_YEAR : this.KEYS.CONTRACT_YEAR) : this.KEYS.PAY_PERIODS;
+  let storage = qbStorageExists();
+  let key = isYearly ? (isCalendarYear ? KEYS.value.CALENDAR_YEAR : KEYS.value.CONTRACT_YEAR) : KEYS.value.PAY_PERIODS;
   let data = {
     [key]: {
-      timesheets: this.timesheets,
-      supplementalData: this.supplementalData,
-      lastUpdated: this.lastUpdated
+      timesheets: timesheets.value,
+      supplementalData: supplementalData.value,
+      lastUpdated: lastUpdated.value
     },
-    ptoBalances: this.ptoBalances
+    ptoBalances: ptoBalances.value,
+    system: system.value
   };
 
   // overwrite storage
-  localStorage.setItem(this.KEYS.QB, JSON.stringify({ ...storage, ...data }));
+  localStorage.setItem(KEYS.value.QB, JSON.stringify({ ...storage, ...data }));
 } // setStorage
 
 /**
@@ -295,75 +329,22 @@ function setStorage(isCalendarYear, isYearly) {
  * @param {Boolean} isYearly - Whether or not the time period is yearly
  */
 async function setData(isCalendarYear, isYearly) {
-  let storage = this.qbStorageExists();
-  let key = isYearly ? (isCalendarYear ? this.KEYS.CALENDAR_YEAR : this.KEYS.CONTRACT_YEAR) : this.KEYS.PAY_PERIODS;
-  if (storage && storage[key] && this.employeeIsUser() && !this.isStorageExpired(storage[key].lastUpdated)) {
-    this.setDataFromStorage(storage, key);
+  let storage = qbStorageExists();
+  let key = isYearly ? (isCalendarYear ? KEYS.value.CALENDAR_YEAR : KEYS.value.CONTRACT_YEAR) : KEYS.value.PAY_PERIODS;
+  if (storage && storage[key] && employeeIsUser() && !isStorageExpired(storage[key].lastUpdated)) {
+    setDataFromStorage(storage, key);
   } else {
-    await this.setDataFromApi(isCalendarYear, isYearly);
+    await setDataFromApi(isCalendarYear, isYearly);
   }
-  this.refreshPlannedPto();
+  refreshPlannedPto();
 } // setData
 
 /**
  * Sets the timesheets data on initial load based on a time period (current and previous pay period displayed).
  */
 async function setInitialData() {
-  await this.setData();
+  await Promise.all([setData(), !store.getters.contracts ? updateStoreContracts() : _]);
 } // setInitialData
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  beforeUnmount,
-  components: {
-    TimePeriodHours,
-    PTOHours
-  },
-  computed: {
-    getLastUpdatedText
-  },
-  created,
-  data() {
-    return {
-      excludeIfZero: ['Jury Duty', 'Maternity/Paternity Time Off'],
-      errorMessage: null,
-      lastUpdated: null,
-      loading: true,
-      ptoBalances: null,
-      supplementalData: null,
-      timesheets: null,
-      KEYS: {
-        QB: 'qbData',
-        PAY_PERIODS: 'payPeriods',
-        CALENDAR_YEAR: 'calendarYear',
-        CONTRACT_YEAR: 'contractYear'
-      }
-    };
-  },
-  methods: {
-    addPlanToBalances,
-    convertToSeconds,
-    employeeIsUser,
-    hasError,
-    isStorageExpired,
-    now,
-    qbStorageExists,
-    refreshPlannedPto,
-    removeExcludedPtoBalances,
-    resetData,
-    setInitialData,
-    setData,
-    setDataFromApi,
-    setDataFromStorage,
-    setStorage
-  },
-  props: ['employee']
-};
 </script>
 
 <style scoped>

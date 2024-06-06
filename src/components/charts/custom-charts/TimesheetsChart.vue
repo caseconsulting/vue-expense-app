@@ -16,10 +16,27 @@
   </div>
 </template>
 
-<script>
-import DoughnutChart from '../base-charts/DoughnutChart.vue';
+<script setup>
+import DoughnutChart from '@/components/charts/base-charts/DoughnutChart.vue';
+import { inject, ref, onMounted, onBeforeUnmount } from 'vue';
 import { formatNumber } from '@/utils/utils.js';
 import _ from 'lodash';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const props = defineProps(['jobcodes', 'nonBillables']);
+const emitter = inject('emitter');
+
+const completed = ref(0);
+const needed = ref(0);
+const remainingHours = ref(0);
+const options = ref(null);
+const chartData = ref(null);
+const dataReceived = ref(false);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -30,20 +47,20 @@ import _ from 'lodash';
 /**
  * The Before Unmount lifecycle hook
  */
-function beforeUnmount() {
-  this.emitter.off('timesheets-chart-data');
-} // beforeUnmount
+onBeforeUnmount(() => {
+  emitter.off('timesheets-chart-data');
+}); // beforeUnmount
 
 /**
  * Mounted lifecycle hook.
  */
-async function mounted() {
-  this.emitter.on('timesheets-chart-data', async ({ completed, needed, remainingHours }) => {
-    this.completed = completed;
-    this.needed = needed;
-    this.remainingHours = remainingHours;
-    await this.fillData();
-    this.dataReceived = true;
+onMounted(async () => {
+  emitter.on('timesheets-chart-data', async ({ completed: c, needed: n, remainingHours: r }) => {
+    completed.value = c;
+    needed.value = n;
+    remainingHours.value = r;
+    await fillData();
+    dataReceived.value = true;
   });
 
   // create tooltip
@@ -62,7 +79,7 @@ async function mounted() {
   // Set vuetify class styling
   tooltipEl.classList.add('px-4', 'py-2');
   document.body.appendChild(tooltipEl);
-} // mounted
+}); // onMounted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -77,7 +94,7 @@ async function fillData() {
   let colors = ['#1A237E', '#5C6BC0', '#9FA8DA'];
   let colorsOptions = ['#1A237E', '#5C6BC0', '#9FA8DA'];
   // remove pto jobcodes from chart for yearly data
-  let jobcodes = _.pickBy(this.jobcodes, (value, key) => !this.nonBillables?.includes(key));
+  let jobcodes = _.pickBy(props.jobcodes, (value, key) => !props.nonBillables?.includes(key));
   let jobCodeValues = _.map(Object.values(jobcodes), (duration) => {
     return formatNumber(Number(duration / 60 / 60));
   }); // removes decimals if a whole number
@@ -88,11 +105,11 @@ async function fillData() {
   colors = _.slice(colors, 0, jobCodeValues?.length);
   colors.push('#EAEAEA'); // push grey for remaining hours
 
-  this.chartData = {
+  chartData.value = {
     labels: [...Object.keys(jobcodes || []), 'Remaining'],
     datasets: [
       {
-        data: [...jobCodeValues, this.remainingHours >= 0 ? this.remainingHours : 0],
+        data: [...jobCodeValues, remainingHours.value >= 0 ? remainingHours.value : 0],
         backgroundColor: colors,
         borderWidth: 2
       }
@@ -130,7 +147,7 @@ async function fillData() {
     tooltipEl.style.top = position.top + tooltipModel.caretY + 'px';
   } // externalTooltipHandler
 
-  this.options = {
+  options.value = {
     cutout: '70%',
     plugins: {
       legend: {
@@ -145,32 +162,8 @@ async function fillData() {
     },
     maintainAspectRatio: false
   };
-  this.dataReceived = true;
+  dataReceived.value = true;
 } // fillData
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  beforeUnmount,
-  components: { DoughnutChart },
-  data() {
-    return {
-      completed: 0,
-      needed: 0,
-      remainingHours: 0,
-      options: null,
-      chartData: null,
-      dataReceived: false
-    };
-  },
-  methods: { fillData },
-  mounted,
-  props: ['jobcodes', 'nonBillables']
-};
 </script>
 
 <style scoped>

@@ -33,8 +33,10 @@
           <div class="font-weight-bold d-inline-block">Period Hours Completed (<span class="var">PHC</span>)</div>
           =
           <ul>
-            <li>Pay Period —> All hours inputted in QuickBooks during the displayed time period</li>
-            <li>Calendar/Contract Period —> Billable hours inputted in QuickBooks during the displayed time period</li>
+            <li>Pay Period —> All hours inputted in ADP/QuickBooks during the displayed time period</li>
+            <li>
+              Calendar/Contract Period —> Billable hours inputted in ADP/QuickBooks during the displayed time period
+            </li>
           </ul>
         </div>
         <div>
@@ -63,7 +65,8 @@
         </div>
         <div class="mb-3">
           <div class="font-weight-bold d-inline-block">Work Days Remaining (<span class="var">WDR</span>)</div>
-          = week days from today to the period end date - future days inputted in QuickBooks - 1 IF today is a week day
+          = week days from today to the period end date - future days inputted in ADP/QuickBooks - 1 IF today is a week
+          day
         </div>
       </div>
       <div>Note: You can edit Work Days Remaining field by clicking on it</div>

@@ -27,8 +27,6 @@ export default createStore({
       fiscalDateView: null,
       loginTime: null,
       ptoCashOuts: null,
-      quickbooksPTO: null,
-      quickbooksMonthlyHours: null,
       user: null,
       userRole: null,
       storeIsPopulated: false,
@@ -68,12 +66,6 @@ export default createStore({
     setLoginTime(state, payload) {
       state.loginTime = payload.loginTime;
     },
-    setQuickbooksPTO(state, payload) {
-      state.quickbooksPTO = payload.quickbooksPTO;
-    },
-    setQuickbooksMonthlyHours(state, payload) {
-      state.quickbooksMonthlyHours = payload.quickbooksMonthlyHours;
-    },
     setPtoCashOuts(state, payload) {
       state.ptoCashOuts = payload.ptoCashOuts;
     },
@@ -111,12 +103,6 @@ export default createStore({
     },
     setLoginTime(context, payload) {
       context.commit('setLoginTime', payload);
-    },
-    setQuickbooksPTO(context, payload) {
-      context.commit('setQuickbooksPTO', payload);
-    },
-    setQuickbooksMonthlyHours(context, payload) {
-      context.commit('setQuickbooksMonthlyHours', payload);
     },
     setPtoCashOuts(context, payload) {
       context.commit('setPtoCashOuts', payload);
@@ -161,12 +147,6 @@ export default createStore({
     },
     loginTime(state) {
       return state.loginTime;
-    },
-    quickbooksPTO(state) {
-      return state.quickbooksPTO;
-    },
-    quickbooksMonthlyHours(state) {
-      return state.quickbooksMonthlyHours;
     },
     ptoCashOuts(state) {
       return state.ptoCashOuts;

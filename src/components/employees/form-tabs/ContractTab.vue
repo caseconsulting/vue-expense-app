@@ -159,17 +159,6 @@
             </v-text-field>
             <!-- End End Date -->
           </v-col>
-          <v-col class="pt-0">
-            <v-switch
-              v-if="(userRoleIsAdmin() || userRoleIsManager()) && show1860Switch(project)"
-              v-model="project.bonusCalculationDate"
-              @click="isolate1860CalcOption(project.projectId)"
-              label="Use for 1860 calculation?"
-              color="primary"
-              class="ma-0 pa-0"
-              hide-details
-            />
-          </v-col>
         </v-row>
       </div>
       <!-- End of project loop -->
@@ -432,34 +421,6 @@ function hasEndDatesFilled(index) {
 } // hasEndDatesFilled
 
 /**
- * Allows admin to select a project as the 1860 calculation without manually
- * unselected the other ones. Also checks to see if the project is current.
- *
- * @param project ID of project to be selected, all others will be unselected
- */
-function isolate1860CalcOption(projectId) {
-  for (let c of this.editedContracts) {
-    for (let p of c.projects) {
-      if (p.projectId !== projectId || p.presentDate !== true) p.bonusCalculationDate = false;
-    }
-  }
-} // isolate1860CalcOption
-
-/**
- * Whether or not to show the 1860 bonus calculation switch. If false, it will also
- * set the bonusCalculationDate to false for the project.
- *
- * @param project project to decide for
- * @return if project should show 1860 calculation
- */
-
-function show1860Switch(project) {
-  let toShow = !project.endDate || isBefore(getTodaysDate(), project.endDate, 'day');
-  if (!toShow) project.bonusCalculationDate = false;
-  return toShow;
-} // show1860Switch
-
-/**
  * Parse the date after losing focus.
  *
  * @return String - The date in YYYY-MM format
@@ -591,8 +552,6 @@ export default {
     getRequiredRules,
     getTodaysDate, // dateUtils
     hasEndDatesFilled,
-    isolate1860CalcOption,
-    show1860Switch,
     isAfter, // dateUtils
     isBefore, // dateUtils
     isEmpty,
