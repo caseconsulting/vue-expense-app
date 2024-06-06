@@ -106,11 +106,55 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref, inject, watch } from 'vue';
+import { useStore } from 'vuex';
 import _ from 'lodash';
 import { userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
+<<<<<<< HEAD
 import { employeeFilter } from '@/shared/filterUtils';
 import { getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
+=======
+import { customEmployeeFilter, getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
+const emitter = inject('emitter');
+const store = useStore();
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                       DATA                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const employees = ref([]);
+const employeesInfo = ref([]);
+const filteredEmployees = ref([]);
+const headers = ref([
+  {
+    title: 'Employee #',
+    key: 'employeeNumber'
+  },
+  {
+    title: 'Name',
+    key: 'fullName'
+  },
+  {
+    title: 'Awards',
+    key: 'awardNames'
+  },
+  {
+    title: 'Email',
+    key: 'email'
+  }
+]); // datatable headers
+const awardSearch = ref(null);
+const awards = ref([]);
+const search = ref(null); // query text for datatable search field
+const selectedTags = ref([]);
+const showInactiveEmployees = ref(false);
+const sortBy = ref([{ key: 'employeeNumber' }]); // sort datatable items
+const tags = ref([]);
+const tagFlip = ref([]);
+>>>>>>> 6fbab3b3 (POR-2608: saving)
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -121,26 +165,26 @@ import { getActive, getFullName, populateEmployeesDropdown } from './reports-uti
 /**
  * The created lifecycle hook.
  */
-function created() {
-  this.emitter.on('get-employees-to-contact', (tab) => {
+onMounted(() => {
+  emitter.on('get-employees-to-contact', (tab) => {
     if (tab === 'awards') {
-      this.emitter.emit('list-of-employees-to-contact', this.filteredEmployees);
+      emitter.emit('list-of-employees-to-contact', filteredEmployees.value);
     }
   });
-  this.employeesInfo = this.getActive(this.$store.getters.employees); // default to filtered
-  this.tags = this.$store.getters.tags;
-  this.filteredEmployees = this.employeesInfo; // this one is shown
-  this.populateDropdowns(this.employeesInfo);
-  this.buildAwardsColumns();
+  employeesInfo.value = getActive(store.getters.employees); // default to filtered
+  tags.value = store.getters.tags;
+  filteredEmployees.value = employeesInfo.value; // this one is shown
+  populateDropdowns(employeesInfo.value);
+  buildAwardsColumns();
   if (localStorage.getItem('requestedFilter')) {
-    this.awardSearch = localStorage.getItem('requestedFilter');
-    this.refreshDropdownItems();
+    awardSearch.value = localStorage.getItem('requestedFilter');
+    refreshDropdownItems();
     localStorage.removeItem('requestedFilter');
   }
 
   // initial set of table download data
-  this.updateTableDownload(this.filteredEmployees);
-} // created
+  updateTableDownload(filteredEmployees.value);
+}); // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -152,7 +196,7 @@ function created() {
  * Gets all of the active awards for each employee and displays the column on the table.
  */
 function buildAwardsColumns() {
-  this.employeesInfo.forEach((currentEmp) => {
+  employeesInfo.value.forEach((currentEmp) => {
     if (currentEmp.awards) {
       let hasAward = false;
       let awards = '';
@@ -176,7 +220,7 @@ function buildAwardsColumns() {
  *
  */
 function chipColor(id) {
-  return this.tagFlip.includes(id) ? 'red' : 'gray';
+  return tagFlip.value.includes(id) ? 'red' : 'gray';
 } // chipColor
 
 /**
@@ -193,11 +237,11 @@ function handleClick(_, { item }) {
  */
 function negateTag(item) {
   // try to find the id in the tagFlip array, if it is there then remove it else add it
-  const index = this.tagFlip.indexOf(item.id);
+  const index = tagFlip.value.indexOf(item.id);
   if (index >= 0) {
-    this.tagFlip.splice(index, 1);
+    tagFlip.value.splice(index, 1);
   } else {
-    this.tagFlip.push(item.id);
+    tagFlip.value.push(item.id);
   }
 } // negateTag
 
@@ -205,13 +249,13 @@ function negateTag(item) {
  * Populates all awards in the search dropdown.
  */
 function populateAwardsDropdown() {
-  this.awards = [];
-  _.forEach(this.filteredEmployees, (employee) =>
+  awards.value = [];
+  _.forEach(filteredEmployees.value, (employee) =>
     _.forEach(employee.awards, (award) => {
-      this.awards.push(award.name);
+      awards.value.push(award.name);
     })
   );
-  this.awards = new Set(this.awards);
+  awards.value = new Set(awards.value);
 } // populateAwardsDropdown
 
 /**
@@ -221,30 +265,30 @@ function populateAwardsDropdown() {
  */
 function populateDropdowns(employees) {
   // refresh the employees autocomplete list to be those that match the query
-  this.employees = this.populateEmployeesDropdown(employees);
-  this.populateAwardsDropdown(employees);
+  employees.value = populateEmployeesDropdown(employees);
+  populateAwardsDropdown(employees);
 } // populateDropdowns
 
 /**
  * Refresh the list based on the current queries
  */
 function refreshDropdownItems() {
-  this.filteredEmployees = this.employeesInfo;
-  if (this.search) {
-    this.filteredEmployees = _.filter(this.filteredEmployees, (employee) => {
-      return employee.employeeNumber == this.search;
+  filteredEmployees.value = employeesInfo.value;
+  if (search.value) {
+    filteredEmployees.value = _.filter(filteredEmployees.value, (employee) => {
+      return employee.employeeNumber == search.value;
     });
   }
-  if (this.awardSearch) {
-    this.searchAwards();
+  if (awardSearch.value) {
+    searchAwards();
   }
-  if (this.selectedTags.length > 0) {
-    this.filteredEmployees = _.filter(this.filteredEmployees, (employee) => {
-      return this.selectedTagsHasEmployee(employee);
+  if (selectedTags.value.length > 0) {
+    filteredEmployees.value = _.filter(filteredEmployees.value, (employee) => {
+      return selectedTagsHasEmployee(employee);
     });
   }
 
-  this.populateDropdowns(this.filteredEmployees);
+  populateDropdowns(filteredEmployees.value);
 } // refreshDropdownItems
 
 /**
@@ -253,9 +297,9 @@ function refreshDropdownItems() {
  * @param item - The filter to remove
  */
 function removeTag(item) {
-  const selIndex = this.selectedTags.findIndex((t) => t.id === item.id);
+  const selIndex = selectedTags.value.findIndex((t) => t.id === item.id);
   if (selIndex >= 0) {
-    this.selectedTags.splice(selIndex, 1);
+    selectedTags.value.splice(selIndex, 1);
   }
 } // remove
 
@@ -263,9 +307,9 @@ function removeTag(item) {
  * Filters employees on the data table by the award entered by the user.
  */
 function searchAwards() {
-  this.filteredEmployees = _.filter(this.filteredEmployees, (employee) => {
+  filteredEmployees.value = _.filter(filteredEmployees.value, (employee) => {
     if (employee.awardNames) {
-      return employee.awardNames.includes(this.awardSearch);
+      return employee.awardNames.includes(awardSearch.value);
     } else {
       return false;
     }
@@ -280,9 +324,9 @@ function searchAwards() {
  */
 function selectedTagsHasEmployee(e) {
   let inTag, tagFlipped;
-  for (let i = 0; i < this.selectedTags.length; i++) {
-    inTag = this.selectedTags[i].employees.includes(e.id);
-    tagFlipped = this.tagFlip.includes(this.selectedTags[i].id);
+  for (let i = 0; i < selectedTags.value.length; i++) {
+    inTag = selectedTags.value[i].employees.includes(e.id);
+    tagFlipped = tagFlip.value.includes(selectedTags.value[i].id);
     if (inTag != tagFlipped) {
       return true;
     }
@@ -296,7 +340,7 @@ function selectedTagsHasEmployee(e) {
  * @param event the event data containing the table information
  */
 function updateTableDownload(event) {
-  this.emitter.emit('reports-table-update', { tab: 'awards', table: event });
+  emitter.emit('reports-table-update', { tab: 'awards', table: event });
 }
 
 // |--------------------------------------------------|
@@ -308,39 +352,40 @@ function updateTableDownload(event) {
 /**
  * Watches the showInactiveUsers to refilter the table as needed
  */
-function watchShowInactiveUsers() {
-  this.search = null;
-  this.employeesInfo = this.$store.getters.employees;
-  if (!this.showInactiveEmployees) this.employeesInfo = this.getActive(this.employeesInfo);
-  this.populateDropdowns(this.employeesInfo);
-  this.refreshDropdownItems();
-} // watchShowInactiveUsers
+watch(showInactiveEmployees, () => {
+  search.value = null;
+  employeesInfo.value = store.getters.employees;
+  if (!showInactiveEmployees.value) employeesInfo.value = getActive(employeesInfo.value);
+  populateDropdowns(employeesInfo.value);
+  refreshDropdownItems();
+}); // watchShowInactiveUsers
 
 /**
  * In the case that the page has been force reloaded (and the store cleared)
  * this watcher will be activated when the store is populated again.
  */
-function watchTagFlip() {
-  this.refreshDropdownItems();
-} // watchTagFlip
+watch(tagFlip, () => {
+  refreshDropdownItems();
+}); // watchTagFlip
 
 /**
  * Remove items from tagFlip array when they are removed from the selected
  * tags
  */
-function watchSelectedTags() {
+watch(selectedTags, () => {
   let negatedTagRemoved = true;
   // use normal for loop to have the index
-  for (let i = 0; i < this.tagFlip.length; i++) {
+  for (let i = 0; i < tagFlip.value.length; i++) {
     // try to find the current tag in the selectedTags
-    _.forEach(this.selectedTags, (t) => {
-      if (t.id === this.tagFlip[i]) negatedTagRemoved = false;
+    _.forEach(selectedTags.value, (t) => {
+      if (t.id === tagFlip.value[i]) negatedTagRemoved = false;
     });
     // if it isn't there, remove it from tagFlip too
     if (negatedTagRemoved) {
-      this.tagFlip.splice(i, 1);
+      tagFlip.value.splice(i, 1);
     }
   }
+<<<<<<< HEAD
   this.refreshDropdownItems();
 } // watchSelectedTags
 
@@ -412,6 +457,10 @@ export default {
     selectedTags: { handler: watchSelectedTags, deep: true }
   }
 };
+=======
+  refreshDropdownItems();
+}); // watchSelectedTags
+>>>>>>> 6fbab3b3 (POR-2608: saving)
 </script>
 
 <style lang="css" scoped>
