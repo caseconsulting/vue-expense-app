@@ -379,7 +379,7 @@
               item-value="id"
               class="elevation-4 smaller-font"
               density="compact"
-              :no-data-text="`Your search for '${search || ''}' found no results.`"
+              :no-data-text="'No results :('"
               expand-on-click
             >
               <!-- Cost slot -->
