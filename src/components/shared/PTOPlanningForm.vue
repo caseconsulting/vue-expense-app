@@ -132,6 +132,7 @@ import {
   add,
   subtract,
   setMonth,
+  setYear,
   isAfter,
   isBefore,
   isSame,
@@ -178,15 +179,15 @@ const ranges = ref([
 // add current projects to `ranges`
 for (let contract of employee.value.contracts ?? []) {
   for (let project of contract.projects) {
-    // skip conditions: project is not current or endDate has passed
+    // skip if project is not active
     if (project.endDate) continue;
     // get YYYY-MM format of start and end dates, cutting off anything this month or before
-    let [projectStart, projectEnd] = [project.startDate, project.endDate];
-    if (isSameOrBefore(projectStart, getTodaysDate(), 'month')) projectStart = add(getTodaysDate(), 1, 'month');
-    if (!projectEnd) projectEnd = add(project.startDate, 11, 'month');
-    projectStart = format(projectStart, null, 'YYYY-MM');
-    projectEnd = format(projectEnd, null, 'YYYY-MM');
-    // finally, add to ranges
+    let projectStart = add(getTodaysDate(), 1, 'month');
+    // get project end date for this contract year
+    let projectEnd = setYear(project.startDate, getTodaysDate('YYYY'));
+    projectEnd = add(projectEnd, 11, 'month');
+    // format dates and add changes
+    [projectStart, projectEnd] = [format(projectStart, null, 'YYYY-MM'), format(projectEnd, null, 'YYYY-MM')];
     ranges.value.push([projectStart, projectEnd]);
   }
 }
@@ -200,10 +201,10 @@ const headers = ref([
     key: 'date',
     value: (item) => format(item.date, null, getDateFormat(item.date))
   },
-  { title: 'PTO', sortable: false, width: '15%', value: 'ptoHours' },
-  { title: 'Holiday', sortable: false, width: '15%', value: 'holidayHours' },
-  { title: 'PTO Balance', sortable: false, width: '25%', key: 'ptoBalance' },
-  { title: 'Holiday Balance', sortable: false, width: '25%', key: 'holidayBalance' }
+  { title: 'PTO hours', sortable: false, width: '17%', value: 'ptoHours' },
+  { title: 'Holiday hours', sortable: false, width: '17%', value: 'holidayHours' },
+  { title: 'PTO Balance', sortable: false, width: '23%', key: 'ptoBalance' },
+  { title: 'Holiday Balance', sortable: false, width: '23%', key: 'holidayBalance' }
 ]);
 
 /**
