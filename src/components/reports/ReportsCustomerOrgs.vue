@@ -112,10 +112,53 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import _ from 'lodash';
 import { userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
 import { customEmployeeFilter, getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
+import { onMounted, ref, inject, watch } from 'vue';
+import { useStore } from 'vuex';
+const store = useStore();
+const emitter = inject('emitter');
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                       DATA                       |
+// |                                                  |
+// |--------------------------------------------------|
+const employees = ref([]);
+const employeesInfo = ref([]);
+const filteredEmployees = ref([]);
+const headers = ref([
+  {
+    title: 'Employee #',
+    key: 'employeeNumber'
+  },
+  {
+    title: 'Name',
+    key: 'fullName'
+  },
+  {
+    title: 'Current Customer Org',
+    key: 'currentOrgName'
+  },
+  {
+    title: 'Current Customer Org Experience',
+    key: 'currentOrgYoE'
+  },
+  {
+    title: 'Email',
+    key: 'email'
+  }
+]); // datatable headers
+const custOrgSearch = ref(null);
+const custOrgs = ref([]);
+const search = ref(null); // query text for datatable search field
+const selectedTags = ref([]);
+const showInactiveEmployees = ref(false);
+const sortBy = ref([{ key: 'employeeNumber' }]); // sort datatable items
+const tags = ref([]);
+const tagFlip = ref([]);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -126,27 +169,27 @@ import { customEmployeeFilter, getActive, getFullName, populateEmployeesDropdown
 /**
  * The created lifecycle hook.
  */
-function created() {
-  this.emitter.on('get-employees-to-contact', (tab) => {
+onMounted(() => {
+  emitter.on('get-employees-to-contact', (tab) => {
     if (tab === 'customer orgs') {
-      this.emitter.emit('list-of-employees-to-contact', this.filteredEmployees);
+      emitter.emit('list-of-employees-to-contact', filteredEmployees.value);
     }
   });
 
-  this.employeesInfo = this.getActive(this.$store.getters.employees); // default to filtered list
-  this.tags = this.$store.getters.tags;
-  this.filteredEmployees = this.employeesInfo; // this one is shown
-  this.populateDropdowns(this.employeesInfo);
-  this.buildCustomerOrgColumns();
+  employeesInfo.value = getActive(store.getters.employees); // default to filtered list
+  tags.value = store.getters.tags;
+  filteredEmployees.value = employeesInfo.value; // one.value is shown
+  populateDropdowns(employeesInfo.value);
+  buildCustomerOrgColumns();
   if (localStorage.getItem('requestedFilter')) {
-    this.custOrgSearch = localStorage.getItem('requestedFilter');
-    this.refreshDropdownItems();
+    custOrgSearch.value = localStorage.getItem('requestedFilter');
+    refreshDropdownItems();
     localStorage.removeItem('requestedFilter');
   }
 
   // initial set of table download data
-  this.updateTableDownload(this.filteredEmployees);
-} // created
+  updateTableDownload(filteredEmployees.value);
+}); // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -158,7 +201,7 @@ function created() {
  * Gets all of the current customer orgs for each employee and displays the column on the table.
  */
 function buildCustomerOrgColumns() {
-  this.employeesInfo.forEach((currentEmp) => {
+  employeesInfo.value.forEach((currentEmp) => {
     if (currentEmp.customerOrgExp) {
       let hasCurrent = false;
       let orgs = '';
@@ -187,7 +230,7 @@ function buildCustomerOrgColumns() {
  *
  */
 function chipColor(id) {
-  return this.tagFlip.includes(id) ? 'red' : 'gray';
+  return tagFlip.value.includes(id) ? 'red' : 'gray';
 } // chipColor
 
 /**
@@ -204,11 +247,11 @@ function handleClick(_, { item }) {
  */
 function negateTag(item) {
   // try to find the id in the tagFlip array, if it is there then remove it else add it
-  const index = this.tagFlip.indexOf(item.id);
+  const index = tagFlip.value.indexOf(item.id);
   if (index >= 0) {
-    this.tagFlip.splice(index, 1);
+    tagFlip.value.splice(index, 1);
   } else {
-    this.tagFlip.push(item.id);
+    tagFlip.value.push(item.id);
   }
 } // negateTag
 
@@ -216,13 +259,13 @@ function negateTag(item) {
  * Populates all current customer orgs in the search dropdown.
  */
 function populateCustomerOrgsDropdown() {
-  this.custOrgs = [];
-  _.forEach(this.filteredEmployees, (employee) =>
+  custOrgs.value = [];
+  _.forEach(filteredEmployees.value, (employee) =>
     _.forEach(employee.customerOrgExp, (org) => {
-      if (org.current) this.custOrgs.push(org.name);
+      if (org.current) custOrgs.value.push(org.name);
     })
   );
-  this.custOrgs = new Set(this.custOrgs);
+  custOrgs.value = new Set(custOrgs.value);
 } // populateCustomerOrgsDropdown
 
 /**
@@ -232,30 +275,30 @@ function populateCustomerOrgsDropdown() {
  */
 function populateDropdowns(employees) {
   // refresh the employees autocomplete list to be those that match the query
-  this.employees = this.populateEmployeesDropdown(employees);
-  this.populateCustomerOrgsDropdown(employees);
+  employees.value = populateEmployeesDropdown(employees);
+  populateCustomerOrgsDropdown(employees);
 } // populateDropdowns
 
 /**
  * Refresh the list based on the current queries
  */
 function refreshDropdownItems() {
-  this.filteredEmployees = this.employeesInfo;
-  if (this.search) {
-    this.filteredEmployees = _.filter(this.filteredEmployees, (employee) => {
-      return employee.employeeNumber == this.search;
+  filteredEmployees.value = employeesInfo.value;
+  if (search.value) {
+    filteredEmployees.value = _.filter(filteredEmployees.value, (employee) => {
+      return employee.employeeNumber == search.value;
     });
   }
-  if (this.custOrgSearch) {
-    this.searchCustomerOrgs();
+  if (custOrgSearch.value) {
+    searchCustomerOrgs();
   }
-  if (this.selectedTags.length > 0) {
-    this.filteredEmployees = _.filter(this.filteredEmployees, (employee) => {
-      return this.selectedTagsHasEmployee(employee);
+  if (selectedTags.value.length > 0) {
+    filteredEmployees.value = _.filter(filteredEmployees.value, (employee) => {
+      return selectedTagsHasEmployee(employee);
     });
   }
 
-  this.populateDropdowns(this.filteredEmployees);
+  populateDropdowns(filteredEmployees.value);
 } // refreshDropdownItems
 
 /**
@@ -264,9 +307,9 @@ function refreshDropdownItems() {
  * @param item - The filter to remove
  */
 function removeTag(item) {
-  const selIndex = this.selectedTags.findIndex((t) => t.id === item.id);
+  const selIndex = selectedTags.value.findIndex((t) => t.id === item.id);
   if (selIndex >= 0) {
-    this.selectedTags.splice(selIndex, 1);
+    selectedTags.value.splice(selIndex, 1);
   }
 } // remove
 
@@ -274,17 +317,17 @@ function removeTag(item) {
  * Filters employees on the data table by the customer org entered by the user.
  */
 function searchCustomerOrgs() {
-  this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
+  filteredEmployees.value = _.filter(employeesInfo.value, (employee) => {
     if (employee.customerOrgExp) {
-      return employee.customerOrgExp.find((org) => org.current && org.name === this.custOrgSearch);
+      return employee.customerOrgExp.find((org) => org.current && org.name === custOrgSearch.value);
     } else {
       return false;
     }
   });
-  if (this.search) {
+  if (search.value) {
     // if there is a desired employee search then only show that employee
-    this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
-      return employee.employeeNumber == this.search;
+    filteredEmployees.value = _.filter(employeesInfo.value, (employee) => {
+      return employee.employeeNumber == search.value;
     });
   }
 } // searchCustomerOrgs
@@ -297,9 +340,9 @@ function searchCustomerOrgs() {
  */
 function selectedTagsHasEmployee(e) {
   let inTag, tagFlipped;
-  for (let i = 0; i < this.selectedTags.length; i++) {
-    inTag = this.selectedTags[i].employees.includes(e.id);
-    tagFlipped = this.tagFlip.includes(this.selectedTags[i].id);
+  for (let i = 0; i < selectedTags.value.length; i++) {
+    inTag = selectedTags.value[i].employees.includes(e.id);
+    tagFlipped = tagFlip.value.includes(selectedTags.value[i].id);
     if (inTag != tagFlipped) {
       return true;
     }
@@ -308,12 +351,12 @@ function selectedTagsHasEmployee(e) {
 } // selectedTagsHasEmployee
 
 /**
- * Emit new data for this tab
+ * Emit new data for tab.value
  *
  * @param event the event data containing the table information
  */
 function updateTableDownload(event) {
-  this.emitter.emit('reports-table-update', { tab: 'customerOrgs', table: event });
+  emitter.emit('reports-table-update', { tab: 'customerOrgs', table: event });
 }
 
 // |--------------------------------------------------|
@@ -325,114 +368,41 @@ function updateTableDownload(event) {
 /**
  * Watches the showInactiveUsers to refilter the table as needed
  */
-function watchShowInactiveUsers() {
-  this.search = null;
-  this.employeesInfo = this.$store.getters.employees;
-  if (!this.showInactiveEmployees) this.employeesInfo = this.getActive(this.employeesInfo);
-  this.populateDropdowns(this.employeesInfo);
-  this.refreshDropdownItems();
-} // watchShowInactiveUsers
+watch(showInactiveEmployees, () => {
+  search.value = null;
+  employeesInfo.value = store.getters.employees;
+  if (!showInactiveEmployees.value) employeesInfo.value = getActive(employeesInfo.value);
+  populateDropdowns(employeesInfo.value);
+  refreshDropdownItems();
+});
 
 /**
  * In the case that the page has been force reloaded (and the store cleared)
- * this watcher will be activated when the store is populated again.
+ * watcher.value will be activated when the store is populated again.
  */
-function watchTagFlip() {
-  this.refreshDropdownItems();
-} // watchTagFlip
+watch(tagFlip, () => {
+  refreshDropdownItems();
+});
 
 /**
  * Remove items from tagFlip array when they are removed from the selected
  * tags
  */
-function watchSelectedTags() {
+watch(selectedTags, () => {
   let negatedTagRemoved = true;
   // use normal for loop to have the index
-  for (let i = 0; i < this.tagFlip.length; i++) {
+  for (let i = 0; i < tagFlip.value.length; i++) {
     // try to find the current tag in the selectedTags
-    _.forEach(this.selectedTags, (t) => {
-      if (t.id === this.tagFlip[i]) negatedTagRemoved = false;
+    _.forEach(selectedTags.value, (t) => {
+      if (t.id === tagFlip.value[i]) negatedTagRemoved = false;
     });
     // if it isn't there, remove it from tagFlip too
     if (negatedTagRemoved) {
-      this.tagFlip.splice(i, 1);
+      tagFlip.value.splice(i, 1);
     }
   }
-  this.refreshDropdownItems();
-} // watchSelectedTags
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  created,
-  data() {
-    return {
-      employees: [],
-      employeesInfo: [],
-      filteredEmployees: [],
-      headers: [
-        {
-          title: 'Employee #',
-          key: 'employeeNumber'
-        },
-        {
-          title: 'Name',
-          key: 'fullName'
-        },
-        {
-          title: 'Current Customer Org',
-          key: 'currentOrgName'
-        },
-        {
-          title: 'Current Customer Org Experience',
-          key: 'currentOrgYoE'
-        },
-        {
-          title: 'Email',
-          key: 'email'
-        }
-      ], // datatable headers
-      custOrgSearch: null,
-      custOrgs: [],
-      search: null, // query text for datatable search field
-      selectedTags: [],
-      showInactiveEmployees: false,
-      sortBy: [{ key: 'employeeNumber' }], // sort datatable items
-      sortDesc: false,
-      tags: [],
-      tagFlip: [],
-      tagSearchString: ''
-    };
-  },
-  methods: {
-    buildCustomerOrgColumns,
-    customEmployeeFilter,
-    chipColor,
-    getActive,
-    getFullName,
-    handleClick,
-    negateTag,
-    populateEmployeesDropdown,
-    populateCustomerOrgsDropdown,
-    populateDropdowns,
-    refreshDropdownItems,
-    removeTag,
-    searchCustomerOrgs,
-    selectedTagsHasEmployee,
-    updateTableDownload,
-    userRoleIsAdmin,
-    userRoleIsManager
-  },
-  watch: {
-    showInactiveEmployees: watchShowInactiveUsers,
-    tagFlip: { handler: watchTagFlip, deep: true },
-    selectedTags: { handler: watchSelectedTags, deep: true }
-  }
-};
+  refreshDropdownItems();
+});
 </script>
 
 <style lang="css" scoped>

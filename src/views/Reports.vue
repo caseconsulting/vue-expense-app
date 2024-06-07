@@ -58,8 +58,8 @@
           </div>
           <div v-else>
             <!-- user is not mobile -->
-            <v-tabs color="blue" center-active grow show-arrows>
-              <v-tab v-for="(tab, i) in tabs" :key="tab" :value="tab.value" @click="changeTab(tab, i)">
+            <v-tabs color="blue" v-model="currentWindow" center-active grow show-arrows>
+              <v-tab v-for="(tab, i) in tabs" :key="i" :value="i" @click="changeTab(tab, i)">
                 {{ tab.title }}
               </v-tab>
             </v-tabs>
@@ -80,6 +80,7 @@
 <script setup>
 import { watch, onMounted, computed, ref, reactive, inject } from 'vue';
 import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 import ContactEmployeesModal from '@/components/shared/ContactEmployeesModal.vue';
 import ReportsPageLoader from '@/components/reports/ReportsPageLoader.vue';
 import ReportsAwards from '@/components/reports/ReportsAwards.vue';
@@ -89,7 +90,7 @@ import ReportsCertifications from '@/components/reports/ReportsCertifications.vu
 import ReportsForeignLanguages from '@/components/reports/ReportsForeignLanguages.vue';
 import ReportsJobRoles from '@/components/reports/ReportsJobRoles.vue';
 import ReportsTechnologies from '@/components/reports/ReportsTechnologies.vue';
-import ReportsSecurityInfo from '../components/reports/ReportsSecurityInfo.vue';
+import ReportsSecurityInfo from '@/components/reports/ReportsSecurityInfo.vue';
 import { updateStoreEmployees, updateStoreContracts, updateStoreTags } from '@/utils/storeUtils';
 import { isMobile, userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
 <<<<<<< HEAD
@@ -179,7 +180,9 @@ onMounted(async () => {
     loading.value = false;
   }
   if (localStorage.getItem('requestedDataType')) {
-    currentTab.value = tabs.value.find((item) => item.key === localStorage.getItem('requestedDataType'));
+    // find requested tab and change to it
+    let requestedTab = localStorage.getItem('requestedDataType');
+    for (let i in tabs.value) if (tabs.value[i].key === requestedTab) changeTab(tabs.value[i], i);
     localStorage.removeItem('requestedDataType');
     wasRedirected.value = true;
     window.scrollTo(0, 0);
