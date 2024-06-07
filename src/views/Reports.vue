@@ -125,6 +125,7 @@ import ReportsTechnologies from '@/components/reports/ReportsTechnologies.vue';
 import ReportsSecurityInfo from '../components/reports/ReportsSecurityInfo.vue';
 import { updateStoreEmployees, updateStoreContracts, updateStoreTags } from '@/utils/storeUtils';
 import { isMobile, userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
+import { useRouter } from 'vue-router';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -140,6 +141,7 @@ const wasRedirected = ref(false);
 const requestedDataType = ref(localStorage.getItem('requestedDataType'));
 const store = useStore();
 const emitter = inject('emitter');
+const router = useRouter();
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -180,7 +182,7 @@ onMounted(async () => {
  */
 function backClick() {
   localStorage.setItem('requestedDataType', localStorage.getItem('requestedDataType'));
-  this.$router.push({
+  router.push({
     path: '/stats',
     name: 'stats'
   });
