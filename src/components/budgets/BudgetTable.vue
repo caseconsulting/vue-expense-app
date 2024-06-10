@@ -1,7 +1,7 @@
 <template>
   <div id="budget-table">
     <div v-if="expenseTypeData && expenseTypeData.length > 0">
-      <v-row>
+      <v-row :justify="expenseTypeData.length === 1 ? 'center' : 'start'">
         <!-- Loop all budgets -->
         <v-col v-for="(item, i) in expenseTypeData" :key="i" cols="12" sm="6" lg="6">
           <v-card>
