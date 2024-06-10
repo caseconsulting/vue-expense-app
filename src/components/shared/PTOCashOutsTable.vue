@@ -86,7 +86,7 @@
               v-if="userRoleIsAdmin() || userRoleIsManager()"
               hide-details
               :items="employees"
-              :customFilter="customFilter"
+              :custom-filter="employeeFilter"
               v-model="filteredEmployee"
               item-title="text"
               id="employeeIdFilter"
@@ -213,6 +213,7 @@
 <script>
 import { formatNumber, isMobile, userRoleIsAdmin, userRoleIsManager, monthDayYearFormat, isEmpty } from '@/utils/utils';
 import { getEmployeeByID, nicknameAndLastName } from '@/shared/employeeUtils';
+import { employeeFilter } from '@/shared/filterUtils';
 import api from '@/shared/api.js';
 import { updateStoreUser, updateStoreEmployees, updateStorePtoCashOuts, updateStoreTags } from '@/utils/storeUtils';
 import _ from 'lodash';
@@ -369,26 +370,6 @@ function clickedCancelDelete() {
   this.isDeleting = false;
   this.toggleDeleteModal = false;
 } // clickedCancelDelete
-
-/**
- * Custom filter for employee autocomplete options.
- *
- * @param item - employee
- * @param queryText - text used for filtering
- * @return string - filtered employee name
- */
-function customFilter(itemValue, queryText, itemObject) {
-  const item = itemObject.raw;
-  const query = queryText ? queryText : '';
-  const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
-  const firstNameFullName = `${item.firstName} ${item.lastName}`;
-
-  const queryContainsNickName = nickNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
-  const queryContainsFirstName =
-    firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
-
-  return queryContainsNickName || queryContainsFirstName;
-} // customFilter
 
 /**
  * Deletes PTO cash out from database. Updates vuex store accordingly.
@@ -669,10 +650,10 @@ export default {
     clickedCancelDelete,
     clickedConfirmDelete,
     clickedEdit,
-    customFilter,
     deletePTOCashOut,
     displayError,
     displaySuccess,
+    employeeFilter,
     formatNumber,
     isApproved,
     isMobile,

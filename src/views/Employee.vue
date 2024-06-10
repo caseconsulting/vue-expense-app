@@ -113,7 +113,7 @@
                   class="employee-dropdown"
                   density="compact"
                   :items="dropdownEmployees"
-                  :custom-filter="customFilter"
+                  :custom-filter="employeeFilter"
                   hide-details
                   item-title="itemTitle"
                   return-object
@@ -235,6 +235,7 @@ import {
   updateStoreUser,
   updateStoreTags
 } from '@/utils/storeUtils';
+import { employeeFilter } from '@/shared/filterUtils';
 import { format, getTodaysDate, FORMATTED_ISOFORMAT } from '@/shared/dateUtils';
 import _ from 'lodash';
 import ConvertEmployeeToCsv from '@/components/employees/csv/ConvertEmployeeToCsv.vue';
@@ -266,26 +267,6 @@ async function resumeReceived(newEmployeeForm, changes) {
     await api.updateItem(api.EMPLOYEES, this.model);
   }
 } // resumeReceived
-
-/**
- * Custom filter for employee autocomplete options.
- *
- * @param item - employee
- * @param queryText - text used for filtering
- * @return string - filtered employee name
- */
-function customFilter(itemValue, queryText, itemObject) {
-  const item = itemObject.raw;
-  const query = queryText ? queryText : '';
-  const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
-  const firstNameFullName = `${item.firstName} ${item.lastName}`;
-
-  const queryContainsNickName = nickNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
-  const queryContainsFirstName =
-    firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
-
-  return queryContainsNickName || queryContainsFirstName;
-} // customFilter
 
 /**
  * Clears the status message of the uploadStatus
@@ -703,10 +684,10 @@ export default {
   mounted,
   methods: {
     clearStatus,
-    customFilter,
     deleteResume,
     displayMessage,
     downloadResume,
+    employeeFilter,
     format,
     hasAdminPermissions,
     getProfileData,

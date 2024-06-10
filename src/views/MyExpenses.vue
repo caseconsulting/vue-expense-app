@@ -49,7 +49,7 @@
                     variant="underlined"
                     hide-details
                     :items="employees"
-                    :custom-filter="customFilter"
+                    :custom-filter="employeeFilter"
                     item-title="text"
                     label="Filter by Employee"
                     clearable
@@ -131,7 +131,7 @@
                     v-model.trim="employee"
                     hide-details
                     :items="employees"
-                    :custom-filter="customFilter"
+                    :custom-filter="employeeFilter"
                     item-title="text"
                     label="Filter by Employee"
                     variant="underlined"
@@ -560,6 +560,7 @@ import {
   userRoleIsAdmin,
   userRoleIsManager
 } from '@/utils/utils';
+import { employeeFilter } from '@/shared/filterUtils';
 import { format, isBetween } from '@/shared/dateUtils';
 import { getDateOptionalRules, getNonFutureDateRules } from '@/shared/validationUtils.js';
 import { updateStoreBudgets, updateStoreExpenseTypes, updateStoreEmployees, updateStoreTags } from '@/utils/storeUtils';
@@ -712,29 +713,6 @@ function constructAutoComplete(aggregatedData) {
     (employee) => employee.text.toLowerCase()
   );
 } // constructAutoComplete
-
-/**
- * Custom filter for employee autocomplete options.
- *
- * @param _ - unused
- * @param queryText - text used for filtering
- * @param item - employee
- * @return string - filtered employee name
- */
-function customFilter(_, queryText, item) {
-  item = item.raw;
-
-  const query = queryText ? queryText : '';
-  const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
-  const firstNameFullName = `${item.firstName} ${item.lastName}`;
-
-  const queryNickName = nickNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase());
-  const queryFirstName = firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase());
-
-  if (queryNickName >= 0) return queryNickName;
-  if (queryFirstName >= 0) return item.nickname ? true : queryFirstName;
-  return false;
-} // customFilter
 
 /**
  * Delete a selected expense.
@@ -1365,10 +1343,10 @@ export default {
     clearStatus,
     constructAutoComplete,
     convertToMoneyString,
-    customFilter,
     deleteExpense,
     deleteModelFromTable,
     displayError,
+    employeeFilter,
     filterExpenses,
     format,
     getEmployee,

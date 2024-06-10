@@ -20,7 +20,7 @@
         <v-autocomplete
           v-model="employees"
           :items="filteredEmployees"
-          :customFilter="customFilter"
+          :custom-filter="employeeFilter"
           multiple
           chips
           clearable
@@ -81,6 +81,7 @@ import _ from 'lodash';
 import { computed, ref, onMounted, inject } from 'vue';
 import { useStore } from 'vuex';
 import { nicknameAndLastName } from '@/shared/employeeUtils';
+import { employeeFilter } from '@/shared/filterUtils';
 import { isMobile } from '@/utils/utils';
 
 // |--------------------------------------------------|
@@ -131,26 +132,6 @@ onMounted(() => {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
-
-/**
- * Custom filter for employee autocomplete options.
- *
- * @param item - employee
- * @param queryText - text used for filtering
- * @return string - filtered employee name
- */
-function customFilter(_, queryText, item) {
-  item = item.raw;
-  const query = queryText ? queryText : '';
-  const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
-  const firstNameFullName = `${item.firstName} ${item.lastName}`;
-
-  const queryContainsNickName = nickNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
-  const queryContainsFirstName =
-    firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
-
-  return queryContainsNickName || queryContainsFirstName;
-} // customFilter
 
 /**
  * Copyies the list of employee emails to the user's clipboard.

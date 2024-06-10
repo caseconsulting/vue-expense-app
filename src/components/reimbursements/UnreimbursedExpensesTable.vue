@@ -12,7 +12,7 @@
               <!-- Search Filters -->
               <v-autocomplete
                 :items="employees"
-                :customFilter="customFilter"
+                :custom-filter="employeeFilter"
                 v-model="employee"
                 id="filterEmployee"
                 class="mr-3"
@@ -174,6 +174,7 @@ import { asyncForEach, isEmpty, convertToMoneyString, userRoleIsAdmin, userRoleI
 import { storeIsPopulated } from '@/utils/utils';
 import { updateStoreEmployees, updateStoreTags } from '@/utils/storeUtils';
 import { getTodaysDate } from '@/shared/dateUtils';
+import { employeeFilter } from '@/shared/filterUtils';
 import employeeUtils from '@/shared/employeeUtils';
 
 // |--------------------------------------------------|
@@ -368,26 +369,6 @@ function createExpenses(aggregatedData) {
     return _.merge(expense, additionalAttributes);
   });
 } // createExpenses
-
-/**
- * Custom filter for employee autocomplete options.
- *
- * @param item - the employee
- * @param queryText - the text used for checking for query in the name of the employee
- * @return boolean - true if the query is in the name with or without nickname
- */
-function customFilter(_, queryText, item) {
-  item = item.raw;
-  const query = queryText ? queryText : '';
-  const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
-  const firstNameFullName = `${item.firstName} ${item.lastName}`;
-
-  const queryContainsNickName = nickNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
-  const queryContainsFirstName =
-    firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
-
-  return queryContainsNickName || queryContainsFirstName;
-} // customFilter
 
 /**
  * Determine the state of the group check box based on expenses.
@@ -984,11 +965,11 @@ export default {
     constructAutoComplete,
     convertToMoneyString,
     createExpenses,
-    customFilter,
     determineCheckBox,
     determineShowOnFeed,
     determineShowSwitch,
     emitSelectionChange,
+    employeeFilter,
     getBudgetTotal,
     groupEmployeeExpenses,
     isEmpty,
