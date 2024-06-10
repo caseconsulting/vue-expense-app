@@ -122,14 +122,15 @@
           </div>
         </v-col>
         <!-- End Granted Date -->
-
       </v-row>
 
       <!-- Badge Number -->
       <v-text-field
         v-model="clearance.badgeNum"
         prepend-icon="mdi-badge-account-outline"
+        maxlength="5"
         counter="5"
+        :rules="[validateBadge(clearance.badgeNum)]"
         label="Badge Number"
         variant="underlined"
         clearable
@@ -512,6 +513,14 @@ async function validateFields() {
   this.emitter.emit('clearanceStatus', errorCount); // emit error status
 } // validateFields
 
+/**
+ * Validate input field for badge number.
+ */
+function validateBadge(badgeNum) {
+  const pattern = /^[A-Za-z0-9_-]*$/;
+  return pattern.test(badgeNum) || 'Invalid Badge Number';
+} //validateBadge
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     WATCHERS                     |
@@ -609,7 +618,8 @@ export default {
     removeAdjDate,
     removeBiDate,
     removePolyDate,
-    validateFields
+    validateFields,
+    validateBadge
   },
   props: ['model', 'validating'],
   watch: {
