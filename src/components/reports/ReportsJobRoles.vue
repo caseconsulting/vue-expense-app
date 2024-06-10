@@ -315,7 +315,7 @@ function selectedTagsHasEmployee(e) {
  * @param event the event data containing the table information
  */
 function updateTableDownload(event) {
-  emitter.emit('reports-table-update', { tab: 'jobRoles', table: event });
+  emitter.emit('reports-table-update', { tab: 'jobRoles', table: event, headers: headers });
 }
 
 // |--------------------------------------------------|
