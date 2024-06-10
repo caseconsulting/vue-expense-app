@@ -24,24 +24,23 @@
         <v-btn
           :disabled="!$store.getters.contracts"
           :size="isMobile ? 'small' : 'default'"
-          class="my-2"
+          class="my-2 mr-2"
           @click="toggleContractForm = true"
         >
           Create a contract <v-icon end> mdi-file-document-plus </v-icon>
         </v-btn>
-        <contracts-page-loader v-if="loading" />
-        <contracts-table v-else />
-
-        <br />
-
         <!-- Download contracts CSV button -->
-        <v-card-actions class="justify-end">
+        
           <convert-contracts-to-csv
             :mid-action="midAction"
             :contracts="$store.getters.contracts"
             :employees="$store.getters.employees"
           />
-        </v-card-actions>
+        
+        <contracts-page-loader v-if="loading" />
+        <contracts-table v-else />
+
+        <br />
       </v-container>
     </v-card>
     <ContractForm :toggle-contract-form="toggleContractForm" />
