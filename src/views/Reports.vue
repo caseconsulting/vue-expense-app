@@ -93,7 +93,7 @@ import ReportsSecurityInfo from '@/components/reports/ReportsSecurityInfo.vue';
 import { updateStoreEmployees, updateStoreContracts, updateStoreTags } from '@/utils/storeUtils';
 import { isMobile, userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
 import { useRouter } from 'vue-router';
-import employeeCsv from '@/utils/csv/employeeCsv.js';
+import baseCsv from '@/utils/csv/baseCsv.js';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -185,7 +185,7 @@ onMounted(async () => {
 
   // update table download for tab that emitted
   emitter.on('reports-table-update', (data) => {
-    tableData[data.tab] = data.table;
+    tableData[data.tab] = data;
   });
 });
 
@@ -224,7 +224,7 @@ function changeTab(newTab, index) {
 function getTableEmployeeData(tab = currentTab.value) {
   let employees = [];
   tab = tab.key || tab;
-  let data = tableData[tab];
+  let data = tableData[tab].table;
 
   // fetch employees
   let tableIds = new Set(data.map((item) => item.key || item.id));
@@ -246,9 +246,27 @@ function renderContactEmployeesModal() {
  * Downloads the current tab's table based on tableData
  */
 function downloadTable() {
+  // get title and raw data
   let title = `${currentTab.value.title} Download`;
-  let employees = getTableEmployeeData();
-  employeeCsv.download(employees, store.getters.contracts, store.getters.tags, title);
+  let data = tableData[currentTab.value.key];
+  let table = data.table;
+  let rawHeaders = data.headers;
+
+  // index headers to be easier to find
+  let headers = {};
+  for (let h of rawHeaders) headers[h.key] = h.title;
+
+  // extract and format data
+  let renameKeys = (item) => {
+    let newItem = {};
+    for (let key of Object.keys(item)) newItem[headers[key]] = item[key];
+    return newItem;
+  };
+  let csvData = table.map((item) => renameKeys(item.columns));
+
+  // parse and download to xlsx
+  let csvString = baseCsv.generate(csvData);
+  baseCsv.download(csvString, title);
 } // downloadTable
 
 // |--------------------------------------------------|

@@ -332,7 +332,7 @@ function selectedTagsHasEmployee(e) {
  * @param event the event data containing the table information
  */
 function updateTableInfo(event) {
-  emitter.emit('reports-table-update', { tab: 'awards', table: event });
+  emitter.emit('reports-table-update', { tab: 'awards', table: event, headers: headers });
 }
 
 // |--------------------------------------------------|
