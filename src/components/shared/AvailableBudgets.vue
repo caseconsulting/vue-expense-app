@@ -37,7 +37,15 @@
             <!-- End Loop all budgets -->
             <div class="d-flex justify-center align-center">
               <router-link v-if="this.fiscalDateView" to="/myExpenses" class="no-decoration center">
-                <v-btn class="home_buttons" @click="selectReceipt = true">Create an Expense</v-btn>
+                <v-btn
+                  variant="outlined"
+                  density="compact"
+                  class="px-2 mr-2 ml-auto"
+                  :color="caseRed"
+                  @click="selectReceipt = true"
+                >
+                  Create an Expense
+                </v-btn>
               </router-link>
             </div>
           </div>
