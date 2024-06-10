@@ -68,7 +68,7 @@
         <v-col v-if="displayTimeAndBalances" cols="12" md="5" lg="5" class="pt-0">
           <time-data :key="model" :employee="model" class="mb-4" />
           <available-budgets
-            :key="refreshKey"
+            :key="refreshKey.b"
             class="mb-4"
             :employee="model"
             :expenses="expenses"
@@ -77,7 +77,7 @@
             :employee-data-loading="loading"
             :fiscal-date-view="fiscalDateView"
           />
-          <anniversary-card :employee="model" emit-catcher="employee-page" :key="refreshKey" location="profile" />
+          <anniversary-card :employee="model" emit-catcher="employee-page" :key="refreshKey.a.id" location="profile" />
         </v-col>
 
         <!-- Employee Form -->
@@ -134,7 +134,7 @@
               <v-spacer />
               <convert-employee-to-csv
                 v-if="userRoleIsAdmin()"
-                :key="refreshKey"
+                :key="refreshKey.a.id"
                 :contracts="contracts"
                 :employee="model"
                 :filename="`${model.nickname || model.firstName} ${model.lastName}`"
@@ -173,7 +173,7 @@
             </v-card-title>
             <employee-info
               v-if="!editing"
-              :key="refreshKey"
+              :key="refreshKey.a.id"
               :model="model"
               :contracts="contracts"
               :current-tab="currentTab"
@@ -184,7 +184,7 @@
           <div v-if="userRoleIsAdmin() || userIsEmployee()" class="mt-4">
             <budget-chart
               v-if="!loading"
-              :key="refreshKey"
+              :key="refreshKey.e"
               :employee="model"
               :accessible-budgets="accessibleBudgets"
               :expenses="expenses"
@@ -204,7 +204,7 @@
       </v-row>
       <resume-parser
         v-if="!loading && !editing"
-        :key="refreshKey"
+        :key="refreshKey.a.id"
         :toggle-resume-parser="toggleResumeParser"
         :employee="model"
       />
