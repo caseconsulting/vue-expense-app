@@ -12,7 +12,7 @@
         <v-col cols="6" md="3" align-self="center">
           <v-menu>
             <template #activator="{ props }">
-              <v-btn variant="text" color="#bc3825" theme="dark" class="font-weight-bold" v-bind="props">
+              <v-btn variant="text" theme="dark" class="font-weight-bold" v-bind="props">
                 {{ selectedDropdown }}
                 <v-icon>mdi-chevron-down</v-icon>
               </v-btn>
