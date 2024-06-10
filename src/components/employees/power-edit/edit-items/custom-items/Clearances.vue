@@ -9,11 +9,36 @@
       variant="underlined"
       class="field"
     ></v-autocomplete>
+    <!-- Submission Date -->
+    <v-text-field
+      :model-value="format(model.submissionDate, null, FORMATTED_ISOFORMAT)"
+      label="Submission Date"
+      :rules="[...getDateOptionalRules(), ...getDateSubmissionRules(model)]"
+      hint="MM/DD/YYYY format"
+      v-mask="'##/##/####'"
+      variant="underlined"
+      class="small-field mx-4"
+      @update:focused="model.submissionDate = parseEventDate()"
+      @keypress="showSubmissionMenu = false"
+    >
+      <v-menu activator="parent" v-model="showSubmissionMenu" :close-on-content-click="false" location="start center">
+        <v-date-picker
+          v-model="model.submissionDate"
+          @update:model-value="showSubmissionMenu = false"
+          :max="maxSubmission()"
+          show-adjacent-months
+          hide-actions
+          keyboard-icon=""
+          color="#bc3825"
+          title="Submission Date"
+        ></v-date-picker>
+      </v-menu>
+    </v-text-field>
     <!-- Granted Date -->
     <v-text-field
       :model-value="format(model.grantedDate, null, FORMATTED_ISOFORMAT)"
       label="Granted Date"
-      class="small-field mx-4"
+      class="small-field"
       :rules="[...getDateOptionalRules(), ...getDateGrantedRules(model)]"
       hint="MM/DD/YYYY format"
       v-mask="'##/##/####'"
@@ -32,31 +57,6 @@
           keyboard-icon=""
           color="#bc3825"
           title="Granted Date"
-        ></v-date-picker>
-      </v-menu>
-    </v-text-field>
-    <!-- Submission Date -->
-    <v-text-field
-      :model-value="format(model.submissionDate, null, FORMATTED_ISOFORMAT)"
-      label="Submission Date"
-      :rules="[...getDateOptionalRules(), ...getDateSubmissionRules(model)]"
-      hint="MM/DD/YYYY format"
-      v-mask="'##/##/####'"
-      variant="underlined"
-      class="small-field"
-      @update:focused="model.submissionDate = parseEventDate()"
-      @keypress="showSubmissionMenu = false"
-    >
-      <v-menu activator="parent" v-model="showSubmissionMenu" :close-on-content-click="false" location="start center">
-        <v-date-picker
-          v-model="model.submissionDate"
-          @update:model-value="showSubmissionMenu = false"
-          :max="maxSubmission()"
-          show-adjacent-months
-          hide-actions
-          keyboard-icon=""
-          color="#bc3825"
-          title="Submission Date"
         ></v-date-picker>
       </v-menu>
     </v-text-field>

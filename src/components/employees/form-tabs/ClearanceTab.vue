@@ -39,6 +39,43 @@
       </v-autocomplete>
 
       <v-row class="py-3">
+        <!-- Submission Date -->
+        <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
+          <v-text-field
+            ref="formFields"
+            :model-value="format(clearance.submissionDate, null, 'MM/DD/YYYY')"
+            label="Submission Date"
+            clearable
+            :rules="[...getDateOptionalRules(), dateSubmissionRules(cIndex)]"
+            hint="MM/DD/YYYY format"
+            v-mask="'##/##/####'"
+            variant="underlined"
+            prepend-icon="mdi-calendar"
+            @click:clear="clearance.submissionDate = null"
+            @update:focused="clearance.submissionDate = parseEventDate()"
+            @click:prepend="clearance.showSubmissionMenu = true"
+            @keypress="clearance.showSubmissionMenu = false"
+          >
+            <v-menu
+              activator="parent"
+              v-model="clearance.showSubmissionMenu"
+              :close-on-content-click="false"
+              location="start center"
+            >
+              <v-date-picker
+                v-model="clearance.submissionDate"
+                @update:model-value="clearance.showSubmissionMenu = false"
+                :max="maxSubmission(cIndex)"
+                show-adjacent-months
+                hide-actions
+                keyboard-icon=""
+                color="#bc3825"
+                title="Submission Date"
+              ></v-date-picker>
+            </v-menu>
+          </v-text-field>
+        </v-col>
+        <!-- End Submission Date -->
         <!-- Granted Date -->
         <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
           <div>
@@ -84,43 +121,7 @@
           </div>
         </v-col>
         <!-- End Granted Date -->
-        <!-- Submission Date -->
-        <v-col cols="12" sm="6" md="12" lg="6" class="pt-0">
-          <v-text-field
-            ref="formFields"
-            :model-value="format(clearance.submissionDate, null, 'MM/DD/YYYY')"
-            label="Submission Date"
-            clearable
-            :rules="[...getDateOptionalRules(), dateSubmissionRules(cIndex)]"
-            hint="MM/DD/YYYY format"
-            v-mask="'##/##/####'"
-            variant="underlined"
-            prepend-icon="mdi-calendar"
-            @click:clear="clearance.submissionDate = null"
-            @update:focused="clearance.submissionDate = parseEventDate()"
-            @click:prepend="clearance.showSubmissionMenu = true"
-            @keypress="clearance.showSubmissionMenu = false"
-          >
-            <v-menu
-              activator="parent"
-              v-model="clearance.showSubmissionMenu"
-              :close-on-content-click="false"
-              location="start center"
-            >
-              <v-date-picker
-                v-model="clearance.submissionDate"
-                @update:model-value="clearance.showSubmissionMenu = false"
-                :max="maxSubmission(cIndex)"
-                show-adjacent-months
-                hide-actions
-                keyboard-icon=""
-                color="#bc3825"
-                title="Submission Date"
-              ></v-date-picker>
-            </v-menu>
-          </v-text-field>
-        </v-col>
-        <!-- End Submission Date -->
+
       </v-row>
 
       <!-- Badge Number -->
