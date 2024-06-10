@@ -1,7 +1,7 @@
 <template>
   <!-- Download CSV Button -->
-  <v-btn :disabled="midAction" @click="download()" elevation="2" :size="isMobile || (isSmallScreen && 'x-small')"
-    ><i class="material-icons">download</i>Download All</v-btn
+  <v-btn class="width" :disabled="midAction" @click="download()" elevation="2" :size="buttonSizing"
+    >Download All<icon class="material-icons ml-2" :size="buttonSizing">download</icon></v-btn
   >
 </template>
 <script>
@@ -19,6 +19,10 @@ import contractsCsv from '@/utils/csv/contractsCsv.js';
 function download() {
   contractsCsv.download(this.contracts, this.employees);
 } // download
+
+function buttonSizing(){
+  isMobile || (isSmallScreen && 'x-small') ? 'small' : 'comfortable';
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -41,5 +45,8 @@ export default {
 .download {
   font-size: 20px;
   cursor: pointer;
+}
+.width {
+  width: 21%;
 }
 </style>
