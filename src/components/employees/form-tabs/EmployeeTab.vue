@@ -123,6 +123,7 @@
         id="agencyIdentificationNumber"
         ref="formFields"
         v-model.trim="editedEmployee.agencyIdentificationNumber"
+        :rules="getAINRules()"
         label="Agency Identification Number"
         variant="underlined"
         data-vv-name="Agency Identification Number"
@@ -413,7 +414,13 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
-import { getDateRules, getNumberRules, getRequiredRules, getValidateFalse } from '@/shared/validationUtils.js';
+import {
+  getAINRules,
+  getDateRules,
+  getNumberRules,
+  getRequiredRules,
+  getValidateFalse
+} from '@/shared/validationUtils.js';
 import {
   asyncForEach,
   isEmpty,
@@ -912,6 +919,7 @@ export default {
     duplicateEmployeeNum,
     format,
     formatKebabCase,
+    getAINRules,
     getDateRules,
     getNumberRules,
     getRequiredRules,

@@ -4,6 +4,16 @@ import store from '../../store/index';
 import _ from 'lodash';
 
 /**
+ * Gets the rules for valid AIN number, where it must be 7 digits that can lead with 0s, and not required
+ * @returns Array - The array of rule functions
+ */
+export function getAINRules() {
+  return [
+    (v) => (!isEmpty(v) ? String(v).match(/^[0-9]{7}$/) || 'Agency Identification Number must be 7 digits' : true)
+  ];
+} //getAINRules
+
+/**
  * Gets the optional date rules in MM/DD/YYYY format.
  * @return Array - The array of rule functions
  */
