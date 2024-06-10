@@ -30,7 +30,6 @@
           Create a contract <v-icon end> mdi-file-document-plus </v-icon>
         </v-btn>
         <!-- Download contracts CSV button -->
-
         <convert-contracts-to-csv
           :mid-action="midAction"
           :contracts="$store.getters.contracts"
