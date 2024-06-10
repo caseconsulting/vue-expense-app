@@ -18,7 +18,7 @@
         <v-card-title class="d-flex align-center header_style" v-bind:class="{ 'justify-center': isMobile() }">
           <h2 class="text-white">Reports</h2>
           <v-spacer />
-          <v-btn @click="downloadTable()" v-bind="props" class="mr-4">
+          <v-btn v-if="userRoleIsAdmin() || userRoleIsManager()" @click="downloadTable()" v-bind="props" class="mr-4">
             Download
             <template #append>
               <v-icon>mdi-download</v-icon>
@@ -80,7 +80,6 @@
 <script setup>
 import { watch, onMounted, computed, ref, reactive, inject } from 'vue';
 import { useStore } from 'vuex';
-import { useRouter } from 'vue-router';
 import ContactEmployeesModal from '@/components/shared/ContactEmployeesModal.vue';
 import ReportsPageLoader from '@/components/reports/ReportsPageLoader.vue';
 import ReportsAwards from '@/components/reports/ReportsAwards.vue';
