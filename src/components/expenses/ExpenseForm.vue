@@ -15,7 +15,7 @@
           variant="underlined"
           :items="activeEmployees"
           :rules="getRequiredRules()"
-          :custom-filter="customFilter"
+          :custom-filter="employeeFilter"
           :disabled="isReimbursed || isEdit || isInactive"
           v-model="editedExpense.employeeId"
           item-title="text"
@@ -412,6 +412,7 @@ import {
 import { updateStoreBudgets } from '@/utils/storeUtils';
 import { getRole } from '@/utils/auth';
 import { isBetween, getTodaysDate, format } from '../../shared/dateUtils';
+import { employeeFilter } from '@/shared/filterUtils';
 import { mask } from 'vue-the-mask';
 
 import _ from 'lodash';
@@ -937,29 +938,6 @@ async function createNewEntry() {
     }
   }
 } // createNewEntry
-
-/**
- * Custom filter for employee autocomplete options.
- *
- * @param _ - unused
- * @param queryText - text used for filtering
- * @param item - employee
- * @return string - filtered employee name
- */
-function customFilter(_, queryText, item) {
-  item = item.raw;
-
-  const query = queryText ? queryText : '';
-  const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
-  const firstNameFullName = `${item.firstName} ${item.lastName}`;
-
-  const queryNickName = nickNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase());
-  const queryFirstName = firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase());
-
-  if (queryNickName >= 0) return queryNickName;
-  if (queryFirstName >= 0) return item.nickname ? true : queryFirstName;
-  return false;
-} // customFilter
 
 /**
  * Redirects description field to modal if needed (only for exchange for training hours)
@@ -2073,8 +2051,8 @@ export default {
     createNewEntry,
     convertToMoneyString,
     costHint,
-    customFilter,
     descRedirect,
+    employeeFilter,
     encodeUrl,
     filteredExpenseTypes,
     formatCost,

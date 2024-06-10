@@ -6,7 +6,7 @@
           <v-autocomplete
             id="employeesSearch"
             v-model="search"
-            :customFilter="customEmployeeFilter"
+            :custom-filter="employeeFilter"
             :items="employees"
             variant="underlined"
             label="Search By Employee Name"
@@ -114,7 +114,8 @@
 <script>
 import _ from 'lodash';
 import { userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
-import { customEmployeeFilter, getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
+import { employeeFilter } from '@/shared/filterUtils';
+import { getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -397,8 +398,8 @@ export default {
   },
   methods: {
     buildCustomerOrgColumns,
-    customEmployeeFilter,
     chipColor,
+    employeeFilter,
     getActive,
     getFullName,
     handleClick,

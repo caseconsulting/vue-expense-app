@@ -99,7 +99,7 @@
           v-if="editedExpenseType.accessibleBy && editedExpenseType.accessibleBy.includes('Custom')"
           v-model="customAccess"
           :items="activeEmployees"
-          :customFilter="customFilter"
+          :custom-filter="employeeFilter"
           no-data-text="No Employees Available"
           item-props.color="gray"
           multiple
@@ -401,6 +401,7 @@ import { format } from '@/shared/dateUtils';
 import { updateStoreExpenseTypes } from '@/utils/storeUtils';
 import { mask } from 'vue-the-mask';
 import { isValid, isSameOrAfter, isSameOrBefore } from '../../shared/dateUtils';
+import { employeeFilter } from '@/shared/filterUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -485,26 +486,6 @@ function clearForm() {
   this.editedExpenseType.id = null;
   this.editedExpenseType.accessibleBy = ['FullTime'];
 } // clearForm
-
-/**
- * Custom filter for employee autocomplete options.
- *
- * @param item - employee
- * @param queryText - the text used to filter the names
- * @return string - filtered employee
- */
-function customFilter(_, queryText, item) {
-  item = item.raw;
-  const query = queryText ? queryText : '';
-  const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
-  const firstNameFullName = `${item.firstName} ${item.lastName}`;
-
-  const queryContainsNickName = nickNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
-  const queryContainsFirstName =
-    firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
-
-  return queryContainsNickName || queryContainsFirstName;
-} // customFilter
 
 /**
  * Formats the budget on the form for a nicer display.
@@ -854,10 +835,7 @@ async function created() {
     if (employee.workStatus > 0) {
       activeEmployees.push({
         value: employee.id,
-        text: `${employee.firstName} ${employee.lastName}`,
-        nickname: employee.nickname,
-        firstName: employee.firstName,
-        lastName: employee.lastName
+        text: `${employee.nickname || employee.firstName} ${employee.lastName}`
       });
     }
   });
@@ -1061,7 +1039,7 @@ export default {
     checkRequireURL,
     checkSelection,
     clearForm,
-    customFilter,
+    employeeFilter,
     formatBudget,
     format,
     getDateRules,

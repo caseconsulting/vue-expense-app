@@ -6,7 +6,7 @@
           <v-autocomplete
             id="employeesSearch"
             v-model="search"
-            :customFilter="customEmployeeFilter"
+            :custom-filter="employeeFilter"
             :items="employees"
             variant="underlined"
             label="Search By Employee Name"
@@ -25,7 +25,6 @@
           <v-autocomplete
             v-model="contractSearch"
             :items="contractsDropDown"
-            :customFilter="customFilter"
             label="Search By Contract"
             variant="underlined"
             clearable
@@ -39,7 +38,6 @@
           <v-autocomplete
             v-model="primeSearch"
             :items="primesDropDown"
-            :customFilter="customFilter"
             label="Search By Prime"
             variant="underlined"
             clearable
@@ -129,7 +127,8 @@
 <script>
 import _ from 'lodash';
 import { userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
-import { customEmployeeFilter, getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
+import { employeeFilter } from '@/shared/filterUtils';
+import { getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -198,20 +197,6 @@ function buildContractsColumn() {
     }
   });
 } // buildContractsColumn
-
-/**
- * Custom filter for contract autocomplete options.
- *
- * @param item - contract object
- * @param queryText - query to use to filter
- * @return string - the filtered contract
- */
-function customFilter(item, queryText) {
-  const query = queryText ? queryText.trim() : '';
-  const contract = item ? item.toLowerCase() : '';
-  const queryContainsContract = contract.indexOf(query.toString().toLowerCase()) >= 0;
-  return queryContainsContract;
-} // customFilter
 
 /**
  * Returns the color that at tag filter chip should be
@@ -517,9 +502,8 @@ export default {
   },
   methods: {
     buildContractsColumn,
-    customEmployeeFilter,
-    customFilter,
     chipColor,
+    employeeFilter,
     getActive,
     getFullName,
     handleClick,

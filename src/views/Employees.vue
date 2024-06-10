@@ -193,7 +193,7 @@
             :items="filteredEmployees"
             :loading="loading"
             :search="search"
-            :custom-filter="customFilter"
+            :custom-filter="employeeFilter"
             mobile-breakpoint="800"
             item-key="employeeNumber"
             class="elevation-1 employees-table text-body-2"
@@ -324,6 +324,7 @@ import {
   userRoleIsAdmin,
   userRoleIsManager
 } from '@/utils/utils';
+import { employeeFilter } from '@/shared/filterUtils';
 import { format } from '../shared/dateUtils';
 
 // |--------------------------------------------------|
@@ -382,87 +383,6 @@ function clearStatus() {
 function chipColor(id) {
   return this.tagFlip.includes(id) ? 'red' : 'gray';
 } // chipColor
-
-/**
- * Custom filter for employee table searching
- *
- * @param _ - unused value (in theory the current item of employee to search)
- * @param search - The search value in the search bar
- * @param item - The item in the table
- * @returns Boolean - True if the item matches the search criteria
- */
-function customFilter(_, search, item) {
-  item = item.raw;
-
-  // reset index if search is different than before
-  if (this.searchCache.search != search || this.searchCache.tableKey != this.dataTableKey) {
-    this.searchIndex = new Set();
-    this.searchCache.search = search;
-    this.searchCache.tableKey = this.dataTableKey;
-  }
-
-  /**
-   * Bounce conditions:
-   *  - nothing is being searched
-   *  - the search is only one character and one term
-   *  - searching something that's not the employee object
-   *  - the employee has been searched before
-   */
-  let terms = search.split(','); // used for searching later, search is split by comma
-  if (search == null || (terms.length == 1 && terms[0].length < 2)) return true;
-  if (this.searchIndex.has(item.email)) return false;
-
-  // mark employee as searched
-  this.searchIndex.add(item.email);
-
-  // different items from the employee to look through
-  let [frst, midl, last, nick, F, M, N, L] = [
-    item.firstName?.trim(),
-    item.middleName?.trim(),
-    item.lastName?.trim(),
-    item.nickname?.trim(),
-    item.firstName ? item.firstName.trim()[0] : '',
-    item.middleName ? item.middleName.trim()[0] : '',
-    item.nickname ? item.nickname.trim()[0] : '',
-    item.lastName ? item.lastName.trim()[0] : ''
-  ];
-  let searchableTerms = [
-    `${item.employeeNumber}`,
-    `${frst} ${last}`,
-    `${last} ${frst}`,
-    `${frst} ${midl} ${last}`,
-    `${frst} ${nick} ${last}`,
-    `${frst} ${nick} ${midl} ${last}`,
-    `${frst} ${midl} ${nick} ${last}`,
-    `${F}${M}${L}`,
-    `${F}${N}${L}`,
-    `${F}${M}${N}${L}`,
-    `${F}${N}${M}${L}`,
-    `${F} ${L}`,
-    `${L} ${F}`,
-    `${F} ${N} ${last}`,
-    `${F} ${M} ${last}`,
-    `${F} ${N} ${M} ${last}`,
-    `${F} ${M} ${N} ${last}`,
-    `${frst} ${M} ${last}`,
-    `${frst} ${N} ${last}`,
-    `${frst} ${N} ${M} ${last}`,
-    `${frst} ${M} ${N} ${last}`
-  ];
-
-  // search through all searchable terms with all search terms
-  for (let t of terms) {
-    t = t.trim();
-    if (t.length < 2) continue;
-    for (let s of searchableTerms) {
-      if (s && s.toLowerCase().includes(t.toLowerCase())) {
-        return true;
-      }
-    }
-  }
-
-  return false;
-} // customFilter
 
 /**
  * Delete an employee and display status.
@@ -992,11 +912,6 @@ export default {
         currentZIP: null
       }, // selected employee
       search: null, // query text for datatable search field
-      searchIndex: new Set(),
-      searchCache: {
-        search: null,
-        tableKey: null
-      },
       selectedTags: [], // tags to include or exclude in filter
       sortBy: [{ key: 'hireDate', order: 'asc' }], // sort datatable items
       status: {
@@ -1024,10 +939,10 @@ export default {
     clearCreateEmployee,
     clearStatus,
     chipColor,
-    customFilter,
     deleteEmployee,
     deleteModelFromTable,
     displayError,
+    employeeFilter,
     employeePath,
     filterEmployees,
     getLoginDate,
