@@ -129,6 +129,7 @@
       @update:focused="editedPersonalInfo.birthday = format(birthdayFormat, null, 'YYYY-MM-DD')"
       @click:prepend="BirthdayMenu = true"
       @keypress="BirthdayMenu = false"
+      autocomplete="off"
     >
       <v-menu
         activator="parent"

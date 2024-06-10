@@ -31,6 +31,7 @@
             prepend-icon="mdi-calendar"
             @click:prepend="award.showReceivedMenu = true"
             @keypress="award.showReceivedMenu = false"
+            autocomplete="off"
           >
             <v-menu
               activator="parent"

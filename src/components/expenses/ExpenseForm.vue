@@ -220,6 +220,7 @@
               @click:prepend="purchaseMenu = true"
               @keypress="purchaseMenu = false"
               @update:focused="editedExpense.purchaseDate = format(purchaseDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
+              autocomplete="off"
             >
               <template v-slot:prepend>
                 <div v-bind="props" class="pointer">
@@ -269,6 +270,7 @@
               "
               @update:model-value="reimburseMenu = false"
               v-bind="props"
+              autocomplete="off"
             >
               <template v-slot:prepend>
                 <div v-bind="props" class="pointer">
