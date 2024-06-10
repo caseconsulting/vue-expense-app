@@ -74,7 +74,7 @@
         :items-per-page="-1"
         class="elevation-1 row-pointer"
         @click:row="handleClick"
-        @update:current-items="updateTableDownload($event)"
+        @update:current-items="updateTableInfo($event)"
       >
         <!-- Employee Number Slot -->
         <template v-slot:[`item.employeeNumber`]="{ item }">
@@ -163,11 +163,6 @@ const tagFlip = ref([]);
  * The created lifecycle hook.
  */
 onMounted(() => {
-  emitter.on('get-employees-to-contact', (tab) => {
-    if (tab === 'awards') {
-      emitter.emit('list-of-employees-to-contact', filteredEmployees.value);
-    }
-  });
   employeesInfo.value = getActive(store.getters.employees); // default to filtered
   tags.value = store.getters.tags;
   filteredEmployees.value = employeesInfo.value; // this one is shown
@@ -180,7 +175,7 @@ onMounted(() => {
   }
 
   // initial set of table download data
-  updateTableDownload(filteredEmployees.value);
+  updateTableInfo(filteredEmployees.value);
 }); // created
 
 // |--------------------------------------------------|
@@ -260,10 +255,10 @@ function populateAwardsDropdown() {
  *
  * @param employees - array of employees for dropdown and to get contracts
  */
-function populateDropdowns(employees) {
+function populateDropdowns(emps) {
   // refresh the employees autocomplete list to be those that match the query
-  employees.value = populateEmployeesDropdown(employees);
-  populateAwardsDropdown(employees);
+  employees.value = populateEmployeesDropdown(emps);
+  populateAwardsDropdown(emps);
 } // populateDropdowns
 
 /**
@@ -336,7 +331,7 @@ function selectedTagsHasEmployee(e) {
  *
  * @param event the event data containing the table information
  */
-function updateTableDownload(event) {
+function updateTableInfo(event) {
   emitter.emit('reports-table-update', { tab: 'awards', table: event });
 }
 

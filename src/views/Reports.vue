@@ -166,7 +166,6 @@ const currentWindow = ref(0);
  */
 onMounted(async () => {
   emitter.on('close-contact-employees-modal', () => (toggleContactEmployeesModal.value = false));
-  emitter.on('list-of-employees-to-contact', (employees) => (employeesToContact.value = employees));
   if (store.getters.storeIsPopulated) {
     await Promise.all([
       !store.getters.employees ? updateStoreEmployees() : '',
@@ -219,11 +218,27 @@ function changeTab(newTab, index) {
 } // changeTab
 
 /**
+ * Filters through table data of a given tab and returns the employee
+ * objects for anyone in the table
+ */
+function getTableEmployeeData(tab = currentTab.value) {
+  let employees = [];
+  tab = tab.key || tab;
+  let data = tableData[tab];
+
+  // fetch employees
+  let tableIds = new Set(data.map((item) => item.key || item.id));
+  for (let e of store.getters.employees) if (tableIds.has(e.id)) employees.push(e);
+
+  return employees;
+} // getTableEmployeeData
+
+/**
  * Pops up the contacts employee modal
  */
 function renderContactEmployeesModal() {
   contactKey.value++;
-  emitter.emit('get-employees-to-contact', currentTab.value.key);
+  employeesToContact.value = getTableEmployeeData();
   toggleContactEmployeesModal.value = true;
 } // renderContactEmployeesModal
 
@@ -231,16 +246,10 @@ function renderContactEmployeesModal() {
  * Downloads the current tab's table based on tableData
  */
 function downloadTable() {
-  let tab = currentTab.value.key;
-  let data = tableData[tab];
   let title = `${currentTab.value.title} Download`;
-  // rebuild the employee object based on items from table
-  let employees = [];
-  let tableIds = new Set(data.map((item) => item.key || item.id));
-  for (let e of store.getters.employees) if (tableIds.has(e.id)) employees.push(e);
-  // download
+  let employees = getTableEmployeeData();
   employeeCsv.download(employees, store.getters.contracts, store.getters.tags, title);
-}
+} // downloadTable
 
 // |--------------------------------------------------|
 // |                                                  |
