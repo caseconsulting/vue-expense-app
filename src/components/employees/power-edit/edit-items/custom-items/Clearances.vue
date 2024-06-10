@@ -67,7 +67,7 @@
       v-model="model.badgeNum"
       maxlength="5"
       counter="5"
-      :rules="[validateBadge(model.badgeNum)]"
+      :rules="[getBadgeNumberRules(model.badgeNum)]"
       label="Badge Number"
       variant="underlined"
       class="small-field mx-4"
@@ -226,6 +226,7 @@ import { inject, ref, watch } from 'vue';
 import { mask } from 'vue-the-mask';
 import { format, isBefore, isValid, DEFAULT_ISOFORMAT, FORMATTED_ISOFORMAT } from '@/shared/dateUtils';
 import {
+  getBadgeNumberRules,
   getAfterSubmissionRules,
   getDateBadgeRules,
   getDateGrantedRules,
@@ -352,14 +353,6 @@ function removeDate(item, key) {
     return dateConvert !== itemDate;
   });
 } // removeDates
-
-/**
- * Validate input field for badge number.
- */
-function validateBadge(badgeNum) {
-  const pattern = /^[A-Za-z0-9_-]*$/;
-  return pattern.test(badgeNum) || 'Invalid Badge #';
-} //validateBadge
 </script>
 
 <style scoped>
