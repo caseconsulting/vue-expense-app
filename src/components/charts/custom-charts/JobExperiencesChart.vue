@@ -87,8 +87,6 @@ function jobExperienceData() {
         this.jobExperience[index] = 1; // creates array slot
         this.jobExperienceNames[index] = [name]; // creates a new key-value pair as an array
       }
-      console.log(this.jobExperienceNames);
-      console.log(employee);
     }
   });
 } // jobExperienceData
