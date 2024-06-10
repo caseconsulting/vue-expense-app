@@ -11,7 +11,7 @@
         <div v-if="isMobile" class="text-center">
           <v-menu offset="y">
             <template #activator="{ props }">
-              <v-btn variant="text" color="#bc3825" theme="dark" class="font-weight-bold" v-bind="props">
+              <v-btn variant="text" theme="dark" class="font-weight-bold" v-bind="props">
                 {{ statsTab.toUpperCase() }} <v-icon class="pb-1"> mdi-chevron-down </v-icon>
               </v-btn>
             </template>
