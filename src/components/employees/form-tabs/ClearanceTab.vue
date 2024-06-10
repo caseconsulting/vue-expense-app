@@ -130,7 +130,7 @@
         prepend-icon="mdi-badge-account-outline"
         maxlength="5"
         counter="5"
-        :rules="[validateBadge(clearance.badgeNum)]"
+        :rules="[getBadgeNumberRules(clearance.badgeNum)]"
         label="Badge Number"
         variant="underlined"
         clearable
@@ -309,7 +309,7 @@
 
 <script>
 import _ from 'lodash';
-import { getDateOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
+import { getDateOptionalRules, getRequiredRules, getBadgeNumberRules } from '@/shared/validationUtils.js';
 import { asyncForEach, isEmpty } from '@/utils/utils';
 import { format, isAfter, isBefore, DEFAULT_ISOFORMAT, FORMATTED_ISOFORMAT } from '@/shared/dateUtils';
 import { mask } from 'vue-the-mask';
@@ -513,14 +513,6 @@ async function validateFields() {
   this.emitter.emit('clearanceStatus', errorCount); // emit error status
 } // validateFields
 
-/**
- * Validate input field for badge number.
- */
-function validateBadge(badgeNum) {
-  const pattern = /^[A-Za-z0-9_-]*$/;
-  return pattern.test(badgeNum) || 'Invalid Badge Number';
-} //validateBadge
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                     WATCHERS                     |
@@ -619,7 +611,7 @@ export default {
     removeBiDate,
     removePolyDate,
     validateFields,
-    validateBadge
+    getBadgeNumberRules
   },
   props: ['model', 'validating'],
   watch: {
