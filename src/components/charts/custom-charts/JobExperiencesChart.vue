@@ -8,6 +8,7 @@
 import BarChart from '../base-charts/BarChart.vue';
 import { storeIsPopulated } from '@/utils/utils';
 import { difference, getTodaysDate } from '@/shared/dateUtils';
+import _ from 'lodash';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -57,6 +58,8 @@ function findMaxIndex() {
 function jobExperienceData() {
   this.employees = this.$store.getters.employees;
   this.employees.forEach((employee) => {
+    // get the name so we can filter on click later
+    let name = employee.firstName + ' ' + employee.lastName;
     // only include active employees
     if (employee.hireDate !== undefined && employee.workStatus != 0) {
       // find time at case
@@ -79,9 +82,13 @@ function jobExperienceData() {
       let index = Math.floor(Math.round(amOfYears) / 5);
       if (this.jobExperience[index] !== undefined) {
         this.jobExperience[index] += 1; // bumps counter
+        this.jobExperienceNames[index].push(name); // pushed onto the value array
       } else {
         this.jobExperience[index] = 1; // creates array slot
+        this.jobExperienceNames[index] = [name]; // creates a new key-value pair as an array
       }
+      console.log(this.jobExperienceNames);
+      console.log(employee);
     }
   });
 } // jobExperienceData
@@ -146,6 +153,17 @@ function drawJobExpHistGraph() {
         }
       }
     },
+    onClick: (x, y) => {
+      if (_.first(y)) {
+        let index = _.first(y).index;
+        localStorage.setItem('requestedDataType', 'job roles');
+        localStorage.setItem('requestedFilter', this.jobExperienceNames[index]);
+        this.$router.push({
+          path: '/employees',
+          name: 'employees'
+        });
+      }
+    },
     plugins: {
       legend: {
         display: false
@@ -182,7 +200,8 @@ export default {
       chartData: null,
       dataReceived: false,
       employees: null,
-      jobExperience: []
+      jobExperience: [],
+      jobExperienceNames: {}
     };
   },
   methods: {
