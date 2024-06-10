@@ -18,7 +18,7 @@
         <v-card-title class="d-flex align-center header_style" v-bind:class="{ 'justify-center': isMobile() }">
           <h2 class="text-white">Reports</h2>
           <v-spacer />
-          <v-btn @click="downloadTable()" v-bind="props" class="mr-4">
+          <v-btn v-if="userRoleIsAdmin() || userRoleIsManager()" @click="downloadTable()" v-bind="props" class="mr-4">
             Download
             <template #append>
               <v-icon>mdi-download</v-icon>
@@ -80,7 +80,6 @@
 <script setup>
 import { watch, onMounted, computed, ref, reactive, inject } from 'vue';
 import { useStore } from 'vuex';
-import { useRouter } from 'vue-router';
 import ContactEmployeesModal from '@/components/shared/ContactEmployeesModal.vue';
 import ReportsPageLoader from '@/components/reports/ReportsPageLoader.vue';
 import ReportsAwards from '@/components/reports/ReportsAwards.vue';
@@ -93,11 +92,8 @@ import ReportsTechnologies from '@/components/reports/ReportsTechnologies.vue';
 import ReportsSecurityInfo from '@/components/reports/ReportsSecurityInfo.vue';
 import { updateStoreEmployees, updateStoreContracts, updateStoreTags } from '@/utils/storeUtils';
 import { isMobile, userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
-<<<<<<< HEAD
 import { useRouter } from 'vue-router';
-=======
 import employeeCsv from '@/utils/csv/employeeCsv.js';
->>>>>>> 12bdde05 (POR-2608: filled in download button data from tabs)
 
 // |--------------------------------------------------|
 // |                                                  |
