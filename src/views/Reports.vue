@@ -35,7 +35,7 @@
         <reports-page-loader v-if="loading" />
         <div v-else>
           <!-- user is mobile -->
-          <div v-if="isMobile()" class="text-center">
+          <div v-if="isMobile()" class="text-start">
             <v-menu offset="y">
               <template #activator="{ props }">
                 <v-btn variant="text" theme="dark" class="font-weight-bold" v-bind="props">
