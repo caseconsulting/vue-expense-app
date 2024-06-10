@@ -9,6 +9,7 @@
 import BarChart from '../base-charts/BarChart.vue';
 import { storeIsPopulated } from '@/utils/utils';
 import { difference, getTodaysDate } from '@/shared/dateUtils';
+import _ from 'lodash';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -44,6 +45,7 @@ function caseYearsData() {
   }
   this.employees = this.$store.getters.employees;
   this.employees.forEach((employee) => {
+    let name = employee.firstName + ' ' + employee.lastName;
     if (employee.hireDate !== undefined && employee.workStatus != 0) {
       // find time at case
       var amOfYears = this.calculateTimeDifference(employee.hireDate);
@@ -51,7 +53,13 @@ function caseYearsData() {
       // push time to array
       if (amOfYears > 18) amOfYears = 18;
       else if (amOfYears < 0) amOfYears = 0;
-      this.caseYears[Math.floor(Math.round(amOfYears) / 2)] += 1;
+      let index = Math.floor(Math.round(amOfYears) / 2);
+      this.caseYears[index] += 1;
+      if (this.caseYears[index] == 1) {
+        this.caseYearsNames[index] = [name]; // add a new key-value array if it is the first instance
+      } else {
+        this.caseYearsNames[index].push(name); // add a new name to existing key
+      }
     }
   });
 } // caseYearsData
@@ -111,6 +119,17 @@ function drawCaseYearsHistGraph() {
         }
       }
     },
+    onClick: (x, y) => {
+      if (_.first(y)) {
+        let index = _.first(y).index;
+        localStorage.setItem('requestedDataType', 'job roles');
+        localStorage.setItem('requestedFilter', this.caseYearsNames[index]);
+        this.$router.push({
+          path: '/employees',
+          name: 'employees'
+        });
+      }
+    },
     plugins: {
       legend: {
         display: false
@@ -163,7 +182,8 @@ export default {
       chartData: null,
       dataReceived: false,
       employees: null,
-      caseYears: []
+      caseYears: [],
+      caseYearsNames: {}
     };
   },
   methods: {
