@@ -1,10 +1,13 @@
 <template>
   <div v-if="model == null && !loading" class="text-center">
     <h1>Invalid Employee!</h1>
-    <img
-      src="https://media.giphy.com/media/fnuSiwXMTV3zmYDf6k/giphy.gif"
-      alt="GIF of Kazoo Kid saying 'Wait a minute, who are you?'"
-    />
+    <v-container class="invalid-results-gif">
+      <v-img
+        src="https://media.giphy.com/media/fnuSiwXMTV3zmYDf6k/giphy.gif"
+        alt="GIF of Kazoo Kid saying 'Wait a minute, who are you?'"
+        aspect-ratio="4/3"
+      ></v-img>
+    </v-container>
   </div>
   <v-container v-else class="my-3 mx-0 px-0" fluid>
     <v-row v-if="basicEmployeeDataLoading" class="pt-0">
@@ -745,5 +748,11 @@ export default {
   align-items: center !important;
   font-size: 20px !important;
   opacity: 1 !important;
+}
+</style>
+
+<style scoped>
+.invalid-results-gif {
+  max-width: 80%;
 }
 </style>
