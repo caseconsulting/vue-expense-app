@@ -65,7 +65,9 @@
     <!-- Badge Number -->
     <v-text-field
       v-model="model.badgeNum"
+      maxlength="5"
       counter="5"
+      :rules="[validateBadge(model.badgeNum)]"
       label="Badge Number"
       variant="underlined"
       class="small-field mx-4"
@@ -350,6 +352,14 @@ function removeDate(item, key) {
     return dateConvert !== itemDate;
   });
 } // removeDates
+
+/**
+ * Validate input field for badge number.
+ */
+function validateBadge(badgeNum) {
+  const pattern = /^[A-Za-z0-9_-]*$/;
+  return pattern.test(badgeNum) || 'Invalid Badge #';
+} //validateBadge
 </script>
 
 <style scoped>
