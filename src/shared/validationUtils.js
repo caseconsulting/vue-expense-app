@@ -258,6 +258,7 @@ export function getBadgeNumberRules(clearance) {
 } //getBadgeNumberRules
 
 export default {
+  getAINRules,
   getDateOptionalRules,
   getDatesArrayOptionalRules,
   getDateMonthYearOptionalRules,
