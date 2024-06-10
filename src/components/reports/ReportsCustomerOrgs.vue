@@ -174,12 +174,6 @@ const tagFlip = ref([]);
  * The created lifecycle hook.
  */
 onMounted(() => {
-  emitter.on('get-employees-to-contact', (tab) => {
-    if (tab === 'customer orgs') {
-      emitter.emit('list-of-employees-to-contact', filteredEmployees.value);
-    }
-  });
-
   employeesInfo.value = getActive(store.getters.employees); // default to filtered list
   tags.value = store.getters.tags;
   filteredEmployees.value = employeesInfo.value; // one.value is shown
@@ -277,10 +271,10 @@ function populateCustomerOrgsDropdown() {
  *
  * @param employees - array of employees for dropdown and to get contracts
  */
-function populateDropdowns(employees) {
+function populateDropdowns(emps) {
   // refresh the employees autocomplete list to be those that match the query
-  employees.value = populateEmployeesDropdown(employees);
-  populateCustomerOrgsDropdown(employees);
+  employees.value = populateEmployeesDropdown(emps);
+  populateCustomerOrgsDropdown(emps);
 } // populateDropdowns
 
 /**
