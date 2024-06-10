@@ -30,13 +30,13 @@
           Create a contract <v-icon end> mdi-file-document-plus </v-icon>
         </v-btn>
         <!-- Download contracts CSV button -->
-        
-          <convert-contracts-to-csv
-            :mid-action="midAction"
-            :contracts="$store.getters.contracts"
-            :employees="$store.getters.employees"
-          />
-        
+
+        <convert-contracts-to-csv
+          :mid-action="midAction"
+          :contracts="$store.getters.contracts"
+          :employees="$store.getters.employees"
+        />
+
         <contracts-page-loader v-if="loading" />
         <contracts-table v-else />
 
