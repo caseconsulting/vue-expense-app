@@ -40,7 +40,7 @@
                 <v-btn
                   variant="outlined"
                   density="compact"
-                  class="px-2 mr-2 ml-auto"
+                  class="px-2 mr-2 ml-auto mb-3"
                   :color="caseRed"
                   @click="selectReceipt = true"
                 >
