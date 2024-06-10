@@ -236,6 +236,14 @@ export function getPTOCashOutRules(ptoLimit, employeeId, originalAmount) {
   ];
 } // getPTOCashOutRules
 
+/**
+ * Validate (numbers and letters) input field for badge number.
+ */
+export function getBadgeNumberRules(badgeNum) {
+  const pattern = /^[A-Za-z0-9_-]*$/;
+  return pattern.test(badgeNum) || 'Invalid Badge #';
+} //getBadgeNumberRules
+
 export default {
   getDateOptionalRules,
   getDatesArrayOptionalRules,
@@ -257,5 +265,6 @@ export default {
   duplicateEmployeeNumberRule,
   duplicateTechnologyRules,
   technologyExperienceRules,
-  getPTOCashOutRules
+  getPTOCashOutRules,
+  getBadgeNumberRules
 };
