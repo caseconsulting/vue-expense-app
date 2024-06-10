@@ -55,6 +55,7 @@
             @update:focused="clearance.submissionDate = parseEventDate()"
             @click:prepend="clearance.showSubmissionMenu = true"
             @keypress="clearance.showSubmissionMenu = false"
+            autocomplete="off"
           >
             <v-menu
               activator="parent"
@@ -153,6 +154,7 @@
         @update:focused="clearance.badgeExpirationDate = parseEventDate()"
         @keypress="clearance.showBadgeMenu = false"
         @click:prepend="clearance.showBadgeMenu = true"
+        autocomplete="off"
       >
         <v-menu
           activator="parent"

@@ -25,6 +25,7 @@
         prepend-icon="mdi-calendar"
         @click:prepend="highSchool.showReceivedMenu = true"
         @keypress="highSchool.showReceivedMenu = false"
+        autocomplete="off"
       >
         <v-menu
           activator="parent"

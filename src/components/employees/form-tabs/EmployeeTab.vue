@@ -174,6 +174,7 @@
         @update:focused="editedEmployee.hireDate = format(hireDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
         @click:prepend="hireMenu = true"
         @keypress="hireMenu = false"
+        autocomplete="off"
       >
         <v-menu
           activator="parent"

@@ -222,6 +222,7 @@
           @blur="editedExpenseType.startDate = format(startDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
           @click:prepend="showStartMenu = true"
           @keypress="showStartMenu = false"
+          autocomplete="off"
         >
           <v-menu
             activator="parent"
@@ -258,6 +259,7 @@
           @blur="editedExpenseType.endDate = format(endDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
           @update:model-value="showEndMenu = false"
           v-bind="props"
+          autocomplete="off"
         >
           <v-menu
             activator="parent"

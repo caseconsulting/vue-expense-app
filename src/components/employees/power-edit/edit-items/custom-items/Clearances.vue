@@ -20,6 +20,7 @@
       class="small-field mx-4"
       @update:focused="model.submissionDate = parseEventDate()"
       @keypress="showSubmissionMenu = false"
+      autocomplete="off"
     >
       <v-menu activator="parent" v-model="showSubmissionMenu" :close-on-content-click="false" location="start center">
         <v-date-picker
@@ -46,6 +47,7 @@
       :disabled="model.awaitingClearance"
       @update:focused="model.grantedDate = parseEventDate()"
       @keypress="showGrantedMenu = false"
+      autocomplete="off"
     >
       <v-menu activator="parent" v-model="showGrantedMenu" :close-on-content-click="false" location="start center">
         <v-date-picker
@@ -83,6 +85,7 @@
       :disabled="model.awaitingClearance"
       @update:focused="model.badgeExpirationDate = parseEventDate()"
       @keypress="showBadgeMenu = false"
+      autocomplete="off"
     >
       <v-menu activator="parent" v-model="showBadgeMenu" :close-on-content-click="false" location="start center">
         <v-date-picker
