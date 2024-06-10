@@ -113,8 +113,10 @@ import { customEmployeeFilter, getActive, getFullName, populateEmployeesDropdown
 import { getTodaysDate, isSameOrBefore } from '@/shared/dateUtils';
 import { onMounted, ref, inject, watch } from 'vue';
 import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 const store = useStore();
 const emitter = inject('emitter');
+const router = useRouter();
 
 const employees = ref([]);
 const employeesInfo = ref([]);
@@ -222,7 +224,7 @@ function chipColor(id) {
  * @param item - the employee
  */
 function handleClick(_, { item }) {
-  this.$router.push(`/employee/${item.employeeNumber}`);
+  router.push(`/employee/${item.employeeNumber}`);
 } //handleClick
 
 /**
