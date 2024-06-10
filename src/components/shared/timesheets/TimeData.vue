@@ -1,12 +1,12 @@
 <template>
   <div id="t-sheets-data">
     <v-card density="compact">
-      <v-card-title class="header_style d-flex align-center justify-space-between py-0 relative">
+      <v-card-title class="header_style d-flex align-center justify-space-between py-0 pt-2 relative">
         <h3>{{ system }} Time Data</h3>
         <span v-if="getLastUpdatedText && employeeIsUser()" class="last-updated">
           {{ getLastUpdatedText }}
         </span>
-        <v-btn variant="text" icon="mdi-refresh" @click="resetData()">
+        <v-btn class="pr-xs-1" variant="text" icon="mdi-refresh" @click="resetData()">
           <template v-slot:default>
             <v-tooltip activator="parent" location="top">Refresh {{ system }} data</v-tooltip>
             <v-icon color="white" size="large">mdi-refresh</v-icon>

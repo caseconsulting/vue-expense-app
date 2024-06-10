@@ -1,39 +1,45 @@
 <template>
   <div>
-    <div class="d-flex justify-space-between">
-      <h3 class="d-flex align-center">
-        <v-icon class="mr-2">mdi-palm-tree</v-icon>
-        PTO Balances
-        <v-avatar
-          @click="openLink('https://3.basecamp.com/3097063/buckets/179119/messages/6950289713')"
-          class="ml-2 nudge-up pointer"
-          size="x-small"
+    <div class="d-flex flex-wrap justify-start">
+      <div class="mb-2">
+        <h3>
+          <v-icon>mdi-palm-tree</v-icon>
+          PTO Balances
+          <v-avatar
+            @click="openLink('https://3.basecamp.com/3097063/buckets/179119/messages/6950289713')"
+            class="ml-2 mr-2 nudge-up pointer"
+            size="x-small"
+            density="compact"
+          >
+            <v-tooltip activator="parent" location="top">Click for more information</v-tooltip>
+            <v-icon size="x-small" color="#3f51b5">mdi-information</v-icon>
+          </v-avatar>
+        </h3>
+      </div>
+      <div>
+        <v-btn
+          v-if="ptoBalances['PTO'] || ptoBalances['PTO'] === 0"
+          @click="showPTOPlanningFormModal = true"
+          variant="outlined"
           density="compact"
+          class="px-2 mb-2 mr-2 ml-auto"
+          :color="caseRed"
+          width="135"
         >
-          <v-tooltip activator="parent" location="top">Click for more information</v-tooltip>
-          <v-icon size="x-small" color="#3f51b5">mdi-information</v-icon>
-        </v-avatar>
-      </h3>
-      <v-btn
-        v-if="ptoBalances['PTO'] || ptoBalances['PTO'] === 0"
-        @click="showPTOPlanningFormModal = true"
-        variant="outlined"
-        density="compact"
-        class="px-2 mr-2 ml-auto"
-        :color="caseRed"
-      >
-        Plan PTO
-      </v-btn>
-      <v-btn
-        v-if="(ptoBalances['PTO'] || ptoBalances['PTO'] === 0) && system !== 'ADP'"
-        @click="showPTOCashOutFormModal = true"
-        variant="outlined"
-        density="compact"
-        class="px-2"
-        :color="caseRed"
-      >
-        Cash Out PTO
-      </v-btn>
+          Plan PTO
+        </v-btn>
+        <v-btn
+          v-if="(ptoBalances['PTO'] || ptoBalances['PTO'] === 0) && system !== 'ADP'"
+          @click="showPTOCashOutFormModal = true"
+          variant="outlined"
+          density="compact"
+          class="px-2 mb-2"
+          :color="caseRed"
+          width="135"
+        >
+          Cash Out PTO
+        </v-btn>
+      </div>
     </div>
     <div v-if="Object.keys(ptoBalances || []).length === 0" class="my-4">No balances to display</div>
     <div v-for="jobcode in sortedBalancesByDuration" :key="jobcode">
