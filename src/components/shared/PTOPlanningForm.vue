@@ -184,8 +184,9 @@ for (let contract of employee.value.contracts ?? []) {
     // get YYYY-MM format of start and end dates, cutting off anything this month or before
     let projectStart = add(getTodaysDate(), 1, 'month');
     // get project end date for this contract year
-    let projectEnd = setYear(project.startDate, getTodaysDate('YYYY'));
-    projectEnd = add(projectEnd, 11, 'month');
+    let projectEnd = subtract(project.startDate, 1, 'day');
+    projectEnd = setYear(projectEnd, getTodaysDate('YYYY'));
+    projectEnd = add(projectEnd, 1, 'year');
     // format dates and add changes
     [projectStart, projectEnd] = [format(projectStart, null, 'YYYY-MM'), format(projectEnd, null, 'YYYY-MM')];
     ranges.value.push([projectStart, projectEnd]);
