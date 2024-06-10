@@ -581,6 +581,7 @@ function refreshKey() {
  * Updates the dropdown employee when the employee model changes.
  */
 function watchModel() {
+  if (!this.model) return;
   this.dropdownEmployee = {
     ..._.cloneDeep(this.model),
     itemTitle: `${this.model.lastName}, ${this.model.nickname || this.model.firstName}`
