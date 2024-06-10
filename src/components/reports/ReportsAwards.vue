@@ -109,6 +109,7 @@
 <script setup>
 import { onMounted, ref, inject, watch } from 'vue';
 import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 import _ from 'lodash';
 import { userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
 <<<<<<< HEAD
@@ -118,6 +119,7 @@ import { getActive, getFullName, populateEmployeesDropdown } from './reports-uti
 import { customEmployeeFilter, getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
 const emitter = inject('emitter');
 const store = useStore();
+const router = useRouter();
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -229,7 +231,7 @@ function chipColor(id) {
  * @param item - the employee
  */
 function handleClick(_, { item }) {
-  this.$router.push(`/employee/${item.employeeNumber}`);
+  router.push(`/employee/${item.employeeNumber}`);
 } //handleClick
 
 /**
