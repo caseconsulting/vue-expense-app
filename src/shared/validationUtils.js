@@ -247,6 +247,7 @@ export function getPTOCashOutRules(ptoLimit, employeeId, originalAmount) {
 } // getPTOCashOutRules
 
 export default {
+  getAINRules,
   getDateOptionalRules,
   getDatesArrayOptionalRules,
   getDateMonthYearOptionalRules,
