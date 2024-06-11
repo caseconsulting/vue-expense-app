@@ -65,7 +65,7 @@ export function employeeFilter(__, search, item) {
     if (t.length < 2) continue;
     for (let s of searchableTerms) {
       if (s && s.toLowerCase().includes(t.toLowerCase())) {
-        return true;
+        return s.indexOf(t);
       }
     }
   }
