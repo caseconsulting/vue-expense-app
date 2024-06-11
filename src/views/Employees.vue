@@ -484,7 +484,7 @@ function hasAdminPermissions() {
  * Loads in basecamp avatars, setting them when finished
  */
 async function loadBasecampAvatars() {
-  await this.updateStoreAvatars();
+  if (!this.$store.getters.basecampAvatars) await this.updateStoreAvatars();
   let avatars = this.$store.getters.basecampAvatars;
   _.map(this.employees, (employee) => {
     let avatar = _.find(avatars, ['email_address', employee.email]);
@@ -520,14 +520,12 @@ async function refreshEmployees() {
     !this.$store.getters.contracts && (userRoleIsAdmin() || userRoleIsManager()) ? this.updateStoreContracts() : '',
     !this.$store.getters.tags && (userRoleIsAdmin() || userRoleIsManager()) ? this.updateStoreTags() : ''
   ]);
-
-  // assets that don't need to be awaited on, but need data that is awaited on
-  Promise.all([!this.$store.getters.basecampAvatars ? this.loadBasecampAvatars() : '']);
-
   this.employees = this.$store.getters.employees; // get all employees
-  this.filterEmployees(); // filter employees
   this.contracts = this.$store.getters.contracts;
   this.tags = this.$store.getters.tags;
+  // assets that don't need to be awaited on, but need data that is awaited on
+  Promise.all([this.loadBasecampAvatars()]);
+  this.filterEmployees(); // filter employees
   this.loading = false; // set loading status to false
 } // refreshEmployees
 
