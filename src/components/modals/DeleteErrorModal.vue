@@ -9,7 +9,7 @@
           <v-btn
             color="gray darken-1"
             variant="text"
-            @click.native="
+            @click="
               emit(`invalid-${type}-delete`);
               activate = false;
             "

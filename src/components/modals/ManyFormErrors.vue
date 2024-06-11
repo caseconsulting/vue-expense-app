@@ -15,7 +15,7 @@
           <v-spacer></v-spacer>
           <v-btn
             variant="text"
-            @click.native="
+            @click="
               emit('canceled-form');
               activate = false;
             "

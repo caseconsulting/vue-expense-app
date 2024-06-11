@@ -9,7 +9,7 @@
             id="submitNoBtn"
             color="red"
             variant="text"
-            @click.native="
+            @click="
               emit(`canceled-${type}`);
               activate = false;
             "
@@ -23,7 +23,7 @@
             id="submitYesBtn"
             color="green-darken-1"
             variant="text"
-            @click.native="
+            @click="
               emit(`confirmed-${type}`);
               activate = false;
             "

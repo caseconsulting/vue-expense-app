@@ -10,7 +10,7 @@
             id="submitNoBtn"
             color="red"
             variant="text"
-            @click.native="
+            @click="
               activate = false;
               loading = true;
               emit(`backout-canceled-${type}`);
@@ -26,7 +26,7 @@
             id="submitYesBtn"
             color="green-darken-1"
             variant="text"
-            @click.native="
+            @click="
               emit(`backout-confirmed-${type}`);
               activate = false;
               loading = true;

@@ -129,7 +129,7 @@
           <template v-slot:[`item.showOnFeed`]="{ item }">
             <v-switch
               :model-value="item.showSwitch && item.selected"
-              @click.native.stop
+              @click.stop
               @update:model-value="toggleShowOnFeedGroup(item)"
               :disabled="!item.checkBox.all"
               :color="caseGray"
