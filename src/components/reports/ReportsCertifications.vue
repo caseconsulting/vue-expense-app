@@ -252,7 +252,7 @@ function populateCertificationsDropdown() {
       }
     })
   );
-  certifications.value = new Set(certifications.value);
+  certifications.value = Array.from(new Set(certifications.value));
 } // populateCertificationsDropdown
 
 /**

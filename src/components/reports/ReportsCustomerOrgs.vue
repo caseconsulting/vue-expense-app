@@ -262,7 +262,7 @@ function populateCustomerOrgsDropdown() {
       if (org.current) custOrgs.value.push(org.name);
     })
   );
-  custOrgs.value = new Set(custOrgs.value);
+  custOrgs.value = Array.from(new Set(custOrgs.value));
 } // populateCustomerOrgsDropdown
 
 /**
