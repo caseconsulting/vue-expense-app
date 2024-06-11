@@ -35,7 +35,7 @@
         <reports-page-loader v-if="loading" />
         <div v-else>
           <!-- user is mobile -->
-          <div v-if="isMobile()" class="text-start">
+          <div v-if="isMobile()" class="text-center">
             <v-menu offset="y">
               <template #activator="{ props }">
                 <v-btn variant="text" theme="dark" class="font-weight-bold" v-bind="props">
@@ -54,14 +54,14 @@
               </v-list>
             </v-menu>
             <hr class="my-1" />
-            <ReportsContracts v-if="currentTab === 'contracts'" />
-            <ReportsCustomerOrgs v-if="currentTab === 'customer orgs'" />
-            <ReportsCertifications v-if="currentTab === 'certifications'" />
-            <ReportsAwards v-if="currentTab === 'awards'" />
-            <ReportsForeignLanguages v-if="currentTab === 'languages'" />
-            <ReportsJobRoles v-if="currentTab === 'job roles'" />
-            <ReportsTechnologies v-if="currentTab === 'technologies'" />
-            <ReportsSecurityInfo v-if="currentTab === 'security info'" />
+            <ReportsContracts v-if="currentTab === 'contracts'" class="text-start" />
+            <ReportsCustomerOrgs v-if="currentTab === 'customer orgs'" class="text-start" />
+            <ReportsCertifications v-if="currentTab === 'certifications'" class="text-start" />
+            <ReportsAwards v-if="currentTab === 'awards'" class="text-start" />
+            <ReportsForeignLanguages v-if="currentTab === 'languages'" class="text-start" />
+            <ReportsJobRoles v-if="currentTab === 'job roles'" class="text-start" />
+            <ReportsTechnologies v-if="currentTab === 'technologies'" class="text-start" />
+            <ReportsSecurityInfo v-if="currentTab === 'security info'" class="text-start" />
           </div>
           <div v-else>
             <!-- user is not mobile -->
