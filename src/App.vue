@@ -340,7 +340,11 @@ async function created() {
 
   this.environment = import.meta.env.VITE_AUTH0_CALLBACK;
 
-  this.emitter.on('timeout-acknowledged', () => (this.timedOut = false)); // Session end - log out
+  this.emitter.on('timeout-acknowledged', () => {
+    this.timedOut = false;
+    this.handleLogout(); // logout after acknowledging
+  }); // Session end - log out
+
   this.emitter.on('close', () => (this.switchRole = false));
   this.emitter.on('badgeExp', () => {
     this.badgeKey++;
@@ -408,15 +412,6 @@ function $route(to, from) {
     this.badgeKey++;
   }
 } // $route
-
-/**
- * Logs user out when their session expires
- */
-function watchSessionTimedOut() {
-  if (this.timedOut) {
-    this.handleLogout();
-  }
-} // watchSessionTimedOut
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -507,8 +502,7 @@ export default {
     updateEmployeeLogin
   },
   watch: {
-    $route,
-    timedOut: watchSessionTimedOut
+    $route
   },
   beforeUnmount,
   created
