@@ -318,7 +318,7 @@ function populateBadgeExpirationsDropdown() {
     });
   }
 
-  badgeExpirations.value = new Set(badgeExpirations.value);
+  badgeExpirations.value = Array.from(new Set(badgeExpirations.value));
   // refresh the employees autocomplete list to be those that match the query
   employees.value = populateEmployeesDropdown(filteredEmployees.value);
 } // populateBadgeExpirationsDropdown
