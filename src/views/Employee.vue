@@ -68,7 +68,7 @@
         <v-col v-if="displayTimeAndBalances" cols="12" md="5" lg="5" class="pt-0">
           <time-data :key="model" :employee="model" class="mb-4" />
           <available-budgets
-            :key="refreshKey.b"
+            :key="refreshKey"
             class="mb-4"
             :employee="model"
             :expenses="expenses"
