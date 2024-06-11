@@ -61,11 +61,12 @@ export function employeeFilter(__, search, item) {
 
   // search through all searchable terms with all search terms
   for (let t of terms) {
-    t = t.trim();
+    t = t.toLowerCase().trim();
     if (t.length < 2) continue;
     for (let s of searchableTerms) {
-      if (s && s.toLowerCase().includes(t.toLowerCase())) {
-        return s.indexOf(t);
+      s = s.toLowerCase();
+      if (s && s.includes(t)) {
+        return true;
       }
     }
   }
