@@ -102,7 +102,6 @@
 
 <script setup>
 import _ from 'lodash';
-import { userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
 import { employeeFilter } from '@/shared/filterUtils';
 import { selectedTagsHasEmployee } from '@/shared/employeeUtils';
 import { getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
