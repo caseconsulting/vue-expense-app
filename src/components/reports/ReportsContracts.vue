@@ -1,4 +1,3 @@
-<!-- eslint-disable vue/no-v-model-argument -->
 <template>
   <div>
     <v-container fluid class="px-1 px-md-4">

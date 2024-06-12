@@ -1,5 +1,5 @@
 <template>
-  <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
+  <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
     <v-autocomplete
       clearable
       label="Filter by Tag (click to flip)"
@@ -32,7 +32,6 @@
 import _ from 'lodash';
 import { ref, watch } from 'vue';
 import { useStore } from 'vuex';
-import { userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -110,7 +109,7 @@ function removeTag(item) {
 watch(
   () => tagsInfo.value.flipped,
   function watchFlipped() {
-    emit('update:modelValue', tagsInfo.value);
+    emit('update:modelValue', tagsInfo.value); //required emit to update model
   },
   { deep: true }
 ); // watchflipped;
@@ -134,7 +133,7 @@ watch(
         tagsInfo.value.flipped.splice(i, 1);
       }
     }
-    emit('update:modelValue', tagsInfo.value);
+    emit('update:modelValue', tagsInfo.value); //required emit to update model
   },
   { deep: true }
 ); // watchSelectedTags
