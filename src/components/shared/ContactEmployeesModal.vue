@@ -64,7 +64,7 @@
           color="grey-darken-3"
           variant="text"
           :size="isMobile() ? 'x-small' : 'default'"
-          @click.native="
+          @click="
             emit('close-contact-employees-modal');
             activate = false;
           "

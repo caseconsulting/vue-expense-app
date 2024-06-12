@@ -62,7 +62,7 @@
           <v-spacer></v-spacer>
           <v-btn
             variant="text"
-            @click.native="
+            @click="
               emit('closed-project-employees-assigned-modal');
               activate = false;
             "

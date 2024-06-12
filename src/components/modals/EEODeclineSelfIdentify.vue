@@ -21,7 +21,7 @@
           <v-btn
             color="red"
             variant="text"
-            @click.native="
+            @click="
               emit(`cancel-decline-self-identify`);
               activate = false;
             "
@@ -32,7 +32,7 @@
           <v-btn
             color="green-darken-1"
             variant="text"
-            @click.native="
+            @click="
               emit(`confirm-decline-self-identify`);
               activate = false;
             "

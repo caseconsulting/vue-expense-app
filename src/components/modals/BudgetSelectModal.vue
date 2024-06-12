@@ -12,7 +12,7 @@
           <!-- Budget List -->
           <div v-if="budgetYears.length > 0">
             <div v-for="(budgetYear, index) in budgetYears" :key="budgetYear">
-              <v-list-item ripple @click.native="select(budgetYear)" class="pointer">
+              <v-list-item ripple @click="select(budgetYear)" class="pointer">
                 <v-list-item-title>
                   <h2 v-bind:class="{ 'text-center': true, 'text-decoration-underline': isCurrent(budgetYear) }">
                     {{ budgetYear }} - {{ budgetYear + 1 }}
@@ -30,7 +30,7 @@
           <!-- Cancel Button -->
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="grey-darken-3" variant="text" @click.native="activate = false"> Close </v-btn>
+            <v-btn color="grey-darken-3" variant="text" @click="activate = false"> Close </v-btn>
           </v-card-actions>
           <!-- End Cancel Button -->
         </v-list>
