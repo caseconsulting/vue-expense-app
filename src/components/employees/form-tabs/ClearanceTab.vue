@@ -128,12 +128,13 @@
       <v-text-field
         v-model="clearance.badgeNum"
         prepend-icon="mdi-badge-account-outline"
+        clearable
         maxlength="5"
-        counter="5"
-        :rules="[getBadgeNumberRules(clearance.badgeNum)]"
+        counter
+        hide-details="auto"
+        :rules="[getBadgeNumberRules(clearance)]"
         label="Badge Number"
         variant="underlined"
-        clearable
         :disabled="clearance.awaitingClearance"
         @update:focused="capitalizeBadges(clearance)"
       ></v-text-field>
