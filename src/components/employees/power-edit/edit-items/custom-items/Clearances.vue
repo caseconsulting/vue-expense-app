@@ -66,13 +66,14 @@
     <v-text-field
       v-model="model.badgeNum"
       maxlength="5"
-      counter="5"
-      :rules="[getBadgeNumberRules(model.badgeNum)]"
+      counter
+      hide-details="auto"
+      :rules="[getBadgeNumberRules(model)]"
       label="Badge Number"
       variant="underlined"
       class="small-field mx-4"
       :disabled="model.awaitingClearance"
-      @update:model-value="model.badgeNum = model.badgeNum ? model.badgeNum.toUpperCase() : undefined"
+      @update:focused="model.badgeNum = model.badgeNum ? model.badgeNum.toUpperCase() : undefined"
     ></v-text-field>
     <!-- Badge Expiration Date -->
     <v-text-field

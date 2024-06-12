@@ -238,12 +238,13 @@ export function getPTOCashOutRules(ptoLimit, employeeId, originalAmount) {
 
 /**
  * Validate (numbers and letters) input field for badge number.
- * @param badgeNum employee's badge number
  */
-export function getBadgeNumberRules(badgeNum) {
-  const pattern = /^[A-Za-z0-9_-]*$/;
-  const counter = badgeNum.length == 5;
-  return (pattern.test(badgeNum) && counter) || 'Invalid Badge #';
+export function getBadgeNumberRules(clearance) {
+  const pattern = /^[A-Za-z0-9]*$/;
+  return (v) =>
+    v && clearance.badgeNum
+      ? (pattern.test(clearance.badgeNum) && clearance.badgeNum.length == 5) || 'Invalid Badge #'
+      : true;
 } //getBadgeNumberRules
 
 export default {
