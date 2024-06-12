@@ -92,6 +92,7 @@ import ReportsTechnologies from '@/components/reports/ReportsTechnologies.vue';
 import ReportsSecurityInfo from '@/components/reports/ReportsSecurityInfo.vue';
 import { updateStoreEmployees, updateStoreContracts, updateStoreTags } from '@/utils/storeUtils';
 import { isMobile, userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
+import { getEmployeeCurrentProjects } from '@/shared/employeeUtils';
 import { useRouter } from 'vue-router';
 import baseCsv from '@/utils/csv/baseCsv.js';
 
@@ -263,6 +264,39 @@ function downloadTable() {
     return newItem;
   };
   let csvData = table.map((item) => renameKeys(item.columns));
+
+  // EXTRA DATA
+  let extraDataReports = ['contracts'];
+  // create an index of employees
+  let employeesIndex = {};
+  if (extraDataReports.includes(currentTab.value.key))
+    for (let e of store.getters.employees) employeesIndex[e.employeeNumber] = e;
+
+  // EXTRA DATA: contract tab - add in current project
+  if (currentTab.value.key === 'contracts') {
+    // get contracts info so that we can get the project names
+    let projects = {};
+    for (let c of store.getters.contracts) for (let p of c.projects) projects[p.id] = p;
+    // header info (hardcoded based on headers of tables)
+    let employeeNumberHeader = 'Employee #';
+    let contractHeader = 'Current Contract';
+    let projectHeader = 'Current Project';
+    // loop through all rows and add in employee's current project
+    let currentProjects, row, emp;
+    for (let i in csvData) {
+      row = csvData[i];
+      // get the current projects of user
+      emp = employeesIndex[row[employeeNumberHeader]];
+      currentProjects = getEmployeeCurrentProjects(emp.id, store.getters.employees);
+      currentProjects = currentProjects.map((p) => projects[p.projectId].projectName);
+      // place after contracts by copying everything in order
+      csvData[i] = {};
+      for (let colName in row) {
+        csvData[i][colName] = row[colName];
+        if (colName === contractHeader) csvData[i][projectHeader] = currentProjects?.join(' & ');
+      }
+    }
+  }
 
   // parse and download to xlsx
   let csvString = baseCsv.generate(csvData);
