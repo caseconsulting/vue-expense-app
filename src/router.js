@@ -19,6 +19,7 @@ import PageNotFound from '@/views/PageNotFound';
 import Contracts from '@/views/Contracts.vue';
 import { requireAuth, isAdminOrManager } from '@/utils/auth';
 import multiguard from 'vue-router-multiguard';
+import { isLoggedIn } from './utils/auth';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -143,6 +144,20 @@ const router = createRouter({
       beforeEnter: requireAuth
     }
   ]
+});
+
+// this prevents the user from reloading after they've timed out
+router.beforeEach((to, from, next) => {
+  // name must not exist, not be login (to prevent recursion) and the user must be timed out
+  // from === '/' && !from.name <-- true if page was reloaded
+  if (from === '/' && !from.name && from.name !== 'login' && !isLoggedIn()) {
+    next({
+      path: '/',
+      query: { redirect: to.fullPath }
+    });
+  } else {
+    next(true);
+  }
 });
 
 export default router;

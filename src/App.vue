@@ -188,6 +188,15 @@ function onUserProfile() {
   return this.$route.params.id === this.userId.toString();
 } // onUserProfile
 
+/**
+ * Determines whether the user's login has timed out
+ *
+ * @return boolean - whether the user's login has timed out
+ */
+function timedOut() {
+  return this.$store.getters.timedOut;
+}
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -314,7 +323,7 @@ function setSessionTimeouts() {
   let sessionRemainder = expTime - now;
   // set session timeout
   this.sessionTimeout = window.setTimeout(() => {
-    this.timedOut = true;
+    this.setTimedOut(true);
     this.session = false;
   }, sessionRemainder);
 
@@ -325,6 +334,13 @@ function setSessionTimeouts() {
     }, sessionRemainder - 300000);
   }
 } // setSessionTimeouts
+
+/**
+ * Sets whether the user's login is timed out
+ */
+function setTimedOut(isTimedOut) {
+  this.$store.dispatch('setTimedOut', { timedOut: isTimedOut });
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -341,7 +357,7 @@ async function created() {
   this.environment = import.meta.env.VITE_AUTH0_CALLBACK;
 
   this.emitter.on('timeout-acknowledged', () => {
-    this.timedOut = false;
+    this.setTimedOut(false);
     this.handleLogout(); // logout after acknowledging
   }); // Session end - log out
 
@@ -429,7 +445,6 @@ export default {
     inset: false,
     initials: '',
     profilePic: 'src/assets/img/logo-big.png',
-    timedOut: false,
     session: false,
     sessionTimeout: null,
     sessionTimeoutWarning: null,
@@ -477,7 +492,8 @@ export default {
     isMobile,
     isSmallScreen,
     onUserProfile,
-    storeIsPopulated
+    storeIsPopulated,
+    timedOut
   },
   components: {
     MainNav,
@@ -499,7 +515,8 @@ export default {
     setSessionTimeouts,
     updateStoreUser,
     updateStoreEmployees,
-    updateEmployeeLogin
+    updateEmployeeLogin,
+    setTimedOut
   },
   watch: {
     $route
