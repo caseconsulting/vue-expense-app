@@ -28,11 +28,35 @@
   </v-container>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref, watch } from 'vue';
 import _ from 'lodash';
 import TechBarChart from '../custom-charts/TechBarChart.vue';
 import VueWordCloud from 'vuewordcloud';
-import { storeIsPopulated } from '@/utils/utils';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const colors = ['#bc3825', '#415364', '#7F4645'];
+const employees = ref(null);
+const router = useRouter();
+const store = useStore();
+const technologies = ref({});
+const words = ref([]);
+
+/**
+ * Mounted lifecycle hook. Gets items then organizes them and fills data.
+ */
+onMounted(() => {
+  if (store.getters.storeIsPopulated) {
+    parseEmployeeData();
+  }
+}); // mounted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -44,24 +68,24 @@ import { storeIsPopulated } from '@/utils/utils';
  * Parse through employee data to get technologies.
  */
 function parseEmployeeData() {
-  this.employees = this.$store.getters.employees;
+  employees.value = store.getters.employees;
   //Put into dictionary where key is tech type and value is quantity
-  this.employees.forEach((employee) => {
+  employees.value.forEach((employee) => {
     if (employee.technologies && employee.workStatus != 0) {
       employee.technologies.forEach((currTech) => {
         // **** ALL TECH ****
-        if (!this.technologies[currTech.name]) {
-          this.technologies[currTech.name] = 1;
+        if (!technologies.value[currTech.name]) {
+          technologies.value[currTech.name] = 1;
         } else {
-          this.technologies[currTech.name] += 1;
+          technologies.value[currTech.name] += 1;
         }
       });
     }
   });
 
-  this.technologies = _.forEach(this.technologies, (value, key) => {
+  technologies.value = _.forEach(technologies.value, (value, key) => {
     if (value > 1) {
-      this.words.push([key, value]);
+      words.value.push([key, value]);
     }
   });
 } // parseEmployeeData
@@ -74,7 +98,7 @@ function parseEmployeeData() {
 function wordClicked(word) {
   localStorage.setItem('requestedDataType', 'technologies');
   localStorage.setItem('requestedFilter', word);
-  this.$router.push({
+  router.push({
     path: '/reports',
     name: 'reports'
   });
@@ -82,52 +106,13 @@ function wordClicked(word) {
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                  LIFECYCLE HOOKS                 |
+// |                    WATCHERS                      |
 // |                                                  |
 // |--------------------------------------------------|
 
-/**
- * Mounted lifecycle hook. Gets items then organizes them and fills data.
- */
-function mounted() {
-  if (this.storeIsPopulated) {
-    this.parseEmployeeData();
+watch(store.getters.storeIsPopulated, (newVal) => {
+  if (newVal) {
+    parseEmployeeData();
   }
-} // mounted
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  components: {
-    TechBarChart,
-    [VueWordCloud.name]: VueWordCloud
-  },
-  computed: {
-    storeIsPopulated
-  },
-  data() {
-    return {
-      colors: ['#bc3825', '#415364', '#7F4645'],
-      employees: null,
-      technologies: {},
-      words: []
-    };
-  },
-  methods: {
-    parseEmployeeData,
-    wordClicked
-  },
-  mounted,
-  watch: {
-    storeIsPopulated: function () {
-      if (this.storeIsPopulated) {
-        this.parseEmployeeData();
-      }
-    }
-  }
-};
+});
 </script>
