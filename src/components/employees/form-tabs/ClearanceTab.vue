@@ -510,6 +510,13 @@ async function validateFields() {
   await asyncForEach(components, async (field) => {
     if (field && (await field.validate()).length > 0) errorCount++;
   });
+
+  await this.editedClearances.forEach((clearance) => {
+    //goes through each clearance and ensures it follows validation
+    let badgeValidation = getBadgeNumberRules(clearance);
+    if (badgeValidation(clearance) === 'Invalid Badge #, Must be 5 characters') errorCount++;
+  });
+
   this.emitter.emit('doneValidating', { tab: 'clearance', data: this.editedClearances }); // emit done validating and sends edited data back to parent
   this.emitter.emit('clearanceStatus', errorCount); // emit error status
 } // validateFields
