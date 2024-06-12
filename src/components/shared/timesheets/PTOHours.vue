@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="d-flex flex-wrap justify-start">
+    <div class="d-flex flex-wrap justify-space-between">
       <div class="mb-2">
         <h3>
           <v-icon>mdi-palm-tree</v-icon>
