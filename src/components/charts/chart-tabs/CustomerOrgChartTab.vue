@@ -16,18 +16,8 @@
     </v-row>
   </v-container>
 </template>
-<script>
+<script setup>
 import CustomerOrgChart from '../custom-charts/CustomerOrgChart.vue';
 import EmployeesCustomerOrgChart from '../custom-charts/EmployeesCustomerOrgChart.vue';
 import ICTable from '../custom-charts/IcTable.vue';
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  components: { CustomerOrgChart, ICTable, EmployeesCustomerOrgChart }
-};
 </script>
