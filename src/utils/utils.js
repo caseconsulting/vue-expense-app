@@ -3,6 +3,7 @@ import MobileDetect from 'mobile-detect';
 import _ from 'lodash';
 import { getRole } from '@/utils/auth';
 import { format, getTodaysDate, isAfter, isBefore, setYear, subtract, DEFAULT_ISOFORMAT } from '@/shared/dateUtils';
+import store from '../../store/index';
 
 /**
  * Async function to loop an array.
@@ -171,11 +172,11 @@ export async function updateEmployeeLogin(employee) {
       timeToLive: 60
     })
   ]); // Create an audit of the success
-  if (this.$store.getters.employees) {
-    let employees = this.$store.getters.employees;
+  if (store.getters.employees) {
+    let employees = store.getters.employees;
     let i = employees.findIndex((emp) => emp.id === employee.id);
     employees[i] = employee;
-    this.$store.dispatch('setLoginTime', { employees });
+    store.dispatch('setLoginTime', { employees });
   }
 } // updateEmployee
 
@@ -191,7 +192,7 @@ export async function updateEmployeeLogin(employee) {
  * @return boolean - if the store is populated
  */
 export function storeIsPopulated() {
-  return this.$store.getters.storeIsPopulated;
+  return store.getters.storeIsPopulated;
 } // storeIsPopulated
 
 /**

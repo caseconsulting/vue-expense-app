@@ -20,7 +20,7 @@
           :headers="headers"
           :items="audits"
           :custom-sort="customDateSort"
-          :sort-by.sync="sortBy"
+          :sort-by="sortBy"
           :search="search"
           class="elevation-1"
         ></v-data-table>
@@ -29,10 +29,34 @@
   </span>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref } from 'vue';
 import { difference } from '../../shared/dateUtils';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
 const IsoFormat = 'MMMM Do YYYY, h:mm:ss a';
+const props = defineProps(['audits']);
+
+const headers = ref([
+  {
+    title: 'Event Date',
+    key: 'dateCreated'
+  },
+  {
+    title: 'Employee Name',
+    key: 'employeeName'
+  },
+  {
+    title: 'Description',
+    key: 'description'
+  }
+]); // datatable headers
+const search = ref(null);
+const sortBy = ref([{ key: 'dateCreated' }]);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -45,58 +69,28 @@ const IsoFormat = 'MMMM Do YYYY, h:mm:ss a';
  *
  * @param items - items to sort
  * @param sortBy - the things to sort by
- * @param sortDesc - whether or not to flip the sort
+ * @param shouldSortDesc - whether or not to flip the sort
  * @return array - the audits or sorted items
  */
-function customDateSort(items, sortBy, sortDesc) {
-  if (!sortDesc) {
-    return this.audits;
+function customDateSort(items, sortBy, shouldSortDesc) {
+  if (!shouldSortDesc) {
+    return props.audits;
   }
 
   if (sortBy[0] === 'dateCreated') {
     return items.sort((a, b) => {
-      return sortDesc[0]
+      return shouldSortDesc[0]
         ? difference(a.dateCreated, b.dateCreated, 'second', IsoFormat)
         : difference(b.dateCreated, a.dateCreated, 'second', IsoFormat);
     });
   } else if (sortBy[0] === 'description' || sortBy[0] === 'employeeName') {
     return items.sort((a, b) => {
-      return sortDesc[0] ? a.description.localeCompare(b.description) : b.description.localeCompare(a.description);
+      return shouldSortDesc[0]
+        ? a.description.localeCompare(b.description)
+        : b.description.localeCompare(a.description);
     });
   }
 
-  return this.audits;
+  return props.audits;
 } // customDateSort
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  data() {
-    return {
-      headers: [
-        {
-          title: 'Event Date',
-          key: 'dateCreated'
-        },
-        {
-          title: 'Employee Name',
-          key: 'employeeName'
-        },
-        {
-          title: 'Description',
-          key: 'description'
-        }
-      ], // datatable headers
-      search: null,
-      sortBy: [{ key: 'dateCreated' }],
-      sortDesc: false
-    };
-  },
-  props: ['audits'],
-  methods: { customDateSort }
-};
 </script>
