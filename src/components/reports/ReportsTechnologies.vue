@@ -117,7 +117,6 @@ import _ from 'lodash';
 import { userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
 import { employeeFilter } from '@/shared/filterUtils';
 import { getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
-import { getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
 import { onMounted, ref, inject, watch } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';

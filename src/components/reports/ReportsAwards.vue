@@ -112,11 +112,8 @@ import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import _ from 'lodash';
 import { userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
-<<<<<<< HEAD
 import { employeeFilter } from '@/shared/filterUtils';
 import { getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
-=======
-import { customEmployeeFilter, getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
 const emitter = inject('emitter');
 const store = useStore();
 const router = useRouter();
@@ -156,7 +153,6 @@ const showInactiveEmployees = ref(false);
 const sortBy = ref([{ key: 'employeeNumber' }]); // sort datatable items
 const tags = ref([]);
 const tagFlip = ref([]);
->>>>>>> 6fbab3b3 (POR-2608: saving)
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -382,82 +378,8 @@ watch(selectedTags, () => {
       tagFlip.value.splice(i, 1);
     }
   }
-<<<<<<< HEAD
-  this.refreshDropdownItems();
-} // watchSelectedTags
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  created,
-  data() {
-    return {
-      employees: [],
-      employeesInfo: [],
-      filteredEmployees: [],
-      headers: [
-        {
-          title: 'Employee #',
-          key: 'employeeNumber'
-        },
-        {
-          title: 'Name',
-          key: 'fullName'
-        },
-        {
-          title: 'Awards',
-          key: 'awardNames'
-        },
-        {
-          title: 'Email',
-          key: 'email'
-        }
-      ], // datatable headers
-      awardSearch: null,
-      awards: [],
-      search: null, // query text for datatable search field
-      selectedTags: [],
-      showInactiveEmployees: false,
-      sortBy: [{ key: 'employeeNumber' }], // sort datatable items
-      sortDesc: false,
-      tags: [],
-      tagFlip: [],
-      tagSearchString: ''
-    };
-  },
-  methods: {
-    buildAwardsColumns,
-    chipColor,
-    employeeFilter,
-    getActive,
-    getFullName,
-    handleClick,
-    negateTag,
-    populateEmployeesDropdown,
-    populateAwardsDropdown,
-    populateDropdowns,
-    refreshDropdownItems,
-    removeTag,
-    searchAwards,
-    selectedTagsHasEmployee,
-    updateTableDownload,
-    userRoleIsAdmin,
-    userRoleIsManager
-  },
-  watch: {
-    showInactiveEmployees: watchShowInactiveUsers,
-    tagFlip: { handler: watchTagFlip, deep: true },
-    selectedTags: { handler: watchSelectedTags, deep: true }
-  }
-};
-=======
   refreshDropdownItems();
 }); // watchSelectedTags
->>>>>>> 6fbab3b3 (POR-2608: saving)
 </script>
 
 <style lang="css" scoped>

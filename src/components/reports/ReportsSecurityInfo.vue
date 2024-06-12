@@ -130,7 +130,6 @@ import { userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
 import { employeeFilter } from '@/shared/filterUtils';
 import { add, format, getTodaysDate } from '@/shared/dateUtils';
 import { getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
-import { getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
 import { onMounted, ref, inject, watch } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
