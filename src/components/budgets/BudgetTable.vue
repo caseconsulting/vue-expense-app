@@ -84,6 +84,12 @@ import _ from 'lodash';
 const expenseTypeData = ref(null);
 const props = defineProps(['employee', 'accessibleBudgets', 'fiscalDateView', 'expenses', 'expenseTypes']);
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                LIFECYCLE HOOKS                   |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * Sets the data for the budgets given an employee id
  */
