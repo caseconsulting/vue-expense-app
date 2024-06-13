@@ -35,7 +35,7 @@
         <v-btn
           color="grey-darken-3"
           variant="text"
-          @click.native="
+          @click="
             emit('close-exchange-training-hours-calculator');
             activate = false;
           "
@@ -46,7 +46,7 @@
           color="green "
           variant="text"
           :disabled="isNaN(parseInt(salary)) || isNaN(parseFloat(hours))"
-          @click.native="
+          @click="
             emit('insert-training-hours', getCost());
             activate = false;
           "

@@ -27,7 +27,7 @@
           <v-spacer></v-spacer>
           <v-btn
             variant="text"
-            @click.native="
+            @click="
               emit('closed-contract-settings-modal');
               activate = false;
             "
@@ -37,7 +37,7 @@
           <v-btn
             variant="text"
             class="text-green"
-            @click.native="
+            @click="
               save();
               activate = false;
             "

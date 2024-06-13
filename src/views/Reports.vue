@@ -53,7 +53,7 @@
             </v-menu>
             <hr class="my-1" />
             <div v-for="tab in tabs" :key="tab">
-              <component v-if="currentTab.key === tab.key" :is="tab.component" />
+              <component v-if="currentTab.key === tab.key" :is="tab.component" class="text-start" />
             </div>
           </div>
           <div v-else>

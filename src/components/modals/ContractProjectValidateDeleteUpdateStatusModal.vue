@@ -22,7 +22,7 @@
           <v-spacer></v-spacer>
           <v-btn
             variant="text"
-            @click.native="
+            @click="
               activate = false;
               this.emitter.emit('contract-project-validate-error-acknowledged');
             "

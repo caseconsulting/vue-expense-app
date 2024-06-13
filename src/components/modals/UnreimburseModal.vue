@@ -11,7 +11,7 @@
           <v-btn
             color="red"
             variant="text"
-            @click.native="
+            @click="
               emit(`canceled-unreimburse-expense`);
               activate = false;
             "
@@ -23,7 +23,7 @@
             color="green-darken-1"
             id="confirmUnreimbursed"
             variant="text"
-            @click.native="
+            @click="
               emit(`confirm-unreimburse-expense`);
               activate = false;
             "

@@ -9,7 +9,7 @@
           <v-btn
             color="gray darken-1"
             variant="text"
-            @click.native="
+            @click="
               emitter.emit('timeout-acknowledged');
               activate = false;
             "
