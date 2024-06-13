@@ -312,20 +312,6 @@ import { format } from '../shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     COMPUTED                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Key for data table, also has implications for custom search
- * of data table
- */
-// function dataTableKey() {
-//   return { a: this.filter, b: this.selectedTags };
-// } // dataTableKey
-
-// |--------------------------------------------------|
-// |                                                  |
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -713,7 +699,6 @@ export default {
     TagsFilter
   },
   computed: {
-    // dataTableKey,
     storeIsPopulated
   },
   created,
