@@ -286,8 +286,6 @@ function getEmployeeWorkedHours(employee, _, __, tags) {
   if (!INFO[n]) return '---';
   let timesheets = INFO[n].timesheets;
 
-  let quamp = n == 10079;
-
   // exclude all nonbillable jobcodes for CASE employees, but only PTO for CYK employees
   let nonBillables = SUPP_DATA.nonBillables;
   let cykTag = tags.find((t) => t.tagName === 'CYK');
@@ -295,13 +293,10 @@ function getEmployeeWorkedHours(employee, _, __, tags) {
 
   // tally up hours
   let total = 0;
-  if (quamp) console.log(INFO[n]);
   for (let jobcode in timesheets) {
-    if (quamp) console.log(`Looking at jobcode ${jobcode}`);
     if (!nonBillables.has(jobcode)) {
-      if (quamp) console.log(`including`);
       total += timesheets[jobcode] / 3600; // seconds to hours
-    } else if (quamp) console.log('not including');
+    }
   }
 
   // format
