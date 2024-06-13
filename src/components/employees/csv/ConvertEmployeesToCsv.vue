@@ -6,7 +6,7 @@
     elevation="2"
     :size="isMobile || isSmallScreen ? 'small' : 'default'"
   >
-    <i class="material-icons">download</i>{{ downloadText || 'Download All' }}
+    <i class="material-icons">Download</i>{{ downloadText || 'Download All' }}
   </v-btn>
 </template>
 
