@@ -92,10 +92,11 @@ export function getEmployeeCurrentProjects(employeeId, employees) {
 
 /**
  * helper function: return true if any selected tag has employee listed under it.
- * NOTE: make sure tagsInfo is the value not the ref!
  *
  * @param employeeId - the employee's ID
  * @param {Object} tagsInfo - object of selected tags array and flipped tags array
+ * NOTE: make sure tagsInfo is the value object not the ref!
+ *
  * @return true if the employee has a tag selected in filters
  */
 export function selectedTagsHasEmployee(employeeId, tagsInfo) {
