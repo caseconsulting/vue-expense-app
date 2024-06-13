@@ -205,7 +205,7 @@ async function download() {
     startDate = format(startDate, null, 'YYYY-MM-DD');
     endDate = format(endDate, null, 'YYYY-MM-DD');
     this.loading = 'Downloading timesheets from QuickBooks...';
-    await qbCsv.download(csvInfo, { filename, startDate, endDate });
+    await qbCsv.download(csvInfo, this.$store.getters.tags, { filename, startDate, endDate });
   }
 
   // close the modal
