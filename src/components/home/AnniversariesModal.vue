@@ -3,19 +3,19 @@
     <v-card-title class="header_style d-flex align-center justify-space-between">
       <span class="text-body-1 text-md-h5">Anniversaries in {{ format(date, DEFAULT_ISOFORMAT, 'MMMM YYYY') }}</span>
       <div>
-        <v-btn variant="text" icon="" density="comfortable" :size="isMobile ? 'small' : 'large'">
+        <v-btn variant="text" icon="" density="comfortable" :size="isMobile() ? 'small' : 'large'">
           <v-tooltip activator="parent" location="top">Previous Month</v-tooltip>
-          <v-icon @click="showPreviousMonth()" :size="isMobile ? 'large' : 'x-large'">mdi-arrow-left-thin</v-icon>
+          <v-icon @click="showPreviousMonth()" :size="isMobile() ? 'large' : 'x-large'">mdi-arrow-left-thin</v-icon>
         </v-btn>
-        <v-btn variant="text" icon="" class="mr-2" density="comfortable" :size="isMobile ? 'small' : 'large'">
+        <v-btn variant="text" icon="" class="mr-2" density="comfortable" :size="isMobile() ? 'small' : 'large'">
           <v-tooltip activator="parent" location="top">Next Month</v-tooltip>
-          <v-icon @click="showNextMonth()" :size="isMobile ? 'large' : 'x-large'">mdi-arrow-right-thin</v-icon>
+          <v-icon @click="showNextMonth()" :size="isMobile() ? 'large' : 'x-large'">mdi-arrow-right-thin</v-icon>
         </v-btn>
       </div>
     </v-card-title>
     <v-card-text>
       <v-list>
-        <div v-if="!anniversaries || anniversaries.length === 0" class="ml-7 my-4 text-body-1">
+        <div v-if="anniversaries.length === 0" class="ml-7 my-4 text-body-1">
           There are no anniversaries this month!
         </div>
         <v-list-item
@@ -23,12 +23,12 @@
           :key="anniversary.text"
           :ripple="false"
           inactive
-          :lines="isMobile ? 'three' : 'one'"
+          :lines="isMobile() ? 'three' : 'one'"
           class="mt-2"
         >
           <template v-slot:prepend>
             <v-avatar>
-              <v-icon :color="item.color">{{ item.icon }}</v-icon>
+              <v-icon :color="props.item.color">{{ props.item.icon }}</v-icon>
             </v-avatar>
           </template>
           <v-list-item-title>{{ anniversary.date }}</v-list-item-title>
@@ -43,10 +43,24 @@
   </v-card>
 </template>
 
-<script>
+<script setup>
 import _ from 'lodash';
+import { inject, ref } from 'vue';
+import { useStore } from 'vuex';
 import { DEFAULT_ISOFORMAT, add, difference, format, getMonth, getYear, setYear, subtract } from '@/shared/dateUtils';
 import { isMobile } from '@/utils/utils';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const props = defineProps(['item']);
+const store = useStore();
+const emitter = inject('emitter');
+const date = ref(null);
+const anniversaries = ref(null);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -54,10 +68,8 @@ import { isMobile } from '@/utils/utils';
 // |                                                  |
 // |--------------------------------------------------|
 
-function created() {
-  this.anniversaries = _.cloneDeep(this.item.events);
-  this.date = format(this.item.date.split(' in ')[1], 'MMM YYYY', DEFAULT_ISOFORMAT);
-}
+anniversaries.value = _.cloneDeep(props.item.events);
+date.value = format(props.item.date.split(' in ')[1], 'MMM YYYY', DEFAULT_ISOFORMAT);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -71,13 +83,13 @@ function created() {
  * @param msg - Message to emit
  */
 function emit(msg) {
-  this.emitter.emit(msg);
+  emitter.emit(msg);
 } // emit
 
 function isEmployeeAnniversaryMonth(employee) {
-  if (getMonth(this.date) === getMonth(employee.hireDate)) {
+  if (getMonth(date.value) === getMonth(employee.hireDate)) {
     let hireDate = format(employee.hireDate, null, DEFAULT_ISOFORMAT);
-    let anniversary = setYear(hireDate, getYear(this.date));
+    let anniversary = setYear(hireDate, getYear(date.value));
     let diff = difference(anniversary, hireDate, 'month');
     return diff >= 12;
   }
@@ -86,12 +98,12 @@ function isEmployeeAnniversaryMonth(employee) {
 }
 
 function populateAnniversaries() {
-  this.anniversaries = [];
-  let activeEmployees = _.filter(this.$store.getters.employees, (e) => e.workStatus > 0);
+  anniversaries.value = [];
+  let activeEmployees = _.filter(store.getters.employees, (e) => e.workStatus > 0);
   _.forEach(activeEmployees, (e) => {
-    if (this.isEmployeeAnniversaryMonth(e)) {
+    if (isEmployeeAnniversaryMonth(e)) {
       let hireDate = format(e.hireDate, null, DEFAULT_ISOFORMAT);
-      let anniversary = setYear(hireDate, getYear(this.date));
+      let anniversary = setYear(hireDate, getYear(date.value));
       let yearsDiff = difference(anniversary, hireDate, 'year');
       let employeeAnniversaryObj = {
         text: `${e.nickname || e.firstName} ${e.lastName} is celebrating ${yearsDiff} ${
@@ -100,52 +112,21 @@ function populateAnniversaries() {
         anniversary: anniversary,
         icon: `mdi-party-popper`,
         date: format(anniversary, null, 'll'),
-        color: this.caseRed
+        color: '#bc3825'
       };
-      this.anniversaries.push(employeeAnniversaryObj);
+      anniversaries.value.push(employeeAnniversaryObj);
     }
   });
-  this.anniversaries.sort((a, b) => new Date(a.anniversary) - new Date(b.anniversary));
+  anniversaries.value.sort((a, b) => new Date(a.anniversary) - new Date(b.anniversary));
 }
 
 function showPreviousMonth() {
-  this.date = subtract(this.date, 1, 'month', DEFAULT_ISOFORMAT);
-  this.populateAnniversaries();
+  date.value = subtract(date.value, 1, 'month', DEFAULT_ISOFORMAT);
+  populateAnniversaries();
 }
 
 function showNextMonth() {
-  this.date = add(this.date, 1, 'month', DEFAULT_ISOFORMAT);
-  this.populateAnniversaries();
+  date.value = add(date.value, 1, 'month', DEFAULT_ISOFORMAT);
+  populateAnniversaries();
 }
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  created,
-  data() {
-    return {
-      date: null,
-      DEFAULT_ISOFORMAT,
-      anniversaries: null
-    };
-  },
-  computed: {
-    isMobile
-  },
-  methods: {
-    emit,
-    isEmployeeAnniversaryMonth,
-    populateAnniversaries,
-    showPreviousMonth,
-    showNextMonth,
-    format
-  },
-  props: [
-    'item' // the passed event item
-  ]
-};
 </script>

@@ -6,7 +6,7 @@
         <h3>Activity Feed</h3>
       </v-card-title>
       <v-spacer></v-spacer>
-      <div v-if="loading" class="pa-8 pt-6">
+      <div v-if="loading.value" class="pa-8 pt-6">
         <v-progress-linear :indeterminate="true"></v-progress-linear>
       </div>
       <div v-else>
@@ -131,9 +131,24 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import _ from 'lodash';
 import AnniversariesModal from './AnniversariesModal.vue';
+import { inject, ref } from 'vue';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     SETUP                        |
+// |                                                  |
+// |--------------------------------------------------|
+
+const props = defineProps(['events', 'loading']);
+const emitter = inject('emitter');
+const filters = ref([]);
+const item = ref(null);
+const activeFilters = ref([]);
+const searchString = ref('');
+const toggleAnniversariesModal = ref(false);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -141,42 +156,11 @@ import AnniversariesModal from './AnniversariesModal.vue';
 // |                                                  |
 // |--------------------------------------------------|
 
-/**
- * created lifecycle hook
- */
-function created() {
-  this.emitter.on('close-anniversaries-modal', () => {
-    this.toggleAnniversariesModal = false;
-  });
+emitter.on('close-anniversaries-modal', () => {
+  toggleAnniversariesModal.value = false;
+});
 
-  this.filterEvents();
-} // created
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     COMPUTED                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * itemHeight - determines the height of each item in the activity feed.
- *
- * @return int - height for activity feed item
- */
-function itemHeight() {
-  switch (this.$vuetify.display.name) {
-    case 'xs':
-      return 115;
-    case 'sm':
-      return 115;
-    case 'md':
-      return 100;
-    case 'lg':
-      return 100;
-    case 'xl':
-      return 100;
-  }
-} // itemHeight
+filterEvents();
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -192,13 +176,13 @@ function itemHeight() {
  * @return array - filtered events array
  */
 function filterEvents() {
-  this.events.forEach((event) => {
-    if (!this.filters.some((f) => f.type === event.type)) {
-      this.filters.push(event);
-      this.activeFilters.push(event);
+  props.events.forEach((event) => {
+    if (!filters.value.some((f) => f.type === event.type)) {
+      filters.value.push(event);
+      activeFilters.value.push(event);
     }
   });
-  var filteredEvents = _.filter(this.events, (event) => this.activeFilters.some((f) => f.type === event.type));
+  var filteredEvents = _.filter(props.events, (event) => activeFilters.value.some((f) => f.type === event.type));
   return filteredEvents;
 } // filterEvents
 
@@ -225,58 +209,13 @@ function getURL(item) {
 /**
  * Opens the modal for employees with anniversaries in a certain month.
  *
- * @param item Object - The month's anniversariese
+ * @param item Object - The month's anniversaries
  */
 function openAnniversariesModal(item) {
-  this.toggleAnniversariesModal = true;
+  toggleAnniversariesModal.value = true;
   item.events.sort((a, b) => new Date(a.anniversary) - new Date(b.anniversary));
   this.item = item;
 } // openAnniversariesModal
-
-/**
- * Removes an item from the activity feed's active filters
- *
- * @param item - The filter to remove
- */
-function remove(item) {
-  const index = this.activeFilters.findIndex((f) => f.type === item.type);
-  if (index >= 0) {
-    this.activeFilters.splice(index, 1);
-  }
-} // remove
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  components: {
-    AnniversariesModal
-  },
-  data() {
-    return {
-      dense: false,
-      filters: [],
-      item: null,
-      activeFilters: [],
-      searchString: '',
-      toggleAnniversariesModal: false
-    };
-  },
-  computed: {
-    itemHeight
-  },
-  methods: {
-    filterEvents,
-    getURL,
-    openAnniversariesModal,
-    remove
-  },
-  created,
-  props: ['events', 'loading']
-};
 </script>
 
 <style lang="scss" scoped>
