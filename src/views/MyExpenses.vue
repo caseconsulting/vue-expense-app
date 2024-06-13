@@ -57,7 +57,9 @@
                 </v-col>
 
                 <!-- Tags filter -->
-                <tags-filter v-model="tagsInfo" @update:modelValue="filterExpenses()"></tags-filter>
+                <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="12" md="3">
+                  <tags-filter v-model="tagsInfo" @update:modelValue="filterExpenses()"></tags-filter>
+                </v-col>
                 <!-- End Tags Filter -->
 
                 <!-- Search Bar -->

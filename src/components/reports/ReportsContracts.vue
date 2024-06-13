@@ -111,6 +111,7 @@ import { useRouter } from 'vue-router';
 const store = useStore();
 const emitter = inject('emitter');
 const router = useRouter();
+import { userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
 import TagsFilter from '@/components/shared/TagsFilter.vue';
 
 // |--------------------------------------------------|

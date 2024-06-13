@@ -1,39 +1,38 @@
 <template>
-  <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0" :align="isMobile() ? 'center' : ''">
-    <v-autocomplete
-      clearable
-      label="Filter by Tag (click to flip)"
-      v-model="tagsInfo.selected"
-      :items="tags"
-      multiple
-      variant="underlined"
-      item-title="tagName"
-      item-value="id"
-      return-object
-    >
-      <template #chip="{ props, item }">
-        <v-chip
-          size="small"
-          closable
-          @click.stop
-          v-bind="props"
-          @click="negateTag(item.raw)"
-          @click:close="removeTag(item.raw)"
-          :color="chipColor(item.raw.id)"
-        >
-          {{ tagsInfo.flipped.includes(item.raw.id) ? 'NOT ' : '' }}
-          {{ item.raw.tagName }}
-        </v-chip>
-      </template>
-    </v-autocomplete>
-  </v-col>
+  <v-autocomplete
+    :class="props.classProps"
+    clearable
+    label="Filter by Tag (click to flip)"
+    v-model="tagsInfo.selected"
+    :items="store.getters.tags || []"
+    multiple
+    variant="underlined"
+    item-title="tagName"
+    item-value="id"
+    hide-details
+    return-object
+  >
+    <template #chip="{ props, item }">
+      <v-chip
+        size="small"
+        closable
+        @click.stop
+        v-bind="props"
+        @click="negateTag(item.raw)"
+        @click:close="removeTag(item.raw)"
+        :color="chipColor(item.raw.id)"
+      >
+        {{ tagsInfo.flipped.includes(item.raw.id) ? 'NOT ' : '' }}
+        {{ item.raw.tagName }}
+      </v-chip>
+    </template>
+  </v-autocomplete>
 </template>
 
 <script setup>
 import _ from 'lodash';
-import { ref, watch } from 'vue';
+import { watch } from 'vue';
 import { useStore } from 'vuex';
-import { isMobile } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -55,9 +54,9 @@ const tagsInfo = defineModel({
     );
   }
 });
+const props = defineProps(['classProps']);
 
 const store = useStore();
-const tags = ref(store.getters.tags);
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |

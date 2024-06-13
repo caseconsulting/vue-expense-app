@@ -33,7 +33,9 @@
             @click:clear="awardSearch = null"
           ></v-autocomplete>
         </v-col>
-        <tags-filter v-model="tagsInfo" @update:modelValue="refreshDropdownItems()"></tags-filter>
+        <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
+          <tags-filter v-model="tagsInfo" @update:modelValue="refreshDropdownItems()"></tags-filter>
+        </v-col>
         <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
           <v-checkbox v-model="showInactiveEmployees" label="Show Inactive Users"></v-checkbox>
         </v-col>
@@ -87,6 +89,7 @@ import _ from 'lodash';
 import { employeeFilter } from '@/shared/filterUtils';
 import { getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
 import { selectedTagsHasEmployee } from '@/shared/employeeUtils';
+import { userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
 import TagsFilter from '@/components/shared/TagsFilter.vue';
 const emitter = inject('emitter');
 const store = useStore();
