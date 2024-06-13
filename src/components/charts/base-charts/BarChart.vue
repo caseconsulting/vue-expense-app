@@ -19,6 +19,13 @@ const props = defineProps([
   'options', // chart options
   'chartId' // id for the canvas
 ]);
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                LIFECYCLE HOOKS                   |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * Mounted lifecycle hook.
  */
