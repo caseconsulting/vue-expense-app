@@ -22,22 +22,37 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import _ from 'lodash';
-import { storeIsPopulated, userRoleIsIntern } from '@/utils/utils.js';
+import { onMounted, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                 LIFECYCLE HOOKS                  |
+// |                       SETUP                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+const dataReceived = ref(false);
+const employees = ref(null);
+const tableContents = ref(null);
+const headers = ref(null);
+const router = useRouter();
+const store = useStore();
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                LIFECYCLE HOOKS                   |
 // |                                                  |
 // |--------------------------------------------------|
 
 /**
  * Mounted lifecycle hook.
  */
-async function mounted() {
-  if (this.storeIsPopulated) await this.fillData();
-} // mounted
+onMounted(async () => {
+  if (store.getters.storeIsPopulated) await fillData();
+}); // mounted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -52,7 +67,7 @@ async function mounted() {
  */
 function clickedRow(_, { item }) {
   localStorage.setItem('requestedFilter', item.employeeNames.join(', '));
-  this.$router.push({
+  router.push({
     path: '/employees',
     name: 'employees'
   });
@@ -63,21 +78,21 @@ function clickedRow(_, { item }) {
  */
 function fillData() {
   // access store
-  this.employees = this.$store.getters.employees;
+  employees.value = store.getters.employees;
 
   // filter out inactive and interns if selected
-  this.employees = this.employees.filter((emp) => emp.workStatus != 0);
+  employees.value = employees.value.filter((emp) => emp.workStatus != 0);
   let billableCount = 0;
   let internCount = 0;
   let overheadCount = 0;
   let overheadAwaitingClearanceCount = 0;
   let internsAwaitingClearanceCount = 0;
   let [billableEmployeeNames, internEmployeeNames] = [[], []];
-  let overheadEmployeeNames = _.map(this.employees, (e) => {
+  let overheadEmployeeNames = _.map(employees.value, (e) => {
     return { name: `${e.nickname || e.firstName} ${e.lastName}` };
   });
   // tally up counts
-  _.forEach(this.employees, (e) => {
+  _.forEach(employees.value, (e) => {
     let name = `${e.nickname || e.firstName} ${e.lastName}`;
     let awaitingClearance = e.clearances && e.clearances.some((c) => c.awaitingClearance);
     if (e.contracts && e.contracts.some((c) => c.projects.some((p) => !p.endDate))) {
@@ -105,12 +120,12 @@ function fillData() {
     }
   });
 
-  overheadCount = this.employees.length - billableCount - internCount;
+  overheadCount = employees.value.length - billableCount - internCount;
   overheadEmployeeNames = _.map(overheadEmployeeNames, (x) => {
     return x.name;
   });
 
-  this.tableContents = [
+  tableContents.value = [
     { title: 'Billable Employees', value: billableCount, employeeNames: billableEmployeeNames },
     {
       title: 'Overhead Employees',
@@ -126,18 +141,18 @@ function fillData() {
       } awaiting clearance)`,
       employeeNames: internEmployeeNames
     },
-    { title: 'Total Employees', value: this.employees.length, employeeNames: [] }
+    { title: 'Total Employees', value: employees.value.length, employeeNames: [] }
   ];
 
   // remove 'awaiting clerance' parens if value is zero
   if (overheadCount == 0) {
-    this.tableContents[1].value = `${overheadCount}`;
+    tableContents.value[1].value = `${overheadCount}`;
   }
   if (internCount == 0) {
-    this.tableContents[2].value = `${internCount}`;
+    tableContents.value[2].value = `${internCount}`;
   }
 
-  this.headers = [
+  headers.value = [
     {
       text: 'topic',
       align: 'start',
@@ -145,39 +160,18 @@ function fillData() {
     },
     { text: 'val', value: 'value' }
   ];
-  this.dataReceived = true;
+  dataReceived.value = true;
 } // fillData
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                      EXPORT                      |
+// |                    WATCHERS                      |
 // |                                                  |
 // |--------------------------------------------------|
 
-export default {
-  computed: {
-    storeIsPopulated,
-    userRoleIsIntern
-  },
-  data() {
-    return {
-      dataReceived: false,
-      employees: null,
-      tableContents: null,
-      headers: null
-    };
-  },
-  methods: {
-    clickedRow,
-    fillData
-  },
-  mounted,
-  watch: {
-    storeIsPopulated: function () {
-      if (this.storeIsPopulated) this.fillData();
-    }
-  }
-};
+watch(store.getters.storeIsPopulated, (newVal) => {
+  if (newVal) fillData();
+});
 </script>
 
 <style>

@@ -38,23 +38,40 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import _ from 'lodash';
-import { storeIsPopulated } from '@/utils/utils.js';
 import { difference, format, getTodaysDate, isBefore, minimum, maximum } from '@/shared/dateUtils';
+import { onMounted, ref, watch } from 'vue';
+import { useStore } from 'vuex';
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                 LIFECYCLE HOOKS                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const dataReceived = ref(false);
+const employees = ref(null);
+const expanded = ref([]);
+const filterItems = ['All', 'Full Time', 'Part Time'];
+const filterSelection = ref('All');
+const headers = ref(null);
+const showInterns = ref(true);
+const store = useStore();
+const tableContents = ref(null);
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                LIFECYCLE HOOKS                   |
 // |                                                  |
 // |--------------------------------------------------|
 
 /**
  * Mounted lifecycle hook.
  */
-async function mounted() {
-  if (this.storeIsPopulated) await this.fillData();
-} // mounted
+onMounted(async () => {
+  if (store.getters.storeIsPopulated) await fillData();
+}); // mounted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -70,25 +87,25 @@ function fillData() {
   let totalYears = 0;
 
   // access store
-  this.employees = this.$store.getters.employees;
+  employees.value = store.getters.employees;
 
   // filter out inactive and interns if selected
-  if (!this.showInterns) {
-    this.employees = this.employees.filter(
+  if (!showInterns.value) {
+    employees.value = employees.value.filter(
       (emp) => emp.workStatus != 0 && (emp.jobRole ? emp.jobRole.toLowerCase() != 'intern' : true)
     );
   }
 
   // filter out employees based on radio selection
-  if (this.filterSelection === 'Full Time') {
-    this.employees = this.employees.filter((emp) => emp.workStatus === 100);
-  } else if (this.filterSelection === 'Part Time') {
-    this.employees = this.employees.filter((emp) => emp.workStatus > 0 && emp.workStatus < 100);
+  if (filterSelection.value === 'Full Time') {
+    employees.value = employees.value.filter((emp) => emp.workStatus === 100);
+  } else if (filterSelection.value === 'Part Time') {
+    employees.value = employees.value.filter((emp) => emp.workStatus > 0 && emp.workStatus < 100);
   } else {
-    this.employees = this.employees.filter((emp) => emp.workStatus != 0);
+    employees.value = employees.value.filter((emp) => emp.workStatus != 0);
   }
 
-  this.employees.forEach((emp) => {
+  employees.value.forEach((emp) => {
     if (emp.icTimeFrames) {
       // get values from input, convert to array, and then sort them
       let given_ranges = _.mapValues(emp.icTimeFrames, 'range');
@@ -97,7 +114,7 @@ function fillData() {
         .sort((a, b) => {
           // array has text in format YYYY-MM, so reformat to YYYYMM
           // so that it can be sorted as a regular int
-          this.format(a[0], null, 'YYYY-MM') - this.format(b[0], null, 'YYYY-MM');
+          format(a[0], null, 'YYYY-MM') - format(b[0], null, 'YYYY-MM');
         })
         .reverse();
       let ranges = [];
@@ -105,10 +122,10 @@ function fillData() {
       // combine any dates that overlap, keep separate ones that don't
       durations.forEach((d) => {
         previousVal = ranges[ranges.length - 1];
-        if (ranges.length != 0 && this.isBefore(d[0], previousVal[1])) {
+        if (ranges.length != 0 && isBefore(d[0], previousVal[1])) {
           // overlap combination
-          firstStart = this.minimum([previousVal[0], d[0]]);
-          lastEnd = this.maximum([previousVal[1], d[1]]);
+          firstStart = minimum([previousVal[0], d[0]]);
+          lastEnd = maximum([previousVal[1], d[1]]);
           ranges[ranges.length - 1] = [firstStart, lastEnd];
         } else {
           // no overlap
@@ -118,9 +135,9 @@ function fillData() {
       let totalDurationMonths = 0; // total months
       // loop each reach to get total duration in months
       _.forEach(ranges, (range) => {
-        let start = this.format(range[0], null, 'YYYY-MM');
-        let end = range.length > 1 ? this.format(range[1], null, 'YYYY-MM') : this.getTodaysDate();
-        let duration = this.difference(end, start, 'months') + 1; // calculate range duration
+        let start = format(range[0], null, 'YYYY-MM');
+        let end = range.length > 1 ? format(range[1], null, 'YYYY-MM') : getTodaysDate();
+        let duration = difference(end, start, 'months') + 1; // calculate range duration
         totalDurationMonths += Math.max(duration, 0); // remove negative values
       });
       const totalDurationYears = totalDurationMonths / 12;
@@ -130,15 +147,15 @@ function fillData() {
     }
   });
 
-  let averageYoE = totalYears / this.employees.length;
+  let averageYoE = totalYears / employees.value.length;
 
-  this.tableContents = [
-    { title: 'Total Employees', value: this.employees.length },
+  tableContents.value = [
+    { title: 'Total Employees', value: employees.value.length },
     { title: 'Company Wide IC Experience', value: totalYears.toFixed(2) + ' Years' },
     { title: 'Average IC Experience per Employee', value: averageYoE.toFixed(2) + ' Years' }
   ];
 
-  this.headers = [
+  headers.value = [
     {
       text: 'topic',
       align: 'start',
@@ -146,7 +163,7 @@ function fillData() {
     },
     { text: 'val', value: 'value' }
   ];
-  this.dataReceived = true;
+  dataReceived.value = true;
 } // fillData
 
 /**
@@ -157,7 +174,7 @@ function getRoleCounts() {
   let unknownJobRoles = 0;
   let unknownJRText = 'Unknown Job Role';
 
-  this.employees.forEach((emp) => {
+  employees.value.forEach((emp) => {
     if (emp.workStatus != 0) {
       if (emp.jobRole) {
         if (roles[emp.jobRole]) roles[emp.jobRole] += 1;
@@ -186,49 +203,21 @@ function getRoleCounts() {
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                      EXPORT                      |
+// |                    WATCHERS                      |
 // |                                                  |
 // |--------------------------------------------------|
 
-export default {
-  computed: {
-    storeIsPopulated
-  },
-  data() {
-    return {
-      dataReceived: false,
-      employees: null,
-      expanded: [],
-      tableContents: null,
-      headers: null,
-      filterItems: ['All', 'Full Time', 'Part Time'],
-      filterSelection: 'All',
-      showInterns: true
-    };
-  },
-  methods: {
-    difference, // dateUtils
-    format, // dateUtils
-    fillData,
-    getRoleCounts,
-    getTodaysDate, // dateUtils
-    isBefore, // dateUtils
-    minimum, // dateUtils
-    maximum // dateUtils
-  },
-  mounted,
-  watch: {
-    storeIsPopulated: function () {
-      if (this.storeIsPopulated) this.fillData();
-    },
-    showInterns: function () {
-      if (this.storeIsPopulated) this.fillData();
-    },
-    filterSelection: function () {
-      if (this.storeIsPopulated) this.fillData();
-    }
-  }
-};
+watch(store.getters.storeIsPopulated, (newVal) => {
+  if (newVal) fillData();
+});
+
+watch(showInterns, () => {
+  if (store.getters.storeIsPopulated) fillData();
+});
+
+watch(filterSelection, () => {
+  if (store.getters.storeIsPopulated) fillData();
+});
 </script>
 
 <style>
