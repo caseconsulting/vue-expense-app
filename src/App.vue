@@ -140,7 +140,6 @@
         v-if="environment != 'https://app.consultwithcase.com'"
         :toggleSwitchRole="switchRole"
       ></switch-role-modal>
-      <time-out-modal :toggleTimeOut="timedOut"></time-out-modal>
       <time-out-warning-modal :toggleWarning="session"></time-out-warning-modal>
     </v-app>
   </div>
@@ -167,7 +166,6 @@ import youtube from '@/assets/img/trademarks/youtube.png';
 import MainNav from '@/components/utils/MainNav.vue';
 import NotificationBanners from '@/components/utils/NotificationBanners.vue';
 import SwitchRoleModal from '@/components/modals/SwitchRoleModal.vue';
-import TimeOutModal from '@/components/modals/TimeOutModal.vue';
 import TimeOutWarningModal from '@/components/modals/TimeOutWarningModal.vue';
 
 // |--------------------------------------------------|
@@ -323,8 +321,12 @@ function setSessionTimeouts() {
   let sessionRemainder = expTime - now;
   // set session timeout
   this.sessionTimeout = window.setTimeout(() => {
-    this.setTimedOut(true);
+    sessionStorage.setItem('timedOut', true);
     this.session = false;
+    this.$router.go({
+      path: '/',
+      query: { redirect: this.$route.path }
+    });
   }, sessionRemainder);
 
   // set session warning timeout, time minus 300000 = - 5 min
@@ -334,13 +336,6 @@ function setSessionTimeouts() {
     }, sessionRemainder - 300000);
   }
 } // setSessionTimeouts
-
-/**
- * Sets whether the user's login is timed out
- */
-function setTimedOut(isTimedOut) {
-  this.$store.dispatch('setTimedOut', { timedOut: isTimedOut });
-}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -357,8 +352,7 @@ async function created() {
   this.environment = import.meta.env.VITE_AUTH0_CALLBACK;
 
   this.emitter.on('timeout-acknowledged', () => {
-    this.setTimedOut(false);
-    this.handleLogout(); // logout after acknowledging
+    this.handleLogout();
   }); // Session end - log out
 
   this.emitter.on('close', () => (this.switchRole = false));
@@ -499,7 +493,6 @@ export default {
     MainNav,
     NotificationBanners,
     SwitchRoleModal,
-    TimeOutModal,
     TimeOutWarningModal
   },
   methods: {
@@ -515,8 +508,7 @@ export default {
     setSessionTimeouts,
     updateStoreUser,
     updateStoreEmployees,
-    updateEmployeeLogin,
-    setTimedOut
+    updateEmployeeLogin
   },
   watch: {
     $route

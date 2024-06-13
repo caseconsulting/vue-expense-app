@@ -30,8 +30,7 @@ export default createStore({
       user: null,
       userRole: null,
       storeIsPopulated: false,
-      tags: null,
-      timedOut: false
+      tags: null
     };
   },
   mutations: {
@@ -72,9 +71,6 @@ export default createStore({
     },
     setTags(state, payload) {
       state.tags = payload.tags;
-    },
-    setTimedOut(state, payload) {
-      state.timedOut = payload.timedOut;
     }
   },
   actions: {
@@ -113,9 +109,6 @@ export default createStore({
     },
     setTags(context, payload) {
       context.commit('setTags', payload);
-    },
-    setTimedOut(context, payload) {
-      context.commit('setTimedOut', payload);
     }
   },
   getters: {
@@ -160,9 +153,6 @@ export default createStore({
     },
     tags(state) {
       return state.tags;
-    },
-    timedOut(state) {
-      return state.timedOut;
     }
   }
 });

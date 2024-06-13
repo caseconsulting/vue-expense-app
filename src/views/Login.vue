@@ -12,6 +12,10 @@
           Login
         </v-btn>
       </v-col>
+
+      <v-col v-if="isTimedOut" cols="12">
+        <v-alert class="session-expired-alert" text="Session expired. Please login again." type="warning"></v-alert>
+      </v-col>
     </v-row>
   </v-container>
 </template>
@@ -45,6 +49,11 @@ function created() {
 
 export default {
   created,
+  computed: {
+    isTimedOut() {
+      return !!sessionStorage.getItem('timedOut');
+    }
+  },
   methods: {
     login,
     isLoggedIn
@@ -56,6 +65,12 @@ export default {
 #custom-button-color {
   /* background-color: #68caa6; */
   background-color: red;
+}
+
+.session-expired-alert {
+  text-align: center;
+  justify-content: center;
+  font-weight: bold;
 }
 
 @media only screen and (max-width: 767px) {
