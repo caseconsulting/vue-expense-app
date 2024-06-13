@@ -92,14 +92,10 @@ export function getEmployeeCurrentProjects(employeeId, employees) {
 
 /**
  * helper function: return true if any selected tag has employee listed under it.
+ * NOTE: make sure tagsInfo is the value not the ref!
  *
-<<<<<<< HEAD
- * @param employeeId - the employee's Id
- * @param {Object} tagsInfo - object with selected tags array and flipped tags array
-=======
  * @param employeeId - the employee's ID
  * @param {Object} tagsInfo - object of selected tags array and flipped tags array
->>>>>>> ff1c4da2 (POR-2614-Tag-filtering-in-a-seperate-component-to-be-used-in-multiple-components: refactored myExpensens.vue to use TagsFilter.vue and changed params to selectedTagsHasEmployee methods)
  * @return true if the employee has a tag selected in filters
  */
 export function selectedTagsHasEmployee(employeeId, tagsInfo) {
