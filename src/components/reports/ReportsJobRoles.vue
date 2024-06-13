@@ -207,7 +207,7 @@ function refreshDropdownItems() {
   }
   if (tagsInfo.value.selected.length > 0) {
     filteredEmployees.value = _.filter(filteredEmployees.value, (employee) => {
-      return selectedTagsHasEmployee(employee.id, tagsInfo);
+      return selectedTagsHasEmployee(employee.id, tagsInfo.value);
     });
   }
 
