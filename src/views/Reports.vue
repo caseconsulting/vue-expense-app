@@ -42,7 +42,7 @@
             <v-menu offset="y">
               <template #activator="{ props }">
                 <v-btn variant="text" theme="dark" class="font-weight-bold" v-bind="props">
-                  {{ currentTab.toUpperCase() }} <v-icon class="pb-1"> mdi-chevron-down </v-icon>
+                  {{ currentTab.title.toUpperCase() }} <v-icon class="pb-1"> mdi-chevron-down </v-icon>
                 </v-btn>
               </template>
               <v-list>
