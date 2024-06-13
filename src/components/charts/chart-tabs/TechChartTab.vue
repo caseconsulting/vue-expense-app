@@ -49,6 +49,12 @@ const store = useStore();
 const technologies = ref({});
 const words = ref([]);
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                LIFECYCLE HOOKS                   |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * Mounted lifecycle hook. Gets items then organizes them and fills data.
  */
