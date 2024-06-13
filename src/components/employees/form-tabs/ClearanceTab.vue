@@ -122,17 +122,19 @@
           </div>
         </v-col>
         <!-- End Granted Date -->
-
       </v-row>
 
       <!-- Badge Number -->
       <v-text-field
         v-model="clearance.badgeNum"
         prepend-icon="mdi-badge-account-outline"
-        counter="5"
+        clearable
+        maxlength="5"
+        counter
+        hide-details="auto"
+        :rules="[getBadgeNumberRules(clearance)]"
         label="Badge Number"
         variant="underlined"
-        clearable
         :disabled="clearance.awaitingClearance"
         @update:focused="capitalizeBadges(clearance)"
       ></v-text-field>
@@ -308,7 +310,7 @@
 
 <script>
 import _ from 'lodash';
-import { getDateOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
+import { getDateOptionalRules, getRequiredRules, getBadgeNumberRules } from '@/shared/validationUtils.js';
 import { asyncForEach, isEmpty } from '@/utils/utils';
 import { format, isAfter, isBefore, DEFAULT_ISOFORMAT, FORMATTED_ISOFORMAT } from '@/shared/dateUtils';
 import { mask } from 'vue-the-mask';
@@ -508,6 +510,13 @@ async function validateFields() {
   await asyncForEach(components, async (field) => {
     if (field && (await field.validate()).length > 0) errorCount++;
   });
+
+  await this.editedClearances.forEach((clearance) => {
+    //goes through each clearance and ensures it follows validation
+    let badgeValidation = getBadgeNumberRules(clearance);
+    if (badgeValidation(clearance) === 'Invalid Badge #, Must be 5 characters') errorCount++;
+  });
+
   this.emitter.emit('doneValidating', { tab: 'clearance', data: this.editedClearances }); // emit done validating and sends edited data back to parent
   this.emitter.emit('clearanceStatus', errorCount); // emit error status
 } // validateFields
@@ -609,7 +618,8 @@ export default {
     removeAdjDate,
     removeBiDate,
     removePolyDate,
-    validateFields
+    validateFields,
+    getBadgeNumberRules
   },
   props: ['model', 'validating'],
   watch: {

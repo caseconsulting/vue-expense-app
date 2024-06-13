@@ -65,12 +65,15 @@
     <!-- Badge Number -->
     <v-text-field
       v-model="model.badgeNum"
-      counter="5"
+      maxlength="5"
+      counter
+      hide-details="auto"
+      :rules="[getBadgeNumberRules(model)]"
       label="Badge Number"
       variant="underlined"
       class="small-field mx-4"
       :disabled="model.awaitingClearance"
-      @update:model-value="model.badgeNum = model.badgeNum ? model.badgeNum.toUpperCase() : undefined"
+      @update:focused="model.badgeNum = model.badgeNum ? model.badgeNum.toUpperCase() : undefined"
     ></v-text-field>
     <!-- Badge Expiration Date -->
     <v-text-field
@@ -224,6 +227,7 @@ import { inject, ref, watch } from 'vue';
 import { mask } from 'vue-the-mask';
 import { format, isBefore, isValid, DEFAULT_ISOFORMAT, FORMATTED_ISOFORMAT } from '@/shared/dateUtils';
 import {
+  getBadgeNumberRules,
   getAfterSubmissionRules,
   getDateBadgeRules,
   getDateGrantedRules,
