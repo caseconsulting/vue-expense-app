@@ -86,7 +86,7 @@
   </v-card>
 </template>
 
-<script>
+<script setup>
 import { isMobile, isSmallScreen } from '@/utils/utils';
 import { getTodaysDate, format, startOf, endOf, subtract, isSameOrBefore, isSameOrAfter } from '@/shared/dateUtils';
 import _ from 'lodash';
@@ -94,6 +94,38 @@ import baseCsv from '@/utils/csv/baseCsv.js';
 import employeeCsv from '@/utils/csv/employeeCsv.js';
 import eeoCsv from '@/utils/csv/eeoCsv.js';
 import qbCsv from '@/utils/csv/qbCsv.js';
+import { ref, inject, onBeforeUnmount, watch } from 'vue';
+import { useStore } from 'vuex';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                       SETUP                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+const emitter = inject('emitter');
+const props = defineProps(['employees', 'contracts']);
+const store = useStore();
+const exportType = ref(null);
+const exportTypes = ref([
+  { title: 'Employee Data', value: 'emp', periodType: 'year' },
+  { title: 'EEO Data', value: 'eeo', periodType: 'year' },
+  { title: 'Timesheet Data', value: 'qb', periodType: 'month' }
+]);
+const tagFlip = ref([]);
+const filterOptions = ref({
+  statuses: ['Full Time', 'Part Time', 'Inactive'], // order matters to filterEmployees() > status filter
+  tags: null,
+  year: [],
+  month: []
+});
+const filters = ref({
+  statuses: ['Full Time', 'Part Time'],
+  tags: [],
+  period: 'All'
+});
+const status = ref(false);
+const loading = ref(false);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -104,39 +136,38 @@ import qbCsv from '@/utils/csv/qbCsv.js';
 /**
  * Created
  */
-async function created() {
-  // fill in tag options
-  this.filterOptions.tags = this.$store.getters.tags;
 
-  // default export type
-  this.exportType = this.exportTypes[0];
+// fill in tag options
+filterOptions.value.tags = store.getters.tags;
 
-  // fill in year options
-  let years = _.uniq(_.map(this.employees, (e) => format(e.hireDate, null, 'YYYY'))); // get unique hire dates
-  years = _.orderBy(years, null, ['desc']); // sort
-  years.push('All'); // add "All" to beginning
-  this.filterOptions.year = years;
+// default export type
+exportType.value = exportTypes.value[0];
 
-  // fill in month options (only current and previous)
-  let lastMonth = subtract(getTodaysDate(), 1, 'month');
-  let thisMonth = getTodaysDate();
-  lastMonth = { text: format(lastMonth, null, 'MMMM'), value: format(lastMonth, null, 'YYYY-MM') };
-  thisMonth = { text: format(thisMonth, null, 'MMMM'), value: format(thisMonth, null, 'YYYY-MM') };
-  this.filterOptions.month.push(lastMonth);
-  this.filterOptions.month.push(thisMonth);
+// fill in year options
+let years = _.uniq(_.map(props.employees, (e) => format(e.hireDate, null, 'YYYY'))); // get unique hire dates
+years = _.orderBy(years, null, ['desc']); // sort
+years.push('All'); // add "All" to beginning
+filterOptions.value.year = years;
 
-  // allow loading messages
-  this.emitter.on('update-export-employee-data-loading', (msg) => {
-    this.loading = msg;
-  });
-}
+// fill in month options (only current and previous)
+let lastMonth = subtract(getTodaysDate(), 1, 'month');
+let thisMonth = getTodaysDate();
+lastMonth = { text: format(lastMonth, null, 'MMMM'), value: format(lastMonth, null, 'YYYY-MM') };
+thisMonth = { text: format(thisMonth, null, 'MMMM'), value: format(thisMonth, null, 'YYYY-MM') };
+filterOptions.value.month.push(lastMonth);
+filterOptions.value.month.push(thisMonth);
+
+// allow loading messages
+emitter.on('update-export-employee-data-loading', (msg) => {
+  loading.value = msg;
+});
 
 /**
  * beforeUnmount lifecycle hook - close event listener
  */
-function beforeUnmount() {
-  this.emitter.off('update-export-employee-data-loading');
-}
+onBeforeUnmount(() => {
+  emitter.off('update-export-employee-data-loading');
+});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -148,7 +179,7 @@ function beforeUnmount() {
  * Emits to close modal
  */
 function close() {
-  this.emitter.emit(`close-employee-export`);
+  emitter.emit(`close-employee-export`);
 }
 
 /**
@@ -158,34 +189,34 @@ function close() {
  *
  */
 function chipColor(id) {
-  return this.tagFlip.includes(id) ? 'red' : 'gray';
+  return tagFlip.value.includes(id) ? 'red' : 'gray';
 } // chipColor
 
 /**
  * Downloads employees as CSV
  */
 async function download() {
-  this.loading = true; // disable download button
+  loading.value = true; // disable download button
 
   // filter CSV info
-  let csvInfo = this.employees;
-  csvInfo = this.filterEmployees(csvInfo);
+  let csvInfo = props.employees;
+  csvInfo = filterEmployees(csvInfo);
   if (csvInfo.length === 0) {
-    this.status = 'Filters produce no employees. Operation cancelled.';
-    this.loading = false;
+    status.value = 'Filters produce no employees. Operation cancelled.';
+    loading.value = false;
     return;
   }
 
   // download from proper csv util
-  let filename = `Download (${this.filters.period})`;
+  let filename = `Download (${filters.value.period})`;
   let startDate, endDate;
-  if (this.exportType.value === 'emp') {
-    filename = `Employee Export - ${this.filters.period}`;
-    employeeCsv.download(csvInfo, this.contracts, this.filterOptions.tags, filename);
-  } else if (this.exportType.value === 'eeo') {
+  if (exportType.value.value === 'emp') {
+    filename = `Employee Export - ${filters.value.period}`;
+    employeeCsv.download(csvInfo, props.contracts, filterOptions.value.tags, filename);
+  } else if (exportType.value.value === 'eeo') {
     let eeo = eeoCsv.fileString(csvInfo);
-    csvInfo = this.filterDeclined(csvInfo);
-    let emp = employeeCsv.fileString(csvInfo, this.contracts, this.filterOptions.tags, true);
+    csvInfo = filterDeclined(csvInfo);
+    let emp = employeeCsv.fileString(csvInfo, props.contracts, filterOptions.value.tags, true);
     let csvText = [
       {
         name: 'EEO Compliance Report',
@@ -196,21 +227,21 @@ async function download() {
         csv: emp
       }
     ];
-    filename = `EEO Compliance Report - ${this.filters.period}`;
+    filename = `EEO Compliance Report - ${filters.value.period}`;
     baseCsv.download(csvText, filename);
-  } else if (this.exportType.value === 'qb') {
-    filename = `Timesheet Report - ${this.filters.period}`;
-    startDate = startOf(this.filters.period, 'month');
-    endDate = endOf(this.filters.period, 'month');
+  } else if (exportType.value.value === 'qb') {
+    filename = `Timesheet Report - ${filters.value.period}`;
+    startDate = startOf(filters.value.period, 'month');
+    endDate = endOf(filters.value.period, 'month');
     startDate = format(startDate, null, 'YYYY-MM-DD');
     endDate = format(endDate, null, 'YYYY-MM-DD');
-    this.loading = 'Downloading timesheets from QuickBooks...';
+    loading.value = 'Downloading timesheets from QuickBooks...';
     await qbCsv.download(csvInfo, { filename, startDate, endDate });
   }
 
   // close the modal
-  this.loading = false;
-  this.close();
+  loading.value = false;
+  close();
 } // download
 
 /**
@@ -243,7 +274,7 @@ function filterDeclined(employees) {
  */
 function filterEmployees(employees) {
   // shortcut filters variable
-  let f = this.filters;
+  let f = filters.value;
 
   // return all employees that pass the filters
   return _.filter(employees, (e) => {
@@ -251,8 +282,8 @@ function filterEmployees(employees) {
     // remove employees that were hired after given year, or departed before given year
     if (f.period.value) f.period = f.period.value; // convert objects into normal
     if (f.period != 'All') {
-      let hireYearValid = !!e.hireDate && isSameOrBefore(e.hireDate, f.period, this.exportType.periodType);
-      let deptYearValid = !this.deptDate || isSameOrAfter(e.deptDate, f.period, this.exportType.periodType);
+      let hireYearValid = !!e.hireDate && isSameOrBefore(e.hireDate, f.period, exportType.value.periodType);
+      let deptYearValid = !this.deptDate || isSameOrAfter(e.deptDate, f.period, exportType.value.periodType);
       if (!hireYearValid || !deptYearValid) return false;
     }
 
@@ -263,15 +294,15 @@ function filterEmployees(employees) {
     for (let i = 0; i < f.tags.length; i++) {
       tag = f.tags[i];
       tagHasEmployee = tag.employees.includes(e.id);
-      if (this.tagFlip.includes(tag.id) && !tagHasEmployee) employeeHasTag = true; // tag is negated and employee is on it
-      if (!this.tagFlip.includes(tag.id) && tagHasEmployee) employeeHasTag = true; // tag is normal (not negated) and employee is not on it
+      if (tagFlip.value.includes(tag.id) && !tagHasEmployee) employeeHasTag = true; // tag is negated and employee is on it
+      if (!tagFlip.value.includes(tag.id) && tagHasEmployee) employeeHasTag = true; // tag is normal (not negated) and employee is not on it
       if (employeeHasTag) i = f.tags.length; // exit loop early if employee is on a tag
     }
     if (f.tags.length > 0 && !employeeHasTag) return false;
 
     // - STATUS FILTER -
     // remove employees that do not have the status
-    let statusOpts = this.filterOptions.statuses; // ['Full Time', 'Part Time', 'Inactive']
+    let statusOpts = filterOptions.value.statuses; // ['Full Time', 'Part Time', 'Inactive']
     // mini function to map employee status (integer) to text used in form (string)
     let statusString = (s) => {
       if (s == 0) return statusOpts[2];
@@ -291,11 +322,11 @@ function filterEmployees(employees) {
  */
 function negateTag(item) {
   // try to find the id in the tagFlip array, if it is there then remove it else add it
-  const index = this.tagFlip.indexOf(item.id);
+  const index = tagFlip.value.indexOf(item.id);
   if (index >= 0) {
-    this.tagFlip.splice(index, 1);
+    tagFlip.value.splice(index, 1);
   } else {
-    this.tagFlip.push(item.id);
+    tagFlip.value.push(item.id);
   }
 } // negateTag
 
@@ -305,9 +336,9 @@ function negateTag(item) {
  * @param item - The filter to remove
  */
 function removeTag(item) {
-  const selIndex = this.filters['tags'].findIndex((t) => t.id === item.id);
+  const selIndex = filters.value['tags'].findIndex((t) => t.id === item.id);
   if (selIndex >= 0) {
-    this.filters['tags'].splice(selIndex, 1);
+    filters.value['tags'].splice(selIndex, 1);
   }
 } // remove
 
@@ -324,64 +355,23 @@ function removeTag(item) {
 function updatePeriodDefault() {
   // set default period value based on type of export
   let defaults = {
-    emp: this.filterOptions.year[0],
-    eeo: this.filterOptions.year[0],
-    qb: this.filterOptions.month[0]
+    emp: filterOptions.value.year[0],
+    eeo: filterOptions.value.year[0],
+    qb: filterOptions.value.month[0]
   };
-  this.filters.period = defaults[this.exportType.value];
+  filters.value.period = defaults[exportType.value.value];
 }
 
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  created,
-  beforeUnmount,
-  computed: {
-    isMobile,
-    isSmallScreen
+/**
+ * exportType watcher
+ */
+watch(
+  exportType,
+  () => {
+    updatePeriodDefault;
   },
-  data() {
-    return {
-      exportType: null,
-      exportTypes: [
-        { title: 'Employee Data', value: 'emp', periodType: 'year' },
-        { title: 'EEO Data', value: 'eeo', periodType: 'year' },
-        { title: 'Timesheet Data', value: 'qb', periodType: 'month' }
-      ],
-      tagFlip: [],
-      filterOptions: {
-        statuses: ['Full Time', 'Part Time', 'Inactive'], // order matters to filterEmployees() > status filter
-        tags: null,
-        year: [],
-        month: []
-      },
-      filters: {
-        statuses: ['Full Time', 'Part Time'],
-        tags: [],
-        period: 'All'
-      },
-      status: false,
-      loading: false
-    };
-  },
-  watch: {
-    exportType: { handler: updatePeriodDefault, deep: true }
-  },
-  methods: {
-    close,
-    chipColor,
-    download,
-    filterDeclined,
-    filterEmployees,
-    negateTag,
-    removeTag
-  },
-  props: ['employees', 'contracts']
-};
+  { deep: true }
+);
 </script>
 
 <style scoped>
