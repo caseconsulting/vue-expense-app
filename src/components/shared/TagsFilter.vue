@@ -1,5 +1,5 @@
 <template>
-  <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
+  <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0" :align="isMobile() ? 'center' : ''">
     <v-autocomplete
       clearable
       label="Filter by Tag (click to flip)"
@@ -11,11 +11,12 @@
       item-value="id"
       return-object
     >
-      <template v-slot:selection="{ item }">
+      <template #chip="{ props, item }">
         <v-chip
           size="small"
           closable
           @click.stop
+          v-bind="props"
           @click="negateTag(item.raw)"
           @click:close="removeTag(item.raw)"
           :color="chipColor(item.raw.id)"
@@ -32,6 +33,7 @@
 import _ from 'lodash';
 import { ref, watch } from 'vue';
 import { useStore } from 'vuex';
+import { isMobile } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |

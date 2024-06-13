@@ -57,7 +57,7 @@
                 </v-col>
 
                 <!-- Tags filter -->
-                <tags-filter v-model="tagsInfo" @update:modelValue="refreshExpenses()"></tags-filter>
+                <tags-filter v-model="tagsInfo" @update:modelValue="filterExpenses()"></tags-filter>
                 <!-- End Tags Filter -->
 
                 <!-- Search Bar -->
