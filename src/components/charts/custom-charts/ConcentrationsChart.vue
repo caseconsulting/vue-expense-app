@@ -4,52 +4,72 @@
       ref="pieChart"
       chartId="concentrations-chart"
       :key="chartKey"
-      :options="options"
+      :options="option"
       :chartData="chartData"
     ></pie-chart>
   </v-card>
 </template>
 
-<script>
+<script setup>
 import PieChart from '../base-charts/PieChart.vue';
 import _ from 'lodash';
+import { onMounted, onBeforeMount, onBeforeUnmount, ref, inject } from 'vue';
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                 LIFECYCLE HOOKS                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const chartData = ref(null);
+const chartKey = ref(0);
+const colors = ref([]);
+const concentrations = ref(null);
+const dataReceived = ref(false);
+const degree = ref(null);
+const emitter = inject('emitter');
+const enabled = ref(false);
+const labels = ref([]);
+const option = ref(null);
+const quantities = ref([]);
+const text = ref('');
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                LIFECYCLE HOOKS                   |
 // |                                                  |
 // |--------------------------------------------------|
 
 /**
  * Mounted lifecycle hook.
  */
-async function mounted() {
+onMounted(async () => {
   // emit comes from HighestDegreeChart.vue when a pie slice is clicked
-  await this.emitter.on('concentrations-update', async (receiveConcentrations) => {
-    this.quantities = [];
-    this.labels = [];
-    this.dataReceived = false;
-    this.degree = receiveConcentrations.degree;
-    this.concentrations = receiveConcentrations.concentrations;
-    await this.fetchData(this.concentrations);
-    await this.fillData();
+  await emitter.on('concentrations-update', async (receiveConcentrations) => {
+    quantities.value = [];
+    labels.value = [];
+    dataReceived.value = false;
+    degree.value = receiveConcentrations.degree;
+    concentrations.value = receiveConcentrations.concentrations;
+    await fetchData(concentrations.value);
+    await fillData();
   });
-} // mounted
+}); // mounted
 
 /**
  * Created lifecycle hook.
  */
-async function created() {
-  await this.fetchData(null);
-  await this.fillData();
-} // created
+onBeforeMount(async () => {
+  await fetchData(null);
+  await fillData();
+}); // created
 
 /**
  * Before destroy lifecycle hook.
  */
-function beforeUnmount() {
-  this.emitter.off('concentrations-update');
-} // beforeUnmount
+onBeforeUnmount(() => {
+  emitter.off('concentrations-update');
+}); // beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -65,13 +85,13 @@ function beforeUnmount() {
 function fetchData(concentrations) {
   if (concentrations) {
     if (_.isEmpty(concentrations)) {
-      this.text = `There are no concentrations for an education of ${this.degree}`;
-      this.quantities.push(1);
-      this.enabled = false;
-      this.colors = ['grey'];
+      text.value = `There are no concentrations for an education of ${degree.value}`;
+      quantities.value.push(1);
+      enabled.value = false;
+      colors.value = ['grey'];
     } else {
-      this.text = `${this.degree} Degree Concentrations`;
-      this.enabled = true;
+      text.value = `${degree.value} Degree Concentrations`;
+      enabled.value = true;
       const sortable = Object.entries(concentrations)
         .sort(([, a], [, b]) => b - a)
         .reduce((r, [k, v]) => ({ ...r, [k]: v }), {});
@@ -79,12 +99,12 @@ function fetchData(concentrations) {
       for (let i = 0; i < 10; i++) {
         let con = Object.keys(sortable)[i];
         if (con) {
-          this.quantities.push(sortable[con]);
-          this.labels.push(con);
+          quantities.value.push(sortable[con]);
+          labels.value.push(con);
         }
       }
-      this.text = `Top ${this.degree} Degree Concentrations`;
-      this.colors = [
+      text.value = `Top ${degree.value} Degree Concentrations`;
+      colors.value = [
         'rgba(54, 162, 235, 1)',
         'rgba(255, 206, 86, 1)',
         'rgba(75, 192, 192, 1)',
@@ -99,13 +119,13 @@ function fetchData(concentrations) {
   } else {
     // these presets are when a degree has not been selected OR if there are no concentrations
     if (!_.isEmpty(concentrations)) {
-      this.text = 'There are no concentrations for this type of degree';
+      text.value = 'There are no concentrations for this type of degree';
     } else {
-      this.text = 'Click on an Education To See Concentrations';
+      text.value = 'Click on an Education To See Concentrations';
     }
-    this.quantities.push(1);
-    this.enabled = false;
-    this.colors = ['grey'];
+    quantities.value.push(1);
+    enabled.value = false;
+    colors.value = ['grey'];
   }
 } // fetchData
 
@@ -113,60 +133,31 @@ function fetchData(concentrations) {
  * Sets up the formatting and data options for the chart.
  */
 function fillData() {
-  this.chartData = {
-    labels: this.labels,
+  chartData.value = {
+    labels: labels.value,
     datasets: [
       {
-        data: this.quantities,
-        backgroundColor: this.colors
+        data: quantities.value,
+        backgroundColor: colors.value
       }
     ]
   };
-  this.options = {
+  option.value = {
     plugins: {
       title: {
         display: true,
-        text: this.text,
+        text: text.value,
         font: {
           size: 15
         }
       },
       tooltip: {
-        enabled: this.enabled
+        enabled: enabled.value
       }
     },
     maintainAspectRatio: false
   };
-  this.chartKey++; // rerenders the chart
-  this.dataReceived = true;
+  chartKey.value++; // rerenders the chart
+  dataReceived.value = true;
 } // fillData
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  components: { PieChart },
-  data() {
-    return {
-      options: null,
-      chartData: null,
-      concentrations: null,
-      dataReceived: false,
-      degree: null,
-      chartKey: 0,
-      text: '',
-      colors: [],
-      enabled: false,
-      labels: [],
-      quantities: []
-    };
-  },
-  methods: { fetchData, fillData },
-  mounted,
-  created,
-  beforeUnmount
-};
 </script>

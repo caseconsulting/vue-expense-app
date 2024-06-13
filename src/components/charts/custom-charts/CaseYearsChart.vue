@@ -1,31 +1,48 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5">
-    <bar-chart ref="barChart" chartId="case-years" :options="options" :chartData="chartData" />
+    <bar-chart ref="barChart" chartId="case-years" :options="option" :chartData="chartData" />
   </v-card>
   <v-skeleton-loader v-else type="paragraph@5"></v-skeleton-loader>
 </template>
 
-<script>
+<script setup>
 import BarChart from '../base-charts/BarChart.vue';
-import { storeIsPopulated } from '@/utils/utils';
 import { difference, getTodaysDate } from '@/shared/dateUtils';
 import _ from 'lodash';
+import { onMounted, ref, watch } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                 LIFECYCLE HOOKS                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const caseYears = ref([]);
+const caseYearsNames = ref({});
+const chartData = ref(null);
+const dataReceived = ref(false);
+const employees = ref(null);
+const option = ref(null);
+const router = useRouter();
+const store = useStore();
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                LIFECYCLE HOOKS                   |
 // |                                                  |
 // |--------------------------------------------------|
 
 /**
  * Mounted lifecycle hook.
  */
-async function mounted() {
-  if (this.storeIsPopulated) {
-    await this.caseYearsData();
-    await this.drawCaseYearsHistGraph();
+onMounted(async () => {
+  if (store.getters.storeIsPopulated) {
+    await caseYearsData();
+    await drawCaseYearsHistGraph();
   }
-} // mounted
+}); // mounted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -41,24 +58,24 @@ function caseYearsData() {
   //init the caseYears array
   const MAXIMUM_INDEX = 10;
   for (let i = 0; i < MAXIMUM_INDEX; i++) {
-    this.caseYears.push(0);
+    caseYears.value.push(0);
   }
-  this.employees = this.$store.getters.employees;
-  this.employees.forEach((employee) => {
+  employees.value = store.getters.employees;
+  employees.value.forEach((employee) => {
     let name = employee.firstName + ' ' + employee.lastName;
     if (employee.hireDate !== undefined && employee.workStatus != 0) {
       // find time at case
-      var amOfYears = this.calculateTimeDifference(employee.hireDate);
+      var amOfYears = calculateTimeDifference(employee.hireDate);
 
       // push time to array
       if (amOfYears > 18) amOfYears = 18;
       else if (amOfYears < 0) amOfYears = 0;
       let index = Math.floor(Math.round(amOfYears) / 2);
-      this.caseYears[index] += 1;
-      if (this.caseYears[index] == 1) {
-        this.caseYearsNames[index] = [name]; // add a new key-value array if it is the first instance
+      caseYears.value[index] += 1;
+      if (caseYears.value[index] == 1) {
+        caseYearsNames.value[index] = [name]; // add a new key-value array if it is the first instance
       } else {
-        this.caseYearsNames[index].push(name); // add a new name to existing key
+        caseYearsNames.value[index].push(name); // add a new name to existing key
       }
     }
   });
@@ -71,8 +88,8 @@ function caseYearsData() {
  * @return - the decimal value of the difference
  */
 function calculateTimeDifference(startDate) {
-  let end = this.getTodaysDate();
-  return this.difference(end, startDate, 'years'); //Provides decimal value
+  let end = getTodaysDate();
+  return difference(end, startDate, 'years'); //Provides decimal value
 } // calculateTimeDifference
 
 /**
@@ -81,9 +98,9 @@ function calculateTimeDifference(startDate) {
  * @return Object - case years chart data
  */
 function drawCaseYearsHistGraph() {
-  let experienceNum = this.caseYears;
+  let experienceNum = caseYears.value;
   let chartLabels = ['0-1', '2-3', '4-5', '6-7', '8-9', '10-11', '12-13', '14-15', '16-17', '18+'];
-  let maxIndex = this.findMaxIndex();
+  let maxIndex = findMaxIndex();
   let data = {
     labels: chartLabels.splice(0, maxIndex + 1),
     datasets: [
@@ -123,8 +140,8 @@ function drawCaseYearsHistGraph() {
       if (_.first(y)) {
         let index = _.first(y).index;
         localStorage.setItem('requestedDataType', 'job roles');
-        localStorage.setItem('requestedFilter', this.caseYearsNames[index]);
-        this.$router.push({
+        localStorage.setItem('requestedFilter', caseYearsNames.value[index]);
+        router.push({
           path: '/employees',
           name: 'employees'
         });
@@ -144,9 +161,9 @@ function drawCaseYearsHistGraph() {
     },
     maintainAspectRatio: false
   };
-  this.chartData = data;
-  this.options = options;
-  this.dataReceived = true;
+  chartData.value = data;
+  option.value = options;
+  dataReceived.value = true;
 } // drawCaseYearsHistGraph
 
 /**
@@ -157,7 +174,7 @@ function drawCaseYearsHistGraph() {
  */
 function findMaxIndex() {
   let max = 0;
-  this.caseYears.forEach((element, index) => {
+  caseYears.value.forEach((element, index) => {
     if (element !== undefined || element !== null) {
       if (element > 0) max = index;
     }
@@ -167,41 +184,14 @@ function findMaxIndex() {
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                      EXPORT                      |
+// |                    WATCHERS                      |
 // |                                                  |
 // |--------------------------------------------------|
 
-export default {
-  components: { BarChart },
-  computed: {
-    storeIsPopulated
-  },
-  data() {
-    return {
-      options: null,
-      chartData: null,
-      dataReceived: false,
-      employees: null,
-      caseYears: [],
-      caseYearsNames: {}
-    };
-  },
-  methods: {
-    caseYearsData,
-    calculateTimeDifference,
-    difference, // dateUtils
-    drawCaseYearsHistGraph,
-    findMaxIndex,
-    getTodaysDate // dateUtils
-  },
-  mounted,
-  watch: {
-    storeIsPopulated: function () {
-      if (this.storeIsPopulated) {
-        this.drawCaseYearsHistGraph();
-        this.caseYearsData();
-      }
-    }
+watch(store.getters.storeIsPopulated, (newVal) => {
+  if (newVal) {
+    drawCaseYearsHistGraph();
+    caseYearsData();
   }
-};
+});
 </script>

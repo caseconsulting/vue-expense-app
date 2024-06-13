@@ -1,13 +1,32 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5">
-    <bar-chart ref="barChart" chartId="foreign-languages" :options="options" :chartData="chartData" />
+    <bar-chart ref="barChart" chartId="foreign-languages" :options="option" :chartData="chartData" />
   </v-card>
 </template>
 
-<script>
+<script setup>
 import _ from 'lodash';
 import BarChart from '../base-charts/BarChart.vue';
-import { storeIsPopulated, isEmpty } from '@/utils/utils';
+import { isEmpty } from '@/utils/utils';
+import { onMounted, ref, watch } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const chartData = ref(null);
+const dataReceived = ref(false);
+const employees = ref(null);
+const jobQuantities = ref([]);
+const languageOptions = ref({});
+const languages = ref([]);
+const option = ref(null);
+const router = useRouter();
+const store = useStore();
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -18,12 +37,12 @@ import { storeIsPopulated, isEmpty } from '@/utils/utils';
 /**
  * Mounted lifecycle hook.
  */
-async function mounted() {
-  if (this.storeIsPopulated) {
-    await this.fetchData();
-    await this.fillData();
+onMounted(async () => {
+  if (store.getters.storeIsPopulated) {
+    await fetchData();
+    await fillData();
   }
-} // mounted
+}); // mounted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -36,15 +55,15 @@ async function mounted() {
  * up each language for active employees.
  */
 function fetchData() {
-  this.employees = this.$store.getters.employees;
-  this.employees.forEach((emp) => {
+  employees.value = store.getters.employees;
+  employees.value.forEach((emp) => {
     if (!isEmpty(emp.languages) && emp.workStatus != 0) {
       emp.languages.forEach((lang) => {
         if (lang.name !== 'English') {
-          if (this.languageOptions[lang.name]) {
-            this.languageOptions[lang.name] += 1;
+          if (languageOptions.value[lang.name]) {
+            languageOptions.value[lang.name] += 1;
           } else {
-            this.languageOptions[lang.name] = 1;
+            languageOptions.value[lang.name] = 1;
           }
         }
       });
@@ -52,7 +71,7 @@ function fetchData() {
   });
 
   //sorts contents from most common languages to least
-  let sortedLangs = Object.entries(this.languageOptions);
+  let sortedLangs = Object.entries(languageOptions.value);
   sortedLangs = sortedLangs.sort((a, b) => {
     return b[1] - a[1];
   });
@@ -60,8 +79,8 @@ function fetchData() {
   //10 is just a limit to prevent an extremely long and crammed graph
   for (let i = 0; i < 10; i++) {
     if (sortedLangs.length > i) {
-      this.languages.push(sortedLangs[i][0]);
-      this.jobQuantities.push(sortedLangs[i][1]);
+      languages.value.push(sortedLangs[i][0]);
+      jobQuantities.value.push(sortedLangs[i][1]);
     }
   }
 } // fetchData
@@ -82,17 +101,17 @@ function fillData() {
     'rgba(66, 129, 164, 1)'
   ];
 
-  this.chartData = {
-    labels: this.languages,
+  chartData.value = {
+    labels: languages.value,
     datasets: [
       {
-        data: this.jobQuantities,
+        data: jobQuantities.value,
         backgroundColor: colors
       }
     ]
   };
 
-  this.options = {
+  option.value = {
     scales: {
       x: {
         beginAtZero: true,
@@ -121,9 +140,9 @@ function fillData() {
     onClick: (x, y) => {
       if (_.first(y)) {
         let index = _.first(y).index;
-        localStorage.setItem('requestedDataType', 'foreignLanguages');
-        localStorage.setItem('requestedFilter', this.chartData.labels[index]);
-        this.$router.push({
+        localStorage.setItem('requestedDataType', 'languages');
+        localStorage.setItem('requestedFilter', chartData.value.labels[index]);
+        router.push({
           path: '/reports',
           name: 'reports'
         });
@@ -150,40 +169,19 @@ function fillData() {
     },
     maintainAspectRatio: false
   };
-  this.dataReceived = true;
+  dataReceived.value = true;
 } // fillData
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                      EXPORT                      |
+// |                     WATCHERS                     |
 // |                                                  |
 // |--------------------------------------------------|
 
-export default {
-  components: { BarChart },
-  computed: {
-    storeIsPopulated
-  },
-  data() {
-    return {
-      options: null,
-      chartData: null,
-      dataReceived: false,
-      employees: null,
-      languageOptions: {},
-      languages: [],
-      jobQuantities: []
-    };
-  },
-  methods: { fetchData, fillData },
-  mounted,
-  watch: {
-    storeIsPopulated: function () {
-      if (this.storeIsPopulated) {
-        this.fetchData();
-        this.fillData();
-      }
-    }
+watch(store.getters.storeIsPopulated, (newVal) => {
+  if (newVal) {
+    fetchData();
+    fillData();
   }
-};
+});
 </script>

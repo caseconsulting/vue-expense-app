@@ -5,7 +5,7 @@
         ref="barChart"
         :key="chartKey"
         chartId="budget-chart"
-        :options="options"
+        :options="option"
         :chart-data="chartData"
       ></bar-chart>
 
@@ -32,27 +32,47 @@
   </v-card>
 </template>
 
-<script>
+<script setup>
 import api from '@/shared/api.js';
 import pattern from 'patternomaly';
 import _ from 'lodash';
 import BarChart from '@/components/charts/base-charts/BarChart.vue';
 import { isFullTime, getCurrentBudgetYear } from '@/utils/utils';
-import { getTodaysDate, getYear, isBetween } from '@/shared/dateUtils';
+import { getYear, isBetween } from '@/shared/dateUtils';
+import { onMounted, ref, defineProps, watch, computed } from 'vue';
+import { useRouter } from 'vue-router';
 
 // |--------------------------------------------------|
 // |                                                  |
-// |               LIFECYCLE HOOKS                    |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const allBudgetNames = ref([]);
+const chartKey = ref(0);
+const chartData = ref(null);
+const dataReceived = ref(false);
+const expenseTypeData = ref([]); // aggregated budgets for expense types
+const selectedBudgets = ref([]);
+const loading = ref(false); // loading status
+const option = ref(null);
+const props = defineProps(['employee', 'accessibleBudgets', 'fiscalDateView', 'expenses', 'expenseTypes']);
+const router = useRouter();
+const searchString = ref('');
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                LIFECYCLE HOOKS                   |
 // |                                                  |
 // |--------------------------------------------------|
 
 /**
  * Mounted lifecycle hook.
  */
-async function mounted() {
-  await this.refreshBudgets();
-  this.drawGraph();
-} // mounted
+onMounted(async () => {
+  await refreshBudgets();
+  drawGraph();
+}); // mounted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -67,17 +87,17 @@ async function mounted() {
  *
  * @return Object - budget data
  */
-function budgets() {
+const budget = computed(() => {
   let budgetNames = []; // budget expense type names
   let budgetDifference = []; // remaining budget amounts
   let reimbursed = []; // reimbursed amounts
   let unreimbursed = []; // pending amounts
   let odReimbursed = []; // reimbursed overdraft amount
   let odUnreimbursed = []; // pending overdraft amount
-  if (this.expenseTypeData !== undefined) {
-    let expenseTypes = this.expenseTypeData;
+  if (expenseTypeData.value !== undefined) {
+    let expenseTypes = expenseTypeData.value;
     _.forEach(expenseTypes, (expenseType) => {
-      if (this.selectedBudgets.includes(expenseType.expenseTypeName)) {
+      if (selectedBudgets.value.includes(expenseType.expenseTypeName)) {
         budgetNames.push(expenseType.expenseTypeName);
         let budget = expenseType.budgetObject;
         if (budget) {
@@ -136,7 +156,13 @@ function budgets() {
     odReimbursed: odReimbursed,
     odUnreimbursed: odUnreimbursed
   };
-} // budgets
+});
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      METHODS                     |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * Format and set data options for budget chart.
@@ -144,11 +170,11 @@ function budgets() {
  * @return Object - budget chart data
  */
 function drawGraph() {
-  this.selectedBudgets = this.expenseTypeData
-    .filter((a) => this.selectedBudgets.includes(a.expenseTypeName))
+  selectedBudgets.value = expenseTypeData.value
+    .filter((a) => selectedBudgets.value.includes(a.expenseTypeName))
     .map((a) => a.expenseTypeName);
 
-  let budgets = this.getFinalBudgetsData(this.budgets);
+  let budgets = getFinalBudgetsData(budget.value);
   let bars = [
     {
       type: 'bar',
@@ -187,9 +213,8 @@ function drawGraph() {
     datasets: bars
   };
 
-  let [year] = this.fiscalDateView.split('-');
-  const employee = this.employee;
-  const router = this.$router;
+  let [year] = props.fiscalDateView.split('-');
+  const employee = props.employee;
   let options = {
     scales: {
       y: {
@@ -220,7 +245,7 @@ function drawGraph() {
           JSON.stringify({
             defaultEmployee: employee.id,
             defaultFilterReimbursed: 'both',
-            defaultSearch: this.chartData.labels[index]
+            defaultSearch: chartData.value.labels[index]
           })
         );
         router.push({
@@ -273,17 +298,11 @@ function drawGraph() {
     },
     maintainAspectRatio: false
   };
-  this.chartData = data;
-  this.options = options;
-  this.chartKey++; // rerenders the chart
-  this.dataReceived = true;
+  chartData.value = data;
+  option.value = options;
+  chartKey.value++; // rerenders the chart
+  dataReceived.value = true;
 } // drawGraph
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      METHODS                     |
-// |                                                  |
-// |--------------------------------------------------|
 
 /**
  * Checks if there are any negative values in each budget data
@@ -309,16 +328,16 @@ function getFinalBudgetsData(budgets) {
  * Refresh and sets the aggregated budgets to draw the graph
  */
 async function refreshBudgets() {
-  if (!this.accessibleBudgets || !this.fiscalDateView) return;
+  if (!props.accessibleBudgets || !props.fiscalDateView) return;
 
-  this.loading = true; // set loading status to true
+  loading.value = true; // set loading status to true
   let budgetsVar;
-  if (this.fiscalDateView == this.getCurrentBudgetYear(this.employee.hireDate)) {
+  if (props.fiscalDateView == getCurrentBudgetYear(props.employee.hireDate)) {
     // viewing active budget year
-    budgetsVar = this.accessibleBudgets;
+    budgetsVar = props.accessibleBudgets;
   } else {
     // get existing budgets for the budget year being viewed
-    let existingBudgets = await api.getFiscalDateViewBudgets(this.employee.id, this.fiscalDateView);
+    let existingBudgets = await api.getFiscalDateViewBudgets(props.employee.id, props.fiscalDateView);
     existingBudgets = _.filter(existingBudgets, (e) => !!e);
 
     budgetsVar = existingBudgets;
@@ -328,38 +347,38 @@ async function refreshBudgets() {
     let budget = b.budgetObject;
     return (
       !_.some(
-        this.expenseTypes,
+        props.expenseTypes,
         (e) =>
           e.id == budget.expenseTypeId &&
           (e.isInactive ||
             !isBetween(
-              this.getYear(this.fiscalDateView),
+              getYear(props.fiscalDateView),
               getYear(budget.fiscalStartDate),
               getYear(budget.fiscalEndDate),
               'year',
               '[]'
             ))
-      ) || _.some(this.expenses, (e) => e.expenseTypeId == budget.expenseTypeId && _.isEmpty(e.reimbursedDate))
+      ) || _.some(props.expenses, (e) => e.expenseTypeId == budget.expenseTypeId && _.isEmpty(e.reimbursedDate))
     );
   });
 
   // prohibit overdraft if employee is not full time
   _.forEach(budgetsVar, async (budget) => {
-    if (!this.isFullTime(this.employee)) {
+    if (!isFullTime(props.employee)) {
       budget.odFlag = false;
     }
   });
 
   // remove any budgets where budget amount is 0 and 0 total expenses
-  this.expenseTypeData = _.filter(budgetsVar, (data) => {
+  expenseTypeData.value = _.filter(budgetsVar, (data) => {
     let budget = data.budgetObject;
     return budget.amount != 0 || budget.reimbursedAmount != 0 || budget.pendingAmount != 0;
   });
 
   // reset chart to initial state
-  this.allBudgetNames = this.expenseTypeData.map((e) => e.expenseTypeName); // sets dropdown options
-  this.selectedBudgets = this.expenseTypeData.map((e) => e.expenseTypeName); // selects all budgets to display at initial state
-  this.loading = false; // set loading status to false
+  allBudgetNames.value = expenseTypeData.value.map((e) => e.expenseTypeName); // sets dropdown options
+  selectedBudgets.value = expenseTypeData.value.map((e) => e.expenseTypeName); // selects all budgets to display at initial state
+  loading.value = false; // set loading status to false
 } // refreshBudgets
 
 // |--------------------------------------------------|
@@ -371,59 +390,22 @@ async function refreshBudgets() {
 /**
  * Watcher for fiscalDateView - refresh budgets and draw graph.
  */
-async function watchFiscalDateView() {
-  await this.refreshBudgets();
-  this.drawGraph();
-} // watchFiscalDateView
+watch(
+  () => props.fiscalDateView,
+  async () => {
+    await refreshBudgets();
+    drawGraph();
+  }
+); // watchFiscalDateView
 
 /**
  * Watcher for accessibleBudgets - refresh budgets and draw graph.
  */
-async function watchAccessibleBudgets() {
-  await this.refreshBudgets();
-  this.drawGraph();
-} // watchAccessibleBudgets
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  components: {
-    BarChart
-  },
-  computed: {
-    budgets
-  },
-  data() {
-    return {
-      allBudgetNames: [],
-      chartKey: 0,
-      chartData: null,
-      dataReceived: false,
-      options: null,
-      expenseTypeData: [], // aggregated budgets for expense types
-      selectedBudgets: [],
-      loading: false, // loading status
-      searchString: ''
-    };
-  },
-  methods: {
-    drawGraph,
-    getCurrentBudgetYear,
-    getFinalBudgetsData,
-    getTodaysDate,
-    getYear,
-    isFullTime,
-    refreshBudgets
-  },
-  mounted,
-  props: ['employee', 'accessibleBudgets', 'fiscalDateView', 'expenses', 'expenseTypes'],
-  watch: {
-    fiscalDateView: watchFiscalDateView,
-    accessibleBudgets: { handler: watchAccessibleBudgets, deep: true }
+watch(
+  () => props.accessibleBudgets,
+  async () => {
+    await refreshBudgets();
+    drawGraph();
   }
-};
+); // watchAccessibleBudgets
 </script>
