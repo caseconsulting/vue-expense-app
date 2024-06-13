@@ -82,7 +82,13 @@
                 </v-btn-toggle>
               </v-col>
               <!-- Tags filter -->
-              <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" :align="isMobile() ? 'center' : ''" cols="5" md="5" sm="6">
+              <v-col
+                v-if="userRoleIsAdmin() || userRoleIsManager()"
+                :align="isMobile() ? 'center' : ''"
+                cols="5"
+                md="5"
+                sm="6"
+              >
                 <tags-filter
                   v-model="tagsInfo"
                   @update:modelValue="filterEmployees()"
