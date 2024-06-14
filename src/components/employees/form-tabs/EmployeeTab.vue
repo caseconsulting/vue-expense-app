@@ -124,6 +124,7 @@
         ref="formFields"
         v-model.trim="editedEmployee.agencyIdentificationNumber"
         :rules="getAINRules()"
+        maxLength="7"
         label="Agency Identification Number"
         variant="underlined"
         data-vv-name="Agency Identification Number"

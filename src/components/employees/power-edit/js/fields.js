@@ -35,6 +35,8 @@ export const AIN = {
   selected: false,
   editType: TYPES.DEFAULT,
   infoType: TYPES.DEFAULT,
+  rules: [v.getAINRules()].flat(),
+  maxLength: 7,
   ...smallWidth
 };
 
