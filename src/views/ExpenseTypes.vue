@@ -968,7 +968,7 @@ function expenseFormError(msg) {
  */
 function filterExpenseTypes() {
   console.log('filter expense types');
-  filteredExpenseTypes.value = {...expenseTypes.value};
+  filteredExpenseTypes.value = { ...expenseTypes.value };
 
   // filter expense types by active or inactive
   filteredExpenseTypes.value = _.filter(filteredExpenseTypes.value, (expenseType) => {
@@ -976,7 +976,7 @@ function filterExpenseTypes() {
       ? !expenseType.isInactive
       : filter.value.active == 'notActive'
         ? expenseType.isInactive
-        : {...filteredExpenseTypes.value};
+        : { ...filteredExpenseTypes.value };
   });
 
   // filter expense types by overdraft
@@ -985,7 +985,7 @@ function filterExpenseTypes() {
       ? expenseType.odFlag
       : filter.value.overdraft == 'noOverdraft'
         ? !expenseType.odFlag
-        : {...filteredExpenseTypes.value};
+        : { ...filteredExpenseTypes.value };
   });
 
   // filter expense types by recurring
@@ -994,7 +994,7 @@ function filterExpenseTypes() {
       ? expenseType.recurringFlag
       : filter.value.recurring == 'notRecurring'
         ? !expenseType.recurringFlag
-        : {...filteredExpenseTypes.value};
+        : { ...filteredExpenseTypes.value };
   });
   console.log('done filter');
 } // filterExpenseTypes
