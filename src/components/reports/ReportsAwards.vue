@@ -248,7 +248,7 @@ function populateAwardsDropdown() {
       awards.value.push(award.name);
     })
   );
-  awards.value = new Set(awards.value);
+  awards.value = Array.from(new Set(awards.value));
 } // populateAwardsDropdown
 
 /**

@@ -243,7 +243,7 @@ function populateLanguagesDropdown() {
       languages.value.push(lang.name);
     })
   );
-  languages.value = new Set(languages.value);
+  languages.value = Array.from(new Set(languages.value));
 } // populateLanguagesDropdown
 
 /**

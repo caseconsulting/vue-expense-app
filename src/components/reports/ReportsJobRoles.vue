@@ -223,7 +223,7 @@ function populateJobRoleDropdown() {
   let employeeJobRoles = _.map(filteredEmployees.value, (employee) => employee.jobRole);
   employeeJobRoles = _.compact(employeeJobRoles);
   _.forEach(employeeJobRoles, (jobRole) => jobRoles.value.push(jobRole));
-  jobRoles.value = new Set(jobRoles.value);
+  jobRoles.value = Array.from(new Set(jobRoles.value));
 } // populateJobRoleDropdown
 
 /**

@@ -127,6 +127,7 @@ const certifications = ref([]);
 const search = ref(null); // query text for datatable search field
 const selectedTags = ref([]);
 const showInactiveEmployees = ref(false);
+const sortBy = ref([{ key: 'employeeNumber' }]); // sort datatable items
 const tagFlip = ref([]);
 const tags = ref([]);
 // datatable headers
@@ -252,7 +253,7 @@ function populateCertificationsDropdown() {
       }
     })
   );
-  certifications.value = new Set(certifications.value);
+  certifications.value = Array.from(new Set(certifications.value));
 } // populateCertificationsDropdown
 
 /**

@@ -261,7 +261,7 @@ function populateTechnologiesDropdown() {
       }
     })
   );
-  technologies.value = new Set(technologies.value);
+  technologies.value = Array.from(new Set(technologies.value));
 } // populateTechnologiesDropdown
 
 /**
