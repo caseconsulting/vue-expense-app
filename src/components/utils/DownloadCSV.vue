@@ -7,8 +7,16 @@
   </v-btn>
 </template>
 
-<script>
+<script setup>
 import baseCsv from '@/utils/csv/baseCsv.js';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const props = defineProps(['color', 'filename', 'generateData', 'sortKey', 'tooltip']);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -19,22 +27,9 @@ import baseCsv from '@/utils/csv/baseCsv.js';
  * Downloads employees as CSV
  */
 function download() {
-  let csvData = this.generateData();
-  if (this.sortKey) csvData = baseCsv.sort(csvData, this.sortKey);
+  let csvData = props.generateData();
+  if (props.sortKey) csvData = baseCsv.sort(csvData, props.sortKey);
   let csv = baseCsv.generate(csvData);
-  baseCsv.download(csv, this.filename);
+  baseCsv.download(csv, props.filename);
 } // download
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  methods: {
-    download
-  },
-  props: ['color', 'filename', 'generateData', 'sortKey', 'tooltip']
-};
 </script>
