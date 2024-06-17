@@ -315,8 +315,8 @@ function populateContractsAndPrimesDropdown(employees) {
       });
     });
   });
-  contractsDropDown.value = new Set(contractsDropDown.value);
-  primesDropDown.value = new Set(primesDropDown.value);
+  contractsDropDown.value = Array.from(new Set(contractsDropDown.value));
+  primesDropDown.value = Array.from(new Set(primesDropDown.value));
 } // populateContractsAndPrimesDropdown
 
 /**

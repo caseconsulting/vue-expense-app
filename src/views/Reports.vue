@@ -42,7 +42,7 @@
             <v-menu offset="y">
               <template #activator="{ props }">
                 <v-btn variant="text" theme="dark" class="font-weight-bold" v-bind="props">
-                  {{ currentTab.toUpperCase() }} <v-icon class="pb-1"> mdi-chevron-down </v-icon>
+                  {{ currentTab.title.toUpperCase() }} <v-icon class="pb-1"> mdi-chevron-down </v-icon>
                 </v-btn>
               </template>
               <v-list>
@@ -95,6 +95,7 @@ import { isMobile, userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
 import { getEmployeeCurrentProjects } from '@/shared/employeeUtils';
 import { useRouter } from 'vue-router';
 import baseCsv from '@/utils/csv/baseCsv.js';
+import { shallowRef } from 'vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -111,7 +112,7 @@ const tableData = reactive({});
 const store = useStore();
 const emitter = inject('emitter');
 const router = useRouter();
-const tabs = ref([
+const tabs = shallowRef([
   {
     key: 'contracts',
     title: 'Contracts',
@@ -153,6 +154,7 @@ const tabs = ref([
     component: ReportsSecurityInfo
   }
 ]);
+const props = ref();
 const currentTab = ref(tabs.value[0]);
 const currentWindow = ref(0);
 
