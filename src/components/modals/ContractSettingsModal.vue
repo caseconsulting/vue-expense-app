@@ -8,41 +8,28 @@
         </v-card-title>
         <v-card-text>
           <h3>Employee Timesheets Contract View</h3>
-          <div class="px-6 py-2">
-            <div class="d-flex align-center">
-              <span> Employee current project start date: </span>
-              <v-spacer></v-spacer>
-              <div>
-                <v-switch
-                  v-model="model.contractViewEnabled"
-                  color="primary"
-                  density="compact"
-                  :label="model.contractViewEnabled ? 'Enabled' : 'Disabled'"
-                  class="d-inline-block"
-                  hide-details
-                />
-                <v-tooltip activator="parent" location="top">
-                  Displays yearly data based on employee's current project start date
-                </v-tooltip>
-              </div>
-            </div>
-            <div class="d-flex align-center">
-              <span> Contract PoP date: </span>
-              <v-spacer></v-spacer>
-              <div>
-                <v-switch
-                  v-model="model.contractViewEnabled"
-                  color="primary"
-                  density="compact"
-                  :label="model.contractViewEnabled ? 'Enabled' : 'Disabled'"
-                  class="d-inline-block"
-                  hide-details
-                />
-                <v-tooltip activator="parent" location="top">
-                  Displays yearly data based on employee's contract PoP start date
-                </v-tooltip>
-              </div>
-            </div>
+          <div class="pa-6">
+            <v-row v-for="(value, key) of timesheetsContractViewOptions" :key="value">
+              <v-col cols="8" class="d-flex align-center pa-0">
+                {{ value.title }}
+              </v-col>
+              <v-col cols="4" class="pa-0">
+                <div>
+                  <v-switch
+                    color="primary"
+                    density="compact"
+                    :model-value="model.settings?.timesheetsContractViewOption === key"
+                    :label="model.settings?.timesheetsContractViewOption === key ? 'Enabled' : 'Disabled'"
+                    class="d-inline-block"
+                    hide-details
+                    @update:model-value="updateSettings(value, key)"
+                  />
+                  <v-tooltip v-if="value.tooltip" activator="parent" location="top">
+                    {{ value.tooltip }}
+                  </v-tooltip>
+                </div>
+              </v-col>
+            </v-row>
           </div>
         </v-card-text>
         <v-card-actions>
@@ -92,6 +79,13 @@ const store = useStore();
 const loading = ref(false);
 const activate = ref(false);
 const model = ref(_.cloneDeep(props.contract));
+const timesheetsContractViewOptions = ref({
+  0: {
+    title: 'Employee current project start date',
+    tooltip: "Displays yearly data based on employee's current project start date"
+  },
+  1: { title: 'Contract PoP date', tooltip: 'Displays yearly data based on contract PoP start date' }
+});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -117,8 +111,8 @@ onMounted(() => {
  */
 async function save() {
   loading.value = true;
-  let data = { id: props.contract.id, contractViewEnabled: model.value.contractViewEnabled };
-  await api.updateAttribute(api.CONTRACTS, data, 'contractViewEnabled');
+  let data = { id: props.contract.id, settings: model.value.settings };
+  await api.updateAttribute(api.CONTRACTS, data, 'settings');
   let contracts = store.getters.contracts;
   let i = _.findIndex(contracts, (c) => c.id === model.value.id);
   contracts[i] = _.cloneDeep(model.value);
@@ -126,6 +120,20 @@ async function save() {
   emitter.emit('closed-contract-settings-modal');
   loading.value = false;
 } // save
+
+/**
+ * Updates the settings timesheetsContractViewOption model to the options key.
+ *
+ * @param {Object} value - The timesheetsContractViewOptions value
+ * @param {Number} key - The timesheetsContractViewOptions key
+ */
+function updateSettings(__, key) {
+  _.set(
+    model.value,
+    'settings.timesheetsContractViewOption',
+    model.value.settings?.timesheetsContractViewOption === key ? null : key
+  );
+} // updateSettings
 
 // |--------------------------------------------------|
 // |                                                  |

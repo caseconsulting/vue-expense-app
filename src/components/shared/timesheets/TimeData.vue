@@ -45,6 +45,7 @@ import { computed, inject, ref, onBeforeMount, onBeforeUnmount } from 'vue';
 import { useStore } from 'vuex';
 import { difference, isBefore, now } from '@/shared/dateUtils';
 import { updateStoreContracts } from '@/utils/storeUtils';
+import { getCalendarYearPeriod, getContractYearPeriod } from './time-periods';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -266,10 +267,12 @@ async function resetData() {
  * @param {Boolean} isYearly - Whether or not the time period is yearly
  */
 async function setDataFromApi(isCalendarYear, isYearly) {
-  let code = isYearly ? (isCalendarYear ? 3 : 4) : 2;
+  let code = !isYearly ? 2 : null;
+  let period = isYearly ? (isCalendarYear ? getCalendarYearPeriod() : getContractYearPeriod(props.employee)) : null;
   let timesheetsData = await api.getTimesheetsData(props.employee.employeeNumber, {
     code,
-    employeeId: props.employee.id
+    employeeId: props.employee.id,
+    ...(period || {})
   });
   if (!hasError(timesheetsData)) {
     timesheets.value = timesheetsData.timesheets;
