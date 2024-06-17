@@ -140,7 +140,6 @@
         v-if="environment != 'https://app.consultwithcase.com'"
         :toggleSwitchRole="switchRole"
       ></switch-role-modal>
-      <time-out-modal :toggleTimeOut="timedOut"></time-out-modal>
       <time-out-warning-modal :toggleWarning="session"></time-out-warning-modal>
     </v-app>
   </div>
@@ -167,7 +166,6 @@ import youtube from '@/assets/img/trademarks/youtube.png';
 import MainNav from '@/components/utils/MainNav.vue';
 import NotificationBanners from '@/components/utils/NotificationBanners.vue';
 import SwitchRoleModal from '@/components/modals/SwitchRoleModal.vue';
-import TimeOutModal from '@/components/modals/TimeOutModal.vue';
 import TimeOutWarningModal from '@/components/modals/TimeOutWarningModal.vue';
 
 // |--------------------------------------------------|
@@ -187,6 +185,15 @@ function onUserProfile() {
   }
   return this.$route.params.id === this.userId.toString();
 } // onUserProfile
+
+/**
+ * Determines whether the user's login has timed out
+ *
+ * @return boolean - whether the user's login has timed out
+ */
+function timedOut() {
+  return this.$store.getters.timedOut;
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -314,8 +321,12 @@ function setSessionTimeouts() {
   let sessionRemainder = expTime - now;
   // set session timeout
   this.sessionTimeout = window.setTimeout(() => {
-    this.timedOut = true;
+    sessionStorage.setItem('timedOut', true);
     this.session = false;
+    this.$router.go({
+      path: '/',
+      query: { redirect: this.$route.path }
+    });
   }, sessionRemainder);
 
   // set session warning timeout, time minus 300000 = - 5 min
@@ -340,7 +351,10 @@ async function created() {
 
   this.environment = import.meta.env.VITE_AUTH0_CALLBACK;
 
-  this.emitter.on('timeout-acknowledged', () => (this.timedOut = false)); // Session end - log out
+  this.emitter.on('timeout-acknowledged', () => {
+    this.handleLogout();
+  }); // Session end - log out
+
   this.emitter.on('close', () => (this.switchRole = false));
   this.emitter.on('badgeExp', () => {
     this.badgeKey++;
@@ -409,15 +423,6 @@ function $route(to, from) {
   }
 } // $route
 
-/**
- * Logs user out when their session expires
- */
-function watchSessionTimedOut() {
-  if (this.timedOut) {
-    this.handleLogout();
-  }
-} // watchSessionTimedOut
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -434,7 +439,6 @@ export default {
     inset: false,
     initials: '',
     profilePic: 'src/assets/img/logo-big.png',
-    timedOut: false,
     session: false,
     sessionTimeout: null,
     sessionTimeoutWarning: null,
@@ -482,13 +486,13 @@ export default {
     isMobile,
     isSmallScreen,
     onUserProfile,
-    storeIsPopulated
+    storeIsPopulated,
+    timedOut
   },
   components: {
     MainNav,
     NotificationBanners,
     SwitchRoleModal,
-    TimeOutModal,
     TimeOutWarningModal
   },
   methods: {
@@ -507,8 +511,7 @@ export default {
     updateEmployeeLogin
   },
   watch: {
-    $route,
-    timedOut: watchSessionTimedOut
+    $route
   },
   beforeUnmount,
   created

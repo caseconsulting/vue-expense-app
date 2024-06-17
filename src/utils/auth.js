@@ -190,6 +190,7 @@ export function isTokenExpired(token) {
  */
 export async function login() {
   auth.authorize();
+  sessionStorage.removeItem('timedOut'); // this key exists if the login session times out, loggin in should remove it
 } // login
 
 /**
