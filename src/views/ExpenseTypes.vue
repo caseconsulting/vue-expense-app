@@ -198,7 +198,7 @@
               :sort-by="sortBy"
               :items-per-page="itemsPerPage"
               :headers="_headers"
-              :items="filteredExpenseTypes"
+              :items="expenseTypeList"
               :expanded="expanded"
               expand-on-click
               :loading="loading"
@@ -207,7 +207,7 @@
               class="elevation-4"
               density="compact"
             >
-              Budget Name slot
+              <!-- Budget Name slot -->
               <template #[`item.budgetName`]="{ item }">
                 <p class="mb-0">
                   {{ limitedText(item.budgetName) }}
@@ -503,7 +503,7 @@ import {
   updateStoreTags
 } from '@/utils/storeUtils';
 import { format } from '../shared/dateUtils';
-import { onBeforeMount, onBeforeUnmount, onMounted, ref, watch, computed, inject } from 'vue';
+import { onBeforeMount, onBeforeUnmount, ref, watch, computed, inject } from 'vue';
 import { useStore } from 'vuex';
 
 // |--------------------------------------------------|
@@ -604,7 +604,6 @@ const deleteType = ref(''); // item.budgetName for when item is deleted
  * destroy listeners
  */
 onBeforeUnmount(() => {
-  console.log('beforeUnmount');
   emitter.off('add');
   emitter.off('startAction');
   emitter.off('endAction');
@@ -615,14 +614,12 @@ onBeforeUnmount(() => {
   emitter.off('finished-editing-expense-type');
   emitter.off('editing-expense-type');
   emitter.off('invalid-expense type-delete');
-  console.log('end beforeUnmount');
 }); // beforeUnmount
 
 /**
  * Set user info, employees, and expense types. Creates event listeners.
  */
 onBeforeMount(async () => {
-  console.log('before mount');
   // expenseTypeForm listeners
   emitter.on('add', () => {
     addModelToTable();
@@ -663,19 +660,10 @@ onBeforeMount(async () => {
     midAction.value = false;
   });
 
-  console.log(store.getters);
-
   if (store.getters.storeIsPopulated) {
     loadExpenseTypesData();
   }
-  console.log('loading value is ' + loading.value);
-  console.log('done with before mount');
 }); // created
-
-onMounted(() => {
-  console.log('onMounted');
-  console.log(store.getters.storeIsPopulated);
-});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -683,27 +671,23 @@ onMounted(() => {
 // |                                                  |
 // |--------------------------------------------------|
 
-// /**
-//  * the list of expense types
-//  *
-//  * @return array - the filtered expense types
-//  */
-// const expenseTypeList = computed(() => {
-//   console.log('computed expensetypelist');
-//   console.log(filteredExpenseTypes.value);
-//   return filteredExpenseTypes.value;
-// }); // expenseTypeList
+/**
+ * the list of expense types
+ *
+ * @return array - the filtered expense types
+ */
+const expenseTypeList = computed(() => {
+  return filteredExpenseTypes.value;
+}); // expenseTypeList
 
-// /**
-//  * Checks if the store is populated from initial page load.
-//  *
-//  * @returns boolean - True if the store is populated
-//  */
-// const storeIsPopulated = computed(() => {
-//   console.log('computed storeispop');
-//   console.log('store.getters.storeIsPopulated= ' + store.getters.storeIsPopulated);
-//   return store.getters.storeIsPopulated;
-// }); // storeIsPopulated
+/**
+ * Checks if the store is populated from initial page load.
+ *
+ * @returns boolean - True if the store is populated
+ */
+const storeIsPopulated = computed(() => {
+  return store.getters.storeIsPopulated;
+}); // storeIsPopulated
 
 const _headers = computed(() => {
   if (userRoleIsAdmin()) {
@@ -711,16 +695,7 @@ const _headers = computed(() => {
   } else {
     return headers.value.filter((x) => x.show);
   }
-});
-
-// /**
-//  * returns the headers to show
-//  *
-//  * @return - headers to show
-//  */
-// function _headers() {
-
-// } // _headers
+}); // _headers
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -732,7 +707,6 @@ const _headers = computed(() => {
  * Refresh and updates expense type list and displays a successful create status in the snackbar.
  */
 async function addModelToTable() {
-  console.log('addModeltoTable');
   await updateStoreExpenseTypes();
   await refreshExpenseTypes();
 
@@ -749,7 +723,6 @@ async function addModelToTable() {
  * @return string - the string of categories
  */
 function categoriesToString(categories) {
-  console.log('categoriesToString');
   let string = '';
   for (let i = 0; i < categories.length; i++) {
     string += categories[i].name;
@@ -770,7 +743,6 @@ function categoriesToString(categories) {
  * @return string - the string of categories on the feed
  */
 function categoriesOnFeed(categories) {
-  console.log('categoriesOn Feed');
   let string = '';
   for (let i = 0; i < categories.length; i++) {
     if (categories[i].showOnFeed) {
@@ -793,7 +765,6 @@ function categoriesOnFeed(categories) {
  * @return string - the string of categories that require a url
  */
 function categoriesReqUrl(categories) {
-  console.log('categories req url');
   let string = '';
   for (let i = 0; i < categories.length; i++) {
     if (categories[i].requireURL) {
@@ -816,7 +787,6 @@ function categoriesReqUrl(categories) {
  * @return string - the string of categories that require a receipt
  */
 function categoriesReqReceipt(categories) {
-  console.log('cat req receipt');
   let string = '';
   //first filter out those that have a receipt required. then map each match to just it's name (now it's a list).
   //finally join the array items with a comma.
@@ -857,7 +827,6 @@ function categoriesReqReceipt(categories) {
  * Clear the selected expense type.
  */
 function clearModel() {
-  console.log('clear model');
   model.value['id'] = '';
   model.value['budget'] = 0;
   model.value['budgetName'] = '';
@@ -882,7 +851,6 @@ function clearModel() {
  * Clear the action status that is displayed in the snackbar.
  */
 function clearStatus() {
-  console.log('clear stat');
   status.value['show'] = false;
   status.value['statusType'] = undefined;
   status.value['statusMessage'] = '';
@@ -910,7 +878,6 @@ function clearStatus() {
  * Delete an expense type and display status.
  */
 async function deleteExpenseType() {
-  console.log('delete expense type');
   let et = await api.deleteItem(api.EXPENSE_TYPES, deleteModel.value.id);
   if (et.id) {
     // successfully deletes expense type
@@ -926,7 +893,6 @@ async function deleteExpenseType() {
  * Refresh and updates expense type list and displays a successful delete status in the snackbar.
  */
 async function deleteModelFromTable() {
-  console.log('delete model from table');
   await updateStoreExpenseTypes();
   await refreshExpenseTypes();
 
@@ -942,7 +908,6 @@ async function deleteModelFromTable() {
  * @param err - String error message
  */
 function displayError(err) {
-  console.log('display error');
   status.value['show'] = true;
   status.value['statusType'] = 'ERROR';
   status.value['statusMessage'] = err;
@@ -953,13 +918,11 @@ function displayError(err) {
  * Sets inAction boolean to false.
  */
 function endAction() {
-  console.log('end action');
   midAction.value = false;
 } // endAction
 
 /** Display error from expense form */
 function expenseFormError(msg) {
-  console.log('expense form error');
   displayError(JSON.parse(msg));
 }
 
@@ -967,7 +930,6 @@ function expenseFormError(msg) {
  * Filters expense types based on filter selections.
  */
 function filterExpenseTypes() {
-  console.log('filter expense types');
   filteredExpenseTypes.value = { ...expenseTypes.value };
 
   // filter expense types by active or inactive
@@ -996,7 +958,6 @@ function filterExpenseTypes() {
         ? !expenseType.recurringFlag
         : { ...filteredExpenseTypes.value };
   });
-  console.log('done filter');
 } // filterExpenseTypes
 
 /**
@@ -1006,7 +967,6 @@ function filterExpenseTypes() {
  * @return String - accessible by description
  */
 function getAccess(expenseType) {
-  console.log('get access');
   let accessList = _.filter(expenseType.accessibleBy, (accessType) => {
     return accessType == 'FullTime' || accessType == 'PartTime' || accessType == 'Intern' || accessType == 'Custom';
   });
@@ -1020,7 +980,6 @@ function getAccess(expenseType) {
  * @return Object - basecamp name and url data
  */
 function getCampfire(url) {
-  console.log('get campfire');
   return _.find(campfires.value, (campfire) => {
     return campfire.url == url;
   });
@@ -1033,7 +992,6 @@ function getCampfire(url) {
  * @return Array - list of employees with access
  */
 function getEmployeeList(accessibleBy) {
-  console.log('get employee list');
   let employeesList = [];
   if (accessibleBy.includes('FullTime')) {
     // accessible by all employees
@@ -1082,7 +1040,6 @@ function getEmployeeList(accessibleBy) {
  * @return String - employee full name
  */
 function getEmployeeName(employeeId) {
-  console.log('get employee name');
   let localEmployee = _.find(employees.value, ['id', employeeId]);
   return `${localEmployee.firstName} ${localEmployee.lastName}`;
 } // getEmployeeName
@@ -1136,7 +1093,6 @@ function getEmployeeName(employeeId) {
  * Load all data required to load the page initially.
  */
 async function loadExpenseTypesData() {
-  console.log('in loading');
   initialPageLoading.value = true;
   userInfo.value = store.getters.user;
   [campfires.value] = await Promise.all([
@@ -1160,7 +1116,6 @@ async function loadExpenseTypesData() {
     });
   }
   initialPageLoading.value = false;
-  console.log('at end of loadExpense');
 } // loadExpenseTypesData
 
 // TODO: check
@@ -1186,7 +1141,6 @@ async function loadExpenseTypesData() {
  * @return string - the shortened string
  */
 function limitedText(val) {
-  console.log('limited text');
   // limits text displayed to 50 characters on table view
   return val.length > 50 ? `${val.substring(0, 50)}...` : val;
 } // limitedText
@@ -1197,7 +1151,6 @@ function limitedText(val) {
  * @param item - expense type selected
  */
 function onSelect(item) {
-  console.log('on select');
   model.value = _.cloneDeep(item);
 } // onSelect
 
@@ -1205,7 +1158,6 @@ function onSelect(item) {
  * Refresh expense type data and filters expense types.
  */
 async function refreshExpenseTypes() {
-  console.log('refresh expense type');
   loading.value = true; // set loading status to true
   let budgetsWithExpenses;
   [budgetsWithExpenses] = await Promise.all([
@@ -1248,7 +1200,6 @@ async function refreshExpenseTypes() {
  * set midAction to true
  */
 function startAction() {
-  console.log('startaction');
   midAction.value = true;
 } // startAction
 
@@ -1256,7 +1207,6 @@ function startAction() {
  * Scrolls window back to the top of the form.
  */
 function toTopOfForm() {
-  console.log('totopofform');
   window.scrollTo(0, form.value.$el.offsetTop - 70);
 } // toTopOfForm
 
@@ -1264,7 +1214,6 @@ function toTopOfForm() {
  * Refresh and updates expense type list and displays a successful update status in the snackbar.
  */
 async function updateModelInTable() {
-  console.log('updatemodelintable');
   await updateStoreExpenseTypes();
   await refreshExpenseTypes();
 
@@ -1281,7 +1230,6 @@ async function updateModelInTable() {
  * @param item - expense type to validate
  */
 async function validateDelete(item) {
-  console.log('validatedelete');
   midAction.value = true;
   deleteType.value = item.budgetName;
   try {
@@ -1302,7 +1250,6 @@ async function validateDelete(item) {
  * @param id id of tag to find
  */
 function getTagByID(id) {
-  console.log('get tag by id');
   return store.getters.tags.find((t) => t.id === id);
 } // getTagByID
 
@@ -1316,16 +1263,14 @@ function getTagByID(id) {
  * watcher for filter.active, filter.recurring, filter.overdraft
  */
 watch([filter.value.active, filter.value.recurring, filter.value.overdraft], () => {
-  console.log('filter watcher');
   filterExpenseTypes();
 }); // watchFilterExpenseTypes
 
 /**
  * Watcher for storeIsPopulated
  */
-watch(store.getters.storeIsPopulated, (newValue) => {
+watch(storeIsPopulated, (newValue) => {
   if (newValue) {
-    console.log('in watcher');
     loadExpenseTypesData();
   }
 });
