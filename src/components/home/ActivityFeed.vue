@@ -6,7 +6,7 @@
         <h3>Activity Feed</h3>
       </v-card-title>
       <v-spacer></v-spacer>
-      <div v-if="loading.value" class="pa-8 pt-6">
+      <div v-if="loading" class="pa-8 pt-6">
         <v-progress-linear :indeterminate="true"></v-progress-linear>
       </div>
       <div v-else>
@@ -149,12 +149,6 @@ const item = ref(null);
 const activeFilters = ref([]);
 const searchString = ref('');
 const toggleAnniversariesModal = ref(false);
-
-// |--------------------------------------------------|
-// |                                                  |
-// |               LIFECYCLE HOOKS                    |
-// |                                                  |
-// |--------------------------------------------------|
 
 emitter.on('close-anniversaries-modal', () => {
   toggleAnniversariesModal.value = false;

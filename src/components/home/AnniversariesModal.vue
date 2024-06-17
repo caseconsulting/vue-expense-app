@@ -62,12 +62,6 @@ const emitter = inject('emitter');
 const date = ref(null);
 const anniversaries = ref(null);
 
-// |--------------------------------------------------|
-// |                                                  |
-// |                LIFECYCLE HOOKS                   |
-// |                                                  |
-// |--------------------------------------------------|
-
 anniversaries.value = _.cloneDeep(props.item.events);
 date.value = format(props.item.date.split(' in ')[1], 'MMM YYYY', DEFAULT_ISOFORMAT);
 
