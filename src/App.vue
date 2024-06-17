@@ -186,15 +186,6 @@ function onUserProfile() {
   return this.$route.params.id === this.userId.toString();
 } // onUserProfile
 
-/**
- * Determines whether the user's login has timed out
- *
- * @return boolean - whether the user's login has timed out
- */
-function timedOut() {
-  return this.$store.getters.timedOut;
-}
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -323,10 +314,12 @@ function setSessionTimeouts() {
   this.sessionTimeout = window.setTimeout(() => {
     sessionStorage.setItem('timedOut', true);
     this.session = false;
-    this.$router.go({
-      path: '/',
-      query: { redirect: this.$route.path }
-    });
+    if (this.$route.path !== '/') {
+      this.$router.go({
+        path: '/',
+        query: { redirect: this.$route.path }
+      });
+    }
   }, sessionRemainder);
 
   // set session warning timeout, time minus 300000 = - 5 min
@@ -486,8 +479,7 @@ export default {
     isMobile,
     isSmallScreen,
     onUserProfile,
-    storeIsPopulated,
-    timedOut
+    storeIsPopulated
   },
   components: {
     MainNav,
