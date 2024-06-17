@@ -35,7 +35,7 @@
             @click:clear="technologySearch = null"
           ></v-autocomplete>
         </v-col>
-        <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
+        <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="6" xl="3" lg="3" md="3" sm="6" class="my-2 py-0">
           <tags-filter v-model="tagsInfo" @update:modelValue="refreshDropdownItems()"></tags-filter>
         </v-col>
         <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-2 py-0">
