@@ -4,60 +4,38 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, defineProps, ref } from 'vue';
 import Chart from 'chart.js/auto';
 // |--------------------------------------------------|
 // |                                                  |
-// |                 LIFECYCLE HOOKS                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const chart = ref(null);
+const props = defineProps([
+  'chartData', // chart data to render
+  'options', // chart options
+  'chartId' // id for the canvas
+]);
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                LIFECYCLE HOOKS                   |
 // |                                                  |
 // |--------------------------------------------------|
 
 /**
  * Mounted lifecycle hook.
  */
-function mounted() {
-  const canvas = document.getElementById(this.chartId);
+onMounted(() => {
+  const canvas = document.getElementById(props.chartId);
   const ctx = canvas.getContext('2d');
-  this.chart = new Chart(ctx, {
+  chart.value = new Chart(ctx, {
     type: 'bar',
-    data: this.chartData,
-    options: { ...this.options, responsive: true }
+    data: props.chartData,
+    options: { ...props.options, responsive: true }
   });
-} // mounted
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      METHODS                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Destroys the instance of the current chart.
- */
-function destroyChart() {
-  this.chart.destroy();
-} // destroyChart
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  mounted,
-  props: [
-    'chartData', // chart data to render
-    'options', // chart options
-    'chartId' // id for the canvas
-  ],
-  methods: {
-    destroyChart
-  },
-  data() {
-    return {
-      chart: null
-    };
-  }
-};
+}); // mounted
 </script>
