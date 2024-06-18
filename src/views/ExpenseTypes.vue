@@ -805,24 +805,6 @@ function categoriesReqReceipt(categories) {
   return string;
 } // categoriesReqReceipt
 
-// TODO: check
-// /**
-//  * Changes the employee avatar to default if it fails to display original.
-//  *
-//  * @param item - employee to check
-//  */
-// function changeAvatar(item) {
-//   let index = _.findIndex(employees.value, (employee) => {
-//     return employee.id === item.id;
-//   });
-
-//   let newItem = employees.value[index];
-
-//   newItem.avatar = null;
-
-//   employees.value.splice(index, 1, newItem);
-// } // changeAvatar
-
 /**
  * Clear the selected expense type.
  */
@@ -856,23 +838,6 @@ function clearStatus() {
   status.value['statusMessage'] = '';
   status.value['color'] = '';
 } // clearStatus
-
-// TODO: check
-// /**
-//  * Add expense type to expanded row when clicked.
-//  *
-//  * @param value - expense type to add
-//  */
-// function clickedRow(value) {
-//   if (_.isEmpty(expanded.value) || expanded.value[0].id != value.id) {
-//     // expand the selected expense type if the selected expense type is not already expanded
-//     expanded.value = [];
-//     expanded.value.push(value);
-//   } else {
-//     // collapse the expense type if the selected expense type is already expanded
-//     expanded.value = [];
-//   }
-// } // clickedRow
 
 /**
  * Delete an expense type and display status.
@@ -1044,51 +1009,6 @@ function getEmployeeName(employeeId) {
   return `${localEmployee.firstName} ${localEmployee.lastName}`;
 } // getEmployeeName
 
-// TODO: check
-// /**
-//  * Check if an employee has access to an expense type. Returns true if employee has access, otherwise returns false.
-//  *
-//  * @param employee - Employee to access
-//  * @param expenseType - ExpenseType to be accessed
-//  * @return Boolean - employee has access to expense type
-//  */
-// function hasAccess(employee, expenseType) {
-//   let result = false;
-//   if (employee.workStatus == 0) {
-//     result = false;
-//   } else if (expenseType.accessibleBy.includes('Intern') && employee.employeeRole == 'intern') {
-//     result = true;
-//   } else if (
-//     expenseType.accessibleBy.includes('FullTime') &&
-//     employee.employeeRole != 'intern' &&
-//     employee.workStatus == 100
-//   ) {
-//     result = true;
-//   } else if (
-//     expenseType.accessibleBy.includes('PartTime') &&
-//     employee.employeeRole != 'intern' &&
-//     employee.workStatus < 100
-//   ) {
-//     result = true;
-//   } else {
-//     result = expenseType.accessibleBy.includes(employee.id);
-//   }
-
-//   return result;
-// } // hasAccess
-
-// TODO: check
-// /**
-//  * Check if an expense type is inactive. Returns 'Not Active' if the expense type is not active, otherwise returns an
-//  * empty String.
-//  *
-//  * @param expenseType - expense type to check
-//  * @return String - expense type is inactive string
-//  */
-// function isInactive(expenseType) {
-//   return !expenseType.isInactive ? '' : 'Not Active';
-// } // isInactive
-
 /**
  * Load all data required to load the page initially.
  */
@@ -1117,22 +1037,6 @@ async function loadExpenseTypesData() {
   }
   initialPageLoading.value = false;
 } // loadExpenseTypesData
-
-// TODO: check
-// /**
-//  * Returns a number with two decimal point precision as a string.
-//  *
-//  * @param value - number to filter
-//  * @return String - number with two decimal points
-//  */
-// function twoDecimals(value) {
-//   return `${new Intl.NumberFormat('en-US', {
-//     style: 'decimal',
-//     useGrouping: false,
-//     minimumFractionDigits: 2,
-//     maximumFractionDigits: 2
-//   }).format(value)}`;
-// } // twoDecimals
 
 /**
  * limits the length of the text
@@ -1262,9 +1166,12 @@ function getTagByID(id) {
 /**
  * watcher for filter.active, filter.recurring, filter.overdraft
  */
-watch([filter.value.active, filter.value.recurring, filter.value.overdraft], () => {
-  filterExpenseTypes();
-}); // watchFilterExpenseTypes
+watch(
+  () => [filter.value.active, filter.value.recurring, filter.value.overdraft],
+  () => {
+    filterExpenseTypes();
+  }
+); // watchFilterExpenseTypes
 
 /**
  * Watcher for storeIsPopulated
