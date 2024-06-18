@@ -465,12 +465,13 @@ function concentrationsEmit(degree) {
 // |                                                  |
 // |--------------------------------------------------|
 
-watch(store.getters.storeIsPopulated, (newVal) => {
-  if (newVal) {
+watch(
+  () => store.getters.storeIsPopulated,
+  () => {
     educations.value = initDegrees();
     fillData();
   }
-});
+);
 </script>
 
 <style>

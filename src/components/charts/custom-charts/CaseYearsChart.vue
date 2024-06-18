@@ -139,7 +139,6 @@ function drawCaseYearsHistGraph() {
     onClick: (x, y) => {
       if (_.first(y)) {
         let index = _.first(y).index;
-        localStorage.setItem('requestedDataType', 'job roles');
         localStorage.setItem('requestedFilter', caseYearsNames.value[index]);
         router.push({
           path: '/employees',
@@ -188,10 +187,11 @@ function findMaxIndex() {
 // |                                                  |
 // |--------------------------------------------------|
 
-watch(store.getters.storeIsPopulated, (newVal) => {
-  if (newVal) {
+watch(
+  () => store.getters.storeIsPopulated,
+  () => {
     drawCaseYearsHistGraph();
     caseYearsData();
   }
-});
+);
 </script>

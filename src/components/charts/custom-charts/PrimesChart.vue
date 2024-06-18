@@ -215,10 +215,11 @@ function fillData() {
 // |                                                  |
 // |--------------------------------------------------|
 
-watch(store.getters.storeIsPopulated, (newVal) => {
-  if (newVal) {
+watch(
+  () => store.getters.storeIsPopulated,
+  () => {
     fetchData();
     fillData();
   }
-});
+);
 </script>

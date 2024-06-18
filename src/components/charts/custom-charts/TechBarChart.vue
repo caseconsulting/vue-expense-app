@@ -6,7 +6,7 @@
           <DownloadCSV
             v-if="userRoleIsAdmin()"
             filename="technologies.csv"
-            :generateData="generateCsvData()"
+            :generateData="generateCsvData"
             sortKey="Technology"
             :tooltip="'Download ' + showCurrent + ' Technologies to CSV'"
           ></DownloadCSV>
@@ -369,14 +369,15 @@ watch(showCurrent, () => {
   fillData();
 }); // watchShowCurrent
 
-watch(store.getters.storeIsPopulated, (newVal) => {
-  if (newVal) {
+watch(
+  () => store.getters.storeIsPopulated,
+  () => {
     parseEmployeeData();
     // Sort tech by number of occurances
     sortTech(technologies.value);
     fillData();
   }
-});
+);
 </script>
 
 <style scoped>

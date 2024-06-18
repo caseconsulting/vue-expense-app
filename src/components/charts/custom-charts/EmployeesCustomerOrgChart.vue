@@ -145,7 +145,7 @@ function fillData() {
       if (_.first(y)) {
         let index = _.first(y).index;
         let labelClicked = chartData.value.labels[index];
-        localStorage.setItem('requestedDataType', 'customer orgs');
+        localStorage.setItem('requestedDataType', 'customerOrgs');
         localStorage.setItem('requestedFilter', labelClicked);
         router.push({
           path: '/reports',

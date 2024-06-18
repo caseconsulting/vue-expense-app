@@ -171,7 +171,6 @@ function drawJobExpHistGraph() {
     onClick: (x, y) => {
       if (_.first(y)) {
         let index = _.first(y).index;
-        localStorage.setItem('requestedDataType', 'job roles');
         localStorage.setItem('requestedFilter', jobExperienceNames.value[index]);
         router.push({
           path: '/employees',
@@ -204,11 +203,12 @@ function drawJobExpHistGraph() {
 // |                                                  |
 // |--------------------------------------------------|
 
-watch(store.getters.storeIsPopulated, (newVal) => {
-  if (newVal) {
+watch(
+  () => store.getters.storeIsPopulated,
+  () => {
     // eslint-disable-next-line no-undef
     jobExperienceData();
     drawJobExpHistGraph();
   }
-});
+);
 </script>

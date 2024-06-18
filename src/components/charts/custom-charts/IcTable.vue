@@ -207,9 +207,12 @@ function getRoleCounts() {
 // |                                                  |
 // |--------------------------------------------------|
 
-watch(store.getters.storeIsPopulated, (newVal) => {
-  if (newVal) fillData();
-});
+watch(
+  () => store.getters.storeIsPopulated,
+  () => {
+    fillData();
+  }
+);
 
 watch(showInterns, () => {
   if (store.getters.storeIsPopulated) fillData();

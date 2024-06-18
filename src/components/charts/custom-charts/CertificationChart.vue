@@ -259,12 +259,13 @@ function breakSentence(s) {
 // |                                                  |
 // |--------------------------------------------------|
 
-watch(store.getters.storeIsPopulated, (newVal) => {
-  if (newVal) {
+watch(
+  () => store.getters.storeIsPopulated,
+  () => {
     fetchCertData();
     fillCertData();
   }
-});
+);
 </script>
 
 <style scoped>

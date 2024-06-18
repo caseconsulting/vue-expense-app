@@ -140,7 +140,7 @@ function fillData() {
     onClick: (x, y) => {
       if (_.first(y)) {
         let index = _.first(y).index;
-        localStorage.setItem('requestedDataType', 'languages');
+        localStorage.setItem('requestedDataType', 'foreignLanguages');
         localStorage.setItem('requestedFilter', chartData.value.labels[index]);
         router.push({
           path: '/reports',
@@ -178,10 +178,11 @@ function fillData() {
 // |                                                  |
 // |--------------------------------------------------|
 
-watch(store.getters.storeIsPopulated, (newVal) => {
-  if (newVal) {
+watch(
+  () => store.getters.storeIsPopulated,
+  () => {
     fetchData();
     fillData();
   }
-});
+);
 </script>
