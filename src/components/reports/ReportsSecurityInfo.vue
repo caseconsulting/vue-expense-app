@@ -46,32 +46,7 @@
           ></v-autocomplete>
         </v-col>
         <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
-          <v-autocomplete
-            clearable
-            label="Filter by Tag (click to flip)"
-            v-model="selectedTags"
-            :items="tags"
-            multiple
-            variant="underlined"
-            item-title="tagName"
-            item-value="id"
-            @update:model-value="refreshDropdownItems()"
-            return-object
-          >
-            <template v-slot:selection="{ item }">
-              <v-chip
-                size="small"
-                closable
-                @click.stop
-                @click="negateTag(item.raw)"
-                @click:close="removeTag(item.raw)"
-                :color="chipColor(item.raw.id)"
-              >
-                {{ tagFlip.includes(item.raw.id) ? 'NOT ' : '' }}
-                {{ item.raw.tagName }}
-              </v-chip>
-            </template>
-          </v-autocomplete>
+          <tags-filter v-model="tagsInfo" @update:modelValue="refreshDropdownItems()"></tags-filter>
         </v-col>
         <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
           <v-checkbox v-model="showInactiveEmployees" label="Show Inactive Users"></v-checkbox>
@@ -126,13 +101,16 @@
 
 <script setup>
 import _ from 'lodash';
-import { userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
 import { employeeFilter } from '@/shared/filterUtils';
 import { add, format, getTodaysDate } from '@/shared/dateUtils';
 import { getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
 import { onMounted, ref, inject, watch } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import { selectedTagsHasEmployee } from '@/shared/employeeUtils';
+import { userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
+import TagsFilter from '@/components/shared/TagsFilter.vue';
+
 const store = useStore();
 const emitter = inject('emitter');
 const router = useRouter();
@@ -172,11 +150,12 @@ const badgeExpirations = ref([]);
 const clearanceSearch = ref(null);
 const clearances = ref(['TS/SCI - Full Scope', 'TS/SCI - CI Poly', 'TS/SCI - No Poly', 'Top Secret', 'Secret']);
 const search = ref(null); // query text for datatable search field
-const selectedTags = ref([]);
 const showInactiveEmployees = ref(false);
 const sortBy = ref([{ key: 'employeeNumber' }]); // sort datatable items
-const tags = ref([]);
-const tagFlip = ref([]);
+const tagsInfo = ref({
+  selected: [],
+  flipped: []
+});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -189,7 +168,6 @@ const tagFlip = ref([]);
  */
 onMounted(() => {
   employeesInfo.value = getActive(store.getters.employees); // default to filtered list
-  tags.value = store.getters.tags;
   filteredEmployees.value = employeesInfo.value; // one.value is shown
   populateDropdowns(employeesInfo.value);
 
@@ -209,16 +187,6 @@ onMounted(() => {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
-
-/**
- * Returns the color that at tag filter chip should be
- *
- * @param id ID of the tag item
- *
- */
-function chipColor(id) {
-  return tagFlip.value.includes(id) ? 'red' : 'gray';
-} // chipColor
 
 /**
  * Returns the expiration dates for all clearances in natural readable format. The sorting key of item.badgeExpiration
@@ -282,19 +250,6 @@ function handleClick(_, { item }) {
 } //handleClick
 
 /**
- * negates a tag
- */
-function negateTag(item) {
-  // try to find the id in the tagFlip array, if it is there then remove it else add it
-  const index = tagFlip.value.indexOf(item.id);
-  if (index >= 0) {
-    tagFlip.value.splice(index, 1);
-  } else {
-    tagFlip.value.push(item.id);
-  }
-} // negateTag
-
-/**
  * Populates all job roles in the search dropdown.
  */
 function populateBadgeExpirationsDropdown() {
@@ -350,9 +305,9 @@ function refreshDropdownItems() {
   if (clearanceSearch.value) {
     searchClearances(clearanceSearch.value);
   }
-  if (selectedTags.value.length > 0) {
+  if (tagsInfo.value.selected.length > 0) {
     filteredEmployees.value = _.filter(filteredEmployees.value, (employee) => {
-      return selectedTagsHasEmployee(employee);
+      return selectedTagsHasEmployee(employee.id, tagsInfo.value);
     });
   }
 
@@ -360,19 +315,7 @@ function refreshDropdownItems() {
 } // refreshDropdownItems
 
 /**
- * Removes an item from the tag filters's active filters
- *
- * @param item - The filter to remove
- */
-function removeTag(item) {
-  const selIndex = selectedTags.value.findIndex((t) => t.id === item.id);
-  if (selIndex >= 0) {
-    selectedTags.value.splice(selIndex, 1);
-  }
-} // removeTag
-
-/**
- * If there is a desired badge expiration date, will.value calculate what dates fall within the range.
+ * If there is a desired badge expiration date, this will calculate what dates fall within the range.
  *
  * @param requestedDate - the requested search for the badge expiration date
  * @param forDropdown - used to limit the badge expiration dropdown options based on if there were dates found in that range
@@ -441,24 +384,6 @@ function searchClearances(search) {
 } // searchClearances
 
 /**
- * helper function: return true if any selected tag has employee listed under it.
- *
- * @param e - the employee
- * @return true if the employee has a tag selected in filters
- */
-function selectedTagsHasEmployee(e) {
-  let inTag, tagFlipped;
-  for (let i = 0; i < selectedTags.value.length; i++) {
-    inTag = selectedTags.value[i].employees.includes(e.id);
-    tagFlipped = tagFlip.value.includes(selectedTags.value[i].id);
-    if (inTag != tagFlipped) {
-      return true;
-    }
-  }
-  return false;
-} // selectedTagsHasEmployee
-
-/**
  * Emit new data for tab.value
  *
  * @param event the event data containing the table information
@@ -481,34 +406,6 @@ watch(showInactiveEmployees, () => {
   employeesInfo.value = store.getters.employees;
   if (!showInactiveEmployees.value) employeesInfo.value = getActive(employeesInfo.value);
   populateDropdowns(employeesInfo.value);
-  refreshDropdownItems();
-});
-
-/**
- * In the case that the page has been force reloaded (and the store cleared)
- * watcher.value will be activated when the store is populated again.
- */
-watch(tagFlip, () => {
-  refreshDropdownItems();
-});
-
-/**
- * Remove items from tagFlip array when they are removed from the selected
- * tags
- */
-watch(selectedTags, () => {
-  let negatedTagRemoved = true;
-  // use normal for loop to have the index
-  for (let i = 0; i < tagFlip.value.length; i++) {
-    // try to find the current tag in the selectedTags
-    _.forEach(selectedTags.value, (t) => {
-      if (t.id === tagFlip.value[i]) negatedTagRemoved = false;
-    });
-    // if it isn't there, remove it from tagFlip too
-    if (negatedTagRemoved) {
-      tagFlip.value.splice(i, 1);
-    }
-  }
   refreshDropdownItems();
 });
 </script>

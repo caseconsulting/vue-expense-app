@@ -82,37 +82,18 @@
                 </v-btn-toggle>
               </v-col>
               <!-- Tags filter -->
-              <v-col :align="isMobile() ? 'center' : ''" cols="5" md="5" sm="6">
-                <v-autocomplete
-                  v-if="hasAdminPermissions()"
-                  v-model="selectedTags"
-                  class="mt-2 mt-md-4 ml-1 ml-md-4"
-                  variant="underlined"
-                  clearable
-                  label="Filter by Tag (click to flip)"
-                  :items="tags"
-                  multiple
-                  color="gray"
-                  item-title="tagName"
-                  item-value="id"
-                  hide-details
-                  return-object
-                >
-                  <template #chip="{ props, item }">
-                    <v-chip
-                      size="small"
-                      closable
-                      v-bind="props"
-                      :color="chipColor(item.raw.id)"
-                      @click.stop
-                      @click="negateTag(item.raw)"
-                      @click:close="removeTag(item.raw)"
-                    >
-                      {{ tagFlip.includes(item.raw.id) ? 'NOT ' : '' }}
-                      {{ item.raw.tagName }}
-                    </v-chip>
-                  </template>
-                </v-autocomplete>
+              <v-col
+                v-if="userRoleIsAdmin() || userRoleIsManager()"
+                :align="isMobile() ? 'center' : ''"
+                cols="5"
+                md="5"
+                sm="6"
+              >
+                <tags-filter
+                  v-model="tagsInfo"
+                  @update:modelValue="filterEmployees()"
+                  classProps="mt-2 mt-md-4 ml-1 ml-md-4"
+                ></tags-filter>
               </v-col>
               <!-- End Tags Filter -->
             </v-row>
@@ -312,7 +293,9 @@ import _ from 'lodash';
 import ConvertEmployeeToCsv from '@/components/employees/csv/ConvertEmployeeToCsv.vue';
 import PowerEditContainer from '@/components/employees/power-edit/PowerEditContainer.vue';
 import TagManager from '@/components/employees/tags/TagManager.vue';
+import TagsFilter from '@/components/shared/TagsFilter.vue';
 import EmployeesSyncModal from '@/components/modals/EmployeesSyncModal.vue';
+import { selectedTagsHasEmployee } from '@/shared/employeeUtils';
 import {
   isEmpty,
   isFullTime,
@@ -326,20 +309,6 @@ import {
 } from '@/utils/utils';
 import { employeeFilter } from '@/shared/filterUtils';
 import { format } from '../shared/dateUtils';
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     COMPUTED                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Key for data table, also has implications for custom search
- * of data table
- */
-function dataTableKey() {
-  return { a: this.filter, b: this.selectedTags };
-} // dataTableKey
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -373,16 +342,6 @@ function clearStatus() {
   this.status['statusMessage'] = null;
   this.status['color'] = null;
 } // clearStatus
-
-/**
- * Returns the color that at tag filter chip should be
- *
- * @param id ID of the tag item
- *
- */
-function chipColor(id) {
-  return this.tagFlip.includes(id) ? 'red' : 'gray';
-} // chipColor
 
 /**
  * Delete an employee and display status.
@@ -442,8 +401,8 @@ function filterEmployees() {
     let fullCheck = this.filter.active.includes('full') && this.isFullTime(employee);
     let partCheck = this.filter.active.includes('part') && this.isPartTime(employee);
     let inactiveCheck = this.filter.active.includes('inactive') && this.isInactive(employee);
-    let tagCheck = this.selectedTagsHasEmployee(employee);
-    return (fullCheck || partCheck || inactiveCheck) && (this.selectedTags.length <= 0 || tagCheck);
+    let tagCheck = selectedTagsHasEmployee(employee.id, this.tagsInfo);
+    return (fullCheck || partCheck || inactiveCheck) && (this.tagsInfo.selected.length <= 0 || tagCheck);
   });
 } // filterEmployees
 
@@ -495,20 +454,6 @@ async function loadBasecampAvatars() {
 }
 
 /**
- * negates a tag
- */
-function negateTag(item) {
-  // try to find the id in the tagFlip array, if it is there then remove it else add it
-  const index = this.tagFlip.indexOf(item.id);
-  if (index >= 0) {
-    this.tagFlip.splice(index, 1);
-  } else {
-    this.tagFlip.push(item.id);
-  }
-  this.refreshEmployees();
-} // negateTag
-
-/**
  * Refresh employee data and filters employees.
  */
 async function refreshEmployees() {
@@ -530,18 +475,6 @@ async function refreshEmployees() {
 } // refreshEmployees
 
 /**
- * Removes an item from the tag filters's active filters
- *
- * @param item - The filter to remove
- */
-function removeTag(item) {
-  const selIndex = this.selectedTags.findIndex((t) => t.id === item.id);
-  if (selIndex >= 0) {
-    this.selectedTags.splice(selIndex, 1);
-  }
-} // removeTag
-
-/**
  * open the create employee form
  */
 function renderCreateEmployee() {
@@ -556,24 +489,6 @@ function renderManageTags() {
   this.manageTags = true;
   this.childKey++;
 } // renderManageTags
-
-/**
- * helper function: return true if any selected tag has employee listed under it.
- *
- * @param e - the employee
- * @return true if the employee has a tag selected in filters
- */
-function selectedTagsHasEmployee(e) {
-  let inTag, tagFlipped;
-  for (let i = 0; i < this.selectedTags.length; i++) {
-    inTag = this.selectedTags[i].employees.includes(e.id);
-    tagFlipped = this.tagFlip.includes(this.selectedTags[i].id);
-    if (inTag != tagFlipped) {
-      return true;
-    }
-  }
-  return false;
-} // selectedTagsHasEmployee
 
 /**
  * helper function: return true if given employee is on a tag
@@ -765,34 +680,6 @@ async function watchStoreIsPopulated() {
   if (this.storeIsPopulated) await this.refreshEmployees();
 } // watchStoreIsPopulated
 
-/**
- * In the case that the page has been force reloaded (and the store cleared)
- * this watcher will be activated when the store is populated again.
- */
-function watchTagFlip() {
-  this.filterEmployees();
-} // watchTagFlip
-
-/**
- * Remove items from tagFlip array when they are removed from the selected
- * tags
- */
-function watchSelectedTags() {
-  let negatedTagRemoved = true;
-  // use normal for loop to have the index
-  for (let i = 0; i < this.tagFlip.length; i++) {
-    // try to find the current tag in the selectedTags
-    _.forEach(this.selectedTags, (t) => {
-      if (t.id === this.tagFlip[i]) negatedTagRemoved = false;
-    });
-    // if it isn't there, remove it from tagFlip too
-    if (negatedTagRemoved) {
-      this.tagFlip.splice(i, 1);
-    }
-  }
-  this.filterEmployees();
-}
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -808,10 +695,10 @@ export default {
     ExportEmployeeData,
     ConvertEmployeeToCsv,
     PowerEditContainer,
-    TagManager
+    TagManager,
+    TagsFilter
   },
   computed: {
-    dataTableKey,
     storeIsPopulated
   },
   created,
@@ -910,7 +797,6 @@ export default {
         currentZIP: null
       }, // selected employee
       search: null, // query text for datatable search field
-      selectedTags: [], // tags to include or exclude in filter
       sortBy: [{ key: 'hireDate', order: 'asc' }], // sort datatable items
       status: {
         statusType: undefined,
@@ -920,23 +806,22 @@ export default {
       showExportDataModal: false,
       syncing: false,
       tags: [],
-      tagFlip: [],
-      tagSearchString: '',
+      tagsInfo: {
+        selected: [],
+        flipped: []
+      },
       toggleEmployeesSyncModal: false
     };
   },
   watch: {
     'filter.active': watchFilterActive,
-    storeIsPopulated: watchStoreIsPopulated,
-    tagFlip: watchTagFlip,
-    selectedTags: watchSelectedTags
+    storeIsPopulated: watchStoreIsPopulated
   },
   beforeUnmount,
   methods: {
     changeAvatar,
     clearCreateEmployee,
     clearStatus,
-    chipColor,
     deleteEmployee,
     deleteModelFromTable,
     displayError,
@@ -953,11 +838,9 @@ export default {
     isMobile,
     loadBasecampAvatars,
     monthDayYearFormat,
-    negateTag,
     refreshEmployees,
     renderCreateEmployee,
     renderManageTags,
-    removeTag,
     selectedTagsHasEmployee,
     employeeIsOnTag,
     syncApplications,

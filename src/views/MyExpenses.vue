@@ -57,36 +57,8 @@
                 </v-col>
 
                 <!-- Tags filter -->
-                <v-col cols="12" md="3">
-                  <v-autocomplete
-                    v-if="userRoleIsAdmin() || userRoleIsManager()"
-                    v-model="selectedTags"
-                    variant="underlined"
-                    clearable
-                    label="Filter by Tag (click to flip)"
-                    :items="tags"
-                    multiple
-                    hide-details
-                    color="gray"
-                    item-title="tagName"
-                    item-value="id"
-                    return-object
-                  >
-                    <template #chip="{ props, item }">
-                      <v-chip
-                        size="small"
-                        closable
-                        v-bind="props"
-                        :color="tagFlip.includes(item.raw.id) ? 'red' : 'gray'"
-                        @click.stop
-                        @click="negateTag(item.raw)"
-                        @click:close="removeTag(item.raw)"
-                      >
-                        {{ tagFlip.includes(item.raw.id) ? 'NOT ' : '' }}
-                        {{ item.raw.tagName }}
-                      </v-chip>
-                    </template>
-                  </v-autocomplete>
+                <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="12" md="3">
+                  <tags-filter v-model="tagsInfo" @update:modelValue="filterExpenses()"></tags-filter>
                 </v-col>
                 <!-- End Tags Filter -->
 
@@ -139,37 +111,7 @@
                   />
                 </v-col>
                 <!-- Tags filter -->
-                <v-col cols="6">
-                  <v-autocomplete
-                    v-if="userRoleIsAdmin() || userRoleIsManager()"
-                    v-model="selectedTags"
-                    variant="underlined"
-                    clearable
-                    label="Filter by Tag (click to flip)"
-                    :items="[]"
-                    multiple
-                    hide-details
-                    color="gray"
-                    item-title="tagName"
-                    item-value="id"
-                    return-object
-                  >
-                    <template #chip="{ props, item }">
-                      <v-chip
-                        size="small"
-                        closable
-                        v-bind="props"
-                        :color="tagFlip.includes(item.raw.id) ? 'red' : 'gray'"
-                        @click.stop
-                        @click="negateTag(item.raw)"
-                        @click:close="removeTag(item.raw)"
-                      >
-                        {{ tagFlip.includes(item.raw.id) ? 'NOT ' : '' }}
-                        {{ item.raw.tagName }}
-                      </v-chip>
-                    </template>
-                  </v-autocomplete>
-                </v-col>
+                <tags-filter v-model="tagsInfo" @update:modelValue="filterExpenses()"></tags-filter>
               </v-row>
             </div>
 
@@ -550,6 +492,7 @@ import ConvertExpensesToCsv from '@/components/expenses/ConvertExpensesToCsv.vue
 import DeleteModal from '@/components/modals/DeleteModal.vue';
 import employeeUtils from '@/shared/employeeUtils';
 import ExpenseForm from '@/components/expenses/ExpenseForm.vue';
+import TagsFilter from '@/components/shared/TagsFilter.vue';
 import UnreimburseModal from '@/components/modals/UnreimburseModal.vue';
 import _ from 'lodash';
 import {
@@ -772,24 +715,6 @@ function displayError(err) {
 } // displayError
 
 /**
- * helper function: return true if any selected tag has employee listed under it.
- *
- * @param employeeId - the employee ID
- * @return true if the employee has a tag selected in filters
- */
-function selectedTagsHasEmployee(employeeId) {
-  let inTag, tagFlipped;
-  for (let i = 0; i < this.selectedTags.length; i++) {
-    inTag = this.selectedTags[i].employees.includes(employeeId);
-    tagFlipped = this.tagFlip.includes(this.selectedTags[i].id);
-    if (inTag != tagFlipped) {
-      return true;
-    }
-  }
-  return false;
-} // selectedTagsHasEmployee
-
-/**
  * Filters expenses based on filter selections.
  */
 function filterExpenses() {
@@ -802,9 +727,9 @@ function filterExpenses() {
     });
   }
 
-  if (this.selectedTags?.length > 0) {
+  if (this.tagsInfo.selected?.length > 0) {
     this.filteredExpenses = _.filter(this.filteredExpenses, (expense) => {
-      return this.selectedTagsHasEmployee(expense.employeeId);
+      return employeeUtils.selectedTagsHasEmployee(expense.employeeId, this.tagsInfo);
     });
   }
 
@@ -897,8 +822,6 @@ async function loadMyExpensesData() {
     this.refreshExpenses()
   ]);
 
-  this.tags = this.$store.getters.tags;
-
   // get expense types
   let expenseTypes = this.$store.getters.expenseTypes;
   this.expenseTypes = _.map(expenseTypes, (expenseType) => {
@@ -954,32 +877,6 @@ function onSelect(item) {
   this.expense.edit = true;
   this.expense['cost'] = moneyFilter(item.cost);
 } // onSelect
-
-/**
- * negates a tag
- */
-function negateTag(item) {
-  // try to find the id in the tagFlip array, if it is there then remove it else add it
-  const index = this.tagFlip.indexOf(item.id);
-  if (index >= 0) {
-    this.tagFlip.splice(index, 1);
-  } else {
-    this.tagFlip.push(item.id);
-  }
-  this.refreshExpenses();
-} // negateTag
-
-/**
- * Removes an item from the tag filters's active filters
- *
- * @param item - The filter to remove
- */
-function removeTag(item) {
-  const selIndex = this.selectedTags.findIndex((t) => t.id === item.id);
-  if (selIndex >= 0) {
-    this.selectedTags.splice(selIndex, 1);
-  }
-} // removeTag
 
 /**
  * Refresh expense data and filters expenses.
@@ -1180,26 +1077,6 @@ async function watchStorePopulated() {
   }
 } // watchStorePopulated
 
-/**
- * Remove items from tagFlip array when they are removed from the selected
- * tags
- */
-function watchSelectedTags() {
-  let negatedTagRemoved = true;
-  // use normal for loop to have the index
-  for (let i = 0; i < this.tagFlip.length; i++) {
-    // try to find the current tag in the selectedTags
-    _.forEach(this.selectedTags, (t) => {
-      if (t.id === this.tagFlip[i]) negatedTagRemoved = false;
-    });
-    // if it isn't there, remove it from tagFlip too
-    if (negatedTagRemoved) {
-      this.tagFlip.splice(i, 1);
-    }
-  }
-  this.filterExpenses();
-} // watchSelectedTags
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -1212,6 +1089,7 @@ export default {
     ConvertExpensesToCsv,
     DeleteModal,
     ExpenseForm,
+    TagsFilter,
     UnreimburseModal
   },
   directives: { mask },
@@ -1303,7 +1181,6 @@ export default {
         showOnFeed: null
       }, // expense to edit
       search: null, // query text for datatable search field
-      selectedTags: [], // tags to include or exclude in filter
       toSort: [{ key: 'createdAt', order: 'desc' }], // default sort datatable items
       startDateFilter: null,
       startDateFilterMenu: null,
@@ -1312,8 +1189,10 @@ export default {
         statusMessage: '',
         color: ''
       }, // snackbar action status
-      tags: [],
-      tagFlip: [],
+      tagsInfo: {
+        selected: [],
+        flipped: []
+      },
       unreimbursing: false, // activate unreimburse model when value changes
       userInfo: null // user information
     };
@@ -1328,8 +1207,6 @@ export default {
     endDateFilter: watchFilterExpenses,
     startDateFilter: watchFilterExpenses,
     search: watchFilterExpenses,
-    selectedTags: watchSelectedTags,
-    tagFlip: watchFilterExpenses,
     'filter.active': watchFilterExpenses,
     'filter.reimbursed': watchFilterExpenses,
     storeIsPopulated: watchStorePopulated
@@ -1355,7 +1232,6 @@ export default {
     hasRecipient,
     isBetween,
     isEmpty,
-    negateTag,
     userRoleIsAdmin,
     userRoleIsManager,
     isMobile,
@@ -1364,9 +1240,7 @@ export default {
     monthDayYearFormat,
     onSelect,
     parseEventDate,
-    removeTag,
     refreshExpenses,
-    selectedTagsHasEmployee,
     startAction,
     toTopOfForm,
     unreimburseExpense,

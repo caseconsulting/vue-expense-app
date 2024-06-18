@@ -40,32 +40,7 @@
 
         <!-- Tag selector -->
         <h3 class="mt-4">Filter by tag</h3>
-        <v-autocomplete
-          :disabled="loading"
-          clearable
-          label="Filter by Tag (click to flip)"
-          v-model="filters.tags"
-          :items="filterOptions.tags"
-          multiple
-          variant="underlined"
-          item-title="tagName"
-          item-value="id"
-          return-object
-        >
-          <template v-slot:selection="{ item }">
-            <v-chip
-              size="small"
-              closable
-              @click.stop
-              @click="negateTag(item.raw)"
-              @click:close="removeTag(item.raw)"
-              :color="chipColor(item.raw.id)"
-            >
-              {{ tagFlip.includes(item.raw.id) ? 'NOT ' : '' }}
-              {{ item.raw.tagName }}
-            </v-chip>
-          </template>
-        </v-autocomplete>
+        <tags-filter v-model="filters.tagsInfo"></tags-filter>
       </div>
     </v-card-text>
 
@@ -94,6 +69,8 @@ import baseCsv from '@/utils/csv/baseCsv.js';
 import employeeCsv from '@/utils/csv/employeeCsv.js';
 import eeoCsv from '@/utils/csv/eeoCsv.js';
 import qbCsv from '@/utils/csv/qbCsv.js';
+
+import TagsFilter from '@/components/shared/TagsFilter.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -150,16 +127,6 @@ function beforeUnmount() {
 function close() {
   this.emitter.emit(`close-employee-export`);
 }
-
-/**
- * Returns the color that at tag filter chip should be
- *
- * @param id ID of the tag item
- *
- */
-function chipColor(id) {
-  return this.tagFlip.includes(id) ? 'red' : 'gray';
-} // chipColor
 
 /**
  * Downloads employees as CSV
@@ -260,14 +227,15 @@ function filterEmployees(employees) {
     // remove employees that do not have a given tag, or who do have a given negated tag
     let tag, tagHasEmployee;
     let employeeHasTag;
-    for (let i = 0; i < f.tags.length; i++) {
-      tag = f.tags[i];
+    const tagsInfo = f.tagsInfo;
+    for (let i = 0; i < tagsInfo.selected.length; i++) {
+      tag = tagsInfo.selected[i];
       tagHasEmployee = tag.employees.includes(e.id);
-      if (this.tagFlip.includes(tag.id) && !tagHasEmployee) employeeHasTag = true; // tag is negated and employee is on it
-      if (!this.tagFlip.includes(tag.id) && tagHasEmployee) employeeHasTag = true; // tag is normal (not negated) and employee is not on it
-      if (employeeHasTag) i = f.tags.length; // exit loop early if employee is on a tag
+      if (tagsInfo.flipped.includes(tag.id) && !tagHasEmployee) employeeHasTag = true; // tag is negated and employee is on it
+      if (!tagsInfo.flipped.includes(tag.id) && tagHasEmployee) employeeHasTag = true; // tag is normal (not negated) and employee is not on it
+      if (employeeHasTag) i = tagsInfo.selected.length; // exit loop early if employee is on a tag
     }
-    if (f.tags.length > 0 && !employeeHasTag) return false;
+    if (tagsInfo.selected.length > 0 && !employeeHasTag) return false;
 
     // - STATUS FILTER -
     // remove employees that do not have the status
@@ -285,31 +253,6 @@ function filterEmployees(employees) {
     return true;
   });
 }
-
-/**
- * negates a tag
- */
-function negateTag(item) {
-  // try to find the id in the tagFlip array, if it is there then remove it else add it
-  const index = this.tagFlip.indexOf(item.id);
-  if (index >= 0) {
-    this.tagFlip.splice(index, 1);
-  } else {
-    this.tagFlip.push(item.id);
-  }
-} // negateTag
-
-/**
- * Removes an item from the tag filters's active filters
- *
- * @param item - The filter to remove
- */
-function removeTag(item) {
-  const selIndex = this.filters['tags'].findIndex((t) => t.id === item.id);
-  if (selIndex >= 0) {
-    this.filters['tags'].splice(selIndex, 1);
-  }
-} // remove
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -338,6 +281,9 @@ function updatePeriodDefault() {
 // |--------------------------------------------------|
 
 export default {
+  components: {
+    TagsFilter
+  },
   created,
   beforeUnmount,
   computed: {
@@ -352,7 +298,6 @@ export default {
         { title: 'EEO Data', value: 'eeo', periodType: 'year' },
         { title: 'Timesheet Data', value: 'qb', periodType: 'month' }
       ],
-      tagFlip: [],
       filterOptions: {
         statuses: ['Full Time', 'Part Time', 'Inactive'], // order matters to filterEmployees() > status filter
         tags: null,
@@ -361,7 +306,10 @@ export default {
       },
       filters: {
         statuses: ['Full Time', 'Part Time'],
-        tags: [],
+        tagsInfo: {
+          selected: [],
+          flipped: []
+        },
         period: 'All'
       },
       status: false,
@@ -373,12 +321,9 @@ export default {
   },
   methods: {
     close,
-    chipColor,
     download,
     filterDeclined,
-    filterEmployees,
-    negateTag,
-    removeTag
+    filterEmployees
   },
   props: ['employees', 'contracts']
 };

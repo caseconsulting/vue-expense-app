@@ -98,35 +98,11 @@
           </v-col>
           <v-col cols="12" sm="12" md="4" lg="4" xl="4" xxl="4">
             <!-- Tag Filter -->
-            <v-autocomplete
+            <tags-filter
               v-if="userRoleIsAdmin() || userRoleIsManager()"
-              clearable
-              hide-details
-              label="Filter by Tag (click to flip)"
-              v-model="selectedTags"
-              :items="tags"
-              multiple
-              class="ml-5 ml-md-0 ml-lg-0 ml-xl-0 ml-xxl-0 mr-5 pt-0 pb-4"
-              variant="underlined"
-              item-title="tagName"
-              item-value="id"
-              return-object
-            >
-              <template v-slot:chip="{ props, item }">
-                <v-chip
-                  size="small"
-                  closable
-                  v-bind="props"
-                  @click.stop
-                  @click="negateTag(item.raw)"
-                  @click:close="removeTag(item.raw)"
-                  :color="chipColor(item.raw.id)"
-                >
-                  {{ tagFlip.includes(item.raw.id) ? 'NOT ' : '' }}
-                  {{ item.raw.tagName }}
-                </v-chip>
-              </template>
-            </v-autocomplete>
+              classProps="ml-5 ml-md-0 ml-lg-0 ml-xl-0 ml-xxl-0 mr-5 pt-0 pb-4"
+              v-model="tagsInfo"
+            ></tags-filter>
           </v-col>
         </v-row>
       </fieldset>
@@ -221,6 +197,7 @@ import GeneralConfirmationModal from '../modals/GeneralConfirmationModal.vue';
 import dateUtils from '@/shared/dateUtils';
 import DeleteModal from '../modals/DeleteModal.vue';
 import PTOCashOutForm from './PTOCashOutForm.vue';
+import TagsFilter from '@/components/shared/TagsFilter.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -248,7 +225,6 @@ async function created() {
   if (promises.length > 0) {
     await Promise.all(promises);
   }
-  this.tags = this.$store.getters.tags; // get the tags
   this.loading = false;
 } // created¬
 
@@ -305,16 +281,6 @@ async function approveSelectedPTOCashOuts() {
   });
   return await Promise.all(promises);
 } // approveSelectedPTOCashOuts
-
-/**
- * Returns the color that at tag filter chip should be
- *
- * @param id ID of the tag item
- *
- */
-function chipColor(id) {
-  return this.tagFlip.includes(id) ? 'red' : 'gray';
-} // chipColor
 
 /**
  * Event handler confirm clicked approve
@@ -413,31 +379,6 @@ function displaySuccess(msg) {
 } // displaySuccess
 
 /**
- * negates a tag
- */
-function negateTag(item) {
-  // try to find the id in the tagFlip array, if it is there then remove it else add it
-  const index = this.tagFlip.indexOf(item.id);
-  if (index >= 0) {
-    this.tagFlip.splice(index, 1);
-  } else {
-    this.tagFlip.push(item.id);
-  }
-} // negateTag
-
-/**
- * Removes an item from the tag filters's active filters
- *
- * @param item - The filter to remove
- */
-function removeTag(item) {
-  const selIndex = this.selectedTags.findIndex((t) => t.id === item.id);
-  if (selIndex >= 0) {
-    this.selectedTags.splice(selIndex, 1);
-  }
-} // removeTag
-
-/**
  * Changes the timesheets employee when a row is clicked
  *
  * @param item Object - The item from the row clicked
@@ -496,12 +437,12 @@ function filteredPtoCashOuts() {
     filteredPtoCashOuts = _.filter(filteredPtoCashOuts, (p) => p.employeeId == this.filteredEmployee);
   }
   // filter tags
-  if (this.selectedTags.length > 0) {
+  if (this.tagsInfo.selected.length > 0) {
     filteredPtoCashOuts = _.filter(filteredPtoCashOuts, (p) => {
       let inTag, tagFlipped;
-      for (let i = 0; i < this.selectedTags.length; i++) {
-        inTag = this.selectedTags[i].employees.includes(p.employeeId);
-        tagFlipped = this.tagFlip.includes(this.selectedTags[i].id);
+      for (let i = 0; i < this.tagsInfo.selected.length; i++) {
+        inTag = this.tagsInfo.selected[i].employees.includes(p.employeeId);
+        tagFlipped = this.tagsInfo.flipped.includes(this.tagsInfo.selected[i].id);
         if (inTag != tagFlipped) {
           return true;
         }
@@ -581,25 +522,6 @@ function watchSelected() {
   }
 } // watchSelected
 
-/**
- * Remove items from tagFlip array when they are removed from the selected
- * tags
- */
-function watchSelectedTags() {
-  let negatedTagRemoved = true;
-  // use normal for loop to have the index
-  for (let i = 0; i < this.tagFlip.length; i++) {
-    // try to find the current tag in the selectedTags
-    _.forEach(this.selectedTags, (t) => {
-      if (t.id === this.tagFlip[i]) negatedTagRemoved = false;
-    });
-    // if it isn't there, remove it from tagFlip too
-    if (negatedTagRemoved) {
-      this.tagFlip.splice(i, 1);
-    }
-  }
-} // watchSelectedTags
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -628,9 +550,10 @@ export default {
       sortBy: [{ key: 'creationDate', order: 'desc' }],
       sortDesc: true,
       selected: [],
-      selectedTags: [],
-      tagFlip: [],
-      tags: [],
+      tagsInfo: {
+        selected: [],
+        flipped: []
+      },
       isApproving: false,
       isUnapproving: false,
       isDeleting: false,
@@ -644,7 +567,6 @@ export default {
   },
   methods: {
     approveSelectedPTOCashOuts,
-    chipColor,
     clickedConfirmApprove,
     clickedDelete,
     clickedCancelDelete,
@@ -661,8 +583,6 @@ export default {
     getEmployeeByID,
     monthDayYearFormat,
     nicknameAndLastName,
-    negateTag,
-    removeTag,
     rowClicked,
     updateStoreUser,
     updateStoreEmployees,
@@ -680,9 +600,8 @@ export default {
   },
   props: ['unapprovedOnly'],
   watch: {
-    selected: watchSelected,
-    selectedTags: watchSelectedTags
+    selected: watchSelected
   },
-  components: { GeneralConfirmationModal, DeleteModal, PTOCashOutForm }
+  components: { GeneralConfirmationModal, DeleteModal, PTOCashOutForm, TagsFilter }
 };
 </script>

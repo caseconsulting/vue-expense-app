@@ -90,11 +90,34 @@ export function getEmployeeCurrentProjects(employeeId, employees) {
   return currentProjects;
 }
 
+/**
+ * helper function: return true if any selected tag has employee listed under it.
+ *
+ * @param employeeId - the employee's ID
+ * @param {Object} tagsInfo - object of selected tags array and flipped tags array
+ * NOTE: make sure tagsInfo is the value object not the ref!
+ *
+ * @return true if the employee has a tag selected in filters
+ */
+export function selectedTagsHasEmployee(employeeId, tagsInfo) {
+  const { selected, flipped } = tagsInfo;
+  let inTag, tagFlipped;
+  for (let i = 0; i < selected.length; i++) {
+    inTag = selected[i].employees.includes(employeeId);
+    tagFlipped = flipped.includes(selected[i].id);
+    if (inTag != tagFlipped) {
+      return true;
+    }
+  }
+  return false;
+} // selectedTagsHasEmployee
+
 export default {
   fullName,
   firstAndLastName,
   nicknameAndLastName,
   getEmployeeByID,
   getEmployeeCurrentContracts,
-  getEmployeeCurrentProjects
+  getEmployeeCurrentProjects,
+  selectedTagsHasEmployee
 };
