@@ -68,7 +68,8 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, onBeforeMount, defineProps, watch } from 'vue';
 import { convertToMoneyString, getCurrentBudgetYear, isFullTime } from '@/utils/utils';
 import { format, getYear, isBetween, DEFAULT_ISOFORMAT, FORMATTED_ISOFORMAT } from '../../shared/dateUtils';
 import api from '@/shared/api';
@@ -76,16 +77,25 @@ import _ from 'lodash';
 
 // |--------------------------------------------------|
 // |                                                  |
-// |              LIFECYCLE HOOKS                     |
+// |                     SETUP                        |
+// |                                                  |
+// |--------------------------------------------------|
+
+const expenseTypeData = ref(null);
+const props = defineProps(['employee', 'accessibleBudgets', 'fiscalDateView', 'expenses', 'expenseTypes']);
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                LIFECYCLE HOOKS                   |
 // |                                                  |
 // |--------------------------------------------------|
 
 /**
  * Sets the data for the budgets given an employee id
  */
-async function created() {
-  await this.refreshBudgets();
-} // created
+onBeforeMount(async () => {
+  await refreshBudgets();
+});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -136,9 +146,9 @@ function getAmount(budget) {
  */
 function getDate(item) {
   return (
-    this.format(item.budgetObject.fiscalStartDate, DEFAULT_ISOFORMAT, FORMATTED_ISOFORMAT) +
+    format(item.budgetObject.fiscalStartDate, DEFAULT_ISOFORMAT, FORMATTED_ISOFORMAT) +
     ' to ' +
-    this.format(item.budgetObject.fiscalEndDate, DEFAULT_ISOFORMAT, FORMATTED_ISOFORMAT)
+    format(item.budgetObject.fiscalEndDate, DEFAULT_ISOFORMAT, FORMATTED_ISOFORMAT)
   );
 } // getDate
 
@@ -181,7 +191,7 @@ function odFlagMessage(expenseType) {
  * @return boolean - budget has no remaining budget
  */
 function noRemaining(budget) {
-  return this.calcRemaining(budget) <= 0;
+  return calcRemaining(budget) <= 0;
 } // noRemaining
 
 /**
@@ -189,12 +199,12 @@ function noRemaining(budget) {
  */
 async function refreshBudgets() {
   let budgetsVar;
-  if (this.fiscalDateView == this.getCurrentBudgetYear(this.employee.hireDate)) {
+  if (props.fiscalDateView == getCurrentBudgetYear(props.employee.hireDate)) {
     // viewing active budget year
-    budgetsVar = this.accessibleBudgets;
+    budgetsVar = props.accessibleBudgets;
   } else {
     // get existing budgets for the budget year being viewed
-    let existingBudgets = await api.getFiscalDateViewBudgets(this.employee.id, this.fiscalDateView);
+    let existingBudgets = await api.getFiscalDateViewBudgets(props.employee.id, props.fiscalDateView);
     existingBudgets = _.filter(existingBudgets, (e) => !!e);
     budgetsVar = existingBudgets;
   }
@@ -204,30 +214,30 @@ async function refreshBudgets() {
     let budget = b.budgetObject;
     return (
       !_.some(
-        this.expenseTypes,
+        props.expenseTypes,
         (e) =>
           e.id == budget.expenseTypeId &&
           (e.isInactive ||
             !isBetween(
-              this.getYear(this.fiscalDateView),
+              getYear(props.fiscalDateView),
               getYear(budget.fiscalStartDate),
               getYear(budget.fiscalEndDate),
               'year',
               '[]'
             ))
-      ) || _.some(this.expenses, (e) => e.expenseTypeId == budget.expenseTypeId && _.isEmpty(e.reimbursedDate))
+      ) || _.some(props.expenses, (e) => e.expenseTypeId == budget.expenseTypeId && _.isEmpty(e.reimbursedDate))
     );
   });
 
   // prohibit overdraft if employee is not full time
   _.forEach(budgetsVar, async (budget) => {
-    if (!this.isFullTime(this.employee)) {
+    if (!isFullTime(props.employee)) {
       budget.odFlag = false;
     }
   });
 
   // remove any budgets where budget amount is 0 and 0 total expenses
-  this.expenseTypeData = _.filter(budgetsVar, (data) => {
+  expenseTypeData.value = _.filter(budgetsVar, (data) => {
     let budget = data.budgetObject;
     return budget.amount != 0 || budget.reimbursedAmount != 0 || budget.pendingAmount != 0;
   });
@@ -242,41 +252,10 @@ async function refreshBudgets() {
 /**
  * watcher for fiscalDateView - refresh budgets and draw graph
  */
-async function watchFiscalDateView() {
-  await this.refreshBudgets();
-} // watchFiscalDateView
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  created,
-  data() {
-    return {
-      expenseTypeData: null
-    };
-  },
-  methods: {
-    refreshBudgets,
-    calcRemaining,
-    convertToMoneyString,
-    getCurrentBudgetYear,
-    isFullTime,
-    format,
-    getAmount,
-    getDate,
-    getReimbursed,
-    getPending,
-    getYear,
-    noRemaining,
-    odFlagMessage
-  },
-  props: ['employee', 'accessibleBudgets', 'fiscalDateView', 'expenses', 'expenseTypes'],
-  watch: {
-    fiscalDateView: watchFiscalDateView
+watch(
+  () => props.fiscalDateView,
+  async () => {
+    await refreshBudgets();
   }
-};
+);
 </script>
