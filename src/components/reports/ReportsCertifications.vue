@@ -104,6 +104,7 @@ const certificationSearch = ref(null);
 const certifications = ref([]);
 const search = ref(null); // query text for datatable search field
 const showInactiveEmployees = ref(false);
+const sortBy = ref([{ key: 'employeeNumber' }]); // sort datatable items
 const tagsInfo = ref({
   selected: [],
   flipped: []
