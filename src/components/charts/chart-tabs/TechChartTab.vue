@@ -116,9 +116,10 @@ function wordClicked(word) {
 // |                                                  |
 // |--------------------------------------------------|
 
-watch(store.getters.storeIsPopulated, (newVal) => {
-  if (newVal) {
-    parseEmployeeData();
+watch(
+  () => store.getters.storeIsPopulated,
+  () => {
+    parseEmployeeData;
   }
-});
+);
 </script>
