@@ -15,30 +15,81 @@
   </v-container>
 </template>
 
-<script>
+<script setup>
 import _ from 'lodash';
 import api from '@/shared/api';
 import BarChart from '../charts/base-charts/BarChart.vue';
 import AuditsTable from '@/components/audits/AuditsTable.vue';
 import { storeIsPopulated } from '@/utils/utils.js';
 import { format, isBefore, getHour, add } from '../../shared/dateUtils';
-const IsoFormat = 'MMMM Do YYYY, h:mm:ss a';
+import { computed, onBeforeMount, watch } from 'vue';
+import { ref } from 'vue';
+import { useStore } from 'vuex';
+import { updateStoreEmployees } from '../../utils/storeUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                 LIFECYCLE HOOKS                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+const IsoFormat = 'MMMM Do YYYY, h:mm:ss a';
+const store = useStore();
+
+const props = defineProps(['queryStartDate', 'queryEndDate', 'show24HourTitle']);
+
+const employees = ref({});
+const chartKey = ref(0);
+const chartLoaded = ref(false);
+const loginAudits = ref([]);
+const loginChartOptions = ref({});
+const loginChartData = ref({});
+
+onBeforeMount(async () => {
+  if (!store.getters.employees) {
+    await updateStoreEmployees();
+  }
+  employees.value = store.getters.employees; // get all employees
+  await fillData();
+});
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     COMPUTED                     |
 // |                                                  |
 // |--------------------------------------------------|
 
 /**
- * created lifecycle hook
+ * returns the combined date range computed value
+ *
+ * @return - full date range
  */
-async function created() {
-  if (this.storeIsPopulated) {
-    this.employees = this.$store.getters.employees; // get all employees
-    await this.fillData();
+const dateRange = computed(() => `${props.queryStartDate} ${props.queryEndDate}`);
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * fills data when dateRange changes
+ */
+watch(
+  () => dateRange,
+  async () => {
+    await fillData();
   }
-} // created
+);
+
+/**
+ * fills data when store is populated since employees are needed to fill data
+ */
+watch(storeIsPopulated, async () => {
+  if (storeIsPopulated) {
+    employees.value = store.getters.employees; // get all employees
+    await fillData();
+  }
+});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -52,12 +103,12 @@ async function created() {
 async function fillData() {
   //obtains all login related entries in dev-audits
   //set to null so its data is reset each time the chart renders (changing date ranges)
-  this.loginAudits = [];
-  let loginData = await api.getAudits('login', this.queryStartDate, this.queryEndDate);
+  loginAudits.value = [];
+  let loginData = await api.getAudits('login', props.queryStartDate, props.queryEndDate);
 
   _.forEach(loginData, (audit) => {
     audit.dateCreated = format(audit.dateCreated, null, IsoFormat);
-    let employee = _.find(this.employees, (emp) => {
+    let employee = _.find(employees.value, (emp) => {
       return emp.id === audit.employeeId;
     });
     let employeeName = '';
@@ -67,7 +118,7 @@ async function fillData() {
       nickname = employee.nickname ? employee.nickname : '';
     }
     //adds login audit object into array
-    this.loginAudits.push({
+    loginAudits.value.push({
       dateCreated: audit.dateCreated,
       description: audit.description,
       employeeName: employeeName,
@@ -77,18 +128,18 @@ async function fillData() {
   let title;
   let colors;
   let showTooltips;
-  if (this.loginAudits.length === 0) {
+  if (loginAudits.value.length === 0) {
     colors = 'grey';
-    title = this.show24HourTitle
+    title = props.show24HourTitle
       ? 'No Login Trend Data In Last 24 Hours'
       : 'No Login Trend Data In Selected Date Range';
     showTooltips = false;
   } else {
     colors = '#bc3825';
-    title = this.show24HourTitle
+    title = props.show24HourTitle
       ? 'Login Trend Data For Last 24 Hours'
-      : `Login Trend Data From ${format(this.queryStartDate, null, 'MM/DD/YYYY hh:mm')} to ${format(
-          this.queryEndDate,
+      : `Login Trend Data From ${format(props.queryStartDate, null, 'MM/DD/YYYY hh:mm')} to ${format(
+          props.queryEndDate,
           null,
           'MM/DD/YYYY hh:mm'
         )}`;
@@ -96,10 +147,10 @@ async function fillData() {
   }
   //used to collect login time data, with the keys representing a specific hour and
   //each respective value representing the number of users logged in at that hour TODO: make this reactive to the current time
-  let hoursAndLogins = generateTimeLabels(this.queryStartDate, this.queryEndDate);
+  let hoursAndLogins = generateTimeLabels(props.queryStartDate, props.queryEndDate);
   //gets the dateCreated attribute for each login audit and grabs the hour and meidiem (am or pm)
   //to accumulate on the hoursAndLogins map
-  _.forEach(this.loginAudits, (login) => {
+  _.forEach(loginAudits.value, (login) => {
     let time = login.dateCreated.split(', ')[1];
     let hour = time.split(':')[0];
     let meridiem = time.split(' ')[1];
@@ -110,7 +161,7 @@ async function fillData() {
   //# of users logged on at each hour
   let data = Object.values(hoursAndLogins);
 
-  this.loginChartData = {
+  loginChartData.value = {
     labels: labels,
     datasets: [
       {
@@ -120,7 +171,7 @@ async function fillData() {
     ]
   };
 
-  this.loginChartOptions = {
+  loginChartOptions.value = {
     scales: {
       x: {
         beginAtZero: true,
@@ -163,30 +214,9 @@ async function fillData() {
     },
     maintainAspectRatio: false
   };
-  this.chartKey++; // rerenders the chart
-  this.chartLoaded = true;
+  chartKey.value++; // rerenders the chart
+  chartLoaded.value = true;
 } // fillData
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     COMPUTED                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * returns the combined date range computed value
- *
- * @return - full date range
- */
-function dateRange() {
-  return `${this.queryStartDate} ${this.queryEndDate}`;
-} //dateRange
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     METHODS                      |
-// |                                                  |
-// |--------------------------------------------------|
 
 /**
  * returns an object for the hours based on the most recent 24 hour period
@@ -213,60 +243,4 @@ function generateTimeLabels(queryStart, queryEnd) {
   }
   return returnObj;
 } // generateTimeLabels
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     WATCHERS                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * fills data when dateRange changes
- */
-async function watchDateRange() {
-  await this.fillData();
-} // watchDateRange
-
-/**
- * fills data when store is populated since employees are needed to fill data
- */
-async function watchStoreIsPopulated() {
-  if (this.storeIsPopulated) {
-    this.employees = this.$store.getters.employees; // get all employees
-    await this.fillData();
-  }
-}
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  components: { BarChart, AuditsTable },
-  created,
-  data() {
-    return {
-      chartKey: 0,
-      chartLoaded: false,
-      loginAudits: [],
-      loginChartOptions: null,
-      loginChartData: null
-    };
-  },
-  computed: {
-    dateRange,
-    storeIsPopulated
-  },
-  methods: {
-    fillData,
-    generateTimeLabels
-  },
-  props: ['queryStartDate', 'queryEndDate', 'show24HourTitle'],
-  watch: {
-    dateRange: watchDateRange,
-    storeIsPopulated: watchStoreIsPopulated
-  }
-};
 </script>
