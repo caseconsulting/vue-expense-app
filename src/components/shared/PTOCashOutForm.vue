@@ -7,7 +7,7 @@
         </h6>
         <h3>Cash Out PTO</h3>
       </v-card-title>
-      <div v-if="!isSubmitting && $store.getters.ptoCashOuts && pto">
+      <div v-if="!isSubmitting && store.getters.ptoCashOuts && pto">
         <v-card-text v-if="employee">
           <p>
             <span v-if="pto">
@@ -39,7 +39,6 @@
             <!-- Approved Date for PTO Cash Out (Optional) -->
             <v-menu
               v-if="userRoleIsAdmin() || userRoleIsManager()"
-              ref="approvedDateMenu"
               :close-on-content-click="false"
               v-model="approvedDateMenu"
               location="start center"
@@ -112,22 +111,38 @@
     </v-card>
   </v-form>
 </template>
-<script>
-import {
-  getNumberRules,
-  getRequiredRules,
-  getPTOCashOutRules,
-  getDateOptionalRules
-} from '@/shared/validationUtils.js';
+
+<script setup>
+import { getNumberRules, getPTOCashOutRules, getDateOptionalRules } from '@/shared/validationUtils.js';
 import api from '@/shared/api.js';
 import dateUtils from '@/shared/dateUtils.js';
 import { generateUUID, openLink, userRoleIsAdmin, userRoleIsManager } from '../../utils/utils';
 import { updateStoreEmployees, updateStorePtoCashOuts } from '../../utils/storeUtils';
 import { format } from '../../shared/dateUtils';
 import { mask } from 'vue-the-mask';
-import { getEmployeeByID, nicknameAndLastName } from '../../shared/employeeUtils';
-
+import { nicknameAndLastName } from '../../shared/employeeUtils';
 import _ from 'lodash';
+import { computed, onBeforeMount, inject, ref, watch } from 'vue';
+import { useStore } from 'vuex';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                       SETUP                      |
+// |                                                  |
+// |--------------------------------------------------|
+const props = defineProps(['item', 'employeeId', 'pto', 'editing']);
+const store = useStore();
+const emitter = inject('emitter');
+
+const approvedDateMenu = ref(false);
+const approvedDateFormatted = ref(null);
+const employee = ref(null);
+const form = ref(null);
+const isSubmitting = ref(false);
+const ptoCashOutObj = ref({ approvedDate: null });
+const valid = ref(false);
+
+const vMask = mask;
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -138,21 +153,72 @@ import _ from 'lodash';
 /**
  * Created lifecycle hook
  */
-async function created() {
+onBeforeMount(async () => {
   await Promise.all([
-    !this.$store.getters.employees ? this.updateStoreEmployees() : '',
-    !this.$store.getters.ptoCashOuts ? this.updateStorePtoCashOuts() : ''
+    !store.getters.employees ? updateStoreEmployees() : '',
+    !store.getters.ptoCashOuts ? updateStorePtoCashOuts() : ''
   ]);
-  this.employee = _.find(this.$store.getters.employees, (e) => e.id === this.employeeId);
-  if (this.item) {
-    let editingItem = _.cloneDeep(this.item);
-    this.ptoCashOutObj['id'] = editingItem.id;
-    this.ptoCashOutObj['employeeId'] = editingItem.employeeId;
-    this.ptoCashOutObj['amount'] = Number(editingItem.amount);
-    this.ptoCashOutObj['creationDate'] = editingItem.creationDate;
-    this.ptoCashOutObj['approvedDate'] = editingItem.approvedDate;
+  employee.value = _.find(store.getters.employees, (e) => e.id === props.employeeId);
+  if (props.item) {
+    let editingItem = _.cloneDeep(props.item);
+    ptoCashOutObj.value['id'] = editingItem.id;
+    ptoCashOutObj.value['employeeId'] = editingItem.employeeId;
+    ptoCashOutObj.value['amount'] = Number(editingItem.amount);
+    ptoCashOutObj.value['creationDate'] = editingItem.creationDate;
+    ptoCashOutObj.value['approvedDate'] = editingItem.approvedDate;
   }
-} // created
+}); // created
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+const ptoData = computed(() => {
+  return {
+    pendingPtoCashOutAmount: getPendingPtoCashoutAmount(employee.value.id),
+    ptoBalance: props.pto
+  };
+}); //ptoData
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Watcher for ptoCashOutObj.approvedDate - format date.
+ */
+watch(
+  () => ptoCashOutObj.value.approvedDate,
+  () => {
+    approvedDateFormatted.value =
+      format(ptoCashOutObj.value.approvedDate, null, 'MM/DD/YYYY') || approvedDateFormatted.value;
+    if (ptoCashOutObj.value.approvedDate !== null && !format(ptoCashOutObj.value.approvedDate, null, 'MM/DD/YYYY')) {
+      ptoCashOutObj.value.approvedDate = null;
+    }
+  }
+); // watchApprovedDate
+
+/**
+ * Watcher for item prop.
+ */
+watch(
+  () => props.item,
+  () => {
+    if (props.item) {
+      let editingItem = _.cloneDeep(props.item);
+      ptoCashOutObj.value['employeeId'] = editingItem.employeeId;
+      ptoCashOutObj.value['id'] = editingItem.id;
+      ptoCashOutObj.value['amount'] = Number(editingItem.amount);
+      ptoCashOutObj.value['creationDate'] = editingItem.creationDate;
+      ptoCashOutObj.value['approvedDate'] = editingItem.approvedDate;
+    }
+  },
+  { deep: true }
+); // watchEditPTOCashOutItem
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -166,28 +232,28 @@ async function created() {
  */
 async function submit() {
   try {
-    this.valid = this.$refs.form.validate();
-    if (this.valid) {
-      this.isSubmitting = true;
-      if (this.item) {
-        await this.updatePTOCashOutRequest();
+    valid.value = form.value.validate();
+    if (valid.value) {
+      isSubmitting.value = true;
+      if (props.item) {
+        await updatePTOCashOutRequest();
       } else {
-        await this.createPTOCashOutRequest();
+        await createPTOCashOutRequest();
       }
-      this.emitter.emit('close-pto-cash-out-form');
-      this.clearForm();
-      this.isSubmitting = false;
-      if (this.item) {
-        this.displaySuccess('Successfully edited PTO Cash Out request!');
+      emitter.emit('close-pto-cash-out-form');
+      clearForm();
+      isSubmitting.value = false;
+      if (props.item) {
+        displaySuccess('Successfully edited PTO Cash Out request!');
       } else {
-        this.displaySuccess('Successfully created PTO Cash Out request!');
+        displaySuccess('Successfully created PTO Cash Out request!');
       }
     }
   } catch (err) {
-    this.emitter.emit('close-pto-cash-out-form');
-    this.clearForm();
-    this.isSubmitting = false;
-    this.displayError(err);
+    emitter.emit('close-pto-cash-out-form');
+    clearForm();
+    isSubmitting.value = false;
+    displayError(err);
   }
 } // submit
 
@@ -195,23 +261,23 @@ async function submit() {
  * Cancel event handler
  */
 function cancel() {
-  this.emitter.emit('close-pto-cash-out-form');
-  this.clearForm();
+  emitter.emit('close-pto-cash-out-form');
+  clearForm();
 } // cancel
 
 /**
  * Clears form and resets validation.
  */
 function clearForm() {
-  this.ptoCashOutObj['id'] = null;
-  this.ptoCashOutObj['employeeId'] = null;
-  this.ptoCashOutObj['amount'] = null;
-  this.ptoCashOutObj['creationDate'] = null;
-  this.ptoCashOutObj['approvedDate'] = null;
+  ptoCashOutObj.value['id'] = null;
+  ptoCashOutObj.value['employeeId'] = null;
+  ptoCashOutObj.value['amount'] = null;
+  ptoCashOutObj.value['creationDate'] = null;
+  ptoCashOutObj.value['approvedDate'] = null;
 
-  this.approvedDateFormatted = null;
-  this.$refs.form.reset();
-  this.$refs.form.resetValidation();
+  approvedDateFormatted.value = null;
+  form.value.reset();
+  form.value.resetValidation();
 } // clearForm
 
 /**
@@ -225,7 +291,7 @@ function displayError(err) {
     statusMessage: err,
     color: 'red'
   };
-  this.emitter.emit('status-alert', status);
+  emitter.emit('status-alert', status);
 } // displayError
 
 /**
@@ -238,7 +304,7 @@ function displaySuccess(msg) {
     statusMessage: msg,
     color: 'green'
   };
-  this.emitter.emit('status-alert', status);
+  emitter.emit('status-alert', status);
 } // displaySuccess
 
 /**
@@ -248,9 +314,7 @@ function displaySuccess(msg) {
  * @returns Number - The pending cash out amount
  */
 function getPendingPtoCashoutAmount(employeeId) {
-  let pendingPtoCashOuts = this.$store.getters.ptoCashOuts.filter(
-    (p) => !p.approvedDate && employeeId === p.employeeId
-  );
+  let pendingPtoCashOuts = store.getters.ptoCashOuts.filter((p) => !p.approvedDate && employeeId === p.employeeId);
   return pendingPtoCashOuts.reduce((n, { amount }) => n + amount, 0);
 } // getPendingPtoCashoutAmount
 
@@ -260,9 +324,9 @@ function getPendingPtoCashoutAmount(employeeId) {
  * @returns String - The hint text
  */
 function cashOutHint() {
-  if (this.ptoCashOutObj.amount) {
-    let amount = this.editing ? this.ptoCashOutObj.amount - this.item.amount : Number(this.ptoCashOutObj.amount);
-    return `Balance after cash out: ${(this.pto - this.getPendingPtoCashoutAmount(this.employee.id) - amount).toFixed(2)}h`;
+  if (ptoCashOutObj.value.amount) {
+    let amount = props.editing ? ptoCashOutObj.value.amount - props.item.amount : Number(ptoCashOutObj.value.amount);
+    return `Balance after cash out: ${(props.pto - getPendingPtoCashoutAmount(employee.value.id) - amount).toFixed(2)}h`;
   }
 } // cashOutHint
 
@@ -270,118 +334,40 @@ function cashOutHint() {
  * Creates a PTO Cash Out record in the database.
  */
 async function createPTOCashOutRequest() {
-  let newItem = _.cloneDeep(this.ptoCashOutObj);
+  let newItem = _.cloneDeep(ptoCashOutObj.value);
   let ptoCashOut = await api.createItem(api.PTO_CASH_OUTS, {
     id: generateUUID(),
     amount: Number(newItem.amount),
-    employeeId: this.employee.id,
+    employeeId: employee.value.id,
     creationDate: dateUtils.getTodaysDate(),
     approvedDate: newItem.approvedDate ? newItem.approvedDate : null
   });
-  this.$store.dispatch('setPtoCashOuts', { ptoCashOuts: [...this.$store.getters.ptoCashOuts, ptoCashOut] });
+  store.dispatch('setPtoCashOuts', { ptoCashOuts: [...store.getters.ptoCashOuts, ptoCashOut] });
 } // createPTOCashOutRequest
 
 /**
  * Update PTO Cash Out record in the database.
  */
 async function updatePTOCashOutRequest() {
-  let ptoCashOuts = _.cloneDeep(this.$store.getters.ptoCashOuts);
-  let editedItem = _.cloneDeep(this.ptoCashOutObj);
+  let ptoCashOuts = _.cloneDeep(store.getters.ptoCashOuts);
+  let editedItem = _.cloneDeep(ptoCashOutObj.value);
   let index = ptoCashOuts.findIndex((p) => p.id == editedItem.id);
   ptoCashOuts[index] = editedItem;
   await api.updateItem(api.PTO_CASH_OUTS, {
     ...editedItem
   });
-  this.$store.dispatch('setPtoCashOuts', { ptoCashOuts: ptoCashOuts });
+  store.dispatch('setPtoCashOuts', { ptoCashOuts: ptoCashOuts });
 } // updatePTOCashOutRequest
-
-/**
- * Watcher for ptoCashOutObj.approvedDate - format date.
- */
-function watchApprovedDate() {
-  this.approvedDateFormatted =
-    this.format(this.ptoCashOutObj.approvedDate, null, 'MM/DD/YYYY') || this.approvedDateFormatted;
-  if (this.ptoCashOutObj.approvedDate !== null && !this.format(this.ptoCashOutObj.approvedDate, null, 'MM/DD/YYYY')) {
-    this.ptoCashOutObj.approvedDate = null;
-  }
-} // watchApprovedDate
-
-/**
- * Watcher for item prop.
- */
-function watchEditPTOCashOutItem() {
-  if (this.item) {
-    let editingItem = _.cloneDeep(this.item);
-    this.ptoCashOutObj['id'] = editingItem.id;
-    this.ptoCashOutObj['employeeId'] = editingItem.employeeId;
-    this.ptoCashOutObj['amount'] = Number(editingItem.amount);
-    this.ptoCashOutObj['creationDate'] = editingItem.creationDate;
-    this.ptoCashOutObj['approvedDate'] = editingItem.approvedDate;
-  }
-} // watchEditPTOCashOutItem
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     COMPUTED                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-function ptoData() {
-  return {
-    pendingPtoCashOutAmount: this.getPendingPtoCashoutAmount(this.employee.id),
-    ptoBalance: this.pto
-  };
-}
-
+</script>
+<script>
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
-export default {
-  created,
-  data() {
-    return {
-      show: false,
-      employee: null,
-      ptoCashOutObj: { approvedDate: null },
-      valid: false,
-      isSubmitting: false,
-      approvedDateMenu: false,
-      approvedDateFormatted: null
-    };
-  },
-  directives: { mask },
-  methods: {
-    getDateOptionalRules,
-    getNumberRules,
-    getRequiredRules,
-    getPTOCashOutRules,
-    submit,
-    cancel,
-    cashOutHint,
-    clearForm,
-    displaySuccess,
-    displayError,
-    getPendingPtoCashoutAmount,
-    nicknameAndLastName,
-    createPTOCashOutRequest,
-    openLink,
-    userRoleIsAdmin,
-    userRoleIsManager,
-    updateStoreEmployees,
-    updateStorePtoCashOuts,
-    updatePTOCashOutRequest,
-    getEmployeeByID,
-    format
-  },
-  watch: {
-    'ptoCashOutObj.approvedDate': watchApprovedDate,
-    item: watchEditPTOCashOutItem
-  },
-  computed: { ptoData },
-  props: ['item', 'employeeId', 'pto', 'editing']
-};
+// export default {
+//   directives: { mask }
+// };
 </script>
 <style scoped>
 h3 {
