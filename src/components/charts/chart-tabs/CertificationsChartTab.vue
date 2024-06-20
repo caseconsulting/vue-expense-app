@@ -7,16 +7,6 @@
     </v-row>
   </v-container>
 </template>
-<script>
+<script setup>
 import CertificationChart from '../custom-charts/CertificationChart.vue';
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  components: { CertificationChart }
-};
 </script>
