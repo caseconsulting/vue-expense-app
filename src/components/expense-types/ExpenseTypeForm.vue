@@ -28,7 +28,7 @@
           multiple
           append-icon
           chips
-          :search.sync="categoryInput"
+          :search="categoryInput"
         >
         </v-combobox>
 
@@ -108,7 +108,7 @@
           clearable
           closable-chips
           class="mt-0 pt-0"
-          :search.sync="searchString"
+          :search="searchString"
           @update:model-value="searchString = ''"
           item-title="text"
           item-value="value"
@@ -209,7 +209,6 @@
 
         <!-- Start Date -->
         <v-text-field
-          v-if="!editedExpenseType.recurringFlag"
           variant="underlined"
           v-model="startDateFormatted"
           id="startDate"
@@ -246,7 +245,6 @@
 
         <!-- End Date -->
         <v-text-field
-          v-if="!editedExpenseType.recurringFlag"
           variant="underlined"
           v-model="endDateFormatted"
           id="endDate"
@@ -391,17 +389,153 @@
   </v-card>
 </template>
 
-<script>
+<script setup>
 import api from '@/shared/api.js';
+import { getRequiredRules } from '../../shared/validationUtils';
+import { getDateRules } from '../../shared/validationUtils';
 import GeneralConfirmationModal from '@/components/modals/GeneralConfirmationModal.vue';
 import _ from 'lodash';
-import { getDateRules, getRequiredRules } from '@/shared/validationUtils.js';
 import { generateUUID, isEmpty } from '@/utils/utils';
 import { format } from '@/shared/dateUtils';
 import { updateStoreExpenseTypes } from '@/utils/storeUtils';
 import { mask } from 'vue-the-mask';
 import { isValid, isSameOrAfter, isSameOrBefore } from '../../shared/dateUtils';
 import { employeeFilter } from '@/shared/filterUtils';
+import { onMounted, onBeforeUnmount, ref, computed, inject, watch, nextTick } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     SETUP                        |
+// |                                                  |
+// |--------------------------------------------------|
+
+const activeEmployees = ref(null); // list of active employees
+const budgetFormatted = ref('');
+const budgetRules = ref([
+  (v) => !!v || 'Budget amount is required',
+  (v) => parseFloat(v, 10) > 0 || 'Budget must be greater than 0.',
+  (v) =>
+    /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?$/.test(v) ||
+    'Budget amount must be a number with two decimal digits.'
+]); // rules for an expense type budget
+const campfires = ref([]); // basecamp campfires
+const categories = ref([]); // list of expense type categories
+const categoryInput = ref(null); // category combobox input
+const checkBoxValid = ref([
+  () => {
+    return !checkBoxRule.value;
+  }
+]);
+const customAccess = ref([]); // list of employees with custom access
+const customAccessRules = ref([
+  () => {
+    return customAccess.value.length > 0 || 'Select at least one employee or uncheck the Custom checkbox';
+  }
+]);
+const emitter = inject('emitter');
+const endDateRules = ref([
+  (v) => {
+    return !isEmpty(v) && isValid(v, 'MM/DD/YYYY') && editedExpenseType.value.startDate
+      ? isSameOrAfter(v, editedExpenseType.value.startDate) || 'End date must be at or after start date'
+      : true;
+  }
+]);
+const endDateFormatted = ref(null); // formatted end date
+const expenseTypeForm = ref(null); // filled in from the template
+const props = defineProps(['model']); // expense type to be created/updated
+const editedExpenseType = ref(_.cloneDeep(props.model)); // used to store edits made to an expense type or when creating new expense type
+const router = useRouter();
+const searchString = ref('');
+const showStartMenu = ref(false); // boolean for showing date picker
+const showEndMenu = ref(false); // booleand for showing date picket
+const startDateFormatted = ref(null); // formateed start date
+const startDateRules = ref([
+  (v) => {
+    return !isEmpty(v) && isValid(v, 'MM/DD/YYYY') && editedExpenseType.value.endDate
+      ? isSameOrBefore(v, editedExpenseType.value.endDate) || 'Start date must be at or before end date'
+      : true;
+  }
+]);
+const store = useStore();
+const submitting = ref(false); // submitting form
+const submitForm = ref(false); // triggers subit form modal when changed
+const valid = ref(false); // form is valid
+const vMask = mask; // custom directive
+const tagBudgetRules = ref([
+  (v) => !!v || 'Budget amount is required',
+  (v) => parseFloat(v, 10) >= 0 || 'Budget must either be a positive or zero dollar amount.',
+  (v) =>
+    /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?$/.test(v) ||
+    'Budget amount must be a number with two decimal digits.'
+]); // rules for a tag budget
+const tags = ref([]);
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Gets and sets all employees.
+ */
+onMounted(async () => {
+  emitter.on('confirmed-type', async () => {
+    submitForm.value = false;
+    await submit();
+    await updateStoreExpenseTypes();
+  });
+  emitter.on('canceled-type', () => {
+    submitting.value = false;
+    submitForm.value = false;
+  });
+  tags.value = store.getters.tags;
+  // get all employees
+  let employees = store.getters.employees;
+  let activeEmployees = [];
+
+  // populate list of active employees
+  _.forEach(employees, (employee) => {
+    if (employee.workStatus > 0) {
+      activeEmployees.push({
+        value: employee.id,
+        text: `${employee.nickname || employee.firstName} ${employee.lastName}`
+      });
+    }
+  });
+
+  activeEmployees = _.sortBy(activeEmployees, ['text']); // sort employees
+  activeEmployees.value = activeEmployees;
+  campfires.value = store.getters.basecampCampfires;
+  editedExpenseType.value = _.cloneDeep(props.model);
+
+  clearForm();
+}); // created
+
+/**
+ * beforeUnmount lifecycle hook
+ */
+onBeforeUnmount(() => {
+  emitter.off('confirmed-type');
+  emitter.off('canceled-type');
+}); //beforeUnmount
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                    COMPUTED                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * boolean for checkBox appearance
+ *
+ * @return boolean - whether checkbox appears
+ */
+const checkBoxRule = computed(() => {
+  return !(editedExpenseType.value.accessibleBy && editedExpenseType.value.accessibleBy.length > 0);
+}); // checkBoxRule
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -413,19 +547,19 @@ import { employeeFilter } from '@/shared/filterUtils';
  * Set required receipt for expense type if all category required receipt checkboxes are enabled. If there are no categories, make sure the main toggle is false.
  */
 function checkRequireReceipt() {
-  if (_.isEmpty(this.editedExpenseType.categories)) {
-    this.editedExpenseType.requireURL = false;
+  if (_.isEmpty(editedExpenseType.value.categories)) {
+    editedExpenseType.value.requireURL = false;
   } else {
     // check if any categories do not require a receipt
-    let somethingIsFalse = _.find(this.editedExpenseType.categories, (category) => {
+    let somethingIsFalse = _.find(editedExpenseType.value.categories, (category) => {
       return !category.requireReceipt;
     });
 
     // update require receipt for expense type
     if (somethingIsFalse) {
-      this.editedExpenseType.requiredFlag = false;
+      editedExpenseType.value.requiredFlag = false;
     } else {
-      this.editedExpenseType.requiredFlag = true;
+      editedExpenseType.value.requiredFlag = true;
     }
   }
 } // checkRequireReceipt
@@ -434,19 +568,19 @@ function checkRequireReceipt() {
  * Set required url for expense type if all category required url checkboxes are enabled. If there are no categories, make sure the main toggle is false.
  */
 function checkRequireURL() {
-  if (_.isEmpty(this.editedExpenseType.categories)) {
-    this.editedExpenseType.requireURL = false;
+  if (_.isEmpty(editedExpenseType.value.categories)) {
+    editedExpenseType.value.requireURL = false;
   } else {
     // check if any categories do not require a url
-    let somethingIsFalse = _.find(this.editedExpenseType.categories, (category) => {
+    let somethingIsFalse = _.find(editedExpenseType.value.categories, (category) => {
       return !category.requireURL;
     });
 
     // update require url for expense type
     if (somethingIsFalse) {
-      this.editedExpenseType.requireURL = false;
+      editedExpenseType.value.requireURL = false;
     } else {
-      this.editedExpenseType.requireURL = true;
+      editedExpenseType.value.requireURL = true;
     }
   }
 } // checkRequireURL
@@ -455,19 +589,19 @@ function checkRequireURL() {
  * Set always on feed for expense type if all category show on feed checkboxes are enabled. If there are no categories, make sure the main toggle is false.
  */
 function checkSelection() {
-  if (_.isEmpty(this.editedExpenseType.categories)) {
-    this.editedExpenseType.requireURL = false;
+  if (_.isEmpty(editedExpenseType.value.categories)) {
+    editedExpenseType.value.requireURL = false;
   } else {
     // check if any categories are hidden on feed
-    let somethingIsFalse = _.find(this.editedExpenseType.categories, (category) => {
+    let somethingIsFalse = _.find(editedExpenseType.value.categories, (category) => {
       return !category.showOnFeed;
     });
 
     // update always on feed for expense type
     if (somethingIsFalse) {
-      this.editedExpenseType.alwaysOnFeed = false;
+      editedExpenseType.value.alwaysOnFeed = false;
     } else {
-      this.editedExpenseType.alwaysOnFeed = true;
+      editedExpenseType.value.alwaysOnFeed = true;
     }
   }
 } // checkSelection
@@ -476,24 +610,24 @@ function checkSelection() {
  * Clears the form and sets all fields to a default state.
  */
 function clearForm() {
-  if (this.$refs.expenseTypeForm) {
-    this.$refs.expenseTypeForm.reset();
+  if (expenseTypeForm.value) {
+    expenseTypeForm.value.reset();
   }
-  this.emitter.emit('finished-editing-expense-type'); //notify parent no longer editing an expense type
-  this.startDateFormatted = null;
-  this.endDateFormatted = null;
-  this.customAccess = [];
-  this.editedExpenseType.id = null;
-  this.editedExpenseType.accessibleBy = ['FullTime'];
+  emitter.emit('finished-editing-expense-type'); //notify parent no longer editing an expense type
+  startDateFormatted.value = null;
+  endDateFormatted.value = null;
+  customAccess.value = [];
+  editedExpenseType.value.id = null;
+  editedExpenseType.value.accessibleBy = ['FullTime'];
 } // clearForm
 
 /**
  * Formats the budget on the form for a nicer display.
  */
 function formatBudget() {
-  this.editedExpenseType.budget = this.parseBudget(this.budgetFormatted);
-  if (Number(this.editedExpenseType.budget)) {
-    this.budgetFormatted = Number(this.editedExpenseType.budget).toLocaleString().toString();
+  editedExpenseType.value.budget = parseBudget(budgetFormatted.value);
+  if (Number(editedExpenseType.value.budget)) {
+    budgetFormatted.value = Number(editedExpenseType.value.budget).toLocaleString().toString();
   }
 } // formatBudget
 
@@ -504,7 +638,7 @@ function formatBudget() {
  * @return boolean - custom employees have access
  */
 function isCustomSelected() {
-  return this.editedExpenseType.accessibleBy && this.editedExpenseType.accessibleBy.includes('Custom');
+  return editedExpenseType.value.accessibleBy && editedExpenseType.value.accessibleBy.includes('Custom');
 } // isCustomSelected
 
 /**
@@ -513,9 +647,9 @@ function isCustomSelected() {
  * @return string - the string flag hint
  */
 function odFlagHint() {
-  if (!!this.model.id && this.model.odFlag) {
+  if (!!props.model.id && props.model.odFlag) {
     return 'Cannot be undone';
-  } else if (this.editedExpenseType.odFlag) {
+  } else if (editedExpenseType.value.odFlag) {
     return 'Cannot be undone once submitted';
   } else {
     return '';
@@ -540,121 +674,121 @@ function parseBudget(budget) {
  * route to FAQ
  */
 function toFAQ() {
-  let faq = this.$router.resolve({ path: '/help/expenseTypes' });
+  let faq = router.resolve({ path: '/help/expenseTypes' });
   window.open(faq.href, '_blank');
 } // toFAQ
 
-/**
- * Removes a category from the list of expense type categories.
- *
- * @param category - category to remove
- */
-function removeCategory(category) {
-  this.editedExpenseType.categories.splice(
-    this.editedExpenseType.categories.map((cat) => cat.name).indexOf(category),
-    1
-  );
-  this.editedExpenseType.categories = [...this.editedExpenseType.categories];
-  this.categories.splice(this.categories.indexOf(category), 1);
-  this.categories = [...this.categories];
+// /**
+//  * Removes a category from the list of expense type categories.
+//  *
+//  * @param category - category to remove
+//  */
+// function removeCategory(category) {
+//   editedExpenseType.value.categories.splice(
+//     editedExpenseType.value.categories.map((cat) => cat.name).indexOf(category),
+//     1
+//   );
+//   editedExpenseType.value.categories = [...editedExpenseType.value.categories];
+//   categories.value.splice(categories.value.indexOf(category), 1);
+//   categories.value = [...categories.value];
 
-  //recompute the receipt, show on feed, and url select all buttons
-  this.checkRequireURL();
-  this.checkRequireReceipt();
-  this.checkSelection();
-} // removeCategory
+//   //recompute the receipt, show on feed, and url select all buttons
+//   checkRequireURL();
+//   checkRequireReceipt();
+//   checkSelection();
+// } // removeCategory
 
 /**
  * Submits an expense type.
  */
 async function submit() {
-  this.submitting = true; // set loading status to true
-  this.emitter.emit('startAction');
+  submitting.value = true; // set loading status to true
+  emitter.emit('startAction');
 
   // set accessibleBy based on access radio
-  if (this.isCustomSelected()) {
-    this.editedExpenseType.accessibleBy = _.union(this.editedExpenseType.accessibleBy, this.customAccess); // merge unique vals
+  if (isCustomSelected()) {
+    editedExpenseType.value.accessibleBy = _.union(editedExpenseType.value.accessibleBy, customAccess.value); // merge unique vals
   }
 
   // convert budget input into a floating point number
-  this.editedExpenseType.budget = parseFloat(this.editedExpenseType.budget);
+  editedExpenseType.value.budget = parseFloat(editedExpenseType.value.budget);
 
-  if (this.editedExpenseType.odFlag == null) {
+  if (editedExpenseType.value.odFlag == null) {
     // set overdraft flag to false if checkbox is null
-    this.editedExpenseType.odFlag = false;
+    editedExpenseType.value.odFlag = false;
   }
 
-  if (this.editedExpenseType.recurringFlag == null) {
+  if (editedExpenseType.value.recurringFlag == null) {
     // set recurring flag to false if checkbox is null
-    this.editedExpenseType.recurringFlag = false;
+    editedExpenseType.value.recurringFlag = false;
   }
 
-  if (this.editedExpenseType.requiredFlag == null) {
+  if (editedExpenseType.value.requiredFlag == null) {
     // set receipt required flag to false if checkbox is null
-    this.editedExpenseType.requiredFlag = false;
+    editedExpenseType.value.requiredFlag = false;
   }
 
-  if (this.editedExpenseType.isInactive == null) {
+  if (editedExpenseType.value.isInactive == null) {
     // set is inactive flag to false if checkbox is null
-    this.editedExpenseType.isInactive = false;
+    editedExpenseType.value.isInactive = false;
   }
 
-  if (this.editedExpenseType.proRated == null) {
-    this.editedExpenseType.proRated = false;
+  if (editedExpenseType.value.proRated == null) {
+    editedExpenseType.value.proRated = false;
   }
 
   // format dates
-  if (this.editedExpenseType.startDate) {
-    this.editedExpenseType.startDate = format(this.editedExpenseType.startDate, null, 'YYYY-MM-DD');
+  if (editedExpenseType.value.startDate) {
+    editedExpenseType.value.startDate = format(editedExpenseType.value.startDate, null, 'YYYY-MM-DD');
   }
-  if (this.editedExpenseType.endDate) {
-    this.editedExpenseType.endDate = format(this.editedExpenseType.endDate, null, 'YYYY-MM-DD');
+  if (editedExpenseType.value.endDate) {
+    editedExpenseType.value.endDate = format(editedExpenseType.value.endDate, null, 'YYYY-MM-DD');
   }
 
-  if (this.$refs.expenseTypeForm && this.$refs.expenseTypeForm.validate()) {
-    for (var i = 0; i < this.editedExpenseType.categories.length; i++) {
-      this.editedExpenseType.categories[i] = JSON.stringify(this.editedExpenseType.categories[i]);
+  if (expenseTypeForm.value && expenseTypeForm.value.validate()) {
+    for (var i = 0; i < editedExpenseType.value.categories.length; i++) {
+      editedExpenseType.value.categories[i] = JSON.stringify(editedExpenseType.value.categories[i]);
     }
     // form is validated
-    if (this.editedExpenseType.recurringFlag) {
+    if (editedExpenseType.value.recurringFlag) {
       // clear start and end date fields if expense type is recurring
-      this.editedExpenseType['startDate'] = null;
-      this.editedExpenseType['endDate'] = null;
+      editedExpenseType.value['startDate'] = null;
+      editedExpenseType.value['endDate'] = null;
     }
 
-    if (this.editedExpenseType.id) {
+    if (editedExpenseType.value.id) {
       // editing an expense type
-      let newExpenseType = await api.updateItem(api.EXPENSE_TYPES, this.editedExpenseType);
+      let newExpenseType = await api.updateItem(api.EXPENSE_TYPES, editedExpenseType.value);
 
       if (newExpenseType.id) {
         // successfully updates expense type
-        this.emitter.emit('update');
-        this.clearForm();
+        emitter.emit('update');
+        clearForm();
       } else {
         // emit error if fails to update expense type
-        this.emitter.emit('error', JSON.stringify(newExpenseType.response.data.message));
+        emitter.emit('error', JSON.stringify(newExpenseType.response.data.message));
       }
     } else {
       // creating a new expense type
       let newUUID = generateUUID();
-      this.editedExpenseType['id'] = newUUID;
-      let newExpenseType = await api.createItem(api.EXPENSE_TYPES, this.editedExpenseType);
+      editedExpenseType.value['id'] = newUUID;
+      let newExpenseType = await api.createItem(api.EXPENSE_TYPES, editedExpenseType.value);
 
       if (newExpenseType.id) {
         // successfully creates an expense type
-        this.editedExpenseType['id'] = newExpenseType.id;
-        this.emitter.emit('add');
-        this.clearForm();
+        editedExpenseType.value['id'] = newExpenseType.id;
+        emitter.emit('add');
+        clearForm();
       } else {
         // emit error if fails to create an expense type
-        this.emitter.emit('error', JSON.stringify(newExpenseType.response.data.message));
-        this.editedExpenseType['id'] = '';
+        emitter.emit('error', JSON.stringify(newExpenseType.response.data.message));
+        editedExpenseType.value['id'] = '';
       }
     }
   }
 
-  this.submitting = false; // set loading status to false
-  this.emitter.emit('endAction');
+  submitting.value = false; // set loading status to false
+  emitter.emit('endAction');
 } // submit
 
 /**
@@ -662,10 +796,10 @@ async function submit() {
  * feed to false otherwise.
  */
 function toggleShowAllCategories() {
-  if (!this.submitting) {
-    let alwaysOF = this.editedExpenseType.alwaysOnFeed;
+  if (!submitting.value) {
+    let alwaysOF = editedExpenseType.value.alwaysOnFeed;
 
-    _.forEach(this.editedExpenseType.categories, (category) => {
+    _.forEach(editedExpenseType.value.categories, (category) => {
       category.showOnFeed = alwaysOF;
     });
   }
@@ -675,10 +809,10 @@ function toggleShowAllCategories() {
  * Sets all category require url to true if expense type require url is enabled. Sets all to false otherwise.
  */
 function toggleRequireURL() {
-  if (!this.submitting) {
-    let requireURL = this.editedExpenseType.requireURL;
+  if (!submitting.value) {
+    let requireURL = editedExpenseType.value.requireURL;
 
-    _.forEach(this.editedExpenseType.categories, (category) => {
+    _.forEach(editedExpenseType.value.categories, (category) => {
       category.requireURL = requireURL;
     });
   }
@@ -688,10 +822,10 @@ function toggleRequireURL() {
  * Sets all category require url to true if expense type require url is enabled. Sets all to false otherwise.
  */
 function toggleRequireReceipt() {
-  if (!this.submitting) {
-    let requireReceipt = this.editedExpenseType.requiredFlag;
+  if (!submitting.value) {
+    let requireReceipt = editedExpenseType.value.requiredFlag;
 
-    _.forEach(this.editedExpenseType.categories, (category) => {
+    _.forEach(editedExpenseType.value.categories, (category) => {
       category.requireReceipt = requireReceipt;
     });
   }
@@ -701,7 +835,7 @@ function toggleRequireReceipt() {
  * Creates empty tag budget field in tagBudgets list
  */
 function addTagBudget() {
-  this.editedExpenseType.tagBudgets.push({});
+  editedExpenseType.value.tagBudgets.push({});
 } // addTagBudgets
 
 /**
@@ -710,7 +844,7 @@ function addTagBudget() {
  * @param index index of tag budget to remove
  */
 function removeTagBudget(index) {
-  this.editedExpenseType.tagBudgets.splice(index, 1);
+  editedExpenseType.value.tagBudgets.splice(index, 1);
 } // removeTagBudget
 
 /**
@@ -720,8 +854,8 @@ function removeTagBudget(index) {
  * @param index autocomplete input index
  */
 function remove(data, index) {
-  let indx = this.editedExpenseType.tagBudgets[index].tags.findIndex((t) => t == data.id);
-  this.editedExpenseType.tagBudgets[index].tags.splice(indx, 1);
+  let indx = editedExpenseType.value.tagBudgets[index].tags.findIndex((t) => t == data.id);
+  editedExpenseType.value.tagBudgets[index].tags.splice(indx, 1);
 } // remove
 
 /**
@@ -730,8 +864,8 @@ function remove(data, index) {
  */
 function tagOptions(selectedItems) {
   let selectedTags = [];
-  if (this.editedExpenseType.tagBudgets.length > 0) {
-    this.editedExpenseType.tagBudgets.forEach((t) => {
+  if (editedExpenseType.value.tagBudgets.length > 0) {
+    editedExpenseType.value.tagBudgets.forEach((t) => {
       if (t.tags) {
         t.tags.forEach((id) => {
           selectedTags.push(id);
@@ -742,16 +876,16 @@ function tagOptions(selectedItems) {
   if (selectedItems && selectedItems.length > 0) {
     selectedTags = selectedTags.filter((st) => !selectedItems.includes(st));
   }
-  return this.tags.filter((t) => !selectedTags.includes(t.id));
+  return tags.value.filter((t) => !selectedTags.includes(t.id));
 } // tagOptions
 
-/**
- * Gets tag object given id
- * @param id id of tag to find
- */
-function getTagByID(id) {
-  return this.tags.find((t) => t.id === id);
-} // getTagByID
+// /**
+//  * Gets tag object given id
+//  * @param id id of tag to find
+//  */
+// function getTagByID(id) {
+//   return tags.value.find((t) => t.id === id);
+// } // getTagByID
 
 /**
  * Checks if index in element is first in array
@@ -776,9 +910,9 @@ function isLast(index, arr) {
  * @param index index of tag budget to move
  */
 function moveTagBudgetUp(index) {
-  let temp = this.editedExpenseType.tagBudgets[index - 1];
-  this.editedExpenseType.tagBudgets[index - 1] = this.editedExpenseType.tagBudgets[index];
-  this.editedExpenseType.tagBudgets[index] = temp;
+  let temp = editedExpenseType.value.tagBudgets[index - 1];
+  editedExpenseType.value.tagBudgets[index - 1] = editedExpenseType.value.tagBudgets[index];
+  editedExpenseType.value.tagBudgets[index] = temp;
 } // moveTagBudgetUp
 
 /**
@@ -786,75 +920,10 @@ function moveTagBudgetUp(index) {
  * @param index index of tag budget to move
  */
 function moveTagBudgetDown(index) {
-  let temp = this.editedExpenseType.tagBudgets[index + 1];
-  this.editedExpenseType.tagBudgets[index + 1] = this.editedExpenseType.tagBudgets[index];
-  this.editedExpenseType.tagBudgets[index] = temp;
+  let temp = editedExpenseType.value.tagBudgets[index + 1];
+  editedExpenseType.value.tagBudgets[index + 1] = editedExpenseType.value.tagBudgets[index];
+  editedExpenseType.value.tagBudgets[index] = temp;
 } // moveTagBudgetDown
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                    COMPUTED                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * boolean for checkBox appearance
- *
- * @return boolean - whether checkbox appears
- */
-function checkBoxRule() {
-  return !(this.editedExpenseType.accessibleBy && this.editedExpenseType.accessibleBy.length > 0);
-} // checkBoxRule
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                 LIFECYCLE HOOKS                  |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Gets and sets all employees.
- */
-async function created() {
-  this.emitter.on('confirmed-type', async () => {
-    this.submitForm = false;
-    await this.submit();
-    await this.updateStoreExpenseTypes();
-  });
-  this.emitter.on('canceled-type', () => {
-    this.submitting = false;
-    this.submitForm = false;
-  });
-  this.tags = this.$store.getters.tags;
-  // get all employees
-  let employees = this.$store.getters.employees;
-  let activeEmployees = [];
-
-  // populate list of active employees
-  _.forEach(employees, (employee) => {
-    if (employee.workStatus > 0) {
-      activeEmployees.push({
-        value: employee.id,
-        text: `${employee.nickname || employee.firstName} ${employee.lastName}`
-      });
-    }
-  });
-
-  activeEmployees = _.sortBy(activeEmployees, ['text']); // sort employees
-  this.activeEmployees = activeEmployees;
-  this.campfires = this.$store.getters.basecampCampfires;
-  this.editedExpenseType = _.cloneDeep(this.model);
-
-  this.clearForm();
-} // created
-
-/**
- * beforeUnmount lifecycle hook
- */
-function beforeUnmount() {
-  this.emitter.off('confirmed-type');
-  this.emitter.off('canceled-type');
-} //beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -865,59 +934,65 @@ function beforeUnmount() {
 /**
  * watcher for model.id - sets the model as the editedExpenseType and check if it is editing
  */
-function watchModelID() {
-  this.editedExpenseType = _.cloneDeep(this.model); //set editedExpense to new value of model
+watch(
+  () => props.model.id,
+  () => {
+    editedExpenseType.value = _.cloneDeep(props.model); //set editedExpense to new value of model
 
-  // set array used for custom access chip-selector to previously saved data but without the access strings
-  // This code sucks
-  if (this.editedExpenseType.accessibleBy.includes('Custom')) {
-    let index = 1;
-    if (this.editedExpenseType.accessibleBy.includes('FullTime')) {
-      index++;
+    // set array used for custom access chip-selector to previously saved data but without the access strings
+    // This code sucks
+    if (editedExpenseType.value.accessibleBy.includes('Custom')) {
+      let index = 1;
+      if (editedExpenseType.value.accessibleBy.includes('FullTime')) {
+        index++;
+      }
+      if (editedExpenseType.value.accessibleBy.includes('PartTime')) {
+        index++;
+      }
+      if (editedExpenseType.value.accessibleBy.includes('Intern')) {
+        index++;
+      }
+      // set only the ids of people with custom access (don't include the access type)
+      customAccess.value = editedExpenseType.value.accessibleBy.splice(
+        index,
+        editedExpenseType.value.accessibleBy.length
+      );
     }
-    if (this.editedExpenseType.accessibleBy.includes('PartTime')) {
-      index++;
-    }
-    if (this.editedExpenseType.accessibleBy.includes('Intern')) {
-      index++;
-    }
-    // set only the ids of people with custom access (don't include the access type)
-    this.customAccess = this.editedExpenseType.accessibleBy.splice(index, this.editedExpenseType.accessibleBy.length);
-  }
 
-  //when model id is not empty then must be editing an expense
-  if (!this.isEmpty(this.model.id)) {
-    this.emitter.emit('editing-expense-type'); //notify parent that expense is being edited
+    //when model id is not empty then must be editing an expense
+    if (!isEmpty(props.model.id)) {
+      emitter.emit('editing-expense-type'); //notify parent that expense is being edited
+    }
+    if (editedExpenseType.value.id != null) {
+      //map categories
+      categories.value = _.map(editedExpenseType.value.categories, (category) => {
+        return category.name;
+      });
+    }
+    startDateFormatted.value = format(editedExpenseType.value.startDate, null, 'MM/DD/YYYY');
+    endDateFormatted.value = format(editedExpenseType.value.endDate, null, 'MM/DD/YYYY');
+    editedExpenseType.value.budget = props.model.budget;
+    budgetFormatted.value = editedExpenseType.value.budget;
+    formatBudget();
   }
-  if (this.editedExpenseType.id != null) {
-    //map categories
-    this.categories = _.map(this.editedExpenseType.categories, (category) => {
-      return category.name;
-    });
-  }
-  this.startDateFormatted = this.format(this.editedExpenseType.startDate, null, 'MM/DD/YYYY');
-  this.endDateFormatted = this.format(this.editedExpenseType.endDate, null, 'MM/DD/YYYY');
-  this.editedExpenseType.budget = this.model.budget;
-  this.budgetFormatted = this.editedExpenseType.budget;
-  this.formatBudget();
-} // watchModelID
+); // watchModelID
 
 /**
  * watcher for categories - limits categories and updates checkboxes
  *
  * @param val - categories list
  */
-function watchCategories(val) {
+watch(categories, (val) => {
   // limit categories to less than 10
   if (val.length > 10) {
-    this.$nextTick(() => this.categories.pop());
-    this.$nextTick(() => this.editedExpenseType.categories.pop());
+    nextTick(() => categories.value.pop());
+    nextTick(() => editedExpenseType.value.categories.pop());
   }
 
   // update categories checkboxes
-  if (val.length > this.editedExpenseType.categories.length) {
+  if (val.length > editedExpenseType.value.categories.length) {
     // category was added
-    let c = _.map(this.editedExpenseType.categories, (category) => {
+    let c = _.map(editedExpenseType.value.categories, (category) => {
       return category.name;
     });
 
@@ -925,159 +1000,48 @@ function watchCategories(val) {
       return !c.includes(x);
     });
 
-    this.editedExpenseType.categories.push({
+    editedExpenseType.value.categories.push({
       name: val[index],
-      showOnFeed: this.editedExpenseType.alwaysOnFeed,
-      requireURL: this.editedExpenseType.requireURL,
-      requireReceipt: this.editedExpenseType.requiredFlag
+      showOnFeed: editedExpenseType.value.alwaysOnFeed,
+      requireURL: editedExpenseType.value.requireURL,
+      requireReceipt: editedExpenseType.value.requiredFlag
     });
-  } else if (val.length < this.editedExpenseType.categories.length) {
+  } else if (val.length < editedExpenseType.value.categories.length) {
     // category was removed
-    this.editedExpenseType.categories = _.filter(this.editedExpenseType.categories, (category) => {
+    editedExpenseType.value.categories = _.filter(editedExpenseType.value.categories, (category) => {
       return val.includes(category.name);
     });
   }
-} // watchCategories
+}); // watchCategories
 
 /**
  * watcher for editedExpenseType.endDate - formats date
  */
-function watchEditedExpenseTypeEndDate() {
-  this.endDateFormatted = this.format(this.editedExpenseType.endDate, null, 'MM/DD/YYYY') || this.endDateFormatted;
-  //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-  if (this.editedExpenseType.endDate !== null && !this.format(this.editedExpenseType.endDate, null, 'MM/DD/YYYY')) {
-    this.editedExpenseType.endDate = null;
+watch(
+  () => editedExpenseType.value.endDate,
+  () => {
+    endDateFormatted.value = format(editedExpenseType.value.endDate, null, 'MM/DD/YYYY') || endDateFormatted.value;
+    //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+    if (editedExpenseType.value.endDate !== null && !format(editedExpenseType.value.endDate, null, 'MM/DD/YYYY')) {
+      editedExpenseType.value.endDate = null;
+    }
   }
-} // watchEditedExpenseTypeEndDate
+); // watchEditedExpenseTypeEndDate
 
 /**
  * watcher for editedExpenseType.startDate - format date
  */
-function watchEditedExpenseTypeStartDate() {
-  this.startDateFormatted =
-    this.format(this.editedExpenseType.startDate, null, 'MM/DD/YYYY') || this.startDateFormatted;
-  //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-  if (this.editedExpenseType.startDate !== null && !this.format(this.editedExpenseType.startDate, null, 'MM/DD/YYYY')) {
-    this.editedExpenseType.startDate = null;
+watch(
+  () => editedExpenseType.value.startDate,
+  () => {
+    startDateFormatted.value =
+      format(editedExpenseType.value.startDate, null, 'MM/DD/YYYY') || startDateFormatted.value;
+    //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+    if (editedExpenseType.value.startDate !== null && !format(editedExpenseType.value.startDate, null, 'MM/DD/YYYY')) {
+      editedExpenseType.value.startDate = null;
+    }
   }
-} // watchEditedExpenseTypeStartDate
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  components: {
-    GeneralConfirmationModal
-  },
-  created,
-  beforeUnmount,
-  data() {
-    return {
-      activeEmployees: null, // list of active employees
-      budgetFormatted: '',
-      budgetRules: [
-        (v) => !!v || 'Budget amount is required',
-        (v) => parseFloat(v, 10) > 0 || 'Budget must be greater than 0.',
-        (v) =>
-          /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?$/.test(v) ||
-          'Budget amount must be a number with two decimal digits.'
-      ], // rules for an expense type budget
-      campfires: [], // basecamp campfires
-      categories: [], // list of expense type categories
-      categoryInput: null, // category combobox input
-      checkBoxValid: [
-        () => {
-          return !this.checkBoxRule;
-        }
-      ],
-      customAccess: [], // list of employees with custom access
-      customAccessRules: [
-        () => {
-          return this.customAccess.length > 0 || 'Select at least one employee or uncheck the Custom checkbox';
-        }
-      ],
-      startDateRules: [
-        (v) => {
-          return !this.isEmpty(v) && isValid(v, 'MM/DD/YYYY') && this.editedExpenseType.endDate
-            ? isSameOrBefore(v, this.editedExpenseType.endDate) || 'Start date must be at or before end date'
-            : true;
-        }
-      ],
-      endDateRules: [
-        (v) => {
-          return !this.isEmpty(v) && isValid(v, 'MM/DD/YYYY') && this.editedExpenseType.startDate
-            ? isSameOrAfter(v, this.editedExpenseType.startDate) || 'End date must be at or after start date'
-            : true;
-        }
-      ],
-      endDateFormatted: null, // formatted end date
-      editedExpenseType: _.cloneDeep(this.model), //used to store edits made to an expense type or when creating new expense type
-      searchString: '',
-      showStartMenu: false, // boolean for showing date picker
-      showEndMenu: false, // boolean for showing date picker
-      startDateFormatted: null, // formatted start date
-      submitting: false, // submitting form
-      submitForm: false, //triggers submit form modal when changed
-      valid: false, // form is valid
-      tagBudgetRules: [
-        (v) => !!v || 'Budget amount is required',
-        (v) => parseFloat(v, 10) >= 0 || 'Budget must either be a positive or zero dollar amount.',
-        (v) =>
-          /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?$/.test(v) ||
-          'Budget amount must be a number with two decimal digits.'
-      ], // rules for a tag budget,
-      tags: []
-    };
-  },
-  directives: { mask },
-  methods: {
-    addTagBudget,
-    checkRequireReceipt,
-    checkRequireURL,
-    checkSelection,
-    clearForm,
-    employeeFilter,
-    formatBudget,
-    format,
-    getDateRules,
-    getRequiredRules,
-    getTagByID,
-    isCustomSelected,
-    isEmpty,
-    isFirst,
-    isLast,
-    isSameOrAfter,
-    isSameOrBefore,
-    isValid,
-    moveTagBudgetDown,
-    moveTagBudgetUp,
-    odFlagHint,
-    parseBudget,
-    remove,
-    removeCategory,
-    removeTagBudget,
-    submit,
-    toFAQ,
-    toggleRequireURL,
-    toggleRequireReceipt,
-    toggleShowAllCategories,
-    updateStoreExpenseTypes,
-    tagOptions
-  },
-  props: ['model'], // expense type to be created/updated
-  computed: {
-    checkBoxRule
-  },
-  watch: {
-    'model.id': watchModelID,
-    categories: watchCategories,
-    'editedExpenseType.endDate': watchEditedExpenseTypeEndDate,
-    'editedExpenseType.startDate': watchEditedExpenseTypeStartDate
-  }
-};
+); // watchEditedExpenseTypeStartDate
 </script>
 
 <style scoped>
