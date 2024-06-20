@@ -62,7 +62,7 @@
         </v-col>
         <!-- Submit Button -->
         <v-col cols="1" class="d-flex align-center">
-          <v-btn class="ml-2" @click="setDateRange">
+          <v-btn class="ml-2" @click="setDateRange()">
             <v-tooltip activator="parent" location="top">
               Show data from 12am on start date up to 12am on end date.
             </v-tooltip>
@@ -88,13 +88,52 @@
   </v-card>
 </template>
 
-<script>
+<script setup>
 import ResumeParserAudits from '@/components/audits/ResumeParserAudits.vue';
 import LoginAudits from '@/components/audits/LoginAudits.vue';
 import _ from 'lodash';
 import { storeIsPopulated } from '@/utils/utils';
 import { updateStoreEmployees } from '@/utils/storeUtils';
 import { isAfter, format, subtract, getTodaysDate } from '../shared/dateUtils';
+import { useStore } from 'vuex';
+import { ref, onBeforeMount } from 'vue';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SET UP                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+const store = useStore();
+const auditsQuery = ref({
+  range: [],
+  showRangeMenu: false
+});
+const firstLoad = ref(true); // this is used to set chart titles to "last 24 hours" if a custom date range has not been set
+const queryA = ref(subtract(getTodaysDate('YYYY-MM-DDTHH:mm:ssZ'), 1, 'd', 'YYYY-MM-DDTHH:mm:ssZ'));
+const queryB = ref(getTodaysDate('YYYY-MM-DDTHH:mm:ssZ'));
+const reloader = ref(0);
+const requiredRules = ref([(v) => !_.isEmpty(v) || 'This field is required']); // rules for a required field
+const selectedDropdown = ref('User Logins');
+const today = getTodaysDate();
+const dateRange = ref(null);
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                LIFECYLCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * created lifecycle hook
+ */
+onBeforeMount(async () => {
+  if (storeIsPopulated) {
+    if (!store.getters.employees) {
+      await updateStoreEmployees();
+    }
+  }
+}); // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -106,20 +145,20 @@ import { isAfter, format, subtract, getTodaysDate } from '../shared/dateUtils';
  * sets the dateRange of the audits to get
  */
 function setDateRange() {
-  if (this.$refs.dateRange.validate()) {
+  if (dateRange.value.validate()) {
     // Hide the calendar popup
-    this.auditsQuery.showRangeMenu = false;
+    auditsQuery.value.showRangeMenu = false;
 
     // Temp variables
-    let start = this.auditsQuery.range[0];
-    let end = this.auditsQuery.range[1];
+    let start = auditsQuery.value.range[0];
+    let end = auditsQuery.value.range[1];
     // Flips date values if user selected end date and THEN selected start date
     // Then sets values to a date array which is passed to the parser audit page
-    this.queryB = isAfter(start, end) ? format(start, null, 'YYYY-MM-DD') : format(end, null, 'YYYY-MM-DD');
-    this.queryA = isAfter(start, end) ? format(end, null, 'YYYY-MM-DD') : format(start, null, 'YYYY-MM-DD');
+    queryB.value = isAfter(start, end) ? format(start, null, 'YYYY-MM-DD') : format(end, null, 'YYYY-MM-DD');
+    queryA.value = isAfter(start, end) ? format(end, null, 'YYYY-MM-DD') : format(start, null, 'YYYY-MM-DD');
     // Display chart titles with date ranges rather than 'last 24 hours'
-    this.firstLoad = false;
-    this.reloader++; // refreshes the charts
+    firstLoad.value = false;
+    reloader.value++; // refreshes the charts
   }
 } // setDateRange
 
@@ -158,7 +197,7 @@ function formatRange(range) {
  */
 function selectDropDown(tab) {
   // Clear date query field
-  this.$refs.dateRange.reset();
+  dateRange.value.reset();
   // Set query to last 24 hours
   this.auditsQueryFormatted = {
     range: [
@@ -167,81 +206,8 @@ function selectDropDown(tab) {
     ]
   };
   // Reset variable to show 'last 24 hours' chart title
-  this.firstLoad = true;
+  firstLoad.value = true;
   // Change the view to selected tab
-  this.selectedDropdown = tab;
+  selectedDropdown.value = tab;
 } // selectDropDown
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                LIFECYLCLE HOOKS                  |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * created lifecycle hook
- */
-async function created() {
-  if (this.storeIsPopulated) {
-    if (!this.$store.getters.employees) {
-      await this.updateStoreEmployees();
-    }
-  }
-} // created
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     WATCHERS                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * updates employees if they are not already populated, this happens if the user directly navigates to the audits page
- */
-async function watchStoreIsPopulated() {
-  if (!this.$store.getters.employees) {
-    await this.updateStoreEmployees();
-  }
-} // watchStoreIsPopulated
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  components: {
-    LoginAudits,
-    ResumeParserAudits
-  },
-  data() {
-    return {
-      auditsQuery: {
-        range: [],
-        showRangeMenu: false
-      },
-      firstLoad: true, // this is used to set chart titles to "last 24 hours" if a custom date range has not been set
-      queryA: subtract(getTodaysDate('YYYY-MM-DDTHH:mm:ssZ'), 1, 'd', 'YYYY-MM-DDTHH:mm:ssZ'),
-      queryB: getTodaysDate('YYYY-MM-DDTHH:mm:ssZ'),
-      reloader: 0,
-      requiredRules: [(v) => !_.isEmpty(v) || 'This field is required'], // rules for a required field
-      selectedDropdown: 'User Logins',
-      today: getTodaysDate()
-    };
-  },
-  computed: {
-    storeIsPopulated
-  },
-  watch: {
-    storeIsPopulated: watchStoreIsPopulated
-  },
-  created,
-  methods: {
-    setDateRange,
-    formatRange,
-    selectDropDown,
-    updateStoreEmployees
-  }
-};
 </script>
