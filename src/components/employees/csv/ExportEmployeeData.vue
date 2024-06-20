@@ -108,12 +108,6 @@ const filters = ref({
 const status = ref(false);
 const loading = ref(false);
 
-// |--------------------------------------------------|
-// |                                                  |
-// |                     LIFECYCLE                    |
-// |                                                  |
-// |--------------------------------------------------|
-
 /**
  * Created
  */
@@ -143,6 +137,12 @@ onBeforeMount(async () => {
     loading.value = msg;
   });
 });
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     LIFECYCLE                    |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * beforeUnmount lifecycle hook - close event listener
