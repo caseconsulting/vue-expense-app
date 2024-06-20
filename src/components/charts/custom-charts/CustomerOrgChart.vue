@@ -1,6 +1,6 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5">
-    <pie-chart ref="pieChart" :key="chartKey" chartId="cust-org" :options="options" :chartData="chartData"></pie-chart>
+    <pie-chart ref="pieChart" :key="chartKey" chartId="cust-org" :options="option" :chartData="chartData"></pie-chart>
     <v-container class="ma-0">
       <v-row justify="center" no-gutters>
         <v-radio-group inline v-model="showCurrent" class="d-flex justify-center">
@@ -13,26 +13,45 @@
   </v-card>
 </template>
 
-<script>
+<script setup>
 import PieChart from '../base-charts/PieChart.vue';
 import _ from 'lodash';
-import { storeIsPopulated } from '@/utils/utils.js';
+import { onBeforeMount, ref, watch } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                 LIFECYCLE HOOKS                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const chartData = ref(null);
+const chartKey = ref(0);
+const dataReceived = ref(false);
+const employees = ref(null);
+const label = ref([]);
+const option = ref(null);
+const quantities = ref([]);
+const router = useRouter();
+const showCurrent = ref('All');
+const store = useStore();
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                LIFECYCLE HOOKS                   |
 // |                                                  |
 // |--------------------------------------------------|
 
 /**
  * Created lifecycle hook
  */
-async function created() {
-  if (this.storeIsPopulated) {
-    await this.fetchData();
-    await this.fillData();
+onBeforeMount(async () => {
+  if (store.getters.storeIsPopulated) {
+    await fetchData();
+    await fillData();
   }
-} // created
+}); // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -46,18 +65,18 @@ async function created() {
 function fetchData() {
   let allCompOrgExp = {};
   // access store
-  this.employees = this.$store.getters.employees;
+  employees.value = store.getters.employees;
   // tally up customer org experience for active employees
-  this.employees.forEach((emp) => {
+  employees.value.forEach((emp) => {
     if (emp.customerOrgExp && emp.workStatus != 0) {
       _.forEach(emp.customerOrgExp, (org) => {
         let orgName = org.name;
         let orgYears = org.years;
         // We get whether or not we want to show current or past info
-        let orgCurrent = this.showCurrent === 'Current' ? org.current : !org.current;
+        let orgCurrent = showCurrent.value === 'Current' ? org.current : !org.current;
 
         // error checks if orgYears is undefined
-        if (orgYears && (orgCurrent || this.showCurrent === 'All')) {
+        if (orgYears && (orgCurrent || showCurrent.value === 'All')) {
           if (allCompOrgExp[orgName]) {
             allCompOrgExp[orgName] += Math.round(Number(orgYears) * 100) / 100;
           } else {
@@ -68,12 +87,12 @@ function fetchData() {
     }
   });
   let labels = Object.keys(allCompOrgExp);
-  this.quantities = [];
+  quantities.value = [];
 
   _.forEach(labels, (label) => {
-    this.quantities.push(allCompOrgExp[label]);
+    quantities.value.push(allCompOrgExp[label]);
   });
-  this.labels = labels;
+  label.value = labels;
 } // fetchData
 
 /**
@@ -83,9 +102,9 @@ function fillData() {
   let text = '';
   let colors = [];
   let enabled = true;
-  if (_.isEmpty(this.quantities)) {
+  if (_.isEmpty(quantities.value)) {
     text = 'No Customer Org Data Found';
-    this.quantities.push(1);
+    quantities.value.push(1);
     enabled = false;
     colors = ['grey'];
   } else {
@@ -100,25 +119,25 @@ function fillData() {
       'rgba(156, 175, 183, 1)',
       'rgba(66, 129, 164, 1)'
     ];
-    text = `${this.showCurrent} Customer Org Experience (Years)`;
+    text = `${showCurrent.value} Customer Org Experience (Years)`;
   }
-  this.chartData = {
-    labels: this.labels,
+  chartData.value = {
+    labels: label.value,
     datasets: [
       {
-        data: this.quantities,
+        data: quantities.value,
         backgroundColor: colors
       }
     ]
   };
 
-  this.options = {
+  option.value = {
     onClick: (x, y) => {
       let index = _.first(y).index;
-      let labelClicked = this.chartData.labels[index];
+      let labelClicked = chartData.value.labels[index];
       localStorage.setItem('requestedDataType', 'customerOrgs');
       localStorage.setItem('requestedFilter', labelClicked);
-      this.$router.push({
+      router.push({
         path: '/reports',
         name: 'reports'
       });
@@ -145,57 +164,29 @@ function fillData() {
     maintainAspectRatio: false
   };
 
-  this.dataReceived = true;
+  dataReceived.value = true;
 } // fillData
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     WATCHERS                      |
+// |                    WATCHERS                      |
 // |                                                  |
 // |--------------------------------------------------|
 
 /**
  * Watcher for showCurrent - fills data.
  */
-function watchShowCurrent() {
-  this.fetchData();
-  this.fillData(); // renders a different chart every time the radio button changes
-  this.chartKey++; // rerenders the chart
-} // watchShowCurrent
+watch(showCurrent, () => {
+  fetchData();
+  fillData(); // renders a different chart every time the radio button changes
+  chartKey.value++; // rerenders the chart
+});
 
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  components: { PieChart },
-  computed: {
-    storeIsPopulated
-  },
-  data() {
-    return {
-      dataReceived: false,
-      chartData: null,
-      options: null,
-      employees: null,
-      showCurrent: 'All',
-      chartKey: 0,
-      labels: [],
-      quantities: []
-    };
-  },
-  methods: { fetchData, fillData },
-  created,
-  watch: {
-    showCurrent: watchShowCurrent,
-    storeIsPopulated: function () {
-      if (this.storeIsPopulated) {
-        this.fetchData();
-        this.fillData();
-      }
-    }
+watch(
+  () => store.getters.storeIsPopulated,
+  () => {
+    fetchData();
+    fillData();
   }
-};
+);
 </script>

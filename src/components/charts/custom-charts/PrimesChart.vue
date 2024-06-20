@@ -1,13 +1,31 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5">
-    <bar-chart ref="barChart" chartId="primes-chart" :options="options" :chartData="chartData"></bar-chart>
+    <bar-chart ref="barChart" chartId="primes-chart" :options="option" :chartData="chartData"></bar-chart>
   </v-card>
 </template>
 
-<script>
+<script setup>
 import BarChart from '../base-charts/BarChart.vue';
 import _ from 'lodash';
-import { storeIsPopulated } from '@/utils/utils';
+import { onMounted, ref, watch } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const chartData = ref(null);
+const dataReceived = ref(false);
+const employees = ref(null);
+const label = ref([]);
+const option = ref(null);
+const primes = ref({});
+const store = useStore();
+const router = useRouter();
+const values = ref([]);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -18,12 +36,12 @@ import { storeIsPopulated } from '@/utils/utils';
 /**
  * Mounted lifecycle hook.
  */
-async function mounted() {
-  if (this.storeIsPopulated) {
-    await this.fetchData();
-    await this.fillData();
+onMounted(async () => {
+  if (store.getters.storeIsPopulated) {
+    await fetchData();
+    await fillData();
   }
-} // mounted
+}); // mounted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -46,7 +64,7 @@ function getCurrentProjects(employee) {
       if (contract.projects) {
         contract.projects.forEach((project) => {
           if (currContract.projects.length === 0) {
-            let con = this.$store.getters.contracts.find((c) => c.id === contract.contractId);
+            let con = store.getters.contracts.find((c) => c.id === contract.contractId);
             currContract.name = con.contractName;
             currContract.prime = con.primeName;
           }
@@ -68,31 +86,31 @@ function getCurrentProjects(employee) {
  * Extracts and tallies up each employees primes.
  */
 function fetchData() {
-  this.employees = this.$store.getters.employees;
+  employees.value = store.getters.employees;
   //Put into dictionary where key is prime and value is quantity
-  this.employees.forEach((employee) => {
+  employees.value.forEach((employee) => {
     if (employee.workStatus != 0) {
-      let currContracts = this.getCurrentProjects(employee);
+      let currContracts = getCurrentProjects(employee);
       //let currPrimes = {};
       currContracts.forEach((contract) => {
-        if (!this.primes[contract.prime]) {
-          this.primes[contract.prime] = 1;
+        if (!primes.value[contract.prime]) {
+          primes.value[contract.prime] = 1;
         } else {
-          this.primes[contract.prime] += 1;
+          primes.value[contract.prime] += 1;
         }
       });
     }
   });
 
   // We now sort the entries
-  let primePairs = Object.entries(this.primes);
+  let primePairs = Object.entries(primes.value);
   primePairs = primePairs.sort((a, b) => {
     return b[1] - a[1];
   });
 
   for (let i = 0; i < primePairs.length; i++) {
-    this.labels.push(primePairs[i][0]);
-    this.values.push(primePairs[i][1]);
+    label.value.push(primePairs[i][0]);
+    values.value.push(primePairs[i][1]);
   }
 } // fetchData
 
@@ -113,25 +131,25 @@ function fillData() {
   let borderColors = [];
 
   // Set the background and border colors
-  for (let i = 0; i < this.labels.length; i++) {
+  for (let i = 0; i < label.value.length; i++) {
     backgroundColors[i] = colors[i % 4];
     borderColors[i] = colors[i % 4];
   }
 
   // Set the chart data
-  this.chartData = {
-    labels: this.labels,
+  chartData.value = {
+    labels: label.value,
     datasets: [
       {
         label: null,
-        data: this.values,
+        data: values.value,
         backgroundColor: backgroundColors,
         borderColor: borderColors,
         borderWidth: 1
       }
     ]
   };
-  this.options = {
+  option.value = {
     scales: {
       x: {
         title: {
@@ -160,8 +178,8 @@ function fillData() {
       if (_.first(y)) {
         let index = _.first(y).index;
         localStorage.setItem('requestedDataType', 'contracts');
-        localStorage.setItem('requestedFilter', this.chartData.labels[index]);
-        this.$router.push({
+        localStorage.setItem('requestedFilter', chartData.value.labels[index]);
+        router.push({
           path: '/reports',
           name: 'reports'
         });
@@ -173,7 +191,7 @@ function fillData() {
       },
       title: {
         display: true,
-        text: 'Top ' + this.values.length + ' Primes That We Currently Subcontract',
+        text: 'Top ' + values.value.length + ' Primes That We Currently Subcontract',
         font: {
           size: 15
         }
@@ -188,43 +206,20 @@ function fillData() {
     },
     maintainAspectRatio: false
   };
-  this.dataReceived = true;
+  dataReceived.value = true;
 } // fillData
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                      EXPORT                      |
+// |                     WATCHERS                     |
 // |                                                  |
 // |--------------------------------------------------|
 
-export default {
-  components: { BarChart },
-  mounted,
-  computed: {
-    storeIsPopulated
-  },
-  data() {
-    return {
-      options: null,
-      chartData: null,
-      dataReceived: false,
-      primes: {},
-      labels: [],
-      values: []
-    };
-  },
-  methods: {
-    getCurrentProjects,
-    fetchData,
-    fillData
-  },
-  watch: {
-    storeIsPopulated: function () {
-      if (this.storeIsPopulated) {
-        this.fetchData();
-        this.fillData();
-      }
-    }
+watch(
+  () => store.getters.storeIsPopulated,
+  () => {
+    fetchData();
+    fillData();
   }
-};
+);
 </script>

@@ -1,11 +1,30 @@
 <template>
   <v-card v-if="dataReceived" class="pa-7">
-    <pie-chart ref="chart" :key="chartKey" chartId="majors-chart" :options="options" :chartData="chartData"></pie-chart>
+    <pie-chart ref="chart" :key="chartKey" chartId="majors-chart" :options="option" :chartData="chartData"></pie-chart>
   </v-card>
 </template>
 
-<script>
+<script setup>
 import PieChart from '../base-charts/PieChart.vue';
+import { onBeforeUnmount, onBeforeMount ,onMounted, ref, inject } from 'vue';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const chartData = ref(null);
+const chartKey = ref(0);
+const colors = ref([]);
+const dataReceived = ref(false);
+const eduKind = ref(null);
+const emitter = inject('emitter');
+const enabled = ref(false);
+const label = ref([]);
+const option = ref(null);
+const quantities = ref([]);
+const text = ref('');
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -16,34 +35,34 @@ import PieChart from '../base-charts/PieChart.vue';
 /**
  * Mounted lifecycle hook.
  */
-async function mounted() {
+onMounted(async () => {
   // emit comes from HighestDegreeChart when a pie slice is clicked
-  await this.emitter.on('majors-update', async (receiveData, title) => {
-    this.quantities = [];
-    this.labels = [];
-    this.dataReceived = false;
+  await emitter.on('majors-update', async (receiveData, title) => {
+    quantities.value = [];
+    label.value = [];
+    dataReceived.value = false;
     let majorsOrSchools = receiveData.majorsOrSchools;
-    this.eduKind = receiveData.eduKind;
+    eduKind.value = receiveData.eduKind;
 
-    await this.fetchData(majorsOrSchools);
-    await this.fillData(title);
+    await fetchData(majorsOrSchools);
+    await fillData(title);
   });
-} // mounted
+}); // mounted
 
 /**
  * Created lifecycle hook
  */
-async function created() {
-  await this.fetchData(null);
-  await this.fillData();
-} // created
+onBeforeMount(async () => {
+  await fetchData(null);
+  await fillData();
+}); // created
 
 /**
  * Before destroy lifecycle hook.
  */
-function beforeUnmount() {
-  this.emitter.off('majors-update');
-} //beforeUnmount
+onBeforeUnmount(() => {
+  emitter.off('majors-update');
+}); //beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -58,7 +77,7 @@ function beforeUnmount() {
  */
 function fetchData(majorsOrSchools) {
   if (majorsOrSchools) {
-    this.enabled = true;
+    enabled.value = true;
     const sortable = Object.entries(majorsOrSchools)
       .sort(([, a], [, b]) => b - a)
       .reduce((r, [k, v]) => ({ ...r, [k]: v }), {});
@@ -66,12 +85,12 @@ function fetchData(majorsOrSchools) {
     for (let i = 0; i < 10; i++) {
       let majorOrSchool = Object.keys(sortable)[i];
       if (majorOrSchool) {
-        this.quantities.push(sortable[majorOrSchool]);
-        this.labels.push(majorOrSchool);
+        quantities.value.push(sortable[majorOrSchool]);
+        label.value.push(majorOrSchool);
       }
     }
-    this.text = `Top ${this.eduKind} Degree Majors`;
-    this.colors = [
+    text.value = `Top ${eduKind.value} Degree Majors`;
+    colors.value = [
       'rgba(54, 162, 235, 1)',
       'rgba(255, 206, 86, 1)',
       'rgba(75, 192, 192, 1)',
@@ -84,10 +103,10 @@ function fetchData(majorsOrSchools) {
     ];
   } else {
     // these presets are when an education has not been selected
-    this.quantities.push(1);
-    this.enabled = false;
-    this.text = `Click on an Education To See the Top Majors/Schools`;
-    this.colors = ['grey'];
+    quantities.value.push(1);
+    enabled.value = false;
+    text.value = `Click on an Education To See the Top Majors/Schools`;
+    colors.value = ['grey'];
   }
 } // fetchData
 
@@ -97,65 +116,33 @@ function fetchData(majorsOrSchools) {
  * @param title the title to display if there is one
  */
 function fillData(title) {
-  this.chartData = {
-    labels: this.labels,
+  chartData.value = {
+    labels: label.value,
     datasets: [
       {
-        data: this.quantities,
-        backgroundColor: this.colors
+        data: quantities.value,
+        backgroundColor: colors.value
       }
     ]
   };
-  this.options = {
+  option.value = {
     plugins: {
       title: {
         display: true,
-        text: title ? title : this.text,
+        text: title ? title : text.value,
         font: {
           size: 15
         }
       },
       tooltip: {
-        enabled: this.enabled
+        enabled: enabled.value
       }
     },
     maintainAspectRatio: false
   };
-  this.chartKey++; // rerenders the chart
-  this.dataReceived = true;
+  chartKey.value++; // rerenders the chart
+  dataReceived.value = true;
 } // fillData
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  components: { PieChart },
-  data() {
-    return {
-      options: null,
-      chartData: null,
-      majorsOrSchools: null,
-      dataReceived: false,
-      kind: null,
-      chartKey: 0,
-      text: '',
-      colors: [],
-      enabled: false,
-      labels: [],
-      quantities: []
-    };
-  },
-  methods: {
-    fetchData,
-    fillData
-  },
-  mounted,
-  created,
-  beforeUnmount
-};
 </script>
 
 <style scoped>

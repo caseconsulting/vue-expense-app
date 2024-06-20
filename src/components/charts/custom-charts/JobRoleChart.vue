@@ -1,13 +1,31 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5">
-    <bar-chart ref="barChart" chartId="job-roles-chart" :options="options" :chartData="chartData" />
+    <bar-chart ref="barChart" chartId="job-roles-chart" :options="option" :chartData="chartData" />
   </v-card>
 </template>
 
-<script>
+<script setup>
 import BarChart from '../base-charts/BarChart.vue';
 import _ from 'lodash';
-import { storeIsPopulated } from '@/utils/utils';
+import { onMounted, ref, watch } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const chartData = ref(null);
+const dataReceived = ref(false);
+const employees = ref(null);
+const jobTitles = ref([]);
+const jobQuantities = ref([]);
+const option = ref(null);
+const roles = ref({});
+const router = useRouter();
+const store = useStore();
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -18,12 +36,12 @@ import { storeIsPopulated } from '@/utils/utils';
 /**
  * Mounted lifecycle hook.
  */
-async function mounted() {
-  if (this.storeIsPopulated) {
-    await this.fetchData();
-    await this.fillData();
+onMounted(async () => {
+  if (store.getters.storeIsPopulated) {
+    await fetchData();
+    await fillData();
   }
-} // mounted
+}); // mounted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -36,26 +54,26 @@ async function mounted() {
  * each role for active employees.
  */
 function fetchData() {
-  this.employees = this.$store.getters.employees;
-  this.employees.forEach((emp) => {
+  employees.value = store.getters.employees;
+  employees.value.forEach((emp) => {
     if (emp.jobRole && emp.workStatus != 0) {
-      if (this.roles[emp.jobRole]) {
-        this.roles[emp.jobRole] += 1;
+      if (roles.value[emp.jobRole]) {
+        roles.value[emp.jobRole] += 1;
       } else {
-        this.roles[emp.jobRole] = 1;
+        roles.value[emp.jobRole] = 1;
       }
     }
   });
   //sorts contents from most common roles to least
-  let sortedRoles = Object.entries(this.roles);
+  let sortedRoles = Object.entries(roles.value);
   sortedRoles = sortedRoles.sort((a, b) => {
     return b[1] - a[1];
   });
   //10 is just a limit to prevent an extremely long and crammed graph
   for (let i = 0; i < 10; i++) {
     if (sortedRoles.length > i) {
-      this.jobTitles.push(sortedRoles[i][0]);
-      this.jobQuantities.push(sortedRoles[i][1]);
+      jobTitles.value.push(sortedRoles[i][0]);
+      jobQuantities.value.push(sortedRoles[i][1]);
     }
   }
 } // fetchData
@@ -76,17 +94,17 @@ function fillData() {
     'rgba(66, 129, 164, 1)'
   ];
 
-  this.chartData = {
-    labels: this.jobTitles,
+  chartData.value = {
+    labels: jobTitles.value,
     datasets: [
       {
-        data: this.jobQuantities,
+        data: jobQuantities.value,
         backgroundColor: colors
       }
     ]
   };
 
-  this.options = {
+  option.value = {
     aspectRatio: 2,
     scales: {
       x: {
@@ -117,8 +135,8 @@ function fillData() {
       if (_.first(y)) {
         let index = _.first(y).index;
         localStorage.setItem('requestedDataType', 'jobRoles');
-        localStorage.setItem('requestedFilter', this.chartData.labels[index]);
-        this.$router.push({
+        localStorage.setItem('requestedFilter', chartData.value.labels[index]);
+        router.push({
           path: '/reports',
           name: 'reports'
         });
@@ -145,40 +163,20 @@ function fillData() {
     },
     maintainAspectRatio: false
   };
-  this.dataReceived = true;
+  dataReceived.value = true;
 } // fillData
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                      EXPORT                      |
+// |                     WATCHERS                     |
 // |                                                  |
 // |--------------------------------------------------|
 
-export default {
-  components: { BarChart },
-  computed: {
-    storeIsPopulated
-  },
-  data() {
-    return {
-      options: null,
-      chartData: null,
-      dataReceived: false,
-      employees: null,
-      roles: {},
-      jobTitles: [],
-      jobQuantities: []
-    };
-  },
-  methods: { fetchData, fillData },
-  mounted,
-  watch: {
-    storeIsPopulated: function () {
-      if (this.storeIsPopulated) {
-        this.fetchData();
-        this.fillData();
-      }
-    }
+watch(
+  () => store.getters.storeIsPopulated,
+  () => {
+    fetchData();
+    fillData();
   }
-};
+);
 </script>

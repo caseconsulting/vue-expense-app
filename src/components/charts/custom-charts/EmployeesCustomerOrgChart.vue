@@ -1,28 +1,45 @@
 <template>
-  <v-card v-if="dataRecieved" class="pa-5">
-    <bar-chart ref="barChart" chartId="employees-cust-org-chart" :options="options" :chartData="chartData"></bar-chart>
+  <v-card v-if="dataReceived" class="pa-5">
+    <bar-chart ref="barChart" chartId="employees-cust-org-chart" :options="option" :chartData="chartData"></bar-chart>
   </v-card>
 </template>
-<script>
+
+<script setup>
 import BarChart from '../base-charts/BarChart.vue';
 import _ from 'lodash';
-import { storeIsPopulated } from '@/utils/utils';
+import { onMounted, ref } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                 LIFECYCLE HOOKS                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const chartData = ref(null);
+const dataReceived = ref(false);
+const label = ref([]);
+const option = ref(null);
+const router = useRouter();
+const store = useStore();
+const values = ref([]);
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                LIFECYCLE HOOKS                   |
 // |                                                  |
 // |--------------------------------------------------|
 
 /**
  * Mounted lifecycle hook.
  */
-async function mounted() {
-  if (this.storeIsPopulated) {
-    await this.fetchData();
-    await this.fillData();
+onMounted(async () => {
+  if (store.getters.storeIsPopulated) {
+    await fetchData();
+    await fillData();
   }
-} // mounted
+}); // mounted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -34,7 +51,7 @@ async function mounted() {
  * Gets customer org data count from employees list.
  */
 function fetchData() {
-  let employees = this.$store.getters.employees;
+  let employees = store.getters.employees;
   let employeesCustOrg = {};
   employees.forEach((e) => {
     if (e.customerOrgExp && e.workStatus != 0) {
@@ -58,8 +75,8 @@ function fetchData() {
 
   for (let i = 0; i < sortedEmployeeCustOrg.length; i++) {
     if (sortedEmployeeCustOrg.length > 1) {
-      this.labels.push(sortedEmployeeCustOrg[i][0]);
-      this.values.push(sortedEmployeeCustOrg[i][1]);
+      label.value.push(sortedEmployeeCustOrg[i][0]);
+      values.value.push(sortedEmployeeCustOrg[i][1]);
     }
   }
 } // fetchData
@@ -84,21 +101,21 @@ function fillData() {
   let borderColors = [];
 
   // Set the background and border colors
-  for (let i = 0; i < this.labels.length; i++) {
+  for (let i = 0; i < label.value.length; i++) {
     backgroundColors[i] = colors[i % 9];
     borderColors[i] = colors[i % 9];
   }
 
-  this.chartData = {
-    labels: this.labels,
+  chartData.value = {
+    labels: label.value,
     datasets: [
       {
-        data: this.values,
+        data: values.value,
         backgroundColor: backgroundColors
       }
     ]
   };
-  this.options = {
+  option.value = {
     scales: {
       x: {
         beginAtZero: true,
@@ -127,10 +144,10 @@ function fillData() {
     onClick: (x, y) => {
       if (_.first(y)) {
         let index = _.first(y).index;
-        let labelClicked = this.chartData.labels[index];
+        let labelClicked = chartData.value.labels[index];
         localStorage.setItem('requestedDataType', 'customerOrgs');
         localStorage.setItem('requestedFilter', labelClicked);
-        this.$router.push({
+        router.push({
           path: '/reports',
           name: 'reports'
         });
@@ -157,33 +174,6 @@ function fillData() {
     },
     maintainAspectRatio: false
   };
-  this.dataRecieved = true;
+  dataReceived.value = true;
 } // fillData
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  mounted,
-  components: { BarChart },
-  data() {
-    return {
-      options: null,
-      chartData: null,
-      dataRecieved: false,
-      labels: [],
-      values: []
-    };
-  },
-  computed: {
-    storeIsPopulated
-  },
-  methods: {
-    fillData,
-    fetchData
-  }
-};
 </script>
