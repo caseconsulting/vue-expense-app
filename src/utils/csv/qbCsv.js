@@ -288,7 +288,7 @@ function getEmployeeWorkedHours(employee, _, __, tags) {
 
   // exclude all nonbillable jobcodes for CASE employees, but only PTO for CYK employees
   let nonBillables = SUPP_DATA.nonBillables;
-  let cykTag = tags.find((t) => t.tagName === 'CYK');
+  let cykTag = tags.find((t) => t.tagName !== 'CYK');
   if (cykTag.employees.includes(employee.id)) nonBillables = new Set(['PTO']);
 
   // tally up hours
