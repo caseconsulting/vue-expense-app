@@ -25,19 +25,31 @@
           <span class="checkbox-label">{{ label }}</span>
         </template>
       </v-checkbox>
-      <!-- Reimburse Button -->
-      <v-btn
-        @click="emitter.emit('reimburse-expenses', isGeneratingGiftCard)"
-        id="custom-button-color"
-        theme="dark"
-        class="reimburse_button mt-5"
-        variant="text"
-        block
-      >
-        <template v-slot:prepend><v-icon>mdi-currency-usd</v-icon></template>
-        Reimburse
-      </v-btn>
+      <v-row class="mt-5">
+        <v-col cols="12" lg="8" class="px-2">
+          <!-- Reimburse Button -->
+          <v-btn
+            @click="emitter.emit('reimburse-expenses', isGeneratingGiftCard)"
+            class="reimburse_button"
+            variant="text"
+            block
+          >
+            <template v-slot:prepend><v-icon>mdi-currency-usd</v-icon></template>
+            Reimburse
+          </v-btn>
+        </v-col>
+        <v-col cols="12" lg="4" class="px-2">
+          <!-- Revise Button -->
+          <v-btn @click="toggleRevisalRequestModal = true" class="reimburse_button" variant="text" block>
+            <template v-slot:prepend><v-icon>mdi-receipt-text-remove</v-icon></template>
+            Reject
+          </v-btn>
+        </v-col>
+      </v-row>
     </v-card-text>
+    <v-dialog v-model="toggleRevisalRequestModal" persistent width="35%">
+      <revise-expense-modal :expenses="selected"></revise-expense-modal>
+    </v-dialog>
   </v-card>
   <!--End of Totals Card-->
 </template>
@@ -45,6 +57,7 @@
 <script>
 import _ from 'lodash';
 import { convertToMoneyString } from '@/utils/utils';
+import ReviseExpenseModal from '@/components/modals/RejectExpenseModal.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -126,6 +139,10 @@ function updateSelected(item) {
 function created() {
   this.emitter.on('selectExpense', this.updateSelected);
   this.emitter.on('expenseChange', this.updateSelected);
+  this.emitter.on('cancel-revisal-request', () => (this.toggleRevisalRequestModal = false));
+  this.emitter.on('confirm-revisal-request', (reason) => {
+    this.toggleRevisalRequestModal = false;
+  });
 } // created
 
 /**
@@ -134,6 +151,8 @@ function created() {
 function beforeUnmount() {
   this.emitter.off('selectExpense');
   this.emitter.off('expenseChange');
+  this.emitter.off('cancel-revisal-request');
+  this.emitter.off('confirm-revisal-request');
 } //beforeUnmount
 
 // |--------------------------------------------------|
@@ -143,6 +162,9 @@ function beforeUnmount() {
 // |--------------------------------------------------|
 
 export default {
+  components: {
+    ReviseExpenseModal
+  },
   created,
   beforeUnmount,
   computed: {
@@ -152,6 +174,7 @@ export default {
     return {
       isGeneratingGiftCard: true,
       selected: [],
+      toggleRevisalRequestModal: false,
       reimbursing: false
     };
   },
