@@ -65,8 +65,7 @@
         </div>
         <div class="mb-3">
           <div class="font-weight-bold d-inline-block">Work Days Remaining (<span class="var">WDR</span>)</div>
-          = week days from today to the period end date - future days inputted in ADP/QuickBooks - 1 IF today is a week
-          day
+          = week days from today to the period end date - future days inputted in ADP/QuickBooks day
         </div>
       </div>
       <div>Note: You can edit Work Days Remaining field by clicking on it</div>

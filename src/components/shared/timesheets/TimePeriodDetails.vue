@@ -236,7 +236,6 @@ const remainingHours = computed(() => {
 const remainingWorkDays = computed(() => {
   let remainingDays;
   let daysToSubtract = futureDays.value;
-  if (isWeekDay(today.value)) daysToSubtract += 1;
 
   if (customWorkDayInput.value && Number(customWorkDayInput.value)) {
     remainingDays = customWorkDayInput.value || remainingWorkDays.value;
