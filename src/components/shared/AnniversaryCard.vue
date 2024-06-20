@@ -36,22 +36,64 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, onBeforeUnmount, inject, onBeforeMount } from 'vue';
 import BudgetSelectModal from '@/components/modals/BudgetSelectModal.vue';
 import _ from 'lodash';
 import api from '@/shared/api.js';
-import { isMobile, getCurrentBudgetYear } from '@/utils/utils';
+import { getCurrentBudgetYear } from '@/utils/utils';
 import {
   add,
   difference,
   format,
   getTodaysDate,
   isAfter,
-  isBefore,
   isValid,
   setYear,
   DEFAULT_ISOFORMAT
 } from '@/shared/dateUtils';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                       SETUP                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+const props = defineProps(['employee', 'hasBudgets', 'location', 'emitCatcher']);
+const emitter = inject(['emitter']);
+
+const allUserBudgets = ref(null);
+const budgetYears = ref([]);
+const changingBudgetView = ref(false);
+const hireDate = ref('');
+const fiscalDateView = ref('');
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * created lifecycle hook
+ */
+onBeforeMount(async () => {
+  await loadData();
+
+  emitter.on('selected-budget-year', (date) => {
+    if (date != fiscalDateView.value) {
+      fiscalDateView.value = date;
+      emitter.emit(`change-budget-year-${props.emitCatcher}`, date);
+    }
+  });
+}); //created
+
+/**
+ * beforeUnmount lifecycle hook
+ */
+onBeforeUnmount(() => {
+  emitter.off('selected-budget-year');
+}); //beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -64,24 +106,24 @@ import {
  *
  * @return boolean - viewing the current active year budget
  */
-function viewingCurrentBudgetYear() {
-  return this.fiscalDateView == this.getCurrentBudgetYear(this.hireDate);
-} // viewingCurrentBudgetYear
+const viewingCurrentBudgetYear = computed(() => {
+  return fiscalDateView.value == getCurrentBudgetYear(hireDate.value);
+}); // viewingCurrentBudgetYear
 
 /**
  * Get the next anniversary date for the employee based on their hire date.
  *
  * @return String - next employee anniversary date (day of year, month, day, year)
  */
-function getAnniversary() {
-  if (isValid(this.hireDate, DEFAULT_ISOFORMAT)) {
+const getAnniversary = computed(() => {
+  if (isValid(hireDate.value, DEFAULT_ISOFORMAT)) {
     // if valid date
     let now = getTodaysDate();
     let curYear = now.split('-')[0];
 
-    if (isAfter(now, this.hireDate)) {
+    if (isAfter(now, hireDate.value)) {
       // employee's hire date is before today
-      let anniversary = setYear(this.hireDate, curYear);
+      let anniversary = setYear(hireDate.value, curYear);
       // employee's hire date is before today
       if (isAfter(add(now, 1, 'days'), anniversary)) {
         // employee's anniversary date has already occured this year
@@ -93,26 +135,26 @@ function getAnniversary() {
       }
     } else {
       // employee's hire date is in the future
-      return format(add(this.hireDate, 1, 'years'), null, 'LL');
+      return format(add(hireDate.value, 1, 'years'), null, 'LL');
     }
   } else {
     // TODO: Return something for invalid date
-    return 'Ooops no anniversary, when did you start working here again? ';
+    return 'Ooops no anniversary, when did you start working here again?';
   }
-} // getAnniversary
+}); // getAnniversary
 
 /**
  * Get the days until the employee's next anniversary date.
  *
  * @return number - returns the number of days until next anniversary
  */
-function getDaysUntil() {
+const getDaysUntil = computed(() => {
   let now = getTodaysDate();
   let curYear = now.split('-')[0];
 
-  let anniversary = setYear(this.hireDate, curYear);
+  let anniversary = setYear(hireDate.value, curYear);
 
-  if (isAfter(now, this.hireDate)) {
+  if (isAfter(now, hireDate.value)) {
     // employee's hire date is before today
     if (isAfter(add(now, 1, 'days'), anniversary)) {
       // employee's anniversary date has already occured this year
@@ -120,21 +162,21 @@ function getDaysUntil() {
     }
   } else {
     // employee's hire date is in the future
-    anniversary = add(this.hireDate, 1, 'years');
+    anniversary = add(hireDate.value, 1, 'years');
   }
 
   return difference(anniversary, now, 'days');
-} // getDaysUntil
+}); // getDaysUntil
 
 /**
  * Get the year for the employee budget year view.
  *
  * @return Int - year for budget year view
  */
-function getFiscalYearView() {
-  let [year] = this.fiscalDateView.split('-');
+const getFiscalYearView = computed(() => {
+  let [year] = fiscalDateView.value.split('-');
   return parseInt(year);
-} // getFiscalYearView
+}); // getFiscalYearView;
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -146,101 +188,30 @@ function getFiscalYearView() {
  * load the data and api call to get budgets
  */
 async function loadData() {
-  this.hireDate = format(this.employee.hireDate, null, DEFAULT_ISOFORMAT);
-  this.fiscalDateView = this.getCurrentBudgetYear(this.hireDate);
-  this.allUserBudgets = await api.getEmployeeBudgets(this.employee.id);
-  this.refreshBudgetYears();
+  hireDate.value = format(props.employee.hireDate, null, DEFAULT_ISOFORMAT);
+  fiscalDateView.value = getCurrentBudgetYear(hireDate.value);
+  allUserBudgets.value = await api.getEmployeeBudgets(props.employee.id);
+  refreshBudgetYears();
 } // loadData
 
 /**
  * Refresh and sets the budget year view options for the employee.
  */
 function refreshBudgetYears() {
-  let budgetYears = [];
+  let tempBudgetYears = [];
   // push all employee budget years
-  let budgetDates = _.uniqBy(_.map(this.allUserBudgets, 'fiscalStartDate'));
+  let budgetDates = _.uniqBy(_.map(allUserBudgets.value, 'fiscalStartDate'));
   budgetDates.forEach((date) => {
     const [year] = date.split('-');
-    budgetYears.push(parseInt(year));
+    tempBudgetYears.push(parseInt(year));
   });
   // push active budget year
-  let [currYear] = this.getCurrentBudgetYear(this.hireDate).split('-');
-  budgetYears.push(parseInt(currYear));
+  let [currYear] = getCurrentBudgetYear(hireDate.value).split('-');
+  tempBudgetYears.push(parseInt(currYear));
   // remove duplicate years and filter to include only active and previous years
-  budgetYears = _.filter(_.uniqBy(budgetYears), (year) => {
+  tempBudgetYears = _.filter(_.uniqBy(tempBudgetYears), (year) => {
     return parseInt(year) <= parseInt(currYear);
   });
-  this.budgetYears = _.reverse(_.sortBy(budgetYears)); // sort budgets from current to past
+  budgetYears.value = _.reverse(_.sortBy(tempBudgetYears)); // sort budgets from current to past
 } // refreshBudgetYears
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                 LIFECYCLE HOOKS                  |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * created lifecycle hook
- */
-async function created() {
-  await this.loadData();
-
-  this.emitter.on('selected-budget-year', (date) => {
-    if (date != this.fiscalDateView) {
-      this.fiscalDateView = date;
-      this.emitter.emit(`change-budget-year-${this.emitCatcher}`, date);
-    }
-  });
-} // created
-
-/**
- * beforeUnmount lifecycle hook
- */
-function beforeUnmount() {
-  this.emitter.off('selected-budget-year');
-} //beforeUnmount
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  components: {
-    BudgetSelectModal
-  },
-  computed: {
-    isMobile,
-    viewingCurrentBudgetYear,
-    getAnniversary,
-    getDaysUntil,
-    getFiscalYearView
-  },
-  data() {
-    return {
-      allUserBudgets: null, // all user budgets
-      budgetYears: [], // list of options for chaning budget year view
-      changingBudgetView: false, // change budget year view activator
-      hireDate: '', // employee hire date
-      fiscalDateView: '' // current budget year view by anniversary day
-    };
-  },
-  created,
-  beforeUnmount,
-  methods: {
-    add, // dateUtils
-    difference, // dateUtils
-    format, // dateUtils
-    getCurrentBudgetYear,
-    getTodaysDate, // dateUtils
-    isAfter, // dateUtils
-    isBefore, // dateUtils
-    isValid, // dateUtils
-    loadData,
-    refreshBudgetYears,
-    setYear // dateUtils
-  },
-  props: ['employee', 'hasBudgets', 'location', 'emitCatcher']
-};
 </script>
