@@ -187,7 +187,7 @@
             mobile-breakpoint="800"
             item-key="employeeNumber"
             class="elevation-1 employees-table text-body-2"
-            @click:row="handleClick"
+            @click:row="handleClick()"
           >
             <!-- Delete Action Item Slot -->
             <template #[`item.actions`]="{ item }">
