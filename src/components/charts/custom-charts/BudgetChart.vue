@@ -1,6 +1,6 @@
 <template>
   <div v-if="dataReceived">
-    <v-card class="px-10 pt-5 my-7 pointer" v-if="chartData.labels.length > 0">
+    <v-card class="px-10 pt-5 my-7 pointer">
       <bar-chart
         ref="barChart"
         :key="chartKey"
