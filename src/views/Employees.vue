@@ -317,6 +317,7 @@ import { employeeFilter } from '@/shared/filterUtils';
 import { format } from '../shared/dateUtils';
 import { ref, inject, onBeforeMount, onBeforeUnmount, computed, watch } from 'vue';
 import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -326,6 +327,7 @@ import { useStore } from 'vuex';
 
 const store = useStore();
 const emitter = inject('emitter');
+const router = useRouter();
 const applicationSyncData = ref(null);
 const childKey = ref(0);
 const contracts = ref([]);
@@ -551,7 +553,7 @@ function getLoginDate(item) {
  * @param item - the employee
  */
 function handleClick(_, tableItem) {
-  this.$router.push(employeePath(tableItem.item));
+  router.push(employeePath(tableItem.item));
 } //handleClick
 
 /**
