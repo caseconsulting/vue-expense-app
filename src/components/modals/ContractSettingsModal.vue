@@ -114,15 +114,9 @@ watch(
   () => props.toggleModal,
   () => {
     model.value = _.cloneDeep(props.contract);
-    if (props.toggleModal) activate.value = true;
+    if (props.toggleModal) activate.value = props.toggleModal;
   }
-); // watchEmployeesAssignedModal
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     METHODS                      |
-// |                                                  |
-// |--------------------------------------------------|
+);
 
 /**
  * Save contract settings and dispatch updates to store.
