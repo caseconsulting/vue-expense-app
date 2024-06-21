@@ -54,11 +54,39 @@ function watchToggleDeleteErrorModal() {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+// The watcher above and this emitter kind of do the same thing, but the watcher didn't update when it should've in
+// some cases. To fix this, I used this event instead (fired in ExpenseTypes.vue), but I didn't delete the watcher to
+// avoid breaking anything else.
+
+/**
+ * Created lifecycle hook - sets up event listeners
+ */
+function created() {
+  this.emitter.on('delete-expense-type-error-show', () => {
+    this.activate = true;
+  });
+}
+
+/**
+ * Before Unmount lifecycle hook - removes event listeners
+ */
+function beforeUnmount() {
+  this.emitter.off('delete-expense-type-error-show');
+}
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
 
 export default {
+  created,
+  beforeUnmount,
   data() {
     return {
       activate: false // dialog activator

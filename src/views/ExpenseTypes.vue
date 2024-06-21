@@ -1142,7 +1142,8 @@ async function validateDelete(item) {
       deleteModel.value['id'] = item.id;
       deleting.value = true;
     } else {
-      invalidDelete.value = true;
+      // tells DeleteErrorModal to appear
+      emitter.emit('delete-expense-type-error-show');
     }
   } catch (err) {
     displayError(err);
