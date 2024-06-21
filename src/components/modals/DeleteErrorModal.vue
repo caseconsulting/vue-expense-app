@@ -23,7 +23,38 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { inject, ref, watch } from 'vue';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const props = defineProps([
+  'toggleDeleteErrorModal', // dialog activator
+  'type' // type of object being deleted
+]);
+const emitter = inject('emitter');
+
+const activate = ref(false); // dialog activator
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+// Watcher for toggleDeleteErrorModal
+watch(
+  () => props.toggleDeleteErrorModal,
+  () => {
+    activate.value = props.toggleDeleteErrorModal;
+    console.log(activate.value); // TODO debug
+  }
+);
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -36,43 +67,6 @@
  * @param msg - Message to emit
  */
 function emit(msg) {
-  this.emitter.emit(msg);
+  emitter.emit(msg);
 } // emit
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                    WATCHERS                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * watcher for toggleDeleteErrorModal
- */
-function watchToggleDeleteErrorModal() {
-  this.activate = true;
-} // watchToggleDeleteErrorModal
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  data() {
-    return {
-      activate: false // dialog activator
-    };
-  },
-  methods: {
-    emit
-  },
-  props: [
-    'toggleDeleteErrorModal', // dialog activator
-    'type' // type of object being deleted
-  ],
-  watch: {
-    toggleDeleteErrorModal: watchToggleDeleteErrorModal
-  }
-};
 </script>

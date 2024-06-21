@@ -50,23 +50,44 @@
     </v-dialog>
   </div>
 </template>
-<script>
+
+<script setup>
 import _ from 'lodash';
 import api from '@/shared/api.js';
 import { updateStoreContracts } from '@/utils/storeUtils';
+import { inject, ref, watch } from 'vue';
+import { useStore } from 'vuex';
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                 LIFECYCLE HOOKS                  |
+// |                      SETUP                       |
 // |                                                  |
 // |--------------------------------------------------|
 
-/**
- * Created lifecyle hook
- */
-function created() {
-  if (!this.$store.getters.contracts) this.updateStoreContracts();
-} // created
+const props = defineProps(['toggleModal', 'contract']);
+const emitter = inject('emitter');
+const store = useStore();
+
+const loading = ref(false);
+const activate = ref(false);
+const model = ref(_.cloneDeep(props.contract));
+
+if (!store.getters.contracts) updateStoreContracts();
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+// Watcher for modal toggle
+watch(
+  () => props.toggleModal,
+  () => {
+    model.value = _.cloneDeep(props.contract);
+    if (props.toggleModal) activate.value = props.toggleModal;
+  }
+);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -80,55 +101,21 @@ function created() {
  * @param msg - Message to emit
  */
 function emit(msg) {
-  this.emitter.emit(msg);
+  emitter.emit(msg);
 } // emit
 
 /**
  * Save contract settings and dispatch updates to store.
  */
 async function save() {
-  this.loading = true;
-  let data = { id: this.contract.id, contractViewEnabled: this.model.contractViewEnabled };
+  loading.value = true;
+  let data = { id: props.contract.id, contractViewEnabled: model.value.contractViewEnabled };
   await api.updateAttribute(api.CONTRACTS, data, 'contractViewEnabled');
-  let contracts = this.$store.getters.contracts;
-  let i = _.findIndex(contracts, (c) => c.id === this.model.id);
-  contracts[i] = _.cloneDeep(this.model);
-  this.$store.dispatch('setContracts', { contracts });
-  this.emit('closed-contract-settings-modal');
-  this.loading = false;
+  let contracts = store.getters.contracts;
+  let i = _.findIndex(contracts, (c) => c.id === model.value.id);
+  contracts[i] = _.cloneDeep(model.value);
+  store.dispatch('setContracts', { contracts });
+  emit('closed-contract-settings-modal');
+  loading.value = false;
 } // save
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     WATCHERS                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Watcher for modal toggle
- */
-function watchToggleModal() {
-  this.model = _.cloneDeep(this.contract);
-  if (this.toggleModal) this.activate = true;
-} // watchEmployeesAssignedModal
-
-export default {
-  created,
-  data() {
-    return {
-      loading: false,
-      activate: false,
-      model: _.cloneDeep(this.contract)
-    };
-  },
-  methods: {
-    emit,
-    save,
-    updateStoreContracts
-  },
-  props: ['toggleModal', 'contract'],
-  watch: {
-    toggleModal: watchToggleModal
-  }
-};
 </script>

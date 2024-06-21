@@ -40,8 +40,26 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { format, setYear } from '@/shared/dateUtils';
+import { computed, inject, ref, watch } from 'vue';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const props = defineProps([
+  'toggleBudgetSelectModal', // dialog activator
+  'budgetYears', // all budget years
+  'current', // current fiscal date view
+  'hireDate', // employee hire date
+  'hasBudgets'
+]);
+const emitter = inject('emitter');
+
+const activate = ref(false);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -50,13 +68,23 @@ import { format, setYear } from '@/shared/dateUtils';
 // |--------------------------------------------------|
 
 /**
- * Gets the anniversary date based on hire date.
- *
- * @return String - anniversary date
+ * The anniversary date based on hire date.
  */
-function getAnniversaryDate() {
-  return format(this.hireDate, null, 'MMMM Do');
-} // getAnniversaryDate
+const getAnniversaryDate = computed(() => format(props.hireDate, null, 'MMMM Do'));
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+// watcher for toggleBudgetSelectModal
+watch(
+  () => props.toggleBudgetSelectModal,
+  () => {
+    activate.value = true;
+  }
+);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -71,7 +99,7 @@ function getAnniversaryDate() {
  * @return boolean - given budget year is equal to current
  */
 function isCurrent(budgetYear) {
-  let [year] = this.current.split('-');
+  let [year] = props.current.split('-');
   return budgetYear == year;
 } // isCurrent
 
@@ -82,53 +110,7 @@ function isCurrent(budgetYear) {
  */
 function select(budgetYear) {
   let fiscalYear = setYear(this.hireDate, budgetYear);
-  this.emitter.emit(`selected-budget-year`, fiscalYear);
-  this.activate = false;
+  emitter.emit(`selected-budget-year`, fiscalYear);
+  activate.value = false;
 } // select
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                    WATCHERS                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * watcher for toggleBudgetSelectModal
- */
-function watchToggleBudgetSelectModal() {
-  this.activate = true;
-} // watchToggleBudgetSelectModal
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  computed: {
-    getAnniversaryDate
-  },
-  data() {
-    return {
-      activate: false // dialog activator
-    };
-  },
-  methods: {
-    format,
-    isCurrent,
-    select,
-    setYear
-  },
-  props: [
-    'toggleBudgetSelectModal', // dialog activator
-    'budgetYears', // all budget years
-    'current', // current fiscal date view
-    'hireDate', // employee hire date
-    'hasBudgets'
-  ],
-  watch: {
-    toggleBudgetSelectModal: watchToggleBudgetSelectModal
-  }
-};
 </script>
