@@ -142,7 +142,7 @@ const isSubmitting = ref(false);
 const ptoCashOutObj = ref({ approvedDate: null });
 const valid = ref(false);
 
-const vMask = mask;
+const vMask = mask; //v-mask directive
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -358,16 +358,6 @@ async function updatePTOCashOutRequest() {
   });
   store.dispatch('setPtoCashOuts', { ptoCashOuts: ptoCashOuts });
 } // updatePTOCashOutRequest
-</script>
-<script>
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-// export default {
-//   directives: { mask }
-// };
 </script>
 <style scoped>
 h3 {
