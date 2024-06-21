@@ -10,7 +10,7 @@
 import { setIdToken, setAccessToken, setRole, setProfile } from '@/utils/auth';
 import api from '@/shared/api';
 import { getTodaysDate } from '../shared/dateUtils';
-import { onMounted } from 'vue';
+import { onMounted, nextTick } from 'vue';
 const login_format = 'MMM Do, YYYY HH:mm:ss';
 
 // |--------------------------------------------------|
@@ -23,7 +23,7 @@ const login_format = 'MMM Do, YYYY HH:mm:ss';
  * mounted lifecycle hook
  */
 onMounted(() => {
-  this.$nextTick(async function () {
+  nextTick(async function () {
     try {
       // set tokens
       setAccessToken();
