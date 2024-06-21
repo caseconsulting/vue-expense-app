@@ -264,7 +264,7 @@ const supplementalDataWithPlan = computed(() => {
 function showContractYear() {
   let empCurContract = _.find(props.employee.contracts, (c) => _.find(c.projects, (p) => !p.endDate));
   let contract = _.find(store.getters.contracts, (c) => c.id === empCurContract?.contractId);
-  return contract.settings?.timesheetsContractViewOption;
+  return contract?.settings?.timesheetsContractViewOption;
 } // showContractYear
 
 /**
