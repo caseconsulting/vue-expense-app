@@ -59,6 +59,7 @@
     </v-dialog>
   </div>
 </template>
+
 <script setup>
 import _ from 'lodash';
 import api from '@/shared/api.js';
@@ -107,6 +108,7 @@ onMounted(() => {
 // |--------------------------------------------------|
 
 /**
+>>>>>>> 7a83eed1 (POR-2545-migrate-first-half-of-components/modals-to-composition-api: resolve merge conflicts)
  * Save contract settings and dispatch updates to store.
  */
 async function save() {
