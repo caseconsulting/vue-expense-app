@@ -39,7 +39,24 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, inject, watch } from 'vue';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const activate = ref(false); // dialog activator
+const emitter = inject('emitter');
+const props = defineProps([
+  'submitting',
+  'title',
+  'toggleModal', // dialog activator,
+  'type' //sends appropriate emits based on where its called
+]);
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -52,7 +69,7 @@
  * @param msg - Message to emit
  */
 function emit(msg) {
-  this.emitter.emit(msg);
+  emitter.emit(msg);
 } // emit
 
 // |--------------------------------------------------|
@@ -64,33 +81,10 @@ function emit(msg) {
 /**
  * watcher for toggleSubmissionConfirmation
  */
-function watchToggleModalConfirmation() {
-  this.activate = this.toggleModal;
-} // watchToggleSubmissionConfirmation
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  data() {
-    return {
-      activate: false // dialog activator
-    };
-  },
-  methods: {
-    emit
-  },
-  props: [
-    'submitting',
-    'title',
-    'toggleModal', // dialog activator,
-    'type' //sends appropriate emits based on where its called
-  ],
-  watch: {
-    toggleModal: watchToggleModalConfirmation
+watch(
+  () => props.toggleModal,
+  () => {
+    activate.value = props.toggleModal;
   }
-};
+); // watchToggleSubmissionConfirmation
 </script>

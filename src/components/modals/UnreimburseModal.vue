@@ -37,7 +37,19 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, inject, watch } from 'vue';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const activate = ref(false); // dialog activator
+const emitter = inject('emitter');
+const props = defineProps(['toggleUnreimburseModal']); // dialog activator
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -53,10 +65,10 @@
 function emit(msg, data) {
   if (data) {
     // data exists
-    this.emitter.emit(msg, data);
+    emitter.emit(msg, data);
   } else {
     // data does not exist
-    this.emitter.emit(msg);
+    emitter.emit(msg);
   }
 } // emit
 
@@ -69,30 +81,10 @@ function emit(msg, data) {
 /**
  * watcher for toggleUnreimburseModal
  */
-function watchToggleUnreimburseModal() {
-  this.activate = true;
-} // watchToggleUnreimburseModal
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  data() {
-    return {
-      activate: false // dialog activator
-    };
-  },
-  methods: {
-    emit
-  },
-  props: [
-    'toggleUnreimburseModal' // dialog activator
-  ],
-  watch: {
-    toggleUnreimburseModal: watchToggleUnreimburseModal
+watch(
+  () => props.toggleUnreimburseModal,
+  () => {
+    activate.value = true;
   }
-};
+); // watchToggleUnreimburseModal
 </script>

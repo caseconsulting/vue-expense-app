@@ -29,10 +29,25 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, inject, watch } from 'vue';
+
 // |--------------------------------------------------|
 // |                                                  |
-// |                      Methods                     |
+// |                       SETUP                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+const activate = ref(false); // dialog activator
+const emitter = inject('emitter');
+const props = defineProps([
+  'errorTabs',
+  'toggleSubmissionConfirmation' // dialog activator
+]);
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      METHODS                     |
 // |                                                  |
 // |--------------------------------------------------|
 
@@ -42,7 +57,7 @@
  * @param msg - Message to emit
  */
 function emit(msg) {
-  this.emitter.emit(msg);
+  emitter.emit(msg);
 } // emit
 
 /**
@@ -67,34 +82,12 @@ function isPlural(val) {
 /**
  * watcher for toggleSubmissionConfirmation
  */
-function watchToggleSubmissionConfirmation() {
-  this.activate = this.toggleSubmissionConfirmation;
-} // watchToggleSubmissionConfirmation
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  data() {
-    return {
-      activate: false // dialog activator
-    };
-  },
-  methods: {
-    emit,
-    isPlural
-  },
-  props: [
-    'errorTabs',
-    'toggleSubmissionConfirmation' // dialog activator
-  ],
-  watch: {
-    toggleSubmissionConfirmation: watchToggleSubmissionConfirmation
+watch(
+  () => props.toggleSubmissionConfirmation,
+  () => {
+    activate.value = props.toggleSubmissionConfirmation;
   }
-};
+); // watchToggleSubmissionConfirmation
 </script>
 
 <style scoped>
