@@ -443,23 +443,6 @@ const toggleEmployeesSyncModal = ref(false);
 // |--------------------------------------------------|
 
 /**
- * Changes the employee avatar to default if it fails to display original.
- *
- * @param item - employee to check
- */
-// function changeAvatar(item) {
-//   let index = _.findIndex(employees.value, (employee) => {
-//     return employee.id === item.id;
-//   });
-
-//   let newItem = employees.value[index];
-
-//   newItem.avatar = null;
-
-//   employees.value.splice(index, 1, newItem);
-// } // changeAvatar
-
-/**
  * Clear the action status that is displayed in the snackbar.
  */
 function clearStatus() {
@@ -476,7 +459,7 @@ async function deleteEmployee() {
   let e = await api.deleteItem(api.EMPLOYEES, deleteModel.value.id); // delete employee from api
   if (e.id) {
     // update data if successfully deletes employee
-    await deleteModel.value.valueFromTable();
+    await deleteModelFromTable();
   } else {
     // display error if failed to deleted employee
     displayError(e.response.data.message);
@@ -487,14 +470,14 @@ async function deleteEmployee() {
 /**
  * Refresh and updates employee list and displays a successful delete status in the snackbar.
  */
-// async function deleteModelFromTable() {
-//   await refreshEmployees();
+async function deleteModelFromTable() {
+  await refreshEmployees();
 
-//   status.value['show'] = true;
-//   status.value['statusType'] = 'SUCCESS';
-//   status.value['statusMessage'] = 'Employee was successfully deleted!';
-//   status.value['color'] = 'green';
-// } // deleteModelFromTable
+  status.value['show'] = true;
+  status.value['statusType'] = 'SUCCESS';
+  status.value['statusMessage'] = 'Employee was successfully deleted!';
+  status.value['color'] = 'green';
+} // deleteModelFromTable
 
 /**
  * Set and display an error action status in the snackbar.
@@ -624,7 +607,7 @@ function renderManageTags() {
  */
 function employeeIsOnTag(e) {
   if (e.id) e = e.id; // just use the id
-  for (let t of tags) {
+  for (let t of tags.value) {
     if (t.employees.includes(e)) return true;
   }
   return false;
@@ -661,7 +644,7 @@ async function validateDelete(item) {
   if (employeeIsOnTag(item.id)) {
     // remove them from the tag
     let tagPromises = [];
-    for (let t of tags) {
+    for (let t of tags.value) {
       if (t.employees.includes(item.id)) {
         let index = t.employees.indexOf(item.id);
         t.employees.splice(index, 1);
