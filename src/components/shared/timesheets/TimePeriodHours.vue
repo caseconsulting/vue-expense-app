@@ -52,7 +52,7 @@
           <v-icon size="x-large">mdi-calendar-weekend</v-icon>
         </v-btn>
         <v-tooltip v-if="!timePeriodLoading" activator="parent" location="top">
-          <span>{{ showContractYear() ? 'Contract Year' : 'Coming soon: contract year view' }}</span>
+          <span>{{ showContractYear() ? 'Contract Year' : 'Contract year has not been enabled by an admin' }}</span>
         </v-tooltip>
       </div>
     </v-row>
@@ -264,7 +264,7 @@ const supplementalDataWithPlan = computed(() => {
 function showContractYear() {
   let empCurContract = _.find(props.employee.contracts, (c) => _.find(c.projects, (p) => !p.endDate));
   let contract = _.find(store.getters.contracts, (c) => c.id === empCurContract?.contractId);
-  return contract?.contractViewEnabled;
+  return contract?.settings?.timesheetsContractViewOption;
 } // showContractYear
 
 /**

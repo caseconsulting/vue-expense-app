@@ -7,28 +7,37 @@
           <span>Settings for {{ contract.primeName }} {{ contract.contractName }}</span>
         </v-card-title>
         <v-card-text>
-          <v-row class="d-flex align-center">
-            <span> Employee Timesheets Contract View: </span>
-            <div>
-              <v-switch
-                v-model="model.contractViewEnabled"
-                color="primary"
-                :label="model.contractViewEnabled ? 'Enabled' : 'Disabled'"
-                class="d-inline-block ml-5"
-                hide-details
-              />
-              <v-tooltip activator="parent" location="top">
-                Displays yearly data based on employee's current project start date
-              </v-tooltip>
-            </div>
-          </v-row>
+          <h3>Employee Timesheets Contract View</h3>
+          <div class="pa-6">
+            <v-row v-for="(value, key) of timesheetsContractViewOptions" :key="value">
+              <v-col cols="8" class="d-flex align-center pa-0">
+                {{ value.title }}
+              </v-col>
+              <v-col cols="4" class="pa-0">
+                <div>
+                  <v-switch
+                    color="primary"
+                    density="compact"
+                    :model-value="model.settings?.timesheetsContractViewOption === key"
+                    :label="model.settings?.timesheetsContractViewOption === key ? 'Enabled' : 'Disabled'"
+                    class="d-inline-block"
+                    hide-details
+                    @update:model-value="updateSettings(value, key)"
+                  />
+                  <v-tooltip v-if="value.tooltip" activator="parent" location="top">
+                    {{ value.tooltip }}
+                  </v-tooltip>
+                </div>
+              </v-col>
+            </v-row>
+          </div>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn
             variant="text"
             @click="
-              emit('closed-contract-settings-modal');
+              emitter.emit('closed-contract-settings-modal');
               activate = false;
             "
             :disabled="loading"
@@ -50,13 +59,12 @@
     </v-dialog>
   </div>
 </template>
-
 <script setup>
 import _ from 'lodash';
 import api from '@/shared/api.js';
-import { updateStoreContracts } from '@/utils/storeUtils';
-import { inject, ref, watch } from 'vue';
+import { inject, onMounted, ref, watch } from 'vue';
 import { useStore } from 'vuex';
+import { updateStoreContracts } from '@/utils/storeUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -71,23 +79,26 @@ const store = useStore();
 const loading = ref(false);
 const activate = ref(false);
 const model = ref(_.cloneDeep(props.contract));
-
-if (!store.getters.contracts) updateStoreContracts();
+const timesheetsContractViewOptions = ref({
+  0: {
+    title: 'Employee current project start date',
+    tooltip: "Displays yearly data based on employee's current project start date"
+  },
+  1: { title: 'Contract PoP date', tooltip: 'Displays yearly data based on contract PoP start date' }
+});
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     WATCHERS                     |
+// |                 LIFECYCLE HOOKS                  |
 // |                                                  |
 // |--------------------------------------------------|
 
-// Watcher for modal toggle
-watch(
-  () => props.toggleModal,
-  () => {
-    model.value = _.cloneDeep(props.contract);
-    if (props.toggleModal) activate.value = props.toggleModal;
-  }
-);
+/**
+ * Created lifecyle hook
+ */
+onMounted(() => {
+  if (!store.getters.contracts) updateStoreContracts();
+}); // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -96,26 +107,48 @@ watch(
 // |--------------------------------------------------|
 
 /**
- * Emits a message and data if it exists.
- *
- * @param msg - Message to emit
- */
-function emit(msg) {
-  emitter.emit(msg);
-} // emit
-
-/**
  * Save contract settings and dispatch updates to store.
  */
 async function save() {
   loading.value = true;
-  let data = { id: props.contract.id, contractViewEnabled: model.value.contractViewEnabled };
-  await api.updateAttribute(api.CONTRACTS, data, 'contractViewEnabled');
+  let data = { id: props.contract.id, settings: model.value.settings };
+  await api.updateAttribute(api.CONTRACTS, data, 'settings');
   let contracts = store.getters.contracts;
   let i = _.findIndex(contracts, (c) => c.id === model.value.id);
   contracts[i] = _.cloneDeep(model.value);
   store.dispatch('setContracts', { contracts });
-  emit('closed-contract-settings-modal');
+  emitter.emit('closed-contract-settings-modal');
   loading.value = false;
 } // save
+
+/**
+ * Updates the settings timesheetsContractViewOption model to the options key.
+ *
+ * @param {Object} value - The timesheetsContractViewOptions value
+ * @param {Number} key - The timesheetsContractViewOptions key
+ */
+function updateSettings(__, key) {
+  _.set(
+    model.value,
+    'settings.timesheetsContractViewOption',
+    model.value.settings?.timesheetsContractViewOption === key ? null : key
+  );
+} // updateSettings
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Watcher for modal toggle
+ */
+watch(
+  () => props.toggleModal,
+  () => {
+    model.value = _.cloneDeep(props.contract);
+    if (props.toggleModal) activate.value = true;
+  }
+); // watchEmployeesAssignedModal
 </script>
