@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-v-model-argument -->
 <template>
   <div>
     <!-- Status Alert -->
@@ -27,7 +28,7 @@
           closable-chips
           variant="underlined"
           :label="employees.length == 1 ? `${employees.length} Employee` : `${employees.length} Employees`"
-          :search.sync="employeeSearch"
+          v-model:search="employeeSearch"
           @update:model-value="employeeSearch = ''"
           item-title="employeeName"
           return-object
