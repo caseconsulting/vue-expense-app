@@ -232,7 +232,8 @@ watch(
  */
 async function submit() {
   try {
-    valid.value = form.value.validate();
+    const validResponse = await form.value.validate();
+    valid.value = validResponse.valid;
     if (valid.value) {
       isSubmitting.value = true;
       if (props.item) {
@@ -240,7 +241,7 @@ async function submit() {
       } else {
         await createPTOCashOutRequest();
       }
-      emitter.emit('close-pto-cash-out-form');
+      emitCloseForm();
       clearForm();
       isSubmitting.value = false;
       if (props.item) {
@@ -250,7 +251,7 @@ async function submit() {
       }
     }
   } catch (err) {
-    emitter.emit('close-pto-cash-out-form');
+    emitCloseForm();
     clearForm();
     isSubmitting.value = false;
     displayError(err);
@@ -261,9 +262,10 @@ async function submit() {
  * Cancel event handler
  */
 function cancel() {
-  emitter.emit('close-pto-cash-out-form');
+  emitCloseForm();
   clearForm();
 } // cancel
+
 
 /**
  * Clears form and resets validation.
@@ -274,7 +276,7 @@ function clearForm() {
   ptoCashOutObj.value['amount'] = null;
   ptoCashOutObj.value['creationDate'] = null;
   ptoCashOutObj.value['approvedDate'] = null;
-
+  
   approvedDateFormatted.value = null;
   form.value.reset();
   form.value.resetValidation();
@@ -306,6 +308,14 @@ function displaySuccess(msg) {
   };
   emitter.emit('status-alert', status);
 } // displaySuccess
+
+/**
+ * Emits close form events
+ */
+ function emitCloseForm() {
+  emitter.emit('close-pto-cash-out-form-table');
+  emitter.emit('close-pto-cash-out-form-hours');
+}
 
 /**
  * Gets the user's pending PTO cash out amount

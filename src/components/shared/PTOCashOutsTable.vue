@@ -273,27 +273,23 @@ onBeforeMount(async () => {
  * beforeUnmount lifecycle hook. Destroys all event listeners.
  */
 onBeforeUnmount(() => {
-  emitter.off('confirm-pto-cash-outs');
-  emitter.off('canceled-pto-cash-outs');
+  emitter.off('confirmed-pto-cash-outs');
   emitter.off('confirm-delete-PTO cash out');
   emitter.off('canceled-delete-PTO cash out');
-  emitter.off('close-pto-cash-out-form');
+  emitter.off('close-pto-cash-out-form-table');
 }); // beforeUnmount
 
 /**
  * Mounted lifecycle hook
  */
 onMounted(async () => {
-  emitter.on('close-pto-cash-out-form', () => {
+  emitter.on('close-pto-cash-out-form-table', () => {
     toggleEditModal.value = false;
     clickedEditItem.value = null;
     userPto.value = null;
   });
   emitter.on('confirmed-pto-cash-outs', async () => {
     await clickedConfirmApprove();
-  });
-  emitter.on('canceled-pto-cash-outs', () => {
-    toggleApproveModal.value = false;
   });
   emitter.on('confirm-delete-PTO cash out', async () => {
     await clickedConfirmDelete();
@@ -545,8 +541,11 @@ function uncheckAllBoxes() {
 async function clickedEdit(item) {
   clickedEditItem.value = item;
   toggleEditModal.value = true;
-  let employee = _.find(store.getters.employees, (e) => e.id === item.employeeId);
-  let employeeBalances = await api.getTimesheetsData(employee.employeeNumber, { code: 1 });
+  let tempEmployee = _.find(store.getters.employees, (e) => e.id === item.employeeId);
+  let employeeBalances = await api.getTimesheetsData(tempEmployee.employeeNumber, {
+    code: 1,
+    employeeId: tempEmployee.id
+  });
   let pto = employeeBalances?.ptoBalances?.PTO / 60 / 60 || 0;
   userPto.value = formatNumber(pto);
 } // clickedEdit

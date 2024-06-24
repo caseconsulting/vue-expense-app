@@ -110,7 +110,8 @@ const showMore = ref(false);
  * The Mounted lifecycle hook.
  */
 onMounted(() => {
-  emitter.on('close-pto-cash-out-form', () => {
+  emitter.on('close-pto-cash-out-form-hours', () => {
+
     showPTOCashOutFormModal.value = false;
   });
   emitter.on('close-pto-planning-form', () => {
@@ -122,7 +123,7 @@ onMounted(() => {
  * The Mounted lifecycle hook.
  */
 onBeforeUnmount(() => {
-  emitter.off('close-pto-cash-out-form');
+  emitter.off('close-pto-cash-out-form-hours');
   emitter.off('close-pto-planning-form');
 }); // mounted
 
