@@ -17,6 +17,7 @@ import Home from '@/views/Home.vue';
 import TrainingAnalytics from '@/views/TrainingAnalytics';
 import PageNotFound from '@/views/PageNotFound';
 import Contracts from '@/views/Contracts.vue';
+import EmployeeBeta from '@/views/EmployeeBeta.vue';
 import { requireAuth, isAdminOrManager } from '@/utils/auth';
 import multiguard from 'vue-router-multiguard';
 
@@ -132,6 +133,13 @@ const router = createRouter({
       path: '/employee/:id',
       name: 'employee',
       component: Employee,
+      beforeEnter: requireAuth
+    },
+    // beta employee profile page
+    {
+      path: '/employee-beta/:id',
+      name: 'employee-beta',
+      component: EmployeeBeta,
       beforeEnter: requireAuth
     },
     //Below catch-all code works for Vue 2
