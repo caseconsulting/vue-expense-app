@@ -109,7 +109,7 @@ function isCurrent(budgetYear) {
  * @param budgetYear - int budget year selected
  */
 function select(budgetYear) {
-  let fiscalYear = setYear(this.hireDate, budgetYear);
+  let fiscalYear = setYear(props.hireDate, budgetYear);
   emitter.emit(`selected-budget-year`, fiscalYear);
   activate.value = false;
 } // select
