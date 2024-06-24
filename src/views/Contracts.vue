@@ -94,10 +94,10 @@ onBeforeMount(async () => {
   loading.value = true;
   emitter.on('canceled-contract-form', () => (toggleContractForm.value = false));
   emitter.on('submitted-contract-form', () => (toggleContractForm.value = false));
-  emitter.on('status-alert', (status) => {
-    status.value['statusType'] = status.statusType;
-    status.value['statusMessage'] = status.statusMessage;
-    status.value['color'] = status.color;
+  emitter.on('status-alert', (currStatus) => {
+    status.value['statusType'] = currStatus.statusType;
+    status.value['statusMessage'] = currStatus.statusMessage;
+    status.value['color'] = currStatus.color;
   });
 
   await Promise.all([
