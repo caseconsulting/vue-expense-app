@@ -95,11 +95,28 @@ const timesheetsContractViewOptions = ref({
 // |--------------------------------------------------|
 
 /**
- * Created lifecyle hook
+ * Mounted lifecyle hook
  */
 onMounted(() => {
   if (!store.getters.contracts) updateStoreContracts();
-}); // created
+});
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Watcher for modal toggle
+ */
+watch(
+  () => props.toggleModal,
+  () => {
+    model.value = _.cloneDeep(props.contract);
+    if (props.toggleModal) activate.value = true;
+  }
+); // watchEmployeesAssignedModal
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -108,7 +125,6 @@ onMounted(() => {
 // |--------------------------------------------------|
 
 /**
->>>>>>> 7a83eed1 (POR-2545-migrate-first-half-of-components/modals-to-composition-api: resolve merge conflicts)
  * Save contract settings and dispatch updates to store.
  */
 async function save() {
@@ -136,21 +152,4 @@ function updateSettings(__, key) {
     model.value.settings?.timesheetsContractViewOption === key ? null : key
   );
 } // updateSettings
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     WATCHERS                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Watcher for modal toggle
- */
-watch(
-  () => props.toggleModal,
-  () => {
-    model.value = _.cloneDeep(props.contract);
-    if (props.toggleModal) activate.value = true;
-  }
-); // watchEmployeesAssignedModal
 </script>
