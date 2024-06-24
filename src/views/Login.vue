@@ -20,45 +20,34 @@
   </v-container>
 </template>
 
-<script>
+<script setup>
 import { isLoggedIn, login } from '@/utils/auth';
+import { computed } from 'vue';
+import { useRouter } from 'vue-router';
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                 LIFECYCLE HOOKS                  |
+// |                      SETUP                       |
 // |                                                  |
 // |--------------------------------------------------|
 
-/**
- * Route to home page on log in.
- */
-function created() {
-  let path = decodeURIComponent(window.location.search).split('=/')[1];
-  path = path ? path : 'home';
-  localStorage.setItem('redirectUrl', path);
-  if (this.isLoggedIn()) {
-    this.$router.push(path);
-  }
-} // created
+const router = useRouter();
+
+// Route to home page on log in.
+let path = decodeURIComponent(window.location.search).split('=/')[1];
+path = path ? path : 'home';
+localStorage.setItem('redirectUrl', path);
+if (isLoggedIn()) {
+  router.push(path);
+}
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                      EXPORT                      |
+// |                     COMPUTED                     |
 // |                                                  |
 // |--------------------------------------------------|
 
-export default {
-  created,
-  computed: {
-    isTimedOut() {
-      return !!sessionStorage.getItem('timedOut');
-    }
-  },
-  methods: {
-    login,
-    isLoggedIn
-  }
-};
+const isTimedOut = computed(() => !!sessionStorage.getItem('timedOut'));
 </script>
 
 <style>
