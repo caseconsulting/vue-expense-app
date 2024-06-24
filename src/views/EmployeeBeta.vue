@@ -4,9 +4,14 @@
       <employee-page-loader />
     </v-row>
     <div v-else>
+      <employee-info :model="model"></employee-info>
       <hire-info-card :model="model"></hire-info-card>
-      <certifications-card :model="model"></certifications-card>
-      <awards-card :model="model"></awards-card>
+      <certifications-card
+        :model="model"
+        :isAdmin="hasAdminPermissions()"
+        :isUser="userIsEmployee()"
+      ></certifications-card>
+      <awards-card :model="model" :isAdmin="hasAdminPermissions()" :isUser="userIsEmployee()"></awards-card>
       <v-btn color="#bc3825" @click="goBackToAlphaProfile()" theme="dark" class="ma-2">Go to Alpha profile!</v-btn>
     </div>
   </v-container>
