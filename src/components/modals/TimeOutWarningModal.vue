@@ -14,7 +14,18 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, watch } from 'vue';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     SETUP                        |
+// |                                                  |
+// |--------------------------------------------------|
+
+const activate = ref(false); // dialog activator
+const props = defineProps(['toggleWarning']); // dialog activator
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                    WATCHERS                      |
@@ -24,25 +35,10 @@
 /**
  * watcher for toggleWarning
  */
-function watchToggleWarning() {
-  this.activate = this.toggleWarning;
-} // watchToggleWarning
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  data() {
-    return {
-      activate: false // dialog activator
-    };
-  },
-  props: ['toggleWarning'], // dialog activator
-  watch: {
-    toggleWarning: watchToggleWarning
+watch(
+  () => props.toggleWarning,
+  () => {
+    activate.value = props.toggleWarning;
   }
-};
+); // watchToggleWarning
 </script>

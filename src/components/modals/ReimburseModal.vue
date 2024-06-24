@@ -33,12 +33,17 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, watch } from 'vue';
+
 // |--------------------------------------------------|
 // |                                                  |
-// |                     METHODS                      |
+// |                      SETUP                       |
 // |                                                  |
 // |--------------------------------------------------|
+
+const activate = ref(false); // dialog activator
+const props = defineProps(['toggleReimburseModal']);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -49,25 +54,10 @@
 /**
  * watcher for toggleReimburseModal
  */
-function watchToggleReimburseModal() {
-  this.activate = this.toggleReimburseModal;
-} // watchToggleReimburseModal
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  data() {
-    return {
-      activate: false // dialog activator
-    };
-  },
-  props: ['toggleReimburseModal'], // dialog activator
-  watch: {
-    toggleReimburseModal: watchToggleReimburseModal
+watch(
+  () => props.toggleReimburseModal,
+  () => {
+    activate.value = props.toggleReimburseModal;
   }
-};
+); // watchToggleReimburseModal
 </script>
