@@ -111,7 +111,6 @@ const showMore = ref(false);
  */
 onMounted(() => {
   emitter.on('close-pto-cash-out-form-hours', () => {
-
     showPTOCashOutFormModal.value = false;
   });
   emitter.on('close-pto-planning-form', () => {

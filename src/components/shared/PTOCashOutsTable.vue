@@ -412,7 +412,7 @@ watch(selected, () => {
 async function approveSelectedPTOCashOuts() {
   let promises = [];
   selected.value.forEach((e) => {
-    let item = _.find(filteredPtoCashOuts, (f) => f.id === e);
+    let item = _.find(filteredPtoCashOuts.value, (f) => f.id === e);
     item['approvedDate'] = dateUtils.getTodaysDate();
     item['approvalWasSeen'] = false;
     promises.push(api.updateItem(api.PTO_CASH_OUTS, item));

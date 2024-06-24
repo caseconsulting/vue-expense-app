@@ -266,7 +266,6 @@ function cancel() {
   clearForm();
 } // cancel
 
-
 /**
  * Clears form and resets validation.
  */
@@ -276,7 +275,6 @@ function clearForm() {
   ptoCashOutObj.value['amount'] = null;
   ptoCashOutObj.value['creationDate'] = null;
   ptoCashOutObj.value['approvedDate'] = null;
-  
   approvedDateFormatted.value = null;
   form.value.reset();
   form.value.resetValidation();
@@ -312,7 +310,7 @@ function displaySuccess(msg) {
 /**
  * Emits close form events
  */
- function emitCloseForm() {
+function emitCloseForm() {
   emitter.emit('close-pto-cash-out-form-table');
   emitter.emit('close-pto-cash-out-form-hours');
 }
