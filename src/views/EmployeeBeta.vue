@@ -1,3 +1,159 @@
 <template>
   <v-card>Hi</v-card>
 </template>
+
+<script setup>
+import _ from 'lodash';
+import { ref, inject, onBeforeMount, watch, onMounted } from 'vue';
+import { useStore } from 'vuex';
+import { useRoute } from 'vue-router';
+import {
+  // getCurrentBudgetYear,
+  // isEmpty,
+  // isMobile,
+  storeIsPopulated,
+  userRoleIsAdmin,
+  userRoleIsManager
+} from '@/utils/utils.js';
+import {
+  // updateStoreBudgets,
+  updateStoreContracts,
+  updateStoreEmployees,
+  // updateStoreExpenseTypes,
+  updateStoreUser,
+  updateStoreTags
+} from '@/utils/storeUtils';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                       SETUP                      |
+// |                                                  |
+// |--------------------------------------------------|
+const emitter = inject('emitter');
+const store = useStore();
+const route = useRoute();
+
+const contracts = ref(null);
+const displayTimeAndBalances = ref(false);
+const loading = ref(false);
+const model = ref({
+  awards: [],
+  birthday: '',
+  birthdayFeed: false,
+  certifications: [],
+  city: '',
+  contract: '',
+  country: '',
+  currentCity: '',
+  currentState: '',
+  currentStreet: '',
+  currentStreet2: '',
+  currentZIP: '',
+  degrees: [],
+  deptDate: '',
+  email: '@consultwithcase.com',
+  employeeNumber: null,
+  employeeRole: '',
+  firstName: '',
+  fiscalDateView: '',
+  github: '',
+  hireDate: null,
+  id: null,
+  jobRole: '',
+  lastName: '',
+  middleName: '',
+  nickname: '',
+  noMiddleName: false,
+  personalEmail: '',
+  phoneNumber: '',
+  prime: '',
+  st: '',
+  technologies: [],
+  twitter: '',
+  workStatus: 100
+}); // selected employee
+const user = ref(null);
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+onBeforeMount(async () => {
+  storeIsPopulated() ? await getProfileData() : (loading.value = true);
+  if (!store.getters.employees) await updateStoreEmployees();
+});
+
+onMounted(() => {
+  //TODO: add emitters with updating employee through the editing form
+  emitter.on('update', (updatedEmployee) => {
+    if (updatedEmployee) {
+      model.value = updatedEmployee;
+    }
+  });
+});
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Get employee data.
+ */
+async function getProfileData() {
+  loading.value = true;
+  console.log('gettign profile data');
+  await Promise.all([
+    !store.getters.employees ? updateStoreEmployees() : '',
+    !store.getters.user ? updateStoreUser() : '',
+    !store.getters.contracts ? updateStoreContracts() : '',
+    hasAdminPermissions() && !store.getters.tags ? updateStoreTags() : ''
+  ]);
+  if (store.getters.user.employeeNumber == route.params.id) {
+    // user looking at their own profile
+    model.value = store.getters.user;
+  } else {
+    // user looking at another employees profile
+    let employees = store.getters.employees;
+    this.model = _.find(employees, (employee) => {
+      return employee.employeeNumber == route.params.id;
+    });
+  }
+  user.value = store.getters.user;
+  contracts.value = store.getters.contracts;
+  displayTimeAndBalances.value = hasAdminPermissions();
+  if (model.value) {
+    // await refreshExpenseData(true); //TODO:Implement Expenses and Quickbooks Time
+  }
+  console.log(model.value);
+  loading.value = false;
+} // getProfileData
+
+/**
+ * checks to see if the user has admin permissions
+ *
+ * @return boolean - whether the user is an admin or manager
+ */
+function hasAdminPermissions() {
+  return userRoleIsAdmin() || userRoleIsManager();
+} // hasAdminPermissions
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Load the profile data if the page is refreshed.
+ */
+watch(
+  () => storeIsPopulated(),
+  async () => {
+    if (storeIsPopulated()) await getProfileData();
+  } // watchStoreisPopulated
+);
+</script>
