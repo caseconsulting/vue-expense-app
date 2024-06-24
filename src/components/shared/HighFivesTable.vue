@@ -1,20 +1,23 @@
 <template>
   <p>hey</p>
 </template>
-<script>
-import { isMobile, userRoleIsAdmin, userRoleIsManager, monthDayYearFormat, isEmpty } from '@/utils/utils';
-import { getEmployeeByID, nicknameAndLastName } from '@/shared/employeeUtils';
+<script setup>
+import { onBeforeMount } from 'vue';
 // import api from '@/shared/api.js';
 // import _ from 'lodash';
 // import dateUtils from '@/shared/dateUtils';
+// |--------------------------------------------------|
+// |                                                  |
+// |                       SETUP                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
 // |                                                  |
 // |--------------------------------------------------|
-function created() {}
-
+onBeforeMount(() => {});
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -32,27 +35,4 @@ function created() {}
 // |                     WATCHERS                     |
 // |                                                  |
 // |--------------------------------------------------|
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  created,
-  data() {
-    return {};
-  },
-  methods: {
-    isMobile,
-    isEmpty,
-    getEmployeeByID,
-    monthDayYearFormat,
-    nicknameAndLastName,
-    userRoleIsAdmin,
-    userRoleIsManager
-  },
-  computed: {}
-};
 </script>
