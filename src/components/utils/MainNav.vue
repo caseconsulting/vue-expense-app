@@ -61,10 +61,172 @@
   </div>
 </template>
 
-<script>
+<script setup>
 // @ is an alias to /src
 import { getRole } from '@/utils/auth';
 import _ from 'lodash';
+import { ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+// would call it 'route' normally, but that name is already taken
+const route = useRoute();
+const router = useRouter();
+
+const items = ref([
+  {
+    title: 'Home',
+    icon: 'mdi-home',
+    route: 'home',
+    permission: ['user', 'admin', 'intern', 'manager'],
+    active: false
+  },
+  {
+    title: 'Expenses',
+    icon: 'mdi-currency-usd',
+    subItems: [
+      {
+        title: 'My Budgets',
+        icon: 'mdi-hand-coin',
+        route: 'myBudgets',
+        permission: ['user', 'admin', 'intern', 'manager'],
+        active: false
+      },
+      {
+        title: 'My Expenses',
+        icon: 'mdi-currency-usd',
+        route: 'expenses',
+        permission: ['admin', 'user', 'intern', 'manager'],
+        active: false
+      },
+      {
+        title: 'Expense Types',
+        icon: 'mdi-book',
+        route: 'expenseTypes',
+        permission: ['admin', 'user', 'manager'],
+        active: false
+      },
+      {
+        title: 'Reimbursements',
+        icon: 'mdi-monitor',
+        route: 'reimbursements',
+        permission: ['admin', 'manager'],
+        active: false
+      }
+    ],
+    permission: ['user', 'admin', 'intern', 'manager'],
+    active: false
+  },
+  {
+    title: 'PTO Cash Outs',
+    icon: 'mdi-cash',
+    route: 'ptoCashOuts',
+    permission: ['admin', 'user', 'manager'],
+    active: false
+  },
+  {
+    title: 'Employees',
+    alias: ['employee'],
+    icon: 'mdi-account-group',
+    route: 'employees',
+    permission: ['admin', 'user', 'intern', 'manager'],
+    active: false
+  },
+  {
+    title: 'Statistics Dashboard',
+    alias: ['stats'],
+    icon: 'mdi-chart-bar',
+    route: 'stats',
+    permission: ['admin', 'user', 'intern', 'manager'],
+    active: false
+  },
+  {
+    title: 'Audits',
+    alias: ['audit'],
+    icon: 'mdi-clipboard-check',
+    route: 'audits',
+    permission: ['admin', 'manager'],
+    active: false
+  },
+  {
+    title: 'Contracts',
+    icon: 'mdi-file-document-edit',
+    route: 'contracts',
+    permission: ['admin', 'manager'],
+    active: false
+  },
+  {
+    title: 'Reports',
+    alias: ['reports'],
+    icon: 'mdi-clipboard-list',
+    route: 'reports',
+    permission: ['admin', 'user', 'intern', 'manager'],
+    active: false
+  },
+  {
+    title: 'Training',
+    icon: 'mdi-fire',
+    route: 'training',
+    permission: ['admin', 'user', 'intern', 'manager'],
+    active: false
+  },
+  {
+    title: 'Help',
+    icon: 'mdi-lifebuoy',
+    route: 'help',
+    permission: ['admin', 'user', 'intern', 'manager'],
+    active: false
+  }
+]); // navigation options
+const permissions = ref(''); // user role
+const visibleTiles = ref([]);
+
+// Set permissions by user role.
+permissions.value = getRole();
+visibleTiles.value = getVisibleTiles();
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+// Updates active field of item with subItems.
+watch(
+  () => route.name,
+  () => {
+    var isAnyActive;
+    for (var i in items.value) {
+      if (items.value[i].subItems) {
+        isAnyActive = false;
+        for (var j in items.value[i].subItems) {
+          if (items.value[i].subItems[j].route == route.name) {
+            items.value[i].subItems[j].active = true;
+            isAnyActive = true;
+          } else {
+            items.value[i].subItems[j].active = false;
+          }
+        }
+        items.value[i].active = isAnyActive;
+      } else {
+        items.value[i].active = route.name
+          ? route.name.includes(items.value[i].route) ||
+            !_.isNil(
+              _.find(items.value[i].alias, (alias) => {
+                return route.name.includes(alias);
+              })
+            )
+          : null;
+      }
+    }
+  },
+  { immediate: true }
+);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -73,40 +235,10 @@ import _ from 'lodash';
 // |--------------------------------------------------|
 
 /**
- * Updates active field of item with subItems.
- */
-function checkActive() {
-  var isAnyActive;
-  for (var i in this.items) {
-    if (this.items[i].subItems) {
-      isAnyActive = false;
-      for (var j in this.items[i].subItems) {
-        if (this.items[i].subItems[j].route == this.route) {
-          this.items[i].subItems[j].active = true;
-          isAnyActive = true;
-        } else {
-          this.items[i].subItems[j].active = false;
-        }
-      }
-      this.items[i].active = isAnyActive;
-    } else {
-      this.items[i].active = this.route
-        ? this.route.includes(this.items[i].route) ||
-          !_.isNil(
-            _.find(this.items[i].alias, (alias) => {
-              return this.route.includes(alias);
-            })
-          )
-        : null;
-    }
-  }
-} // checkActive
-
-/**
  * Scrolls up the page.
  */
 function handleNavigation(item) {
-  this.$router.push({ name: item.route });
+  router.push({ name: item.route });
   window.scrollTo(0, 0);
 } // scrollUp
 
@@ -116,12 +248,12 @@ function handleNavigation(item) {
  * @return Array - Filtered items
  */
 function getVisibleTiles() {
-  return _.filter(this.items, (item) => {
+  return _.filter(items.value, (item) => {
     if (item.subItems) {
-      if (_.includes(item.permission, this.permissions)) {
+      if (_.includes(item.permission, permissions.value)) {
         item.subItems = _.filter(item.subItems, (subItem) => {
           {
-            return _.includes(subItem.permission, this.permissions);
+            return _.includes(subItem.permission, permissions.value);
           }
         });
         return true;
@@ -129,173 +261,10 @@ function getVisibleTiles() {
         return false;
       }
     } else {
-      return _.includes(item.permission, this.permissions);
+      return _.includes(item.permission, permissions.value);
     }
   });
 } // visibleTiles
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                 LIFECYCLE HOOKS                  |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- *  Set permissions by user role.
- */
-function created() {
-  this.permissions = this.getRole();
-  this.route = this.$route.name;
-  this.visibleTiles = this.getVisibleTiles();
-} // created
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     WATCHERS                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Handler for watcher of the route.
- */
-function watchRouteHandler() {
-  this.route = this.$route.name;
-} // watchRouteHandler
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  computed: {},
-  created,
-  data() {
-    return {
-      items: [
-        {
-          title: 'Home',
-          icon: 'mdi-home',
-          route: 'home',
-          permission: ['user', 'admin', 'intern', 'manager'],
-          active: false
-        },
-        {
-          title: 'Expenses',
-          icon: 'mdi-currency-usd',
-          subItems: [
-            {
-              title: 'My Budgets',
-              icon: 'mdi-hand-coin',
-              route: 'myBudgets',
-              permission: ['user', 'admin', 'intern', 'manager'],
-              active: false
-            },
-            {
-              title: 'My Expenses',
-              icon: 'mdi-currency-usd',
-              route: 'expenses',
-              permission: ['admin', 'user', 'intern', 'manager'],
-              active: false
-            },
-            {
-              title: 'Expense Types',
-              icon: 'mdi-book',
-              route: 'expenseTypes',
-              permission: ['admin', 'user', 'manager'],
-              active: false
-            },
-            {
-              title: 'Reimbursements',
-              icon: 'mdi-monitor',
-              route: 'reimbursements',
-              permission: ['admin', 'manager'],
-              active: false
-            }
-          ],
-          permission: ['user', 'admin', 'intern', 'manager'],
-          active: false
-        },
-        {
-          title: 'PTO Cash Outs',
-          icon: 'mdi-cash',
-          route: 'ptoCashOuts',
-          permission: ['admin', 'user', 'manager'],
-          active: false
-        },
-        {
-          title: 'Employees',
-          alias: ['employee'],
-          icon: 'mdi-account-group',
-          route: 'employees',
-          permission: ['admin', 'user', 'intern', 'manager'],
-          active: false
-        },
-        {
-          title: 'Statistics Dashboard',
-          alias: ['stats'],
-          icon: 'mdi-chart-bar',
-          route: 'stats',
-          permission: ['admin', 'user', 'intern', 'manager'],
-          active: false
-        },
-        {
-          title: 'Audits',
-          alias: ['audit'],
-          icon: 'mdi-clipboard-check',
-          route: 'audits',
-          permission: ['admin', 'manager'],
-          active: false
-        },
-        {
-          title: 'Contracts',
-          icon: 'mdi-file-document-edit',
-          route: 'contracts',
-          permission: ['admin', 'manager'],
-          active: false
-        },
-        {
-          title: 'Reports',
-          alias: ['reports'],
-          icon: 'mdi-clipboard-list',
-          route: 'reports',
-          permission: ['admin', 'user', 'intern', 'manager'],
-          active: false
-        },
-        {
-          title: 'Training',
-          icon: 'mdi-fire',
-          route: 'training',
-          permission: ['admin', 'user', 'intern', 'manager'],
-          active: false
-        },
-        {
-          title: 'Help',
-          icon: 'mdi-lifebuoy',
-          route: 'help',
-          permission: ['admin', 'user', 'intern', 'manager'],
-          active: false
-        }
-      ], // navigation options
-      permissions: '', // user role
-      route: ''
-    };
-  },
-  methods: {
-    checkActive,
-    getRole,
-    getVisibleTiles,
-    handleNavigation
-  },
-  watch: {
-    '$route.name': {
-      handler: watchRouteHandler,
-      deep: true
-    },
-    route: checkActive
-  }
-};
 </script>
 
 <style lang="scss" scoped>
