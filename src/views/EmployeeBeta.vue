@@ -18,10 +18,13 @@
 </template>
 
 <script setup>
-import _ from 'lodash';
-import { ref, inject, onBeforeMount, watch, onMounted, provide } from 'vue';
-import { useStore } from 'vuex';
-import { useRoute, useRouter } from 'vue-router';
+import {
+  updateStoreContracts,
+  updateStoreEmployees,
+  updateStoreTags,
+  // updateStoreExpenseTypes,
+  updateStoreUser
+} from '@/utils/storeUtils';
 import {
   // getCurrentBudgetYear,
   // isEmpty,
@@ -30,18 +33,10 @@ import {
   userRoleIsAdmin,
   userRoleIsManager
 } from '@/utils/utils.js';
-import {
-  // updateStoreBudgets,
-  updateStoreContracts,
-  updateStoreEmployees,
-  // updateStoreExpenseTypes,
-  updateStoreUser,
-  updateStoreTags
-} from '@/utils/storeUtils';
-import AwardsCard from '@/components/employee-beta/AwardsCard.vue';
-import CertificationsCard from '@/components/employee-beta/CertificationsCard.vue';
-import HireInfoCard from '@/components/employee-beta/HireInfoCard.vue';
-import EmployeePageLoader from '@/components/employees/EmployeePageLoader.vue';
+import _ from 'lodash';
+import { inject, onBeforeMount, onMounted, provide, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 
 // |--------------------------------------------------|
 // |                                                  |
