@@ -1,4 +1,5 @@
 <template>
+<<<<<<< HEAD
   <v-container>
     <v-row v-if="basicEmployeeDataLoading" class="pt-0">
       <employee-page-loader />
@@ -10,6 +11,7 @@
         :isUser="userIsEmployee()"
       ></certifications-card>
       <awards-card :model="model" :isAdmin="hasAdminPermissions()" :isUser="userIsEmployee()"></awards-card>
+      <contract-info-card :contracts="contracts" :model="model"></contract-info-card>
     </div>
   </v-container>
 </template>
@@ -35,9 +37,13 @@ import {
   updateStoreUser,
   updateStoreTags
 } from '@/utils/storeUtils';
+<<<<<<< HEAD
 import AwardsCard from '@/components/employee-beta/AwardsCard.vue';
 import CertificationsCard from '@/components/employee-beta/CertificationsCard.vue';
 import EmployeePageLoader from '@/components/employees/EmployeePageLoader.vue';
+=======
+import ContractInfoCard from '@/components/employee-beta/ContractInfoCard.vue';
+>>>>>>> e8315e02 (POR-2674-Contract-Info-Card-component: added the contract information card and dialog)
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -131,6 +137,7 @@ async function getProfileData() {
   if (store.getters.user.employeeNumber == route.params.id) {
     // user looking at their own profile
     model.value = store.getters.user;
+    console.log(model.value);
   } else {
     // user looking at another employees profile
     let employees = store.getters.employees;
@@ -145,6 +152,11 @@ async function getProfileData() {
   if (model.value) {
     // await refreshExpenseData(true); //TODO:Implement Expenses and Quickbooks Time
   }
+<<<<<<< HEAD
+=======
+  // console.log(model.value);
+  console.log(loading.value);
+>>>>>>> e8315e02 (POR-2674-Contract-Info-Card-component: added the contract information card and dialog)
   loading.value = false;
 } // getProfileData
 
