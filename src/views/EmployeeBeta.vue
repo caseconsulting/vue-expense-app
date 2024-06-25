@@ -1,5 +1,4 @@
 <template>
-<<<<<<< HEAD
   <v-container>
     <v-row v-if="basicEmployeeDataLoading" class="pt-0">
       <employee-page-loader />
@@ -37,13 +36,10 @@ import {
   updateStoreUser,
   updateStoreTags
 } from '@/utils/storeUtils';
-<<<<<<< HEAD
 import AwardsCard from '@/components/employee-beta/AwardsCard.vue';
 import CertificationsCard from '@/components/employee-beta/CertificationsCard.vue';
 import EmployeePageLoader from '@/components/employees/EmployeePageLoader.vue';
-=======
 import ContractInfoCard from '@/components/employee-beta/ContractInfoCard.vue';
->>>>>>> e8315e02 (POR-2674-Contract-Info-Card-component: added the contract information card and dialog)
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -152,11 +148,6 @@ async function getProfileData() {
   if (model.value) {
     // await refreshExpenseData(true); //TODO:Implement Expenses and Quickbooks Time
   }
-<<<<<<< HEAD
-=======
-  // console.log(model.value);
-  console.log(loading.value);
->>>>>>> e8315e02 (POR-2674-Contract-Info-Card-component: added the contract information card and dialog)
   loading.value = false;
 } // getProfileData
 
