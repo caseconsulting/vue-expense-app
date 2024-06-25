@@ -10,6 +10,7 @@
         :isUser="userIsEmployee()"
       ></certifications-card>
       <awards-card :model="model" :isAdmin="hasAdminPermissions()" :isUser="userIsEmployee()"></awards-card>
+      <v-btn color="#bc3825" @click="goBackToAlphaProfile()" theme="dark" class="ma-2">Go to Alpha profile!</v-btn>
     </div>
   </v-container>
 </template>
@@ -18,7 +19,7 @@
 import _ from 'lodash';
 import { ref, inject, onBeforeMount, watch, onMounted } from 'vue';
 import { useStore } from 'vuex';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import {
   // getCurrentBudgetYear,
   // isEmpty,
@@ -48,6 +49,7 @@ import EmployeePageLoader from '@/components/employees/EmployeePageLoader.vue';
 const emitter = inject('emitter');
 const store = useStore();
 const route = useRoute();
+const router = useRouter();
 
 const basicEmployeeDataLoading = ref(false);
 const contracts = ref(null);
@@ -147,6 +149,13 @@ async function getProfileData() {
   }
   loading.value = false;
 } // getProfileData
+
+/**
+ * Routes user to their employee page
+ */
+function goBackToAlphaProfile() {
+  router.push(`/employee/${store.getters.employeeNumber}`);
+} // handleProfile
 
 /**
  * checks to see if the user has admin permissions
