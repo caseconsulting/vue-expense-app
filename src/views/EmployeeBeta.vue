@@ -4,7 +4,12 @@
       <employee-page-loader />
     </v-row>
     <div v-else>
-      <certifications-card :model="model"></certifications-card>
+      <certifications-card
+        :model="model"
+        :isAdmin="hasAdminPermissions()"
+        :isUser="userIsEmployee()"
+      ></certifications-card>
+      <awards-card :model="model" :isAdmin="hasAdminPermissions()" :isUser="userIsEmployee()"></awards-card>
     </div>
   </v-container>
 </template>
@@ -30,6 +35,7 @@ import {
   updateStoreUser,
   updateStoreTags
 } from '@/utils/storeUtils';
+import AwardsCard from '@/components/employee-beta/AwardsCard.vue';
 import CertificationsCard from '@/components/employee-beta/CertificationsCard.vue';
 import EmployeePageLoader from '@/components/employees/EmployeePageLoader.vue';
 
@@ -38,6 +44,7 @@ import EmployeePageLoader from '@/components/employees/EmployeePageLoader.vue';
 // |                       SETUP                      |
 // |                                                  |
 // |--------------------------------------------------|
+
 const emitter = inject('emitter');
 const store = useStore();
 const route = useRoute();
@@ -149,6 +156,17 @@ async function getProfileData() {
 function hasAdminPermissions() {
   return userRoleIsAdmin() || userRoleIsManager();
 } // hasAdminPermissions
+
+/**
+ * Check if the user the employee that is displayed. Returns true if the user is the employee displayed, otherwise returns false.
+ *
+ * @return boolean - user is the employee that is displayed
+ */
+function userIsEmployee() {
+  return !_.isNil(model.value) && !_.isNil(user.value)
+    ? user.value.employeeNumber === model.value.employeeNumber
+    : false;
+} // userIsEmployee
 
 // |--------------------------------------------------|
 // |                                                  |
