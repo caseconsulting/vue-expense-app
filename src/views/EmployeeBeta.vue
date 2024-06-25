@@ -11,6 +11,7 @@
         :isAdmin="hasAdminPermissions()"
         :isUser="userIsEmployee()"
       ></education-info-card>
+      <contract-info-card :contracts="contracts" :model="model"></contract-info-card>
       <v-btn color="#bc3825" @click="goBackToAlphaProfile()" theme="dark" class="ma-2">Go to Alpha profile!</v-btn>
       <div id="certification-award">
         <v-sheet class="pa-5">
@@ -68,7 +69,7 @@ import LanguagesCard from '@/components/employee-beta/LanguagesCard.vue';
 import TechnologiesCard from '@/components/employee-beta/TechnologiesCard.vue';
 import EmployeePageLoader from '@/components/employees/EmployeePageLoader.vue';
 import EducationInfoCard from '../components/employee-beta/EducationInfoCard.vue';
-
+import ContractInfoCard from '@/components/employee-beta/ContractInfoCard.vue';
 // |--------------------------------------------------|
 // |                                                  |
 // |                       SETUP                      |
@@ -170,6 +171,7 @@ async function getProfileData() {
   if (store.getters.user.employeeNumber == route.params.id) {
     // user looking at their own profile
     model.value = store.getters.user;
+    console.log(model.value);
   } else {
     // user looking at another employees profile
     let employees = store.getters.employees;
