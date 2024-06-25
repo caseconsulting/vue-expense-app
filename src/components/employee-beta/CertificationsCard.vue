@@ -3,7 +3,7 @@
     <v-card>
       <v-card-title class="d-flex align-center justify-space-between header_style">
         <h3 class="text-white px-2">Certifications</h3>
-        <v-btn v-if="isAdmin || isUser" density="comfortable" variant="text">
+        <v-btn v-if="isAdmin || isUser" density="comfortable" variant="text" icon="">
           <v-tooltip activator="parent" location="top"> Edit Profile </v-tooltip>
           <v-icon id="edit" color="white"> mdi-pencil </v-icon>
         </v-btn>
@@ -71,7 +71,7 @@ const toggleModal = ref(false);
 
 const filteredList = computed(() => {
   const startIndex = 0; //each page contains 5 certification entries
-  const endIndex = startIndex + 5;
+  const endIndex = 5;
   if (!isEmpty(props.model.certifications)) {
     return props.model.certifications.slice(startIndex, endIndex);
   }
