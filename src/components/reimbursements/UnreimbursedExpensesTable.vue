@@ -551,6 +551,42 @@ function refreshExpenses() {
 } // refreshExpenses
 
 /**
+ * Rejects selected expenses with a reasoning provided. Soft rejected expenses will not be shown on the
+ * Reimbursments page until the user has resubmitted an expense. Hard rejected expenses will never show
+ * on the Reimbursements page again.
+ *
+ * @param {String} field - The reject property in the expense
+ * @param {String} reason - The reasoning for expense rejection
+ */
+async function rejectExpenses(field, reason) {
+  this.loading = true;
+  let selectedExpenses = _.filter(this.pendingExpenses, (e) => e.selected);
+  await this.asyncForEach(selectedExpenses, async (expense) => {
+    let reasons = _.get(expense, field + '.reasons');
+    reasons = [...(reasons || []), reason];
+    _.set(expense, field + '.reasons', reasons);
+    _.set(expense, field + '.revised', false);
+    let baseExpense = this.removeAggregateExpenseData(expense);
+    let rejectedExpense = await api.updateItem(api.EXPENSES, baseExpense);
+    if (!rejectedExpense.id) {
+      // failed to reject expense
+      let msg = rejectedExpense.response.data.message;
+      this.alerts.push({ status: 'error', message: msg, color: 'red' });
+    } else {
+      // successfully rejected expense
+      let msg = 'Successfully rejected expense';
+      this.alerts.push({ status: 'success', message: msg, color: 'green' });
+    }
+    let self = this;
+    setTimeout(function () {
+      self.alerts.shift();
+    }, 15000);
+    this.emitter.emit('reimburseAlert', this.alerts);
+  });
+  this.loading = false;
+} // rejectExpenses
+
+/**
  * Reimburse the selected list of expenses.
  */
 async function reimburseExpenses() {
@@ -822,6 +858,51 @@ function unCheckAllBoxes() {
 
 // |--------------------------------------------------|
 // |                                                  |
+<<<<<<< HEAD
+=======
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ *  Sets the aggregated expeneses and datatable. Creates event listeners.
+ */
+async function created() {
+  this.emitter.on('selectExpense', this.selectExpense);
+  this.emitter.on('toggleExpense', this.toggleShowOnFeed);
+  this.emitter.on('confirm-reimburse', async () => await this.reimburseExpenses());
+  this.emitter.on('cancel-reimburse', () => (this.buttonClicked = false));
+  this.emitter.on('confirm-expenses-rejection', async ({ field, reason }) => await this.rejectExpenses(field, reason));
+  this.emitter.on('reimburse-expenses', (isGeneratingGiftCard) => {
+    this.buttonClicked = true;
+    this.isGeneratingGiftCard = isGeneratingGiftCard;
+  });
+
+  let unreimbursedExpenses;
+  [unreimbursedExpenses, this.expenseTypes] = await Promise.all([
+    api.getUnreimbursedExpenses(),
+    api.getItems(api.EXPENSE_TYPES),
+    !this.$store.getters.employees ? this.updateStoreEmployees() : '',
+    !this.$store.getters.tags ? this.updateStoreTags() : ''
+  ]);
+  this.loadExpensesData(unreimbursedExpenses);
+} // created
+
+/**
+ * beforeUnmount lifecycle hook
+ */
+function beforeUnmount() {
+  this.emitter.off('selectExpense');
+  this.emitter.off('toggleExpense');
+  this.emitter.off('confirm-reimburse');
+  this.emitter.off('cancel-reimburse');
+  this.emitter.off('confirm-expenses-rejection');
+  this.emitter.off('reimburse-expenses');
+} //beforeUnmount
+
+// |--------------------------------------------------|
+// |                                                  |
+>>>>>>> bdb3a625 (POR-2658: make the reject button functional)
 // |                     WATCHERS                     |
 // |                                                  |
 // |--------------------------------------------------|
@@ -845,6 +926,118 @@ function watchExpenseType() {
   //unchecks all checkboxes when filter changes
   unCheckAllBoxes();
 } // watchExpenseType
+<<<<<<< HEAD
+=======
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      EXPORT                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+export default {
+  created,
+  beforeUnmount,
+  components: {
+    TagsFilter,
+    ReimburseModal,
+    UnreimbursedExpensesExpandedTable
+  },
+  computed: {
+    filteredItems,
+    getSelectedExpensesToReimburse,
+    mainCheckBox,
+    showReimburseButton,
+    storeIsPopulated
+  },
+  data: () => ({
+    aggregatedData: [],
+    alerts: [], // status alerts
+    buttonClicked: false, // reimburse button clicked
+    empBudgets: [], // grouped employee and expense types
+    employee: null, // employee autocomplete filter
+    employees: [], // employee autocomplete options
+    expanded: [], // datatable expanded
+    expenseType: null, // expense type autocomplete filter
+    expenseTypes: [], // expense type autocomplete options
+    headers: [
+      {
+        title: 'Employee',
+        key: 'employeeName',
+        align: 'center'
+      },
+      {
+        title: 'Expense Type',
+        key: 'budgetName',
+        align: 'center'
+      },
+      {
+        title: 'Total',
+        key: 'cost',
+        align: 'center'
+      },
+      {
+        title: 'Show on Feed',
+        key: 'showOnFeed',
+        align: 'center',
+        width: '10%',
+        sortable: false
+      }
+    ], // datatable headers
+    isGeneratingGiftCard: false,
+    itemsPerPage: -1, // data table elements per page
+    loading: true, // is loading
+    pendingExpenses: [], // pending expenses
+    status: {
+      statusType: undefined,
+      statusMessage: '',
+      color: ''
+    }, // reimburse
+    tagsInfo: {
+      selected: [],
+      flipped: []
+    }
+  }),
+  methods: {
+    asyncForEach,
+    checkAllBoxes,
+    constructAutoComplete,
+    convertToMoneyString,
+    createExpenses,
+    determineCheckBox,
+    determineShowOnFeed,
+    determineShowSwitch,
+    emitSelectionChange,
+    employeeFilter,
+    getBudgetTotal,
+    groupEmployeeExpenses,
+    isEmpty,
+    loadExpensesData,
+    matchingEmployeeAndExpenseType,
+    refreshExpenses,
+    reimburseExpenses,
+    rejectExpenses,
+    resetShowOnFeedToggles,
+    selectExpense,
+    removeAggregateExpenseData,
+    getTodaysDate,
+    selectedTagsHasEmployee,
+    toggleAll,
+    toggleGroup,
+    toggleShowOnFeedGroup,
+    toggleShowOnFeed,
+    unCheckAllBoxes,
+    updateStoreEmployees,
+    updateStoreTags,
+    userRoleIsAdmin,
+    userRoleIsManager
+  },
+  watch: {
+    employee: watchEmployee,
+    expenseType: watchExpenseType
+  }
+};
+>>>>>>> bdb3a625 (POR-2658: make the reject button functional)
 </script>
 
 <style>

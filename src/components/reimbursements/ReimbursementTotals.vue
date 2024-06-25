@@ -40,14 +40,14 @@
         </v-col>
         <v-col cols="12" lg="4" class="px-2">
           <!-- Revise Button -->
-          <v-btn @click="toggleRevisalRequestModal = true" class="reimburse_button" variant="text" block>
+          <v-btn @click="toggleExpenseRejectionModal = true" class="reimburse_button" variant="text" block>
             <template v-slot:prepend><v-icon>mdi-receipt-text-remove</v-icon></template>
             Reject
           </v-btn>
         </v-col>
       </v-row>
     </v-card-text>
-    <v-dialog v-model="toggleRevisalRequestModal" persistent width="35%">
+    <v-dialog v-model="toggleExpenseRejectionModal" persistent width="35%">
       <expense-rejection-modal :expenses="selected"></expense-rejection-modal>
     </v-dialog>
   </v-card>
