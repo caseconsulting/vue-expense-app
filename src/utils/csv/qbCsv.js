@@ -30,8 +30,8 @@ let WORK_HOURS_PER_DAY = 8;
  * Downloads array of employees EEO information as csv file.
  * @param employees - array of employees objects
  */
-export async function download(employees, tags, options = { filename: null, startDate: null, endDate: null }) {
-  let convertedEmployees = await convertEmployees(employees, options.startDate, options.endDate, tags); // convert employees into csv object (returns two arrays)
+export async function download(employees, options = { filename: null, startDate: null, endDate: null }) {
+  let convertedEmployees = await convertEmployees(employees, options.startDate, options.endDate); // convert employees into csv object (returns two arrays)
   let csvFileString = csvUtils.generate(convertedEmployees); // convert to csv file string
   if (!options.filename) options.filename = `EEO Compliance Report`;
   csvUtils.download(csvFileString, options.filename); // download csv file string as .csv
@@ -43,7 +43,7 @@ export async function download(employees, tags, options = { filename: null, star
  * @param employees - expense object to convert
  * @return a new object passable to csv.js
  */
-export async function convertEmployees(employees, startDate, endDate, tags) {
+export async function convertEmployees(employees, startDate, endDate) {
   // columns and their getter functions
   let cols = [
     {
@@ -86,7 +86,7 @@ export async function convertEmployees(employees, startDate, endDate, tags) {
   for (let e of employees) {
     // build out object based on cols array
     let row = {};
-    for (let col of cols) row[col.title] = col.getter(e, startDate, endDate, tags);
+    for (let col of cols) row[col.title] = col.getter(e, startDate, endDate);
     rows.push(row);
   }
 
@@ -276,20 +276,16 @@ function getEmployeePotentialHours(employee, startDate, endDate) {
  * Gets employee hours worked
  *
  * @param employee
- * @param _ unused startDate
- * @param __ unused endDate
- * @param tags tag information to search for CYK
  * @returns {String} employee hours worked
  */
-function getEmployeeWorkedHours(employee, _, __, tags) {
+function getEmployeeWorkedHours(employee) {
   let n = employee.employeeNumber;
   if (!INFO[n]) return '---';
   let timesheets = INFO[n].timesheets;
 
-  // exclude all nonbillable jobcodes for CASE employees, but only PTO for CYK employees
-  let nonBillables = SUPP_DATA.nonBillables;
-  let cykTag = tags.find((t) => t.tagName !== 'CYK');
-  if (cykTag.employees.includes(employee.id)) nonBillables = new Set(['PTO']);
+  // use SUPP_DATA.nonBillables if you want all non-billable timecodes, but Dave has requested
+  // to only include PTO as non-billable (yes, that means Holiday is considered billable for this)
+  let nonBillables = new Set(['PTO']);
 
   // tally up hours
   let total = 0;
