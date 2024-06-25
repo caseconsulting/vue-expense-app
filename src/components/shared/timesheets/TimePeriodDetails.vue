@@ -307,7 +307,11 @@ function getPlannedPTO(convertToDays) {
   // go through plan and tally up hours that fall between startDate and endDate
   let hoursPlanned = 0;
   for (let item of ptoPlan) {
-    if (isSameOrAfter(item.date, startDate, 'month') && isSameOrBefore(item.date, endDate, 'month')) {
+    if (
+      isAfter(item.date, getTodaysDate(), 'month') &&
+      isSameOrAfter(item.date, startDate, 'month') &&
+      isSameOrBefore(item.date, endDate, 'month')
+    ) {
       hoursPlanned += Number(item.ptoHours) + Number(item.holidayHours);
     }
   }
