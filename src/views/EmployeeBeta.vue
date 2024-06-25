@@ -37,6 +37,10 @@ import _ from 'lodash';
 import { inject, onBeforeMount, onMounted, provide, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
+import AwardsCard from '../components/employee-beta/AwardsCard.vue';
+import CertificationsCard from '../components/employee-beta/CertificationsCard.vue';
+import EmployeeInfo from '../components/employee-beta/EmployeeInfo.vue';
+import EmployeePageLoader from '../components/employees/EmployeePageLoader.vue';
 
 // |--------------------------------------------------|
 // |                                                  |

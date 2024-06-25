@@ -8,7 +8,7 @@
           <v-img class="display-inline-block position-absolute" :src="avatar" :alt="altText" />
         </v-avatar>
       </v-col>
-      <!-- name, email, links -->
+      <!-- general info -->
       <v-col class="pl-5 pt-5">
         <v-row>
           <v-col>
@@ -17,10 +17,26 @@
             <h2 v-cloak class="other-text">{{ model.email }}</h2>
           </v-col>
         </v-row>
-        <v-row>
-          <v-col>
-            <a :href="model.github">
-              <github-icon width="32" height="32" color="cornflowerblue"></github-icon>
+        <!-- personal email and links -->
+        <v-row class="mt-1" no-gutters>
+          <v-col v-if="model.personalEmail" style="max-width: fit-content">
+            <a :href="`mailto:${model.personalEmail}`">
+              <v-btn icon="mdi-email" color="blue" width="32" height="32" variant="text"></v-btn>
+            </a>
+          </v-col>
+          <v-col v-if="model.github" style="max-width: fit-content">
+            <a :href="`https://github.com/${model.github}`" target="_blank">
+              <v-btn icon="$github" color="blue" width="32" height="32" variant="text"></v-btn>
+            </a>
+          </v-col>
+          <v-col v-if="model.linkedIn" style="max-width: fit-content">
+            <a :href="model.linkedIn" target="_blank">
+              <v-btn icon="$linkedin" color="blue" width="32" height="32" variant="text"></v-btn>
+            </a>
+          </v-col>
+          <v-col v-if="model.twitter" style="max-width: fit-content">
+            <a :href="`https://x.com/${model.twitter}`" target="_blank">
+              <v-btn icon="$twitter" color="blue" width="32" height="32" variant="text"></v-btn>
             </a>
           </v-col>
         </v-row>
@@ -34,8 +50,6 @@ import _ from 'lodash';
 import { computed, onMounted, ref } from 'vue';
 import { useStore } from 'vuex';
 import { updateStoreAvatars } from '../../utils/storeUtils';
-import GithubIcon from '../custom-icons/GithubIcon.vue';
-// import { mdiGithub } from '@mdi/js';
 
 // |--------------------------------------------------|
 // |                                                  |
