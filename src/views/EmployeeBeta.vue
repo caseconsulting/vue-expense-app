@@ -4,6 +4,7 @@
       <employee-page-loader />
     </v-row>
     <div v-else>
+      <hire-info-card :model="model"></hire-info-card>
       <certifications-card
         :model="model"
         :isAdmin="hasAdminPermissions()"
@@ -37,6 +38,7 @@ import {
 } from '@/utils/storeUtils';
 import AwardsCard from '@/components/employee-beta/AwardsCard.vue';
 import CertificationsCard from '@/components/employee-beta/CertificationsCard.vue';
+import HireInfoCard from '@/components/employee-beta/HireInfoCard.vue';
 import EmployeePageLoader from '@/components/employees/EmployeePageLoader.vue';
 
 // |--------------------------------------------------|
