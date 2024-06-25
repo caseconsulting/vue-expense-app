@@ -466,6 +466,42 @@ function refreshExpenses() {
 } // refreshExpenses
 
 /**
+ * Rejects selected expenses with a reasoning provided. Soft rejected expenses will not be shown on the
+ * Reimbursments page until the user has resubmitted an expense. Hard rejected expenses will never show
+ * on the Reimbursements page again.
+ *
+ * @param {String} field - The reject property in the expense
+ * @param {String} reason - The reasoning for expense rejection
+ */
+async function rejectExpenses(field, reason) {
+  this.loading = true;
+  let selectedExpenses = _.filter(this.pendingExpenses, (e) => e.selected);
+  await this.asyncForEach(selectedExpenses, async (expense) => {
+    let reasons = _.get(expense, field + '.reasons');
+    reasons = [...(reasons || []), reason];
+    _.set(expense, field + '.reasons', reasons);
+    _.set(expense, field + '.revised', false);
+    let baseExpense = this.removeAggregateExpenseData(expense);
+    let rejectedExpense = await api.updateItem(api.EXPENSES, baseExpense);
+    if (!rejectedExpense.id) {
+      // failed to reject expense
+      let msg = rejectedExpense.response.data.message;
+      this.alerts.push({ status: 'error', message: msg, color: 'red' });
+    } else {
+      // successfully rejected expense
+      let msg = 'Successfully rejected expense';
+      this.alerts.push({ status: 'success', message: msg, color: 'green' });
+    }
+    let self = this;
+    setTimeout(function () {
+      self.alerts.shift();
+    }, 15000);
+    this.emitter.emit('reimburseAlert', this.alerts);
+  });
+  this.loading = false;
+} // rejectExpenses
+
+/**
  * Reimburse the selected list of expenses.
  */
 async function reimburseExpenses() {
@@ -749,6 +785,7 @@ async function created() {
   this.emitter.on('toggleExpense', this.toggleShowOnFeed);
   this.emitter.on('confirm-reimburse', async () => await this.reimburseExpenses());
   this.emitter.on('cancel-reimburse', () => (this.buttonClicked = false));
+  this.emitter.on('confirm-expenses-rejection', async ({ field, reason }) => await this.rejectExpenses(field, reason));
   this.emitter.on('reimburse-expenses', (isGeneratingGiftCard) => {
     this.buttonClicked = true;
     this.isGeneratingGiftCard = isGeneratingGiftCard;
@@ -772,6 +809,7 @@ function beforeUnmount() {
   this.emitter.off('toggleExpense');
   this.emitter.off('confirm-reimburse');
   this.emitter.off('cancel-reimburse');
+  this.emitter.off('confirm-expenses-rejection');
   this.emitter.off('reimburse-expenses');
 } //beforeUnmount
 
@@ -884,6 +922,7 @@ export default {
     matchingEmployeeAndExpenseType,
     refreshExpenses,
     reimburseExpenses,
+    rejectExpenses,
     resetShowOnFeedToggles,
     selectExpense,
     removeAggregateExpenseData,

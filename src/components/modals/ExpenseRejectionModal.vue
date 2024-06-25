@@ -25,7 +25,7 @@
       <v-btn
         variant="text"
         @click="
-          emitter.emit('cancel-revisal-request');
+          emitter.emit('close-expenses-rejection');
           activate = false;
         "
         >Cancel</v-btn
@@ -36,7 +36,8 @@
         variant="text"
         :disabled="reason.length < 1"
         @click="
-          emitter.emit('confirm-revisal-request', reason);
+          emitter.emit('close-expenses-rejection');
+          emitter.emit('confirm-expenses-rejection', { field: selectedDenialType.field, reason });
           activate = false;
         "
       >
@@ -62,11 +63,13 @@ const emitter = inject('emitter');
 const denialTypes = ref([
   {
     title: 'Request Revisal',
-    info: 'Requesting a revision will send an email to the employee(s) listed below, along with the provided reasoning. The expense(s) will not reappear on the Reimbursements page until the user(s) have resubmitted them.'
+    info: 'Requesting a revision will send an email to the employee(s) listed below, along with the provided reasoning. The expense(s) will not reappear on the Reimbursements page until the user(s) have resubmitted them.',
+    field: 'rejections.softRejections'
   },
   {
     title: 'Reject Expense',
-    info: 'Rejecting an expense will send an email to the employee(s) listed below, along with the provided reasoning. The expense(s) will no longer appear on the Reimbursements page, and the user(s) will not be able to delete the rejected expense.'
+    info: 'Rejecting an expense will send an email to the employee(s) listed below, along with the provided reasoning. The expense(s) will no longer appear on the Reimbursements page, and the user(s) will not be able to delete the rejected expense.',
+    field: 'rejections.hardRejections'
   }
 ]);
 const selectedDenialType = ref(denialTypes.value[0]);
@@ -78,8 +81,13 @@ const reason = ref('');
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * Gets the list of comma separated names from the expenses.
+ *
+ * @returns String - The list of employee names
+ */
 const employeeNames = computed(() => {
   let names = Array.from(new Set(_.map(props.expenses, (e) => e.employeeName)));
   return names?.join(', ');
-});
+}); // employeeNames
 </script>
