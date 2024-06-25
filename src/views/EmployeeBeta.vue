@@ -5,19 +5,15 @@
     </v-row>
     <div v-else>
       <hire-info-card :model="model"></hire-info-card>
-      <certifications-card
-        :model="model"
-        :isAdmin="hasAdminPermissions()"
-        :isUser="userIsEmployee()"
-      ></certifications-card>
-      <awards-card :model="model" :isAdmin="hasAdminPermissions()" :isUser="userIsEmployee()"></awards-card>
+      <certifications-card :model="model"></certifications-card>
+      <awards-card :model="model"></awards-card>
     </div>
   </v-container>
 </template>
 
 <script setup>
 import _ from 'lodash';
-import { ref, inject, onBeforeMount, watch, onMounted } from 'vue';
+import { ref, inject, onBeforeMount, watch, onMounted, provide } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 import {
@@ -55,6 +51,12 @@ const basicEmployeeDataLoading = ref(false);
 const contracts = ref(null);
 const displayTimeAndBalances = ref(false);
 const loading = ref(false);
+
+const isAdmin = ref(false);
+provide('isAdmin', isAdmin);
+const isUser = ref(false);
+provide('isUser', isUser);
+
 const model = ref({
   awards: [],
   birthday: '',
@@ -136,7 +138,7 @@ async function getProfileData() {
   } else {
     // user looking at another employees profile
     let employees = store.getters.employees;
-    this.model = _.find(employees, (employee) => {
+    model.value = _.find(employees, (employee) => {
       return employee.employeeNumber == route.params.id;
     });
   }
@@ -144,6 +146,8 @@ async function getProfileData() {
   contracts.value = store.getters.contracts;
   displayTimeAndBalances.value = hasAdminPermissions();
   basicEmployeeDataLoading.value = false;
+  isAdmin.value = hasAdminPermissions();
+  isUser.value = userIsEmployee();
   if (model.value) {
     // await refreshExpenseData(true); //TODO:Implement Expenses and Quickbooks Time
   }
