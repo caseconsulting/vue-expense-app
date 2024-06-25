@@ -13,9 +13,11 @@
         </v-radio-group>
 
         <!-- Period selector -->
-        <h3 class="cap-first mt-4">Report {{ exportType.periodType }}</h3>
+        <h3 :class="exportType.periodType ? '' : 'disabled'" class="cap-first mt-4">
+          Report {{ exportType.periodType || 'Period' }}
+        </h3>
         <v-select
-          :disabled="loading"
+          :disabled="loading || !exportType.periodType"
           class="d-inline-block w-100"
           v-model="filters.period"
           :items="filterOptions[exportType.periodType]"
@@ -24,7 +26,7 @@
           variant="underlined"
         />
 
-        <!-- Year selector -->
+        <!-- Status selector -->
         <h3 class="mt-4">Filter by status</h3>
         <v-autocomplete
           :disabled="loading"
@@ -68,6 +70,7 @@ import baseCsv from '@/utils/csv/baseCsv.js';
 import employeeCsv from '@/utils/csv/employeeCsv.js';
 import eeoCsv from '@/utils/csv/eeoCsv.js';
 import qbCsv from '@/utils/csv/qbCsv.js';
+import pptoCsv from '@/utils/csv/pptoCsv.js';
 import TagsFilter from '@/components/shared/TagsFilter.vue';
 import { ref, inject, onBeforeUnmount, watch, onBeforeMount } from 'vue';
 import { useStore } from 'vuex';
@@ -85,7 +88,8 @@ const exportType = ref(null);
 const exportTypes = ref([
   { title: 'Employee Data', value: 'emp', periodType: 'year' },
   { title: 'EEO Data', value: 'eeo', periodType: 'year' },
-  { title: 'Timesheet Data', value: 'qb', periodType: 'month' }
+  { title: 'Timesheet Data', value: 'qb', periodType: 'month' },
+  { title: 'Planned PTO Data', value: 'ppto', periodType: null }
 ]);
 const tagsInfo = ref({
   selected: [],
@@ -209,6 +213,9 @@ async function download() {
     endDate = format(endDate, null, 'YYYY-MM-DD');
     loading.value = 'Downloading timesheets from QuickBooks...';
     await qbCsv.download(csvInfo, { filename, startDate, endDate });
+  } else if (this.exportType.value === 'ppto') {
+    filename = `Planned PTO Report - as of ${getTodaysDate('YYYY-MM-DD')}`;
+    await pptoCsv.download(csvInfo, { filename });
   }
 
   // close the modal
@@ -252,8 +259,9 @@ function filterEmployees(employees) {
   return _.filter(employees, (e) => {
     // - YEAR FILTER -
     // remove employees that were hired after given year, or departed before given year
+    let yearFilterExclusions = ['ppto']; // periodTypes to exclude
     if (f.period.value) f.period = f.period.value; // convert objects into normal
-    if (f.period != 'All') {
+    if (f.period != 'All' && !yearFilterExclusions.includes(exportType.value.value)) {
       let hireYearValid = !!e.hireDate && isSameOrBefore(e.hireDate, f.period, exportType.value.periodType);
       let deptYearValid = !f.deptDate || isSameOrAfter(e.deptDate, f.period, exportType.value.periodType);
       if (!hireYearValid || !deptYearValid) return false;
@@ -305,7 +313,8 @@ function updatePeriodDefault() {
   let defaults = {
     emp: filterOptions.value.year[0],
     eeo: filterOptions.value.year[0],
-    qb: filterOptions.value.month[0]
+    qb: filterOptions.value.month[0],
+    ppto: filters.value.period
   };
   filters.value.period = defaults[exportType.value.value];
 }
@@ -323,6 +332,9 @@ watch(
 </script>
 
 <style scoped>
+.disabled {
+  opacity: 0.6;
+}
 .download {
   font-size: 20px;
   cursor: pointer;
