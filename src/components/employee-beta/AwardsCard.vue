@@ -3,7 +3,7 @@
     <v-card>
       <v-card-title class="d-flex align-center justify-space-between header_style">
         <h3 class="text-white px-2">Awards</h3>
-        <v-btn v-if="isAdmin || isUser" density="comfortable" variant="text">
+        <v-btn v-if="isAdmin || isUser" density="comfortable" variant="text" icon="">
           <v-tooltip activator="parent" location="top"> Edit Profile </v-tooltip>
           <v-icon id="edit" color="white"> mdi-pencil </v-icon>
         </v-btn>
@@ -32,19 +32,20 @@
         <p v-else class="pt-6 pl-6">No Award Information</p>
         <!-- Pagination -->
         <div v-if="!isEmpty(model.awards) && Math.ceil(model.awards.length / 5) != 1" class="text-center">
-          <!-- <v-pagination v-model="page" :length="Math.ceil(model.awards.length / 5)" :total-visible="8"></v-pagination> TODO: Remove Pagination -->
           <v-card-actions class="d-flex justify-center">
-            <v-btn>Click To See More</v-btn>
+            <v-btn @click="toggleAwardsModal()">Click To See More</v-btn>
           </v-card-actions>
         </div>
       </v-card-text>
+      <awards-modal v-model="toggleModal" :model="model"></awards-modal>
     </v-card>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, inject } from 'vue';
 import { isEmpty, monthYearFormat } from '@/utils/utils';
+import AwardsModal from '@/components/employee-beta/AwardsModal.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -52,8 +53,10 @@ import { isEmpty, monthYearFormat } from '@/utils/utils';
 // |                                                  |
 // |--------------------------------------------------|
 
-const props = defineProps(['model', 'isAdmin', 'isUser']);
-const page = ref(1);
+const props = defineProps(['model']);
+const isAdmin = inject('isAdmin');
+const isUser = inject('isUser');
+const toggleModal = ref(false);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -62,13 +65,23 @@ const page = ref(1);
 // |--------------------------------------------------|
 
 const filteredList = computed(() => {
-  const startIndex = 5 * (page.value - 1);
-  const endIndex = startIndex + 5;
+  const startIndex = 0;
+  const endIndex = 5;
   if (!isEmpty(props.model.awards)) {
     return props.model.awards.slice(startIndex, endIndex);
   }
   return [];
 });
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+function toggleAwardsModal() {
+  toggleModal.value = !toggleModal.value;
+}
 </script>
 
 <style scoped>
