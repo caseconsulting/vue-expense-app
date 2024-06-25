@@ -1,5 +1,12 @@
 <template>
-  <v-card>Hi</v-card>
+  <v-container>
+    <v-row v-if="basicEmployeeDataLoading" class="pt-0">
+      <employee-page-loader />
+    </v-row>
+    <div v-else>
+      <certifications-card :model="model"></certifications-card>
+    </div>
+  </v-container>
 </template>
 
 <script setup>
@@ -23,6 +30,8 @@ import {
   updateStoreUser,
   updateStoreTags
 } from '@/utils/storeUtils';
+import CertificationsCard from '@/components/employee-beta/CertificationsCard.vue';
+import EmployeePageLoader from '@/components/employees/EmployeePageLoader.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -33,6 +42,7 @@ const emitter = inject('emitter');
 const store = useStore();
 const route = useRoute();
 
+const basicEmployeeDataLoading = ref(false);
 const contracts = ref(null);
 const displayTimeAndBalances = ref(false);
 const loading = ref(false);
@@ -79,7 +89,6 @@ const user = ref(null);
 // |                 LIFECYCLE HOOKS                  |
 // |                                                  |
 // |--------------------------------------------------|
-
 onBeforeMount(async () => {
   storeIsPopulated() ? await getProfileData() : (loading.value = true);
   if (!store.getters.employees) await updateStoreEmployees();
@@ -105,7 +114,7 @@ onMounted(() => {
  */
 async function getProfileData() {
   loading.value = true;
-  console.log('gettign profile data');
+  basicEmployeeDataLoading.value = true;
   await Promise.all([
     !store.getters.employees ? updateStoreEmployees() : '',
     !store.getters.user ? updateStoreUser() : '',
@@ -125,10 +134,10 @@ async function getProfileData() {
   user.value = store.getters.user;
   contracts.value = store.getters.contracts;
   displayTimeAndBalances.value = hasAdminPermissions();
+  basicEmployeeDataLoading.value = false;
   if (model.value) {
     // await refreshExpenseData(true); //TODO:Implement Expenses and Quickbooks Time
   }
-  console.log(model.value);
   loading.value = false;
 } // getProfileData
 
