@@ -4,7 +4,7 @@
       <employee-page-loader />
     </v-row>
     <div v-else>
-      <hire-info-card></hire-info-card>
+      <hire-info-card :model="model"></hire-info-card>
       <certifications-card
         :model="model"
         :isAdmin="hasAdminPermissions()"
