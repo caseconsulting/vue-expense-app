@@ -33,7 +33,7 @@
         <!-- Pagination -->
         <div v-if="!isEmpty(model.awards) && Math.ceil(model.awards.length / 5) != 1" class="text-center">
           <!-- <v-pagination v-model="page" :length="Math.ceil(model.awards.length / 5)" :total-visible="8"></v-pagination> TODO: Remove Pagination -->
-          <v-card-actions>
+          <v-card-actions class="d-flex justify-center">
             <v-btn>Click To See More</v-btn>
           </v-card-actions>
         </div>
@@ -45,6 +45,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { isEmpty, monthYearFormat } from '@/utils/utils';
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                       SETUP                      |

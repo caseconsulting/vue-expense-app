@@ -37,24 +37,20 @@
           v-if="!isEmpty(model.certifications) && Math.ceil(model.certifications.length / 5) != 1"
           class="text-center"
         >
-          <v-card-actions>
-            <v-btn>Click To See More</v-btn>
+          <v-card-actions class="d-flex justify-center">
+            <v-btn @click="toggleCertificationsModal()">Click To See More</v-btn>
           </v-card-actions>
-          <!-- Pagination TODO: Remove Pagination to modal
-           <v-pagination
-            v-model="page"
-            :length="Math.ceil(model.certifications.length / 5)"
-            :total-visible="8"
-          ></v-pagination> -->
         </div>
       </v-card-text>
+      <certifications-modal v-model="toggleModal" :model="model"></certifications-modal>
     </v-card>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, inject } from 'vue';
 import { isEmpty, monthDayYearFormat } from '@/utils/utils';
+import CertificationsModal from '@/components/employee-beta/CertificationsModal.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -62,8 +58,10 @@ import { isEmpty, monthDayYearFormat } from '@/utils/utils';
 // |                                                  |
 // |--------------------------------------------------|
 
-const props = defineProps(['model', 'isAdmin', 'isUser']);
-const page = ref(1);
+const props = defineProps(['model']);
+const isAdmin = inject('isAdmin');
+const isUser = inject('isUser');
+const toggleModal = ref(false);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -72,13 +70,23 @@ const page = ref(1);
 // |--------------------------------------------------|
 
 const filteredList = computed(() => {
-  const startIndex = 5 * (page.value - 1); //each page contains 5 certification entries
+  const startIndex = 0; //each page contains 5 certification entries
   const endIndex = startIndex + 5;
   if (!isEmpty(props.model.certifications)) {
     return props.model.certifications.slice(startIndex, endIndex);
   }
   return [];
 });
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+function toggleCertificationsModal() {
+  toggleModal.value = !toggleModal.value;
+}
 </script>
 
 <style scoped>
