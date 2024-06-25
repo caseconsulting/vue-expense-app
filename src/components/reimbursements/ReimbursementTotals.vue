@@ -40,15 +40,15 @@
         </v-col>
         <v-col cols="12" lg="4" class="px-2">
           <!-- Revise Button -->
-          <v-btn @click="toggleRevisalRequestModal = true" class="reimburse_button" variant="text" block>
+          <v-btn @click="toggleExpenseRejectionModal = true" class="reimburse_button" variant="text" block>
             <template v-slot:prepend><v-icon>mdi-receipt-text-remove</v-icon></template>
             Reject
           </v-btn>
         </v-col>
       </v-row>
     </v-card-text>
-    <v-dialog v-model="toggleRevisalRequestModal" persistent width="35%">
-      <revise-expense-modal :expenses="selected"></revise-expense-modal>
+    <v-dialog v-model="toggleExpenseRejectionModal" persistent width="35%">
+      <expense-rejection-modal :expenses="selected"></expense-rejection-modal>
     </v-dialog>
   </v-card>
   <!--End of Totals Card-->
@@ -57,7 +57,7 @@
 <script>
 import _ from 'lodash';
 import { convertToMoneyString } from '@/utils/utils';
-import ReviseExpenseModal from '@/components/modals/RejectExpenseModal.vue';
+import ExpenseRejectionModal from '@/components/modals/ExpenseRejectionModal.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -139,10 +139,7 @@ function updateSelected(item) {
 function created() {
   this.emitter.on('selectExpense', this.updateSelected);
   this.emitter.on('expenseChange', this.updateSelected);
-  this.emitter.on('cancel-revisal-request', () => (this.toggleRevisalRequestModal = false));
-  this.emitter.on('confirm-revisal-request', (reason) => {
-    this.toggleRevisalRequestModal = false;
-  });
+  this.emitter.on('close-expenses-rejection', () => (this.toggleExpenseRejectionModal = false));
 } // created
 
 /**
@@ -151,8 +148,7 @@ function created() {
 function beforeUnmount() {
   this.emitter.off('selectExpense');
   this.emitter.off('expenseChange');
-  this.emitter.off('cancel-revisal-request');
-  this.emitter.off('confirm-revisal-request');
+  this.emitter.off('close-expenses-rejection');
 } //beforeUnmount
 
 // |--------------------------------------------------|
@@ -163,7 +159,7 @@ function beforeUnmount() {
 
 export default {
   components: {
-    ReviseExpenseModal
+    ExpenseRejectionModal
   },
   created,
   beforeUnmount,
@@ -174,7 +170,7 @@ export default {
     return {
       isGeneratingGiftCard: true,
       selected: [],
-      toggleRevisalRequestModal: false,
+      toggleExpenseRejectionModal: false,
       reimbursing: false
     };
   },
