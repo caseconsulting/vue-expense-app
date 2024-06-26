@@ -156,7 +156,7 @@
 import TimesheetsChart from '@/components/charts/custom-charts/TimesheetsChart.vue';
 import TimePeriodDetails from '@/components/shared/timesheets/TimePeriodDetails.vue';
 import TimePeriodJobCodes from '@/components/shared/timesheets/TimePeriodJobCodes.vue';
-import { isAfter, isBefore } from '@/shared/dateUtils';
+import { isAfter, isBefore, isSameOrBefore, getTodaysDate } from '@/shared/dateUtils';
 import _ from 'lodash';
 import { computed, inject, ref, reactive, watch, onMounted, onBeforeUnmount } from 'vue';
 import { useStore } from 'vuex';
@@ -278,6 +278,7 @@ function refreshPtoPlan() {
   plannedTimeData.Holiday = 0;
   for (let plan of props.employee.plannedPto?.plan ?? []) {
     // skip if past, stop if future
+    if (isSameOrBefore(plan.date, getTodaysDate(), 'month')) continue;
     if (isBefore(plan.date, startDate, 'month')) continue;
     if (isAfter(plan.date, endDate, 'month')) break;
     // else, add it (* 3600 to convert hours to seconds)

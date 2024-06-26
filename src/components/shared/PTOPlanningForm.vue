@@ -244,13 +244,15 @@ onMounted(async () => {
   // update employee specific information
   PTOPerMonth.value *= employee.value.workStatus / 100;
 
+  // load in employee's plan from database
   if (employee.value.plannedPto?.plan) {
     // get plannedMonths from database if user has a saved plan
     plannedMonths.value = employee.value.plannedPto.plan;
     // remove any months that are in the past
-    for (var i = 0; i < plannedMonths.value; i++) {
-      if (isBefore(plannedMonths.value[i].date, getTodaysDate(), 'month')) delete plannedMonths.value[i];
-      else break; // months are in order, can just break if current month is today or future
+    for (var i = 0; i < plannedMonths.value.length; i++) {
+      if (isSameOrBefore(plannedMonths.value[i].date, getTodaysDate(), 'month')) plannedMonths.value.splice(i--, 1);
+      else break;
+      // months are in order, can just break if current month is today or future
     }
   }
 
