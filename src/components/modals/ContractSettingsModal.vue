@@ -36,7 +36,7 @@
           <v-spacer></v-spacer>
           <v-btn
             variant="text"
-            @click.native="
+            @click="
               emitter.emit('closed-contract-settings-modal');
               activate = false;
             "
@@ -59,10 +59,11 @@
     </v-dialog>
   </div>
 </template>
+
 <script setup>
 import _ from 'lodash';
 import api from '@/shared/api.js';
-import { watch, inject, ref, onMounted } from 'vue';
+import { inject, onMounted, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 import { updateStoreContracts } from '@/utils/storeUtils';
 
@@ -94,11 +95,28 @@ const timesheetsContractViewOptions = ref({
 // |--------------------------------------------------|
 
 /**
- * Created lifecyle hook
+ * Mounted lifecyle hook
  */
 onMounted(() => {
   if (!store.getters.contracts) updateStoreContracts();
-}); // created
+});
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Watcher for modal toggle
+ */
+watch(
+  () => props.toggleModal,
+  () => {
+    model.value = _.cloneDeep(props.contract);
+    activate.value = props.toggleModal;
+  }
+);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -134,21 +152,4 @@ function updateSettings(__, key) {
     model.value.settings?.timesheetsContractViewOption === key ? null : key
   );
 } // updateSettings
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     WATCHERS                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Watcher for modal toggle
- */
-watch(
-  () => props.toggleModal,
-  () => {
-    model.value = _.cloneDeep(props.contract);
-    if (props.toggleModal) activate.value = true;
-  }
-); // watchEmployeesAssignedModal
 </script>

@@ -35,39 +35,33 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, watch } from 'vue';
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const props = defineProps([
+  'toggleDeleteModal', // dialog activator
+  'type', // type of object being deleted
+  'deleteInfo' //delete info to be displayed
+]);
+
+const activate = ref(false); // dialog activator
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                    WATCHERS                      |
 // |                                                  |
 // |--------------------------------------------------|
 
-/**
- * watcher for toggleDeleteModal
- */
-function watchToggleDeleteModal() {
-  this.activate = this.toggleDeleteModal;
-} // watchToggleDeleteModal
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  data() {
-    return {
-      activate: false // dialog activator
-    };
-  },
-  props: [
-    'toggleDeleteModal', // dialog activator
-    'type', // type of object being deleted
-    'deleteInfo' //delete info to be displayed
-  ],
-  watch: {
-    toggleDeleteModal: watchToggleDeleteModal
+// Watcher for toggleDeleteModal
+watch(
+  () => props.toggleDeleteModal,
+  () => {
+    activate.value = props.toggleDeleteModal;
   }
-};
+);
 </script>
