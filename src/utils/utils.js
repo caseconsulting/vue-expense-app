@@ -255,6 +255,25 @@ export function sortUserTechnologies(technologies) {
   return _.orderBy(technologies, [currentIteratee, yearsIteratee], ['desc', 'asc']); // needs to sort by ascending negative years to work
 }
 
+/**
+ * Helper function to sort languages by proficiency, highest to lowest: Literacy, Native-like, Personal, Basic
+ * @param {Array} technologies - List of known languages
+ * return filteredList - A list of languages sorted by proficiency
+ */
+export function sortLanguagesByProficiency(languages) {
+  const levelProficiency = [
+    'Literacy - fluency and broad vocabulary associated with high levels of education',
+    'Native-like - ability to use the language like a native speaker',
+    'Personal - words you know depending on your day-to-day activities (experiences, work, country, friends)',
+    'Basic - most basic words that everyone uses'
+  ];
+  const compare = (languageA, languageB) => {
+    return levelProficiency.indexOf(languageB.proficiency) - levelProficiency.indexOf(languageA.proficiency);
+  };
+  const sortedByProficiency = languages.toSorted(compare);
+  return sortedByProficiency;
+}
+
 export const STATES = {
   AL: 'Alabama',
   AK: 'Alaska',
