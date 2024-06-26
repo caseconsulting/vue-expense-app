@@ -4,6 +4,7 @@
       <employee-page-loader />
     </v-row>
     <v-card v-else elevation="5">
+      <resume-card v-model="model" :editing="editing" :loading="loading"></resume-card>
       <v-btn color="#bc3825" @click="goBackToAlphaProfile()" theme="dark" class="ma-2">Go to Alpha profile!</v-btn>
       <employee-info :model="model"></employee-info>
       <!-- hire and contract info -->
@@ -108,6 +109,7 @@ import EmployeeForm from '@/components/employee-beta/EmployeeForm.vue';
 import PersonalInfoCard from '@/components/employee-beta/personal/PersonalInfoCard.vue';
 import OtherInfoCard from '@/components/employee-beta/personal/OtherInfoCard.vue';
 import ClearanceCard from '@/components/employee-beta/personal/ClearanceCard.vue';
+import ResumeCard from '@/components/employee-beta/ResumeCard.vue';
 // |--------------------------------------------------|
 // |                                                  |
 // |                       SETUP                      |
@@ -122,6 +124,7 @@ const router = useRouter();
 const basicEmployeeDataLoading = ref(false);
 const contracts = ref(null);
 const displayTimeAndBalances = ref(false);
+const editing = ref(false);
 const loading = ref(false);
 
 const isAdmin = ref(false);
@@ -162,6 +165,7 @@ const model = ref({
   personalEmail: '',
   phoneNumber: '',
   prime: '',
+  resumeUpdated: null,
   st: '',
   technologies: [],
   twitter: '',
