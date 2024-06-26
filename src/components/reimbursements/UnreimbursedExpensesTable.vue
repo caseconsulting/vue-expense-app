@@ -461,6 +461,7 @@ function refreshExpenses() {
       }
     });
   });
+  this.pendingExpenses = this.getNonRejectedExpenses(this.pendingExpenses);
   this.empBudgets = this.groupEmployeeExpenses(this.pendingExpenses);
   this.unCheckAllBoxes();
 } // refreshExpenses
@@ -485,19 +486,17 @@ async function rejectExpenses(field, reason) {
     let rejectedExpense = await api.updateItem(api.EXPENSES, baseExpense);
     if (!rejectedExpense.id) {
       // failed to reject expense
-      let msg = rejectedExpense.response.data.message;
+      let msg = rejectedExpense?.response?.data?.message || 'Failed to reject expense';
       this.alerts.push({ status: 'error', message: msg, color: 'red' });
     } else {
       // successfully rejected expense
       let msg = 'Successfully rejected expense';
       this.alerts.push({ status: 'success', message: msg, color: 'green' });
     }
-    let self = this;
-    setTimeout(function () {
-      self.alerts.shift();
-    }, 15000);
+    setTimeout(() => this.alerts.shift(), 10000);
     this.emitter.emit('reimburseAlert', this.alerts);
   });
+  this.refreshExpenses();
   this.loading = false;
 } // rejectExpenses
 
@@ -573,7 +572,6 @@ async function reimburseExpenses() {
   });
 
   this.refreshExpenses();
-  this.emitter.emit('finished-reimbursing');
   this.loading = false; // set reimbursing status to false
 } // reimburseExpenses
 
@@ -643,10 +641,27 @@ function determineShowOnFeed(expense) {
 } // determineShowOnFeed
 
 /**
+ * Gets unreimbursed expenses that have not been rejected, or expenses that have been rejected and revised.
+ *
+ * @param unreimbursedExpenses Array - The array of unreimbursed expenses
+ * @returns Array - The array of unreimbursed, non-rejected expenses
+ */
+function getNonRejectedExpenses(unreimbursedExpenses) {
+  return _.filter(unreimbursedExpenses, (expense) => {
+    let rejections = expense.rejections;
+    return !(
+      rejections?.hardRejections?.reasons?.length > 0 ||
+      (rejections?.softRejections?.reasons?.length > 0 && !rejections?.softRejections?.revised)
+    );
+  });
+} // getNonRejectedExpenses
+
+/**
  * Loads and organizes all data relevant to the data table.
  */
 function loadExpensesData(unreimbursedExpenses) {
-  this.pendingExpenses = this.createExpenses(unreimbursedExpenses);
+  this.pendingExpenses = this.getNonRejectedExpenses(unreimbursedExpenses);
+  this.pendingExpenses = this.createExpenses(this.pendingExpenses);
   this.constructAutoComplete(this.pendingExpenses);
   this.empBudgets = this.groupEmployeeExpenses(this.pendingExpenses);
   this.unCheckAllBoxes();
@@ -916,6 +931,7 @@ export default {
     emitSelectionChange,
     employeeFilter,
     getBudgetTotal,
+    getNonRejectedExpenses,
     groupEmployeeExpenses,
     isEmpty,
     loadExpensesData,
