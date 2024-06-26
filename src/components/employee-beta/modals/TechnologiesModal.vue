@@ -1,10 +1,36 @@
 <template>
   <base-info-modal title="Technologies and Skills">
     <v-card-text>
+      <!-- Employee has Technology Experience -->
       <div v-if="!isEmpty(model.technologies)">
+        <!--Tech Filters -->
+        <div class="mb-3">
+          <fieldset class="filter_border">
+            <legend class="legend_style">Sort By</legend>
+            <v-col cols="12">
+              <v-btn-toggle color="primary" v-model="filters" density="compact" multiple>
+                <v-btn value="current">
+                  <v-tooltip activator="parent" location="top">Current</v-tooltip>
+                  <v-icon size="x-large">mdi-check{{ filters.includes('current') ? '-bold' : '' }}</v-icon>
+                </v-btn>
+
+                <v-btn value="date">
+                  <v-tooltip activator="parent" location="top">Years of Experience</v-tooltip>
+                  <v-icon size="x-large">mdi-calendar-multiple{{ filters.includes('date') ? '-check' : '' }}</v-icon>
+                </v-btn>
+
+                <v-btn value="name">
+                  <v-tooltip activator="parent" location="top">Alphabetical</v-tooltip>
+                  <v-icon size="x-large">mdi-sort-alphabetical-descending-variant</v-icon>
+                </v-btn>
+              </v-btn-toggle>
+            </v-col>
+          </fieldset>
+        </div>
+        <!-- End of Sort Filters -->
         <v-list>
           <!-- Loop Technologies -->
-          <v-list-item v-for="(technology, index) in visibleItems" :key="technology.name + index">
+          <v-list-item v-for="(technology, index) in filteredList" :key="technology.name + index">
             <v-list-item-title class="d-flex align-center pb-4">
               <div class="mx-3">
                 <span v-if="technology.current">
@@ -23,9 +49,12 @@
           </v-list-item>
           <!-- End Loop Technologies -->
         </v-list>
-        <!-- Pagination -->
-        <div v-if="pages != 1" class="text-center">
-          <v-pagination v-model="currentPage" :length="pages" total-visible="8"></v-pagination>
+        <div v-if="!isEmpty(model.technologies) && Math.ceil(model.technologies.length / ITEMS_PER_PAGE) != 1" class="text-center">
+          <v-pagination
+            v-model="page"
+            :length="Math.ceil(model.technologies.length / ITEMS_PER_PAGE)"
+            :total-visible="8"
+          ></v-pagination>
         </div>
       </div>
       <!-- Employee does not have Technology Experience -->
@@ -35,10 +64,11 @@
 </template>
 
 <script setup>
-import { computed, watch } from 'vue';
-import BaseInfoModal from './BaseInfoModal.vue';
+import _ from 'lodash';
+import { ref, computed, watch } from 'vue';
+import BaseInfoModal from '@/components/employee-beta/modals/BaseInfoModal.vue';
 import { isEmpty, sortUserTechnologies } from '@/utils/utils';
-import { ref } from 'vue';
+
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -49,9 +79,8 @@ import { ref } from 'vue';
 const ITEMS_PER_PAGE = 8;
 
 const props = defineProps(['model']);
-
-const currentPage = ref(1);
-const filteredList = ref(sortUserTechnologies(props.model.technologies));
+const page = ref(1);
+const filters = ref([]);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -59,19 +88,14 @@ const filteredList = ref(sortUserTechnologies(props.model.technologies));
 // |                                                  |
 // |--------------------------------------------------|
 
-/**
- * Items visible on the current page
- */
-const visibleItems = computed(() => {
-  const startIndex = (currentPage.value - 1) * ITEMS_PER_PAGE;
+const filteredList = computed(() => {
+  const startIndex = (page.value - 1) * ITEMS_PER_PAGE; //each page contains 5 technologies entries
   const endIndex = startIndex + ITEMS_PER_PAGE;
-  return filteredList.value.slice(startIndex, endIndex);
+  if (!isEmpty(props.model.technologies)) {
+    return sortByFilters(props.model.technologies, filters.value).slice(startIndex, endIndex);
+  }
+  return [];
 });
-
-/**
- * The number of pages
- */
-const pages = computed(() => Math.ceil(filteredList.value.length / ITEMS_PER_PAGE));
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -87,4 +111,22 @@ watch(
   },
   { deep: true }
 );
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Helper function to sort technologies by current then by number of years
+ * @param {Array} technologies - List of technologies
+ * @param {Array} filters - List of applied filters
+ * return filteredList - A list of technologies sorted by current and most years
+ */
+function sortByFilters(technologies, filters) {
+  console.log(filters);
+  const sorted = _.sortBy(technologies, filters); //needs to sort by ascending negative years to work
+  return sorted;
+}
 </script>

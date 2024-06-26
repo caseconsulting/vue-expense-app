@@ -63,9 +63,7 @@ const filteredList = computed(() => {
   const startIndex = 0; //each page contains 5 certification entries
   const endIndex = 5;
   if (!isEmpty(props.model.languages)) {
-    const list = sortLanguagesByProficiency(props.model.languages).slice(startIndex, endIndex);
-    console.log(list);
-    return list;
+    return sortLanguagesByProficiency(props.model.languages).slice(startIndex, endIndex);
   }
   return [];
 });
