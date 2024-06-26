@@ -4,7 +4,7 @@
       <v-card>
         <v-card-text class="font-weight-medium text-h6">Are you sure you want to decline to self-identify?</v-card-text>
         <v-card-text>
-          EEOC prefers employees self-identify as to race and gender. If you refuses to identify, CASE will complete the
+          EEOC prefers employees self-identify as to race and gender. If you refuse to identify, CASE will complete the
           information on your behalf based on other records or visual observation.
         </v-card-text>
         <v-card-text>
@@ -46,7 +46,36 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { inject, ref, watch } from 'vue';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const props = defineProps([
+  'toggleDeclineSelfIdentifyModal' // dialog activator
+]);
+const emitter = inject('emitter');
+
+const activate = ref(false); // dialog activator
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+// Watcher for modal
+watch(
+  () => props.toggleDeclineSelfIdentifyModal,
+  () => {
+    activate.value = props.toggleDeclineSelfIdentifyModal;
+  }
+);
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -62,46 +91,10 @@
 function emit(msg, data) {
   if (data) {
     // data exists
-    this.emitter.emit(msg, data);
+    emitter.emit(msg, data);
   } else {
     // data does not exist
-    this.emitter.emit(msg);
+    emitter.emit(msg);
   }
 } // emit
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                    WATCHERS                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * watcher for modal
- */
-function watchDeclineSelfIdentifyModal() {
-  if (this.toggleDeclineSelfIdentifyModal) this.activate = true;
-} // watchToggleUnreimburseModal
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  data() {
-    return {
-      activate: false // dialog activator
-    };
-  },
-  methods: {
-    emit
-  },
-  props: [
-    'toggleDeclineSelfIdentifyModal' // dialog activator
-  ],
-  watch: {
-    toggleDeclineSelfIdentifyModal: watchDeclineSelfIdentifyModal
-  }
-};
 </script>
