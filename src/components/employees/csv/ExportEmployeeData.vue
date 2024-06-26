@@ -313,13 +313,7 @@ function updatePeriodDefault() {
 /**
  * exportType watcher
  */
-watch(
-  exportType,
-  () => {
-    updatePeriodDefault;
-  },
-  { deep: true }
-);
+watch(exportType, updatePeriodDefault, { deep: true });
 </script>
 
 <style scoped>
