@@ -20,6 +20,9 @@
             <v-icon size="large" class="pr-1"> mdi-arrow-left-thin </v-icon>
             Back
           </v-btn>
+          <!-- FOR BETA TESTING!!! -->
+          <v-btn color="#bc3825" @click="handleProfileBeta()" theme="dark" class="ma-2">Go to Beta View!</v-btn>
+          <!-- END BETA TESTING -->
         </v-col>
         <v-col
           v-if="hasAdminPermissions() || userIsEmployee()"
@@ -370,6 +373,13 @@ function pushHistoryState(employeeNumber) {
 } // pushHistoryState
 
 /**
+ * Routes user to their employee page
+ */
+function handleProfileBeta() {
+  this.$router.push(`/employee-beta/${this.$store.getters.employeeNumber}`);
+} // handleProfile
+
+/**
  * Navigates to an employee
  * future: support custom loops
  *
@@ -649,6 +659,7 @@ export default {
     downloadResume,
     employeeFilter,
     format,
+    handleProfileBeta,
     hasAdminPermissions,
     getProfileData,
     getCurrentBudgetYear,
