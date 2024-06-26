@@ -21,22 +21,66 @@
         <v-row class="mt-1" no-gutters>
           <v-col v-if="model.personalEmail" style="max-width: fit-content">
             <a :href="`mailto:${model.personalEmail}`">
-              <v-btn icon="mdi-email" color="blue" width="32" height="32" variant="text"></v-btn>
+              <v-hover v-slot="{ isHovering, props }">
+                <v-btn
+                  v-bind="props"
+                  icon=""
+                  :color="isHovering ? caseRed : 'blue'"
+                  :width="buttonSize"
+                  :height="buttonSize"
+                  variant="text"
+                >
+                  <v-icon icon="mdi-email" size="28"></v-icon>
+                </v-btn>
+              </v-hover>
             </a>
           </v-col>
           <v-col v-if="model.github" style="max-width: fit-content">
             <a :href="`https://github.com/${model.github}`" target="_blank">
-              <v-btn icon="$github" color="blue" width="32" height="32" variant="text"></v-btn>
+              <v-hover v-slot="{ isHovering, props }">
+                <v-btn
+                  v-bind="props"
+                  icon=""
+                  :color="isHovering ? caseRed : 'blue'"
+                  :width="buttonSize"
+                  :height="buttonSize"
+                  variant="text"
+                >
+                  <v-icon icon="$github" size="30"></v-icon>
+                </v-btn>
+              </v-hover>
             </a>
           </v-col>
           <v-col v-if="model.linkedIn" style="max-width: fit-content">
             <a :href="model.linkedIn" target="_blank">
-              <v-btn icon="$linkedin" color="blue" width="32" height="32" variant="text"></v-btn>
+              <v-hover v-slot="{ isHovering, props }">
+                <v-btn
+                  v-bind="props"
+                  icon=""
+                  :color="isHovering ? caseRed : 'blue'"
+                  :width="buttonSize"
+                  :height="buttonSize"
+                  variant="text"
+                >
+                  <v-icon icon="$linkedin" size="33"></v-icon>
+                </v-btn>
+              </v-hover>
             </a>
           </v-col>
           <v-col v-if="model.twitter" style="max-width: fit-content">
             <a :href="`https://x.com/${model.twitter}`" target="_blank">
-              <v-btn icon="$twitter" color="blue" width="32" height="32" variant="text"></v-btn>
+              <v-hover v-slot="{ isHovering, props }">
+                <v-btn
+                  v-bind="props"
+                  icon=""
+                  :color="isHovering ? caseRed : 'blue'"
+                  :width="buttonSize"
+                  :height="buttonSize"
+                  variant="text"
+                >
+                  <v-icon icon="$twitter" size="23"></v-icon>
+                </v-btn>
+              </v-hover>
             </a>
           </v-col>
         </v-row>
@@ -56,6 +100,8 @@ import { updateStoreAvatars } from '../../utils/storeUtils';
 // |                      SETUP                       |
 // |                                                  |
 // |--------------------------------------------------|
+
+const buttonSize = 34;
 
 const store = useStore();
 const props = defineProps({

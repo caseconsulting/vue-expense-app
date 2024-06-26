@@ -41,6 +41,7 @@ import AwardsCard from '../components/employee-beta/AwardsCard.vue';
 import CertificationsCard from '../components/employee-beta/CertificationsCard.vue';
 import EmployeeInfo from '../components/employee-beta/EmployeeInfo.vue';
 import EmployeePageLoader from '../components/employees/EmployeePageLoader.vue';
+import HireInfoCard from '../components/employee-beta/HireInfoCard.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
