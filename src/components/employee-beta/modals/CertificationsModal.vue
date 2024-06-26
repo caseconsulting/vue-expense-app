@@ -14,6 +14,8 @@
             </v-list-item-title>
             <v-row class="pl-10">
               <p><b>Date Received: </b>{{ monthDayYearFormat(certification.dateReceived) }}</p>
+            </v-row>
+            <v-row class="pl-10">
               <p v-if="certification.expirationDate">
                 <b>Expiration Date: </b>{{ monthDayYearFormat(certification.expirationDate) }}
               </p>
