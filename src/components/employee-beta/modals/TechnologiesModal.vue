@@ -23,6 +23,7 @@
           </v-list-item>
           <!-- End Loop Technologies -->
         </v-list>
+        <!-- Pagination -->
         <div v-if="pages != 1" class="text-center">
           <v-pagination v-model="currentPage" :length="pages" total-visible="8"></v-pagination>
         </div>
@@ -36,8 +37,7 @@
 <script setup>
 import { computed, watch } from 'vue';
 import BaseInfoModal from './BaseInfoModal.vue';
-import { isEmpty } from 'lodash';
-import { sortUserTechnologies } from '../../../utils/utils';
+import { isEmpty, sortUserTechnologies } from '@/utils/utils';
 import { ref } from 'vue';
 
 // |--------------------------------------------------|

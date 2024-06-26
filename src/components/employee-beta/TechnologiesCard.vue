@@ -52,8 +52,7 @@
 
 <script setup>
 import { computed, inject, ref } from 'vue';
-import { isEmpty } from '@/utils/utils';
-import { sortUserTechnologies } from '../../utils/utils';
+import { isEmpty, sortUserTechnologies } from '@/utils/utils';
 import TechnologiesModal from './modals/TechnologiesModal.vue';
 
 // |--------------------------------------------------|
