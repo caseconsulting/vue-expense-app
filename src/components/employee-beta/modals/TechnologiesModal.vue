@@ -14,9 +14,9 @@
                   <v-icon size="x-large">mdi-check{{ filters.includes('current') ? '-bold' : '' }}</v-icon>
                 </v-btn>
 
-                <v-btn value="date">
+                <v-btn value="years">
                   <v-tooltip activator="parent" location="top">Years of Experience</v-tooltip>
-                  <v-icon size="x-large">mdi-calendar-multiple{{ filters.includes('date') ? '-check' : '' }}</v-icon>
+                  <v-icon size="x-large">mdi-calendar-multiple{{ filters.includes('years') ? '-check' : '' }}</v-icon>
                 </v-btn>
 
                 <v-btn value="name">
@@ -49,7 +49,10 @@
           </v-list-item>
           <!-- End Loop Technologies -->
         </v-list>
-        <div v-if="!isEmpty(model.technologies) && Math.ceil(model.technologies.length / ITEMS_PER_PAGE) != 1" class="text-center">
+        <div
+          v-if="!isEmpty(model.technologies) && Math.ceil(model.technologies.length / ITEMS_PER_PAGE) != 1"
+          class="text-center"
+        >
           <v-pagination
             v-model="page"
             :length="Math.ceil(model.technologies.length / ITEMS_PER_PAGE)"
@@ -65,10 +68,9 @@
 
 <script setup>
 import _ from 'lodash';
-import { ref, computed, watch } from 'vue';
+import { ref, computed } from 'vue';
+import { isEmpty } from '@/utils/utils';
 import BaseInfoModal from '@/components/employee-beta/modals/BaseInfoModal.vue';
-import { isEmpty, sortUserTechnologies } from '@/utils/utils';
-
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -77,10 +79,15 @@ import { isEmpty, sortUserTechnologies } from '@/utils/utils';
 // |--------------------------------------------------|
 
 const ITEMS_PER_PAGE = 8;
+const iteratees = {
+  current: (obj) => !obj.current,
+  years: (obj) => -obj.years,
+  name: (obj) => obj.name
+};
 
 const props = defineProps(['model']);
 const page = ref(1);
-const filters = ref([]);
+const filters = ref(['current', 'years']);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -99,34 +106,21 @@ const filteredList = computed(() => {
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     WATCHERS                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-// updates the filtered list only when technologies change
-watch(
-  () => props.model.technologies,
-  () => {
-    filteredList.value = sortUserTechnologies(props.model.technologies);
-  },
-  { deep: true }
-);
-
-// |--------------------------------------------------|
-// |                                                  |
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
 
 /**
- * Helper function to sort technologies by current then by number of years
+ * Helper function to sort technologies by filters
  * @param {Array} technologies - List of technologies
  * @param {Array} filters - List of applied filters
- * return filteredList - A list of technologies sorted by current and most years
+ * @return filteredList - A list of technologies sorted by current and most years
  */
 function sortByFilters(technologies, filters) {
-  console.log(filters);
-  const sorted = _.sortBy(technologies, filters); //needs to sort by ascending negative years to work
+  const sorted = _.sortBy(
+    technologies,
+    filters.map((filter) => iteratees[filter])
+  );
   return sorted;
 }
 </script>
