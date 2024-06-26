@@ -62,7 +62,6 @@ const pageList = ref([]);
  * Emits to parent the component was created and get data for the list.
  */
 onBeforeMount(() => {
-  console.log(filterCompanies.value);
   if (!isEmpty(props.model.companies)) {
     pageList.value = filterCompanies.value.slice(0, 4);
   }

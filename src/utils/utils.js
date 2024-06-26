@@ -157,7 +157,6 @@ export function monthYearFormatBETA(date) {
   return !isEmpty(date) ? format(date, null, 'MMM, YYYY') : '';
 } // monthYearFormat
 
-
 /**
  * Opens a link in a new tab.
  *
