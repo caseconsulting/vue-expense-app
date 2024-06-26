@@ -148,6 +148,16 @@ export function monthYearFormat(date) {
 } // monthYearFormat
 
 /**
+ * Returns a date formated as 'MMM YYYY' (Aug 2020).
+ *
+ * @param date - date to format
+ * @return String - date formated
+ */
+export function monthYearFormatBETA(date) {
+  return !isEmpty(date) ? format(date, null, 'MMM, YYYY') : '';
+} // monthYearFormat
+
+/**
  * Opens a link in a new tab.
  *
  * @param link String - the link to open

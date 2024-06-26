@@ -6,6 +6,11 @@
     <div v-else>
       <employee-info :model="model"></employee-info>
       <hire-info-card :model="model"></hire-info-card>
+      <education-info-card
+        :model="model"
+        :isAdmin="hasAdminPermissions()"
+        :isUser="userIsEmployee()"
+      ></education-info-card>
       <v-btn color="#bc3825" @click="goBackToAlphaProfile()" theme="dark" class="ma-2">Go to Alpha profile!</v-btn>
       <div id="certification-award">
         <v-sheet class="pa-5">
@@ -61,8 +66,8 @@ import EmployeeInfo from '../components/employee-beta/EmployeeInfo.vue';
 import HireInfoCard from '@/components/employee-beta/HireInfoCard.vue';
 import LanguagesCard from '@/components/employee-beta/LanguagesCard.vue';
 import TechnologiesCard from '@/components/employee-beta/TechnologiesCard.vue';
-
 import EmployeePageLoader from '@/components/employees/EmployeePageLoader.vue';
+import EducationInfoCard from '../components/employee-beta/EducationInfoCard.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
