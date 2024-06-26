@@ -114,7 +114,7 @@ watch(
   () => props.toggleModal,
   () => {
     model.value = _.cloneDeep(props.contract);
-    if (props.toggleModal) activate.value = props.toggleModal;
+    activate.value = props.toggleModal;
   }
 );
 
