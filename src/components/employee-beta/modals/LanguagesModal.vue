@@ -1,5 +1,5 @@
 <template>
-  <base-info-modal>
+  <base-info-modal title="Foreign Languages">
     <v-card-text>
       <div v-if="!isEmpty(model.languages)">
         <!-- Loop Languages -->

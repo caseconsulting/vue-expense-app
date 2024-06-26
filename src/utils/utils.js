@@ -242,23 +242,9 @@ export function userRoleIsIntern() {
 } //userRoleIsIntern
 
 /**
- * Sorts a user's tech and skills by:
- * 1. whether the skill is current
- * 2. the duration of the skill
- *
- * @param {Array} technologies the list of technologies to sort
- * @return {Array} A new sorted list
- */
-export function sortUserTechnologies(technologies) {
-  const currentIteratee = _.iteratee({ current: true });
-  const yearsIteratee = (obj) => -obj.years;
-  return _.orderBy(technologies, [currentIteratee, yearsIteratee], ['desc', 'asc']); // needs to sort by ascending negative years to work
-}
-
-/**
  * Helper function to sort languages by proficiency, highest to lowest: Literacy, Native-like, Personal, Basic
  * @param {Array} technologies - List of known languages
- * return filteredList - A list of languages sorted by proficiency
+ * @return filteredList - A list of languages sorted by proficiency
  */
 export function sortLanguagesByProficiency(languages) {
   const levelProficiency = [
@@ -630,6 +616,7 @@ export default {
   openLink,
   updateEmployeeLogin,
   storeIsPopulated,
+  sortLanguagesByProficiency,
   userRoleIsAdmin,
   userRoleIsManager,
   userRoleIsUser,

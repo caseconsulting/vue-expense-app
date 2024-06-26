@@ -51,8 +51,9 @@
 </template>
 
 <script setup>
+import _ from 'lodash';
 import { computed, inject, ref } from 'vue';
-import { isEmpty, sortUserTechnologies } from '@/utils/utils';
+import { isEmpty } from '@/utils/utils';
 import TechnologiesModal from '@/components/employee-beta/modals/TechnologiesModal.vue';
 
 // |--------------------------------------------------|
@@ -84,6 +85,20 @@ const filteredList = computed(() => {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Sorts a user's tech and skills by:
+ * 1. whether the skill is current
+ * 2. the duration of the skill
+ *
+ * @param {Array} technologies the list of technologies to sort
+ * @return {Array} A new sorted list
+ */
+function sortUserTechnologies(technologies) {
+  const currentIteratee = _.iteratee({ current: true });
+  const yearsIteratee = (obj) => -obj.years;
+  return _.orderBy(technologies, [currentIteratee, yearsIteratee], ['desc', 'asc']); // needs to sort by ascending negative years to work
+}
 
 function toggleTechnologiesModal() {
   toggleModal.value = !toggleModal.value;
