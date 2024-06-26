@@ -41,23 +41,9 @@
     <div class="d-flex justify-space-between my-3 pointer" @click="showCustomWorkDayInput = true">
       <div class="mr-3">
         Work Days Remaining
-        <span
-          v-if="(futureDays > 0 && !isYearly && dateIsCurrentPeriod) || (futureDays > 0 && isYearly)"
-          class="text-blue"
-        >
-          *
-        </span>
-        <v-tooltip
-          v-if="(futureDays > 0 && !isYearly && dateIsCurrentPeriod) || (futureDays > 0 && isYearly)"
-          activator="parent"
-          location="top"
-          class="text-center"
-        >
-          {{ futureDays }} {{ futureDays > 1 ? 'days' : 'day' }} subtracted to account for future timesheets<span
-            v-if="getPlannedPTO() > 0"
-            >,<br />including {{ getPlannedPTO(true) }} {{ getPlannedPTO(true) > 1 ? 'days' : 'day' }} of planned
-            PTO/Holiday</span
-          >
+        <span v-if="remainingWorkDaysTooltip" class="text-blue"> * </span>
+        <v-tooltip v-if="remainingWorkDaysTooltip" activator="parent" location="top" class="text-center">
+          <div v-for="line in remainingWorkDaysTooltip.split('NEWLINE')" :key="line" class="text-left">{{ line }}</div>
         </v-tooltip>
       </div>
       <div class="dotted-line"></div>
@@ -236,6 +222,8 @@ const remainingHours = computed(() => {
 const remainingWorkDays = computed(() => {
   let remainingDays;
   let daysToSubtract = futureDays.value;
+  // subtract a day if hours were entered for today's date
+  if (props.supplementalData?.today > 0 && isWeekDay(today.value)) daysToSubtract += 1;
 
   if (customWorkDayInput.value && Number(customWorkDayInput.value)) {
     remainingDays = customWorkDayInput.value || remainingWorkDays.value;
@@ -247,6 +235,26 @@ const remainingWorkDays = computed(() => {
   }
   return Math.max(remainingDays, 0);
 }); // remainingWorkDays
+
+/**
+ * The remaining work days tooltip for the amount of days subtracted.
+ *
+ * @returns String - The tooltip text to display
+ */
+const remainingWorkDaysTooltip = computed(() => {
+  let tooltip = '';
+  if (props.supplementalData?.today > 0 && isWeekDay(today.value)) {
+    tooltip += '1 day subtracted to account for timesheets entered today';
+  }
+  if (futureDays.value > 0) {
+    if (tooltip.length > 0) tooltip += 'NEWLINE';
+    tooltip += `${futureDays.value} ${futureDays.value.length === 1 ? 'day' : 'days'} subtracted to account for future timesheets`;
+    if (getPlannedPTO() > 0) {
+      tooltip += `,NEWLINEincluding ${getPlannedPTO(true)} ${getPlannedPTO(true) > 1 ? 'days' : 'day'} of planned PTO/Holiday`;
+    }
+  }
+  return tooltip;
+}); // remainingWorkDaysTooltip
 
 /**
  * The remaining average hours needed per day.
