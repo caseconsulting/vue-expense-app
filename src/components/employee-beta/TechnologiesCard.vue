@@ -39,20 +39,22 @@
         </v-list>
         <div v-if="!isEmpty(model.technologies) && Math.ceil(model.technologies.length / 5) != 1" class="text-center">
           <v-card-actions class="d-flex justify-center">
-            <v-btn>Click To See More</v-btn>
+            <v-btn @click="activateModal()">Click To See More</v-btn>
           </v-card-actions>
         </div>
       </div>
       <!-- Employee does not have Technology Experience -->
       <p v-else>No Technologies or Skills Information</p>
     </v-card-text>
+    <technologies-modal v-model="toggleModal" :model="model"></technologies-modal>
   </v-card>
 </template>
 
 <script setup>
-import _ from 'lodash';
-import { computed, inject } from 'vue';
+import { computed, inject, ref } from 'vue';
 import { isEmpty } from '@/utils/utils';
+import { sortUserTechnologies } from '../../utils/utils';
+import TechnologiesModal from './modals/TechnologiesModal.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -64,6 +66,7 @@ const props = defineProps(['model']);
 
 const isAdmin = inject('isAdmin');
 const isUser = inject('isUser');
+const toggleModal = ref(false);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -73,7 +76,7 @@ const isUser = inject('isUser');
 
 const filteredList = computed(() => {
   if (!isEmpty(props.model.technologies)) {
-    return sortByCurrentAndYears(props.model.technologies).slice(0, 5);
+    return sortUserTechnologies(props.model.technologies).slice(0, 5);
   }
   return [];
 });
@@ -82,18 +85,10 @@ const filteredList = computed(() => {
 // |                                                  |
 // |                     METHODS                      |
 // |                                                  |
-// |---------------------------------------------------
+// |--------------------------------------------------|
 
-/**
- * Helper function to sort technologies by current then by number of years
- * @param {Array} technologies - List of technologies
- * return filteredList - A list of technologies sorted by current and most years
- */
-function sortByCurrentAndYears(technologies) {
-  const currentIteratee = _.iteratee({ current: true });
-  const yearsIteratee = (obj) => -obj.years;
-  const sortedByCurrentAndYears = _.orderBy(technologies, [currentIteratee, yearsIteratee], ['desc', 'asc']); //needs to sort by ascending negative years to work
-  return sortedByCurrentAndYears;
+function activateModal() {
+  toggleModal.value = !toggleModal.value;
 }
 </script>
 
