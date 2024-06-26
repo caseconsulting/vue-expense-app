@@ -12,9 +12,13 @@
       <v-col class="pl-5 pt-5">
         <v-row>
           <v-col>
+            <!-- h3 was an arbitrary choice. Because of the styling, it shouldn't matter which one you pick -->
             <h3 class="name-text">{{ employeeName }}</h3>
             <h3 class="nickname-text" :style="`color: ${caseGray}`">{{ nickname }}</h3>
-            <h2 v-cloak class="other-text">{{ model.email }}</h2>
+            <!-- the div puts employee id and email on next line -->
+            <div></div>
+            <h3 class="other-text">EMPID: {{ model.employeeNumber }}</h3>
+            <h3 v-cloak class="other-text">{{ model.email }}</h3>
           </v-col>
         </v-row>
         <!-- personal email and links -->
@@ -162,8 +166,10 @@ const altText = computed(() => {
 }
 
 .other-text {
+  display: inline-block;
   font-size: medium;
   font-weight: 500;
+  padding-right: 0.8em;
 }
 
 .logo-icons {
