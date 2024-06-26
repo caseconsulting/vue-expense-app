@@ -149,6 +149,7 @@ const user = ref(null);
 onBeforeMount(async () => {
   storeIsPopulated() ? await getProfileData() : (loading.value = true);
   if (!store.getters.employees) await updateStoreEmployees();
+  console.log(contracts.value);
 });
 
 onMounted(() => {

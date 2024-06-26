@@ -1,6 +1,7 @@
 <template>
   <v-card title="Current Contract Information" elevation="8" class="ma-5">
-    <v-card-text>
+    <v-card-text v-if="isEmpty(contracts)">No contracts to be displayed</v-card-text>
+    <v-card-text v-else>
       <p><b>Contract: </b>{{ getContractNameFromId(currentContractId) }}</p>
       <p><b>Prime: </b>{{ getPrimeNameFromId(currentContractId) }}</p>
       <p>Project: {{ getProjectNameFromId(currentProjectId) }}</p>
@@ -25,7 +26,6 @@
 <script setup>
 import { ref, onBeforeMount } from 'vue';
 import { isEmpty } from '@/utils/utils';
-// import { isEmpty, monthDayYearFormat } from '@/utils/utils';
 import { difference, getTodaysDate } from '@/shared/dateUtils';
 import _ from 'lodash';
 
