@@ -241,6 +241,20 @@ export function userRoleIsIntern() {
   return getRole() === 'intern';
 } //userRoleIsIntern
 
+/**
+ * Sorts a user's tech and skills by:
+ * 1. whether the skill is current
+ * 2. the duration of the skill
+ *
+ * @param {Array} technologies the list of technologies to sort
+ * @return {Array} A new sorted list
+ */
+export function sortUserTechnologies(technologies) {
+  const currentIteratee = _.iteratee({ current: true });
+  const yearsIteratee = (obj) => -obj.years;
+  return _.orderBy(technologies, [currentIteratee, yearsIteratee], ['desc', 'asc']); // needs to sort by ascending negative years to work
+}
+
 export const STATES = {
   AL: 'Alabama',
   AK: 'Alaska',
