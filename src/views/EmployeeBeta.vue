@@ -7,6 +7,11 @@
       <hire-info-card :model="model"></hire-info-card>
       <certifications-card :model="model"></certifications-card>
       <awards-card :model="model"></awards-card>
+      <education-info-card
+        :model="model"
+        :isAdmin="hasAdminPermissions()"
+        :isUser="userIsEmployee()"
+      ></education-info-card>
     </div>
   </v-container>
 </template>
@@ -36,6 +41,7 @@ import AwardsCard from '@/components/employee-beta/AwardsCard.vue';
 import CertificationsCard from '@/components/employee-beta/CertificationsCard.vue';
 import HireInfoCard from '@/components/employee-beta/HireInfoCard.vue';
 import EmployeePageLoader from '@/components/employees/EmployeePageLoader.vue';
+import EducationInfoCard from '../components/employee-beta/EducationInfoCard.vue';
 
 // |--------------------------------------------------|
 // |                                                  |

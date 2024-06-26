@@ -45,6 +45,15 @@ $case-darkgray: #415364;
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
 }
 
+.beta_header_style {
+  /* border-radius: 5px; */
+  background-color: $case-red;
+  color: white;
+  font-size: 16px;
+  height: 45px;
+  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+}
+
 .reimburse_button {
   background-color: $case-red !important;
   color: white !important;
