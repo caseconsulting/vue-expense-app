@@ -39,7 +39,7 @@
         </v-list>
         <div v-if="!isEmpty(model.technologies) && Math.ceil(model.technologies.length / 5) != 1" class="text-center">
           <v-card-actions class="d-flex justify-center">
-            <v-btn @click="activateModal()">Click To See More</v-btn>
+            <v-btn @click="toggleTechnologiesModal()">Click To See More</v-btn>
           </v-card-actions>
         </div>
       </div>
@@ -53,7 +53,7 @@
 <script setup>
 import { computed, inject, ref } from 'vue';
 import { isEmpty, sortUserTechnologies } from '@/utils/utils';
-import TechnologiesModal from './modals/TechnologiesModal.vue';
+import TechnologiesModal from '@/components/employee-beta/modals/TechnologiesModal.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -62,7 +62,6 @@ import TechnologiesModal from './modals/TechnologiesModal.vue';
 // |--------------------------------------------------|
 
 const props = defineProps(['model']);
-
 const isAdmin = inject('isAdmin');
 const isUser = inject('isUser');
 const toggleModal = ref(false);
@@ -86,7 +85,7 @@ const filteredList = computed(() => {
 // |                                                  |
 // |--------------------------------------------------|
 
-function activateModal() {
+function toggleTechnologiesModal() {
   toggleModal.value = !toggleModal.value;
 }
 </script>
