@@ -6,13 +6,31 @@
     <div v-else>
       <employee-info :model="model"></employee-info>
       <hire-info-card :model="model"></hire-info-card>
-      <certifications-card
-        :model="model"
-        :isAdmin="hasAdminPermissions()"
-        :isUser="userIsEmployee()"
-      ></certifications-card>
-      <awards-card :model="model" :isAdmin="hasAdminPermissions()" :isUser="userIsEmployee()"></awards-card>
       <v-btn color="#bc3825" @click="goBackToAlphaProfile()" theme="dark" class="ma-2">Go to Alpha profile!</v-btn>
+      <div id="certification-award">
+        <v-sheet class="pa-5">
+          <v-row justify="space-evenly">
+            <v-col class="pa-5">
+              <certifications-card :model="model"></certifications-card>
+            </v-col>
+            <v-col class="pa-5">
+              <awards-card :model="model"></awards-card>
+            </v-col>
+          </v-row>
+        </v-sheet>
+      </div>
+      <div id="tech-skill-language">
+        <v-sheet class="pa-5">
+          <v-row justify="space-evenly">
+            <v-col class="pa-5">
+              <technologies-card :model="model"></technologies-card>
+            </v-col>
+            <v-col class="pa-5">
+              <languages-card :model="model"></languages-card>
+            </v-col>
+          </v-row>
+        </v-sheet>
+      </div>
     </div>
   </v-container>
 </template>
@@ -37,11 +55,14 @@ import _ from 'lodash';
 import { inject, onBeforeMount, onMounted, provide, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
-import AwardsCard from '../components/employee-beta/AwardsCard.vue';
-import CertificationsCard from '../components/employee-beta/CertificationsCard.vue';
+import AwardsCard from '@/components/employee-beta/AwardsCard.vue';
+import CertificationsCard from '@/components/employee-beta/CertificationsCard.vue';
 import EmployeeInfo from '../components/employee-beta/EmployeeInfo.vue';
-import EmployeePageLoader from '../components/employees/EmployeePageLoader.vue';
-import HireInfoCard from '../components/employee-beta/HireInfoCard.vue';
+import HireInfoCard from '@/components/employee-beta/HireInfoCard.vue';
+import LanguagesCard from '@/components/employee-beta/LanguagesCard.vue';
+import TechnologiesCard from '@/components/employee-beta/TechnologiesCard.vue';
+
+import EmployeePageLoader from '@/components/employees/EmployeePageLoader.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -88,7 +109,9 @@ const model = ref({
   hireDate: null,
   id: null,
   jobRole: '',
+  languages: [],
   lastName: '',
+  linkedIn: '',
   middleName: '',
   nickname: '',
   noMiddleName: false,
