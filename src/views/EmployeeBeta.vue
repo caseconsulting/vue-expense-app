@@ -6,6 +6,14 @@
     <div v-else>
       <employee-info :model="model"></employee-info>
       <hire-info-card :model="model"></hire-info-card>
+      <certifications-card :model="model"></certifications-card>
+      <awards-card :model="model"></awards-card>
+      <case-experience-info-card :model="model"></case-experience-info-card>
+      <past-job-experience-info-card
+        :model="model"
+        :isAdmin="hasAdminPermissions()"
+        :isUser="userIsEmployee()"
+      ></past-job-experience-info-card>
       <v-btn color="#bc3825" @click="goBackToAlphaProfile()" theme="dark" class="ma-2">Go to Alpha profile!</v-btn>
       <div id="certification-award">
         <v-sheet class="pa-5">
@@ -56,12 +64,13 @@ import { inject, onBeforeMount, onMounted, provide, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import AwardsCard from '@/components/employee-beta/AwardsCard.vue';
+import CaseExperienceInfoCard from '@/components/employee-beta/CaseExperienceInfoCard.vue';
 import CertificationsCard from '@/components/employee-beta/CertificationsCard.vue';
 import EmployeeInfo from '../components/employee-beta/EmployeeInfo.vue';
 import HireInfoCard from '@/components/employee-beta/HireInfoCard.vue';
 import LanguagesCard from '@/components/employee-beta/LanguagesCard.vue';
 import TechnologiesCard from '@/components/employee-beta/TechnologiesCard.vue';
-
+import PastJobExperienceInfoCard from '@/components/employee-beta/PastJobExperienceInfoCard.vue';
 import EmployeePageLoader from '@/components/employees/EmployeePageLoader.vue';
 
 // |--------------------------------------------------|
