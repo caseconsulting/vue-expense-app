@@ -1504,6 +1504,10 @@ async function submit() {
         this.editedExpense.recipient = null;
       }
 
+      if (this.editedExpense?.rejections?.softRejections) {
+        this.editedExpense.rejections.softRejections.revised = true;
+      }
+
       if (this.isEmpty(this.editedExpense.id)) {
         // creating a new expense
         await this.createNewEntry();

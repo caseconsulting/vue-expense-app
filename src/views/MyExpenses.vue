@@ -855,12 +855,10 @@ async function loadMyExpensesData() {
  * @return boolean - disables the delete and edit button if false
  */
 function canDelete(expense) {
-  if (expense.canDelete !== undefined && expense.canDelete !== null && !expense.canDelete) {
-    //canDelete is present and equals false
-    return false;
-  } else {
-    return true;
-  }
+  return (
+    (expense.canDelete === undefined || expense.canDelete === null || expense.canDelete) &&
+    !expense.rejections?.hardRejections?.reasons
+  );
 } // canDelete
 
 /**
