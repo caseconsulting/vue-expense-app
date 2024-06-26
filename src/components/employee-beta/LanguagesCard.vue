@@ -25,10 +25,7 @@
         </div>
         <!-- Employee does not have Language Experience -->
         <p v-else>No Foreign Language Information</p>
-        <div
-          v-if="true || (!isEmpty(model.languages) && Math.ceil(model.languages.length / 5) != 1)"
-          class="text-center"
-        >
+        <div v-if="!isEmpty(model.languages) && Math.ceil(model.languages.length / 5) != 1" class="text-center">
           <v-card-actions class="d-flex justify-center">
             <v-btn @click="activateModal()">Click To See More</v-btn>
           </v-card-actions>
