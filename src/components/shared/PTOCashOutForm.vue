@@ -124,7 +124,11 @@ import { nicknameAndLastName } from '../../shared/employeeUtils';
 import _ from 'lodash';
 import { computed, onBeforeMount, inject, ref, watch } from 'vue';
 import { useStore } from 'vuex';
+<<<<<<< HEAD
 import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSnackbar.vue';
+=======
+
+>>>>>>> 95406fae (POR 2720 - sync with master (#232))
 // |--------------------------------------------------|
 // |                                                  |
 // |                       SETUP                      |
@@ -245,16 +249,26 @@ async function submit() {
       clearForm();
       isSubmitting.value = false;
       if (props.item) {
+<<<<<<< HEAD
         useDisplaySuccess('Successfully edited PTO Cash Out request!');
       } else {
         useDisplaySuccess('Successfully created PTO Cash Out request!');
+=======
+        displaySuccess('Successfully edited PTO Cash Out request!');
+      } else {
+        displaySuccess('Successfully created PTO Cash Out request!');
+>>>>>>> 95406fae (POR 2720 - sync with master (#232))
       }
     }
   } catch (err) {
     emitCloseForm();
     clearForm();
     isSubmitting.value = false;
+<<<<<<< HEAD
     useDisplayError(err);
+=======
+    displayError(err);
+>>>>>>> 95406fae (POR 2720 - sync with master (#232))
   }
 } // submit
 
@@ -279,6 +293,38 @@ function clearForm() {
   form.value.reset();
   form.value.resetValidation();
 } // clearForm
+
+/**
+ * Emits close form events
+ */
+<<<<<<< HEAD
+function emitCloseForm() {
+  emitter.emit('close-pto-cash-out-form-table');
+  emitter.emit('close-pto-cash-out-form-hours');
+}
+=======
+function displayError(err) {
+  let status = {
+    statusType: 'ERROR',
+    statusMessage: err,
+    color: 'red'
+  };
+  emitter.emit('status-alert', status);
+} // displayError
+
+/**
+ * Displays success message
+ * @param msg success message to display
+ */
+function displaySuccess(msg) {
+  let status = {
+    statusType: 'SUCCESS',
+    statusMessage: msg,
+    color: 'green'
+  };
+  emitter.emit('status-alert', status);
+} // displaySuccess
+>>>>>>> 95406fae (POR 2720 - sync with master (#232))
 
 /**
  * Emits close form events

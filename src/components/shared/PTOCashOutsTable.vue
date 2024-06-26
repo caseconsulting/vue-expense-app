@@ -201,7 +201,10 @@ import PTOCashOutForm from './PTOCashOutForm.vue';
 import TagsFilter from '@/components/shared/TagsFilter.vue';
 import { computed, inject, onBeforeMount, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useStore } from 'vuex';
+<<<<<<< HEAD
 import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSnackbar.vue';
+=======
+>>>>>>> 95406fae (POR 2720 - sync with master (#232))
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -430,11 +433,19 @@ async function clickedConfirmApprove() {
     await approveSelectedPTOCashOuts();
     await updateStorePtoCashOuts();
     isApproving.value = false;
+<<<<<<< HEAD
     useDisplaySuccess('Successfully approved PTO cash outs!');
     uncheckAllBoxes();
   } catch (err) {
     isApproving.value = false;
     useDisplayError(err);
+=======
+    displaySuccess('Successfully approved PTO cash outs!');
+    uncheckAllBoxes();
+  } catch (err) {
+    isApproving.value = false;
+    displayError(err);
+>>>>>>> 95406fae (POR 2720 - sync with master (#232))
   }
   toggleApproveModal.value = false;
 } // clickedConfirmApprove
@@ -458,10 +469,17 @@ async function clickedConfirmDelete() {
     loading.value = true;
     await deletePTOCashOut(clickedDeleteItem.value);
     loading.value = false;
+<<<<<<< HEAD
     useDisplaySuccess('Successfully deleted PTO cash out!');
   } catch (err) {
     loading.value = false;
     useDisplayError(err);
+=======
+    displaySuccess('Successfully deleted PTO cash out!');
+  } catch (err) {
+    loading.value = false;
+    displayError(err);
+>>>>>>> 95406fae (POR 2720 - sync with master (#232))
   }
   isDeleting.value = false;
   clickedDeleteItem.value = null;
@@ -490,6 +508,37 @@ async function deletePTOCashOut(item) {
 } // deletePTOCashOut
 
 /**
+<<<<<<< HEAD
+=======
+ * Displays error snackbar
+ *
+ * @param err error message to display
+ */
+function displayError(err) {
+  let status = {
+    statusType: 'ERROR',
+    statusMessage: err,
+    color: 'red'
+  };
+
+  emitter.emit('status-alert', status);
+} // displayError
+
+/**
+ * Displays success message
+ * @param msg success message to display
+ */
+function displaySuccess(msg) {
+  let status = {
+    statusType: 'SUCCESS',
+    statusMessage: msg,
+    color: 'green'
+  };
+  emitter.emit('status-alert', status);
+} // displaySuccess
+
+/**
+>>>>>>> 95406fae (POR 2720 - sync with master (#232))
  * Changes the timesheets employee when a row is clicked
  *
  * @param item Object - The item from the row clicked
