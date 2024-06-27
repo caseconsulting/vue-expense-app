@@ -20,9 +20,9 @@
         <v-icon class="text-align: float-right" v-if="!props.model.birthdayFeed">mdi-shield</v-icon>
         <v-icon class="text-align: float-right" v-else>mdi-shield-outline</v-icon>
       </p>
-      <div style="display: flex">
+      <div style="display: flex" v-if="!isEmpty(getCurrentAddress() && (isAdmin || isUser))">
         <p style="width: 65px"><b>Address:</b></p>
-        <p style="width: 200px" v-if="!isEmpty(getCurrentAddress() && (isAdmin || isUser))">
+        <p style="width: 200px">
           {{ getCurrentAddress() }}
         </p>
         <v-icon style="margin-left: auto; margin-right: 0">mdi-shield</v-icon>
