@@ -1,6 +1,7 @@
 <template>
   <base-card title="Technologies and Skills">
-    <template #infoIcon>
+    <template #title>
+      <h3 class="text-white px-2">Technologies and Skills</h3>
       <div>
         <v-tooltip activator="parent" location="right"> Showing current with most years </v-tooltip>
         <v-icon id="information" color="white" size="x-small">mdi-information</v-icon>
