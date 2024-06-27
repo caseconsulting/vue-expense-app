@@ -1,18 +1,11 @@
 <template>
-  <v-card>
-    <v-card-title class="d-flex align-center justify-space-between header_style">
-      <div class="d-flex align-center">
-        <h3 class="text-white px-2">Technologies and Skills</h3>
-        <div>
-          <v-tooltip activator="parent" location="right"> Showing current with most years </v-tooltip>
-          <v-icon id="information" color="white" size="x-small">mdi-information</v-icon>
-        </div>
+  <base-card title="Technologies and Skills">
+    <template #infoIcon>
+      <div>
+        <v-tooltip activator="parent" location="right"> Showing current with most years </v-tooltip>
+        <v-icon id="information" color="white" size="x-small">mdi-information</v-icon>
       </div>
-      <v-btn v-if="isAdmin || isUser" density="comfortable" variant="text" icon="">
-        <v-tooltip activator="parent" location="top"> Edit Profile </v-tooltip>
-        <v-icon id="edit" color="white"> mdi-pencil </v-icon>
-      </v-btn>
-    </v-card-title>
+    </template>
     <v-card-text>
       <!-- Employee has Technology Experience -->
       <div v-if="!isEmpty(model.technologies)">
@@ -46,13 +39,14 @@
       <!-- Employee does not have Technology Experience -->
       <p v-else>No Technologies or Skills Information</p>
     </v-card-text>
-  </v-card>
+  </base-card>
 </template>
 
 <script setup>
 import _ from 'lodash';
-import { computed, inject } from 'vue';
+import { computed } from 'vue';
 import { isEmpty } from '@/utils/utils';
+import BaseCard from '@/components/employee-beta/BaseCard.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -61,9 +55,6 @@ import { isEmpty } from '@/utils/utils';
 // |--------------------------------------------------|
 
 const props = defineProps(['model']);
-
-const isAdmin = inject('isAdmin');
-const isUser = inject('isUser');
 
 // |--------------------------------------------------|
 // |                                                  |

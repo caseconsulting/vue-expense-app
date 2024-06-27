@@ -1,12 +1,5 @@
 <template>
-  <v-card>
-    <v-card-title class="d-flex align-center justify-space-between beta_header_style">
-      <h3>Past Experience</h3>
-      <v-btn v-if="isAdmin || isUser" density="comfortable" variant="text" icon="" class="mx-1">
-        <v-tooltip activator="parent" location="top"> Edit Education </v-tooltip>
-        <v-icon id="edit" color="white"> mdi-pencil </v-icon>
-      </v-btn>
-    </v-card-title>
+  <base-card title="Past Experience">
     <v-card-text v-if="isEmpty(pageList)">
       <p>No past job experience to display</p>
     </v-card-text>
@@ -36,7 +29,7 @@
         </div>
       </v-list-item>
     </v-card-text>
-  </v-card>
+  </base-card>
 </template>
 
 <script setup>
@@ -44,8 +37,9 @@ import { _, isEmpty } from 'lodash';
 import { monthYearFormatBETA } from '../../utils/utils';
 import { onBeforeMount, ref } from 'vue';
 import { add, difference, minimum } from '../../shared/dateUtils';
+import BaseCard from '@/components/employee-beta/BaseCard.vue';
 
-const props = defineProps(['isAdmin', 'isUser', 'model']);
+const props = defineProps(['model']);
 
 const earliestStartDate = ref(null);
 const endDate = ref(null);
