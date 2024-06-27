@@ -1,7 +1,7 @@
 <template>
   <v-card>
     <v-card-title class="d-flex align-center justify-space-between beta_header_style">
-      <h3>CASE Information</h3>
+      <h3 class="text-white px-2">CASE Information</h3>
     </v-card-title>
 
     <!-- Job Role and Hire Date information -->
@@ -14,7 +14,7 @@
     </v-card-text>
 
     <!-- Anniversary Card -->
-    <v-card class="ma-8" elevation="8" style="background-color: #f8f8f8">
+    <v-card class="ma-8" elevation="4" style="background-color: #f8f8f8">
       <v-row no-gutters class="pa-4">
         <v-card-title class="pa-0">
           <p v-if="!model.hireDate">0 Days until Anniversary</p>
@@ -49,9 +49,6 @@ const getDaysUntil = computed(() => {
   let curYear = now.split('-')[0];
 
   let anniversary = setYear(props.model.hireDate, curYear);
-  console.log(props.model);
-
-  console.log(anniversary + ' ' + props.model.hireDate);
 
   if (isAfter(now, props.model.hireDate)) {
     // employee's hire date is before today

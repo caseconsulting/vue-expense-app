@@ -1,5 +1,5 @@
 <template>
-  <v-card @click="toggleInfo" variant="elevated" width="170px" style="margin: 40px" rounded="1">
+  <v-card @click="toggleInfo" elevation="4" width="170px" rounded="1">
     <span style="background-color: red"></span>
     <div class="info-header font-weight-black" style="padding-top: 5px">Hire date</div>
     <div class="info-div">{{ monthDayYearFormat(hireDate) }}</div>
