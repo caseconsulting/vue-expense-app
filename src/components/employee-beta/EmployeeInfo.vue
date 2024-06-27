@@ -1,28 +1,40 @@
 <template>
-  <v-sheet>
-    <v-row>
+  <div>
+    <v-row class="ma-3 align-center">
       <!-- profile picture -->
-      <v-col class="ml-5 mt-5 display-inline" style="max-width: fit-content">
+      <v-col class="display-inline fit-content">
         <v-avatar :color="caseRed" :size="96">
           <span class="text-h4 display-inline-block position-absolute">{{ initials }}</span>
           <v-img class="display-inline-block position-absolute" :src="avatar" :alt="altText" />
         </v-avatar>
       </v-col>
       <!-- general info -->
-      <v-col class="pl-5 pt-5">
-        <v-row>
-          <v-col>
-            <!-- h3 was an arbitrary choice. Because of the styling, it shouldn't matter which one you pick -->
+      <v-col>
+        <!-- first row: name and nickname -->
+        <v-row class="mr-5 align-baseline" no-gutters>
+          <!-- name -->
+          <v-col class="mr-3 fit-content">
             <h3 class="name-text">{{ employeeName }}</h3>
+          </v-col>
+          <!-- nickname -->
+          <v-col class="fit-content">
             <h3 class="nickname-text" :style="`color: ${caseGray}`">{{ nickname }}</h3>
-            <!-- the div puts employee id and email on next line -->
-            <div></div>
-            <h3 class="other-text">EMPID: {{ model.employeeNumber }}</h3>
-            <h3 v-cloak class="other-text">{{ model.email }}</h3>
           </v-col>
         </v-row>
-        <!-- personal email and links -->
+        <!-- second row: emp id and case email -->
+        <v-row class="mr-5 align-baseline" no-gutters>
+          <!-- emp id -->
+          <v-col class="mr-3 fit-content">
+            <h3 class="other-text" :style="`color: ${caseGray}`">EMPID: {{ model.employeeNumber }}</h3>
+          </v-col>
+          <!-- email -->
+          <v-col class="fit-content">
+            <h3 v-cloak class="other-text" :style="`color: ${caseGray}`">{{ model.email }}</h3>
+          </v-col>
+        </v-row>
+        <!-- third row: personal email and links -->
         <v-row class="mt-1" no-gutters>
+          <!-- personal email -->
           <v-col v-if="model.personalEmail" style="max-width: fit-content">
             <a :href="`mailto:${model.personalEmail}`">
               <v-hover v-slot="{ isHovering, props }">
@@ -39,6 +51,7 @@
               </v-hover>
             </a>
           </v-col>
+          <!-- github -->
           <v-col v-if="model.github" style="max-width: fit-content">
             <a :href="`https://github.com/${model.github}`" target="_blank">
               <v-hover v-slot="{ isHovering, props }">
@@ -55,6 +68,7 @@
               </v-hover>
             </a>
           </v-col>
+          <!-- linkedin -->
           <v-col v-if="model.linkedIn" style="max-width: fit-content">
             <a :href="model.linkedIn" target="_blank">
               <v-hover v-slot="{ isHovering, props }">
@@ -71,6 +85,7 @@
               </v-hover>
             </a>
           </v-col>
+          <!-- X (the everything app you can do everything on it) -->
           <v-col v-if="model.twitter" style="max-width: fit-content">
             <a :href="`https://x.com/${model.twitter}`" target="_blank">
               <v-hover v-slot="{ isHovering, props }">
@@ -90,7 +105,7 @@
         </v-row>
       </v-col>
     </v-row>
-  </v-sheet>
+  </div>
 </template>
 
 <script setup>
@@ -151,28 +166,35 @@ const altText = computed(() => {
 </script>
 
 <style scoped>
+.fit-content {
+  max-width: fit-content;
+}
+
 .name-text {
   font-size: xx-large;
   color: black;
   display: inline-block;
+  white-space: nowrap;
 }
 
 .nickname-text {
   font-size: large;
   font-weight: 500;
-  color: gray;
   display: inline-block;
-  padding-left: 0.5em;
+  white-space: nowrap;
 }
 
 .other-text {
-  display: inline-block;
   font-size: medium;
   font-weight: 500;
-  padding-right: 0.8em;
+  display: inline-block;
+  white-space: nowrap;
 }
 
 .logo-icons {
   top: -10%;
+}
+
+@media (max-width: 620px) {
 }
 </style>
