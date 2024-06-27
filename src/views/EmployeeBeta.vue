@@ -65,7 +65,7 @@ import {
   userRoleIsManager
 } from '@/utils/utils.js';
 import _ from 'lodash';
-import { inject, onBeforeMount, onMounted, provide, ref, watch } from 'vue';
+import { inject, onBeforeMount, onMounted, onUnmounted, provide, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import AwardsCard from '@/components/employee-beta/AwardsCard.vue';
@@ -145,18 +145,25 @@ const user = ref(null);
 // |                 LIFECYCLE HOOKS                  |
 // |                                                  |
 // |--------------------------------------------------|
+
 onBeforeMount(async () => {
   storeIsPopulated() ? await getProfileData() : (loading.value = true);
   if (!store.getters.employees) await updateStoreEmployees();
 });
 
 onMounted(() => {
+  // register events
   //TODO: add emitters with updating employee through the editing form
   emitter.on('update', (updatedEmployee) => {
     if (updatedEmployee) {
       model.value = updatedEmployee;
     }
   });
+});
+
+onUnmounted(() => {
+  // unregister events
+  emitter.off('update');
 });
 
 // |--------------------------------------------------|
