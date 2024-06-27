@@ -148,7 +148,7 @@ export function monthYearFormat(date) {
 } // monthYearFormat
 
 /**
- * Returns a date formated as 'MMM YYYY' (Aug 2020).
+ * Returns a date formated as 'MMM, YYYY' (Aug, 2020).
  *
  * @param date - date to format
  * @return String - date formated
