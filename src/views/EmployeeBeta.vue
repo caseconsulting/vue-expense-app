@@ -203,7 +203,7 @@ async function getProfileData() {
  * Routes user to their employee page
  */
 function goBackToAlphaProfile() {
-  router.push(`/employee/${store.getters.employeeNumber}`);
+  router.push(`/employee/${route.params.id}`);
 } // handleProfile
 
 /**
