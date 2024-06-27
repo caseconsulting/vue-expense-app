@@ -4,7 +4,7 @@
       <h3 class="text-white px-2">
         <v-icon size="small" style="margin-right: 10px" id="personal" color="white"> mdi-shield </v-icon>Clearance
       </h3>
-      <v-btn v-if="isAdmin || isUser" density="comfortable" variant="text">
+      <v-btn v-if="isAdmin || isUser" density="comfortable" variant="text" icon="">
         <v-tooltip activator="parent" location="top"> Edit Profile </v-tooltip>
         <v-icon id="edit" color="white"> mdi-pencil </v-icon>
       </v-btn>
