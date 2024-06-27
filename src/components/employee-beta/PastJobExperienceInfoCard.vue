@@ -47,8 +47,7 @@
 
 <script setup>
 import { _ } from 'lodash';
-import { isEmpty } from '../../utils/utils';
-import { monthYearFormatBETA } from '../../utils/utils';
+import { monthYearFormatBETA, isEmpty } from '../../utils/utils';
 import { onBeforeMount, ref } from 'vue';
 import { add, difference, minimum } from '../../shared/dateUtils';
 import PastJobExperienceModal from './modals/PastJobExperienceModal.vue';

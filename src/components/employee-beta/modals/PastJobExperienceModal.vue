@@ -34,17 +34,27 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { isEmpty } from '../../../utils/utils';
+import { ref, computed } from 'vue';
 import BaseInfoModal from './BaseInfoModal.vue';
-import { computed } from 'vue';
 import { add, difference, minimum } from '../../../shared/dateUtils';
-import { monthYearFormatBETA } from '../../../utils/utils';
+import { monthYearFormatBETA, isEmpty } from '../../../utils/utils';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                       SETUP                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 const earliestStartDate = ref(null);
 const endDate = ref(null);
 const props = defineProps(['model']);
 const page = ref(1);
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                    COMPUTED                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 const filteredList = computed(() => {
   const startIndex = (page.value - 1) * 5; //each page contains 5 job entries
@@ -54,6 +64,12 @@ const filteredList = computed(() => {
   }
   return [];
 });
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 function getDurationOfPosition(position) {
   let totalTime = 0;
