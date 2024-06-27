@@ -1,12 +1,17 @@
 <template>
   <v-card title="Current Contract Information" elevation="8" class="ma-5">
-    <v-card-text v-if="isEmpty(contracts)">No contracts to be displayed</v-card-text>
-    <v-card-text v-else>
-      <p><b>Contract: </b>{{ getContractNameFromId(currentContractId) }}</p>
-      <p><b>Prime: </b>{{ getPrimeNameFromId(currentContractId) }}</p>
-      <p>Project: {{ getProjectNameFromId(currentProjectId) }}</p>
+    <v-card-text v-if="!isEmpty(contractsList)">
+      <div v-if="!noneActive">
+        <p><b>Contract: </b>{{ getContractNameFromId(currentContractId) }}</p>
+        <p><b>Prime: </b>{{ getPrimeNameFromId(currentContractId) }}</p>
+        <p>Project: {{ getProjectNameFromId(currentProjectId) }}</p>
+      </div>
+      <div v-else style="font-size: 15px; text-align: center" class="mt-3">
+        <p><b>No contracts are currently active, to view past assignments click below.</b></p>
+      </div>
     </v-card-text>
-    <v-card-actions>
+    <v-card-text v-else> No contracts to be displayed </v-card-text>
+    <v-card-actions v-if="!isEmpty(contractsList) && (noneActive || model.contracts.length > 1)">
       <v-btn block @click="open">Click to see more</v-btn>
     </v-card-actions>
     <v-dialog v-model="dialog">
@@ -25,9 +30,9 @@
 
 <script setup>
 import { ref, onBeforeMount } from 'vue';
-import { isEmpty } from '@/utils/utils';
 import { difference, getTodaysDate } from '@/shared/dateUtils';
 import _ from 'lodash';
+import { isEmpty } from '../../utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -35,12 +40,14 @@ import _ from 'lodash';
 // |                                                  |
 // |--------------------------------------------------|
 
+const props = defineProps(['contracts', 'model']);
+
 const contractsList = ref([]);
 const currentContractId = ref('');
 const currentProjectId = ref('');
 const dialog = ref(false);
+const noneActive = ref(false);
 const projectsList = ref([]);
-const props = defineProps(['contracts', 'model']);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -53,23 +60,13 @@ const props = defineProps(['contracts', 'model']);
  */
 onBeforeMount(() => {
   if (!isEmpty(props.model.contracts)) {
-    contractsList.value = props.model.contracts.slice(0, 5);
+    contractsList.value = props.model.contracts.slice(0, 10);
     projectsList.value = props.contracts.map((c) => c.projects).flat();
     getCurrentAssignment();
+    // sort the filtered list by start date, ascending
+    contractsList.value = _.sortBy(contractsList.value, (o) => getContractEarliestDate(o));
   }
-  // sort the filtered list by start date, ascending
-  contractsList.value = _.sortBy(contractsList.value, (o) => getContractEarliestDate(o));
 }); // created
-
-// onMounted(() => {
-//   getCurrentAssignment();
-// })
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                    COMPUTED                      |
-// |                                                  |
-// |--------------------------------------------------|
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -77,6 +74,9 @@ onBeforeMount(() => {
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * Opens the dialog
+ */
 function open() {
   dialog.value = true;
 }
@@ -135,8 +135,12 @@ function getCurrentAssignment() {
       if (!props.model.contracts[c].projects[p].endDate) {
         currentProjectId.value = props.model.contracts[c].projects[p].projectId;
         currentContractId.value = props.model.contracts[c].contractId;
+        return;
       }
     }
+  }
+  if (!currentContractId.value) {
+    noneActive.value = true;
   }
 } // getCurrentProject
 
@@ -158,15 +162,6 @@ function getPrimeName(contract) {
 function getPrimeNameFromId(contractId) {
   return props.contracts.find((c) => c.id === contractId).primeName;
 }
-
-// /**
-//  * Finds the project name from the employees project id.
-//  *
-//  * @param contract - The employees contract object
-//  */
-// function getProjectName(project) {
-//   return contractProjects.value.find((p) => p.id === project.projectId).projectName;
-// } // getProjectName
 
 /**
  * Current project name from ID
@@ -220,17 +215,6 @@ function dateReadable(time) {
 
   return read;
 } // dateReadable
-
-// /**
-//  * return a readable project length instead of some other format.
-//  *
-//  * @param project - the project
-//  * @return string - a readable format of the project length
-//  */
-// function getProjectLengthInYearsReadable(project) {
-//   let length = getProjectLengthInYears(project);
-//   return dateReadable(length);
-// } // getProjectLengthInYearsReadable
 
 /**
  * Converts the intervals to length of time in years.
