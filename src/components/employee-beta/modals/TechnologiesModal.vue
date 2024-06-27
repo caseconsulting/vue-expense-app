@@ -9,17 +9,19 @@
             <legend class="legend_style">Sort By</legend>
             <v-col cols="12">
               <v-btn-toggle color="primary" v-model="filters" density="compact" multiple>
-                <v-btn value="current">
+                <v-btn value="filter1current">
                   <v-tooltip activator="parent" location="top">Current</v-tooltip>
-                  <v-icon size="x-large">mdi-check{{ filters.includes('current') ? '-bold' : '' }}</v-icon>
+                  <v-icon size="x-large">mdi-check{{ filters.includes('filter1current') ? '-bold' : '' }}</v-icon>
                 </v-btn>
 
-                <v-btn value="years">
+                <v-btn value="filter2years">
                   <v-tooltip activator="parent" location="top">Years of Experience</v-tooltip>
-                  <v-icon size="x-large">mdi-calendar-multiple{{ filters.includes('years') ? '-check' : '' }}</v-icon>
+                  <v-icon size="x-large"
+                    >mdi-calendar-multiple{{ filters.includes('filter2years') ? '-check' : '' }}</v-icon
+                  >
                 </v-btn>
 
-                <v-btn value="name">
+                <v-btn value="filter3name">
                   <v-tooltip activator="parent" location="top">Alphabetical</v-tooltip>
                   <v-icon size="x-large">mdi-sort-alphabetical-descending-variant</v-icon>
                 </v-btn>
@@ -80,14 +82,14 @@ import BaseInfoModal from '@/components/employee-beta/modals/BaseInfoModal.vue';
 
 const ITEMS_PER_PAGE = 8;
 const iteratees = {
-  current: (obj) => !obj.current,
-  years: (obj) => -obj.years,
-  name: (obj) => obj.name
+  filter1current: (obj) => !obj.current,
+  filter2years: (obj) => -obj.years,
+  filter3name: (obj) => obj.name
 };
 
 const props = defineProps(['model']);
 const page = ref(1);
-const filters = ref(['current', 'years']);
+const filters = ref(['filter1current', 'filter2years']);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -114,12 +116,12 @@ const filteredList = computed(() => {
  * Helper function to sort technologies by filters
  * @param {Array} technologies - List of technologies
  * @param {Array} filters - List of applied filters
- * @return filteredList - A list of technologies sorted by current and most years
+ * @return filteredList - A list of technologies sorted by filters
  */
 function sortByFilters(technologies, filters) {
   const sorted = _.sortBy(
     technologies,
-    filters.map((filter) => iteratees[filter])
+    filters.sort().map((filter) => iteratees[filter]) //sort filters so order by current, years, name
   );
   return sorted;
 }
