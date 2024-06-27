@@ -24,16 +24,17 @@
 </template>
 
 <script setup>
+import { inject } from 'vue';
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                       SETUP                      |
 // |                                                  |
 // |--------------------------------------------------|
 
-import { inject } from 'vue';
-
 defineProps(['title']);
+const toggleModal = defineModel();
+
 const isAdmin = inject('isAdmin');
 const isUser = inject('isUser');
-const toggleModal = defineModel();
 </script>

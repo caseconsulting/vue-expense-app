@@ -19,6 +19,7 @@
         :isAdmin="hasAdminPermissions()"
         :isUser="userIsEmployee()"
       ></education-info-card>
+      <contract-info-card :contracts="contracts" :model="model"></contract-info-card>
       <v-btn color="#bc3825" @click="goBackToAlphaProfile()" theme="dark" class="ma-2">Go to Alpha profile!</v-btn>
       <div id="certification-award">
         <v-sheet class="pa-5">
@@ -65,7 +66,7 @@ import {
   userRoleIsManager
 } from '@/utils/utils.js';
 import _ from 'lodash';
-import { inject, onBeforeMount, onMounted, provide, ref, watch } from 'vue';
+import { inject, onBeforeMount, onMounted, onUnmounted, provide, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import AwardsCard from '@/components/employee-beta/AwardsCard.vue';
@@ -78,7 +79,7 @@ import TechnologiesCard from '@/components/employee-beta/TechnologiesCard.vue';
 import PastJobExperienceInfoCard from '@/components/employee-beta/PastJobExperienceInfoCard.vue';
 import EmployeePageLoader from '@/components/employees/EmployeePageLoader.vue';
 import EducationInfoCard from '../components/employee-beta/EducationInfoCard.vue';
-
+import ContractInfoCard from '@/components/employee-beta/ContractInfoCard.vue';
 // |--------------------------------------------------|
 // |                                                  |
 // |                       SETUP                      |
@@ -145,18 +146,26 @@ const user = ref(null);
 // |                 LIFECYCLE HOOKS                  |
 // |                                                  |
 // |--------------------------------------------------|
+
 onBeforeMount(async () => {
   storeIsPopulated() ? await getProfileData() : (loading.value = true);
   if (!store.getters.employees) await updateStoreEmployees();
+  console.log(contracts.value);
 });
 
 onMounted(() => {
+  // register events
   //TODO: add emitters with updating employee through the editing form
   emitter.on('update', (updatedEmployee) => {
     if (updatedEmployee) {
       model.value = updatedEmployee;
     }
   });
+});
+
+onUnmounted(() => {
+  // unregister events
+  emitter.off('update');
 });
 
 // |--------------------------------------------------|
@@ -180,6 +189,7 @@ async function getProfileData() {
   if (store.getters.user.employeeNumber == route.params.id) {
     // user looking at their own profile
     model.value = store.getters.user;
+    console.log(model.value);
   } else {
     // user looking at another employees profile
     let employees = store.getters.employees;
@@ -203,7 +213,7 @@ async function getProfileData() {
  * Routes user to their employee page
  */
 function goBackToAlphaProfile() {
-  router.push(`/employee/${store.getters.employeeNumber}`);
+  router.push(`/employee/${route.params.id}`);
 } // handleProfile
 
 /**
