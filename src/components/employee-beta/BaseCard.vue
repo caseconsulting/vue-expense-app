@@ -2,8 +2,9 @@
   <v-card id="base-card">
     <v-card-title class="d-flex align-center justify-space-between beta_header_style">
       <div class="d-flex align-center">
-        <h3 class="text-white px-2">{{ title }}</h3>
-        <slot name="infoIcon"></slot>
+        <slot name="title">
+          <h3 class="text-white px-2">{{ title }}</h3>
+        </slot>
       </div>
       <v-btn v-if="isAdmin || isUser" @click="toggleEdit()" density="comfortable" variant="text" icon="" class="mx-1">
         <v-tooltip activator="parent" location="top"> Edit {{ title }} </v-tooltip>
@@ -25,7 +26,12 @@ import { inject } from 'vue';
 
 const emitter = inject('emitter');
 
-const props = defineProps(['title']);
+const props = defineProps({
+  title: {
+    type: String,
+    required: true
+  }
+});
 const isAdmin = inject('isAdmin');
 const isUser = inject('isUser');
 
