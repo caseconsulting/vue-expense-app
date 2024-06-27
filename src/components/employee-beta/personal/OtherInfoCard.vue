@@ -1,15 +1,11 @@
 <template>
-  <v-card class="infoTab">
-    <v-card-title class="d-flex align-center justify-space-between beta_header_style">
+  <base-card title="Other Information">
+    <template #title>
       <h3 class="text-white px-2">
         <v-icon size="small" style="margin-right: 10px" id="personal" color="white"> mdi-information </v-icon>Other
         Information
       </h3>
-      <v-btn v-if="isAdmin || isUser" density="comfortable" variant="text" icon="">
-        <v-tooltip activator="parent" location="top"> Edit Profile </v-tooltip>
-        <v-icon id="edit" color="white"> mdi-pencil </v-icon>
-      </v-btn>
-    </v-card-title>
+    </template>
     <v-card-text class="px-7 pt-5 pb-1 text-black">
       <p v-if="!isEmpty(getAIN())"><b>AIN:</b> {{ getAIN() }}</p>
       <p v-if="!isEmpty(getEmployeeRole())"><b>EMP ROLE:</b> {{ _.startCase(getEmployeeRole()) }}</p>
@@ -19,13 +15,14 @@
         <v-btn size="small" v-else>Complete Now</v-btn>
       </div>
     </v-card-text>
-  </v-card>
+  </base-card>
 </template>
 
 <script setup>
 import _ from 'lodash';
-import { ref, inject } from 'vue';
+import { ref } from 'vue';
 import { isEmpty } from '@/utils/utils';
+import BaseCard from '../BaseCard.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -34,8 +31,6 @@ import { isEmpty } from '@/utils/utils';
 // |--------------------------------------------------|
 
 const props = defineProps(['model']);
-const isAdmin = inject('isAdmin');
-const isUser = inject('isUser');
 const eeoFilledOut = ref(false);
 
 // |--------------------------------------------------|

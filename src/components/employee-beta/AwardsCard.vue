@@ -1,13 +1,6 @@
 <template>
   <div class="infoTab">
-    <v-card>
-      <v-card-title class="d-flex align-center justify-space-between beta_header_style">
-        <h3 class="text-white px-2">Awards</h3>
-        <v-btn v-if="isAdmin || isUser" density="comfortable" variant="text" icon="">
-          <v-tooltip activator="parent" location="top"> Edit Profile </v-tooltip>
-          <v-icon id="edit" color="white"> mdi-pencil </v-icon>
-        </v-btn>
-      </v-card-title>
+    <base-card title="Awards">
       <v-card-text>
         <!-- Employee has Awards -->
         <div v-if="!isEmpty(filteredList)">
@@ -38,14 +31,15 @@
         </div>
       </v-card-text>
       <awards-modal v-model="toggleModal" :model="model"></awards-modal>
-    </v-card>
+    </base-card>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, inject } from 'vue';
+import { ref, computed } from 'vue';
 import { isEmpty, monthYearFormat } from '@/utils/utils';
 import AwardsModal from '@/components/employee-beta/modals/AwardsModal.vue';
+import BaseCard from '@/components/employee-beta/BaseCard.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -54,8 +48,6 @@ import AwardsModal from '@/components/employee-beta/modals/AwardsModal.vue';
 // |--------------------------------------------------|
 
 const props = defineProps(['model']);
-const isAdmin = inject('isAdmin');
-const isUser = inject('isUser');
 const toggleModal = ref(false);
 
 // |--------------------------------------------------|
