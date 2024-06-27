@@ -72,7 +72,7 @@
           </v-card-actions>
         </div>
       </v-card-text>
-      <education-modal :model="model" :dialog="dialog"></education-modal>
+      <education-modal :model="model" v-model="dialog"></education-modal>
     </base-card>
   </div>
 </template>

@@ -10,47 +10,37 @@
       <v-container v-else fluid>
         <v-form ref="form" v-model="valid" lazy-validation class="my-1 mx-xl-5 mx-lg-5 mx-md-0">
           <v-expansion-panels v-model="formTabs" variant="accordion" multiple>
-            <v-expansion-panel title="Employee" value="Employee">
-              <v-expansion-panel-text>
-                <div>Editing: {{ formTabs }}</div>
-              </v-expansion-panel-text>
-            </v-expansion-panel>
-            <v-expansion-panel title="Personal" value="Personal Information">
-              <v-expansion-panel-text>
-                <div>Editing: {{ formTabs }}</div>
-              </v-expansion-panel-text>
-            </v-expansion-panel>
-            <v-expansion-panel title="Clearance" value="Clearance">
-              <v-expansion-panel-text>
-                <div>Editing: {{ formTabs }}</div>
-              </v-expansion-panel-text>
-            </v-expansion-panel>
-            <v-expansion-panel title="Contracts" value="Contracts">
-              <v-expansion-panel-text>
-                <div>Editing: {{ formTabs }}</div>
-              </v-expansion-panel-text>
-            </v-expansion-panel>
+            <base-form title="Employee" value="Employee">
+              <div>Editing: {{ formTabs }}</div>
+            </base-form>
+            <base-form title="Personal" value="Personal Information">
+              <div>Editing: {{ formTabs }}</div>
+            </base-form>
+            <base-form title="Clearance" value="Clearance">
+              <div>Editing: {{ formTabs }}</div>
+            </base-form>
+            <base-form title="Contracts" value="Contracts">
+              <div>Editing: {{ formTabs }}</div>
+            </base-form>
+            <base-form title="Technologies and Skills" value="Technologies and Skills">
+              <div>Editing: {{ formTabs }}</div>
+            </base-form>
+            <base-form title="Job Experience" value="Past Experience">
+              <div>Editing: {{ formTabs }}</div>
+            </base-form>
             <awards-form :formTabs="formTabs"></awards-form>
-            <v-expansion-panel title="Certifications" value="Certifications">
-              <v-expansion-panel-text>
-                <div>Editing: {{ formTabs }}</div>
-              </v-expansion-panel-text>
-            </v-expansion-panel>
-            <v-expansion-panel title="Education" value="Education">
-              <v-expansion-panel-text>
-                <div>Editing: {{ formTabs }}</div>
-              </v-expansion-panel-text>
-            </v-expansion-panel>
-            <v-expansion-panel title="Foreign Languages" value="Foreign Languages">
-              <v-expansion-panel-text>
-                <div>Editing: {{ formTabs }}</div>
-              </v-expansion-panel-text>
-            </v-expansion-panel>
-            <v-expansion-panel title="Other Information" value="Other Information">
-              <v-expansion-panel-text>
-                <div>Editing: {{ formTabs }}</div>
-              </v-expansion-panel-text>
-            </v-expansion-panel>
+            <base-form title="Certifications" value="Certifications">
+              <div>Editing: {{ formTabs }}</div>
+            </base-form>
+            <base-form title="Education" value="Education">
+              <div>Editing: {{ formTabs }}</div>
+            </base-form>
+            <base-form title="Foreign Languages" value="Foreign Languages">
+              <div>Editing: {{ formTabs }}</div>
+            </base-form>
+            <base-form title="Other Information" value="Other Information">
+              <div>Editing: {{ formTabs }}</div>
+            </base-form>
           </v-expansion-panels>
           <v-card-actions>
             <!-- Form action buttons -->
@@ -75,6 +65,7 @@
 <script setup>
 import { computed, inject, onBeforeMount, onBeforeUnmount, ref } from 'vue';
 import AwardsForm from '@/components/employee-beta/forms/AwardsForm.vue';
+import BaseForm from '@/components/employee-beta/forms/BaseForm.vue';
 import FormCancelConfirmation from '@/components/modals/FormCancelConfirmation.vue';
 
 // |--------------------------------------------------|
@@ -89,7 +80,7 @@ const props = defineProps(['editing', 'employee', 'contracts']);
 const isUser = inject('isUser');
 const dialog = ref(false);
 
-const formTabs = ref(null); //TODO: Sync up current tabs on edit form and info cards
+const formTabs = ref([]); //TODO: Sync up current tabs on edit form and info cards
 const submitting = ref(false);
 const toggleCancelConfirmation = ref(false);
 const valid = ref(false);
