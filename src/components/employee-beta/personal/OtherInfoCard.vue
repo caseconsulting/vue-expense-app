@@ -1,6 +1,6 @@
 <template>
   <v-card class="infoTab">
-    <v-card-title class="d-flex align-center justify-space-between header_style">
+    <v-card-title class="d-flex align-center justify-space-between beta_header_style">
       <h3 class="text-white px-2">
         <v-icon size="small" style="margin-right: 10px" id="personal" color="white"> mdi-information </v-icon>Other
         Information
