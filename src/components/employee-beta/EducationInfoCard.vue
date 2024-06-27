@@ -1,13 +1,6 @@
 <template>
   <div class="eduTab">
-    <v-card>
-      <v-card-title class="d-flex align-center justify-space-between beta_header_style">
-        <h3>Education</h3>
-        <v-btn v-if="isAdmin || isUser" density="comfortable" variant="text" icon="" class="mx-1">
-          <v-tooltip activator="parent" location="top"> Edit Education </v-tooltip>
-          <v-icon id="edit" color="white"> mdi-pencil </v-icon>
-        </v-btn>
-      </v-card-title>
+    <base-card title="Education">
       <v-card-text v-if="isEmpty(showableList)">
         <p>No Education to display</p>
       </v-card-text>
@@ -79,15 +72,17 @@
           </v-card-actions>
         </div>
       </v-card-text>
-      <education-modal :model="model" :dialog="dialog"></education-modal>
-    </v-card>
+      <education-modal :model="model" v-model="dialog"></education-modal>
+    </base-card>
   </div>
 </template>
 
 <script setup>
 import { onBeforeMount, ref } from 'vue';
+
 import { monthYearFormatBETA, isEmpty } from '../../utils/utils';
 import EducationModal from './modals/EducationModal.vue';
+import BaseCard from '@/components/employee-beta/BaseCard.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -98,7 +93,7 @@ import EducationModal from './modals/EducationModal.vue';
 const dialog = ref(false);
 const showableList = ref([]);
 const totalList = ref([]);
-const props = defineProps(['model', 'isAdmin', 'isUser']);
+const props = defineProps(['model']);
 
 // |--------------------------------------------------|
 // |                                                  |

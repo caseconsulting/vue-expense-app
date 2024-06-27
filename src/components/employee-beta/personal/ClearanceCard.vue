@@ -1,14 +1,10 @@
 <template>
-  <v-card class="infoTab">
-    <v-card-title class="d-flex align-center justify-space-between beta_header_style">
+  <base-card title="Clearance">
+    <template #title>
       <h3 class="text-white px-2">
         <v-icon size="small" style="margin-right: 10px" id="personal" color="white"> mdi-shield </v-icon>Clearance
       </h3>
-      <v-btn v-if="isAdmin || isUser" density="comfortable" variant="text" icon="">
-        <v-tooltip activator="parent" location="top"> Edit Profile </v-tooltip>
-        <v-icon id="edit" color="white"> mdi-pencil </v-icon>
-      </v-btn>
-    </v-card-title>
+    </template>
     <v-card-text class="px-7 pt-5 pb-1 text-black">
       <p v-if="!isEmpty(getClearanceType())" style="margin-bottom: 5px; font-size: 25px">
         <b>{{ getClearanceType() }}</b>
@@ -35,13 +31,13 @@
     <div class="text-center">
       <v-btn size="small" variant="text">Click to view more</v-btn>
     </div>
-  </v-card>
+  </base-card>
 </template>
 
 <script setup>
-import { ref, inject, onBeforeMount } from 'vue';
+import { ref, onBeforeMount } from 'vue';
 import { isEmpty, monthDayYearFormat } from '@/utils/utils';
-
+import BaseCard from '../BaseCard.vue';
 // |--------------------------------------------------|
 // |                                                  |
 // |                      SETUP                       |
@@ -49,8 +45,6 @@ import { isEmpty, monthDayYearFormat } from '@/utils/utils';
 // |--------------------------------------------------|
 
 const props = defineProps(['model']);
-const isAdmin = inject('isAdmin');
-const isUser = inject('isUser');
 const clearances = ref([]);
 const displayedClearance = ref([]);
 
