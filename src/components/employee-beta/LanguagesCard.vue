@@ -1,45 +1,39 @@
 <template>
   <div class="infoTab">
-    <v-card>
-      <v-card-title class="d-flex align-center justify-space-between beta_header_style">
-        <h3 class="text-white px-2">Foreign Languages</h3>
-        <v-btn v-if="isAdmin || isUser" density="comfortable" variant="text" icon="">
-          <v-tooltip activator="parent" location="top"> Edit Profile </v-tooltip>
-          <v-icon id="edit" color="white"> mdi-pencil </v-icon>
-        </v-btn>
-      </v-card-title>
+    <base-card title="Foreign Languages">
       <v-card-text class="px-7 pt-5 pb-1 text-black">
         <!-- Employee has entered languages-->
-        <div v-if="!isEmpty(model.languages)">
+        <div v-if="!isEmpty(languages)">
           <!-- Loop Languages -->
-          <div v-for="(languages, index) in filteredList" :key="languages.name + index">
+          <div v-for="(language, index) in filteredList" :key="language.name + index">
             <v-row>
               <v-col>
-                <p><b>Language: </b>{{ languages.name }}</p>
+                <p><b>Language: </b>{{ language.name }}</p>
               </v-col>
             </v-row>
-            <p class="pl-10"><b>Level of Fluency: </b>{{ languages.proficiency }}</p>
+            <p class="pl-10"><b>Level of Fluency: </b>{{ language.proficiency }}</p>
             <hr v-if="index < filteredList.length - 1" class="mb-3" />
           </div>
           <!-- End Loop Languages -->
         </div>
         <!-- Employee does not have Language Experience -->
         <p v-else>No Foreign Language Information</p>
-        <div v-if="!isEmpty(model.languages) && Math.ceil(model.languages.length / 5) != 1" class="text-center">
+        <div v-if="!isEmpty(languages) && Math.ceil(languages.length / 5) != 1" class="text-center">
           <v-card-actions class="d-flex justify-center">
             <v-btn @click="activateModal()">Click To See More</v-btn>
           </v-card-actions>
         </div>
       </v-card-text>
-    </v-card>
-    <languages-modal v-model="toggleModal" :model="model"></languages-modal>
+      <languages-modal v-model="toggleModal" :model="model"></languages-modal>
+    </base-card>
   </div>
 </template>
 
 <script setup>
 import { isEmpty, sortLanguagesByProficiency } from '@/utils/utils';
-import { computed, inject, ref } from 'vue';
+import { computed, ref } from 'vue';
 import LanguagesModal from './modals/LanguagesModal.vue';
+import BaseCard from '@/components/employee-beta/BaseCard.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -48,9 +42,8 @@ import LanguagesModal from './modals/LanguagesModal.vue';
 // |--------------------------------------------------|
 
 const props = defineProps(['model']);
-
-const isAdmin = inject('isAdmin');
-const isUser = inject('isUser');
+const languages = ref(props.model.languages ? props.model.languages : []);
+console.log(languages.value);
 const toggleModal = ref(false);
 
 // |--------------------------------------------------|
@@ -62,8 +55,8 @@ const toggleModal = ref(false);
 const filteredList = computed(() => {
   const startIndex = 0; //each page contains 5 certification entries
   const endIndex = 5;
-  if (!isEmpty(props.model.languages)) {
-    return sortLanguagesByProficiency(props.model.languages).slice(startIndex, endIndex);
+  if (!isEmpty(languages.value)) {
+    return sortLanguagesByProficiency(languages.value).slice(startIndex, endIndex);
   }
   return [];
 });

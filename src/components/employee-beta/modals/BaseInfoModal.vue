@@ -6,7 +6,7 @@
           <h3 class="text-white px-2">{{ title }}</h3>
           <div>
             <!-- Edit Button -->
-            <v-btn v-if="isAdmin || isUser" density="comfortable" variant="text" icon="">
+            <v-btn v-if="isAdmin || isUser" @click="toggleEdit()" density="comfortable" variant="text" icon="">
               <v-tooltip activator="parent" location="top"> Edit Profile </v-tooltip>
               <v-icon id="edit" color="white"> mdi-pencil </v-icon>
             </v-btn>
@@ -32,9 +32,20 @@ import { inject } from 'vue';
 // |                                                  |
 // |--------------------------------------------------|
 
-defineProps(['title']);
-const toggleModal = defineModel();
-
+const emitter = inject('emitter');
+const props = defineProps(['title']);
 const isAdmin = inject('isAdmin');
 const isUser = inject('isUser');
+const toggleModal = defineModel();
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+function toggleEdit() {
+  toggleModal.value = false;
+  emitter.emit('editing', props.title);
+}
 </script>
