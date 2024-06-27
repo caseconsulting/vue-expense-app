@@ -211,6 +211,7 @@ async function getProfileData() {
   if (model.value) {
     // await refreshExpenseData(true); //TODO:Implement Expenses and Quickbooks Time
   }
+  console.log(model.value);
   loading.value = false;
 } // getProfileData
 
