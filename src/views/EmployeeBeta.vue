@@ -47,6 +47,7 @@
         </v-sheet>
       </div>
     </div>
+    <employee-form :employee="model" :contracts="contracts"></employee-form>
   </v-container>
 </template>
 
@@ -67,21 +68,23 @@ import {
   userRoleIsManager
 } from '@/utils/utils.js';
 import _ from 'lodash';
-import { inject, onBeforeMount, onMounted, onUnmounted, provide, ref, watch } from 'vue';
+import { inject, onBeforeMount, onBeforeUnmount, onMounted, provide, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import AwardsCard from '@/components/employee-beta/AwardsCard.vue';
 import CaseExperienceInfoCard from '@/components/employee-beta/CaseExperienceInfoCard.vue';
 import CertificationsCard from '@/components/employee-beta/CertificationsCard.vue';
-import EmployeeInfo from '../components/employee-beta/EmployeeInfo.vue';
+import EmployeeInfo from '@/components/employee-beta/EmployeeInfo.vue';
 import HireInfoCard from '@/components/employee-beta/HireInfoCard.vue';
 import LanguagesCard from '@/components/employee-beta/LanguagesCard.vue';
 import TechnologiesCard from '@/components/employee-beta/TechnologiesCard.vue';
 import PastJobExperienceInfoCard from '@/components/employee-beta/PastJobExperienceInfoCard.vue';
 import PersonalCard from '@/components/employee-beta/PersonalCard.vue';
 import EmployeePageLoader from '@/components/employees/EmployeePageLoader.vue';
-import EducationInfoCard from '../components/employee-beta/EducationInfoCard.vue';
 import ContractInfoCard from '@/components/employee-beta/ContractInfoCard.vue';
+import EducationInfoCard from '@/components/employee-beta/EducationInfoCard.vue';
+import EmployeeForm from '@/components/employee-beta/EmployeeForm.vue';
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                       SETUP                      |
@@ -165,9 +168,9 @@ onMounted(() => {
   });
 });
 
-onUnmounted(() => {
-  // unregister events
+onBeforeUnmount(() => {
   emitter.off('update');
+  emitter.off('editing');
 });
 
 // |--------------------------------------------------|
@@ -208,6 +211,7 @@ async function getProfileData() {
   if (model.value) {
     // await refreshExpenseData(true); //TODO:Implement Expenses and Quickbooks Time
   }
+  console.log(model.value);
   loading.value = false;
 } // getProfileData
 
