@@ -1,6 +1,6 @@
 <template>
   <div class="infoTab">
-    <base-card title="Languages">
+    <base-card title="Foreign Languages">
       <v-card-text class="px-7 pt-5 pb-1 text-black">
         <!-- Employee has entered languages-->
         <div v-if="!isEmpty(model.languages)">
