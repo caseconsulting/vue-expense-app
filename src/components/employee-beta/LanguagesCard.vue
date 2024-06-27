@@ -1,7 +1,7 @@
 <template>
   <div class="infoTab">
     <v-card>
-      <v-card-title class="d-flex align-center justify-space-between header_style">
+      <v-card-title class="d-flex align-center justify-space-between beta_header_style">
         <h3 class="text-white px-2">Foreign Languages</h3>
         <v-btn v-if="isAdmin || isUser" density="comfortable" variant="text" icon="">
           <v-tooltip activator="parent" location="top"> Edit Profile </v-tooltip>

@@ -1,6 +1,6 @@
 <template>
   <v-card>
-    <v-card-title class="d-flex align-center justify-space-between header_style">
+    <v-card-title class="d-flex align-center justify-space-between beta_header_style">
       <div class="d-flex align-center">
         <h3 class="text-white px-2">Technologies and Skills</h3>
         <div>
