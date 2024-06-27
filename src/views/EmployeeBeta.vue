@@ -3,50 +3,63 @@
     <v-row v-if="basicEmployeeDataLoading" class="pt-0">
       <employee-page-loader />
     </v-row>
-    <div v-else>
-      <employee-info :model="model"></employee-info>
-      <hire-info-card :model="model"></hire-info-card>
-      <personal-card :model="model"></personal-card>
-      <certifications-card :model="model"></certifications-card>
-      <awards-card :model="model"></awards-card>
-      <case-experience-info-card :model="model"></case-experience-info-card>
-      <past-job-experience-info-card
-        :model="model"
-        :isAdmin="hasAdminPermissions()"
-        :isUser="userIsEmployee()"
-      ></past-job-experience-info-card>
-      <education-info-card
-        :model="model"
-        :isAdmin="hasAdminPermissions()"
-        :isUser="userIsEmployee()"
-      ></education-info-card>
-      <contract-info-card :contracts="contracts" :model="model"></contract-info-card>
+    <v-card v-else elevation="5">
       <v-btn color="#bc3825" @click="goBackToAlphaProfile()" theme="dark" class="ma-2">Go to Alpha profile!</v-btn>
-      <div id="certification-award">
-        <v-sheet class="pa-5">
-          <v-row justify="space-evenly">
-            <v-col class="pa-5">
-              <certifications-card :model="model"></certifications-card>
-            </v-col>
-            <v-col class="pa-5">
-              <awards-card :model="model"></awards-card>
-            </v-col>
-          </v-row>
-        </v-sheet>
-      </div>
-      <div id="tech-skill-language">
-        <v-sheet class="pa-5">
-          <v-row justify="space-evenly">
-            <v-col class="pa-5">
-              <technologies-card :model="model"></technologies-card>
-            </v-col>
-            <v-col class="pa-5">
-              <languages-card :model="model"></languages-card>
-            </v-col>
-          </v-row>
-        </v-sheet>
-      </div>
-    </div>
+      <employee-info :model="model"></employee-info>
+      <v-row class="ma-2">
+        <v-col class="pa-3" style="max-width: fit-content">
+          <hire-info-card :model="model"></hire-info-card>
+        </v-col>
+        <v-col class="pa-3" style="max-width: fit-content">
+          <contract-info-card :contracts="contracts" :model="model"></contract-info-card>
+        </v-col>
+      </v-row>
+      <v-row class="ma-2">
+        <v-col class="pa-3" style="max-width: fit-content">
+          <personal-card :model="model"></personal-card>
+        </v-col>
+      </v-row>
+      <v-row class="ma-2">
+        <v-col>
+          <case-experience-info-card :model="model"></case-experience-info-card>
+        </v-col>
+      </v-row>
+      <!-- certifications and awards -->
+      <v-row class="ma-2">
+        <v-col>
+          <certifications-card :model="model"></certifications-card>
+        </v-col>
+        <v-col>
+          <awards-card :model="model"></awards-card>
+        </v-col>
+      </v-row>
+      <!-- education and past experience -->
+      <v-row class="ma-2">
+        <v-col>
+          <education-info-card
+            :model="model"
+            :isAdmin="hasAdminPermissions()"
+            :isUser="userIsEmployee()"
+          ></education-info-card>
+        </v-col>
+        <v-col>
+          <past-job-experience-info-card
+            :model="model"
+            :isAdmin="hasAdminPermissions()"
+            :isUser="userIsEmployee()"
+          ></past-job-experience-info-card>
+        </v-col>
+      </v-row>
+      <!-- tech, skills, languages -->
+      <v-row class="ma-2">
+        <v-col>
+          <technologies-card :model="model"></technologies-card>
+        </v-col>
+        <v-col>
+          <languages-card :model="model"></languages-card>
+        </v-col>
+      </v-row>
+    </v-card>
     <employee-form :employee="model" :contracts="contracts"></employee-form>
   </v-container>
 </template>
@@ -155,7 +168,6 @@ const user = ref(null);
 onBeforeMount(async () => {
   storeIsPopulated() ? await getProfileData() : (loading.value = true);
   if (!store.getters.employees) await updateStoreEmployees();
-  console.log(contracts.value);
 });
 
 onMounted(() => {
@@ -194,7 +206,7 @@ async function getProfileData() {
   if (store.getters.user.employeeNumber == route.params.id) {
     // user looking at their own profile
     model.value = store.getters.user;
-    console.log(model.value);
+    console.log('Loaded user model:', model.value);
   } else {
     // user looking at another employees profile
     let employees = store.getters.employees;
