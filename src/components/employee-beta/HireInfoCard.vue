@@ -2,7 +2,7 @@
   <v-card @click="toggleInfo" variant="elevated" width="170px" style="margin: 40px" rounded="1">
     <span style="background-color: red"></span>
     <div class="info-header font-weight-black" style="padding-top: 5px">Hire date</div>
-    <div class="info-div">{{ hireDate }}</div>
+    <div class="info-div">{{ monthDayYearFormat(hireDate) }}</div>
     <div v-if="wasIntern && moreInfo" class="info-header font-weight-black">Internship date</div>
     <div v-if="wasIntern && moreInfo" class="info-div">
       {{ internshipDate }}
@@ -14,6 +14,7 @@
 
 <script setup>
 import { ref, onBeforeMount, computed } from 'vue';
+import { monthDayYearFormat } from '@/utils/utils';
 import { difference, format, getTodaysDate } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
@@ -35,7 +36,7 @@ const moreInfo = ref(false);
 // |--------------------------------------------------|
 
 onBeforeMount(() => {
-  hireDate.value = format(props.model.hireDate, null, 'LL');
+  hireDate.value = props.model.hireDate;
 });
 
 // |--------------------------------------------------|
@@ -49,7 +50,9 @@ onBeforeMount(() => {
  */
 function toggleInfo() {
   moreInfo.value = !moreInfo.value;
-  internshipDate.value = 'May 20, 2024'; //dummy data for internship date
+  //TEMPORARY: dummy data for internship date since there is no internship data fields
+  wasIntern.value = !wasIntern.value;
+  internshipDate.value = 'May 20, 2024';
 } // toggleInfo
 
 // |--------------------------------------------------|
@@ -64,8 +67,10 @@ function toggleInfo() {
  * @return number - returns the number of days since joining CASE
  */
 const getDaysWith = computed(() => {
-  let years = Math.trunc(difference(getTodaysDate(), hireDate.value, 'years'));
-  let days = Math.abs(Math.trunc(365 * years) - difference(getTodaysDate(), hireDate.value, 'days'));
+  let years = Math.trunc(difference(getTodaysDate(), format(hireDate.value, null, 'LL'), 'years'));
+  let days = Math.abs(
+    Math.trunc(365 * years) - difference(getTodaysDate(), format(hireDate.value, null, 'LL'), 'days')
+  );
   if (days > 1) {
     return days + ' days';
   } else if (days == 1) {
@@ -81,7 +86,7 @@ const getDaysWith = computed(() => {
  * @return number - returns the number of years since joining CASE
  */
 const getYearsWith = computed(() => {
-  let years = Math.trunc(difference(getTodaysDate(), hireDate.value, 'years'));
+  let years = Math.trunc(difference(getTodaysDate(), format(hireDate.value, null, 'LL'), 'years'));
   if (years > 1) {
     return years + ' Years and';
   } else if (years == 1) {

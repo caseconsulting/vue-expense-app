@@ -6,6 +6,7 @@
     <div v-else>
       <employee-info :model="model"></employee-info>
       <hire-info-card :model="model"></hire-info-card>
+      <personal-card :model="model"></personal-card>
       <certifications-card :model="model"></certifications-card>
       <awards-card :model="model"></awards-card>
       <case-experience-info-card :model="model"></case-experience-info-card>
@@ -77,6 +78,7 @@ import HireInfoCard from '@/components/employee-beta/HireInfoCard.vue';
 import LanguagesCard from '@/components/employee-beta/LanguagesCard.vue';
 import TechnologiesCard from '@/components/employee-beta/TechnologiesCard.vue';
 import PastJobExperienceInfoCard from '@/components/employee-beta/PastJobExperienceInfoCard.vue';
+import PersonalCard from '@/components/employee-beta/PersonalCard.vue';
 import EmployeePageLoader from '@/components/employees/EmployeePageLoader.vue';
 import EducationInfoCard from '../components/employee-beta/EducationInfoCard.vue';
 import ContractInfoCard from '@/components/employee-beta/ContractInfoCard.vue';
