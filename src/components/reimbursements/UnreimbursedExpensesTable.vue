@@ -478,6 +478,10 @@ async function rejectExpenses(field, reason) {
   this.loading = true;
   let selectedExpenses = _.filter(this.pendingExpenses, (e) => e.selected);
   await this.asyncForEach(selectedExpenses, async (expense) => {
+    // to remove the expense type data in the ExpenseTypeTotal modal
+    this.emitter.emit('expenseChange', expense);
+    this.emitter.emit('expenseClicked', undefined);
+    // set reasoning in rejection object
     let reasons = _.get(expense, field + '.reasons');
     reasons = [...(reasons || []), reason];
     _.set(expense, field + '.reasons', reasons);
@@ -538,10 +542,7 @@ async function reimburseExpenses() {
       // failed to reimburse expense
       msg = reimbursedExpense.response.data.message;
       this.alerts.push({ status: 'error', message: msg, color: 'red' });
-      let self = this;
-      setTimeout(function () {
-        self.alerts.shift();
-      }, 20000);
+      setTimeout(() => this.alerts.shift(), 20000);
 
       // revert reimburse date change
       let groupIndex = _.findIndex(this.empBudgets, {
@@ -563,10 +564,7 @@ async function reimburseExpenses() {
         }`;
       }
       this.alerts.push({ status: 'success', message: msg, color: 'green' });
-      let self = this;
-      setTimeout(function () {
-        self.alerts.shift();
-      }, 15000);
+      setTimeout(() => this.alerts.shift(), 15000);
     }
     this.emitter.emit('reimburseAlert', this.alerts);
   });
