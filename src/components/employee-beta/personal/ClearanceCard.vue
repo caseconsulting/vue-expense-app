@@ -76,10 +76,20 @@ function getClearances() {
     }
   }
 }
+/**
+ * Returns whether or not the employee is still awaiting clearance
+ *
+ * @return boolean - whether or not clearance has been granted
+ */
 function checkAwaitingClearance() {
   return displayedClearance.value.awaitingClearance;
 }
 
+/**
+ * Returns the type of clearance
+ *
+ * @return String - clearance type
+ */
 function getClearanceType() {
   if (checkAwaitingClearance()) {
     return displayedClearance.value.type + ' - Awaiting Clearance';
@@ -87,10 +97,20 @@ function getClearanceType() {
   return displayedClearance.value.type;
 }
 
+/**
+ * Returns clearance submission date
+ *
+ * @return String - submission date
+ */
 function getSubmissionDate() {
   return monthDayYearFormat(displayedClearance.value.submissionDate);
 }
 
+/**
+ * Returns clearance granted date
+ *
+ * @return String - granted date
+ */
 function getGrantedDate() {
   if (!checkAwaitingClearance()) {
     return monthDayYearFormat(displayedClearance.value.grantedDate);
@@ -99,6 +119,11 @@ function getGrantedDate() {
   }
 }
 
+/**
+ * Returns clearance adjudication dates
+ *
+ * @return String - adjudication dates
+ */
 function getAdjudicationDates() {
   let dates = null;
   if (!isEmpty(displayedClearance.value['adjudicationDates'])) {
@@ -113,6 +138,11 @@ function getAdjudicationDates() {
   return dates;
 }
 
+/**
+ * Returns clearance bi dates
+ *
+ * @return String - bi dates
+ */
 function getBiDates() {
   let dates = null;
   if (!isEmpty(displayedClearance.value['biDates'])) {
@@ -126,6 +156,12 @@ function getBiDates() {
   }
   return dates;
 }
+
+/**
+ * Returns clearance poly dates
+ *
+ * @return String - poly dates
+ */
 function getPolyDates() {
   let dates = null;
   if (!isEmpty(displayedClearance.value['adjudicationDates'])) {
@@ -140,6 +176,11 @@ function getPolyDates() {
   return dates;
 }
 
+/**
+ * Returns employee badge number
+ *
+ * @return String - badge number
+ */
 function getBadgeNumber() {
   if (!checkAwaitingClearance()) {
     return displayedClearance.value.badgeNum;
@@ -148,6 +189,11 @@ function getBadgeNumber() {
   }
 }
 
+/**
+ * Returns badge expiration date
+ *
+ * @return String - expiration date
+ */
 function getBadgeExpirationDate() {
   if (!checkAwaitingClearance()) {
     return monthDayYearFormat(displayedClearance.value.badgeExpirationDate);
