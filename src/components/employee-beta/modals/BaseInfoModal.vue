@@ -2,7 +2,7 @@
   <div class="baseInfoModal">
     <v-dialog v-model="toggleModal" max-width="650">
       <v-card>
-        <v-card-title class="d-flex align-center justify-space-between header_style">
+        <v-card-title class="d-flex align-center justify-space-between beta_header_style">
           <h3 class="text-white px-2">{{ title }}</h3>
           <div>
             <!-- Edit Button -->

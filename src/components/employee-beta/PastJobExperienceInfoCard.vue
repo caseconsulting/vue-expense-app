@@ -7,7 +7,7 @@
         <v-icon id="edit" color="white"> mdi-pencil </v-icon>
       </v-btn>
     </v-card-title>
-    <v-card-text v-if="isEmpty(pageList)">
+    <v-card-text v-if="isEmpty(pageList)" class="mt-6" style="font-size: 18px;">
       <p>No past job experience to display</p>
     </v-card-text>
     <v-card-text v-else>
@@ -35,15 +35,23 @@
           <p class="ma-2 px-6" style="color: #828282; display: inline">{{ getDurationOfPosition(position) }} months</p>
         </div>
       </v-list-item>
+      <div v-if="!isEmpty(model.companies) && Math.ceil(model.companies.length / 5) != 1" class="text-center">
+        <v-card-actions class="d-flex justify-center">
+          <v-btn @click="toggleJobExpModal()">Click To See More</v-btn>
+        </v-card-actions>
+      </div>
+      <past-job-experience-modal v-model="toggleModal" :model="model"></past-job-experience-modal>
     </v-card-text>
   </v-card>
 </template>
 
 <script setup>
-import { _, isEmpty } from 'lodash';
+import { _ } from 'lodash';
+import { isEmpty } from '../../utils/utils';
 import { monthYearFormatBETA } from '../../utils/utils';
 import { onBeforeMount, ref } from 'vue';
 import { add, difference, minimum } from '../../shared/dateUtils';
+import PastJobExperienceModal from './modals/PastJobExperienceModal.vue';
 
 const props = defineProps(['isAdmin', 'isUser', 'model']);
 
@@ -51,6 +59,7 @@ const earliestStartDate = ref(null);
 const endDate = ref(null);
 const filterCompanies = ref(_.cloneDeep(props.model.companies));
 const pageList = ref([]);
+const toggleModal = ref(false);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -94,5 +103,9 @@ function getDurationOfPosition(position) {
   totalTime = Math.round(difference(position.endDate, position.startDate, 'M'));
 
   return totalTime;
+}
+
+function toggleJobExpModal() {
+  toggleModal.value = !toggleModal.value;
 }
 </script>
