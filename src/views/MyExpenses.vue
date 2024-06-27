@@ -41,7 +41,7 @@
                 <v-spacer></v-spacer>
 
                 <!-- Employee Filter -->
-                <v-col align="end" cols="3">
+                <v-col align="end" cols="12" sm="4" md="3">
                   <v-autocomplete
                     v-if="userRoleIsAdmin() || userRoleIsManager()"
                     id="employeeIdFilter"
@@ -57,13 +57,13 @@
                 </v-col>
 
                 <!-- Tags filter -->
-                <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="12" md="3">
+                <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="12" sm="4" md="3">
                   <tags-filter v-model="tagsInfo" @update:modelValue="filterExpenses()"></tags-filter>
                 </v-col>
                 <!-- End Tags Filter -->
 
                 <!-- Search Bar -->
-                <v-col align="end" cols="3">
+                <v-col align="end" cols="12" sm="4" md="3">
                   <v-text-field
                     id="search"
                     v-model="search"
@@ -118,192 +118,199 @@
             <!-- Filters -->
             <fieldset>
               <legend class="legend_style">Filters</legend>
-              <v-container fluid class="px-2 pt-1 pb-4">
-                <v-row dense>
-                  <v-col cols="12" md="3">
-                    <!-- Active Filter -->
-                    <div class="d-inline-block mr-4">
-                      <h4>Active Expense Type:</h4>
-                      <v-btn-toggle
-                        v-model="filter.active"
-                        color="primary"
-                        class="filter_color"
-                        :density="isMobile() ? 'compact' : 'comfortable'"
-                        mandatory
-                      >
-                        <!-- Show Active -->
-                        <v-tooltip location="top">
-                          <template #activator="{ props }">
-                            <v-btn value="active" v-bind="props" variant="text" density="comfortable">
-                              <v-icon id="showActive" class="mr-1">
-                                mdi-check-circle{{ filter.active.includes('active') ? '' : '-outline' }}
-                              </v-icon>
-                            </v-btn>
-                          </template>
-                          <span>Show Active</span>
-                        </v-tooltip>
+              <v-container fluid>
+                <v-row class="d-flex flex-wrap">
+                  <!-- Active Filter -->
+                  <div class="d-inline-block pa-2">
+                    <h4>Active Expense Type:</h4>
+                    <v-btn-toggle
+                      v-model="filter.active"
+                      color="primary"
+                      class="filter_color"
+                      :density="isMobile() ? 'compact' : 'comfortable'"
+                      mandatory
+                    >
+                      <!-- Show Active -->
+                      <v-tooltip location="top">
+                        <template #activator="{ props }">
+                          <v-btn value="active" v-bind="props" variant="text">
+                            <v-icon class="mr-1">
+                              mdi-check-circle{{ filter.active.includes('active') ? '' : '-outline' }}
+                            </v-icon>
+                          </v-btn>
+                        </template>
+                        <span>Show Active</span>
+                      </v-tooltip>
 
-                        <!-- Show Inactive -->
-                        <v-tooltip location="top">
-                          <template #activator="{ props }">
-                            <v-btn value="notActive" v-bind="props" variant="text">
-                              <v-icon id="showInactive">
-                                mdi-close-circle{{ filter.active.includes('notActive') ? '' : '-outline' }}
-                              </v-icon>
-                            </v-btn>
-                          </template>
-                          <span>Show Inactive</span>
-                        </v-tooltip>
+                      <!-- Show Inactive -->
+                      <v-tooltip location="top">
+                        <template #activator="{ props }">
+                          <v-btn value="notActive" v-bind="props" variant="text">
+                            <v-icon>
+                              mdi-close-circle{{ filter.active.includes('notActive') ? '' : '-outline' }}
+                            </v-icon>
+                          </v-btn>
+                        </template>
+                        <span>Show Inactive</span>
+                      </v-tooltip>
 
-                        <!-- Show Active and Inactive -->
-                        <v-tooltip location="top">
-                          <template #activator="{ props }">
-                            <v-btn
-                              id="bothActiveInactive"
-                              value="both"
-                              v-bind="props"
-                              variant="text"
-                              :class="filter.active.includes('both') ? 'font-weight-black' : ''"
-                            >
-                              BOTH
-                            </v-btn>
-                          </template>
-                          <span>Show All</span>
-                        </v-tooltip>
-                      </v-btn-toggle>
-                    </div>
-                    <!-- End Active Filter -->
-                  </v-col>
-                  <v-col cols="12" md="3">
-                    <!-- Reimbursed Filter -->
-                    <div class="d-inline-block" :class="!userRoleIsAdmin() && !userRoleIsManager() ? 'ml-3' : ''">
-                      <h4>Reimbursed:</h4>
-                      <v-btn-toggle
-                        v-model="filter.reimbursed"
-                        color="primary"
-                        class="filter_color"
-                        :density="isMobile() ? 'compact' : 'comfortable'"
-                        mandatory
-                      >
-                        <!-- Show Reimbursed -->
-                        <v-tooltip location="top">
-                          <template #activator="{ props }">
-                            <v-btn value="reimbursed" v-bind="props" variant="text" density="comfortable">
-                              <v-icon id="showReimbursed" class="mr-1">
-                                mdi-check-circle{{ filter.reimbursed.includes('reimbursed') ? '' : '-outline' }}
-                              </v-icon>
-                            </v-btn>
-                          </template>
-                          <span>Show Reimbursed</span>
-                        </v-tooltip>
+                      <!-- Show Active and Inactive -->
+                      <v-tooltip location="top">
+                        <template #activator="{ props }">
+                          <v-btn
+                            value="both"
+                            v-bind="props"
+                            variant="text"
+                            :class="filter.active.includes('both') ? 'font-weight-black' : ''"
+                          >
+                            BOTH
+                          </v-btn>
+                        </template>
+                        <span>Show All</span>
+                      </v-tooltip>
+                    </v-btn-toggle>
+                  </div>
+                  <!-- End Active Filter -->
+                  <!-- Status Filter -->
+                  <div class="d-inline-block pa-2" :class="!userRoleIsAdmin() && !userRoleIsManager() ? 'ml-3' : ''">
+                    <h4>Status:</h4>
+                    <v-btn-toggle
+                      v-model="filter.status"
+                      color="primary"
+                      class="filter_color"
+                      :density="isMobile() ? 'compact' : 'comfortable'"
+                      mandatory
+                    >
+                      <!-- Show Reimbursed -->
+                      <v-tooltip location="top">
+                        <template #activator="{ props }">
+                          <v-btn value="reimbursed" v-bind="props" variant="text" density="comfortable">
+                            <v-icon id="reimbursedStatus" class="mr-1">
+                              mdi-check-circle{{ filter.status.includes('reimbursed') ? '' : '-outline' }}
+                            </v-icon>
+                          </v-btn>
+                        </template>
+                        <span>Show Reimbursed</span>
+                      </v-tooltip>
 
-                        <!-- Show Pending -->
-                        <v-tooltip location="top">
-                          <template #activator="{ props }">
-                            <v-btn value="notReimbursed" v-bind="props" variant="text">
-                              <v-icon id="showPending">
-                                mdi-close-circle{{ filter.reimbursed.includes('notReimbursed') ? '' : '-outline' }}
-                              </v-icon>
-                            </v-btn>
-                          </template>
-                          <span>Show Pending</span>
-                        </v-tooltip>
+                      <!-- Show Rejected -->
+                      <v-tooltip location="top">
+                        <template #activator="{ props }">
+                          <v-btn value="rejected" v-bind="props" variant="text">
+                            <v-icon id="showRejected">
+                              mdi-close-circle{{ filter.status.includes('rejected') ? '' : '-outline' }}
+                            </v-icon>
+                          </v-btn>
+                        </template>
+                        <span>Show Rejected</span>
+                      </v-tooltip>
 
-                        <!-- Show Reimbursed and Pending -->
-                        <v-tooltip location="top">
-                          <template #activator="{ props }">
-                            <v-btn
-                              id="bothReimbursed"
-                              value="both"
-                              v-bind="props"
-                              variant="text"
-                              :class="filter.reimbursed.includes('both') ? 'font-weight-black' : ''"
-                            >
-                              BOTH
-                            </v-btn>
-                          </template>
-                          <span>Show All</span>
-                        </v-tooltip>
-                      </v-btn-toggle>
-                    </div>
-                    <!-- End Reimbursed Filter -->
-                  </v-col>
-                  <v-col cols="12" md="6" class="d-flex pa-1">
-                    <v-container fluid class="pa-0" :class="!userRoleIsAdmin() && !userRoleIsManager() ? 'ml-3' : ''">
-                      <h4 class="ml-0 pl-0 mb-1">Reimbursed Date Range:</h4>
-                      <v-row class="ml-1">
-                        <!-- Start Date Filter -->
-                        <v-menu v-model="startDateFilterMenu" :close-on-content-click="false" location="start center">
-                          <template #activator="{ props }">
-                            <v-text-field
-                              ref="formFields"
-                              v-mask="'##/##/####'"
-                              :model-value="format(startDateFilter, null, 'MM/DD/YYYY')"
-                              :rules="getDateOptionalRules()"
-                              label="Start Date"
-                              variant="underlined"
-                              hint="MM/DD/YYYY format"
-                              prepend-icon="mdi-calendar"
-                              persistent-hint
-                              class="mr-5"
-                              v-bind="props"
-                              @update:focused="startDateFilter = parseEventDate()"
-                              @click:prepend="startDateFilterMenu = true"
-                              @keypress="startDateFilterMenu = false"
-                            />
-                          </template>
-                          <v-date-picker
-                            v-model="startDateFilter"
-                            show-adjacent-months
-                            hide-actions
-                            keyboard-icon=""
-                            color="#bc3825"
-                            title="Start Date Filter"
-                            @update:model-value="
-                              startDateFilterMenu = false;
-                              startDateFilter = format(startDateFilter, null, 'MM/DD/YYYY');
-                            "
+                      <!-- Show Pending -->
+                      <v-tooltip location="top">
+                        <template #activator="{ props }">
+                          <v-btn value="pending" v-bind="props" variant="text">
+                            <v-icon id="showPending">
+                              mdi-star-four-points-circle{{ filter.status.includes('pending') ? '' : '-outline' }}
+                            </v-icon>
+                          </v-btn>
+                        </template>
+                        <span>Show Pending</span>
+                      </v-tooltip>
+
+                      <!-- Show All -->
+                      <v-tooltip location="top">
+                        <template #activator="{ props }">
+                          <v-btn
+                            id="allStatus"
+                            value="all"
+                            v-bind="props"
+                            variant="text"
+                            :class="filter.status.includes('all') ? 'font-weight-black' : ''"
+                          >
+                            All
+                          </v-btn>
+                        </template>
+                        <span>Show All Expenses</span>
+                      </v-tooltip>
+                    </v-btn-toggle>
+                  </div>
+                  <!-- End Status Filter -->
+                  <!-- Reimbursed Date Range Filter -->
+                  <div class="pa-2">
+                    <h4 class="ml-0 pl-0 mb-1">Reimbursed Date Range:</h4>
+                    <v-row class="ml-1">
+                      <!-- Start Date Filter -->
+                      <v-menu v-model="startDateFilterMenu" :close-on-content-click="false" location="start center">
+                        <template #activator="{ props }">
+                          <v-text-field
+                            ref="formFields"
+                            v-mask="'##/##/####'"
+                            :model-value="format(startDateFilter, null, 'MM/DD/YYYY')"
+                            :rules="getDateOptionalRules()"
+                            label="Start Date"
+                            variant="underlined"
+                            hint="MM/DD/YYYY format"
+                            prepend-icon="mdi-calendar"
+                            persistent-hint
+                            class="mr-5"
+                            v-bind="props"
+                            @update:focused="startDateFilter = parseEventDate()"
+                            @click:prepend="startDateFilterMenu = true"
+                            @keypress="startDateFilterMenu = false"
                           />
-                        </v-menu>
-                        <!-- End Start Date Filter-->
+                        </template>
+                        <v-date-picker
+                          v-model="startDateFilter"
+                          show-adjacent-months
+                          hide-actions
+                          keyboard-icon=""
+                          color="#bc3825"
+                          title="Start Date Filter"
+                          @update:model-value="
+                            startDateFilterMenu = false;
+                            startDateFilter = format(startDateFilter, null, 'MM/DD/YYYY');
+                          "
+                        />
+                      </v-menu>
+                      <!-- End Start Date Filter-->
 
-                        <!-- End Date Filter -->
-                        <v-menu v-model="endDateFilterMenu" :close-on-content-click="false" location="start center">
-                          <template #activator="{ props }">
-                            <v-text-field
-                              ref="formFields"
-                              v-mask="'##/##/####'"
-                              :model-value="format(endDateFilter, null, 'MM/DD/YYYY')"
-                              :rules="getDateOptionalRules()"
-                              label="End Date"
-                              variant="underlined"
-                              hint="MM/DD/YYYY format"
-                              prepend-icon="mdi-calendar"
-                              persistent-hint
-                              class="mr-5"
-                              v-bind="props"
-                              @update:focused="endDateFilter = parseEventDate()"
-                              @click:prepend="endDateFilterMenu = true"
-                              @keypress="endDateFilterMenu = false"
-                            />
-                          </template>
-                          <v-date-picker
-                            v-model="endDateFilter"
-                            show-adjacent-months
-                            hide-actions
-                            keyboard-icon=""
-                            color="#bc3825"
-                            title="Start Date Filter"
-                            @update:model-value="
-                              endDateFilterMenu = false;
-                              endDateFilter = format(endDateFilter, null, 'MM/DD/YYYY');
-                            "
+                      <!-- End Date Filter -->
+                      <v-menu v-model="endDateFilterMenu" :close-on-content-click="false" location="start center">
+                        <template #activator="{ props }">
+                          <v-text-field
+                            ref="formFields"
+                            v-mask="'##/##/####'"
+                            :model-value="format(endDateFilter, null, 'MM/DD/YYYY')"
+                            :rules="getDateOptionalRules()"
+                            label="End Date"
+                            variant="underlined"
+                            hint="MM/DD/YYYY format"
+                            prepend-icon="mdi-calendar"
+                            persistent-hint
+                            class="mr-5"
+                            v-bind="props"
+                            @update:focused="endDateFilter = parseEventDate()"
+                            @click:prepend="endDateFilterMenu = true"
+                            @keypress="endDateFilterMenu = false"
                           />
-                        </v-menu>
-                        <!-- End End Date Filter-->
-                      </v-row>
-                    </v-container>
-                  </v-col>
+                        </template>
+                        <v-date-picker
+                          v-model="endDateFilter"
+                          show-adjacent-months
+                          hide-actions
+                          keyboard-icon=""
+                          color="#bc3825"
+                          title="Start Date Filter"
+                          @update:model-value="
+                            endDateFilterMenu = false;
+                            endDateFilter = format(endDateFilter, null, 'MM/DD/YYYY');
+                          "
+                        />
+                      </v-menu>
+                      <!-- End End Date Filter-->
+                    </v-row>
+                    <!-- End Date Range Filter -->
+                  </div>
                 </v-row>
               </v-container>
             </fieldset>
@@ -318,6 +325,7 @@
               :expanded="expanded"
               :loading="loading || initialPageLoading"
               :items-per-page="15"
+              :row-props="rowClasses"
               :search="search"
               item-value="id"
               class="elevation-4 smaller-font"
@@ -325,18 +333,6 @@
               :no-data-text="'No results :('"
               expand-on-click
             >
-              <!-- Cost slot -->
-              <template #[`item.cost`]="{ item }">
-                <td>{{ convertToMoneyString(item.cost) }}</td>
-              </template>
-              <!-- Purchase date slot -->
-              <template #[`item.purchaseDate`]="{ item }">
-                <td>{{ monthDayYearFormat(item.purchaseDate) }}</td>
-              </template>
-              <!-- Reimburse date Slot -->
-              <template #[`item.reimbursedDate`]="{ item }">
-                <td>{{ monthDayYearFormat(item.reimbursedDate) }}</td>
-              </template>
               <!-- Creation date slot -->
               <template #[`item.createdAt`]="{ item }">
                 <td>{{ monthDayYearFormat(item.createdAt) }}</td>
@@ -351,7 +347,18 @@
               <template #[`item.budgetName`]="{ item }">
                 <td>{{ item.budgetName }}</td>
               </template>
-
+              <!-- Cost slot -->
+              <template #[`item.cost`]="{ item }">
+                <td>{{ convertToMoneyString(item.cost) }}</td>
+              </template>
+              <!-- Purchase date slot -->
+              <template #[`item.purchaseDate`]="{ item }">
+                <td>{{ monthDayYearFormat(item.purchaseDate) }}</td>
+              </template>
+              <!-- Reimburse date Slot -->
+              <template #[`item.reimbursedDate`]="{ item }">
+                <td>{{ monthDayYearFormat(item.reimbursedDate) }}</td>
+              </template>
               <!--Action Items-->
               <template #[`item.actions`]="{ item }">
                 <td class="d-flex justify-end mr-4">
@@ -452,6 +459,20 @@
                           </v-icon>
                           <v-icon v-else class="mr-1 mx-3" id="marks"> mdi-close-circle-outline </v-icon>
                         </div>
+                        <div v-if="!isEmpty(item?.rejections?.softRejections)">
+                          <b>Revisal Requests:</b>
+                          <div v-for="(reason, i) in item.rejections.softRejections.reasons" :key="reason">
+                            &nbsp;&nbsp;&nbsp;&nbsp;<b>Reason {{ i + 1 }}: </b>{{ reason }}
+                          </div>
+                          <div>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<b>Revised: </b>
+                            {{ item.rejections.softRejections.revised ? 'Yes' : 'No' }}
+                          </div>
+                        </div>
+                        <div v-if="!isEmpty(item?.rejections?.hardRejections)">
+                          <b>Rejection reason:</b>
+                          {{ item?.rejections?.hardRejections?.reasons?.[0] }}
+                        </div>
                       </div>
                     </v-card-text>
                   </v-card>
@@ -550,7 +571,7 @@ const expense = ref({
 const expenseTypes = ref([]); // expense types
 const filter = ref({
   active: 'both',
-  reimbursed: 'notReimbursed' //default only shows expenses that are not reimbursed
+  status: 'pending' //default only shows expenses that are not reimbursed
 }); // datatable filters
 const filteredExpenses = ref([]); // filtered expenses
 const form = ref(null);
@@ -933,16 +954,18 @@ function filterExpenses() {
       isBetween(expense.reimbursedDate, startDateFilter.value, endDateFilter.value, 'days', '[]')
     );
   }
-
-  if (filter.value.reimbursed !== 'both') {
+  if (filter.value.status !== 'all') {
     // filter expenses by reimburse date
     filteredExpenses.value = _.filter(filteredExpenses.value, (expense) => {
-      if (filter.value.reimbursed == 'notReimbursed') {
+      if (filter.value.status === 'pending') {
         // filter for pending expenses
-        return !isReimbursed(expense);
-      } else {
+        return !isReimbursed(expense) && !(expense?.rejections?.hardRejections?.reasons?.length > 0);
+      } else if (filter.value.status === 'reimbursed') {
         // filter for reimbursed expenses
         return isReimbursed(expense);
+      } else if (filter.value.status === 'rejected') {
+        // filter for rejected expenses
+        return isRejected(expense);
       }
     });
   }
@@ -983,6 +1006,19 @@ function getEmployee(eId) {
 function isReimbursed(expense) {
   return expense && !isEmpty(expense.reimbursedDate);
 } // isReimbursed
+
+/**
+ * Checks if the expense is rejected. Returns true if the
+ * expense is reimbursed, otherwise returns false.
+ *
+ * @param expense - expense to check
+ * @return boolean - expense is rejected
+ */
+function isRejected(expense) {
+  return (
+    expense?.rejections?.softRejections?.reasons?.length > 0 || expense?.rejections?.hardRejections?.reasons?.length
+  );
+} // isRejected
 
 async function loadMyExpensesData() {
   initialPageLoading.value = true;
@@ -1087,6 +1123,20 @@ function startAction() {
 function toTopOfForm() {
   window.scrollTo(0, form.value.$el.offsetTop - 70);
 } // toTopOfForm
+
+/**
+ * Sets the class for a row in the data table.
+ *
+ * @param item - The row item
+ * @returns Object - The row class
+ */
+function rowClasses({ item }) {
+  if (item?.rejections?.hardRejections?.reasons?.length > 0) {
+    return { class: 'rejected-expense-row' };
+  } else if (item?.rejections?.softRejections?.reasons?.length > 0 && !item?.rejections?.softRejections?.revised) {
+    return { class: 'revised-expense-row' };
+  }
+} // rowClasses
 
 /**
  * Unreimburse an expense.
@@ -1197,6 +1247,14 @@ watch(storeIsPopulated, async () => {
 td,
 v-data-table-header__content {
   font-size: 0.93em !important;
+}
+
+.rejected-expense-row {
+  background-color: rgb(255, 146, 146);
+}
+
+.revised-expense-row {
+  background-color: rgb(247, 247, 164);
 }
 
 .v-data-table-header__content {
