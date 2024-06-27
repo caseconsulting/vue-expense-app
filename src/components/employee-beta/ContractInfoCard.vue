@@ -1,5 +1,5 @@
 <template>
-  <v-card title="Current Contract Information" elevation="8" class="ma-5">
+  <v-card title="Current Contract Information" elevation="4">
     <v-card-text v-if="!isEmpty(contractsList)">
       <div v-if="!noneActive">
         <p><b>Contract: </b>{{ getContractNameFromId(currentContractId) }}</p>

@@ -22,7 +22,7 @@
           <!-- End Loop Awards -->
         </div>
         <!-- Employee does not have Awards -->
-        <p v-else class="pt-6 pl-6">No Award Information</p>
+        <p v-else class="mt-6 ml-6">No Award Information</p>
         <!-- Pagination -->
         <div v-if="!isEmpty(model.awards) && Math.ceil(model.awards.length / 5) != 1" class="text-center">
           <v-card-actions class="d-flex justify-center">
