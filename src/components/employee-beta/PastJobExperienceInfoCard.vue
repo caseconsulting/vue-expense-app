@@ -1,13 +1,6 @@
 <template>
-  <v-card>
-    <v-card-title class="d-flex align-center justify-space-between beta_header_style">
-      <h3>Past Experience</h3>
-      <v-btn v-if="isAdmin || isUser" density="comfortable" variant="text" icon="" class="mx-1">
-        <v-tooltip activator="parent" location="top"> Edit Education </v-tooltip>
-        <v-icon id="edit" color="white"> mdi-pencil </v-icon>
-      </v-btn>
-    </v-card-title>
-    <v-card-text v-if="isEmpty(pageList)" class="mt-6" style="font-size: 18px;">
+  <base-card title="Past Experience">
+    <v-card-text v-if="isEmpty(pageList)" class="mt-6" style="font-size: 18px">
       <p>No past job experience to display</p>
     </v-card-text>
     <v-card-text v-else>
@@ -42,7 +35,7 @@
       </div>
       <past-job-experience-modal v-model="toggleModal" :model="model"></past-job-experience-modal>
     </v-card-text>
-  </v-card>
+  </base-card>
 </template>
 
 <script setup>
@@ -51,8 +44,9 @@ import { monthYearFormatBETA, isEmpty } from '../../utils/utils';
 import { onBeforeMount, ref } from 'vue';
 import { add, difference, minimum } from '../../shared/dateUtils';
 import PastJobExperienceModal from './modals/PastJobExperienceModal.vue';
+import BaseCard from '@/components/employee-beta/BaseCard.vue';
 
-const props = defineProps(['isAdmin', 'isUser', 'model']);
+const props = defineProps(['model']);
 
 const earliestStartDate = ref(null);
 const endDate = ref(null);

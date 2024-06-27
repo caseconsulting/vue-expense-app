@@ -1,15 +1,15 @@
 <template>
   <base-info-modal title="Foreign Languages">
     <v-card-text>
-      <div v-if="!isEmpty(model.languages)">
+      <div v-if="!isEmpty(filteredList)">
         <!-- Loop Languages -->
-        <div v-for="(languages, index) in visibleItems" :key="languages.name + index">
+        <div v-for="(language, index) in visibleItems" :key="language.name + index">
           <v-row>
             <v-col>
-              <p><b>Language: </b>{{ languages.name }}</p>
+              <p><b>Language: </b>{{ language.name }}</p>
             </v-col>
           </v-row>
-          <p class="pl-10"><b>Level of Fluency: </b>{{ languages.proficiency }}</p>
+          <p class="pl-10"><b>Level of Fluency: </b>{{ language.proficiency }}</p>
           <hr v-if="index < filteredList.length - 1" class="mb-3" />
         </div>
         <!-- End Loop Languages -->
@@ -38,9 +38,8 @@ import BaseInfoModal from './BaseInfoModal.vue';
 const ITEMS_PER_PAGE = 8;
 
 const props = defineProps(['model']);
-
 const currentPage = ref(1);
-const filteredList = ref(sortLanguagesByProficiency(props.model.languages));
+const filteredList = ref(sortLanguagesByProficiency(props.model.languages ? props.model.languages : []));
 
 // |--------------------------------------------------|
 // |                                                  |

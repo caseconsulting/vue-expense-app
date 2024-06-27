@@ -1,15 +1,15 @@
 <template>
-  <v-dialog v-model="show" max-height="500" max-width="900">
+  <v-dialog v-model="dialog" max-height="500" max-width="900">
     <template v-slot:default>
       <v-card>
         <v-card-title class="d-flex align-center justify-space-between beta_header_style">
           <h3>All Education</h3>
           <div>
-            <v-btn v-if="isAdmin || isUser" density="comfortable" variant="text" icon="">
+            <v-btn v-if="isAdmin || isUser" @click="toggleEdit()" density="comfortable" variant="text" icon="">
               <v-tooltip activator="parent" location="top"> Edit Education </v-tooltip>
               <v-icon id="edit" color="white"> mdi-pencil </v-icon>
             </v-btn>
-            <v-btn @click="show" variant="text" icon="">
+            <v-btn @click="dialog = false" variant="text" icon="">
               <v-tooltip activator="parent" location="top"> Collapse </v-tooltip>
               <v-icon id="collapse" color="white">mdi-arrow-collapse</v-icon>
             </v-btn>
@@ -84,7 +84,7 @@
 </template>
 
 <script setup>
-import { computed, inject, onBeforeMount, ref } from 'vue';
+import { inject, onBeforeMount, ref } from 'vue';
 import { monthYearFormatBETA, isEmpty } from '../../../utils/utils';
 
 // |--------------------------------------------------|
@@ -93,7 +93,10 @@ import { monthYearFormatBETA, isEmpty } from '../../../utils/utils';
 // |                                                  |
 // |--------------------------------------------------|
 
-const props = defineProps(['model', 'dialog']);
+const props = defineProps(['model']);
+const dialog = defineModel();
+
+const emitter = inject('emitter');
 const totalList = ref([]);
 const isUser = inject('isUser');
 const isAdmin = inject('isAdmin');
@@ -115,16 +118,6 @@ onBeforeMount(() => {
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     COMPUTED                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-const show = computed(() => {
-  return props.dialog;
-});
-
-// |--------------------------------------------------|
-// |                                                  |
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -143,5 +136,10 @@ function getMinors(degree) {
     }
   }
   return minorsString;
+}
+
+function toggleEdit() {
+  dialog.value = false;
+  emitter.emit('editing', 'Education');
 }
 </script>
