@@ -1,17 +1,8 @@
 <template>
-  <v-card>
-    <v-card-title class="d-flex align-center justify-space-between beta_header_style">
-      <h3>Past Experience</h3>
-      <v-btn v-if="isAdmin || isUser" density="comfortable" variant="text" icon="" class="mx-1">
-        <v-tooltip activator="parent" location="top"> Edit Education </v-tooltip>
-        <v-icon id="edit" color="white"> mdi-pencil </v-icon>
-      </v-btn>
-    </v-card-title>
-    <v-card-text v-if="isEmpty(pageList)" class="mt-6" style="font-size: 18px;">
-      <p>No past job experience to display</p>
-    </v-card-text>
-    <v-card-text v-else>
-      <v-list-item v-for="(company, index) in pageList" :key="company.companyName + index">
+  <base-info-modal title="Past Job Experience">
+    <v-card-text class="px-7 pt-5 pb-1 text-black"> </v-card-text>
+    <div v-if="!isEmpty(filteredList)">
+      <v-list-item v-for="(company, index) in filteredList" :key="company.companyName + index">
         <v-list-item-title class="d-flex align-center">
           <v-icon class="mx-3">mdi-briefcase-outline</v-icon>
           <p class="mt-3">
@@ -35,51 +26,58 @@
           <p class="ma-2 px-6" style="color: #828282; display: inline">{{ getDurationOfPosition(position) }} months</p>
         </div>
       </v-list-item>
-      <div v-if="!isEmpty(model.companies) && Math.ceil(model.companies.length / 5) != 1" class="text-center">
-        <v-card-actions class="d-flex justify-center">
-          <v-btn @click="toggleJobExpModal()">Click To See More</v-btn>
-        </v-card-actions>
-      </div>
-      <past-job-experience-modal v-model="toggleModal" :model="model"></past-job-experience-modal>
-    </v-card-text>
-  </v-card>
+    </div>
+    <div v-if="!isEmpty(model.companies) && Math.ceil(model.companies.length / 5) != 1" class="text-center">
+      <v-pagination v-model="page" :length="Math.ceil(model.companies.length / 5)" :total-visible="8"></v-pagination>
+    </div>
+  </base-info-modal>
 </template>
 
 <script setup>
-import { _ } from 'lodash';
-import { monthYearFormatBETA, isEmpty } from '../../utils/utils';
-import { onBeforeMount, ref } from 'vue';
-import { add, difference, minimum } from '../../shared/dateUtils';
-import PastJobExperienceModal from './modals/PastJobExperienceModal.vue';
+import { ref, computed } from 'vue';
+import BaseInfoModal from './BaseInfoModal.vue';
+import { add, difference, minimum } from '../../../shared/dateUtils';
+import { monthYearFormatBETA, isEmpty } from '../../../utils/utils';
 
-const props = defineProps(['isAdmin', 'isUser', 'model']);
+// |--------------------------------------------------|
+// |                                                  |
+// |                       SETUP                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 const earliestStartDate = ref(null);
 const endDate = ref(null);
-const filterCompanies = ref(_.cloneDeep(props.model.companies));
-const pageList = ref([]);
-const toggleModal = ref(false);
+const props = defineProps(['model']);
+const page = ref(1);
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                 LIFESTYLE HOOKS                  |
+// |                    COMPUTED                      |
 // |                                                  |
 // |--------------------------------------------------|
 
-/**
- * Emits to parent the component was created and get data for the list.
- */
-onBeforeMount(() => {
+const filteredList = computed(() => {
+  const startIndex = (page.value - 1) * 5; //each page contains 5 job entries
+  const endIndex = startIndex + 5;
   if (!isEmpty(props.model.companies)) {
-    pageList.value = filterCompanies.value.slice(0, 4);
+    return props.model.companies.slice(startIndex, endIndex);
   }
-}); // created
+  return [];
+});
 
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+function getDurationOfPosition(position) {
+  let totalTime = 0;
+
+  totalTime = Math.round(difference(position.endDate, position.startDate, 'M'));
+
+  return totalTime;
+}
 
 function getTotalTimeAtCompany(company) {
   let totalTime = 0; // in months
@@ -94,17 +92,5 @@ function getTotalTimeAtCompany(company) {
   endDate.value = add(earliestStartDate.value, totalTime, 'M');
 
   return earliestStartDate.value;
-}
-
-function getDurationOfPosition(position) {
-  let totalTime = 0;
-
-  totalTime = Math.round(difference(position.endDate, position.startDate, 'M'));
-
-  return totalTime;
-}
-
-function toggleJobExpModal() {
-  toggleModal.value = !toggleModal.value;
 }
 </script>
