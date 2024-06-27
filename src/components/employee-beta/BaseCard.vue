@@ -5,7 +5,7 @@
         <h3 class="text-white px-2">{{ title }}</h3>
         <slot name="infoIcon"></slot>
       </div>
-      <v-btn v-if="isAdmin || isUser" density="comfortable" variant="text" icon="" class="mx-1">
+      <v-btn v-if="isAdmin || isUser" @click="toggleEdit()" density="comfortable" variant="text" icon="" class="mx-1">
         <v-tooltip activator="parent" location="top"> Edit {{ title }} </v-tooltip>
         <v-icon id="edit" color="white"> mdi-pencil </v-icon>
       </v-btn>
@@ -17,7 +17,25 @@
 <script setup>
 import { inject } from 'vue';
 
-defineProps(['title']);
+// |--------------------------------------------------|
+// |                                                  |
+// |                       SETUP                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+const emitter = inject('emitter');
+
+const props = defineProps(['title']);
 const isAdmin = inject('isAdmin');
 const isUser = inject('isUser');
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+function toggleEdit() {
+  emitter.emit('editing', props.title);
+}
 </script>
