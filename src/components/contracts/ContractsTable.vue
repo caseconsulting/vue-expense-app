@@ -1153,19 +1153,9 @@ export default {
   font-size: 11px;
   line-height: 1.2;
 }
-
-/*
-tr.v-data-table__tr--clickable > td {
-  background: red !important;
-  opacity: 1;
-}*/
 </style>
 
 <style scoped>
-td {
-  background-color: red;
-}
-
 .contracts-table :deep(td:first-of-type) {
   width: 2%;
 }
