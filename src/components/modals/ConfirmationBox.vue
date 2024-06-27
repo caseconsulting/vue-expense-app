@@ -12,27 +12,27 @@
         <v-card-text>
           <!-- Overdraft Allowed start above overdraft and not going over overdraft limit -->
           <p v-if="isOverCovered">
-            You are already above the initial budget of {{ convertToMoneyString(expense.budget) }}. However you are
-            still within the overdraft limit of {{ convertToMoneyString(expense.budget * 2) }}. You will be reimbursed
-            but will be charged next year for an additional {{ convertToMoneyString(expense.cost) }}.
+            You are already above the initial budget of {{ convertToMoneyString(expenseRef.budget) }}. However you are
+            still within the overdraft limit of {{ convertToMoneyString(expenseRef.budget * 2) }}. You will be
+            reimbursed but will be charged next year for an additional {{ convertToMoneyString(expenseRef.cost) }}.
           </p>
           <!-- Overdraft Allowed and Going over initial budget-->
-          <p v-else-if="expense.od && isCovered">
-            The expense type you are about to submit is covered up to {{ convertToMoneyString(expense.budget) }} but
+          <p v-else-if="expenseRef.od && isCovered">
+            The expense type you are about to submit is covered up to {{ convertToMoneyString(expenseRef.budget) }} but
             allows overdraft. You will be reimbursed but will be charged the following year for
-            {{ convertToMoneyString(expense.cost - expense.remaining) }}.
+            {{ convertToMoneyString(expenseRef.cost - expenseRef.remaining) }}.
           </p>
           <!-- Overdraft Allowed and going over overdraft budget -->
-          <p v-else-if="expense.od && !isCovered">
+          <p v-else-if="expenseRef.od && !isCovered">
             The expense type you are about to submit is only covered up to
-            {{ convertToMoneyString(expense.budget * 2) }} with overdraft. You will be reimbursed
-            {{ convertToMoneyString(expense.remaining) }} of {{ convertToMoneyString(expense.cost) }}.
+            {{ convertToMoneyString(expenseRef.budget * 2) }} with overdraft. You will be reimbursed
+            {{ convertToMoneyString(expenseRef.remaining) }} of {{ convertToMoneyString(expenseRef.cost) }}.
           </p>
           <!-- Overdraft not allowed and going over budget -->
           <p v-else>
             The expense type you are about to submit is only covered up to
-            {{ convertToMoneyString(expense.budget) }} and does not allow overdraft. You will be reimbursed
-            {{ convertToMoneyString(expense.remaining) }} of {{ convertToMoneyString(expense.cost) }}.
+            {{ convertToMoneyString(expenseRef.budget) }} and does not allow overdraft. You will be reimbursed
+            {{ convertToMoneyString(expenseRef.remaining) }} of {{ convertToMoneyString(expenseRef.cost) }}.
           </p>
           <p>Do you want to continue?</p>
         </v-card-text>
@@ -40,7 +40,7 @@
           <v-spacer></v-spacer>
           <div>
             <v-btn color="red" variant="text" @click="emit('canceledSubmit')">No, take me back</v-btn>
-            <v-btn color="green-darken-1" variant="text" @click="emit('confirmSubmit', expense)">Yes, submit</v-btn>
+            <v-btn color="green-darken-1" variant="text" @click="emit('confirmSubmit', expenseRef)">Yes, submit</v-btn>
           </div>
         </v-card-actions>
       </v-card>
@@ -48,8 +48,49 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { isEmpty, convertToMoneyString } from '@/utils/utils';
+import { inject, ref, watch } from 'vue';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const props = defineProps([
+  'expense', // expense to confirm
+  'toggleConfirmationBox', // dialog activator
+  'isCovered',
+  'isOverCovered'
+]);
+const emitter = inject('emitter');
+
+// props should not be directly written to, so expense needs to be mirrored with a ref
+const expenseRef = ref(props.expense);
+const activate = ref(false); // dialog activator
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+// watcher for toggleConfirmationBox
+watch(
+  () => props.toggleConfirmationBox,
+  () => {
+    activate.value = true;
+  }
+);
+
+// ensure that changes to expense prop are reflected
+watch(
+  () => props.expense,
+  () => {
+    expenseRef.value = props.expense;
+  }
+);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -67,72 +108,31 @@ import { isEmpty, convertToMoneyString } from '@/utils/utils';
 function emit(msg, data) {
   if (data) {
     // data exists
-    if (!this.isCovered) {
+    if (!props.isCovered) {
       let adjustNote = '';
-      if (!this.expense.od) {
+      if (!expenseRef.value.od) {
         adjustNote = `Expense type is only covered up to $${
-          this.expense.budget
-        }. You will be reimbursed $${this.expense.remaining.toFixed(2)} of $${this.expense.cost}`; // added toFixed(2) to resolve decimal issue in notes.
+          expenseRef.value.budget
+        }. You will be reimbursed $${expenseRef.value.remaining.toFixed(2)} of $${expenseRef.value.cost}`; // added toFixed(2) to resolve decimal issue in notes.
       } else {
-        adjustNote = `Expense type is only covered up to $${(2 * this.expense.budget).toFixed(
+        adjustNote = `Expense type is only covered up to $${(2 * expenseRef.value.budget).toFixed(
           2
-        )}. You will be reimbursed $${this.expense.remaining} of $${this.expense.cost}`;
+        )}. You will be reimbursed $${expenseRef.value.remaining} of $${expenseRef.value.cost}`;
       }
-      if (!this.isEmpty(this.expense.note)) {
+      if (!isEmpty(expenseRef.value.note)) {
         // expense has a note
-        this.expense.note += `\n\n${adjustNote}`;
+        expenseRef.value.note += `\n\n${adjustNote}`;
       } else {
         // expense does not have a note
-        this.expense.note = adjustNote;
+        expenseRef.value.note = adjustNote;
       }
-      this.expense.cost = this.expense.remaining;
+      expenseRef.value.cost = expenseRef.value.remaining;
     }
-    this.emitter.emit(msg, data);
+    emitter.emit(msg, data);
   } else {
     // data does not exist
-    this.emitter.emit(msg);
+    emitter.emit(msg);
   }
-  this.activate = false;
+  activate.value = false;
 } // emit
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                    WATCHERS                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * watcher for toggleConfirmationBox
- */
-function watchToggleConfirmationBox() {
-  this.activate = true;
-} // watchToggleConfirmationBox
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  data() {
-    return {
-      activate: false // dialog activator
-    };
-  },
-  methods: {
-    convertToMoneyString,
-    emit,
-    isEmpty
-  },
-  props: [
-    'expense', // expense to confirm
-    'toggleConfirmationBox', // dialog activator
-    'isCovered',
-    'isOverCovered'
-  ],
-  watch: {
-    toggleConfirmationBox: watchToggleConfirmationBox
-  }
-};
 </script>

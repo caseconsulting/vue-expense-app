@@ -43,7 +43,23 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { inject, ref, watch } from 'vue';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+const props = defineProps([
+  'toggleSubmissionConfirmation', // dialog activator,
+  'type' //sends appropriate emits based on where its called
+]);
+const emitter = inject('emitter');
+
+const activate = ref(false); // dialog activator
+const loading = ref(false); // loading circle
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -56,7 +72,7 @@
  * @param msg - Message to emit
  */
 function emit(msg) {
-  this.emitter.emit(msg);
+  emitter.emit(msg);
 } // emit
 
 // |--------------------------------------------------|
@@ -65,36 +81,12 @@ function emit(msg) {
 // |                                                  |
 // |--------------------------------------------------|
 
-/**
- * watcher for toggleSubmissionConfirmation
- */
-function watchToggleSubmissionConfirmation() {
-  this.activate = this.toggleSubmissionConfirmation;
-  this.loading = false;
-} // watchToggleSubmissionConfirmation
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  data() {
-    return {
-      activate: false, // dialog activator
-      loading: false // loading circle
-    };
-  },
-  methods: {
-    emit
-  },
-  props: [
-    'toggleSubmissionConfirmation', // dialog activator,
-    'type' //sends appropriate emits based on where its called
-  ],
-  watch: {
-    toggleSubmissionConfirmation: watchToggleSubmissionConfirmation
+// watcher for toggleSubmissionConfirmation
+watch(
+  () => props.toggleSubmissionConfirmation,
+  () => {
+    activate.value = props.toggleSubmissionConfirmation;
+    loading.value = false;
   }
-};
+);
 </script>

@@ -68,8 +68,17 @@
   </v-dialog>
 </template>
 
-<script>
+<script setup>
 import { convertToMoneyString, monthDayYearFormat } from '@/utils/utils';
+import { inject, ref, watch } from 'vue';
+// |--------------------------------------------------|
+// |                                                  |
+// |                       SETUP                      |
+// |                                                  |
+// |--------------------------------------------------|
+const props = defineProps(['activator', 'selectedBudget']);
+const emitter = inject('emitter');
+const showDialog = ref(false);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -93,22 +102,6 @@ function calcRemaining(budget) {
   }
   return 0;
 } // calcRemaining
-
-/**
- * Emits a message and data if it exists.
- *
- * @param msg - Message to emit
- * @param data - Data to emit
- */
-function emit(msg, data) {
-  if (data) {
-    // data exists
-    this.emitter.emit(msg, data);
-  } else {
-    // data does not exist
-    this.emitter.emit(msg);
-  }
-} // emit
 
 /**
  * Get the amount of an aggregate budget. Returns the amount if it exists. Returns zero if the budget itself does not
@@ -160,7 +153,7 @@ function odFlagMessage(expenseType) {
  * @return boolean - budget has no remaining budget
  */
 function noRemaining(budget) {
-  return this.calcRemaining(budget) <= 0 && !budget.odFlag;
+  return calcRemaining(budget) <= 0 && !budget.odFlag;
 } // noRemaining
 
 // |--------------------------------------------------|
@@ -172,49 +165,19 @@ function noRemaining(budget) {
 /**
  * watcher for activator - activates dialog if activator changes
  */
-function watchActivator() {
-  this.showDialog = this.activator;
-} // watchActivator
+watch(
+  () => props.activator,
+  () => {
+    showDialog.value = props.activator;
+  }
+); // watchActivator
 
 /**
  * watcher for showDialog - emits if false
  */
-function watchShowDialog() {
-  if (!this.showDialog) {
-    this.emit('close-summary');
+watch(showDialog, () => {
+  if (!showDialog.value) {
+    emitter.emit('close-summary');
   }
-} // watchShowDialog
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     EXPORT                       |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  data() {
-    return {
-      showDialog: false
-    };
-  },
-  methods: {
-    calcRemaining,
-    convertToMoneyString,
-    emit,
-    getAmount,
-    getReimbursed,
-    getPending,
-    odFlagMessage,
-    monthDayYearFormat,
-    noRemaining
-  },
-  props: [
-    'activator', // dialog activator
-    'selectedBudget' // selected budget
-  ],
-  watch: {
-    activator: watchActivator,
-    showDialog: watchShowDialog
-  }
-};
+}); // watchShowDialog
 </script>

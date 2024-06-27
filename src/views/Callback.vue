@@ -6,10 +6,11 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { setIdToken, setAccessToken, setRole, setProfile } from '@/utils/auth';
 import api from '@/shared/api';
 import { getTodaysDate } from '../shared/dateUtils';
+import { onMounted, nextTick } from 'vue';
 const login_format = 'MMM Do, YYYY HH:mm:ss';
 
 // |--------------------------------------------------|
@@ -21,16 +22,16 @@ const login_format = 'MMM Do, YYYY HH:mm:ss';
 /**
  * mounted lifecycle hook
  */
-function mounted() {
-  this.$nextTick(async function () {
+onMounted(() => {
+  nextTick(async function () {
     try {
       // set tokens
-      this.setAccessToken();
-      this.setIdToken();
-      this.setProfile();
+      setAccessToken();
+      setIdToken();
+      setProfile();
       let user = await api.getUser();
       let employeeRole = user.employeeRole;
-      this.setRole(employeeRole);
+      setRole(employeeRole);
       // passes this local storage information to App.vue to avoid
       // loading the data again when the page switches to the admin/user view
       localStorage.setItem('user', JSON.stringify(user));
@@ -41,24 +42,7 @@ function mounted() {
       window.location.href = '/loginFailed';
     }
   });
-} //mounted
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  name: 'Callback',
-  mounted,
-  methods: {
-    setAccessToken,
-    setIdToken,
-    setProfile,
-    setRole
-  }
-};
+}); //mounted
 </script>
 
 <style scoped>

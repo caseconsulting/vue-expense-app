@@ -283,10 +283,14 @@ function getEmployeeWorkedHours(employee) {
   if (!INFO[n]) return '---';
   let timesheets = INFO[n].timesheets;
 
+  // use SUPP_DATA.nonBillables if you want all non-billable timecodes, but Dave has requested
+  // to only include PTO as non-billable (yes, that means Holiday is considered billable for this)
+  let nonBillables = new Set(['PTO']);
+
   // tally up hours
   let total = 0;
   for (let jobcode in timesheets) {
-    if (!SUPP_DATA.nonBillables.has(jobcode)) {
+    if (!nonBillables.has(jobcode)) {
       total += timesheets[jobcode] / 3600; // seconds to hours
     }
   }
@@ -304,12 +308,13 @@ function getEmployeeWorkedHours(employee) {
  * @param employee
  * @returns {String} employee hours worked over, floored at 0
  */
-function getEmployeeHoursOver(employee, startDate, endDate) {
+function getEmployeeHoursOver(employee, startDate, endDate, tags) {
   let n = employee.employeeNumber;
   if (!INFO[n]) return '---';
 
   let hoursOver =
-    getEmployeeWorkedHours(employee, startDate, endDate) - getEmployeePotentialHours(employee, startDate, endDate);
+    getEmployeeWorkedHours(employee, startDate, endDate, tags) -
+    getEmployeePotentialHours(employee, startDate, endDate);
 
   // set min to 0 and format
   hoursOver = Math.max(0, hoursOver);
