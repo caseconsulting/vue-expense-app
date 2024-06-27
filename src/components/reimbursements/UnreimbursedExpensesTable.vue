@@ -564,6 +564,10 @@ async function rejectExpenses(field, reason) {
   loading.value = true;
   let selectedExpenses = _.filter(pendingExpenses.value, (e) => e.selected);
   await asyncForEach(selectedExpenses, async (expense) => {
+    // to remove the expense type data in the ExpenseTypeTotal modal
+    emitter.emit('expenseChange', expense);
+    emitter.emit('expenseClicked', undefined);
+    // set reasoning in rejection object
     let reasons = _.get(expense, field + '.reasons');
     reasons = [...(reasons || []), reason];
     _.set(expense, field + '.reasons', reasons);
@@ -623,11 +627,16 @@ async function reimburseExpenses() {
     if (!reimbursedExpense.id) {
       // failed to reimburse expense
       msg = reimbursedExpense.response.data.message;
+<<<<<<< HEAD
       alerts.value.push({ status: 'error', message: msg, color: 'red' });
       let self = alerts.value;
       setTimeout(function () {
         self.shift();
       }, 20000);
+=======
+      this.alerts.push({ status: 'error', message: msg, color: 'red' });
+      setTimeout(() => this.alerts.shift(), 20000);
+>>>>>>> db89982a (POR-2658: remove expense details cards after rejecting an expense)
 
       // revert reimburse date change
       let groupIndex = _.findIndex(empBudgets.value, {
@@ -648,11 +657,16 @@ async function reimburseExpenses() {
             : 'but FAILED to email recipient gift card information'
         }`;
       }
+<<<<<<< HEAD
       alerts.value.push({ status: 'success', message: msg, color: 'green' });
       let self = alerts.value;
       setTimeout(function () {
         self.shift();
       }, 15000);
+=======
+      this.alerts.push({ status: 'success', message: msg, color: 'green' });
+      setTimeout(() => this.alerts.shift(), 15000);
+>>>>>>> db89982a (POR-2658: remove expense details cards after rejecting an expense)
     }
     emitter.emit('reimburseAlert', alerts.value);
   });

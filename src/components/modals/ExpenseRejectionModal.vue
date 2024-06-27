@@ -68,7 +68,7 @@ const denialTypes = ref([
   },
   {
     title: 'Reject Expense',
-    info: 'Rejecting an expense will send an email to the employee(s) listed below, along with the provided reasoning. The expense(s) will no longer appear on the Reimbursements page, and the user(s) will not be able to delete the rejected expense.',
+    info: 'Rejecting an expense will send an email to the employee(s) listed below, along with the provided reasoning. The expense(s) will no longer appear on the Reimbursements page, and the user(s) will not be able to delete or resubmit the rejected expense.',
     field: 'rejections.hardRejections'
   }
 ]);
