@@ -6,6 +6,7 @@
     <v-card v-else elevation="5">
       <v-btn color="#bc3825" @click="goBackToAlphaProfile()" theme="dark" class="ma-2">Go to Alpha profile!</v-btn>
       <employee-info :model="model"></employee-info>
+      <!-- hire and contract info -->
       <v-row class="ma-2">
         <v-col class="pa-3" style="max-width: fit-content">
           <hire-info-card :model="model"></hire-info-card>
@@ -14,11 +15,19 @@
           <contract-info-card :contracts="contracts" :model="model"></contract-info-card>
         </v-col>
       </v-row>
+      <!-- personal info -->
       <v-row class="ma-2">
         <v-col class="pa-3" style="max-width: fit-content">
-          <personal-card :model="model"></personal-card>
+          <personal-info-card style="padding-bottom: 10px" :model="model"></personal-info-card>
+        </v-col>
+        <v-col class="pa-3" style="max-width: fit-content">
+          <other-info-card style="padding-bottom: 10px" :model="model"></other-info-card>
+        </v-col>
+        <v-col class="pa-3" style="max-width: fit-content" v-if="isUser || isAdmin">
+          <clearance-card style="padding-bottom: 10px" :model="model"></clearance-card>
         </v-col>
       </v-row>
+      <!-- case info -->
       <v-row class="ma-2">
         <v-col>
           <case-experience-info-card :model="model"></case-experience-info-card>
@@ -92,12 +101,13 @@ import HireInfoCard from '@/components/employee-beta/HireInfoCard.vue';
 import LanguagesCard from '@/components/employee-beta/LanguagesCard.vue';
 import TechnologiesCard from '@/components/employee-beta/TechnologiesCard.vue';
 import PastJobExperienceInfoCard from '@/components/employee-beta/PastJobExperienceInfoCard.vue';
-import PersonalCard from '@/components/employee-beta/PersonalCard.vue';
 import EmployeePageLoader from '@/components/employees/EmployeePageLoader.vue';
 import ContractInfoCard from '@/components/employee-beta/ContractInfoCard.vue';
 import EducationInfoCard from '@/components/employee-beta/EducationInfoCard.vue';
 import EmployeeForm from '@/components/employee-beta/EmployeeForm.vue';
-
+import PersonalInfoCard from '@/components/employee-beta/personal/PersonalInfoCard.vue';
+import OtherInfoCard from '@/components/employee-beta/personal/OtherInfoCard.vue';
+import ClearanceCard from '@/components/employee-beta/personal/ClearanceCard.vue';
 // |--------------------------------------------------|
 // |                                                  |
 // |                       SETUP                      |
