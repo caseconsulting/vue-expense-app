@@ -100,11 +100,72 @@
   </v-row>
 </template>
 
-<script>
+<script setup>
 import api from '@/shared/api.js';
 import caseLogo from '@/assets/img/logo-big.png';
 import _ from 'lodash';
 import { isEmpty } from '@/utils/utils';
+import { ref, onBeforeMount, computed } from 'vue';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const categoryFilter = ref('All'); // category filter
+const search = ref(''); // search filter
+const urlsOriginal = ref([]); // all training urls,
+const categories = ref([
+  {
+    value: 'Training',
+    icon: 'mdi-dumbbell'
+  },
+  {
+    value: 'Conference',
+    icon: 'mdi-account-group'
+  },
+  {
+    value: 'Certifications',
+    icon: 'mdi-star'
+  },
+  {
+    value: 'Lodging',
+    icon: 'mdi-bed'
+  },
+  {
+    value: 'Travel',
+    icon: 'mdi-airplane'
+  },
+  {
+    value: 'Meals',
+    icon: 'mdi-silverware'
+  }
+]);
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Gets all training urls.
+ */
+onBeforeMount(async () => {
+  let allURLS = await api.getItems(api.TRAINING_URLS);
+  urlsOriginal.value = _.forEach(allURLS, (urlObject) => {
+    urlObject.title = titleFormat(urlObject.title);
+    if (urlObject.logo != null) {
+      urlObject.display = urlObject.logo;
+    } else if (urlObject.image != null) {
+      urlObject.display = urlObject.image;
+    } else {
+      urlObject.display = caseLogo;
+      urlObject.isCaseLogo = true;
+    }
+  });
+}); // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -117,16 +178,16 @@ import { isEmpty } from '@/utils/utils';
  *
  * @return Array - filtered training urls
  */
-function urls() {
+const urls = computed(() => {
   let filteredUrls = [];
-  if (this.categoryFilter != 'All') {
+  if (categoryFilter.value != 'All') {
     // filter by category
-    filteredUrls = _.filter(this.urlsOriginal, (url) => {
-      return url.category === this.categoryFilter;
+    filteredUrls = _.filter(urlsOriginal.value, (url) => {
+      return url.category === categoryFilter.value;
     });
   } else {
     // creates new list with no url duplicates and adds all hits for same url
-    let urls = _.cloneDeep(this.urlsOriginal);
+    let urls = _.cloneDeep(urlsOriginal.value);
     _.forEach(urls, (urlObject) => {
       let url = urlObject.id;
       let dupIndex = _.findIndex(filteredUrls, (duplicate) => {
@@ -143,20 +204,20 @@ function urls() {
     });
   }
 
-  if (!this.isEmpty(this.search)) {
+  if (!isEmpty(search.value)) {
     // filter by serach
     filteredUrls = _.filter(filteredUrls, (url) => {
       let includes =
-        (url.title && url.title.toLowerCase().includes(this.search.toLowerCase())) ||
-        (url.description && url.description.toLowerCase().includes(this.search.toLowerCase())) ||
-        (url.id && url.id.toLowerCase().includes(this.search.toLowerCase())) ||
-        (url.hits && url.hits.toString().includes(this.search));
+        (url.title && url.title.toLowerCase().includes(search.value.toLowerCase())) ||
+        (url.description && url.description.toLowerCase().includes(search.value.toLowerCase())) ||
+        (url.id && url.id.toLowerCase().includes(search.value.toLowerCase())) ||
+        (url.hits && url.hits.toString().includes(search.value));
       return includes;
     });
   }
 
   return _.sortBy(filteredUrls, ['hits', 'id']).reverse(); // sort by most hits
-} // urls
+}); // urls
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -172,11 +233,11 @@ function urls() {
  * @param item - training url
  */
 function changeDisplay(item) {
-  let index = _.findIndex(this.urlsOriginal, (url) => {
+  let index = _.findIndex(urlsOriginal.value, (url) => {
     return url.id === item.id && url.category === item.category;
   });
 
-  let newItem = this.urlsOriginal[index];
+  let newItem = urlsOriginal.value[index];
 
   if (newItem.display === item.logo && item.image != item.logo && item.image != null) {
     newItem.display = item.image;
@@ -184,7 +245,7 @@ function changeDisplay(item) {
     newItem.display = caseLogo;
     newItem.isCaseLogo = true;
   }
-  this.urlsOriginal.splice(index, 1, newItem);
+  urlsOriginal.value.splice(index, 1, newItem);
 } // changeDisplay
 
 /**
@@ -193,10 +254,10 @@ function changeDisplay(item) {
  * @param category - category to filter by
  */
 function filterByCategory(category) {
-  if (this.categoryFilter == category) {
-    this.categoryFilter = 'All';
+  if (categoryFilter.value == category) {
+    categoryFilter.value = 'All';
   } else {
-    this.categoryFilter = category;
+    categoryFilter.value = category;
   }
 } // filterByCategory
 
@@ -208,7 +269,7 @@ function filterByCategory(category) {
  * @return boolean - category was already selected
  */
 function isFocus(value) {
-  return value == this.categoryFilter;
+  return value == categoryFilter.value;
 } // isFocus
 
 /**
@@ -225,85 +286,6 @@ function titleFormat(value) {
   let title = value.length > 130 ? value.substring(0, 130) + '...' : value;
   return title;
 } // titleFormat
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                 LIFECYCLE HOOKS                  |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Gets all training urls.
- */
-async function created() {
-  let allURLS = await api.getItems(api.TRAINING_URLS);
-  this.urlsOriginal = _.forEach(allURLS, (urlObject) => {
-    urlObject.title = this.titleFormat(urlObject.title);
-    if (urlObject.logo != null) {
-      urlObject.display = urlObject.logo;
-    } else if (urlObject.image != null) {
-      urlObject.display = urlObject.image;
-    } else {
-      urlObject.display = caseLogo;
-      urlObject.isCaseLogo = true;
-    }
-  });
-} // created
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  data() {
-    return {
-      caseLogo, // default case logo
-      categoryFilter: 'All', // category filter
-      search: '', // search filter
-      urlsShow: [], // training urls to display
-      urlsOriginal: [], // all training urls,
-      categories: [
-        {
-          value: 'Training',
-          icon: 'mdi-dumbbell'
-        },
-        {
-          value: 'Conference',
-          icon: 'mdi-account-group'
-        },
-        {
-          value: 'Certifications',
-          icon: 'mdi-star'
-        },
-        {
-          value: 'Lodging',
-          icon: 'mdi-bed'
-        },
-        {
-          value: 'Travel',
-          icon: 'mdi-airplane'
-        },
-        {
-          value: 'Meals',
-          icon: 'mdi-silverware'
-        }
-      ] // categories for button filters
-    };
-  },
-  computed: {
-    urls
-  },
-  created,
-  methods: {
-    changeDisplay,
-    filterByCategory,
-    isEmpty,
-    isFocus,
-    titleFormat
-  }
-};
 </script>
 
 <style scoped>
