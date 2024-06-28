@@ -93,21 +93,22 @@ import _ from 'lodash';
 import { inject, onBeforeMount, onBeforeUnmount, onMounted, provide, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
-import AwardsCard from '@/components/employee-beta/AwardsCard.vue';
-import CaseExperienceInfoCard from '@/components/employee-beta/CaseExperienceInfoCard.vue';
-import CertificationsCard from '@/components/employee-beta/CertificationsCard.vue';
+import AwardsCard from '@/components/employee-beta/cards/AwardsCard.vue';
+import CaseExperienceInfoCard from '@/components/employee-beta/cards/CaseExperienceInfoCard.vue';
+import CertificationsCard from '@/components/employee-beta/cards/CertificationsCard.vue';
 import EmployeeInfo from '@/components/employee-beta/EmployeeInfo.vue';
-import HireInfoCard from '@/components/employee-beta/HireInfoCard.vue';
-import LanguagesCard from '@/components/employee-beta/LanguagesCard.vue';
-import TechnologiesCard from '@/components/employee-beta/TechnologiesCard.vue';
-import PastJobExperienceInfoCard from '@/components/employee-beta/PastJobExperienceInfoCard.vue';
+import HireInfoCard from '@/components/employee-beta/cards/HireInfoCard.vue';
+import LanguagesCard from '@/components/employee-beta/cards/LanguagesCard.vue';
+import TechnologiesCard from '@/components/employee-beta/cards/TechnologiesCard.vue';
+import PastJobExperienceInfoCard from '@/components/employee-beta/cards/PastJobExperienceInfoCard.vue';
 import EmployeePageLoader from '@/components/employees/EmployeePageLoader.vue';
-import ContractInfoCard from '@/components/employee-beta/ContractInfoCard.vue';
-import EducationInfoCard from '@/components/employee-beta/EducationInfoCard.vue';
+import ContractInfoCard from '@/components/employee-beta/cards/ContractInfoCard.vue';
+import EducationInfoCard from '@/components/employee-beta/cards/EducationInfoCard.vue';
 import EmployeeForm from '@/components/employee-beta/EmployeeForm.vue';
-import PersonalInfoCard from '@/components/employee-beta/personal/PersonalInfoCard.vue';
-import OtherInfoCard from '@/components/employee-beta/personal/OtherInfoCard.vue';
-import ClearanceCard from '@/components/employee-beta/personal/ClearanceCard.vue';
+import PersonalInfoCard from '@/components/employee-beta/cards/personal/PersonalInfoCard.vue';
+import OtherInfoCard from '@/components/employee-beta/cards/personal/OtherInfoCard.vue';
+import ClearanceCard from '@/components/employee-beta/cards/personal/ClearanceCard.vue';
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                       SETUP                      |

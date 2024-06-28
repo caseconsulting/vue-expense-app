@@ -32,8 +32,8 @@
 <script setup>
 import { isEmpty, sortLanguagesByProficiency } from '@/utils/utils';
 import { computed, ref } from 'vue';
-import LanguagesModal from './modals/LanguagesModal.vue';
-import BaseCard from '@/components/employee-beta/BaseCard.vue';
+import LanguagesModal from '../modals/LanguagesModal.vue';
+import BaseCard from './BaseCard.vue';
 
 // |--------------------------------------------------|
 // |                                                  |

@@ -80,9 +80,9 @@
 <script setup>
 import { onBeforeMount, ref } from 'vue';
 
-import { monthYearFormatBETA, isEmpty } from '../../utils/utils';
-import EducationModal from './modals/EducationModal.vue';
-import BaseCard from '@/components/employee-beta/BaseCard.vue';
+import { monthYearFormatBETA, isEmpty } from '@/utils/utils';
+import EducationModal from '../modals/EducationModal.vue';
+import BaseCard from './BaseCard.vue';
 
 // |--------------------------------------------------|
 // |                                                  |

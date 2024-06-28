@@ -39,7 +39,7 @@
 import { ref, computed } from 'vue';
 import { isEmpty, monthYearFormat } from '@/utils/utils';
 import AwardsModal from '@/components/employee-beta/modals/AwardsModal.vue';
-import BaseCard from '@/components/employee-beta/BaseCard.vue';
+import BaseCard from './BaseCard.vue';
 
 // |--------------------------------------------------|
 // |                                                  |

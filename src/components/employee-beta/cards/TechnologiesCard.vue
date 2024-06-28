@@ -49,7 +49,7 @@ import _ from 'lodash';
 import { computed, ref } from 'vue';
 import { isEmpty } from '@/utils/utils';
 import TechnologiesModal from '@/components/employee-beta/modals/TechnologiesModal.vue';
-import BaseCard from '@/components/employee-beta/BaseCard.vue';
+import BaseCard from './BaseCard.vue';
 
 // |--------------------------------------------------|
 // |                                                  |

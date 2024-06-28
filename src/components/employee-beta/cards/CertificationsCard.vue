@@ -46,7 +46,7 @@
 import { ref, computed } from 'vue';
 import { isEmpty, monthDayYearFormat } from '@/utils/utils';
 import CertificationsModal from '@/components/employee-beta/modals/CertificationsModal.vue';
-import BaseCard from '@/components/employee-beta/BaseCard.vue';
+import BaseCard from './BaseCard.vue';
 
 // |--------------------------------------------------|
 // |                                                  |

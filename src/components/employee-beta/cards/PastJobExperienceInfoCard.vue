@@ -40,11 +40,11 @@
 
 <script setup>
 import { _ } from 'lodash';
-import { monthYearFormatBETA, isEmpty } from '../../utils/utils';
+import { monthYearFormatBETA, isEmpty } from '@/utils/utils';
 import { onBeforeMount, ref } from 'vue';
-import { add, difference, minimum } from '../../shared/dateUtils';
-import PastJobExperienceModal from './modals/PastJobExperienceModal.vue';
-import BaseCard from '@/components/employee-beta/BaseCard.vue';
+import { add, difference, minimum } from '@/shared/dateUtils';
+import PastJobExperienceModal from '../modals/PastJobExperienceModal.vue';
+import BaseCard from './BaseCard.vue';
 
 const props = defineProps(['model']);
 
