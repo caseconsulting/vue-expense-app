@@ -336,7 +336,7 @@ const deleteModel = ref({
   id: null
 }); // employee to delete
 const deleting = ref(false); // activate delete confirmation model
-const employees = []; // employees
+const employees = ref([]); // employees
 const employeeNumber = ref(null);
 const filter = ref({
   active: ['full', 'part'] // default only shows full and part time employees
