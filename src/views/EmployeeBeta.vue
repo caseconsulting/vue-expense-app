@@ -3,120 +3,138 @@
     <v-row v-if="basicEmployeeDataLoading" class="pt-0">
       <employee-page-loader />
     </v-row>
-    <v-card v-else elevation="5" fluid>
-      <div class="d-flex flex-column align-center">
-        <v-btn color="#bc3825" @click="goBackToAlphaProfile()" theme="dark" class="ma-2">Go to Alpha profile!</v-btn>
-        <employee-info :model="model"></employee-info>
-        <!-- hire and contract info -->
-        <v-row class="ma-2">
-          <v-col class="pa-3" style="max-width: fit-content">
-            <hire-info-card :model="model"></hire-info-card>
-          </v-col>
-          <v-col class="pa-3" style="max-width: fit-content">
-            <contract-info-card :contracts="contracts" :model="model"></contract-info-card>
-          </v-col>
-        </v-row>
-      </div>
-      <v-card class="ma-2">
-        <v-card-title>
-          <v-row>
-            <v-col cols="12" align="center">
-              <v-menu v-if="useDropDown">
-                <template v-slot:activator="{ props }">
-                  <v-btn variant="text" size="large" class="mt-5 font-weight-bold" v-bind="props"
-                    >{{ infoTab || 'Select Info' }} <v-icon size="large" class="pb-1">mdi-chevron-down</v-icon>
-                  </v-btn>
-                </template>
-                <v-list>
-                  <v-list-item @click="selectDropDown('Personal')">Personal</v-list-item>
-                  <v-list-item @click="selectDropDown('Certifications & Awards')">Certifications & Awards</v-list-item>
-                  <v-list-item @click="selectDropDown('Tech, Skills, & Languages')"
-                    >Tech, Skills, & Languages</v-list-item
+    <v-card v-else elevation="5">
+      <v-row justify="center">
+        <v-col style="max-width: 650px">
+          <div class="d-flex flex-column justify-center align-center">
+            <v-btn color="#bc3825" @click="goBackToAlphaProfile()" theme="dark" class="ma-2"
+              >Go to Alpha profile!</v-btn
+            >
+            <employee-info :model="model"></employee-info>
+            <!-- hire and contract info -->
+            <v-row class="ma-2">
+              <v-col class="pa-3" style="max-width: fit-content">
+                <hire-info-card :model="model"></hire-info-card>
+              </v-col>
+              <v-col class="pa-3" style="max-width: fit-content">
+                <contract-info-card :contracts="contracts" :model="model"></contract-info-card>
+              </v-col>
+            </v-row>
+          </div>
+        </v-col>
+        <v-col>
+          <v-card class="ma-2">
+            <v-card-title>
+              <v-row>
+                <v-col cols="12" align="center">
+                  <v-menu v-if="useDropDown">
+                    <template v-slot:activator="{ props }">
+                      <v-btn variant="text" size="large" class="text-subtitle-1 font-weight-bold" v-bind="props"
+                        >{{ infoTab || 'Select Info' }} <v-icon size="large">mdi-chevron-down</v-icon>
+                      </v-btn>
+                    </template>
+                    <v-list>
+                      <v-list-item @click="selectDropDown('Personal')">Personal</v-list-item>
+                      <v-list-item @click="selectDropDown('Certifications & Awards')"
+                        >Certifications & Awards</v-list-item
+                      >
+                      <v-list-item @click="selectDropDown('Tech, Skills, & Languages')"
+                        >Tech, Skills, & Languages</v-list-item
+                      >
+                      <v-list-item @click="selectDropDown('Job Experience')">Job Experience</v-list-item>
+                      <v-list-item @click="selectDropDown('Education')">Education</v-list-item>
+                    </v-list>
+                  </v-menu>
+                  <v-tabs
+                    v-else
+                    v-model="infoTab"
+                    center-active
+                    show-arrows
+                    align-tabs="center"
+                    color="blue"
+                    class="mx-4"
                   >
-                  <v-list-item @click="selectDropDown('Job Experience')">Job Experience</v-list-item>
-                  <v-list-item @click="selectDropDown('Education')">Education</v-list-item>
-                </v-list>
-              </v-menu>
-              <v-tabs v-else v-model="infoTab" center-active show-arrows align-tabs="center" color="blue" class="mx-4">
-                <v-tab value="Personal">Personal</v-tab>
-                <v-tab value="Certifications & Awards">Certifications & Awards</v-tab>
-                <v-tab value="Tech, Skills, & Languages">Tech, Skills, & Languages</v-tab>
-                <v-tab value="Job Experience">Job Experience</v-tab>
-                <v-tab value="Education">Education</v-tab>
-              </v-tabs>
-              <v-divider></v-divider>
-            </v-col>
-          </v-row>
-        </v-card-title>
-        <v-card-text>
-          <v-tabs-window v-model="infoTab">
-            <v-tabs-window-item value="Personal">
-              <!-- personal info -->
-              <v-row class="d-flex flex-wrap">
-                <v-col class="pa-3">
-                  <personal-info-card style="padding-bottom: 10px" :model="model"></personal-info-card>
-                </v-col>
-                <v-col class="pa-3">
-                  <other-info-card style="padding-bottom: 10px" :model="model"></other-info-card>
-                </v-col>
-                <v-col v-if="isUser || isAdmin" class="pa-3">
-                  <clearance-card style="padding-bottom: 10px" :model="model"></clearance-card>
+                    <v-tab value="Personal">Personal</v-tab>
+                    <v-tab value="Certifications & Awards">Certifications & Awards</v-tab>
+                    <v-tab value="Tech, Skills, & Languages">Tech, Skills, & Languages</v-tab>
+                    <v-tab value="Job Experience">Job Experience</v-tab>
+                    <v-tab value="Education">Education</v-tab>
+                  </v-tabs>
+                  <v-divider></v-divider>
                 </v-col>
               </v-row>
-            </v-tabs-window-item>
-            <v-tabs-window-item value="Certifications & Awards">
-              <!-- certifications and awards -->
-              <v-row>
-                <v-col>
-                  <certifications-card :model="model"></certifications-card>
-                </v-col>
-                <v-col>
-                  <awards-card :model="model"></awards-card>
-                </v-col>
-              </v-row>
-            </v-tabs-window-item>
-            <v-tabs-window-item value="Tech, Skills, & Languages">
-              <!-- tech, skills, languages -->
-              <v-row>
-                <v-col>
-                  <technologies-card :model="model"></technologies-card>
-                </v-col>
-                <v-col>
-                  <languages-card :model="model"></languages-card>
-                </v-col>
-              </v-row>
-            </v-tabs-window-item>
-            <v-tabs-window-item value="Job Experience">
-              <v-row>
-                <!-- case info -->
-                <v-col>
-                  <case-experience-info-card :model="model"></case-experience-info-card>
-                </v-col>
-                <!-- past experience -->
-                <v-col>
-                  <past-job-experience-info-card
-                    :model="model"
-                    :isAdmin="hasAdminPermissions()"
-                    :isUser="userIsEmployee()"
-                  ></past-job-experience-info-card>
-                </v-col>
-              </v-row>
-            </v-tabs-window-item>
-            <v-tabs-window-item value="Education">
-              <!-- education and past experience -->
-              <v-row class="ma-2">
-                <v-col>
-                  <education-info-card
-                    :model="model"
-                    :isAdmin="hasAdminPermissions()"
-                    :isUser="userIsEmployee()"
-                  ></education-info-card>
-                </v-col>
-              </v-row>
-            </v-tabs-window-item>
-          </v-tabs-window>
-        </v-card-text>
-      </v-card>
+            </v-card-title>
+            <v-card-text>
+              <v-tabs-window v-model="infoTab">
+                <v-tabs-window-item value="Personal">
+                  <!-- personal info -->
+                  <v-row class="my-2">
+                    <v-col>
+                      <personal-info-card style="padding-bottom: 10px" :model="model"></personal-info-card>
+                    </v-col>
+                    <v-col>
+                      <other-info-card style="padding-bottom: 10px" :model="model"></other-info-card>
+                    </v-col>
+                    <v-col v-if="isUser || isAdmin">
+                      <clearance-card style="padding-bottom: 10px" :model="model"></clearance-card>
+                    </v-col>
+                  </v-row>
+                </v-tabs-window-item>
+                <v-tabs-window-item value="Certifications & Awards">
+                  <!-- certifications and awards -->
+                  <v-row class="my-2">
+                    <v-col>
+                      <certifications-card :model="model"></certifications-card>
+                    </v-col>
+                    <v-col>
+                      <awards-card :model="model"></awards-card>
+                    </v-col>
+                  </v-row>
+                </v-tabs-window-item>
+                <v-tabs-window-item value="Tech, Skills, & Languages">
+                  <!-- tech, skills, languages -->
+                  <v-row class="my-2">
+                    <v-col>
+                      <technologies-card :model="model"></technologies-card>
+                    </v-col>
+                    <v-col>
+                      <languages-card :model="model"></languages-card>
+                    </v-col>
+                  </v-row>
+                </v-tabs-window-item>
+                <v-tabs-window-item value="Job Experience">
+                  <v-row class="my-2">
+                    <!-- case info -->
+                    <v-col>
+                      <case-experience-info-card :model="model"></case-experience-info-card>
+                    </v-col>
+                    <!-- past experience -->
+                    <v-col>
+                      <past-job-experience-info-card
+                        :model="model"
+                        :isAdmin="hasAdminPermissions()"
+                        :isUser="userIsEmployee()"
+                      ></past-job-experience-info-card>
+                    </v-col>
+                  </v-row>
+                </v-tabs-window-item>
+                <v-tabs-window-item value="Education">
+                  <!-- education and past experience -->
+                  <v-row class="my-2">
+                    <v-col>
+                      <education-info-card
+                        :model="model"
+                        :isAdmin="hasAdminPermissions()"
+                        :isUser="userIsEmployee()"
+                      ></education-info-card>
+                    </v-col>
+                  </v-row>
+                </v-tabs-window-item>
+              </v-tabs-window>
+            </v-card-text>
+          </v-card>
+        </v-col>
+      </v-row>
     </v-card>
     <employee-form :employee="model" :contracts="contracts"></employee-form>
   </v-container>
@@ -360,9 +378,3 @@ watch(
   } // watchStoreisPopulated
 );
 </script>
-
-<style scoped>
-#employee-container {
-  max-width: 1250px;
-}
-</style>
