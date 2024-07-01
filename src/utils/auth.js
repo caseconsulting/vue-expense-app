@@ -2,6 +2,7 @@ import { jwtDecode } from 'jwt-decode';
 import auth0 from 'auth0-js';
 import router from '../router';
 import { AUTH_CONFIG } from './auth0-variables';
+import { emitter } from '../main';
 import CryptoJS from 'crypto-js';
 
 const AUDIENCE = AUTH_CONFIG.audience;
@@ -235,7 +236,7 @@ export function refreshUserSession() {
     if (authResult && authResult.accessToken && authResult.idToken) {
       setCookie(ACCESS_TOKEN_KEY, authResult.accessToken);
       setCookie(ID_TOKEN_KEY, authResult.idToken);
-      window.emitter.emit('user-session-refreshed');
+      emitter.emit('user-session-refreshed');
     }
   });
 } // refreshUserSession
