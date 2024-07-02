@@ -2,7 +2,7 @@
   <v-container>
     <!-- Status Notification -->
     <v-snackbar
-      v-model="uploadStatus.statusType"
+      v-model="uploadStatus.enabled"
       :color="uploadStatus.color"
       :multi-line="true"
       :timeout="3000"
@@ -14,47 +14,51 @@
       </v-card-text>
       <v-btn color="white" variant="text" @click="clearStatus()"> Close </v-btn>
     </v-snackbar>
-    <v-col v-if="isAdmin || isUser" cols="9" align="right" justify="right" class="px-0 pr-3 ma-0">
-      <v-btn
-        v-if="!editing"
-        :size="isMobile ? 'x-small' : 'default'"
-        color="#bc3825"
-        class="text-white mr-1"
-        @click="toggleResumeParser = !toggleResumeParser"
-      >
-        <b>Upload Resume</b>
-      </v-btn>
-      <v-btn
-        v-if="!editing"
-        class="text-white"
-        color="#bc3825"
-        :size="isMobile ? 'x-small' : 'default'"
-        :disabled="model.resumeUpdated == null"
-        :loading="deleteLoading"
-        @click="toggleDeleteModal = !toggleDeleteModal"
-      >
-        <b>Delete Resume</b>
-      </v-btn>
-    </v-col>
-    <v-btn
-      v-if="isAdmin || isUser"
-      :disabled="!model.resumeUpdated"
-      density="comfortable"
-      variant="text"
-      icon=""
-      class="mx-1"
-      @click="downloadResume()"
-    >
-      <v-tooltip activator="parent" location="top">
-        <p class="ma-0 pa-0">
-          {{ model.resumeUpdated != null ? 'Download Resume' : 'No resume available' }}
-        </p>
-        <p class="ma-0 pa-0">
-          {{ model.resumeUpdated != null ? `Uploaded ${format(model.resumeUpdated, null, dateFormat)}` : '' }}
-        </p>
-      </v-tooltip>
-      <v-icon id="resume-download" color="red"> mdi-file-download </v-icon>
-    </v-btn>
+    <v-row>
+      <v-col v-if="isAdmin || isUser" align="right" class="px-0 pr-3 ma-0">
+        <v-btn
+          v-if="!editing"
+          :size="isMobile() ? 'x-small' : 'default'"
+          color="#bc3825"
+          class="text-white"
+          @click="toggleResumeParser = !toggleResumeParser"
+          prepend-icon="mdi-upload"
+        >
+          <b>Upload Resume</b>
+        </v-btn>
+        <v-btn
+          v-if="!editing"
+          class="text-white mx-1"
+          color="#bc3825"
+          :size="isMobile() ? 'x-small' : 'default'"
+          :disabled="model.resumeUpdated == null"
+          :loading="deleteLoading"
+          @click="toggleDeleteModal = !toggleDeleteModal"
+          prepend-icon="mdi-delete"
+        >
+          <b>Delete Resume</b>
+        </v-btn>
+        <v-btn
+          v-if="isAdmin || isUser"
+          class="text-white"
+          color="#bc3825"
+          :size="isMobile() ? 'x-small' : 'default'"
+          :disabled="model.resumeUpdated == null"
+          @click="downloadResume()"
+          prepend-icon="mdi-file-download"
+        >
+          <v-tooltip activator="parent" location="top">
+            <p class="ma-0 pa-0">
+              {{ model.resumeUpdated != null ? 'Download Resume' : 'No resume available' }}
+            </p>
+            <p class="ma-0 pa-0">
+              {{ model.resumeUpdated != null ? `Uploaded ${format(model.resumeUpdated, null, dateFormat)}` : '' }}
+            </p>
+          </v-tooltip>
+          <b>Download Resume</b>
+        </v-btn>
+      </v-col>
+    </v-row>
     <resume-parser
       v-if="!loading && !editing"
       :toggle-resume-parser="toggleResumeParser"
@@ -81,7 +85,7 @@ import ResumeParser from '@/components/modals/ResumeParser.vue';
 // |--------------------------------------------------|
 const dateFormat = FORMATTED_ISOFORMAT;
 
-const props = defineProps(['editing', 'loading']);
+defineProps(['editing', 'loading']);
 const model = defineModel();
 const emitter = inject('emitter');
 
@@ -92,9 +96,10 @@ const deleteLoading = ref(false);
 const toggleResumeParser = ref(false);
 const toggleDeleteModal = ref(false);
 const uploadStatus = ref({
-  statusType: undefined,
-  statusMessage: null,
-  color: null
+  enabled: false,
+  statusType: '',
+  statusMessage: '',
+  color: ''
 });
 
 // |--------------------------------------------------|
@@ -107,12 +112,11 @@ onMounted(() => {
   emitter.on('confirm-delete-resume', async () => {
     await deleteResume();
   });
-  emitter.on('canceled-delete-resume', () => {});
   emitter.on('resume', async (result) => {
     await resumeReceived(result.newEmployeeForm, result.totalChanges);
   });
-  emitter.on('uploaded', async (displayMessage) => {
-    if (displayMessage) displayMessage('SUCCESS', 'Successfully uploaded resume', 'green');
+  emitter.on('uploaded', async (message) => {
+    if (message) displayMessage('SUCCESS', 'Successfully uploaded resume', 'green');
     model.value.resumeUpdated = getTodaysDate();
     model.value = _.cloneDeep(model.value); // force vue to reload the object
     await api.updateItem(api.EMPLOYEES, model.value);
@@ -120,10 +124,9 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
-  emitter.off('delete-resume');
   emitter.off('confirm-delete-resume');
-  emitter.off('canceled-delete-resume');
   emitter.off('resume');
+  emitter.off('uploaded');
 });
 
 // |--------------------------------------------------|
@@ -136,6 +139,7 @@ onBeforeUnmount(() => {
  * Clears the status message of the uploadStatus
  */
 function clearStatus() {
+  uploadStatus.value['enabled'] = false;
   uploadStatus.value['statusType'] = undefined;
   uploadStatus.value['statusMessage'] = null;
   uploadStatus.value['color'] = null;
@@ -160,11 +164,12 @@ async function deleteResume() {
 /**
  * Displays the message
  *
- * @param type - the type of message
- * @param msg - the message to display
- * @param color - the color of the banner
+ * @param {string} type - the type of message
+ * @param {string} msg - the message to display
+ * @param {string} color - the color of the banner
  */
 function displayMessage(type, msg, color) {
+  uploadStatus.value['enabled'] = true;
   uploadStatus.value['statusType'] = type;
   uploadStatus.value['statusMessage'] = msg;
   uploadStatus.value['color'] = color;
