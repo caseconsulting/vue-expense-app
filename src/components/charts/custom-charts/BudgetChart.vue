@@ -39,7 +39,7 @@ import _ from 'lodash';
 import BarChart from '@/components/charts/base-charts/BarChart.vue';
 import { isFullTime, getCurrentBudgetYear } from '@/utils/utils';
 import { getYear, isBetween } from '@/shared/dateUtils';
-import { onMounted, ref, defineProps, watch, computed } from 'vue';
+import { onMounted, ref, watch, computed } from 'vue';
 import { useRouter } from 'vue-router';
 
 // |--------------------------------------------------|
