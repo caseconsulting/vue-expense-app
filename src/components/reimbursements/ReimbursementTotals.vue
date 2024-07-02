@@ -25,19 +25,31 @@
           <span class="checkbox-label">{{ label }}</span>
         </template>
       </v-checkbox>
-      <!-- Reimburse Button -->
-      <v-btn
-        @click="emitter.emit('reimburse-expenses', isGeneratingGiftCard)"
-        id="custom-button-color"
-        theme="dark"
-        class="reimburse_button mt-5"
-        variant="text"
-        block
-      >
-        <template v-slot:prepend><v-icon>mdi-currency-usd</v-icon></template>
-        Reimburse
-      </v-btn>
+      <v-row class="mt-5">
+        <v-col cols="12" lg="8" class="px-2">
+          <!-- Reimburse Button -->
+          <v-btn
+            @click="emitter.emit('reimburse-expenses', isGeneratingGiftCard)"
+            class="reimburse_button"
+            variant="text"
+            block
+          >
+            <template v-slot:prepend><v-icon>mdi-currency-usd</v-icon></template>
+            Reimburse
+          </v-btn>
+        </v-col>
+        <v-col cols="12" lg="4" class="px-2">
+          <!-- Revise Button -->
+          <v-btn @click="toggleExpenseRejectionModal = true" class="reimburse_button" variant="text" block>
+            <template v-slot:prepend><v-icon>mdi-receipt-text-remove</v-icon></template>
+            Reject
+          </v-btn>
+        </v-col>
+      </v-row>
     </v-card-text>
+    <v-dialog v-model="toggleExpenseRejectionModal" persistent width="35%">
+      <expense-rejection-modal :expenses="selected"></expense-rejection-modal>
+    </v-dialog>
   </v-card>
   <!--End of Totals Card-->
 </template>
@@ -45,6 +57,7 @@
 <script>
 import _ from 'lodash';
 import { convertToMoneyString } from '@/utils/utils';
+import ExpenseRejectionModal from '@/components/modals/ExpenseRejectionModal.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -126,6 +139,7 @@ function updateSelected(item) {
 function created() {
   this.emitter.on('selectExpense', this.updateSelected);
   this.emitter.on('expenseChange', this.updateSelected);
+  this.emitter.on('close-expenses-rejection', () => (this.toggleExpenseRejectionModal = false));
 } // created
 
 /**
@@ -134,6 +148,7 @@ function created() {
 function beforeUnmount() {
   this.emitter.off('selectExpense');
   this.emitter.off('expenseChange');
+  this.emitter.off('close-expenses-rejection');
 } //beforeUnmount
 
 // |--------------------------------------------------|
@@ -143,6 +158,9 @@ function beforeUnmount() {
 // |--------------------------------------------------|
 
 export default {
+  components: {
+    ExpenseRejectionModal
+  },
   created,
   beforeUnmount,
   computed: {
@@ -152,6 +170,7 @@ export default {
     return {
       isGeneratingGiftCard: true,
       selected: [],
+      toggleExpenseRejectionModal: false,
       reimbursing: false
     };
   },

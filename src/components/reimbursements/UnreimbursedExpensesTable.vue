@@ -461,9 +461,48 @@ function refreshExpenses() {
       }
     });
   });
+  this.pendingExpenses = this.getNonRejectedExpenses(this.pendingExpenses);
   this.empBudgets = this.groupEmployeeExpenses(this.pendingExpenses);
   this.unCheckAllBoxes();
 } // refreshExpenses
+
+/**
+ * Rejects selected expenses with a reasoning provided. Soft rejected expenses will not be shown on the
+ * Reimbursments page until the user has resubmitted an expense. Hard rejected expenses will never show
+ * on the Reimbursements page again.
+ *
+ * @param {String} field - The reject property in the expense
+ * @param {String} reason - The reasoning for expense rejection
+ */
+async function rejectExpenses(field, reason) {
+  this.loading = true;
+  let selectedExpenses = _.filter(this.pendingExpenses, (e) => e.selected);
+  await this.asyncForEach(selectedExpenses, async (expense) => {
+    // to remove the expense type data in the ExpenseTypeTotal modal
+    this.emitter.emit('expenseChange', expense);
+    this.emitter.emit('expenseClicked', undefined);
+    // set reasoning in rejection object
+    let reasons = _.get(expense, field + '.reasons');
+    reasons = [...(reasons || []), reason];
+    _.set(expense, field + '.reasons', reasons);
+    _.set(expense, field + '.revised', false);
+    let baseExpense = this.removeAggregateExpenseData(expense);
+    let rejectedExpense = await api.updateItem(api.EXPENSES, baseExpense);
+    if (!rejectedExpense.id) {
+      // failed to reject expense
+      let msg = rejectedExpense?.response?.data?.message || 'Failed to reject expense';
+      this.alerts.push({ status: 'error', message: msg, color: 'red' });
+    } else {
+      // successfully rejected expense
+      let msg = 'Successfully rejected expense';
+      this.alerts.push({ status: 'success', message: msg, color: 'green' });
+    }
+    setTimeout(() => this.alerts.shift(), 10000);
+    this.emitter.emit('reimburseAlert', this.alerts);
+  });
+  this.refreshExpenses();
+  this.loading = false;
+} // rejectExpenses
 
 /**
  * Reimburse the selected list of expenses.
@@ -503,10 +542,7 @@ async function reimburseExpenses() {
       // failed to reimburse expense
       msg = reimbursedExpense.response.data.message;
       this.alerts.push({ status: 'error', message: msg, color: 'red' });
-      let self = this;
-      setTimeout(function () {
-        self.alerts.shift();
-      }, 20000);
+      setTimeout(() => this.alerts.shift(), 20000);
 
       // revert reimburse date change
       let groupIndex = _.findIndex(this.empBudgets, {
@@ -528,16 +564,12 @@ async function reimburseExpenses() {
         }`;
       }
       this.alerts.push({ status: 'success', message: msg, color: 'green' });
-      let self = this;
-      setTimeout(function () {
-        self.alerts.shift();
-      }, 15000);
+      setTimeout(() => this.alerts.shift(), 15000);
     }
     this.emitter.emit('reimburseAlert', this.alerts);
   });
 
   this.refreshExpenses();
-  this.emitter.emit('finished-reimbursing');
   this.loading = false; // set reimbursing status to false
 } // reimburseExpenses
 
@@ -607,10 +639,27 @@ function determineShowOnFeed(expense) {
 } // determineShowOnFeed
 
 /**
+ * Gets unreimbursed expenses that have not been rejected, or expenses that have been rejected and revised.
+ *
+ * @param unreimbursedExpenses Array - The array of unreimbursed expenses
+ * @returns Array - The array of unreimbursed, non-rejected expenses
+ */
+function getNonRejectedExpenses(unreimbursedExpenses) {
+  return _.filter(unreimbursedExpenses, (expense) => {
+    let rejections = expense.rejections;
+    return !(
+      rejections?.hardRejections?.reasons?.length > 0 ||
+      (rejections?.softRejections?.reasons?.length > 0 && !rejections?.softRejections?.revised)
+    );
+  });
+} // getNonRejectedExpenses
+
+/**
  * Loads and organizes all data relevant to the data table.
  */
 function loadExpensesData(unreimbursedExpenses) {
-  this.pendingExpenses = this.createExpenses(unreimbursedExpenses);
+  this.pendingExpenses = this.getNonRejectedExpenses(unreimbursedExpenses);
+  this.pendingExpenses = this.createExpenses(this.pendingExpenses);
   this.constructAutoComplete(this.pendingExpenses);
   this.empBudgets = this.groupEmployeeExpenses(this.pendingExpenses);
   this.unCheckAllBoxes();
@@ -749,6 +798,7 @@ async function created() {
   this.emitter.on('toggleExpense', this.toggleShowOnFeed);
   this.emitter.on('confirm-reimburse', async () => await this.reimburseExpenses());
   this.emitter.on('cancel-reimburse', () => (this.buttonClicked = false));
+  this.emitter.on('confirm-expenses-rejection', async ({ field, reason }) => await this.rejectExpenses(field, reason));
   this.emitter.on('reimburse-expenses', (isGeneratingGiftCard) => {
     this.buttonClicked = true;
     this.isGeneratingGiftCard = isGeneratingGiftCard;
@@ -772,6 +822,7 @@ function beforeUnmount() {
   this.emitter.off('toggleExpense');
   this.emitter.off('confirm-reimburse');
   this.emitter.off('cancel-reimburse');
+  this.emitter.off('confirm-expenses-rejection');
   this.emitter.off('reimburse-expenses');
 } //beforeUnmount
 
@@ -878,12 +929,14 @@ export default {
     emitSelectionChange,
     employeeFilter,
     getBudgetTotal,
+    getNonRejectedExpenses,
     groupEmployeeExpenses,
     isEmpty,
     loadExpensesData,
     matchingEmployeeAndExpenseType,
     refreshExpenses,
     reimburseExpenses,
+    rejectExpenses,
     resetShowOnFeedToggles,
     selectExpense,
     removeAggregateExpenseData,
