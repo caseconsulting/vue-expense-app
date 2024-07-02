@@ -15,9 +15,8 @@
       <v-btn color="white" variant="text" @click="clearStatus()"> Close </v-btn>
     </v-snackbar>
     <v-row>
-      <v-col v-if="isAdmin || isUser" align="right" class="px-0 pr-3 ma-0">
+      <v-col v-if="(isAdmin || isUser) && !editing" align="right" class="px-0 pr-3 ma-0">
         <v-btn
-          v-if="!editing"
           :size="isMobile() ? 'x-small' : 'default'"
           color="#bc3825"
           class="text-white"
@@ -27,7 +26,6 @@
           <b>Upload Resume</b>
         </v-btn>
         <v-btn
-          v-if="!editing"
           class="text-white mx-1"
           color="#bc3825"
           :size="isMobile() ? 'x-small' : 'default'"
@@ -39,7 +37,6 @@
           <b>Delete Resume</b>
         </v-btn>
         <v-btn
-          v-if="isAdmin || isUser"
           class="text-white"
           color="#bc3825"
           :size="isMobile() ? 'x-small' : 'default'"

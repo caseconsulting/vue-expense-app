@@ -70,7 +70,7 @@
         </v-col>
       </v-row>
     </v-card>
-    <employee-form :employee="model" :contracts="contracts"></employee-form>
+    <employee-form v-model="editing" :employee="model" :contracts="contracts"></employee-form>
   </v-container>
 </template>
 
@@ -196,7 +196,6 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   emitter.off('update');
-  emitter.off('editing');
 });
 
 // |--------------------------------------------------|
