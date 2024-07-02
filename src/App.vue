@@ -5,29 +5,29 @@
       <v-navigation-drawer
         v-if="isLoggedIn()"
         v-model="drawer"
-        :rail="!isMobile"
+        :rail="!isMobile()"
         @update:rail="mainNavReloadKey++"
         order="1"
-        :expand-on-hover="!isMobile"
-        :permanent="isLoggedIn() && !isMobile"
+        :expand-on-hover="!isMobile()"
+        :permanent="isLoggedIn() && !isMobile()"
       >
         <main-nav :key="mainNavReloadKey"></main-nav>
       </v-navigation-drawer>
       <v-app-bar class="nav-color" theme="dark">
-        <v-app-bar-nav-icon v-show="isLoggedIn() && isMobile" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
-        <div class="d-flex align-center pointer ml-4" @click="goToHome">
+        <v-app-bar-nav-icon v-show="isLoggedIn() && isMobile()" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
+        <div class="d-flex align-center pointer ml-4" @click="goToHome()">
           <v-avatar size="40" color="grey-lighten-4" class="mr-2">
             <img src="@/assets/img/logo-big.png" class="logo-bar" />
           </v-avatar>
-          <div v-if="!isMobile" class="app-title">
+          <div v-if="!isMobile()" class="app-title">
             <h1>CASE Portal</h1>
           </div>
           <!-- In Mobile View decrease title size-->
-          <h1 v-show="isMobile" class="font-25">CASE Portal</h1>
+          <h1 v-show="isMobile()" class="font-25">CASE Portal</h1>
         </div>
         <v-spacer></v-spacer>
         <!-- Display social media icons and links dropdown menu -->
-        <v-item-group class="hidden-sm-and-down" v-show="isLoggedIn() && !isMobile">
+        <v-item-group class="hidden-sm-and-down" v-show="isLoggedIn() && !isMobile()">
           <v-menu open-on-hover open-delay="0" theme="light">
             <template v-slot:activator="{ props }">
               <v-btn id="links-btn" size="small" class="my-2" v-bind="props">Links &#9662; </v-btn>
@@ -76,11 +76,11 @@
         </v-item-group>
 
         <!-- User image and logout -->
-        <v-menu location="bottom" theme="light" open-on-click v-if="isLoggedIn() && $store.getters.user">
+        <v-menu location="bottom" theme="light" open-on-click v-if="isLoggedIn() && store.getters.user">
           <template v-slot:activator="{ props }">
-            <user-avatar class="pointer mx-3" v-bind="props" :employee="$store.getters.user" :image="profilePic" />
+            <user-avatar class="pointer mx-3" v-bind="props" :employee="store.getters.user" :image="profilePic" />
           </template>
-          <v-list v-if="!(isMobile || isSmallScreen)">
+          <v-list v-if="!(isMobile() || isSmallScreen())">
             <v-list-item>
               <v-btn :disabled="onUserProfile" variant="text" @click="handleProfile()">Profile</v-btn>
             </v-list-item>
@@ -119,7 +119,7 @@
       </v-app-bar>
       <v-main :style="{ padding: getMainPadding() }" class="app-bg-color">
         <v-container fluid grid-list-lg class="px-2 px-md-4">
-          <notification-banners v-if="isLoggedIn() && storeIsPopulated" />
+          <notification-banners v-if="isLoggedIn() && storeIsPopulated()" />
           <router-view></router-view>
         </v-container>
       </v-main>
@@ -145,7 +145,7 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import {
   isLoggedIn,
   logout,
@@ -167,6 +167,129 @@ import MainNav from '@/components/utils/MainNav.vue';
 import NotificationBanners from '@/components/utils/NotificationBanners.vue';
 import SwitchRoleModal from '@/components/modals/SwitchRoleModal.vue';
 import TimeOutWarningModal from '@/components/modals/TimeOutWarningModal.vue';
+import { onBeforeMount, onBeforeUnmount, ref, computed, inject, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useStore } from 'vuex';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const emitter = inject('emitter');
+// const props = defineProps({ source: String });
+const route = useRoute();
+const router = useRouter();
+const store = useStore();
+
+const loadingCreated = ref(false);
+const environment = ref('');
+const switchRole = ref(false);
+const drawer = ref(isLoggedIn());
+const inset = ref(false);
+const profilePic = ref('src/assets/img/logo-big.png');
+const session = ref(false);
+const sessionTimeout = ref(null);
+const sessionTimeoutWarning = ref(null);
+const userId = ref(null);
+const badgeKey = ref(0);
+const links = ref([
+  { name: 'CASE Website', link: 'https://www.consultwithcase.com/' },
+  { name: 'Submit New Referral', link: 'https://www.consultwithcase.com/apply-form' },
+  { name: 'CASE Information', link: 'https://3.basecamp.com/3097063/buckets/4708396/messages/650777910' },
+  { name: 'Basecamp', link: 'https://3.basecamp.com/3097063' },
+  { name: 'QuickBooks Time', link: 'https://tsheets.intuit.com/page/login_oii' },
+  { name: 'ADP', link: 'https://workforcenow.adp.com/' },
+  { name: 'BambooHR', link: 'https://consultwithcase.bamboohr.com/home/' },
+  { name: 'Jira', link: 'https://consultwithcase.atlassian.net/jira/your-work' },
+  {
+    name: 'Portal & Basecamp How-Tos',
+    link: 'https://3.basecamp.com/3097063/buckets/34631168/message_boards/6620373851'
+  },
+  { name: 'Workspace at Reston Town Center Map', link: floorPlan }
+]);
+const benefitsLinks = [
+  { name: 'Net Benefits/Fidelity', link: 'https://nb.fidelity.com/public/nb/default/home' },
+  { name: 'Benefits Booklet', link: 'https://3.basecamp.com/3097063/buckets/4708396/uploads/6746972426' },
+  { name: 'Medical (Health) Insurance', link: 'https://www.anthem.com/' },
+  { name: 'Disability & Life Insurance', link: 'https://www.mutualofomaha.com/' },
+  { name: 'Dental & Vision Insurance', link: 'https://www.sunlife.com/' },
+  { name: 'Dependent Care', link: 'https://www.wageworks.com/' }
+];
+const mediaLinks = [
+  { name: 'Github', link: 'https://github.com/caseconsulting', img: github },
+  { name: 'LinkedIn', link: 'https://linkedin.com/company/case-consulting-inc', img: linkedin },
+  { name: 'Youtube', link: 'https://www.youtube.com/channel/UC_oJY4OrOpLNrIBAN7Y-9fA', img: youtube, size: 23 },
+  { name: 'X', link: 'https://x.com/consultwithcase?lang=en', img: x, size: 17 },
+  { name: 'Facebook', link: 'https://www.facebook.com/ConsultwithCase/', img: facebook }
+];
+const mainNavReloadKey = ref(0);
+const version = ref(null);
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * created lifecycle hook - set up listeners and getting access token and handle things for login
+ */
+onBeforeMount(async () => {
+  loadingCreated.value = true;
+
+  environment.value = import.meta.env.VITE_AUTH0_CALLBACK;
+
+  emitter.on('timeout-acknowledged', () => {
+    handleLogout();
+  }); // Session end - log out
+
+  emitter.on('close', () => (switchRole.value = false));
+  emitter.on('badgeExp', () => {
+    badgeKey.value++;
+  }); // used to refresh badge expiration banner
+  emitter.on('user-session-refreshed', () => {
+    clearTimeout(sessionTimeout.value);
+    clearTimeout(sessionTimeoutWarning.value);
+    session.value = false;
+    setSessionTimeouts();
+  });
+  // set expiration date if access token received
+  let accessToken = getAccessToken();
+  if (accessToken && isLoggedIn()) {
+    setSessionTimeouts();
+
+    await populateStore();
+
+    //stores the employee number
+    userId.value = store.getters.employeeNumber;
+
+    store.getters.loginTime ? updateEmployeeLogin(store.getters.user) : '';
+    // run API calls in background
+    Promise.all([updateStoreEmployees()]);
+  }
+
+  let pic = getProfile();
+
+  if (pic) {
+    profilePic.value = pic;
+  }
+
+  version.value = p.version;
+
+  loadingCreated.value = false;
+}); // created
+
+/**
+ * beforeUnmount lifecycle hook - close event listener
+ */
+onBeforeUnmount(() => {
+  emitter.off('close');
+  emitter.off('relog');
+  emitter.off('badgeExp');
+  emitter.off('user-session-refreshed');
+}); //beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -179,12 +302,12 @@ import TimeOutWarningModal from '@/components/modals/TimeOutWarningModal.vue';
  *
  * @return boolean - if the user is visiting their profile
  */
-function onUserProfile() {
-  if (this.userId == null) {
+const onUserProfile = computed(() => {
+  if (userId.value == null) {
     return false;
   }
-  return this.$route.params.id === this.userId.toString();
-} // onUserProfile
+  return route.params.id === userId.value.toString();
+}); // onUserProfile
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -198,13 +321,13 @@ function onUserProfile() {
  * @param index - its a rick roll interns 2021
  */
 function badumbadumdodooodoo(index) {
-  let oldLink = this.links[index].link;
+  let oldLink = links.value[index].link;
   let roll = Math.ceil(
     Math.random() *
       Math.ceil((Math.sin(Math.PI * 2) * (50 * 4)) / (1 << 1) - 100 + ((2 << 5) + 1) * 3 + 4 + Math.log(Math.E))
   );
   if (roll === 69 || roll == 42.0) {
-    this.links[index].link = `https://ww
+    links.value[index].link = `https://ww
     w.yo
     utu
     be
@@ -214,7 +337,7 @@ function badumbadumdodooodoo(index) {
     w4w9Wg
     XcQ`.replace(/\s/g, '');
     setTimeout(() => {
-      this.links[index].link = oldLink;
+      links.value[index].link = oldLink;
     }, 2000);
   }
 } // badumbadumdodooodoo
@@ -227,7 +350,7 @@ function badumbadumdodooodoo(index) {
 function getMainPadding() {
   if (!isLoggedIn()) {
     return '64px 0px 0px 0px';
-  } else if (!this.isMobile && isLoggedIn()) {
+  } else if (!isMobile() && isLoggedIn()) {
     return '64px 0px 0px 56px';
   } else {
     return '56px 0px 0px 0px';
@@ -245,8 +368,8 @@ function handleLogout() {
  * redirects to user's employee page
  */
 function handleProfile() {
-  // We don't use this.userId becuase it may be null by the time we click the button
-  this.$router.push({ name: 'employee', params: { id: `${this.userId}`, replace: true } });
+  // We don't use userId.value becuase it may be null by the time we click the button
+  router.push({ name: 'employee', params: { id: `${userId.value}`, replace: true } });
 } // handleProfile
 
 /**
@@ -259,27 +382,27 @@ async function populateStore() {
   if (lastLogin) {
     employee = JSON.parse(localStorage.getItem('user')); // gets data from Callback.vue after login
     employee.lastLogin = lastLogin;
-    this.$store.dispatch('setUser', { user: employee }); // dispatch data to the vuex store
-    this.$store.dispatch('setLoginTime', { loginTime: lastLogin });
+    store.dispatch('setUser', { user: employee }); // dispatch data to the vuex store
+    store.dispatch('setLoginTime', { loginTime: lastLogin });
     //await updateEmployee(employee);
   } else {
-    await this.updateStoreUser();
-    employee = this.$store.getters.user;
+    await updateStoreUser();
+    employee = store.getters.user;
   }
   localStorage.removeItem('user');
   localStorage.removeItem('lastLogin'); // remove from local storage to prevent login audit on refresh
 
   // This is used to help pages know when data is loaded into the store.
   // Otherwise, on reload, pages would try to access the store before it was populated.
-  this.$store.dispatch('setStoreIsPopulated', { populated: true });
+  store.dispatch('setStoreIsPopulated', { populated: true });
 } // populateStore
 
 /**
  * Scrolls up to the home page
  */
 function goToHome() {
-  if (this.isLoggedIn()) {
-    this.$router.push({ path: '/home' });
+  if (isLoggedIn()) {
+    router.push({ path: '/home' });
     window.scrollTo(0, 0);
   }
 } // goToHome
@@ -297,7 +420,7 @@ function refreshSession() {
     let unixHour = 60 * 60 * 1000; // 60 min in unix time difference
     if (sessionRemainder - unixHour <= 0) {
       // session ending in < 60 min while user is still active, refresh access token
-      this.refreshUserSession();
+      refreshUserSession();
     }
   }
 } // refreshSession
@@ -311,88 +434,24 @@ function setSessionTimeouts() {
   let now = Math.trunc(new Date().getTime());
   let sessionRemainder = expTime - now;
   // set session timeout
-  this.sessionTimeout = window.setTimeout(() => {
+  sessionTimeout.value = window.setTimeout(() => {
     sessionStorage.setItem('timedOut', true);
-    this.session = false;
-    if (this.$route.path !== '/') {
-      this.$router.go({
+    session.value = false;
+    if (route.path !== '/') {
+      router.go({
         path: '/',
-        query: { redirect: this.$route.path }
+        query: { redirect: route.path }
       });
     }
   }, sessionRemainder);
 
   // set session warning timeout, time minus 300000 = - 5 min
   if (sessionRemainder > 300000) {
-    this.sessionTimeoutWarning = window.setTimeout(() => {
-      this.session = true;
+    sessionTimeoutWarning.value = window.setTimeout(() => {
+      session.value = true;
     }, sessionRemainder - 300000);
   }
 } // setSessionTimeouts
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                 LIFECYCLE HOOKS                  |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * created lifecycle hook - set up listeners and getting access token and handle things for login
- */
-async function created() {
-  this.loadingCreated = true;
-
-  this.environment = import.meta.env.VITE_AUTH0_CALLBACK;
-
-  this.emitter.on('timeout-acknowledged', () => {
-    this.handleLogout();
-  }); // Session end - log out
-
-  this.emitter.on('close', () => (this.switchRole = false));
-  this.emitter.on('badgeExp', () => {
-    this.badgeKey++;
-  }); // used to refresh badge expiration banner
-  this.emitter.on('user-session-refreshed', () => {
-    clearTimeout(this.sessionTimeout);
-    clearTimeout(this.sessionTimeoutWarning);
-    this.session = false;
-    this.setSessionTimeouts();
-  });
-  // set expiration date if access token received
-  let accessToken = getAccessToken();
-  if (accessToken && isLoggedIn()) {
-    this.setSessionTimeouts();
-
-    await this.populateStore();
-
-    //stores the employee number
-    this.userId = this.$store.getters.employeeNumber;
-
-    this.$store.getters.loginTime ? this.updateEmployeeLogin(this.$store.getters.user) : '';
-    // run API calls in background
-    Promise.all([this.updateStoreEmployees()]);
-  }
-
-  let pic = getProfile();
-
-  if (pic) {
-    this.profilePic = pic;
-  }
-
-  this.version = p.version;
-
-  this.loadingCreated = false;
-} // created
-
-/**
- * beforeUnmount lifecycle hook - close event listener
- */
-function beforeUnmount() {
-  this.emitter.off('close');
-  this.emitter.off('relog');
-  this.emitter.off('badgeExp');
-  this.emitter.off('user-session-refreshed');
-} //beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -406,108 +465,18 @@ function beforeUnmount() {
  * @param to - the place to route to
  * @param from - the place you were routed from
  */
-function $route(to, from) {
-  if (to.params.id && from.params.id) {
-    this.$router.go(this.$router.currentPath);
+watch(
+  () => route,
+  (to, from) => {
+    if (to.params.id && from.params.id) {
+      router.go(router.currentPath);
+    }
+    //updates badge expiration warning whenever you leave your user profile
+    if (from.params.id) {
+      badgeKey.value++;
+    }
   }
-  //updates badge expiration warning whenever you leave your user profile
-  if (from.params.id) {
-    this.badgeKey++;
-  }
-} // $route
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  data: () => ({
-    loadingCreated: false,
-    environment: '',
-    switchRole: false,
-    floorPlan: floorPlan,
-    drawer: isLoggedIn(),
-    inset: false,
-    initials: '',
-    profilePic: 'src/assets/img/logo-big.png',
-    session: false,
-    sessionTimeout: null,
-    sessionTimeoutWarning: null,
-    now: Math.trunc(new Date().getTime() / 1000),
-    userId: null,
-    badgeKey: 0,
-    date: null,
-    links: [
-      { name: 'CASE Website', link: 'https://www.consultwithcase.com/' },
-      { name: 'Submit New Referral', link: 'https://www.consultwithcase.com/apply-form' },
-      { name: 'CASE Information', link: 'https://3.basecamp.com/3097063/buckets/4708396/messages/650777910' },
-      { name: 'Basecamp', link: 'https://3.basecamp.com/3097063' },
-      { name: 'QuickBooks Time', link: 'https://tsheets.intuit.com/page/login_oii' },
-      { name: 'ADP', link: 'https://workforcenow.adp.com/' },
-      { name: 'BambooHR', link: 'https://consultwithcase.bamboohr.com/home/' },
-      { name: 'Jira', link: 'https://consultwithcase.atlassian.net/jira/your-work' },
-      {
-        name: 'Portal & Basecamp How-Tos',
-        link: 'https://3.basecamp.com/3097063/buckets/34631168/message_boards/6620373851'
-      },
-      { name: 'Workspace at Reston Town Center Map', link: floorPlan }
-    ],
-    benefitsLinks: [
-      { name: 'Net Benefits/Fidelity', link: 'https://nb.fidelity.com/public/nb/default/home' },
-      { name: 'Benefits Booklet', link: 'https://3.basecamp.com/3097063/buckets/4708396/uploads/6746972426' },
-      { name: 'Medical (Health) Insurance', link: 'https://www.anthem.com/' },
-      { name: 'Disability & Life Insurance', link: 'https://www.mutualofomaha.com/' },
-      { name: 'Dental & Vision Insurance', link: 'https://www.sunlife.com/' },
-      { name: 'Dependent Care', link: 'https://www.wageworks.com/' }
-    ],
-    mediaLinks: [
-      { name: 'Github', link: 'https://github.com/caseconsulting', img: github },
-      { name: 'LinkedIn', link: 'https://linkedin.com/company/case-consulting-inc', img: linkedin },
-      { name: 'Youtube', link: 'https://www.youtube.com/channel/UC_oJY4OrOpLNrIBAN7Y-9fA', img: youtube, size: 23 },
-      { name: 'X', link: 'https://x.com/consultwithcase?lang=en', img: x, size: 17 },
-      { name: 'Facebook', link: 'https://www.facebook.com/ConsultwithCase/', img: facebook }
-    ],
-    mainNavReloadKey: 0,
-    version: null
-  }),
-  props: {
-    source: String
-  },
-  computed: {
-    isMobile,
-    isSmallScreen,
-    onUserProfile,
-    storeIsPopulated
-  },
-  components: {
-    MainNav,
-    NotificationBanners,
-    SwitchRoleModal,
-    TimeOutWarningModal
-  },
-  methods: {
-    badumbadumdodooodoo,
-    getMainPadding,
-    handleLogout,
-    handleProfile,
-    isLoggedIn,
-    populateStore,
-    goToHome,
-    refreshUserSession,
-    refreshSession,
-    setSessionTimeouts,
-    updateStoreUser,
-    updateStoreEmployees,
-    updateEmployeeLogin
-  },
-  watch: {
-    $route
-  },
-  beforeUnmount,
-  created
-};
+); // $route
 </script>
 
 <style lang="scss">
