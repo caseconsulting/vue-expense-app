@@ -10,9 +10,10 @@
             </span>
           </v-col>
           <v-col>
-            <h4 class="title-text">
-              {{ technology.name }}
-            </h4>
+            <!-- there's margin on paragraphs that needs to be removed here -->
+            <p class="title-text ma-0">
+              <b>{{ technology.name }}</b>
+            </p>
           </v-col>
         </v-col>
       </v-row>
