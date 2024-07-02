@@ -26,8 +26,8 @@
 </template>
 
 <script setup>
-import { add, getTodaysDate, isAfter, setYear, difference } from '../../shared/dateUtils';
-import { monthDayYearFormat } from '../../utils/utils';
+import { add, getTodaysDate, isAfter, setYear, difference } from '@/shared/dateUtils';
+import { monthDayYearFormat } from '@/utils/utils';
 import { computed } from 'vue';
 
 // |--------------------------------------------------|

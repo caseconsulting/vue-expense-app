@@ -1,19 +1,9 @@
 <template>
   <base-info-modal title="Foreign Languages">
     <v-card-text>
-      <div v-if="!isEmpty(filteredList)">
-        <!-- Loop Languages -->
-        <div v-for="(language, index) in visibleItems" :key="language.name + index">
-          <v-row>
-            <v-col>
-              <p><b>Language: </b>{{ language.name }}</p>
-            </v-col>
-          </v-row>
-          <p class="pl-10"><b>Level of Fluency: </b>{{ language.proficiency }}</p>
-          <hr v-if="index < filteredList.length - 1" class="mb-3" />
-        </div>
-        <!-- End Loop Languages -->
-      </div>
+      <!-- Loop Languages -->
+      <languages-list v-if="!isEmpty(filteredList)" :list="visibleItems"></languages-list>
+      <!-- End Loop Languages -->
       <!-- Employee does not have Language Experience -->
       <p v-else>No Foreign Language Information</p>
       <!-- Pagination -->
@@ -28,6 +18,7 @@
 import { computed, ref, watch } from 'vue';
 import { isEmpty, sortLanguagesByProficiency } from '@/utils/utils';
 import BaseInfoModal from './BaseInfoModal.vue';
+import LanguagesList from '../lists/LanguagesList.vue';
 
 // |--------------------------------------------------|
 // |                                                  |

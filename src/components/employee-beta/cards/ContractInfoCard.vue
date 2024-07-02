@@ -32,7 +32,7 @@
 import { ref, onBeforeMount } from 'vue';
 import { difference, getTodaysDate } from '@/shared/dateUtils';
 import _ from 'lodash';
-import { isEmpty } from '../../utils/utils';
+import { isEmpty } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
