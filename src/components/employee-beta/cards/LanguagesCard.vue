@@ -3,19 +3,7 @@
     <base-card title="Foreign Languages">
       <v-card-text class="px-7 pt-5 pb-1 text-black">
         <!-- Employee has entered languages-->
-        <div v-if="!isEmpty(languages)">
-          <!-- Loop Languages -->
-          <div v-for="(language, index) in filteredList" :key="language.name + index">
-            <v-row>
-              <v-col>
-                <p><b>Language: </b>{{ language.name }}</p>
-              </v-col>
-            </v-row>
-            <p class="pl-10"><b>Level of Fluency: </b>{{ language.proficiency }}</p>
-            <hr v-if="index < filteredList.length - 1" class="mb-3" />
-          </div>
-          <!-- End Loop Languages -->
-        </div>
+        <languages-list v-if="!isEmpty(languages)" :list="filteredList"></languages-list>
         <!-- Employee does not have Language Experience -->
         <p v-else>No Foreign Language Information</p>
         <div v-if="!isEmpty(languages) && Math.ceil(languages.length / 5) != 1" class="text-center">
@@ -32,8 +20,9 @@
 <script setup>
 import { isEmpty, sortLanguagesByProficiency } from '@/utils/utils';
 import { computed, ref } from 'vue';
-import LanguagesModal from './modals/LanguagesModal.vue';
-import BaseCard from '@/components/employee-beta/BaseCard.vue';
+import BaseCard from './BaseCard.vue';
+import LanguagesList from '../lists/LanguagesList.vue';
+import LanguagesModal from '../modals/LanguagesModal.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -43,7 +32,6 @@ import BaseCard from '@/components/employee-beta/BaseCard.vue';
 
 const props = defineProps(['model']);
 const languages = ref(props.model.languages ? props.model.languages : []);
-console.log(languages.value);
 const toggleModal = ref(false);
 
 // |--------------------------------------------------|
