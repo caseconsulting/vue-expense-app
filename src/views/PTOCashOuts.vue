@@ -23,7 +23,7 @@
         <v-card-text headline color="white">
           <span class="text-h6 font-weight-medium">{{ status.statusMessage }}</span>
         </v-card-text>
-        <v-btn color="white" variant="text" @click="clearStatus"> Close </v-btn>
+        <v-btn color="white" variant="text" @click="clearStatus()"> Close </v-btn>
       </v-snackbar>
       <v-col cols="12" xl="8" lg="7">
         <p-t-o-cash-outs-table />
@@ -35,9 +35,29 @@
     </v-row>
   </div>
 </template>
-<script>
+<script setup>
 import PTOCashOutsTable from '@/components/shared/PTOCashOutsTable.vue';
 import TimeData from '@/components/shared/timesheets/TimeData';
+import { onBeforeMount, onBeforeUnmount, onMounted, inject, watch, ref } from 'vue';
+import { useStore } from 'vuex';
+import { storeIsPopulated } from '../utils/utils';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const emitter = inject('emitter');
+const store = useStore();
+
+const loading = ref(true);
+const status = ref({
+  statusType: undefined,
+  statusMessage: '',
+  color: ''
+});
+const employee = ref(null);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -47,48 +67,33 @@ import TimeData from '@/components/shared/timesheets/TimeData';
 /**
  * Created lifecycle hook
  */
-function created() {
-  if (this.$store.getters.storeIsPopulated) {
-    this.employee = this.$store.getters.user;
-    this.loading = false;
+onBeforeMount(() => {
+  if (store.getters.storeIsPopulated) {
+    employee.value = store.getters.user;
+    loading.value = false;
   }
-} // created
+}); // created
 
 /**
  * Mounted lifecycle hook
  */
-function mounted() {
-  this.emitter.on('status-alert', (status) => {
-    this.status['statusType'] = status.statusType;
-    this.status['statusMessage'] = status.statusMessage;
-    this.status['color'] = status.color;
+onMounted(() => {
+  emitter.on('status-alert', (status) => {
+    status.value['statusType'] = status.statusType;
+    status.value['statusMessage'] = status.statusMessage;
+    status.value['color'] = status.color;
   });
-  this.emitter.on('change-timesheets-employee', (employee) => {
-    this.employee = employee;
+  emitter.on('change-timesheets-employee', (employee) => {
+    employee.value = employee;
   });
-} // mounted
+}); // mounted
 
 /**
  * before destroy lifecycle hook
  */
-function beforeUnmount() {
-  this.emitter.off('status-alert');
-} // beforeUnmount
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                    COMPUTED                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Checks if the store is populated from initial page load.
- *
- * @returns boolean - True if the store is populated
- */
-function storeIsPopulated() {
-  return this.$store.getters.storeIsPopulated;
-} // storeIsPopulated
+onBeforeUnmount(() => {
+  emitter.off('status-alert');
+}); // beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -99,12 +104,12 @@ function storeIsPopulated() {
 /**
  * A watcher for when the vuex store is populated with necessary data.
  */
-async function watchStoreIsPopulated() {
-  if (this.$store.getters.storeIsPopulated) {
-    this.employee = this.$store.getters.user;
-    this.loading = false;
+watch(storeIsPopulated, async () => {
+  if (storeIsPopulated) {
+    employee.value = store.getters.user;
+    loading.value = false;
   }
-} // watchStoreIsPopulated
+}); // watchStoreIsPopulated
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -116,43 +121,8 @@ async function watchStoreIsPopulated() {
  * Clear the action status that is displayed in the snackbar.
  */
 function clearStatus() {
-  this.status['statusType'] = undefined;
-  this.status['statusMessage'] = '';
-  this.status['color'] = '';
+  status.value['statusType'] = undefined;
+  status.value['statusMessage'] = '';
+  status.value['color'] = '';
 } // clearStatus
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-export default {
-  components: {
-    PTOCashOutsTable,
-    TimeData
-  },
-  data() {
-    return {
-      loading: true,
-      status: {
-        statusType: undefined,
-        statusMessage: '',
-        color: ''
-      },
-      employee: null
-    };
-  },
-  computed: {
-    storeIsPopulated
-  },
-  watch: {
-    storeIsPopulated: watchStoreIsPopulated
-  },
-  beforeUnmount,
-  created,
-  mounted,
-  methods: {
-    clearStatus
-  }
-};
 </script>
