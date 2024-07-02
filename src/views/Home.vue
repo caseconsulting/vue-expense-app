@@ -183,6 +183,11 @@ onBeforeMount(async () => {
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * Checks if the store is populated from initial page load.
+ *
+ * @returns boolean - True if the store is populated
+ */
 computed(store.getters.storeIsPopulated);
 
 // |--------------------------------------------------|
@@ -416,6 +421,7 @@ async function createEvents() {
 
   // generate schedules
   let schedules = _.map(scheduleEntries.value, (a) => {
+    let now = getTodaysDate();
     let cutOff = startOf(subtract(now, 6, 'months'), 'day');
 
     let startDate = a.starts_at;
