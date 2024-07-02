@@ -322,10 +322,10 @@ const sections = ref({
 });
 
 role.value = getRole();
-if (route == 'help2') {
+if (route.name === 'help2') {
   panel.value = 0;
 }
-if (route == 'help3') {
+if (route.name === 'help3') {
   panel.value = 3;
 }
 
