@@ -123,6 +123,10 @@ $case-darkgray: #415364;
   padding-top: 20px;
 }
 
+.fit-content {
+  max-width: fit-content;
+}
+
 .login_e {
   -webkit-animation: login-change 1s infinite alternate both;
   -moz-animation: login-change 10s infinite alternate both;

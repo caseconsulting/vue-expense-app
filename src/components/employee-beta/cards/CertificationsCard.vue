@@ -1,35 +1,15 @@
 <template>
   <div class="infoTab">
     <base-card title="Certifications">
-      <v-card-text class="px-7 pt-5 pb-1 text-black">
+      <v-card-text class="text-black">
         <!-- Employee has Certifications -->
         <div v-if="!isEmpty(filteredList)">
-          <!-- Loop Certifications -->
-          <v-list>
-            <v-list-item v-for="(certification, index) in filteredList" :key="certification.name + index">
-              <v-list-item-title class="d-flex align-center pb-4">
-                <v-icon class="mx-3">mdi-star-check</v-icon>
-                <p class="ma-3">
-                  <b>{{ certification.name }}</b>
-                </p>
-              </v-list-item-title>
-              <v-row class="pl-10">
-                <p><b>Date Received: </b>{{ monthDayYearFormat(certification.dateReceived) }}</p>
-              </v-row>
-              <v-row class="pl-10">
-                <p v-if="certification.expirationDate">
-                  <b>Expiration Date: </b>{{ monthDayYearFormat(certification.expirationDate) }}
-                </p>
-                <v-divider v-if="index < filteredList.length - 1" class="mb-3"></v-divider>
-              </v-row>
-            </v-list-item>
-          </v-list>
-          <!-- End Loop Certifications -->
+          <certifications-list :list="filteredList"></certifications-list>
         </div>
         <!-- Employee does not have Certifications -->
         <p v-else class="ml-6">No Certification Information</p>
         <div
-          v-if="!isEmpty(model.certifications) && Math.ceil(model.certifications.length / 5) != 1"
+          v-if="!isEmpty(model.certifications) && Math.ceil(model.certifications.length / ITEMS_PER_PAGE) != 1"
           class="text-center"
         >
           <v-card-actions class="d-flex justify-center">
@@ -44,15 +24,18 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { isEmpty, monthDayYearFormat } from '@/utils/utils';
-import CertificationsModal from '@/components/employee-beta/modals/CertificationsModal.vue';
-import BaseCard from '@/components/employee-beta/BaseCard.vue';
+import { isEmpty } from '@/utils/utils';
+import BaseCard from './BaseCard.vue';
+import CertificationsList from '../lists/CertificationsList.vue';
+import CertificationsModal from '../modals/CertificationsModal.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
 // |                       SETUP                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+const ITEMS_PER_PAGE = 5;
 
 const props = defineProps(['model']);
 const toggleModal = ref(false);
@@ -65,7 +48,7 @@ const toggleModal = ref(false);
 
 const filteredList = computed(() => {
   const startIndex = 0; //each page contains 5 certification entries
-  const endIndex = 5;
+  const endIndex = ITEMS_PER_PAGE;
   if (!isEmpty(props.model.certifications)) {
     return props.model.certifications.slice(startIndex, endIndex);
   }

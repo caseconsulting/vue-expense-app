@@ -1,55 +1,42 @@
 <template>
-  <base-card title="Technologies and Skills">
-    <template #title>
-      <h3 class="text-white px-2">Technologies and Skills</h3>
-      <div>
-        <v-tooltip activator="parent" location="right"> Showing current with most years </v-tooltip>
-        <v-icon id="information" color="white" size="x-small">mdi-information</v-icon>
-      </div>
-    </template>
-    <v-card-text>
-      <!-- Employee has Technology Experience -->
-      <div v-if="!isEmpty(model.technologies)">
-        <v-list>
-          <!-- Loop Technologies -->
-          <v-list-item v-for="(technology, index) in filteredList" :key="technology.name + index">
-            <v-list-item-title class="d-flex align-center pb-4">
-              <div class="mx-3">
-                <span v-if="technology.current">
-                  <v-icon>mdi-check</v-icon>
-                  <v-tooltip activator="parent" location="left">Current Skill</v-tooltip>
-                </span>
-              </div>
-              <p class="ma-3">
-                <b>{{ technology.name }}</b>
-              </p>
-            </v-list-item-title>
-            <v-row class="pl-10">
-              <p><b>Experience: </b>{{ Number(technology.years).toFixed(1) }} years</p>
-            </v-row>
-            <hr v-if="index < filteredList.length - 1" class="my-3" />
-          </v-list-item>
-          <!-- End Loop Technologies -->
-        </v-list>
-        <div v-if="!isEmpty(model.technologies) && Math.ceil(model.technologies.length / 5) != 1" class="text-center">
-          <v-card-actions class="d-flex justify-center">
-            <v-btn @click="toggleTechnologiesModal()">Click To See More</v-btn>
-          </v-card-actions>
+  <div>
+    <base-card title="Technologies and Skills">
+      <template #title>
+        <v-row no-gutters>
+          <v-col class="mr-1">
+            <h3 class="text-white">Tech and Skills</h3>
+          </v-col>
+          <v-col>
+            <v-tooltip activator="parent" location="right"> Showing current with most years </v-tooltip>
+            <v-icon class="nudge-up" color="white" size="x-small">mdi-information</v-icon>
+          </v-col>
+        </v-row>
+      </template>
+      <template #default>
+        <!-- Employee has Technology Experience -->
+        <div v-if="!isEmpty(model.technologies)">
+          <technologies-list :list="filteredList"></technologies-list>
+          <div v-if="!isEmpty(model.technologies) && Math.ceil(model.technologies.length / 5) != 1" class="text-center">
+            <v-card-actions class="d-flex justify-center">
+              <v-btn @click="toggleTechnologiesModal()">Click To See More</v-btn>
+            </v-card-actions>
+          </div>
         </div>
-      </div>
-      <!-- Employee does not have Technology Experience -->
-      <p v-else>No Technologies or Skills Information</p>
-    </v-card-text>
+        <!-- Employee does not have Technology Experience -->
+        <p v-else>No Technologies or Skills Information</p>
+      </template>
+    </base-card>
     <technologies-modal v-model="toggleModal" :model="model"></technologies-modal>
-  </base-card>
+  </div>
 </template>
 
 <script setup>
 import _ from 'lodash';
 import { computed, ref } from 'vue';
 import { isEmpty } from '@/utils/utils';
+import BaseCard from './BaseCard.vue';
+import TechnologiesList from '../lists/TechnologiesList.vue';
 import TechnologiesModal from '@/components/employee-beta/modals/TechnologiesModal.vue';
-import BaseCard from '@/components/employee-beta/BaseCard.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
