@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="dialog" persistent @click:outside="toggleCancelConfirmation = true">
+  <v-dialog v-model="editing" persistent @click:outside="toggleCancelConfirmation = true">
     <v-card>
       <v-card-title class="d-flex align-center justify-space-between beta_header_style">
         <h3 class="text-white px-2">Editing {{ isUser ? 'My Profile' : fullName }}</h3>
@@ -76,9 +76,9 @@ import FormCancelConfirmation from '@/components/modals/FormCancelConfirmation.v
 
 const emitter = inject('emitter');
 
-const props = defineProps(['editing', 'employee', 'contracts']);
+const props = defineProps(['employee', 'contracts']);
 const isUser = inject('isUser');
-const dialog = ref(false);
+const editing = defineModel();
 
 const formTabs = ref([]); //TODO: Sync up current tabs on edit form and info cards
 const submitting = ref(false);
@@ -104,7 +104,7 @@ const fullName = computed(() => {
 onBeforeMount(() => {
   emitter.on('editing', (cardName) => {
     formTabs.value = [cardName];
-    dialog.value = true;
+    editing.value = true;
   });
   // Starts listener to see if the user cancelled to submit the form
   emitter.on('canceled-cancel', () => {
@@ -113,7 +113,7 @@ onBeforeMount(() => {
   emitter.on('confirmed-cancel', async () => {
     toggleCancelConfirmation.value = false;
     await cancel();
-    dialog.value = false;
+    editing.value = false;
   });
 });
 
