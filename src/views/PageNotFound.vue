@@ -1,22 +1,32 @@
 <template>
   <div />
 </template>
-<script>
+
+<script setup>
+import { onBeforeMount } from 'vue';
+import { useRouter } from 'vue-router';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                       SETUP                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+const router = useRouter();
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFESTYLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
 /**
  * Route to admin page if user role is admin, otherwise route
  * to home page.
  */
-function created() {
-  this.$router.push('home');
-} // created
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default { created };
+onBeforeMount(() => {
+  router.push('/home');
+}); // created
 </script>
 
 <style></style>
