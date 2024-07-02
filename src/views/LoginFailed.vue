@@ -17,37 +17,22 @@
   </v-container>
 </template>
 
-<script>
+<script setup>
 import { isLoggedIn, login } from '@/utils/auth';
+import { useRouter } from 'vue-router';
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                 LIFECYCLE HOOKS                  |
+// |                      SETUP                       |
 // |                                                  |
 // |--------------------------------------------------|
 
-/**
- * Route to home page on log in.
- */
-function created() {
-  if (this.isLoggedIn()) {
-    this.$router.push('home');
-  }
-} // created
+const router = useRouter();
 
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  created,
-  methods: {
-    isLoggedIn,
-    login
-  }
-};
+// Route to home page on log in.
+if (isLoggedIn()) {
+  router.push('home');
+}
 </script>
 
 <style>
