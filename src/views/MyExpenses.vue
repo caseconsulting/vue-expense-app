@@ -748,13 +748,6 @@ const parseEventDate = computed(() => {
   return format(event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD');
 }); // parseEventDate
 
-// /**
-//  * Computed property for storeIsPopulated.
-//  */
-// const storeIsPopulated = computed(() => {
-//   return store.getters.storeIsPopulated;
-// }); // storeIsPopulated
-
 /**
  * Checks if the user is inactive. Returns true if the user is
  * inactive, otherwise returns false.
@@ -817,14 +810,6 @@ function clearExpense() {
   expense.value = _.mapValues(expense.value, () => {
     return null;
   });
-  // if (this.asUser) {
-  //   // creating or updating an expense as a user
-  //   expense.value['employeeId'] = userInfo.value.id;
-  //   expense.value['employeeName'] = userInfo.value.id;
-  // } else {
-  //   expense.value['employeeId'] = null;
-  //   expense.value['employeeName'] = null;
-  // }
   expense.value['employeeId'] = null;
   expense.value['employeeName'] = null;
 } // clearExpense
@@ -995,17 +980,6 @@ function getEmployee(eId) {
   let employee = _.find(store.getters.employees, ['id', eId]);
   return employeeUtils.nicknameAndLastName(employee);
 } // getEmployee
-
-// /**
-//  * Checks if expense type has recipient.
-//  *
-//  * @param expense - the expense object
-//  * @return boolean - whether the expense has a recipient
-//  */
-// function hasRecipient(expense) {
-//   let expenseType = _.find(expenseTypes.value, (type) => expense.expenseTypeId === type.value);
-//   return !isEmpty(expenseType.hasRecipient) && expenseType.hasRecipient;
-// } // hasRecipient
 
 /**
  * Checks if the expense is reimbursed. Returns true if the
