@@ -217,7 +217,6 @@ async function getProfileData() {
   if (store.getters.user.employeeNumber == route.params.id) {
     // user looking at their own profile
     model.value = store.getters.user;
-    console.log('Loaded user model:', model.value);
   } else {
     // user looking at another employees profile
     let employees = store.getters.employees;
@@ -234,7 +233,6 @@ async function getProfileData() {
   if (model.value) {
     // await refreshExpenseData(true); //TODO:Implement Expenses and Quickbooks Time
   }
-  console.log(model.value);
   loading.value = false;
 } // getProfileData
 

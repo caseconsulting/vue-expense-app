@@ -30,27 +30,7 @@
           </fieldset>
         </div>
         <!-- End of Sort Filters -->
-        <v-list>
-          <!-- Loop Technologies -->
-          <v-list-item v-for="(technology, index) in filteredList" :key="technology.name + index">
-            <v-list-item-title class="d-flex align-center pb-4">
-              <div class="mx-3">
-                <span v-if="technology.current">
-                  <v-icon>mdi-check</v-icon>
-                  <v-tooltip activator="parent" location="left">Current Skill</v-tooltip>
-                </span>
-              </div>
-              <p class="ma-3">
-                <b>{{ technology.name }}</b>
-              </p>
-            </v-list-item-title>
-            <v-row class="pl-10">
-              <p><b>Experience: </b>{{ Number(technology.years).toFixed(1) }} years</p>
-            </v-row>
-            <hr v-if="index < filteredList.length - 1" class="my-3" />
-          </v-list-item>
-          <!-- End Loop Technologies -->
-        </v-list>
+        <technologies-list :list="filteredList"></technologies-list>
         <div
           v-if="!isEmpty(model.technologies) && Math.ceil(model.technologies.length / ITEMS_PER_PAGE) != 1"
           class="text-center"
@@ -73,6 +53,7 @@ import _ from 'lodash';
 import { ref, computed } from 'vue';
 import { isEmpty } from '@/utils/utils';
 import BaseInfoModal from '@/components/employee-beta/modals/BaseInfoModal.vue';
+import TechnologiesList from '../lists/TechnologiesList.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
