@@ -6,6 +6,7 @@
         <v-data-table
           :headers="projectHeaders"
           :items="contract.item.projects"
+          :row-props="rowProps"
           class="projects-table"
           hide-default-footer
           hide-default-header
@@ -24,17 +25,8 @@
 
           <!-- Item CheckBox Slot -->
           <template v-slot:[`item.data-table-select`]="{ item }">
-            <div class="checkBox-container fill-height fill-width align-center">
-              <div :class="`${item.status}-status status-indicator`"></div>
-              <v-checkbox
-                :model-value="item.checkBox"
-                primary
-                class="ma-0 pl-4"
-                hide-details
-                @click.stop="toggleProjectCheckBox(item)"
-              >
-              </v-checkbox>
-            </div>
+            <v-checkbox :model-value="item.checkBox" primary hide-details @click.stop="toggleProjectCheckBox(item)">
+            </v-checkbox>
           </template>
 
           <!-- Project Name Slot -->
@@ -231,21 +223,6 @@ function created() {
 // |--------------------------------------------------|
 
 /**
- * Adds grey highlight to project row when editing or deleting
- *
- * @param item Item in projects v-data-table row
- */
-function projectRowClass(item) {
-  if (
-    (this.editingProjectItem && this.editingProjectItem.id == item.id) ||
-    (this.deleteProjectItem && this.deleteProjectItem.project && this.deleteProjectItem.project.id == item.id)
-  ) {
-    return 'highlight-project-row';
-  }
-  return 'highlight-project-row';
-} // projectRowClass
-
-/**
  * Click edit handler
  *
  * @param item item that is being edited
@@ -341,7 +318,6 @@ export default {
   created,
   components: { ProjectsEmployeesAssignedModal },
   methods: {
-    projectRowClass,
     updateProject,
     clickedEdit,
     clickedCancel,
@@ -411,15 +387,11 @@ export default {
     };
   },
 
-  props: ['contract', 'isEditingContractItem', 'isContractDeletingOrUpdatingStatus', 'colspan']
+  props: ['contract', 'isEditingContractItem', 'isContractDeletingOrUpdatingStatus', 'colspan', 'rowProps']
 };
 </script>
 <style lang="scss">
 @import 'src/assets/styles/styles';
-
-.projects-table > div > table > tbody > tr > td {
-  padding-left: 0px !important;
-}
 
 .projects-table > div {
   overflow-y: hidden !important;
