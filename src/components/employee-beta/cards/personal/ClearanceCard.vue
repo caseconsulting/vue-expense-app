@@ -1,9 +1,7 @@
 <template>
   <base-card title="Clearance">
-    <template #title>
-      <h3 class="text-white px-2">
-        <v-icon size="small" style="margin-right: 10px" id="personal" color="white"> mdi-shield </v-icon>Clearance
-      </h3>
+    <template #prependIcon>
+      <v-icon size="small" style="margin-right: 10px" id="personal" color="white"> mdi-shield-account </v-icon>
     </template>
     <v-card-text class="px-7 pt-5 pb-1 text-black">
       <p v-if="!isEmpty(getClearanceType())" style="margin-bottom: 5px; font-size: 25px">
@@ -49,7 +47,6 @@ const clearances = ref([]);
 const displayedClearance = ref([]);
 
 onBeforeMount(() => {
-  console.log(props.model);
   getClearances();
 });
 

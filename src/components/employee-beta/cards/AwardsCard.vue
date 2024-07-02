@@ -5,20 +5,7 @@
         <!-- Employee has Awards -->
         <div v-if="!isEmpty(filteredList)">
           <!-- Loop Awards -->
-          <v-list>
-            <v-list-item v-for="(awards, index) in filteredList" :key="awards.name + index">
-              <v-list-item-title class="d-flex align-center pb-4">
-                <v-icon class="mx-3">mdi-trophy-award</v-icon>
-                <p class="ma-3">
-                  <b>{{ awards.name }}</b>
-                </p>
-              </v-list-item-title>
-              <v-row class="pl-10">
-                <p><b>Date Received: </b>{{ monthYearFormat(awards.dateReceived) }}</p>
-                <v-divider v-if="index < filteredList.length - 1" class="mb-3"></v-divider>
-              </v-row>
-            </v-list-item>
-          </v-list>
+          <awards-list :list="filteredList"></awards-list>
           <!-- End Loop Awards -->
         </div>
         <!-- Employee does not have Awards -->
@@ -37,9 +24,10 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { isEmpty, monthYearFormat } from '@/utils/utils';
-import AwardsModal from '@/components/employee-beta/modals/AwardsModal.vue';
-import BaseCard from '@/components/employee-beta/BaseCard.vue';
+import { isEmpty } from '@/utils/utils';
+import BaseCard from './BaseCard.vue';
+import AwardsList from '../lists/AwardsList.vue';
+import AwardsModal from '../modals/AwardsModal.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
