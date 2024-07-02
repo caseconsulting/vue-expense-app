@@ -28,7 +28,7 @@
               :loading="isDeleting"
               size="small"
               class="text-white"
-              :disabled="!this.contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
+              :disabled="!contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
               @click="clickedDelete()"
               >Delete
             </v-btn>
@@ -36,7 +36,7 @@
               class="ml-1 font-weight-medium"
               :loading="isActivating"
               size="small"
-              :disabled="!this.contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
+              :disabled="!contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
               @click="clickedUpdateStatus(contractStatuses.ACTIVE)"
               >Activate</v-btn
             >
@@ -44,7 +44,7 @@
               class="ml-1"
               :loading="isDeactivating"
               size="small"
-              :disabled="!this.contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
+              :disabled="!contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
               @click="clickedUpdateStatus(contractStatuses.UNSTAFFED)"
               >Unstaffed</v-btn
             >
@@ -52,7 +52,7 @@
               class="ml-1"
               :loading="isClosing"
               size="small"
-              :disabled="!this.contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
+              :disabled="!contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
               @click="clickedUpdateStatus(contractStatuses.CLOSED)"
               >Close</v-btn
             >
@@ -102,7 +102,7 @@
                 v-model="editingItem.primeName"
                 label="Prime Name"
                 variant="underlined"
-                :rules="[(v) => !!v || 'Field is required', duplicateContractPrimeCombo()]"
+                :rules="[(v) => !!v || 'Field is required', duplicateContractPrimeCombo]"
                 required
                 @click.stop
               ></v-text-field>
@@ -117,7 +117,7 @@
                 v-model="editingItem.contractName"
                 label="Contract Name"
                 variant="underlined"
-                :rules="[(v) => !!v || 'Field is required', duplicateContractPrimeCombo()]"
+                :rules="[(v) => !!v || 'Field is required', duplicateContractPrimeCombo]"
                 required
                 @click.stop
               ></v-text-field>
@@ -337,10 +337,10 @@
     <project-form :toggleProjectForm="toggleProjectForm" :contract="addProjectUnderContract" />
   </div>
 </template>
-<script>
+<script setup>
 import _ from 'lodash';
 import api from '@/shared/api';
-import { updateStoreContracts, updateStoreEmployees } from '@/utils/storeUtils';
+import { updateStoreEmployees } from '@/utils/storeUtils';
 import { asyncForEach, isMobile } from '@/utils/utils';
 import { getProject } from '@/shared/contractUtils';
 
@@ -353,6 +353,96 @@ import GeneralConfirmationModal from '@/components/modals/GeneralConfirmationMod
 import ContractEmployeesAssignedModal from '../modals/ContractEmployeesAssignedModal.vue';
 import ExpandedContractTableRow from './ExpandedContractTableRow.vue';
 
+import { ref, inject, onBeforeMount, onBeforeUnmount, computed, watch } from 'vue';
+import { useStore } from 'vuex';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const store = useStore();
+const emitter = inject('emitter');
+const duplicateContractPrimeCombo = ref(() => {
+  let found = _.some(store.getters.contracts, (c) => {
+    if (c.id == editingItem.value.id) return false;
+    return c.contractName === editingItem.value.contractName && c.primeName === editingItem.value.primeName;
+  });
+  return !found || 'Duplicate contract and prime combination';
+});
+const contractStatuses = ref(api.CONTRACT_STATUSES);
+const clickedContract = ref(null);
+const contractStatusItem = ref(null);
+const addProjectUnderContract = ref(null);
+const toggleProjectForm = ref(false);
+const relationships = ref([]);
+const deleteItem = ref(null);
+const deletingItems = ref(null);
+const expanded = ref([]);
+const toggleContractEmployeesModal = ref(false);
+const toggleValidateModal = ref(false);
+const toggleContractSettingsModal = ref(false);
+const toggleContractDeleteModal = ref(false);
+const toggleContractStatusModal = ref(false);
+const contractLoading = ref(false);
+const editingItem = ref(null);
+const isEditingProjectItem = ref(false);
+const filter = ref([api.CONTRACT_STATUSES.ACTIVE]);
+const search = ref(null);
+const statusItemClicked = ref(null);
+const valid = ref(true);
+const validateMessage = ref('');
+const titleMessage = ref('');
+const contractsCheckBoxes = ref([]);
+const isDeleting = ref(false);
+const isActivating = ref(false);
+const isDeactivating = ref(false);
+const isClosing = ref(false);
+const contractHeaders = ref([
+  {
+    title: 'Prime',
+    key: 'primeName',
+    align: 'start'
+  },
+  {
+    title: 'Contract',
+    key: 'contractName',
+    align: 'start'
+  },
+  {
+    title: 'Directorate',
+    key: 'directorate',
+    align: 'start'
+  },
+  {
+    title: 'PoP-Start Date',
+    key: 'popStartDate',
+    align: 'start'
+  },
+  {
+    title: 'PoP-End Date',
+    key: 'popEndDate',
+    align: 'start'
+  },
+  {
+    title: 'Description',
+    key: 'description',
+    align: 'start'
+  },
+  {
+    title: 'Active Employees',
+    key: 'spacer',
+    align: 'start'
+  },
+  {
+    key: 'actions',
+    sortable: false,
+    align: 'end'
+  }
+]);
+const form = ref(null);
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -362,68 +452,68 @@ import ExpandedContractTableRow from './ExpandedContractTableRow.vue';
 /**
  * created life cycle hook
  */
-async function created() {
-  this.emitter.on('confirm-delete-contract', async () => {
-    await this.deleteItems(this.deletingItems);
-    this.deletingItems = null;
-    this.toggleContractDeleteModal = false;
+onBeforeMount(async () => {
+  emitter.on('confirm-delete-contract', async () => {
+    await deleteItems(deletingItems.value);
+    deletingItems.value = null;
+    toggleContractDeleteModal.value = false;
   });
-  this.emitter.on('canceled-delete-contract', () => {
-    this.deletingItems = null;
-    this.toggleContractDeleteModal = false;
+  emitter.on('canceled-delete-contract', () => {
+    deletingItems.value = null;
+    toggleContractDeleteModal.value = false;
   });
-  this.emitter.on('confirmed-contract-status', () => {
-    this.updateStatus(this.statusItemClicked);
-    this.toggleContractStatusModal = false;
+  emitter.on('confirmed-contract-status', () => {
+    updateStatus(statusItemClicked.value);
+    toggleContractStatusModal.value = false;
   });
-  this.emitter.on('canceled-contract-status', () => {
-    this.toggleContractStatusModal = false;
+  emitter.on('canceled-contract-status', () => {
+    toggleContractStatusModal.value = false;
   });
-  this.emitter.on('contract-project-validate-error-acknowledged', () => {
-    this.toggleValidateModal = false;
+  emitter.on('contract-project-validate-error-acknowledged', () => {
+    toggleValidateModal.value = false;
   });
-  this.emitter.on('canceled-project-form', () => {
-    this.toggleProjectForm = false;
+  emitter.on('canceled-project-form', () => {
+    toggleProjectForm.value = false;
   });
-  this.emitter.on('submitted-project-form', () => {
-    this.toggleProjectForm = false;
+  emitter.on('submitted-project-form', () => {
+    toggleProjectForm.value = false;
   });
-  this.emitter.on('closed-contract-employees-assigned-modal', () => {
-    this.toggleContractEmployeesModal = false;
+  emitter.on('closed-contract-employees-assigned-modal', () => {
+    toggleContractEmployeesModal.value = false;
   });
-  this.emitter.on('closed-contract-settings-modal', () => {
-    this.toggleContractSettingsModal = false;
+  emitter.on('closed-contract-settings-modal', () => {
+    toggleContractSettingsModal.value = false;
   });
-  this.emitter.on('filter', (filter) => {
-    this.filter = filter;
+  emitter.on('filter', (theFilter) => {
+    filter.value = theFilter;
   });
-  this.emitter.on('is-editing-project-item', (value) => {
-    this.isEditingProjectItem = value;
+  emitter.on('is-editing-project-item', (value) => {
+    isEditingProjectItem.value = value;
   });
-  this.emitter.on('toggle-project-checkBox', ({ contract, project }) => {
-    this.toggleProjectCheckBox(contract, project);
+  emitter.on('toggle-project-checkBox', ({ contract, project }) => {
+    toggleProjectCheckBox(contract, project);
   });
-  this.resetAllCheckBoxes();
-  this.expanded = _.map(this.$store.getters.contracts, 'id'); // expands all contracts in table
-} // created
+  resetAllCheckBoxes();
+  expanded.value = _.map(store.getters.contracts, 'id'); // expands all contracts in table
+}); // created
 
 /**
  * beforeUnmount lifecycle hook - close event listeners
  */
-function beforeUnmount() {
-  this.emitter.off('confirm-delete-contract');
-  this.emitter.off('canceled-delete-contract');
-  this.emitter.off('confirmed-contract-status');
-  this.emitter.off('canceled-contract-status');
-  this.emitter.off('canceled-project-form');
-  this.emitter.off('submitted-project-form');
-  this.emitter.off('closed-project-employees-assigned-modal');
-  this.emitter.off('closed-contract-settings-modal');
-  this.emitter.off('contract-project-validate-error-acknowledged');
-  this.emitter.off('filter');
-  this.emitter.off('is-editing-project-item');
-  this.emitter.off('toggle-project-checkbox');
-} // beforeUnmount
+onBeforeUnmount(() => {
+  emitter.off('confirm-delete-contract');
+  emitter.off('canceled-delete-contract');
+  emitter.off('confirmed-contract-status');
+  emitter.off('canceled-contract-status');
+  emitter.off('canceled-project-form');
+  emitter.off('submitted-project-form');
+  emitter.off('closed-project-employees-assigned-modal');
+  emitter.off('closed-contract-settings-modal');
+  emitter.off('contract-project-validate-error-acknowledged');
+  emitter.off('filter');
+  emitter.off('is-editing-project-item');
+  emitter.off('toggle-project-checkbox');
+}); // beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -435,25 +525,25 @@ function beforeUnmount() {
  * Updates contract object in inline row edit
  */
 async function updateContractPrime() {
-  this.valid = this.$refs.form.validate();
-  if (!this.valid) return;
-  this.contractLoading = true;
+  valid.value = form.value.validate();
+  if (!valid.value) return;
+  contractLoading.value = true;
   try {
-    let response = await api.updateItem(api.CONTRACTS, this.editingItem);
+    let response = await api.updateItem(api.CONTRACTS, editingItem.value);
     if (response.name === 'AxiosError') {
       throw new Error(response.response.data.message);
     }
-    let contracts = _.cloneDeep(this.$store.getters.contracts);
-    let itemIndex = contracts.findIndex((item) => item.id == this.editingItem.id);
-    contracts[itemIndex] = this.editingItem;
-    this.$store.dispatch('setContracts', { contracts });
-    this.contractLoading = false;
-    this.displaySuccess('Item was successfully saved!');
+    let contracts = _.cloneDeep(store.getters.contracts);
+    let itemIndex = contracts.findIndex((item) => item.id == editingItem.value.id);
+    contracts[itemIndex] = editingItem.value;
+    store.dispatch('setContracts', { contracts });
+    contractLoading.value = false;
+    displaySuccess('Item was successfully saved!');
   } catch (err) {
-    this.displayError(err);
+    displayError(err);
   }
-  this.contractLoading = false;
-  this.editingItem = null;
+  contractLoading.value = false;
+  editingItem.value = null;
 } // updateContractPrime
 
 /**
@@ -461,9 +551,9 @@ async function updateContractPrime() {
  * @param items contract and project items to delete
  */
 async function deleteItems(items) {
-  this.isDeleting = true;
+  isDeleting.value = true;
   try {
-    let contracts = _.cloneDeep(this.$store.getters.contracts);
+    let contracts = _.cloneDeep(store.getters.contracts);
     let deleteContractPromises = [];
     let deleteProjectPromises = [];
     items.contracts.forEach((c) => {
@@ -482,21 +572,21 @@ async function deleteItems(items) {
     items.contracts.forEach((c) => {
       let contractIndex = contracts.findIndex((item) => item.id == c.id);
       contracts.splice(contractIndex, 1);
-      this.contractsCheckBoxes.splice(contractIndex, 1);
+      contractsCheckBoxes.value.splice(contractIndex, 1);
     });
     items.projects.forEach((p) => {
       let contractIndex = contracts.findIndex((c) => c.id == p.contractOfProject.id);
       let projectIndex = contracts[contractIndex].projects.findIndex((item) => item.id == p.project.id);
-      this.contractsCheckBoxes[contractIndex].projectsCheckBoxes.splice(projectIndex, 1);
+      contractsCheckBoxes.value[contractIndex].projectsCheckBoxes.splice(projectIndex, 1);
       contracts[contractIndex].projects.splice(projectIndex, 1);
     });
-    this.$store.dispatch('setContracts', { contracts });
-    this.displaySuccess('Successfully deleted item(s)!');
+    store.dispatch('setContracts', { contracts });
+    displaySuccess('Successfully deleted item(s)!');
   } catch (err) {
-    this.displayError(err);
+    displayError(err);
   }
-  this.isDeleting = false;
-  this.resetAllCheckBoxes();
+  isDeleting.value = false;
+  resetAllCheckBoxes();
 } // deleteItems
 
 /**
@@ -505,7 +595,7 @@ async function deleteItems(items) {
  * @param item item that is being edited
  */
 function clickedEdit(item) {
-  this.editingItem = _.cloneDeep(item);
+  editingItem.value = _.cloneDeep(item);
 } // clickedEdit
 
 /**
@@ -513,29 +603,29 @@ function clickedEdit(item) {
  */
 async function clickedUpdateStatus(status) {
   let relationships = [];
-  let selectedItems = this.getSelectedItems();
-  if (status === this.contractStatuses.ACTIVE) {
-    this.toggleContractStatusModal = true;
-    this.statusItemClicked = status;
+  let selectedItems = getSelectedItems();
+  if (status === contractStatuses.value.ACTIVE) {
+    toggleContractStatusModal.value = true;
+    statusItemClicked.value = status;
     return;
   }
   await asyncForEach(selectedItems.contracts, async (c) => {
-    relationships = [...relationships, ...(await this.getActiveEmployeeContractRelationships(c))];
+    relationships = [...relationships, ...(await getActiveEmployeeContractRelationships(c))];
   });
   await asyncForEach(selectedItems.projects, async (p) => {
     relationships = [
       ...relationships,
-      ...(await this.getActiveEmployeeContractRelationships(p.contractOfProject, p.project))
+      ...(await getActiveEmployeeContractRelationships(p.contractOfProject, p.project))
     ];
   });
   if (relationships.length != 0) {
-    this.titleMessage = `Cannot mark item(s) as ${status}`;
-    this.validateMessage = `Please remove the following relationships before marking selected item(s) as ${status}.`;
-    this.toggleValidateModal = !this.toggleValidateModal;
-    this.relationships = relationships;
+    titleMessage.value = `Cannot mark item(s) as ${status}`;
+    validateMessage.value = `Please remove the following relationships before marking selected item(s) as ${status}.`;
+    toggleValidateModal.value = !toggleValidateModal.value;
+    relationships.value = relationships;
   } else {
-    this.toggleContractStatusModal = true;
-    this.statusItemClicked = status;
+    toggleContractStatusModal.value = true;
+    statusItemClicked.value = status;
   }
 } // clickedUpdateStatus
 
@@ -544,25 +634,22 @@ async function clickedUpdateStatus(status) {
  */
 async function clickedDelete() {
   let relationships = [];
-  let selectedItems = this.getSelectedItems();
+  let selectedItems = getSelectedItems();
   await asyncForEach(selectedItems.contracts, async (c) => {
-    relationships = [...relationships, ...(await this.getEmployeeContractRelationships(c))];
+    relationships = [...relationships, ...(await getEmployeeContractRelationships(c))];
   });
   await asyncForEach(selectedItems.projects, async (p) => {
-    relationships = [
-      ...relationships,
-      ...(await this.getEmployeeContractRelationships(p.contractOfProject, p.project))
-    ];
+    relationships = [...relationships, ...(await getEmployeeContractRelationships(p.contractOfProject, p.project))];
   });
 
   if (relationships.length != 0) {
-    this.titleMessage = 'Cannot delete item(s)';
-    this.validateMessage = 'Please remove the following relationships before deleting selected item(s).';
-    this.toggleValidateModal = true;
-    this.relationships = relationships;
+    titleMessage.value = 'Cannot delete item(s)';
+    validateMessage.value = 'Please remove the following relationships before deleting selected item(s).';
+    toggleValidateModal.value = true;
+    relationships.value = relationships;
   } else {
-    this.deletingItems = selectedItems;
-    this.toggleContractDeleteModal = true;
+    deletingItems.value = selectedItems;
+    toggleContractDeleteModal.value = true;
   }
 } // clickedDelete
 
@@ -572,18 +659,18 @@ async function clickedDelete() {
  * @param status status to update selected items to
  */
 async function updateStatus(status) {
-  this.contractLoading = true;
+  contractLoading.value = true;
   if (status == api.CONTRACT_STATUSES.ACTIVE) {
-    this.isActivating = true;
+    isActivating.value = true;
   } else if (status == api.CONTRACT_STATUSES.UNSTAFFED) {
-    this.isDeactivating = true;
+    isDeactivating.value = true;
   } else {
-    this.isClosing = true;
+    isClosing.value = true;
   }
   try {
     let updatePromises = [];
-    let contracts = _.cloneDeep(this.$store.getters.contracts);
-    let selectedItems = this.getSelectedItems();
+    let contracts = _.cloneDeep(store.getters.contracts);
+    let selectedItems = getSelectedItems();
 
     selectedItems.contracts.forEach((c) => {
       let contractIndex = contracts.findIndex((item) => item.id == c.id);
@@ -602,27 +689,17 @@ async function updateStatus(status) {
     });
     await Promise.all(updatePromises);
 
-    this.$store.dispatch('setContracts', { contracts });
-    this.displaySuccess(`Successfully marked item(s) as ${status}`);
+    store.dispatch('setContracts', { contracts });
+    displaySuccess(`Successfully marked item(s) as ${status}`);
   } catch (err) {
-    this.displayError(err);
+    displayError(err);
   }
-  this.contractLoading = false;
-  this.isActivating = false;
-  this.isDeactivating = false;
-  this.isClosing = false;
-  this.resetAllCheckBoxes();
+  contractLoading.value = false;
+  isActivating.value = false;
+  isDeactivating.value = false;
+  isClosing.value = false;
+  resetAllCheckBoxes();
 } // updateStatus
-
-/**
- * Clones a passed item.
- *
- * @param item - The item to clone
- * @return The cloned item
- */
-function cloneDeep(item) {
-  return _.cloneDeep(item);
-} // cloneDeep
 
 /**
  * Gets relationships between projects and active employees.
@@ -634,10 +711,10 @@ function cloneDeep(item) {
  *        [{contract: "", prime: "", project: {...}, employees: [...]}, ...]
  */
 async function getActiveEmployeeContractRelationships(contract, project = null) {
-  if (!this.$store.getters.employees) {
-    await this.updateStoreEmployees();
+  if (!store.getters.employees) {
+    await updateStoreEmployees();
   }
-  let employees = this.$store.getters.employees;
+  let employees = store.getters.employees;
   let relationships = [];
   employees.forEach((e) => {
     if (e.contracts && e.workStatus > 0) {
@@ -668,7 +745,7 @@ async function getActiveEmployeeContractRelationships(contract, project = null) 
                 relationships.push({
                   contract: contract.contractName,
                   prime: contract.primeName,
-                  project: this.getProject(contract.id, p.projectId, this.$store.getters.contracts),
+                  project: getProject(contract.id, p.projectId, store.getters.contracts),
                   employees: [e]
                 });
               } else {
@@ -693,10 +770,10 @@ async function getActiveEmployeeContractRelationships(contract, project = null) 
  *        [{contract: "", prime: "", project: {...}, employees: [...]}, ...]
  */
 async function getEmployeeContractRelationships(contract, project = null) {
-  if (!this.$store.getters.employees) {
-    await this.updateStoreEmployees();
+  if (!store.getters.employees) {
+    await updateStoreEmployees();
   }
-  let employees = this.$store.getters.employees;
+  let employees = store.getters.employees;
   let relationships = [];
   employees.forEach((e) => {
     if (e.contracts) {
@@ -724,7 +801,7 @@ async function getEmployeeContractRelationships(contract, project = null) {
               relationships.push({
                 contract: contract.contractName,
                 prime: contract.primeName,
-                project: this.getProject(contract.id, p.projectId, this.$store.getters.contracts),
+                project: getProject(contract.id, p.projectId, store.getters.contracts),
                 employees: [e]
               });
             } else {
@@ -750,7 +827,7 @@ function displayError(err) {
     color: 'red'
   };
 
-  this.emitter.emit('status-alert', status);
+  emitter.emit('status-alert', status);
 } // displayError
 
 /**
@@ -763,7 +840,7 @@ function displaySuccess(msg) {
     statusMessage: msg,
     color: 'green'
   };
-  this.emitter.emit('status-alert', status);
+  emitter.emit('status-alert', status);
 } // displaySuccess
 
 /**
@@ -776,10 +853,10 @@ function displaySuccess(msg) {
  */
 function isDeletingOrUpdatingStatus(contractItem = null) {
   return contractItem
-    ? this.contractLoading &&
-        ((this.contractStatusItem && this.contractStatusItem.id == contractItem.id) ||
-          (this.deleteItem && this.deleteItem.id == contractItem.id))
-    : this.contractLoading && (this.contractStatusItem || this.deleteItem);
+    ? contractLoading.value &&
+        ((contractStatusItem.value && contractStatusItem.value.id == contractItem.id) ||
+          (deleteItem.value && deleteItem.value.id == contractItem.id))
+    : contractLoading.value && (contractStatusItem.value || deleteItem.value);
 } // isDeletingOrUpdatingStatus
 
 /**
@@ -787,10 +864,10 @@ function isDeletingOrUpdatingStatus(contractItem = null) {
  */
 function resetAllCheckBoxes() {
   let uncheckedBox = { all: false, indeterminate: false };
-  for (let i = 0; i < this.$store.getters.contracts.length; i++) {
-    this.contractsCheckBoxes[i] = _.cloneDeep(uncheckedBox);
-    this.contractsCheckBoxes[i].contractId = this.$store.getters.contracts[i].id;
-    this.contractsCheckBoxes[i].projectsCheckBoxes = this.$store.getters.contracts[i].projects.map((p) => ({
+  for (let i = 0; i < store.getters.contracts.length; i++) {
+    contractsCheckBoxes.value[i] = _.cloneDeep(uncheckedBox);
+    contractsCheckBoxes.value[i].contractId = store.getters.contracts[i].id;
+    contractsCheckBoxes.value[i].projectsCheckBoxes = store.getters.contracts[i].projects.map((p) => ({
       projectId: p.id,
       checkBox: false
     }));
@@ -803,18 +880,18 @@ function resetAllCheckBoxes() {
  * @param contractItem contract item to check
  */
 function toggleContractCheckBox(contractItem) {
-  let index = this.contractsCheckBoxes.findIndex((c) => c.contractId == contractItem.id);
-  let contractCheckBox = this.contractsCheckBoxes[index];
-  if (this.determineCheckBox(contractCheckBox).all) {
-    this.setAllProjectsCheckBox(contractItem, false);
+  let index = contractsCheckBoxes.value.findIndex((c) => c.contractId == contractItem.id);
+  let contractCheckBox = contractsCheckBoxes.value[index];
+  if (determineCheckBox(contractCheckBox).all) {
+    setAllProjectsCheckBox(contractItem, false);
   } else {
-    this.setAllProjectsCheckBox(contractItem, true);
+    setAllProjectsCheckBox(contractItem, true);
   }
-  contractCheckBox = this.contractsCheckBoxes[index];
-  let updatedCheckBox = this.determineCheckBox(contractCheckBox);
+  contractCheckBox = contractsCheckBoxes.value[index];
+  let updatedCheckBox = determineCheckBox(contractCheckBox);
   contractCheckBox.all = updatedCheckBox.all;
   contractCheckBox.indeterminate = updatedCheckBox.indeterminate;
-  this.contractsCheckBoxes[index] = contractCheckBox;
+  contractsCheckBoxes.value[index] = contractCheckBox;
 } // toggleContractCheckBox
 
 /**
@@ -824,19 +901,19 @@ function toggleContractCheckBox(contractItem) {
  * @param projectItem project item
  */
 function toggleProjectCheckBox(contract, projectItem) {
-  this.contractsCheckBoxes
+  contractsCheckBoxes.value
     .find((cb) => cb.contractId == contract.item.id)
     .projectsCheckBoxes.forEach((pb) => {
       if (pb.projectId == projectItem.id) {
         pb.checkBox = !pb.checkBox;
       }
     });
-  let index = this.contractsCheckBoxes.findIndex((c) => c.contractId == contract.item.id);
-  let contractCheckBox = this.contractsCheckBoxes[index];
-  let updatedCheckBox = this.determineCheckBox(contractCheckBox);
+  let index = contractsCheckBoxes.value.findIndex((c) => c.contractId == contract.item.id);
+  let contractCheckBox = contractsCheckBoxes.value[index];
+  let updatedCheckBox = determineCheckBox(contractCheckBox);
   contractCheckBox.all = updatedCheckBox.all;
   contractCheckBox.indeterminate = updatedCheckBox.indeterminate;
-  this.contractsCheckBoxes[index] = contractCheckBox;
+  contractsCheckBoxes.value[index] = contractCheckBox;
 } // toggleProjectCheckBox
 
 /**
@@ -870,14 +947,14 @@ function determineCheckBox(contractCheckBox) {
  * @param contractItem contract item to set all projects checkbox for
  */
 function setAllProjectsCheckBox(contractItem, value) {
-  let index = this.contractsCheckBoxes.findIndex((c) => c.contractId == contractItem.id);
-  let contractCheckBox = this.contractsCheckBoxes[index];
+  let index = contractsCheckBoxes.value.findIndex((c) => c.contractId == contractItem.id);
+  let contractCheckBox = contractsCheckBoxes.value[index];
   let updatedProjectsCheckBoxes = contractCheckBox.projectsCheckBoxes.map((p) => {
     p.checkBox = value;
     return p;
   });
   contractCheckBox.projectsCheckBoxes = updatedProjectsCheckBoxes;
-  this.contractsCheckBoxes[index] = contractCheckBox;
+  contractsCheckBoxes.value[index] = contractCheckBox;
 } // setAllProjectsCheckBox
 
 /**
@@ -889,7 +966,7 @@ function setAllProjectsCheckBox(contractItem, value) {
 function getSelectedItems() {
   let selectedContractIds = [];
   let selectedProjectIds = [];
-  this.contractsCheckBoxes.forEach((c) => {
+  contractsCheckBoxes.value.forEach((c) => {
     if (c.all) {
       selectedContractIds.push(c.contractId);
     } else if (c.indeterminate) {
@@ -901,7 +978,7 @@ function getSelectedItems() {
     }
   });
   let selectedItems = { contracts: [], projects: [] };
-  this.$store.getters.contracts.forEach((c) => {
+  store.getters.contracts.forEach((c) => {
     if (selectedContractIds.includes(c.id)) {
       selectedItems.contracts.push(c);
     } else {
@@ -921,184 +998,57 @@ function getSelectedItems() {
 // |                                                  |
 // |--------------------------------------------------|
 
+computed(isMobile);
+
 /**
  * Merges the checkBox list and the contracts list
  *
  * @return filtered out unstaffed items
  */
-function storeContracts() {
-  let mergedCheckBoxContractsData = _.merge(this.$store.getters.contracts, this.contractsCheckBoxes);
+const storeContracts = computed(() => {
+  let mergedCheckBoxContractsData = _.merge(store.getters.contracts, contractsCheckBoxes.value);
   mergedCheckBoxContractsData.forEach((c) => {
     c.projects = _.merge(c.projects, c.projectsCheckBoxes);
   });
   return mergedCheckBoxContractsData
-    .filter((c) => this.filter.includes(c.status))
+    .filter((c) => filter.value.includes(c.status))
     .map((c) => {
-      return { ...c, projects: c.projects.filter((p) => this.filter.includes(p.status)) };
+      return { ...c, projects: c.projects.filter((p) => filter.value.includes(p.status)) };
     });
-} // storeContracts
+}); // storeContracts
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                      EXPORT                      |
+// |                    WATCHERS                      |
 // |                                                  |
 // |--------------------------------------------------|
 
-export default {
-  beforeUnmount,
-  created,
-  components: {
-    DeleteModal,
-    ContractFilter,
-    ContractSettingsModal,
-    ContractProjectValidateDeleteUpdateStatusModal,
-    GeneralConfirmationModal,
-    ProjectForm,
-    ContractEmployeesAssignedModal,
-    ExpandedContractTableRow
-  },
-  computed: {
-    isMobile,
-    storeContracts
-  },
-  methods: {
-    getProject,
-    updateStoreEmployees,
-    getActiveEmployeeContractRelationships,
-    getEmployeeContractRelationships,
-    cloneDeep,
-    displaySuccess,
-    displayError,
-    clickedEdit,
-    updateStoreContracts,
-    updateContractPrime,
-    isDeletingOrUpdatingStatus,
-    resetAllCheckBoxes,
-    determineCheckBox,
-    setAllProjectsCheckBox,
-    toggleContractCheckBox,
-    toggleProjectCheckBox,
-    getSelectedItems,
-    clickedDelete,
-    clickedUpdateStatus,
-    deleteItems,
-    updateStatus
-  },
-  data() {
-    return {
-      duplicateContractPrimeCombo: () => {
-        let found = _.some(this.$store.getters.contracts, (c) => {
-          if (c.id == this.editingItem.id) return false;
-          return c.contractName === this.editingItem.contractName && c.primeName === this.editingItem.primeName;
-        });
-        return !found || 'Duplicate contract and prime combination';
-      },
-      contractStatuses: api.CONTRACT_STATUSES,
-      contracts: this.$store.getters.contracts,
-      clickedContract: null,
-      contractStatusItem: null,
-      contractValid: true,
-      addProjectUnderContract: null,
-      toggleProjectForm: false,
-      relationships: [],
-      deleteItem: null,
-      deletingItems: null,
-      expanded: [],
-      toggleContractEmployeesModal: false,
-      toggleValidateModal: false,
-      toggleContractSettingsModal: false,
-      toggleContractDeleteModal: false,
-      toggleContractStatusModal: false,
-      contractLoading: false,
-      editingItem: null,
-      isEditingProjectItem: false,
-      loading: false,
-      filter: [api.CONTRACT_STATUSES.ACTIVE],
-      search: null,
-      statusItemClicked: null,
-      valid: true,
-      validateMessage: '',
-      titleMessage: '',
-      contractsCheckBoxes: [],
-      isDeleting: false,
-      isActivating: false,
-      isDeactivating: false,
-      isClosing: false,
-      legendKey: [
-        { status: 'Active', color: '#0f9d58' },
-        { status: 'Unstaffed', color: '#f4b400' },
-        { status: 'Closed', color: '#db4437' }
-      ],
-      contractHeaders: [
-        {
-          title: 'Prime',
-          key: 'primeName',
-          align: 'start'
-        },
-        {
-          title: 'Contract',
-          key: 'contractName',
-          align: 'start'
-        },
-        {
-          title: 'Directorate',
-          key: 'directorate',
-          align: 'start'
-        },
-        {
-          title: 'PoP-Start Date',
-          key: 'popStartDate',
-          align: 'start'
-        },
-        {
-          title: 'PoP-End Date',
-          key: 'popEndDate',
-          align: 'start'
-        },
-        {
-          title: 'Description',
-          key: 'description',
-          align: 'start'
-        },
-        {
-          title: 'Active Employees',
-          key: 'spacer',
-          align: 'start'
-        },
-        {
-          key: 'actions',
-          sortable: false,
-          align: 'end'
-        }
-      ]
-    };
-  },
-  watch: {
-    '$store.getters.contracts': function () {
-      if (this.$store.getters.contracts.length > this.contractsCheckBoxes.length) {
-        let newContract = this.$store.getters.contracts[0];
-        let checkBoxObj = {
-          all: false,
-          indeterminate: false,
-          contractId: newContract.id,
-          projectsCheckBoxes: [...newContract.projects.map((p) => ({ checkBox: false, projectId: p.id }))]
-        };
-        this.contractsCheckBoxes = [checkBoxObj, ...this.contractsCheckBoxes];
-      }
-
-      this.$store.getters.contracts.forEach((c, index) => {
-        if (c.projects.length > this.contractsCheckBoxes[index].projectsCheckBoxes.length) {
-          let newProject = c.projects[0];
-          let checkBox = this.contractsCheckBoxes[index].all ? true : false;
-          this.contractsCheckBoxes[index].projectsCheckBoxes = [
-            { checkBox, projectId: newProject.id },
-            ...this.contractsCheckBoxes[index].projectsCheckBoxes
-          ];
-        }
-      });
+watch(
+  () => store.getters.contracts,
+  () => {
+    if (store.getters.contracts.length > contractsCheckBoxes.value.length) {
+      let newContract = store.getters.contracts[0];
+      let checkBoxObj = {
+        all: false,
+        indeterminate: false,
+        contractId: newContract.id,
+        projectsCheckBoxes: [...newContract.projects.map((p) => ({ checkBox: false, projectId: p.id }))]
+      };
+      contractsCheckBoxes.value = [checkBoxObj, ...contractsCheckBoxes.value];
     }
+
+    store.getters.contracts.forEach((c, index) => {
+      if (c.projects.length > contractsCheckBoxes.value[index].projectsCheckBoxes.length) {
+        let newProject = c.projects[0];
+        let checkBox = contractsCheckBoxes.value[index].all ? true : false;
+        contractsCheckBoxes.value[index].projectsCheckBoxes = [
+          { checkBox, projectId: newProject.id },
+          ...contractsCheckBoxes.value[index].projectsCheckBoxes
+        ];
+      }
+    });
   }
-};
+);
 </script>
 
 <style lang="scss">
