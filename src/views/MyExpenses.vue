@@ -134,8 +134,8 @@
                         <!-- Show Active -->
                         <v-tooltip location="top">
                           <template #activator="{ props }">
-                            <v-btn value="active" v-bind="props" variant="text">
-                              <v-icon class="mr-1">
+                            <v-btn value="active" v-bind="props" variant="text" density="comfortable">
+                              <v-icon id="showActive" class="mr-1">
                                 mdi-check-circle{{ filter.active.includes('active') ? '' : '-outline' }}
                               </v-icon>
                             </v-btn>
@@ -147,7 +147,7 @@
                         <v-tooltip location="top">
                           <template #activator="{ props }">
                             <v-btn value="notActive" v-bind="props" variant="text">
-                              <v-icon>
+                              <v-icon id="showInactive">
                                 mdi-close-circle{{ filter.active.includes('notActive') ? '' : '-outline' }}
                               </v-icon>
                             </v-btn>
@@ -159,6 +159,7 @@
                         <v-tooltip location="top">
                           <template #activator="{ props }">
                             <v-btn
+                              id="bothActiveInactive"
                               value="both"
                               v-bind="props"
                               variant="text"
@@ -246,7 +247,7 @@
                               persistent-hint
                               class="mr-5"
                               v-bind="props"
-                              @update:focused="startDateFilter = parseEventDate"
+                              @update:focused="startDateFilter = parseEventDate()"
                               @click:prepend="startDateFilterMenu = true"
                               @keypress="startDateFilterMenu = false"
                             />
@@ -281,7 +282,7 @@
                               persistent-hint
                               class="mr-5"
                               v-bind="props"
-                              @update:focused="endDateFilter = parseEventDate"
+                              @update:focused="endDateFilter = parseEventDate()"
                               @click:prepend="endDateFilterMenu = true"
                               @keypress="endDateFilterMenu = false"
                             />
@@ -740,15 +741,6 @@ const roleHeaders = computed(() => {
 }); // roleHeaders
 
 /**
- * Parse the date after losing focus.
- *
- * @return String - The date in YYYY-MM-DD format
- */
-const parseEventDate = computed(() => {
-  return format(event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD');
-}); // parseEventDate
-
-/**
  * Checks if the user is inactive. Returns true if the user is
  * inactive, otherwise returns false.
  *
@@ -1006,8 +998,8 @@ async function loadMyExpensesData() {
   ]);
 
   // get expense types
-  let expenseTypes = store.getters.expenseTypes;
-  expenseTypes.value = _.map(expenseTypes, (expenseType) => {
+  let temporaryExpenseTypes = store.getters.expenseTypes;
+  expenseTypes.value = _.map(temporaryExpenseTypes, (expenseType) => {
     return {
       /* beautify preserve:start */
       text: `${expenseType.budgetName} - $${expenseType.budget}`,
@@ -1060,6 +1052,15 @@ function onSelect(item) {
   expense.value.edit = true;
   expense.value['cost'] = moneyFilter(item.cost);
 } // onSelect
+
+/**
+ * Parse the date after losing focus.
+ *
+ * @return String - The date in YYYY-MM-DD format
+ */
+function parseEventDate() {
+  return format(event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD');
+} // parseEventDate
 
 /**
  * Refresh expense data and filters expenses.
