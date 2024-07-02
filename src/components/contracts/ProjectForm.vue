@@ -72,34 +72,57 @@
     >
   </v-form>
 </template>
-<script>
+
+<script setup>
 import api from '../../shared/api';
 import _ from 'lodash';
 import { generateUUID } from '@/utils/utils';
+import { ref, watch, inject } from 'vue';
+import { useStore } from 'vuex';
+
+const props = defineProps(['toggleProjectForm', 'contract']);
+const emitter = inject('emitter');
+const store = useStore();
+const valid = ref(false);
+const popStartDate = ref(null);
+const popEndDate = ref(null);
+const projectName = ref(null);
+const description = ref(null);
+const dialog = ref(false);
+const directorate = ref(null);
+const loading = ref(false);
+const duplicateProjects = ref(() => {
+  if (props.contract) {
+    let contract = _.find(store.getters.contracts, (c) => c.id == props.contract.id);
+    let found = _.some(contract.projects, (p) => p.projectName === projectName.value);
+    return !found || 'Duplicate project names';
+  }
+});
+const form = ref(null);
 
 /**
  * Resets the form and closed the form dialog.
  */
 function cancel() {
-  this.dialog = false;
-  this.emitter.emit('canceled-project-form');
-  this.$refs.form.reset();
-  this.$refs.form.resetValidation();
+  dialog.value = false;
+  emitter.emit('canceled-project-form');
+  form.value.reset();
+  form.value.resetValidation();
 } // cancel
 
 /**
  * Creates a validated project.
  */
 async function submit() {
-  this.valid = this.$refs.form.validate();
-  if (this.valid) {
-    this.loading = true;
-    await this.createProject();
-    this.$refs.form.reset();
-    this.$refs.form.resetValidation();
-    this.dialog = false;
-    this.loading = false;
-    this.emitter.emit('submitted-project-form');
+  valid.value = form.value.validate();
+  if (valid.value) {
+    loading.value = true;
+    await createProject();
+    form.value.reset();
+    form.value.resetValidation();
+    dialog.value = false;
+    loading.value = false;
+    emitter.emit('submitted-project-form');
   }
 } // submit
 
@@ -109,20 +132,20 @@ async function submit() {
 async function createProject() {
   let project = {
     id: generateUUID(),
-    projectName: this.projectName,
-    directorate: this.directorate,
-    popStartDate: this.popStartDate,
-    popEndDate: this.popEndDate,
-    description: this.description,
+    projectName: projectName.value,
+    directorate: directorate.value,
+    popStartDate: popStartDate.value,
+    popEndDate: popEndDate.value,
+    description: description.value,
     status: api.CONTRACT_STATUSES.ACTIVE
   };
-  let contract = _.cloneDeep(this.contract);
+  let contract = _.cloneDeep(props.contract);
   contract.projects = [project, ...contract.projects];
   await api.updateItem(api.CONTRACTS, contract);
-  let contracts = _.cloneDeep(this.$store.getters.contracts);
+  let contracts = _.cloneDeep(store.getters.contracts);
   let contractIndex = contracts.findIndex((c) => c.id == contract.id);
   contracts[contractIndex] = contract;
-  this.$store.dispatch('setContracts', { contracts: contracts });
+  store.dispatch('setContracts', { contracts: contracts });
 } // createProject
 
 // |--------------------------------------------------|
@@ -131,47 +154,15 @@ async function createProject() {
 // |                                                  |
 // |--------------------------------------------------|
 
+watch(
+  () => props.toggleProjectForm,
+  () => watchToggleProjectForm()
+);
+
 /**
  * Watches the dialog toggle from the ContractsTable.
  */
 function watchToggleProjectForm() {
-  this.dialog = this.toggleProjectForm;
+  dialog.value = props.toggleProjectForm;
 } // watchToggleContractForm
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  data() {
-    return {
-      valid: false,
-      popStartDate: null,
-      popEndDate: null,
-      projectName: null,
-      description: null,
-      dialog: false,
-      directorate: null,
-      loading: false,
-      duplicateProjects: () => {
-        if (this.contract) {
-          let contract = _.find(this.$store.getters.contracts, (c) => c.id == this.contract.id);
-          let found = _.some(contract.projects, (p) => p.projectName === this.projectName);
-          return !found || 'Duplicate project names';
-        }
-      }
-    };
-  },
-  methods: {
-    cancel,
-    createProject,
-    submit
-  },
-  props: ['toggleProjectForm', 'contract'],
-  watch: {
-    toggleProjectForm: watchToggleProjectForm
-  }
-};
 </script>
