@@ -242,8 +242,21 @@ export function userRoleIsIntern() {
 } //userRoleIsIntern
 
 /**
+ * Helper function to sort Items by their dataReceieved property
+ * @param {*} items - A list of objects each incluing the dateReceived property
+ * @returns sortedList - A list of items sorted by their dateReceived properties in decending order
+ */
+export function sortByDateReceived(items) {
+  const dateToNumber = (date) => (date ? Number(format(date, null, 'YYYYMMDD')) : 0);
+  const sortedItems = items.toSorted((itemA, itemB) => {
+    return dateToNumber(itemB.dateReceived) - dateToNumber(itemA.dateReceived);
+  });
+  return sortedItems;
+}
+
+/**
  * Helper function to sort languages by proficiency, highest to lowest: Literacy, Native-like, Personal, Basic
- * @param {Array} technologies - List of known languages
+ * @param {object[]} languages - List of known languages
  * @return filteredList - A list of languages sorted by proficiency
  */
 export function sortLanguagesByProficiency(languages) {
@@ -616,6 +629,7 @@ export default {
   openLink,
   updateEmployeeLogin,
   storeIsPopulated,
+  sortByDateReceived,
   sortLanguagesByProficiency,
   userRoleIsAdmin,
   userRoleIsManager,
