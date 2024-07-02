@@ -104,7 +104,7 @@ import PastJobExperienceInfoCard from '@/components/employee-beta/cards/PastJobE
 import EmployeePageLoader from '@/components/employees/EmployeePageLoader.vue';
 import ContractInfoCard from '@/components/employee-beta/cards/ContractInfoCard.vue';
 import EducationInfoCard from '@/components/employee-beta/cards/EducationInfoCard.vue';
-import EmployeeForm from '@/components/employee-beta/EmployeeForm.vue';
+import EmployeeForm from '@/components/employee-beta/forms/EmployeeForm.vue';
 import PersonalInfoCard from '@/components/employee-beta/cards/personal/PersonalInfoCard.vue';
 import OtherInfoCard from '@/components/employee-beta/cards/personal/OtherInfoCard.vue';
 import ClearanceCard from '@/components/employee-beta/cards/personal/ClearanceCard.vue';
