@@ -4,6 +4,7 @@
       <employee-page-loader />
     </v-row>
     <v-card v-else elevation="5">
+      <resume-card v-model="model" :editing="editing" :loading="loading"></resume-card>
       <v-btn color="#bc3825" @click="goBackToAlphaProfile()" theme="dark" class="ma-2">Go to Alpha profile!</v-btn>
       <employee-info :model="model"></employee-info>
       <!-- hire and contract info -->
@@ -69,7 +70,7 @@
         </v-col>
       </v-row>
     </v-card>
-    <employee-form :employee="model" :contracts="contracts"></employee-form>
+    <employee-form v-model="editing" :employee="model" :contracts="contracts"></employee-form>
   </v-container>
 </template>
 
@@ -108,6 +109,7 @@ import EmployeeForm from '@/components/employee-beta/forms/EmployeeForm.vue';
 import PersonalInfoCard from '@/components/employee-beta/cards/personal/PersonalInfoCard.vue';
 import OtherInfoCard from '@/components/employee-beta/cards/personal/OtherInfoCard.vue';
 import ClearanceCard from '@/components/employee-beta/cards/personal/ClearanceCard.vue';
+import ResumeCard from '@/components/employee-beta/ResumeCard.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -123,6 +125,7 @@ const router = useRouter();
 const basicEmployeeDataLoading = ref(false);
 const contracts = ref(null);
 const displayTimeAndBalances = ref(false);
+const editing = ref(false);
 const loading = ref(false);
 
 const isAdmin = ref(false);
@@ -163,6 +166,7 @@ const model = ref({
   personalEmail: '',
   phoneNumber: '',
   prime: '',
+  resumeUpdated: null,
   st: '',
   technologies: [],
   twitter: '',
@@ -193,7 +197,6 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   emitter.off('update');
-  emitter.off('editing');
 });
 
 // |--------------------------------------------------|
