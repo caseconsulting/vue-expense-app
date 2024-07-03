@@ -42,9 +42,42 @@
   <!--End of Totals Card-->
 </template>
 
-<script>
+<script setup>
 import _ from 'lodash';
 import { convertToMoneyString } from '@/utils/utils';
+import { ref, onBeforeMount, onBeforeUnmount, computed, inject } from 'vue';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const emitter = inject('emitter');
+const isGeneratingGiftCard = ref(true);
+const selected = ref([]);
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ *  Creates event listeners.
+ */
+onBeforeMount(() => {
+  emitter.on('selectExpense', updateSelected);
+  emitter.on('expenseChange', updateSelected);
+}); // created
+
+/**
+ * beforeUnmount lifecycle hook
+ */
+onBeforeUnmount(() => {
+  emitter.off('selectExpense');
+  emitter.off('expenseChange');
+}); //beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -57,26 +90,25 @@ import { convertToMoneyString } from '@/utils/utils';
  *
  * @return Array - expense type and each total
  */
-function totals() {
-  let totals = [];
-  totals = _.map(this.selected, (item) => {
+const totals = computed(() => {
+  let theTotals = [];
+  theTotals = _.map(selected.value, (item) => {
     return {
       name: item.budgetName,
       id: item.expenseTypeId,
       costTotal: 0
     };
   });
-  totals = _.uniqWith(totals, _.isEqual);
-  _.forEach(this.selected, (expense) => {
-    _.forEach(totals, (total) => {
+  theTotals = _.uniqWith(theTotals, _.isEqual);
+  _.forEach(selected.value, (expense) => {
+    _.forEach(theTotals, (total) => {
       if (total.id === expense.expenseTypeId) {
         total.costTotal += parseFloat(expense.cost);
       }
     });
   });
-
-  return totals;
-} // totals
+  return theTotals;
+}); // totals
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -92,74 +124,27 @@ function totals() {
 function updateSelected(item) {
   if (_.isArray(item)) {
     // item is an array
-    if (item.length < this.selected.length) {
+    if (item.length < selected.value.length) {
       // remove items
-      this.selected = _.xor(this.selected, _.xor(item, this.selected));
+      selected.value = _.xor(selected.value, _.xor(item, selected.value));
     } else {
       // add items
-      this.selected.push(item);
-      this.selected = _.flatten(this.selected);
-      this.selected = _.uniqWith(this.selected, _.isEqual);
+      selected.value.push(item);
+      selected.value = _.flatten(selected.value);
+      selected.value = _.uniqWith(selected.value, _.isEqual);
     }
   } else if (item) {
     // item is not an array
-    let indexOfItem = _.indexOf(this.selected, item);
+    let indexOfItem = _.indexOf(selected.value, item);
     if (indexOfItem > -1) {
       // remove item
-      this.selected.splice(indexOfItem, 1);
+      selected.value.splice(indexOfItem, 1);
     } else {
       // add item
-      this.selected.push(item);
+      selected.value.push(item);
     }
   }
 } // updateSelected
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                 LIFECYCLE HOOKS                  |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- *  Creates event listeners.
- */
-function created() {
-  this.emitter.on('selectExpense', this.updateSelected);
-  this.emitter.on('expenseChange', this.updateSelected);
-} // created
-
-/**
- * beforeUnmount lifecycle hook
- */
-function beforeUnmount() {
-  this.emitter.off('selectExpense');
-  this.emitter.off('expenseChange');
-} //beforeUnmount
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  created,
-  beforeUnmount,
-  computed: {
-    totals
-  },
-  data() {
-    return {
-      isGeneratingGiftCard: true,
-      selected: [],
-      reimbursing: false
-    };
-  },
-  methods: {
-    convertToMoneyString,
-    updateSelected
-  }
-};
 </script>
 
 <style scoped>

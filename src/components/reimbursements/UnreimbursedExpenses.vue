@@ -5,7 +5,7 @@
         <!-- Expense Table -->
         <unreimbursed-expenses-table></unreimbursed-expenses-table>
       </v-col>
-      <v-col v-if="!isMobile" cols="4" class="followScroll pr-7 pl-0">
+      <v-col v-if="!isMobile()" cols="4" class="followScroll pr-7 pl-0">
         <!-- Expenses Total -->
         <reimbursement-totals></reimbursement-totals>
         <!-- Expense Info -->
@@ -25,7 +25,7 @@
       </v-col>
       <v-col v-else cols="12">
         <!-- Expenses Total -->
-        <expense-type-totals></expense-type-totals>
+        <reimbursement-totals></reimbursement-totals>
         <!-- Expense Info -->
         <reimbursement-expense-details></reimbursement-expense-details>
         <!-- Status Alert -->
@@ -44,11 +44,21 @@
   </v-container>
 </template>
 
-<script>
+<script setup>
 import ReimbursementExpenseDetails from '@/components/reimbursements/ReimbursementExpenseDetails.vue';
 import ReimbursementTotals from '@/components/reimbursements/ReimbursementTotals.vue';
 import UnreimbursedExpensesTable from '@/components/reimbursements/UnreimbursedExpensesTable.vue';
 import { isMobile } from '@/utils/utils';
+import { ref, onBeforeMount, onBeforeUnmount, computed, inject } from 'vue';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const emitter = inject('emitter');
+const alerts = ref([]); // status alerts
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -59,43 +69,26 @@ import { isMobile } from '@/utils/utils';
 /**
  * Created lifecycle hook.
  */
-async function created() {
-  this.emitter.on('reimburseAlert', (alerts) => {
-    this.alerts = alerts;
+onBeforeMount(async () => {
+  emitter.on('reimburseAlert', (theAlerts) => {
+    alerts.value = theAlerts;
   });
-} // created
+}); // created
 
 /**
  * beforeUnmount lifecycle hook.
  */
-function beforeUnmount() {
-  this.emitter.off('reimburseAlert');
-} // beforeUnmount
+onBeforeUnmount(() => {
+  emitter.off('reimburseAlert');
+}); // beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                      EXPORT                      |
+// |                    COMPUTED                      |
 // |                                                  |
 // |--------------------------------------------------|
 
-export default {
-  components: {
-    ReimbursementExpenseDetails,
-    ReimbursementTotals,
-    UnreimbursedExpensesTable
-  },
-  computed: {
-    isMobile
-  },
-  created,
-  beforeUnmount,
-  data() {
-    return {
-      alerts: [], // status alerts
-      employee: {}
-    };
-  }
-};
+computed(isMobile);
 </script>
 
 <style>
