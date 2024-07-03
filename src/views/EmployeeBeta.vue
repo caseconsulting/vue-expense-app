@@ -13,7 +13,7 @@
           <v-btn color="#bc3825" @click="goBackToAlphaProfile()" theme="dark" class="ma-2">Go to Alpha profile!</v-btn>
         </v-col>
         <v-col align-self="center" class="d-flex justify-center">
-          <h1>{{ 'Hello, ' + model.firstName + '!'}}</h1>
+          <h1>{{ 'Hello, ' + model.firstName + '!' }}</h1>
         </v-col>
         <v-spacer></v-spacer>
       </v-row>
