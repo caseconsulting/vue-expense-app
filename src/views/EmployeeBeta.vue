@@ -17,14 +17,14 @@
         </v-col>
       </v-row>
       <!-- personal info -->
-      <v-row class="ma-2">
+      <v-row class="ma-2" v-if="isUser || isAdmin">
         <v-col class="pa-3" style="max-width: fit-content">
           <personal-info-card style="padding-bottom: 10px" :model="model"></personal-info-card>
         </v-col>
         <v-col class="pa-3" style="max-width: fit-content">
           <other-info-card style="padding-bottom: 10px" :model="model"></other-info-card>
         </v-col>
-        <v-col class="pa-3" style="max-width: fit-content" v-if="isUser || isAdmin">
+        <v-col class="pa-3" style="max-width: fit-content">
           <clearance-card style="padding-bottom: 10px" :model="model"></clearance-card>
         </v-col>
       </v-row>
