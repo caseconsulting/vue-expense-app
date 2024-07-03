@@ -21,7 +21,7 @@
 import { ref, computed } from 'vue';
 import { isEmpty, sortByDateReceived } from '@/utils/utils';
 import BaseInfoModal from '@/components/employee-beta/modals/BaseInfoModal.vue';
-import AwardsList from '../lists/AwardsList.vue';
+import AwardsList from '@/components/employee-beta/lists/AwardsList.vue';
 
 // |--------------------------------------------------|
 // |                                                  |

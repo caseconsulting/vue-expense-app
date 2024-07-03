@@ -23,8 +23,8 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { isEmpty, sortByDateReceived } from '@/utils/utils';
-import BaseInfoModal from '../modals/BaseInfoModal.vue';
-import CertificationsList from '../lists/CertificationsList.vue';
+import BaseInfoModal from '@/components/employee-beta/modals/BaseInfoModal.vue';
+import CertificationsList from '@/components/employee-beta//lists/CertificationsList.vue';
 
 // |--------------------------------------------------|
 // |                                                  |

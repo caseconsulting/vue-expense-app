@@ -25,9 +25,9 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { isEmpty, sortByDateReceived } from '@/utils/utils';
-import AwardsList from '@/lists/AwardsList.vue';
+import AwardsList from '@/components/employee-beta/lists/AwardsList.vue';
 import AwardsModal from '@/components/employee-beta/modals/AwardsModal.vue';
-import BaseCard from '@/components/employee-beta/BaseCard.vue';
+import BaseCard from '@/components/employee-beta/cards/BaseCard.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
