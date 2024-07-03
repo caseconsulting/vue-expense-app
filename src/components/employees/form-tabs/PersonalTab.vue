@@ -169,6 +169,22 @@
     </p>
     <div class="groove pr-5 pl-2">
       <!-- Place of Birth: City text field -->
+      <v-autocomplete
+        class="pb-3 pt-0"
+        @update:search="updateCityDropDown($event)"
+        :items="Object.keys(placeIds)"
+        v-model="searchString"
+        hide-no-data
+        variant="outlined"
+        persitent-hint="Search address and select option to auto-fill fields below."
+        persistent-hint
+      >
+        <template v-slot:item="{ item, props }">
+          <v-list-item @click="updateCityBoxes(item, props)">{{ item.value }}</v-list-item>
+        </template>
+        <v-list slot="append-item" name="joe" class="case-gray"> <span class="ml-2">Powered By Google</span> </v-list>
+      </v-autocomplete>
+
       <v-text-field
         v-model="editedPersonalInfo.city"
         label="City"
@@ -217,7 +233,7 @@
         persistent-hint
       >
         <template v-slot:item="{ item, props }">
-          <v-list-item @click="updateBoxes(item, props)">{{ item.value }}</v-list-item>
+          <v-list-item @click="updateAddressBoxes(item, props)">{{ item.value }}</v-list-item>
         </template>
         <v-list slot="append-item" name="joe" class="case-gray"> <span class="ml-2">Powered By Google</span> </v-list>
       </v-autocomplete>
@@ -373,11 +389,28 @@ async function updateAddressDropDown(query) {
 } //updateAddressDropDown
 
 /**
+ * Updates the address dropdown according to the user's input.
+ */
+async function updateCityDropDown(query) {
+  if (query.length > 2) {
+    let locations = await api.getCity(query);
+    //object used to contain addresses and their respective ID's
+    //needed later to obtain the selected address's zip code
+    this.predictions = {};
+    _.forEach(locations.predictions, (location) => {
+      this.placeIds[location.description] = location.place_id;
+    });
+  } else {
+    this.predictions = {};
+  }
+} //updateAddressDropDown
+
+/**
  * Once an address has been selected, it autofills the city, street, and state fields.
  * It also updates the zip code field making an additional Google Maps API call
  * to obtain the selected address's zip code.
  */
-async function updateBoxes(item) {
+async function updateAddressBoxes(item) {
   this.searchString = item.value;
   if (!this.isEmpty(this.searchString)) {
     let fullAddress = this.searchString.split(', ');
@@ -402,7 +435,42 @@ async function updateBoxes(item) {
     this.placeIds = {};
     this.searchString = null;
   }
-} // updateBoxes
+} // updateAddressBoxes
+
+/**
+ * Once an address has been selected, it autofills the city, street, and state fields.
+ * It also updates the zip code field making an additional Google Maps API call
+ * to obtain the selected address's zip code.
+ */
+async function updateCityBoxes(item) {
+  this.searchString = item.value;
+  let country = '';
+  let state = '';
+  if (!this.isEmpty(this.searchString)) {
+    let birthInfo = this.searchString.split(', ');
+    let city = birthInfo[0];
+
+    // a city outside the US with no state/region
+    if (birthInfo.length == 2) {
+      country = birthInfo[1];
+    } else {
+      state = birthInfo[1];
+      country = birthInfo[2];
+    }
+
+    if (country === 'USA') {
+      country = 'United States';
+    }
+    //fills in the first three fields
+    this.editedPersonalInfo.city = city;
+    this.editedPersonalInfo.country = country;
+    this.editedPersonalInfo.st = this.states[state];
+
+    //resets addresses and ID's in dropdown
+    this.placeIds = {};
+    this.searchString = null;
+  }
+} // updateCityBoxes
 
 /**
  * Checks whether the current user role has admin permissions, used specifically
@@ -559,6 +627,7 @@ export default {
       phoneNumberTypes: ['Home', 'Cell', 'Work'],
       searchString: null,
       placeIds: {},
+      predictions: {},
       userId: null,
       github,
       linkedin,
@@ -578,7 +647,9 @@ export default {
     getRole,
     isEmpty,
     updateAddressDropDown,
-    updateBoxes,
+    updateCityDropDown,
+    updateAddressBoxes,
+    updateCityBoxes,
     userhasAdminPermissions,
     userIsEmployee,
     validateFields,

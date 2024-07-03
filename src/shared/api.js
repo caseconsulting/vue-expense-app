@@ -337,6 +337,16 @@ async function getZipCode(addressId) {
 } // getZipCode
 
 /**
+ * gets a google map location
+ *
+ * @param locationQuery - the query text used to find the location
+ * @return - the location data
+ */
+async function getCity(locationQuery) {
+  return await execute('get', `${GOOGLE_MAPS}/getCity/${locationQuery}`);
+} // getCity
+
+/**
  * deletes the resume
  *
  * @param employeeId - the id of the employee who we are deleting the resume for
@@ -497,6 +507,7 @@ export default {
   getAudits,
   getBasecampAvatars,
   getBasecampCampfires,
+  getCity,
   getEmployeeBudget,
   getEmployeeBudgets,
   getEmployeeExpenseTypes,
