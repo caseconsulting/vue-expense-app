@@ -602,7 +602,7 @@ function clickedEdit(item) {
  * Handler for clicked update status buttons (Deactivate, Activate, Close)
  */
 async function clickedUpdateStatus(status) {
-  let relationships = [];
+  let theRelationships = [];
   let selectedItems = getSelectedItems();
   if (status === contractStatuses.value.ACTIVE) {
     toggleContractStatusModal.value = true;
@@ -610,19 +610,19 @@ async function clickedUpdateStatus(status) {
     return;
   }
   await asyncForEach(selectedItems.contracts, async (c) => {
-    relationships = [...relationships, ...(await getActiveEmployeeContractRelationships(c))];
+    theRelationships = [...relationships.value, ...(await getActiveEmployeeContractRelationships(c))];
   });
   await asyncForEach(selectedItems.projects, async (p) => {
-    relationships = [
-      ...relationships,
+    theRelationships = [
+      ...relationships.value,
       ...(await getActiveEmployeeContractRelationships(p.contractOfProject, p.project))
     ];
   });
-  if (relationships.length != 0) {
+  if (theRelationships.length != 0) {
     titleMessage.value = `Cannot mark item(s) as ${status}`;
     validateMessage.value = `Please remove the following relationships before marking selected item(s) as ${status}.`;
     toggleValidateModal.value = !toggleValidateModal.value;
-    relationships.value = relationships;
+    relationships.value = theRelationships;
   } else {
     toggleContractStatusModal.value = true;
     statusItemClicked.value = status;
@@ -633,20 +633,23 @@ async function clickedUpdateStatus(status) {
  * Handler for click delete button event
  */
 async function clickedDelete() {
-  let relationships = [];
+  let theRelationships = [];
   let selectedItems = getSelectedItems();
   await asyncForEach(selectedItems.contracts, async (c) => {
-    relationships = [...relationships, ...(await getEmployeeContractRelationships(c))];
+    theRelationships = [...relationships.value, ...(await getEmployeeContractRelationships(c))];
   });
   await asyncForEach(selectedItems.projects, async (p) => {
-    relationships = [...relationships, ...(await getEmployeeContractRelationships(p.contractOfProject, p.project))];
+    theRelationships = [
+      ...relationships.value,
+      ...(await getEmployeeContractRelationships(p.contractOfProject, p.project))
+    ];
   });
 
-  if (relationships.length != 0) {
+  if (theRelationships.length != 0) {
     titleMessage.value = 'Cannot delete item(s)';
     validateMessage.value = 'Please remove the following relationships before deleting selected item(s).';
     toggleValidateModal.value = true;
-    relationships.value = relationships;
+    relationships.value = theRelationships;
   } else {
     deletingItems.value = selectedItems;
     toggleContractDeleteModal.value = true;
@@ -715,7 +718,7 @@ async function getActiveEmployeeContractRelationships(contract, project = null) 
     await updateStoreEmployees();
   }
   let employees = store.getters.employees;
-  let relationships = [];
+  let theRelationships = [];
   employees.forEach((e) => {
     if (e.contracts && e.workStatus > 0) {
       let contractObj = e.contracts.find((c) => c.contractId == contract.id);
@@ -725,31 +728,31 @@ async function getActiveEmployeeContractRelationships(contract, project = null) 
             c.projects.some((p) => p.projectId == project.id && p.presentDate)
           );
           if (employeeAssignedToProject) {
-            let index = relationships.findIndex((r) => r.project.id == project.id);
+            let index = theRelationships.findIndex((r) => r.project.id == project.id);
             if (index < 0) {
-              relationships.push({
+              theRelationships.push({
                 contract: contract.contractName,
                 prime: contract.primeName,
                 project: project,
                 employees: [e]
               });
             } else {
-              relationships[index].employees.push(e);
+              theRelationships[index].employees.push(e);
             }
           }
         } else {
           contractObj.projects.forEach((p) => {
             if (p.presentDate) {
-              let index = relationships.findIndex((r) => r.project.id == p.projectId);
+              let index = theRelationships.findIndex((r) => r.project.id == p.projectId);
               if (index < 0) {
-                relationships.push({
+                theRelationships.push({
                   contract: contract.contractName,
                   prime: contract.primeName,
                   project: getProject(contract.id, p.projectId, store.getters.contracts),
                   employees: [e]
                 });
               } else {
-                relationships[index].employees.push(e);
+                theRelationships[index].employees.push(e);
               }
             }
           });
@@ -757,7 +760,7 @@ async function getActiveEmployeeContractRelationships(contract, project = null) 
       }
     }
   });
-  return relationships;
+  return theRelationships;
 } // getActiveEmployeeContractRelationships
 
 /**
@@ -774,7 +777,7 @@ async function getEmployeeContractRelationships(contract, project = null) {
     await updateStoreEmployees();
   }
   let employees = store.getters.employees;
-  let relationships = [];
+  let theRelationships = [];
   employees.forEach((e) => {
     if (e.contracts) {
       let contractObj = e.contracts.find((c) => c.contractId == contract.id);
@@ -782,37 +785,37 @@ async function getEmployeeContractRelationships(contract, project = null) {
         if (project) {
           let employeeAssignedToProject = e.contracts.some((c) => c.projects.some((p) => p.projectId == project.id));
           if (employeeAssignedToProject) {
-            let index = relationships.findIndex((r) => r.project.id == project.id);
+            let index = theRelationships.findIndex((r) => r.project.id == project.id);
             if (index < 0) {
-              relationships.push({
+              theRelationships.push({
                 contract: contract.contractName,
                 prime: contract.primeName,
                 project: project,
                 employees: [e]
               });
             } else {
-              relationships[index].employees.push(e);
+              theRelationships[index].employees.push(e);
             }
           }
         } else {
           contractObj.projects.forEach((p) => {
-            let index = relationships.findIndex((r) => r.project.id == p.projectId);
+            let index = theRelationships.findIndex((r) => r.project.id == p.projectId);
             if (index < 0) {
-              relationships.push({
+              theRelationships.push({
                 contract: contract.contractName,
                 prime: contract.primeName,
                 project: getProject(contract.id, p.projectId, store.getters.contracts),
                 employees: [e]
               });
             } else {
-              relationships[index].employees.push(e);
+              theRelationships[index].employees.push(e);
             }
           });
         }
       }
     }
   });
-  return relationships;
+  return theRelationships;
 } // getEmployeeContractRelationships
 
 /**
