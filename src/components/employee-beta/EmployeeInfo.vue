@@ -36,7 +36,7 @@
                       </v-btn>
                     </template>
                     <v-list>
-                      <v-list-item @click="selectDropDown('Personal')">Personal</v-list-item>
+                      <v-list-item v-if="isUser || isAdmin" @click="selectDropDown('Personal')">Personal</v-list-item>
                       <v-list-item @click="selectDropDown('Certifications & Awards')"
                         >Certifications & Awards</v-list-item
                       >
@@ -56,7 +56,7 @@
                     color="blue"
                     class="mx-4"
                   >
-                    <v-tab value="Personal">Personal</v-tab>
+                    <v-tab v-if="isUser || isAdmin" value="Personal">Personal</v-tab>
                     <v-tab value="Certifications & Awards">Certifications & Awards</v-tab>
                     <v-tab value="Tech, Skills, & Languages">Tech, Skills, & Languages</v-tab>
                     <v-tab value="Job Experience">Job Experience</v-tab>
@@ -70,7 +70,7 @@
               <v-tabs-window v-model="infoTab">
                 <v-tabs-window-item value="Personal">
                   <!-- personal info -->
-                  <v-row class="my-2">
+                  <v-row class="my-2" v-if="isUser || isAdmin">
                     <v-col>
                       <personal-info-card style="padding-bottom: 10px" :model="model"></personal-info-card>
                     </v-col>
