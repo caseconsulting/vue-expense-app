@@ -1,5 +1,5 @@
 <template>
-  <div class="infoTab">
+  <div class="infoCard">
     <base-card title="Awards">
       <v-card-text>
         <!-- Employee has Awards -->

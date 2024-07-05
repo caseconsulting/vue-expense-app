@@ -1,5 +1,5 @@
 <template>
-  <div class="infoTab">
+  <div class="infoCard">
     <base-card title="Foreign Languages">
       <v-card-text class="px-7 pt-5 pb-1 text-black">
         <!-- Employee has entered languages-->
