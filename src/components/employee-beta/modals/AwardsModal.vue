@@ -19,9 +19,9 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { isEmpty } from '@/utils/utils';
+import { isEmpty, sortByDateReceived } from '@/utils/utils';
 import BaseInfoModal from '@/components/employee-beta/modals/BaseInfoModal.vue';
-import AwardsList from '../lists/AwardsList.vue';
+import AwardsList from '@/components/employee-beta/lists/AwardsList.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -42,7 +42,7 @@ const filteredList = computed(() => {
   const startIndex = 5 * (page.value - 1); //each page contains 5 award entries
   const endIndex = startIndex + 5;
   if (!isEmpty(props.model.awards)) {
-    return props.model.awards.slice(startIndex, endIndex);
+    return sortByDateReceived(props.model.awards).slice(startIndex, endIndex);
   }
   return [];
 });
