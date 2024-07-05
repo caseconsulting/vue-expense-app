@@ -1,200 +1,218 @@
 <template>
-  <div>
-    <v-row class="ma-3 align-center">
-      <!-- profile picture -->
-      <v-col class="display-inline fit-content">
-        <v-avatar :color="caseRed" :size="96">
-          <span class="text-h4 display-inline-block position-absolute">{{ initials }}</span>
-          <v-img class="display-inline-block position-absolute" :src="avatar" :alt="altText" />
-        </v-avatar>
-      </v-col>
-      <!-- general info -->
-      <v-col>
-        <!-- first row: name and nickname -->
-        <v-row class="mr-5 align-baseline" no-gutters>
-          <!-- name -->
-          <v-col class="mr-3 fit-content">
-            <h3 class="name-text">{{ employeeName }}</h3>
-          </v-col>
-          <!-- nickname -->
-          <v-col class="fit-content">
-            <h3 class="nickname-text" :style="`color: ${caseGray}`">{{ nickname }}</h3>
-          </v-col>
-        </v-row>
-        <!-- second row: emp id and case email -->
-        <v-row class="mr-5 align-baseline" no-gutters>
-          <!-- emp id -->
-          <v-col class="mr-3 fit-content">
-            <h3 class="other-text" :style="`color: ${caseGray}`">EMPID: {{ model.employeeNumber }}</h3>
-          </v-col>
-          <!-- email -->
-          <v-col class="fit-content">
-            <h3 v-cloak class="other-text" :style="`color: ${caseGray}`">{{ model.email }}</h3>
-          </v-col>
-        </v-row>
-        <!-- third row: personal email and links -->
-        <v-row class="mt-1" no-gutters>
-          <!-- personal email -->
-          <v-col v-if="model.personalEmail" style="max-width: fit-content">
-            <a :href="`mailto:${model.personalEmail}`">
-              <v-hover v-slot="{ isHovering, props }">
-                <v-btn
-                  v-bind="props"
-                  icon=""
-                  :color="isHovering ? caseRed : 'blue'"
-                  :width="buttonSize"
-                  :height="buttonSize"
-                  variant="text"
-                >
-                  <v-icon icon="mdi-email" size="28"></v-icon>
-                </v-btn>
-              </v-hover>
-            </a>
-          </v-col>
-          <!-- github -->
-          <v-col v-if="model.github" style="max-width: fit-content">
-            <a :href="`https://github.com/${model.github}`" target="_blank">
-              <v-hover v-slot="{ isHovering, props }">
-                <v-btn
-                  v-bind="props"
-                  icon=""
-                  :color="isHovering ? caseRed : 'blue'"
-                  :width="buttonSize"
-                  :height="buttonSize"
-                  variant="text"
-                >
-                  <v-icon icon="$github" size="30"></v-icon>
-                </v-btn>
-              </v-hover>
-            </a>
-          </v-col>
-          <!-- linkedin -->
-          <v-col v-if="model.linkedIn" style="max-width: fit-content">
-            <a :href="model.linkedIn" target="_blank">
-              <v-hover v-slot="{ isHovering, props }">
-                <v-btn
-                  v-bind="props"
-                  icon=""
-                  :color="isHovering ? caseRed : 'blue'"
-                  :width="buttonSize"
-                  :height="buttonSize"
-                  variant="text"
-                >
-                  <v-icon icon="$linkedin" size="33"></v-icon>
-                </v-btn>
-              </v-hover>
-            </a>
-          </v-col>
-          <!-- X (the everything app you can do everything on it) -->
-          <v-col v-if="model.twitter" style="max-width: fit-content">
-            <a :href="`https://x.com/${model.twitter}`" target="_blank">
-              <v-hover v-slot="{ isHovering, props }">
-                <v-btn
-                  v-bind="props"
-                  icon=""
-                  :color="isHovering ? caseRed : 'blue'"
-                  :width="buttonSize"
-                  :height="buttonSize"
-                  variant="text"
-                >
-                  <v-icon icon="$twitter" size="23"></v-icon>
-                </v-btn>
-              </v-hover>
-            </a>
-          </v-col>
-        </v-row>
-      </v-col>
-    </v-row>
-  </div>
+  <v-container id="employee-container">
+    <base-card title="Employee" elevation="5">
+      <template #title>
+        <div class="d-flex justify-lg-space-between align-center">
+          <h3 class="text-white">{{ employeeTitle }}</h3>
+        </div>
+      </template>
+      <template #actions>
+        <resume-card v-model="model" :editing="editing" :loading="loading"></resume-card>
+      </template>
+      <v-row justify="center">
+        <v-col style="max-width: 650px">
+          <div class="d-flex flex-column justify-center align-center">
+            <employee-info-card :model="model"></employee-info-card>
+            <!-- hire and contract info -->
+            <v-row class="ma-2">
+              <v-col class="pa-3" style="max-width: fit-content">
+                <contract-info-card :contracts="contracts" :model="model"></contract-info-card>
+              </v-col>
+              <v-col class="pa-3" style="max-width: fit-content">
+                <hire-info-card :model="model"></hire-info-card>
+              </v-col>
+            </v-row>
+          </div>
+        </v-col>
+        <v-col>
+          <v-card class="ma-2">
+            <v-card-title>
+              <v-row>
+                <v-col cols="12" align="center">
+                  <v-menu v-if="useDropDown">
+                    <template v-slot:activator="{ props }">
+                      <v-btn variant="text" size="large" class="text-subtitle-1 font-weight-bold" v-bind="props"
+                        >{{ infoTab || 'Select Info' }} <v-icon size="large">mdi-chevron-down</v-icon>
+                      </v-btn>
+                    </template>
+                    <v-list>
+                      <v-list-item @click="selectDropDown('Personal')">Personal</v-list-item>
+                      <v-list-item @click="selectDropDown('Certifications & Awards')"
+                        >Certifications & Awards</v-list-item
+                      >
+                      <v-list-item @click="selectDropDown('Tech, Skills, & Languages')"
+                        >Tech, Skills, & Languages</v-list-item
+                      >
+                      <v-list-item @click="selectDropDown('Job Experience')">Job Experience</v-list-item>
+                      <v-list-item @click="selectDropDown('Education')">Education</v-list-item>
+                    </v-list>
+                  </v-menu>
+                  <v-tabs
+                    v-else
+                    v-model="infoTab"
+                    center-active
+                    show-arrows
+                    align-tabs="center"
+                    color="blue"
+                    class="mx-4"
+                  >
+                    <v-tab value="Personal">Personal</v-tab>
+                    <v-tab value="Certifications & Awards">Certifications & Awards</v-tab>
+                    <v-tab value="Tech, Skills, & Languages">Tech, Skills, & Languages</v-tab>
+                    <v-tab value="Job Experience">Job Experience</v-tab>
+                    <v-tab value="Education">Education</v-tab>
+                  </v-tabs>
+                  <v-divider></v-divider>
+                </v-col>
+              </v-row>
+            </v-card-title>
+            <v-card-text>
+              <v-tabs-window v-model="infoTab">
+                <v-tabs-window-item value="Personal">
+                  <!-- personal info -->
+                  <v-row class="my-2">
+                    <v-col>
+                      <personal-info-card style="padding-bottom: 10px" :model="model"></personal-info-card>
+                    </v-col>
+                    <v-col>
+                      <other-info-card style="padding-bottom: 10px" :model="model"></other-info-card>
+                    </v-col>
+                    <v-col v-if="isUser || isAdmin">
+                      <clearance-card style="padding-bottom: 10px" :model="model"></clearance-card>
+                    </v-col>
+                  </v-row>
+                </v-tabs-window-item>
+                <v-tabs-window-item value="Certifications & Awards">
+                  <!-- certifications and awards -->
+                  <v-row class="my-2">
+                    <v-col>
+                      <certifications-card :model="model"></certifications-card>
+                    </v-col>
+                    <v-col>
+                      <awards-card :model="model"></awards-card>
+                    </v-col>
+                  </v-row>
+                </v-tabs-window-item>
+                <v-tabs-window-item value="Tech, Skills, & Languages">
+                  <!-- tech, skills, languages -->
+                  <v-row class="my-2">
+                    <v-col>
+                      <technologies-card :model="model"></technologies-card>
+                    </v-col>
+                    <v-col>
+                      <languages-card :model="model"></languages-card>
+                    </v-col>
+                  </v-row>
+                </v-tabs-window-item>
+                <v-tabs-window-item value="Job Experience">
+                  <v-row class="my-2">
+                    <!-- case info -->
+                    <v-col>
+                      <case-experience-info-card :model="model"></case-experience-info-card>
+                    </v-col>
+                    <!-- past experience -->
+                    <v-col>
+                      <past-job-experience-info-card
+                        :model="model"
+                        :isAdmin="isAdmin"
+                        :isUser="isUser"
+                      ></past-job-experience-info-card>
+                    </v-col>
+                  </v-row>
+                </v-tabs-window-item>
+                <v-tabs-window-item value="Education">
+                  <!-- education and past experience -->
+                  <v-row class="my-2">
+                    <v-col>
+                      <education-info-card :model="model" :isAdmin="isAdmin" :isUser="isUser"></education-info-card>
+                    </v-col>
+                  </v-row>
+                </v-tabs-window-item>
+              </v-tabs-window>
+            </v-card-text>
+          </v-card>
+        </v-col>
+      </v-row>
+      <employee-form v-model="editing" :employee="model" :contracts="contracts"></employee-form>
+    </base-card>
+  </v-container>
 </template>
 
 <script setup>
-import _ from 'lodash';
-import { computed, onMounted, ref } from 'vue';
-import { useStore } from 'vuex';
-import { updateStoreAvatars } from '../../utils/storeUtils';
+import { computed, ref, inject } from 'vue';
+import { useDisplay } from 'vuetify';
+import AwardsCard from '@/components/employee-beta/cards/AwardsCard.vue';
+import BaseCard from '@/components/employee-beta/cards/BaseCard.vue';
+import CaseExperienceInfoCard from '@/components/employee-beta/cards/CaseExperienceInfoCard.vue';
+import CertificationsCard from '@/components/employee-beta/cards/CertificationsCard.vue';
+import ClearanceCard from '@/components/employee-beta/cards/personal/ClearanceCard.vue';
+import ContractInfoCard from '@/components/employee-beta/cards/ContractInfoCard.vue';
+import EducationInfoCard from '@/components/employee-beta/cards/EducationInfoCard.vue';
+import EmployeeForm from '@/components/employee-beta/forms/EmployeeForm.vue';
+import EmployeeInfoCard from '@/components/employee-beta/cards/EmployeeInfoCard.vue';
+import HireInfoCard from '@/components/employee-beta/cards/HireInfoCard.vue';
+import LanguagesCard from '@/components/employee-beta/cards/LanguagesCard.vue';
+import OtherInfoCard from '@/components/employee-beta/cards/personal/OtherInfoCard.vue';
+import PastJobExperienceInfoCard from '@/components/employee-beta/cards/PastJobExperienceInfoCard.vue';
+import PersonalInfoCard from '@/components/employee-beta/cards/personal/PersonalInfoCard.vue';
+import ResumeCard from '@/components/employee-beta/ResumeCard.vue';
+import TechnologiesCard from '@/components/employee-beta/cards/TechnologiesCard.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                      SETUP                       |
+// |                       SETUP                      |
 // |                                                  |
 // |--------------------------------------------------|
 
-const buttonSize = 34;
+const display = useDisplay();
 
-const store = useStore();
-const props = defineProps({
-  model: {
-    type: Object,
-    required: true
+const model = defineModel();
+defineProps(['contracts', 'loading']);
+const isAdmin = inject('isAdmin');
+const isUser = inject('isUser');
+
+const editing = ref(false);
+const infoTab = ref(null); //currently active tab
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                    COMPUTED                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * computed title for employee header
+ *
+ * @return {string} employee name or My Profile if current user
+ */
+const employeeTitle = computed(() => {
+  return isUser.value ? 'My Profile' : (model.value.nickname || model.value.firstName) + "'s Profile";
+});
+
+/**
+ * computed boolean to decide whether or not to use dropdown.
+ *
+ * @return boolean - returns true for small screens
+ */
+const useDropDown = computed(() => {
+  switch (display.name.value) {
+    case 'xs':
+      return true;
+    default:
+      return false;
   }
-});
-const avatar = ref(null);
-
-onMounted(async () => {
-  if (!store.getters.basecampAvatars) await updateStoreAvatars();
-  let avatars = store.getters.basecampAvatars;
-  const item = _.find(avatars, ['email_address', props.model.email]);
-  avatar.value = item ? item.avatar_url : null;
-});
+}); // useDropDown
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     COMPUTED                     |
+// |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
 
-const initials = computed(() => {
-  if (!props.model) return '';
-  return (
-    (props.model.nickname || props.model.firstName).charAt(0).toUpperCase() +
-    props.model.lastName.charAt(0).toUpperCase()
-  );
-});
-
-const employeeName = computed(() => {
-  return !props.model ? 'unknown employee' : `${props.model.firstName} ${props.model.lastName}`;
-});
-
-const nickname = computed(() => {
-  return props.model.nickname ? `aka ${props.model.nickname}` : null;
-});
-
-const altText = computed(() => {
-  return `${employeeName.value}'s Avatar'`;
-});
+/**
+ * This is used to select the correct tab on mobile devices.
+ */
+function selectDropDown(name) {
+  infoTab.value = name;
+} // selectDropDown
 </script>
-
-<style scoped>
-.fit-content {
-  max-width: fit-content;
-}
-
-.name-text {
-  font-size: xx-large;
-  color: black;
-  display: inline-block;
-  white-space: nowrap;
-}
-
-.nickname-text {
-  font-size: large;
-  font-weight: 500;
-  display: inline-block;
-  white-space: nowrap;
-}
-
-.other-text {
-  font-size: medium;
-  font-weight: 500;
-  display: inline-block;
-  white-space: nowrap;
-}
-
-.logo-icons {
-  top: -10%;
-}
-
-@media (max-width: 620px) {
-}
-</style>

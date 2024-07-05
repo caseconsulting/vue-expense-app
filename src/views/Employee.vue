@@ -376,7 +376,7 @@ function pushHistoryState(employeeNumber) {
  * Routes user to their employee page
  */
 function handleProfileBeta() {
-  this.$router.push(`/employee-beta/${this.$route.params.id}`);
+  this.$router.push(`/employee-beta/${this.model.employeeNumber}`);
 } // handleProfile
 
 /**
