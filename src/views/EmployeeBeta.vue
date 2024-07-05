@@ -3,7 +3,7 @@
     <v-row v-if="basicEmployeeDataLoading" class="pt-0">
       <employee-page-loader />
     </v-row>
-    <div>
+    <div v-else>
       <v-row align="center" class="pt-3">
         <v-col class="pa-0 pl-4">
           <v-btn id="backBtn" elevation="2" :size="isMobile() ? 'x-small' : 'default'" @click="router.back()">
@@ -20,25 +20,25 @@
           >
             <b>{{ 'Hello, ' + model.firstName + '!' }}</b>
           </p>
-          <!-- Timesheets and Budgets-->
         </v-col>
         <v-spacer></v-spacer>
       </v-row>
-      <v-row>
+      <v-row ref="">
+        <!-- Timesheets and Budgets-->
         <v-col v-if="displayTimeAndBalances" cols="12" md="4" class="pt-0" height>
           <time-data :key="model" :employee="model" class="my-4" />
-          <!-- <available-budgets TODO:
-              :key="refreshKey"
-              class="mb-4"
-              :employee="model"
-              :expenses="expenses"
-              :expense-types="expenseTypes"
-              :accessible-budgets="accessibleBudgets"
-              :employee-data-loading="loading"
-              :fiscal-date-view="fiscalDateView"
-            /> -->
+          <employee-budgets
+            :refreshKey="refreshKey"
+            class="mb-4"
+            :employee="model"
+            :expenses="expenses"
+            :expense-types="expenseTypes"
+            :accessible-budgets="accessibleBudgets"
+            :employee-data-loading="loading"
+            :fiscal-date-view="fiscalDateView"
+          />
         </v-col>
-        <v-col cols="12" :md="displayTimeAndBalances ? 8 : 12" class="pa-0">
+        <v-col cols="12" :md="displayTimeAndBalances ? 7 : 12" class="pa-0">
           <employee-info v-model="model" :contracts="contracts" :loading="loading"></employee-info>
         </v-col>
       </v-row>
@@ -47,25 +47,28 @@
 </template>
 
 <script setup>
+import api from '@/shared/api.js';
 import {
-  updateStoreContracts,
-  updateStoreEmployees,
-  updateStoreTags,
-  // updateStoreExpenseTypes,
-  updateStoreUser
-} from '@/utils/storeUtils';
-import {
-  // getCurrentBudgetYear,
+  getCurrentBudgetYear,
   // isEmpty,
   isMobile,
   storeIsPopulated,
   userRoleIsAdmin,
   userRoleIsManager
 } from '@/utils/utils.js';
+import {
+  updateStoreBudgets,
+  updateStoreContracts,
+  updateStoreEmployees,
+  updateStoreExpenseTypes,
+  updateStoreTags,
+  updateStoreUser
+} from '@/utils/storeUtils';
 import _ from 'lodash';
-import { inject, onBeforeMount, onBeforeUnmount, onMounted, provide, ref, watch, computed } from 'vue';
+import { inject, onBeforeMount, onBeforeUnmount, onMounted, provide, ref, watch, computed, readonly } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
+import EmployeeBudgets from '@/components/employee-beta/EmployeeBudgets.vue';
 import EmployeeInfo from '@/components/employee-beta/EmployeeInfo.vue';
 import EmployeePageLoader from '@/components/employees/EmployeePageLoader.vue';
 import TimeData from '@/components/shared/timesheets/TimeData.vue';
@@ -87,11 +90,14 @@ provide('isAdmin', isAdmin);
 const isUser = ref(false);
 provide('isUser', isUser);
 
+const accessibleBudgets = ref(null);
 const basicEmployeeDataLoading = ref(true);
 const contracts = ref(null);
 const displayTimeAndBalances = ref(false);
+const expenses = ref(null);
+const expenseTypes = ref(null);
+const fiscalDateView = ref('');
 const loading = ref(true);
-
 const model = ref({
   awards: [],
   birthday: '',
@@ -131,6 +137,12 @@ const model = ref({
   twitter: '',
   workStatus: 100
 }); // selected employee
+const refreshKey = readonly({
+  model,
+  expenses,
+  expenseTypes,
+  accessibleBudgets
+});
 const user = ref(null);
 
 // |--------------------------------------------------|
@@ -177,6 +189,20 @@ computed(storeIsPopulated);
 // |--------------------------------------------------|
 
 /**
+ * Checks if the user has access to any budgets
+ */
+async function checkForBudgetAccess() {
+  if (userIsEmployee()) {
+    if (!store.getters.budgets) {
+      await updateStoreBudgets();
+    }
+    accessibleBudgets.value = store.getters.budgets;
+  } else if (hasAdminPermissions()) {
+    accessibleBudgets.value = await api.getAllActiveEmployeeBudgets(model.value.id);
+  }
+} // checkForBudgetAccess
+
+/**
  * Get employee data.
  */
 async function getProfileData() {
@@ -205,7 +231,7 @@ async function getProfileData() {
   isUser.value = userIsEmployee();
   basicEmployeeDataLoading.value = false;
   if (model.value) {
-    // await refreshExpenseData(true); //TODO: Implement Expenses
+    await refreshExpenseData(true); //TODO: Implement Expenses
   }
   loading.value = false;
 } // getProfileData
@@ -225,6 +251,22 @@ function goBackToAlphaProfile() {
 function hasAdminPermissions() {
   return userRoleIsAdmin() || userRoleIsManager();
 } // hasAdminPermissions
+
+/**
+ * Refreshes expense data based on the model, including: accessibleBudgets, expenses, expenseTypes, and fiscalDateView
+ */
+async function refreshExpenseData(full = false) {
+  // these are aggregated so it probably doesn't need to be updated
+  if (full) {
+    [expenses.value] = await Promise.all([
+      hasAdminPermissions() || userIsEmployee() ? api.getAllAggregateExpenses() : '', // only load if needed
+      !store.getters.expenseTypes ? updateStoreExpenseTypes() : ''
+    ]);
+    expenseTypes.value = store.getters.expenseTypes;
+  }
+  await checkForBudgetAccess();
+  fiscalDateView.value = getCurrentBudgetYear(model.value.hireDate);
+} // refreshExpenseData
 
 /**
  * Check if the user the employee that is displayed. Returns true if the user is the employee displayed, otherwise returns false.
