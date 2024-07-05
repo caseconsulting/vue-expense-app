@@ -1,26 +1,32 @@
 <template>
-  <v-container fluid>
+  <v-container fluid class="pa-0">
     <v-row v-if="basicEmployeeDataLoading" class="pt-0">
       <employee-page-loader />
     </v-row>
     <div>
-      <v-row>
-        <v-col>
+      <v-row align="center" class="pt-3">
+        <v-col class="pa-0 pl-4">
           <v-btn id="backBtn" elevation="2" :size="isMobile() ? 'x-small' : 'default'" @click="router.back()">
             <v-icon size="large" class="pr-1"> mdi-arrow-left-thin </v-icon>
             Back
           </v-btn>
           <v-btn color="#bc3825" @click="goBackToAlphaProfile()" theme="dark" class="ma-2">Go to Alpha profile!</v-btn>
         </v-col>
-        <v-col align-self="center" class="d-flex justify-center">
-          <h1>{{ 'Hello, ' + model.firstName + '!' }}</h1>
+        <v-col class="pa-0">
+          <p
+            v-if="isUser"
+            class="text-h6 text-sm-h4 text-center mb-0"
+            style="font-family: 'Avenir', Helvetica, Arial, sans-serif"
+          >
+            <b>{{ 'Hello, ' + model.firstName + '!' }}</b>
+          </p>
           <!-- Timesheets and Budgets-->
         </v-col>
         <v-spacer></v-spacer>
       </v-row>
       <v-row>
-        <v-col v-if="displayTimeAndBalances" cols="4" class="pt-3" height>
-          <time-data :key="model" :employee="model" class="ma-4" />
+        <v-col v-if="displayTimeAndBalances" cols="12" md="4" class="pt-0" height>
+          <time-data :key="model" :employee="model" class="my-4" />
           <!-- <available-budgets TODO:
               :key="refreshKey"
               class="mb-4"
@@ -32,7 +38,7 @@
               :fiscal-date-view="fiscalDateView"
             /> -->
         </v-col>
-        <v-col cols="8">
+        <v-col cols="12" :md="displayTimeAndBalances ? 8 : 12" class="pa-0">
           <employee-info v-model="model" :contracts="contracts" :loading="loading"></employee-info>
         </v-col>
       </v-row>
