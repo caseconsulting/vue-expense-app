@@ -27,7 +27,7 @@
       <v-row>
         <v-col v-if="displayTimeAndBalances" cols="12" md="4" class="pt-0" height>
           <time-data :key="model" :employee="model" class="my-4" />
-          <available-budgets
+          <employee-budgets
             :refreshKey="refreshKey"
             class="mb-4"
             :employee="model"
@@ -37,6 +37,7 @@
             :employee-data-loading="loading"
             :fiscal-date-view="fiscalDateView"
           />
+          
         </v-col>
         <v-col cols="12" :md="displayTimeAndBalances ? 8 : 12" class="pa-0">
           <employee-info v-model="model" :contracts="contracts" :loading="loading"></employee-info>
@@ -68,7 +69,7 @@ import _ from 'lodash';
 import { inject, onBeforeMount, onBeforeUnmount, onMounted, provide, ref, watch, computed, readonly } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
-import AvailableBudgets from '@/components/shared/AvailableBudgets.vue';
+import EmployeeBudgets from '@/components/employee-beta/EmployeeBudgets.vue'
 import EmployeeInfo from '@/components/employee-beta/EmployeeInfo.vue';
 import EmployeePageLoader from '@/components/employees/EmployeePageLoader.vue';
 import TimeData from '@/components/shared/timesheets/TimeData.vue';
