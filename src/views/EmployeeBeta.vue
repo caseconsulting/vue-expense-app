@@ -14,6 +14,20 @@
         </v-col>
         <v-col align-self="center" class="d-flex justify-center">
           <h1>{{ 'Hello, ' + model.firstName + '!' }}</h1>
+          <!-- Timesheets and Budgets-->
+          </v-col>
+        <v-col v-if="displayTimeAndBalances" cols="12" md="5" lg="5" class="pt-0">
+          <time-data :key="model" :employee="model" class="mb-4" />
+          <!-- <available-budgets
+            :key="refreshKey"
+            class="mb-4"
+            :employee="model"
+            :expenses="expenses"
+            :expense-types="expenseTypes"
+            :accessible-budgets="accessibleBudgets"
+            :employee-data-loading="loading"
+            :fiscal-date-view="fiscalDateView"
+          /> -->
         </v-col>
         <v-spacer></v-spacer>
       </v-row>
@@ -200,6 +214,7 @@ import PersonalInfoCard from '@/components/employee-beta/cards/personal/Personal
 import OtherInfoCard from '@/components/employee-beta/cards/personal/OtherInfoCard.vue';
 import ClearanceCard from '@/components/employee-beta/cards/personal/ClearanceCard.vue';
 import ResumeCard from '@/components/employee-beta/ResumeCard.vue';
+import TimeData from '@/components/shared/timesheets/TimeData.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -351,12 +366,12 @@ async function getProfileData() {
   }
   user.value = store.getters.user;
   contracts.value = store.getters.contracts;
-  displayTimeAndBalances.value = hasAdminPermissions();
-  basicEmployeeDataLoading.value = false;
+  displayTimeAndBalances.value = userRoleIsAdmin() || userIsEmployee();
   isAdmin.value = hasAdminPermissions();
   isUser.value = userIsEmployee();
+  basicEmployeeDataLoading.value = false;
   if (model.value) {
-    // await refreshExpenseData(true); //TODO:Implement Expenses and Quickbooks Time
+    // await refreshExpenseData(true); //TODO: Implement Expenses
   }
   loading.value = false;
 } // getProfileData
