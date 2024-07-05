@@ -23,7 +23,7 @@
           </div>
         </div>
         <!-- Employee does not have Technology Experience -->
-        <p v-else>No Technologies or Skills Information</p>
+        <p v-else class="mt-6 ml-6">No Technologies or Skills Information</p>
       </template>
     </base-card>
     <technologies-modal v-model="toggleModal" :model="model"></technologies-modal>

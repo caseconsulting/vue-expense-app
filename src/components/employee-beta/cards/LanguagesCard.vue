@@ -5,7 +5,7 @@
         <!-- Employee has entered languages-->
         <languages-list v-if="!isEmpty(languages)" :list="filteredList"></languages-list>
         <!-- Employee does not have Language Experience -->
-        <p v-else>No Foreign Language Information</p>
+        <p v-else class="mt-6 ml-6">No Foreign Language Information</p>
         <div v-if="!isEmpty(languages) && Math.ceil(languages.length / 5) != 1" class="text-center">
           <v-card-actions class="d-flex justify-center">
             <v-btn @click="activateModal()">Click To See More</v-btn>
