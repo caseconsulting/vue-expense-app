@@ -7,7 +7,7 @@
           <certifications-list :list="filteredList"></certifications-list>
         </div>
         <!-- Employee does not have Certifications -->
-        <p v-else class="ml-6">No Certification Information</p>
+        <p v-else class="mt-6 ml-6">No Certification Information</p>
         <div
           v-if="!isEmpty(model.certifications) && Math.ceil(model.certifications.length / ITEMS_PER_PAGE) != 1"
           class="text-center"

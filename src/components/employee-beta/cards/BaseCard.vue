@@ -1,13 +1,15 @@
 <template>
   <v-card id="base-card">
     <v-card-title class="beta_header_style px-0 d-flex align-center">
-      <v-container class="fit-content d-flex flex-nowrap justify-start">
+      <v-container class="fit-content d-flex flex-nowrap">
         <!-- title -->
         <v-row no-gutters class="fit-content align-center">
           <v-col v-if="$slots.prependIcon" class="mr-2">
+            <!-- Card Title Icon Slot -->
             <slot name="prependIcon"></slot>
           </v-col>
           <v-col>
+            <!-- Custom Title Slot  -->
             <slot name="title">
               <h3 class="text-white">{{ title }}</h3>
             </slot>
@@ -20,13 +22,7 @@
             <slot name="actions"></slot>
           </v-col>
           <v-col class="ml-2">
-            <v-btn
-              v-if="(isAdmin || isUser) && !noEdit"
-              @click="toggleEdit()"
-              density="comfortable"
-              variant="text"
-              icon=""
-            >
+            <v-btn v-if="isAdmin || isUser" @click="toggleEdit()" density="comfortable" variant="text" icon="">
               <v-tooltip activator="parent" location="top"> Edit {{ title }} </v-tooltip>
               <v-icon id="edit" color="white"> mdi-pencil </v-icon>
             </v-btn>
@@ -35,6 +31,7 @@
       </v-container>
     </v-card-title>
     <v-card-text>
+      <!-- Default Slot -->
       <slot></slot>
     </v-card-text>
   </v-card>
@@ -55,10 +52,6 @@ const props = defineProps({
   title: {
     type: String,
     required: true
-  },
-  noEdit: {
-    type: Boolean,
-    default: false
   }
 });
 const isAdmin = inject('isAdmin');

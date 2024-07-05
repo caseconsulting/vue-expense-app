@@ -15,26 +15,36 @@
       <v-btn color="white" variant="text" @click="clearStatus()"> Close </v-btn>
     </v-snackbar>
     <v-row>
-      <v-col v-if="(isAdmin || isUser) && !editing" align="right" class="px-0 pr-3 ma-0">
+      <v-col v-if="(isAdmin || isUser) && !editing" align="right" class="px-0 ma-0">
         <v-btn
           :size="isMobile() ? 'x-small' : 'default'"
           color="#bc3825"
           class="text-white"
           @click="toggleResumeParser = !toggleResumeParser"
-          prepend-icon="mdi-upload"
+          variant="text"
+          density="comfortable"
+          icon=""
         >
-          <b>Upload Resume</b>
+          <v-tooltip activator="parent" location="top">
+            <p class="ma-0 pa-0">Upload Resume</p>
+          </v-tooltip>
+          <v-icon icon="mdi-upload"></v-icon>
         </v-btn>
         <v-btn
-          class="text-white mx-1"
+          class="text-white mx-1 fit-content"
           color="#bc3825"
           :size="isMobile() ? 'x-small' : 'default'"
           :disabled="model.resumeUpdated == null"
           :loading="deleteLoading"
           @click="toggleDeleteModal = !toggleDeleteModal"
-          prepend-icon="mdi-delete"
+          variant="text"
+          density="comfortable"
+          icon=""
         >
-          <b>Delete Resume</b>
+          <v-tooltip activator="parent" location="top">
+            <p class="ma-0 pa-0">Delete Resume</p>
+          </v-tooltip>
+          <v-icon icon="mdi-delete"></v-icon>
         </v-btn>
         <v-btn
           class="text-white"
@@ -42,7 +52,9 @@
           :size="isMobile() ? 'x-small' : 'default'"
           :disabled="model.resumeUpdated == null"
           @click="downloadResume()"
-          prepend-icon="mdi-file-download"
+          variant="text"
+          density="comfortable"
+          icon=""
         >
           <v-tooltip activator="parent" location="top">
             <p class="ma-0 pa-0">
@@ -52,7 +64,7 @@
               {{ model.resumeUpdated != null ? `Uploaded ${format(model.resumeUpdated, null, dateFormat)}` : '' }}
             </p>
           </v-tooltip>
-          <b>Download Resume</b>
+          <v-icon icon="mdi-file-download"></v-icon>
         </v-btn>
       </v-col>
     </v-row>
