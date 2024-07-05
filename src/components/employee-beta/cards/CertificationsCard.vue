@@ -24,10 +24,10 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { isEmpty } from '@/utils/utils';
-import BaseCard from './BaseCard.vue';
-import CertificationsList from '../lists/CertificationsList.vue';
-import CertificationsModal from '../modals/CertificationsModal.vue';
+import { isEmpty, sortByDateReceived } from '@/utils/utils';
+import BaseCard from '@/components/employee-beta/cards/BaseCard.vue';
+import CertificationsList from '@/components/employee-beta/lists/CertificationsList.vue';
+import CertificationsModal from '@/components/employee-beta/modals/CertificationsModal.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -50,7 +50,7 @@ const filteredList = computed(() => {
   const startIndex = 0; //each page contains 5 certification entries
   const endIndex = ITEMS_PER_PAGE;
   if (!isEmpty(props.model.certifications)) {
-    return props.model.certifications.slice(startIndex, endIndex);
+    return sortByDateReceived(props.model.certifications).slice(startIndex, endIndex);
   }
   return [];
 });

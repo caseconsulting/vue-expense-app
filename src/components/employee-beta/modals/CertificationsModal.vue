@@ -22,9 +22,9 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { isEmpty } from '@/utils/utils';
-import BaseInfoModal from '../modals/BaseInfoModal.vue';
-import CertificationsList from '../lists/CertificationsList.vue';
+import { isEmpty, sortByDateReceived } from '@/utils/utils';
+import BaseInfoModal from '@/components/employee-beta/modals/BaseInfoModal.vue';
+import CertificationsList from '@/components/employee-beta//lists/CertificationsList.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -45,7 +45,7 @@ const filteredList = computed(() => {
   const startIndex = 5 * (page.value - 1); //each page contains 5 certification entries
   const endIndex = startIndex + 5;
   if (!isEmpty(props.model.certifications)) {
-    return props.model.certifications.slice(startIndex, endIndex);
+    return sortByDateReceived(props.model.certifications).slice(startIndex, endIndex);
   }
   return [];
 });

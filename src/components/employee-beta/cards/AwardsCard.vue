@@ -24,10 +24,10 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { isEmpty } from '@/utils/utils';
-import BaseCard from './BaseCard.vue';
-import AwardsList from '../lists/AwardsList.vue';
-import AwardsModal from '../modals/AwardsModal.vue';
+import { isEmpty, sortByDateReceived } from '@/utils/utils';
+import AwardsList from '@/components/employee-beta/lists/AwardsList.vue';
+import AwardsModal from '@/components/employee-beta/modals/AwardsModal.vue';
+import BaseCard from '@/components/employee-beta/cards/BaseCard.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -48,7 +48,7 @@ const filteredList = computed(() => {
   const startIndex = 0;
   const endIndex = 5;
   if (!isEmpty(props.model.awards)) {
-    return props.model.awards.slice(startIndex, endIndex);
+    return sortByDateReceived(props.model.awards).slice(startIndex, endIndex);
   }
   return [];
 });
