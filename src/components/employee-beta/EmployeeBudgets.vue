@@ -58,11 +58,6 @@
               :expense-types="expenseTypes"
               :fiscal-date-view="fiscalDateView"
             />
-            <!-- <v-card v-else class="pa-6">
-              <v-skeleton-loader width="40%" class="px-5 mx-auto" type="heading" />
-              <v-skeleton-loader type="image" />
-              <v-skeleton-loader width="60%" class="px-5" type="text" />
-            </v-card> -->
           </div>
         </div>
       </v-card-text>

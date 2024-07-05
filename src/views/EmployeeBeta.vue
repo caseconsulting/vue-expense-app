@@ -20,11 +20,11 @@
           >
             <b>{{ 'Hello, ' + model.firstName + '!' }}</b>
           </p>
-          <!-- Timesheets and Budgets-->
         </v-col>
         <v-spacer></v-spacer>
       </v-row>
-      <v-row>
+      <v-row ref="">
+        <!-- Timesheets and Budgets-->
         <v-col v-if="displayTimeAndBalances" cols="12" md="4" class="pt-0" height>
           <time-data :key="model" :employee="model" class="my-4" />
           <employee-budgets
@@ -37,9 +37,8 @@
             :employee-data-loading="loading"
             :fiscal-date-view="fiscalDateView"
           />
-          
         </v-col>
-        <v-col cols="12" :md="displayTimeAndBalances ? 8 : 12" class="pa-0">
+        <v-col cols="12" :md="displayTimeAndBalances ? 7 : 12" class="pa-0">
           <employee-info v-model="model" :contracts="contracts" :loading="loading"></employee-info>
         </v-col>
       </v-row>
@@ -69,7 +68,7 @@ import _ from 'lodash';
 import { inject, onBeforeMount, onBeforeUnmount, onMounted, provide, ref, watch, computed, readonly } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
-import EmployeeBudgets from '@/components/employee-beta/EmployeeBudgets.vue'
+import EmployeeBudgets from '@/components/employee-beta/EmployeeBudgets.vue';
 import EmployeeInfo from '@/components/employee-beta/EmployeeInfo.vue';
 import EmployeePageLoader from '@/components/employees/EmployeePageLoader.vue';
 import TimeData from '@/components/shared/timesheets/TimeData.vue';
