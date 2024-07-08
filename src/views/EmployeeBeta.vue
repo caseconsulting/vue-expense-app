@@ -292,7 +292,6 @@ watch(
   storeIsPopulated,
   async () => {
     if (storeIsPopulated) {
-      console.log('watch store');
       await getProfileData();
     }
   } // watchStoreisPopulated

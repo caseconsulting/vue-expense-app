@@ -83,11 +83,12 @@ import { useStore } from 'vuex';
 // |--------------------------------------------------|
 
 const props = defineProps([
-  'employee',
-  'expenseTypes',
   'accessibleBudgets',
-  'fiscalDateView',
+  'employee',
   'employeeDataLoading',
+  'expenses',
+  'expenseTypes',
+  'fiscalDateView',
   'refreshKey'
 ]);
 const emitter = inject('emitter');
@@ -132,21 +133,6 @@ onBeforeMount(async () => {
 onBeforeUnmount(() => {
   emitter.off('close-summary');
 }); //beforeUnmount
-
-// // |--------------------------------------------------|
-// // |                                                  |
-// // |                     COMPUTED                     |
-// // |                                                  |
-// // |--------------------------------------------------|
-
-// /**
-//  * returns as true if the current signed in user has the same id as the employee prop
-//  *
-//  * @return boolean - current signed in user has the same id as the employee prop
-//  */
-// const isUser = computed(() => {
-//   return props.employee && currentUser.value && props.employee.id == currentUser.value.id;
-// }); // isUser
 
 // |--------------------------------------------------|
 // |                                                  |
