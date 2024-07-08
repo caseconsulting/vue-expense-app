@@ -411,6 +411,13 @@ function fillData() {
         font: {
           size: 15
         }
+      },
+      subtitle: {
+        display: true,
+        text: '*Click on a slice to see employees',
+        font: {
+          style: 'italic'
+        }
       }
     },
     maintainAspectRatio: false

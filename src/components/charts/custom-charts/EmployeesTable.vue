@@ -15,6 +15,7 @@
         <v-toolbar color="transparent">
           <v-toolbar-title class="font-weight-bold">Employee Statistics</v-toolbar-title>
         </v-toolbar>
+        <p class="pl-3" style="color: #828282"><i>*Click on row to see employees</i></p>
       </template>
       <template v-slot:headers></template>
       <template v-slot:bottom></template>

@@ -149,6 +149,13 @@ function fillData() {
           size: 15
         }
       },
+      subtitle: {
+        display: true,
+        text: enabled.value ? '*Click on a slice to see employees' : '',
+        font: {
+          style: 'italic'
+        }
+      },
       tooltip: {
         enabled: enabled.value
       }
