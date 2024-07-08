@@ -93,7 +93,7 @@ import ExpenseForm from '@/components/expenses/ExpenseForm.vue';
 import AnniversaryCard from '@/components/shared/AnniversaryCard.vue';
 import api from '@/shared/api.js';
 import { updateStoreBudgets, updateStoreEmployees, updateStoreExpenseTypes } from '@/utils/storeUtils';
-import { getCurrentBudgetYear } from '@/utils/utils';
+import { getCurrentBudgetYear, isMobile } from '@/utils/utils';
 import { computed, inject, onBeforeMount, onBeforeUnmount, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 
