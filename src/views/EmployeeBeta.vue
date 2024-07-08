@@ -94,7 +94,7 @@
             :loading="loading"
             :refreshKey="refreshKey"
           ></employee-info>
-          <activity-feed class="pa-4" :employee="model" />
+          <activity-feed class="pa-2" :employee="model" />
         </v-col>
       </v-row>
     </div>

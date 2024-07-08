@@ -1,139 +1,147 @@
+<!-- eslint-disable vue/no-v-model-argument -->
 <template>
   <div>
     <v-card class="overflow-y-hidden">
       <!-- Title -->
-      <v-card-title class="d-flex align-center header_style">
+      <v-card-title class="d-flex align-center justify-space-between header_style">
         <h3>Activity Feed</h3>
-        <v-switch
-          v-model="toggleUserActivities"
-          label="Show User Activities"
-          color="info"
-          base-color="white"
-          inset
-          hide-details
-        ></v-switch>
+        <div class="d-flex">
+          <v-switch
+            v-if="smAndUp"
+            v-model="toggleUserActivities"
+            label="Show User Activities"
+            color="info"
+            base-color="white"
+            inset
+            hide-details
+            class="px-2"
+          ></v-switch>
+          <v-switch v-model="toggleEnable" label="Enable" color="info" base-color="white" inset hide-details></v-switch>
+        </div>
       </v-card-title>
       <v-spacer></v-spacer>
-      <div v-if="loading" class="pa-8 pt-6">
-        <v-progress-linear :indeterminate="true"></v-progress-linear>
-      </div>
-      <div v-else>
-        <!-- Autocomplete filters -->
-        <v-card-text class="mb-0 pb-0">
-          <!-- Loading Bar -->
-          <v-autocomplete
-            v-model="activeFilters"
-            :items="filters"
-            multiple
-            chips
-            closable-chips
-            hide-details
-            variant="filled"
-            density="compact"
-            return-object
-            item-title="type"
-            item-value="type"
-            :search.sync="searchString"
-            @update:model-value="searchString = ''"
-            class="elevate"
-            append-icon=""
-          >
-            <template v-slot:chip="{ props, item }">
-              <v-chip v-bind="props" class="pl-2">
-                <v-avatar :color="item.raw.color" size="23" class="mr-1">
-                  <v-icon color="white" close>{{ item.raw.icon }}</v-icon>
-                </v-avatar>
-                <span class="text-black">
-                  {{ item.raw.type }}
-                </span>
-              </v-chip>
-            </template>
-            <template v-slot:item="{ props, item }">
-              <v-list-item v-bind="props" :title="item.raw.type">
-                <template v-slot:prepend>
-                  <v-avatar :color="item.raw.color" size="30" class="mr-1">
+      <v-expand-transition v-show="toggleEnable">
+        <div v-if="loading" class="pa-8 pt-6">
+          <v-progress-linear :indeterminate="true"></v-progress-linear>
+        </div>
+        <div v-else>
+          <!-- Autocomplete filters -->
+          <v-card-text class="mb-0 pb-0">
+            <!-- Loading Bar -->
+            <v-autocomplete
+              v-model="activeFilters"
+              :items="filters"
+              multiple
+              chips
+              closable-chips
+              hide-details
+              variant="filled"
+              density="compact"
+              return-object
+              item-title="type"
+              item-value="type"
+              v-model:search="searchString"
+              @update:model-value="searchString = ''"
+              class="elevate"
+              append-icon=""
+            >
+              <template v-slot:chip="{ props, item }">
+                <v-chip v-bind="props" class="pl-2">
+                  <v-avatar :color="item.raw.color" size="23" class="mr-1">
                     <v-icon color="white" close>{{ item.raw.icon }}</v-icon>
                   </v-avatar>
-                </template>
-              </v-list-item>
-            </template>
-          </v-autocomplete>
-        </v-card-text>
-        <v-timeline side="end" density="compact" class="timeline ml-9">
-          <!-- Timeline -->
-          <v-timeline-item v-for="item in filterEvents" density="compact" :dot-color="item.color" :key="item.name">
-            <!-- Expanded Event Description -->
-            <v-tooltip
-              v-if="item.truncatedText"
-              activator="parent"
-              location="top"
-              max-width="400px"
-              min-width="200px"
-              :color="item.truncatedText ? 'grey-darken-3' : 'rgba(0, 0, 0, 0)'"
-              open-delay="200"
-            >
-              <span class="activityFeedText">{{ item.text }}</span>
-            </v-tooltip>
-            <!-- Icon -->
-            <template v-slot:icon v-if="item.icon">
-              <v-btn variant="text" icon :href="getURL(item)" target="blank">
-                <v-tooltip
-                  v-if="
-                    item.newCampfire ||
-                    item.congratulateCampfire ||
-                    item.birthdayCampfire ||
-                    item.campfire ||
-                    item.eventScheduled ||
-                    item.basecampLink
-                  "
-                  activator="parent"
-                  location="bottom"
+                  <span class="text-black">
+                    {{ item.raw.type }}
+                  </span>
+                </v-chip>
+              </template>
+              <template v-slot:item="{ props, item }">
+                <v-list-item v-bind="props" :title="item.raw.type">
+                  <template v-slot:prepend>
+                    <v-avatar :color="item.raw.color" size="30" class="mr-1">
+                      <v-icon color="white" close>{{ item.raw.icon }}</v-icon>
+                    </v-avatar>
+                  </template>
+                </v-list-item>
+              </template>
+            </v-autocomplete>
+          </v-card-text>
+          <v-timeline side="end" density="compact" class="timeline ml-9">
+            <!-- Timeline -->
+            <v-timeline-item v-for="item in filterEvents" density="compact" :dot-color="item.color" :key="item.name">
+              <!-- Expanded Event Description -->
+              <v-tooltip
+                v-if="item.truncatedText"
+                activator="parent"
+                location="top"
+                max-width="400px"
+                min-width="200px"
+                :color="item.truncatedText ? 'grey-darken-3' : 'rgba(0, 0, 0, 0)'"
+                open-delay="200"
+              >
+                <span class="activityFeedText">{{ item.text }}</span>
+              </v-tooltip>
+              <!-- Icon -->
+              <template v-slot:icon v-if="item.icon">
+                <v-btn variant="text" icon :href="getURL(item)" target="blank">
+                  <v-tooltip
+                    v-if="
+                      item.newCampfire ||
+                      item.congratulateCampfire ||
+                      item.birthdayCampfire ||
+                      item.campfire ||
+                      item.eventScheduled ||
+                      item.basecampLink
+                    "
+                    activator="parent"
+                    location="bottom"
+                  >
+                    <span v-if="item.newCampfire">Welcome to team</span>
+                    <span v-else-if="item.congratulateCampfire">Congratulate</span>
+                    <span v-else-if="item.birthdayCampfire">Say happy birthday</span>
+                    <span v-else-if="item.campfire">Comment in campfire</span>
+                    <span v-else-if="item.eventScheduled">See event</span>
+                    <span v-else-if="item.basecampLink">View in Basecamp</span>
+                  </v-tooltip>
+                  <v-icon class="text-white">{{ item.icon }}</v-icon>
+                </v-btn>
+              </template>
+              <!-- End Icon -->
+
+              <!-- Item Title: Date -->
+              <h3>{{ item.date }}</h3>
+
+              <div v-if="item.type === 'Anniversary'" class="px-4">
+                <v-btn @click="openAnniversariesModal(item)" color="#bc3825" class="text-white" size="small"
+                  >View {{ item.events.length }} {{ item.events.length > 1 ? 'Anniversaries' : 'Anniversary' }}</v-btn
                 >
-                  <span v-if="item.newCampfire">Welcome to team</span>
-                  <span v-else-if="item.congratulateCampfire">Congratulate</span>
-                  <span v-else-if="item.birthdayCampfire">Say happy birthday</span>
-                  <span v-else-if="item.campfire">Comment in campfire</span>
-                  <span v-else-if="item.eventScheduled">See event</span>
-                  <span v-else-if="item.basecampLink">View in Basecamp</span>
-                </v-tooltip>
-                <v-icon class="text-white">{{ item.icon }}</v-icon>
-              </v-btn>
-            </template>
-            <!-- End Icon -->
-
-            <!-- Item Title: Date -->
-            <h3>{{ item.date }}</h3>
-
-            <div v-if="item.type === 'Anniversary'" class="px-4">
-              <v-btn @click="openAnniversariesModal(item)" color="#bc3825" class="text-white" size="small"
-                >View {{ item.events.length }} {{ item.events.length > 1 ? 'Anniversaries' : 'Anniversary' }}</v-btn
-              >
-            </div>
-
-            <div v-else>
-              <!-- Event has a link -->
-              <v-list-item
-                class="ma-auto pa-auto activityFeedText"
-                v-if="item.link"
-                :href="item.link"
-                target="_blank"
-                :density="true && 'compact'"
-              >
-                <v-row dense>
-                  <v-col cols="11">{{ item.truncatedText ? item.truncatedText : item.text }}&nbsp;</v-col>
-                  <v-col cols="1">
-                    <v-icon height="12" width="12" color="blue">open-in-new</v-icon>
-                  </v-col>
-                </v-row>
-              </v-list-item>
-              <!-- Event does not have a link -->
-              <div class="px-4 activityFeedText" v-else>
-                {{ item.truncatedText ? item.truncatedText : item.text }}
               </div>
-            </div>
-          </v-timeline-item>
-        </v-timeline>
-      </div>
+
+              <div v-else>
+                <!-- Event has a link -->
+                <v-list-item
+                  class="ma-auto pa-auto activityFeedText"
+                  v-if="item.link"
+                  :href="item.link"
+                  target="_blank"
+                  :density="true && 'compact'"
+                >
+                  <v-row dense>
+                    <v-col cols="11">{{ item.truncatedText ? item.truncatedText : item.text }}&nbsp;</v-col>
+                    <v-col cols="1">
+                      <v-icon height="12" width="12" color="blue">open-in-new</v-icon>
+                    </v-col>
+                  </v-row>
+                </v-list-item>
+                <!-- Event does not have a link -->
+                <div class="px-4 activityFeedText" v-else>
+                  {{ item.truncatedText ? item.truncatedText : item.text }}
+                </div>
+              </div>
+            </v-timeline-item>
+          </v-timeline>
+        </div>
+      </v-expand-transition>
     </v-card>
     <v-dialog v-model="toggleAnniversariesModal" max-width="700" scrollable>
       <AnniversariesModal :item="item" />
@@ -162,15 +170,18 @@ import {
 } from '@/shared/dateUtils';
 import { isEmpty } from '@/utils/utils';
 import AnniversariesModal from './AnniversariesModal.vue';
-import { computed, inject, onBeforeMount, ref, watch } from 'vue';
+import { computed, inject, onBeforeMount, onBeforeUnmount, ref, watch } from 'vue';
 import { useStore } from 'vuex';
+import { useDisplay } from 'vuetify';
 
 // |--------------------------------------------------|
 // |                                                  |
 // |                     SETUP                        |
 // |                                                  |
 // |--------------------------------------------------|
+const TEXTMAXLENGTH = 110;
 
+const { smAndUp } = useDisplay();
 const emitter = inject('emitter');
 const store = useStore();
 const props = defineProps({
@@ -179,6 +190,7 @@ const props = defineProps({
     required: true
   }
 });
+const toggleActivitiesFeedStorage = JSON.parse(localStorage.toggleActivitiesFeed ?? '{}'); // retrieve key from localStorage as object
 
 const activeFilters = ref([]);
 const events = ref([]);
@@ -188,9 +200,8 @@ const item = ref(null);
 const loading = ref(true);
 const searchString = ref('');
 const toggleAnniversariesModal = ref(false);
-const toggleUserActivities = ref(false);
-
-const TEXTMAXLENGTH = 110;
+const toggleEnable = ref(JSON.parse(toggleActivitiesFeedStorage?.enable ?? 'true'));
+const toggleUserActivities = ref(JSON.parse(toggleActivitiesFeedStorage?.userActivities ?? 'false'));
 
 emitter.on('close-anniversaries-modal', () => {
   toggleAnniversariesModal.value = false;
@@ -206,6 +217,13 @@ onBeforeMount(async () => {
   if (store.getters.storeIsPopulated) {
     await createEvents();
   }
+});
+
+onBeforeUnmount(() => {
+  localStorage.toggleActivitiesFeed = JSON.stringify({
+    enable: toggleEnable.value,
+    userActivities: toggleUserActivities.value
+  });
 });
 
 // |--------------------------------------------------|
@@ -245,11 +263,18 @@ const filterEvents = computed(() => {
  * Create the events to populate the activity feed
  */
 async function createEvents() {
+  if (!toggleEnable.value) {
+    return;
+  }
   loading.value = true;
   if (store.getters.events) {
     events.value = store.getters.events;
     // add all event types to filters and set activeFilters to all types by default
     filters.value = activeFilters.value = _.uniqBy(events.value, 'type');
+    // filter events only containing the current employee
+    employeeEvents.value = _.filter(events.value, (event) =>
+      event.employees?.includes(getEmployeePreferredName(props.employee))
+    );
     loading.value = false;
     return; //exit function
   }
@@ -283,6 +308,7 @@ async function createEvents() {
         if (monthDiff >= 0 && monthDiff < monthsBack) {
           event.date = getEventDateMessage(anniversary);
           if (isSame(anniversary, hireDate, 'day')) {
+            event.employees = [getEmployeePreferredName(a)];
             event.text = a.firstName + ' ' + a.lastName + ' has joined the CASE team!'; //new hire message
             event.icon = 'mdi-account-plus';
             event.type = 'New Hire';
@@ -686,6 +712,15 @@ watch(
     }
   }
 );
+
+/**
+ * A watcher for when the activties feed is enabled but data is not loaded
+ */
+watch(toggleEnable, async () => {
+  if (loading.value) {
+    await createEvents();
+  }
+});
 </script>
 
 <style lang="scss" scoped>
