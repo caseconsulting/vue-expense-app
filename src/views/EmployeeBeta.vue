@@ -39,7 +39,8 @@
           />
         </v-col>
         <v-col cols="12" :md="displayTimeAndBalances ? 7 : 12" class="pa-0">
-          <employee-info v-model="model" :contracts="contracts" :loading="loading"></employee-info>
+          <employee-info v-model="model" :contracts="contracts" :loading="loading" />
+          <activity-feed class="pa-4" :employee="model" />
         </v-col>
       </v-row>
     </div>
@@ -68,6 +69,7 @@ import _ from 'lodash';
 import { inject, onBeforeMount, onBeforeUnmount, onMounted, provide, ref, watch, computed, readonly } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
+import ActivityFeed from '@/components/shared/activity-feed/ActivityFeed.vue';
 import EmployeeBudgets from '@/components/employee-beta/EmployeeBudgets.vue';
 import EmployeeInfo from '@/components/employee-beta/EmployeeInfo.vue';
 import EmployeePageLoader from '@/components/employees/EmployeePageLoader.vue';
