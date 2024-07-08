@@ -94,6 +94,7 @@
             :loading="loading"
             :refreshKey="refreshKey"
           ></employee-info>
+          <activity-feed class="pa-4" :employee="model" />
         </v-col>
       </v-row>
     </div>
@@ -115,6 +116,7 @@ import _ from 'lodash';
 import { computed, inject, onBeforeMount, onBeforeUnmount, onMounted, provide, readonly, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
+import ActivityFeed from '@/components/shared/activity-feed/ActivityFeed.vue';
 import EmployeeBudgets from '@/components/employee-beta/EmployeeBudgets.vue';
 import EmployeeInfo from '@/components/employee-beta/EmployeeInfo.vue';
 import EmployeePageLoader from '@/components/employee-beta/EmployeePageLoader.vue';

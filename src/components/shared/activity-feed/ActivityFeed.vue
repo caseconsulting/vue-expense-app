@@ -4,6 +4,14 @@
       <!-- Title -->
       <v-card-title class="d-flex align-center header_style">
         <h3>Activity Feed</h3>
+        <v-switch
+          v-model="toggleUserActivities"
+          label="Show User Activities"
+          color="info"
+          base-color="white"
+          inset
+          hide-details
+        ></v-switch>
       </v-card-title>
       <v-spacer></v-spacer>
       <div v-if="loading" class="pa-8 pt-6">
@@ -165,14 +173,22 @@ import { useStore } from 'vuex';
 
 const emitter = inject('emitter');
 const store = useStore();
+const props = defineProps({
+  employee: {
+    type: Object,
+    required: true
+  }
+});
 
 const activeFilters = ref([]);
 const events = ref([]);
+const employeeEvents = ref([]);
 const filters = ref([]);
 const item = ref(null);
 const loading = ref(true);
 const searchString = ref('');
 const toggleAnniversariesModal = ref(false);
+const toggleUserActivities = ref(false);
 
 const TEXTMAXLENGTH = 110;
 
@@ -213,8 +229,10 @@ computed(store.getters.storeIsPopulated);
  * @return array - filtered events array
  */
 const filterEvents = computed(() => {
-  var filteredEvents = _.filter(events.value, (event) => activeFilters.value.some((f) => f.type === event.type));
-  return filteredEvents;
+  if (toggleUserActivities.value) {
+    return _.filter(employeeEvents.value, (event) => activeFilters.value.some((f) => f.type === event.type));
+  }
+  return _.filter(events.value, (event) => activeFilters.value.some((f) => f.type === event.type));
 }); // filterEvents
 
 // |--------------------------------------------------|
@@ -282,6 +300,7 @@ async function createEvents() {
                 difference(anniversary, hireDate, 'year') +
                 ' years at CASE!';
             }
+            event.employees = [getEmployeePreferredName(a)];
             event.anniversary = anniversary;
             event.icon = 'mdi-party-popper';
             event.type = 'Anniversary';
@@ -344,6 +363,7 @@ async function createEvents() {
       } else {
         event.text = getEmployeePreferredName(b) + ' ' + b.lastName + "'s" + ' birthday!';
       }
+      event.employees = [getEmployeePreferredName(b)];
       event.icon = 'mdi-cake-variant';
       event.type = 'Birthday';
       event.color = 'orange darken-3';
@@ -369,6 +389,7 @@ async function createEvents() {
         event.link = a.url;
       }
       event.text = `${getEmployeePreferredName(a)} ${a.lastName} used their ${a.budgetName} budget on ${a.description}`;
+      event.employees = [getEmployeePreferredName(a)];
       event.daysFromToday = difference(startOf(now, 'day'), startOf(reimbursedDate, 'day'), 'day');
       if (a.budgetName === 'High Five') {
         event.congratulateCampfile = a.campfire;
@@ -382,6 +403,7 @@ async function createEvents() {
           event.text = `${getEmployeePreferredName(a)} ${a.lastName} gave ${getEmployeePreferredName(recipient)} ${
             recipient.lastName
           } a High Five: ${a.note}`;
+          event.employees = [getEmployeePreferredName(a), getEmployeePreferredName(recipient)];
         } else {
           event.text = `${a.description}: ${a.note}`;
         }
@@ -455,6 +477,7 @@ async function createEvents() {
       color: '#f9c64e',
       type: 'Award',
       daysFromToday: difference(startOf(now, 'day'), startOf(dateSubmitted, 'day'), 'day'),
+      employees: [getEmployeePreferredName(a.employee)],
       text: `${getEmployeePreferredName(a.employee)} ${a.employee.lastName} was awarded "${a.name}" in ${format(
         a.dateReceived,
         null,
@@ -481,6 +504,7 @@ async function createEvents() {
       color: 'blue lighten-1',
       type: 'Certification',
       daysFromToday: difference(startOf(now, 'day'), startOf(dateSubmitted, 'day'), 'day'),
+      employees: [getEmployeePreferredName(c.employee)],
       text: `${getEmployeePreferredName(c.employee)} ${c.employee.lastName} was certified "${c.name}"`,
       congratulateCampfire: 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726'
     };
@@ -498,6 +522,10 @@ async function createEvents() {
   store.dispatch('setEvents', { events: events.value });
   // add all event types to filters and set activeFilters to all types by default
   filters.value = activeFilters.value = _.uniqBy(events.value, 'type');
+  // filter events only containing the current employee
+  employeeEvents.value = _.filter(events.value, (event) =>
+    event.employees?.includes(getEmployeePreferredName(props.employee))
+  );
   loading.value = false;
 } //createEvents
 

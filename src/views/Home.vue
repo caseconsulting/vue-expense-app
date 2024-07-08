@@ -76,7 +76,7 @@
         </v-col>
         <!-- Activity Feed -->
         <v-col cols="12" lg="6" class="pa-0 px-xl-4 px-lg-2 px-md-0 pt-3 pt-lg-0 pt-xl-0 pt-xxl-0">
-          <activity-feed id="home-activity-feed" />
+          <activity-feed id="home-activity-feed" :employee="employee" />
         </v-col>
       </v-row>
     </span>
