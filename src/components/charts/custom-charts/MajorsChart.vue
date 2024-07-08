@@ -6,7 +6,7 @@
 
 <script setup>
 import PieChart from '../base-charts/PieChart.vue';
-import { onBeforeUnmount, onBeforeMount ,onMounted, ref, inject } from 'vue';
+import { onBeforeUnmount, onBeforeMount, onMounted, ref, inject } from 'vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -132,6 +132,13 @@ function fillData(title) {
         text: title ? title : text.value,
         font: {
           size: 15
+        }
+      },
+      subtitle: {
+        display: true,
+        text: enabled.value ? '*Click on a slice to see employees' : '',
+        font: {
+          style: 'italic'
         }
       },
       tooltip: {
