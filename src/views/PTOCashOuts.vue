@@ -78,13 +78,13 @@ onBeforeMount(() => {
  * Mounted lifecycle hook
  */
 onMounted(() => {
-  emitter.on('status-alert', (status) => {
-    status.value['statusType'] = status.statusType;
-    status.value['statusMessage'] = status.statusMessage;
-    status.value['color'] = status.color;
+  emitter.on('status-alert', (stat) => {
+    status.value.statusType = stat.statusType;
+    status.value.statusMessage = stat.statusMessage;
+    status.value.color = stat.color;
   });
-  emitter.on('change-timesheets-employee', (employee) => {
-    employee.value = employee;
+  emitter.on('change-timesheets-employee', (emp) => {
+    employee.value = emp;
   });
 }); // mounted
 
@@ -121,8 +121,8 @@ watch(storeIsPopulated, async () => {
  * Clear the action status that is displayed in the snackbar.
  */
 function clearStatus() {
-  status.value['statusType'] = undefined;
-  status.value['statusMessage'] = '';
-  status.value['color'] = '';
+  status.value.statusType = undefined;
+  status.value.statusMessage = '';
+  status.value.color = '';
 } // clearStatus
 </script>
