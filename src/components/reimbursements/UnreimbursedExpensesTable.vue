@@ -49,7 +49,7 @@
           :items="filteredItems"
           :expanded="expanded"
           :loading="loading"
-          :items-per-page.sync="itemsPerPage"
+          :v-model="itemsPerPage"
           show-select
           expand-on-click
           class="text-center"
@@ -134,19 +134,19 @@
       <!-- Reimburse Modal -->
       <reimburse-modal
         :toggleReimburseModal="buttonClicked"
-        :selectedReimbursements="getSelectedExpensesToReimburse"
+        :selectedReimbursements="getSelectedExpensesToReimburse()"
       ></reimburse-modal>
     </v-card>
   </div>
 </template>
 
-<script>
+<script setup>
 import ReimburseModal from '@/components/modals/ReimburseModal.vue';
 import UnreimbursedExpensesExpandedTable from '@/components/reimbursements/UnreimbursedExpensesExpandedTable.vue';
 
 import api from '@/shared/api.js';
 import _ from 'lodash';
-import { asyncForEach, isEmpty, convertToMoneyString, userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
+import { asyncForEach, convertToMoneyString } from '@/utils/utils';
 import { storeIsPopulated } from '@/utils/utils';
 import { updateStoreEmployees, updateStoreTags } from '@/utils/storeUtils';
 import { getTodaysDate } from '@/shared/dateUtils';
@@ -154,6 +154,98 @@ import { employeeFilter } from '@/shared/filterUtils';
 import { selectedTagsHasEmployee } from '@/shared/employeeUtils';
 import employeeUtils from '@/shared/employeeUtils';
 import TagsFilter from '@/components/shared/TagsFilter.vue';
+import { ref, onBeforeMount, onBeforeUnmount, inject, watch, computed } from 'vue';
+import { useStore } from 'vuex';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                       SETUP                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+//const aggregatedData = ref([]);
+const store = useStore();
+const emitter = inject('emitter');
+const alerts = ref([]); // status alerts
+const buttonClicked = ref(false); // reimburse button clicked
+const empBudgets = ref([]); // grouped employee and expense types
+const employee = ref(null); // employee autocomplete filter
+const employees = ref([]); // employee autocomplete options
+const expanded = ref([]); // datatable expanded
+const expenseType = ref(null); // expense type autocomplete filter
+const expenseTypes = ref([]); // expense type autocomplete options
+const headers = ref([
+  {
+    title: 'Employee',
+    key: 'employeeName',
+    align: 'center'
+  },
+  {
+    title: 'Expense Type',
+    key: 'budgetName',
+    align: 'center'
+  },
+  {
+    title: 'Total',
+    key: 'cost',
+    align: 'center'
+  },
+  {
+    title: 'Show on Feed',
+    key: 'showOnFeed',
+    align: 'center',
+    width: '10%',
+    sortable: false
+  }
+]); // datatable headers
+const isGeneratingGiftCard = ref(false);
+const itemsPerPage = ref(-1); // data table elements per page
+const loading = ref(true); // is loading
+const pendingExpenses = ref([]); // pending expenses
+const tagsInfo = ref({
+  selected: [],
+  flipped: []
+});
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ *  Sets the aggregated expeneses and datatable. Creates event listeners.
+ */
+onBeforeMount(async () => {
+  emitter.on('selectExpense', selectExpense);
+  emitter.on('toggleExpense', toggleShowOnFeed);
+  emitter.on('confirm-reimburse', async () => await reimburseExpenses());
+  emitter.on('cancel-reimburse', () => (buttonClicked.value = false));
+  emitter.on('reimburse-expenses', (isGeneratingAGiftCard) => {
+    buttonClicked.value = true;
+    isGeneratingGiftCard.value = isGeneratingAGiftCard;
+  });
+
+  let unreimbursedExpenses;
+  [unreimbursedExpenses, expenseTypes.value] = await Promise.all([
+    api.getUnreimbursedExpenses(),
+    api.getItems(api.EXPENSE_TYPES),
+    !store.getters.employees ? updateStoreEmployees() : '',
+    !store.getters.tags ? updateStoreTags() : ''
+  ]);
+  loadExpensesData(unreimbursedExpenses);
+}); // created
+
+/**
+ * beforeUnmount lifecycle hook
+ */
+onBeforeUnmount(() => {
+  emitter.off('selectExpense');
+  emitter.off('toggleExpense');
+  emitter.off('confirm-reimburse');
+  emitter.off('cancel-reimburse');
+  emitter.off('reimburse-expenses');
+}); //beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -161,31 +253,33 @@ import TagsFilter from '@/components/shared/TagsFilter.vue';
 // |                                                  |
 // |--------------------------------------------------|
 
+computed(storeIsPopulated);
+
 /**
  * Filter budgets based on employee and/or expense type. Returns budget if the employee and expense type match.
  *
  * @return Array - filtered budgets
  */
-function filteredItems() {
-  let data = this.empBudgets;
+const filteredItems = computed(() => {
+  let data = empBudgets.value;
   data = _.filter(data, (budget) => {
-    if (this.tagsInfo.selected.length == 0) return true;
-    return selectedTagsHasEmployee(budget.employeeId, this.tagsInfo);
+    if (tagsInfo.value.selected.length == 0) return true;
+    return selectedTagsHasEmployee(budget.employeeId, tagsInfo.value);
   });
   data = _.filter(data, (budget) => {
-    if (!this.employee && !this.expenseType) {
+    if (!employee.value && !expenseType.value) {
       return true;
-    } else if (!this.employee && this.expenseType) {
-      return budget.expenseTypeId === this.expenseType;
-    } else if (!this.expenseType && this.employee) {
-      return budget.employeeId === this.employee;
+    } else if (!employee.value && expenseType.value) {
+      return budget.expenseTypeId === expenseType.value;
+    } else if (!expenseType.value && employee.value) {
+      return budget.employeeId === employee.value;
     } else {
-      return budget.employeeId === this.employee && budget.expenseTypeId === this.expenseType;
+      return budget.employeeId === employee.value && budget.expenseTypeId === expenseType.value;
     }
   });
   data.sort((a, b) => (a.lastName < b.lastName ? 1 : -1));
   return data;
-} // filteredItems
+}); // filteredItems
 
 /**
  * Gets all selected expenses
@@ -193,7 +287,7 @@ function filteredItems() {
  * @return array - the filtered pending expenses that are just selected
  */
 function getSelectedExpensesToReimburse() {
-  return _.filter(this.pendingExpenses, (expense) => {
+  return _.filter(pendingExpenses.value, (expense) => {
     if (expense.selected) {
       return true;
     }
@@ -205,13 +299,13 @@ function getSelectedExpensesToReimburse() {
  *
  * @return Object - main checkbox state
  */
-function mainCheckBox() {
+const mainCheckBox = computed(() => {
   let checkBox = {
     all: true,
     indeterminate: false
   };
 
-  _.forEach(this.empBudgets, (budget) => {
+  _.forEach(empBudgets.value, (budget) => {
     if (_.some(budget.expenses, { selected: false })) {
       checkBox.all = false;
     }
@@ -224,16 +318,7 @@ function mainCheckBox() {
     checkBox.indeterminate = false;
   }
   return checkBox;
-} // mainCheckBox
-
-/**
- * Returns the display status of the reimburse button. Returns true if an expense is selected, otherwise returns false.
- *
- * @return boolean - display reimbursed button
- */
-function showReimburseButton() {
-  return this.pendingExpenses.length > 0 && (this.mainCheckBox.all || this.mainCheckBox.indeterminate);
-} // showReimburseButton
+}); // mainCheckBox
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -245,13 +330,13 @@ function showReimburseButton() {
  * Check all expenses and boxes.
  */
 function checkAllBoxes() {
-  _.forEach(this.filteredItems, (budget) => {
+  _.forEach(filteredItems.value, (budget) => {
     budget.checkBox.all = true;
     budget.checkBox.indeterminate = false;
     return _.forEach(budget.expenses, (expense) => {
-      this.emitSelectionChange(expense, true);
+      emitSelectionChange(expense, true);
       expense.selected = true;
-      this.determineShowOnFeed(expense);
+      determineShowOnFeed(expense);
     });
   });
 } // checkAllBoxes
@@ -263,7 +348,7 @@ function checkAllBoxes() {
  */
 function constructAutoComplete(aggregatedData) {
   // set employees
-  this.employees = _.map(aggregatedData, (data) => {
+  employees.value = _.map(aggregatedData, (data) => {
     if (data && data.employeeName && data.employeeId) {
       return {
         text: data.employeeName,
@@ -276,9 +361,9 @@ function constructAutoComplete(aggregatedData) {
   }).filter((data) => {
     return data != null;
   });
-  this.employees = _.uniqBy(this.employees, (e) => e.value);
+  employees.value = _.uniqBy(employees.value, (e) => e.value);
   // set expense types
-  this.expenseTypes = _.map(aggregatedData, (data) => {
+  expenseTypes.value = _.map(aggregatedData, (data) => {
     if (data && data.budgetName && data.expenseTypeId) {
       return {
         text: data.budgetName,
@@ -288,7 +373,7 @@ function constructAutoComplete(aggregatedData) {
   }).filter((data) => {
     return data != null;
   });
-  this.expenseTypes = _.uniqBy(this.expenseTypes, (e) => e.value);
+  expenseTypes.value = _.uniqBy(expenseTypes.value, (e) => e.value);
 } // constructAutoComplete
 
 /**
@@ -308,9 +393,9 @@ function createExpenses(aggregatedData) {
       showSwitch: false,
       failed: false
     };
-    const employees = this.$store.getters.employees;
+    const employees = store.getters.employees;
     let employee = _.find(employees, (emp) => emp.id === expense.employeeId);
-    let expenseType = _.find(this.expenseTypes, (expenseType) => expenseType.id === expense.expenseTypeId);
+    let expenseType = _.find(expenseTypes.value, (expenseType) => expenseType.id === expense.expenseTypeId);
     expense.budgetName = expenseType.budgetName;
     expense.employeeName = employeeUtils.firstAndLastName(employee);
     expense.firstName = employee.firstName;
@@ -399,7 +484,7 @@ function determineShowSwitch(budget) {
  */
 function emitSelectionChange(expense, newSelect) {
   if (expense.selected != newSelect) {
-    this.emitter.emit('expenseChange', expense);
+    emitter.emit('expenseChange', expense);
   }
 } // emitSelectionChange
 
@@ -429,7 +514,7 @@ function groupEmployeeExpenses(expenses) {
   // Create a list of expenses under each group
   data = _.forEach(data, (item) => {
     return (item.expenses = _.filter(expenses, (expense) => {
-      return this.matchingEmployeeAndExpenseType(expense, item);
+      return matchingEmployeeAndExpenseType(expense, item);
     }));
   });
 
@@ -453,47 +538,47 @@ function matchingEmployeeAndExpenseType(expense, item) {
  * Refresh expenses.
  */
 function refreshExpenses() {
-  this.pendingExpenses = [];
-  _.forEach(this.empBudgets, (budget) => {
+  pendingExpenses.value = [];
+  _.forEach(empBudgets.value, (budget) => {
     _.forEach(budget.expenses, (budgetExpense) => {
       if (!budgetExpense.reimbursedDate) {
-        this.pendingExpenses.push(budgetExpense);
+        pendingExpenses.value.push(budgetExpense);
       }
     });
   });
-  this.empBudgets = this.groupEmployeeExpenses(this.pendingExpenses);
-  this.unCheckAllBoxes();
+  empBudgets.value = groupEmployeeExpenses(pendingExpenses.value);
+  unCheckAllBoxes();
 } // refreshExpenses
 
 /**
  * Reimburse the selected list of expenses.
  */
 async function reimburseExpenses() {
-  this.loading = true;
+  loading.value = true;
   // reimburse button is clicked
-  this.buttonClicked = false;
+  buttonClicked.value = false;
   let expensesToReimburse = [];
 
   // get selected expenses and set reimburse date
-  this.empBudgets = _.forEach(this.empBudgets, (budget) => {
+  empBudgets.value = _.forEach(empBudgets.value, (budget) => {
     return _.forEach(budget.expenses, (expense) => {
       if (expense.selected) {
         //to remove the expense type data in the ExpenseTypeTotal modal
-        this.emitter.emit('expenseChange', expense);
-        this.emitter.emit('expenseClicked', undefined);
+        emitter.emit('expenseChange', expense);
+        emitter.emit('expenseClicked', undefined);
         expense.reimbursedDate = getTodaysDate();
         expense.reimbursementWasSeen = false;
-        expensesToReimburse.push(this.removeAggregateExpenseData(expense));
+        expensesToReimburse.push(removeAggregateExpenseData(expense));
       }
     });
   });
 
   // reimburse expense on back end
-  await this.asyncForEach(expensesToReimburse, async (expense) => {
-    let expenseType = _.find(this.expenseTypes, (et) => et.value === expense.expenseTypeId);
+  await asyncForEach(expensesToReimburse, async (expense) => {
+    let expenseType = _.find(expenseTypes.value, (et) => et.value === expense.expenseTypeId);
     let isHighFive = !!expenseType && expenseType.text === 'High Five';
     let reimbursedExpense;
-    if (isHighFive && this.isGeneratingGiftCard) {
+    if (isHighFive && isGeneratingGiftCard.value) {
       reimbursedExpense = await api.processHighFive(expense);
     } else {
       reimbursedExpense = await api.updateItem(api.EXPENSES, expense);
@@ -502,43 +587,43 @@ async function reimburseExpenses() {
     if (!reimbursedExpense.id) {
       // failed to reimburse expense
       msg = reimbursedExpense.response.data.message;
-      this.alerts.push({ status: 'error', message: msg, color: 'red' });
-      let self = this;
+      alerts.value.push({ status: 'error', message: msg, color: 'red' });
+      let self = alerts.value;
       setTimeout(function () {
-        self.alerts.shift();
+        self.shift();
       }, 20000);
 
       // revert reimburse date change
-      let groupIndex = _.findIndex(this.empBudgets, {
+      let groupIndex = _.findIndex(empBudgets.value, {
         employeeId: expense.employeeId,
         expenseTypeId: expense.expenseTypeId
       });
-      let expenseIndex = _.findIndex(this.empBudgets[groupIndex].expenses, { id: expense.id });
-      this.empBudgets[groupIndex].expenses[expenseIndex].reimbursedDate = null;
-      this.empBudgets[groupIndex].expenses[expenseIndex].failed = true;
-      this.empBudgets[groupIndex].expenses[expenseIndex].selected = false;
+      let expenseIndex = _.findIndex(empBudgets.value[groupIndex].expenses, { id: expense.id });
+      empBudgets.value[groupIndex].expenses[expenseIndex].reimbursedDate = null;
+      empBudgets.value[groupIndex].expenses[expenseIndex].failed = true;
+      empBudgets.value[groupIndex].expenses[expenseIndex].selected = false;
     } else {
       // successfully reimbursed expense
       msg = 'Successfully reimbursed expense';
-      if (isHighFive && this.isGeneratingGiftCard) {
+      if (isHighFive && isGeneratingGiftCard.value) {
         msg += `, generated gift card, ${
           reimbursedExpense.emailSent
             ? 'and emailed recipient gift card information.'
             : 'but FAILED to email recipient gift card information'
         }`;
       }
-      this.alerts.push({ status: 'success', message: msg, color: 'green' });
-      let self = this;
+      alerts.value.push({ status: 'success', message: msg, color: 'green' });
+      let self = alerts.value;
       setTimeout(function () {
-        self.alerts.shift();
+        self.shift();
       }, 15000);
     }
-    this.emitter.emit('reimburseAlert', this.alerts);
+    emitter.emit('reimburseAlert', alerts.value);
   });
 
-  this.refreshExpenses();
-  this.emitter.emit('finished-reimbursing');
-  this.loading = false; // set reimbursing status to false
+  refreshExpenses();
+  emitter.emit('finished-reimbursing');
+  loading.value = false; // set reimbursing status to false
 } // reimburseExpenses
 
 /**
@@ -547,25 +632,25 @@ async function reimburseExpenses() {
  * @param expense - expense selected
  */
 function selectExpense(expense) {
-  this.empBudgets = _.forEach(this.empBudgets, (budget) => {
+  empBudgets.value = _.forEach(empBudgets.value, (budget) => {
     if (expense.key === budget.key) {
       return _.forEach(budget.expenses, (budgetExpense) => {
         if (expense === budgetExpense) {
           budgetExpense.selected = !budgetExpense.selected;
           if (!budgetExpense.selected) {
-            budget.showSwitch = this.determineShowSwitch(budget);
+            budget.showSwitch = determineShowSwitch(budget);
           } else {
             budgetExpense.showOnFeed = expense.showOnFeed;
-            budget.showSwitch = this.determineShowSwitch(budget);
+            budget.showSwitch = determineShowSwitch(budget);
           }
         }
       });
     }
   });
 
-  this.empBudgets = _.forEach(this.empBudgets, (budget) => {
+  empBudgets.value = _.forEach(empBudgets.value, (budget) => {
     if (expense.key === budget.key) {
-      budget.checkBox = this.determineCheckBox(budget);
+      budget.checkBox = determineCheckBox(budget);
     }
   });
 } // selectExpense
@@ -576,7 +661,7 @@ function selectExpense(expense) {
  * @param expense - expense toggled
  */
 function toggleShowOnFeed(expense) {
-  this.empBudgets = _.forEach(this.empBudgets, (budget) => {
+  empBudgets.value = _.forEach(empBudgets.value, (budget) => {
     if (expense.key === budget.key) {
       return _.forEach(budget.expenses, (budgetExpense) => {
         if (expense === budgetExpense) {
@@ -586,9 +671,9 @@ function toggleShowOnFeed(expense) {
     }
   });
 
-  this.empBudgets = _.forEach(this.empBudgets, (budget) => {
+  empBudgets.value = _.forEach(empBudgets.value, (budget) => {
     if (expense.key === budget.key) {
-      budget.showSwitch = this.determineShowSwitch(budget);
+      budget.showSwitch = determineShowSwitch(budget);
     }
   });
 } // toggleShowOnFeed
@@ -599,9 +684,9 @@ function toggleShowOnFeed(expense) {
  * @param expense - expense toggled
  */
 function determineShowOnFeed(expense) {
-  this.empBudgets = _.forEach(this.empBudgets, (budget) => {
+  empBudgets.value = _.forEach(empBudgets.value, (budget) => {
     if (expense.key === budget.key) {
-      budget.showSwitch = this.determineShowSwitch(budget);
+      budget.showSwitch = determineShowSwitch(budget);
     }
   });
 } // determineShowOnFeed
@@ -610,12 +695,12 @@ function determineShowOnFeed(expense) {
  * Loads and organizes all data relevant to the data table.
  */
 function loadExpensesData(unreimbursedExpenses) {
-  this.pendingExpenses = this.createExpenses(unreimbursedExpenses);
-  this.constructAutoComplete(this.pendingExpenses);
-  this.empBudgets = this.groupEmployeeExpenses(this.pendingExpenses);
-  this.unCheckAllBoxes();
-  this.resetShowOnFeedToggles();
-  this.loading = false;
+  pendingExpenses.value = createExpenses(unreimbursedExpenses);
+  constructAutoComplete(pendingExpenses.value);
+  empBudgets.value = groupEmployeeExpenses(pendingExpenses.value);
+  unCheckAllBoxes();
+  resetShowOnFeedToggles();
+  loading.value = false;
 } // loadExpensesData
 
 /**
@@ -638,7 +723,7 @@ function removeAggregateExpenseData(expense) {
  * Resets show on feed toggles when page is created
  */
 function resetShowOnFeedToggles() {
-  this.empBudgets = _.forEach(this.empBudgets, (budget) => {
+  empBudgets.value = _.forEach(empBudgets.value, (budget) => {
     budget.showSwitch = false;
   });
 } // resetShowOnFeedToggles
@@ -647,15 +732,15 @@ function resetShowOnFeedToggles() {
  * Toggle all expenses selected.
  */
 function toggleAll() {
-  if (!this.mainCheckBox.all && !this.mainCheckBox.indeterminate) {
+  if (!mainCheckBox.value.all && !mainCheckBox.value.indeterminate) {
     // check all boxes
-    this.checkAllBoxes();
-  } else if (this.mainCheckBox.all && !this.mainCheckBox.indeterminate) {
+    checkAllBoxes();
+  } else if (mainCheckBox.value.all && !mainCheckBox.value.indeterminate) {
     // clear all checkboxes
-    this.mainCheckBox.all = false;
-    this.unCheckAllBoxes();
-  } else if (!this.mainCheckBox.all && this.mainCheckBox.indeterminate) {
-    this.checkAllBoxes();
+    mainCheckBox.value.all = false;
+    unCheckAllBoxes();
+  } else if (!mainCheckBox.value.all && mainCheckBox.value.indeterminate) {
+    checkAllBoxes();
   }
 } // toggleAll
 
@@ -666,19 +751,19 @@ function toggleAll() {
  */
 function toggleGroup(value) {
   // updated group expenses selected
-  this.empBudgets = _.forEach(this.empBudgets, (budget) => {
+  empBudgets.value = _.forEach(empBudgets.value, (budget) => {
     if (value === budget) {
       // matching budget
-      if (this.determineCheckBox(budget).all) {
+      if (determineCheckBox(budget).all) {
         // unselect all expenses
         return _.forEach(budget.expenses, (expense) => {
-          this.emitSelectionChange(expense, false);
+          emitSelectionChange(expense, false);
           expense.selected = false;
         });
       } else {
         // select all expenses
         return _.forEach(budget.expenses, (expense) => {
-          this.emitSelectionChange(expense, true);
+          emitSelectionChange(expense, true);
           expense.selected = true;
         });
       }
@@ -686,9 +771,9 @@ function toggleGroup(value) {
   });
 
   // set the group check box
-  this.empBudgets = _.forEach(this.empBudgets, (budget) => {
+  empBudgets.value = _.forEach(empBudgets.value, (budget) => {
     if (value === budget) {
-      budget.checkBox = this.determineCheckBox(budget);
+      budget.checkBox = determineCheckBox(budget);
     }
   });
 } // toggleGroup
@@ -699,7 +784,7 @@ function toggleGroup(value) {
  * @param value - expense group toggled
  */
 function toggleShowOnFeedGroup(value) {
-  this.empBudgets = _.forEach(this.empBudgets, (budget) => {
+  empBudgets.value = _.forEach(empBudgets.value, (budget) => {
     if (value === budget) {
       let check = true;
       for (let i = 0; i < budget.expenses.length; i++) {
@@ -714,9 +799,9 @@ function toggleShowOnFeedGroup(value) {
   });
 
   // set the group check box
-  this.empBudgets = _.forEach(this.empBudgets, (budget) => {
+  empBudgets.value = _.forEach(empBudgets.value, (budget) => {
     if (value === budget) {
-      budget.showSwitch = this.determineShowSwitch(budget);
+      budget.showSwitch = determineShowSwitch(budget);
     }
   });
 } // toggleShowOnFeedGroup
@@ -725,11 +810,11 @@ function toggleShowOnFeedGroup(value) {
  * Uncheck all expenses and boxes
  */
 function unCheckAllBoxes() {
-  _.forEach(this.filteredItems, (budget) => {
+  _.forEach(filteredItems.value, (budget) => {
     budget.checkBox.all = false;
     budget.checkBox.indeterminate = false;
     return _.forEach(budget.expenses, (expense) => {
-      this.emitSelectionChange(expense, false);
+      emitSelectionChange(expense, false);
       expense.selected = false;
     });
   });
@@ -737,173 +822,29 @@ function unCheckAllBoxes() {
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                 LIFECYCLE HOOKS                  |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- *  Sets the aggregated expeneses and datatable. Creates event listeners.
- */
-async function created() {
-  this.emitter.on('selectExpense', this.selectExpense);
-  this.emitter.on('toggleExpense', this.toggleShowOnFeed);
-  this.emitter.on('confirm-reimburse', async () => await this.reimburseExpenses());
-  this.emitter.on('cancel-reimburse', () => (this.buttonClicked = false));
-  this.emitter.on('reimburse-expenses', (isGeneratingGiftCard) => {
-    this.buttonClicked = true;
-    this.isGeneratingGiftCard = isGeneratingGiftCard;
-  });
-
-  let unreimbursedExpenses;
-  [unreimbursedExpenses, this.expenseTypes] = await Promise.all([
-    api.getUnreimbursedExpenses(),
-    api.getItems(api.EXPENSE_TYPES),
-    !this.$store.getters.employees ? this.updateStoreEmployees() : '',
-    !this.$store.getters.tags ? this.updateStoreTags() : ''
-  ]);
-  this.loadExpensesData(unreimbursedExpenses);
-} // created
-
-/**
- * beforeUnmount lifecycle hook
- */
-function beforeUnmount() {
-  this.emitter.off('selectExpense');
-  this.emitter.off('toggleExpense');
-  this.emitter.off('confirm-reimburse');
-  this.emitter.off('cancel-reimburse');
-  this.emitter.off('reimburse-expenses');
-} //beforeUnmount
-
-// |--------------------------------------------------|
-// |                                                  |
 // |                     WATCHERS                     |
 // |                                                  |
 // |--------------------------------------------------|
+
+watch(employee, () => watchEmployee());
 
 /**
  * watcher for employee
  */
 function watchEmployee() {
   //unchecks all checkboxes when filter changes
-  this.unCheckAllBoxes();
+  unCheckAllBoxes();
 } // watchEmployee
+
+watch(expenseType, () => watchExpenseType());
 
 /**
  * watcher for expenseType
  */
 function watchExpenseType() {
   //unchecks all checkboxes when filter changes
-  this.unCheckAllBoxes();
+  unCheckAllBoxes();
 } // watchExpenseType
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  created,
-  beforeUnmount,
-  components: {
-    TagsFilter,
-    ReimburseModal,
-    UnreimbursedExpensesExpandedTable
-  },
-  computed: {
-    filteredItems,
-    getSelectedExpensesToReimburse,
-    mainCheckBox,
-    showReimburseButton,
-    storeIsPopulated
-  },
-  data: () => ({
-    aggregatedData: [],
-    alerts: [], // status alerts
-    buttonClicked: false, // reimburse button clicked
-    empBudgets: [], // grouped employee and expense types
-    employee: null, // employee autocomplete filter
-    employees: [], // employee autocomplete options
-    expanded: [], // datatable expanded
-    expenseType: null, // expense type autocomplete filter
-    expenseTypes: [], // expense type autocomplete options
-    headers: [
-      {
-        title: 'Employee',
-        key: 'employeeName',
-        align: 'center'
-      },
-      {
-        title: 'Expense Type',
-        key: 'budgetName',
-        align: 'center'
-      },
-      {
-        title: 'Total',
-        key: 'cost',
-        align: 'center'
-      },
-      {
-        title: 'Show on Feed',
-        key: 'showOnFeed',
-        align: 'center',
-        width: '10%',
-        sortable: false
-      }
-    ], // datatable headers
-    isGeneratingGiftCard: false,
-    itemsPerPage: -1, // data table elements per page
-    loading: true, // is loading
-    pendingExpenses: [], // pending expenses
-    status: {
-      statusType: undefined,
-      statusMessage: '',
-      color: ''
-    }, // reimburse
-    tagsInfo: {
-      selected: [],
-      flipped: []
-    }
-  }),
-  methods: {
-    asyncForEach,
-    checkAllBoxes,
-    constructAutoComplete,
-    convertToMoneyString,
-    createExpenses,
-    determineCheckBox,
-    determineShowOnFeed,
-    determineShowSwitch,
-    emitSelectionChange,
-    employeeFilter,
-    getBudgetTotal,
-    groupEmployeeExpenses,
-    isEmpty,
-    loadExpensesData,
-    matchingEmployeeAndExpenseType,
-    refreshExpenses,
-    reimburseExpenses,
-    resetShowOnFeedToggles,
-    selectExpense,
-    removeAggregateExpenseData,
-    getTodaysDate,
-    selectedTagsHasEmployee,
-    toggleAll,
-    toggleGroup,
-    toggleShowOnFeedGroup,
-    toggleShowOnFeed,
-    unCheckAllBoxes,
-    updateStoreEmployees,
-    updateStoreTags,
-    userRoleIsAdmin,
-    userRoleIsManager
-  },
-  watch: {
-    employee: watchEmployee,
-    expenseType: watchExpenseType
-  }
-};
 </script>
 
 <style>
