@@ -996,7 +996,7 @@ async function loadMyExpensesData() {
     !store.getters.expenseTypes ? updateStoreExpenseTypes() : '',
     !store.getters.employees ? updateStoreEmployees() : '',
     !store.getters.budgets ? updateStoreBudgets() : '',
-    !store.getters.tags && userRoleIsAdmin() && userRoleIsManager() ? updateStoreTags() : '', // tags only required for admin/manager
+    !store.getters.tags && (userRoleIsAdmin() || userRoleIsManager()) ? updateStoreTags() : '', // tags only required for admin/manager
     refreshExpenses()
   ]);
 
