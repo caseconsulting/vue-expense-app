@@ -370,9 +370,8 @@
                     id="edit"
                     :disabled="
                       isEditing ||
-                      (!(userRoleIsAdmin() || userRoleIsManager()) && isReimbursed(item)) ||
-                      midAction ||
-                      (!(userRoleIsAdmin() || userRoleIsManager()) && !canDelete(item))
+                      (!(userRoleIsAdmin() || userRoleIsManager()) && (isReimbursed(item) || !canDelete(item))) ||
+                      midAction
                     "
                     variant="text"
                     icon

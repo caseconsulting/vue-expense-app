@@ -52,6 +52,20 @@
           <v-col cols="5"><b>Category:</b></v-col>
           <v-col cols="7">N/A</v-col>
         </v-row>
+        <v-row dense v-if="!isEmpty(expense?.rejections?.softRejections)">
+          <v-col cols="5" class="text-red"><b>Revisals</b></v-col>
+          <v-col cols="7" class="revisal-reason">
+            <div v-if="!isEmpty(expense?.rejections?.softRejections)">
+              <div v-for="(reason, i) in expense.rejections.softRejections.reasons" :key="reason">
+                <b>Reason {{ i + 1 }}: </b>{{ reason }}
+              </div>
+              <div>
+                <b>Revised: </b>
+                {{ expense.rejections.softRejections.revised ? 'Yes' : 'No' }}
+              </div>
+            </div>
+          </v-col>
+        </v-row>
         <v-row dense>
           <attachment :expense="expense" :mode="'adminExpenseInfo'"></attachment>
         </v-row>
@@ -135,6 +149,12 @@ computed(isMobile);
 .notes {
   height: 125px;
   max-height: 125px;
+  overflow-y: auto;
+}
+
+.revisal-reason {
+  height: 100px;
+  max-height: 100px;
   overflow-y: auto;
 }
 
