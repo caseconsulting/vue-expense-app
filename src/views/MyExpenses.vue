@@ -111,7 +111,10 @@
                   />
                 </v-col>
                 <!-- Tags filter -->
-                <tags-filter v-model="tagsInfo" @update:modelValue="filterExpenses()"></tags-filter>
+                <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="12" md="3">
+                  <tags-filter v-model="tagsInfo" @update:modelValue="filterExpenses()"></tags-filter>
+                </v-col>
+                <!-- End Tags Filter -->
               </v-row>
             </div>
 
@@ -988,12 +991,12 @@ async function loadMyExpensesData() {
   initialPageLoading.value = true;
   loading.value = true;
   // get user info, defaulting to params if exists
-  userInfo.value = JSON.parse(localStorage.getItem('requestedFilter')) || store.getters.user; // TODO parse localstorage into string and then parse from string
+  userInfo.value = JSON.parse(localStorage.getItem('requestedFilter')) || store.getters.user; // TODO: parse localstorage into string and then parse from string
   await Promise.all([
     !store.getters.expenseTypes ? updateStoreExpenseTypes() : '',
     !store.getters.employees ? updateStoreEmployees() : '',
     !store.getters.budgets ? updateStoreBudgets() : '',
-    !store.getters.tags ? updateStoreTags() : '',
+    !store.getters.tags && userRoleIsAdmin() && userRoleIsManager() ? updateStoreTags() : '', // tags only required for admin/manager
     refreshExpenses()
   ]);
 
