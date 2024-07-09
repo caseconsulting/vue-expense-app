@@ -627,16 +627,8 @@ async function reimburseExpenses() {
     if (!reimbursedExpense.id) {
       // failed to reimburse expense
       msg = reimbursedExpense.response.data.message;
-<<<<<<< HEAD
       alerts.value.push({ status: 'error', message: msg, color: 'red' });
-      let self = alerts.value;
-      setTimeout(function () {
-        self.shift();
-      }, 20000);
-=======
-      this.alerts.push({ status: 'error', message: msg, color: 'red' });
-      setTimeout(() => this.alerts.shift(), 20000);
->>>>>>> db89982a (POR-2658: remove expense details cards after rejecting an expense)
+      setTimeout(() => alerts.value.shift(), 20000);
 
       // revert reimburse date change
       let groupIndex = _.findIndex(empBudgets.value, {
@@ -657,16 +649,8 @@ async function reimburseExpenses() {
             : 'but FAILED to email recipient gift card information'
         }`;
       }
-<<<<<<< HEAD
       alerts.value.push({ status: 'success', message: msg, color: 'green' });
-      let self = alerts.value;
-      setTimeout(function () {
-        self.shift();
-      }, 15000);
-=======
-      this.alerts.push({ status: 'success', message: msg, color: 'green' });
-      setTimeout(() => this.alerts.shift(), 15000);
->>>>>>> db89982a (POR-2658: remove expense details cards after rejecting an expense)
+      setTimeout(() => alerts.value.shift(), 15000);
     }
     emitter.emit('reimburseAlert', alerts.value);
   });
