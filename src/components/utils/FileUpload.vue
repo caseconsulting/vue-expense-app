@@ -65,7 +65,10 @@ const acceptedFileTypes = computed(() => {
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       '.doc',
-      'image/*',
+      'image/gif', //.gif
+      'image/jpeg', //.jpeg
+      'image/png', //.png
+      'image/bmp', //.bmp
       '.pdf'
     ].join(',');
   }

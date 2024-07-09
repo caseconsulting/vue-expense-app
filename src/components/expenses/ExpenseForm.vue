@@ -804,6 +804,7 @@ function clearForm() {
   // don't clear form if there was an error in submitting
   if (this.errorSubmitting) {
     this.errorSubmitting = false; // reset var
+    this.isInactive = false; // enable form
     return;
   }
 
