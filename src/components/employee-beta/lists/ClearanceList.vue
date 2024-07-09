@@ -16,13 +16,13 @@
           <p v-if="!isEmpty(getBadgeExpirationDate(clearance))" class="gray-text ml-6">
             <b>Expiration: </b>{{ getBadgeExpirationDate(clearance) }}
           </p>
-          <p v-if="!isEmpty(getAdjudicationDates(clearance)) && clearance.awaitingClearance" class="gray-text ml-6">
+          <p v-if="!isEmpty(getAdjudicationDates(clearance))" class="gray-text ml-6">
             <b>Adjudication Dates: </b>{{ getAdjudicationDates(clearance) }}
           </p>
-          <p v-if="!isEmpty(getBiDates(clearance)) && clearance.awaitingClearance" class="gray-text ml-6">
+          <p v-if="!isEmpty(getBiDates(clearance))" class="gray-text ml-6">
             <b>Bi Dates: </b>{{ getBiDates(clearance) }}
           </p>
-          <p v-if="!isEmpty(getPolyDates(clearance)) && clearance.awaitingClearance" class="gray-text ml-6">
+          <p v-if="!isEmpty(getPolyDates(clearance))" class="gray-text ml-6">
             <b>Poly Dates: </b>{{ getPolyDates(clearance) }}
           </p>
         </v-card-text>
@@ -120,7 +120,7 @@ function getAdjudicationDates(clearance) {
   if (!isEmpty(clearance.adjudicationDates)) {
     clearance.adjudicationDates.forEach((adjudicationDate) => {
       if (isEmpty(dates)) dates = monthDayYearFormat(adjudicationDate);
-      else dates = dates + ', ' + monthDayYearFormat(adjudicationDate);
+      else dates = dates + '; ' + monthDayYearFormat(adjudicationDate);
     });
   }
   return dates;
@@ -137,7 +137,7 @@ function getBiDates(clearance) {
   if (!isEmpty(clearance.biDates)) {
     clearance.biDates.forEach((biDate) => {
       if (isEmpty(dates)) dates = monthDayYearFormat(biDate);
-      else dates = dates + ', ' + monthDayYearFormat(biDate);
+      else dates = dates + '; ' + monthDayYearFormat(biDate);
     });
   }
   return dates;
@@ -154,7 +154,7 @@ function getPolyDates(clearance) {
   if (!isEmpty(clearance.adjudicationDates)) {
     clearance.polyDates.forEach((polyDate) => {
       if (isEmpty(dates)) dates = monthDayYearFormat(polyDate);
-      else dates = dates + ', ' + monthDayYearFormat(polyDate);
+      else dates = dates + '; ' + monthDayYearFormat(polyDate);
     });
   }
   return dates;
