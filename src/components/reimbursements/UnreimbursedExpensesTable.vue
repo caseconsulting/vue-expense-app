@@ -163,7 +163,6 @@ import { useStore } from 'vuex';
 // |                                                  |
 // |--------------------------------------------------|
 
-//const aggregatedData = ref([]);
 const store = useStore();
 const emitter = inject('emitter');
 const alerts = ref([]); // status alerts
@@ -221,6 +220,7 @@ onBeforeMount(async () => {
   emitter.on('toggleExpense', toggleShowOnFeed);
   emitter.on('confirm-reimburse', async () => await reimburseExpenses());
   emitter.on('cancel-reimburse', () => (buttonClicked.value = false));
+  emitter.on('confirm-expenses-rejection', async ({ field, reason }) => await rejectExpenses(field, reason));
   emitter.on('reimburse-expenses', (isGeneratingAGiftCard) => {
     buttonClicked.value = true;
     isGeneratingGiftCard.value = isGeneratingAGiftCard;
@@ -244,6 +244,7 @@ onBeforeUnmount(() => {
   emitter.off('toggleExpense');
   emitter.off('confirm-reimburse');
   emitter.off('cancel-reimburse');
+  emitter.off('confirm-expenses-rejection');
   emitter.off('reimburse-expenses');
 }); //beforeUnmount
 
@@ -546,9 +547,48 @@ function refreshExpenses() {
       }
     });
   });
+  pendingExpenses.value = getNonRejectedExpenses(pendingExpenses.value);
   empBudgets.value = groupEmployeeExpenses(pendingExpenses.value);
   unCheckAllBoxes();
 } // refreshExpenses
+
+/**
+ * Rejects selected expenses with a reasoning provided. Soft rejected expenses will not be shown on the
+ * Reimbursments page until the user has resubmitted an expense. Hard rejected expenses will never show
+ * on the Reimbursements page again.
+ *
+ * @param {String} field - The reject property in the expense
+ * @param {String} reason - The reasoning for expense rejection
+ */
+async function rejectExpenses(field, reason) {
+  loading.value = true;
+  let selectedExpenses = _.filter(pendingExpenses.value, (e) => e.selected);
+  await asyncForEach(selectedExpenses, async (expense) => {
+    // to remove the expense type data in the ExpenseTypeTotal modal
+    emitter.emit('expenseChange', expense);
+    emitter.emit('expenseClicked', undefined);
+    // set reasoning in rejection object
+    let reasons = _.get(expense, field + '.reasons');
+    reasons = [...(reasons || []), reason];
+    _.set(expense, field + '.reasons', reasons);
+    _.set(expense, field + '.revised', false);
+    let baseExpense = removeAggregateExpenseData(expense);
+    let rejectedExpense = await api.updateItem(api.EXPENSES, baseExpense);
+    if (!rejectedExpense.id) {
+      // failed to reject expense
+      let msg = rejectedExpense?.response?.data?.message || 'Failed to reject expense';
+      alerts.value.push({ status: 'error', message: msg, color: 'red' });
+    } else {
+      // successfully rejected expense
+      let msg = 'Successfully rejected expense';
+      alerts.value.push({ status: 'success', message: msg, color: 'green' });
+    }
+    setTimeout(() => alerts.value.shift(), 10000);
+    emitter.emit('reimburseAlert', alerts.value);
+  });
+  refreshExpenses();
+  loading.value = false;
+} // rejectExpenses
 
 /**
  * Reimburse the selected list of expenses.
@@ -588,10 +628,7 @@ async function reimburseExpenses() {
       // failed to reimburse expense
       msg = reimbursedExpense.response.data.message;
       alerts.value.push({ status: 'error', message: msg, color: 'red' });
-      let self = alerts.value;
-      setTimeout(function () {
-        self.shift();
-      }, 20000);
+      setTimeout(() => alerts.value.shift(), 20000);
 
       // revert reimburse date change
       let groupIndex = _.findIndex(empBudgets.value, {
@@ -613,16 +650,12 @@ async function reimburseExpenses() {
         }`;
       }
       alerts.value.push({ status: 'success', message: msg, color: 'green' });
-      let self = alerts.value;
-      setTimeout(function () {
-        self.shift();
-      }, 15000);
+      setTimeout(() => alerts.value.shift(), 15000);
     }
     emitter.emit('reimburseAlert', alerts.value);
   });
 
   refreshExpenses();
-  emitter.emit('finished-reimbursing');
   loading.value = false; // set reimbursing status to false
 } // reimburseExpenses
 
@@ -692,10 +725,27 @@ function determineShowOnFeed(expense) {
 } // determineShowOnFeed
 
 /**
+ * Gets unreimbursed expenses that have not been rejected, or expenses that have been rejected and revised.
+ *
+ * @param unreimbursedExpenses Array - The array of unreimbursed expenses
+ * @returns Array - The array of unreimbursed, non-rejected expenses
+ */
+function getNonRejectedExpenses(unreimbursedExpenses) {
+  return _.filter(unreimbursedExpenses, (expense) => {
+    let rejections = expense.rejections;
+    return !(
+      rejections?.hardRejections?.reasons?.length > 0 ||
+      (rejections?.softRejections?.reasons?.length > 0 && !rejections?.softRejections?.revised)
+    );
+  });
+} // getNonRejectedExpenses
+
+/**
  * Loads and organizes all data relevant to the data table.
  */
 function loadExpensesData(unreimbursedExpenses) {
-  pendingExpenses.value = createExpenses(unreimbursedExpenses);
+  pendingExpenses.value = getNonRejectedExpenses(unreimbursedExpenses);
+  pendingExpenses.value = createExpenses(pendingExpenses.value);
   constructAutoComplete(pendingExpenses.value);
   empBudgets.value = groupEmployeeExpenses(pendingExpenses.value);
   unCheckAllBoxes();

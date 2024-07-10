@@ -25,24 +25,37 @@
           <span class="checkbox-label">{{ label }}</span>
         </template>
       </v-checkbox>
-      <!-- Reimburse Button -->
-      <v-btn
-        @click="emitter.emit('reimburse-expenses', isGeneratingGiftCard)"
-        id="custom-button-color"
-        theme="dark"
-        class="reimburse_button mt-5"
-        variant="text"
-        block
-      >
-        <template v-slot:prepend><v-icon>mdi-currency-usd</v-icon></template>
-        Reimburse
-      </v-btn>
+      <v-row class="mt-5">
+        <v-col cols="12" lg="8" class="px-2">
+          <!-- Reimburse Button -->
+          <v-btn
+            @click="emitter.emit('reimburse-expenses', isGeneratingGiftCard)"
+            class="reimburse_button"
+            variant="text"
+            block
+          >
+            <template v-slot:prepend><v-icon>mdi-currency-usd</v-icon></template>
+            Reimburse
+          </v-btn>
+        </v-col>
+        <v-col cols="12" lg="4" class="px-2">
+          <!-- Revise Button -->
+          <v-btn @click="toggleExpenseRejectionModal = true" class="reimburse_button" variant="text" block>
+            <template v-slot:prepend><v-icon>mdi-receipt-text-remove</v-icon></template>
+            Reject
+          </v-btn>
+        </v-col>
+      </v-row>
     </v-card-text>
+    <v-dialog v-model="toggleExpenseRejectionModal" persistent width="35%">
+      <expense-rejection-modal :expenses="selected"></expense-rejection-modal>
+    </v-dialog>
   </v-card>
   <!--End of Totals Card-->
 </template>
 
 <script setup>
+import ExpenseRejectionModal from '@/components/modals/ExpenseRejectionModal.vue';
 import _ from 'lodash';
 import { convertToMoneyString } from '@/utils/utils';
 import { ref, onBeforeMount, onBeforeUnmount, computed, inject } from 'vue';
@@ -56,6 +69,7 @@ import { ref, onBeforeMount, onBeforeUnmount, computed, inject } from 'vue';
 const emitter = inject('emitter');
 const isGeneratingGiftCard = ref(true);
 const selected = ref([]);
+const toggleExpenseRejectionModal = ref(false);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -69,6 +83,7 @@ const selected = ref([]);
 onBeforeMount(() => {
   emitter.on('selectExpense', updateSelected);
   emitter.on('expenseChange', updateSelected);
+  emitter.on('close-expenses-rejection', () => (toggleExpenseRejectionModal.value = false));
 }); // created
 
 /**
@@ -77,6 +92,7 @@ onBeforeMount(() => {
 onBeforeUnmount(() => {
   emitter.off('selectExpense');
   emitter.off('expenseChange');
+  emitter.off('close-expenses-rejection');
 }); //beforeUnmount
 
 // |--------------------------------------------------|
