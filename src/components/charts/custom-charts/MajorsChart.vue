@@ -136,7 +136,6 @@ function fillData(title) {
       },
       subtitle: {
         display: true,
-        text: enabled.value ? '*Click on a slice to see employees' : '',
         font: {
           style: 'italic'
         }

@@ -414,7 +414,6 @@ function fillData() {
       },
       subtitle: {
         display: true,
-        text: '*Click on a slice to see employees',
         font: {
           style: 'italic'
         }
