@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid>
+  <v-container fluid id="full-page">
     <!-- Status Alert -->
     <v-snackbar
       v-model="status.statusType"
@@ -44,7 +44,12 @@
       <v-row class="pb-3">
         <!-- Title -->
         <v-col cols="12" md="6">
-          <h1 align="center" justify="center" id="home-greeting">Hello, {{ getEmployeePreferredName(employee) }}!</h1>
+          <h1 v-if="isBirthday(employee)" align="center" justify="center" id="home-greeting">
+            Happy Birthday, {{ getEmployeePreferredName(employee) }}!
+          </h1>
+          <h1 v-else align="center" justify="center" id="home-greeting">
+            Hello, {{ getEmployeePreferredName(employee) }}!
+          </h1>
           <div class="text-center">
             <v-btn color="#bc3825" @click="handleProfile()" theme="dark">View Profile</v-btn>
           </div>
@@ -53,6 +58,12 @@
         <!-- Anniversary Date -->
         <v-col cols="12" md="6" class="px-xl-4 px-lg-2 px-md-0">
           <anniversary-card v-if="!loading" :employee="employee" :has-budgets="true" location="home" />
+          <ConfettiExplosion
+            v-if="isBirthday(employee)"
+            :particleCount="300"
+            :particleSize="20"
+            class="ml-12"
+          ></ConfettiExplosion>
         </v-col>
       </v-row>
       <v-row class="pb-3">
@@ -92,6 +103,7 @@ import { isEmpty, getCurrentBudgetYear } from '@/utils/utils';
 import { updateStoreExpenseTypes, updateStoreBudgets } from '@/utils/storeUtils';
 import TimeData from '@/components/shared/timesheets/TimeData';
 import AnniversaryCard from '@/components/shared/AnniversaryCard';
+import ConfettiExplosion from 'vue-confetti-explosion';
 import {
   format,
   getTodaysDate,
@@ -168,15 +180,6 @@ onBeforeMount(async () => {
 // |                                                  |
 // |--------------------------------------------------|
 
-/**
- * Checks if the store is populated from initial page load.
- *
- * @returns boolean - True if the store is populated
- */
-// store.getters.storeIsPopulated = computed(() => {
-//   return store.getters.storeIsPopulated;
-// }); // storeIsPopulated
-
 computed(store.getters.storeIsPopulated);
 
 // |--------------------------------------------------|
@@ -184,6 +187,13 @@ computed(store.getters.storeIsPopulated);
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+function isBirthday(employee) {
+  let today = getTodaysDate();
+  let bday = employee.birthday;
+  bday = setYear(bday, getYear(today));
+  return bday === today;
+}
 
 /**
  * Gets an employees anniversary. If an employee's anniversary date is more than 2 months in the future,
