@@ -101,12 +101,14 @@ function isUSA() {
 
 async function searchCity(query) {
   predictions.value = [];
+  let predictionsSet = new Set(); // to prevent duplicate cities
   if (query?.length > 2) {
     showMenu.value = true;
     let locations = await api.getCity(query);
     _.forEach(locations.predictions, (location) => {
-      predictions.value.push({ title: location.description, value: location.place_id });
+      predictionsSet.add({ title: location.description, value: location.place_id });
     });
+    predictions.value = [...predictionsSet];
   } else {
     showMenu.value = false;
   }

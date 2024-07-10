@@ -172,8 +172,8 @@
       <v-autocomplete
         class="pb-3 pt-0"
         @update:search="updateCityDropDown($event)"
-        :items="Object.keys(placeIds)"
-        v-model="searchString"
+        :items="Object.keys(predictions)"
+        v-model="citySearchString"
         hide-no-data
         variant="outlined"
         persitent-hint="Search address and select option to auto-fill fields below."
@@ -389,7 +389,7 @@ async function updateAddressDropDown(query) {
 } //updateAddressDropDown
 
 /**
- * Updates the address dropdown according to the user's input.
+ * Updates the city dropdown according to the user's input.
  */
 async function updateCityDropDown(query) {
   if (query.length > 2) {
@@ -398,12 +398,12 @@ async function updateCityDropDown(query) {
     //needed later to obtain the selected address's zip code
     this.predictions = {};
     _.forEach(locations.predictions, (location) => {
-      this.placeIds[location.description] = location.place_id;
+      this.predictions[location.description] = location.predictions;
     });
   } else {
     this.predictions = {};
   }
-} //updateAddressDropDown
+} //updateCityDropDown
 
 /**
  * Once an address has been selected, it autofills the city, street, and state fields.
@@ -421,7 +421,9 @@ async function updateAddressBoxes(item) {
 
     //obtains the selected address's ID needed for the zip code API call
     let selectedAddress = this.placeIds[this.searchString];
-    let res = await api.getZipCode(selectedAddress);
+    console.log(selectedAddress);
+    let res = await api.getZipCode(item.value);
+    console.log(res);
     //Response contains an array of objects, with each object containing
     //a field title 'type'. 'Type' is another array and we want the one
     //containing the postal_code string
@@ -438,16 +440,14 @@ async function updateAddressBoxes(item) {
 } // updateAddressBoxes
 
 /**
- * Once an address has been selected, it autofills the city, street, and state fields.
- * It also updates the zip code field making an additional Google Maps API call
- * to obtain the selected address's zip code.
+ * Once a city has been selected, it will update the fields.
  */
 async function updateCityBoxes(item) {
-  this.searchString = item.value;
+  this.citySearchString = item.value;
   let country = '';
   let state = '';
-  if (!this.isEmpty(this.searchString)) {
-    let birthInfo = this.searchString.split(', ');
+  if (!this.isEmpty(this.citySearchString)) {
+    let birthInfo = this.citySearchString.split(', ');
     let city = birthInfo[0];
 
     // a city outside the US with no state/region
@@ -467,8 +467,8 @@ async function updateCityBoxes(item) {
     this.editedPersonalInfo.st = this.states[state];
 
     //resets addresses and ID's in dropdown
-    this.placeIds = {};
-    this.searchString = null;
+    this.predictions = {};
+    this.citySearchString = null;
   }
 } // updateCityBoxes
 
@@ -621,11 +621,12 @@ export default {
       addressDropDown: [],
       birthdayFormat: null, // formatted birthday
       BirthdayMenu: false, // display birthday menu
+      citySearchString: null, // user input for searching POB
       countries: [], // list of countries
       phoneNumbers: [],
       phonePrivacyBadgeIcon: 'mdi-shield-outline',
       phoneNumberTypes: ['Home', 'Cell', 'Work'],
-      searchString: null,
+      searchString: null, // user input for address searching
       placeIds: {},
       predictions: {},
       userId: null,
