@@ -10,6 +10,7 @@
         order="1"
         :expand-on-hover="!isMobile()"
         :permanent="isLoggedIn() && !isMobile()"
+        :key="logoutReloadKey"
       >
         <main-nav :key="mainNavReloadKey"></main-nav>
       </v-navigation-drawer>
@@ -146,14 +147,7 @@
 </template>
 
 <script setup>
-import {
-  isLoggedIn,
-  logout,
-  getProfile,
-  getTokenExpirationDate,
-  getAccessToken,
-  refreshUserSession
-} from '@/utils/auth';
+import { logout, getProfile, getTokenExpirationDate, getAccessToken, refreshUserSession } from '@/utils/auth';
 import { isMobile, isSmallScreen, storeIsPopulated, updateEmployeeLogin } from '@/utils/utils';
 import { updateStoreUser, updateStoreEmployees } from '@/utils/storeUtils';
 import p from '../package.json';
@@ -186,7 +180,7 @@ const store = useStore();
 const loadingCreated = ref(false);
 const environment = ref('');
 const switchRole = ref(false);
-const drawer = ref(isLoggedIn());
+const drawer = ref(localStorage.getItem('isLoggedIn') === 'true');
 const inset = ref(false);
 const profilePic = ref('src/assets/img/logo-big.png');
 const session = ref(false);
@@ -224,7 +218,11 @@ const mediaLinks = [
   { name: 'X', link: 'https://x.com/consultwithcase?lang=en', img: x, size: 17 },
   { name: 'Facebook', link: 'https://www.facebook.com/ConsultwithCase/', img: facebook }
 ];
+
+// these values are updated to force-reload the components they belong to
 const mainNavReloadKey = ref(0);
+const logoutReloadKey = ref(0);
+
 const version = ref(null);
 
 // |--------------------------------------------------|
@@ -241,6 +239,16 @@ onBeforeMount(async () => {
 
   environment.value = import.meta.env.VITE_AUTH0_CALLBACK;
 
+  emitter.on('login', () => {
+    localStorage.setItem('isLoggedIn', true);
+    logoutReloadKey.value++;
+  });
+
+  emitter.on('logout', () => {
+    localStorage.setItem('isLoggedIn', false);
+    logoutReloadKey.value++;
+  });
+
   emitter.on('timeout-acknowledged', () => {
     handleLogout();
   }); // Session end - log out
@@ -249,12 +257,14 @@ onBeforeMount(async () => {
   emitter.on('badgeExp', () => {
     badgeKey.value++;
   }); // used to refresh badge expiration banner
+
   emitter.on('user-session-refreshed', () => {
     clearTimeout(sessionTimeout.value);
     clearTimeout(sessionTimeoutWarning.value);
     session.value = false;
     setSessionTimeouts();
   });
+
   // set expiration date if access token received
   let accessToken = getAccessToken();
   if (accessToken && isLoggedIn()) {
@@ -289,6 +299,8 @@ onBeforeUnmount(() => {
   emitter.off('relog');
   emitter.off('badgeExp');
   emitter.off('user-session-refreshed');
+  emitter.off('login');
+  emitter.off('logout');
 }); //beforeUnmount
 
 // |--------------------------------------------------|
@@ -314,6 +326,15 @@ const onUserProfile = computed(() => {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Whether the user is currently logged in
+ *
+ * @return True if the user is logged in, otherwise false
+ */
+function isLoggedIn() {
+  return localStorage.getItem('isLoggedIn') === 'true';
+}
 
 /**
  * idk what this does
@@ -414,8 +435,8 @@ function goToHome() {
 function refreshSession() {
   let accessToken = getAccessToken();
   if (accessToken && isLoggedIn()) {
-    let expTime = Math.trunc(getTokenExpirationDate(accessToken).getTime());
-    let now = Math.trunc(new Date().getTime());
+    let expTime = getTokenExpirationDate(accessToken).getTime();
+    let now = Date.now();
     let sessionRemainder = expTime - now;
     let unixHour = 60 * 60 * 1000; // 60 min in unix time difference
     if (sessionRemainder - unixHour <= 0) {
@@ -429,18 +450,20 @@ function refreshSession() {
  * Sets the session timeout and the session timeout warning
  */
 function setSessionTimeouts() {
-  let accessToken = getAccessToken();
-  let expTime = Math.trunc(getTokenExpirationDate(accessToken).getTime());
-  let now = Math.trunc(new Date().getTime());
-  let sessionRemainder = expTime - now;
+  const accessToken = getAccessToken();
+  const expTime = getTokenExpirationDate(accessToken).getTime();
+  const now = Date.now();
+  const sessionRemainder = expTime - now;
+
   // set session timeout
   sessionTimeout.value = window.setTimeout(() => {
     sessionStorage.setItem('timedOut', true);
     session.value = false;
-    if (route.path !== '/') {
-      router.go({
-        path: '/',
-        query: { redirect: route.path }
+    handleLogout();
+    if (route.name !== 'home' && route.name !== 'login') {
+      router.push({
+        name: 'login',
+        query: { query: { redirect: route.fullPath } }
       });
     }
   }, sessionRemainder);
@@ -477,6 +500,13 @@ watch(
     }
   }
 ); // $route
+
+watch(
+  () => sessionStorage.getItem('isTimedOut'),
+  (newValue) => {
+    if (newValue) handleLogout();
+  }
+);
 </script>
 
 <style lang="scss">
