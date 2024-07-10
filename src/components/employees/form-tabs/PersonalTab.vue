@@ -421,9 +421,7 @@ async function updateAddressBoxes(item) {
 
     //obtains the selected address's ID needed for the zip code API call
     let selectedAddress = this.placeIds[this.searchString];
-    console.log(selectedAddress);
-    let res = await api.getZipCode(item.value);
-    console.log(res);
+    let res = await api.getZipCode(selectedAddress);
     //Response contains an array of objects, with each object containing
     //a field title 'type'. 'Type' is another array and we want the one
     //containing the postal_code string
