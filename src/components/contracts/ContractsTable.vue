@@ -66,7 +66,7 @@
             :items-per-page="-1"
             :search="search"
             :expanded="expanded"
-            color="purple"
+            :row-props="rowProps"
             class="contracts-table text-body-2"
             density="compact"
             hover
@@ -80,18 +80,14 @@
 
             <!-- CheckBox Slot -->
             <template v-slot:[`item.data-table-select`]="{ item }">
-              <div class="checkBox-container fill-height fill-width align-center">
-                <div :class="`${item.status}-status status-indicator`"></div>
-                <v-checkbox
-                  :model-value="item.all"
-                  :indeterminate="item.indeterminate"
-                  primary
-                  class="ma-0 pl-4"
-                  hide-details
-                  @click.stop="toggleContractCheckBox(item)"
-                >
-                </v-checkbox>
-              </div>
+              <v-checkbox
+                :model-value="item.all"
+                :indeterminate="item.indeterminate"
+                primary
+                hide-details
+                @click.stop="toggleContractCheckBox(item)"
+              >
+              </v-checkbox>
             </template>
 
             <!-- Prime Name Slot -->
@@ -186,6 +182,7 @@
                 :colspan="columns.length"
                 :isEditingContractItem="editingItem != null"
                 :isContractDeletingOrUpdatingStatus="isDeletingOrUpdatingStatus()"
+                :rowProps="rowProps"
               />
             </template>
 
@@ -798,6 +795,16 @@ function resetAllCheckBoxes() {
 } // resetCheckAllBoxes
 
 /**
+ * Sets the props for a row in the data table.
+ *
+ * @param item - The row item
+ * @returns Object - The row class
+ */
+function rowProps({ item }) {
+  return { class: `${item.status}-status` };
+} // rowProps
+
+/**
  * Toggles the contract item check box and all the project item boxes
  *
  * @param contractItem contract item to check
@@ -864,6 +871,7 @@ function determineCheckBox(contractCheckBox) {
 
   return checkBox;
 } // determineCheckBox
+
 /**
  * Sets all projects checkbox of a contract to the given value.
  *
@@ -975,6 +983,7 @@ export default {
     isDeletingOrUpdatingStatus,
     resetAllCheckBoxes,
     determineCheckBox,
+    rowProps,
     setAllProjectsCheckBox,
     toggleContractCheckBox,
     toggleProjectCheckBox,
@@ -1103,43 +1112,20 @@ export default {
 
 <style lang="scss">
 @import 'src/assets/styles/styles';
-
-.status-indicator {
-  position: absolute;
-  left: 0;
-  height: 100%;
-  width: 5px;
+.closed-status > td:first-of-type {
+  border-left: 3px solid #db4437 !important;
 }
 
-.checkBox-container {
-  position: relative;
-  display: flex;
+.unstaffed-status > td:first-of-type {
+  border-left: 3px solid #f4b400 !important;
 }
 
-.closed-status {
-  background-color: #db4437;
-}
-
-.unstaffed-status {
-  background-color: #f4b400;
-}
-
-.active-status {
-  background-color: #0f9d58;
-}
-
-.highlight-contract-row {
-  background-color: rgb(224, 224, 224) !important;
+.active-status > td:first-of-type {
+  border-left: 3px solid #0f9d58 !important;
 }
 
 .contracts-table > div > table > tbody > tr > td {
-  background: #f0f0f0 !important;
-  opacity: 1;
-  padding-left: 0px !important;
-}
-
-.contracts-table > div > table > thead > tr > th {
-  padding-left: 0px !important;
+  background-color: #f0f0f0;
 }
 
 .description textarea {
