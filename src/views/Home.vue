@@ -311,11 +311,12 @@ async function createEvents() {
   // filter out empty arrays
   anniversaries = _.filter(anniversaries, (a) => a.date);
 
+  const now = getTodaysDate();
+
   // generate birthdays
   let birthdays = _.map(employees.value, (b) => {
     if (b.birthdayFeed && !isEmpty(b.birthday) && b.workStatus != 0) {
       let event = {};
-      let now = getTodaysDate();
       let cutOff = startOf(subtract(now, 6, 'months'), 'day');
       let birthday = format(b.birthday, 'MM-DD', 'MM-DD');
       birthday = setYear(birthday, getYear(now), 'MM-DD');
@@ -352,7 +353,6 @@ async function createEvents() {
   let expenses = _.map(aggregatedExpenses.value, (a) => {
     if (!isEmpty(a.showOnFeed) && a.showOnFeed) {
       //value of showOnFeed is true
-      let now = getTodaysDate();
       let reimbursedDate = format(a.reimbursedDate, 'YYYY-MM-DD', 'YYYY-MM-DD');
       let event = {};
       event.date = getEventDateMessage(reimbursedDate);
@@ -404,7 +404,6 @@ async function createEvents() {
 
   // generate schedules
   let schedules = _.map(scheduleEntries.value, (a) => {
-    let now = getTodaysDate();
     let cutOff = startOf(subtract(now, 6, 'months'), 'day');
 
     let startDate = a.starts_at;
@@ -439,7 +438,6 @@ async function createEvents() {
   // generate awards
   let awards = _.map(aggregatedAwards.value, (a) => {
     // get award information
-    let now = getTodaysDate();
     const dateSubmitted = a.dateSubmitted || a.dateReceived;
     let award = {
       icon: 'mdi-fire',
@@ -465,7 +463,6 @@ async function createEvents() {
   // generate certs
   let certs = _.map(aggregatedCerts.value, (c) => {
     // get cert information
-    let now = getTodaysDate();
     const dateSubmitted = c.dateSubmitted || c.dateReceived;
     let cert = {
       icon: 'mdi-certificate',
@@ -484,7 +481,29 @@ async function createEvents() {
     return wantToDisplay ? cert : null;
   });
 
-  let mergedEventsList = [...anniversaries, ...newHires, ...birthdays, ...expenses, ...schedules, ...awards, ...certs]; // merges lists
+  let announcements = _.map(eventData.announcements, (announcement) => {
+    const date = startOf(announcement.createdAt, 'day');
+    return {
+      type: 'Announcement',
+      icon: 'mdi-bullhorn',
+      color: 'purple',
+      text: `${announcement.author}: ${announcement.title}`,
+      date: getEventDateMessage(date),
+      daysFromToday: difference(now, date, 'day'),
+      basecampLink: announcement.url
+    };
+  });
+
+  let mergedEventsList = [
+    ...anniversaries,
+    ...newHires,
+    ...birthdays,
+    ...expenses,
+    ...schedules,
+    ...awards,
+    ...certs,
+    ...announcements
+  ]; // merges lists
   events.value = _.sortBy(_.compact(mergedEventsList), 'daysFromToday'); //sorts by days from today
   store.dispatch('setEvents', { events: events.value });
   loadingEvents.value = false;
