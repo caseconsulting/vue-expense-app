@@ -12,10 +12,10 @@
       <v-card-text color="white">
         <span class="text-h6 font-weight-medium">{{ status.statusMessage }}</span>
       </v-card-text>
-      <v-btn color="white" variant="text" @click="clearStatus"> Close </v-btn>
+      <v-btn color="white" variant="text" @click="clearStatus()"> Close </v-btn>
     </v-snackbar>
     <v-card color="#bc3825">
-      <v-card-title class="d-flex align-center header_style" v-bind:class="{ 'justify-center': isMobile }">
+      <v-card-title class="d-flex align-center header_style" v-bind:class="{ 'justify-center': isMobile() }">
         <h2 class="text-center text-white">Reimbursements</h2>
       </v-card-title>
     </v-card>
@@ -41,11 +41,32 @@
   </v-card>
 </template>
 
-<script>
+<script setup>
 import UnreimbursedExpenses from '@/components/reimbursements/UnreimbursedExpenses.vue';
 import { isMobile } from '@/utils/utils';
 import PTOCashOutsTable from '../components/shared/PTOCashOutsTable.vue';
 import TimeData from '@/components/shared/timesheets/TimeData';
+import { onBeforeMount, onMounted, ref, inject, watch } from 'vue';
+import { useStore } from 'vuex';
+import { storeIsPopulated } from '../utils/utils';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const emitter = inject('emitter');
+const store = useStore();
+
+const currentTab = ref('expenses'); // default page
+const employee = ref(null);
+const loading = ref(true);
+const status = ref({
+  statusType: undefined,
+  statusMessage: '',
+  color: ''
+});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -56,50 +77,35 @@ import TimeData from '@/components/shared/timesheets/TimeData';
 /**
  * Created lifecycle hook
  */
-function created() {
-  if (this.$store.getters.storeIsPopulated) {
-    this.employee = this.$store.getters.user;
-    this.loading = false;
+onBeforeMount(() => {
+  if (store.getters.storeIsPopulated) {
+    employee.value = store.getters.user;
+    loading.value = false;
   }
-} // created
+}); // created
 
 /**
  * Mounted lifecycle hook
  */
-function mounted() {
-  this.emitter.on('status-alert', (status) => {
-    this.status['statusType'] = status.statusType;
-    this.status['statusMessage'] = status.statusMessage;
-    this.status['color'] = status.color;
+onMounted(() => {
+  emitter.on('status-alert', (stat) => {
+    status.value.statusType = stat.statusType;
+    status.value.statusMessage = stat.statusMessage;
+    status.value.color = stat.color;
   });
 
-  this.emitter.on('change-timesheets-employee', (employee) => {
-    this.employee = employee;
+  emitter.on('change-timesheets-employee', (emp) => {
+    employee.value = emp;
   });
-} // mounted
+}); // mounted
 
 /**
  * before destroy lifecycle hook
  */
-function beforeUnmount() {
-  this.emitter.off('status-alert');
-  this.emitter.off('change-timesheets-employee');
-} // beforeUnmount
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     COMPUTED                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Checks if the store is populated from initial page load.
- *
- * @returns boolean - True if the store is populated
- */
-function storeIsPopulated() {
-  return this.$store.getters.storeIsPopulated;
-} // storeIsPopulated
+onBeforeMount(() => {
+  emitter.off('status-alert');
+  emitter.off('change-timesheets-employee');
+}); // beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -111,9 +117,9 @@ function storeIsPopulated() {
  * Clear the action status that is displayed in the snackbar.
  */
 function clearStatus() {
-  this.status['statusType'] = undefined;
-  this.status['statusMessage'] = '';
-  this.status['color'] = '';
+  status.value.statusType = undefined;
+  status.value.statusMessage = '';
+  status.value.color = '';
 } // clearStatus
 
 // |--------------------------------------------------|
@@ -125,48 +131,10 @@ function clearStatus() {
 /**
  * A watcher for when the vuex store is populated with necessary data.
  */
-async function watchStoreIsPopulated() {
-  if (this.$store.getters.storeIsPopulated) {
-    this.employee = this.$store.getters.user;
-    this.loading = false;
+watch(storeIsPopulated, async () => {
+  if (storeIsPopulated) {
+    employee.value = store.getters.user;
+    loading.value = false;
   }
-} // watchStoreIsPopulated
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  components: {
-    UnreimbursedExpenses,
-    PTOCashOutsTable,
-    TimeData
-  },
-  data() {
-    return {
-      currentTab: 'expenses',
-      employee: null,
-      status: {
-        statusType: undefined,
-        statusMessage: '',
-        color: ''
-      }
-    };
-  },
-  computed: {
-    isMobile,
-    storeIsPopulated
-  },
-  watch: {
-    storeIsPopulated: watchStoreIsPopulated
-  },
-  created,
-  beforeUnmount,
-  mounted,
-  methods: {
-    clearStatus
-  }
-};
+}); // watchStoreIsPopulated
 </script>
