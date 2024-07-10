@@ -11,7 +11,7 @@ import UserAvatar from '@/components/shared/UserAvatar';
 
 import App from './App.vue';
 
-export const emitter = mitt();
+const emitter = mitt();
 
 const app = createApp(App).use(router).use(store).use(vuetify);
 app.component('UserAvatar', UserAvatar);

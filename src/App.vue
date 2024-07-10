@@ -10,7 +10,6 @@
         order="1"
         :expand-on-hover="!isMobile()"
         :permanent="isLoggedIn() && !isMobile()"
-        :key="logoutReloadKey"
       >
         <main-nav :key="mainNavReloadKey"></main-nav>
       </v-navigation-drawer>
@@ -147,7 +146,14 @@
 </template>
 
 <script setup>
-import { logout, getProfile, getTokenExpirationDate, getAccessToken, refreshUserSession } from '@/utils/auth';
+import {
+  isLoggedIn,
+  logout,
+  getProfile,
+  getTokenExpirationDate,
+  getAccessToken,
+  refreshUserSession
+} from '@/utils/auth';
 import { isMobile, isSmallScreen, storeIsPopulated, updateEmployeeLogin } from '@/utils/utils';
 import { updateStoreUser, updateStoreEmployees } from '@/utils/storeUtils';
 import p from '../package.json';
@@ -180,7 +186,7 @@ const store = useStore();
 const loadingCreated = ref(false);
 const environment = ref('');
 const switchRole = ref(false);
-const drawer = ref(localStorage.getItem('isLoggedIn') === 'true');
+const drawer = ref(isLoggedIn());
 const inset = ref(false);
 const profilePic = ref('src/assets/img/logo-big.png');
 const session = ref(false);
@@ -221,7 +227,6 @@ const mediaLinks = [
 
 // these values are updated to force-reload the components they belong to
 const mainNavReloadKey = ref(0);
-const logoutReloadKey = ref(0);
 
 const version = ref(null);
 
@@ -238,16 +243,6 @@ onBeforeMount(async () => {
   loadingCreated.value = true;
 
   environment.value = import.meta.env.VITE_AUTH0_CALLBACK;
-
-  emitter.on('login', () => {
-    localStorage.setItem('isLoggedIn', true);
-    logoutReloadKey.value++;
-  });
-
-  emitter.on('logout', () => {
-    localStorage.setItem('isLoggedIn', false);
-    logoutReloadKey.value++;
-  });
 
   emitter.on('timeout-acknowledged', () => {
     handleLogout();
@@ -299,8 +294,6 @@ onBeforeUnmount(() => {
   emitter.off('relog');
   emitter.off('badgeExp');
   emitter.off('user-session-refreshed');
-  emitter.off('login');
-  emitter.off('logout');
 }); //beforeUnmount
 
 // |--------------------------------------------------|
@@ -326,15 +319,6 @@ const onUserProfile = computed(() => {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
-
-/**
- * Whether the user is currently logged in
- *
- * @return True if the user is logged in, otherwise false
- */
-function isLoggedIn() {
-  return localStorage.getItem('isLoggedIn') === 'true';
-}
 
 /**
  * idk what this does
@@ -460,10 +444,10 @@ function setSessionTimeouts() {
     sessionStorage.setItem('timedOut', true);
     session.value = false;
     handleLogout();
-    if (route.name !== 'home' && route.name !== 'login') {
+    if (route.name !== 'login') {
       router.push({
         name: 'login',
-        query: { query: { redirect: route.fullPath } }
+        query: { redirect: route.fullPath }
       });
     }
   }, sessionRemainder);

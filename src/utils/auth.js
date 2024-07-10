@@ -3,7 +3,6 @@ import auth0 from 'auth0-js';
 import router from '../router';
 import { AUTH_CONFIG } from './auth0-variables';
 import CryptoJS from 'crypto-js';
-import { emitter } from '@/main';
 
 const AUDIENCE = AUTH_CONFIG.audience;
 const CALLBACK = AUTH_CONFIG.callbackUrl;
@@ -191,7 +190,6 @@ export function isTokenExpired(token) {
  */
 export async function login() {
   auth.authorize();
-  emitter.emit('login');
   sessionStorage.removeItem('timedOut'); // this key exists if the login session times out, loggin in should remove it
 } // login
 
@@ -201,7 +199,6 @@ export async function login() {
 export function logout() {
   clearCookies();
   router.push({ name: 'login' });
-  emitter.emit('logout');
 } // logout
 
 /**
@@ -217,7 +214,6 @@ export function requireAuth(to, from, next) {
       name: 'login',
       query: { redirect: to.fullPath }
     });
-    emitter.emit('logout');
   } else {
     next();
   }
@@ -239,7 +235,7 @@ export function refreshUserSession() {
     if (authResult && authResult.accessToken && authResult.idToken) {
       setCookie(ACCESS_TOKEN_KEY, authResult.accessToken);
       setCookie(ID_TOKEN_KEY, authResult.idToken);
-      emitter.emit('user-session-refreshed');
+      window.emitter.emit('user-session-refreshed');
     }
   });
 } // refreshUserSession
