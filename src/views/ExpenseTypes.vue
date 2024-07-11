@@ -473,7 +473,7 @@
               :delete-info="'(' + deleteType + ')'"
               :type="'expense-type'"
             />
-            <delete-error-modal :toggle-delete-error-modal="invalidDelete" type="expense type" />
+            <delete-error-modal v-model="invalidDelete" type="expense type" />
             <!-- End Confirmation Modals -->
           </v-container>
         </v-card>
@@ -1143,7 +1143,7 @@ async function validateDelete(item) {
       deleting.value = true;
     } else {
       // tells DeleteErrorModal to appear
-      emitter.emit('delete-expense-type-error-show');
+      invalidDelete.value = true;
     }
   } catch (err) {
     displayError(err);
