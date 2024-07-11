@@ -60,7 +60,7 @@ const getDaysWith = computed(() => {
   let days = Math.abs(
     Math.trunc(365 * years) - difference(getTodaysDate(), format(props.model.hireDate, null, 'LL'), 'days')
   );
-  if (days > 1) {
+  if (days > 1 || days === 0) {
     return days + ' days';
   } else if (days == 1) {
     return days + ' day';
