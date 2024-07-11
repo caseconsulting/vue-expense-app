@@ -189,6 +189,9 @@ computed(store.getters.storeIsPopulated);
 // |--------------------------------------------------|
 
 function isBirthday(employee) {
+  if (employee.birthday === undefined) {
+    return false; // no birthday is entered
+  }
   let today = getTodaysDate();
   let bday = employee.birthday;
   bday = setYear(bday, getYear(today));
