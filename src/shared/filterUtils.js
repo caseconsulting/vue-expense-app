@@ -14,6 +14,8 @@ export function employeeFilter(__, search, item) {
   item.id = item.id || item.value;
   item = _.find(store.getters.employees, (e) => e.id === item.id);
 
+  if (!item) return false;
+
   /**
    * Bounce conditions:
    *  - nothing is being searched
