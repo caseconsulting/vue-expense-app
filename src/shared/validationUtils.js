@@ -8,9 +8,7 @@ import _ from 'lodash';
  * @returns Array - The array of rule functions
  */
 export function getAINRules() {
-  return [
-    (v) => (!isEmpty(v) ? String(v).match(/^[0-9]{7}$/) || 'Agency Identification Number must be 7 digits' : true)
-  ];
+  return [(v) => (!isEmpty(v) ? /^[0-9]{7}$/.test(v) || 'Agency Identification Number must be 7 digits' : true)];
 } //getAINRules
 
 /**
