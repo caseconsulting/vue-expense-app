@@ -10,6 +10,7 @@
         order="1"
         :expand-on-hover="!isMobile()"
         :permanent="isLoggedIn() && !isMobile()"
+        :key="logoutReloadKey"
       >
         <main-nav :key="mainNavReloadKey"></main-nav>
       </v-navigation-drawer>
@@ -148,6 +149,7 @@
 <script setup>
 import {
   isLoggedIn,
+  isTimedOut,
   logout,
   getProfile,
   getTokenExpirationDate,
@@ -227,6 +229,7 @@ const mediaLinks = [
 
 // these values are updated to force-reload the components they belong to
 const mainNavReloadKey = ref(0);
+const logoutReloadKey = ref(0);
 
 const version = ref(null);
 
@@ -366,6 +369,7 @@ function getMainPadding() {
  * Logout of expense app
  */
 function handleLogout() {
+  logoutReloadKey.value++;
   logout();
 } // handleLogout
 
@@ -443,6 +447,8 @@ function setSessionTimeouts() {
   sessionTimeout.value = window.setTimeout(() => {
     sessionStorage.setItem('timedOut', true);
     session.value = false;
+
+    // logout and redirect to login page
     handleLogout();
     if (route.name !== 'login') {
       router.push({
@@ -487,10 +493,10 @@ watch(
 
 watch(
   () => sessionStorage.getItem('isTimedOut'),
-  (newValue) => {
-    if (newValue) handleLogout();
+  () => {
+    if (isTimedOut()) handleLogout();
   }
-);
+); // watch sessionStorage.isTimedOut
 </script>
 
 <style lang="scss">

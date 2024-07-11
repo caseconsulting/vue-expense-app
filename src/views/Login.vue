@@ -13,7 +13,7 @@
         </v-btn>
       </v-col>
 
-      <v-col v-if="isTimedOut" cols="12">
+      <v-col v-if="isTimedOut()" cols="12">
         <v-alert class="session-expired-alert" text="Session expired. Please login again." type="warning"></v-alert>
       </v-col>
     </v-row>
@@ -21,8 +21,7 @@
 </template>
 
 <script setup>
-import { isLoggedIn, login } from '@/utils/auth';
-import { computed } from 'vue';
+import { isLoggedIn, login, isTimedOut } from '@/utils/auth';
 import { useRouter } from 'vue-router';
 
 // |--------------------------------------------------|
@@ -40,14 +39,6 @@ localStorage.setItem('redirectUrl', path);
 if (isLoggedIn()) {
   router.push(path);
 }
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     COMPUTED                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-const isTimedOut = computed(() => !!sessionStorage.getItem('timedOut'));
 </script>
 
 <style>
