@@ -1,12 +1,12 @@
 <template>
   <div id="t-sheets-data">
     <v-card density="compact">
-      <v-card-title class="header_style d-flex align-center justify-space-between py-0 relative">
+      <v-card-title class="header_style d-flex align-center justify-space-between py-0 pt-2 relative">
         <h3>{{ system }} Time Data</h3>
         <span v-if="getLastUpdatedText && employeeIsUser()" class="last-updated">
           {{ getLastUpdatedText }}
         </span>
-        <v-btn variant="text" icon="mdi-refresh" @click="resetData()">
+        <v-btn class="pr-xs-1" variant="text" icon="mdi-refresh" @click="resetData()">
           <template v-slot:default>
             <v-tooltip activator="parent" location="top">Refresh {{ system }} data</v-tooltip>
             <v-icon color="white" size="large">mdi-refresh</v-icon>
@@ -43,8 +43,9 @@ import _ from 'lodash';
 import api from '@/shared/api';
 import { computed, inject, ref, onBeforeMount, onBeforeUnmount } from 'vue';
 import { useStore } from 'vuex';
-import { difference, isBefore, now } from '@/shared/dateUtils';
+import { difference, getTodaysDate, isBefore, isSameOrBefore, now } from '@/shared/dateUtils';
 import { updateStoreContracts } from '@/utils/storeUtils';
+import { getCalendarYearPeriod, getContractYearPeriod } from './time-periods';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -57,7 +58,7 @@ const emitter = inject('emitter');
 const store = useStore();
 
 const clonedEmployee = ref(props.employee);
-const excludeIfZero = ref(['Jury Duty', 'Maternity/Paternity Time Off']);
+const excludeIfZero = ref(['Jury Duty', 'Maternity/Paternity Time Off', 'Bereavement']);
 const errorMessage = ref(null);
 const lastUpdated = ref(null);
 const loading = ref(true);
@@ -224,20 +225,28 @@ function addPlanToBalances(balanceKey, itemsKey, planResults, planKey) {
  */
 function refreshPlannedPto() {
   // set plan to employee object
-  let plan = {
-    pto: props.employee.plannedPto?.results?.pto,
-    holiday: props.employee.plannedPto?.results?.holiday,
-    endDate: props.employee.plannedPto?.results?.endDate
+  let employeePlan = props.employee.plannedPto;
+  let planResults = {
+    pto: Number(employeePlan?.results?.pto),
+    holiday: Number(employeePlan?.results?.holiday),
+    endDate: employeePlan?.results?.endDate
   };
   // yeet outta here if there is no planned PTO
-  if (!plan.endDate) {
+  if (!planResults.endDate) {
     delete ptoBalances.value?.['PTO']?.items?.['PTO after plan'];
     delete ptoBalances.value?.['Holiday']?.items?.['Holiday after plan'];
     return;
   }
+  // negate any balances that are from the past
+  for (let month of employeePlan.plan) {
+    if (isSameOrBefore(month.date, getTodaysDate(), 'month')) {
+      planResults.pto += Number(month.ptoHours);
+      planResults.holiday += Number(month.holidayHours);
+    } else break; // months are sorted, can just break if current month is today or future
+  }
   // set planned PTO and Holiday balances
-  addPlanToBalances('PTO', 'PTO after plan', plan, 'pto');
-  addPlanToBalances('Holiday', 'Holiday after plan', plan, 'holiday');
+  addPlanToBalances('PTO', 'PTO after plan', planResults, 'pto');
+  addPlanToBalances('Holiday', 'Holiday after plan', planResults, 'holiday');
 } // refreshPlannedPto
 
 /**
@@ -266,10 +275,12 @@ async function resetData() {
  * @param {Boolean} isYearly - Whether or not the time period is yearly
  */
 async function setDataFromApi(isCalendarYear, isYearly) {
-  let code = isYearly ? (isCalendarYear ? 3 : 4) : 2;
+  let code = !isYearly ? 2 : null;
+  let period = isYearly ? (isCalendarYear ? getCalendarYearPeriod() : getContractYearPeriod(props.employee)) : null;
   let timesheetsData = await api.getTimesheetsData(props.employee.employeeNumber, {
     code,
-    employeeId: props.employee.id
+    employeeId: props.employee.id,
+    ...(period || {})
   });
   if (!hasError(timesheetsData)) {
     timesheets.value = timesheetsData.timesheets;

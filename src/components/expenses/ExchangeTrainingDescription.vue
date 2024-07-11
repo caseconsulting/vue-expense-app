@@ -30,14 +30,14 @@
       <!-- Action Button -->
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="grey-darken-3" variant="text" @click.native="emitter.emit('close-exchange-training-desc')">
+        <v-btn color="grey-darken-3" variant="text" @click="emitter.emit('close-exchange-training-desc')">
           Close
         </v-btn>
         <v-btn
           color="green "
           variant="text"
           :disabled="!charMinMet"
-          @click.native="emitter.emit('insert-training-desc', description)"
+          @click="emitter.emit('insert-training-desc', description)"
         >
           Insert Description
         </v-btn>

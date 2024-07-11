@@ -60,7 +60,7 @@ Here is what goes into the chart's options object:
   onClick: (x, y) => {
     if (_.first(y)) {
       let index = _.first(y).index;
-      localStorage.setItem('requestedDataType', 'Job Roles');
+      localStorage.setItem('requestedDataType', 'jobRoles');
       localStorage.setItem('requestedFilter', this.chartData.labels[index]);
       this.$router.push({
         path: '/reports',
@@ -108,9 +108,9 @@ The real routing happens in the child, EmployeeReportsTable, though it isn't req
 ```javascript
 if (this.$route.params.requestedDataType) {
   this.dataType = this.$route.params.requestedDataType;
-  if (this.$route.params.requestedDataType === 'Contracts') {
+  if (this.$route.params.requestedDataType === 'contracts') {
     this.prime = this.$route.params.requestedFilter;
-  } else if (this.$route.params.requestedDataType === 'Job Roles') {
+  } else if (this.$route.params.requestedDataType === 'jobRoles') {
     this.dataTypeSearch = this.$route.params.requestedFilter;
   }
 }

@@ -4,6 +4,16 @@ import store from '../../store/index';
 import _ from 'lodash';
 
 /**
+ * Gets the rules for valid AIN number, where it must be 7 digits that can lead with 0s, and not required
+ * @returns Array - The array of rule functions
+ */
+export function getAINRules() {
+  return [
+    (v) => (!isEmpty(v) ? String(v).match(/^[0-9]{7}$/) || 'Agency Identification Number must be 7 digits' : true)
+  ];
+} //getAINRules
+
+/**
  * Gets the optional date rules in MM/DD/YYYY format.
  * @return Array - The array of rule functions
  */
@@ -236,7 +246,19 @@ export function getPTOCashOutRules(ptoLimit, employeeId, originalAmount) {
   ];
 } // getPTOCashOutRules
 
+/**
+ * Validate (numbers and letters) input field for badge number.
+ */
+export function getBadgeNumberRules(clearance) {
+  const pattern = /^[A-Za-z0-9]*$/;
+  return (v) =>
+    v && clearance.badgeNum
+      ? (pattern.test(clearance.badgeNum) && clearance.badgeNum.length == 5) || 'Invalid Badge #, Must be 5 characters'
+      : true;
+} //getBadgeNumberRules
+
 export default {
+  getAINRules,
   getDateOptionalRules,
   getDatesArrayOptionalRules,
   getDateMonthYearOptionalRules,
@@ -257,5 +279,6 @@ export default {
   duplicateEmployeeNumberRule,
   duplicateTechnologyRules,
   technologyExperienceRules,
-  getPTOCashOutRules
+  getPTOCashOutRules,
+  getBadgeNumberRules
 };

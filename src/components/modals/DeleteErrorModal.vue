@@ -9,7 +9,7 @@
           <v-btn
             color="gray darken-1"
             variant="text"
-            @click.native="
+            @click="
               emit(`invalid-${type}-delete`);
               activate = false;
             "
@@ -23,7 +23,59 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { inject, onBeforeUnmount, ref, watch } from 'vue';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const props = defineProps([
+  'toggleDeleteErrorModal', // dialog activator
+  'type' // type of object being deleted
+]);
+const emitter = inject('emitter');
+
+const activate = ref(false); // dialog activator
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+// The watcher above and this emitter kind of do the same thing, but the watcher didn't update when it should've in
+// some cases. To fix this, I used this event instead (fired in ExpenseTypes.vue), but I didn't delete the watcher to
+// avoid breaking anything else.
+// this and the watcher that sets `activate` to true do the same thing, except the watcher broke under certain cases.
+// to avoid more issues, I've left it there
+emitter.on('delete-expense-type-error-show', () => {
+  activate.value = true;
+});
+
+/**
+ * Before Unmount lifecycle hook - removes event listeners
+ */
+onBeforeUnmount(() => {
+  emitter.off('delete-expense-type-error-show');
+});
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+// Watcher for toggleDeleteErrorModal
+watch(
+  () => props.toggleDeleteErrorModal,
+  () => {
+    activate.value = props.toggleDeleteErrorModal;
+  }
+);
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -36,43 +88,6 @@
  * @param msg - Message to emit
  */
 function emit(msg) {
-  this.emitter.emit(msg);
+  emitter.emit(msg);
 } // emit
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                    WATCHERS                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * watcher for toggleDeleteErrorModal
- */
-function watchToggleDeleteErrorModal() {
-  this.activate = true;
-} // watchToggleDeleteErrorModal
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  data() {
-    return {
-      activate: false // dialog activator
-    };
-  },
-  methods: {
-    emit
-  },
-  props: [
-    'toggleDeleteErrorModal', // dialog activator
-    'type' // type of object being deleted
-  ],
-  watch: {
-    toggleDeleteErrorModal: watchToggleDeleteErrorModal
-  }
-};
 </script>

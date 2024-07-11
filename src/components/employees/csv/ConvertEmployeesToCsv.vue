@@ -4,15 +4,23 @@
     :disabled="midAction || loading"
     @click="download()"
     elevation="2"
-    :size="isMobile || isSmallScreen ? 'small' : 'default'"
+    :size="isMobile() || isSmallScreen() ? 'small' : 'default'"
   >
-    <i class="material-icons">download</i>{{ downloadText || 'Download All' }}
+    <i class="material-icons">Download</i>{{ downloadText || 'Download All' }}
   </v-btn>
 </template>
 
-<script>
+<script setup>
 import { isMobile, isSmallScreen } from '@/utils/utils';
 import employeeCsv from '@/utils/csv/employeeCsv.js';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const props = defineProps(['contracts', 'employees', 'tags', 'midAction', 'loading', 'downloadText']);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -23,25 +31,8 @@ import employeeCsv from '@/utils/csv/employeeCsv.js';
  * Downloads employees as CSV
  */
 function download() {
-  employeeCsv.download(this.employees, this.contracts, this.tags);
+  employeeCsv.download(props.employees, props.contracts, props.tags);
 } // download
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  computed: {
-    isMobile,
-    isSmallScreen
-  },
-  methods: {
-    download
-  },
-  props: ['contracts', 'employees', 'tags', 'midAction', 'loading', 'downloadText']
-};
 </script>
 
 <style scoped>

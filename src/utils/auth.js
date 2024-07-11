@@ -124,6 +124,16 @@ export function getTokenExpirationDate(encodedToken) {
 } // getTokenExpirationDate
 
 /**
+ * Whether the 'timedOut' key in session storage is set to true
+ *
+ * @returns {Boolean} The value of the 'timedOut' key in the session storage
+ */
+export function isTimedOut() {
+  // if getting timedOut returns a string or boolean, this functionality should always work
+  return sessionStorage.getItem('timedOut') === 'true' || sessionStorage.getItem('timedOut') === true;
+}
+
+/**
  * checks to see if the current user is an admin before the router continues
  *
  * @param to - path to next page
@@ -190,6 +200,7 @@ export function isTokenExpired(token) {
  */
 export async function login() {
   auth.authorize();
+  sessionStorage.removeItem('timedOut'); // this key exists if the login session times out, loggin in should remove it
 } // login
 
 /**
@@ -197,7 +208,7 @@ export async function login() {
  */
 export function logout() {
   clearCookies();
-  router.go('/');
+  router.push({ name: 'login' });
 } // logout
 
 /**
@@ -210,7 +221,7 @@ export function logout() {
 export function requireAuth(to, from, next) {
   if (!isLoggedIn()) {
     next({
-      path: '/',
+      name: 'login',
       query: { redirect: to.fullPath }
     });
   } else {

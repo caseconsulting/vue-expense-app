@@ -1,7 +1,7 @@
 <template>
   <!-- Download CSV Button -->
-  <v-btn :disabled="midAction" @click="download()" elevation="2" :size="isMobile || (isSmallScreen && 'x-small')"
-    ><i class="material-icons">download</i>Download All</v-btn
+  <v-btn :disabled="midAction" @click="download()" elevation="2"
+    >Download All<i class="material-icons ml-2">download</i></v-btn
   >
 </template>
 <script>

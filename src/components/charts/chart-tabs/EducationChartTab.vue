@@ -17,19 +17,9 @@
   </v-container>
 </template>
 
-<script>
+<script setup>
 import HighestDegreeChart from '../custom-charts/HighestDegreeChart.vue';
 import MajorsChart from '../custom-charts/MajorsChart.vue';
 import MinorsChart from '../custom-charts/MinorsChart.vue';
 import ConcentrationsChart from '../custom-charts/ConcentrationsChart.vue';
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  components: { HighestDegreeChart, MajorsChart, MinorsChart, ConcentrationsChart }
-};
 </script>

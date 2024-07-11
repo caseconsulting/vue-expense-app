@@ -4,15 +4,35 @@
       ref="pieChart"
       chartId="minors-chart"
       :key="chartKey"
-      :options="options"
+      :options="option"
       :chartData="chartData"
     ></pie-chart>
   </v-card>
 </template>
 
-<script>
+<script setup>
 import PieChart from '../base-charts/PieChart.vue';
 import _ from 'lodash';
+import { onBeforeMount, onBeforeUnmount, onMounted, ref, inject } from 'vue';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const chartData = ref(null);
+const chartKey = ref(0);
+const colors = ref([]);
+const dataReceived = ref(false);
+const degree = ref(null);
+const emitter = inject('emitter');
+const enabled = ref(false);
+const label = ref([]);
+const minors = ref(null);
+const option = ref(null);
+const quantities = ref([]);
+const text = ref('');
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -23,33 +43,33 @@ import _ from 'lodash';
 /**
  * Before destroy lifecycle hook.
  */
-function beforeUnmount() {
-  this.emitter.off('minors-update');
-} // beforeUnmount
+onBeforeUnmount(() => {
+  emitter.off('minors-update');
+}); // beforeUnmount
 
 /**
  * Mounted lifecycle hook.
  */
-async function mounted() {
+onMounted(async () => {
   // emit comes from HighestDegreeChart.vue when a pie slice is clicked
-  this.emitter.on('minors-update', async (receiveMinors) => {
-    this.quantities = [];
-    this.labels = [];
-    this.dataReceived = false;
-    this.degree = receiveMinors.degree;
-    this.minors = receiveMinors.minors;
-    await this.fetchData(this.minors);
-    await this.fillData();
+  emitter.on('minors-update', async (receiveMinors) => {
+    quantities.value = [];
+    label.value = [];
+    dataReceived.value = false;
+    degree.value = receiveMinors.degree;
+    minors.value = receiveMinors.minors;
+    await fetchData(minors.value);
+    await fillData();
   });
-} // mounted
+}); // mounted
 
 /**
  * Created lifecycle hook.
  */
-async function created() {
-  await this.fetchData(null);
-  await this.fillData();
-} // created
+onBeforeMount(async () => {
+  await fetchData(null);
+  await fillData();
+}); // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -64,12 +84,12 @@ async function created() {
 function fetchData(minors) {
   if (minors) {
     if (_.isEmpty(minors)) {
-      this.text = `There are no minors for an education of ${this.degree}`;
-      this.quantities.push(1);
-      this.enabled = false;
-      this.colors = ['grey'];
+      text.value = `There are no minors for an education of ${degree.value}`;
+      quantities.value.push(1);
+      enabled.value = false;
+      colors.value = ['grey'];
     } else {
-      this.enabled = true;
+      enabled.value = true;
       const sortable = Object.entries(minors)
         .sort(([, a], [, b]) => b - a)
         .reduce((r, [k, v]) => ({ ...r, [k]: v }), {});
@@ -77,12 +97,12 @@ function fetchData(minors) {
       for (let i = 0; i < 10; i++) {
         let minor = Object.keys(sortable)[i];
         if (minor) {
-          this.quantities.push(sortable[minor]);
-          this.labels.push(minor);
+          quantities.value.push(sortable[minor]);
+          label.value.push(minor);
         }
       }
-      this.text = `Top ${this.degree} Degree Minors`;
-      this.colors = [
+      text.value = `Top ${degree.value} Degree Minors`;
+      colors.value = [
         'rgba(54, 162, 235, 1)',
         'rgba(255, 206, 86, 1)',
         'rgba(75, 192, 192, 1)',
@@ -97,13 +117,13 @@ function fetchData(minors) {
   } else {
     // these presets are when a degree has not been selected OR if there are no minors
     if (!_.isEmpty(minors)) {
-      this.text = 'There are no minors for this type of education';
+      text.value = 'There are no minors for this type of education';
     } else {
-      this.text = 'Click on an Education To See Minors';
+      text.value = 'Click on an Education To See Minors';
     }
-    this.quantities.push(1);
-    this.enabled = false;
-    this.colors = ['grey'];
+    quantities.value.push(1);
+    enabled.value = false;
+    colors.value = ['grey'];
   }
 } // fetchData
 
@@ -111,60 +131,37 @@ function fetchData(minors) {
  * Sets the chart formatting and options data.
  */
 function fillData() {
-  this.chartData = {
-    labels: this.labels,
+  chartData.value = {
+    labels: label.value,
     datasets: [
       {
-        data: this.quantities,
-        backgroundColor: this.colors
+        data: quantities.value,
+        backgroundColor: colors.value
       }
     ]
   };
-  this.options = {
+  option.value = {
     plugins: {
       title: {
         display: true,
-        text: this.text,
+        text: text.value,
         font: {
           size: 15
         }
       },
+      subtitle: {
+        display: true,
+        font: {
+          style: 'italic'
+        }
+      },
       tooltip: {
-        enabled: this.enabled
+        enabled: enabled.value
       }
     },
     maintainAspectRatio: false
   };
-  this.chartKey++; // rerenders the chart
-  this.dataReceived = true;
+  chartKey.value++; // rerenders the chart
+  dataReceived.value = true;
 } // fillData
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  components: { PieChart },
-  data() {
-    return {
-      options: null,
-      chartData: null,
-      minors: null,
-      dataReceived: false,
-      degree: null,
-      chartKey: 0,
-      text: '',
-      colors: [],
-      enabled: false,
-      labels: [],
-      quantities: []
-    };
-  },
-  methods: { fetchData, fillData },
-  mounted,
-  created,
-  beforeUnmount
-};
 </script>

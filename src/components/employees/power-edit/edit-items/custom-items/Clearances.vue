@@ -9,32 +9,6 @@
       variant="underlined"
       class="field"
     ></v-autocomplete>
-    <!-- Granted Date -->
-    <v-text-field
-      :model-value="format(model.grantedDate, null, FORMATTED_ISOFORMAT)"
-      label="Granted Date"
-      class="small-field mx-4"
-      :rules="[...getDateOptionalRules(), ...getDateGrantedRules(model)]"
-      hint="MM/DD/YYYY format"
-      v-mask="'##/##/####'"
-      variant="underlined"
-      :disabled="model.awaitingClearance"
-      @update:focused="model.grantedDate = parseEventDate()"
-      @keypress="showGrantedMenu = false"
-    >
-      <v-menu activator="parent" v-model="showGrantedMenu" :close-on-content-click="false" location="start center">
-        <v-date-picker
-          v-model="model.grantedDate"
-          @update:model-value="showGrantedMenu = false"
-          :min="model.submissionDate"
-          show-adjacent-months
-          hide-actions
-          keyboard-icon=""
-          color="#bc3825"
-          title="Granted Date"
-        ></v-date-picker>
-      </v-menu>
-    </v-text-field>
     <!-- Submission Date -->
     <v-text-field
       :model-value="format(model.submissionDate, null, FORMATTED_ISOFORMAT)"
@@ -43,9 +17,10 @@
       hint="MM/DD/YYYY format"
       v-mask="'##/##/####'"
       variant="underlined"
-      class="small-field"
+      class="small-field mx-4"
       @update:focused="model.submissionDate = parseEventDate()"
       @keypress="showSubmissionMenu = false"
+      autocomplete="off"
     >
       <v-menu activator="parent" v-model="showSubmissionMenu" :close-on-content-click="false" location="start center">
         <v-date-picker
@@ -60,15 +35,45 @@
         ></v-date-picker>
       </v-menu>
     </v-text-field>
+    <!-- Granted Date -->
+    <v-text-field
+      :model-value="format(model.grantedDate, null, FORMATTED_ISOFORMAT)"
+      label="Granted Date"
+      class="small-field"
+      :rules="[...getDateOptionalRules(), ...getDateGrantedRules(model)]"
+      hint="MM/DD/YYYY format"
+      v-mask="'##/##/####'"
+      variant="underlined"
+      :disabled="model.awaitingClearance"
+      @update:focused="model.grantedDate = parseEventDate()"
+      @keypress="showGrantedMenu = false"
+      autocomplete="off"
+    >
+      <v-menu activator="parent" v-model="showGrantedMenu" :close-on-content-click="false" location="start center">
+        <v-date-picker
+          v-model="model.grantedDate"
+          @update:model-value="showGrantedMenu = false"
+          :min="model.submissionDate"
+          show-adjacent-months
+          hide-actions
+          keyboard-icon=""
+          color="#bc3825"
+          title="Granted Date"
+        ></v-date-picker>
+      </v-menu>
+    </v-text-field>
     <!-- Badge Number -->
     <v-text-field
       v-model="model.badgeNum"
-      counter="5"
+      maxlength="5"
+      counter
+      hide-details="auto"
+      :rules="[getBadgeNumberRules(model)]"
       label="Badge Number"
       variant="underlined"
       class="small-field mx-4"
       :disabled="model.awaitingClearance"
-      @update:model-value="model.badgeNum = model.badgeNum ? model.badgeNum.toUpperCase() : undefined"
+      @update:focused="model.badgeNum = model.badgeNum ? model.badgeNum.toUpperCase() : undefined"
     ></v-text-field>
     <!-- Badge Expiration Date -->
     <v-text-field
@@ -83,6 +88,7 @@
       :disabled="model.awaitingClearance"
       @update:focused="model.badgeExpirationDate = parseEventDate()"
       @keypress="showBadgeMenu = false"
+      autocomplete="off"
     >
       <v-menu activator="parent" v-model="showBadgeMenu" :close-on-content-click="false" location="start center">
         <v-date-picker
@@ -221,6 +227,7 @@ import { inject, ref, watch } from 'vue';
 import { mask } from 'vue-the-mask';
 import { format, isBefore, isValid, DEFAULT_ISOFORMAT, FORMATTED_ISOFORMAT } from '@/shared/dateUtils';
 import {
+  getBadgeNumberRules,
   getAfterSubmissionRules,
   getDateBadgeRules,
   getDateGrantedRules,

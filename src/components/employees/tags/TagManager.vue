@@ -27,7 +27,7 @@
       <v-btn
         color="grey-darken-3"
         variant="text"
-        @click.native="
+        @click="
           emit(`close-tag-manager`);
           activate = false;
         "

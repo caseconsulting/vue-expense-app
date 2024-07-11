@@ -13,14 +13,34 @@
   </v-container>
 </template>
 
-<script>
+<script setup>
 import api from '@/shared/api';
 import _ from 'lodash';
 import PieChart from '@/components/charts/base-charts/PieChart.vue';
 import AuditsTable from '@/components/audits/AuditsTable.vue';
 import { storeIsPopulated } from '@/utils/utils.js';
 import { format } from '../../shared/dateUtils';
+import { onBeforeMount, ref, watch } from 'vue';
+import { computed } from 'vue';
+import { useStore } from 'vuex';
+import { updateStoreEmployees } from '../../utils/storeUtils';
 const IsoFormat = 'MMMM Do YYYY, h:mm:ss a';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+const props = defineProps(['queryStartDate', 'queryEndDate', 'show24HourTitle']);
+const store = useStore();
+
+const chartsLoaded = ref(false);
+const employees = ref([]);
+const resumeAudits = ref([]);
+const resumeChartOptions = ref(null);
+const resumeChartData = ref(null);
+const resumeChart2Options = ref(null);
+const resumeChart2Data = ref(null);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -32,15 +52,15 @@ const IsoFormat = 'MMMM Do YYYY, h:mm:ss a';
  * Generates chart data and table
  */
 async function fillData() {
-  let resumeData = await api.getAudits('resume', this.queryStartDate, this.queryEndDate);
+  let resumeData = await api.getAudits('resume', props.queryStartDate, props.queryEndDate);
 
   _.forEach(resumeData, (audit) => {
     audit.dateCreated = format(audit.dateCreated, null, IsoFormat);
-    let employee = _.find(this.employees, (emp) => {
+    let employee = _.find(employees.value, (emp) => {
       return emp.id === audit.employeeId;
     });
 
-    this.resumeAudits.push({
+    resumeAudits.value.push({
       dateCreated: audit.dateCreated,
       description: audit.description,
       employeeName: `${employee.firstName} ${employee.lastName}`,
@@ -73,18 +93,18 @@ async function fillData() {
     labels = ['Successful', 'Failed'];
     data = [successes, failures];
     backgroundColor = ['rgba(50, 168, 82, 1)', 'rgba(230, 61, 55, 1)'];
-    text = this.show24HourTitle
+    text = props.show24HourTitle
       ? 'Proportion of Resumes Successfully Parsed In Last 24 Hours'
       : 'Proportion of Resumes Successfully Parsed';
     showToolTips = true;
   } else {
     data = [1];
     backgroundColor = ['grey'];
-    text = this.show24HourTitle ? 'No Resume Parser Audits In Last 24 Hours' : 'No Resume Parser Audits in Date Range';
+    text = props.show24HourTitle ? 'No Resume Parser Audits In Last 24 Hours' : 'No Resume Parser Audits in Date Range';
     showToolTips = false;
   }
 
-  this.resumeChartData = {
+  resumeChartData.value = {
     labels: labels,
     datasets: [
       {
@@ -94,7 +114,7 @@ async function fillData() {
     ]
   };
 
-  this.resumeChartOptions = {
+  resumeChartOptions.value = {
     plugins: {
       title: {
         display: true,
@@ -123,18 +143,18 @@ async function fillData() {
     labels = ['Only Successful Parse', 'Submitted Changes'];
     data = [successes - numSubmits, numSubmits];
     backgroundColor = ['rgba(134, 31, 65, 1)', 'rgba(232, 119, 34, 1)'];
-    text = this.show24HourTitle
+    text = props.show24HourTitle
       ? 'Proportion of People Who Submitted Changes In Last 24 Hours'
       : 'Proportion of People Who Submitted Changes';
     showToolTips = true;
   } else {
     data = [1];
     backgroundColor = ['grey'];
-    text = this.show24HourTitle ? 'No Resume Parser Audits In Last 24 Hours' : 'No Resume Parser Audits Date Range';
+    text = props.show24HourTitle ? 'No Resume Parser Audits In Last 24 Hours' : 'No Resume Parser Audits Date Range';
     showToolTips = false;
   }
 
-  this.resumeChart2Data = {
+  resumeChart2Data.value = {
     labels: labels,
     datasets: [
       {
@@ -144,7 +164,7 @@ async function fillData() {
     ]
   };
 
-  this.resumeChart2Options = {
+  resumeChart2Options.value = {
     plugins: {
       title: {
         display: true,
@@ -159,7 +179,7 @@ async function fillData() {
     },
     maintainAspectRatio: false
   };
-  this.chartsLoaded = true;
+  chartsLoaded.value = true;
 } // fillData
 
 // |--------------------------------------------------|
@@ -168,15 +188,13 @@ async function fillData() {
 // |                                                  |
 // |--------------------------------------------------|
 
-/**
- * created lifecycle hook
- */
-async function created() {
-  if (this.storeIsPopulated) {
-    this.employees = this.$store.getters.employees; // get all employees
-    await this.fillData();
+onBeforeMount(async () => {
+  if (!store.getters.employees) {
+    await updateStoreEmployees();
   }
-} //created
+  employees.value = store.getters.employees; // get all employees
+  await fillData();
+});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -186,12 +204,8 @@ async function created() {
 
 /**
  * returns the combined date range computed value
- *
- * @return - full date range
  */
-function dateRange() {
-  return `${this.queryStartDate} ${this.queryEndDate}`;
-} // dateRange
+const dateRange = computed(() => `${props.queryStartDate} ${props.queryEndDate}`);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -199,74 +213,28 @@ function dateRange() {
 // |                                                  |
 // |--------------------------------------------------|
 
-/**
- * fills data when dateRange changes
- */
-async function watchDateRange() {
-  await this.fillData();
-} // watchDateRange
-
-/**
- * fills data when store is populated since employees are needed to fill data
- */
-async function watchStoreIsPopulated() {
-  if (this.storeIsPopulated) {
-    this.employees = this.$store.getters.employees; // get all employees
+// fills data when dateRange changes
+watch(
+  () => dateRange,
+  async () => {
     await this.fillData();
   }
-}
+);
+
+// fills data when store is populated since employees are needed to fill data
+watch(
+  () => storeIsPopulated,
+  async () => {
+    if (this.storeIsPopulated) {
+      employees.value = store.getters.employees; // get all employees
+      await this.fillData();
+    }
+  }
+);
 
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
 // |                                                  |
 // |--------------------------------------------------|
-
-export default {
-  components: { AuditsTable, PieChart },
-  computed: {
-    storeIsPopulated,
-    dateRange
-  },
-  created,
-  data() {
-    return {
-      chartsLoaded: false,
-      employees: [],
-      headers: [
-        {
-          text: 'Event Date',
-          value: 'dateCreated'
-        },
-        {
-          text: 'Employee Name',
-          value: 'employeeName'
-        },
-        {
-          text: 'Description',
-          value: 'description'
-        },
-        {
-          text: '',
-          value: 'nickname',
-          width: 0,
-          cellClass: 'clear'
-        }
-      ], // datatable headers
-      resumeAudits: [],
-      resumeChartOptions: null,
-      resumeChartData: null,
-      resumeChart2Options: null,
-      resumeChart2Data: null
-    };
-  },
-  methods: {
-    fillData
-  },
-  props: ['queryStartDate', 'queryEndDate', 'show24HourTitle'],
-  watch: {
-    dateRange: watchDateRange,
-    storeIsPopulated: watchStoreIsPopulated
-  }
-};
 </script>

@@ -48,6 +48,7 @@
           prepend-icon="mdi-calendar"
           @click:prepend="degree.showEducationMenu = true"
           @keypress="degree.showEducationMenu = false"
+          autocomplete="off"
         >
           <v-menu
             activator="parent"

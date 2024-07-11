@@ -15,6 +15,7 @@
         <v-toolbar color="transparent">
           <v-toolbar-title class="font-weight-bold">Employee Clearances</v-toolbar-title>
         </v-toolbar>
+        <p class="pl-3" style="color: #828282"><i>*Click on row to see employees</i></p>
       </template>
       <template v-slot:headers></template>
       <template v-slot:bottom></template>
@@ -22,22 +23,39 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import _ from 'lodash';
-import { storeIsPopulated } from '@/utils/utils.js';
+import { onBeforeMount, ref, watch } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                 LIFECYCLE HOOKS                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const dataReceived = ref(false);
+const employees = ref(null);
+const headers = ref(null);
+const router = useRouter();
+const store = useStore();
+const tableContents = ref(null);
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                LIFECYCLE HOOKS                   |
 // |                                                  |
 // |--------------------------------------------------|
 
 /**
  * Mounted lifecycle hook.
  */
-async function mounted() {
-  if (this.storeIsPopulated) await this.fillData();
-} // mounted
+onBeforeMount(async () => {
+  if (store.getters.storeIsPopulated) {
+    await fillData();
+  }
+}); // mounted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -51,9 +69,9 @@ async function mounted() {
  * @param value - item clicked
  */
 function clickedRow(_, { item }) {
-  localStorage.setItem('requestedDataType', 'security info');
+  localStorage.setItem('requestedDataType', 'securityInfo');
   localStorage.setItem('requestedFilter', item.title);
-  this.$router.push({
+  router.push({
     path: '/reports',
     name: 'reports'
   });
@@ -66,7 +84,7 @@ function clickedRow(_, { item }) {
  */
 function getClearanceCount(type) {
   let num = _.reduce(
-    this.employees,
+    employees.value,
     (a, b) => {
       return b.clearances && _.some(b.clearances, (c) => c.type === type && !c.awaitingClearance) ? a + 1 : a + 0;
     },
@@ -80,15 +98,15 @@ function getClearanceCount(type) {
  */
 function fillData() {
   // access store
-  this.employees = this.$store.getters.employees;
+  employees.value = store.getters.employees;
 
   // filter out inactive and interns if selected
-  this.employees = this.employees.filter((emp) => emp.workStatus != 0);
+  employees.value = employees.value.filter((emp) => emp.workStatus != 0);
 
   const CLEARANCE_TYPES = ['TS/SCI - Full Scope', 'TS/SCI - CI Poly', 'TS/SCI - No Poly', 'Top Secret', 'Secret'];
-  this.tableContents = _.map(CLEARANCE_TYPES, (type) => ({ title: type, value: this.getClearanceCount(type) }));
+  tableContents.value = _.map(CLEARANCE_TYPES, (type) => ({ title: type, value: getClearanceCount(type) }));
 
-  this.headers = [
+  headers.value = [
     {
       text: 'topic',
       align: 'start',
@@ -96,39 +114,21 @@ function fillData() {
     },
     { text: 'val', value: 'value' }
   ];
-  this.dataReceived = true;
+  dataReceived.value = true;
 } // fillData
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                      EXPORT                      |
+// |                    WATCHERS                      |
 // |                                                  |
 // |--------------------------------------------------|
 
-export default {
-  computed: {
-    storeIsPopulated
-  },
-  data() {
-    return {
-      dataReceived: false,
-      employees: null,
-      tableContents: null,
-      headers: null
-    };
-  },
-  methods: {
-    clickedRow,
-    getClearanceCount,
-    fillData
-  },
-  mounted,
-  watch: {
-    storeIsPopulated: function () {
-      if (this.storeIsPopulated) this.fillData();
-    }
+watch(
+  () => store.getters.storeIsPopulated,
+  () => {
+    fillData();
   }
-};
+);
 </script>
 
 <style>

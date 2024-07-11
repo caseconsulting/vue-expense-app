@@ -142,7 +142,13 @@ const router = createRouter({
       component: PageNotFound,
       beforeEnter: requireAuth
     }
-  ]
+  ],
+  scrollBehavior(to) {
+    // resets scroll when going to an employee profile
+    if (to.name === 'employee') {
+      return { top: 0, left: 0 };
+    }
+  }
 });
 
 export default router;

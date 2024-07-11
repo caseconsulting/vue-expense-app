@@ -1,28 +1,6 @@
 import _ from 'lodash';
 
 /**
- * Custom filter for employee autocomplete options.
- *
- * @param item - employee object
- * @param queryText - query to use to filter
- * @return string - the filtered name
- */
-export function customEmployeeFilter(_, queryText, item) {
-  item = item.raw;
-
-  const query = queryText ? queryText.trim() : '';
-  const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
-  const firstNameFullName = `${item.firstName} ${item.lastName}`;
-
-  const queryContainsNickName = nickNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
-  const queryContainsFirstName =
-    firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
-  const queryContainsEmployeeNumber = item.value.toString().indexOf(query.toString()) >= 0;
-
-  return queryContainsNickName || queryContainsFirstName || queryContainsEmployeeNumber;
-} // customEmployeeFilter
-
-/**
  * Returns a filtered list of the input with all inactive
  * employees removed
  */
@@ -51,10 +29,11 @@ export function getFullName(item) {
 export function populateEmployeesDropdown(empData) {
   return _.sortBy(
     _.map(empData, (data) => {
-      if (data && data.firstName && data.lastName && data.employeeNumber) {
+      if (data && data.firstName && (data.nickname || data.lastName) && data.employeeNumber) {
         return {
-          text: data.firstName + ' ' + data.lastName,
+          text: `${data.nickname || data.firstName} ${data.lastName}`,
           value: data.employeeNumber.toString(),
+          id: data.id,
           nickname: data.nickname,
           firstName: data.firstName,
           lastName: data.lastName
@@ -68,7 +47,6 @@ export function populateEmployeesDropdown(empData) {
 } // constructAutoComplete
 
 export default {
-  customEmployeeFilter,
   getActive,
   getFullName,
   populateEmployeesDropdown

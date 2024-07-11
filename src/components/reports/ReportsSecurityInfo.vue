@@ -6,7 +6,7 @@
           <v-autocomplete
             id="employeesSearch"
             v-model="search"
-            :customFilter="customEmployeeFilter"
+            :custom-filter="employeeFilter"
             :items="employees"
             label="Search By Employee Name"
             variant="underlined"
@@ -46,32 +46,7 @@
           ></v-autocomplete>
         </v-col>
         <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
-          <v-autocomplete
-            clearable
-            label="Filter by Tag (click to flip)"
-            v-model="selectedTags"
-            :items="tags"
-            multiple
-            variant="underlined"
-            item-title="tagName"
-            item-value="id"
-            @update:model-value="refreshDropdownItems()"
-            return-object
-          >
-            <template v-slot:selection="{ item }">
-              <v-chip
-                size="small"
-                closable
-                @click.stop
-                @click="negateTag(item.raw)"
-                @click:close="removeTag(item.raw)"
-                :color="chipColor(item.raw.id)"
-              >
-                {{ tagFlip.includes(item.raw.id) ? 'NOT ' : '' }}
-                {{ item.raw.tagName }}
-              </v-chip>
-            </template>
-          </v-autocomplete>
+          <tags-filter v-model="tagsInfo" @update:modelValue="refreshDropdownItems()"></tags-filter>
         </v-col>
         <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
           <v-checkbox v-model="showInactiveEmployees" label="Show Inactive Users"></v-checkbox>
@@ -86,6 +61,7 @@
         :items-per-page="-1"
         class="elevation-1"
         @click:row="handleClick"
+        @update:current-items="updateTableDownload($event)"
       >
         <!-- Employee Number Slot -->
         <template v-slot:[`item.employeeNumber`]="{ item }">
@@ -123,11 +99,63 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import _ from 'lodash';
-import { userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
+import { employeeFilter } from '@/shared/filterUtils';
 import { add, format, getTodaysDate } from '@/shared/dateUtils';
-import { customEmployeeFilter, getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
+import { getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
+import { onMounted, ref, inject, watch } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+import { selectedTagsHasEmployee } from '@/shared/employeeUtils';
+import { userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
+import TagsFilter from '@/components/shared/TagsFilter.vue';
+
+const store = useStore();
+const emitter = inject('emitter');
+const router = useRouter();
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                       DATA                       |
+// |                                                  |
+// |--------------------------------------------------|
+const employees = ref([]);
+const employeesInfo = ref([]);
+const filteredEmployees = ref([]);
+const headers = ref([
+  {
+    title: 'Employee #',
+    key: 'employeeNumber'
+  },
+  {
+    title: 'Name',
+    key: 'fullName'
+  },
+  {
+    title: 'Clearance Type',
+    key: 'clearanceType'
+  },
+  {
+    title: 'Badge Expiration Date',
+    key: 'badgeExpiration'
+  },
+  {
+    title: 'Email',
+    key: 'email'
+  }
+]); // datatable headers
+const badgeExpirationDateSearch = ref(null);
+const badgeExpirations = ref([]);
+const clearanceSearch = ref(null);
+const clearances = ref(['TS/SCI - Full Scope', 'TS/SCI - CI Poly', 'TS/SCI - No Poly', 'Top Secret', 'Secret']);
+const search = ref(null); // query text for datatable search field
+const showInactiveEmployees = ref(false);
+const sortBy = ref([{ key: 'employeeNumber' }]); // sort datatable items
+const tagsInfo = ref({
+  selected: [],
+  flipped: []
+});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -138,41 +166,27 @@ import { customEmployeeFilter, getActive, getFullName, populateEmployeesDropdown
 /**
  * The created lifecycle hook.
  */
-function created() {
-  this.emitter.on('get-employees-to-contact', (tab) => {
-    if (tab === 'security info') {
-      this.emitter.emit('list-of-employees-to-contact', this.filteredEmployees);
-    }
-  });
-
-  this.employeesInfo = this.getActive(this.$store.getters.employees); // default to filtered list
-  this.tags = this.$store.getters.tags;
-  this.filteredEmployees = this.employeesInfo; // this one is shown
-  this.populateDropdowns(this.employeesInfo);
+onMounted(() => {
+  employeesInfo.value = getActive(store.getters.employees); // default to filtered list
+  filteredEmployees.value = employeesInfo.value; // one.value is shown
+  populateDropdowns(employeesInfo.value);
 
   // fill in search boxes if routed from another page
   if (localStorage.getItem('requestedFilter')) {
-    this.clearanceSearch = localStorage.getItem('requestedFilter');
-    this.refreshDropdownItems();
+    clearanceSearch.value = localStorage.getItem('requestedFilter');
+    refreshDropdownItems();
     localStorage.removeItem('requestedFilter');
   }
-} // created
+
+  // initial set of table download data
+  updateTableDownload(filteredEmployees.value);
+}); // created
 
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
-
-/**
- * Returns the color that at tag filter chip should be
- *
- * @param id ID of the tag item
- *
- */
-function chipColor(id) {
-  return this.tagFlip.includes(id) ? 'red' : 'gray';
-} // chipColor
 
 /**
  * Returns the expiration dates for all clearances in natural readable format. The sorting key of item.badgeExpiration
@@ -232,49 +246,36 @@ function getClearanceType(clearances, item) {
  * @param item - the employee
  */
 function handleClick(_, { item }) {
-  this.$router.push(`/employee/${item.employeeNumber}`);
+  router.push(`/employee/${item.employeeNumber}`);
 } //handleClick
-
-/**
- * negates a tag
- */
-function negateTag(item) {
-  // try to find the id in the tagFlip array, if it is there then remove it else add it
-  const index = this.tagFlip.indexOf(item.id);
-  if (index >= 0) {
-    this.tagFlip.splice(index, 1);
-  } else {
-    this.tagFlip.push(item.id);
-  }
-} // negateTag
 
 /**
  * Populates all job roles in the search dropdown.
  */
 function populateBadgeExpirationsDropdown() {
   // formats the badge exp dropdowns to include the date in the future
-  this.badgeExpirations = [];
+  badgeExpirations.value = [];
   let dateRanges = ['30 Days', '60 Days', '90 Days', '180 Days', '365 Days'];
   _.forEach(dateRanges, (date) => {
     let search = date.split(' ');
     let num = parseInt(search[0]);
     let dateType = search[1].toLowerCase();
     let futureDate = format(add(getTodaysDate(), num, dateType), null, 'MMM Do, YYYY');
-    this.badgeExpirations.push(date + ' (' + futureDate + ')');
+    badgeExpirations.value.push(date + ' (' + futureDate + ')');
   });
 
-  if (this.search) {
+  if (search.value) {
     // once the dropdown is in place, we want to only show options that match
     // dates found in filteredEmployees
-    this.badgeExpirations = _.filter(this.badgeExpirations, (date) => {
-      let result = this.searchBadgeExpirationDates(date, true);
+    badgeExpirations.value = _.filter(badgeExpirations.value, (date) => {
+      let result = searchBadgeExpirationDates(date, true);
       return result;
     });
   }
 
-  this.badgeExpirations = new Set(this.badgeExpirations);
+  badgeExpirations.value = Array.from(new Set(badgeExpirations.value));
   // refresh the employees autocomplete list to be those that match the query
-  this.employees = this.populateEmployeesDropdown(this.filteredEmployees);
+  employees.value = populateEmployeesDropdown(filteredEmployees.value);
 } // populateBadgeExpirationsDropdown
 
 /**
@@ -282,48 +283,36 @@ function populateBadgeExpirationsDropdown() {
  *
  * @param employees - array of employees for dropdown and to get contracts
  */
-function populateDropdowns(employees) {
+function populateDropdowns(emps) {
   // refresh the employees autocomplete list to be those that match the query
-  this.populateEmployeesDropdown(employees);
-  this.populateBadgeExpirationsDropdown(employees);
+  employees.value = populateEmployeesDropdown(emps);
+  populateBadgeExpirationsDropdown(emps);
 } // populateDropdowns
 
 /**
  * Refresh the list based on the current queries
  */
 function refreshDropdownItems() {
-  this.filteredEmployees = this.employeesInfo;
-  if (this.search) {
-    this.filteredEmployees = _.filter(this.filteredEmployees, (employee) => {
-      return employee.employeeNumber == this.search;
+  filteredEmployees.value = employeesInfo.value;
+  if (search.value) {
+    filteredEmployees.value = _.filter(filteredEmployees.value, (employee) => {
+      return employee.employeeNumber == search.value;
     });
   }
-  if (this.badgeExpirationDateSearch) {
-    this.searchBadgeExpirationDates(this.badgeExpirationDateSearch);
+  if (badgeExpirationDateSearch.value) {
+    searchBadgeExpirationDates(badgeExpirationDateSearch.value);
   }
-  if (this.clearanceSearch) {
-    this.searchClearances(this.clearanceSearch);
+  if (clearanceSearch.value) {
+    searchClearances(clearanceSearch.value);
   }
-  if (this.selectedTags.length > 0) {
-    this.filteredEmployees = _.filter(this.filteredEmployees, (employee) => {
-      return this.selectedTagsHasEmployee(employee);
+  if (tagsInfo.value.selected.length > 0) {
+    filteredEmployees.value = _.filter(filteredEmployees.value, (employee) => {
+      return selectedTagsHasEmployee(employee.id, tagsInfo.value);
     });
   }
 
-  this.populateDropdowns(this.filteredEmployees);
+  populateDropdowns(filteredEmployees.value);
 } // refreshDropdownItems
-
-/**
- * Removes an item from the tag filters's active filters
- *
- * @param item - The filter to remove
- */
-function removeTag(item) {
-  const selIndex = this.selectedTags.findIndex((t) => t.id === item.id);
-  if (selIndex >= 0) {
-    this.selectedTags.splice(selIndex, 1);
-  }
-} // removeTag
 
 /**
  * If there is a desired badge expiration date, this will calculate what dates fall within the range.
@@ -340,9 +329,9 @@ function searchBadgeExpirationDates(requestedDate, forDropdown) {
   let upperBound = parseInt(format(add(getTodaysDate(), num, dateType), null, 'X'));
   let foundEmployees = [];
 
-  if (this.filteredEmployees.length > 0) {
-    // this means we already filtered by something so we want to restrict the dropdown
-    foundEmployees = _.filter(this.filteredEmployees, (employee) => {
+  if (filteredEmployees.value.length > 0) {
+    // means.value we already filtered by something so we want to restrict the dropdown
+    foundEmployees = _.filter(filteredEmployees.value, (employee) => {
       let found = [];
       // if they have no badge expirations, then badgeExpiration will be the big number
       if (employee.badgeExpiration < 100000000000000000) {
@@ -357,8 +346,8 @@ function searchBadgeExpirationDates(requestedDate, forDropdown) {
       return found.length > 0; // used for the filter function. only keeps employees that met the date criteria
     });
   } else {
-    // this means we havent already filtered so we only want to filter the employees
-    foundEmployees = _.filter(this.employeesInfo, (employee) => {
+    // means.value we havent already filtered so we only want to filter the employees
+    foundEmployees = _.filter(employeesInfo.value, (employee) => {
       // if they have no badge expirations, then badgeExpiration will be the big number
       if (employee.badgeExpiration < 100000000000000000) {
         // loop through every employee's clearances and see if any of them are in the selected range
@@ -371,7 +360,7 @@ function searchBadgeExpirationDates(requestedDate, forDropdown) {
     });
   }
   if (!forDropdown) {
-    this.filteredEmployees = foundEmployees;
+    filteredEmployees.value = foundEmployees;
     return;
   } else {
     return foundEmployees.length > 0; // used to filter the dropdowns in populateDataTypeDropDowns
@@ -384,7 +373,7 @@ function searchBadgeExpirationDates(requestedDate, forDropdown) {
  * @param search - the clearance to search for
  */
 function searchClearances(search) {
-  this.filteredEmployees = _.filter(this.filteredEmployees, (e) => {
+  filteredEmployees.value = _.filter(filteredEmployees.value, (e) => {
     if (e.clearances) {
       for (let i = 0; i < e.clearances.length; i++) {
         if (e.clearances[i].type == search) return true;
@@ -395,22 +384,13 @@ function searchClearances(search) {
 } // searchClearances
 
 /**
- * helper function: return true if any selected tag has employee listed under it.
+ * Emit new data for tab.value
  *
- * @param e - the employee
- * @return true if the employee has a tag selected in filters
+ * @param event the event data containing the table information
  */
-function selectedTagsHasEmployee(e) {
-  let inTag, tagFlipped;
-  for (let i = 0; i < this.selectedTags.length; i++) {
-    inTag = this.selectedTags[i].employees.includes(e.id);
-    tagFlipped = this.tagFlip.includes(this.selectedTags[i].id);
-    if (inTag != tagFlipped) {
-      return true;
-    }
-  }
-  return false;
-} // selectedTagsHasEmployee
+function updateTableDownload(event) {
+  emitter.emit('reports-table-update', { tab: 'securityInfo', table: event, headers: headers });
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -421,117 +401,13 @@ function selectedTagsHasEmployee(e) {
 /**
  * Watches the showInactiveUsers to refilter the table as needed
  */
-function watchShowInactiveUsers() {
-  this.search = null;
-  this.employeesInfo = this.$store.getters.employees;
-  if (!this.showInactiveEmployees) this.employeesInfo = this.getActive(this.employeesInfo);
-  this.populateDropdowns(this.employeesInfo);
-  this.refreshDropdownItems();
-} // watchShowInactiveUsers
-
-/**
- * In the case that the page has been force reloaded (and the store cleared)
- * this watcher will be activated when the store is populated again.
- */
-function watchTagFlip() {
-  this.refreshDropdownItems();
-} // watchTagFlip
-
-/**
- * Remove items from tagFlip array when they are removed from the selected
- * tags
- */
-function watchSelectedTags() {
-  let negatedTagRemoved = true;
-  // use normal for loop to have the index
-  for (let i = 0; i < this.tagFlip.length; i++) {
-    // try to find the current tag in the selectedTags
-    _.forEach(this.selectedTags, (t) => {
-      if (t.id === this.tagFlip[i]) negatedTagRemoved = false;
-    });
-    // if it isn't there, remove it from tagFlip too
-    if (negatedTagRemoved) {
-      this.tagFlip.splice(i, 1);
-    }
-  }
-  this.refreshDropdownItems();
-} // watchSelectedTags
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  created,
-  data() {
-    return {
-      employees: [],
-      employeesInfo: [],
-      filteredEmployees: [],
-      headers: [
-        {
-          title: 'Employee #',
-          key: 'employeeNumber'
-        },
-        {
-          title: 'Name',
-          key: 'fullName'
-        },
-        {
-          title: 'Clearance Type',
-          key: 'clearanceType'
-        },
-        {
-          title: 'Badge Expiration Date',
-          key: 'badgeExpiration'
-        },
-        {
-          title: 'Email',
-          key: 'email'
-        }
-      ], // datatable headers
-      badgeExpirationDateSearch: null,
-      badgeExpirations: [],
-      clearanceSearch: null,
-      clearances: ['TS/SCI - Full Scope', 'TS/SCI - CI Poly', 'TS/SCI - No Poly', 'Top Secret', 'Secret'],
-      search: null, // query text for datatable search field
-      selectedTags: [],
-      showInactiveEmployees: false,
-      sortBy: [{ key: 'employeeNumber' }], // sort datatable items
-      sortDesc: false,
-      tags: [],
-      tagFlip: [],
-      tagSearchString: ''
-    };
-  },
-  methods: {
-    customEmployeeFilter,
-    chipColor,
-    getActive,
-    getBadgeExpiration,
-    getClearanceType,
-    getFullName,
-    handleClick,
-    negateTag,
-    populateBadgeExpirationsDropdown,
-    populateEmployeesDropdown,
-    populateDropdowns,
-    refreshDropdownItems,
-    removeTag,
-    searchBadgeExpirationDates,
-    searchClearances,
-    selectedTagsHasEmployee,
-    userRoleIsAdmin,
-    userRoleIsManager
-  },
-  watch: {
-    showInactiveEmployees: watchShowInactiveUsers,
-    tagFlip: { handler: watchTagFlip, deep: true },
-    selectedTags: { handler: watchSelectedTags, deep: true }
-  }
-};
+watch(showInactiveEmployees, () => {
+  search.value = null;
+  employeesInfo.value = store.getters.employees;
+  if (!showInactiveEmployees.value) employeesInfo.value = getActive(employeesInfo.value);
+  populateDropdowns(employeesInfo.value);
+  refreshDropdownItems();
+});
 </script>
 
 <style lang="css" scoped>

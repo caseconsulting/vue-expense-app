@@ -19,7 +19,7 @@
           <v-col cols="5"><b>Cost:</b></v-col>
           <v-col cols="7">{{ convertToMoneyString(expense.cost) }}</v-col>
         </v-row>
-        <v-dialog v-model="showExchangeCalculator" :width="isMobile ? '100%' : '50%'" persistent>
+        <v-dialog v-model="showExchangeCalculator" :width="isMobile() ? '100%' : '50%'" persistent>
           <ExchangeTrainingHoursCalculatorReverse :cost="expense.cost" />
         </v-dialog>
         <v-row dense v-if="expense.category === 'Exchange for training hours'">
@@ -52,6 +52,20 @@
           <v-col cols="5"><b>Category:</b></v-col>
           <v-col cols="7">N/A</v-col>
         </v-row>
+        <v-row dense v-if="!isEmpty(expense?.rejections?.softRejections)">
+          <v-col cols="5" class="text-red"><b>Revisals</b></v-col>
+          <v-col cols="7" class="revisal-reason">
+            <div v-if="!isEmpty(expense?.rejections?.softRejections)">
+              <div v-for="(reason, i) in expense.rejections.softRejections.reasons" :key="reason">
+                <b>Reason {{ i + 1 }}: </b>{{ reason }}
+              </div>
+              <div>
+                <b>Revised: </b>
+                {{ expense.rejections.softRejections.revised ? 'Yes' : 'No' }}
+              </div>
+            </div>
+          </v-col>
+        </v-row>
         <v-row dense>
           <attachment :expense="expense" :mode="'adminExpenseInfo'"></attachment>
         </v-row>
@@ -60,10 +74,21 @@
   </v-card>
 </template>
 
-<script>
+<script setup>
 import Attachment from '@/components/utils/Attachment.vue';
+import { isMobile, isEmpty, convertToMoneyString, monthDayYearFormat } from '@/utils/utils';
 import ExchangeTrainingHoursCalculatorReverse from '@/components/expenses/ExchangeTrainingHoursCalculatorReverse.vue';
-import { isEmpty, convertToMoneyString, monthDayYearFormat } from '@/utils/utils';
+import { ref, onBeforeMount, onBeforeUnmount, inject, computed } from 'vue';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const emitter = inject('emitter');
+const expense = ref(undefined); // expense info
+const showExchangeCalculator = ref(false);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -77,10 +102,10 @@ import { isEmpty, convertToMoneyString, monthDayYearFormat } from '@/utils/utils
  * @param clickedExpense - Expense to show info for
  */
 function displayExpense(clickedExpense) {
-  if (this.expense == clickedExpense) {
-    this.expense = undefined;
+  if (expense.value == clickedExpense) {
+    expense.value = undefined;
   } else {
-    this.expense = clickedExpense;
+    expense.value = clickedExpense;
   }
 } // displayExpense
 
@@ -93,56 +118,43 @@ function displayExpense(clickedExpense) {
 /**
  * Creates event listeners.
  */
-function created() {
-  this.emitter.on('expenseClicked', this.displayExpense);
-  this.emitter.on('close-exchange-training-hours-calculator-reverse', () => {
-    this.showExchangeCalculator = false;
+onBeforeMount(() => {
+  emitter.on('expenseClicked', displayExpense);
+  emitter.on('close-exchange-training-hours-calculator-reverse', () => {
+    showExchangeCalculator.value = false;
   });
-  this.emitter.on('insert-training-hours-cost', () => {
-    this.showExchangeCalculator = false;
+  emitter.on('insert-training-hours-cost', () => {
+    showExchangeCalculator.value = false;
   });
-} // created
+}); // created
 
 /**
  * beforeUnmount lifecycle hook
  */
-function beforeUnmount() {
-  this.emitter.off('expenseClicked');
-  this.emitter.off('close-exchange-training-hours-calculator-reverse');
-} //beforeUnmount
+onBeforeUnmount(() => {
+  emitter.off('expenseClicked');
+  emitter.off('close-exchange-training-hours-calculator-reverse');
+}); //beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                      EXPORT                      |
+// |                    COMPUTED                      |
 // |                                                  |
 // |--------------------------------------------------|
 
-export default {
-  created,
-  beforeUnmount,
-  components: {
-    Attachment,
-    ExchangeTrainingHoursCalculatorReverse
-  },
-  data() {
-    return {
-      expense: undefined, // expense info
-      showExchangeCalculator: false
-    };
-  },
-  methods: {
-    convertToMoneyString,
-    displayExpense,
-    isEmpty,
-    monthDayYearFormat
-  }
-};
+computed(isMobile);
 </script>
 
 <style scoped>
 .notes {
   height: 125px;
   max-height: 125px;
+  overflow-y: auto;
+}
+
+.revisal-reason {
+  height: 100px;
+  max-height: 100px;
   overflow-y: auto;
 }
 

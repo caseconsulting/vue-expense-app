@@ -3,37 +3,55 @@
     <div v-if="userRoleIsAdmin()" class="float-right">
       <DownloadCSV
         filename="certifications.csv"
-        :generateData="generateCsvData"
+        :generateData="generateCsvData()"
         sortKey="Certification"
         tooltip="Download Active Certifications to CSV"
       ></DownloadCSV>
     </div>
-    <bar-chart ref="barChart" chartId="certifications-chart" :options="options" :chartData="chartData"></bar-chart>
+    <bar-chart ref="barChart" chartId="certifications-chart" :options="option" :chartData="chartData"></bar-chart>
   </v-card>
 </template>
 
-<script>
+<script setup>
 import _ from 'lodash';
 import BarChart from '../base-charts/BarChart.vue';
 import DownloadCSV from '@/components/utils/DownloadCSV.vue';
-import { storeIsPopulated, userRoleIsAdmin } from '@/utils/utils';
+import { userRoleIsAdmin } from '@/utils/utils';
 import { getTodaysDate, isBefore, isSameOrBefore } from '@/shared/dateUtils';
+import { onMounted, ref, watch } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                 LIFECYCLE HOOKS                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const chartData = ref(null);
+const dataReceived = ref(false);
+const employees = ref(null);
+const labels = ref([]);
+const option = ref(null);
+const router = useRouter();
+const store = useStore();
+const values = ref([]);
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                LIFECYCLE HOOKS                   |
 // |                                                  |
 // |--------------------------------------------------|
 
 /**
  * Mounted lifecycle hook.
  */
-async function mounted() {
-  if (this.storeIsPopulated) {
-    await this.fetchCertData();
-    await this.fillCertData();
+onMounted(async () => {
+  if (store.getters.storeIsPopulated) {
+    await fetchCertData();
+    await fillCertData();
   }
-} // mounted
+}); // mounted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -47,12 +65,12 @@ async function mounted() {
 async function fetchCertData() {
   // Put into dictionary where key is kinda tech and value is quantity
   let certifications = {};
-  this.employees = this.$store.getters.employees;
+  employees.value = store.getters.employees;
   // tally up each certification
-  this.employees.forEach((employee) => {
+  employees.value.forEach((employee) => {
     if (employee.certifications && employee.workStatus != 0) {
       employee.certifications.forEach((currCert) => {
-        if (!currCert.expirationDate || this.isBefore(this.getTodaysDate(), currCert.expirationDate)) {
+        if (!currCert.expirationDate || isBefore(getTodaysDate(), currCert.expirationDate)) {
           if (!certifications[currCert.name]) {
             certifications[currCert.name] = 1;
           } else {
@@ -75,11 +93,11 @@ async function fetchCertData() {
   // could be problematic for really long certifications
   for (let i = 0; i < certificationPairs.length; i++) {
     if (certificationPairs[i][0].length > 30) {
-      this.labels.push(this.breakSentence(certificationPairs[i][0]));
+      labels.value.push(breakSentence(certificationPairs[i][0]));
     } else {
-      this.labels.push(certificationPairs[i][0]);
+      labels.value.push(certificationPairs[i][0]);
     }
-    this.values.push(certificationPairs[i][1]);
+    values.value.push(certificationPairs[i][1]);
   }
 } // fetchCertData
 
@@ -101,24 +119,24 @@ function fillCertData() {
   let borderColors = [];
 
   // Set the background and border colors
-  for (let i = 0; i < this.labels.length; i++) {
+  for (let i = 0; i < labels.value.length; i++) {
     backgroundColors[i] = colors[i];
     borderColors[i] = colors[i];
   }
   // Set the chart data
-  this.chartData = {
-    labels: this.labels,
+  chartData.value = {
+    labels: labels.value,
     datasets: [
       {
         label: null,
-        data: this.values,
+        data: values.value,
         backgroundColor: backgroundColors,
         borderColor: borderColors,
         borderWidth: 1
       }
     ]
   };
-  this.options = {
+  option.value = {
     scales: {
       x: {
         beginAtZero: true,
@@ -147,12 +165,12 @@ function fillCertData() {
     onClick: (x, y) => {
       if (_.first(y)) {
         let index = _.first(y).index;
-        let label = Array.isArray(this.chartData.labels[index])
-          ? this.chartData.labels[index].join(' ')
-          : this.chartData.labels[index];
+        let label = Array.isArray(chartData.value.labels[index])
+          ? chartData.value.labels[index].join(' ')
+          : chartData.value.labels[index];
         localStorage.setItem('requestedDataType', 'certifications');
         localStorage.setItem('requestedFilter', label);
-        this.$router.push({
+        router.push({
           path: '/reports',
           name: 'reports'
         });
@@ -164,7 +182,7 @@ function fillCertData() {
       },
       title: {
         display: true,
-        text: 'Top ' + this.values.length + ' Certifications Used by Employees',
+        text: 'Top ' + values.value.length + ' Certifications Used by Employees',
         font: {
           size: 15
         }
@@ -179,9 +197,9 @@ function fillCertData() {
       tooltip: {
         callbacks: {
           title: (tooltipItem) => {
-            if (Array.isArray(this.labels[tooltipItem[0].dataIndex])) {
+            if (Array.isArray(labels.value[tooltipItem[0].dataIndex])) {
               let label = '';
-              this.labels[tooltipItem[0].dataIndex].forEach((item) => (label += item + ' '));
+              labels.value[tooltipItem[0].dataIndex].forEach((item) => (label += item + ' '));
               return label.trim();
             } else {
               return tooltipItem[0].label;
@@ -192,7 +210,7 @@ function fillCertData() {
     },
     maintainAspectRatio: false
   };
-  this.dataReceived = true;
+  dataReceived.value = true;
 } // fillCertData
 
 /**
@@ -202,7 +220,7 @@ function fillCertData() {
  */
 function generateCsvData() {
   let csvData = [];
-  let employees = this.$store.getters.employees;
+  let employees = store.getters.employees;
   employees.forEach((e) => {
     if (e.certifications) {
       e.certifications.forEach((c) => {
@@ -237,43 +255,17 @@ function breakSentence(s) {
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                      EXPORT                      |
+// |                     WATCHERS                     |
 // |                                                  |
 // |--------------------------------------------------|
 
-export default {
-  components: { BarChart, DownloadCSV },
-  mounted,
-  computed: {
-    storeIsPopulated
-  },
-  data() {
-    return {
-      options: null,
-      chartData: null,
-      dataReceived: false,
-      values: [],
-      labels: []
-    };
-  },
-  methods: {
-    breakSentence,
-    fetchCertData,
-    fillCertData,
-    generateCsvData,
-    getTodaysDate, // dateUtils
-    isBefore, // dateUtils
-    userRoleIsAdmin
-  },
-  watch: {
-    storeIsPopulated: function () {
-      if (this.storeIsPopulated) {
-        this.fetchCertData();
-        this.fillCertData();
-      }
-    }
+watch(
+  () => store.getters.storeIsPopulated,
+  () => {
+    fetchCertData();
+    fillCertData();
   }
-};
+);
 </script>
 
 <style scoped>

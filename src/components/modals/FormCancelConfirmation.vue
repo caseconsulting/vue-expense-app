@@ -9,7 +9,7 @@
             id="submitNoBtn"
             color="red"
             variant="text"
-            @click.native="
+            @click="
               emit(`canceled-${type}`);
               activate = false;
             "
@@ -23,7 +23,7 @@
             id="submitYesBtn"
             color="green-darken-1"
             variant="text"
-            @click.native="
+            @click="
               emit(`confirmed-${type}`);
               activate = false;
             "
@@ -39,7 +39,23 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, inject, watch } from 'vue';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const activate = ref(false); // dialog activator
+const emitter = inject('emitter');
+const props = defineProps([
+  'submitting',
+  'toggleSubmissionConfirmation', // dialog activator,
+  'type' //sends appropriate emits based on where its called
+]);
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -52,7 +68,7 @@
  * @param msg - Message to emit
  */
 function emit(msg) {
-  this.emitter.emit(msg);
+  emitter.emit(msg);
 } // emit
 
 // |--------------------------------------------------|
@@ -64,32 +80,10 @@ function emit(msg) {
 /**
  * watcher for toggleSubmissionConfirmation
  */
-function watchToggleSubmissionConfirmation() {
-  this.activate = this.toggleSubmissionConfirmation;
-} // watchToggleSubmissionConfirmation
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  data() {
-    return {
-      activate: false // dialog activator
-    };
-  },
-  methods: {
-    emit
-  },
-  props: [
-    'submitting',
-    'toggleSubmissionConfirmation', // dialog activator,
-    'type' //sends appropriate emits based on where its called
-  ],
-  watch: {
-    toggleSubmissionConfirmation: watchToggleSubmissionConfirmation
+watch(
+  () => props.toggleSubmissionConfirmation,
+  () => {
+    activate.value = props.toggleSubmissionConfirmation;
   }
-};
+); // watchToggleSubmissionConfirmation
 </script>

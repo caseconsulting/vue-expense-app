@@ -6,14 +6,14 @@
       @click="download()"
       elevation="2"
       class="ml-3"
-      :size="isMobile || isSmallScreen ? 'small' : 'default'"
+      :size="isMobile() || isSmallScreen() ? 'small' : 'default'"
       ><i class="material-icons">file_download</i>
       Generate EEO Report
     </v-btn>
   </div>
 </template>
 
-<script>
+<script setup>
 import _ from 'lodash';
 import { isMobile, isSmallScreen } from '@/utils/utils';
 import eeoCsv from '@/utils/csv/eeoCsv.js';
@@ -25,30 +25,21 @@ import eeoCsv from '@/utils/csv/eeoCsv.js';
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                     SETUP                        |
+// |                                                  |
+// |--------------------------------------------------|
+
+const props = defineProps(['employees', 'midAction', 'loading']);
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
 
 function download() {
-  eeoCsv.download(_.cloneDeep(this.employees));
+  eeoCsv.download(_.cloneDeep(props.employees));
 }
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  computed: {
-    isMobile,
-    isSmallScreen
-  },
-  methods: {
-    download
-  },
-  props: ['employees', 'midAction', 'loading'] // employees to export
-};
 </script>
 
 <style scoped>

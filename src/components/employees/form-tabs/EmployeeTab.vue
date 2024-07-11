@@ -123,6 +123,8 @@
         id="agencyIdentificationNumber"
         ref="formFields"
         v-model.trim="editedEmployee.agencyIdentificationNumber"
+        :rules="getAINRules()"
+        maxLength="7"
         label="Agency Identification Number"
         variant="underlined"
         data-vv-name="Agency Identification Number"
@@ -174,6 +176,7 @@
         @update:focused="editedEmployee.hireDate = format(hireDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
         @click:prepend="hireMenu = true"
         @keypress="hireMenu = false"
+        autocomplete="off"
       >
         <v-menu
           activator="parent"
@@ -412,7 +415,13 @@
 <script>
 import api from '@/shared/api.js';
 import _ from 'lodash';
-import { getDateRules, getNumberRules, getRequiredRules, getValidateFalse } from '@/shared/validationUtils.js';
+import {
+  getAINRules,
+  getDateRules,
+  getNumberRules,
+  getRequiredRules,
+  getValidateFalse
+} from '@/shared/validationUtils.js';
 import {
   asyncForEach,
   isEmpty,
@@ -911,6 +920,7 @@ export default {
     duplicateEmployeeNum,
     format,
     formatKebabCase,
+    getAINRules,
     getDateRules,
     getNumberRules,
     getRequiredRules,

@@ -91,9 +91,25 @@
   </v-card>
 </template>
 
-<script>
+<script setup>
 import { nicknameAndLastName } from '@/shared/employeeUtils';
 import _ from 'lodash';
+import { onMounted, ref, watch, inject } from 'vue';
+import { useStore } from 'vuex';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     SETUP                        |
+// |                                                  |
+// |--------------------------------------------------|
+
+const updatesToUsers = ref(null);
+const creations = ref(null);
+const emitter = inject('emitter');
+const failures = ref(null);
+const props = defineProps(['syncData']);
+const showMore = ref(false);
+const store = useStore();
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -104,13 +120,13 @@ import _ from 'lodash';
 /**
  * Mounted lifecycle hook
  */
-function mounted() {
-  if (this.syncData && !this.isError(this.syncData)) {
-    this.setUpdates();
-    this.setCreations();
-    this.setFailures();
+onMounted(() => {
+  if (props.syncData && !isError(props.syncData)) {
+    setUpdates();
+    setCreations();
+    setFailures();
   }
-} // mounted
+}); // mounted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -125,7 +141,7 @@ function mounted() {
  * @param data - The data to emit
  */
 function emit(msg, data) {
-  this.emitter.emit(msg, data);
+  emitter.emit(msg, data);
 } // emit
 
 /**
@@ -135,10 +151,10 @@ function emit(msg, data) {
  * @returns An employee's name if the employee number exists
  */
 function getName(employeeNumber) {
-  let employees = this.$store.getters.employees;
+  let employees = store.getters.employees;
   if (employees) {
     let employee = _.find(employees, (e) => e.employeeNumber === parseInt(employeeNumber));
-    return employee ? this.nicknameAndLastName(employee) : employeeNumber;
+    return employee ? nicknameAndLastName(employee) : employeeNumber;
   }
   return employeeNumber;
 } // getName
@@ -147,24 +163,24 @@ function getName(employeeNumber) {
  * Sets up and formats updates made by the data sync function response.
  */
 function setUpdates() {
-  this.updatesToUsers = {};
+  updatesToUsers.value = {};
 
-  let bambooUpdates = this.syncData.caseAndBambooSyncResult.fieldsUpdated;
+  let bambooUpdates = props.syncData.caseAndBambooSyncResult.fieldsUpdated;
   _.forEach(bambooUpdates, (record) => {
     const [eNum, fieldName] = Object.entries(record)[0];
-    if (this.updatesToUsers[eNum]) {
-      this.updatesToUsers[eNum].add(fieldName);
+    if (updatesToUsers.value[eNum]) {
+      updatesToUsers.value[eNum].add(fieldName);
     } else {
-      this.updatesToUsers[eNum] = new Set([fieldName]);
+      updatesToUsers.value[eNum] = new Set([fieldName]);
     }
   });
-  let adpUpdates = this.syncData.bambooAndADPSyncResult.fieldsUpdated;
+  let adpUpdates = props.syncData.bambooAndADPSyncResult.fieldsUpdated;
   _.forEach(adpUpdates, (record) => {
     const [eNum, fieldName] = Object.entries(record)[0];
-    if (this.updatesToUsers[eNum]) {
-      this.updatesToUsers[eNum].add(fieldName);
+    if (updatesToUsers.value[eNum]) {
+      updatesToUsers.value[eNum].add(fieldName);
     } else {
-      this.updatesToUsers[eNum] = new Set([fieldName]);
+      updatesToUsers.value[eNum] = new Set([fieldName]);
     }
   });
 } // setUpdates
@@ -173,18 +189,21 @@ function setUpdates() {
  * * Sets up and formats creations made by the data sync function response.
  */
 function setCreations() {
-  this.creations = this.syncData.caseAndBambooSyncResult.usersCreated;
+  creations.value = props.syncData.caseAndBambooSyncResult.usersCreated;
 } // setCreations
 
 /**
  * * Sets up and formats failures found by the data sync function response.
  */
 function setFailures() {
-  let failures = [...this.syncData.caseAndBambooSyncResult.failures, ...this.syncData.bambooAndADPSyncResult.failures];
-  this.failures = [];
+  let failures = [
+    ...props.syncData.caseAndBambooSyncResult.failures,
+    ...props.syncData.bambooAndADPSyncResult.failures
+  ];
+  failures.value = [];
   _.forEach(failures, (f) => {
     const [eNum, error] = Object.entries(f)[0];
-    this.failures.push({ [this.getName(eNum)]: error });
+    failures.value.push({ [getName(eNum)]: error });
   });
 } // setFailures
 
@@ -207,43 +226,14 @@ function isError(data) {
 /**
  * Resets data when data sync was manually invoked.
  */
-function watchSyncData() {
-  if (this.syncData && !this.isError(this.syncData)) {
-    this.setUpdates();
-    this.setCreations();
-    this.setFailures();
+watch(
+  () => props.syncData,
+  () => {
+    if (props.syncData && !isError(props.syncData)) {
+      setUpdates();
+      setCreations();
+      setFailures();
+    }
   }
-} // watchSyncData
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  mounted,
-  data() {
-    return {
-      dialog: false,
-      updatesToUsers: null,
-      creations: null,
-      failures: null,
-      showMore: false
-    };
-  },
-  methods: {
-    emit,
-    getName,
-    nicknameAndLastName,
-    isError,
-    setUpdates,
-    setCreations,
-    setFailures
-  },
-  props: ['syncData'],
-  watch: {
-    syncData: watchSyncData
-  }
-};
+); // watchSyncData
 </script>

@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-v-model-argument -->
 <template>
   <div>
     <!-- Status Alert -->
@@ -20,14 +21,14 @@
         <v-autocomplete
           v-model="employees"
           :items="filteredEmployees"
-          :customFilter="customFilter"
+          :custom-filter="employeeFilter"
           multiple
           chips
           clearable
           closable-chips
           variant="underlined"
           :label="employees.length == 1 ? `${employees.length} Employee` : `${employees.length} Employees`"
-          :search.sync="employeeSearch"
+          v-model:search="employeeSearch"
           @update:model-value="employeeSearch = ''"
           item-title="employeeName"
           return-object
@@ -64,7 +65,7 @@
           color="grey-darken-3"
           variant="text"
           :size="isMobile() ? 'x-small' : 'default'"
-          @click.native="
+          @click="
             emit('close-contact-employees-modal');
             activate = false;
           "
@@ -81,6 +82,7 @@ import _ from 'lodash';
 import { computed, ref, onMounted, inject } from 'vue';
 import { useStore } from 'vuex';
 import { nicknameAndLastName } from '@/shared/employeeUtils';
+import { employeeFilter } from '@/shared/filterUtils';
 import { isMobile } from '@/utils/utils';
 
 // |--------------------------------------------------|
@@ -131,26 +133,6 @@ onMounted(() => {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
-
-/**
- * Custom filter for employee autocomplete options.
- *
- * @param item - employee
- * @param queryText - text used for filtering
- * @return string - filtered employee name
- */
-function customFilter(_, queryText, item) {
-  item = item.raw;
-  const query = queryText ? queryText : '';
-  const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
-  const firstNameFullName = `${item.firstName} ${item.lastName}`;
-
-  const queryContainsNickName = nickNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
-  const queryContainsFirstName =
-    firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
-
-  return queryContainsNickName || queryContainsFirstName;
-} // customFilter
 
 /**
  * Copyies the list of employee emails to the user's clipboard.

@@ -1,9 +1,9 @@
 <template>
   <!-- Reimbursements -->
-  <span v-if="this.mode === 'adminExpenseInfo'">
+  <span v-if="mode === 'adminExpenseInfo'">
     <!-- admin dashboard has attachment -->
     <v-btn
-      v-if="!isEmpty(this.expense.receipt)"
+      v-if="!isEmpty(expense.receipt)"
       :disabled="midAction"
       icon
       :color="caseGray"
@@ -26,9 +26,21 @@
   <!-- End Expenses -->
 </template>
 
-<script>
+<script setup>
 import api from '@/shared/api';
 import { isEmpty } from '@/utils/utils';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const props = defineProps([
+  'expense', // attachment expense
+  'mode', // attachment use
+  'midAction' //whether or not to disable button
+]);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -40,25 +52,7 @@ import { isEmpty } from '@/utils/utils';
  * Opens a new windows tab displaying the signed url of the expense selected.
  */
 async function openDownloadTab() {
-  let signedURL = await api.getAttachment(this.expense.employeeId, this.expense.id);
+  let signedURL = await api.getAttachment(props.expense.employeeId, props.expense.id);
   window.open(signedURL, '_blank');
 } // openDownloadTab
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  methods: {
-    isEmpty,
-    openDownloadTab
-  },
-  props: [
-    'expense', // attachment expense
-    'mode', // attachment use
-    'midAction' //whether or not to disable button
-  ]
-};
 </script>

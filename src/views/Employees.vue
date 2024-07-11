@@ -13,7 +13,7 @@
       <v-card-text color="white">
         <span class="text-h6 font-weight-medium">{{ status.statusMessage }}</span>
       </v-card-text>
-      <v-btn color="white" variant="text" @click="clearStatus"> Close </v-btn>
+      <v-btn color="white" variant="text" @click="clearStatus()"> Close </v-btn>
     </v-snackbar>
     <v-card>
       <v-container fluid class="px-0 px-md-4">
@@ -48,7 +48,14 @@
               <!-- Active Filter -->
               <v-col :align="isMobile() ? 'center' : ''" cols="7" md="4" sm="6">
                 <h4 class="d-block mx-auto">Employee Status:</h4>
-                <v-btn-toggle color="primary" class="filter_color mx-auto" v-model="filter.active" text multiple>
+                <v-btn-toggle
+                  color="primary"
+                  class="filter_color mx-auto"
+                  v-model="filter.active"
+                  text
+                  multiple
+                  @update:modelValue="filterEmployees()"
+                >
                   <!-- Full Time -->
                   <v-tooltip location="top" text="Full Time">
                     <template #activator="{ props }">
@@ -82,37 +89,18 @@
                 </v-btn-toggle>
               </v-col>
               <!-- Tags filter -->
-              <v-col :align="isMobile() ? 'center' : ''" cols="5" md="5" sm="6">
-                <v-autocomplete
-                  v-if="hasAdminPermissions()"
-                  v-model="selectedTags"
-                  class="mt-2 mt-md-4 ml-1 ml-md-4"
-                  variant="underlined"
-                  clearable
-                  label="Filter by Tag (click to flip)"
-                  :items="tags"
-                  multiple
-                  color="gray"
-                  item-title="tagName"
-                  item-value="id"
-                  hide-details
-                  return-object
-                >
-                  <template #chip="{ props, item }">
-                    <v-chip
-                      size="small"
-                      closable
-                      v-bind="props"
-                      :color="chipColor(item.raw.id)"
-                      @click.stop
-                      @click="negateTag(item.raw)"
-                      @click:close="removeTag(item.raw)"
-                    >
-                      {{ tagFlip.includes(item.raw.id) ? 'NOT ' : '' }}
-                      {{ item.raw.tagName }}
-                    </v-chip>
-                  </template>
-                </v-autocomplete>
+              <v-col
+                v-if="userRoleIsAdmin() || userRoleIsManager()"
+                :align="isMobile() ? 'center' : ''"
+                cols="5"
+                md="5"
+                sm="6"
+              >
+                <tags-filter
+                  v-model="tagsInfo"
+                  @update:modelValue="filterEmployees()"
+                  classProps="mt-2 mt-md-4 ml-1 ml-md-4"
+                ></tags-filter>
               </v-col>
               <!-- End Tags Filter -->
             </v-row>
@@ -193,7 +181,7 @@
             :items="filteredEmployees"
             :loading="loading"
             :search="search"
-            :custom-filter="customFilter"
+            :custom-filter="employeeFilter"
             mobile-breakpoint="800"
             item-key="employeeNumber"
             class="elevation-1 employees-table text-body-2"
@@ -286,7 +274,7 @@
         </div>
       </v-container>
     </v-card>
-    <v-dialog v-model="createEmployee" @click:outside="clearCreateEmployee" :width="isMobile() ? '100%' : '80%'">
+    <v-dialog v-model="createEmployee" @click:outside="clearCreateEmployee()" :width="isMobile() ? '100%' : '80%'">
       <employee-form :key="childKey" :contracts="contracts" :model="model" />
     </v-dialog>
     <v-dialog v-model="manageTags" scrollable :width="isMobile() ? '100%' : '70%'" persistent>
@@ -301,7 +289,7 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import api from '@/shared/api.js';
 import { updateStoreEmployees, updateStoreAvatars, updateStoreContracts, updateStoreTags } from '@/utils/storeUtils';
 import ExportEmployeeData from '@/components/employees/csv/ExportEmployeeData.vue';
@@ -312,9 +300,10 @@ import _ from 'lodash';
 import ConvertEmployeeToCsv from '@/components/employees/csv/ConvertEmployeeToCsv.vue';
 import PowerEditContainer from '@/components/employees/power-edit/PowerEditContainer.vue';
 import TagManager from '@/components/employees/tags/TagManager.vue';
+import TagsFilter from '@/components/shared/TagsFilter.vue';
 import EmployeesSyncModal from '@/components/modals/EmployeesSyncModal.vue';
+import { selectedTagsHasEmployee } from '@/shared/employeeUtils';
 import {
-  isEmpty,
   isFullTime,
   isInactive,
   isPartTime,
@@ -324,21 +313,128 @@ import {
   userRoleIsAdmin,
   userRoleIsManager
 } from '@/utils/utils';
+import { employeeFilter } from '@/shared/filterUtils';
 import { format } from '../shared/dateUtils';
+import { ref, inject, onBeforeMount, onBeforeUnmount, computed, watch } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     COMPUTED                     |
+// |                     SET UP                       |
 // |                                                  |
 // |--------------------------------------------------|
 
-/**
- * Key for data table, also has implications for custom search
- * of data table
- */
-function dataTableKey() {
-  return { a: this.filter, b: this.selectedTags };
-} // dataTableKey
+const store = useStore();
+const emitter = inject('emitter');
+const router = useRouter();
+const applicationSyncData = ref(null);
+const childKey = ref(0);
+const contracts = ref([]);
+const createEmployee = ref(false);
+const deleteModel = ref({
+  id: null
+}); // employee to delete
+const deleting = ref(false); // activate delete confirmation model
+const employees = ref([]); // employees
+const employeeNumber = ref(null);
+const filter = ref({
+  active: ['full', 'part'] // default only shows full and part time employees
+}); // datatable filter
+const filteredEmployees = ref([]); // filtered employees,
+const headers = ref([
+  {
+    value: 'avatars',
+    sortable: false
+  },
+  {
+    title: 'First Name',
+    key: 'firstName'
+  },
+  {
+    title: 'Middle Name',
+    key: 'middleName'
+  },
+  {
+    title: 'Last Name',
+    key: 'lastName'
+  },
+  {
+    title: 'Nickname',
+    key: 'nickname'
+  },
+  {
+    title: 'Hire Date',
+    key: 'hireDate'
+  },
+  {
+    title: 'Email',
+    key: 'email'
+  },
+  userRoleIsAdmin() || userRoleIsManager()
+    ? {
+        title: 'Last Login',
+        key: 'lastLoginSeconds'
+      }
+    : _,
+  userRoleIsAdmin() || userRoleIsManager()
+    ? {
+        title: 'Actions',
+        key: 'actions',
+        sortable: false
+      }
+    : _
+]); // datatable headers
+const midAction = ref(false);
+const powerEdit = ref(false);
+const invalidDelete = ref(false); // invalid delete status
+const itemsPerPage = ref(-1); // items per datatable page
+const loading = ref(false); // loading status
+const manageTags = ref(false); // modal for tag management
+const model = ref({
+  id: null,
+  firstName: null,
+  middleName: null,
+  lastName: null,
+  nickname: null,
+  email: '@consultwithcase.com',
+  employeeRole: null,
+  employeeNumber: null,
+  hireDate: null,
+  workStatus: 100,
+  birthday: null,
+  birthdayFeed: false,
+  jobRole: null,
+  prime: null,
+  contract: null,
+  github: null,
+  twitter: null,
+  phoneNumber: null,
+  city: null,
+  st: null,
+  country: null,
+  deptDate: null,
+  currentCity: null,
+  currentState: null,
+  currentStreet: null,
+  currentStreet2: null,
+  currentZIP: null
+}); // selected employee
+const search = ref(null); // query text for datatable search field
+const sortBy = ref([{ key: 'hireDate', order: 'asc' }]); // sort datatable items
+const status = ref({
+  statusType: undefined,
+  statusMessage: null,
+  color: null
+}); // snackbar action status
+const showExportDataModal = ref(false);
+const syncing = ref(false);
+const tags = ref([]);
+const tagsInfo = ref({
+  selected: [],
+  flipped: []
+});
+const toggleEmployeesSyncModal = ref(false);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -347,148 +443,40 @@ function dataTableKey() {
 // |--------------------------------------------------|
 
 /**
- * Changes the employee avatar to default if it fails to display original.
- *
- * @param item - employee to check
- */
-function changeAvatar(item) {
-  let index = _.findIndex(this.employees, (employee) => {
-    return employee.id === item.id;
-  });
-
-  let newItem = this.employees[index];
-
-  newItem.avatar = null;
-
-  this.employees.splice(index, 1, newItem);
-} // changeAvatar
-
-/**
  * Clear the action status that is displayed in the snackbar.
  */
 function clearStatus() {
-  this.status['show'] = false;
-  this.status['statusType'] = undefined;
-  this.status['statusMessage'] = null;
-  this.status['color'] = null;
+  status.value['show'] = false;
+  status.value['statusType'] = undefined;
+  status.value['statusMessage'] = null;
+  status.value['color'] = null;
 } // clearStatus
-
-/**
- * Returns the color that at tag filter chip should be
- *
- * @param id ID of the tag item
- *
- */
-function chipColor(id) {
-  return this.tagFlip.includes(id) ? 'red' : 'gray';
-} // chipColor
-
-/**
- * Custom filter for employee table searching
- *
- * @param _ - unused value (in theory the current item of employee to search)
- * @param search - The search value in the search bar
- * @param item - The item in the table
- * @returns Boolean - True if the item matches the search criteria
- */
-function customFilter(_, search, item) {
-  item = item.raw;
-
-  // reset index if search is different than before
-  if (this.searchCache.search != search || this.searchCache.tableKey != this.dataTableKey) {
-    this.searchIndex = new Set();
-    this.searchCache.search = search;
-    this.searchCache.tableKey = this.dataTableKey;
-  }
-
-  /**
-   * Bounce conditions:
-   *  - nothing is being searched
-   *  - the search is only one character and one term
-   *  - searching something that's not the employee object
-   *  - the employee has been searched before
-   */
-  let terms = search.split(','); // used for searching later, search is split by comma
-  if (search == null || (terms.length == 1 && terms[0].length < 2)) return true;
-  if (this.searchIndex.has(item.email)) return false;
-
-  // mark employee as searched
-  this.searchIndex.add(item.email);
-
-  // different items from the employee to look through
-  let [frst, midl, last, nick, F, M, N, L] = [
-    item.firstName?.trim(),
-    item.middleName?.trim(),
-    item.lastName?.trim(),
-    item.nickname?.trim(),
-    item.firstName ? item.firstName.trim()[0] : '',
-    item.middleName ? item.middleName.trim()[0] : '',
-    item.nickname ? item.nickname.trim()[0] : '',
-    item.lastName ? item.lastName.trim()[0] : ''
-  ];
-  let searchableTerms = [
-    `${item.employeeNumber}`,
-    `${frst} ${last}`,
-    `${last} ${frst}`,
-    `${frst} ${midl} ${last}`,
-    `${frst} ${nick} ${last}`,
-    `${frst} ${nick} ${midl} ${last}`,
-    `${frst} ${midl} ${nick} ${last}`,
-    `${F}${M}${L}`,
-    `${F}${N}${L}`,
-    `${F}${M}${N}${L}`,
-    `${F}${N}${M}${L}`,
-    `${F} ${L}`,
-    `${L} ${F}`,
-    `${F} ${N} ${last}`,
-    `${F} ${M} ${last}`,
-    `${F} ${N} ${M} ${last}`,
-    `${F} ${M} ${N} ${last}`,
-    `${frst} ${M} ${last}`,
-    `${frst} ${N} ${last}`,
-    `${frst} ${N} ${M} ${last}`,
-    `${frst} ${M} ${N} ${last}`
-  ];
-
-  // search through all searchable terms with all search terms
-  for (let t of terms) {
-    t = t.trim();
-    if (t.length < 2) continue;
-    for (let s of searchableTerms) {
-      if (s && s.toLowerCase().includes(t.toLowerCase())) {
-        return true;
-      }
-    }
-  }
-
-  return false;
-} // customFilter
 
 /**
  * Delete an employee and display status.
  */
 async function deleteEmployee() {
-  let e = await api.deleteItem(api.EMPLOYEES, this.deleteModel.id); // delete employee from api
+  let e = await api.deleteItem(api.EMPLOYEES, deleteModel.value.id); // delete employee from api
   if (e.id) {
     // update data if successfully deletes employee
-    await this.deleteModelFromTable();
+    await deleteModelFromTable();
   } else {
     // display error if failed to deleted employee
-    this.displayError(e.response.data.message);
+    displayError(e.response.data.message);
   }
-  this.midAction = false;
+  midAction.value = false;
 } // deleteEmployee
 
 /**
  * Refresh and updates employee list and displays a successful delete status in the snackbar.
  */
 async function deleteModelFromTable() {
-  await this.refreshEmployees();
+  await refreshEmployees();
 
-  this.status['show'] = true;
-  this.status['statusType'] = 'SUCCESS';
-  this.status['statusMessage'] = 'Employee was successfully deleted!';
-  this.status['color'] = 'green';
+  status.value['show'] = true;
+  status.value['statusType'] = 'SUCCESS';
+  status.value['statusMessage'] = 'Employee was successfully deleted!';
+  status.value['color'] = 'green';
 } // deleteModelFromTable
 
 /**
@@ -497,10 +485,10 @@ async function deleteModelFromTable() {
  * @param err - String error message
  */
 function displayError(err) {
-  this.status['show'] = true;
-  this.status['statusType'] = 'ERROR';
-  this.status['statusMessage'] = err;
-  this.status['color'] = 'red';
+  status.value['show'] = true;
+  status.value['statusType'] = 'ERROR';
+  status.value['statusMessage'] = err;
+  status.value['color'] = 'red';
 } // displayError
 
 /**
@@ -518,12 +506,12 @@ function employeePath(item) {
  */
 function filterEmployees() {
   //filter for Active Expense Types
-  this.filteredEmployees = _.filter(this.employees, (employee) => {
-    let fullCheck = this.filter.active.includes('full') && this.isFullTime(employee);
-    let partCheck = this.filter.active.includes('part') && this.isPartTime(employee);
-    let inactiveCheck = this.filter.active.includes('inactive') && this.isInactive(employee);
-    let tagCheck = this.selectedTagsHasEmployee(employee);
-    return (fullCheck || partCheck || inactiveCheck) && (this.selectedTags.length <= 0 || tagCheck);
+  filteredEmployees.value = _.filter(employees.value, (employee) => {
+    let fullCheck = filter.value.active.includes('full') && isFullTime(employee);
+    let partCheck = filter.value.active.includes('part') && isPartTime(employee);
+    let inactiveCheck = filter.value.active.includes('inactive') && isInactive(employee);
+    let tagCheck = selectedTagsHasEmployee(employee.id, tagsInfo.value);
+    return (fullCheck || partCheck || inactiveCheck) && (tagsInfo.value.selected.length <= 0 || tagCheck);
   });
 } // filterEmployees
 
@@ -548,7 +536,7 @@ function getLoginDate(item) {
  * @param item - the employee
  */
 function handleClick(_, tableItem) {
-  this.$router.push(employeePath(tableItem.item));
+  router.push(employeePath(tableItem.item));
 } //handleClick
 
 /**
@@ -557,16 +545,16 @@ function handleClick(_, tableItem) {
  * @return boolean - whether the user is an admin or manager
  */
 function hasAdminPermissions() {
-  return this.userRoleIsAdmin() || this.userRoleIsManager();
+  return userRoleIsAdmin() || userRoleIsManager();
 } // hasAdminPermissions
 
 /**
  * Loads in basecamp avatars, setting them when finished
  */
 async function loadBasecampAvatars() {
-  await this.updateStoreAvatars();
-  let avatars = this.$store.getters.basecampAvatars;
-  _.map(this.employees, (employee) => {
+  if (!store.getters.basecampAvatars) await updateStoreAvatars();
+  let avatars = store.getters.basecampAvatars;
+  _.map(employees.value, (employee) => {
     let avatar = _.find(avatars, ['email_address', employee.email]);
     let avatarUrl = avatar ? avatar.avatar_url : null;
     employee.avatar = avatarUrl;
@@ -575,87 +563,41 @@ async function loadBasecampAvatars() {
 }
 
 /**
- * negates a tag
- */
-function negateTag(item) {
-  // try to find the id in the tagFlip array, if it is there then remove it else add it
-  const index = this.tagFlip.indexOf(item.id);
-  if (index >= 0) {
-    this.tagFlip.splice(index, 1);
-  } else {
-    this.tagFlip.push(item.id);
-  }
-  this.refreshEmployees();
-} // negateTag
-
-/**
  * Refresh employee data and filters employees.
  */
 async function refreshEmployees() {
-  this.loading = true; // set loading status to true
+  loading.value = true; // set loading status to true
 
   // assets to wait for load
   await Promise.all([
-    !this.$store.getters.employees ? this.updateStoreEmployees() : '',
-    !this.$store.getters.contracts && (userRoleIsAdmin() || userRoleIsManager()) ? this.updateStoreContracts() : '',
-    !this.$store.getters.tags && (userRoleIsAdmin() || userRoleIsManager()) ? this.updateStoreTags() : ''
+    !store.getters.employees ? updateStoreEmployees() : '',
+    !store.getters.contracts && (userRoleIsAdmin() || userRoleIsManager()) ? updateStoreContracts() : '',
+    !store.getters.tags && (userRoleIsAdmin() || userRoleIsManager()) ? updateStoreTags() : ''
   ]);
-
+  employees.value = store.getters.employees; // get all employees
+  contracts.value = store.getters.contracts;
+  tags.value = store.getters.tags;
   // assets that don't need to be awaited on, but need data that is awaited on
-  Promise.all([!this.$store.getters.basecampAvatars ? this.loadBasecampAvatars() : '']);
-
-  this.employees = this.$store.getters.employees; // get all employees
-  this.filterEmployees(); // filter employees
-  this.contracts = this.$store.getters.contracts;
-  this.tags = this.$store.getters.tags;
-  this.loading = false; // set loading status to false
+  Promise.all([loadBasecampAvatars()]);
+  filterEmployees(); // filter employees
+  loading.value = false; // set loading status to false
 } // refreshEmployees
-
-/**
- * Removes an item from the tag filters's active filters
- *
- * @param item - The filter to remove
- */
-function removeTag(item) {
-  const selIndex = this.selectedTags.findIndex((t) => t.id === item.id);
-  if (selIndex >= 0) {
-    this.selectedTags.splice(selIndex, 1);
-  }
-} // removeTag
 
 /**
  * open the create employee form
  */
 function renderCreateEmployee() {
-  this.createEmployee = true;
-  this.childKey++;
+  createEmployee.value = true;
+  childKey.value++;
 } // renderCreateEmployee
 
 /**
  * open the tags management modal
  */
 function renderManageTags() {
-  this.manageTags = true;
-  this.childKey++;
+  manageTags.value = true;
+  childKey.value++;
 } // renderManageTags
-
-/**
- * helper function: return true if any selected tag has employee listed under it.
- *
- * @param e - the employee
- * @return true if the employee has a tag selected in filters
- */
-function selectedTagsHasEmployee(e) {
-  let inTag, tagFlipped;
-  for (let i = 0; i < this.selectedTags.length; i++) {
-    inTag = this.selectedTags[i].employees.includes(e.id);
-    tagFlipped = this.tagFlip.includes(this.selectedTags[i].id);
-    if (inTag != tagFlipped) {
-      return true;
-    }
-  }
-  return false;
-} // selectedTagsHasEmployee
 
 /**
  * helper function: return true if given employee is on a tag
@@ -665,7 +607,7 @@ function selectedTagsHasEmployee(e) {
  */
 function employeeIsOnTag(e) {
   if (e.id) e = e.id; // just use the id
-  for (let t of this.tags) {
+  for (let t of tags.value) {
     if (t.employees.includes(e)) return true;
   }
   return false;
@@ -675,20 +617,20 @@ function employeeIsOnTag(e) {
  * Syncs data between different applications (Portal, BambooHR, ADP, ...).
  */
 function syncApplications() {
-  this.syncing = true;
+  syncing.value = true;
   api
     .syncApplications()
     .then(async (res) => {
-      await this.updateStoreEmployees();
-      await this.refreshEmployees();
-      this.applicationSyncData = res.body;
+      await updateStoreEmployees();
+      await refreshEmployees();
+      applicationSyncData.value = res.body;
     })
     .catch((err) => {
-      this.applicationSyncData = err;
+      applicationSyncData.value = err;
     })
     .finally(() => {
-      this.toggleEmployeesSyncModal = true;
-      this.syncing = false;
+      toggleEmployeesSyncModal.value = true;
+      syncing.value = false;
     });
 } // syncApplications
 
@@ -699,10 +641,10 @@ function syncApplications() {
  */
 async function validateDelete(item) {
   // remove employee from tag object first
-  if (this.employeeIsOnTag(item.id)) {
+  if (employeeIsOnTag(item.id)) {
     // remove them from the tag
     let tagPromises = [];
-    for (let t of this.tags) {
+    for (let t of tags.value) {
       if (t.employees.includes(item.id)) {
         let index = t.employees.indexOf(item.id);
         t.employees.splice(index, 1);
@@ -712,21 +654,21 @@ async function validateDelete(item) {
     await Promise.all(tagPromises);
   }
 
-  this.midAction = true;
+  midAction.value = true;
   try {
     let expenses = await api.getAllEmployeeExpenses(item.id); // get employee expenses
     let valid = expenses.length <= 0; // valid if no expenses
 
     if (valid) {
       // employee can be deleted
-      this.deleteModel['id'] = item.id;
-      this.deleting = true; // activate model to confirm delete
+      deleteModel.value['id'] = item.id;
+      deleting.value = true; // activate model to confirm delete
     } else {
       // employee cannot be deleted
-      this.invalidDelete = !this.invalidDelete;
+      invalidDelete.value = !invalidDelete.value;
     }
   } catch (err) {
-    this.displayError(err);
+    displayError(err);
   }
 } // validateDelete
 
@@ -734,9 +676,9 @@ async function validateDelete(item) {
  * Called to reset the data on the employee form if exited w/out submitting
  */
 async function clearCreateEmployee() {
-  this.createEmployee = false;
-  // if (this.employeeNumber) {
-  //   await api.deleteResume(this.model.id);
+  createEmployee.value = false;
+  // if (employeeNumber.value) {
+  //   await api.deleteResume(model.value.id);
   // }
 } // clearCreateEmployee
 
@@ -749,81 +691,81 @@ async function clearCreateEmployee() {
 /**
  *  Adjust datatable header for user view. Creates event listeners.
  */
-async function created() {
-  this.emitter.on('cancel-form', async () => {
+onBeforeMount(async () => {
+  emitter.on('cancel-form', async () => {
     //used to reset the employee form modal
-    await this.clearCreateEmployee();
+    await clearCreateEmployee();
   });
-  this.emitter.on('canceled-delete-employee', () => {
-    this.deleting = false;
-    this.midAction = false;
+  emitter.on('canceled-delete-employee', () => {
+    deleting.value = false;
+    midAction.value = false;
   });
-  this.emitter.on('confirm-delete-employee', async () => {
-    this.deleting = false;
-    await this.deleteEmployee();
-    await this.updateStoreEmployees();
-    await this.refreshEmployees();
+  emitter.on('confirm-delete-employee', async () => {
+    deleting.value = false;
+    await deleteEmployee();
+    await updateStoreEmployees();
+    await refreshEmployees();
   });
-  this.emitter.on('invalid-employee-delete', () => {
-    this.midAction = false;
+  emitter.on('invalid-employee-delete', () => {
+    midAction.value = false;
   });
-  this.emitter.on('empNum', (empNum) => {
-    this.employeeNumber = empNum;
+  emitter.on('empNum', (empNum) => {
+    employeeNumber.value = empNum;
   });
-  this.emitter.on('close-tag-manager', () => {
-    this.manageTags = false;
+  emitter.on('close-tag-manager', () => {
+    manageTags.value = false;
   });
-  this.emitter.on('close-data-sync-results-modal', () => {
-    this.toggleEmployeesSyncModal = false;
-    this.applicationSyncData = null;
-    this.childKey++;
+  emitter.on('close-data-sync-results-modal', () => {
+    toggleEmployeesSyncModal.value = false;
+    applicationSyncData.value = null;
+    childKey.value++;
   });
-  this.emitter.on('close-employee-export', () => {
-    this.showExportDataModal = false;
+  emitter.on('close-employee-export', () => {
+    showExportDataModal.value = false;
   });
-  this.emitter.on('cancel-power-edit', () => {
-    this.powerEdit = false;
+  emitter.on('cancel-power-edit', () => {
+    powerEdit.value = false;
   });
 
   // fill in search box if routed from another page
   if (localStorage.getItem('requestedFilter')) {
-    this.search = localStorage.getItem('requestedFilter');
+    search.value = localStorage.getItem('requestedFilter');
     localStorage.removeItem('requestedFilter');
   }
 
   // only refresh employees if data is in store. Otherwise, set loading and wait in watcher
-  this.storeIsPopulated ? await this.refreshEmployees() : (this.loading = true);
+  storeIsPopulated ? await refreshEmployees() : (loading.value = true);
 
   // remove admin-only actions if user is not admin (by default everything is included)
   const adminSpecific = ['lastLoginSeconds']; // requires admin role, NOT manager
   const adminPermissions = ['actions']; // requires admin level, including manager
-  if (!this.hasAdminPermissions()) {
-    this.headers = _.filter(this.headers, (header) => {
+  if (!hasAdminPermissions()) {
+    headers.value = _.filter(headers.value, (header) => {
       return !adminPermissions.includes(header.value);
     });
   }
-  if (!this.userRoleIsAdmin()) {
-    this.headers = _.filter(this.headers, (header) => {
+  if (!userRoleIsAdmin()) {
+    headers.value = _.filter(headers.value, (header) => {
       return !adminSpecific.includes(header.value);
     });
   }
-  this.search = this.search ? this.search + ' ' : ''; // solution for redirecting from stats dashboard with a filter
-} // created
+  search.value = search.value ? search.value + ' ' : ''; // solution for redirecting from stats dashboard with a filter
+}); // created
 
 /**
  * destroy listeners
  */
-function beforeUnmount() {
-  this.emitter.off('cancel-form');
-  this.emitter.off('canceled-delete-employee');
-  this.emitter.off('confirm-delete-employee');
-  this.emitter.off('invalid-employee-delete');
-  this.emitter.off('empNum');
-  this.emitter.off('close-tag-manager');
-  this.emitter.off('close-data-sync-results-modal');
-  this.emitter.off('close-employee-export');
-  this.emitter.off('cancel-power-edit');
-} // beforeUnmount
+onBeforeUnmount(() => {
+  emitter.off('cancel-form');
+  emitter.off('canceled-delete-employee');
+  emitter.off('confirm-delete-employee');
+  emitter.off('invalid-employee-delete');
+  emitter.off('empNum');
+  emitter.off('close-tag-manager');
+  emitter.off('close-data-sync-results-modal');
+  emitter.off('close-employee-export');
+  emitter.off('cancel-power-edit');
+}); // beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -836,7 +778,7 @@ function beforeUnmount() {
  */
 function watchFilterActive() {
   // filter employees based on datatable active filter
-  this.filterEmployees();
+  filterEmployees();
 } // watchFilterActive
 
 /**
@@ -844,219 +786,19 @@ function watchFilterActive() {
  * this watcher will be activated when the store is populated again.
  */
 async function watchStoreIsPopulated() {
-  if (this.storeIsPopulated) await this.refreshEmployees();
+  if (storeIsPopulated) await refreshEmployees();
 } // watchStoreIsPopulated
 
-/**
- * In the case that the page has been force reloaded (and the store cleared)
- * this watcher will be activated when the store is populated again.
- */
-function watchTagFlip() {
-  this.filterEmployees();
-} // watchTagFlip
-
-/**
- * Remove items from tagFlip array when they are removed from the selected
- * tags
- */
-function watchSelectedTags() {
-  let negatedTagRemoved = true;
-  // use normal for loop to have the index
-  for (let i = 0; i < this.tagFlip.length; i++) {
-    // try to find the current tag in the selectedTags
-    _.forEach(this.selectedTags, (t) => {
-      if (t.id === this.tagFlip[i]) negatedTagRemoved = false;
-    });
-    // if it isn't there, remove it from tagFlip too
-    if (negatedTagRemoved) {
-      this.tagFlip.splice(i, 1);
-    }
-  }
-  this.filterEmployees();
-}
+watch(filter.value.active, () => watchFilterActive());
+watch(storeIsPopulated, () => watchStoreIsPopulated());
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                      EXPORT                      |
+// |                    COMPUTED                      |
 // |                                                  |
 // |--------------------------------------------------|
 
-export default {
-  components: {
-    DeleteErrorModal,
-    DeleteModal,
-    EmployeeForm,
-    EmployeesSyncModal,
-    ExportEmployeeData,
-    ConvertEmployeeToCsv,
-    PowerEditContainer,
-    TagManager
-  },
-  computed: {
-    dataTableKey,
-    storeIsPopulated
-  },
-  created,
-  data() {
-    return {
-      applicationSyncData: null,
-      childKey: 0,
-      contracts: [],
-      createEmployee: false,
-      deleteModel: {
-        id: null
-      }, // employee to delete
-      deleting: false, // activate delete confirmation model
-      employees: [], // employees
-      employeeNumber: null,
-      filter: {
-        active: ['full', 'part'] // default only shows full and part time employees
-      }, // datatable filter
-      filteredEmployees: [], // filtered employees,
-      headers: [
-        {
-          value: 'avatars',
-          sortable: false
-        },
-        {
-          title: 'First Name',
-          key: 'firstName'
-        },
-        {
-          title: 'Middle Name',
-          key: 'middleName'
-        },
-        {
-          title: 'Last Name',
-          key: 'lastName'
-        },
-        {
-          title: 'Nickname',
-          key: 'nickname'
-        },
-        {
-          title: 'Hire Date',
-          key: 'hireDate'
-        },
-        {
-          title: 'Email',
-          key: 'email'
-        },
-        userRoleIsAdmin() || userRoleIsManager()
-          ? {
-              title: 'Last Login',
-              key: 'lastLoginSeconds'
-            }
-          : _,
-        userRoleIsAdmin() || userRoleIsManager()
-          ? {
-              title: 'Actions',
-              key: 'actions',
-              sortable: false
-            }
-          : _
-      ], // datatable headers
-      midAction: false,
-      powerEdit: false,
-      invalidDelete: false, // invalid delete status
-      itemsPerPage: -1, // items per datatable page
-      loading: false, // loading status
-      manageTags: false, // modal for tag management
-      model: {
-        id: null,
-        firstName: null,
-        middleName: null,
-        lastName: null,
-        nickname: null,
-        email: '@consultwithcase.com',
-        employeeRole: null,
-        employeeNumber: null,
-        hireDate: null,
-        workStatus: 100,
-        birthday: null,
-        birthdayFeed: false,
-        jobRole: null,
-        prime: null,
-        contract: null,
-        github: null,
-        twitter: null,
-        phoneNumber: null,
-        city: null,
-        st: null,
-        country: null,
-        deptDate: null,
-        currentCity: null,
-        currentState: null,
-        currentStreet: null,
-        currentStreet2: null,
-        currentZIP: null
-      }, // selected employee
-      search: null, // query text for datatable search field
-      searchIndex: new Set(),
-      searchCache: {
-        search: null,
-        tableKey: null
-      },
-      selectedTags: [], // tags to include or exclude in filter
-      sortBy: [{ key: 'hireDate', order: 'asc' }], // sort datatable items
-      status: {
-        statusType: undefined,
-        statusMessage: null,
-        color: null
-      }, // snackbar action status
-      showExportDataModal: false,
-      syncing: false,
-      tags: [],
-      tagFlip: [],
-      tagSearchString: '',
-      toggleEmployeesSyncModal: false
-    };
-  },
-  watch: {
-    'filter.active': watchFilterActive,
-    storeIsPopulated: watchStoreIsPopulated,
-    tagFlip: watchTagFlip,
-    selectedTags: watchSelectedTags
-  },
-  beforeUnmount,
-  methods: {
-    changeAvatar,
-    clearCreateEmployee,
-    clearStatus,
-    chipColor,
-    customFilter,
-    deleteEmployee,
-    deleteModelFromTable,
-    displayError,
-    employeePath,
-    filterEmployees,
-    getLoginDate,
-    handleClick,
-    hasAdminPermissions,
-    isEmpty,
-    isFullTime,
-    isInactive,
-    isPartTime,
-    isMobile,
-    loadBasecampAvatars,
-    monthDayYearFormat,
-    negateTag,
-    refreshEmployees,
-    renderCreateEmployee,
-    renderManageTags,
-    removeTag,
-    selectedTagsHasEmployee,
-    employeeIsOnTag,
-    syncApplications,
-    userRoleIsAdmin,
-    userRoleIsManager,
-    validateDelete,
-    updateStoreAvatars,
-    updateStoreContracts,
-    updateStoreEmployees,
-    updateStoreTags
-  }
-};
+computed(storeIsPopulated);
 </script>
 
 <style>
