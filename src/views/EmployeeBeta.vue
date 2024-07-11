@@ -5,21 +5,57 @@
     </v-row>
     <div v-else>
       <v-row align="center" class="pt-3">
-        <v-col class="pa-0 pl-4">
+        <v-col class="pa-0 pl-4" cols="4">
           <v-btn id="backBtn" elevation="2" :size="isMobile() ? 'x-small' : 'default'" @click="router.back()">
             <v-icon size="large" class="pr-1"> mdi-arrow-left-thin </v-icon>
             Back
           </v-btn>
           <v-btn color="#bc3825" @click="goBackToAlphaProfile()" theme="dark" class="ma-2">Go to Alpha profile!</v-btn>
         </v-col>
-        <v-col class="pa-0">
-          <p
-            v-if="isUser"
-            class="text-h6 text-sm-h4 text-center mb-0"
-            style="font-family: 'Avenir', Helvetica, Arial, sans-serif"
-          >
-            <b>{{ 'Hello, ' + model.firstName + '!' }}</b>
-          </p>
+        <v-col class="pa-0 d-flex justify-center" cols="4">
+          <v-row no-gutters class="fit-content d-flex-inline align-center">
+            <!-- if user is admin, show search button -->
+            <v-col v-if="isAdmin" class="fit-content d-flex justify-end">
+              <v-btn icon="" variant="text" @click="onSearchButton()">
+                <v-icon size="32" color="black">mdi-magnify</v-icon>
+              </v-btn>
+            </v-col>
+            <v-col class="text-no-wrap d-flex align-center">
+              <!-- if user is not searching -->
+              <div v-if="!inSearchMode">
+                <!-- if user is viewing their own profile  -->
+                <p
+                  v-if="isUser"
+                  class="text-h6 text-sm-h4 text-center mb-0"
+                  style="font-family: 'Avenir', Helvetica, Arial, sans-serif"
+                >
+                  <b>{{ 'Hello, ' + model.firstName + '!' }}</b>
+                </p>
+                <p
+                  v-else-if="isAdmin"
+                  class="text-h6 text-sm-h4 text-center mb-0"
+                  style="font-family: 'Avenir', Helvetica, Arial, sans-serif"
+                >
+                  <b>Search Employees</b>
+                </p>
+              </div>
+              <!-- if user is admin and is searching -->
+              <v-responsive v-else-if="isAdmin && inSearchMode" min-width="250px" class="d-flex align-center">
+                <v-autocomplete
+                  v-model="dropdownEmployee"
+                  :items="employeeNames"
+                  item-title="itemTitle"
+                  :custom-filter="employeeFilter"
+                  label="Search Employees"
+                  density="comfortable"
+                  hide-details
+                  return-object
+                  autofocus
+                  @update:model-value="onSearchUpdate()"
+                ></v-autocomplete>
+              </v-responsive>
+            </v-col>
+          </v-row>
         </v-col>
         <v-spacer></v-spacer>
       </v-row>
@@ -49,14 +85,6 @@
 <script setup>
 import api from '@/shared/api.js';
 import {
-  getCurrentBudgetYear,
-  // isEmpty,
-  isMobile,
-  storeIsPopulated,
-  userRoleIsAdmin,
-  userRoleIsManager
-} from '@/utils/utils.js';
-import {
   updateStoreBudgets,
   updateStoreContracts,
   updateStoreEmployees,
@@ -64,14 +92,16 @@ import {
   updateStoreTags,
   updateStoreUser
 } from '@/utils/storeUtils';
+import { getCurrentBudgetYear, isMobile, storeIsPopulated, userRoleIsAdmin, userRoleIsManager } from '@/utils/utils.js';
 import _ from 'lodash';
-import { inject, onBeforeMount, onBeforeUnmount, onMounted, provide, ref, watch, computed, readonly } from 'vue';
+import { computed, inject, onBeforeMount, onBeforeUnmount, onMounted, provide, readonly, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import EmployeeBudgets from '@/components/employee-beta/EmployeeBudgets.vue';
 import EmployeeInfo from '@/components/employee-beta/EmployeeInfo.vue';
 import EmployeePageLoader from '@/components/employees/EmployeePageLoader.vue';
 import TimeData from '@/components/shared/timesheets/TimeData.vue';
+import { employeeFilter } from '@/shared/filterUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -144,6 +174,8 @@ const refreshKey = readonly({
   accessibleBudgets
 });
 const user = ref(null);
+const inSearchMode = ref(false);
+const dropdownEmployee = ref(null);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -181,6 +213,19 @@ onBeforeUnmount(() => {
 // |--------------------------------------------------|
 
 computed(storeIsPopulated);
+
+/**
+ * List of all employees with an item title for the autocomplete
+ */
+const employeeNames = computed(() => {
+  let employees = _.filter(store.getters.employees, (e) => e.workStatus > 0);
+  return _.map(employees, (e) => {
+    return {
+      ...e,
+      itemTitle: `${e.lastName}, ${e.nickname || e.firstName}`
+    };
+  });
+});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -278,6 +323,20 @@ function userIsEmployee() {
     ? user.value.employeeNumber === model.value.employeeNumber
     : false;
 } // userIsEmployee
+
+/**
+ * Toggles search mode when the search button is clicked
+ */
+function onSearchButton() {
+  inSearchMode.value = !inSearchMode.value;
+}
+
+/**
+ * Run when the employee search field is updated
+ */
+function onSearchUpdate() {
+  if (dropdownEmployee.value) router.push(`${dropdownEmployee.value.employeeNumber}`);
+}
 
 // |--------------------------------------------------|
 // |                                                  |
