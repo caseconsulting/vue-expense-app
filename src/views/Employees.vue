@@ -270,7 +270,7 @@
 
           <!-- Confirmation Modals -->
           <delete-modal :toggle-delete-modal="deleting" :type="'employee'" />
-          <delete-error-modal :toggle-delete-error-modal="invalidDelete" type="employee" />
+          <delete-error-modal v-model="invalidDelete" type="employee" />
         </div>
       </v-container>
     </v-card>
