@@ -23,7 +23,7 @@
         <v-form ref="form" v-model="valid" lazy-validation class="my-1 mx-xl-5 mx-lg-5 mx-md-0">
           <v-expansion-panels v-model="formTabs" variant="accordion" multiple>
             <base-form title="Personal" value="Personal Information">
-              <div>Editing: {{ formTabs }}</div>
+              <personal-info-form v-model="editedEmployee"></personal-info-form>
             </base-form>
             <base-form title="Clearance" value="Clearance">
               <div>Editing: {{ formTabs }}</div>
@@ -68,6 +68,8 @@
 import { computed, inject, onBeforeMount, onBeforeUnmount, ref } from 'vue';
 import BaseForm from '@/components/employee-beta/forms/BaseForm.vue';
 import FormCancelConfirmation from '@/components/modals/FormCancelConfirmation.vue';
+import PersonalInfoForm from './PersonalInfoForm.vue';
+import { cloneDeep } from 'lodash';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -78,6 +80,7 @@ import FormCancelConfirmation from '@/components/modals/FormCancelConfirmation.v
 const emitter = inject('emitter');
 
 const props = defineProps(['employee', 'contracts']);
+const editedEmployee = ref(cloneDeep(props.employee));
 const isUser = inject('isUser');
 const editing = defineModel();
 
