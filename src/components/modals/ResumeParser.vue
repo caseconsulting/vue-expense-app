@@ -1113,7 +1113,7 @@ function clearForm() {
   this.totalChanges = 0;
 
   if (this.$refs.submit !== undefined) {
-    this.$refs.submit.reset();
+    this.$refs.submit.reset;
   }
   this.extractResume = false;
 } // clearForm
