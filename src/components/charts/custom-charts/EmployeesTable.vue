@@ -69,7 +69,6 @@ onMounted(async () => {
 function clickedRow(_, { item }) {
   localStorage.setItem('requestedFilter', item.employeeNames.join(', '));
   if (item.value == 0) {
-    console.log('this should display');
     localStorage.setItem('requestedFilter', 'none');
   }
   router.push({
