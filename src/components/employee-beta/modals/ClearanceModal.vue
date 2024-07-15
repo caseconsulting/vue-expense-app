@@ -3,7 +3,7 @@
     <v-card-text>
       <!-- Employee has clearances -->
       <div v-if="!isEmpty(model.clearances)">
-        <clearance-list :list="model.clearances"></clearance-list>
+        <clearance-list :list="model.clearances" :toggleModal="true"></clearance-list>
       </div>
       <!-- Employee does not have clearances -->
       <p v-else class="mt-6 ml-6">No Clearance Information</p>
