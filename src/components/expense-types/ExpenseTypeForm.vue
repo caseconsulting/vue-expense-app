@@ -209,6 +209,7 @@
 
         <!-- Start Date -->
         <v-text-field
+          v-if="!editedExpenseType.recurringFlag"
           variant="underlined"
           v-model="startDateFormatted"
           id="startDate"
@@ -245,6 +246,7 @@
 
         <!-- End Date -->
         <v-text-field
+          v-if="!editedExpenseType.recurringFlag"
           variant="underlined"
           v-model="endDateFormatted"
           id="endDate"
