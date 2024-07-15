@@ -636,6 +636,7 @@ const toSort = ref([{ key: 'createdAt', order: 'desc' }]); // default sort datat
 const startDateFilter = ref(null);
 const startDateFilterMenu = ref(null);
 const status = ref({
+  show: false,
   statusType: undefined,
   statusMessage: '',
   color: ''

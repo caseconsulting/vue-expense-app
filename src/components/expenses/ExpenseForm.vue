@@ -585,7 +585,7 @@ function calcAdjustedBudget(employee, expenseType) {
 async function checkCoverage() {
   this.isInactive = true;
   if (this.$refs.form) {
-    this.valid = await this.$refs.form.validate();
+    await this.$refs.form.validate();
     if (!this.valid) return;
     this.emitter.emit('startAction');
     // form is validated
