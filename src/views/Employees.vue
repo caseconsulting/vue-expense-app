@@ -46,7 +46,7 @@
           <v-card v-if="hasAdminPermissions()" class="pa-0 pa-md-4" variant="outlined">
             <v-row color="black" class="mx-1 mx-md-5 my-1">
               <!-- Active Filter -->
-              <v-col :align="isMobile() ? 'center' : ''" cols="7" md="4" sm="6">
+              <v-col :align="isMobile() ? 'center' : ''" cols="8" md="4" sm="6">
                 <h4 class="d-block mx-auto">Employee Status:</h4>
                 <v-btn-toggle
                   color="primary"
@@ -92,7 +92,7 @@
               <v-col
                 v-if="userRoleIsAdmin() || userRoleIsManager()"
                 :align="isMobile() ? 'center' : ''"
-                cols="5"
+                cols="9"
                 md="5"
                 sm="6"
               >
@@ -112,8 +112,9 @@
             v-if="hasAdminPermissions()"
             id="createEmployeeBtn"
             class="mb-5"
+            :class="isMobile() ? 'ml-2' : ''"
             :disabled="loading"
-            :size="isMobile() ? 'x-small' : 'default'"
+            :size="isMobile() ? 'small' : 'default'"
             elevation="2"
             @click="renderCreateEmployee()"
           >
@@ -127,7 +128,7 @@
             id="manageTagsBtn"
             class="mb-5 ml-2 ml-md-4"
             :disabled="loading"
-            :size="isMobile() ? 'x-small' : 'default'"
+            :size="isMobile() ? 'small' : 'default'"
             elevation="2"
             @click="renderManageTags()"
           >
@@ -142,7 +143,7 @@
             class="mb-5 ml-2 ml-md-4"
             :disabled="loading || syncing"
             elevation="2"
-            :size="isMobile() ? 'x-small' : 'default'"
+            :size="isMobile() ? 'small' : 'default'"
             @click="syncApplications()"
           >
             {{ isMobile() ? 'Sync Apps' : 'Sync Applications' }}
@@ -157,6 +158,7 @@
             :mid-action="midAction"
             :disabled="loading || syncing"
             elevation="2"
+            :size="isMobile() ? 'small' : 'default'"
             class="mb-5 ml-2 ml-md-4"
             @click.stop="showExportDataModal = !showExportDataModal"
           >
