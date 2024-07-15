@@ -46,6 +46,9 @@
                   :height="buttonSize"
                   variant="text"
                 >
+                  <v-tooltip activator="parent" location="bottom">
+                    <p class="ma-0 pa-0">Email {{ employeeName }}</p>
+                  </v-tooltip>
                   <v-icon icon="mdi-email" size="28"></v-icon>
                 </v-btn>
               </v-hover>
@@ -63,6 +66,9 @@
                   :height="buttonSize"
                   variant="text"
                 >
+                  <v-tooltip activator="parent" location="bottom">
+                    <p class="ma-0 pa-0">Go to Github Profile</p>
+                  </v-tooltip>
                   <v-icon icon="$github" size="30"></v-icon>
                 </v-btn>
               </v-hover>
@@ -80,6 +86,9 @@
                   :height="buttonSize"
                   variant="text"
                 >
+                  <v-tooltip activator="parent" location="bottom">
+                    <p class="ma-0 pa-0">Go to LinkedIn Profile</p>
+                  </v-tooltip>
                   <v-icon icon="$linkedin" size="33"></v-icon>
                 </v-btn>
               </v-hover>
@@ -97,6 +106,9 @@
                   :height="buttonSize"
                   variant="text"
                 >
+                  <v-tooltip activator="parent" location="bottom">
+                    <p class="ma-0 pa-0">Go to X Profile</p>
+                  </v-tooltip>
                   <v-icon icon="$twitter" size="23"></v-icon>
                 </v-btn>
               </v-hover>
