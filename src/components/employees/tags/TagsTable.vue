@@ -145,6 +145,8 @@ import { AxiosError } from 'axios';
 async function created() {
   !this.$store.getters.tags ? await updateStoreTags() : _;
   this.tags = _.cloneDeep(this.$store.getters.tags);
+  this.tags = cleanUpTags(this.tags, this.$store.getters.employees);
+  this.$store.dispatch('setTags', { tags: this.tags });
   this.loading = false;
 } // created
 
@@ -171,6 +173,18 @@ async function beforeUnmount() {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Removes any inactive employees from the tags
+ */
+function cleanUpTags(tags, employees) {
+  tags.forEach((tag) => {
+    tag.employees = tag.employees.filter((e) => {
+      return _.find(employees, (emp) => e === emp.id && emp.workStatus > 0);
+    });
+  });
+  return tags;
+}
 
 /**
  * Cancels the process of creating or editing a tag.
@@ -436,6 +450,7 @@ export default {
   },
   methods: {
     cancelEdit,
+    cleanUpTags,
     createTag,
     deleteTag,
     displayError,
