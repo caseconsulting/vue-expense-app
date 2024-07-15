@@ -84,6 +84,7 @@ import { useStore } from 'vuex';
 
 const props = defineProps([
   'employee',
+  'expenses',
   'expenseTypes',
   'accessibleBudgets',
   'fiscalDateView',
