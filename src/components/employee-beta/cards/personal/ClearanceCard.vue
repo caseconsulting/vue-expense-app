@@ -4,7 +4,11 @@
       <template v-if="!isEmpty(clearances)" #prependIcon>
         <v-icon size="small" id="personal" color="white"> mdi-shield-account </v-icon>
       </template>
-      <clearance-list v-if="!isEmpty(clearances)" :list="[displayedClearance]"></clearance-list>
+      <clearance-list
+        v-if="!isEmpty(clearances)"
+        :list="[displayedClearance]"
+        :toggleModal="displayedClearance.awaitingClearance"
+      ></clearance-list>
       <p v-if="isEmpty(clearances)" class="text-center mt-6 mx-2">No Clearance Information</p>
       <div v-if="!isEmpty(clearances) && clearances.length != 1" class="text-center">
         <v-card-actions class="d-flex justify-center">
