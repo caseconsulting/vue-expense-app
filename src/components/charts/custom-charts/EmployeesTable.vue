@@ -68,6 +68,9 @@ onMounted(async () => {
  */
 function clickedRow(_, { item }) {
   localStorage.setItem('requestedFilter', item.employeeNames.join(', '));
+  if (item.value == 0) {
+    localStorage.setItem('requestedFilter', 'none');
+  }
   router.push({
     path: '/employees',
     name: 'employees'
@@ -145,7 +148,7 @@ function fillData() {
     { title: 'Total Employees', value: employees.value.length, employeeNames: [] }
   ];
 
-  // remove 'awaiting clerance' parens if value is zero
+  // remove 'awaiting clearance' parens if value is zero
   if (overheadCount == 0) {
     tableContents.value[1].value = `${overheadCount}`;
   }
