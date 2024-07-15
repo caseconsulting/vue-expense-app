@@ -599,6 +599,7 @@ function clickedEdit(item) {
  * Handler for clicked update status buttons (Deactivate, Activate, Close)
  */
 async function clickedUpdateStatus(status) {
+  relationships.value = [];
   let theRelationships = [];
   let selectedItems = getSelectedItems();
   if (status === contractStatuses.value.ACTIVE) {
@@ -607,14 +608,17 @@ async function clickedUpdateStatus(status) {
     return;
   }
   await asyncForEach(selectedItems.contracts, async (c) => {
-    theRelationships = [...relationships.value, ...(await getActiveEmployeeContractRelationships(c))];
+    theRelationships.push([...relationships.value, ...(await getActiveEmployeeContractRelationships(c))]);
   });
   await asyncForEach(selectedItems.projects, async (p) => {
-    theRelationships = [
+    theRelationships.push([
       ...relationships.value,
       ...(await getActiveEmployeeContractRelationships(p.contractOfProject, p.project))
-    ];
+    ]);
   });
+
+  theRelationships = theRelationships.flat();
+
   if (theRelationships.length != 0) {
     titleMessage.value = `Cannot mark item(s) as ${status}`;
     validateMessage.value = `Please remove the following relationships before marking selected item(s) as ${status}.`;
@@ -630,17 +634,21 @@ async function clickedUpdateStatus(status) {
  * Handler for click delete button event
  */
 async function clickedDelete() {
+  relationships.value = [];
   let theRelationships = [];
   let selectedItems = getSelectedItems();
   await asyncForEach(selectedItems.contracts, async (c) => {
-    theRelationships = [...relationships.value, ...(await getEmployeeContractRelationships(c))];
+    theRelationships.push([...relationships.value, ...(await getEmployeeContractRelationships(c))]);
   });
+
   await asyncForEach(selectedItems.projects, async (p) => {
-    theRelationships = [
+    theRelationships.push([
       ...relationships.value,
       ...(await getEmployeeContractRelationships(p.contractOfProject, p.project))
-    ];
+    ]);
   });
+
+  theRelationships = theRelationships.flat();
 
   if (theRelationships.length != 0) {
     titleMessage.value = 'Cannot delete item(s)';
