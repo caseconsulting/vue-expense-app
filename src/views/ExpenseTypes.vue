@@ -376,7 +376,7 @@
                             </p>
                           </div>
                           <!-- Button to view names of employees with access -->
-                          <v-dialog v-model="showAccess" max-width="400px" scrollable>
+                          <v-dialog v-model="showAccess[item.id]" max-width="400px" scrollable>
                             <template #activator="{ props }">
                               <v-btn class="px-1 ml-3" size="x-small" variant="outlined" v-bind="props"> view </v-btn>
                             </template>
@@ -408,7 +408,7 @@
                               <!-- Close dialog button -->
                               <v-card-actions>
                                 <v-spacer />
-                                <v-btn theme="dark" variant="text" @click="showAccess = false"> Close </v-btn>
+                                <v-btn theme="dark" variant="text" @click="showAccess[item.id] = false"> Close </v-btn>
                               </v-card-actions>
                             </v-card>
                           </v-dialog>
@@ -581,7 +581,7 @@ const model = ref({
   tagBudgets: []
 }); // selected expense type
 const search = ref(''); // query text for datatable search field
-const showAccess = ref(false); // activate display for access list
+const showAccess = ref({}); // activate display for access list, object of ids to boolean
 const showAccessLength = ref(0); // number of employees with access
 const sortBy = ref([{ key: 'budgetName', order: 'asc' }]); // sort datatable items
 const status = ref({
