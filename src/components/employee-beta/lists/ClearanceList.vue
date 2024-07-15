@@ -16,13 +16,13 @@
           <p v-if="!isEmpty(getBadgeExpirationDate(clearance))" class="gray-text ml-6">
             <b>Expiration: </b>{{ getBadgeExpirationDate(clearance) }}
           </p>
-          <p v-if="!isEmpty(getAdjudicationDates(clearance))" class="gray-text ml-6">
+          <p v-if="toggleModal && !isEmpty(getAdjudicationDates(clearance))" class="gray-text ml-6">
             <b>Adjudication Dates: </b>{{ getAdjudicationDates(clearance) }}
           </p>
-          <p v-if="!isEmpty(getBiDates(clearance))" class="gray-text ml-6">
+          <p v-if="toggleModal && !isEmpty(getBiDates(clearance))" class="gray-text ml-6">
             <b>Bi Dates: </b>{{ getBiDates(clearance) }}
           </p>
-          <p v-if="!isEmpty(getPolyDates(clearance))" class="gray-text ml-6">
+          <p v-if="toggleModal && !isEmpty(getPolyDates(clearance))" class="gray-text ml-6">
             <b>Poly Dates: </b>{{ getPolyDates(clearance) }}
           </p>
         </v-card-text>
@@ -47,6 +47,9 @@ defineProps({
   list: {
     type: Array,
     required: true
+  },
+  toggleModal: {
+    type: Boolean
   }
 });
 
