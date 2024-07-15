@@ -493,7 +493,8 @@ async function createEvents() {
       text: `${announcement.author}: ${announcement.title}`,
       date: getEventDateMessage(date),
       daysFromToday: difference(now, date, 'day'),
-      basecampLink: announcement.url
+      basecampLink: announcement.url,
+      link: announcement.url
     };
   });
 
