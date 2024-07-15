@@ -41,7 +41,7 @@
 import api from '@/shared/api.js';
 import { add, format, getTodaysDate, isBefore } from '@/shared/dateUtils';
 import { updateStoreExpenseTypes } from '@/utils/storeUtils';
-import { asyncForEach, isMobile, isSmallScreen } from '@/utils/utils.js';
+import { asyncForEach, isMobile, isSmallScreen, userRoleIsIntern } from '@/utils/utils.js';
 import _ from 'lodash';
 import { onBeforeMount, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -72,7 +72,10 @@ onBeforeMount(async () => {
   checkBadges();
   checkCertifications();
   await checkReimbursements();
-  await checkPtoCashOuts();
+  //interns don't have access to pto
+  if (!userRoleIsIntern()) {
+    await checkPtoCashOuts();
+  }
 });
 
 // |--------------------------------------------------|
