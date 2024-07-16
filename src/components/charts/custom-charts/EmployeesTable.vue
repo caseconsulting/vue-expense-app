@@ -67,7 +67,7 @@ onMounted(async () => {
  * @param value - row clicked
  */
 function clickedRow(_, { item }) {
-  localStorage.setItem('requestedFilter', item.employeeNames.join(', '));
+  item.employeeNames?.length > 0 ? localStorage.setItem('requestedFilter', item.employeeNames.join(', ')) : _;
   if (item.value == 0) {
     localStorage.setItem('requestedFilter', 'none');
   }

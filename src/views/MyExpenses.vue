@@ -1027,7 +1027,8 @@ async function loadMyExpensesData() {
   initialPageLoading.value = true;
   loading.value = true;
   // get user info, defaulting to params if exists
-  userInfo.value = JSON.parse(localStorage.getItem('requestedFilter')) || store.getters.user; // TODO: parse localstorage into string and then parse from string
+  userInfo.value = store.getters.user; // TODO: parse localstorage into string and then parse from string
+  if (localStorage.getItem('requestedFilter')) userInfo.value = JSON.parse(localStorage.getItem('requestedFilter'));
   await Promise.all([
     !store.getters.expenseTypes ? updateStoreExpenseTypes() : '',
     !store.getters.employees ? updateStoreEmployees() : '',
