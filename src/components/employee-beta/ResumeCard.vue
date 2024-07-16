@@ -1,5 +1,5 @@
 <template>
-  <v-container class="pa-0">
+  <v-container class="pa-2 ma-0">
     <!-- Status Notification -->
     <v-snackbar
       v-model="uploadStatus.enabled"
@@ -14,67 +14,59 @@
       </v-card-text>
       <v-btn color="white" variant="text" @click="clearStatus()"> Close </v-btn>
     </v-snackbar>
-    <v-expansion-panels v-if="useDropDown" variant="accordion" class="position-relative">
-      <v-expansion-panel id="panel-title" align="center" justify="center">
-        <v-expansion-panel-title></v-expansion-panel-title>
-        <v-expansion-panel-text>
-          <p>Hello</p>
-          <v-row>
-            <v-col v-if="(isAdmin || isUser) && !editing" align="right" class="px-0 ma-0">
-              <v-btn
-                color="#bc3825"
-                class="text-white"
-                @click="toggleResumeParser = !toggleResumeParser"
-                variant="text"
-                density="comfortable"
-                icon=""
-              >
-                <v-tooltip activator="parent" location="top">
-                  <p class="ma-0 pa-0">Upload Resume</p>
-                </v-tooltip>
-                <v-icon icon="mdi-upload"></v-icon>
-              </v-btn>
-              <v-btn
-                class="text-white mx-1 fit-content"
-                color="#bc3825"
-                :disabled="model.resumeUpdated == null"
-                :loading="deleteLoading"
-                @click="toggleDeleteModal = !toggleDeleteModal"
-                variant="text"
-                density="comfortable"
-                icon=""
-              >
-                <v-tooltip activator="parent" location="top">
-                  <p class="ma-0 pa-0">Delete Resume</p>
-                </v-tooltip>
-                <v-icon icon="mdi-delete"></v-icon>
-              </v-btn>
-              <v-btn
-                class="text-white"
-                color="#bc3825"
-                :disabled="model.resumeUpdated == null"
-                @click="downloadResume()"
-                variant="text"
-                density="comfortable"
-                icon=""
-              >
-                <v-tooltip activator="parent" location="top">
-                  <p class="ma-0 pa-0">
-                    {{ model.resumeUpdated != null ? 'Download Resume' : 'No resume available' }}
-                  </p>
-                  <p class="ma-0 pa-0">
-                    {{ model.resumeUpdated != null ? `Uploaded ${format(model.resumeUpdated, null, dateFormat)}` : '' }}
-                  </p>
-                </v-tooltip>
-                <v-icon icon="mdi-file-download"></v-icon>
-              </v-btn>
-            </v-col>
-          </v-row>
-        </v-expansion-panel-text>
-      </v-expansion-panel>
-    </v-expansion-panels>
-    <v-row v-else>
-      <v-col v-if="(isAdmin || isUser) && !editing" align="right" class="px-0 ma-0">
+    <v-btn v-if="useDropDown && (isAdmin || isUser) && !editing" variant="text" icon="" density="comfortable">
+      <v-icon icon="mdi-chevron-down" size="large"></v-icon>
+      <v-menu activator="parent" location="bottom" origin="start top">
+        <v-list>
+          <v-list-item class="px-2">
+            <v-btn
+              color="#bc3825"
+              class="text-black"
+              @click="toggleResumeParser = !toggleResumeParser"
+              variant="text"
+              density="comfortable"
+              prepend-icon="mdi-upload"
+            >
+              Upload Resume
+            </v-btn>
+          </v-list-item>
+          <v-list-item class="px-2">
+            <v-btn
+              class="text-black"
+              color="#bc3825"
+              :disabled="model.resumeUpdated == null"
+              :loading="deleteLoading"
+              @click="toggleDeleteModal = !toggleDeleteModal"
+              variant="text"
+              density="comfortable"
+              prepend-icon="mdi-delete"
+            >
+              Delete Resume
+            </v-btn>
+          </v-list-item>
+          <v-list-item class="px-2">
+            <v-btn
+              class="text-black"
+              color="#bc3825"
+              :disabled="model.resumeUpdated == null"
+              @click="downloadResume()"
+              variant="text"
+              density="comfortable"
+              prepend-icon="mdi-file-download"
+            >
+              <p class="ma-0 pa-0">
+                {{ model.resumeUpdated != null ? 'Download ' : 'No resume available' }}
+              </p>
+              <p class="ma-0 pl-1 font-weight-thin">
+                {{ model.resumeUpdated != null ? `Uploaded ${format(model.resumeUpdated, null, dateFormat)}` : '' }}
+              </p>
+            </v-btn>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+    </v-btn>
+    <v-row v-else-if="(isAdmin || isUser) && !editing">
+      <v-col align="right" class="px-2 py-0 ma-0">
         <v-btn
           color="#bc3825"
           class="text-white"
@@ -285,9 +277,3 @@ async function resumeReceived(newEmployeeForm, changes) {
   }
 } // resumeReceived
 </script>
-
-<style scoped>
-#panel-title {
-  /* max-height: 36px; */
-}
-</style>

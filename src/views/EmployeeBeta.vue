@@ -14,10 +14,9 @@
         </v-col>
         <v-col class="pa-0 d-flex justify-center" cols="4">
           <v-row no-gutters class="fit-content d-flex-inline align-center">
-            <!-- if user is admin, show search button -->
-            <v-col v-if="isAdmin" class="fit-content d-flex justify-end"> </v-col>
             <v-col class="text-no-wrap d-flex align-center">
-              <v-btn icon="" variant="text" @click="onSearchButton()">
+              <!-- if user is admin, show search button -->
+              <v-btn v-if="isAdmin" icon="" variant="text" @click="onSearchButton()">
                 <v-icon size="32" color="black">mdi-magnify</v-icon>
               </v-btn>
               <!-- if user is not searching -->
