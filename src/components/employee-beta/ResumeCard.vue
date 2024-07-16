@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container class="pa-0">
     <!-- Status Notification -->
     <v-snackbar
       v-model="uploadStatus.enabled"
@@ -14,10 +14,68 @@
       </v-card-text>
       <v-btn color="white" variant="text" @click="clearStatus()"> Close </v-btn>
     </v-snackbar>
-    <v-row>
+    <v-expansion-panels v-if="useDropDown" variant="accordion" class="position-relative">
+      <v-expansion-panel id="panel-title" align="center" justify="center">
+        <v-expansion-panel-title></v-expansion-panel-title>
+        <v-expansion-panel-text>
+          <p>Hello</p>
+          <v-row>
+            <v-col v-if="(isAdmin || isUser) && !editing" align="right" class="px-0 ma-0">
+              <v-btn
+                color="#bc3825"
+                class="text-white"
+                @click="toggleResumeParser = !toggleResumeParser"
+                variant="text"
+                density="comfortable"
+                icon=""
+              >
+                <v-tooltip activator="parent" location="top">
+                  <p class="ma-0 pa-0">Upload Resume</p>
+                </v-tooltip>
+                <v-icon icon="mdi-upload"></v-icon>
+              </v-btn>
+              <v-btn
+                class="text-white mx-1 fit-content"
+                color="#bc3825"
+                :disabled="model.resumeUpdated == null"
+                :loading="deleteLoading"
+                @click="toggleDeleteModal = !toggleDeleteModal"
+                variant="text"
+                density="comfortable"
+                icon=""
+              >
+                <v-tooltip activator="parent" location="top">
+                  <p class="ma-0 pa-0">Delete Resume</p>
+                </v-tooltip>
+                <v-icon icon="mdi-delete"></v-icon>
+              </v-btn>
+              <v-btn
+                class="text-white"
+                color="#bc3825"
+                :disabled="model.resumeUpdated == null"
+                @click="downloadResume()"
+                variant="text"
+                density="comfortable"
+                icon=""
+              >
+                <v-tooltip activator="parent" location="top">
+                  <p class="ma-0 pa-0">
+                    {{ model.resumeUpdated != null ? 'Download Resume' : 'No resume available' }}
+                  </p>
+                  <p class="ma-0 pa-0">
+                    {{ model.resumeUpdated != null ? `Uploaded ${format(model.resumeUpdated, null, dateFormat)}` : '' }}
+                  </p>
+                </v-tooltip>
+                <v-icon icon="mdi-file-download"></v-icon>
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-expansion-panel-text>
+      </v-expansion-panel>
+    </v-expansion-panels>
+    <v-row v-else>
       <v-col v-if="(isAdmin || isUser) && !editing" align="right" class="px-0 ma-0">
         <v-btn
-          :size="isMobile() ? 'x-small' : 'default'"
           color="#bc3825"
           class="text-white"
           @click="toggleResumeParser = !toggleResumeParser"
@@ -33,7 +91,6 @@
         <v-btn
           class="text-white mx-1 fit-content"
           color="#bc3825"
-          :size="isMobile() ? 'x-small' : 'default'"
           :disabled="model.resumeUpdated == null"
           :loading="deleteLoading"
           @click="toggleDeleteModal = !toggleDeleteModal"
@@ -49,7 +106,6 @@
         <v-btn
           class="text-white"
           color="#bc3825"
-          :size="isMobile() ? 'x-small' : 'default'"
           :disabled="model.resumeUpdated == null"
           @click="downloadResume()"
           variant="text"
@@ -81,11 +137,11 @@
 <script setup>
 import _ from 'lodash';
 import api from '@/shared/api.js';
-import { isMobile } from '@/utils/utils';
 import { format, getTodaysDate, FORMATTED_ISOFORMAT } from '@/shared/dateUtils';
-import { inject, onBeforeUnmount, onMounted, ref } from 'vue';
+import { inject, onBeforeUnmount, onMounted, ref, computed } from 'vue';
 import DeleteModal from '@/components/modals/DeleteModal';
 import ResumeParser from '@/components/modals/ResumeParser.vue';
+import { useDisplay } from 'vuetify';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -93,6 +149,7 @@ import ResumeParser from '@/components/modals/ResumeParser.vue';
 // |                                                  |
 // |--------------------------------------------------|
 const dateFormat = FORMATTED_ISOFORMAT;
+const display = useDisplay();
 
 defineProps(['editing', 'loading']);
 const model = defineModel();
@@ -111,6 +168,20 @@ const uploadStatus = ref({
   color: ''
 });
 
+/**
+ * computed boolean to decide whether or not to use dropdown.
+ *
+ * @return boolean - returns true for small screens
+ */
+const useDropDown = computed(() => {
+  switch (display.name.value) {
+    case 'xs':
+      return true;
+    default:
+      return false;
+  }
+}); // useDropDown
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -118,8 +189,12 @@ const uploadStatus = ref({
 // |--------------------------------------------------|
 
 onMounted(() => {
+  console.log(useDropDown.value);
   emitter.on('confirm-delete-resume', async () => {
     await deleteResume();
+  });
+  emitter.on('canceled-delete-resume', () => {
+    toggleDeleteModal.value = false;
   });
   emitter.on('resume', async (result) => {
     await resumeReceived(result.newEmployeeForm, result.totalChanges);
@@ -134,6 +209,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   emitter.off('confirm-delete-resume');
+  emitter.off('canceled-delete-resume');
   emitter.off('resume');
   emitter.off('uploaded');
 });
@@ -209,3 +285,9 @@ async function resumeReceived(newEmployeeForm, changes) {
   }
 } // resumeReceived
 </script>
+
+<style scoped>
+#panel-title {
+  /* max-height: 36px; */
+}
+</style>
