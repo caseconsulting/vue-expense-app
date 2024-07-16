@@ -3,7 +3,7 @@
     <v-row>
       <!-- Status Alert -->
       <v-snackbar
-        v-model="status.statusType"
+        v-model="status.show"
         :color="status.color"
         :multi-line="true"
         location="top right"
@@ -138,6 +138,7 @@ const hasAccessToBudgets = ref(false); // user has access to one or more budgets
 const hireDate = ref(''); // employee hire date
 const loading = ref(true); // loading status
 const status = ref({
+  show: false,
   statusType: undefined,
   statusMessage: '',
   color: ''
@@ -222,6 +223,7 @@ watch(storeIsPopulated, async () => {
  * Clear the action status that is displayed in the snackbar.
  */
 function clearStatus() {
+  status.value['show'] = false;
   status.value['statusType'] = undefined;
   status.value['statusMessage'] = '';
   status.value['color'] = '';
@@ -233,6 +235,7 @@ function clearStatus() {
  * @param err - String error message
  */
 function displayError(err) {
+  status.value['show'] = true;
   status.value['statusType'] = 'ERROR';
   status.value['statusMessage'] = err;
   status.value['color'] = 'red';
@@ -265,6 +268,7 @@ async function refreshEmployee() {
  * Set and display a successful submit status in the snackbar.
  */
 function showSuccessfulSubmit() {
+  status.value['show'] = true;
   status.value['statusType'] = 'SUCCESS';
   status.value['statusMessage'] = 'Item was successfully submitted!';
   status.value['color'] = 'green';

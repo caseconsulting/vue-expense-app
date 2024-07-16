@@ -96,7 +96,7 @@
                     hide-details
                   />
                 </v-col>
-                <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="6">
+                <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="12">
                   <!-- Employee Filter -->
                   <v-autocomplete
                     id="employeeIdFilter"
@@ -111,7 +111,7 @@
                   />
                 </v-col>
                 <!-- Tags filter -->
-                <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="12" md="3">
+                <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="12">
                   <tags-filter v-model="tagsInfo" @update:modelValue="filterExpenses()"></tags-filter>
                 </v-col>
                 <!-- End Tags Filter -->
@@ -636,6 +636,7 @@ const toSort = ref([{ key: 'createdAt', order: 'desc' }]); // default sort datat
 const startDateFilter = ref(null);
 const startDateFilterMenu = ref(null);
 const status = ref({
+  show: false,
   statusType: undefined,
   statusMessage: '',
   color: ''
