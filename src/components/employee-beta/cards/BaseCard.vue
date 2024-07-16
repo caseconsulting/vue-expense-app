@@ -64,6 +64,22 @@ const isUser = inject('isUser');
 // |--------------------------------------------------|
 
 function toggleEdit() {
-  emitter.emit('editing', props.title);
+  if (props.title === 'Personal Information' || props.title === 'Employee') {
+    emitter.emit('editing', 'Personal Information');
+  } else if (props.title === 'Clearance') {
+    emitter.emit('editing', 'Clearance');
+  } else if (props.title === 'Contracts') {
+    emitter.emit('editing', 'Contracts');
+  } else if (props.title === 'Past Experience') {
+    emitter.emit('editing', 'Past Experience');
+  } else if (props.title === 'Certifications' || props.title === 'Awards') {
+    emitter.emit('editing', 'Certifications + Awards');
+  } else if (props.title === 'Education') {
+    emitter.emit('editing', 'Education');
+  } else if (props.title === 'Technologies and Skills' || props.title === 'Foreign Languages') {
+    emitter.emit('editing', 'Tech, Skills, and Languages');
+  } else {
+    emitter.emit('Personal Information');
+  }
 }
 </script>
