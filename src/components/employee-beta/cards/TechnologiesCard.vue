@@ -7,8 +7,8 @@
             <h3 class="text-white">Tech and Skills</h3>
           </v-col>
           <v-col>
-            <v-tooltip activator="parent" location="right"> Showing current with most years </v-tooltip>
-            <v-icon class="nudge-up" color="white" size="x-small">mdi-information</v-icon>
+            <v-tooltip activator="parent" location="right"> Sorting by current then years of experience </v-tooltip>
+            <v-icon class="nudge-up" color="white" size="15">mdi-information</v-icon>
           </v-col>
         </v-row>
       </template>
