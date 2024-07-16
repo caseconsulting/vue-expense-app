@@ -10,35 +10,25 @@
       <v-container v-else fluid>
         <v-form ref="form" v-model="valid" lazy-validation class="my-1 mx-xl-5 mx-lg-5 mx-md-0">
           <v-expansion-panels v-model="formTabs" variant="accordion" multiple>
-            <base-form title="Employee" value="Employee">
-              <div>Editing: {{ formTabs }}</div>
-            </base-form>
             <base-form title="Personal" value="Personal Information">
-              <div>Editing: {{ formTabs }}</div>
-            </base-form>
-            <base-form title="Clearance" value="Clearance">
               <div>Editing: {{ formTabs }}</div>
             </base-form>
             <base-form title="Contracts" value="Contracts">
               <div>Editing: {{ formTabs }}</div>
             </base-form>
-            <base-form title="Technologies and Skills" value="Technologies and Skills">
-              <div>Editing: {{ formTabs }}</div>
-            </base-form>
             <base-form title="Job Experience" value="Past Experience">
               <div>Editing: {{ formTabs }}</div>
             </base-form>
-            <awards-form :formTabs="formTabs"></awards-form>
-            <base-form title="Certifications" value="Certifications">
+            <base-form title="Certifications + Awards" value="Certifications + Awards">
               <div>Editing: {{ formTabs }}</div>
             </base-form>
             <base-form title="Education" value="Education">
               <div>Editing: {{ formTabs }}</div>
             </base-form>
-            <base-form title="Foreign Languages" value="Foreign Languages">
+            <base-form title="Tech, Skills, and Languages" value="Tech, Skills, and Languages">
               <div>Editing: {{ formTabs }}</div>
             </base-form>
-            <base-form title="Other Information" value="Other Information">
+            <base-form title="Clearance + Other Information" value="Clearance + Other Information">
               <div>Editing: {{ formTabs }}</div>
             </base-form>
           </v-expansion-panels>
@@ -64,7 +54,6 @@
 
 <script setup>
 import { computed, inject, onBeforeMount, onBeforeUnmount, ref } from 'vue';
-import AwardsForm from '@/components/employee-beta/forms/AwardsForm.vue';
 import BaseForm from '@/components/employee-beta/forms/BaseForm.vue';
 import FormCancelConfirmation from '@/components/modals/FormCancelConfirmation.vue';
 
