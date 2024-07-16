@@ -10,6 +10,7 @@
         order="1"
         :expand-on-hover="!isMobile()"
         :permanent="isLoggedIn() && !isMobile()"
+        :key="logoutReloadKey"
       >
         <main-nav :key="mainNavReloadKey"></main-nav>
       </v-navigation-drawer>
@@ -129,7 +130,7 @@
             id="P"
             class="text-black"
             target="_blank"
-            href="https://3.basecamp.com/3097063/buckets/4708396/documents/7470285528"
+            href="https://3.basecamp.com/3097063/buckets/4708396/documents/7593856742"
           >
             <v-tooltip activator="parent" location="top">View Release Notes</v-tooltip>
             <strong>Version</strong> {{ version }}
@@ -148,6 +149,7 @@
 <script setup>
 import {
   isLoggedIn,
+  isTimedOut,
   logout,
   getProfile,
   getTokenExpirationDate,
@@ -224,7 +226,11 @@ const mediaLinks = [
   { name: 'X', link: 'https://x.com/consultwithcase?lang=en', img: x, size: 17 },
   { name: 'Facebook', link: 'https://www.facebook.com/ConsultwithCase/', img: facebook }
 ];
+
+// these values are updated to force-reload the components they belong to
 const mainNavReloadKey = ref(0);
+const logoutReloadKey = ref(0);
+
 const version = ref(null);
 
 // |--------------------------------------------------|
@@ -249,12 +255,14 @@ onBeforeMount(async () => {
   emitter.on('badgeExp', () => {
     badgeKey.value++;
   }); // used to refresh badge expiration banner
+
   emitter.on('user-session-refreshed', () => {
     clearTimeout(sessionTimeout.value);
     clearTimeout(sessionTimeoutWarning.value);
     session.value = false;
     setSessionTimeouts();
   });
+
   // set expiration date if access token received
   let accessToken = getAccessToken();
   if (accessToken && isLoggedIn()) {
@@ -361,6 +369,7 @@ function getMainPadding() {
  * Logout of expense app
  */
 function handleLogout() {
+  logoutReloadKey.value++;
   logout();
 } // handleLogout
 
@@ -414,8 +423,8 @@ function goToHome() {
 function refreshSession() {
   let accessToken = getAccessToken();
   if (accessToken && isLoggedIn()) {
-    let expTime = Math.trunc(getTokenExpirationDate(accessToken).getTime());
-    let now = Math.trunc(new Date().getTime());
+    let expTime = getTokenExpirationDate(accessToken).getTime();
+    let now = Date.now();
     let sessionRemainder = expTime - now;
     let unixHour = 60 * 60 * 1000; // 60 min in unix time difference
     if (sessionRemainder - unixHour <= 0) {
@@ -429,18 +438,22 @@ function refreshSession() {
  * Sets the session timeout and the session timeout warning
  */
 function setSessionTimeouts() {
-  let accessToken = getAccessToken();
-  let expTime = Math.trunc(getTokenExpirationDate(accessToken).getTime());
-  let now = Math.trunc(new Date().getTime());
-  let sessionRemainder = expTime - now;
+  const accessToken = getAccessToken();
+  const expTime = getTokenExpirationDate(accessToken).getTime();
+  const now = Date.now();
+  const sessionRemainder = expTime - now;
+
   // set session timeout
   sessionTimeout.value = window.setTimeout(() => {
     sessionStorage.setItem('timedOut', true);
     session.value = false;
-    if (route.path !== '/') {
-      router.go({
-        path: '/',
-        query: { redirect: route.path }
+
+    // logout and redirect to login page
+    handleLogout();
+    if (route.name !== 'login') {
+      router.push({
+        name: 'login',
+        query: { redirect: route.fullPath }
       });
     }
   }, sessionRemainder);
@@ -477,6 +490,13 @@ watch(
     }
   }
 ); // $route
+
+watch(
+  () => sessionStorage.getItem('isTimedOut'),
+  () => {
+    if (isTimedOut()) handleLogout();
+  }
+); // watch sessionStorage.isTimedOut
 </script>
 
 <style lang="scss">
