@@ -1,10 +1,11 @@
 <template>
-  <v-card title="Current Contract Information" elevation="4">
+  <v-card title="Current Contract Info" elevation="4">
     <v-card-text v-if="!isEmpty(contractsList)">
       <div v-if="!noneActive">
         <p><b>Contract: </b>{{ getContractNameFromId(currentContractId) }}</p>
+        <p class="ml-4">Start Date: {{ getContractStartDate(currentContractId) }}</p>
         <p><b>Prime: </b>{{ getPrimeNameFromId(currentContractId) }}</p>
-        <p>Project: {{ getProjectNameFromId(currentProjectId) }}</p>
+        <p class="ml-4">Project: {{ getProjectNameFromId(currentProjectId) }}</p>
       </div>
       <div v-else style="font-size: 15px; text-align: center" class="mt-3">
         <p><b>No contracts are currently active, to view past assignments click below.</b></p>
@@ -14,13 +15,21 @@
     <v-card-actions v-if="!isEmpty(contractsList) && (noneActive || model.contracts.length > 1)">
       <v-btn block @click="open">Click to see more</v-btn>
     </v-card-actions>
-    <v-dialog v-model="dialog">
+    <v-dialog v-model="dialog" max-width="600">
       <template v-slot:default>
         <v-card title="All Contract Information">
           <v-card-text v-for="(contract, index) in contractsList" :key="contract.contractId + index">
             <p><b>Contract: </b>{{ getContractName(contract) }}</p>
-            <p><b>Prime: </b>{{ getPrimeName(contract) }}</p>
-            <p><b>Time on Contract: </b>{{ getContractLengthInYears(contract) }}</p>
+            <p class="ml-4"><b>Prime: </b>{{ getPrimeName(contract) }}</p>
+            <p class="ml-4"><b>Time on Contract: </b>{{ getContractLengthInYears(contract) }}</p>
+            <div v-for="(project, index) in contract.projects" :key="project.projectId + index">
+              <p class="ml-8" style="margin: 0; display: inline">
+                <b>Project Name: </b> {{ getProjectNameFromId(project.projectId) }}
+              </p>
+              <p class="ml-8" style="margin: 0; display: inline; color: #828282" align="right">
+                ({{ getProjectStartDate(project) }} - {{ getProjectEndDate(project) }})
+              </p>
+            </div>
           </v-card-text>
         </v-card>
       </template>
@@ -33,6 +42,7 @@ import { ref, onBeforeMount } from 'vue';
 import { difference, getTodaysDate } from '@/shared/dateUtils';
 import _ from 'lodash';
 import { isEmpty } from '@/utils/utils';
+import { monthDayYearFormat, monthYearFormatFromString } from '../../../utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -104,8 +114,12 @@ function getContractLengthInYears(contract) {
  * @return the earliest date
  */
 function getContractEarliestDate(contract) {
-  return _.orderBy(contract.projects, ['startDate'])[0].startDate;
+  return _.orderBy(contract.projects, ['popStartDate'])[0].popStartDate;
 } // getContractEarliestDate
+
+function getContractStartDate(contractId) {
+  return monthYearFormatFromString(getContractEarliestDate(getContractObjectFromId(contractId)));
+}
 
 /**
  * Finds the contract name from the employees contract id.
@@ -124,6 +138,16 @@ function getContractName(contract) {
  */
 function getContractNameFromId(contractId) {
   return props.contracts.find((c) => c.id === contractId).contractName;
+}
+
+/**
+ * Current contract name from ID
+ *
+ * @param contractID - the current contracts id number
+ * @return the contract name
+ */
+function getContractObjectFromId(contractId) {
+  return props.contracts.find((c) => c.id === contractId);
 }
 
 /**
@@ -170,8 +194,30 @@ function getPrimeNameFromId(contractId) {
  * @return the project name
  */
 function getProjectNameFromId(projectId) {
-  let temp = projectsList.value.find((p) => p.id === projectId).projectName;
-  return temp;
+  return projectsList.value.find((p) => p.id === projectId).projectName;
+}
+
+/**
+ * Project start date from project object
+ *
+ * @param project - project to find start date
+ * @return the project start date
+ */
+function getProjectStartDate(project) {
+  return monthDayYearFormat(project.startDate);
+}
+
+/**
+ * Project end date from project object
+ *
+ * @param project - project to find end date
+ * @return the project end date
+ */
+function getProjectEndDate(project) {
+  if (project.endDate === null) {
+    return 'Present';
+  }
+  return monthDayYearFormat(project.endDate);
 }
 
 /**
