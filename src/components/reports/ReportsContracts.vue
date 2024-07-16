@@ -6,7 +6,7 @@
           <v-autocomplete
             id="employeesSearch"
             v-model="search"
-            :customFilter="customEmployeeFilter"
+            :custom-filter="employeeFilter"
             :items="employees"
             variant="underlined"
             label="Search By Employee Name"
@@ -25,7 +25,6 @@
           <v-autocomplete
             v-model="contractSearch"
             :items="contractsDropDown"
-            :customFilter="customFilter"
             label="Search By Contract"
             variant="underlined"
             clearable
@@ -39,7 +38,6 @@
           <v-autocomplete
             v-model="primeSearch"
             :items="primesDropDown"
-            :customFilter="customFilter"
             label="Search By Prime"
             variant="underlined"
             clearable
@@ -49,32 +47,7 @@
           ></v-autocomplete>
         </v-col>
         <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
-          <v-autocomplete
-            clearable
-            label="Filter by Tag (click to flip)"
-            v-model="selectedTags"
-            :items="tags"
-            multiple
-            variant="underlined"
-            item-title="tagName"
-            item-value="id"
-            @update:model-value="refreshDropdownItems()"
-            return-object
-          >
-            <template v-slot:selection="{ item }">
-              <v-chip
-                size="small"
-                closable
-                @click.stop
-                @click="negateTag(item.raw)"
-                @click:close="removeTag(item.raw)"
-                :color="chipColor(item.raw.id)"
-              >
-                {{ tagFlip.includes(item.raw.id) ? 'NOT ' : '' }}
-                {{ item.raw.tagName }}
-              </v-chip>
-            </template>
-          </v-autocomplete>
+          <tags-filter v-model="tagsInfo" @update:modelValue="refreshDropdownItems()"></tags-filter>
         </v-col>
         <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
           <v-checkbox v-model="showInactiveEmployees" label="Show Inactive Users"></v-checkbox>
@@ -89,6 +62,7 @@
         :items-per-page="itemsPerPage"
         class="elevation-1 row-pointer"
         @click:row="handleClick"
+        @update:current-items="updateTableDownload($event)"
       >
         <!-- Employee Number Slot -->
         <template v-slot:[`item.employeeNumber`]="{ item }">
@@ -126,10 +100,63 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import _ from 'lodash';
+import { employeeFilter } from '@/shared/filterUtils';
+import { selectedTagsHasEmployee } from '@/shared/employeeUtils';
+import { getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
+import { onMounted, ref, inject, watch } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+const store = useStore();
+const emitter = inject('emitter');
+const router = useRouter();
 import { userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
-import { customEmployeeFilter, getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
+import TagsFilter from '@/components/shared/TagsFilter.vue';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                       DATA                       |
+// |                                                  |
+// |--------------------------------------------------|
+const contractsDropDown = ref([]);
+const contractSearch = ref(null);
+const employees = ref([]);
+const employeesInfo = ref([]);
+const filteredEmployees = ref([]);
+const headers = ref([
+  {
+    title: 'Employee #',
+    key: 'employeeNumber'
+  },
+  {
+    title: 'Name',
+    key: 'fullName'
+  },
+  {
+    title: 'Current Contract',
+    key: 'contractNames'
+  },
+  {
+    title: 'Current Prime',
+    key: 'primeNames'
+  },
+  {
+    title: 'Email',
+    key: 'email'
+  }
+]); // datatable headers
+const itemsPerPage = ref(-1);
+const noContractPlaceholder = ref(' — No Contract — ');
+const primeSearch = ref(null);
+const primesDropDown = ref([]);
+const search = ref(null); // query text for datatable search fiel)
+const showInactiveEmployees = ref(false);
+const sortBy = ref([{ key: 'employeeNumber' }]); // sort datatable item)
+const tagsInfo = ref({
+  selected: [],
+  flipped: []
+});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -140,24 +167,20 @@ import { customEmployeeFilter, getActive, getFullName, populateEmployeesDropdown
 /**
  * The created lifecycle hook.
  */
-function created() {
-  this.emitter.on('get-employees-to-contact', (tab) => {
-    if (tab === 'contracts') {
-      this.emitter.emit('list-of-employees-to-contact', this.filteredEmployees);
-    }
-  });
-
-  this.employeesInfo = this.getActive(this.$store.getters.employees); // default to filtered list
-  this.tags = this.$store.getters.tags;
-  this.filteredEmployees = this.employeesInfo; // this one is shown
-  this.populateDropdowns(this.employeesInfo);
-  this.buildContractsColumn();
+onMounted(() => {
+  employeesInfo.value = getActive(store.getters.employees); // default to filtered list
+  filteredEmployees.value = employeesInfo.value; // one.value is shown
+  populateDropdowns(employeesInfo.value);
+  buildContractsColumn();
   if (localStorage.getItem('requestedFilter')) {
-    this.primeSearch = localStorage.getItem('requestedFilter');
-    this.refreshDropdownItems();
+    primeSearch.value = localStorage.getItem('requestedFilter');
+    refreshDropdownItems();
     localStorage.removeItem('requestedFilter');
   }
-} // created
+
+  // initial set of table download data
+  updateTableDownload(filteredEmployees.value);
+}); // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -169,7 +192,7 @@ function created() {
  * Gets all of the current contracts and displays the column on the table.
  */
 function buildContractsColumn() {
-  this.employeesInfo.forEach((currentEmp) => {
+  employeesInfo.value.forEach((currentEmp) => {
     if (currentEmp.contracts) {
       let contractNames = '';
       let primeNames = '';
@@ -185,7 +208,7 @@ function buildContractsColumn() {
         }
         // add current contracts
         if (current) {
-          let contract = this.$store.getters.contracts.find((c) => c.id === currentCon.contractId);
+          let contract = store.getters.contracts.find((c) => c.id === currentCon.contractId);
           contractNames += `${contract.contractName} & `;
           primeNames += `${contract.primeName} & `;
         }
@@ -200,36 +223,12 @@ function buildContractsColumn() {
 } // buildContractsColumn
 
 /**
- * Custom filter for contract autocomplete options.
- *
- * @param item - contract object
- * @param queryText - query to use to filter
- * @return string - the filtered contract
- */
-function customFilter(item, queryText) {
-  const query = queryText ? queryText.trim() : '';
-  const contract = item ? item.toLowerCase() : '';
-  const queryContainsContract = contract.indexOf(query.toString().toLowerCase()) >= 0;
-  return queryContainsContract;
-} // customFilter
-
-/**
- * Returns the color that at tag filter chip should be
- *
- * @param id ID of the tag item
- *
- */
-function chipColor(id) {
-  return this.tagFlip.includes(id) ? 'red' : 'gray';
-} // chipColor
-
-/**
  * handles click event of the employee table entry
  *
  * @param item - the employee
  */
 function handleClick(_, { item }) {
-  this.$router.push(`/employee/${item.employeeNumber}`);
+  router.push(`/employee/${item.employeeNumber}`);
 } //handleClick
 
 /**
@@ -239,8 +238,8 @@ function handleClick(_, { item }) {
  */
 function populateContractsAndPrimesDropdown(employees) {
   //resets dropdowns after each query
-  this.contractsDropDown = [];
-  this.primesDropDown = [];
+  contractsDropDown.value = [];
+  primesDropDown.value = [];
 
   let origContracts = _.map(employees, (employee) => employee.contracts); // extract contracts
   let employeesContracts = _.compact(origContracts); // remove falsey values
@@ -248,7 +247,7 @@ function populateContractsAndPrimesDropdown(employees) {
   // if there were any employees without a contract they would have been filtered out
   // and we want to show No Contract as an option in the dropdown
   if (origContracts.length !== employeesContracts.length) {
-    this.contractsDropDown.push(this.noContractPlaceholder);
+    contractsDropDown.value.push(noContractPlaceholder.value);
   }
 
   // loop employees
@@ -256,35 +255,35 @@ function populateContractsAndPrimesDropdown(employees) {
     // loop contracts
     _.forEach(contracts, (contract) => {
       // loop through projects to test if contract is current
-      // (this was added to make sure only current contracts/primes were listed in Reports autocomplete dropdowns)
+      // (was.value added to make sure only current contracts/primes were listed in Reports autocomplete dropdowns)
       _.forEach(contract, (projects) => {
         // loop project
         _.forEach(projects, (project) => {
           if (project.presentDate) {
-            let fullContract = this.$store.getters.contracts.find((c) => c.id === contract.contractId);
-            if (this.contract) {
+            let fullContract = store.getters.contracts.find((c) => c.id === contract.contractId);
+            if (contract.value) {
               // limit the prime dropdown to only those that belong to the contract
-              if (fullContract.contractName === this.contractSearch) {
-                this.contractsDropDown.push(fullContract.contractName);
-                this.primesDropDown.push(fullContract.primeName);
+              if (fullContract.contractName === contractSearch.value) {
+                contractsDropDown.value.push(fullContract.contractName);
+                primesDropDown.value.push(fullContract.primeName);
               }
-            } else if (this.primeSearch) {
+            } else if (primeSearch.value) {
               // limit the contract dropdown to only those that belong to the prime
-              if (fullContract.primeName === this.primeSearch) {
-                this.contractsDropDown.push(fullContract.contractName);
-                this.primesDropDown.push(this.primeSearch);
+              if (fullContract.primeName === primeSearch.value) {
+                contractsDropDown.value.push(fullContract.contractName);
+                primesDropDown.value.push(primeSearch.value);
               }
             } else {
-              this.contractsDropDown.push(fullContract.contractName); // add contract name
-              this.primesDropDown.push(fullContract.primeName); // add contract prime
+              contractsDropDown.value.push(fullContract.contractName); // add contract name
+              primesDropDown.value.push(fullContract.primeName); // add contract prime
             }
           }
         });
       });
     });
   });
-  this.contractsDropDown = new Set(this.contractsDropDown);
-  this.primesDropDown = new Set(this.primesDropDown);
+  contractsDropDown.value = Array.from(new Set(contractsDropDown.value));
+  primesDropDown.value = Array.from(new Set(primesDropDown.value));
 } // populateContractsAndPrimesDropdown
 
 /**
@@ -292,84 +291,61 @@ function populateContractsAndPrimesDropdown(employees) {
  *
  * @param employees - array of employees for dropdown and to get contracts
  */
-function populateDropdowns(employees) {
+function populateDropdowns(emps) {
   // refresh the employees autocomplete list to be those that match the query
-  this.employees = this.populateEmployeesDropdown(employees);
-  this.populateContractsAndPrimesDropdown(employees);
+  employees.value = populateEmployeesDropdown(emps);
+  populateContractsAndPrimesDropdown(emps);
 } // populateDropdowns
-
-/**
- * negates a tag
- */
-function negateTag(item) {
-  // try to find the id in the tagFlip array, if it is there then remove it else add it
-  const index = this.tagFlip.indexOf(item.id);
-  if (index >= 0) {
-    this.tagFlip.splice(index, 1);
-  } else {
-    this.tagFlip.push(item.id);
-  }
-} // negateTag
 
 /**
  * Refresh the list based on the current queries
  */
 function refreshDropdownItems() {
-  this.filteredEmployees = this.employeesInfo;
-  if (this.contractSearch) {
-    this.searchContract();
+  filteredEmployees.value = employeesInfo.value;
+  if (contractSearch.value) {
+    searchContract();
   }
-  if (this.primeSearch) {
-    this.searchPrimes();
+  if (primeSearch.value) {
+    searchPrimes();
   }
-  if (this.search) {
-    this.filteredEmployees = _.filter(this.filteredEmployees, (employee) => {
-      return employee.employeeNumber == this.search;
+  if (search.value) {
+    filteredEmployees.value = _.filter(filteredEmployees.value, (employee) => {
+      return employee.employeeNumber == search.value;
     });
   }
-  if (this.selectedTags.length > 0) {
-    this.filteredEmployees = _.filter(this.filteredEmployees, (employee) => {
-      return this.selectedTagsHasEmployee(employee);
+  if (tagsInfo.value.selected.length > 0) {
+    filteredEmployees.value = _.filter(filteredEmployees.value, (employee) => {
+      return selectedTagsHasEmployee(employee.id, tagsInfo.value);
     });
   }
 
-  this.populateDropdowns(this.filteredEmployees);
+  populateDropdowns(filteredEmployees.value);
 } // refreshDropdownItems
-
-/**
- * Removes an item from the tag filters's active filters
- *
- * @param item - The filter to remove
- */
-function removeTag(item) {
-  const selIndex = this.selectedTags.findIndex((t) => t.id === item.id);
-  if (selIndex >= 0) {
-    this.selectedTags.splice(selIndex, 1);
-  }
-} // removeTag
 
 /**
  * Clears the other search forms and searches the table by contract
  */
 function searchContract() {
-  if (this.contractSearch) {
-    if (this.primeSearch) {
-      this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
+  if (contractSearch.value) {
+    if (primeSearch.value) {
+      filteredEmployees.value = _.filter(employeesInfo.value, (employee) => {
         if (employee.contractNames) {
           return (
-            employee.contractNames.split(' & ').findIndex((element) => element.includes(this.contractSearch)) > -1 &&
-            employee.primeNames.split(' & ').findIndex((element) => element.includes(this.primeSearch)) > -1
+            employee.contractNames.split(' & ').findIndex((element) => element.includes(contractSearch.value)) > -1 &&
+            employee.primeNames.split(' & ').findIndex((element) => element.includes(primeSearch.value)) > -1
           );
         } else return false;
       });
-    } else if (this.contractSearch === this.noContractPlaceholder) {
-      this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
+    } else if (contractSearch.value === noContractPlaceholder.value) {
+      filteredEmployees.value = _.filter(employeesInfo.value, (employee) => {
         return !employee.contractNames;
       });
     } else {
-      this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
+      filteredEmployees.value = _.filter(employeesInfo.value, (employee) => {
         if (employee.contractNames) {
-          return employee.contractNames.split(' & ').findIndex((element) => element.includes(this.contractSearch)) > -1;
+          return (
+            employee.contractNames.split(' & ').findIndex((element) => element.includes(contractSearch.value)) > -1
+          );
         } else return false;
       });
     }
@@ -380,20 +356,20 @@ function searchContract() {
  * Clears the other search forms and searches the table by prime
  */
 function searchPrimes() {
-  if (this.primeSearch) {
-    if (this.contractSearch) {
-      this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
+  if (primeSearch.value) {
+    if (contractSearch.value) {
+      filteredEmployees.value = _.filter(employeesInfo.value, (employee) => {
         if (employee.primeNames) {
           return (
-            employee.contractNames.split(' & ').findIndex((element) => element.includes(this.contractSearch)) > -1 &&
-            employee.primeNames.split(' & ').findIndex((element) => element.includes(this.primeSearch)) > -1
+            employee.contractNames.split(' & ').findIndex((element) => element.includes(contractSearch.value)) > -1 &&
+            employee.primeNames.split(' & ').findIndex((element) => element.includes(primeSearch.value)) > -1
           );
         } else return false;
       });
     } else {
-      this.filteredEmployees = _.filter(this.employeesInfo, (employee) => {
+      filteredEmployees.value = _.filter(employeesInfo.value, (employee) => {
         if (employee.primeNames) {
-          return employee.primeNames.split(' & ').findIndex((element) => element.includes(this.primeSearch)) > -1;
+          return employee.primeNames.split(' & ').findIndex((element) => element.includes(primeSearch.value)) > -1;
         } else return false;
       });
     }
@@ -401,22 +377,13 @@ function searchPrimes() {
 } // searchPrimes
 
 /**
- * helper function: return true if any selected tag has employee listed under it.
+ * Emit new data for tab.value
  *
- * @param e - the employee
- * @return true if the employee has a tag selected in filters
+ * @param event the event data containing the table information
  */
-function selectedTagsHasEmployee(e) {
-  let inTag, tagFlipped;
-  for (let i = 0; i < this.selectedTags.length; i++) {
-    inTag = this.selectedTags[i].employees.includes(e.id);
-    tagFlipped = this.tagFlip.includes(this.selectedTags[i].id);
-    if (inTag != tagFlipped) {
-      return true;
-    }
-  }
-  return false;
-} // selectedTagsHasEmployee
+function updateTableDownload(event) {
+  emitter.emit('reports-table-update', { tab: 'contracts', table: event, headers: headers });
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -427,120 +394,13 @@ function selectedTagsHasEmployee(e) {
 /**
  * Watches the showInactiveUsers to refilter the table as needed
  */
-function watchShowInactiveUsers() {
-  this.search = null;
-  this.employeesInfo = this.$store.getters.employees;
-  if (!this.showInactiveEmployees) this.employeesInfo = this.getActive(this.employeesInfo);
-  this.populateDropdowns(this.employeesInfo);
-  this.buildContractsColumn();
-  this.refreshDropdownItems();
-} // watchShowInactiveUsers
-
-/**
- * In the case that the page has been force reloaded (and the store cleared)
- * this watcher will be activated when the store is populated again.
- */
-function watchTagFlip() {
-  this.refreshDropdownItems();
-} // watchTagFlip
-
-/**
- * Remove items from tagFlip array when they are removed from the selected
- * tags
- */
-function watchSelectedTags() {
-  let negatedTagRemoved = true;
-  // use normal for loop to have the index
-  for (let i = 0; i < this.tagFlip.length; i++) {
-    // try to find the current tag in the selectedTags
-    _.forEach(this.selectedTags, (t) => {
-      if (t.id === this.tagFlip[i]) negatedTagRemoved = false;
-    });
-    // if it isn't there, remove it from tagFlip too
-    if (negatedTagRemoved) {
-      this.tagFlip.splice(i, 1);
-    }
-  }
-  this.refreshDropdownItems();
-} // watchSelectedTags
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  created,
-  data() {
-    return {
-      contractsDropDown: [],
-      contractSearch: null,
-      employees: [],
-      employeesInfo: [],
-      filteredEmployees: [],
-      headers: [
-        {
-          title: 'Employee #',
-          key: 'employeeNumber'
-        },
-        {
-          title: 'Name',
-          key: 'fullName'
-        },
-        {
-          title: 'Current Contract',
-          key: 'contractNames'
-        },
-        {
-          title: 'Current Prime',
-          key: 'primeNames'
-        },
-        {
-          title: 'Email',
-          key: 'email'
-        }
-      ], // datatable headers
-      itemsPerPage: -1,
-      noContractPlaceholder: ' — No Contract — ',
-      primeSearch: null,
-      primesDropDown: [],
-      search: null, // query text for datatable search field
-      selectedTags: [],
-      showInactiveEmployees: false,
-      sortBy: [{ key: 'employeeNumber' }], // sort datatable items
-      sortDesc: false,
-      tags: [],
-      tagFlip: [],
-      tagSearchString: null
-    };
-  },
-  methods: {
-    buildContractsColumn,
-    customEmployeeFilter,
-    customFilter,
-    chipColor,
-    getActive,
-    getFullName,
-    handleClick,
-    negateTag,
-    populateContractsAndPrimesDropdown,
-    populateDropdowns,
-    populateEmployeesDropdown,
-    refreshDropdownItems,
-    removeTag,
-    searchContract,
-    searchPrimes,
-    selectedTagsHasEmployee,
-    userRoleIsAdmin,
-    userRoleIsManager
-  },
-  watch: {
-    showInactiveEmployees: watchShowInactiveUsers,
-    tagFlip: { handler: watchTagFlip, deep: true },
-    selectedTags: { handler: watchSelectedTags, deep: true }
-  }
-};
+watch(showInactiveEmployees, () => {
+  search.value = null;
+  employeesInfo.value = store.getters.employees;
+  if (!showInactiveEmployees.value) employeesInfo.value = getActive(employeesInfo.value);
+  populateDropdowns(employeesInfo.value);
+  refreshDropdownItems();
+});
 </script>
 
 <style lang="css" scoped>

@@ -1,10 +1,13 @@
 <template>
   <div v-if="model == null && !loading" class="text-center">
     <h1>Invalid Employee!</h1>
-    <img
-      src="https://media.giphy.com/media/fnuSiwXMTV3zmYDf6k/giphy.gif"
-      alt="GIF of Kazoo Kid saying 'Wait a minute, who are you?'"
-    />
+    <v-container class="invalid-results-gif">
+      <v-img
+        src="https://media.giphy.com/media/fnuSiwXMTV3zmYDf6k/giphy.gif"
+        alt="GIF of Kazoo Kid saying 'Wait a minute, who are you?'"
+        aspect-ratio="4/3"
+      ></v-img>
+    </v-container>
   </div>
   <v-container v-else class="my-3 mx-0 px-0" fluid>
     <v-row v-if="basicEmployeeDataLoading" class="pt-0">
@@ -74,7 +77,7 @@
             :employee-data-loading="loading"
             :fiscal-date-view="fiscalDateView"
           />
-          <anniversary-card :employee="model" emit-catcher="employee-page" :key="refreshKey" location="profile" />
+          <anniversary-card :employee="model" emit-catcher="employee-page" :key="refreshKey.a.id" location="profile" />
         </v-col>
 
         <!-- Employee Form -->
@@ -110,7 +113,7 @@
                   class="employee-dropdown"
                   density="compact"
                   :items="dropdownEmployees"
-                  :custom-filter="customFilter"
+                  :custom-filter="employeeFilter"
                   hide-details
                   item-title="itemTitle"
                   return-object
@@ -131,7 +134,7 @@
               <v-spacer />
               <convert-employee-to-csv
                 v-if="userRoleIsAdmin()"
-                :key="refreshKey"
+                :key="refreshKey.a.id"
                 :contracts="contracts"
                 :employee="model"
                 :filename="`${model.nickname || model.firstName} ${model.lastName}`"
@@ -170,7 +173,7 @@
             </v-card-title>
             <employee-info
               v-if="!editing"
-              :key="refreshKey"
+              :key="refreshKey.a.id"
               :model="model"
               :contracts="contracts"
               :current-tab="currentTab"
@@ -181,7 +184,7 @@
           <div v-if="userRoleIsAdmin() || userIsEmployee()" class="mt-4">
             <budget-chart
               v-if="!loading"
-              :key="refreshKey"
+              :key="refreshKey.e"
               :employee="model"
               :accessible-budgets="accessibleBudgets"
               :expenses="expenses"
@@ -201,7 +204,7 @@
       </v-row>
       <resume-parser
         v-if="!loading && !editing"
-        :key="refreshKey"
+        :key="refreshKey.a.id"
         :toggle-resume-parser="toggleResumeParser"
         :employee="model"
       />
@@ -232,6 +235,7 @@ import {
   updateStoreUser,
   updateStoreTags
 } from '@/utils/storeUtils';
+import { employeeFilter } from '@/shared/filterUtils';
 import { format, getTodaysDate, FORMATTED_ISOFORMAT } from '@/shared/dateUtils';
 import _ from 'lodash';
 import ConvertEmployeeToCsv from '@/components/employees/csv/ConvertEmployeeToCsv.vue';
@@ -263,26 +267,6 @@ async function resumeReceived(newEmployeeForm, changes) {
     await api.updateItem(api.EMPLOYEES, this.model);
   }
 } // resumeReceived
-
-/**
- * Custom filter for employee autocomplete options.
- *
- * @param item - employee
- * @param queryText - text used for filtering
- * @return string - filtered employee name
- */
-function customFilter(itemValue, queryText, itemObject) {
-  const item = itemObject.raw;
-  const query = queryText ? queryText : '';
-  const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
-  const firstNameFullName = `${item.firstName} ${item.lastName}`;
-
-  const queryContainsNickName = nickNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
-  const queryContainsFirstName =
-    firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
-
-  return queryContainsNickName || queryContainsFirstName;
-} // customFilter
 
 /**
  * Clears the status message of the uploadStatus
@@ -581,6 +565,7 @@ function refreshKey() {
  * Updates the dropdown employee when the employee model changes.
  */
 function watchModel() {
+  if (!this.model) return;
   this.dropdownEmployee = {
     ..._.cloneDeep(this.model),
     itemTitle: `${this.model.lastName}, ${this.model.nickname || this.model.firstName}`
@@ -699,10 +684,10 @@ export default {
   mounted,
   methods: {
     clearStatus,
-    customFilter,
     deleteResume,
     displayMessage,
     downloadResume,
+    employeeFilter,
     format,
     hasAdminPermissions,
     getProfileData,
@@ -744,5 +729,11 @@ export default {
   align-items: center !important;
   font-size: 20px !important;
   opacity: 1 !important;
+}
+</style>
+
+<style scoped>
+.invalid-results-gif {
+  max-width: 80%;
 }
 </style>

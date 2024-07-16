@@ -62,7 +62,7 @@
           <v-spacer></v-spacer>
           <v-btn
             variant="text"
-            @click.native="
+            @click="
               emit('closed-project-employees-assigned-modal');
               activate = false;
             "
@@ -74,10 +74,27 @@
     </v-dialog>
   </div>
 </template>
-<script>
+
+<script setup>
 import { updateStoreContracts, updateStoreEmployees } from '@/utils/storeUtils';
 import { nicknameAndLastName } from '@/shared/employeeUtils';
 import { getProjectCurrentEmployees, getProjectPastEmployees } from '@/shared/contractUtils';
+import { onBeforeMount, ref, inject, watch } from 'vue';
+import { useStore } from 'vuex';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const activate = ref(false);
+const currentEmployees = ref([]);
+const emitter = inject('emitter');
+const pastEmployees = ref([]);
+const props = defineProps(['toggleModal', 'contract', 'project']);
+const store = useStore();
+const tab = ref(null);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -88,10 +105,10 @@ import { getProjectCurrentEmployees, getProjectPastEmployees } from '@/shared/co
 /**
  * Created lifecyle hook
  */
-function created() {
-  if (!this.$store.getters.employees) this.updateStoreEmployees();
-  if (!this.$store.getters.contracts) this.updateStoreContracts();
-} // created
+onBeforeMount(() => {
+  if (!store.getters.employees) updateStoreEmployees();
+  if (!store.getters.contracts) updateStoreContracts();
+}); // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -105,7 +122,7 @@ function created() {
  * @param msg - Message to emit
  */
 function emit(msg) {
-  this.emitter.emit(msg);
+  emitter.emit(msg);
 } // emit
 
 // |--------------------------------------------------|
@@ -117,61 +134,37 @@ function emit(msg) {
 /**
  * Watcher for modal toggle
  */
-function watchEmployeesAssignedModal() {
-  if (this.toggleModal) this.activate = true;
-} // watchEmployeesAssignedModal
+watch(
+  () => props.toggleModal,
+  () => {
+    if (props.toggleModal) activate.value = true;
+  }
+); // watchEmployeesAssignedModal
 
 /**
  * Watcher for watchProject. Get current and past employees for project.
  */
-function watchProject() {
-  if (this.project) {
-    this.currentEmployees = getProjectCurrentEmployees(this.contract, this.project, this.$store.getters.employees);
-    this.pastEmployees = getProjectPastEmployees(this.contract, this.project, this.$store.getters.employees);
+watch(
+  () => props.project,
+  () => {
+    if (props.project) {
+      currentEmployees.value = getProjectCurrentEmployees(props.contract, props.project, store.getters.employees);
+      pastEmployees.value = getProjectPastEmployees(props.contract, props.project, store.getters.employees);
+    }
   }
-} // watchProject
+); // watchProject
 
 /**
  * Watcher for the activate variable. Resets active tab to current
  * when closed.
  */
-function watchActivate() {
-  if (!this.activate) {
-    this.tab = 0;
+watch(activate, () => {
+  if (!activate.value) {
+    tab.value = 0;
   }
-} // watchActivate
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  created,
-  data() {
-    return {
-      activate: false,
-      tab: null,
-      tabs: ['Current', 'Past'],
-      pastEmployees: [],
-      currentEmployees: []
-    };
-  },
-  methods: {
-    emit,
-    nicknameAndLastName,
-    updateStoreContracts,
-    updateStoreEmployees
-  },
-  watch: {
-    activate: watchActivate,
-    toggleModal: watchEmployeesAssignedModal,
-    project: watchProject
-  },
-  props: ['toggleModal', 'contract', 'project']
-};
+}); // watchActivate
 </script>
+
 <style scoped>
 .active {
   color: #0000ee;

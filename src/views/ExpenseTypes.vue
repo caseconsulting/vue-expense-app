@@ -35,8 +35,8 @@
                 <v-col cols="4">
                   <h2>Expense Types</h2>
                 </v-col>
-                <v-col cols="2" />
-                <v-col cols="6">
+                <v-spacer></v-spacer>
+                <v-col cols="12" sm="4">
                   <!-- Search Bar -->
                   <v-text-field
                     id="search"
@@ -376,7 +376,7 @@
                             </p>
                           </div>
                           <!-- Button to view names of employees with access -->
-                          <v-dialog v-model="showAccess" max-width="400px" scrollable>
+                          <v-dialog v-model="showAccess[item.id]" max-width="400px" scrollable>
                             <template #activator="{ props }">
                               <v-btn class="px-1 ml-3" size="x-small" variant="outlined" v-bind="props"> view </v-btn>
                             </template>
@@ -408,7 +408,7 @@
                               <!-- Close dialog button -->
                               <v-card-actions>
                                 <v-spacer />
-                                <v-btn theme="dark" variant="text" @click="showAccess = false"> Close </v-btn>
+                                <v-btn theme="dark" variant="text" @click="showAccess[item.id] = false"> Close </v-btn>
                               </v-card-actions>
                             </v-card>
                           </v-dialog>
@@ -473,7 +473,7 @@
               :delete-info="'(' + deleteType + ')'"
               :type="'expense-type'"
             />
-            <delete-error-modal :toggle-delete-error-modal="invalidDelete" type="expense type" />
+            <delete-error-modal v-model="invalidDelete" type="expense type" />
             <!-- End Confirmation Modals -->
           </v-container>
         </v-card>
@@ -487,7 +487,7 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import api from '@/shared/api.js';
 import DeleteErrorModal from '@/components/modals/DeleteErrorModal.vue';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
@@ -503,6 +503,167 @@ import {
   updateStoreTags
 } from '@/utils/storeUtils';
 import { format } from '../shared/dateUtils';
+import { onBeforeMount, onBeforeUnmount, ref, watch, computed, inject } from 'vue';
+import { useStore } from 'vuex';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const campfires = ref([]); // basecamp campfires
+const deleteModel = ref({ id: '' }); // expense type to delete
+const deleting = ref(false); // activate delete confirmation model
+const emitter = inject('emitter');
+const employees = ref([]); // employees
+const expanded = ref([]); // datatable expanded
+const expenseTypes = ref([]); // expense types
+const filter = ref({
+  active: 'active',
+  overdraft: 'both',
+  recurring: 'both'
+}); // datatable filters
+const filteredExpenseTypes = ref([]); // filtered expense types
+const form = ref(null);
+const headers = ref([
+  {
+    title: 'Expense Type',
+    key: 'budgetName',
+    show: true
+  },
+  {
+    title: 'Budget',
+    key: 'budget',
+    show: true
+  },
+  {
+    title: 'Start Date',
+    key: 'startDate',
+    show: true
+  },
+  {
+    title: 'End Date',
+    key: 'endDate',
+    show: true
+  },
+  {
+    title: '',
+    key: 'actions',
+    sortable: false,
+    show: false,
+    align: 'end'
+  }
+]); // datatable headers
+const initialPageLoading = ref(true);
+const invalidDelete = ref(false); // invalid delete staus
+const itemsPerPage = ref(-1); // items per datatable page
+const loading = ref(true); //loading status
+const midAction = ref(false);
+const model = ref({
+  accessibleBy: ['FullTime'],
+  alwaysOnFeed: false,
+  budget: 0,
+  budgetName: '',
+  campfire: null,
+  categories: [],
+  description: '',
+  endDate: null,
+  hasRecipient: false,
+  id: '',
+  isInactive: false,
+  odFlag: false,
+  proRated: false,
+  recurringFlag: false,
+  requiredFlag: true,
+  requireURL: false,
+  startDate: null,
+  tagBudgets: []
+}); // selected expense type
+const search = ref(''); // query text for datatable search field
+const showAccess = ref({}); // activate display for access list, object of ids to boolean
+const showAccessLength = ref(0); // number of employees with access
+const sortBy = ref([{ key: 'budgetName', order: 'asc' }]); // sort datatable items
+const status = ref({
+  show: false,
+  statusType: undefined,
+  statusMessage: '',
+  color: ''
+}); // snackbar action status
+const store = useStore();
+const userInfo = ref(null); // user information
+const deleteType = ref(''); // item.budgetName for when item is deleted
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * destroy listeners
+ */
+onBeforeUnmount(() => {
+  emitter.off('add');
+  emitter.off('startAction');
+  emitter.off('endAction');
+  emitter.off('update');
+  emitter.off('error');
+  emitter.off('canceled-delete-expense-type');
+  emitter.off('confirm-delete-expense-type');
+  emitter.off('finished-editing-expense-type');
+  emitter.off('editing-expense-type');
+  emitter.off('invalid-expense type-delete');
+}); // beforeUnmount
+
+/**
+ * Set user info, employees, and expense types. Creates event listeners.
+ */
+onBeforeMount(async () => {
+  // expenseTypeForm listeners
+  emitter.on('add', () => {
+    addModelToTable();
+  });
+  emitter.on('startAction', () => {
+    startAction();
+  });
+  emitter.on('endAction', () => {
+    endAction();
+  });
+  emitter.on('update', () => {
+    updateModelInTable();
+  });
+  emitter.on('error', (msg) => {
+    expenseFormError(msg);
+  });
+
+  //no longer editing an expense (clear model and enable buttons)
+  emitter.on('finished-editing-expense-type', () => {
+    clearModel();
+    endAction();
+  });
+
+  //when expense type is being edited buttons should be disabled
+  emitter.on('editing-expense-type', () => {
+    startAction();
+  });
+
+  emitter.on('canceled-delete-expense-type', () => {
+    midAction.value = false;
+    deleting.value = false;
+  });
+  emitter.on('confirm-delete-expense-type', async () => {
+    deleting.value = false;
+    await deleteExpenseType();
+  });
+  emitter.on('invalid-expense type-delete', () => {
+    midAction.value = false;
+  });
+
+  if (store.getters.storeIsPopulated) {
+    loadExpenseTypesData();
+  }
+}); // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -515,31 +676,26 @@ import { format } from '../shared/dateUtils';
  *
  * @return array - the filtered expense types
  */
-function expenseTypeList() {
-  return this.filteredExpenseTypes;
-} // expenseTypeList
+const expenseTypeList = computed(() => {
+  return filteredExpenseTypes.value;
+}); // expenseTypeList
 
 /**
  * Checks if the store is populated from initial page load.
  *
  * @returns boolean - True if the store is populated
  */
-function storeIsPopulated() {
-  return this.$store.getters.storeIsPopulated;
-} // storeIsPopulated
+const storeIsPopulated = computed(() => {
+  return store.getters.storeIsPopulated;
+}); // storeIsPopulated
 
-/**
- * returns the headers to show
- *
- * @return - headers to show
- */
-function _headers() {
-  if (this.userRoleIsAdmin()) {
-    return this.headers;
+const _headers = computed(() => {
+  if (userRoleIsAdmin()) {
+    return headers.value;
   } else {
-    return this.headers.filter((x) => x.show);
+    return headers.value.filter((x) => x.show);
   }
-} // _headers
+}); // _headers
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -551,13 +707,13 @@ function _headers() {
  * Refresh and updates expense type list and displays a successful create status in the snackbar.
  */
 async function addModelToTable() {
-  await this.updateStoreExpenseTypes();
-  await this.refreshExpenseTypes();
+  await updateStoreExpenseTypes();
+  await refreshExpenseTypes();
 
-  this.status['show'] = true;
-  this.status['statusType'] = 'SUCCESS';
-  this.status['statusMessage'] = 'Item was successfully submitted!';
-  this.status['color'] = 'green';
+  status.value['show'] = true;
+  status.value['statusType'] = 'SUCCESS';
+  status.value['statusMessage'] = 'Item was successfully submitted!';
+  status.value['color'] = 'green';
 } // addModelToTable
 
 /**
@@ -650,98 +806,65 @@ function categoriesReqReceipt(categories) {
 } // categoriesReqReceipt
 
 /**
- * Changes the employee avatar to default if it fails to display original.
- *
- * @param item - employee to check
- */
-function changeAvatar(item) {
-  let index = _.findIndex(this.employees, (employee) => {
-    return employee.id === item.id;
-  });
-
-  let newItem = this.employees[index];
-
-  newItem.avatar = null;
-
-  this.employees.splice(index, 1, newItem);
-} // changeAvatar
-
-/**
  * Clear the selected expense type.
  */
 function clearModel() {
-  this.model['id'] = '';
-  this.model['budget'] = 0;
-  this.model['budgetName'] = '';
-  this.model['description'] = '';
-  this.model['odFlag'] = false;
-  this.model['proRated'] = false;
-  this.model['startDate'] = '';
-  this.model['endDate'] = '';
-  this.model['recurringFlag'] = false;
-  this.model['requiredFlag'] = false;
-  this.model['isInactive'] = false;
-  this.model['categories'] = [];
-  this.model['accessibleBy'] = ['FullTime'];
-  this.model['hasRecipient'] = false;
-  this.model['alwaysOnFeed'] = false;
-  this.model['campfire'] = null;
-  this.model['requireURL'] = false;
-  this.model['tagBudgets'] = [];
+  model.value['id'] = '';
+  model.value['budget'] = 0;
+  model.value['budgetName'] = '';
+  model.value['description'] = '';
+  model.value['odFlag'] = false;
+  model.value['proRated'] = false;
+  model.value['startDate'] = '';
+  model.value['endDate'] = '';
+  model.value['recurringFlag'] = false;
+  model.value['requiredFlag'] = false;
+  model.value['isInactive'] = false;
+  model.value['categories'] = [];
+  model.value['accessibleBy'] = ['FullTime'];
+  model.value['hasRecipient'] = false;
+  model.value['alwaysOnFeed'] = false;
+  model.value['campfire'] = null;
+  model.value['requireURL'] = false;
+  model.value['tagBudgets'] = [];
 } // clearModel
 
 /**
  * Clear the action status that is displayed in the snackbar.
  */
 function clearStatus() {
-  this.status['show'] = false;
-  this.status['statusType'] = undefined;
-  this.status['statusMessage'] = '';
-  this.status['color'] = '';
+  status.value['show'] = false;
+  status.value['statusType'] = undefined;
+  status.value['statusMessage'] = '';
+  status.value['color'] = '';
 } // clearStatus
-
-/**
- * Add expense type to expanded row when clicked.
- *
- * @param value - expense type to add
- */
-function clickedRow(value) {
-  if (_.isEmpty(this.expanded) || this.expanded[0].id != value.id) {
-    // expand the selected expense type if the selected expense type is not already expanded
-    this.expanded = [];
-    this.expanded.push(value);
-  } else {
-    // collapse the expense type if the selected expense type is already expanded
-    this.expanded = [];
-  }
-} // clickedRow
 
 /**
  * Delete an expense type and display status.
  */
 async function deleteExpenseType() {
-  let et = await api.deleteItem(api.EXPENSE_TYPES, this.deleteModel.id);
+  let et = await api.deleteItem(api.EXPENSE_TYPES, deleteModel.value.id);
   if (et.id) {
     // successfully deletes expense type
-    await this.deleteModelFromTable();
+    await deleteModelFromTable();
   } else {
     // fails to delete expense type
-    this.displayError(et.response.data.message);
+    displayError(et.response.data.message);
   }
-  this.midAction = false;
+  midAction.value = false;
 } // deleteExpenseType
 
 /**
  * Refresh and updates expense type list and displays a successful delete status in the snackbar.
  */
 async function deleteModelFromTable() {
-  await this.updateStoreExpenseTypes();
-  await this.refreshExpenseTypes();
+  await updateStoreExpenseTypes();
+  await refreshExpenseTypes();
 
-  this.status['show'] = true;
-  this.status['statusType'] = 'SUCCESS';
-  this.status['statusMessage'] = 'Item was successfully deleted!';
-  this.status['color'] = 'green';
+  status.value['show'] = true;
+  status.value['statusType'] = 'SUCCESS';
+  status.value['statusMessage'] = 'Item was successfully deleted!';
+  status.value['color'] = 'green';
 } // deleteModelFromTable
 
 /**
@@ -750,55 +873,55 @@ async function deleteModelFromTable() {
  * @param err - String error message
  */
 function displayError(err) {
-  this.status['show'] = true;
-  this.status['statusType'] = 'ERROR';
-  this.status['statusMessage'] = err;
-  this.status['color'] = 'red';
+  status.value['show'] = true;
+  status.value['statusType'] = 'ERROR';
+  status.value['statusMessage'] = err;
+  status.value['color'] = 'red';
 } // displayError
 
 /**
  * Sets inAction boolean to false.
  */
 function endAction() {
-  this.midAction = false;
+  midAction.value = false;
 } // endAction
 
 /** Display error from expense form */
 function expenseFormError(msg) {
-  this.displayError(JSON.parse(msg));
+  displayError(JSON.parse(msg));
 }
 
 /**
  * Filters expense types based on filter selections.
  */
 function filterExpenseTypes() {
-  this.filteredExpenseTypes = this.expenseTypes;
+  filteredExpenseTypes.value = { ...expenseTypes.value };
 
   // filter expense types by active or inactive
-  this.filteredExpenseTypes = _.filter(this.filteredExpenseTypes, (expenseType) => {
-    return this.filter.active == 'active'
+  filteredExpenseTypes.value = _.filter(filteredExpenseTypes.value, (expenseType) => {
+    return filter.value.active == 'active'
       ? !expenseType.isInactive
-      : this.filter.active == 'notActive'
+      : filter.value.active == 'notActive'
         ? expenseType.isInactive
-        : this.filteredExpenseTypes;
+        : { ...filteredExpenseTypes.value };
   });
 
   // filter expense types by overdraft
-  this.filteredExpenseTypes = _.filter(this.filteredExpenseTypes, (expenseType) => {
-    return this.filter.overdraft == 'overdraft'
+  filteredExpenseTypes.value = _.filter(filteredExpenseTypes.value, (expenseType) => {
+    return filter.value.overdraft == 'overdraft'
       ? expenseType.odFlag
-      : this.filter.overdraft == 'noOverdraft'
+      : filter.value.overdraft == 'noOverdraft'
         ? !expenseType.odFlag
-        : this.filteredExpenseTypes;
+        : { ...filteredExpenseTypes.value };
   });
 
   // filter expense types by recurring
-  this.filteredExpenseTypes = _.filter(this.filteredExpenseTypes, (expenseType) => {
-    return this.filter.recurring == 'recurring'
+  filteredExpenseTypes.value = _.filter(filteredExpenseTypes.value, (expenseType) => {
+    return filter.value.recurring == 'recurring'
       ? expenseType.recurringFlag
-      : this.filter.recurring == 'notRecurring'
+      : filter.value.recurring == 'notRecurring'
         ? !expenseType.recurringFlag
-        : this.filteredExpenseTypes;
+        : { ...filteredExpenseTypes.value };
   });
 } // filterExpenseTypes
 
@@ -822,7 +945,7 @@ function getAccess(expenseType) {
  * @return Object - basecamp name and url data
  */
 function getCampfire(url) {
-  return _.find(this.campfires, (campfire) => {
+  return _.find(campfires.value, (campfire) => {
     return campfire.url == url;
   });
 } // getCampfire
@@ -838,7 +961,7 @@ function getEmployeeList(accessibleBy) {
   if (accessibleBy.includes('FullTime')) {
     // accessible by all employees
     employeesList = employeesList.concat(
-      _.filter(this.employees, (employee) => {
+      _.filter(employees.value, (employee) => {
         return employee.workStatus == 100 && employee.employeeRole != 'intern';
       })
     );
@@ -846,7 +969,7 @@ function getEmployeeList(accessibleBy) {
   if (accessibleBy.includes('PartTime')) {
     // accessible by full time employees only
     employeesList = employeesList.concat(
-      _.filter(this.employees, (employee) => {
+      _.filter(employees.value, (employee) => {
         return employee.workStatus < 100 && employee.workStatus > 0 && employee.employeeRole != 'intern';
       })
     );
@@ -854,7 +977,7 @@ function getEmployeeList(accessibleBy) {
   if (accessibleBy.includes('Intern')) {
     // accessible by full time employees only
     employeesList = employeesList.concat(
-      _.filter(this.employees, (employee) => {
+      _.filter(employees.value, (employee) => {
         return employee.workStatus > 0 && employee.employeeRole == 'intern';
       })
     );
@@ -862,13 +985,13 @@ function getEmployeeList(accessibleBy) {
   if (accessibleBy.includes('Custom')) {
     // custom access list
     employeesList = employeesList.concat(
-      _.filter(this.employees, (employee) => {
+      _.filter(employees.value, (employee) => {
         return accessibleBy.includes(employee.id);
       })
     );
   }
   employeesList = [...new Set(employeesList)];
-  this.showAccessLength = employeesList.length;
+  showAccessLength.value = employeesList.length;
   return _.sortBy(employeesList, [
     (employee) => employee.firstName.toLowerCase(),
     (employee) => employee.lastName.toLowerCase()
@@ -882,96 +1005,38 @@ function getEmployeeList(accessibleBy) {
  * @return String - employee full name
  */
 function getEmployeeName(employeeId) {
-  let localEmployee = _.find(this.employees, ['id', employeeId]);
+  let localEmployee = _.find(employees.value, ['id', employeeId]);
   return `${localEmployee.firstName} ${localEmployee.lastName}`;
 } // getEmployeeName
-
-/**
- * Check if an employee has access to an expense type. Returns true if employee has access, otherwise returns false.
- *
- * @param employee - Employee to access
- * @param expenseType - ExpenseType to be accessed
- * @return Boolean - employee has access to expense type
- */
-function hasAccess(employee, expenseType) {
-  let result = false;
-  if (employee.workStatus == 0) {
-    result = false;
-  } else if (expenseType.accessibleBy.includes('Intern') && employee.employeeRole == 'intern') {
-    result = true;
-  } else if (
-    expenseType.accessibleBy.includes('FullTime') &&
-    employee.employeeRole != 'intern' &&
-    employee.workStatus == 100
-  ) {
-    result = true;
-  } else if (
-    expenseType.accessibleBy.includes('PartTime') &&
-    employee.employeeRole != 'intern' &&
-    employee.workStatus < 100
-  ) {
-    result = true;
-  } else {
-    result = expenseType.accessibleBy.includes(employee.id);
-  }
-
-  return result;
-} // hasAccess
-
-/**
- * Check if an expense type is inactive. Returns 'Not Active' if the expense type is not active, otherwise returns an
- * empty String.
- *
- * @param expenseType - expense type to check
- * @return String - expense type is inactive string
- */
-function isInactive(expenseType) {
-  return !expenseType.isInactive ? '' : 'Not Active';
-} // isInactive
 
 /**
  * Load all data required to load the page initially.
  */
 async function loadExpenseTypesData() {
-  this.initialPageLoading = true;
-  this.userInfo = this.$store.getters.user;
-  [this.campfires] = await Promise.all([
-    this.userRoleIsAdmin() ? api.getBasecampCampfires() : '',
-    this.userRoleIsAdmin() && !this.$store.getters.tags ? this.updateStoreTags() : _,
-    this.userRoleIsAdmin() && !this.$store.getters.employees ? this.updateStoreEmployees() : _,
-    this.userRoleIsAdmin() && !this.$store.getters.avatars ? this.updateStoreAvatars() : _,
-    this.refreshExpenseTypes(),
-    this.updateStoreCampfires()
+  initialPageLoading.value = true;
+  userInfo.value = store.getters.user;
+  [campfires.value] = await Promise.all([
+    userRoleIsAdmin() ? api.getBasecampCampfires() : '',
+    userRoleIsAdmin() && !store.getters.tags ? updateStoreTags() : _,
+    userRoleIsAdmin() && !store.getters.employees ? updateStoreEmployees() : _,
+    userRoleIsAdmin() && !store.getters.avatars ? updateStoreAvatars() : _,
+    refreshExpenseTypes(),
+    updateStoreCampfires()
   ]);
 
-  if (this.userRoleIsAdmin()) {
-    this.employees = this.$store.getters.employees;
+  if (userRoleIsAdmin()) {
+    employees.value = store.getters.employees;
     // set employee avatar
-    let avatars = this.$store.getters.basecampAvatars;
-    _.map(this.employees, (employee) => {
+    let avatars = store.getters.basecampAvatars;
+    _.map(employees.value, (employee) => {
       let avatar = _.find(avatars, ['email_address', employee.email]);
       let avatarUrl = avatar ? avatar.avatar_url : null;
       employee.avatar = avatarUrl;
       return employee;
     });
   }
-  this.initialPageLoading = false;
+  initialPageLoading.value = false;
 } // loadExpenseTypesData
-
-/**
- * Returns a number with two decimal point precision as a string.
- *
- * @param value - number to filter
- * @return String - number with two decimal points
- */
-function twoDecimals(value) {
-  return `${new Intl.NumberFormat('en-US', {
-    style: 'decimal',
-    useGrouping: false,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(value)}`;
-} // twoDecimals
 
 /**
  * limits the length of the text
@@ -990,28 +1055,28 @@ function limitedText(val) {
  * @param item - expense type selected
  */
 function onSelect(item) {
-  this.model = _.cloneDeep(item);
+  model.value = _.cloneDeep(item);
 } // onSelect
 
 /**
  * Refresh expense type data and filters expense types.
  */
 async function refreshExpenseTypes() {
-  this.loading = true; // set loading status to true
+  loading.value = true; // set loading status to true
   let budgetsWithExpenses;
   [budgetsWithExpenses] = await Promise.all([
-    !this.userRoleIsAdmin() ? api.getEmployeeBudgets(this.userInfo.id) : '',
-    !this.userRoleIsAdmin() && !this.$store.getters.budgets ? this.updateStoreBudgets() : '',
-    !this.$store.getters.expenseTypes ? this.updateStoreExpenseTypes() : ''
+    !userRoleIsAdmin() ? api.getEmployeeBudgets(userInfo.value.id) : '',
+    !userRoleIsAdmin() && !store.getters.budgets ? updateStoreBudgets() : '',
+    !store.getters.expenseTypes ? updateStoreExpenseTypes() : ''
   ]);
-  this.expenseTypes = this.$store.getters.expenseTypes;
+  expenseTypes.value = store.getters.expenseTypes;
 
   // filter expense types for the user
-  if (!this.userRoleIsAdmin()) {
+  if (!userRoleIsAdmin()) {
     // create an array for the user expense types
     let expenseTypesFiltered = [];
     // get the active budgets for the employee
-    let activeBudgets = this.$store.getters.budgets;
+    let activeBudgets = store.getters.budgets;
     // map the active budgets
     let activeExpTypes = _.map(activeBudgets, (budget) => {
       return budget.expenseTypeId;
@@ -1024,42 +1089,42 @@ async function refreshExpenseTypes() {
     expenseTypesFiltered = _.union(activeExpTypes, budExpTypes);
     // get rid of duplicates
     expenseTypesFiltered = _.uniq(expenseTypesFiltered);
-    // set this.expenseTypes to only have those the user should see (expenseTypesFiltered)
-    this.expenseTypes = _.filter(this.expenseTypes, (expenseType) => {
+    // set expenseTypes.value to only have those the user should see (expenseTypesFiltered)
+    expenseTypes.value = _.filter(expenseTypes.value, (expenseType) => {
       return expenseTypesFiltered.includes(expenseType.id);
     });
   }
 
-  this.filterExpenseTypes();
+  filterExpenseTypes();
 
-  this.loading = false; // set loading status to false
+  loading.value = false; // set loading status to false
 } // refreshExpenseTypes
 
 /**
  * set midAction to true
  */
 function startAction() {
-  this.midAction = true;
+  midAction.value = true;
 } // startAction
 
 /**
  * Scrolls window back to the top of the form.
  */
 function toTopOfForm() {
-  window.scrollTo(0, this.$refs.form.$el.offsetTop - 70);
+  window.scrollTo(0, form.value.$el.offsetTop - 70);
 } // toTopOfForm
 
 /**
  * Refresh and updates expense type list and displays a successful update status in the snackbar.
  */
 async function updateModelInTable() {
-  await this.updateStoreExpenseTypes();
-  await this.refreshExpenseTypes();
+  await updateStoreExpenseTypes();
+  await refreshExpenseTypes();
 
-  this.status['show'] = true;
-  this.status['statusType'] = 'SUCCESS';
-  this.status['statusMessage'] = 'Item was successfully updated!';
-  this.status['color'] = 'green';
+  status.value['show'] = true;
+  status.value['statusType'] = 'SUCCESS';
+  status.value['statusMessage'] = 'Item was successfully updated!';
+  status.value['color'] = 'green';
 } // updateModelInTable
 
 /**
@@ -1069,18 +1134,19 @@ async function updateModelInTable() {
  * @param item - expense type to validate
  */
 async function validateDelete(item) {
-  this.midAction = true;
-  this.deleteType = item.budgetName;
+  midAction.value = true;
+  deleteType.value = item.budgetName;
   try {
     let expenses = await api.getAllExpenseTypeExpenses(item.id);
     if (expenses.length <= 0) {
-      this.deleteModel['id'] = item.id;
-      this.deleting = true;
+      deleteModel.value['id'] = item.id;
+      deleting.value = true;
     } else {
-      this.invalidDelete = true;
+      // tells DeleteErrorModal to appear
+      invalidDelete.value = true;
     }
   } catch (err) {
-    this.displayError(err);
+    displayError(err);
   }
 } // validateDelete
 
@@ -1089,79 +1155,8 @@ async function validateDelete(item) {
  * @param id id of tag to find
  */
 function getTagByID(id) {
-  return this.$store.getters.tags.find((t) => t.id === id);
+  return store.getters.tags.find((t) => t.id === id);
 } // getTagByID
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                 LIFECYCLE HOOKS                  |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * destroy listeners
- */
-function beforeUnmount() {
-  this.emitter.off('add');
-  this.emitter.off('startAction');
-  this.emitter.off('endAction');
-  this.emitter.off('update');
-  this.emitter.off('error');
-  this.emitter.off('canceled-delete-expense-type');
-  this.emitter.off('confirm-delete-expense-type');
-  this.emitter.off('finished-editing-expense-type');
-  this.emitter.off('editing-expense-type');
-  this.emitter.off('invalid-expense type-delete');
-} // beforeUnmount
-
-/**
- * Set user info, employees, and expense types. Creates event listeners.
- */
-async function created() {
-  // expenseTypeForm listeners
-  this.emitter.on('add', () => {
-    this.addModelToTable();
-  });
-  this.emitter.on('startAction', () => {
-    this.startAction();
-  });
-  this.emitter.on('endAction', () => {
-    this.endAction();
-  });
-  this.emitter.on('update', () => {
-    this.updateModelInTable();
-  });
-  this.emitter.on('error', (msg) => {
-    this.expenseFormError(msg);
-  });
-
-  //no longer editing an expense (clear model and enable buttons)
-  this.emitter.on('finished-editing-expense-type', () => {
-    this.clearModel();
-    this.endAction();
-  });
-
-  //when expense type is being edited buttons should be disabled
-  this.emitter.on('editing-expense-type', () => {
-    this.startAction();
-  });
-
-  this.emitter.on('canceled-delete-expense-type', () => {
-    this.midAction = false;
-    this.deleting = false;
-  });
-  this.emitter.on('confirm-delete-expense-type', async () => {
-    this.deleting = false;
-    await this.deleteExpenseType();
-  });
-  this.emitter.on('invalid-expense type-delete', () => {
-    this.midAction = false;
-  });
-
-  if (this.$store.getters.storeIsPopulated) {
-    this.loadExpenseTypesData();
-  }
-} // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -1172,163 +1167,21 @@ async function created() {
 /**
  * watcher for filter.active, filter.recurring, filter.overdraft
  */
-function watchFilterExpenseTypes() {
-  this.filterExpenseTypes();
-} // watchFilterExpenseTypes
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  components: {
-    DeleteErrorModal,
-    DeleteModal,
-    ExpenseTypeForm
-  },
-  data() {
-    return {
-      campfires: [], // basecamp campfires
-      deleteModel: {
-        id: ''
-      }, // expense type to delete
-      deleting: false, // activate delete confirmation model
-      showAccess: false, // activate display for access list
-      showAccessLength: 0, // number of employees with access
-      employees: [], // employees
-      expanded: [], // datatable expanded
-      expenseTypes: [], // expense types
-      filter: {
-        active: 'active',
-        overdraft: 'both',
-        recurring: 'both'
-      }, // databale filters
-      filteredExpenseTypes: [], // filtered expense types
-      headers: [
-        {
-          title: 'Expense Type',
-          key: 'budgetName',
-          show: true
-        },
-        {
-          title: 'Budget',
-          key: 'budget',
-          show: true
-        },
-        {
-          title: 'Start Date',
-          key: 'startDate',
-          show: true
-        },
-        {
-          title: 'End Date',
-          key: 'endDate',
-          show: true
-        },
-        {
-          title: '',
-          key: 'actions',
-          sortable: false,
-          show: false,
-          align: 'end'
-        }
-      ], // datatable headers
-      initialPageLoading: true,
-      invalidDelete: false, // invalid delete status
-      midAction: false,
-      itemsPerPage: -1, // items per datatable page
-      loading: true, // loading status
-      model: {
-        accessibleBy: ['FullTime'],
-        alwaysOnFeed: false,
-        budget: 0,
-        budgetName: '',
-        campfire: null,
-        categories: [],
-        description: '',
-        endDate: null,
-        hasRecipient: false,
-        id: '',
-        isInactive: false,
-        odFlag: false,
-        proRated: false,
-        recurringFlag: false,
-        requiredFlag: true,
-        requireURL: false,
-        startDate: null,
-        tagBudgets: []
-      }, // selected expense type
-      search: '', // query text for datatable search field
-      sortBy: [{ key: 'budgetName', order: 'asc' }], // sort datatable items
-      status: {
-        show: false,
-        statusType: undefined,
-        statusMessage: '',
-        color: ''
-      }, // snakcbar action status
-      tags: [],
-      userInfo: null, // user information
-      deleteType: '' //item.budgetName for when item is deleted
-    };
-  },
-  computed: {
-    expenseTypeList,
-    storeIsPopulated,
-    _headers
-  },
-  watch: {
-    'filter.active': watchFilterExpenseTypes,
-    'filter.recurring': watchFilterExpenseTypes,
-    'filter.overdraft': watchFilterExpenseTypes,
-    storeIsPopulated: loadExpenseTypesData
-  },
-  beforeUnmount,
-  created,
-  methods: {
-    addModelToTable,
-    categoriesToString,
-    categoriesOnFeed,
-    categoriesReqUrl,
-    categoriesReqReceipt,
-    changeAvatar,
-    clearModel, // NOTE: Unused?
-    clearStatus,
-    clickedRow,
-    convertToMoneyString,
-    deleteExpenseType,
-    deleteModelFromTable,
-    displayError,
-    endAction,
-    expenseFormError,
-    limitedText,
-    filterExpenseTypes,
-    format,
-    getAccess,
-    getCampfire,
-    getEmployeeList,
-    getEmployeeName,
-    getTagByID,
-    hasAccess,
-    isInactive,
-    loadExpenseTypesData,
-    onSelect,
-    refreshExpenseTypes,
-    startAction,
-    toTopOfForm,
-    twoDecimals,
-    updateModelInTable,
-    userRoleIsAdmin,
-    validateDelete,
-    updateStoreAvatars,
-    updateStoreBudgets,
-    updateStoreEmployees,
-    updateStoreExpenseTypes,
-    updateStoreCampfires,
-    updateStoreTags
+watch(
+  () => [filter.value.active, filter.value.recurring, filter.value.overdraft],
+  () => {
+    filterExpenseTypes();
   }
-};
+); // watchFilterExpenseTypes
+
+/**
+ * Watcher for storeIsPopulated
+ */
+watch(storeIsPopulated, (newValue) => {
+  if (newValue) {
+    loadExpenseTypesData();
+  }
+});
 </script>
 
 <style scoped>

@@ -37,12 +37,46 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import api from '@/shared/api.js';
-import _ from 'lodash';
-import { asyncForEach, isMobile, isSmallScreen } from '@/utils/utils.js';
-import { updateStoreExpenseTypes } from '@/utils/storeUtils';
 import { add, format, getTodaysDate, isBefore } from '@/shared/dateUtils';
+import { updateStoreExpenseTypes } from '@/utils/storeUtils';
+import { asyncForEach, isMobile, isSmallScreen, userRoleIsIntern } from '@/utils/utils.js';
+import _ from 'lodash';
+import { onBeforeMount, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useStore } from 'vuex';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const store = useStore();
+const route = useRoute();
+const router = useRouter();
+
+const alerts = ref([]);
+const user = ref(null);
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+// Checks if there are any expiring cert and sorts by days until expiration.
+onBeforeMount(async () => {
+  user.value = store.getters.user;
+  checkBadges();
+  checkCertifications();
+  await checkReimbursements();
+  //interns don't have access to pto
+  if (!userRoleIsIntern()) {
+    await checkPtoCashOuts();
+  }
+});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -51,28 +85,38 @@ import { add, format, getTodaysDate, isBefore } from '@/shared/dateUtils';
 // |--------------------------------------------------|
 
 /**
+ * Checks if the user is already on the given page.
+ *
+ * @param page String - The page of the button
+ * @return boolean - checks to see if the current banner is on the page
+ */
+function onPage(page) {
+  return page === route.name;
+} // onPage
+
+/**
  * Checks if a badge for a clearance is expiring within a time period.
  */
 function checkBadges() {
-  if (this.user.clearances != null) {
-    this.user.clearances.forEach((clearance) => {
+  if (user.value.clearances != null) {
+    user.value.clearances.forEach((clearance) => {
       // determines if a user has a badge expiring within 30 days
       if (clearance.badgeExpirationDate) {
         const needToShow = isBefore(clearance.badgeExpirationDate, add(getTodaysDate(), 31, 'days'));
         if (needToShow) {
           const expire = isBefore(clearance.badgeExpirationDate, getTodaysDate()) ? 'expired' : 'is expiring';
           let formattedDate = format(clearance.badgeExpirationDate, null, 'MMMM Do, YYYY');
-          this.alerts.push({
+          alerts.value.push({
             handler: {
               name: 'Profile',
               page: `employee`,
-              extras: { id: `${this.user.employeeNumber}` }
+              extras: { id: `${user.value.employeeNumber}` }
             },
             closeable: false,
             status: 'error',
             color: '#f27311',
             message: `Badge ${expire} on ${formattedDate} for clearance: ${clearance.type}`,
-            id: this.randId(),
+            id: randId(),
             item: clearance
           });
         }
@@ -85,8 +129,8 @@ function checkBadges() {
  * Checks if a certification is expiring within a time period.
  */
 function checkCertifications() {
-  if (this.user.certifications != null) {
-    this.user.certifications.forEach((cert) => {
+  if (user.value.certifications != null) {
+    user.value.certifications.forEach((cert) => {
       // determines if a user has a cert expiring within 30 days
       const needToShow =
         (cert.expirationWasSeen == undefined || !cert.expirationWasSeen) &&
@@ -95,11 +139,11 @@ function checkCertifications() {
       if (needToShow) {
         const expire = isBefore(cert.expirationDate, getTodaysDate()) ? 'expired' : 'is expiring';
         let formattedDate = format(cert.expirationDate, null, 'MMMM Do, YYYY');
-        this.alerts.push({
+        alerts.value.push({
           handler: {
             name: 'Profile',
             page: `employee`,
-            extras: { id: `${this.user.employeeNumber}` }
+            extras: { id: `${user.value.employeeNumber}` }
           },
           closeable: false,
           status: 'error',
@@ -108,7 +152,7 @@ function checkCertifications() {
           // below only needed for mark seen button
           seenButton: true,
           type: 'certification',
-          id: this.randId(),
+          id: randId(),
           item: cert
         });
       }
@@ -123,11 +167,11 @@ async function checkReimbursements() {
   // api to get all expenses for user, filtering out inactive expense types
   let expenses;
   [expenses] = await Promise.all([
-    api.getAllEmployeeExpenses(this.user.id),
-    !this.$store.getters.expenseTypes ? this.updateStoreExpenseTypes() : ''
+    api.getAllEmployeeExpenses(user.value.id),
+    !store.getters.expenseTypes ? updateStoreExpenseTypes() : ''
   ]);
 
-  let activeExpenseTypes = _.filter(this.$store.getters.expenseTypes, (t) => {
+  let activeExpenseTypes = _.filter(store.getters.expenseTypes, (t) => {
     return !t.isInactive;
   });
   let expenseTypes = _.map(activeExpenseTypes, 'id');
@@ -162,7 +206,7 @@ async function checkReimbursements() {
   // push to the banner array
   if (reimbusementsCount != 0) {
     const s = reimbusementsCount != 1 ? 's' : '';
-    this.alerts.push({
+    alerts.value.push({
       handler: {
         name: 'Expenses',
         page: 'expenses',
@@ -172,7 +216,7 @@ async function checkReimbursements() {
       status: 'info',
       color: 'teal',
       message: `You have ${reimbusementsCount} new reimbursed expense${s}`,
-      id: this.randId()
+      id: randId()
     });
 
     // resolve promises to mark read
@@ -184,7 +228,7 @@ async function checkReimbursements() {
  * Checks if a PTO Cash Out was approved.
  */
 async function checkPtoCashOuts() {
-  let cashOuts = await api.getEmployeePtoCashOuts(this.user.id);
+  let cashOuts = await api.getEmployeePtoCashOuts(user.value.id);
   let unseenApprovedCashOuts = _.filter(cashOuts, (c) => c.approvedDate && !c.approvalWasSeen);
 
   if (unseenApprovedCashOuts && unseenApprovedCashOuts.length > 0) {
@@ -200,7 +244,7 @@ async function checkPtoCashOuts() {
         promises.push(api.updateItem(api.PTO_CASH_OUTS, cashOut));
       }
     });
-    this.alerts.push({
+    alerts.value.push({
       handler: {
         name: 'PTO Cash Outs',
         page: 'ptoCashOuts',
@@ -210,7 +254,7 @@ async function checkPtoCashOuts() {
       status: 'info',
       color: 'cyan',
       message: `Your PTO cash out request of ${cashOutAmount} ${cashOutAmount == 1 ? 'hour' : 'hours'} was approved`,
-      id: this.randId()
+      id: randId()
     });
     // resolve promises to mark read
     await Promise.all(promises);
@@ -221,7 +265,7 @@ async function checkPtoCashOuts() {
  * Determines what styles to put on the buttons.
  */
 function getButtonStyling() {
-  if (this.isMobile() && this.isSmallScreen()) {
+  if (isMobile() && isSmallScreen()) {
     return 'notif-btn-mobile';
   } else {
     return 'notif-btn-normal';
@@ -233,7 +277,7 @@ function getButtonStyling() {
  * accomplish this but I've been on this story for too long so.
  */
 function handleClick(pageName, extras = {}) {
-  this.$router.push({ name: pageName, params: extras });
+  router.push({ name: pageName, params: extras });
 } // handleClick
 
 /**
@@ -250,11 +294,11 @@ async function handleMarkSeen(type, item, id) {
   let cert;
   switch (type) {
     case 'certification':
-      cert = _.find(this.user.certifications, (c) => {
+      cert = _.find(user.value.certifications, (c) => {
         return c === item;
       });
       cert.expirationWasSeen = true;
-      await api.updateItem(api.EMPLOYEES, this.user);
+      await api.updateItem(api.EMPLOYEES, user.value);
       break;
     default:
       break;
@@ -269,74 +313,6 @@ async function handleMarkSeen(type, item, id) {
 function randId() {
   return Math.floor(Math.random() * 0xffffffff).toString(16);
 } // randId
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     COMPUTED                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Checks if the user is already on the given page.
- *
- * @param page String - The page of the button
- * @return boolean - checks to see if the current banner is on the page
- */
-function onPage(page) {
-  return page == this.$route.name;
-} // onPage
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                 LIFECYCLE HOOKS                  |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Checks if there are any expiring cert and sorts by days until expiration.
- */
-async function created() {
-  this.user = this.$store.getters.user;
-  this.checkBadges();
-  this.checkCertifications();
-  await this.checkReimbursements();
-  await this.checkPtoCashOuts();
-} // created
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  created,
-  data() {
-    return {
-      alerts: [],
-      user: null
-    };
-  },
-  methods: {
-    add, // dateUtils
-    asyncForEach,
-    checkBadges,
-    checkCertifications,
-    checkReimbursements,
-    checkPtoCashOuts,
-    format, // dateUtils
-    getButtonStyling,
-    getTodaysDate, // dateUtils
-    handleClick,
-    handleMarkSeen,
-    isBefore, // dateUtils
-    isMobile,
-    isSmallScreen,
-    randId,
-    onPage,
-    updateStoreExpenseTypes
-  }
-};
 </script>
 
 <style scoped>

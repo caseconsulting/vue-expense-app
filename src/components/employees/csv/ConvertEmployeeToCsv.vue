@@ -2,7 +2,7 @@
   <span>
     <v-tooltip activator="parent" location="top" text="Download CSV" />
     <v-btn
-      @click.stop="download"
+      @click.stop="download()"
       variant="text"
       density="comfortable"
       icon="mdi-download"
@@ -11,8 +11,16 @@
   </span>
 </template>
 
-<script>
+<script setup>
 import employeeCsv from '@/utils/csv/employeeCsv.js';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const props = defineProps(['contracts', 'employee', 'tags', 'midAction', 'color', 'filename']);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -23,21 +31,8 @@ import employeeCsv from '@/utils/csv/employeeCsv.js';
  * Downloads employees as CSV
  */
 function download() {
-  employeeCsv.download(this.employee, this.contracts, this.tags, this.filename);
+  employeeCsv.download(props.employee, props.contracts, props.tags, props.filename);
 } // download
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  methods: {
-    download
-  },
-  props: ['contracts', 'employee', 'tags', 'midAction', 'color', 'filename']
-};
 </script>
 
 <style scoped>

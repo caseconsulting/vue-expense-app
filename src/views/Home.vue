@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid>
+  <v-container fluid id="full-page">
     <!-- Status Alert -->
     <v-snackbar
       v-model="status.statusType"
@@ -12,7 +12,7 @@
       <v-card-text color="white">
         <span class="text-h6 font-weight-medium">{{ status.statusMessage }}</span>
       </v-card-text>
-      <v-btn color="white" variant="text" @click="clearStatus"> Close </v-btn>
+      <v-btn color="white" variant="text" @click="clearStatus()"> Close </v-btn>
     </v-snackbar>
     <span v-if="loading">
       <v-row>
@@ -44,7 +44,12 @@
       <v-row class="pb-3">
         <!-- Title -->
         <v-col cols="12" md="6">
-          <h1 align="center" justify="center" id="home-greeting">Hello, {{ getEmployeePreferredName(employee) }}!</h1>
+          <h1 v-if="isBirthday(employee)" align="center" justify="center" id="home-greeting">
+            Happy Birthday, {{ getEmployeePreferredName(employee) }}!
+          </h1>
+          <h1 v-else align="center" justify="center" id="home-greeting">
+            Hello, {{ getEmployeePreferredName(employee) }}!
+          </h1>
           <div class="text-center">
             <v-btn color="#bc3825" @click="handleProfile()" theme="dark">View Profile</v-btn>
           </div>
@@ -53,6 +58,12 @@
         <!-- Anniversary Date -->
         <v-col cols="12" md="6" class="px-xl-4 px-lg-2 px-md-0">
           <anniversary-card v-if="!loading" :employee="employee" :has-budgets="true" location="home" />
+          <ConfettiExplosion
+            v-if="isBirthday(employee)"
+            :particleCount="300"
+            :particleSize="20"
+            class="ml-12"
+          ></ConfettiExplosion>
         </v-col>
       </v-row>
       <v-row class="pb-3">
@@ -83,15 +94,16 @@
   </v-container>
 </template>
 
-<script>
+<script setup>
 import api from '@/shared/api.js';
 import ActivityFeed from '@/components/home/ActivityFeed.vue';
 import AvailableBudgets from '@/components/shared/AvailableBudgets.vue';
 import _ from 'lodash';
-import { isEmpty, isMobile, getCurrentBudgetYear } from '@/utils/utils';
+import { isEmpty, getCurrentBudgetYear } from '@/utils/utils';
 import { updateStoreExpenseTypes, updateStoreBudgets } from '@/utils/storeUtils';
 import TimeData from '@/components/shared/timesheets/TimeData';
 import AnniversaryCard from '@/components/shared/AnniversaryCard';
+import ConfettiExplosion from 'vue-confetti-explosion';
 import {
   format,
   getTodaysDate,
@@ -108,6 +120,59 @@ import {
   endOf,
   DEFAULT_ISOFORMAT
 } from '../shared/dateUtils';
+import { ref, inject, onBeforeUnmount, onBeforeMount, computed, watch } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SET UP                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+const store = useStore();
+const router = useRouter();
+const emitter = inject('emitter');
+const accessibleBudgets = ref(null);
+const aggregatedAwards = ref([]);
+const aggregatedExpenses = ref([]);
+const aggregatedCerts = ref([]);
+const employee = ref({}); // employee
+const employees = ref([]);
+const events = ref([]);
+const expenses = ref(null);
+const expenseTypes = ref(null);
+const fiscalDateView = ref(''); // current budget year view by anniversary day
+const hireDate = ref(''); // employee hire date
+const loading = ref(true);
+const loadingBudgets = ref(true);
+const loadingEvents = ref(true);
+const scheduleEntries = ref([]);
+const textMaxLength = ref(110);
+const status = ref({
+  statusType: undefined,
+  statusMessage: '',
+  color: ''
+});
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ *  Set budget information for employee. Creates event listeners.
+ */
+onBeforeMount(async () => {
+  emitter.on('status-alert', (status) => {
+    status.value = status;
+  });
+  if (store.getters.storeIsPopulated) {
+    loading.value = false;
+    await loadHomePageData();
+  }
+}); // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -115,20 +180,23 @@ import {
 // |                                                  |
 // |--------------------------------------------------|
 
-/**
- * Checks if the store is populated from initial page load.
- *
- * @returns boolean - True if the store is populated
- */
-function storeIsPopulated() {
-  return this.$store.getters.storeIsPopulated;
-} // storeIsPopulated
+computed(store.getters.storeIsPopulated);
 
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+function isBirthday(employee) {
+  if (employee.birthday === undefined) {
+    return false; // no birthday is entered
+  }
+  let today = getTodaysDate();
+  let bday = employee.birthday;
+  bday = setYear(bday, getYear(today));
+  return bday === today;
+}
 
 /**
  * Gets an employees anniversary. If an employee's anniversary date is more than 2 months in the future,
@@ -155,21 +223,21 @@ function getAnniversary(date) {
  * Create the events to populate the activity feed
  */
 async function createEvents() {
-  this.loadingEvents = true;
-  if (this.$store.getters.events) {
-    this.events = this.$store.getters.events;
-    this.loadingEvents = false;
+  loadingEvents.value = true;
+  if (store.getters.events) {
+    events.value = store.getters.events;
+    loadingEvents.value = false;
     return; //exit function
   }
   let eventData = await api.getAllEvents();
-  this.employees = eventData.employees;
-  this.scheduleEntries = _.flatten(eventData.schedules);
-  this.aggregatedExpenses = eventData.expenses;
-  this.aggregatedAwards = this.getEmployeeAwards();
-  this.aggregatedCerts = this.getEmployeeCerts();
+  employees.value = eventData.employees;
+  scheduleEntries.value = _.flatten(eventData.schedules);
+  aggregatedExpenses.value = eventData.expenses;
+  aggregatedAwards.value = getEmployeeAwards();
+  aggregatedCerts.value = getEmployeeCerts();
 
   //we want to use their nicknames if they have one
-  this.employees.forEach((employee) => {
+  employees.value.forEach((employee) => {
     employee.firstName = getEmployeePreferredName(employee);
   });
 
@@ -177,7 +245,7 @@ async function createEvents() {
   // created empty two-dimensional array
   let anniversaries = [...Array(monthsBack)].map(() => Array(monthsBack));
   let newHires = [];
-  _.forEach(this.employees, (a) => {
+  _.forEach(employees.value, (a) => {
     let hireDate = format(a.hireDate, null, 'YYYY-MM-DD');
     let todaysDate = getTodaysDate();
     let event = {};
@@ -189,7 +257,7 @@ async function createEvents() {
         let endOfMonth = format(endOf(getTodaysDate(), 'months'), null, DEFAULT_ISOFORMAT);
         let monthDiff = Math.floor(difference(endOfMonth, anniversary, 'months')) + 1;
         if (monthDiff >= 0 && monthDiff < monthsBack) {
-          event.date = this.getEventDateMessage(anniversary);
+          event.date = getEventDateMessage(anniversary);
           if (isSame(anniversary, hireDate, 'day')) {
             event.text = a.firstName + ' ' + a.lastName + ' has joined the CASE team!'; //new hire message
             event.icon = 'mdi-account-plus';
@@ -215,11 +283,11 @@ async function createEvents() {
           }
           event.daysFromToday = difference(startOf(todaysDate, 'day'), startOf(anniversary, 'day'), 'day');
           event.color = '#bc3825';
-          if (this.textMaxLength < event.text.length) {
-            event.truncatedText = _.truncate(event.text, { length: this.textMaxLength });
+          if (textMaxLength.value < event.text.length) {
+            event.truncatedText = _.truncate(event.text, { length: textMaxLength.value });
           }
           if (event.type === 'New Hire') {
-            event.color = this.caseGray;
+            event.color = '#415364';
             newHires.push(event);
           } else {
             if (anniversaries[monthDiff].events) {
@@ -246,17 +314,18 @@ async function createEvents() {
   // filter out empty arrays
   anniversaries = _.filter(anniversaries, (a) => a.date);
 
+  const now = getTodaysDate();
+
   // generate birthdays
-  let birthdays = _.map(this.employees, (b) => {
-    if (b.birthdayFeed && !this.isEmpty(b.birthday) && b.workStatus != 0) {
+  let birthdays = _.map(employees.value, (b) => {
+    if (b.birthdayFeed && !isEmpty(b.birthday) && b.workStatus != 0) {
       let event = {};
-      let now = getTodaysDate();
       let cutOff = startOf(subtract(now, 6, 'months'), 'day');
       let birthday = format(b.birthday, 'MM-DD', 'MM-DD');
       birthday = setYear(birthday, getYear(now), 'MM-DD');
       let diff = difference(startOf(now, 'day'), startOf(birthday, 'day'), 'day');
       // Get event date text
-      event.date = this.getEventDateMessage(birthday);
+      event.date = getEventDateMessage(birthday);
       if (diff < -6) {
         birthday = subtract(birthday, 1, 'years');
         event.date = format(birthday, null, 'MMM D, YYYY');
@@ -275,8 +344,8 @@ async function createEvents() {
       event.color = 'orange darken-3';
       event.daysFromToday = difference(startOf(now, 'day'), startOf(birthday, 'day'), 'day');
       event.birthdayCampfire = 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726';
-      if (this.textMaxLength < event.text.length) {
-        event.truncatedText = _.truncate(event.text, { length: this.textMaxLength });
+      if (textMaxLength.value < event.text.length) {
+        event.truncatedText = _.truncate(event.text, { length: textMaxLength.value });
       }
       return event;
     }
@@ -284,14 +353,13 @@ async function createEvents() {
   });
 
   // generate expenses
-  let expenses = _.map(this.aggregatedExpenses, (a) => {
-    if (!this.isEmpty(a.showOnFeed) && a.showOnFeed) {
+  let expenses = _.map(aggregatedExpenses.value, (a) => {
+    if (!isEmpty(a.showOnFeed) && a.showOnFeed) {
       //value of showOnFeed is true
-      let now = getTodaysDate();
       let reimbursedDate = format(a.reimbursedDate, 'YYYY-MM-DD', 'YYYY-MM-DD');
       let event = {};
-      event.date = this.getEventDateMessage(reimbursedDate);
-      if (!this.isEmpty(a.url)) {
+      event.date = getEventDateMessage(reimbursedDate);
+      if (!isEmpty(a.url)) {
         event.link = a.url;
       }
       event.text = `${getEmployeePreferredName(a)} ${a.lastName} used their ${a.budgetName} budget on ${a.description}`;
@@ -301,7 +369,7 @@ async function createEvents() {
         event.icon = 'mdi-hands-pray';
         event.type = 'High Five';
         event.color = '#167c80'; // like a dark teal kinda color
-        const recipient = _.find(this.employees, (e) => {
+        const recipient = _.find(employees.value, (e) => {
           return e.id === a.recipient;
         });
         if (recipient) {
@@ -327,8 +395,8 @@ async function createEvents() {
         event.type = 'Expense';
         event.color = 'green';
       }
-      if (this.textMaxLength < event.text.length) {
-        event.truncatedText = _.truncate(event.text, { length: this.textMaxLength });
+      if (textMaxLength.value < event.text.length) {
+        event.truncatedText = _.truncate(event.text, { length: textMaxLength.value });
       }
       return event;
     } else {
@@ -338,14 +406,13 @@ async function createEvents() {
   });
 
   // generate schedules
-  let schedules = _.map(this.scheduleEntries, (a) => {
-    let now = getTodaysDate();
+  let schedules = _.map(scheduleEntries.value, (a) => {
     let cutOff = startOf(subtract(now, 6, 'months'), 'day');
 
     let startDate = a.starts_at;
     let endDate = a.ends_at;
     let event = {};
-    event.date = this.getEventDateMessage(startDate);
+    event.date = getEventDateMessage(startDate);
     if (isAfter(cutOff, startOf(startDate, 'day'))) {
       return null;
     }
@@ -365,16 +432,15 @@ async function createEvents() {
     event.link = a.app_url;
     event.eventScheduled = a.app_url;
     event.color = 'blue darken-3';
-    if (this.textMaxLength < event.text.length) {
-      event.truncatedText = _.truncate(event.text, { length: this.textMaxLength });
+    if (textMaxLength.value < event.text.length) {
+      event.truncatedText = _.truncate(event.text, { length: textMaxLength.value });
     }
     return event;
   });
 
   // generate awards
-  let awards = _.map(this.aggregatedAwards, (a) => {
+  let awards = _.map(aggregatedAwards.value, (a) => {
     // get award information
-    let now = getTodaysDate();
     const dateSubmitted = a.dateSubmitted || a.dateReceived;
     let award = {
       icon: 'mdi-fire',
@@ -398,9 +464,8 @@ async function createEvents() {
   });
 
   // generate certs
-  let certs = _.map(this.aggregatedCerts, (c) => {
+  let certs = _.map(aggregatedCerts.value, (c) => {
     // get cert information
-    let now = getTodaysDate();
     const dateSubmitted = c.dateSubmitted || c.dateReceived;
     let cert = {
       icon: 'mdi-certificate',
@@ -419,10 +484,33 @@ async function createEvents() {
     return wantToDisplay ? cert : null;
   });
 
-  let mergedEventsList = [...anniversaries, ...newHires, ...birthdays, ...expenses, ...schedules, ...awards, ...certs]; // merges lists
-  this.events = _.sortBy(_.compact(mergedEventsList), 'daysFromToday'); //sorts by days from today
-  this.$store.dispatch('setEvents', { events: this.events });
-  this.loadingEvents = false;
+  let announcements = _.map(eventData.announcements, (announcement) => {
+    const date = startOf(announcement.createdAt, 'day');
+    return {
+      type: 'Announcement',
+      icon: 'mdi-bullhorn',
+      color: 'purple',
+      text: `${announcement.author}: ${announcement.title}`,
+      date: getEventDateMessage(date),
+      daysFromToday: difference(now, date, 'day'),
+      basecampLink: announcement.url,
+      link: announcement.url
+    };
+  });
+
+  let mergedEventsList = [
+    ...anniversaries,
+    ...newHires,
+    ...birthdays,
+    ...expenses,
+    ...schedules,
+    ...awards,
+    ...certs,
+    ...announcements
+  ]; // merges lists
+  events.value = _.sortBy(_.compact(mergedEventsList), 'daysFromToday'); //sorts by days from today
+  store.dispatch('setEvents', { events: events.value });
+  loadingEvents.value = false;
 } //createEvents
 
 /**
@@ -460,7 +548,7 @@ function getEmployeeAwards() {
   let namedAwards = []; // temp variable for adding employee name
 
   // for each employee, get their awards
-  this.employees.forEach((e) => {
+  employees.value.forEach((e) => {
     if (e.awards) {
       // add their name to the award
       namedAwards = [];
@@ -486,7 +574,7 @@ function getEmployeeCerts() {
   let certs = []; // will be returned
 
   // for each employee, get their certs
-  this.employees.forEach((e) => {
+  employees.value.forEach((e) => {
     if (e.certifications) {
       // add their name to the cert
       e.certifications.forEach((c) => {
@@ -516,67 +604,48 @@ function getEmployeePreferredName(e) {
  * Routes user to their employee page
  */
 function handleProfile() {
-  this.$router.push(`/employee/${this.$store.getters.employeeNumber}`);
+  router.push(`/employee/${store.getters.employeeNumber}`);
 } // handleProfile
 
 /**
  * Loads all of the home page data concurrently upon entering the page.
  */
 async function loadHomePageData() {
-  await Promise.all([this.refreshEmployee(), this.createEvents()]);
+  await Promise.all([refreshEmployee(), createEvents()]);
 } // loadHomePageData
 
 /**
  * Refresh and sets employee information.
  */
 async function refreshEmployee() {
-  this.loadingBudgets = true;
-  this.employee = this.$store.getters.user;
-  this.hireDate = this.employee.hireDate;
-  this.fiscalDateView = this.getCurrentBudgetYear(this.hireDate);
+  loadingBudgets.value = true;
+  employee.value = store.getters.user;
+  hireDate.value = employee.value.hireDate;
+  fiscalDateView.value = getCurrentBudgetYear(hireDate.value);
   await Promise.all([
-    !this.$store.getters.expenseTypes ? this.updateStoreExpenseTypes() : '',
-    !this.$store.getters.budgets ? this.updateStoreBudgets() : ''
+    !store.getters.expenseTypes ? updateStoreExpenseTypes() : '',
+    !store.getters.budgets ? updateStoreBudgets() : ''
   ]);
-  this.expenseTypes = this.$store.getters.expenseTypes;
-  this.accessibleBudgets = this.$store.getters.budgets;
-  this.loadingBudgets = false;
+  expenseTypes.value = store.getters.expenseTypes;
+  accessibleBudgets.value = store.getters.budgets;
+  loadingBudgets.value = false;
 } // refreshEmployee
 
 /**
  * Clear the action status that is displayed in the snackbar.
  */
 function clearStatus() {
-  this.status['statusType'] = undefined;
-  this.status['statusMessage'] = '';
-  this.status['color'] = '';
+  status.value['statusType'] = undefined;
+  status.value['statusMessage'] = '';
+  status.value['color'] = '';
 } // clearStatus
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                 LIFECYCLE HOOKS                  |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- *  Set budget information for employee. Creates event listeners.
- */
-async function created() {
-  this.emitter.on('status-alert', (status) => {
-    this.status = status;
-  });
-  if (this.$store.getters.storeIsPopulated) {
-    this.loading = false;
-    await this.loadHomePageData();
-  }
-} // created
 
 /**
  * Before destroy lifecycle hook. Destroys listeners.
  */
-function beforeUnmount() {
-  this.emitter.off('status-alert');
-} // beforeUnmount
+onBeforeUnmount(() => {
+  emitter.off('status-alert');
+}); // beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -588,78 +657,14 @@ function beforeUnmount() {
  * A watcher for when the vuex store is populated with necessary data.
  */
 async function watchStoreIsPopulated() {
-  if (this.$store.getters.storeIsPopulated) {
-    this.loading = false;
-    await this.loadHomePageData();
+  if (store.getters.storeIsPopulated) {
+    loading.value = false;
+    await loadHomePageData();
   }
 } // watchStoreIsPopulated
 
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  components: {
-    ActivityFeed,
-    AvailableBudgets,
-    TimeData,
-    AnniversaryCard
-  },
-  data() {
-    return {
-      accessibleBudgets: null,
-      aggregatedAwards: [],
-      aggregatedExpenses: [],
-      allUserBudgets: null, // all user budgets
-      budgetYears: [], // list of options for chaning budget year view
-      display: true, // show seconds till anniversary activator
-      employee: {}, // employee
-      employees: [],
-      events: [],
-      expenses: null,
-      expenseTypeData: [], // aggregated budgets for expense types
-      expenseTypes: null,
-      fiscalDateView: '', // current budget year view by anniversary day
-      hireDate: '', // employee hire date
-      loading: true,
-      loadingBudgets: true,
-      loadingEvents: true,
-      scheduleEntries: [],
-      seconds: 0, // seconds until next anniversary date
-      textMaxLength: 110,
-      status: {
-        statusType: undefined,
-        statusMessage: '',
-        color: ''
-      }
-    };
-  },
-  computed: {
-    storeIsPopulated
-  },
-  watch: {
-    storeIsPopulated: watchStoreIsPopulated
-  },
-  created,
-  methods: {
-    beforeUnmount,
-    clearStatus,
-    createEvents,
-    getAnniversary,
-    getCurrentBudgetYear,
-    getEmployeeAwards,
-    getEmployeeCerts,
-    getEmployeePreferredName,
-    getEventDateMessage,
-    isEmpty,
-    isMobile,
-    loadHomePageData,
-    refreshEmployee,
-    handleProfile,
-    updateStoreExpenseTypes,
-    updateStoreBudgets
-  }
-};
+watch(
+  () => store.getters.storeIsPopulated,
+  () => watchStoreIsPopulated()
+);
 </script>

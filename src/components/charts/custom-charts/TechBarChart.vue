@@ -12,7 +12,7 @@
           ></DownloadCSV>
         </v-col>
       </v-row>
-      <bar-chart ref="barChart" :key="chartKey" chartId="tech" :options="options" :chartData="chartData"></bar-chart>
+      <bar-chart ref="barChart" :key="chartKey" chartId="tech" :options="option" :chartData="chartData"></bar-chart>
       <v-row no-gutters>
         <v-col cols="12" xxl="6" xl="6" lg="6" md="6" sm="6">
           <v-radio-group inline v-model="showCurrent" class="mt-5 mb-0 mx-0">
@@ -21,12 +21,12 @@
             <v-radio label="Past" value="Past"></v-radio>
           </v-radio-group>
         </v-col>
-        <v-col cols="12" xxl="6" xl="6" lg="6" md="6" sm="6" :class="!isMobile ? 'text-right' : ''">
-          <v-btn v-if="!isMobile" :disabled="reachedMin" @click="oneLessColumn" size="small" class="mr-2">
+        <v-col cols="12" xxl="6" xl="6" lg="6" md="6" sm="6" :class="!isMobile() ? 'text-right' : ''">
+          <v-btn v-if="!isMobile()" :disabled="reachedMin" @click="oneLessColumn()" size="small" class="mr-2">
             <v-tooltip activator="parent" location="top">Decrease Number of Columns Shown</v-tooltip>
             <v-icon>mdi-minus</v-icon>
           </v-btn>
-          <v-btn v-if="!isMobile" :disabled="reachedMax" @click="oneMoreColumn" size="small" class="mr-2">
+          <v-btn v-if="!isMobile()" :disabled="reachedMax" @click="oneMoreColumn()" size="small" class="mr-2">
             <v-tooltip activator="parent" location="top">Increase Number of Columns Shown</v-tooltip>
             <v-icon>mdi-plus</v-icon>
           </v-btn>
@@ -42,11 +42,58 @@
   </v-card>
 </template>
 
-<script>
+<script setup>
 import _ from 'lodash';
 import BarChart from '../base-charts/BarChart.vue';
 import DownloadCSV from '@/components/utils/DownloadCSV.vue';
-import { isMobile, storeIsPopulated, userRoleIsAdmin } from '@/utils/utils';
+import { isMobile, userRoleIsAdmin } from '@/utils/utils';
+import { onMounted, ref, watch } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                       SETUP                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+const chartData = ref(null);
+const chartKey = ref(0);
+const currentTechnologies = ref({});
+const dataReceived = ref(false);
+const employees = ref(null);
+const enoughData = ref(true);
+const nonCurrentTechnologies = ref({});
+const numOfColumns = ref(5);
+const numOfColumnsMin = ref(2);
+const numOfColumnsMax = ref(10);
+const option = ref(null);
+const reachedMin = ref(false);
+const reachedMax = ref(false);
+const router = useRouter();
+const showCurrent = ref('All');
+const store = useStore();
+const technologies = ref({});
+const technologyPairs = ref({});
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                  LIFECYCLE HOOKS                 |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Mounted lifecycle hook - get items, organize them and fill data.
+ */
+onMounted(async () => {
+  if (store.getters.storeIsPopulated) {
+    await parseEmployeeData();
+    // Sort tech by number of occurances
+    await sortTech(technologies.value);
+
+    await fillData();
+  }
+}); // mounted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -58,10 +105,10 @@ import { isMobile, storeIsPopulated, userRoleIsAdmin } from '@/utils/utils';
  * Takes data that was captured upon load and displays it on the chart.
  */
 function fillData() {
-  let pairs = this.technologyPairs.sort((a, b) => {
+  let pairs = technologyPairs.value.sort((a, b) => {
     return b[1] - a[1];
   });
-  pairs = pairs.slice(0, this.numOfColumns);
+  pairs = pairs.slice(0, numOfColumns.value);
   let labels = [];
   let values = [];
 
@@ -93,7 +140,7 @@ function fillData() {
   }
 
   // Set the chart data
-  this.chartData = {
+  chartData.value = {
     labels: labels,
     datasets: [
       {
@@ -105,7 +152,7 @@ function fillData() {
       }
     ]
   };
-  this.options = {
+  option.value = {
     scales: {
       y: {
         beginAtZero: true,
@@ -134,8 +181,8 @@ function fillData() {
       if (_.first(y)) {
         let index = _.first(y).index;
         localStorage.setItem('requestedDataType', 'technologies');
-        localStorage.setItem('requestedFilter', this.chartData.labels[index]);
-        this.$router.push({
+        localStorage.setItem('requestedFilter', chartData.value.labels[index]);
+        router.push({
           path: '/reports',
           name: 'reports'
         });
@@ -148,7 +195,7 @@ function fillData() {
       title: {
         display: true,
         text: `Top ${pairs.length} ${
-          this.showCurrent === 'All' ? '' : this.showCurrent + ' '
+          showCurrent.value === 'All' ? '' : showCurrent.value + ' '
         }Technologies Used by Employees`,
         font: {
           size: 15
@@ -164,8 +211,8 @@ function fillData() {
     },
     maintainAspectRatio: false
   };
-  this.chartKey++; // rerenders the chart
-  this.dataReceived = true;
+  chartKey.value++; // rerenders the chart
+  dataReceived.value = true;
 } // fillData
 
 /**
@@ -175,13 +222,13 @@ function fillData() {
  */
 function generateCsvData() {
   let csvData = [];
-  this.employees.forEach((e) => {
+  employees.value.forEach((e) => {
     if (e.technologies) {
       e.technologies.forEach((t) => {
         if (
-          this.showCurrent == 'All' ||
-          (this.showCurrent == 'Current' && t.current) ||
-          (this.showCurrent == 'Past' && !t.current)
+          showCurrent.value == 'All' ||
+          (showCurrent.value == 'Current' && t.current) ||
+          (showCurrent.value == 'Past' && !t.current)
         )
           csvData.push({ Technology: t.name, Employee: `${e.firstName} ${e.lastName}` });
       });
@@ -194,14 +241,14 @@ function generateCsvData() {
  * Increases the number of columns on the chart
  */
 function oneMoreColumn() {
-  if (this.numOfColumns < this.numOfColumnsMax && this.numOfColumns < this.technologyPairs.length) {
-    this.reachedMin = false;
-    this.numOfColumns++;
-    this.fillData(); // Refresh the chart
+  if (numOfColumns.value < numOfColumnsMax.value && numOfColumns.value < technologyPairs.value.length) {
+    reachedMin.value = false;
+    numOfColumns.value++;
+    fillData(); // Refresh the chart
   }
   // Disable the "+" button if the max has been reached
-  if (this.numOfColumns === this.numOfColumnsMax || this.numOfColumns === this.technologyPairs.length) {
-    this.reachedMax = true;
+  if (numOfColumns.value === numOfColumnsMax.value || numOfColumns.value === technologyPairs.value.length) {
+    reachedMax.value = true;
   }
 } // oneMoreColumn
 
@@ -209,14 +256,14 @@ function oneMoreColumn() {
  * Decreases the number of columns on the chart
  */
 function oneLessColumn() {
-  if (this.numOfColumns > this.numOfColumnsMin) {
-    this.reachedMax = false;
-    this.numOfColumns--;
-    this.fillData(); // Refresh the chart
+  if (numOfColumns.value > numOfColumnsMin.value) {
+    reachedMax.value = false;
+    numOfColumns.value--;
+    fillData(); // Refresh the chart
   }
   // Disable the "-" button if the min has been reached
-  if (this.numOfColumns === this.numOfColumnsMin) {
-    this.reachedMin = true;
+  if (numOfColumns.value === numOfColumnsMin.value) {
+    reachedMin.value = true;
   }
 } // oneLessColumn
 
@@ -227,12 +274,12 @@ function oneLessColumn() {
  */
 function setNumOfColumns(techArray) {
   if (techArray.length <= 5) {
-    this.numOfColumns = techArray.length;
-    this.reachedMax = true;
+    numOfColumns.value = techArray.length;
+    reachedMax.value = true;
   } else {
-    this.numOfColumns = 5;
-    this.reachedMax = false;
-    this.reachedMin = false;
+    numOfColumns.value = 5;
+    reachedMax.value = false;
+    reachedMin.value = false;
   }
 } // setNumOfColumns
 
@@ -243,19 +290,19 @@ function setNumOfColumns(techArray) {
  */
 function sortTech(techArray) {
   // We now sort the entries
-  this.technologyPairs = Object.entries(techArray);
-  if (this.technologyPairs.length <= this.numOfColumnsMin) {
-    this.numOfColumns = this.technologyPairs.length;
-    this.numOfColumnsMin = this.technologyPairs.length;
-    this.reachedMin = true;
-    this.reachedMax = true;
+  technologyPairs.value = Object.entries(techArray);
+  if (technologyPairs.value.length <= numOfColumnsMin.value) {
+    numOfColumns.value = technologyPairs.value.length;
+    numOfColumnsMin.value = technologyPairs.value.length;
+    reachedMin.value = true;
+    reachedMax.value = true;
   }
-  if (this.technologyPairs.length <= this.numOfColumns) {
-    this.numOfColumns = this.technologyPairs.length;
-    this.reachedMax = true;
+  if (technologyPairs.value.length <= numOfColumns.value) {
+    numOfColumns.value = technologyPairs.value.length;
+    reachedMax.value = true;
   }
   // Set number of columns to display
-  this.setNumOfColumns(techArray);
+  setNumOfColumns(techArray);
 } // sortTech
 
 /**
@@ -263,63 +310,44 @@ function sortTech(techArray) {
  *
  */
 function parseEmployeeData() {
-  this.employees = this.$store.getters.employees;
+  employees.value = store.getters.employees;
   // Put into dictionary where key is tech type and value is quantity
-  this.employees.forEach((employee) => {
+  employees.value.forEach((employee) => {
     if (employee.technologies && employee.workStatus != 0) {
       employee.technologies.forEach((currTech) => {
         // **** ALL TECH ****
-        if (!this.technologies[currTech.name]) {
-          this.technologies[currTech.name] = 1;
+        if (!technologies.value[currTech.name]) {
+          technologies.value[currTech.name] = 1;
         } else {
-          this.technologies[currTech.name] += 1;
+          technologies.value[currTech.name] += 1;
         }
         // **** CURRENT TECH ****
         // Not in array yet, but is current
-        if (!this.currentTechnologies[currTech.name] && currTech.current) {
-          this.currentTechnologies[currTech.name] = 1;
+        if (!currentTechnologies.value[currTech.name] && currTech.current) {
+          currentTechnologies.value[currTech.name] = 1;
         }
         // Already in array, but is current
-        else if (this.currentTechnologies[currTech.name] && currTech.current) {
-          this.currentTechnologies[currTech.name] += 1;
+        else if (currentTechnologies.value[currTech.name] && currTech.current) {
+          currentTechnologies.value[currTech.name] += 1;
         }
         // **** NON CURRENT TECH ****
         // Not in array yet, and is not current
-        else if (!this.nonCurrentTechnologies[currTech.name] && !currTech.current) {
-          this.nonCurrentTechnologies[currTech.name] = 1;
+        else if (!nonCurrentTechnologies.value[currTech.name] && !currTech.current) {
+          nonCurrentTechnologies.value[currTech.name] = 1;
         }
         // Already in array, and is not current
-        else if (this.nonCurrentTechnologies[currTech.name] && !currTech.current) {
-          this.nonCurrentTechnologies[currTech.name] += 1;
+        else if (nonCurrentTechnologies.value[currTech.name] && !currTech.current) {
+          nonCurrentTechnologies.value[currTech.name] += 1;
         }
       });
     }
   });
 
   // Check if there is enough data to display chart
-  if (this.technologies.length >= 2) {
-    this.enoughData = false;
+  if (technologies.value.length >= 2) {
+    enoughData.value = false;
   }
 } // parseEmployeeData
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                  LIFECYCLE HOOKS                 |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Mounted lifecycle hook - get items, organize them and fill data.
- */
-async function mounted() {
-  if (this.storeIsPopulated) {
-    await this.parseEmployeeData();
-    // Sort tech by number of occurances
-    await this.sortTech(this.technologies);
-
-    await this.fillData();
-  }
-} // mounted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -330,75 +358,26 @@ async function mounted() {
 /**
  * Watcher for showCurrent - sorts tech info and then fills data.
  */
-function watchShowCurrent() {
-  if (this.showCurrent === 'All') {
-    this.sortTech(this.technologies);
-  } else if (this.showCurrent === 'Current') {
-    this.sortTech(this.currentTechnologies);
+watch(showCurrent, () => {
+  if (showCurrent.value === 'All') {
+    sortTech(technologies.value);
+  } else if (showCurrent.value === 'Current') {
+    sortTech(currentTechnologies.value);
   } else {
-    this.sortTech(this.nonCurrentTechnologies);
+    sortTech(nonCurrentTechnologies.value);
   }
-  this.fillData();
-} // watchShowCurrent
+  fillData();
+}); // watchShowCurrent
 
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  components: {
-    BarChart,
-    DownloadCSV
-  },
-  computed: {
-    isMobile,
-    storeIsPopulated
-  },
-  data() {
-    return {
-      reachedMax: false,
-      reachedMin: false,
-      dataReceived: false,
-      employees: null,
-      chartData: null,
-      options: null,
-      numOfColumns: 5,
-      numOfColumnsMin: 2,
-      numOfColumnsMax: 10,
-      technologies: {},
-      currentTechnologies: {},
-      nonCurrentTechnologies: {},
-      showCurrent: 'All',
-      enoughData: true,
-      chartKey: 0
-    };
-  },
-  methods: {
-    fillData,
-    generateCsvData,
-    oneMoreColumn,
-    oneLessColumn,
-    sortTech,
-    parseEmployeeData,
-    setNumOfColumns,
-    userRoleIsAdmin
-  },
-  mounted,
-  watch: {
-    showCurrent: watchShowCurrent,
-    storeIsPopulated: function () {
-      if (this.storeIsPopulated) {
-        this.parseEmployeeData();
-        // Sort tech by number of occurances
-        this.sortTech(this.technologies);
-
-        this.fillData();
-      }
-    }
+watch(
+  () => store.getters.storeIsPopulated,
+  () => {
+    parseEmployeeData();
+    // Sort tech by number of occurances
+    sortTech(technologies.value);
+    fillData();
   }
-};
+);
 </script>
 
 <style scoped>

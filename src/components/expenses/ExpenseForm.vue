@@ -15,7 +15,7 @@
           variant="underlined"
           :items="activeEmployees"
           :rules="getRequiredRules()"
-          :custom-filter="customFilter"
+          :custom-filter="employeeFilter"
           :disabled="isReimbursed || isEdit || isInactive"
           v-model="editedExpense.employeeId"
           item-title="text"
@@ -220,6 +220,7 @@
               @click:prepend="purchaseMenu = true"
               @keypress="purchaseMenu = false"
               @update:focused="editedExpense.purchaseDate = format(purchaseDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
+              autocomplete="off"
             >
               <template v-slot:prepend>
                 <div v-bind="props" class="pointer">
@@ -269,6 +270,7 @@
               "
               @update:model-value="reimburseMenu = false"
               v-bind="props"
+              autocomplete="off"
             >
               <template v-slot:prepend>
                 <div v-bind="props" class="pointer">
@@ -410,6 +412,7 @@ import {
 import { updateStoreBudgets } from '@/utils/storeUtils';
 import { getRole } from '@/utils/auth';
 import { isBetween, getTodaysDate, format } from '../../shared/dateUtils';
+import { employeeFilter } from '@/shared/filterUtils';
 import { mask } from 'vue-the-mask';
 
 import _ from 'lodash';
@@ -582,7 +585,7 @@ function calcAdjustedBudget(employee, expenseType) {
 async function checkCoverage() {
   this.isInactive = true;
   if (this.$refs.form) {
-    this.valid = await this.$refs.form.validate();
+    await this.$refs.form.validate();
     if (!this.valid) return;
     this.emitter.emit('startAction');
     // form is validated
@@ -801,6 +804,7 @@ function clearForm() {
   // don't clear form if there was an error in submitting
   if (this.errorSubmitting) {
     this.errorSubmitting = false; // reset var
+    this.isInactive = false; // enable form
     return;
   }
 
@@ -935,29 +939,6 @@ async function createNewEntry() {
     }
   }
 } // createNewEntry
-
-/**
- * Custom filter for employee autocomplete options.
- *
- * @param _ - unused
- * @param queryText - text used for filtering
- * @param item - employee
- * @return string - filtered employee name
- */
-function customFilter(_, queryText, item) {
-  item = item.raw;
-
-  const query = queryText ? queryText : '';
-  const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
-  const firstNameFullName = `${item.firstName} ${item.lastName}`;
-
-  const queryNickName = nickNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase());
-  const queryFirstName = firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase());
-
-  if (queryNickName >= 0) return queryNickName;
-  if (queryFirstName >= 0) return item.nickname ? true : queryFirstName;
-  return false;
-} // customFilter
 
 /**
  * Redirects description field to modal if needed (only for exchange for training hours)
@@ -1524,6 +1505,10 @@ async function submit() {
         this.editedExpense.recipient = null;
       }
 
+      if (this.editedExpense?.rejections?.softRejections) {
+        this.editedExpense.rejections.softRejections.revised = true;
+      }
+
       if (this.isEmpty(this.editedExpense.id)) {
         // creating a new expense
         await this.createNewEntry();
@@ -2071,8 +2056,8 @@ export default {
     createNewEntry,
     convertToMoneyString,
     costHint,
-    customFilter,
     descRedirect,
+    employeeFilter,
     encodeUrl,
     filteredExpenseTypes,
     formatCost,

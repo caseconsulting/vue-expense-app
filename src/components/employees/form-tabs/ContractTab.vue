@@ -76,6 +76,7 @@
               clearable
               @click:prepend="project.showStartMenu = true"
               @keypress="project.showStartMenu = false"
+              autocomplete="off"
             >
               <v-menu
                 activator="parent"
@@ -118,6 +119,7 @@
               @click:prepend="project.showEndMenu = true"
               @keypress="project.showEndMenu = false"
               @update:model-value="project.endDate && project.endDate.length > 0 ? (project.presentDate = false) : ''"
+              autocomplete="off"
             >
               <template v-if="endDatePresentRule(index, projIndex) !== true" v-slot:message>
                 End Date is required (click <v-icon color="black" icon="mdi-check-circle-outline" /> to mark active)

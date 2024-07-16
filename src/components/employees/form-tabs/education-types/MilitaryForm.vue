@@ -29,6 +29,7 @@
             @keypress="military.showStartMenu = false"
             clearable
             persistent-hint
+            autocomplete="off"
           >
             <v-menu
               activator="parent"
@@ -67,6 +68,7 @@
             @keypress="military.showCompleteMenu = false"
             clearable
             persistent-hint
+            autocomplete="off"
           >
             <v-menu
               activator="parent"

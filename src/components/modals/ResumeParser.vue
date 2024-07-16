@@ -651,7 +651,7 @@ function getPhoneNumActionDropdowns() {
 async function onlyUploadResume(eId) {
   try {
     this.loading = true;
-    await api.uploadResume(eId, this.file[0]); //uploads resume to s3
+    await api.uploadResume(eId, this.file?.[0] || this.file); //uploads resume to s3
     this.loading = false;
 
     //confirmation upload pop-up in employee.vue
@@ -716,7 +716,7 @@ async function submit() {
       }
     }, 15000);
 
-    this.resumeObject = (await api.extractResumeText(this.employee.id, this.file[0])).comprehend;
+    this.resumeObject = (await api.extractResumeText(this.employee.id, this.file?.[0] || this.file)).comprehend;
     this.emitter.emit('uploaded', false);
 
     // If it takes too long it should timeout
@@ -1113,7 +1113,7 @@ function clearForm() {
   this.totalChanges = 0;
 
   if (this.$refs.submit !== undefined) {
-    this.$refs.submit.reset();
+    this.$refs.submit.reset;
   }
   this.extractResume = false;
 } // clearForm
@@ -1201,9 +1201,9 @@ export default {
         (v) => {
           return (
             (!this.isEmpty(v) &&
-              (v[0].type.includes('application/pdf') ||
-                v[0].type.includes('image/png') ||
-                v[0].type.includes('image/jpeg'))) ||
+              ((v?.[0] || v).type.includes('application/pdf') ||
+                (v?.[0] || v).type.includes('image/png') ||
+                (v?.[0] || v).type.includes('image/jpeg'))) ||
             'File unsupported, please submit a .png, .pdf, or a .jpeg file'
           );
         }

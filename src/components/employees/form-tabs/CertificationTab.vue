@@ -31,6 +31,7 @@
             @click:prepend="certification.showReceivedMenu = true"
             @keypress="certification.showReceivedMenu = false"
             clearable
+            autocomplete="off"
           >
             <v-menu
               activator="parent"
@@ -68,6 +69,7 @@
             @click:prepend="certification.showExpirationMenu = true"
             @keypress="certification.showExpirationMenu = false"
             @focus="certificationIndex = index"
+            autocomplete="off"
           >
             <v-menu
               activator="parent"

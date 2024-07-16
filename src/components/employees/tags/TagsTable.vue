@@ -54,7 +54,7 @@
           v-model="editedTag.employees"
           :disabled="tagLoading"
           :items="filteredEmployees"
-          :custom-filter="customFilter"
+          :custom-filter="employeeFilter"
           multiple
           variant="underlined"
           chips
@@ -128,6 +128,7 @@ import { generateUUID, isMobile } from '@/utils/utils';
 import { firstAndLastName, fullName, nicknameAndLastName } from '@/shared/employeeUtils';
 import { getRequiredRules } from '@/shared/validationUtils';
 import { updateStoreExpenseTypes, updateStoreTags } from '@/utils/storeUtils';
+import { employeeFilter } from '@/shared/filterUtils';
 
 import DeleteModal from '@/components/modals/DeleteModal.vue';
 import { AxiosError } from 'axios';
@@ -144,6 +145,8 @@ import { AxiosError } from 'axios';
 async function created() {
   !this.$store.getters.tags ? await updateStoreTags() : _;
   this.tags = _.cloneDeep(this.$store.getters.tags);
+  this.tags = cleanUpTags(this.tags, this.$store.getters.employees);
+  this.$store.dispatch('setTags', { tags: this.tags });
   this.loading = false;
 } // created
 
@@ -172,6 +175,18 @@ async function beforeUnmount() {
 // |--------------------------------------------------|
 
 /**
+ * Removes any inactive employees from the tags
+ */
+function cleanUpTags(tags, employees) {
+  tags.forEach((tag) => {
+    tag.employees = tag.employees.filter((e) => {
+      return _.find(employees, (emp) => e === emp.id && emp.workStatus > 0);
+    });
+  });
+  return tags;
+}
+
+/**
  * Cancels the process of creating or editing a tag.
  */
 function cancelEdit() {
@@ -193,29 +208,6 @@ async function createTag() {
   this.editedTag = null;
   this.creatingTag = false;
 } // createTag
-
-/**
- * Custom filter for employee autocomplete options.
- *
- * @param _ - unused
- * @param queryText - text used for filtering
- * @param item - employee
- * @return string - filtered employee name
- */
-function customFilter(_, queryText, item) {
-  item = item.raw;
-
-  const query = queryText ? queryText : '';
-  const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
-  const firstNameFullName = `${item.firstName} ${item.lastName}`;
-
-  const queryNickName = nickNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase());
-  const queryFirstName = firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase());
-
-  if (queryNickName >= 0) return queryNickName;
-  if (queryFirstName >= 0) return item.nickname ? true : queryFirstName;
-  return false;
-} // customFilter
 
 /**
  * Deletes a tag.
@@ -349,12 +341,7 @@ function tableFilter(__, search, item) {
   if (item.tagName.toLowerCase().includes(lcSearch)) return true; // early exit if tag name matches search
   _.forEach(item.employees, (id) => {
     let e = _.find(this.$store.getters.employees, (emp) => emp.id === id);
-    if (
-      e &&
-      (this.nicknameAndLastName(e).toLowerCase().includes(lcSearch) ||
-        this.firstAndLastName(e).toLowerCase().includes(lcSearch) ||
-        this.fullName(e).toLowerCase().includes(lcSearch))
-    ) {
+    if (this.employeeFilter(null, search, e)) {
       found = true;
     }
   });
@@ -463,12 +450,13 @@ export default {
   },
   methods: {
     cancelEdit,
+    cleanUpTags,
     createTag,
-    customFilter,
     deleteTag,
     displayError,
     displaySuccess,
     editTag,
+    employeeFilter,
     emit,
     firstAndLastName,
     fullName,

@@ -3,8 +3,8 @@
     <v-dialog v-model="activate" persistent max-width="310">
       <v-card>
         <v-card-title class="text-h5">Switch Role</v-card-title>
-        <v-card-subtitle v-if="roleOriginial" class="mb-0 pb-0"
-          >Current Role: {{ roleOriginial.charAt(0).toUpperCase() + roleOriginial.slice(1) }}
+        <v-card-subtitle v-if="roleOriginal" class="mb-0 pb-0"
+          >Current Role: {{ roleOriginal.charAt(0).toUpperCase() + roleOriginal.slice(1) }}
         </v-card-subtitle>
         <v-card-actions class="my-0 py-0">
           <v-radio-group v-model="roleSelected" mandatory>
@@ -29,9 +29,25 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import api from '@/shared/api.js';
 import { getRole, setRole } from '@/utils/auth';
+import { ref, onBeforeMount, inject, nextTick, watch } from 'vue';
+import { useStore } from 'vuex';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const activate = ref(false); // dialog activator
+const emitter = inject('emitter');
+const props = defineProps(['toggleSwitchRole']);
+const roleOriginal = ref('');
+const roleSelected = ref('');
+const roles = ref(['Admin', 'User', 'Manager', 'Intern']);
+const store = useStore();
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -42,12 +58,12 @@ import { getRole, setRole } from '@/utils/auth';
 /**
  * created lifecycle hook
  */
-function created() {
-  this.roleOriginial = this.getRole();
-  if (this.roleOriginial) {
-    this.roleSelected = this.roleOriginial.charAt(0).toUpperCase() + this.roleOriginial.slice(1);
+onBeforeMount(() => {
+  roleOriginal.value = getRole();
+  if (roleOriginal.value) {
+    roleSelected.value = roleOriginal.value.charAt(0).toUpperCase() + roleOriginal.value.slice(1);
   }
-} // created
+}); // created
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -59,14 +75,14 @@ function created() {
  * switches the user role in the app
  */
 async function switchRole() {
-  this.$nextTick(async function () {
-    if (this.roleSelected.toLowerCase() != this.roleOriginial) {
+  nextTick(async function () {
+    if (roleSelected.value.toLowerCase() != roleOriginal.value) {
       try {
-        let user = this.$store.getters.user;
-        user.employeeRole = this.roleSelected.toLowerCase();
+        let user = store.getters.user;
+        user.employeeRole = roleSelected.value.toLowerCase();
         await api.updateItem(api.EMPLOYEES, user); // update user employee role
 
-        let employeeRole = await this.setRole(user.employeeRole);
+        let employeeRole = await setRole(user.employeeRole);
         if (employeeRole === 'admin') {
           // user's role is admin
           window.location.href = '/reimbursements';
@@ -79,7 +95,7 @@ async function switchRole() {
       }
     }
   });
-  this.emitter.emit('close');
+  emitter.emit('close');
 } // switchRole
 
 // |--------------------------------------------------|
@@ -91,34 +107,10 @@ async function switchRole() {
 /**
  * watcher for toggleSwitchRole
  */
-function watchToggleSwitchRole() {
-  this.activate = this.toggleSwitchRole;
-} // watchToggleSwitchRole
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  data() {
-    return {
-      activate: false, // dialog activator
-      roleOriginial: '',
-      roleSelected: '',
-      roles: ['Admin', 'User', 'Manager', 'Intern']
-    };
-  },
-  created,
-  methods: {
-    switchRole,
-    getRole,
-    setRole
-  },
-  props: ['toggleSwitchRole'], // dialog activator
-  watch: {
-    toggleSwitchRole: watchToggleSwitchRole
+watch(
+  () => props.toggleSwitchRole,
+  () => {
+    activate.value = props.toggleSwitchRole;
   }
-};
+); // watchToggleSwitchRole
 </script>

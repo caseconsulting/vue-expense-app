@@ -3,6 +3,7 @@
     v-model="model"
     autofocus
     :rules="props.field.rules?.map((func) => func(model, props.item))"
+    :maxLength="props.field.maxLength ?? ''"
     variant="underlined"
   >
   </v-text-field>

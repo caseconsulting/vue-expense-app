@@ -22,9 +22,9 @@
           <v-spacer></v-spacer>
           <v-btn
             variant="text"
-            @click.native="
+            @click="
               activate = false;
-              this.emitter.emit('contract-project-validate-error-acknowledged');
+              emit('contract-project-validate-error-acknowledged');
             "
           >
             Ok
@@ -34,7 +34,35 @@
     ></v-dialog>
   </div>
 </template>
-<script>
+
+<script setup>
+import { inject, ref, watch } from 'vue';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const props = defineProps(['title', 'message', 'toggleModal', 'relationships']);
+const emitter = inject('emitter');
+
+const activate = ref(false);
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+// Watcher for modal toggle
+watch(
+  () => props.toggleModal,
+  () => {
+    activate.value = props.toggleModal;
+  }
+);
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -47,40 +75,6 @@
  * @param msg - Message to emit
  */
 function emit(msg) {
-  this.emitter.emit(msg);
+  emitter.emit(msg);
 } // emit
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     WATCHERS                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Watcher for modal toggle
- */
-function watchToggleContractProjectDeleteWarning() {
-  this.activate = !this.activate;
-} // watchToggleContractProjectDeleteWarning
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  data() {
-    return {
-      activate: false
-    };
-  },
-  methods: {
-    emit
-  },
-  watch: {
-    toggleModal: watchToggleContractProjectDeleteWarning
-  },
-  props: ['title', 'message', 'toggleModal', 'relationships']
-};
 </script>

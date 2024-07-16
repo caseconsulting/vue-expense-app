@@ -31,7 +31,7 @@
         <v-btn
           color="grey-darken-3"
           variant="text"
-          @click.native="
+          @click="
             emit('close-exchange-training-hours-calculator-reverse');
             activate = false;
           "

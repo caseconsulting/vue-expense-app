@@ -1,31 +1,47 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5 pb-0">
-    <pie-chart ref="pieChart" chartId="highest-degree" :options="options" :chartData="chartData" />
+    <pie-chart ref="pieChart" chartId="highest-degree" :options="option" :chartData="chartData" />
     <p class="text-center">Total Degrees: {{ degreeCount }}</p>
   </v-card>
 </template>
 
-<script>
+<script setup>
 import PieChart from '../base-charts/PieChart.vue';
 import _ from 'lodash';
-import { storeIsPopulated } from '@/utils/utils';
-import { getTodaysDate, isBefore } from '@/shared/dateUtils';
+import { onMounted, ref, watch, inject } from 'vue';
+import { useStore } from 'vuex';
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                 LIFECYCLE HOOKS                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const chartData = ref(null);
+const dataReceived = ref(false);
+const degreeCount = ref(0);
+const educations = ref(null);
+const emitter = inject('emitter');
+const employees = ref(null);
+const option = ref(null);
+const showMajors = ref(null);
+const store = useStore();
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                LIFECYCLE HOOKS                   |
 // |                                                  |
 // |--------------------------------------------------|
 
 /**
  * mounted lifecycle hook
  */
-async function mounted() {
-  if (this.storeIsPopulated) {
-    this.educations = await this.initDegrees();
-    await this.fillData();
+onMounted(async () => {
+  if (store.getters.storeIsPopulated) {
+    educations.value = await initDegrees();
+    await fillData();
   }
-} // mounted
+}); // mounted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -42,8 +58,8 @@ async function mounted() {
  */
 function initDegrees() {
   let education = {};
-  this.employees = this.$store.getters.employees;
-  this.employees.forEach((emp) => {
+  employees.value = store.getters.employees;
+  employees.value.forEach((emp) => {
     let highestDegrees = [];
     if (emp.education && emp.workStatus != 0) {
       _.forEach(emp.education, (edu) => {
@@ -53,42 +69,42 @@ function initDegrees() {
             if (highestDegrees.length != 0) {
               if (highestDegrees[0].type === 'Military') {
                 highestDegrees.unshift({
-                  name: this.getDegreeName(this.getDegreeValue(degree.degreeType)),
+                  name: getDegreeName(getDegreeValue(degree.degreeType)),
                   majors: degree.majors,
                   type: edu.type,
-                  value: this.getDegreeValue(degree.degreeType)
+                  value: getDegreeValue(degree.degreeType)
                 });
               } else {
-                let result = this.compareDegree(highestDegrees[0].value, this.getDegreeValue(degree.degreeType));
+                let result = compareDegree(highestDegrees[0].value, getDegreeValue(degree.degreeType));
                 //if a degree of a higher prestige is found, remove all previous entries except militaries
                 if (result === 1) {
                   highestDegrees = _.filter(highestDegrees, (education) => {
                     return education.type === 'Military';
                   });
                   highestDegrees.unshift({
-                    name: this.getDegreeName(this.getDegreeValue(degree.degreeType)),
+                    name: getDegreeName(getDegreeValue(degree.degreeType)),
                     majors: degree.majors,
                     type: edu.type,
-                    value: this.getDegreeValue(degree.degreeType)
+                    value: getDegreeValue(degree.degreeType)
                   });
                 }
                 //Adds to highestDegrees, excluding degrees with a lower prestige
                 if (result > -1 && result !== 1) {
                   highestDegrees.push({
-                    name: this.getDegreeName(this.getDegreeValue(degree.degreeType)),
+                    name: getDegreeName(getDegreeValue(degree.degreeType)),
                     majors: degree.majors,
                     type: edu.type,
-                    value: this.getDegreeValue(degree.degreeType)
+                    value: getDegreeValue(degree.degreeType)
                   });
                 }
               }
             } else {
               //Adds the first degree found to the array
               highestDegrees.push({
-                name: this.getDegreeName(this.getDegreeValue(degree.degreeType)),
+                name: getDegreeName(getDegreeValue(degree.degreeType)),
                 majors: degree.majors,
                 type: edu.type,
-                value: this.getDegreeValue(degree.degreeType)
+                value: getDegreeValue(degree.degreeType)
               });
             }
           });
@@ -98,10 +114,10 @@ function initDegrees() {
               highestDegrees.unshift({
                 type: 'High School',
                 name: edu.name,
-                value: this.getDegreeValue(edu.type)
+                value: getDegreeValue(edu.type)
               });
             } else {
-              let result = this.compareDegree(highestDegrees[0].value, this.getDegreeValue(edu.type));
+              let result = compareDegree(highestDegrees[0].value, getDegreeValue(edu.type));
               //if a degree of a higher prestige is found, remove all previous entries except militaries
               if (result === 1) {
                 highestDegrees = _.filter(highestDegrees, (education) => {
@@ -110,7 +126,7 @@ function initDegrees() {
                 highestDegrees.unshift({
                   type: 'High School',
                   name: edu.name,
-                  value: this.getDegreeValue(edu.type)
+                  value: getDegreeValue(edu.type)
                 });
               }
               //Adds to highestDegrees, excluding degrees with a lower prestige
@@ -118,7 +134,7 @@ function initDegrees() {
                 highestDegrees.push({
                   type: 'High School',
                   name: edu.name,
-                  value: this.getDegreeValue(edu.type)
+                  value: getDegreeValue(edu.type)
                 });
               }
             }
@@ -127,18 +143,18 @@ function initDegrees() {
             highestDegrees.push({
               type: 'High School',
               name: edu.name,
-              value: this.getDegreeValue(edu.type)
+              value: getDegreeValue(edu.type)
             });
           }
         } else if (edu.type === 'military') {
           highestDegrees.push({
             type: 'Military',
             name: edu.branch,
-            value: this.getDegreeValue(edu.type)
+            value: getDegreeValue(edu.type)
           });
         }
       });
-      education = this.addToEducation(education, highestDegrees);
+      education = addToEducation(education, highestDegrees);
     }
   });
   return education;
@@ -222,7 +238,7 @@ function compareDegree(oldDegree, newDegree) {
 function getDegreeConcentrations(degreeName) {
   let concentrationsData = {};
   // loop through each employee
-  this.employees.forEach((employee) => {
+  employees.value.forEach((employee) => {
     if (employee.education) {
       // loop through each employee's educations
       employee.education.forEach((edu) => {
@@ -230,7 +246,7 @@ function getDegreeConcentrations(degreeName) {
           //loop through each degree for the school
           edu.degrees.forEach((degree) => {
             // generalize each degree name to match pie chart categories (Bachelors of Science = Bachelors)
-            if (this.getDegreeName(this.getDegreeValue(degree.degreeType)) === degreeName) {
+            if (getDegreeName(getDegreeValue(degree.degreeType)) === degreeName) {
               // loop through each concentration
               degree.concentrations.forEach((concentration) => {
                 /// count up each occurrence of a concentration
@@ -258,14 +274,14 @@ function getDegreeConcentrations(degreeName) {
 function getDegreeMinors(degreeName) {
   let minorsData = {};
   // loop through each employee
-  this.employees.forEach((employee) => {
+  employees.value.forEach((employee) => {
     if (employee.education) {
       // loop through each employee's educations
       employee.education.forEach((edu) => {
         if (edu.type === 'university') {
           edu.degrees.forEach((degree) => {
             // generalize each degree name to match pie chart categories (Bachelors of Science = Bachelors)
-            if (this.getDegreeName(this.getDegreeValue(degree.degreeType)) === degreeName) {
+            if (getDegreeName(getDegreeValue(degree.degreeType)) === degreeName) {
               // loop through each minor
               degree.minors.forEach((minor) => {
                 /// count up each occurrence of a minor
@@ -349,12 +365,12 @@ function getDegreeName(value) {
  */
 function fillData() {
   let quantities = [];
-  let labels = Object.keys(this.educations);
+  let labels = Object.keys(educations.value);
   _.forEach(labels, (education) => {
     let counts = 0;
-    _.forEach(this.educations[education], (count) => {
+    _.forEach(educations.value[education], (count) => {
       counts += count;
-      this.degreeCount += count;
+      degreeCount.value += count;
     });
     quantities.push(counts);
   });
@@ -366,7 +382,7 @@ function fillData() {
     'rgba(153, 102, 255, 1)',
     'rgba(255, 99, 132, 1)'
   ];
-  this.chartData = {
+  chartData.value = {
     labels: labels,
     datasets: [
       {
@@ -376,16 +392,16 @@ function fillData() {
     ]
   };
 
-  this.options = {
+  option.value = {
     onClick: (x, y) => {
       if (_.first(y)) {
         let index = _.first(y).index;
         // emits to MajorsChart.vue when pie slice is clicked
-        this.majorsEmit(this.chartData.labels[index]);
+        majorsEmit(chartData.value.labels[index]);
         // emits to MinorsChart.vue when pie slice is clicked
-        this.minorsEmit(this.chartData.labels[index]);
+        minorsEmit(chartData.value.labels[index]);
         // emits to ConcentrationsChart.vue when pie slice is clicked
-        this.concentrationsEmit(this.chartData.labels[index]);
+        concentrationsEmit(chartData.value.labels[index]);
       }
     },
     plugins: {
@@ -395,11 +411,17 @@ function fillData() {
         font: {
           size: 15
         }
+      },
+      subtitle: {
+        display: true,
+        font: {
+          style: 'italic'
+        }
       }
     },
     maintainAspectRatio: false
   };
-  this.dataReceived = true;
+  dataReceived.value = true;
 } // fillData
 
 /**
@@ -411,12 +433,12 @@ function fillData() {
  */
 function majorsEmit(edu) {
   let majorsOrSchoolsData = {};
-  majorsOrSchoolsData.majorsOrSchools = this.educations[edu];
+  majorsOrSchoolsData.majorsOrSchools = educations.value[edu];
   majorsOrSchoolsData.eduKind = edu;
-  this.showMajors = true;
+  showMajors.value = true;
   let title = edu === 'High School' ? 'Top High Schools' : edu === 'Military' ? 'Top Military Branches' : '';
 
-  this.emitter.emit('majors-update', majorsOrSchoolsData, title);
+  emitter.emit('majors-update', majorsOrSchoolsData, title);
 } // majorsEmit
 
 /**
@@ -426,9 +448,9 @@ function majorsEmit(edu) {
  */
 function minorsEmit(degree) {
   let minorsData = {};
-  minorsData.minors = this.getDegreeMinors(degree);
+  minorsData.minors = getDegreeMinors(degree);
   minorsData.degree = degree;
-  this.emitter.emit('minors-update', minorsData);
+  emitter.emit('minors-update', minorsData);
 } // minorsEmit
 
 /**
@@ -438,57 +460,24 @@ function minorsEmit(degree) {
  */
 function concentrationsEmit(degree) {
   let concentrationsData = {};
-  concentrationsData.concentrations = this.getDegreeConcentrations(degree);
+  concentrationsData.concentrations = getDegreeConcentrations(degree);
   concentrationsData.degree = degree;
-  this.emitter.emit('concentrations-update', concentrationsData);
+  emitter.emit('concentrations-update', concentrationsData);
 } // concentrationsEmit
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                      EXPORT                      |
+// |                    WATCHERS                      |
 // |                                                  |
 // |--------------------------------------------------|
 
-export default {
-  components: { PieChart },
-  computed: {
-    storeIsPopulated
-  },
-  data() {
-    return {
-      dataReceived: false,
-      options: null,
-      chartData: null,
-      educations: null,
-      showMajors: false,
-      degreeCount: 0
-    };
-  },
-  methods: {
-    addToEducation,
-    fillData,
-    compareDegree,
-    initDegrees,
-    isBefore, // dateUtils
-    getDegreeValue,
-    getDegreeMinors,
-    getDegreeConcentrations,
-    getDegreeName,
-    getTodaysDate, // dateUtils
-    majorsEmit,
-    minorsEmit,
-    concentrationsEmit
-  },
-  mounted,
-  watch: {
-    storeIsPopulated: function () {
-      if (this.storeIsPopulated) {
-        this.educations = this.initDegrees();
-        this.fillData();
-      }
-    }
+watch(
+  () => store.getters.storeIsPopulated,
+  () => {
+    educations.value = initDegrees();
+    fillData();
   }
-};
+);
 </script>
 
 <style>

@@ -12,21 +12,27 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, inject, ref, watch } from 'vue';
+
 // |--------------------------------------------------|
 // |                                                  |
-// |                 LIFECYCLE HOOKS                  |
+// |                      SETUP                       |
 // |                                                  |
 // |--------------------------------------------------|
 
-/**
- * created lifecycle hook - set label
- */
-function created() {
-  if (this.customLabel) {
-    this.label = this.customLabel;
-  }
-} // created
+const props = defineProps(['passedRules', 'receipt', 'customLabel', 'customFileTypes', 'disabled']); // file text field rules
+const emitter = inject('emitter');
+
+const fileSizeLimit = ref(3);
+const previewURL = ref('');
+const inputFile = ref([]);
+const label = ref('Select Receipt (3.0 MB limit)');
+
+// set label
+if (props.customLabel) {
+  label.value = props.customLabel;
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -35,31 +41,23 @@ function created() {
 // |--------------------------------------------------|
 
 /**
- * Check if file is too large. Returns true if the file exceeds the limit, otherwise return false.
- *
- * @return boolean - file is too large
+ * Whether the file is too large
  */
-function fileTooBig() {
-  return this.megabytes > this.fileSizeLimit;
-} // fileTooBig
+const fileTooBig = computed(() => megabytes.value > fileSizeLimit.value);
 
 /**
- * Converts file size from bytes to megabytes.
- *
- * @return Number - file size in megabytes
+ * File size in megabytes
  */
-function megabytes() {
-  return this.inputFile && this.inputFile[0] ? this.inputFile[0].size / 1000000 : 0;
-} // megabytes
+const megabytes = computed(() => (inputFile.value && inputFile.value[0] ? inputFile.value[0].size / 1000000 : 0));
 
 /**
  * Computed array of the accepted file types
  *
  * @return array - the accepted file types
  */
-function acceptedFileTypes() {
-  if (this.customFileTypes) {
-    return this.customFileTypes.join(',');
+const acceptedFileTypes = computed(() => {
+  if (props.customFileTypes) {
+    return props.customFileTypes.join(',');
   } else {
     return [
       'application/msword',
@@ -67,11 +65,37 @@ function acceptedFileTypes() {
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       '.doc',
-      'image/*',
+      'image/gif', //.gif
+      'image/jpeg', //.jpeg
+      'image/png', //.png
+      'image/bmp', //.bmp
       '.pdf'
     ].join(',');
   }
-} // acceptedFileTypes
+});
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+watch(
+  inputFile,
+  () => {
+    receiptChange();
+  },
+  { deep: true }
+);
+
+watch(
+  () => props.receipt,
+  () => {
+    if (props.receipt == null) {
+      inputFile.value[0] = null;
+    }
+  }
+);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -85,10 +109,8 @@ function acceptedFileTypes() {
 function fileSizeRule() {
   return [
     () =>
-      !this.fileTooBig ||
-      `The selected file (${this.megabytes.toFixed(2)} MB) exceeds the size limit of ${this.fileSizeLimit.toFixed(
-        1
-      )} MB`
+      !fileTooBig.value ||
+      `The selected file (${megabytes.value.toFixed(2)} MB) exceeds the size limit of ${fileSizeLimit.value.toFixed(1)} MB`
   ];
 } // fileSizeRule
 
@@ -96,78 +118,22 @@ function fileSizeRule() {
  * Set file data.
  */
 function receiptChange() {
-  if (this.inputFile && this.inputFile[0]) {
+  if (inputFile.value && inputFile.value[0]) {
     // file exists
-    if (this.inputFile[0].name.lastIndexOf('.') <= 0 || this.fileTooBig) {
+    if (inputFile.value[0].name.lastIndexOf('.') <= 0 || fileTooBig.value) {
       // end if file name is missing or file is too large
       return;
     }
     const fr = new FileReader();
-    fr.readAsDataURL(this.inputFile[0]);
+    fr.readAsDataURL(inputFile.value[0]);
     fr.addEventListener('load', () => {
-      this.previewURL = fr.result;
-      this.emitter.emit('fileSelected', this.inputFile[0]);
+      previewURL.value = fr.result;
+      emitter.emit('fileSelected', inputFile.value[0]);
     });
   } else {
     // file does not exist
-    this.previewURL = '';
-    this.emitter.emit('fileSelected', null);
+    previewURL.value = '';
+    emitter.emit('fileSelected', null);
   }
 } // receiptChanged
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     WATCHERS                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * watcher for inputFile
- */
-function watchInputFile() {
-  this.receiptChange();
-} // watchInputFile
-
-/**
- * watcher for receiptFile
- */
-function watchReceipt() {
-  if (this.receipt == null) {
-    this.inputFile[0] = null;
-  }
-} // watchReceipt
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  computed: {
-    acceptedFileTypes,
-    fileTooBig,
-    megabytes
-  },
-  data() {
-    return {
-      dialog: false,
-      fileSizeLimit: 3,
-      previewURL: '',
-      title: 'receipt upload',
-      inputFile: [],
-      label: 'Select Receipt (3.0 MB limit)'
-    };
-  },
-  created,
-  methods: {
-    fileSizeRule,
-    receiptChange
-  },
-  watch: {
-    inputFile: { handler: watchInputFile, deep: true },
-    receipt: watchReceipt
-  },
-  props: ['passedRules', 'receipt', 'customLabel', 'customFileTypes', 'disabled'] // file text field rules
-};
 </script>

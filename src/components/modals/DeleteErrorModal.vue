@@ -1,21 +1,12 @@
 <template>
   <div>
-    <v-dialog v-model="activate" persistent max-width="350">
+    <v-dialog v-model="activate" @click:outside="closeModal()" max-width="350">
       <v-card>
         <v-card-text class="font-weight-medium text-h6">Error: cannot delete {{ type }}</v-card-text>
         <v-card-text>Cannot delete {{ type }}. Expenses for this {{ type }} exist.</v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn
-            color="gray darken-1"
-            variant="text"
-            @click.native="
-              emit(`invalid-${type}-delete`);
-              activate = false;
-            "
-          >
-            Ok
-          </v-btn>
+          <v-btn color="gray darken-1" variant="text" @click="closeModal()"> Ok </v-btn>
           <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>
@@ -23,7 +14,21 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { inject } from 'vue';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const activate = defineModel();
+const props = defineProps([
+  'type' // type of object being deleted
+]);
+const emitter = inject('emitter');
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -31,48 +36,10 @@
 // |--------------------------------------------------|
 
 /**
- * Emits a message.
- *
- * @param msg - Message to emit
+ * Closes modal and emits invalid delete event
  */
-function emit(msg) {
-  this.emitter.emit(msg);
-} // emit
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                    WATCHERS                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * watcher for toggleDeleteErrorModal
- */
-function watchToggleDeleteErrorModal() {
-  this.activate = true;
-} // watchToggleDeleteErrorModal
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  data() {
-    return {
-      activate: false // dialog activator
-    };
-  },
-  methods: {
-    emit
-  },
-  props: [
-    'toggleDeleteErrorModal', // dialog activator
-    'type' // type of object being deleted
-  ],
-  watch: {
-    toggleDeleteErrorModal: watchToggleDeleteErrorModal
-  }
-};
+function closeModal() {
+  emitter.emit(`invalid-${props.type}-delete`);
+  activate.value = false;
+}
 </script>

@@ -86,7 +86,7 @@
               v-if="userRoleIsAdmin() || userRoleIsManager()"
               hide-details
               :items="employees"
-              :customFilter="customFilter"
+              :custom-filter="employeeFilter"
               v-model="filteredEmployee"
               item-title="text"
               id="employeeIdFilter"
@@ -98,35 +98,11 @@
           </v-col>
           <v-col cols="12" sm="12" md="4" lg="4" xl="4" xxl="4">
             <!-- Tag Filter -->
-            <v-autocomplete
+            <tags-filter
               v-if="userRoleIsAdmin() || userRoleIsManager()"
-              clearable
-              hide-details
-              label="Filter by Tag (click to flip)"
-              v-model="selectedTags"
-              :items="tags"
-              multiple
-              class="ml-5 ml-md-0 ml-lg-0 ml-xl-0 ml-xxl-0 mr-5 pt-0 pb-4"
-              variant="underlined"
-              item-title="tagName"
-              item-value="id"
-              return-object
-            >
-              <template v-slot:chip="{ props, item }">
-                <v-chip
-                  size="small"
-                  closable
-                  v-bind="props"
-                  @click.stop
-                  @click="negateTag(item.raw)"
-                  @click:close="removeTag(item.raw)"
-                  :color="chipColor(item.raw.id)"
-                >
-                  {{ tagFlip.includes(item.raw.id) ? 'NOT ' : '' }}
-                  {{ item.raw.tagName }}
-                </v-chip>
-              </template>
-            </v-autocomplete>
+              classProps="ml-5 ml-md-0 ml-lg-0 ml-xl-0 ml-xxl-0 mr-5 pt-0 pb-4"
+              v-model="tagsInfo"
+            ></tags-filter>
           </v-col>
         </v-row>
       </fieldset>
@@ -210,9 +186,11 @@
     </v-dialog>
   </v-card>
 </template>
-<script>
-import { formatNumber, isMobile, userRoleIsAdmin, userRoleIsManager, monthDayYearFormat, isEmpty } from '@/utils/utils';
+
+<script setup>
+import { formatNumber, isMobile, userRoleIsAdmin, userRoleIsManager, monthDayYearFormat } from '@/utils/utils';
 import { getEmployeeByID, nicknameAndLastName } from '@/shared/employeeUtils';
+import { employeeFilter } from '@/shared/filterUtils';
 import api from '@/shared/api.js';
 import { updateStoreUser, updateStoreEmployees, updateStorePtoCashOuts, updateStoreTags } from '@/utils/storeUtils';
 import _ from 'lodash';
@@ -220,6 +198,47 @@ import GeneralConfirmationModal from '../modals/GeneralConfirmationModal.vue';
 import dateUtils from '@/shared/dateUtils';
 import DeleteModal from '../modals/DeleteModal.vue';
 import PTOCashOutForm from './PTOCashOutForm.vue';
+import TagsFilter from '@/components/shared/TagsFilter.vue';
+import { computed, inject, onBeforeMount, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { useStore } from 'vuex';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                       SETUP                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+const props = defineProps(['unapprovedOnly']);
+const store = useStore();
+const emitter = inject('emitter');
+const loading = ref(true);
+const filteredEmployee = ref(null);
+const filter = ref({
+  approved: 'notApproved'
+});
+const headersList = [
+  { title: 'Creation Date', key: 'creationDate' },
+  { title: 'Employee', key: 'employeeId' },
+  { title: 'Amount', key: 'amount' },
+  { title: 'Approved Date', key: 'approvedDate' },
+  { key: 'actions', sortable: false }
+];
+const sortBy = ref([{ key: 'creationDate', order: 'desc' }]);
+const selected = ref([]);
+const tagsInfo = ref({
+  selected: [],
+  flipped: []
+});
+const isApproving = ref(false);
+const isUnapproving = ref(false);
+const isDeleting = ref(false);
+const showApproveButton = ref(false);
+const toggleApproveModal = ref(false);
+const toggleDeleteModal = ref(false);
+const toggleEditModal = ref(false);
+const clickedEditItem = ref(null);
+const clickedDeleteItem = ref(null);
+const userPto = ref(null);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -230,60 +249,156 @@ import PTOCashOutForm from './PTOCashOutForm.vue';
 /**
  * Created lifecycle hook
  */
-async function created() {
+onBeforeMount(async () => {
   let promises = [];
-  if (!this.$store.getters.employees) {
-    promises.push(this.updateStoreEmployees());
+  if (!store.getters.employees) {
+    promises.push(updateStoreEmployees());
   }
-  if (!this.$store.getters.user) {
-    promises.push(this.updateStoreUser());
+  if (!store.getters.user) {
+    promises.push(updateStoreUser());
   }
-  if (!this.$store.getters.ptoCashOuts) {
-    promises.push(this.updateStorePtoCashOuts());
+  if (!store.getters.ptoCashOuts) {
+    promises.push(updateStorePtoCashOuts());
   }
-  if (!this.$store.getters.tags && (userRoleIsAdmin() || userRoleIsManager())) {
-    promises.push(this.updateStoreTags());
+  if (!store.getters.tags && (userRoleIsAdmin() || userRoleIsManager())) {
+    promises.push(updateStoreTags());
   }
   if (promises.length > 0) {
     await Promise.all(promises);
   }
-  this.tags = this.$store.getters.tags; // get the tags
-  this.loading = false;
-} // created¬
+  loading.value = false;
+}); // created¬
 
 /**
  * beforeUnmount lifecycle hook. Destroys all event listeners.
  */
-function beforeUnmount() {
-  this.emitter.off('confirm-pto-cash-outs');
-  this.emitter.off('canceled-pto-cash-outs');
-  this.emitter.off('confirm-delete-PTO cash out');
-  this.emitter.off('canceled-delete-PTO cash out');
-  this.emitter.off('close-pto-cash-out-form');
-} // beforeUnmount
+onBeforeUnmount(() => {
+  emitter.off('confirmed-pto-cash-outs');
+  emitter.off('confirm-delete-PTO cash out');
+  emitter.off('canceled-delete-PTO cash out');
+  emitter.off('close-pto-cash-out-form-table');
+}); // beforeUnmount
 
 /**
  * Mounted lifecycle hook
  */
-async function mounted() {
-  this.emitter.on('close-pto-cash-out-form', () => {
-    this.toggleEditModal = false;
-    this.clickedEditItem = null;
-    this.userPto = null;
+onMounted(async () => {
+  emitter.on('close-pto-cash-out-form-table', () => {
+    toggleEditModal.value = false;
+    clickedEditItem.value = null;
+    userPto.value = null;
   });
-  this.emitter.on('confirmed-pto-cash-outs', async () => {
-    await this.clickedConfirmApprove();
+  emitter.on('confirmed-pto-cash-outs', async () => {
+    await clickedConfirmApprove();
   });
-  this.emitter.on('canceled-pto-cash-outs', () => {
-    this.toggleApproveModal = false;
+  emitter.on('confirm-delete-PTO cash out', async () => {
+    await clickedConfirmDelete();
   });
-  this.emitter.on('confirm-delete-PTO cash out', async () => {
-    await this.clickedConfirmDelete();
+  emitter.on('canceled-delete-PTO cash out', () => {
+    clickedCancelDelete();
   });
-  this.emitter.on('canceled-delete-PTO cash out', () => {
-    this.clickedCancelDelete();
-  });
-} // mounted
+}); // mounted
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Filters data table based on filter settings
+ *
+ * @return Array - filtered PTO cash outs
+ */
+const filteredPtoCashOuts = computed(() => {
+  let filteredPtoCashOuts = _.cloneDeep(store.getters.ptoCashOuts);
+
+  if (filteredEmployee.value) {
+    filteredPtoCashOuts = _.filter(filteredPtoCashOuts, (p) => p.employeeId == filteredEmployee.value);
+  }
+  // filter tags
+  if (tagsInfo.value.selected.length > 0) {
+    filteredPtoCashOuts = _.filter(filteredPtoCashOuts, (p) => {
+      let inTag, tagFlipped;
+      for (let i = 0; i < tagsInfo.value.selected.length; i++) {
+        inTag = tagsInfo.value.selected[i].employees.includes(p.employeeId);
+        tagFlipped = tagsInfo.value.flipped.includes(tagsInfo.value.selected[i].id);
+        if (inTag != tagFlipped) {
+          return true;
+        }
+      }
+      return false;
+    });
+  }
+
+  if (filter.value.approved === 'notApproved' || props.unapprovedOnly) {
+    filteredPtoCashOuts = _.filter(filteredPtoCashOuts, (p) => p.approvedDate == null);
+  } else if (filter.value.approved === 'approved') {
+    filteredPtoCashOuts = _.filter(filteredPtoCashOuts, (p) => p.approvedDate != null);
+  }
+  if (store.getters.employees) {
+    filteredPtoCashOuts.forEach((p, index) => {
+      filteredPtoCashOuts[index].employeeName = nicknameAndLastName(
+        getEmployeeByID(p.employeeId, store.getters.employees)
+      );
+    });
+  }
+  return filteredPtoCashOuts;
+}); // filteredPtoCashOuts
+
+/**
+ * Gets the datatable headers based on user's role. Returns all headers if user role is admin.
+ * Otherwise returns all but 'Employee' header.
+ *
+ * @return Array - datatable headers
+ */
+const roleHeaders = computed(() => {
+  let headers = _.cloneDeep(headersList);
+  if (!(userRoleIsAdmin() || userRoleIsManager())) {
+    headers = _.filter(headers, (h) => h.title != 'Employee');
+  }
+
+  if (props.unapprovedOnly) {
+    headers = _.filter(headers, (h) => h.title != 'actions');
+  }
+  return headers;
+}); // roleHeaders
+
+/**
+ * Gets all employees with submitted PTO Cash Out Requests for autocomplete filter component.
+ *
+ * @return Array - filtered employees
+ */
+const employees = computed(() => {
+  let employeeIdsWithPTOCashOuts = store.getters.ptoCashOuts ? store.getters.ptoCashOuts.map((p) => p.employeeId) : [];
+  return _.map(
+    _.filter(store.getters.employees, (e) => employeeIdsWithPTOCashOuts.includes(e.id)),
+    (e) => ({
+      text: nicknameAndLastName(e),
+      value: e.id,
+      nickname: e.nickname ? e.nickname : '',
+      firstName: e.firstName,
+      lastName: e.lastName
+    })
+  );
+}); // employees
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Watcher for selected items
+ */
+watch(selected, () => {
+  if (selected.value.length == 0) {
+    showApproveButton.value = false;
+  } else {
+    showApproveButton.value = true;
+  }
+}); // watchSelected
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -296,8 +411,8 @@ async function mounted() {
  */
 async function approveSelectedPTOCashOuts() {
   let promises = [];
-  this.selected.forEach((e) => {
-    let item = _.find(this.filteredPtoCashOuts, (f) => f.id === e);
+  selected.value.forEach((e) => {
+    let item = _.find(filteredPtoCashOuts.value, (f) => f.id === e);
     item['approvedDate'] = dateUtils.getTodaysDate();
     item['approvalWasSeen'] = false;
     promises.push(api.updateItem(api.PTO_CASH_OUTS, item));
@@ -306,31 +421,21 @@ async function approveSelectedPTOCashOuts() {
 } // approveSelectedPTOCashOuts
 
 /**
- * Returns the color that at tag filter chip should be
- *
- * @param id ID of the tag item
- *
- */
-function chipColor(id) {
-  return this.tagFlip.includes(id) ? 'red' : 'gray';
-} // chipColor
-
-/**
  * Event handler confirm clicked approve
  */
 async function clickedConfirmApprove() {
   try {
-    this.isApproving = true;
-    await this.approveSelectedPTOCashOuts();
-    await this.updateStorePtoCashOuts();
-    this.isApproving = false;
-    this.displaySuccess('Successfully approved PTO cash outs!');
-    this.uncheckAllBoxes();
+    isApproving.value = true;
+    await approveSelectedPTOCashOuts();
+    await updateStorePtoCashOuts();
+    isApproving.value = false;
+    displaySuccess('Successfully approved PTO cash outs!');
+    uncheckAllBoxes();
   } catch (err) {
-    this.isApproving = false;
-    this.displayError(err);
+    isApproving.value = false;
+    displayError(err);
   }
-  this.toggleApproveModal = false;
+  toggleApproveModal.value = false;
 } // clickedConfirmApprove
 
 /**
@@ -339,9 +444,9 @@ async function clickedConfirmApprove() {
  * @param item PTO cash out item to delete
  */
 function clickedDelete(item) {
-  this.clickedDeleteItem = item;
-  this.isDeleting = true;
-  this.toggleDeleteModal = !this.toggleDeleteModal;
+  clickedDeleteItem.value = item;
+  isDeleting.value = true;
+  toggleDeleteModal.value = !toggleDeleteModal.value;
 } // clickedDelete
 
 /**
@@ -349,46 +454,26 @@ function clickedDelete(item) {
  */
 async function clickedConfirmDelete() {
   try {
-    this.loading = true;
-    await this.deletePTOCashOut(this.clickedDeleteItem);
-    this.loading = false;
-    this.displaySuccess('Successfully deleted PTO cash out!');
+    loading.value = true;
+    await deletePTOCashOut(clickedDeleteItem.value);
+    loading.value = false;
+    displaySuccess('Successfully deleted PTO cash out!');
   } catch (err) {
-    this.loading = false;
-    this.displayError(err);
+    loading.value = false;
+    displayError(err);
   }
-  this.isDeleting = false;
-  this.clickedDeleteItem = null;
-  this.toggleDeleteModal = false;
+  isDeleting.value = false;
+  clickedDeleteItem.value = null;
+  toggleDeleteModal.value = false;
 } // clickedConfirmDelete
 
 /**
  * Event handler for clicking cancel delete in delete modal.
  */
 function clickedCancelDelete() {
-  this.isDeleting = false;
-  this.toggleDeleteModal = false;
+  isDeleting.value = false;
+  toggleDeleteModal.value = false;
 } // clickedCancelDelete
-
-/**
- * Custom filter for employee autocomplete options.
- *
- * @param item - employee
- * @param queryText - text used for filtering
- * @return string - filtered employee name
- */
-function customFilter(itemValue, queryText, itemObject) {
-  const item = itemObject.raw;
-  const query = queryText ? queryText : '';
-  const nickNameFullName = item.nickname ? `${item.nickname} ${item.lastName}` : '';
-  const firstNameFullName = `${item.firstName} ${item.lastName}`;
-
-  const queryContainsNickName = nickNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
-  const queryContainsFirstName =
-    firstNameFullName.toString().toLowerCase().indexOf(query.toString().toLowerCase()) >= 0;
-
-  return queryContainsNickName || queryContainsFirstName;
-} // customFilter
 
 /**
  * Deletes PTO cash out from database. Updates vuex store accordingly.
@@ -396,10 +481,10 @@ function customFilter(itemValue, queryText, itemObject) {
  * @param item PTO cash out item to delete
  */
 async function deletePTOCashOut(item) {
-  let ptoCashOuts = _.cloneDeep(this.$store.getters.ptoCashOuts);
+  let ptoCashOuts = _.cloneDeep(store.getters.ptoCashOuts);
   ptoCashOuts = _.filter(ptoCashOuts, (p) => p.id != item.id);
   let deletedPTOCashOut = await api.deleteItem(api.PTO_CASH_OUTS, item.id);
-  this.$store.dispatch('setPtoCashOuts', { ptoCashOuts });
+  store.dispatch('setPtoCashOuts', { ptoCashOuts });
   return deletedPTOCashOut;
 } // deletePTOCashOut
 
@@ -415,7 +500,7 @@ function displayError(err) {
     color: 'red'
   };
 
-  this.emitter.emit('status-alert', status);
+  emitter.emit('status-alert', status);
 } // displayError
 
 /**
@@ -428,33 +513,8 @@ function displaySuccess(msg) {
     statusMessage: msg,
     color: 'green'
   };
-  this.emitter.emit('status-alert', status);
+  emitter.emit('status-alert', status);
 } // displaySuccess
-
-/**
- * negates a tag
- */
-function negateTag(item) {
-  // try to find the id in the tagFlip array, if it is there then remove it else add it
-  const index = this.tagFlip.indexOf(item.id);
-  if (index >= 0) {
-    this.tagFlip.splice(index, 1);
-  } else {
-    this.tagFlip.push(item.id);
-  }
-} // negateTag
-
-/**
- * Removes an item from the tag filters's active filters
- *
- * @param item - The filter to remove
- */
-function removeTag(item) {
-  const selIndex = this.selectedTags.findIndex((t) => t.id === item.id);
-  if (selIndex >= 0) {
-    this.selectedTags.splice(selIndex, 1);
-  }
-} // removeTag
 
 /**
  * Changes the timesheets employee when a row is clicked
@@ -462,26 +522,16 @@ function removeTag(item) {
  * @param item Object - The item from the row clicked
  */
 function rowClicked(_, { item }) {
-  let employee = this.$store.getters.employees.find((e) => e.id === item.employeeId);
-  this.emitter.emit('change-timesheets-employee', employee);
+  let employee = store.getters.employees.find((e) => e.id === item.employeeId);
+  emitter.emit('change-timesheets-employee', employee);
 } // rowClicked
 
 /**
  * Unchecks all boxes in the data table
  */
 function uncheckAllBoxes() {
-  this.selected = [];
+  selected.value = [];
 } // uncheckAllBoxes
-
-/**
- * Returns if PTO cash out is approved, false otherwise
- *
- * @param ptoCashOut PTO Cash Out item from database
- * @return true if PTO Cash Out Item is approved, false otherwise
- */
-function isApproved(ptoCashOut) {
-  return ptoCashOut && ptoCashOut.approvedDate && !_.isEmpty(ptoCashOut.approvedDate);
-} // isApproved
 
 /**
  * Event handler for clicked edit item.
@@ -489,219 +539,14 @@ function isApproved(ptoCashOut) {
  * @param item PTO Cash Out item to edit
  */
 async function clickedEdit(item) {
-  this.clickedEditItem = item;
-  this.toggleEditModal = true;
-  let employee = _.find(this.$store.getters.employees, (e) => e.id === item.employeeId);
-  let employeeBalances = await api.getTimesheetsData(employee.employeeNumber, { code: 1 });
+  clickedEditItem.value = item;
+  toggleEditModal.value = true;
+  let tempEmployee = _.find(store.getters.employees, (e) => e.id === item.employeeId);
+  let employeeBalances = await api.getTimesheetsData(tempEmployee.employeeNumber, {
+    code: 1,
+    employeeId: tempEmployee.id
+  });
   let pto = employeeBalances?.ptoBalances?.PTO / 60 / 60 || 0;
-  this.userPto = this.formatNumber(pto);
+  userPto.value = formatNumber(pto);
 } // clickedEdit
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     COMPUTED                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Filters data table based on filter settings
- *
- * @return Array - filtered PTO cash outs
- */
-function filteredPtoCashOuts() {
-  let filteredPtoCashOuts = _.cloneDeep(this.$store.getters.ptoCashOuts);
-
-  if (this.filteredEmployee) {
-    filteredPtoCashOuts = _.filter(filteredPtoCashOuts, (p) => p.employeeId == this.filteredEmployee);
-  }
-  // filter tags
-  if (this.selectedTags.length > 0) {
-    filteredPtoCashOuts = _.filter(filteredPtoCashOuts, (p) => {
-      let inTag, tagFlipped;
-      for (let i = 0; i < this.selectedTags.length; i++) {
-        inTag = this.selectedTags[i].employees.includes(p.employeeId);
-        tagFlipped = this.tagFlip.includes(this.selectedTags[i].id);
-        if (inTag != tagFlipped) {
-          return true;
-        }
-      }
-      return false;
-    });
-  }
-
-  if (this.filter.approved === 'notApproved' || this.unapprovedOnly) {
-    filteredPtoCashOuts = _.filter(filteredPtoCashOuts, (p) => p.approvedDate == null);
-  } else if (this.filter.approved === 'approved') {
-    filteredPtoCashOuts = _.filter(filteredPtoCashOuts, (p) => p.approvedDate != null);
-  }
-  if (this.$store.getters.employees) {
-    filteredPtoCashOuts.forEach((p, index) => {
-      filteredPtoCashOuts[index].employeeName = this.nicknameAndLastName(
-        this.getEmployeeByID(p.employeeId, this.$store.getters.employees)
-      );
-    });
-  }
-  return filteredPtoCashOuts;
-} // filteredPtoCashOuts
-
-/**
- * Gets the datatable headers based on user's role. Returns all headers if user role is admin.
- * Otherwise returns all but 'Employee' header.
- *
- * @return Array - datatable headers
- */
-function roleHeaders() {
-  let headers = _.cloneDeep(this.headers);
-  if (!(userRoleIsAdmin() || userRoleIsManager())) {
-    headers = _.filter(headers, (h) => h.title != 'Employee');
-  }
-
-  if (this.unapprovedOnly) {
-    headers = _.filter(headers, (h) => h.title != 'actions');
-  }
-  return headers;
-} // roleHeaders
-
-/**
- * Gets all employees with submitted PTO Cash Out Requests for autocomplete filter component.
- *
- * @return Array - filtered employees
- */
-function employees() {
-  let employeeIdsWithPTOCashOuts = this.$store.getters.ptoCashOuts
-    ? this.$store.getters.ptoCashOuts.map((p) => p.employeeId)
-    : [];
-  return _.map(
-    _.filter(this.$store.getters.employees, (e) => employeeIdsWithPTOCashOuts.includes(e.id)),
-    (e) => ({
-      text: nicknameAndLastName(e),
-      value: e.id,
-      nickname: e.nickname ? e.nickname : '',
-      firstName: e.firstName,
-      lastName: e.lastName
-    })
-  );
-} // employees
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     WATCHERS                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Watcher for selected items
- */
-function watchSelected() {
-  if (this.selected.length == 0) {
-    this.showApproveButton = false;
-  } else {
-    this.showApproveButton = true;
-  }
-} // watchSelected
-
-/**
- * Remove items from tagFlip array when they are removed from the selected
- * tags
- */
-function watchSelectedTags() {
-  let negatedTagRemoved = true;
-  // use normal for loop to have the index
-  for (let i = 0; i < this.tagFlip.length; i++) {
-    // try to find the current tag in the selectedTags
-    _.forEach(this.selectedTags, (t) => {
-      if (t.id === this.tagFlip[i]) negatedTagRemoved = false;
-    });
-    // if it isn't there, remove it from tagFlip too
-    if (negatedTagRemoved) {
-      this.tagFlip.splice(i, 1);
-    }
-  }
-} // watchSelectedTags
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  beforeUnmount,
-  created,
-  data() {
-    return {
-      ptoCashOuts: [],
-      loading: true,
-      filteredEmployee: null,
-      filter: {
-        // active: 'both',
-        approved: 'notApproved' // default only shows cash outs that are not approved
-      },
-      headers: [
-        { title: 'Creation Date', key: 'creationDate' },
-        { title: 'Employee', key: 'employeeId' },
-        { title: 'Amount', key: 'amount' },
-        { title: 'Approved Date', key: 'approvedDate' },
-        { key: 'actions', sortable: false }
-      ],
-      sortBy: [{ key: 'creationDate', order: 'desc' }],
-      sortDesc: true,
-      selected: [],
-      selectedTags: [],
-      tagFlip: [],
-      tags: [],
-      isApproving: false,
-      isUnapproving: false,
-      isDeleting: false,
-      showApproveButton: false,
-      toggleApproveModal: false,
-      toggleDeleteModal: false,
-      toggleEditModal: false,
-      clickedEditItem: null,
-      userPto: null
-    };
-  },
-  methods: {
-    approveSelectedPTOCashOuts,
-    chipColor,
-    clickedConfirmApprove,
-    clickedDelete,
-    clickedCancelDelete,
-    clickedConfirmDelete,
-    clickedEdit,
-    customFilter,
-    deletePTOCashOut,
-    displayError,
-    displaySuccess,
-    formatNumber,
-    isApproved,
-    isMobile,
-    isEmpty,
-    getEmployeeByID,
-    monthDayYearFormat,
-    nicknameAndLastName,
-    negateTag,
-    removeTag,
-    rowClicked,
-    updateStoreUser,
-    updateStoreEmployees,
-    updateStorePtoCashOuts,
-    updateStoreTags,
-    uncheckAllBoxes,
-    userRoleIsAdmin,
-    userRoleIsManager
-  },
-  mounted,
-  computed: {
-    roleHeaders,
-    filteredPtoCashOuts,
-    employees
-  },
-  props: ['unapprovedOnly'],
-  watch: {
-    selected: watchSelected,
-    selectedTags: watchSelectedTags
-  },
-  components: { GeneralConfirmationModal, DeleteModal, PTOCashOutForm }
-};
 </script>

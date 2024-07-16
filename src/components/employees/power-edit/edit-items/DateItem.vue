@@ -9,6 +9,7 @@
     @update:focused="model = parseEventDate()"
     @click="showMenu = true"
     @keypress="showMenu = false"
+    autocomplete="off"
   >
     <v-menu activator="parent" v-model="showMenu" :close-on-content-click="false" location="start center">
       <v-date-picker

@@ -2,16 +2,16 @@
   <div>
     <v-card :elevation="3" class="">
       <v-card color="#bc3825">
-        <v-card-title class="d-flex align-center header_style" v-bind:class="{ 'justify-center': isMobile }">
+        <v-card-title class="d-flex align-center header_style" v-bind:class="{ 'justify-center': isMobile() }">
           <h2 class="text-center text-white">Stats Dashboard</h2>
         </v-card-title>
       </v-card>
       <v-container fluid class="px-0 px-md-4">
         <!-- user is mobile -->
-        <div v-if="isMobile" class="text-center">
+        <div v-if="isMobile()" class="text-center">
           <v-menu offset="y">
             <template #activator="{ props }">
-              <v-btn variant="text" color="#bc3825" theme="dark" class="font-weight-bold" v-bind="props">
+              <v-btn variant="text" theme="dark" class="font-weight-bold" v-bind="props">
                 {{ statsTab.toUpperCase() }} <v-icon class="pb-1"> mdi-chevron-down </v-icon>
               </v-btn>
             </template>
@@ -40,7 +40,7 @@
           center-active
           grow
           show-arrows
-          @update:model-value="changeTab"
+          @update:model-value="changeTab(currentTab)"
         >
           <v-tab value="employees"> Employees </v-tab>
           <v-tab value="education" :disabled="!dataLoaded"> Education </v-tab>
@@ -48,7 +48,7 @@
           <v-tab value="certifications" :disabled="!dataLoaded"> Certifications </v-tab>
           <v-tab value="customerOrg" :disabled="!dataLoaded"> Customer Org </v-tab>
         </v-tabs>
-        <v-window v-if="!isMobile" v-model="currentTab">
+        <v-window v-if="!isMobile()" v-model="currentTab">
           <v-window-item value="employees" class="mx-2 my-6">
             <employees-chart-tab v-if="currentTab === 'employees' && dataLoaded" />
           </v-window-item>
@@ -84,7 +84,7 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import CertificationsChartTab from '../components/charts/chart-tabs/CertificationsChartTab.vue';
 import EmployeesChartTab from '../components/charts/chart-tabs/EmployeesChartTab.vue';
 import TechChartTab from '../components/charts/chart-tabs/TechChartTab.vue';
@@ -92,6 +92,20 @@ import EducationChartTab from '../components/charts/chart-tabs/EducationChartTab
 import CustomerOrgChartTab from '../components/charts/chart-tabs/CustomerOrgChartTab.vue';
 import { isMobile, storeIsPopulated } from '@/utils/utils';
 import { updateStoreEmployees, updateStoreContracts } from '@/utils/storeUtils';
+import { onBeforeMount, onMounted, ref, watch } from 'vue';
+import { useStore } from 'vuex';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     SETUP                        |
+// |                                                  |
+// |--------------------------------------------------|
+
+const store = useStore();
+
+const currentTab = ref('');
+const dataLoaded = ref(false);
+const statsTab = ref('employees');
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -102,7 +116,7 @@ import { updateStoreEmployees, updateStoreContracts } from '@/utils/storeUtils';
 /**
  * Created lifecycle hook.
  */
-function created() {
+onBeforeMount(() => {
   let requestedDataType = localStorage.getItem('requestedDataType');
   if (requestedDataType) {
     let mappings = {};
@@ -110,23 +124,23 @@ function created() {
     mappings['contracts'] = 'employees';
     mappings['certifications'] = 'employees';
     mappings['customer orgs'] = 'customer orgs';
-    this.changeTab(mappings[requestedDataType]);
+    changeTab(mappings[requestedDataType]);
     localStorage.removeItem('requestedDataType');
   }
-} // created
+}); // created
 
 /**
  * Mounted lifecycle hook.
  */
-async function mounted() {
-  if (this.storeIsPopulated) {
+onMounted(async () => {
+  if (storeIsPopulated) {
     await Promise.all([
-      !this.$store.getters.employees ? this.updateStoreEmployees() : '',
-      !this.$store.getters.contracts ? this.updateStoreContracts() : ''
+      !store.getters.employees ? updateStoreEmployees() : '',
+      !store.getters.contracts ? updateStoreContracts() : ''
     ]);
-    this.dataLoaded = true;
+    dataLoaded.value = true;
   }
-} // mounted
+}); // mounted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -140,7 +154,7 @@ async function mounted() {
  * @param event - the new tab
  */
 function changeTab(event) {
-  this.currentTab = event;
+  currentTab.value = event;
 } // changeTab
 
 /**
@@ -148,50 +162,20 @@ function changeTab(event) {
  * @param tabName - The name of the tab
  */
 function selectDropDown(tabName) {
-  this.statsTab = tabName;
+  statsTab.value = tabName;
 } // selectDropDown
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                      EXPORT                      |
+// |                     WATCHERS                     |
 // |                                                  |
 // |--------------------------------------------------|
 
-export default {
-  components: {
-    CertificationsChartTab,
-    EmployeesChartTab,
-    TechChartTab,
-    EducationChartTab,
-    CustomerOrgChartTab
-  },
-  data() {
-    return {
-      currentTab: '',
-      dataLoaded: false,
-      statsTab: 'employees'
-    };
-  },
-  computed: {
-    isMobile,
-    storeIsPopulated
-  },
-  watch: {
-    storeIsPopulated: async function () {
-      await Promise.all([
-        !this.$store.getters.employees ? this.updateStoreEmployees() : '',
-        !this.$store.getters.contracts ? this.updateStoreContracts() : ''
-      ]);
-      if (this.storeIsPopulated) this.dataLoaded = true;
-    }
-  },
-  created,
-  mounted,
-  methods: {
-    changeTab,
-    selectDropDown,
-    updateStoreEmployees,
-    updateStoreContracts
-  }
-};
+watch(storeIsPopulated, async () => {
+  await Promise.all([
+    !store.getters.employees ? updateStoreEmployees() : '',
+    !store.getters.contracts ? updateStoreContracts() : ''
+  ]);
+  if (storeIsPopulated) dataLoaded.value = true;
+});
 </script>
