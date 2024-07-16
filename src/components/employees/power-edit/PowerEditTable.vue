@@ -92,6 +92,7 @@ watch(
   () => props.fields,
   () => {
     if (!_.find(props.fields, (f) => f.key === editItem.value?.field?.key)) {
+      // unexpand the group row if the field being edited is unselected
       expanded.value = [];
       editItem.value = null;
     }
@@ -117,18 +118,33 @@ const employees = computed(() => {
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * The handler for a table row click
+ *
+ * @param {Object} item - The column item being clicked on
+ * @param {Object} field - The column being clicked on
+ */
 function handleItemClick(item, field) {
   if (field.editType) editItem.value = { item, field };
   else if (field.fixed) openLink(router.resolve({ path: `employee/${item.employeeNumber}` })?.href);
-}
+} // handleItemClick
 
+/**
+ * The handler for a row click
+ */
 function handleRowClick() {
   expanded.value = [];
   if (editItem.value?.field?.group) {
     if (!expanded.value.includes(editItem.value?.item?.id)) expanded.value.push(editItem.value?.item?.id);
   }
-}
+} // handleRowClick
 
+/**
+ * Sets the color class on the item being saved
+ *
+ * @param {Object} item - The item clicked on
+ * @param {Object} field - The column clicked on
+ */
 function saveColor(item, field) {
   let itemClass = '';
   let itemSaving = item[field.key + 'tmp'];
@@ -136,8 +152,14 @@ function saveColor(item, field) {
   else if (itemSaving?.success && field.key === itemSaving?.field?.key) itemClass = 'item-success';
   else if (itemSaving?.fail && field.key === itemSaving?.field?.key) itemClass = 'item-fail';
   return itemClass;
-}
+} // saveColor
 
+/**
+ * Saves the item being edited. If the item is a group item, then save the subkeys as well.
+ *
+ * @param {Object} item - The item clicked on
+ * @param {Object} field - The column clicked on
+ */
 async function saveItem(item, field) {
   editItem.value = null;
   let employee = _.find(store.getters.employees, (e) => e.id === item.id);
@@ -168,7 +190,7 @@ async function saveItem(item, field) {
   setTimeout(() => {
     delete employee[tmpField];
   }, 2000);
-}
+} // saveItem
 </script>
 
 <style scoped>

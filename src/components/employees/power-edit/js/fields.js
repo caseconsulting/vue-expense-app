@@ -133,15 +133,15 @@ export const CLEARANCES = {
 //   ...groupWidth
 // };
 
-// export const CONTRACTS = {
-//   title: 'Contracts',
-//   key: 'contracts',
-//   selected: false,
-//   group: true,
-//   editType: TYPES.CUSTOM,
-//   infoType: TYPES.CUSTOM,
-//   ...groupWidth
-// };
+export const CONTRACTS = {
+  title: 'Contracts',
+  key: 'contracts',
+  selected: false,
+  group: true,
+  editType: TYPES.CUSTOM,
+  infoType: TYPES.CUSTOM,
+  ...largeWidth
+};
 
 // export const CUSTOMER_ORG_EXP = {
 //   title: 'Customer Org Exp',
@@ -275,7 +275,7 @@ export default {
   // CERTIFICATIONS,
   CLEARANCES,
   // COMPANIES,
-  // CONTRACTS,
+  CONTRACTS,
   // CUSTOMER_ORG_EXP,
   // EDUCATION,
   // IC_TIME_FRAMES,

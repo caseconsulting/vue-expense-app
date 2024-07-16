@@ -68,14 +68,24 @@ const unSelectedFields = computed(() => {
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * Adds a field to the list of selected fields
+ *
+ * @param {Object} field - The employee field
+ */
 function addField(field) {
   localSelectedFields.value.splice(localSelectedFields.value.length, 0, field);
-}
+} // addField
 
+/**
+ * Removes a field to the list of selected fields
+ *
+ * @param {Object} field - The employee field
+ */
 function removeField(field) {
   let i = _.findIndex(localSelectedFields.value, (f) => f.title === field.title);
   localSelectedFields.value.splice(i, 1);
-}
+} // removeField
 </script>
 
 <style scoped>

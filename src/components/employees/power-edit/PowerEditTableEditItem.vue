@@ -96,9 +96,12 @@ onBeforeUnmount(() => {
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * Emits to PowerEditTable to save the edited item
+ */
 function save() {
   emitter.emit('save-item', { item: clonedItem.value, field: props.field });
-}
+} // save
 </script>
 
 <style>
