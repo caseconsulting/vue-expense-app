@@ -29,7 +29,12 @@
           </v-col>
           <!-- email -->
           <v-col class="fit-content">
-            <h3 v-cloak class="other-text" :style="`color: ${caseGray}`">{{ model.email }}</h3>
+            <a :href="`mailto:${model.email}`" class="clickable-h3">
+              <v-tooltip activator="parent" location="bottom">
+                <p class="ma-0 pa-0">Email {{ employeeName }}</p>
+              </v-tooltip>
+              <h3 v-cloak>{{ model.email }}</h3>
+            </a>
           </v-col>
         </v-row>
         <!-- third row: personal email and links -->
@@ -47,7 +52,7 @@
                   variant="text"
                 >
                   <v-tooltip activator="parent" location="bottom">
-                    <p class="ma-0 pa-0">Email {{ employeeName }}</p>
+                    <p class="ma-0 pa-0">Email {{ employeeName }}'s personal email</p>
                   </v-tooltip>
                   <v-icon icon="mdi-email" size="28"></v-icon>
                 </v-btn>
@@ -205,6 +210,20 @@ const altText = computed(() => {
 
 .logo-icons {
   top: -10%;
+}
+
+.clickable-h3 {
+  color: #2196f3;
+  text-decoration: none;
+  font-size: medium;
+  font-weight: 200;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.clickable-h3:hover {
+  color: #c23010;
+  text-decoration: underline;
 }
 
 @media (max-width: 620px) {
