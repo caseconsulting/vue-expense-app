@@ -8,8 +8,8 @@
       <p v-if="!isEmpty(getEmployeeRole())"><b>EMP ROLE:</b> {{ _.startCase(getEmployeeRole()) }}</p>
       <p><b>EEO Status:</b> {{ eeoStatus() }}</p>
       <div class="text-center" style="padding-bottom: 5px">
-        <v-btn size="small" variant="tonal" @click="toggleView()" v-if="getEEOFilled()">View Now</v-btn>
-        <v-btn size="small" @click="toggleEdit()" v-else>Complete Now</v-btn>
+        <v-btn size="small" variant="tonal" @click="toggleView()" v-if="getEEOFilled()">View EEO Data</v-btn>
+        <v-btn size="small" @click="toggleEdit()" v-else>Complete EEO Form</v-btn>
       </div>
       <e-e-o-compliance-edit-modal v-model="toggleForm" :model="model"></e-e-o-compliance-edit-modal>
       <e-e-o-compliance-view-modal v-model="viewForm" :model="model"></e-e-o-compliance-view-modal>
