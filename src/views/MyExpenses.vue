@@ -712,7 +712,7 @@ onBeforeMount(async () => {
   }
 
   // if coming from budgets chart scroll to top and fill in filter data
-  if (JSON.parse(localStorage.getItem('requestedFilter'))) {
+  if (!_.isEmpty(localStorage.getItem('requestedFilter'))) {
     window.scrollTo(0, 0);
     let storedInfo = JSON.parse(localStorage.getItem('requestedFilter'));
     [search.value, filter.value.reimbursed, employee.value] = [
