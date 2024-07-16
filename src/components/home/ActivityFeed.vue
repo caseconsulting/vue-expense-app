@@ -202,10 +202,10 @@ function getURL(item) {
  *
  * @param item Object - The month's anniversaries
  */
-function openAnniversariesModal(item) {
+function openAnniversariesModal(itm) {
   toggleAnniversariesModal.value = true;
-  item.events.sort((a, b) => new Date(a.anniversary) - new Date(b.anniversary));
-  this.item = item;
+  itm.events.sort((a, b) => new Date(a.anniversary) - new Date(b.anniversary));
+  item.value = itm;
 } // openAnniversariesModal
 </script>
 
