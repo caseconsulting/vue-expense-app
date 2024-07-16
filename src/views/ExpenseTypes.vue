@@ -35,8 +35,8 @@
                 <v-col cols="4">
                   <h2>Expense Types</h2>
                 </v-col>
-                <v-col cols="2" />
-                <v-col cols="6">
+                <v-spacer></v-spacer>
+                <v-col cols="12" sm="4">
                   <!-- Search Bar -->
                   <v-text-field
                     id="search"
