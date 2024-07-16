@@ -15,7 +15,7 @@
     <v-card-actions v-if="!isEmpty(contractsList) && (noneActive || model.contracts.length > 1)">
       <v-btn block @click="open">Click to see more</v-btn>
     </v-card-actions>
-    <v-dialog v-model="dialog" max-width="550">
+    <v-dialog v-model="dialog" max-width="600">
       <template v-slot:default>
         <v-card title="All Contract Information">
           <v-card-text v-for="(contract, index) in contractsList" :key="contract.contractId + index">
