@@ -35,7 +35,6 @@ const emitter = inject('emitter');
 const props = defineProps(['model']);
 
 // const copy = _.cloneDeep(props.model);
-const eeoFilledOut = ref(false);
 const toggleForm = ref(false);
 const viewForm = ref(false);
 
@@ -86,8 +85,14 @@ function getEmployeeRole() {
  * @return boolean - if the EEO is filled out
  */
 function getEEOFilled() {
-  eeoFilledOut.value = props.model.eeoAdminHasFilledOutEeoForm;
-  return eeoFilledOut.value;
+  return (
+    !isEmpty(props.model.eeoGender) &&
+    !isEmpty(props.model.eeoHispanicOrLatino) &&
+    !isEmpty(props.model.eeoRaceOrEthnicity) &&
+    !isEmpty(props.model.eeoJobCategory) &&
+    !isEmpty(props.model.eeoHasDisability) &&
+    !isEmpty(props.model.eeoIsProtectedVeteran)
+  );
 }
 
 /**
@@ -96,7 +101,7 @@ function getEEOFilled() {
  * @return String - complete/incomplete EEO form
  */
 function eeoStatus() {
-  return eeoFilledOut.value ? 'Complete' : 'Incomplete';
+  return getEEOFilled() ? 'Complete' : 'Incomplete';
 }
 
 function toggleEdit() {
