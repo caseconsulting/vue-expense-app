@@ -16,9 +16,6 @@
             <base-form title="Clearance" value="Clearance">
               <div>Editing: {{ formTabs }}</div>
             </base-form>
-            <base-form title="Clearance" value="Clearance">
-              <div>Editing: {{ formTabs }}</div>
-            </base-form>
             <base-form title="Contracts" value="Contracts">
               <div>Editing: {{ formTabs }}</div>
             </base-form>
