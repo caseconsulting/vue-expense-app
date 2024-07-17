@@ -1,15 +1,15 @@
 <template>
   <div>
-    <v-row class="ma-3 align-center">
+    <v-row class="mt-3 align-center">
       <!-- profile picture -->
-      <v-col class="display-inline fit-content">
+      <v-col cols="4" class="display-inline fit-content">
         <v-avatar :color="caseRed" :size="96">
           <span class="text-h4 display-inline-block position-absolute">{{ initials }}</span>
           <v-img class="display-inline-block position-absolute" :src="avatar" :alt="altText" />
         </v-avatar>
       </v-col>
       <!-- general info -->
-      <v-col>
+      <v-col cols="8">
         <!-- first row: name and nickname -->
         <v-row class="mr-5 align-baseline" no-gutters>
           <!-- name -->

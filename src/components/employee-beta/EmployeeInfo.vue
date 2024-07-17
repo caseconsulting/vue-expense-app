@@ -7,7 +7,17 @@
         </div>
       </template>
       <template #actions>
-        <resume-card v-model="model" :editing="editing" :loading="loading"></resume-card>
+        <div class="d-flex flex-row align-center">
+          <resume-card v-model="model" :editing="editing" :loading="loading"></resume-card>
+          <convert-employee-to-csv
+            v-if="isAdmin"
+            :contracts="contracts"
+            :employee="model"
+            :filename="`${model.nickname || model.firstName} ${model.lastName}`"
+            :tags="store.getters.tags"
+            color="white"
+          />
+        </div>
       </template>
       <v-row justify="center">
         <v-col style="max-width: 650px">
@@ -141,12 +151,14 @@
 <script setup>
 import { computed, ref, inject } from 'vue';
 import { useDisplay } from 'vuetify';
+import { useStore } from 'vuex';
 import AwardsCard from '@/components/employee-beta/cards/AwardsCard.vue';
 import BaseCard from '@/components/employee-beta/cards/BaseCard.vue';
 import CaseExperienceInfoCard from '@/components/employee-beta/cards/CaseExperienceInfoCard.vue';
 import CertificationsCard from '@/components/employee-beta/cards/CertificationsCard.vue';
 import ClearanceCard from '@/components/employee-beta/cards/personal/ClearanceCard.vue';
 import ContractInfoCard from '@/components/employee-beta/cards/ContractInfoCard.vue';
+import ConvertEmployeeToCsv from '@/components/employees/csv/ConvertEmployeeToCsv.vue';
 import EducationInfoCard from '@/components/employee-beta/cards/EducationInfoCard.vue';
 import EmployeeForm from '@/components/employee-beta/forms/EmployeeForm.vue';
 import EmployeeInfoCard from '@/components/employee-beta/cards/EmployeeInfoCard.vue';
@@ -165,6 +177,7 @@ import TechnologiesCard from '@/components/employee-beta/cards/TechnologiesCard.
 // |--------------------------------------------------|
 
 const display = useDisplay();
+const store = useStore();
 
 const model = defineModel();
 defineProps(['contracts', 'loading']);
