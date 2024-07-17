@@ -13,7 +13,9 @@
           class="text-center"
         >
           <v-card-actions class="d-flex justify-center">
-            <v-btn @click="toggleCertificationsModal()">Click To See More</v-btn>
+            <v-btn @click="toggleCertificationsModal()"
+              >View All {{ model.certifications.length }} Certifications</v-btn
+            >
           </v-card-actions>
         </div>
       </v-card-text>
