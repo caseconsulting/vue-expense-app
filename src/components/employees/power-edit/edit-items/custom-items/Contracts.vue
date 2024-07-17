@@ -1,36 +1,37 @@
 <template>
   <div>
-    <!-- Current Address: Street 1 -->
-    <v-text-field
-      v-model.trim="streetModel"
-      autofocus
-      hide-details
-      label="Street 1"
+    <!-- Name of Contract -->
+    <v-select
+      ref="formFields"
+      v-model="contract.contractName"
+      :rules="[...getRequiredRules(), duplicateContractPrimeCombo(index)]"
+      :items="getContractsDropdownItems(contract)"
+      @update:model-value="
+        editedContracts.push(0); // force re-render for the items prop
+        editedContracts.pop(0);
+      "
+      label="Contract"
       variant="underlined"
-      class="d-inline-block field mr-4"
-      @update:modelValue="searchAddress($event)"
+      data-vv-name="Contract"
+      clearable
     >
-      <v-menu target="parent" v-model="showMenu" location="bottom">
-        <v-list
-          v-if="predictions.length > 0"
-          :items="predictions"
-          @click:select="predictionSelected"
-          rounded="0"
-        ></v-list>
-        <v-list v-if="predictions.length > 0" @click.stop rounded="0" class="d-flex align-center">
-          <span class="text-caption text-grey ml-2">powered by</span>
-          <v-img :src="google" width="50" alt="Github icon" inline class="ml-1" />
-        </v-list>
-      </v-menu>
-    </v-text-field>
-    <!-- Current Address: Street 2 -->
-    <v-text-field
-      v-model.trim="street2Model"
-      hide-details
-      label="Street 2"
+    </v-select>
+    <!-- Name of Prime -->
+    <v-select
+      ref="formFields"
+      v-model="contract.primeName"
+      :rules="getRequiredRules()"
+      :items="getPrimesDropdownItems(contract)"
+      @update:model-value="
+        editedContracts.push(0); // force re-render for the items prop
+        editedContracts.pop(0);
+      "
+      label="Prime"
       variant="underlined"
-      class="d-inline-block field mr-4"
-    ></v-text-field>
+      data-vv-name="Prime"
+      clearable
+    >
+    </v-select>
     <!-- Current Address: City -->
     <v-text-field
       v-model.trim="cityModel"
@@ -61,13 +62,10 @@
 </template>
 
 <script setup>
-import google from '@/assets/img/trademarks/google.png';
-import { STATES } from '@/utils/utils';
-import { inject, ref, watch } from 'vue';
-import { mask } from 'vue-the-mask';
 import _ from 'lodash';
-import api from '@/shared/api.js';
-const vMask = (a, b) => mask(a, b);
+import { inject, ref, watch } from 'vue';
+import { getRequiredRules } from '@/shared/validationUtils';
+import { getContractsDropdownItems } from '@/shared/contractUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -77,13 +75,21 @@ const vMask = (a, b) => mask(a, b);
 
 const props = defineProps(['field', 'item']);
 const emitter = inject('emitter');
-const streetModel = ref(props.item['currentStreet']);
-const street2Model = ref(props.item['currentStreet2']);
-const cityModel = ref(props.item['currentCity']);
-const stateModel = ref(props.item['currentState']);
-const ZIPModel = ref(props.item['currentZIP']);
-const showMenu = ref(false);
-const predictions = ref([]);
+
+const contracts = ref(_.cloneDeep(props.item[props.field.key]));
+const model = ref(
+  props.item[props.field.key]?.[0] || {
+    contractId: null,
+    projects: [
+      {
+        projectId: null,
+        endDate: null,
+        presentDate: false,
+        startDate: null
+      }
+    ]
+  }
+);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -92,17 +98,13 @@ const predictions = ref([]);
 // |--------------------------------------------------|
 
 watch(
-  () => [streetModel.value, street2Model.value, cityModel.value, stateModel.value, ZIPModel.value],
+  () => [model.value],
   () => {
     emitter.emit('update-item', {
       field: props.field,
       item: {
         ...props.item,
-        currentStreet: streetModel.value,
-        currentStreet2: street2Model.value,
-        currentCity: cityModel.value,
-        currentState: stateModel.value,
-        currentZIP: ZIPModel.value
+        [`${props.field.key}`]: contracts.value
       }
     });
   }
@@ -113,29 +115,6 @@ watch(
 // |                      METHODS                     |
 // |                                                  |
 // |--------------------------------------------------|
-
-async function searchAddress(query) {
-  predictions.value = [];
-  if (query?.length > 3) {
-    showMenu.value = true;
-    let locations = await api.getLocation(query);
-    _.forEach(locations.predictions, (location) => {
-      predictions.value.push({ title: location.description, value: location.place_id });
-    });
-  } else {
-    showMenu.value = false;
-  }
-}
-
-async function predictionSelected(event) {
-  let prediction = _.find(predictions.value, { value: event.id });
-  let [street, city, state] = prediction.title.split(', ');
-  streetModel.value = street;
-  cityModel.value = city;
-  stateModel.value = STATES[state];
-  let zipResult = await api.getZipCode(prediction.value);
-  ZIPModel.value = _.find(zipResult?.result?.address_components, (c) => c.types.includes('postal_code'))?.short_name;
-}
 </script>
 
 <style scoped>

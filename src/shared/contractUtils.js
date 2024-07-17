@@ -1,4 +1,37 @@
 import _ from 'lodash';
+import store from '../../store/index';
+
+/**
+ * Gets contract names available based on if primes or projects are entered.
+ *
+ * @param contract - A user's contract data
+ * @return Array - An array of contract names
+ */
+function getContractsDropdownItems(contract) {
+  let contracts = store.getters.contracts;
+  if (!contract) {
+    return [];
+  } else if (contract.primeName && contract.projects.length == 1 && _.isEmpty(contract.projects[0].projectName)) {
+    // only prime name is filled out
+    let matchedContracts = contracts.filter((c) => c.primeName === contract.primeName);
+    return matchedContracts.map((c) => c.contractName);
+  } else if (contract.primeName) {
+    // prime name and project names are filled out
+    let project = contract.projects[0];
+    let matchedContracts = contracts.filter(
+      (c) => c.primeName === contract.primeName && c.projects.some((p) => p.projectName === project.projectName)
+    );
+    return matchedContracts.map((c) => c.contractName);
+  } else if (_.isEmpty(contract.primeName) && !_.isEmpty(contract.projects[0].projectName)) {
+    // only project names are filled out
+    let project = contract.projects[0];
+    let matchedContracts = store.contracts.filter((c) => c.projects.some((p) => p.projectName === project.projectName));
+    return matchedContracts.map((c) => c.contractName);
+  } else {
+    // prime and projects fields are empty
+    return contracts.map((c) => c.contractName);
+  }
+} // getContractsDropdownItems
 
 /**
  * Gets the projects current employees in the form of a list.
@@ -62,6 +95,7 @@ export function getProject(contractId, projectId, contracts) {
 } // getProject
 
 export default {
+  getContractsDropdownItems,
   getProjectCurrentEmployees,
   getProjectPastEmployees,
   getProject
