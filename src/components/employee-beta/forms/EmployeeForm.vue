@@ -3,6 +3,15 @@
     <v-card>
       <v-card-title class="d-flex align-center justify-space-between beta_header_style">
         <h3 class="text-white px-2">Editing {{ isUser ? 'My Profile' : fullName }}</h3>
+        <v-btn
+          id="modalCloseBtn"
+          align-self="end"
+          density="compact"
+          variant="text"
+          icon=""
+          @click="toggleCancelConfirmation = true"
+          ><v-icon size="large">mdi-window-close</v-icon></v-btn
+        >
       </v-card-title>
       <div v-if="submitting" class="py-10 px-6">
         <v-progress-linear :indeterminate="true"></v-progress-linear>
