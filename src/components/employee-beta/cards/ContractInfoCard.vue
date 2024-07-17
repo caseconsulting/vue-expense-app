@@ -12,16 +12,26 @@
       </div>
     </v-card-text>
     <v-card-text v-else> No contracts to be displayed </v-card-text>
-    <v-card-actions v-if="!isEmpty(contractsList) && (noneActive || model.contracts.length > 1)">
+    <v-card-actions>
       <v-btn block @click="open">Click to see more</v-btn>
     </v-card-actions>
     <v-dialog v-model="dialog" max-width="600">
       <template v-slot:default>
         <v-card title="All Contract Information">
-          <v-card-text v-for="(contract, index) in contractsList" :key="contract.contractId + index">
-            <p><b>Contract: </b>{{ getContractName(contract) }}</p>
+          <v-card-text v-for="(contract, index) in contractsList" :key="contract.contractId + index" class="pt-0">
+            <v-row>
+              <v-col>
+                <p><b>Contract: </b>{{ getContractName(contract) }}</p>
+              </v-col>
+              <v-col>
+                <span v-if="contract.projects.some((p) => !p.endDate)">
+                  <v-tooltip activator="parent" location="right">Current Project</v-tooltip>
+                  <v-icon>mdi-check</v-icon>
+                </span>
+              </v-col>
+            </v-row>
             <p class="ml-4"><b>Prime: </b>{{ getPrimeName(contract) }}</p>
-            <p class="ml-4"><b>Time on Contract: </b>{{ getContractLengthInYears(contract) }}</p>
+            <p class="ml-4"><b>Time on Contract: </b>{{ getContractLengthInMonths(contract) }}</p>
             <div v-for="(project, index) in contract.projects" :key="project.projectId + index">
               <p class="ml-8" style="margin: 0; display: inline">
                 <b>Project Name: </b> {{ getProjectNameFromId(project.projectId) }}
@@ -30,6 +40,7 @@
                 ({{ getProjectStartDate(project) }} - {{ getProjectEndDate(project) }})
               </p>
             </div>
+            <v-divider v-if="index != contractsList.length - 1" class="mt-4"></v-divider>
           </v-card-text>
         </v-card>
       </template>
@@ -42,7 +53,7 @@ import { ref, onBeforeMount } from 'vue';
 import { difference, getTodaysDate } from '@/shared/dateUtils';
 import _ from 'lodash';
 import { isEmpty } from '@/utils/utils';
-import { monthDayYearFormat, monthYearFormatFromString } from '../../../utils/utils';
+import { monthDayYearFormat } from '../../../utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -92,19 +103,21 @@ function open() {
 }
 
 /**
- * Converts the contracts' projects' dates to number of years on the contract.
+ * Converts the contracts' projects' dates to number of months on the contract.
  *
  * @param contract the contract to get the info from
- * @return number - number of years on the contract
+ * @return number - number of months on the contract
  */
-function getContractLengthInYears(contract) {
-  let total = 0;
+function getContractLengthInMonths(contract) {
+  let totalMonths = 0;
+  let totalDays = 0;
   if (contract.projects) {
     contract.projects.forEach((project) => {
-      total += getProjectLengthInYears(project);
+      totalMonths += getProjectLength(project, 'month');
+      totalDays += getProjectLength(project, 'day');
     });
   }
-  return dateReadable(total);
+  return totalMonths <= 1 ? totalDays + ' days' : dateReadable(totalMonths);
 } // getContractLengthInYears
 
 /**
@@ -114,11 +127,15 @@ function getContractLengthInYears(contract) {
  * @return the earliest date
  */
 function getContractEarliestDate(contract) {
-  return _.orderBy(contract.projects, ['popStartDate'])[0].popStartDate;
+  return _.orderBy(contract.projects, ['popStartDate'])[0].startDate;
 } // getContractEarliestDate
 
+/**
+ * Gets the start date of the employee's contract as MMM DD, YYYY format
+ * @param contractId - id of contract
+ */
 function getContractStartDate(contractId) {
-  return monthYearFormatFromString(getContractEarliestDate(getContractObjectFromId(contractId)));
+  return monthDayYearFormat(getContractEarliestDate(getContractObjectFromId(contractId)));
 }
 
 /**
@@ -147,7 +164,7 @@ function getContractNameFromId(contractId) {
  * @return the contract name
  */
 function getContractObjectFromId(contractId) {
-  return props.contracts.find((c) => c.id === contractId);
+  return props.model.contracts.find((c) => c.contractId === contractId);
 }
 
 /**
@@ -263,17 +280,18 @@ function dateReadable(time) {
 } // dateReadable
 
 /**
- * Converts the intervals to length of time in years.
+ * Converts the intervals to length of time in months.
  *
- * @param project the project to convert
- * @return number - time in years
+ * @param project - the project to convert
+ * @param duration - string of duration, 'day' or 'month'
+ * @return number - time in months
  */
-function getProjectLengthInYears(project) {
+function getProjectLength(project, duration) {
   let length;
   if (project.endDate) {
-    length = difference(project.endDate, project.startDate, 'month');
+    length = difference(project.endDate, project.startDate, duration);
   } else {
-    length = difference(getTodaysDate(), project.startDate, 'month');
+    length = difference(getTodaysDate(), project.startDate, duration);
   }
   return length;
 }
