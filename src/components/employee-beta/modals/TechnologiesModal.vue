@@ -30,7 +30,7 @@
           </fieldset>
         </div>
         <!-- End of Sort Filters -->
-        <technologies-list :list="filteredList"></technologies-list>
+        <technologies-list :list="filteredList" :isModal="true"></technologies-list>
         <div
           v-if="!isEmpty(model.technologies) && Math.ceil(model.technologies.length / ITEMS_PER_PAGE) != 1"
           class="text-center"
