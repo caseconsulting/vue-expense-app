@@ -13,7 +13,7 @@
         <!-- Pagination -->
         <div v-if="!isEmpty(model.awards) && Math.ceil(model.awards.length / 5) != 1" class="text-center">
           <v-card-actions class="d-flex justify-center">
-            <v-btn @click="toggleAwardsModal()">Click To See More</v-btn>
+            <v-btn @click="toggleAwardsModal()">View all {{ model.awards.length }} awards </v-btn>
           </v-card-actions>
         </div>
       </v-card-text>
