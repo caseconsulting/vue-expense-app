@@ -1,7 +1,7 @@
 <template>
   <v-card id="base-card">
     <v-card-title class="beta_header_style px-0 d-flex align-center">
-      <v-container class="fit-content d-flex flex-nowrap">
+      <v-container class="d-flex flex-nowrap justify-space-between">
         <!-- title -->
         <v-row no-gutters class="fit-content align-center">
           <v-col v-if="$slots.prependIcon" class="mr-2">
@@ -15,7 +15,7 @@
             </slot>
           </v-col>
         </v-row>
-        <v-spacer class="flex-grow-1"></v-spacer>
+        <v-spacer></v-spacer>
         <!-- action buttons -->
         <v-row no-gutters class="fit-content d-flex align-center justify-end">
           <v-col>

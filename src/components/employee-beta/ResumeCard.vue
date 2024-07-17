@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container class="pa-2 ma-0">
     <!-- Status Notification -->
     <v-snackbar
       v-model="uploadStatus.enabled"
@@ -14,10 +14,60 @@
       </v-card-text>
       <v-btn color="white" variant="text" @click="clearStatus()"> Close </v-btn>
     </v-snackbar>
-    <v-row>
-      <v-col v-if="(isAdmin || isUser) && !editing" align="right" class="px-0 ma-0">
+    <v-btn v-if="useDropDown && (isAdmin || isUser) && !editing" variant="text" icon="" density="comfortable">
+      <v-icon icon="mdi-chevron-down" size="large"></v-icon>
+      <v-menu activator="parent" location="bottom" origin="start top">
+        <v-list>
+          <v-list-item class="px-2">
+            <v-btn
+              color="#bc3825"
+              class="text-black"
+              @click="toggleResumeParser = !toggleResumeParser"
+              variant="text"
+              density="comfortable"
+              prepend-icon="mdi-upload"
+            >
+              Upload Resume
+            </v-btn>
+          </v-list-item>
+          <v-list-item class="px-2">
+            <v-btn
+              class="text-black"
+              color="#bc3825"
+              :disabled="model.resumeUpdated == null"
+              :loading="deleteLoading"
+              @click="toggleDeleteModal = !toggleDeleteModal"
+              variant="text"
+              density="comfortable"
+              prepend-icon="mdi-delete"
+            >
+              Delete Resume
+            </v-btn>
+          </v-list-item>
+          <v-list-item class="px-2">
+            <v-btn
+              class="text-black"
+              color="#bc3825"
+              :disabled="model.resumeUpdated == null"
+              @click="downloadResume()"
+              variant="text"
+              density="comfortable"
+              prepend-icon="mdi-file-download"
+            >
+              <p class="ma-0 pa-0">
+                {{ model.resumeUpdated != null ? 'Download ' : 'No resume available' }}
+              </p>
+              <p class="ma-0 pl-1 font-weight-thin">
+                {{ model.resumeUpdated != null ? `Uploaded ${format(model.resumeUpdated, null, dateFormat)}` : '' }}
+              </p>
+            </v-btn>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+    </v-btn>
+    <v-row v-else-if="(isAdmin || isUser) && !editing">
+      <v-col align="right" class="px-2 py-0 ma-0">
         <v-btn
-          :size="isMobile() ? 'x-small' : 'default'"
           color="#bc3825"
           class="text-white"
           @click="toggleResumeParser = !toggleResumeParser"
@@ -33,7 +83,6 @@
         <v-btn
           class="text-white mx-1 fit-content"
           color="#bc3825"
-          :size="isMobile() ? 'x-small' : 'default'"
           :disabled="model.resumeUpdated == null"
           :loading="deleteLoading"
           @click="toggleDeleteModal = !toggleDeleteModal"
@@ -49,7 +98,6 @@
         <v-btn
           class="text-white"
           color="#bc3825"
-          :size="isMobile() ? 'x-small' : 'default'"
           :disabled="model.resumeUpdated == null"
           @click="downloadResume()"
           variant="text"
@@ -81,11 +129,11 @@
 <script setup>
 import _ from 'lodash';
 import api from '@/shared/api.js';
-import { isMobile } from '@/utils/utils';
 import { format, getTodaysDate, FORMATTED_ISOFORMAT } from '@/shared/dateUtils';
-import { inject, onBeforeUnmount, onMounted, ref } from 'vue';
+import { inject, onBeforeUnmount, onMounted, ref, computed } from 'vue';
 import DeleteModal from '@/components/modals/DeleteModal';
 import ResumeParser from '@/components/modals/ResumeParser.vue';
+import { useDisplay } from 'vuetify';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -93,6 +141,7 @@ import ResumeParser from '@/components/modals/ResumeParser.vue';
 // |                                                  |
 // |--------------------------------------------------|
 const dateFormat = FORMATTED_ISOFORMAT;
+const display = useDisplay();
 
 defineProps(['editing', 'loading']);
 const model = defineModel();
@@ -111,6 +160,20 @@ const uploadStatus = ref({
   color: ''
 });
 
+/**
+ * computed boolean to decide whether or not to use dropdown.
+ *
+ * @return boolean - returns true for small screens
+ */
+const useDropDown = computed(() => {
+  switch (display.name.value) {
+    case 'xs':
+      return true;
+    default:
+      return false;
+  }
+}); // useDropDown
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -118,8 +181,12 @@ const uploadStatus = ref({
 // |--------------------------------------------------|
 
 onMounted(() => {
+  console.log(useDropDown.value);
   emitter.on('confirm-delete-resume', async () => {
     await deleteResume();
+  });
+  emitter.on('canceled-delete-resume', () => {
+    toggleDeleteModal.value = false;
   });
   emitter.on('resume', async (result) => {
     await resumeReceived(result.newEmployeeForm, result.totalChanges);
@@ -134,6 +201,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   emitter.off('confirm-delete-resume');
+  emitter.off('canceled-delete-resume');
   emitter.off('resume');
   emitter.off('uploaded');
 });
