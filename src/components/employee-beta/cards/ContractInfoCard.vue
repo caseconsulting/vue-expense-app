@@ -173,7 +173,10 @@ function getContractObjectFromId(contractId) {
 function getCurrentAssignment() {
   for (let c in props.model.contracts) {
     for (let p in props.model.contracts[c].projects) {
-      if (!props.model.contracts[c].projects[p].endDate) {
+      if (
+        !props.model.contracts[c].projects[p].endDate ||
+        difference(props.model.contracts[c].projects[p].endDate, getTodaysDate(), 'days') > 0
+      ) {
         currentProjectId.value = props.model.contracts[c].projects[p].projectId;
         currentContractId.value = props.model.contracts[c].contractId;
         return;
@@ -288,7 +291,7 @@ function dateReadable(time) {
  */
 function getProjectLength(project, duration) {
   let length;
-  if (project.endDate) {
+  if (project.endDate && 0 > difference(project.endDate, getTodaysDate(), 'days')) {
     length = difference(project.endDate, project.startDate, duration);
   } else {
     length = difference(getTodaysDate(), project.startDate, duration);
