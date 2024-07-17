@@ -20,38 +20,40 @@
                 <v-icon size="32" color="black">mdi-magnify</v-icon>
               </v-btn>
               <!-- if user is not searching -->
-              <div v-if="!inSearchMode">
-                <!-- if user is viewing their own profile  -->
-                <p
-                  v-if="isUser"
-                  class="text-h6 text-sm-h4 text-center mb-0"
-                  style="font-family: 'Avenir', Helvetica, Arial, sans-serif"
-                >
-                  <b>{{ 'Hello, ' + model.firstName + '!' }}</b>
-                </p>
-                <p
-                  v-else-if="isAdmin"
-                  class="text-h6 text-sm-h4 text-center mb-0"
-                  style="font-family: 'Avenir', Helvetica, Arial, sans-serif"
-                >
-                  <b>Search Employees</b>
-                </p>
-              </div>
-              <!-- if user is admin and is searching -->
-              <v-responsive v-else-if="isAdmin && inSearchMode" min-width="250px" class="d-flex align-center">
-                <v-autocomplete
-                  v-model="dropdownEmployee"
-                  :items="employeeNames"
-                  item-title="itemTitle"
-                  :custom-filter="employeeFilter"
-                  label="Search Employees"
-                  density="comfortable"
-                  hide-details
-                  return-object
-                  autofocus
-                  @update:model-value="onSearchUpdate()"
-                ></v-autocomplete>
-              </v-responsive>
+              <v-scroll-y-transition mode="out-in">
+                <div v-if="!inSearchMode">
+                  <!-- if user is viewing their own profile  -->
+                  <p
+                    v-if="isUser"
+                    class="text-h6 text-sm-h4 text-center mb-0"
+                    style="font-family: 'Avenir', Helvetica, Arial, sans-serif"
+                  >
+                    <b>{{ 'Hello, ' + model.firstName + '!' }}</b>
+                  </p>
+                  <p
+                    v-else-if="isAdmin"
+                    class="text-h6 text-sm-h4 text-center mb-0"
+                    style="font-family: 'Avenir', Helvetica, Arial, sans-serif"
+                  >
+                    <b>Search Employees</b>
+                  </p>
+                </div>
+                <!-- if user is admin and is searching -->
+                <v-responsive min-width="250px" class="d-flex align-center" v-else-if="isAdmin && inSearchMode">
+                  <v-autocomplete
+                    v-model="dropdownEmployee"
+                    :items="employeeNames"
+                    item-title="itemTitle"
+                    :custom-filter="employeeFilter"
+                    label="Search Employees"
+                    density="comfortable"
+                    hide-details
+                    return-object
+                    autofocus
+                    @update:model-value="onSearchUpdate()"
+                  ></v-autocomplete>
+                </v-responsive>
+              </v-scroll-y-transition>
             </v-col>
           </v-row>
         </v-col>
