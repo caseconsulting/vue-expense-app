@@ -14,13 +14,11 @@
         </v-col>
         <v-col class="pa-0 d-flex justify-center" cols="4">
           <v-row no-gutters class="fit-content d-flex-inline align-center">
-            <!-- if user is admin, show search button -->
-            <v-col v-if="isAdmin" class="fit-content d-flex justify-end">
-              <v-btn icon="" variant="text" @click="onSearchButton()">
+            <v-col class="text-no-wrap d-flex align-center">
+              <!-- if user is admin, show search button -->
+              <v-btn v-if="isAdmin" icon="" variant="text" @click="onSearchButton()">
                 <v-icon size="32" color="black">mdi-magnify</v-icon>
               </v-btn>
-            </v-col>
-            <v-col class="text-no-wrap d-flex align-center">
               <!-- if user is not searching -->
               <div v-if="!inSearchMode">
                 <!-- if user is viewing their own profile  -->
@@ -75,7 +73,12 @@
           />
         </v-col>
         <v-col cols="12" :md="displayTimeAndBalances ? 7 : 12" class="pa-0">
-          <employee-info v-model="model" :contracts="contracts" :loading="loading"></employee-info>
+          <employee-info
+            v-model="model"
+            :contracts="contracts"
+            :loading="loading"
+            :refreshKey="refreshKey"
+          ></employee-info>
         </v-col>
       </v-row>
     </div>
