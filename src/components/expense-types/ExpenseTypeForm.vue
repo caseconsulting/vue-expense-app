@@ -209,6 +209,7 @@
 
         <!-- Start Date -->
         <v-text-field
+          v-if="!editedExpenseType.recurringFlag"
           variant="underlined"
           v-model="startDateFormatted"
           id="startDate"
@@ -245,6 +246,7 @@
 
         <!-- End Date -->
         <v-text-field
+          v-if="!editedExpenseType.recurringFlag"
           variant="underlined"
           v-model="endDateFormatted"
           id="endDate"
@@ -494,20 +496,20 @@ onMounted(async () => {
   tags.value = store.getters.tags;
   // get all employees
   let employees = store.getters.employees;
-  let activeEmployees = [];
+  let sortedActiveEmployees = [];
 
   // populate list of active employees
   _.forEach(employees, (employee) => {
     if (employee.workStatus > 0) {
-      activeEmployees.push({
+      sortedActiveEmployees.push({
         value: employee.id,
         text: `${employee.nickname || employee.firstName} ${employee.lastName}`
       });
     }
   });
 
-  activeEmployees = _.sortBy(activeEmployees, ['text']); // sort employees
-  activeEmployees.value = activeEmployees;
+  sortedActiveEmployees = _.sortBy(sortedActiveEmployees, ['text']); // sort employees alphabetically
+  activeEmployees.value = sortedActiveEmployees;
   campfires.value = store.getters.basecampCampfires;
   editedExpenseType.value = _.cloneDeep(props.model);
 

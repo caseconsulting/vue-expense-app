@@ -8,7 +8,22 @@
       label="City"
       variant="underlined"
       class="d-inline-block field"
-    ></v-text-field>
+      @update:modelValue="searchCity($event)"
+    >
+      <v-menu target="parent" v-model="showMenu" location="bottom">
+        <v-list
+          v-if="predictions.length > 0"
+          :items="predictions"
+          @click:select="predictionSelected($event)"
+          rounded="0"
+        >
+        </v-list>
+        <v-list v-if="predictions.length > 0" @click.stop rounded="0" class="d-flex align-center">
+          <span class="text-caption text-grey ml-2">powered by</span>
+          <v-img :src="google" width="50" alt="Github icon" inline class="ml-1" />
+        </v-list>
+      </v-menu>
+    </v-text-field>
     <!-- Place of Birth: Country autocomplete -->
     <v-autocomplete
       :items="COUNTRIES"
@@ -34,6 +49,9 @@
 <script setup>
 import { STATES, COUNTRIES } from '@/utils/utils';
 import { inject, ref, watch } from 'vue';
+import google from '@/assets/img/trademarks/google.png';
+import _ from 'lodash';
+import api from '@/shared/api.js';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -43,9 +61,12 @@ import { inject, ref, watch } from 'vue';
 
 const props = defineProps(['field', 'item']);
 const emitter = inject('emitter');
+
 const cityModel = ref(props.item['city']);
 const countryModel = ref(props.item['country']);
 const stateModel = ref(props.item['st']);
+const showMenu = ref(false);
+const predictions = ref([]); // to hold all predictions made by google
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -70,12 +91,51 @@ watch(
 // |--------------------------------------------------|
 
 function isUSA() {
-  if (countryModel.value === 'United States') {
+  if (countryModel.value === 'United States' || countryModel.value === 'USA') {
     return true;
   } else {
     stateModel.value = null;
     return false;
   }
+}
+
+async function searchCity(query) {
+  predictions.value = [];
+  let predictionsSet = new Set(); // to prevent duplicate cities
+  if (query?.length > 2) {
+    showMenu.value = true;
+    let locations = await api.getCity(query);
+    _.forEach(locations.predictions, (location) => {
+      predictionsSet.add({ title: location.description, value: location.place_id });
+    });
+    predictions.value = [...predictionsSet];
+  } else {
+    showMenu.value = false;
+  }
+}
+
+async function predictionSelected(event) {
+  let prediction = _.find(predictions.value, { value: event.id });
+  let country = '';
+  let state = '';
+
+  let birthInfo = prediction.title.split(', ');
+  let city = birthInfo[0];
+
+  // a city outside the US with no state/region
+  if (birthInfo.length == 2) {
+    country = birthInfo[1];
+  } else {
+    state = birthInfo[1];
+    country = birthInfo[2];
+  }
+
+  if (country === 'USA') {
+    country = 'United States';
+  }
+  cityModel.value = city;
+  stateModel.value = STATES[state];
+  countryModel.value = country;
 }
 </script>
 

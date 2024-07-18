@@ -58,7 +58,7 @@ const emitter = inject('emitter');
 const store = useStore();
 
 const clonedEmployee = ref(props.employee);
-const excludeIfZero = ref(['Jury Duty', 'Maternity/Paternity Time Off']);
+const excludeIfZero = ref(['Jury Duty', 'Maternity/Paternity Time Off', 'Bereavement']);
 const errorMessage = ref(null);
 const lastUpdated = ref(null);
 const loading = ref(true);

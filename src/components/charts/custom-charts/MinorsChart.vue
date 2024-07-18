@@ -149,6 +149,12 @@ function fillData() {
           size: 15
         }
       },
+      subtitle: {
+        display: true,
+        font: {
+          style: 'italic'
+        }
+      },
       tooltip: {
         enabled: enabled.value
       }

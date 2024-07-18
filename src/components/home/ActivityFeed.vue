@@ -75,7 +75,8 @@
                     item.congratulateCampfire ||
                     item.birthdayCampfire ||
                     item.campfire ||
-                    item.eventScheduled
+                    item.eventScheduled ||
+                    item.basecampLink
                   "
                   activator="parent"
                   location="bottom"
@@ -85,6 +86,7 @@
                   <span v-else-if="item.birthdayCampfire">Say happy birthday</span>
                   <span v-else-if="item.campfire">Comment in campfire</span>
                   <span v-else-if="item.eventScheduled">See event</span>
+                  <span v-else-if="item.basecampLink">View in Basecamp</span>
                 </v-tooltip>
                 <v-icon class="text-white">{{ item.icon }}</v-icon>
               </v-btn>
@@ -187,17 +189,12 @@ function filterEvents() {
  * @return String - basecamp url
  */
 function getURL(item) {
-  if (!_.isNil(item.newCampfire)) {
-    return item.newCampfire;
-  } else if (!_.isNil(item.congratulateCampfire)) {
-    return item.congratulateCampfire;
-  } else if (!_.isNil(item.birthdayCampfire)) {
-    return item.birthdayCampfire;
-  } else if (!_.isNil(item.campfire)) {
-    return item.campfire;
-  } else if (!_.isNil(item.eventScheduled)) {
-    return item.eventScheduled;
-  }
+  if (!_.isNil(item.newCampfire)) return item.newCampfire;
+  else if (!_.isNil(item.congratulateCampfire)) return item.congratulateCampfire;
+  else if (!_.isNil(item.birthdayCampfire)) return item.birthdayCampfire;
+  else if (!_.isNil(item.campfire)) return item.campfire;
+  else if (!_.isNil(item.eventScheduled)) return item.eventScheduled;
+  else if (!_.isNil(item.basecampLink)) return item.basecampLink;
 } // getURL
 
 /**
@@ -205,10 +202,10 @@ function getURL(item) {
  *
  * @param item Object - The month's anniversaries
  */
-function openAnniversariesModal(item) {
+function openAnniversariesModal(itm) {
   toggleAnniversariesModal.value = true;
-  item.events.sort((a, b) => new Date(a.anniversary) - new Date(b.anniversary));
-  this.item = item;
+  itm.events.sort((a, b) => new Date(a.anniversary) - new Date(b.anniversary));
+  item.value = itm;
 } // openAnniversariesModal
 </script>
 

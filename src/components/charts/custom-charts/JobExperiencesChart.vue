@@ -188,6 +188,13 @@ function drawJobExpHistGraph() {
         font: {
           size: 15
         }
+      },
+      subtitle: {
+        display: true,
+        text: '*Click on a bar to see employees',
+        font: {
+          style: 'italic'
+        }
       }
     },
     maintainAspectRatio: false

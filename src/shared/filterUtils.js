@@ -14,6 +14,8 @@ export function employeeFilter(__, search, item) {
   item.id = item.id || item.value;
   item = _.find(store.getters.employees, (e) => e.id === item.id);
 
+  if (!item) return false;
+
   /**
    * Bounce conditions:
    *  - nothing is being searched
@@ -25,11 +27,12 @@ export function employeeFilter(__, search, item) {
   if (search === null || (terms.length === 1 && terms[0].length < 2)) return true;
 
   // different items from the employee to look through
-  let [frst, midl, last, nick, F, M, N, L] = [
+  let [frst, midl, last, nick, email, F, M, N, L] = [
     item.firstName?.trim(),
     item.middleName?.trim(),
     item.lastName?.trim(),
     item.nickname?.trim(),
+    item.email ? item.email.trim()?.split('@')?.[0] : '',
     item.firstName ? item.firstName.trim()[0] : '',
     item.middleName ? item.middleName.trim()[0] : '',
     item.nickname ? item.nickname.trim()[0] : '',
@@ -37,6 +40,7 @@ export function employeeFilter(__, search, item) {
   ];
   let searchableTerms = [
     `${item.employeeNumber}`,
+    `${email}`,
     `${frst} ${last}`,
     `${last} ${frst}`,
     `${frst} ${midl} ${last}`,

@@ -31,8 +31,7 @@
                       class="pointer"
                       >{{ nicknameAndLastName(e.employee) }}</a
                     ><span>
-                      (assigned project{{ e.currentProjects.length > 1 ? 's' : '' }}:
-                      {{ e.currentProjects.map((p) => p.projectName).join(', ') }})</span
+                      (assigned project{{ e.currentProjects.length > 1 ? 's' : '' }}: {{ getCurrentProject(e) }})</span
                     >
                   </li>
                 </ul>
@@ -66,8 +65,7 @@
                       >{{ nicknameAndLastName(e.employee) }}</a
                     >
                     <span>
-                      (last assigned project{{ e.lastProjects.length > 1 ? 's' : '' }}:
-                      {{ e.lastProjects.map((p) => p.projectName).join(', ') }})</span
+                      (last assigned project{{ e.lastProjects.length > 1 ? 's' : '' }}: {{ getPastProject(e) }})</span
                     >
                   </li>
                 </ul>
@@ -218,6 +216,27 @@ function getPastEmployeesAssignedToContract() {
 function getProject(contractId, projectId) {
   return store.getters.contracts.find((c) => c.id == contractId).projects.find((p) => p.id == projectId);
 } // getProject
+
+/**
+ * Gets the current project aligned with a given contract
+ * @param employee employee that is on the contract
+ */
+function getCurrentProject(employee) {
+  return employee.currentProjects.map((p) => p.projectName).join(', ');
+} // getCurrentProject
+
+/**
+ * Gets the past project aligned with a given contract
+ * @param employee employee that was/is on the contract
+ */
+function getPastProject(employee) {
+  try {
+    return employee.lastProjects.map((p) => p.projectName).join(', ');
+  } catch (err) {
+    console.error(err);
+    return 'project no longer exists';
+  }
+} // getPastProject
 </script>
 
 <style scoped>

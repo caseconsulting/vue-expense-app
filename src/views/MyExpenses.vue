@@ -23,7 +23,7 @@
         <v-card-text color="white">
           <span class="text-h6 font-weight-medium">{{ status.statusMessage }}</span>
         </v-card-text>
-        <v-btn color="white" variant="text" @click="clearStatus"> Close </v-btn>
+        <v-btn color="white" variant="text" @click="clearStatus()"> Close </v-btn>
       </v-snackbar>
 
       <v-col cols="12" lg="8">
@@ -41,7 +41,7 @@
                 <v-spacer></v-spacer>
 
                 <!-- Employee Filter -->
-                <v-col align="end" cols="3">
+                <v-col align="end" cols="12" sm="4" md="3">
                   <v-autocomplete
                     v-if="userRoleIsAdmin() || userRoleIsManager()"
                     id="employeeIdFilter"
@@ -57,13 +57,13 @@
                 </v-col>
 
                 <!-- Tags filter -->
-                <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="12" md="3">
+                <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="12" sm="4" md="3">
                   <tags-filter v-model="tagsInfo" @update:modelValue="filterExpenses()"></tags-filter>
                 </v-col>
                 <!-- End Tags Filter -->
 
                 <!-- Search Bar -->
-                <v-col align="end" cols="3">
+                <v-col align="end" cols="12" sm="4" md="3">
                   <v-text-field
                     id="search"
                     v-model="search"
@@ -96,7 +96,7 @@
                     hide-details
                   />
                 </v-col>
-                <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="6">
+                <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="12">
                   <!-- Employee Filter -->
                   <v-autocomplete
                     id="employeeIdFilter"
@@ -111,198 +111,209 @@
                   />
                 </v-col>
                 <!-- Tags filter -->
-                <tags-filter v-model="tagsInfo" @update:modelValue="filterExpenses()"></tags-filter>
+                <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="12">
+                  <tags-filter v-model="tagsInfo" @update:modelValue="filterExpenses()"></tags-filter>
+                </v-col>
+                <!-- End Tags Filter -->
               </v-row>
             </div>
 
             <!-- Filters -->
             <fieldset>
               <legend class="legend_style">Filters</legend>
-              <v-container fluid class="px-2 pt-1 pb-4">
-                <v-row dense>
-                  <v-col cols="12" md="3">
-                    <!-- Active Filter -->
-                    <div class="d-inline-block mr-4">
-                      <h4>Active Expense Type:</h4>
-                      <v-btn-toggle
-                        v-model="filter.active"
-                        color="primary"
-                        class="filter_color"
-                        :density="isMobile() ? 'compact' : 'comfortable'"
-                        mandatory
-                      >
-                        <!-- Show Active -->
-                        <v-tooltip location="top">
-                          <template #activator="{ props }">
-                            <v-btn value="active" v-bind="props" variant="text">
-                              <v-icon class="mr-1">
-                                mdi-check-circle{{ filter.active.includes('active') ? '' : '-outline' }}
-                              </v-icon>
-                            </v-btn>
-                          </template>
-                          <span>Show Active</span>
-                        </v-tooltip>
+              <v-container fluid>
+                <v-row class="d-flex flex-wrap">
+                  <!-- Active Filter -->
+                  <div class="d-inline-block pa-2">
+                    <h4>Active Expense Type:</h4>
+                    <v-btn-toggle
+                      v-model="filter.active"
+                      color="primary"
+                      class="filter_color"
+                      :density="isMobile() ? 'compact' : 'comfortable'"
+                      mandatory
+                    >
+                      <!-- Show Active -->
+                      <v-tooltip location="top">
+                        <template #activator="{ props }">
+                          <v-btn value="active" v-bind="props" variant="text">
+                            <v-icon class="mr-1">
+                              mdi-check-circle{{ filter.active.includes('active') ? '' : '-outline' }}
+                            </v-icon>
+                          </v-btn>
+                        </template>
+                        <span>Show Active</span>
+                      </v-tooltip>
 
-                        <!-- Show Inactive -->
-                        <v-tooltip location="top">
-                          <template #activator="{ props }">
-                            <v-btn value="notActive" v-bind="props" variant="text">
-                              <v-icon>
-                                mdi-close-circle{{ filter.active.includes('notActive') ? '' : '-outline' }}
-                              </v-icon>
-                            </v-btn>
-                          </template>
-                          <span>Show Inactive</span>
-                        </v-tooltip>
+                      <!-- Show Inactive -->
+                      <v-tooltip location="top">
+                        <template #activator="{ props }">
+                          <v-btn value="notActive" v-bind="props" variant="text">
+                            <v-icon>
+                              mdi-close-circle{{ filter.active.includes('notActive') ? '' : '-outline' }}
+                            </v-icon>
+                          </v-btn>
+                        </template>
+                        <span>Show Inactive</span>
+                      </v-tooltip>
 
-                        <!-- Show Active and Inactive -->
-                        <v-tooltip location="top">
-                          <template #activator="{ props }">
-                            <v-btn
-                              value="both"
-                              v-bind="props"
-                              variant="text"
-                              :class="filter.active.includes('both') ? 'font-weight-black' : ''"
-                            >
-                              BOTH
-                            </v-btn>
-                          </template>
-                          <span>Show All</span>
-                        </v-tooltip>
-                      </v-btn-toggle>
-                    </div>
-                    <!-- End Active Filter -->
-                  </v-col>
-                  <v-col cols="12" md="3">
-                    <!-- Reimbursed Filter -->
-                    <div class="d-inline-block" :class="!userRoleIsAdmin() && !userRoleIsManager() ? 'ml-3' : ''">
-                      <h4>Reimbursed:</h4>
-                      <v-btn-toggle
-                        v-model="filter.reimbursed"
-                        color="primary"
-                        class="filter_color"
-                        :density="isMobile() ? 'compact' : 'comfortable'"
-                        mandatory
-                      >
-                        <!-- Show Reimbursed -->
-                        <v-tooltip location="top">
-                          <template #activator="{ props }">
-                            <v-btn value="reimbursed" v-bind="props" variant="text" density="comfortable">
-                              <v-icon id="showReimbursed" class="mr-1">
-                                mdi-check-circle{{ filter.reimbursed.includes('reimbursed') ? '' : '-outline' }}
-                              </v-icon>
-                            </v-btn>
-                          </template>
-                          <span>Show Reimbursed</span>
-                        </v-tooltip>
+                      <!-- Show Active and Inactive -->
+                      <v-tooltip location="top">
+                        <template #activator="{ props }">
+                          <v-btn
+                            value="both"
+                            v-bind="props"
+                            variant="text"
+                            :class="filter.active.includes('both') ? 'font-weight-black' : ''"
+                          >
+                            BOTH
+                          </v-btn>
+                        </template>
+                        <span>Show All</span>
+                      </v-tooltip>
+                    </v-btn-toggle>
+                  </div>
+                  <!-- End Active Filter -->
+                  <!-- Status Filter -->
+                  <div class="d-inline-block pa-2" :class="!userRoleIsAdmin() && !userRoleIsManager() ? 'ml-3' : ''">
+                    <h4>Status:</h4>
+                    <v-btn-toggle
+                      v-model="filter.status"
+                      color="primary"
+                      class="filter_color"
+                      :density="isMobile() ? 'compact' : 'comfortable'"
+                      mandatory
+                    >
+                      <!-- Show Reimbursed -->
+                      <v-tooltip location="top">
+                        <template #activator="{ props }">
+                          <v-btn value="reimbursed" v-bind="props" variant="text" density="comfortable">
+                            <v-icon id="reimbursedStatus" class="mr-1">
+                              mdi-check-circle{{ filter.status.includes('reimbursed') ? '' : '-outline' }}
+                            </v-icon>
+                          </v-btn>
+                        </template>
+                        <span>Show Reimbursed</span>
+                      </v-tooltip>
 
-                        <!-- Show Pending -->
-                        <v-tooltip location="top">
-                          <template #activator="{ props }">
-                            <v-btn value="notReimbursed" v-bind="props" variant="text">
-                              <v-icon id="showPending">
-                                mdi-close-circle{{ filter.reimbursed.includes('notReimbursed') ? '' : '-outline' }}
-                              </v-icon>
-                            </v-btn>
-                          </template>
-                          <span>Show Pending</span>
-                        </v-tooltip>
+                      <!-- Show Rejected -->
+                      <v-tooltip location="top">
+                        <template #activator="{ props }">
+                          <v-btn value="rejected" v-bind="props" variant="text">
+                            <v-icon id="showRejected">
+                              mdi-close-circle{{ filter.status.includes('rejected') ? '' : '-outline' }}
+                            </v-icon>
+                          </v-btn>
+                        </template>
+                        <span>Show Rejected</span>
+                      </v-tooltip>
 
-                        <!-- Show Reimbursed and Pending -->
-                        <v-tooltip location="top">
-                          <template #activator="{ props }">
-                            <v-btn
-                              id="bothReimbursed"
-                              value="both"
-                              v-bind="props"
-                              variant="text"
-                              :class="filter.reimbursed.includes('both') ? 'font-weight-black' : ''"
-                            >
-                              BOTH
-                            </v-btn>
-                          </template>
-                          <span>Show All</span>
-                        </v-tooltip>
-                      </v-btn-toggle>
-                    </div>
-                    <!-- End Reimbursed Filter -->
-                  </v-col>
-                  <v-col cols="12" md="6" class="d-flex pa-1">
-                    <v-container fluid class="pa-0" :class="!userRoleIsAdmin() && !userRoleIsManager() ? 'ml-3' : ''">
-                      <h4 class="ml-0 pl-0 mb-1">Reimbursed Date Range:</h4>
-                      <v-row class="ml-1">
-                        <!-- Start Date Filter -->
-                        <v-menu v-model="startDateFilterMenu" :close-on-content-click="false" location="start center">
-                          <template #activator="{ props }">
-                            <v-text-field
-                              ref="formFields"
-                              v-mask="'##/##/####'"
-                              :model-value="format(startDateFilter, null, 'MM/DD/YYYY')"
-                              :rules="getDateOptionalRules()"
-                              label="Start Date"
-                              variant="underlined"
-                              hint="MM/DD/YYYY format"
-                              prepend-icon="mdi-calendar"
-                              persistent-hint
-                              class="mr-5"
-                              v-bind="props"
-                              @update:focused="startDateFilter = parseEventDate()"
-                              @click:prepend="startDateFilterMenu = true"
-                              @keypress="startDateFilterMenu = false"
-                            />
-                          </template>
-                          <v-date-picker
-                            v-model="startDateFilter"
-                            show-adjacent-months
-                            hide-actions
-                            keyboard-icon=""
-                            color="#bc3825"
-                            title="Start Date Filter"
-                            @update:model-value="
-                              startDateFilterMenu = false;
-                              startDateFilter = format(startDateFilter, null, 'MM/DD/YYYY');
-                            "
+                      <!-- Show Pending -->
+                      <v-tooltip location="top">
+                        <template #activator="{ props }">
+                          <v-btn value="pending" v-bind="props" variant="text">
+                            <v-icon id="showPending">
+                              mdi-star-four-points-circle{{ filter.status.includes('pending') ? '' : '-outline' }}
+                            </v-icon>
+                          </v-btn>
+                        </template>
+                        <span>Show Pending</span>
+                      </v-tooltip>
+
+                      <!-- Show All -->
+                      <v-tooltip location="top">
+                        <template #activator="{ props }">
+                          <v-btn
+                            id="allStatus"
+                            value="all"
+                            v-bind="props"
+                            variant="text"
+                            :class="filter.status.includes('all') ? 'font-weight-black' : ''"
+                          >
+                            All
+                          </v-btn>
+                        </template>
+                        <span>Show All Expenses</span>
+                      </v-tooltip>
+                    </v-btn-toggle>
+                  </div>
+                  <!-- End Status Filter -->
+                  <!-- Reimbursed Date Range Filter -->
+                  <div class="pa-2">
+                    <h4 class="ml-0 pl-0 mb-1">Reimbursed Date Range:</h4>
+                    <v-row class="ml-1">
+                      <!-- Start Date Filter -->
+                      <v-menu v-model="startDateFilterMenu" :close-on-content-click="false" location="start center">
+                        <template #activator="{ props }">
+                          <v-text-field
+                            ref="formFields"
+                            v-mask="'##/##/####'"
+                            :model-value="format(startDateFilter, null, 'MM/DD/YYYY')"
+                            :rules="getDateOptionalRules()"
+                            label="Start Date"
+                            variant="underlined"
+                            hint="MM/DD/YYYY format"
+                            prepend-icon="mdi-calendar"
+                            persistent-hint
+                            class="mr-5"
+                            v-bind="props"
+                            @update:focused="startDateFilter = parseEventDate()"
+                            @click:prepend="startDateFilterMenu = true"
+                            @keypress="startDateFilterMenu = false"
                           />
-                        </v-menu>
-                        <!-- End Start Date Filter-->
+                        </template>
+                        <v-date-picker
+                          v-model="startDateFilter"
+                          show-adjacent-months
+                          hide-actions
+                          keyboard-icon=""
+                          color="#bc3825"
+                          title="Start Date Filter"
+                          @update:model-value="
+                            startDateFilterMenu = false;
+                            startDateFilter = format(startDateFilter, null, 'MM/DD/YYYY');
+                          "
+                        />
+                      </v-menu>
+                      <!-- End Start Date Filter-->
 
-                        <!-- End Date Filter -->
-                        <v-menu v-model="endDateFilterMenu" :close-on-content-click="false" location="start center">
-                          <template #activator="{ props }">
-                            <v-text-field
-                              ref="formFields"
-                              v-mask="'##/##/####'"
-                              :model-value="format(endDateFilter, null, 'MM/DD/YYYY')"
-                              :rules="getDateOptionalRules()"
-                              label="End Date"
-                              variant="underlined"
-                              hint="MM/DD/YYYY format"
-                              prepend-icon="mdi-calendar"
-                              persistent-hint
-                              class="mr-5"
-                              v-bind="props"
-                              @update:focused="endDateFilter = parseEventDate()"
-                              @click:prepend="endDateFilterMenu = true"
-                              @keypress="endDateFilterMenu = false"
-                            />
-                          </template>
-                          <v-date-picker
-                            v-model="endDateFilter"
-                            show-adjacent-months
-                            hide-actions
-                            keyboard-icon=""
-                            color="#bc3825"
-                            title="Start Date Filter"
-                            @update:model-value="
-                              endDateFilterMenu = false;
-                              endDateFilter = format(endDateFilter, null, 'MM/DD/YYYY');
-                            "
+                      <!-- End Date Filter -->
+                      <v-menu v-model="endDateFilterMenu" :close-on-content-click="false" location="start center">
+                        <template #activator="{ props }">
+                          <v-text-field
+                            ref="formFields"
+                            v-mask="'##/##/####'"
+                            :model-value="format(endDateFilter, null, 'MM/DD/YYYY')"
+                            :rules="getDateOptionalRules()"
+                            label="End Date"
+                            variant="underlined"
+                            hint="MM/DD/YYYY format"
+                            prepend-icon="mdi-calendar"
+                            persistent-hint
+                            class="mr-5"
+                            v-bind="props"
+                            @update:focused="endDateFilter = parseEventDate()"
+                            @click:prepend="endDateFilterMenu = true"
+                            @keypress="endDateFilterMenu = false"
                           />
-                        </v-menu>
-                        <!-- End End Date Filter-->
-                      </v-row>
-                    </v-container>
-                  </v-col>
+                        </template>
+                        <v-date-picker
+                          v-model="endDateFilter"
+                          show-adjacent-months
+                          hide-actions
+                          keyboard-icon=""
+                          color="#bc3825"
+                          title="Start Date Filter"
+                          @update:model-value="
+                            endDateFilterMenu = false;
+                            endDateFilter = format(endDateFilter, null, 'MM/DD/YYYY');
+                          "
+                        />
+                      </v-menu>
+                      <!-- End End Date Filter-->
+                    </v-row>
+                    <!-- End Date Range Filter -->
+                  </div>
                 </v-row>
               </v-container>
             </fieldset>
@@ -317,6 +328,7 @@
               :expanded="expanded"
               :loading="loading || initialPageLoading"
               :items-per-page="15"
+              :row-props="rowClasses"
               :search="search"
               item-value="id"
               class="elevation-4 smaller-font"
@@ -324,18 +336,6 @@
               :no-data-text="'No results :('"
               expand-on-click
             >
-              <!-- Cost slot -->
-              <template #[`item.cost`]="{ item }">
-                <td>{{ convertToMoneyString(item.cost) }}</td>
-              </template>
-              <!-- Purchase date slot -->
-              <template #[`item.purchaseDate`]="{ item }">
-                <td>{{ monthDayYearFormat(item.purchaseDate) }}</td>
-              </template>
-              <!-- Reimburse date Slot -->
-              <template #[`item.reimbursedDate`]="{ item }">
-                <td>{{ monthDayYearFormat(item.reimbursedDate) }}</td>
-              </template>
               <!-- Creation date slot -->
               <template #[`item.createdAt`]="{ item }">
                 <td>{{ monthDayYearFormat(item.createdAt) }}</td>
@@ -350,7 +350,18 @@
               <template #[`item.budgetName`]="{ item }">
                 <td>{{ item.budgetName }}</td>
               </template>
-
+              <!-- Cost slot -->
+              <template #[`item.cost`]="{ item }">
+                <td>{{ convertToMoneyString(item.cost) }}</td>
+              </template>
+              <!-- Purchase date slot -->
+              <template #[`item.purchaseDate`]="{ item }">
+                <td>{{ monthDayYearFormat(item.purchaseDate) }}</td>
+              </template>
+              <!-- Reimburse date Slot -->
+              <template #[`item.reimbursedDate`]="{ item }">
+                <td>{{ monthDayYearFormat(item.reimbursedDate) }}</td>
+              </template>
               <!--Action Items-->
               <template #[`item.actions`]="{ item }">
                 <td class="d-flex justify-end mr-4">
@@ -362,9 +373,8 @@
                     id="edit"
                     :disabled="
                       isEditing ||
-                      (!(userRoleIsAdmin() || userRoleIsManager()) && isReimbursed(item)) ||
-                      midAction ||
-                      (!(userRoleIsAdmin() || userRoleIsManager()) && !canDelete(item))
+                      (!(userRoleIsAdmin() || userRoleIsManager()) && (isReimbursed(item) || !canDelete(item))) ||
+                      midAction
                     "
                     variant="text"
                     icon
@@ -451,6 +461,20 @@
                           </v-icon>
                           <v-icon v-else class="mr-1 mx-3" id="marks"> mdi-close-circle-outline </v-icon>
                         </div>
+                        <div v-if="!isEmpty(item?.rejections?.softRejections)">
+                          <b>Revisal Requests:</b>
+                          <div v-for="(reason, i) in item.rejections.softRejections.reasons" :key="reason">
+                            &nbsp;&nbsp;&nbsp;&nbsp;<b>Reason {{ i + 1 }}: </b>{{ reason }}
+                          </div>
+                          <div>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<b>Revised: </b>
+                            {{ item.rejections.softRejections.revised ? 'Yes' : 'No' }}
+                          </div>
+                        </div>
+                        <div v-if="!isEmpty(item?.rejections?.hardRejections)">
+                          <b>Rejection reason:</b>
+                          {{ item?.rejections?.hardRejections?.reasons?.[0] }}
+                        </div>
                       </div>
                     </v-card-text>
                   </v-card>
@@ -485,7 +509,7 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import api from '@/shared/api.js';
 import Attachment from '@/components/utils/Attachment.vue';
 import ConvertExpensesToCsv from '@/components/expenses/ConvertExpensesToCsv.vue';
@@ -505,9 +529,217 @@ import {
 } from '@/utils/utils';
 import { employeeFilter } from '@/shared/filterUtils';
 import { format, isBetween } from '@/shared/dateUtils';
-import { getDateOptionalRules, getNonFutureDateRules } from '@/shared/validationUtils.js';
+import { getDateOptionalRules } from '@/shared/validationUtils.js';
 import { updateStoreBudgets, updateStoreExpenseTypes, updateStoreEmployees, updateStoreTags } from '@/utils/storeUtils';
 import { mask } from 'vue-the-mask';
+import { onBeforeMount, onBeforeUnmount, ref, watch, computed, inject } from 'vue';
+import { useStore } from 'vuex';
+import { storeIsPopulated } from '../utils/utils';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const emitter = inject('emitter');
+const store = useStore();
+
+const deleting = ref(false); // activate delete model
+const expanded = ref([]); // datatable expanded
+const expenses = ref([]); // all expenses
+const employees = ref([]); // employee autocomplete options
+const employee = ref(null); // employee autocomplete filter
+const endDateFilter = ref(null);
+const endDateFilterMenu = ref(null);
+const expense = ref({
+  id: null,
+  purchaseDate: null,
+  reimbursedDate: null,
+  note: null,
+  url: null,
+  createdAt: null,
+  receipt: null,
+  cost: null,
+  description: null,
+  employeeId: null,
+  expenseTypeId: null,
+  category: null,
+  showOnFeed: null,
+  employeeName: null,
+  budgetName: null,
+  recipient: null
+}); // selected expense
+const expenseTypes = ref([]); // expense types
+const filter = ref({
+  active: 'both',
+  status: 'pending' //default only shows expenses that are not reimbursed
+}); // datatable filters
+const filteredExpenses = ref([]); // filtered expenses
+const form = ref(null);
+const headers = ref([
+  {
+    title: 'Creation Date',
+    key: 'createdAt'
+  },
+  {
+    title: 'Employee',
+    key: 'employeeName'
+  },
+  {
+    title: 'Expense Type',
+    key: 'budgetName'
+  },
+  {
+    title: 'Cost',
+    key: 'cost'
+  },
+  {
+    title: 'Purchase Date',
+    key: 'purchaseDate'
+  },
+  {
+    title: 'Reimburse Date',
+    key: 'reimbursedDate'
+  },
+  {
+    key: 'actions',
+    width: '25%',
+    align: 'end',
+    sortable: false
+  }
+]); // datatable headers
+const isEditing = ref(false); // whether or not an expense is being edited
+const loading = ref(true); // loading status
+const initialPageLoading = ref(true); // loading page at startup
+const midAction = ref(false);
+const propExpense = ref({
+  id: null,
+  createdAt: null,
+  employeeId: null,
+  employeeName: null,
+  expenseTypeId: null,
+  budgetName: null,
+  category: null,
+  cost: 0,
+  description: null,
+  purchaseDate: null,
+  reimbursedDate: null,
+  note: null,
+  receipt: null,
+  recipient: null,
+  url: null,
+  showOnFeed: null
+}); // expense to edit
+const search = ref(null); // query text for datatable search field
+const toSort = ref([{ key: 'createdAt', order: 'desc' }]); // default sort datatable items
+const startDateFilter = ref(null);
+const startDateFilterMenu = ref(null);
+const status = ref({
+  show: false,
+  statusType: undefined,
+  statusMessage: '',
+  color: ''
+}); // snackbar action status
+const tagsInfo = ref({
+  selected: [],
+  flipped: []
+});
+const unreimbursing = ref(false); // activate unreimburse model when value changes
+const userInfo = ref(null); // user information
+const vMask = mask; //custom directive
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ *  Gets and sets user info, expense types, and expenses. Creates event listeners.
+ */
+onBeforeMount(async () => {
+  // expense form listeners
+  emitter.on('add', () => {
+    addModelToTable();
+  });
+  emitter.on('delete', () => {
+    deleteModelFromTable();
+  });
+  emitter.on('startAction', () => {
+    startAction();
+  });
+  emitter.on('update', () => {
+    updateModelInTable();
+  });
+  emitter.on('error', (msg) => {
+    displayError(msg);
+  });
+
+  //no longer editing an expense (clear model and enable buttons)
+  emitter.on('finished-editing-expense', () => {
+    clearExpense();
+    isEditing.value = false;
+  });
+
+  emitter.on('endAction', () => {
+    midAction.value = false;
+  });
+
+  //when expense type is being edited buttons should be disabled
+  emitter.on('editing-expense', () => {
+    isEditing.value = true;
+  });
+
+  emitter.on('canceled-unreimburse-expense', () => {
+    midAction.value = false;
+  });
+  emitter.on('confirm-unreimburse-expense', async () => {
+    await unreimburseExpense();
+  });
+
+  emitter.on('canceled-delete-expense', () => {
+    midAction.value = false;
+    deleting.value = false;
+  });
+  emitter.on('confirm-delete-expense', async () => {
+    deleting.value = false;
+    await deleteExpense();
+  });
+
+  if (store.getters.storeIsPopulated) {
+    loadMyExpensesData();
+  }
+
+  // if coming from budgets chart scroll to top and fill in filter data
+  if (!_.isEmpty(localStorage.getItem('requestedFilter'))) {
+    window.scrollTo(0, 0);
+    let storedInfo = JSON.parse(localStorage.getItem('requestedFilter'));
+    [search.value, filter.value.reimbursed, employee.value] = [
+      storedInfo.defaultSearch,
+      storedInfo.defaultFilterReimbursed,
+      storedInfo.defaultEmployee
+    ];
+    localStorage.removeItem('requestedFilter');
+  }
+}); // onBeforeMount
+
+/**
+ * destroy listeners
+ */
+onBeforeUnmount(() => {
+  emitter.off('add');
+  emitter.off('delete');
+  emitter.off('startAction');
+  emitter.off('update');
+  emitter.off('error');
+  emitter.off('canceled-delete-expense');
+  emitter.off('confirm-delete-expense');
+  emitter.off('finished-editing-expense');
+  emitter.off('editing-expense');
+  emitter.off('confirm-unreimburse-expense');
+  emitter.off('canceled-unreimburse-expense');
+}); // onBeforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -522,31 +754,15 @@ import { mask } from 'vue-the-mask';
  *
  * @return Array - datatable headers
  */
-function roleHeaders() {
+const roleHeaders = computed(() => {
   return userRoleIsAdmin() || userRoleIsManager()
-    ? this.headers
+    ? headers.value
     : (function getUserHeaders(headers) {
         let localHeaders = _.cloneDeep(headers); // create a local copy of all headers
         localHeaders.splice(1, 1); // remove the employee header
         return localHeaders; // return the remaining headers
-      })(this.headers);
-} // roleHeaders
-
-/**
- * Parse the date after losing focus.
- *
- * @return String - The date in YYYY-MM-DD format
- */
-function parseEventDate() {
-  return this.format(event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD');
-} // parseEventDate
-
-/**
- * Computed property for storeIsPopulated.
- */
-function storeIsPopulated() {
-  return this.$store.getters.storeIsPopulated;
-} // storeIsPopulated
+      })(headers.value);
+}); // roleHeaders
 
 /**
  * Checks if the user is inactive. Returns true if the user is
@@ -554,12 +770,12 @@ function storeIsPopulated() {
  *
  * @return boolean - whether or not the user is inactive
  */
-function userIsInactive() {
-  if (this.userInfo == null) {
+const userIsInactive = computed(() => {
+  if (userInfo.value == null) {
     return false;
   }
-  return this.userInfo.workStatus == 0;
-} // userIsInactive
+  return userInfo.value.workStatus == 0;
+}); // userIsInactive
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -593,12 +809,12 @@ function moneyFilter(value) {
  * create status in the snackbar.
  */
 async function addModelToTable() {
-  await this.refreshExpenses();
+  await refreshExpenses();
 
-  this.status['show'] = true;
-  this.status['statusType'] = 'SUCCESS';
-  this.status['statusMessage'] = 'Item was successfully submitted!';
-  this.status['color'] = 'green';
+  status.value['show'] = true;
+  status.value['statusType'] = 'SUCCESS';
+  status.value['statusMessage'] = 'Item was successfully submitted!';
+  status.value['color'] = 'green';
 } // addModelToTable
 
 /**
@@ -606,28 +822,22 @@ async function addModelToTable() {
  * if user sets employeeId and employeeName.
  */
 function clearExpense() {
-  this.expense['description'] = null;
-  this.expense = _.mapValues(this.expense, () => {
+  expense.value['description'] = null;
+  expense.value = _.mapValues(expense.value, () => {
     return null;
   });
-  if (this.asUser) {
-    // creating or updating an expense as a user
-    this.expense['employeeId'] = this.userInfo.id;
-    this.expense['employeeName'] = this.userInfo.id;
-  } else {
-    this.expense['employeeId'] = null;
-    this.expense['employeeName'] = null;
-  }
+  expense.value['employeeId'] = null;
+  expense.value['employeeName'] = null;
 } // clearExpense
 
 /**
  * Clear the action status that is displayed in the snackbar.
  */
 function clearStatus() {
-  this.status['show'] = false;
-  this.status['statusType'] = undefined;
-  this.status['statusMessage'] = '';
-  this.status['color'] = '';
+  status.value['show'] = false;
+  status.value['statusType'] = undefined;
+  status.value['statusMessage'] = '';
+  status.value['color'] = '';
 } // clearStatus
 
 /**
@@ -638,7 +848,7 @@ function clearStatus() {
  */
 function constructAutoComplete(aggregatedData) {
   let seenEmployees = new Set(); // used to not add duplicates
-  this.employees = _.sortBy(
+  employees.value = _.sortBy(
     _.map(aggregatedData, (data) => {
       if (data && data.employeeName && data.employeeId && !seenEmployees.has(data.employeeId)) {
         seenEmployees.add(data.employeeId);
@@ -661,32 +871,32 @@ function constructAutoComplete(aggregatedData) {
  * Delete a selected expense.
  */
 async function deleteExpense() {
-  this.loading = true; // set loading status to true
-  if (this.propExpense.id) {
+  loading.value = true; // set loading status to true
+  if (propExpense.value.id) {
     // expense is selected
-    let deletedExpense = this.propExpense;
-    let deleted = await api.deleteItem(api.EXPENSES, this.propExpense.id);
+    let deletedExpense = propExpense.value;
+    let deleted = await api.deleteItem(api.EXPENSES, propExpense.value.id);
     if (deleted.id) {
       // successfully deletes expense
-      await this.deleteModelFromTable(deletedExpense);
-      if (!this.isEmpty(deletedExpense.receipt)) {
+      await deleteModelFromTable(deletedExpense);
+      if (!isEmpty(deletedExpense.receipt)) {
         // delete attachment from s3 if deleted expense has a receipt
         let deletedAttachment = await api.deleteAttachment(deleted);
         if (deletedAttachment.code) {
           // emit alert if error deleting file
-          this.displayError(`Error Deleting Receipt: ${deletedAttachment.message}`);
+          displayError(`Error Deleting Receipt: ${deletedAttachment.message}`);
         }
       }
     } else {
       // fails to delete expense
-      this.displayError('Error Deleting Expense');
+      displayError('Error Deleting Expense');
     }
     // update budgets in store
-    await this.updateStoreBudgets();
+    await updateStoreBudgets();
 
-    this.midAction = false;
+    midAction.value = false;
   }
-  this.loading = false; // set loading status to false
+  loading.value = false; // set loading status to false
 } // deleteExpense
 
 /**
@@ -694,12 +904,12 @@ async function deleteExpense() {
  * delete status in the snackbar.
  */
 async function deleteModelFromTable() {
-  await this.refreshExpenses();
+  await refreshExpenses();
 
-  this.status['show'] = true;
-  this.status['statusType'] = 'SUCCESS';
-  this.status['statusMessage'] = 'Item was successfully deleted!';
-  this.status['color'] = 'green';
+  status.value['show'] = true;
+  status.value['statusType'] = 'SUCCESS';
+  status.value['statusMessage'] = 'Item was successfully deleted!';
+  status.value['color'] = 'green';
 } // deleteModelFromTable
 
 /**
@@ -708,64 +918,66 @@ async function deleteModelFromTable() {
  * @param err - String error message
  */
 function displayError(err) {
-  this.status['show'] = true;
-  this.status['statusType'] = 'ERROR';
-  this.status['statusMessage'] = err;
-  this.status['color'] = 'red';
+  status.value['show'] = true;
+  status.value['statusType'] = 'ERROR';
+  status.value['statusMessage'] = err;
+  status.value['color'] = 'red';
 } // displayError
 
 /**
  * Filters expenses based on filter selections.
  */
 function filterExpenses() {
-  this.filteredExpenses = this.expenses;
+  filteredExpenses.value = expenses.value;
 
-  if (this.employee) {
+  if (employee.value) {
     // filter expenses by employee
-    this.filteredExpenses = _.filter(this.filteredExpenses, (expense) => {
-      return expense.employeeId === this.employee;
+    filteredExpenses.value = _.filter(filteredExpenses.value, (expense) => {
+      return expense.employeeId === employee.value;
     });
   }
 
-  if (this.tagsInfo.selected?.length > 0) {
-    this.filteredExpenses = _.filter(this.filteredExpenses, (expense) => {
-      return employeeUtils.selectedTagsHasEmployee(expense.employeeId, this.tagsInfo);
+  if (tagsInfo.value.selected?.length > 0) {
+    filteredExpenses.value = _.filter(filteredExpenses.value, (expense) => {
+      return employeeUtils.selectedTagsHasEmployee(expense.employeeId, tagsInfo.value);
     });
   }
 
-  if (this.search) {
-    let headerKeys = _.map(this.headers, (object) => object.key);
-    this.filteredExpenses = _.filter(this.filteredExpenses, (expense) => {
+  if (search.value) {
+    let headerKeys = _.map(headers.value, (object) => object.key);
+    filteredExpenses.value = _.filter(filteredExpenses.value, (expense) => {
       return _.some(Object.entries(expense), ([key, value]) => {
-        return String(value)?.toLowerCase().includes(this.search?.toLowerCase()) && headerKeys?.includes(key);
+        return String(value)?.toLowerCase().includes(search.value?.toLowerCase()) && headerKeys?.includes(key);
       });
     });
   }
 
-  if (this.startDateFilter && this.endDateFilter) {
-    this.filteredExpenses = _.filter(this.filteredExpenses, (expense) =>
-      this.isBetween(expense.reimbursedDate, this.startDateFilter, this.endDateFilter, 'days', '[]')
+  if (startDateFilter.value && endDateFilter.value) {
+    filteredExpenses.value = _.filter(filteredExpenses.value, (expense) =>
+      isBetween(expense.reimbursedDate, startDateFilter.value, endDateFilter.value, 'days', '[]')
     );
   }
-
-  if (this.filter.reimbursed !== 'both') {
+  if (filter.value.status !== 'all') {
     // filter expenses by reimburse date
-    this.filteredExpenses = _.filter(this.filteredExpenses, (expense) => {
-      if (this.filter.reimbursed == 'notReimbursed') {
+    filteredExpenses.value = _.filter(filteredExpenses.value, (expense) => {
+      if (filter.value.status === 'pending') {
         // filter for pending expenses
-        return !this.isReimbursed(expense);
-      } else {
+        return !isReimbursed(expense) && !(expense?.rejections?.hardRejections?.reasons?.length > 0);
+      } else if (filter.value.status === 'reimbursed') {
         // filter for reimbursed expenses
-        return this.isReimbursed(expense);
+        return isReimbursed(expense);
+      } else if (filter.value.status === 'rejected') {
+        // filter for rejected expenses
+        return isRejected(expense);
       }
     });
   }
 
-  if (this.filter.active !== 'both') {
+  if (filter.value.active !== 'both') {
     // filter expenses by active or inactive expense types (available to admin only)
-    this.filteredExpenses = _.filter(this.filteredExpenses, (expense) => {
-      let expenseType = _.find(this.expenseTypes, (type) => expense.expenseTypeId === type.value);
-      if (this.filter.active == 'active') {
+    filteredExpenses.value = _.filter(filteredExpenses.value, (expense) => {
+      let expenseType = _.find(expenseTypes.value, (type) => expense.expenseTypeId === type.value);
+      if (filter.value.active == 'active') {
         // filter for active expenses
         return expenseType && !expenseType.isInactive;
       } else {
@@ -783,20 +995,9 @@ function filterExpenses() {
  * @return string - the name of the high five recipient
  */
 function getEmployee(eId) {
-  let employee = _.find(this.$store.getters.employees, ['id', eId]);
+  let employee = _.find(store.getters.employees, ['id', eId]);
   return employeeUtils.nicknameAndLastName(employee);
 } // getEmployee
-
-/**
- * Checks if expense type has recipient.
- *
- * @param expense - the expense object
- * @return boolean - whether the expense has a recipient
- */
-function hasRecipient(expense) {
-  let expenseType = _.find(this.expenseTypes, (type) => expense.expenseTypeId === type.value);
-  return !this.isEmpty(expenseType.hasRecipient) && expenseType.hasRecipient;
-} // hasRecipient
 
 /**
  * Checks if the expense is reimbursed. Returns true if the
@@ -806,25 +1007,39 @@ function hasRecipient(expense) {
  * @return boolean - expense is reimbursed
  */
 function isReimbursed(expense) {
-  return expense && !this.isEmpty(expense.reimbursedDate);
+  return expense && !isEmpty(expense.reimbursedDate);
 } // isReimbursed
 
+/**
+ * Checks if the expense is rejected. Returns true if the
+ * expense is reimbursed, otherwise returns false.
+ *
+ * @param expense - expense to check
+ * @return boolean - expense is rejected
+ */
+function isRejected(expense) {
+  return (
+    expense?.rejections?.softRejections?.reasons?.length > 0 || expense?.rejections?.hardRejections?.reasons?.length
+  );
+} // isRejected
+
 async function loadMyExpensesData() {
-  this.initialPageLoading = true;
-  this.loading = true;
+  initialPageLoading.value = true;
+  loading.value = true;
   // get user info, defaulting to params if exists
-  this.userInfo = JSON.parse(localStorage.getItem('requestedFilter')) || this.$store.getters.user; // TODO parse localstorage into string and then parse from string
+  userInfo.value = store.getters.user; // TODO: parse localstorage into string and then parse from string
+  if (localStorage.getItem('requestedFilter')) userInfo.value = JSON.parse(localStorage.getItem('requestedFilter'));
   await Promise.all([
-    !this.$store.getters.expenseTypes ? this.updateStoreExpenseTypes() : '',
-    !this.$store.getters.employees ? this.updateStoreEmployees() : '',
-    !this.$store.getters.budgets ? this.updateStoreBudgets() : '',
-    !this.$store.getters.tags ? this.updateStoreTags() : '',
-    this.refreshExpenses()
+    !store.getters.expenseTypes ? updateStoreExpenseTypes() : '',
+    !store.getters.employees ? updateStoreEmployees() : '',
+    !store.getters.budgets ? updateStoreBudgets() : '',
+    !store.getters.tags && (userRoleIsAdmin() || userRoleIsManager()) ? updateStoreTags() : '', // tags only required for admin/manager
+    refreshExpenses()
   ]);
 
   // get expense types
-  let expenseTypes = this.$store.getters.expenseTypes;
-  this.expenseTypes = _.map(expenseTypes, (expenseType) => {
+  let temporaryExpenseTypes = store.getters.expenseTypes;
+  expenseTypes.value = _.map(temporaryExpenseTypes, (expenseType) => {
     return {
       /* beautify preserve:start */
       text: `${expenseType.budgetName} - $${expenseType.budget}`,
@@ -844,8 +1059,8 @@ async function loadMyExpensesData() {
       alwaysOnFeed: expenseType.alwaysOnFeed
     };
   });
-  this.loading = false;
-  this.initialPageLoading = false;
+  loading.value = false;
+  initialPageLoading.value = false;
 }
 
 /**
@@ -855,12 +1070,10 @@ async function loadMyExpensesData() {
  * @return boolean - disables the delete and edit button if false
  */
 function canDelete(expense) {
-  if (expense.canDelete !== undefined && expense.canDelete !== null && !expense.canDelete) {
-    //canDelete is present and equals false
-    return false;
-  } else {
-    return true;
-  }
+  return (
+    (expense.canDelete === undefined || expense.canDelete === null || expense.canDelete) &&
+    !expense.rejections?.hardRejections?.reasons
+  );
 } // canDelete
 
 /**
@@ -869,66 +1082,89 @@ function canDelete(expense) {
  * @param item - expense selected
  */
 function onSelect(item) {
-  this.clearExpense();
-  this.expense = _.mergeWith(this.expense, item, (expenseValue, itemValue) => {
+  clearExpense();
+  expense.value = _.mergeWith(expense.value, item, (expenseValue, itemValue) => {
     return _.isNil(itemValue) ? expenseValue : itemValue;
   });
-  this.isEditing = true;
-  this.expense.edit = true;
-  this.expense['cost'] = moneyFilter(item.cost);
+  isEditing.value = true;
+  expense.value.edit = true;
+  expense.value['cost'] = moneyFilter(item.cost);
 } // onSelect
+
+/**
+ * Parse the date after losing focus.
+ *
+ * @return String - The date in YYYY-MM-DD format
+ */
+function parseEventDate() {
+  return format(event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD');
+} // parseEventDate
 
 /**
  * Refresh expense data and filters expenses.
  */
 async function refreshExpenses() {
-  this.loading = true; // set loading status to true
+  loading.value = true; // set loading status to true
   // load expenses if employee role is user or admin
-  this.expenses = await api.getAllAggregateExpenses();
-  this.constructAutoComplete(this.expenses); // set autocomplete options
+  expenses.value = await api.getAllAggregateExpenses();
+  constructAutoComplete(expenses.value); // set autocomplete options
 
-  this.filterExpenses(); // filter expenses
+  filterExpenses(); // filter expenses
 
-  this.loading = false; // set loading status to false
+  loading.value = false; // set loading status to false
 } // refreshExpenses
 
 /**
  * set midAction to true
  */
 function startAction() {
-  this.midAction = true;
+  midAction.value = true;
 } // startAction
 
 /**
  * Scrolls window back to the top of the form.
  */
 function toTopOfForm() {
-  window.scrollTo(0, this.$refs.form.$el.offsetTop - 70);
+  window.scrollTo(0, form.value.$el.offsetTop - 70);
 } // toTopOfForm
+
+/**
+ * Sets the class for a row in the data table.
+ *
+ * @param item - The row item
+ * @returns Object - The row class
+ */
+function rowClasses({ item }) {
+  if (item?.rejections?.hardRejections?.reasons?.length > 0) {
+    return { class: 'rejected-expense-row' };
+  } else if (item?.rejections?.softRejections?.reasons?.length > 0 && !item?.rejections?.softRejections?.revised) {
+    return { class: 'revised-expense-row' };
+  }
+} // rowClasses
 
 /**
  * Unreimburse an expense.
  */
 async function unreimburseExpense() {
-  this.loading = true; // set loading status to true
+  loading.value = true; // set loading status to true
 
-  this.propExpense.reimbursedDate = null; // clear reimburse date field
-  let updatedExpense = await api.updateItem(api.EXPENSES, this.propExpense);
+  propExpense.value.reimbursedDate = null; // clear reimburse date field
+  let updatedExpense = await api.updateItem(api.EXPENSES, propExpense.value);
 
   if (updatedExpense.id) {
     // successfully unreimburses expense
-    this.status['show'] = true;
-    this.status['statusType'] = 'SUCCESS';
-    this.status['statusMessage'] = 'Item was successfully unreimbursed!';
-    this.status['color'] = 'green';
+    status.value['show'] = true;
+    status.value['statusType'] = 'SUCCESS';
+    status.value['statusMessage'] = 'Item was successfully unreimbursed!';
+    status.value['color'] = 'green';
   } else {
     // fails to unreimburse expense
-    this.displayError('Error Unreimburseing Expense');
+    displayError('Error Unreimburseing Expense');
   }
 
-  await this.refreshExpenses();
-  this.loading = false; // set loading status to false
-  this.midAction = false;
+  await refreshExpenses();
+  loading.value = false; // set loading status to false
+  midAction.value = false;
 } // unreimburseExpense
 
 /**
@@ -936,12 +1172,12 @@ async function unreimburseExpense() {
  * update status in the snackbar.
  */
 async function updateModelInTable() {
-  await this.refreshExpenses();
+  await refreshExpenses();
 
-  this.status['show'] = true;
-  this.status['statusType'] = 'SUCCESS';
-  this.status['statusMessage'] = 'Item was successfully updated!';
-  this.status['color'] = 'green';
+  status.value['show'] = true;
+  status.value['statusType'] = 'SUCCESS';
+  status.value['statusMessage'] = 'Item was successfully updated!';
+  status.value['color'] = 'green';
 } // updateModelInTable
 
 /**
@@ -954,104 +1190,12 @@ async function updateModelInTable() {
 function useInactiveStyle(expense) {
   if (userRoleIsAdmin() || userRoleIsManager()) {
     // admin view
-    let expenseType = _.find(this.expenseTypes, (type) => expense.expenseTypeId === type.value);
+    let expenseType = _.find(expenseTypes.value, (type) => expense.expenseTypeId === type.value);
     return expenseType && expenseType.isInactive;
   }
 
   return false;
 } // useInactiveStyle
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                 LIFECYCLE HOOKS                  |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- *  Gets and sets user info, expense types, and expenses. Creates event listeners.
- */
-async function created() {
-  // expense form listeners
-  this.emitter.on('add', () => {
-    this.addModelToTable();
-  });
-  this.emitter.on('delete', () => {
-    this.deleteModelFromTable();
-  });
-  this.emitter.on('startAction', () => {
-    this.startAction();
-  });
-  this.emitter.on('update', () => {
-    this.updateModelInTable();
-  });
-  this.emitter.on('error', (msg) => {
-    this.displayError(msg);
-  });
-
-  //no longer editing an expense (clear model and enable buttons)
-  this.emitter.on('finished-editing-expense', () => {
-    this.clearExpense();
-    this.isEditing = false;
-  });
-
-  this.emitter.on('endAction', () => {
-    this.midAction = false;
-  });
-
-  //when expense type is being edited buttons should be disabled
-  this.emitter.on('editing-expense', () => {
-    this.isEditing = true;
-  });
-
-  this.emitter.on('canceled-unreimburse-expense', () => {
-    this.midAction = false;
-  });
-  this.emitter.on('confirm-unreimburse-expense', async () => {
-    await this.unreimburseExpense();
-  });
-
-  this.emitter.on('canceled-delete-expense', () => {
-    this.midAction = false;
-    this.deleting = false;
-  });
-  this.emitter.on('confirm-delete-expense', async () => {
-    this.deleting = false;
-    await this.deleteExpense();
-  });
-
-  if (this.$store.getters.storeIsPopulated) {
-    this.loadMyExpensesData();
-  }
-
-  // if coming from budgets chart scroll to top and fill in filter data
-  if (JSON.parse(localStorage.getItem('requestedFilter'))) {
-    window.scrollTo(0, 0);
-    let storedInfo = JSON.parse(localStorage.getItem('requestedFilter'));
-    [this.search, this.filter.reimbursed, this.employee] = [
-      storedInfo.defaultSearch,
-      storedInfo.defaultFilterReimbursed,
-      storedInfo.defaultEmployee
-    ];
-    localStorage.removeItem('requestedFilter');
-  }
-} // created
-
-/**
- * destroy listeners
- */
-function beforeUnmount() {
-  this.emitter.off('add');
-  this.emitter.off('delete');
-  this.emitter.off('startAction');
-  this.emitter.off('update');
-  this.emitter.off('error');
-  this.emitter.off('canceled-delete-expense');
-  this.emitter.off('confirm-delete-expense');
-  this.emitter.off('finished-editing-expense');
-  this.emitter.off('editing-expense');
-  this.emitter.off('confirm-unreimburse-expense');
-  this.emitter.off('canceled-unreimburse-expense');
-} // beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -1062,196 +1206,20 @@ function beforeUnmount() {
 /**
  * watcher for employee, filter.active, filter.reimbursed - filters expenses
  */
-function watchFilterExpenses() {
-  this.filterExpenses();
-} // watchFilterExpenses
+watch([employee, search, filter.value, startDateFilter, endDateFilter], () => {
+  filterExpenses();
+}); // watchFilterExpenses
 
 /**
  * Checks if the store is populated from initial page load.
  *
  * @returns boolean - True if the store is populated
  */
-async function watchStorePopulated() {
-  if (this.$store.getters.storeIsPopulated) {
-    this.loadMyExpensesData();
+watch(storeIsPopulated, async () => {
+  if (storeIsPopulated) {
+    loadMyExpensesData();
   }
-} // watchStorePopulated
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  components: {
-    Attachment,
-    ConvertExpensesToCsv,
-    DeleteModal,
-    ExpenseForm,
-    TagsFilter,
-    UnreimburseModal
-  },
-  directives: { mask },
-  data() {
-    return {
-      deleting: false, // activate delete model
-      expanded: [], // datatable expanded
-      expenses: [], // all expenses
-      employees: [], // employee autocomplete options
-      employee: null, // employee autocomplete filter
-      endDateFilter: null,
-      endDateFilterMenu: null,
-      expense: {
-        id: null,
-        purchaseDate: null,
-        reimbursedDate: null,
-        note: null,
-        url: null,
-        createdAt: null,
-        receipt: null,
-        cost: null,
-        description: null,
-        employeeId: null,
-        expenseTypeId: null,
-        category: null,
-        showOnFeed: null,
-        employeeName: null,
-        budgetName: null,
-        recipient: null
-      }, // selected expense
-      expenseTypes: [], // expense types
-      filter: {
-        active: 'both',
-        reimbursed: 'notReimbursed' //default only shows expenses that are not reimbursed
-      }, // datatable filters
-      filteredExpenses: [], // filtered expenses
-      headers: [
-        {
-          title: 'Creation Date',
-          key: 'createdAt'
-        },
-        {
-          title: 'Employee',
-          key: 'employeeName'
-        },
-        {
-          title: 'Expense Type',
-          key: 'budgetName'
-        },
-        {
-          title: 'Cost',
-          key: 'cost'
-        },
-        {
-          title: 'Purchase Date',
-          key: 'purchaseDate'
-        },
-        {
-          title: 'Reimburse Date',
-          key: 'reimbursedDate'
-        },
-        {
-          key: 'actions',
-          width: '25%',
-          align: 'end',
-          sortable: false
-        }
-      ], // datatable headers
-      isEditing: false, //whether or not an expense is being edited
-      loading: true, // loading status
-      initialPageLoading: true, // loading the page on startup
-      midAction: false,
-      propExpense: {
-        id: null,
-        createdAt: null,
-        employeeId: null,
-        employeeName: null,
-        expenseTypeId: null,
-        budgetName: null,
-        category: null,
-        cost: 0,
-        description: null,
-        purchaseDate: null,
-        reimbursedDate: null,
-        note: null,
-        receipt: null,
-        recipient: null,
-        url: null,
-        showOnFeed: null
-      }, // expense to edit
-      search: null, // query text for datatable search field
-      toSort: [{ key: 'createdAt', order: 'desc' }], // default sort datatable items
-      startDateFilter: null,
-      startDateFilterMenu: null,
-      status: {
-        statusType: undefined,
-        statusMessage: '',
-        color: ''
-      }, // snackbar action status
-      tagsInfo: {
-        selected: [],
-        flipped: []
-      },
-      unreimbursing: false, // activate unreimburse model when value changes
-      userInfo: null // user information
-    };
-  },
-  computed: {
-    roleHeaders,
-    userIsInactive,
-    storeIsPopulated
-  },
-  watch: {
-    employee: watchFilterExpenses,
-    endDateFilter: watchFilterExpenses,
-    startDateFilter: watchFilterExpenses,
-    search: watchFilterExpenses,
-    'filter.active': watchFilterExpenses,
-    'filter.reimbursed': watchFilterExpenses,
-    storeIsPopulated: watchStorePopulated
-  },
-  beforeUnmount,
-  created,
-  methods: {
-    addModelToTable,
-    canDelete,
-    clearExpense,
-    clearStatus,
-    constructAutoComplete,
-    convertToMoneyString,
-    deleteExpense,
-    deleteModelFromTable,
-    displayError,
-    employeeFilter,
-    filterExpenses,
-    format,
-    getEmployee,
-    getDateOptionalRules,
-    getNonFutureDateRules,
-    hasRecipient,
-    isBetween,
-    isEmpty,
-    userRoleIsAdmin,
-    userRoleIsManager,
-    isMobile,
-    isReimbursed,
-    loadMyExpensesData,
-    monthDayYearFormat,
-    onSelect,
-    parseEventDate,
-    refreshExpenses,
-    startAction,
-    toTopOfForm,
-    unreimburseExpense,
-    updateModelInTable,
-    updateStoreEmployees,
-    updateStoreBudgets,
-    updateStoreExpenseTypes,
-    updateStoreTags,
-    useInactiveStyle
-  }
-};
+}); // watchStorePopulated
 </script>
 
 <style>
@@ -1283,6 +1251,14 @@ export default {
 td,
 v-data-table-header__content {
   font-size: 0.93em !important;
+}
+
+.rejected-expense-row {
+  background-color: rgb(255, 146, 146);
+}
+
+.revised-expense-row {
+  background-color: rgb(247, 247, 164);
 }
 
 .v-data-table-header__content {

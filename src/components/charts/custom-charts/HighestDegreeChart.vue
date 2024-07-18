@@ -411,6 +411,12 @@ function fillData() {
         font: {
           size: 15
         }
+      },
+      subtitle: {
+        display: true,
+        font: {
+          style: 'italic'
+        }
       }
     },
     maintainAspectRatio: false

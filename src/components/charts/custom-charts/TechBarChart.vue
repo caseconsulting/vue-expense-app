@@ -21,12 +21,12 @@
             <v-radio label="Past" value="Past"></v-radio>
           </v-radio-group>
         </v-col>
-        <v-col cols="12" xxl="6" xl="6" lg="6" md="6" sm="6" :class="!isMobile ? 'text-right' : ''">
-          <v-btn v-if="!isMobile" :disabled="reachedMin" @click="oneLessColumn()" size="small" class="mr-2">
+        <v-col cols="12" xxl="6" xl="6" lg="6" md="6" sm="6" :class="!isMobile() ? 'text-right' : ''">
+          <v-btn v-if="!isMobile()" :disabled="reachedMin" @click="oneLessColumn()" size="small" class="mr-2">
             <v-tooltip activator="parent" location="top">Decrease Number of Columns Shown</v-tooltip>
             <v-icon>mdi-minus</v-icon>
           </v-btn>
-          <v-btn v-if="!isMobile" :disabled="reachedMax" @click="oneMoreColumn()" size="small" class="mr-2">
+          <v-btn v-if="!isMobile()" :disabled="reachedMax" @click="oneMoreColumn()" size="small" class="mr-2">
             <v-tooltip activator="parent" location="top">Increase Number of Columns Shown</v-tooltip>
             <v-icon>mdi-plus</v-icon>
           </v-btn>
