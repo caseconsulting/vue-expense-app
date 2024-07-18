@@ -35,8 +35,8 @@
                 <v-col cols="4">
                   <h2>Expense Types</h2>
                 </v-col>
-                <v-col cols="2" />
-                <v-col cols="6">
+                <v-spacer></v-spacer>
+                <v-col cols="12" sm="4">
                   <!-- Search Bar -->
                   <v-text-field
                     id="search"
@@ -376,7 +376,7 @@
                             </p>
                           </div>
                           <!-- Button to view names of employees with access -->
-                          <v-dialog v-model="showAccess" max-width="400px" scrollable>
+                          <v-dialog v-model="showAccess[item.id]" max-width="400px" scrollable>
                             <template #activator="{ props }">
                               <v-btn class="px-1 ml-3" size="x-small" variant="outlined" v-bind="props"> view </v-btn>
                             </template>
@@ -408,7 +408,7 @@
                               <!-- Close dialog button -->
                               <v-card-actions>
                                 <v-spacer />
-                                <v-btn theme="dark" variant="text" @click="showAccess = false"> Close </v-btn>
+                                <v-btn theme="dark" variant="text" @click="showAccess[item.id] = false"> Close </v-btn>
                               </v-card-actions>
                             </v-card>
                           </v-dialog>
@@ -473,7 +473,7 @@
               :delete-info="'(' + deleteType + ')'"
               :type="'expense-type'"
             />
-            <delete-error-modal :toggle-delete-error-modal="invalidDelete" type="expense type" />
+            <delete-error-modal v-model="invalidDelete" type="expense type" />
             <!-- End Confirmation Modals -->
           </v-container>
         </v-card>
@@ -581,7 +581,7 @@ const model = ref({
   tagBudgets: []
 }); // selected expense type
 const search = ref(''); // query text for datatable search field
-const showAccess = ref(false); // activate display for access list
+const showAccess = ref({}); // activate display for access list, object of ids to boolean
 const showAccessLength = ref(0); // number of employees with access
 const sortBy = ref([{ key: 'budgetName', order: 'asc' }]); // sort datatable items
 const status = ref({
@@ -1143,7 +1143,7 @@ async function validateDelete(item) {
       deleting.value = true;
     } else {
       // tells DeleteErrorModal to appear
-      emitter.emit('delete-expense-type-error-show');
+      invalidDelete.value = true;
     }
   } catch (err) {
     displayError(err);

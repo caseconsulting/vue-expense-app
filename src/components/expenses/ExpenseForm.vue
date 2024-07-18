@@ -585,7 +585,7 @@ function calcAdjustedBudget(employee, expenseType) {
 async function checkCoverage() {
   this.isInactive = true;
   if (this.$refs.form) {
-    this.valid = await this.$refs.form.validate();
+    await this.$refs.form.validate();
     if (!this.valid) return;
     this.emitter.emit('startAction');
     // form is validated
@@ -804,6 +804,7 @@ function clearForm() {
   // don't clear form if there was an error in submitting
   if (this.errorSubmitting) {
     this.errorSubmitting = false; // reset var
+    this.isInactive = false; // enable form
     return;
   }
 
@@ -1502,6 +1503,10 @@ async function submit() {
 
       if (!this.reqRecipient) {
         this.editedExpense.recipient = null;
+      }
+
+      if (this.editedExpense?.rejections?.softRejections) {
+        this.editedExpense.rejections.softRejections.revised = true;
       }
 
       if (this.isEmpty(this.editedExpense.id)) {

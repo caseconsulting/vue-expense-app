@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid>
+  <v-container fluid id="full-page">
     <!-- Status Alert -->
     <v-snackbar
       v-model="status.statusType"
@@ -44,7 +44,15 @@
       <v-row class="pb-3">
         <!-- Title -->
         <v-col cols="12" md="6">
-          <h1 align="center" justify="center" id="home-greeting">Hello, {{ getEmployeePreferredName(employee) }}!</h1>
+          <h1 v-if="isBirthday(employee)" align="center" justify="center" id="home-greeting">
+            Happy Birthday, {{ getEmployeePreferredName(employee) }}!
+          </h1>
+          <h1 v-else-if="isAnniversary(employee)" align="center" justify="center" id="home-greeting">
+            Happy Anniversary, {{ getEmployeePreferredName(employee) }}!
+          </h1>
+          <h1 v-else align="center" justify="center" id="home-greeting">
+            Hello, {{ getEmployeePreferredName(employee) }}!
+          </h1>
           <div class="text-center">
             <v-btn color="#bc3825" @click="handleProfile()" theme="dark">View Profile</v-btn>
           </div>
@@ -53,6 +61,12 @@
         <!-- Anniversary Date -->
         <v-col cols="12" md="6" class="px-xl-4 px-lg-2 px-md-0">
           <anniversary-card v-if="!loading" :employee="employee" :has-budgets="true" location="home" />
+          <ConfettiExplosion
+            v-if="isBirthday(employee) || isAnniversary(employee)"
+            :particleCount="300"
+            :particleSize="20"
+            class="ml-12"
+          ></ConfettiExplosion>
         </v-col>
       </v-row>
       <v-row class="pb-3">
@@ -92,6 +106,7 @@ import { isEmpty, getCurrentBudgetYear } from '@/utils/utils';
 import { updateStoreExpenseTypes, updateStoreBudgets } from '@/utils/storeUtils';
 import TimeData from '@/components/shared/timesheets/TimeData';
 import AnniversaryCard from '@/components/shared/AnniversaryCard';
+import ConfettiExplosion from 'vue-confetti-explosion';
 import {
   format,
   getTodaysDate,
@@ -168,15 +183,6 @@ onBeforeMount(async () => {
 // |                                                  |
 // |--------------------------------------------------|
 
-/**
- * Checks if the store is populated from initial page load.
- *
- * @returns boolean - True if the store is populated
- */
-// store.getters.storeIsPopulated = computed(() => {
-//   return store.getters.storeIsPopulated;
-// }); // storeIsPopulated
-
 computed(store.getters.storeIsPopulated);
 
 // |--------------------------------------------------|
@@ -185,6 +191,22 @@ computed(store.getters.storeIsPopulated);
 // |                                                  |
 // |--------------------------------------------------|
 
+function isBirthday(employee) {
+  if (employee.birthday === undefined) {
+    return false; // no birthday is entered
+  }
+  let today = getTodaysDate();
+  let bday = employee.birthday;
+  bday = setYear(bday, getYear(today));
+  return bday === today;
+}
+
+function isAnniversary(employee) {
+  hireDate.value = employee.hireDate;
+  let anniversary = getAnniversary(hireDate.value);
+  let today = getTodaysDate();
+  return anniversary === today;
+}
 /**
  * Gets an employees anniversary. If an employee's anniversary date is more than 2 months in the future,
  * their previous anniversary date will be used for the activity feed.
@@ -301,11 +323,12 @@ async function createEvents() {
   // filter out empty arrays
   anniversaries = _.filter(anniversaries, (a) => a.date);
 
+  const now = getTodaysDate();
+
   // generate birthdays
   let birthdays = _.map(employees.value, (b) => {
     if (b.birthdayFeed && !isEmpty(b.birthday) && b.workStatus != 0) {
       let event = {};
-      let now = getTodaysDate();
       let cutOff = startOf(subtract(now, 6, 'months'), 'day');
       let birthday = format(b.birthday, 'MM-DD', 'MM-DD');
       birthday = setYear(birthday, getYear(now), 'MM-DD');
@@ -342,7 +365,6 @@ async function createEvents() {
   let expenses = _.map(aggregatedExpenses.value, (a) => {
     if (!isEmpty(a.showOnFeed) && a.showOnFeed) {
       //value of showOnFeed is true
-      let now = getTodaysDate();
       let reimbursedDate = format(a.reimbursedDate, 'YYYY-MM-DD', 'YYYY-MM-DD');
       let event = {};
       event.date = getEventDateMessage(reimbursedDate);
@@ -394,7 +416,6 @@ async function createEvents() {
 
   // generate schedules
   let schedules = _.map(scheduleEntries.value, (a) => {
-    let now = getTodaysDate();
     let cutOff = startOf(subtract(now, 6, 'months'), 'day');
 
     let startDate = a.starts_at;
@@ -429,7 +450,6 @@ async function createEvents() {
   // generate awards
   let awards = _.map(aggregatedAwards.value, (a) => {
     // get award information
-    let now = getTodaysDate();
     const dateSubmitted = a.dateSubmitted || a.dateReceived;
     let award = {
       icon: 'mdi-fire',
@@ -455,7 +475,6 @@ async function createEvents() {
   // generate certs
   let certs = _.map(aggregatedCerts.value, (c) => {
     // get cert information
-    let now = getTodaysDate();
     const dateSubmitted = c.dateSubmitted || c.dateReceived;
     let cert = {
       icon: 'mdi-certificate',
@@ -474,7 +493,30 @@ async function createEvents() {
     return wantToDisplay ? cert : null;
   });
 
-  let mergedEventsList = [...anniversaries, ...newHires, ...birthdays, ...expenses, ...schedules, ...awards, ...certs]; // merges lists
+  let announcements = _.map(eventData.announcements, (announcement) => {
+    const date = startOf(announcement.createdAt, 'day');
+    return {
+      type: 'Announcement',
+      icon: 'mdi-bullhorn',
+      color: 'purple',
+      text: `${announcement.author}: ${announcement.title}`,
+      date: getEventDateMessage(date),
+      daysFromToday: difference(now, date, 'day'),
+      basecampLink: announcement.url,
+      link: announcement.url
+    };
+  });
+
+  let mergedEventsList = [
+    ...anniversaries,
+    ...newHires,
+    ...birthdays,
+    ...expenses,
+    ...schedules,
+    ...awards,
+    ...certs,
+    ...announcements
+  ]; // merges lists
   events.value = _.sortBy(_.compact(mergedEventsList), 'daysFromToday'); //sorts by days from today
   store.dispatch('setEvents', { events: events.value });
   loadingEvents.value = false;

@@ -13,52 +13,32 @@
         </v-btn>
       </v-col>
 
-      <v-col v-if="isTimedOut" cols="12">
+      <v-col v-if="isTimedOut()" cols="12">
         <v-alert class="session-expired-alert" text="Session expired. Please login again." type="warning"></v-alert>
       </v-col>
     </v-row>
   </v-container>
 </template>
 
-<script>
-import { isLoggedIn, login } from '@/utils/auth';
+<script setup>
+import { isLoggedIn, login, isTimedOut } from '@/utils/auth';
+import { useRouter } from 'vue-router';
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                 LIFECYCLE HOOKS                  |
+// |                      SETUP                       |
 // |                                                  |
 // |--------------------------------------------------|
 
-/**
- * Route to home page on log in.
- */
-function created() {
-  let path = decodeURIComponent(window.location.search).split('=/')[1];
-  path = path ? path : 'home';
-  localStorage.setItem('redirectUrl', path);
-  if (this.isLoggedIn()) {
-    this.$router.push(path);
-  }
-} // created
+const router = useRouter();
 
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  created,
-  computed: {
-    isTimedOut() {
-      return !!sessionStorage.getItem('timedOut');
-    }
-  },
-  methods: {
-    login,
-    isLoggedIn
-  }
-};
+// Route to home page on log in.
+let path = decodeURIComponent(window.location.search).split('=/')[1];
+path = path ? path : 'home';
+localStorage.setItem('redirectUrl', path);
+if (isLoggedIn()) {
+  router.push(path);
+}
 </script>
 
 <style>

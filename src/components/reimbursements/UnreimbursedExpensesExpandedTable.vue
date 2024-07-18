@@ -4,7 +4,7 @@
       <v-data-table
         :headers="headers"
         :items="expenses"
-        :sort-by.sync="sortBy"
+        :v-model="sortBy"
         :items-per-page="-1"
         class="text-center"
         item-key="id"
@@ -67,8 +67,43 @@
   </v-container>
 </template>
 
-<script>
+<script setup>
 import { convertToMoneyString, monthDayYearFormat } from '@/utils/utils';
+import { ref, inject } from 'vue';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const emitter = inject('emitter');
+defineProps(['expenses']); // list of expenses
+const headers = ref([
+  {
+    title: 'Cost',
+    key: 'cost',
+    align: 'center'
+  },
+  {
+    title: 'Purchase Date',
+    key: 'purchaseDate',
+    align: 'center'
+  },
+  {
+    title: 'Description',
+    key: 'description',
+    align: 'center'
+  },
+  {
+    title: 'Show on Feed',
+    key: 'showOnFeed',
+    align: 'center',
+    width: '10%',
+    sortable: false
+  }
+]); // data table headers
+const sortBy = ref([{ key: 'purchaseDate' }]); // sort data table by
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -82,7 +117,7 @@ import { convertToMoneyString, monthDayYearFormat } from '@/utils/utils';
  * @param clickedExpense - expense clicked
  */
 function expenseClicked(_, { item }) {
-  this.emitter.emit('expenseClicked', item);
+  emitter.emit('expenseClicked', item);
 } // expenseClicked
 
 /**
@@ -91,7 +126,7 @@ function expenseClicked(_, { item }) {
  * @param selectExpense - selected expense
  */
 function expenseSelected(selectedExpense) {
-  this.emitter.emit('selectExpense', selectedExpense);
+  emitter.emit('selectExpense', selectedExpense);
 } // expenseSelected
 
 /**
@@ -100,7 +135,7 @@ function expenseSelected(selectedExpense) {
  * @param toggledExpense - expense toggled
  */
 function expenseToggle(toggledExpense) {
-  this.emitter.emit('toggleExpense', toggledExpense);
+  emitter.emit('toggleExpense', toggledExpense);
 } // expenseToggle
 
 // |--------------------------------------------------|
@@ -119,54 +154,6 @@ function descriptionFormat(val) {
   // split strings that exceed 250 characters with eclipses
   return val && val.length > 250 ? val.substring(0, 250) + '...' : val;
 } // descriptionFormat
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  data() {
-    return {
-      headers: [
-        {
-          title: 'Cost',
-          key: 'cost',
-          align: 'center'
-        },
-        {
-          title: 'Purchase Date',
-          key: 'purchaseDate',
-          align: 'center'
-        },
-        {
-          title: 'Description',
-          key: 'description',
-          align: 'center'
-        },
-        {
-          title: 'Show on Feed',
-          key: 'showOnFeed',
-          align: 'center',
-          width: '10%',
-          sortable: false
-        }
-      ], // data table headers
-      sortBy: [{ key: 'purchaseDate' }], // sort data table by
-      sortDesc: false // sort data table in descending order
-    };
-  },
-  methods: {
-    convertToMoneyString,
-    descriptionFormat,
-    expenseClicked,
-    expenseSelected,
-    expenseToggle,
-    monthDayYearFormat
-  },
-  props: ['expenses'] // list of expenses
-};
 </script>
 
 <style lang="scss" scoped>

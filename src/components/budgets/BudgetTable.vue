@@ -69,7 +69,7 @@
 </template>
 
 <script setup>
-import { ref, onBeforeMount, defineProps, watch } from 'vue';
+import { ref, onBeforeMount, watch } from 'vue';
 import { convertToMoneyString, getCurrentBudgetYear, isFullTime } from '@/utils/utils';
 import { format, getYear, isBetween, DEFAULT_ISOFORMAT, FORMATTED_ISOFORMAT } from '../../shared/dateUtils';
 import api from '@/shared/api';
