@@ -1,17 +1,28 @@
 <template>
-  <div>
-    <v-tooltip activator="parent" location="top" :text="tooltipText"></v-tooltip>
-    <v-btn :icon="buttonIcon" variant="text" @click="secured = !secured"></v-btn>
-  </div>
+  <v-tooltip location="top" :text="tooltipText">
+    <template #activator="{ props }">
+      <v-btn v-bind="props" :icon="buttonIcon" variant="text" @click="secured = !secured"></v-btn>
+    </template>
+  </v-tooltip>
 </template>
 
 <script setup>
 import { computed } from 'vue';
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
 const secured = defineModel();
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
+
 const buttonIcon = computed(() => (secured.value ? 'mdi-shield' : 'mdi-shield-outline'));
-const tooltipText = computed(() =>
-  secured.value ? 'Click to show other emlployees' : 'Click to hide from other employees'
-);
+const tooltipText = computed(() => (secured.value ? 'Click to show other users' : 'Click to hide from other users'));
 </script>
