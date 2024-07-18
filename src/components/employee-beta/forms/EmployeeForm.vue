@@ -38,7 +38,9 @@
               <div>Editing: {{ formTabs }}</div>
             </base-form>
             <base-form title="Job Experience" value="Past Experience">
-              <div>Editing: {{ formTabs }}</div>
+              <div>
+                <job-experience-tab :model="employee" :validating="validating.jobExperience"></job-experience-tab>
+              </div>
             </base-form>
             <base-form title="Education" value="Education">
               <div>Editing: {{ formTabs }}</div>
@@ -70,6 +72,7 @@ import BaseForm from '@/components/employee-beta/forms/BaseForm.vue';
 import FormCancelConfirmation from '@/components/modals/FormCancelConfirmation.vue';
 import PersonalInfoForm from './PersonalInfoForm.vue';
 import { cloneDeep } from 'lodash';
+import JobExperienceTab from '../form-tabs/JobExperienceTab.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -88,6 +91,19 @@ const formTabs = ref([]); //TODO: Sync up current tabs on edit form and info car
 const submitting = ref(false);
 const toggleCancelConfirmation = ref(false);
 const valid = ref(false);
+const validating = ref({
+  awards: false,
+  certifications: false,
+  clearance: false,
+  contracts: false,
+  customerOrgExp: false,
+  education: false,
+  employee: false,
+  jobExperience: false,
+  languages: false,
+  personal: false,
+  technologies: false
+}); // signal to child tabs to validate
 
 // |--------------------------------------------------|
 // |                                                  |
