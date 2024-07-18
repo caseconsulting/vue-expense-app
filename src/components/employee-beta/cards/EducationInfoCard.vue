@@ -7,12 +7,12 @@
       <v-card-text v-else>
         <education-list :list="showableList"></education-list>
         <div v-if="!isEmpty(showableList) && Math.ceil(totalList.length / 2) != 1" class="text-center">
-          <v-card-actions>
-            <v-btn block @click="dialog = true">Click to see more</v-btn>
+          <v-card-actions class="d-flex justify-center">
+            <v-btn @click="toggleModal = true">Click to see more</v-btn>
           </v-card-actions>
         </div>
       </v-card-text>
-      <education-modal :model="model" v-model="dialog"></education-modal>
+      <education-modal v-model="toggleModal" :model="model"></education-modal>
     </base-card>
   </div>
 </template>
@@ -30,7 +30,7 @@ import EducationModal from '../modals/EducationModal.vue';
 // |                                                  |
 // |--------------------------------------------------|
 
-const dialog = ref(false);
+const toggleModal = ref(false);
 const showableList = ref([]);
 const totalList = ref([]);
 const props = defineProps(['model']);
