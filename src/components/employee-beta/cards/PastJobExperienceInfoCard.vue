@@ -5,7 +5,7 @@
     </v-card-text>
     <v-card-text v-else>
       <past-experience-list :list="pageList"></past-experience-list>
-      <div v-if="!isEmpty(model.companies) && Math.ceil(model.companies.length / 5) != 1" class="text-center">
+      <div v-if="!isEmpty(model.companies) && Math.ceil(model.companies.length / 4) != 1" class="text-center">
         <v-card-actions class="d-flex justify-center">
           <v-btn @click="toggleJobExpModal()">Click To See More</v-btn>
         </v-card-actions>
