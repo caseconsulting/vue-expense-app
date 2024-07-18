@@ -290,5 +290,6 @@ export default {
   duplicateTechnologyRules,
   technologyExperienceRules,
   getPTOCashOutRules,
-  getBadgeNumberRules
+  getBadgeNumberRules,
+  getCaseEmailRules
 };
