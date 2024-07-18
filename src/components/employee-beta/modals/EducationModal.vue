@@ -2,7 +2,10 @@
   <v-dialog v-model="dialog" max-height="500" max-width="900">
     <template v-slot:default>
       <v-card>
-        <v-card-title class="d-flex align-center justify-space-between beta_header_style">
+        <v-card-title
+          style="position: sticky; top: 0; z-index: 1"
+          class="d-flex align-center justify-space-between beta_header_style"
+        >
           <h3>All Education</h3>
           <div>
             <v-btn v-if="isAdmin || isUser" @click="toggleEdit()" density="comfortable" variant="text" icon="">
