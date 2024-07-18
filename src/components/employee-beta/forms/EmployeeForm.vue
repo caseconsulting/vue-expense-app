@@ -49,7 +49,9 @@
               </v-row>
             </base-form>
             <base-form title="Job Experience" value="Past Experience">
-              <div>Editing: {{ formTabs }}</div>
+              <div>
+                <job-experience-tab :model="employee" :validating="validating.jobExperience"></job-experience-tab>
+              </div>
             </base-form>
             <base-form title="Education" value="Education">
               <div>Editing: {{ formTabs }}</div>
@@ -83,6 +85,7 @@ import { computed, inject, onBeforeMount, onBeforeUnmount, ref } from 'vue';
 import LanguagesForm from './LanguagesForm.vue';
 import TechnologiesForm from './TechnologiesForm.vue';
 import PersonalInfoForm from './PersonalInfoForm.vue';
+import JobExperienceTab from '../form-tabs/JobExperienceTab.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -100,6 +103,19 @@ const formTabs = ref([]); //TODO: Sync up current tabs on edit form and info car
 const submitting = ref(false);
 const toggleCancelConfirmation = ref(false);
 const valid = ref(false);
+const validating = ref({
+  awards: false,
+  certifications: false,
+  clearance: false,
+  contracts: false,
+  customerOrgExp: false,
+  education: false,
+  employee: false,
+  jobExperience: false,
+  languages: false,
+  personal: false,
+  technologies: false
+}); // signal to child tabs to validate
 
 // |--------------------------------------------------|
 // |                                                  |
