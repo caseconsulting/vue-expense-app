@@ -1,7 +1,10 @@
 <template>
   <v-dialog v-model="editing" persistent scrollable @click:outside="toggleCancelConfirmation = true">
     <v-card>
-      <v-card-title class="d-flex align-center justify-space-between beta_header_style">
+      <v-card-title
+        class="d-flex align-center justify-space-between beta_header_style"
+        style="position: sticky; top: 0; z-index: 2"
+      >
         <h3 class="text-white px-2">Editing {{ isUser ? 'My Profile' : fullName }}</h3>
         <v-btn
           id="modalCloseBtn"
