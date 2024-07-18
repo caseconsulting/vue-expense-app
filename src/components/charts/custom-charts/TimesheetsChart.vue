@@ -240,9 +240,9 @@ watch(
 <style>
 .custom-input input {
   padding: 5px 10px 3px 9px;
-  width: 48px;
+  width: 78px;
   height: 10px;
-  min-height: 33px;
+  min-height: 25px;
   font-size: 12px;
 }
 </style>
