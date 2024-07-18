@@ -412,29 +412,31 @@
     </div>
   </div>
 </template>
+
 <script>
 import api from '@/shared/api.js';
-import _ from 'lodash';
+import { format } from '@/shared/dateUtils';
 import {
   getAINRules,
+  getCaseEmailRules,
   getDateRules,
   getNumberRules,
   getRequiredRules,
   getValidateFalse
-} from '@/shared/validationUtils.js';
+} from '@/shared/validationUtils';
 import {
   asyncForEach,
   isEmpty,
   isMobile,
   userRoleIsAdmin,
+  userRoleIsIntern,
   userRoleIsManager,
-  userRoleIsUser,
-  userRoleIsIntern
+  userRoleIsUser
 } from '@/utils/utils';
-import { JOB_TITLES } from './dropdown-info/jobTitles';
-import { format } from '@/shared/dateUtils';
+import _ from 'lodash';
 import { mask } from 'vue-the-mask';
 import EEODeclineSelfIdentify from '../../modals/EEODeclineSelfIdentify.vue';
+import { JOB_TITLES } from './dropdown-info/jobTitles';
 
 const caseEmailDomain = '@consultwithcase.com';
 
@@ -915,6 +917,7 @@ export default {
     format,
     formatKebabCase,
     getAINRules,
+    getCaseEmailRules,
     getDateRules,
     getNumberRules,
     getRequiredRules,
