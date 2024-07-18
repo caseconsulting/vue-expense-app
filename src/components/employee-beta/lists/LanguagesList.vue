@@ -1,7 +1,7 @@
 <template>
   <v-list>
     <v-list-item v-for="(language, index) in list" :key="language.name + index">
-      <v-row no-gutters class="d-flex align-center">
+      <v-row no-gutters>
         <v-col class="d-flex">
           <v-col>
             <p>
