@@ -181,7 +181,6 @@ const useDropDown = computed(() => {
 // |--------------------------------------------------|
 
 onMounted(() => {
-  console.log(useDropDown.value);
   emitter.on('confirm-delete-resume', async () => {
     await deleteResume();
   });
