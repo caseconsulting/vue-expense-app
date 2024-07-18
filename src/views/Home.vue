@@ -47,6 +47,9 @@
           <h1 v-if="isBirthday(employee)" align="center" justify="center" id="home-greeting">
             Happy Birthday, {{ getEmployeePreferredName(employee) }}!
           </h1>
+          <h1 v-else-if="isAnniversary(employee)" align="center" justify="center" id="home-greeting">
+            Happy Anniversary, {{ getEmployeePreferredName(employee) }}!
+          </h1>
           <h1 v-else align="center" justify="center" id="home-greeting">
             Hello, {{ getEmployeePreferredName(employee) }}!
           </h1>
@@ -59,7 +62,7 @@
         <v-col cols="12" md="6" class="px-xl-4 px-lg-2 px-md-0">
           <anniversary-card v-if="!loading" :employee="employee" :has-budgets="true" location="home" />
           <ConfettiExplosion
-            v-if="isBirthday(employee)"
+            v-if="isBirthday(employee) || isAnniversary(employee)"
             :particleCount="300"
             :particleSize="20"
             class="ml-12"
@@ -198,6 +201,12 @@ function isBirthday(employee) {
   return bday === today;
 }
 
+function isAnniversary(employee) {
+  hireDate.value = employee.hireDate;
+  let anniversary = getAnniversary(hireDate.value);
+  let today = getTodaysDate();
+  return anniversary === today;
+}
 /**
  * Gets an employees anniversary. If an employee's anniversary date is more than 2 months in the future,
  * their previous anniversary date will be used for the activity feed.
