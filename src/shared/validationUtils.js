@@ -94,6 +94,18 @@ export function getEmailRules() {
 } // getEmailRules
 
 /**
+ * Gets the rules for a valid employee email address
+ *
+ * @return {((v: any) => Boolean | String)[]} The array of rule functions
+ */
+export function getCaseEmailRules() {
+  return [
+    (v) => !isEmpty(v) || 'Email is required',
+    (v) => /^[a-zA-Z]+$/.test(v) || 'Not a valid @consultwithcase email address'
+  ];
+}
+
+/**
  * Gets the rules where a date must come before today's date.
  * @return Array - The array of rule functions
  */
@@ -114,7 +126,7 @@ export function getNumberRules() {
  * @return Array - The array of rule functions
  */
 export function getPhoneNumberRules() {
-  return [(v) => (!this.isEmpty(v) && v.length === 12) || 'Phone number must be valid. Format: ###-###-####'];
+  return [(v) => (!isEmpty(v) && v.length === 12) || 'Phone number must be valid. Format: ###-###-####'];
 } // getPhoneNumberRules
 
 /**
