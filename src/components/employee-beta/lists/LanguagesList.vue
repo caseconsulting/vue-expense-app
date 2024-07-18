@@ -13,7 +13,7 @@
           </v-col>
         </v-col>
       </v-row>
-      <v-row no-gutters class="mx-5">
+      <v-row no-gutters class="mx-5 mb-3">
         <v-divider v-if="index < list.length - 1" />
       </v-row>
     </v-list-item>
