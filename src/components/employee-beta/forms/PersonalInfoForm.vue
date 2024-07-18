@@ -187,13 +187,14 @@
     <v-row class="mb-4 groove d-flex justify-center">
       <!-- phone numbers -->
       <v-col cols="12" v-if="!isMobile()">
-        <v-row v-for="(phoneNumber, index) in phoneNumbers" :key="`${phoneNumber.number}${phoneNumber.type}${index}`">
+        <v-row v-for="(phoneNumber, index) in phoneNumbers" :key="phoneNumber + index">
           <v-col cols="2">
             <v-autocomplete
               v-model="phoneNumber.type"
               label="Type"
               :items="PHONE_TYPES"
               :rules="getPhoneNumberTypeRules()"
+              :autofocus="phoneAutofocus"
             ></v-autocomplete>
           </v-col>
           <v-col class="flex-grow">
@@ -352,6 +353,8 @@ const birthdayMenu = ref(false);
 const searchString = ref('');
 const placeIds = ref({});
 
+const phoneAutofocus = ref(false);
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     COMPUTED                     |
@@ -432,6 +435,7 @@ function initPhoneNumbers() {
  */
 function addPhoneNumber() {
   phoneNumbers.value.push({ number: '', type: '', private: true });
+  phoneAutofocus.value = true;
 }
 
 /**
