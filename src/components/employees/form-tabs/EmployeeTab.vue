@@ -100,7 +100,7 @@
         ref="formFields"
         v-model.trim="emailUsername"
         suffix="@consultwithcase.com"
-        :rules="emailRules"
+        :rules="getCaseEmailRules()"
         label="Email*"
         variant="underlined"
         data-vv-name="Email"
@@ -437,8 +437,6 @@ import { mask } from 'vue-the-mask';
 import EEODeclineSelfIdentify from '../../modals/EEODeclineSelfIdentify.vue';
 
 const caseEmailDomain = '@consultwithcase.com';
-
-const regex = /^[a-zA-Z]+$/;
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -808,10 +806,6 @@ export default {
       departureMenu: false, // display depature menu
       editedEmployee: _.cloneDeep(this.model), //employee that can be edited
       emailUsername: '',
-      emailRules: [
-        (v) => !this.isEmpty(v) || 'Email is required',
-        (v) => regex.test(v) || 'Not a valid @consultwithcase email address'
-      ], // rules for an employee email
       employeeTags: null,
       employeeEditedTags: null,
       employeeRoleFormatted: null,
