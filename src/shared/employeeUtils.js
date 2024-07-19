@@ -1,3 +1,7 @@
+export const EMPLOYEE_ROLES = ['Admin', 'User', 'Intern', 'Manager'];
+export const PHONE_TYPES = ['Home', 'Cell', 'Work'];
+export const CASE_EMAIL_DOMAIN = '@consultwithcase.com';
+
 /**
  * Given an employee returns the employee's full name. Ex. John Jacob Doe
  * @param {JSON} employee - employee object
@@ -113,6 +117,9 @@ export function selectedTagsHasEmployee(employeeId, tagsInfo) {
 } // selectedTagsHasEmployee
 
 export default {
+  EMPLOYEE_ROLES,
+  PHONE_TYPES,
+  CASE_EMAIL_DOMAIN,
   fullName,
   firstAndLastName,
   nicknameAndLastName,
