@@ -95,7 +95,13 @@
 </template>
 
 <script setup>
+import EmployeeBudgets from '@/components/employee-beta/EmployeeBudgets.vue';
+import EmployeeInfo from '@/components/employee-beta/EmployeeInfo.vue';
+import EmployeePageLoader from '@/components/employees/EmployeePageLoader.vue';
+import TimeData from '@/components/shared/timesheets/TimeData.vue';
 import api from '@/shared/api.js';
+import { employeeFilter } from '@/shared/filterUtils';
+import { Employee } from '@/shared/models/employeeTypes';
 import {
   updateStoreBudgets,
   updateStoreContracts,
