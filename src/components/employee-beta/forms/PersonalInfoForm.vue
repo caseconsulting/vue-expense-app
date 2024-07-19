@@ -304,6 +304,7 @@
 import { JOB_TITLES } from '@/components/employees/form-tabs/dropdown-info/jobTitles';
 import api from '@/shared/api';
 import { format, FORMATTED_ISOFORMAT, ISO8601 } from '@/shared/dateUtils';
+import { CASE_EMAIL_DOMAIN, EMPLOYEE_ROLES, PHONE_TYPES } from '@/shared/employeeUtils';
 import {
   getCaseEmailRules,
   getDateOptionalRules,
@@ -317,8 +318,8 @@ import {
 } from '@/shared/validationUtils';
 import { COUNTRIES, isMobile, STATES } from '@/utils/utils';
 import { cloneDeep, filter, forEach, includes, isEmpty, lowerCase, some, startCase } from 'lodash';
-import { computed, ref } from 'vue';
-import { vMask } from 'vue-the-mask';
+import { computed, ref, watch } from 'vue';
+import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
 import PrivateButton from '../PrivateButton.vue';
 
@@ -331,10 +332,7 @@ import PrivateButton from '../PrivateButton.vue';
 const editedEmployee = defineModel();
 const store = useStore();
 
-// TODO put these constants in another file
-const EMPLOYEE_ROLES = ['Admin', 'User', 'Intern', 'Manager'];
-const PHONE_TYPES = ['Home', 'Cell', 'Work'];
-const CASE_EMAIL_DOMAIN = '@consultwithcase.com';
+const vMask = mask; // import v mask directive
 
 // reformatted data for use in form
 const emailUsername = ref(
@@ -383,6 +381,19 @@ const employeeNumberRules = computed(() => [
     return !duplicate || 'This employee id is already in use';
   }
 ]);
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+watch(
+  () => editedEmployee.value.birthday,
+  (newValue) => {
+    formattedBirthday.value = format(newValue, null, FORMATTED_ISOFORMAT);
+  }
+);
 
 // |--------------------------------------------------|
 // |                                                  |
