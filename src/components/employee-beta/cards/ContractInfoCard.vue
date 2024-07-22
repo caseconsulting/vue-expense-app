@@ -193,7 +193,7 @@ function getCurrentAssignment() {
         !props.model.contracts[c].projects[p].endDate ||
         difference(props.model.contracts[c].projects[p].endDate, getTodaysDate(), 'days') > 0
       ) {
-        currentProjects.value = props.model.contracts[c].projects;
+        currentProjects.value = _.reverse(props.model.contracts[c].projects); //Makes the projects descending order from most recent to oldest
         currentContractId.value = props.model.contracts[c].contractId;
         return;
       }
