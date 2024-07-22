@@ -42,7 +42,7 @@
           <div class="d-flex align-center ml-3">
             <div>{{ formatNumber(duration / 60 / 60) }}h</div>
             <v-btn
-              v-if="jobcode in employee.legacyJobCodes"
+              v-if="employee.legacyJobCodes?.hasOwnProperty(jobcode)"
               icon
               variant="text"
               :color="caseRed"
@@ -118,6 +118,7 @@ async function deleteJobCode(jobcode) {
   let attribute = 'legacyJobCodes';
   let emp = _.cloneDeep(props.employee);
   delete emp[attribute][jobcode];
+  if (_.isEmpty(emp[attribute])) emp[attribute] = null;
   let value = { id: emp.id, [`${attribute}`]: emp[attribute] };
   await api.updateAttribute(api.EMPLOYEES, value, attribute);
   // update store
