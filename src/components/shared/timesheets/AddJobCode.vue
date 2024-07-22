@@ -19,7 +19,7 @@
           variant="outlined"
         ></v-text-field>
       </v-col>
-      <v-col cols="4" class="d-flex justify-end pb-0">
+      <v-col cols="4" class="d-flex justify-end pb-0 pr-0">
         <v-btn
           icon
           color="green"
