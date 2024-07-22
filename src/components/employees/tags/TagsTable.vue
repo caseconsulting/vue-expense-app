@@ -132,6 +132,7 @@ import { employeeFilter } from '@/shared/filterUtils';
 
 import DeleteModal from '@/components/modals/DeleteModal.vue';
 import { AxiosError } from 'axios';
+import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSnackbar.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -226,41 +227,13 @@ async function deleteTag() {
     this.$store.dispatch('setTags', { tags: this.tags });
     this.deletedTag = null;
     this.tagLoading = false;
-    this.displaySuccess('Item was successfully deleted!');
+    useDisplaySuccess('Item was successfully deleted!');
   } catch (err) {
-    this.displayError(err);
+    useDisplayError(err);
     this.deletedTag = null;
     this.tagLoading = false;
   }
 } // deleteTag
-
-/**
- * Displays error snackbar
- *
- * @param err error message to display
- */
-function displayError(err) {
-  let status = {
-    statusType: 'ERROR',
-    statusMessage: err,
-    color: 'red'
-  };
-
-  this.emitter.emit('status-alert', status);
-} // displayError
-
-/**
- * Displays success message
- * @param msg success message to display
- */
-function displaySuccess(msg) {
-  let status = {
-    statusType: 'SUCCESS',
-    statusMessage: msg,
-    color: 'green'
-  };
-  this.emitter.emit('status-alert', status);
-} // displaySuccess
 
 /**
  * Edits a tag.
@@ -270,22 +243,6 @@ function displaySuccess(msg) {
 function editTag(tag) {
   this.editedTag = _.cloneDeep(tag);
 } // editTag
-
-/**
- * Emits a message and data if it exists.
- *
- * @param msg - Message to emit
- * @param data - Data to emit
- */
-function emit(msg, data) {
-  if (data) {
-    // data exists
-    this.emitter.emit(msg, data);
-  } else {
-    // data does not exist
-    this.emitter.emit(msg);
-  }
-} // emit
 
 /**
  * Gets the full employee objects from a list of employee ids.
@@ -319,9 +276,9 @@ async function saveEditedTag() {
         this.editedTag = null;
       }
       this.tagLoading = false;
-      this.displaySuccess('Item was successfully saved!');
+      useDisplaySuccess('Item was successfully saved!');
     } catch (err) {
-      this.displayError(err);
+      useDisplayError(err);
     }
   }
 } // saveEditedTag
@@ -453,11 +410,8 @@ export default {
     cleanUpTags,
     createTag,
     deleteTag,
-    displayError,
-    displaySuccess,
     editTag,
     employeeFilter,
-    emit,
     firstAndLastName,
     fullName,
     getRequiredRules,
