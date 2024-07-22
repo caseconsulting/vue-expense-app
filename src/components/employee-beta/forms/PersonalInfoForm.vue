@@ -382,7 +382,7 @@ const employeeNumberRules = computed(() => [
 
 const userIsAdminOrManager = computed(() => {
   const role = store.getters.user.employeeRole;
-  return role === 'admin' || 'manager';
+  return role === 'admin' || role === 'manager';
 });
 
 // |--------------------------------------------------|
