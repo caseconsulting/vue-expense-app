@@ -32,7 +32,14 @@
               <div>Editing: {{ formTabs }}</div>
             </base-form>
             <base-form title="Certifications + Awards" value="Certifications + Awards">
-              <div>Editing: {{ formTabs }}</div>
+              <div>
+                <certs-and-awards-tab
+                  :certifications="employee.certifications"
+                  :awards="employee.awards"
+                  :validateCertifcations="validating.certifications"
+                  :validateAwards="validating.awards"
+                ></certs-and-awards-tab>
+              </div>
             </base-form>
             <base-form title="Tech, Skills, and Languages" value="Tech, Skills, and Languages">
               <div>Editing: {{ formTabs }}</div>
@@ -43,7 +50,13 @@
               </div>
             </base-form>
             <base-form title="Education" value="Education">
-              <div>Editing: {{ formTabs }}</div>
+              <div>
+                <education-tab
+                  :model="employee.education"
+                  :validating="validating.education"
+                  :allowAdditions="true"
+                ></education-tab>
+              </div>
             </base-form>
           </v-expansion-panels>
           <v-card-actions>
@@ -73,6 +86,8 @@ import FormCancelConfirmation from '@/components/modals/FormCancelConfirmation.v
 import PersonalInfoForm from './PersonalInfoForm.vue';
 import { cloneDeep } from 'lodash';
 import JobExperienceTab from '../form-tabs/JobExperienceTab.vue';
+import EducationTab from '../form-tabs/EducationTab.vue';
+import CertsAndAwardsTab from '../form-tabs/CertsAndAwardsTab.vue';
 
 // |--------------------------------------------------|
 // |                                                  |

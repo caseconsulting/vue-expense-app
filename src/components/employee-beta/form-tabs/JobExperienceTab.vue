@@ -24,12 +24,10 @@
                 ref="formFields"
                 :rules="getRequiredRules"
                 label="Date Range"
-                variant="underlined"
                 readonly
                 prepend-icon="mdi-calendar"
                 clearable
                 autocomplete="off"
-                width="300px"
               >
                 <v-menu
                   activator="parent"
@@ -70,7 +68,7 @@
       <!-- End Left Side -->
 
       <!-- Spacer -->
-      <v-col cols="1"></v-col>
+      <!-- <v-col cols="1"></v-col> -->
 
       <!-- Start Right side -->
       <v-col>
@@ -84,13 +82,7 @@
         <v-row>
           <v-col>
             <!-- CASE name -->
-            <v-text-field
-              label="Company"
-              data-vv-name="Company"
-              disabled
-              variant="underlined"
-              model-value="CASE"
-            ></v-text-field>
+            <v-text-field label="Company" data-vv-name="Company" disabled model-value="CASE"></v-text-field>
           </v-col>
 
           <v-col>
@@ -98,7 +90,6 @@
               v-model="editedJobExperienceInfo.jobRole"
               disabled
               label="Position"
-              variant="underlined"
               data-vv-name="Position"
             ></v-text-field>
           </v-col>
@@ -110,7 +101,6 @@
               ref="formFields"
               :model-value="format(editedJobExperienceInfo.hireDate, null, 'MM/DD/YYYY')"
               label="Start Date"
-              variant="underlined"
               prepend-icon="mdi-calendar"
               disabled
             ></v-text-field>
@@ -140,7 +130,6 @@
               :rules="[...getRequiredRules()]"
               :items="companyDropDown"
               label="Company"
-              variant="underlined"
               data-vv-name="Company"
               clearable
             >
@@ -166,7 +155,6 @@
               v-model.trim="position.title"
               :rules="getRequiredRules()"
               label="Position"
-              variant="underlined"
               data-vv-name="Position"
               clearable
             >
@@ -190,7 +178,6 @@
               hint="MM/YYYY format"
               v-mask="'##/####'"
               :rules="[...getDateMonthYearRules()]"
-              variant="underlined"
               prepend-icon="mdi-calendar"
               @update:focused="position.startDate = parseEventDate($event)"
               @click:prepend="position.showStartMenu = true"
@@ -227,7 +214,6 @@
               ref="formFields"
               :model-value="format(position.endDate, null, 'MM/YYYY')"
               :label="position.presentDate ? 'Currently active' : 'End Date'"
-              variant="underlined"
               :rules="[...getDateMonthYearOptionalRules()]"
               hint="MM/YYYY format"
               v-mask="'##/####'"
@@ -326,6 +312,7 @@ import {
   getRequiredRules
 } from '../../../shared/validationUtils';
 import { format, getTodaysDate, isAfter } from '../../../shared/dateUtils';
+import { mask } from 'vue-the-mask';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -336,6 +323,7 @@ import { format, getTodaysDate, isAfter } from '../../../shared/dateUtils';
 const emitter = inject('emitter');
 const props = defineProps(['model', 'validating']);
 const store = useStore();
+const vMask = mask; // custom directive
 
 const companyDropDown = ref([]);
 const companyIndex = ref(0);
