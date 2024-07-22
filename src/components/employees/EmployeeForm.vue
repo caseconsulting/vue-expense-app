@@ -1,21 +1,5 @@
 <template>
   <div :class="!model.id ? 'overflow' : ''">
-    <!-- Status Alert -->
-    <v-snackbar
-      v-model="errorStatus.statusType"
-      :color="errorStatus.color"
-      :multi-line="true"
-      location="top right"
-      :timeout="5000"
-      :vertical="true"
-    >
-      <v-card-text color="white">
-        <span class="text-h6 font-weight-medium">{{ errorStatus.statusMessage }}</span>
-      </v-card-text>
-      <v-btn color="white" variant="text" @click="clearStatus"> Close </v-btn>
-    </v-snackbar>
-    <!-- End Status Alert -->
-
     <v-card>
       <!-- Form Header -->
       <v-card-title class="d-flex align-center header_style">
@@ -357,6 +341,7 @@ import { format } from '@/shared/dateUtils';
 import { getRole } from '@/utils/auth';
 import { generateUUID } from '@/utils/utils';
 import _ from 'lodash';
+import { useDisplayError } from '@/components/shared/StatusSnackbar.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -568,26 +553,6 @@ function cleanUpData() {
 } // cleanUpData
 
 /**
- * Clear the action status that is displayed in the snackbar.
- */
-function clearStatus() {
-  this.errorStatus['statusType'] = undefined;
-  this.errorStatus['statusMessage'] = null;
-  this.errorStatus['color'] = null;
-} // clearStatus
-
-/**
- * Set and display an error action status in the snackbar.
- *
- * @param err - String error message
- */
-function displayError(err) {
-  this.errorStatus['statusType'] = 'ERROR';
-  this.errorStatus['statusMessage'] = err;
-  this.errorStatus['color'] = 'red';
-} // displayError
-
-/**
  * Check if the user has admin privileges
  * Returns true if the user is an admin or a manager,
  * otherwise returns false.
@@ -668,7 +633,7 @@ async function submit() {
       } else {
         // failed to update employee
         this.emitter.emit('error', updatedEmployee.response.data.message);
-        this.displayError(updatedEmployee.response.data.message);
+        useDisplayError(updatedEmployee.response.data.message);
       }
     } else {
       // creating employee
@@ -682,7 +647,7 @@ async function submit() {
       } else {
         // failed to create employee
         this.emitter.emit('error', newEmployee.response.data.message);
-        this.displayError(newEmployee.response.data.message);
+        useDisplayError(newEmployee.response.data.message);
         this.model['id'] = null; // reset id
       }
     }
@@ -916,7 +881,7 @@ async function openUpload() {
     //let err = 'duplicate ID found'
     let message = 'Duplicate employee number, please change to a unique employee number to upload resume';
     this.uploadDisabled = true;
-    this.displayError(message);
+    useDisplayError(message);
   } else {
     //if no error
     this.toggleResumeParser = !this.toggleResumeParser;
@@ -1160,11 +1125,6 @@ export default {
       contractProjects: this.contracts.map((c) => c.projects).flat(),
       deleteLoading: false,
       disableEmpNum: false,
-      errorStatus: {
-        statusType: undefined,
-        statusMessage: null,
-        color: null
-      }, // snack bar error
       errorTabNames: {},
       formTab: null, // currently active tab
       fullName: '', // employee's first and last name
@@ -1266,11 +1226,9 @@ export default {
     cancelA,
     cancelB,
     cleanUpData,
-    clearStatus,
     checkEmployeeDeactivation,
     confirm,
     convertAutocompleteToTitlecase,
-    displayError,
     format, // dateUtils
     getRole,
     hasAdminPermissions,
