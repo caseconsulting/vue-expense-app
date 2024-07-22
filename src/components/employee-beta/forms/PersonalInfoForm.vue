@@ -112,8 +112,8 @@
           :rules="getCaseEmailRules()"
         ></v-text-field>
       </v-col>
-      <!-- employee number -->
-      <v-col>
+      <!-- employee number / employee id -->
+      <v-col v-if="userIsAdminOrManager">
         <v-text-field
           v-model="editedEmployee.employeeNumber"
           label="Employee Number"
@@ -134,11 +134,11 @@
         ></v-text-field>
       </v-col>
       <!-- employee role -->
-      <v-col>
+      <v-col v-if="userIsAdminOrManager">
         <v-combobox v-model="employeeRole" label="Employee Role" :items="EMPLOYEE_ROLES"></v-combobox>
       </v-col>
       <!-- tags -->
-      <v-col>
+      <v-col v-if="userIsAdminOrManager">
         <v-autocomplete
           v-model="tags"
           label="Tags"
@@ -381,6 +381,11 @@ const employeeNumberRules = computed(() => [
     return !duplicate || 'This employee id is already in use';
   }
 ]);
+
+const userIsAdminOrManager = computed(() => {
+  const role = store.getters.user.employeeRole;
+  return role === 'admin' || 'manager';
+});
 
 // |--------------------------------------------------|
 // |                                                  |
