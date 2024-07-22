@@ -127,7 +127,7 @@
               ref="formFields"
               :id="'comp-' + compIndex"
               v-model.trim="company.companyName"
-              :rules="[...getRequiredRules()]"
+              :rules="[...getRequiredRules(), duplicateCompanyName(compIndex)]"
               :items="companyDropDown"
               label="Company"
               data-vv-name="Company"
@@ -214,7 +214,7 @@
               ref="formFields"
               :model-value="format(position.endDate, null, 'MM/YYYY')"
               :label="position.presentDate ? 'Currently active' : 'End Date'"
-              :rules="[...getDateMonthYearOptionalRules()]"
+              :rules="[...getDateMonthYearOptionalRules(), endDatePresentRule(compIndex, index)]"
               hint="MM/YYYY format"
               v-mask="'##/####'"
               clearable
@@ -229,9 +229,9 @@
               "
               autocomplete="off"
             >
-              <!-- <template v-if="endDatePresentRule(compIndex, index) !== true" v-slot:message>
+              <template v-if="endDatePresentRule(compIndex, index) !== true" v-slot:message>
                 End Date is required (click <v-icon color="black" icon="mdi-check-circle-outline" /> to mark active)
-              </template> -->
+              </template>
               <v-menu
                 activator="parent"
                 v-model="position.showEndMenu"
@@ -279,19 +279,13 @@
               Position
             </v-btn>
           </v-col>
-          <!-- <v-col align="left">
-            <v-btn variant="text" icon="" id="delete-company" @click="deleteCompany(compIndex)">
-              <v-tooltip activator="parent" location="bottom">Delete Company</v-tooltip>
-              <v-icon class="case-gray">mdi-delete</v-icon>
-            </v-btn>
-          </v-col> -->
         </v-row>
         <!-- End add postion -->
       </v-col>
     </v-row>
     <!-- End company -->
     <v-row>
-      <v-col>
+      <v-col align="center">
         <v-btn @click="addCompany()" elevation="2" id="add-job">
           <v-icon class="pr-1">mdi-plus</v-icon>
           Job
@@ -302,7 +296,7 @@
 </template>
 
 <script setup>
-import _ from 'lodash';
+import _, { isEmpty } from 'lodash';
 import { ref } from 'vue';
 import { inject, onBeforeMount } from 'vue';
 import { useStore } from 'vuex';
@@ -327,6 +321,24 @@ const vMask = mask; // custom directive
 
 const companyDropDown = ref([]);
 const companyIndex = ref(0);
+const duplicateCompanyName = (compIndex) => {
+  let compNames = _.map(editedJobExperienceInfo.value.companies, (company) => company.companyName);
+  let company = compNames[compIndex];
+  compNames.splice(compIndex, 1);
+  return !compNames.includes(company) || 'Duplicate company name';
+};
+const endDatePresentRule = (compIndex, posIndex) => {
+  if (editedJobExperienceInfo.value !== undefined) {
+    let position = editedJobExperienceInfo.value.companies[compIndex].positions[posIndex];
+    if (position.presentDate == false && isEmpty(position.endDate)) {
+      return 'End Date is required';
+    } else {
+      return true;
+    }
+  } else {
+    return true;
+  }
+};
 const editedJobExperienceInfo = ref(_.cloneDeep(props.model));
 const employees = ref(null);
 const positionIndex = ref(0);
