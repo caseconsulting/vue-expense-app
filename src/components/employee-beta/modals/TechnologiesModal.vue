@@ -7,40 +7,57 @@
         <div style="position: sticky; top: 45px; z-index: 1; background-color: white" class="pt-4">
           <fieldset class="filter_border">
             <legend class="legend_style">Sort By</legend>
-            <v-col cols="12">
-              <v-btn-toggle color="primary" v-model="filters" density="compact" multiple>
-                <v-btn value="filter1current">
-                  <v-tooltip activator="parent" location="top">Current</v-tooltip>
-                  <v-icon size="x-large">mdi-check{{ filters.includes('filter1current') ? '-bold' : '' }}</v-icon>
-                </v-btn>
+            <v-row class="pl-3 pr-3">
+              <v-col cols="5" class="pl-3 pt-6">
+                <v-btn-toggle color="primary" v-model="filters" density="compact" multiple class="">
+                  <v-btn value="filter1current">
+                    <v-tooltip activator="parent" location="top">Current</v-tooltip>
+                    <v-icon size="x-large">mdi-check{{ filters.includes('filter1current') ? '-bold' : '' }}</v-icon>
+                  </v-btn>
 
-                <v-btn value="filter2years">
-                  <v-tooltip activator="parent" location="top">Years of Experience</v-tooltip>
-                  <v-icon size="x-large"
-                    >mdi-calendar-multiple{{ filters.includes('filter2years') ? '-check' : '' }}</v-icon
-                  >
-                </v-btn>
+                  <v-btn value="filter2years">
+                    <v-tooltip activator="parent" location="top">Years of Experience</v-tooltip>
+                    <v-icon size="x-large"
+                      >mdi-calendar-multiple{{ filters.includes('filter2years') ? '-check' : '' }}</v-icon
+                    >
+                  </v-btn>
 
-                <v-btn value="filter3name">
-                  <v-tooltip activator="parent" location="top">Alphabetical</v-tooltip>
-                  <v-icon size="x-large">mdi-sort-alphabetical-descending-variant</v-icon>
-                </v-btn>
-              </v-btn-toggle>
-            </v-col>
+                  <v-btn value="filter3name">
+                    <v-tooltip activator="parent" location="top">Alphabetical</v-tooltip>
+                    <v-icon size="x-large">mdi-sort-alphabetical-descending-variant</v-icon>
+                  </v-btn>
+                </v-btn-toggle>
+              </v-col>
+              <v-col>
+                <v-text-field
+                  id="techSearch"
+                  v-model.trim="search"
+                  append-inner-icon="mdi-magnify"
+                  label="Search (comma separate terms)"
+                  variant="underlined"
+                  single-line
+                />
+              </v-col>
+            </v-row>
           </fieldset>
         </div>
         <!-- End of Sort Filters -->
-        <technologies-list :list="filteredList" :isModal="true"></technologies-list>
-        <div
-          v-if="!isEmpty(model.technologies) && Math.ceil(model.technologies.length / ITEMS_PER_PAGE) != 1"
-          class="text-center"
+        <!-- <technologies-list :list="filteredList" :isModal="true"></technologies-list> -->
+        <v-data-table
+          :items-per-page="ITEMS_PER_PAGE"
+          :search="search"
+          :items="filteredList"
+          item-key="filteredList.id"
+          mobile-breakpoint="800"
         >
-          <v-pagination
-            v-model="page"
-            :length="Math.ceil(model.technologies.length / ITEMS_PER_PAGE)"
-            :total-visible="8"
-          ></v-pagination>
-        </div>
+          <template #[`item.current`]="{ item }">
+            <span v-if="item.current">
+              <v-icon class="pl-6">mdi-check</v-icon>
+              <v-tooltip activator="parent" location="left">Current Skill</v-tooltip>
+            </span>
+            <v-spacer v-else style="min-width: 24px"></v-spacer>
+          </template>
+        </v-data-table>
       </div>
       <!-- Employee does not have Technology Experience -->
       <p v-else>No Technologies or Skills Information</p>
@@ -61,6 +78,7 @@ import TechnologiesList from '../lists/TechnologiesList.vue';
 // |                                                  |
 // |--------------------------------------------------|
 
+const search = ref(null);
 const ITEMS_PER_PAGE = 8;
 const iteratees = {
   filter1current: (obj) => !obj.current,
@@ -69,7 +87,6 @@ const iteratees = {
 };
 
 const props = defineProps(['model']);
-const page = ref(1);
 const filters = ref(['filter1current', 'filter2years']);
 
 // |--------------------------------------------------|
@@ -79,10 +96,8 @@ const filters = ref(['filter1current', 'filter2years']);
 // |--------------------------------------------------|
 
 const filteredList = computed(() => {
-  const startIndex = (page.value - 1) * ITEMS_PER_PAGE; //each page contains 5 technologies entries
-  const endIndex = startIndex + ITEMS_PER_PAGE;
   if (!isEmpty(props.model.technologies)) {
-    return sortByFilters(props.model.technologies, filters.value).slice(startIndex, endIndex);
+    return sortByFilters(props.model.technologies, filters.value);
   }
   return [];
 });
