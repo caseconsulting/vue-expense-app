@@ -154,6 +154,39 @@
     </v-row>
     <v-row><h3>Personal Information</h3></v-row>
     <v-row>
+      <!-- birthday -->
+      <v-col cols="4">
+        <v-text-field
+          v-model="formattedBirthday"
+          label="Birthday"
+          v-mask="'##/##/####'"
+          hint="MM/DD/YYYY"
+          :rules="[...getDateOptionalRules(), ...getNonFutureDateRules()]"
+          prepend-icon="mdi-calendar"
+          @update:focused="editedEmployee.birthday = format(formattedBirthday, null, 'YYYY-MM-DD')"
+          @click:prepend="birthdayMenu = true"
+          @keypress="birthdayMenu = false"
+          autocomplete="off"
+          class="flex-grow"
+          style="min-width: 250px"
+        >
+          <v-menu activator="parent" :close-on-content-click="false" v-model="birthdayMenu" location="start center">
+            <v-date-picker
+              v-model="editedEmployee.birthday"
+              @update:model-value="birthdayMenu = false"
+              show-adjacent-months
+              hide-actions
+              keyboard-icon=""
+              color="#bc3825"
+              title="Birthday"
+            >
+            </v-date-picker>
+          </v-menu>
+          <template #append-inner>
+            <private-button v-model="editedEmployee.birthdayFeed"></private-button>
+          </template>
+        </v-text-field>
+      </v-col>
       <!-- personal email -->
       <v-col>
         <v-text-field v-model="personalEmail.emailValue" label="Personal Email" :rules="getEmailRules()">
@@ -180,6 +213,43 @@
         <v-text-field v-model="editedEmployee.linkedIn" label="LinkedIn Profile URL" :rules="getURLRules()">
           <template #prepend-inner><v-icon>$linkedin</v-icon></template>
         </v-text-field>
+      </v-col>
+
+      <!-- place of birth -->
+      <v-col class="pt-0" cols="12">
+        <v-row class="ml-0"><h4>Place of Birth</h4></v-row>
+        <v-row>
+          <v-col class="d-flex align-center" cols="auto">
+            <v-tooltip location="top" text="Place of birth is always hidden from other users">
+              <template #activator="{ props }">
+                <v-btn v-bind="props" icon="mdi-shield" variant="text" v-ripple="false"></v-btn>
+              </template>
+            </v-tooltip>
+          </v-col>
+          <!-- city of birth -->
+          <v-col>
+            <v-text-field v-model="editedEmployee.city" label="City" hide-details="auto"></v-text-field>
+          </v-col>
+          <!-- state of birth -->
+          <v-col>
+            <v-autocomplete
+              v-model="editedEmployee.st"
+              label="State"
+              :items="Object.values(STATES)"
+              hide-details="auto"
+              :disabled="editedEmployee.country !== 'United States'"
+            ></v-autocomplete>
+          </v-col>
+          <!-- country of birth -->
+          <v-col>
+            <v-autocomplete
+              v-model="editedEmployee.country"
+              label="Country"
+              :items="COUNTRIES"
+              hide-details="auto"
+            ></v-autocomplete>
+          </v-col>
+        </v-row>
       </v-col>
     </v-row>
     <!-- phone numbers -->
@@ -223,78 +293,6 @@
       </v-col>
       <v-col class="d-flex justify-center">
         <v-btn prepend-icon="mdi-plus" @click="addPhoneNumber()">Add Number</v-btn>
-      </v-col>
-    </v-row>
-    <v-row><h3>Birthday</h3></v-row>
-    <v-row class="groove d-flex flex-wrap align-center">
-      <!-- birthday -->
-      <v-col cols="12">
-        <v-row>
-          <v-col cols="4">
-            <v-text-field
-              v-model="formattedBirthday"
-              label="Birthday"
-              v-mask="'##/##/####'"
-              hint="MM/DD/YYYY"
-              :rules="[...getDateOptionalRules(), ...getNonFutureDateRules()]"
-              prepend-icon="mdi-calendar"
-              @update:focused="editedEmployee.birthday = format(formattedBirthday, null, 'YYYY-MM-DD')"
-              @click:prepend="birthdayMenu = true"
-              @keypress="birthdayMenu = false"
-              autocomplete="off"
-              style="min-width: 250px"
-            >
-              <v-menu activator="parent" :close-on-content-click="false" v-model="birthdayMenu" location="start center">
-                <v-date-picker
-                  v-model="editedEmployee.birthday"
-                  @update:model-value="birthdayMenu = false"
-                  show-adjacent-months
-                  hide-actions
-                  keyboard-icon=""
-                  color="#bc3825"
-                  title="Birthday"
-                >
-                </v-date-picker>
-              </v-menu>
-              <template #append>
-                <private-button v-model="editedEmployee.birthdayFeed"></private-button>
-              </template>
-            </v-text-field>
-          </v-col>
-        </v-row>
-      </v-col>
-      <v-spacer></v-spacer>
-      <v-col class="pt-0" cols="12">
-        <!-- place of birth -->
-        <v-row class="ml-0"><h4>Place of Birth</h4></v-row>
-        <v-row>
-          <v-col class="d-flex align-center" cols="auto">
-            <v-tooltip location="top" text="Place of birth is always hidden from other users">
-              <template #activator="{ props }">
-                <v-btn v-bind="props" icon="mdi-shield" variant="text" v-ripple="false"></v-btn>
-              </template>
-            </v-tooltip>
-          </v-col>
-          <v-col>
-            <v-text-field v-model="editedEmployee.city" label="City" hide-details="auto"></v-text-field>
-          </v-col>
-          <v-col>
-            <v-autocomplete
-              v-model="editedEmployee.country"
-              label="Country"
-              :items="COUNTRIES"
-              hide-details="auto"
-            ></v-autocomplete>
-          </v-col>
-          <v-col>
-            <v-autocomplete
-              v-model="editedEmployee.st"
-              label="State"
-              :items="Object.values(STATES)"
-              hide-details="auto"
-            ></v-autocomplete>
-          </v-col>
-        </v-row>
       </v-col>
     </v-row>
   </v-container>
@@ -426,6 +424,8 @@ function prepareSubmit() {
   });
 
   editedEmployee.value.personalEmail = personalEmail.value.emailValue;
+
+  if (editedEmployee.value.country !== 'United States') editedEmployee.value.st = '';
 }
 
 /**
