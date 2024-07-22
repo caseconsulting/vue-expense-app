@@ -1,11 +1,13 @@
 <template>
   <v-card title="Current Contract Info" elevation="4">
-    <v-card-text v-if="!isEmpty(contractsList)">
+    <v-card-text class="pb-0" v-if="!isEmpty(contractsList)">
       <div v-if="!noneActive">
         <p><b>Contract: </b>{{ getContractNameFromId(currentContractId) }}</p>
         <p class="ml-4">Start Date: {{ getContractStartDate(currentContractId) }}</p>
         <p><b>Prime: </b>{{ getPrimeNameFromId(currentContractId) }}</p>
-        <p class="ml-4">Project: {{ getProjectNameFromId(currentProjectId) }}</p>
+        <p v-for="(project, index) in currentProjects" :key="project.projectId + index" class="ml-4">
+          Project: {{ getProjectNameFromId(project.projectId) }}
+        </p>
       </div>
       <div v-else style="font-size: 15px; text-align: center" class="mt-3">
         <p><b>No contracts are currently active, to view past assignments click below.</b></p>
@@ -18,14 +20,28 @@
     <v-dialog v-model="dialog" max-width="600">
       <template v-slot:default>
         <v-card title="All Contract Information">
-          <v-card-text v-for="(contract, index) in contractsList" :key="contract.contractId + index" class="pt-0">
+          <v-card-text v-if="isEmpty(contractsList)">
+            <p>No available contract information</p>
+          </v-card-text>
+
+          <v-card-text
+            v-else
+            v-for="(contract, index) in contractsList"
+            :key="contract.contractId + index"
+            class="pt-0"
+          >
             <v-row>
               <v-col>
                 <p><b>Contract: </b>{{ getContractName(contract) }}</p>
               </v-col>
               <v-col>
-                <span v-if="contract.projects.some((p) => !p.endDate)">
-                  <v-tooltip activator="parent" location="right">Current Project</v-tooltip>
+                <span
+                  v-if="
+                    contract.projects.some((p) => !p.endDate) ||
+                    contract.projects.some((p) => difference(p.endDate, getTodaysDate(), 'days') > 0)
+                  "
+                >
+                  <v-tooltip activator="parent" location="right">Current Contract</v-tooltip>
                   <v-icon>mdi-check</v-icon>
                 </span>
               </v-col>
@@ -65,7 +81,7 @@ const props = defineProps(['contracts', 'model']);
 
 const contractsList = ref([]);
 const currentContractId = ref('');
-const currentProjectId = ref('');
+const currentProjects = ref([]);
 const dialog = ref(false);
 const noneActive = ref(false);
 const projectsList = ref([]);
@@ -84,8 +100,8 @@ onBeforeMount(() => {
     contractsList.value = props.model.contracts.slice(0, 10);
     projectsList.value = props.contracts.map((c) => c.projects).flat();
     getCurrentAssignment();
-    // sort the filtered list by start date, ascending
-    contractsList.value = _.sortBy(contractsList.value, (o) => getContractEarliestDate(o));
+    // sort the filtered list by start date, descending (current contract on top)
+    contractsList.value = _.reverse(_.sortBy(contractsList.value, (o) => getContractEarliestDate(o)));
   }
 }); // created
 
@@ -177,7 +193,7 @@ function getCurrentAssignment() {
         !props.model.contracts[c].projects[p].endDate ||
         difference(props.model.contracts[c].projects[p].endDate, getTodaysDate(), 'days') > 0
       ) {
-        currentProjectId.value = props.model.contracts[c].projects[p].projectId;
+        currentProjects.value = props.model.contracts[c].projects;
         currentContractId.value = props.model.contracts[c].contractId;
         return;
       }
