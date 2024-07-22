@@ -17,7 +17,7 @@
         </v-col>
         <v-col v-else class="margin-y ml-2 d-flex align-center" cols="9">
           <!-- if a skill/tech has a long name then it gets cut off with a ... -->
-          <p class="title-text ma-0" style="width: 15ch; overflow: hidden; text-overflow: ellipsis">
+          <p class="title-text ma-0" style="width: 16ch; overflow: hidden; text-overflow: ellipsis">
             <b>{{ technology.name }}</b>
           </p>
         </v-col>
