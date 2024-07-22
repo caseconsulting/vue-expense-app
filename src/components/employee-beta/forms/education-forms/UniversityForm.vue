@@ -85,7 +85,7 @@
                 <v-autocomplete
                   ref="formFields"
                   v-model="degree.majors[mIndex]"
-                  :rules="[...getRequiredRules()]"
+                  :rules="[...getRequiredRules(), duplicateDiscipline('majors', major, dIndex)]"
                   :items="majorDropDown"
                   label="Major"
                   variant="underlined"
@@ -111,7 +111,7 @@
                 <v-autocomplete
                   ref="formFields"
                   v-model="degree.minors[minIndex]"
-                  :rules="[...getRequiredRules()]"
+                  :rules="[...getRequiredRules(), duplicateDiscipline('minors', minor, dIndex)]"
                   :items="minorDropDown"
                   label="Minor"
                   variant="underlined"
@@ -135,7 +135,7 @@
                 <v-autocomplete
                   ref="formFields"
                   v-model="degree.concentrations[cIndex]"
-                  :rules="[...getRequiredRules()]"
+                  :rules="[...getRequiredRules(), duplicateDiscipline('concentrations', concentration, dIndex)]"
                   :items="concentrationDropDown"
                   variant="underlined"
                   data-vv-name="Concentration"
@@ -217,6 +217,14 @@ const majorDropDown = ref(_.map(majorsAndMinors, (elem) => titleCase(elem))); //
 const minorDropDown = ref(_.map(majorsAndMinors, (elem) => titleCase(elem))); // autocomplete minor options
 const schoolDropDown = SCHOOLS;
 const uni = ref(_.cloneDeep(props.school));
+
+const duplicateDiscipline = (title, discipline, degreeIndex) => {
+  let disciplines = uni.value.degrees[degreeIndex][title];
+  let count = _.countBy(disciplines, (dis) => {
+    return dis === discipline;
+  });
+  return count.true === 1 || 'Duplicate field found, please remove duplicate entries';
+};
 
 // |--------------------------------------------------|
 // |                                                  |
