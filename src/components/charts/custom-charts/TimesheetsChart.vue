@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :key="updateKey">
     <doughnut-chart
       v-if="dataReceived"
       ref="doughnutChart"
@@ -24,6 +24,7 @@
             variant="outlined"
             class="divider ma-0 pa-1 custom-input"
             hide-details
+            @keydown.enter="showCustomCompletedInput = false"
             @blur="showCustomCompletedInput = false"
           ></v-text-field>
         </div>
@@ -43,6 +44,7 @@
             variant="outlined"
             class="ma-0 pa-1 custom-input"
             hide-details
+            @keydown.enter="showCustomNeededInput = false"
             @blur="showCustomNeededInput = false"
           ></v-text-field>
         </div>
@@ -70,6 +72,7 @@ const emitter = inject('emitter');
 const completed = ref(0);
 const needed = ref(0);
 const remainingHours = ref(0);
+const updateKey = ref(0);
 const options = ref(null);
 const customCompletedInput = ref(null);
 const customNeededInput = ref(null);
@@ -139,9 +142,18 @@ async function fillData() {
     return formatNumber(Number(duration / 60 / 60));
   }); // removes decimals if a whole number
 
+  let jobCodeValuesSum = _.sum(_.map(jobCodeValues, (v) => Number(v)));
+  // user inputted custom data
+  let difference = Number(completed.value) - jobCodeValuesSum;
+  if (difference > 0) {
+    jobcodes['Custom Input'] = difference * 60 * 60;
+    jobCodeValues?.push(formatNumber(difference));
+  }
+
   for (let i = 0; i < jobCodeValues?.length / colorsOptions.length; i++) {
     colors = [...colors, ...colorsOptions];
   }
+
   colors = _.slice(colors, 0, jobCodeValues?.length);
   colors.push('#EAEAEA'); // push grey for remaining hours
 
@@ -212,26 +224,34 @@ async function fillData() {
 // |--------------------------------------------------|
 
 watch(
-  () => [customCompletedInput.value, customNeededInput.value],
-  () => {
-    let customCompleted, customNeeded;
-    try {
-      customCompleted = eval(customCompletedInput.value);
-    } catch (err) {
-      customCompleted = completed.value;
-    }
-    try {
-      customNeeded = eval(customNeededInput.value);
-    } catch (err) {
-      customNeeded = needed.value;
-    }
-    if (customCompleted && !isNaN(customCompleted) && !isNaN(parseFloat(customCompleted))) {
-      completed.value = customCompleted || completed.value;
-      emitter.emit('update-time-data-completed', completed.value);
-    }
-    if (customNeeded && !isNaN(customNeeded) && !isNaN(parseFloat(customNeeded))) {
-      needed.value = customNeeded || needed.value;
-      emitter.emit('update-time-data-needed', needed.value);
+  () => [showCustomCompletedInput.value, showCustomNeededInput.value],
+  async () => {
+    if (!showCustomCompletedInput.value && !showCustomNeededInput.value) {
+      let customCompleted, customNeeded;
+      // evaluate custom input as expressions
+      try {
+        customCompleted = eval(customCompletedInput.value);
+      } catch (err) {
+        customCompleted = completed.value;
+      }
+      try {
+        customNeeded = eval(customNeededInput.value);
+      } catch (err) {
+        customNeeded = needed.value;
+      }
+      // emit to TimePeriodDetails if input has changed
+      if (customCompleted && !isNaN(customCompleted) && !isNaN(parseFloat(customCompleted))) {
+        completed.value = customCompleted;
+        emitter.emit('update-time-data-completed', completed.value);
+      }
+      if (customNeeded && !isNaN(customNeeded) && !isNaN(parseFloat(customNeeded))) {
+        needed.value = customNeeded;
+        emitter.emit('update-time-data-needed', needed.value);
+      }
+      // update chart with custom input
+      remainingHours.value = needed.value - completed.value;
+      await fillData();
+      updateKey.value++;
     }
   }
 );
