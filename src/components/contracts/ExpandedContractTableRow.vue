@@ -202,6 +202,7 @@ import ProjectsEmployeesAssignedModal from '../modals/ProjectsEmployeesAssignedM
 import { getProjectCurrentEmployees } from '@/shared/contractUtils';
 import { ref, onBeforeMount, inject } from 'vue';
 import { useStore } from 'vuex';
+import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSnackbar.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -333,43 +334,15 @@ async function updateProject(contract) {
     let contractIndex = contracts.findIndex((c) => c.id == contractObj.id);
     contracts[contractIndex] = contractObj;
     store.dispatch('setContracts', { contracts });
-    displaySuccess('Item was successfully saved!');
+    useDisplaySuccess('Item was successfully saved!');
     projectLoading.value = false;
   } catch (err) {
-    displayError(err);
+    useDisplayError(err);
     projectLoading.value = false;
   }
   editingProjectItem.value = null;
   emitter.emit('is-editing-project-item', false);
 } // updateProject
-
-/**
- * Displays success message
- * @param msg success message to display
- */
-function displaySuccess(msg) {
-  let status = {
-    statusType: 'SUCCESS',
-    statusMessage: msg,
-    color: 'green'
-  };
-  emitter.emit('status-alert', status);
-} // displaySuccess
-
-/**
- * Displays error snackbar
- *
- * @param err error message to display
- */
-function displayError(err) {
-  let status = {
-    statusType: 'ERROR',
-    statusMessage: err,
-    color: 'red'
-  };
-
-  emitter.emit('status-alert', status);
-} // displayError
 
 /**
  * Toggles project checkBox item
