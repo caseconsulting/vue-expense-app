@@ -102,6 +102,9 @@ onBeforeMount(() => {
     getCurrentAssignment();
     // sort the filtered list by start date, descending (current contract on top)
     contractsList.value = _.reverse(_.sortBy(contractsList.value, (o) => getContractEarliestDate(o)));
+    contractsList.value.forEach((contract) => {
+      contract.projects = _.reverse(_.orderBy(contract.projects, ['popStartDate'])); //Sorts each contract's projects from most recent to oldest
+    });
   }
 }); // created
 
@@ -193,7 +196,7 @@ function getCurrentAssignment() {
         !props.model.contracts[c].projects[p].endDate ||
         difference(props.model.contracts[c].projects[p].endDate, getTodaysDate(), 'days') > 0
       ) {
-        currentProjects.value = _.reverse(props.model.contracts[c].projects); //Makes the projects descending order from most recent to oldest
+        currentProjects.value = _.reverse(_.orderBy(props.model.contracts[c].projects, ['popStartDate'])); //Sorts the projects from most recent to oldest
         currentContractId.value = props.model.contracts[c].contractId;
         return;
       }
