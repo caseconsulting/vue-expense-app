@@ -41,7 +41,7 @@ import TimePeriodHours from '@/components/shared/timesheets/TimePeriodHours.vue'
 import PTOHours from '@/components/shared/timesheets/PTOHours.vue';
 import _ from 'lodash';
 import api from '@/shared/api';
-import { unref, computed, inject, ref, watch, onBeforeMount, onBeforeUnmount } from 'vue';
+import { computed, inject, ref, onBeforeMount, onBeforeUnmount, unref, watch } from 'vue';
 import { useStore } from 'vuex';
 import { difference, getTodaysDate, isBefore, isSameOrBefore, now } from '@/shared/dateUtils';
 import { updateStoreContracts } from '@/utils/storeUtils';
