@@ -54,6 +54,30 @@
                   ></v-autocomplete>
                 </v-responsive>
               </v-scroll-y-transition>
+              <!-- Navigation Buttons -->
+              <v-btn
+                v-if="isAdmin"
+                :disabled="loading"
+                icon
+                variant="text"
+                density="comfortable"
+                @click="navEmployee(-1)"
+              >
+                <v-tooltip activator="parent" location="top"> Previous employee </v-tooltip>
+                <v-icon size="x-large"> mdi-arrow-left-thin </v-icon>
+              </v-btn>
+              <v-btn
+                v-if="isAdmin"
+                :disabled="loading"
+                icon
+                variant="text"
+                density="comfortable"
+                class="mr-3"
+                @click="navEmployee(1)"
+              >
+                <v-tooltip activator="parent" location="top"> Next employee </v-tooltip>
+                <v-icon size="x-large"> mdi-arrow-right-thin </v-icon>
+              </v-btn>
             </v-col>
           </v-row>
         </v-col>
@@ -281,7 +305,7 @@ async function getProfileData() {
   isUser.value = userIsEmployee();
   basicEmployeeDataLoading.value = false;
   if (model.value) {
-    await refreshExpenseData(true); //TODO: Implement Expenses
+    refreshExpenseData(true); //TODO: Implement Expenses
   }
   loading.value = false;
 } // getProfileData
@@ -342,9 +366,34 @@ function onSearchButton() {
 async function onSearchUpdate() {
   if (dropdownEmployee.value) {
     await router.push(`${dropdownEmployee.value.employeeNumber}`);
-    await getProfileData();
+    getProfileData();
   }
 }
+/**
+ * Navigates to an employee
+ * future: support custom loops
+ *
+ * @input num - amount of employees to move fowards (may be negative for backwards)
+ */
+async function navEmployee(num) {
+  // set vars
+  let loop, pos, res;
+  let currId = model.value.employeeNumber;
+
+  // create 'loop' of employees in order of their employee number
+  loop = store.getters.employees || (await updateStoreEmployees());
+  loop = loop.filter((e) => e.workStatus !== 0);
+  loop = _.sortBy(loop, ['employeeNumber']);
+
+  // get the employee we're currently at and grab the employee `num` after in
+  // the loop (this can be negative to go backwards, and can be more than 1)
+  pos = _.findIndex(loop, (e) => e.employeeNumber == currId);
+  res = (pos + num) % loop.length;
+  if (res < 0) res = loop.length - 1;
+  dropdownEmployee.value = _.cloneDeep(loop[res]);
+  dropdownEmployee.value.itemTitle = `${dropdownEmployee.value.lastName}, ${dropdownEmployee.value.nickname || dropdownEmployee.value.firstName}`; //add the itemTitle for the searchbar
+  onSearchUpdate();
+} // navEmployee
 
 // |--------------------------------------------------|
 // |                                                  |
