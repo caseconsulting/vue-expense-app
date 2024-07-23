@@ -10,7 +10,9 @@
             <v-icon size="large" class="pr-1"> mdi-arrow-left-thin </v-icon>
             Back
           </v-btn>
-          <v-btn color="#bc3825" @click="goBackToAlphaProfile()" theme="dark" class="ma-2">Go to Alpha profile!</v-btn>
+          <v-btn rounded="xl" color="#bc3825" @click="goBackToAlphaProfile()" theme="dark" class="ma-2"
+            ><v-icon>mdi-alpha</v-icon>view</v-btn
+          >
         </v-col>
         <v-col class="pa-0 d-flex justify-center" cols="4">
           <v-row no-gutters class="fit-content d-flex-inline align-center">
