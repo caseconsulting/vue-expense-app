@@ -155,7 +155,14 @@ async function saveItem(item, field) {
   if (resp.name !== 'AxiosError') {
     employee[tmpField] = { ...employee[tmpField], success: true, saving: false };
   } else {
-    useDisplayCustom(resp?.response?.data?.message || 'An unknown error has occurred', 'CUSTOM', 8000, 'top', 'red');
+    useDisplayCustom(
+      resp?.response?.data?.message || 'An unknown error has occurred',
+      'CUSTOM',
+      8000,
+      'red',
+      '',
+      'top'
+    );
     employee[tmpField] = { ...employee[tmpField], fail: true, saving: false };
   }
 
