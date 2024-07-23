@@ -42,7 +42,6 @@
           </fieldset>
         </div>
         <!-- End of Sort Filters -->
-        <!-- <technologies-list :list="filteredList" :isModal="true"></technologies-list> -->
         <v-data-table
           :items-per-page="ITEMS_PER_PAGE"
           :search="search"
@@ -70,7 +69,6 @@ import _ from 'lodash';
 import { ref, computed } from 'vue';
 import { isEmpty } from '@/utils/utils';
 import BaseInfoModal from '@/components/employee-beta/modals/BaseInfoModal.vue';
-import TechnologiesList from '../lists/TechnologiesList.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
