@@ -109,10 +109,9 @@ import {
   endOf,
   DEFAULT_ISOFORMAT
 } from '../shared/dateUtils';
-import { ref, inject, onBeforeUnmount, onBeforeMount, computed, watch } from 'vue';
+import { ref, onBeforeMount, computed, watch } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-import { useDisplayCustom } from '@/components/shared/StatusSnackbar.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -122,7 +121,6 @@ import { useDisplayCustom } from '@/components/shared/StatusSnackbar.vue';
 
 const store = useStore();
 const router = useRouter();
-const emitter = inject('emitter');
 const accessibleBudgets = ref(null);
 const aggregatedAwards = ref([]);
 const aggregatedExpenses = ref([]);
@@ -150,9 +148,6 @@ const textMaxLength = ref(110);
  *  Set budget information for employee. Creates event listeners.
  */
 onBeforeMount(async () => {
-  emitter.on('status-alert', (status) => {
-    useDisplayCustom(status.statusMessage, status.statusType, 5000, status.color, 'white');
-  });
   if (store.getters.storeIsPopulated) {
     loading.value = false;
     await loadHomePageData();
@@ -621,13 +616,6 @@ async function refreshEmployee() {
   accessibleBudgets.value = store.getters.budgets;
   loadingBudgets.value = false;
 } // refreshEmployee
-
-/**
- * Before destroy lifecycle hook. Destroys listeners.
- */
-onBeforeUnmount(() => {
-  emitter.off('status-alert');
-}); // beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |

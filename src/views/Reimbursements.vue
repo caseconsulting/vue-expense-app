@@ -1,19 +1,5 @@
 <template>
   <v-card :elevation="3">
-    <!-- Status Alert -->
-    <v-snackbar
-      v-model="status.statusType"
-      :color="status.color"
-      :multi-line="true"
-      location="top right"
-      :timeout="5000"
-      :vertical="true"
-    >
-      <v-card-text color="white">
-        <span class="text-h6 font-weight-medium">{{ status.statusMessage }}</span>
-      </v-card-text>
-      <v-btn color="white" variant="text" @click="clearStatus()"> Close </v-btn>
-    </v-snackbar>
     <v-card color="#bc3825">
       <v-card-title class="d-flex align-center header_style" v-bind:class="{ 'justify-center': isMobile() }">
         <h2 class="text-center text-white">Reimbursements</h2>
@@ -49,7 +35,6 @@ import TimeData from '@/components/shared/timesheets/TimeData';
 import { onBeforeMount, onMounted, ref, inject, watch } from 'vue';
 import { useStore } from 'vuex';
 import { storeIsPopulated } from '../utils/utils';
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                      SETUP                       |
@@ -62,11 +47,6 @@ const store = useStore();
 const currentTab = ref('expenses'); // default page
 const employee = ref(null);
 const loading = ref(true);
-const status = ref({
-  statusType: undefined,
-  statusMessage: '',
-  color: ''
-});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -88,12 +68,6 @@ onBeforeMount(() => {
  * Mounted lifecycle hook
  */
 onMounted(() => {
-  emitter.on('status-alert', (stat) => {
-    status.value.statusType = stat.statusType;
-    status.value.statusMessage = stat.statusMessage;
-    status.value.color = stat.color;
-  });
-
   emitter.on('change-timesheets-employee', (emp) => {
     employee.value = emp;
   });
@@ -103,24 +77,8 @@ onMounted(() => {
  * before destroy lifecycle hook
  */
 onBeforeMount(() => {
-  emitter.off('status-alert');
   emitter.off('change-timesheets-employee');
 }); // beforeUnmount
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     METHODS                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Clear the action status that is displayed in the snackbar.
- */
-function clearStatus() {
-  status.value.statusType = undefined;
-  status.value.statusMessage = '';
-  status.value.color = '';
-} // clearStatus
 
 // |--------------------------------------------------|
 // |                                                  |

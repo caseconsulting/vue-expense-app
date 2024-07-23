@@ -201,6 +201,7 @@ import PTOCashOutForm from './PTOCashOutForm.vue';
 import TagsFilter from '@/components/shared/TagsFilter.vue';
 import { computed, inject, onBeforeMount, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useStore } from 'vuex';
+import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSnackbar.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -429,11 +430,11 @@ async function clickedConfirmApprove() {
     await approveSelectedPTOCashOuts();
     await updateStorePtoCashOuts();
     isApproving.value = false;
-    displaySuccess('Successfully approved PTO cash outs!');
+    useDisplaySuccess('Successfully approved PTO cash outs!');
     uncheckAllBoxes();
   } catch (err) {
     isApproving.value = false;
-    displayError(err);
+    useDisplayError(err);
   }
   toggleApproveModal.value = false;
 } // clickedConfirmApprove
@@ -457,10 +458,10 @@ async function clickedConfirmDelete() {
     loading.value = true;
     await deletePTOCashOut(clickedDeleteItem.value);
     loading.value = false;
-    displaySuccess('Successfully deleted PTO cash out!');
+    useDisplaySuccess('Successfully deleted PTO cash out!');
   } catch (err) {
     loading.value = false;
-    displayError(err);
+    useDisplayError(err);
   }
   isDeleting.value = false;
   clickedDeleteItem.value = null;
@@ -487,34 +488,6 @@ async function deletePTOCashOut(item) {
   store.dispatch('setPtoCashOuts', { ptoCashOuts });
   return deletedPTOCashOut;
 } // deletePTOCashOut
-
-/**
- * Displays error snackbar
- *
- * @param err error message to display
- */
-function displayError(err) {
-  let status = {
-    statusType: 'ERROR',
-    statusMessage: err,
-    color: 'red'
-  };
-
-  emitter.emit('status-alert', status);
-} // displayError
-
-/**
- * Displays success message
- * @param msg success message to display
- */
-function displaySuccess(msg) {
-  let status = {
-    statusType: 'SUCCESS',
-    statusMessage: msg,
-    color: 'green'
-  };
-  emitter.emit('status-alert', status);
-} // displaySuccess
 
 /**
  * Changes the timesheets employee when a row is clicked
