@@ -18,7 +18,7 @@
           </div>
         </v-card-title>
         <div v-if="isAdmin || isUser" class="ma-4">
-          <p class="mt-4">
+          <p class="mt-2">
             <b>EEO Compliance Reporting:</b>
             <span
               v-if="
@@ -45,7 +45,7 @@
           </p>
 
           <sensitive-data-field
-            class="ml-2 mb-5"
+            class="ml-2 mb-1"
             v-if="model.eeoDeclineSelfIdentify"
             label="Status"
             :value="`Declined to self-identify${declinedExtraText}.`"
@@ -62,17 +62,17 @@
             "
             class="ml-2"
           >
-            <sensitive-data-field class="mb-5" label="Gender" :value="model.eeoGender.text" />
+            <sensitive-data-field class="mb-1" label="Gender" :value="model.eeoGender.text" />
             <sensitive-data-field
-              class="mb-5"
+              class="mb-1"
               label="Hispanic or Latino"
               :value="model.eeoHispanicOrLatino.value ? 'Yes' : 'No'"
             />
-            <sensitive-data-field class="mb-5" label="Race or Ethnicity" :value="model.eeoRaceOrEthnicity.text" />
-            <sensitive-data-field class="mb-5" label="Job Category" :value="model.eeoJobCategory.text" />
-            <sensitive-data-field class="mb-5" label="Disability" :value="model.eeoHasDisability ? 'Yes' : 'No'" />
+            <sensitive-data-field class="mb-1" label="Race or Ethnicity" :value="model.eeoRaceOrEthnicity.text" />
+            <sensitive-data-field class="mb-1" label="Job Category" :value="model.eeoJobCategory.text" />
+            <sensitive-data-field class="mb-1" label="Disability" :value="model.eeoHasDisability ? 'Yes' : 'No'" />
             <sensitive-data-field
-              class="mb-5"
+              class="mb-1"
               label="Protected Veteran"
               :value="model.eeoIsProtectedVeteran ? 'Yes' : 'No'"
             />
