@@ -13,10 +13,10 @@
         <span class="text-h6 font-weight-medium">{{ status.statusMessage }}</span>
       </v-card-text>
     </div>
-    <div v-else>
+    <div v-else class="font-weight-bold text-body-2 text-center">
       {{ status.statusMessage }}
     </div>
-    <template v-slot:actions>
+    <template v-slot:actions v-if="status.closeColor">
       <v-btn :color="status.closeColor" variant="text" @click="clearStatus()"> Close </v-btn>
     </template>
   </v-snackbar>
@@ -141,6 +141,7 @@ function displaySuccess(msg, timeout, location, color) {
  * @param location (OPTIONAL) location of snackbar
  * @param color (OPTIONAL) color of snackbar
  * @param closeColor (OPTIONAL) color of close button
+ * if no closeColor is noted, the close button will not render
  */
 export function useDisplayCustom(
   msg,
@@ -148,7 +149,7 @@ export function useDisplayCustom(
   timeout = 5000,
   location = 'top right',
   color = 'green',
-  closeColor = 'white'
+  closeColor = ''
 ) {
   emitter.emit('status-custom', { msg, type, timeout, location, color, closeColor });
 }
@@ -176,9 +177,3 @@ export function useDisplaySuccess(msg, timeout = 5000, location = 'top right', c
   emitter.emit('status-success', { msg, timeout, location, color });
 }
 </script>
-
-<style scoped>
-div:has(#snackbar-content) {
-  margin: 0px;
-}
-</style>
