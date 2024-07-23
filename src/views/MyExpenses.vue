@@ -11,21 +11,6 @@
       </v-col>
     </v-row>
     <v-row v-else>
-      <!-- Status Alert -->
-      <v-snackbar
-        v-model="status.show"
-        :color="status.color"
-        :multi-line="true"
-        location="top end"
-        :timeout="5000"
-        :vertical="true"
-      >
-        <v-card-text color="white">
-          <span class="text-h6 font-weight-medium">{{ status.statusMessage }}</span>
-        </v-card-text>
-        <v-btn color="white" variant="text" @click="clearStatus()"> Close </v-btn>
-      </v-snackbar>
-
       <v-col cols="12" lg="8">
         <v-card class="mt-3">
           <v-container fluid>
@@ -535,7 +520,7 @@ import { mask } from 'vue-the-mask';
 import { onBeforeMount, onBeforeUnmount, ref, watch, computed, inject } from 'vue';
 import { useStore } from 'vuex';
 import { storeIsPopulated } from '../utils/utils';
-
+import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSnackbar.vue';
 // |--------------------------------------------------|
 // |                                                  |
 // |                      SETUP                       |
@@ -635,12 +620,6 @@ const search = ref(null); // query text for datatable search field
 const toSort = ref([{ key: 'createdAt', order: 'desc' }]); // default sort datatable items
 const startDateFilter = ref(null);
 const startDateFilterMenu = ref(null);
-const status = ref({
-  show: false,
-  statusType: undefined,
-  statusMessage: '',
-  color: ''
-}); // snackbar action status
 const tagsInfo = ref({
   selected: [],
   flipped: []
@@ -673,7 +652,7 @@ onBeforeMount(async () => {
     updateModelInTable();
   });
   emitter.on('error', (msg) => {
-    displayError(msg);
+    useDisplayError(msg);
   });
 
   //no longer editing an expense (clear model and enable buttons)
@@ -811,10 +790,7 @@ function moneyFilter(value) {
 async function addModelToTable() {
   await refreshExpenses();
 
-  status.value['show'] = true;
-  status.value['statusType'] = 'SUCCESS';
-  status.value['statusMessage'] = 'Item was successfully submitted!';
-  status.value['color'] = 'green';
+  useDisplaySuccess('Item was successfully submitted!');
 } // addModelToTable
 
 /**
@@ -829,16 +805,6 @@ function clearExpense() {
   expense.value['employeeId'] = null;
   expense.value['employeeName'] = null;
 } // clearExpense
-
-/**
- * Clear the action status that is displayed in the snackbar.
- */
-function clearStatus() {
-  status.value['show'] = false;
-  status.value['statusType'] = undefined;
-  status.value['statusMessage'] = '';
-  status.value['color'] = '';
-} // clearStatus
 
 /**
  * Sets a mapping of employee name to employee id of an expense for
@@ -884,12 +850,12 @@ async function deleteExpense() {
         let deletedAttachment = await api.deleteAttachment(deleted);
         if (deletedAttachment.code) {
           // emit alert if error deleting file
-          displayError(`Error Deleting Receipt: ${deletedAttachment.message}`);
+          useDisplayError(`Error Deleting Receipt: ${deletedAttachment.message}`);
         }
       }
     } else {
       // fails to delete expense
-      displayError('Error Deleting Expense');
+      useDisplayError('Error Deleting Expense');
     }
     // update budgets in store
     await updateStoreBudgets();
@@ -906,23 +872,8 @@ async function deleteExpense() {
 async function deleteModelFromTable() {
   await refreshExpenses();
 
-  status.value['show'] = true;
-  status.value['statusType'] = 'SUCCESS';
-  status.value['statusMessage'] = 'Item was successfully deleted!';
-  status.value['color'] = 'green';
+  useDisplaySuccess('Item was successfully deleted!');
 } // deleteModelFromTable
-
-/**
- * Set and display an error action status in the snackbar.
- *
- * @param err - String error message
- */
-function displayError(err) {
-  status.value['show'] = true;
-  status.value['statusType'] = 'ERROR';
-  status.value['statusMessage'] = err;
-  status.value['color'] = 'red';
-} // displayError
 
 /**
  * Filters expenses based on filter selections.
@@ -1153,13 +1104,10 @@ async function unreimburseExpense() {
 
   if (updatedExpense.id) {
     // successfully unreimburses expense
-    status.value['show'] = true;
-    status.value['statusType'] = 'SUCCESS';
-    status.value['statusMessage'] = 'Item was successfully unreimbursed!';
-    status.value['color'] = 'green';
+    useDisplaySuccess('Item was successfully unreimbursed!');
   } else {
     // fails to unreimburse expense
-    displayError('Error Unreimburseing Expense');
+    useDisplayError('Error Unreimburseing Expense');
   }
 
   await refreshExpenses();
@@ -1174,10 +1122,7 @@ async function unreimburseExpense() {
 async function updateModelInTable() {
   await refreshExpenses();
 
-  status.value['show'] = true;
-  status.value['statusType'] = 'SUCCESS';
-  status.value['statusMessage'] = 'Item was successfully updated!';
-  status.value['color'] = 'green';
+  useDisplaySuccess('Item was successfully updated!');
 } // updateModelInTable
 
 /**
