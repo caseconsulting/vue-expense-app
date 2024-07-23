@@ -121,6 +121,9 @@ function durationRules() {
  * @returns Array - the job code rules
  */
 function jobCodeRules() {
-  return [(v) => !(v in props.timeData) || 'Job code already exists'];
+  return [
+    (v) => !(v in props.timeData) || 'Job code already exists',
+    (v) => v?.length < 41 || 'Job code has too many characters'
+  ];
 } // jobCodeRules
 </script>

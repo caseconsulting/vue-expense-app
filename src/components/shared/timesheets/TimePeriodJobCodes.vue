@@ -37,7 +37,7 @@
           :class="isYearly && supplementalData.nonBillables.includes(jobcode) ? 'text-grey' : ''"
           class="d-flex justify-space-between my-3"
         >
-          <div class="mr-3">{{ jobcode }}</div>
+          <div class="mr-3 truncate">{{ jobcode }}</div>
           <div class="dotted-line"></div>
           <div class="d-flex align-center ml-3">
             <div>{{ formatNumber(duration / 60 / 60) }}h</div>
@@ -153,5 +153,10 @@ function hasNonBillables() {
 }
 .nudge-up {
   top: -7px;
+}
+.truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>
