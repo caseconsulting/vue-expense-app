@@ -124,7 +124,7 @@ import { nicknameAndLastName } from '../../shared/employeeUtils';
 import _ from 'lodash';
 import { computed, onBeforeMount, inject, ref, watch } from 'vue';
 import { useStore } from 'vuex';
-
+import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSnackbar.vue';
 // |--------------------------------------------------|
 // |                                                  |
 // |                       SETUP                      |
@@ -245,16 +245,16 @@ async function submit() {
       clearForm();
       isSubmitting.value = false;
       if (props.item) {
-        displaySuccess('Successfully edited PTO Cash Out request!');
+        useDisplaySuccess('Successfully edited PTO Cash Out request!');
       } else {
-        displaySuccess('Successfully created PTO Cash Out request!');
+        useDisplaySuccess('Successfully created PTO Cash Out request!');
       }
     }
   } catch (err) {
     emitCloseForm();
     clearForm();
     isSubmitting.value = false;
-    displayError(err);
+    useDisplayError(err);
   }
 } // submit
 
@@ -279,33 +279,6 @@ function clearForm() {
   form.value.reset();
   form.value.resetValidation();
 } // clearForm
-
-/**
- * Displays error snackbar
- *
- * @param err error message to display
- */
-function displayError(err) {
-  let status = {
-    statusType: 'ERROR',
-    statusMessage: err,
-    color: 'red'
-  };
-  emitter.emit('status-alert', status);
-} // displayError
-
-/**
- * Displays success message
- * @param msg success message to display
- */
-function displaySuccess(msg) {
-  let status = {
-    statusType: 'SUCCESS',
-    statusMessage: msg,
-    color: 'green'
-  };
-  emitter.emit('status-alert', status);
-} // displaySuccess
 
 /**
  * Emits close form events
