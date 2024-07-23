@@ -140,7 +140,7 @@ async function copyEmailList() {
   setTimeout(() => {
     copied.value = false;
   }, 3000);
-  useDisplayCustom('Copied email list to clipboard', 'CUSTOM', 3000, 'bottom', 'black', 'red');
+  useDisplayCustom('Copied email list to clipboard', 'CUSTOM', 3000, 'black', 'red', 'bottom');
 } // copyEmailList
 
 /**

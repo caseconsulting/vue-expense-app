@@ -138,18 +138,19 @@ function displaySuccess(msg, timeout, location, color) {
  * @param msg success message to display
  * @param type (OPTIONAL) type of message
  * @param timeout (OPTIONAL) timeout in milliseconds
- * @param location (OPTIONAL) location of snackbar
  * @param color (OPTIONAL) color of snackbar
  * @param closeColor (OPTIONAL) color of close button
+ * @param location (OPTIONAL) location of snackbar
+ *
  * if no closeColor is noted, the close button will not render
  */
 export function useDisplayCustom(
   msg,
   type = 'CUSTOM',
   timeout = 5000,
-  location = 'top right',
   color = 'green',
-  closeColor = ''
+  closeColor = '',
+  location = 'top right'
 ) {
   emitter.emit('status-custom', { msg, type, timeout, location, color, closeColor });
 }
