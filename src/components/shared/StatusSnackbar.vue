@@ -5,13 +5,20 @@
     :color="status.color"
     :location="status.location"
     :timeout="status.timeout"
-    vertical
+    :vertical="status.statusType == 'SUCCESS' || status.statusType == 'ERROR'"
     multi-line
   >
-    <v-card-text color="white">
-      <span class="text-h6 font-weight-medium">{{ status.statusMessage }}</span>
-    </v-card-text>
-    <v-btn color="white" variant="text" @click="clearStatus()"> Close </v-btn>
+    <div v-if="status.statusType == 'SUCCESS' || status.statusType == 'ERROR'">
+      <v-card-text color="white">
+        <span class="text-h6 font-weight-medium">{{ status.statusMessage }}</span>
+      </v-card-text>
+    </div>
+    <div v-else>
+      {{ status.statusMessage }}
+    </div>
+    <template v-slot:actions>
+      <v-btn :color="status.closeColor" variant="text" @click="clearStatus()"> Close </v-btn>
+    </template>
   </v-snackbar>
 </template>
 
@@ -29,16 +36,21 @@ const status = ref({
   statusType: undefined,
   statusMessage: null,
   color: null,
+  closeColor: 'white',
   timeout: 5000,
   location: ''
 });
 
 emitter.on('status-error', (data) => displayError(data.err, data.timeout, data.location, data.color));
 emitter.on('status-success', (data) => displaySuccess(data.msg, data.timeout, data.location, data.color));
+emitter.on('status-custom', (data) =>
+  displayCustom(data.msg, data.type, data.timeout, data.location, data.color, data.closeColor)
+);
 
 onUnmounted(() => {
   emitter.off('status-error');
   emitter.off('status-success');
+  emitter.off('status-custom');
 });
 
 // |--------------------------------------------------|
@@ -55,9 +67,28 @@ function clearStatus() {
   status.value['statusType'] = undefined;
   status.value['statusMessage'] = null;
   status.value['color'] = null;
+  status.value['closeColor'] = 'white';
   status.value['location'] = '';
   status.value['timeout'] = 5000;
 } // clearStatus
+
+/**
+ * Displays success message
+ * @param msg success message to display
+ * @param timeout timeout in milliseconds
+ * @param location location of snackbar
+ * @param color color of snackbar
+ * @param closeColor color of close button
+ */
+function displayCustom(msg, type, timeout, location, color, closeColor) {
+  status.value['timeout'] = timeout;
+  status.value['location'] = location;
+  status.value['statusType'] = type;
+  status.value['statusMessage'] = msg;
+  status.value['color'] = color;
+  status.value['closeColor'] = closeColor;
+  status.value['show'] = true;
+} // displyCustom
 
 /**
  * Set and display an error action status in the snackbar.
@@ -73,6 +104,7 @@ function displayError(err, timeout, location, color) {
   status.value['statusType'] = 'ERROR';
   status.value['statusMessage'] = err;
   status.value['color'] = color;
+  status.value['closeColor'] = 'white';
   status.value['show'] = true;
 } //displayError
 
@@ -89,6 +121,7 @@ function displaySuccess(msg, timeout, location, color) {
   status.value['statusType'] = 'SUCCESS';
   status.value['statusMessage'] = msg;
   status.value['color'] = color;
+  status.value['closeColor'] = 'white';
   status.value['show'] = true;
 } // displySuccess
 </script>
@@ -99,6 +132,26 @@ function displaySuccess(msg, timeout, location, color) {
 // |                       EXPORT                     |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Displays success message
+ * @param msg success message to display
+ * @param type (OPTIONAL) type of message
+ * @param timeout (OPTIONAL) timeout in milliseconds
+ * @param location (OPTIONAL) location of snackbar
+ * @param color (OPTIONAL) color of snackbar
+ * @param closeColor (OPTIONAL) color of close button
+ */
+export function useDisplayCustom(
+  msg,
+  type = 'CUSTOM',
+  timeout = 5000,
+  location = 'top right',
+  color = 'green',
+  closeColor = 'white'
+) {
+  emitter.emit('status-custom', { msg, type, timeout, location, color, closeColor });
+}
 
 /**
  * Set and display an error action status in the snackbar.
@@ -123,3 +176,9 @@ export function useDisplaySuccess(msg, timeout = 5000, location = 'top right', c
   emitter.emit('status-success', { msg, timeout, location, color });
 }
 </script>
+
+<style scoped>
+div:has(#snackbar-content) {
+  margin: 0px;
+}
+</style>
