@@ -42,6 +42,7 @@
           <!-- number of years -->
           <v-col>
             <v-text-field
+              style="min-width: 100px"
               v-model="technology.time.years"
               suffix="Years"
               type="number"
@@ -52,6 +53,7 @@
           </v-col>
           <v-col>
             <v-text-field
+              style="min-width: 100px"
               v-model="technology.time.months"
               suffix="Months"
               type="number"
@@ -179,11 +181,8 @@ function addTechnology(addToTop = true) {
     time: { years: 0, months: 0 }
   };
 
-  if (addToTop) {
-    technologies.value.unshift(newTech);
-  } else {
-    technologies.value.push(newTech);
-  }
+  if (addToTop) technologies.value.unshift(newTech);
+  else technologies.value.push(newTech);
 }
 
 function deleteTechnology(index) {

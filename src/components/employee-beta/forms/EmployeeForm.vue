@@ -35,11 +35,12 @@
               <div>Editing: {{ formTabs }}</div>
             </base-form>
             <base-form title="Tech, Skills, and Languages" value="Tech, Skills, and Languages">
-              <v-row>
-                <v-col>
+              <v-row style="overflow-x: auto">
+                <v-col style="min-width: 380px">
                   <technologies-form v-model="editedEmployee"></technologies-form>
                 </v-col>
-                <v-col>
+                <v-divider vertical inset></v-divider>
+                <v-col style="min-width: 380px">
                   <languages-form v-model="editedEmployee"></languages-form>
                 </v-col>
               </v-row>
