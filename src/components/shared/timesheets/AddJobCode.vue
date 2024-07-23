@@ -112,7 +112,10 @@ async function save() {
  * @returns Array - the duration rules
  */
 function durationRules() {
-  return [(v) => /^\d+(?:\.\d{0,2})?$/.test(v) || 'Must be a valid number'];
+  return [
+    (v) => /^\d+(?:\.\d{0,2})?$/.test(v) || 'Must be a valid number',
+    (v) => Number(v) < 10000000000 || 'Duration is too large'
+  ];
 } // durationRules
 
 /**
