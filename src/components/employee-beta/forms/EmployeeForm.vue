@@ -35,7 +35,15 @@
               <div>Editing: {{ formTabs }}</div>
             </base-form>
             <base-form title="Tech, Skills, and Languages" value="Tech, Skills, and Languages">
-              <div>Editing: {{ formTabs }}</div>
+              <v-row style="overflow-x: auto">
+                <v-col style="min-width: 380px">
+                  <technologies-form v-model="editedEmployee"></technologies-form>
+                </v-col>
+                <v-divider vertical inset></v-divider>
+                <v-col style="min-width: 380px">
+                  <languages-form v-model="editedEmployee"></languages-form>
+                </v-col>
+              </v-row>
             </base-form>
             <base-form title="Job Experience" value="Past Experience">
               <div>Editing: {{ formTabs }}</div>
@@ -65,11 +73,13 @@
 </template>
 
 <script setup>
-import { computed, inject, onBeforeMount, onBeforeUnmount, ref } from 'vue';
 import BaseForm from '@/components/employee-beta/forms/BaseForm.vue';
 import FormCancelConfirmation from '@/components/modals/FormCancelConfirmation.vue';
-import PersonalInfoForm from './PersonalInfoForm.vue';
 import { cloneDeep } from 'lodash';
+import { computed, inject, onBeforeMount, onBeforeUnmount, ref } from 'vue';
+import LanguagesForm from './LanguagesForm.vue';
+import TechnologiesForm from './TechnologiesForm.vue';
+import PersonalInfoForm from './PersonalInfoForm.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -83,7 +93,6 @@ const props = defineProps(['employee', 'contracts']);
 const editedEmployee = ref(cloneDeep(props.employee));
 const isUser = inject('isUser');
 const editing = defineModel();
-
 const formTabs = ref([]); //TODO: Sync up current tabs on edit form and info cards
 const submitting = ref(false);
 const toggleCancelConfirmation = ref(false);
