@@ -5,14 +5,14 @@
     </v-row>
     <div v-else>
       <v-row align="center" class="pt-3">
-        <v-col class="pa-0 pl-4" cols="4">
+        <v-col class="pa-0 pl-4" cols="3">
           <v-btn id="backBtn" elevation="2" :size="isMobile() ? 'x-small' : 'default'" @click="router.back()">
             <v-icon size="large" class="pr-1"> mdi-arrow-left-thin </v-icon>
             Back
           </v-btn>
           <v-btn color="#bc3825" @click="goBackToAlphaProfile()" theme="dark" class="ma-2">Go to Alpha profile!</v-btn>
         </v-col>
-        <v-col class="pa-0 d-flex justify-center" cols="4">
+        <v-col class="ml-4 pa-0 d-flex justify-center" cols="6">
           <v-row no-gutters class="fit-content d-flex-inline align-center">
             <v-col class="text-no-wrap d-flex align-center">
               <!-- if user is admin, show search button -->
@@ -54,34 +54,20 @@
                   ></v-autocomplete>
                 </v-responsive>
               </v-scroll-y-transition>
-              <!-- Navigation Buttons -->
-              <v-btn
-                v-if="isAdmin"
-                :disabled="loading"
-                icon
-                variant="text"
-                density="comfortable"
-                @click="navEmployee(-1)"
-              >
+            </v-col>
+            <!-- Navigation Buttons -->
+            <v-col class="pl-6">
+              <v-btn v-if="isAdmin" :disabled="loading" icon variant="text" @click="navEmployee(-1)">
                 <v-tooltip activator="parent" location="top"> Previous employee </v-tooltip>
-                <v-icon size="x-large"> mdi-arrow-left-thin </v-icon>
+                <v-icon size="50px"> mdi-arrow-left-thin </v-icon>
               </v-btn>
-              <v-btn
-                v-if="isAdmin"
-                :disabled="loading"
-                icon
-                variant="text"
-                density="comfortable"
-                class="mr-3"
-                @click="navEmployee(1)"
-              >
+              <v-btn v-if="isAdmin" :disabled="loading" icon variant="text" class="mr-3" @click="navEmployee(1)">
                 <v-tooltip activator="parent" location="top"> Next employee </v-tooltip>
-                <v-icon size="x-large"> mdi-arrow-right-thin </v-icon>
+                <v-icon size="50px"> mdi-arrow-right-thin </v-icon>
               </v-btn>
             </v-col>
           </v-row>
         </v-col>
-        <v-spacer></v-spacer>
       </v-row>
       <v-row ref="">
         <!-- Timesheets and Budgets-->
