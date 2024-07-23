@@ -5,16 +5,19 @@
         class="d-flex align-center justify-space-between beta_header_style"
         style="position: sticky; top: 0; z-index: 2"
       >
-        <h3 class="text-white px-2">Editing {{ isUser ? 'My Profile' : fullName }}</h3>
-        <v-btn
-          id="modalCloseBtn"
-          align-self="end"
-          density="compact"
-          variant="text"
-          icon=""
-          @click="toggleCancelConfirmation = true"
-          ><v-icon size="large">mdi-window-close</v-icon></v-btn
-        >
+        <v-row class="d-flex align-center">
+          <v-col>
+            <h3 class="text-white px-2">Editing {{ isUser ? 'My Profile' : fullName }}</h3>
+          </v-col>
+          <v-col class="d-flex align-center" cols="auto">
+            <v-btn size="36" variant="text" icon @click="collapseAllTabs()">
+              <v-icon>mdi-format-vertical-align-center</v-icon>
+            </v-btn>
+            <v-btn id="modalCloseBtn" size="36" variant="text" icon="" @click="toggleCancelConfirmation = true"
+              ><v-icon>mdi-window-close</v-icon></v-btn
+            >
+          </v-col>
+        </v-row>
       </v-card-title>
       <div v-if="submitting" class="py-10 px-6">
         <v-progress-linear :indeterminate="true"></v-progress-linear>
@@ -147,4 +150,8 @@ function submit() {}
 
 //TODO: cancel
 function cancel() {}
+
+function collapseAllTabs() {
+  formTabs.value = [];
+}
 </script>
