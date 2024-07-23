@@ -339,8 +339,11 @@ function onSearchButton() {
 /**
  * Run when the employee search field is updated
  */
-function onSearchUpdate() {
-  if (dropdownEmployee.value) router.push(`${dropdownEmployee.value.employeeNumber}`);
+async function onSearchUpdate() {
+  if (dropdownEmployee.value) {
+    await router.push(`${dropdownEmployee.value.employeeNumber}`);
+    await getProfileData();
+  }
 }
 
 // |--------------------------------------------------|
