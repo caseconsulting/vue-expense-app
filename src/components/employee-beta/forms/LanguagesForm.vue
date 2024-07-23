@@ -18,7 +18,7 @@
             ></v-combobox>
           </v-col>
           <v-col>
-            <v-autocomplete :items="PROFICIENCIES"></v-autocomplete>
+            <v-autocomplete v-model="language.proficiency" label="Proficiency" :items="PROFICIENCIES"></v-autocomplete>
           </v-col>
           <v-col cols="auto">
             <v-tooltip text="Delete Language" location="top">
