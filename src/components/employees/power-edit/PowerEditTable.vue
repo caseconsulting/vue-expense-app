@@ -1,8 +1,5 @@
 <template>
   <div>
-    <v-snackbar v-model="error.status" multi-line color="red" location="top" :timeout="8000" :vertical="true">
-      <span class="font-weight-bold text-body-2 pa-3">{{ error.message }}</span>
-    </v-snackbar>
     <v-form v-model="valid">
       <v-data-table
         :expanded="expanded"
@@ -62,6 +59,7 @@ import { openLink } from '@/utils/utils.js';
 import { computed, ref, inject, watch } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import { useDisplayCustom } from '@/components/shared/StatusSnackbar.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -76,7 +74,6 @@ const router = useRouter();
 const editItem = ref(null);
 const expanded = ref([]);
 const valid = ref(true);
-const error = ref({ status: false, message: null });
 
 emitter.on('save-item', async ({ item, field }) => {
   await saveItem(item, field);
@@ -158,10 +155,14 @@ async function saveItem(item, field) {
   if (resp.name !== 'AxiosError') {
     employee[tmpField] = { ...employee[tmpField], success: true, saving: false };
   } else {
-    error.value = {
-      status: true,
-      message: resp?.response?.data?.message || 'An unknown error has occurred'
-    };
+    useDisplayCustom(
+      resp?.response?.data?.message || 'An unknown error has occurred',
+      'CUSTOM',
+      8000,
+      'red',
+      '',
+      'top'
+    );
     employee[tmpField] = { ...employee[tmpField], fail: true, saving: false };
   }
 

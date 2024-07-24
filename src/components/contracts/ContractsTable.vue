@@ -352,6 +352,7 @@ import ExpandedContractTableRow from './ExpandedContractTableRow.vue';
 
 import { ref, inject, onBeforeMount, onBeforeUnmount, computed, watch } from 'vue';
 import { useStore } from 'vuex';
+import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSnackbar.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -535,9 +536,9 @@ async function updateContractPrime() {
     contracts[itemIndex] = editingItem.value;
     store.dispatch('setContracts', { contracts });
     contractLoading.value = false;
-    displaySuccess('Item was successfully saved!');
+    useDisplaySuccess('Item was successfully saved!');
   } catch (err) {
-    displayError(err);
+    useDisplayError(err);
   }
   contractLoading.value = false;
   editingItem.value = null;
@@ -578,9 +579,9 @@ async function deleteItems(items) {
       contracts[contractIndex].projects.splice(projectIndex, 1);
     });
     store.dispatch('setContracts', { contracts });
-    displaySuccess('Successfully deleted item(s)!');
+    useDisplaySuccess('Successfully deleted item(s)!');
   } catch (err) {
-    displayError(err);
+    useDisplayError(err);
   }
   isDeleting.value = false;
   resetAllCheckBoxes();
@@ -698,9 +699,9 @@ async function updateStatus(status) {
     await Promise.all(updatePromises);
 
     store.dispatch('setContracts', { contracts });
-    displaySuccess(`Successfully marked item(s) as ${status}`);
+    useDisplaySuccess(`Successfully marked item(s) as ${status}`);
   } catch (err) {
-    displayError(err);
+    useDisplayError(err);
   }
   contractLoading.value = false;
   isActivating.value = false;
@@ -822,34 +823,6 @@ async function getEmployeeContractRelationships(contract, project = null) {
   });
   return theRelationships;
 } // getEmployeeContractRelationships
-
-/**
- * Displays error snackbar
- *
- * @param err error message to display
- */
-function displayError(err) {
-  let status = {
-    statusType: 'ERROR',
-    statusMessage: err,
-    color: 'red'
-  };
-
-  emitter.emit('status-alert', status);
-} // displayError
-
-/**
- * Displays success message
- * @param msg success message to display
- */
-function displaySuccess(msg) {
-  let status = {
-    statusType: 'SUCCESS',
-    statusMessage: msg,
-    color: 'green'
-  };
-  emitter.emit('status-alert', status);
-} // displaySuccess
 
 /**
  * Returns true if given contract is being deleted or its status is being updated,

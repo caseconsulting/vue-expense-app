@@ -1,19 +1,5 @@
 <template>
   <v-container fluid id="full-page">
-    <!-- Status Alert -->
-    <v-snackbar
-      v-model="status.statusType"
-      :color="status.color"
-      :multi-line="true"
-      location="top right"
-      :timeout="5000"
-      :vertical="true"
-    >
-      <v-card-text color="white">
-        <span class="text-h6 font-weight-medium">{{ status.statusMessage }}</span>
-      </v-card-text>
-      <v-btn color="white" variant="text" @click="clearStatus()"> Close </v-btn>
-    </v-snackbar>
     <span v-if="loading">
       <v-row>
         <v-col cols="12" md="6" class="px-xl-4 px-lg-2 px-md-0 d-flex justify-center align-center">
@@ -123,7 +109,7 @@ import {
   endOf,
   DEFAULT_ISOFORMAT
 } from '../shared/dateUtils';
-import { ref, inject, onBeforeUnmount, onBeforeMount, computed, watch } from 'vue';
+import { ref, onBeforeMount, computed, watch } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 
@@ -135,7 +121,6 @@ import { useRouter } from 'vue-router';
 
 const store = useStore();
 const router = useRouter();
-const emitter = inject('emitter');
 const accessibleBudgets = ref(null);
 const aggregatedAwards = ref([]);
 const aggregatedExpenses = ref([]);
@@ -152,11 +137,6 @@ const loadingBudgets = ref(true);
 const loadingEvents = ref(true);
 const scheduleEntries = ref([]);
 const textMaxLength = ref(110);
-const status = ref({
-  statusType: undefined,
-  statusMessage: '',
-  color: ''
-});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -168,9 +148,6 @@ const status = ref({
  *  Set budget information for employee. Creates event listeners.
  */
 onBeforeMount(async () => {
-  emitter.on('status-alert', (status) => {
-    status.value = status;
-  });
   if (store.getters.storeIsPopulated) {
     loading.value = false;
     await loadHomePageData();
@@ -639,22 +616,6 @@ async function refreshEmployee() {
   accessibleBudgets.value = store.getters.budgets;
   loadingBudgets.value = false;
 } // refreshEmployee
-
-/**
- * Clear the action status that is displayed in the snackbar.
- */
-function clearStatus() {
-  status.value['statusType'] = undefined;
-  status.value['statusMessage'] = '';
-  status.value['color'] = '';
-} // clearStatus
-
-/**
- * Before destroy lifecycle hook. Destroys listeners.
- */
-onBeforeUnmount(() => {
-  emitter.off('status-alert');
-}); // beforeUnmount
 
 // |--------------------------------------------------|
 // |                                                  |

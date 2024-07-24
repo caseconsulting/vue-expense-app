@@ -1,21 +1,6 @@
 <template>
   <v-container fluid>
     <v-row>
-      <!-- Status Alert -->
-      <v-snackbar
-        v-model="status.show"
-        :color="status.color"
-        :multi-line="true"
-        location="top right"
-        :timeout="5000"
-        :vertical="true"
-      >
-        <v-card-text headline color="white">
-          <span class="text-h6 font-weight-medium">{{ status.statusMessage }}</span>
-        </v-card-text>
-        <v-btn color="white" variant="text" @click="clearStatus"> Close </v-btn>
-      </v-snackbar>
-
       <!-- Title -->
       <v-col cols="12" lg="8" class="d-flex justify-center align-center">
         <div v-if="!loading" :class="isMobile ? 'center' : ''">
@@ -96,6 +81,7 @@ import { updateStoreBudgets, updateStoreEmployees, updateStoreExpenseTypes } fro
 import { getCurrentBudgetYear, isMobile } from '@/utils/utils';
 import { computed, inject, onBeforeMount, onBeforeUnmount, ref, watch } from 'vue';
 import { useStore } from 'vuex';
+import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSnackbar.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -137,12 +123,6 @@ const fiscalDateView = ref(''); // current budget year view by anniversary day
 const hasAccessToBudgets = ref(false); // user has access to one or more budgets
 const hireDate = ref(''); // employee hire date
 const loading = ref(true); // loading status
-const status = ref({
-  show: false,
-  statusType: undefined,
-  statusMessage: '',
-  color: ''
-}); // snackbar action status
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -157,7 +137,7 @@ onBeforeMount(async () => {
   }
 
   emitter.on('error', (msg) => {
-    displayError(msg);
+    useDisplayError(msg);
   });
 
   emitter.on('updateData', async () => {
@@ -220,28 +200,6 @@ watch(storeIsPopulated, async () => {
 // |--------------------------------------------------|
 
 /**
- * Clear the action status that is displayed in the snackbar.
- */
-function clearStatus() {
-  status.value['show'] = false;
-  status.value['statusType'] = undefined;
-  status.value['statusMessage'] = '';
-  status.value['color'] = '';
-} // clearStatus
-
-/**
- * Set and display an error action status in the snackbar.
- *
- * @param err - String error message
- */
-function displayError(err) {
-  status.value['show'] = true;
-  status.value['statusType'] = 'ERROR';
-  status.value['statusMessage'] = err;
-  status.value['color'] = 'red';
-} // displayError
-
-/**
  * Refresh and sets employee information.
  */
 async function refreshEmployee() {
@@ -265,23 +223,11 @@ async function refreshEmployee() {
 } // refreshEmployee
 
 /**
- * Set and display a successful submit status in the snackbar.
- */
-function showSuccessfulSubmit() {
-  status.value['show'] = true;
-  status.value['statusType'] = 'SUCCESS';
-  status.value['statusMessage'] = 'Item was successfully submitted!';
-  status.value['color'] = 'green';
-} // showSuccessfulSubmit
-
-/**
  * Updates the budget data and display a successful submit.
  */
 async function updateData() {
   displayChart.value = false;
   await refreshEmployee();
-  if (status.value['statusType'] !== 'ERROR') {
-    showSuccessfulSubmit();
-  }
+  useDisplaySuccess('Item was successfully submitted!');
 } // updateData
 </script>
