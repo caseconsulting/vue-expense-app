@@ -164,13 +164,11 @@
           v-mask="'##/##/####'"
           hint="MM/DD/YYYY"
           :rules="[...getDateOptionalRules(), ...getNonFutureDateRules()]"
-          prepend-icon="mdi-calendar"
-          @update:focused="editedEmployee.birthday = format(formattedBirthday, null, 'YYYY-MM-DD')"
-          @click:prepend="birthdayMenu = true"
-          @keypress="birthdayMenu = false"
+          prepend-inner-icon="mdi-calendar"
           autocomplete="off"
-          class="flex-grow"
-          style="min-width: 250px"
+          style="min-width: 200px"
+          @update:focused="editedEmployee.birthday = format(formattedBirthday, null, 'YYYY-MM-DD')"
+          @keypress="birthdayMenu = false"
         >
           <v-menu activator="parent" :close-on-content-click="false" v-model="birthdayMenu" location="start center">
             <v-date-picker
