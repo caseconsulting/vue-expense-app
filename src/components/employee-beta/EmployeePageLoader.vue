@@ -18,18 +18,17 @@
         <v-skeleton-loader class="mb-4" type="list-item@20"></v-skeleton-loader>
       </v-col>
       <!-- Employee profile data -->
-      <v-col cols="12" lg="8" class="pt-0">
-        <div class="d-flex align-start">
-          <v-skeleton-loader type="list-item-avatar-three-line" class="employee-avatar"></v-skeleton-loader>
-          <v-skeleton-loader type="list-item@15"></v-skeleton-loader>
-        </div>
+      <v-col cols="12" lg="8" class="pa-0">
+        <v-container class="d-flex ma-0" fluid>
+          <v-skeleton-loader v-if="display.lgAndUp.value" type="list-item@14" width="70%"></v-skeleton-loader>
+          <v-skeleton-loader type="list-item@14" class="w-100"></v-skeleton-loader>
+        </v-container>
       </v-col>
     </v-row>
   </v-container>
 </template>
 
-<style lang="scss">
-.skeleton-loader-avatar {
-  height: 200px;
-}
-</style>
+<script setup>
+import { useDisplay } from 'vuetify';
+const display = useDisplay();
+</script>

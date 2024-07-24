@@ -294,9 +294,7 @@ async function getProfileData() {
   displayTimeAndBalances.value = userRoleIsAdmin() || userIsEmployee();
   isAdmin.value = hasAdminPermissions();
   isUser.value = userIsEmployee();
-  setTimeout(() => {
-    basicEmployeeDataLoading.value = false;
-  }, 20000);
+  basicEmployeeDataLoading.value = false;
   if (model.value) {
     refreshExpenseData(true); //TODO: Implement Expenses
   }
