@@ -1,7 +1,10 @@
 <template>
   <base-card title="Other Information">
-    <template #prependIcon>
-      <v-icon size="small" style="margin-right: 10px" id="personal" color="white"> mdi-information </v-icon>
+    <template #title>
+      <div class="d-flex align-center">
+        <v-icon size="small" style="margin-right: 10px" id="personal" color="white"> mdi-information </v-icon>
+        <h3 class="text-white">Other Information</h3>
+      </div>
     </template>
     <v-card-text class="px-7 pt-5 pb-1 text-black">
       <p v-if="!isEmpty(getAIN())"><b>AIN:</b> {{ getAIN() }}</p>

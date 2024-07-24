@@ -46,7 +46,6 @@
 </template>
 
 <script setup>
-import _ from 'lodash';
 import { ref, computed } from 'vue';
 import { isEmpty } from '@/utils/utils';
 import BaseInfoModal from '@/components/employee-beta/modals/BaseInfoModal.vue';

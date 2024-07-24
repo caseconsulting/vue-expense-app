@@ -4,10 +4,6 @@
       <v-container class="d-flex flex-nowrap justify-space-between">
         <!-- title -->
         <v-row no-gutters class="fit-content align-center">
-          <v-col v-if="$slots.prependIcon" class="mr-2">
-            <!-- Card Title Icon Slot -->
-            <slot name="prependIcon"></slot>
-          </v-col>
           <v-col>
             <!-- Custom Title Slot  -->
             <slot name="title">

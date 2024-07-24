@@ -1,5 +1,5 @@
 <template>
-  <v-container id="employee-container" class="px-1">
+  <v-container id="employee-container" class="px-1 pt-3" fluid>
     <base-card title="Employee" elevation="2">
       <template #title>
         <div class="d-flex justify-lg-space-between align-center">
