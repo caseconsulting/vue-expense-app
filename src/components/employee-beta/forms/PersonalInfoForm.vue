@@ -338,7 +338,7 @@ import {
 } from '@/shared/validationUtils';
 import { COUNTRIES, isMobile, STATES } from '@/utils/utils';
 import { cloneDeep, filter, forEach, includes, isEmpty, lowerCase, some, startCase } from 'lodash';
-import { computed, ref, watch } from 'vue';
+import { computed, onBeforeMount, onBeforeUnmount, ref, watch } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
 import PrivateButton from '../PrivateButton.vue';
@@ -350,8 +350,10 @@ import _ from 'lodash';
 // |                                                  |
 // |--------------------------------------------------|
 
-const editedEmployee = defineModel();
+const editedEmployee = defineModel('editedEmployee', { required: true });
+const prepared = defineModel('prepared', { required: true });
 const store = useStore();
+defineExpose({ prepareSubmit }); // allows parent to use refs to call prepareSubmit()
 
 const vMask = mask; // import v mask directive
 
@@ -379,21 +381,31 @@ const phoneAutofocus = ref(false);
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+onBeforeMount(() => {
+  prepared.value = false;
+});
+
+onBeforeUnmount(() => {
+  prepareSubmit();
+});
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                     COMPUTED                     |
 // |                                                  |
 // |--------------------------------------------------|
 
-/**
- * @type {ComputedRef<((v: any) => true | string)[]>}
- */
+/** @type {import('vue').ComputedRef<((v: any) => true | string[]>} */
 const middleNameRules = computed(() => {
   if (hasMiddleName.value) return getRequiredRules();
   return [() => true];
 });
 
-/**
- * @type {ComputedRef<((v: any) => true | string)[]>}
- */
+/** @type {import('vue').ComputedRef<((v: any) => true | string[]>} */
 const employeeNumberRules = computed(() => [
   ...getRequiredRules(),
   ...getNumberRules(),
@@ -420,7 +432,7 @@ const userIsAdminOrManager = computed(() => {
 watch(
   () => editedEmployee.value.birthday,
   (newValue) => {
-    formattedBirthday.value = format(newValue, null, FORMATTED_ISOFORMAT);
+    formattedBirthday.value = format(newValue, ISO8601, FORMATTED_ISOFORMAT);
   }
 );
 
@@ -437,7 +449,7 @@ function prepareSubmit() {
   editedEmployee.value.email = emailUsername.value + CASE_EMAIL_DOMAIN;
 
   editedEmployee.value.noMiddleName = !hasMiddleName.value;
-  editedEmployee.value.middleName = hasMiddleName.value ? middleName.value : '';
+  editedEmployee.value.middleName = hasMiddleName.value ? middleName.value : undefined;
 
   editedEmployee.value.employeeRole = lowerCase(employeeRole.value);
 
@@ -451,7 +463,9 @@ function prepareSubmit() {
 
   editedEmployee.value.personalEmail = personalEmail.value.emailValue;
 
-  if (editedEmployee.value.country !== 'United States') editedEmployee.value.st = '';
+  if (editedEmployee.value.country !== 'United States') editedEmployee.value.st = undefined;
+
+  prepared.value = true;
 }
 
 /**

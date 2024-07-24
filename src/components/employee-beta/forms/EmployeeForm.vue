@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-v-model-argument -->
 <template>
   <v-dialog
     v-model="editing"
@@ -34,7 +35,11 @@
         <v-form ref="form" v-model="valid" lazy-validation class="my-1 mx-xl-5 mx-lg-5 mx-md-0">
           <v-expansion-panels v-model="formTabs" variant="accordion" multiple>
             <base-form title="Personal" value="Personal Information">
-              <personal-info-form v-model="editedEmployee"></personal-info-form>
+              <personal-info-form
+                ref="personalInfoFormRef"
+                v-model:edited-employee="editedEmployee"
+                v-model:prepared="preparedTabs.personal"
+              ></personal-info-form>
             </base-form>
             <base-form title="Clearance" value="Clearance">
               <div>
@@ -61,10 +66,14 @@
               </div>
             </base-form>
             <base-form title="Tech and Skills" value="Tech and Skills">
-              <technologies-form v-model="editedEmployee"></technologies-form>
+              <technologies-form
+                ref="technologiesFormRef"
+                v-model:edited-employee="editedEmployee"
+                v-model:prepared="preparedTabs.technologies"
+              ></technologies-form>
             </base-form>
             <base-form title="Foreign Languages" value="Languages">
-              <languages-form v-model="editedEmployee"></languages-form>
+              <languages-form ref="languagesFormRef" v-model="editedEmployee"></languages-form>
             </base-form>
             <base-form title="Job Experience" value="Past Experience">
               <div>
@@ -86,7 +95,7 @@
             <v-btn id="employeeCancelBtn" variant="text" class="ma-2" @click="toggleCancelConfirmation = true"
               >Cancel</v-btn
             >
-            <v-btn id="employeeSubmitBtn" variant="outlined" class="ma-2" color="success" @click="submit()">
+            <v-btn id="employeeSubmitBtn" variant="outlined" class="ma-2" color="success" @click="prepareSubmit()">
               <v-icon class="mr-1">mdi-content-save</v-icon>Submit
             </v-btn>
             <!-- End form action buttons -->
@@ -104,11 +113,11 @@
 <script setup>
 import BaseForm from '@/components/employee-beta/forms/BaseForm.vue';
 import FormCancelConfirmation from '@/components/modals/FormCancelConfirmation.vue';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, isEqual, mapValues, pickBy } from 'lodash';
 import { computed, inject, onBeforeMount, onBeforeUnmount, ref } from 'vue';
 import LanguagesForm from './LanguagesForm.vue';
-import TechnologiesForm from './TechnologiesForm.vue';
 import PersonalInfoForm from './PersonalInfoForm.vue';
+import TechnologiesForm from './TechnologiesForm.vue';
 import JobExperienceTab from '../form-tabs/JobExperienceTab.vue';
 import EducationTab from '../form-tabs/EducationTab.vue';
 import CertsAndAwardsTab from '../form-tabs/CertsAndAwardsTab.vue';
@@ -123,6 +132,7 @@ import { useDisplay } from 'vuetify';
 // |                                                  |
 // |--------------------------------------------------|
 
+/** @type {import('mitt').Emitter} */
 const emitter = inject('emitter');
 const { smAndDown } = useDisplay();
 
@@ -206,6 +216,23 @@ const validating = ref({
   technologies: false
 }); // signal to child tabs to validate
 
+// TODO might be able to remove the preparedTabs logic
+let preparedTabs = {
+  personal: true,
+  clearance: true,
+  contracts: true,
+  'Certifications + Awards': true,
+  technologies: true,
+  languages: true,
+  'Past Experience': true,
+  education: true
+};
+
+// template refs
+const personalInfoFormRef = ref(null);
+const technologiesFormRef = ref(null);
+const languagesFormRef = ref(null);
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     COMPUTED                     |
@@ -256,6 +283,14 @@ onBeforeUnmount(() => {
   emitter.off('confirmed-cancel');
 });
 
+const allTabsReady = computed(() => {
+  let allReady = true;
+  Object.values(preparedTabs).forEach((tab) => {
+    if (!tab) allReady = false; // if one isn't ready, we can't continue submitting
+  });
+  return allReady;
+});
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -269,8 +304,29 @@ function setFormData(tab, data) {
   }
 }
 
-//TODO: submit
-function submit() {}
+function prepareSubmit() {
+  if (personalInfoFormRef.value) personalInfoFormRef.value.prepareSubmit();
+  if (technologiesFormRef.value) technologiesFormRef.value.prepareSubmit();
+  if (languagesFormRef.value) languagesFormRef.value.prepareSubmit();
+
+  // if tabs are already prepared (i.e. all tabs are closed), we can just submit now
+  // otherwise we have to tell the tabs to prepare while they are open
+  if (allTabsReady.value) submit();
+}
+
+function submit() {
+  // picks out all the changed values to make the api call
+  let changes = pickBy(editedEmployee.value, (value, key) => {
+    const oldValue = props.employee[key];
+    const newValue = value;
+    return !isEqual(oldValue, newValue);
+  });
+
+  console.log('Changed values:', changes); // TODO for debugging/testing
+
+  // resets all tabs to unprepared state
+  preparedTabs = mapValues(preparedTabs, () => false);
+}
 
 //TODO: cancel
 function cancel() {}

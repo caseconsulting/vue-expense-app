@@ -84,10 +84,10 @@
 </template>
 
 <script setup>
+import api from '@/shared/api';
 import { getRequiredRules } from '@/shared/validationUtils';
 import { isEmpty, map } from 'lodash';
-import { ref } from 'vue';
-import api from '@/shared/api';
+import { onBeforeMount, onBeforeUnmount, ref } from 'vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -95,17 +95,33 @@ import api from '@/shared/api';
 // |                                                  |
 // |--------------------------------------------------|
 
-const editedEmployee = defineModel();
+const editedEmployee = defineModel('editedEmployee', { required: true });
+const prepared = defineModel('prepared', { required: true });
+defineExpose({ prepareSubmit });
 
 const technologies = ref(
   map(editedEmployee.value.technologies, (value) => {
     // adds a 'time' key to each technology, containing an integer value for both years and months
-    value.time = getYearsAndMonths(value.years);
-    return value;
+    // omits the 'years' key as the time key replaces it
+    return { name: value.name, time: getYearsAndMonths(value.years), current: value.current };
   })
 );
 
 const dropdownItems = ref([]);
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+onBeforeMount(() => {
+  prepared.value = false;
+});
+
+onBeforeUnmount(() => {
+  prepareSubmit();
+});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -115,12 +131,23 @@ const dropdownItems = ref([]);
 
 function prepareSubmit() {
   editedEmployee.value.technologies = map(technologies.value, (value) => {
-    // convert integer months and years back to fractional years
-    value.years = value.time.years + value.time.months / 12;
-    // remove 'time' key as it's not meant to be stored in the database
-    delete value.time;
-    return value;
+    let years = value.time.years + value.time.months / 12;
+
+    // if years is not an integer
+    if (Math.round(years) !== years) {
+      // convert to fixed string if it's a float, otherwise leave it as a number
+      // this is how the database stores this data initially
+      // this needs to be in the same format so that changes can be accurately tracked
+      years = years.toFixed(2);
+    }
+    return {
+      name: value.name,
+      years,
+      current: value.current
+    };
   });
+
+  prepared.value = true;
 }
 
 /**
