@@ -116,7 +116,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import EmployeeBudgets from '@/components/employee-beta/EmployeeBudgets.vue';
 import EmployeeInfo from '@/components/employee-beta/EmployeeInfo.vue';
-import EmployeePageLoader from '@/components/employees/EmployeePageLoader.vue';
+import EmployeePageLoader from '@/components/employee-beta/EmployeePageLoader.vue';
 import TimeData from '@/components/shared/timesheets/TimeData.vue';
 import { employeeFilter } from '@/shared/filterUtils';
 
@@ -294,7 +294,9 @@ async function getProfileData() {
   displayTimeAndBalances.value = userRoleIsAdmin() || userIsEmployee();
   isAdmin.value = hasAdminPermissions();
   isUser.value = userIsEmployee();
-  basicEmployeeDataLoading.value = false;
+  setTimeout(() => {
+    basicEmployeeDataLoading.value = false;
+  }, 20000);
   if (model.value) {
     refreshExpenseData(true); //TODO: Implement Expenses
   }
