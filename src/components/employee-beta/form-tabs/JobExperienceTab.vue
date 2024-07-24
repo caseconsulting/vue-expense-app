@@ -22,7 +22,7 @@
               <v-text-field
                 :model-value="formatRange(timeFrame.range)"
                 ref="formFields"
-                :rules="getRequiredRules"
+                :rules="getRequiredRules()"
                 label="Date Range"
                 readonly
                 prepend-icon="mdi-calendar"
