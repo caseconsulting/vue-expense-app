@@ -5,7 +5,7 @@
     </v-row>
     <div v-else>
       <v-row align="center" class="pt-3">
-        <v-col class="pa-0 pl-4" cols="4">
+        <v-col class="pa-0 pl-4" cols="3">
           <v-btn id="backBtn" elevation="2" :size="isMobile() ? 'x-small' : 'default'" @click="router.back()">
             <v-icon size="large" class="pr-1"> mdi-arrow-left-thin </v-icon>
             Back
@@ -14,7 +14,7 @@
             ><v-icon>mdi-alpha</v-icon>view</v-btn
           >
         </v-col>
-        <v-col class="pa-0 d-flex justify-center" cols="4">
+        <v-col class="ml-4 pa-0 d-flex justify-center" cols="6">
           <v-row no-gutters class="fit-content d-flex-inline align-center">
             <v-col class="text-no-wrap d-flex align-center">
               <!-- if user is admin, show search button -->
@@ -57,9 +57,19 @@
                 </v-responsive>
               </v-scroll-y-transition>
             </v-col>
+            <!-- Navigation Buttons -->
+            <v-col class="pl-6">
+              <v-btn v-if="isAdmin" :disabled="loading" icon variant="text" @click="navEmployee(-1)">
+                <v-tooltip activator="parent" location="top"> Previous employee </v-tooltip>
+                <v-icon size="50px"> mdi-arrow-left-thin </v-icon>
+              </v-btn>
+              <v-btn v-if="isAdmin" :disabled="loading" icon variant="text" class="mr-3" @click="navEmployee(1)">
+                <v-tooltip activator="parent" location="top"> Next employee </v-tooltip>
+                <v-icon size="50px"> mdi-arrow-right-thin </v-icon>
+              </v-btn>
+            </v-col>
           </v-row>
         </v-col>
-        <v-spacer></v-spacer>
       </v-row>
       <v-row ref="">
         <!-- Timesheets and Budgets-->
@@ -283,7 +293,7 @@ async function getProfileData() {
   isUser.value = userIsEmployee();
   basicEmployeeDataLoading.value = false;
   if (model.value) {
-    await refreshExpenseData(true); //TODO: Implement Expenses
+    refreshExpenseData(true); //TODO: Implement Expenses
   }
   loading.value = false;
 } // getProfileData
@@ -344,9 +354,34 @@ function onSearchButton() {
 async function onSearchUpdate() {
   if (dropdownEmployee.value) {
     await router.push(`${dropdownEmployee.value.employeeNumber}`);
-    await getProfileData();
+    getProfileData();
   }
 }
+/**
+ * Navigates to an employee
+ * future: support custom loops
+ *
+ * @input num - amount of employees to move fowards (may be negative for backwards)
+ */
+async function navEmployee(num) {
+  // set vars
+  let loop, pos, res;
+  let currId = model.value.employeeNumber;
+
+  // create 'loop' of employees in order of their employee number
+  loop = store.getters.employees || (await updateStoreEmployees());
+  loop = loop.filter((e) => e.workStatus !== 0);
+  loop = _.sortBy(loop, ['employeeNumber']);
+
+  // get the employee we're currently at and grab the employee `num` after in
+  // the loop (this can be negative to go backwards, and can be more than 1)
+  pos = _.findIndex(loop, (e) => e.employeeNumber == currId);
+  res = (pos + num) % loop.length;
+  if (res < 0) res = loop.length - 1;
+  dropdownEmployee.value = _.cloneDeep(loop[res]);
+  dropdownEmployee.value.itemTitle = `${dropdownEmployee.value.lastName}, ${dropdownEmployee.value.nickname || dropdownEmployee.value.firstName}`; //add the itemTitle for the searchbar
+  onSearchUpdate();
+} // navEmployee
 
 // |--------------------------------------------------|
 // |                                                  |
