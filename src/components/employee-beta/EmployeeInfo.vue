@@ -167,7 +167,7 @@ import LanguagesCard from '@/components/employee-beta/cards/LanguagesCard.vue';
 import OtherInfoCard from '@/components/employee-beta/cards/personal/OtherInfoCard.vue';
 import PastJobExperienceInfoCard from '@/components/employee-beta/cards/PastJobExperienceInfoCard.vue';
 import PersonalInfoCard from '@/components/employee-beta/cards/personal/PersonalInfoCard.vue';
-import ResumeCard from '@/components/employee-beta/ResumeCard.vue';
+import ResumeCard from '@/components/employee-beta/cards/ResumeCard.vue';
 import TechnologiesCard from '@/components/employee-beta/cards/TechnologiesCard.vue';
 
 // |--------------------------------------------------|
