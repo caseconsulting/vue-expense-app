@@ -1,6 +1,6 @@
 <template>
   <v-list>
-    <v-list-item v-for="(certification, index) in list" :key="certification.name + index">
+    <v-list-item v-for="(certification, index) in list" :key="certification.name + index" class="px-0">
       <v-list-item-title class="d-flex align-center pb-4">
         <v-icon class="mx-3">mdi-star-check</v-icon>
         <p class="mt-3">

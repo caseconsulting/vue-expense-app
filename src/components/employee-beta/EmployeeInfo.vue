@@ -1,6 +1,6 @@
 <template>
-  <v-container id="employee-container">
-    <base-card title="Employee" elevation="5">
+  <v-container id="employee-container" class="px-1 pt-3" fluid>
+    <base-card title="Employee" elevation="2">
       <template #title>
         <div class="d-flex justify-lg-space-between align-center">
           <h3 class="text-white">{{ employeeTitle }}</h3>
@@ -20,7 +20,7 @@
         </div>
       </template>
       <v-row justify="center">
-        <v-col style="max-width: 650px">
+        <v-col cols="12" lg="5" class="px-1">
           <div class="d-flex flex-column justify-center align-center">
             <employee-info-card :model="model"></employee-info-card>
             <!-- hire and contract info -->
@@ -34,11 +34,11 @@
             </v-row>
           </div>
         </v-col>
-        <v-col>
-          <v-card class="ma-2">
+        <v-col cols="12" lg="7" class="px-0 pb-0">
+          <v-card class="ma-2" elevation="0">
             <v-card-title>
               <v-row>
-                <v-col cols="12" align="center">
+                <v-col cols="12" align="center" class="px-0">
                   <v-menu v-if="useDropDown">
                     <template v-slot:activator="{ props }">
                       <v-btn variant="text" size="large" class="text-subtitle-1 font-weight-bold" v-bind="props"
@@ -76,7 +76,7 @@
                 </v-col>
               </v-row>
             </v-card-title>
-            <v-card-text>
+            <v-card-text class="px-2 pb-2">
               <v-tabs-window v-model="infoTab">
                 <v-tabs-window-item value="Personal">
                   <!-- personal info -->
@@ -167,7 +167,7 @@ import LanguagesCard from '@/components/employee-beta/cards/LanguagesCard.vue';
 import OtherInfoCard from '@/components/employee-beta/cards/personal/OtherInfoCard.vue';
 import PastJobExperienceInfoCard from '@/components/employee-beta/cards/PastJobExperienceInfoCard.vue';
 import PersonalInfoCard from '@/components/employee-beta/cards/personal/PersonalInfoCard.vue';
-import ResumeCard from '@/components/employee-beta/ResumeCard.vue';
+import ResumeCard from '@/components/employee-beta/cards/ResumeCard.vue';
 import TechnologiesCard from '@/components/employee-beta/cards/TechnologiesCard.vue';
 
 // |--------------------------------------------------|

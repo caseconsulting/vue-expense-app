@@ -71,9 +71,9 @@
           </v-row>
         </v-col>
       </v-row>
-      <v-row ref="">
+      <v-row class="pa-0 ma-0">
         <!-- Timesheets and Budgets-->
-        <v-col v-if="displayTimeAndBalances" cols="12" md="4" class="pt-0" height>
+        <v-col v-if="displayTimeAndBalances" cols="12" lg="4" class="pt-0" height>
           <time-data :key="model" :employee="model" class="my-4" />
           <employee-budgets
             :refreshKey="refreshKey"
@@ -86,7 +86,7 @@
             :fiscal-date-view="fiscalDateView"
           />
         </v-col>
-        <v-col cols="12" :md="displayTimeAndBalances ? 7 : 12" class="pa-0">
+        <v-col cols="12" :lg="displayTimeAndBalances ? 8 : 12" class="pa-0">
           <employee-info
             v-model="model"
             :contracts="contracts"
@@ -204,8 +204,6 @@ const dropdownEmployee = ref(null);
 onBeforeMount(async () => {
   if (storeIsPopulated) {
     await getProfileData();
-  } else {
-    loading.value = true;
   }
   console.log('employee pre beta');
   console.log(model);
