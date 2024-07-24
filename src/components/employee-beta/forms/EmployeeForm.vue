@@ -1,5 +1,11 @@
 <template>
-  <v-dialog v-model="editing" persistent scrollable @click:outside="toggleCancelConfirmation = true">
+  <v-dialog
+    v-model="editing"
+    persistent
+    scrollable
+    @click:outside="toggleCancelConfirmation = true"
+    @keydown.esc="toggleCancelConfirmation = true"
+  >
     <v-card>
       <v-card-title
         class="d-flex align-center justify-space-between beta_header_style"
