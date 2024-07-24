@@ -20,8 +20,10 @@
             <v-icon size="large" class="pr-1"> mdi-arrow-left-thin </v-icon>
             Back
           </v-btn>
-          <!-- FOR BETA TESTING!!! -->
-          <v-btn color="#bc3825" @click="handleProfileBeta()" theme="dark" class="ma-2">Go to Beta View!</v-btn>
+          <!---------------------- FOR BETA TESTING!!! ---------------------------->
+          <v-btn rounded="xl" color="#bc3825" @click="handleProfileBeta()" theme="dark" class="ma-2"
+            ><v-icon>mdi-beta</v-icon>view</v-btn
+          >
           <!-- END BETA TESTING -->
         </v-col>
         <v-col
