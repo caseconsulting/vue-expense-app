@@ -1,7 +1,7 @@
 <template>
   <div class="infoCard">
     <base-card title="Certifications">
-      <v-card-text class="text-black">
+      <div class="text-black">
         <!-- Employee has Certifications -->
         <div v-if="!isEmpty(filteredList)">
           <certifications-list :list="filteredList"></certifications-list>
@@ -18,7 +18,7 @@
             >
           </v-card-actions>
         </div>
-      </v-card-text>
+      </div>
       <certifications-modal v-model="toggleModal" :model="model"></certifications-modal>
     </base-card>
   </div>

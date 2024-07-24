@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-row class="mt-3 align-center">
+    <v-row class="mt-3 align-center justify-center">
       <!-- profile picture -->
       <v-col cols="4" class="display-inline fit-content">
         <v-avatar :color="caseRed" :size="96">
@@ -29,7 +29,7 @@
           </v-col>
           <!-- email -->
           <v-col class="fit-content">
-            <a :href="`mailto:${model.email}`" class="clickable-h3">
+            <a :href="`mailto:${model.email}`" class="text-caption clickable-h3">
               <v-tooltip activator="parent" location="bottom">
                 <p class="ma-0 pa-0">Email {{ employeeName }}</p>
               </v-tooltip>
@@ -215,7 +215,6 @@ const altText = computed(() => {
 .clickable-h3 {
   color: #2196f3;
   text-decoration: none;
-  font-size: medium;
   font-weight: 200;
   display: inline-block;
   white-space: nowrap;
