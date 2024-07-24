@@ -1,6 +1,7 @@
 <template>
   <!-- Status Alert -->
   <v-snackbar
+    v-if="status.show"
     v-model="status.show"
     :color="status.color"
     :location="status.location"
