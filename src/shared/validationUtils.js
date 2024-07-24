@@ -26,6 +26,17 @@ export function getDateOptionalRules() {
 } // getDateOptionalRules
 
 /**
+ * Birthday is valid if it's not specified or it's a valid date format
+ */
+export function getBirthdayRules() {
+  const [nonFutureDateRule] = getNonFutureDateRules();
+  return (v) => {
+    if (isEmpty(v)) return true;
+    return nonFutureDateRule(v);
+  };
+}
+
+/**
  * Gets the optional dates rules for an array in MM/DD/YYYY format.
  * @return Array - The array of rule functions
  */

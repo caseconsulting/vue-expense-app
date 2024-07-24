@@ -163,7 +163,7 @@
           label="Birthday"
           v-mask="'##/##/####'"
           hint="MM/DD/YYYY"
-          :rules="[...getDateOptionalRules(), ...getNonFutureDateRules()]"
+          :rules="[getBirthdayRules()]"
           prepend-inner-icon="mdi-calendar"
           autocomplete="off"
           style="min-width: 200px"
@@ -172,7 +172,7 @@
         >
           <v-menu activator="parent" :close-on-content-click="false" v-model="birthdayMenu" location="start center">
             <v-date-picker
-              v-model="editedEmployee.birthday"
+              v-model="formattedBirthday"
               @update:model-value="birthdayMenu = false"
               show-adjacent-months
               hide-actions
@@ -324,10 +324,9 @@ import api from '@/shared/api';
 import { format, FORMATTED_ISOFORMAT, ISO8601 } from '@/shared/dateUtils';
 import { CASE_EMAIL_DOMAIN, EMPLOYEE_ROLES, PHONE_TYPES } from '@/shared/employeeUtils';
 import {
+  getBirthdayRules,
   getCaseEmailRules,
-  getDateOptionalRules,
   getEmailRules,
-  getNonFutureDateRules,
   getNumberRules,
   getPhoneNumberRules,
   getPhoneNumberTypeRules,
@@ -418,19 +417,6 @@ const userIsAdminOrManager = computed(() => {
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     WATCHERS                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-watch(
-  () => editedEmployee.value.birthday,
-  (newValue) => {
-    formattedBirthday.value = format(newValue, ISO8601, FORMATTED_ISOFORMAT);
-  }
-);
-
-// |--------------------------------------------------|
-// |                                                  |
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -457,6 +443,8 @@ function prepareSubmit() {
   editedEmployee.value.personalEmail = personalEmail.value.emailValue;
 
   if (editedEmployee.value.country !== 'United States') editedEmployee.value.st = undefined;
+
+  editedEmployee.value.birthday = format(formattedBirthday.value, FORMATTED_ISOFORMAT, ISO8601);
 }
 
 /**
