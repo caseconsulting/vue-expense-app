@@ -13,7 +13,7 @@
         <p><b>No contracts are currently active, to view past assignments click below.</b></p>
       </div>
     </v-card-text>
-    <v-card-text v-else> No contracts to be displayed </v-card-text>
+    <v-card-text style="text-align: center" v-else> No contract Information </v-card-text>
     <v-card-actions>
       <v-btn block @click="open">Click to see more</v-btn>
     </v-card-actions>
