@@ -167,6 +167,7 @@ const model = ref({
   fiscalDateView: '',
   github: '',
   hireDate: null,
+  icTimeFrames: [],
   id: null,
   jobRole: '',
   languages: [],
@@ -206,7 +207,11 @@ onBeforeMount(async () => {
   } else {
     loading.value = true;
   }
+  console.log('employee pre beta');
+  console.log(model);
   if (!store.getters.employees) await updateStoreEmployees();
+  console.log('employee beta');
+  console.log(model);
 });
 
 onMounted(() => {
