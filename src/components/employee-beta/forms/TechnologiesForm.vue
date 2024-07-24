@@ -87,7 +87,7 @@
 import api from '@/shared/api';
 import { getRequiredRules } from '@/shared/validationUtils';
 import { isEmpty, map } from 'lodash';
-import { onBeforeMount, onBeforeUnmount, ref } from 'vue';
+import { onBeforeUnmount, ref } from 'vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -95,8 +95,7 @@ import { onBeforeMount, onBeforeUnmount, ref } from 'vue';
 // |                                                  |
 // |--------------------------------------------------|
 
-const editedEmployee = defineModel('editedEmployee', { required: true });
-const prepared = defineModel('prepared', { required: true });
+const editedEmployee = defineModel({ required: true });
 defineExpose({ prepareSubmit });
 
 const technologies = ref(
@@ -114,10 +113,6 @@ const dropdownItems = ref([]);
 // |                 LIFECYCLE HOOKS                  |
 // |                                                  |
 // |--------------------------------------------------|
-
-onBeforeMount(() => {
-  prepared.value = false;
-});
 
 onBeforeUnmount(() => {
   prepareSubmit();
@@ -146,8 +141,6 @@ function prepareSubmit() {
       current: value.current
     };
   });
-
-  prepared.value = true;
 }
 
 /**

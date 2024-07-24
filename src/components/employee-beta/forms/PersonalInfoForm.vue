@@ -338,7 +338,7 @@ import {
 } from '@/shared/validationUtils';
 import { COUNTRIES, isMobile, STATES } from '@/utils/utils';
 import { cloneDeep, filter, forEach, includes, isEmpty, lowerCase, some, startCase } from 'lodash';
-import { computed, onBeforeMount, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
 import PrivateButton from '../PrivateButton.vue';
@@ -350,8 +350,7 @@ import _ from 'lodash';
 // |                                                  |
 // |--------------------------------------------------|
 
-const editedEmployee = defineModel('editedEmployee', { required: true });
-const prepared = defineModel('prepared', { required: true });
+const editedEmployee = defineModel({ required: true });
 const store = useStore();
 defineExpose({ prepareSubmit }); // allows parent to use refs to call prepareSubmit()
 
@@ -384,10 +383,6 @@ const phoneAutofocus = ref(false);
 // |                 LIFECYCLE HOOKS                  |
 // |                                                  |
 // |--------------------------------------------------|
-
-onBeforeMount(() => {
-  prepared.value = false;
-});
 
 onBeforeUnmount(() => {
   prepareSubmit();
@@ -464,8 +459,6 @@ function prepareSubmit() {
   editedEmployee.value.personalEmail = personalEmail.value.emailValue;
 
   if (editedEmployee.value.country !== 'United States') editedEmployee.value.st = undefined;
-
-  prepared.value = true;
 }
 
 /**

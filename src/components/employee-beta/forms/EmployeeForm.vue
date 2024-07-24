@@ -35,11 +35,7 @@
         <v-form ref="form" v-model="valid" lazy-validation class="my-1 mx-xl-5 mx-lg-5 mx-md-0">
           <v-expansion-panels v-model="formTabs" variant="accordion" multiple>
             <base-form title="Personal" value="Personal Information">
-              <personal-info-form
-                ref="personalInfoFormRef"
-                v-model:edited-employee="editedEmployee"
-                v-model:prepared="preparedTabs.personal"
-              ></personal-info-form>
+              <personal-info-form ref="personalInfoFormRef" v-model="editedEmployee"></personal-info-form>
             </base-form>
             <base-form title="Clearance" value="Clearance">
               <div>
@@ -66,11 +62,7 @@
               </div>
             </base-form>
             <base-form title="Tech and Skills" value="Tech and Skills">
-              <technologies-form
-                ref="technologiesFormRef"
-                v-model:edited-employee="editedEmployee"
-                v-model:prepared="preparedTabs.technologies"
-              ></technologies-form>
+              <technologies-form ref="technologiesFormRef" v-model="editedEmployee"></technologies-form>
             </base-form>
             <base-form title="Foreign Languages" value="Languages">
               <languages-form ref="languagesFormRef" v-model="editedEmployee"></languages-form>
@@ -95,7 +87,7 @@
             <v-btn id="employeeCancelBtn" variant="text" class="ma-2" @click="toggleCancelConfirmation = true"
               >Cancel</v-btn
             >
-            <v-btn id="employeeSubmitBtn" variant="outlined" class="ma-2" color="success" @click="prepareSubmit()">
+            <v-btn id="employeeSubmitBtn" variant="outlined" class="ma-2" color="success" @click="submit()">
               <v-icon class="mr-1">mdi-content-save</v-icon>Submit
             </v-btn>
             <!-- End form action buttons -->
@@ -113,7 +105,7 @@
 <script setup>
 import BaseForm from '@/components/employee-beta/forms/BaseForm.vue';
 import FormCancelConfirmation from '@/components/modals/FormCancelConfirmation.vue';
-import { cloneDeep, isEqual, mapValues, pickBy } from 'lodash';
+import { cloneDeep, isEqual, pickBy } from 'lodash';
 import { computed, inject, onBeforeMount, onBeforeUnmount, ref } from 'vue';
 import LanguagesForm from './LanguagesForm.vue';
 import PersonalInfoForm from './PersonalInfoForm.vue';
@@ -283,14 +275,6 @@ onBeforeUnmount(() => {
   emitter.off('confirmed-cancel');
 });
 
-const allTabsReady = computed(() => {
-  let allReady = true;
-  Object.values(preparedTabs).forEach((tab) => {
-    if (!tab) allReady = false; // if one isn't ready, we can't continue submitting
-  });
-  return allReady;
-});
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -304,17 +288,11 @@ function setFormData(tab, data) {
   }
 }
 
-function prepareSubmit() {
+function submit() {
+  // allows other tabs to finalize data, if they're open. otherwise the data should already be finalized
   if (personalInfoFormRef.value) personalInfoFormRef.value.prepareSubmit();
   if (technologiesFormRef.value) technologiesFormRef.value.prepareSubmit();
-  if (languagesFormRef.value) languagesFormRef.value.prepareSubmit();
 
-  // if tabs are already prepared (i.e. all tabs are closed), we can just submit now
-  // otherwise we have to tell the tabs to prepare while they are open
-  if (allTabsReady.value) submit();
-}
-
-function submit() {
   // picks out all the changed values to make the api call
   let changes = pickBy(editedEmployee.value, (value, key) => {
     const oldValue = props.employee[key];
@@ -323,9 +301,6 @@ function submit() {
   });
 
   console.log('Changed values:', changes); // TODO for debugging/testing
-
-  // resets all tabs to unprepared state
-  preparedTabs = mapValues(preparedTabs, () => false);
 }
 
 //TODO: cancel
