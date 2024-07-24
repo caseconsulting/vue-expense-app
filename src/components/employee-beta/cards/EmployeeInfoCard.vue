@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-row class="mt-3 align-center">
+    <v-row class="mt-3 align-center justify-center">
       <!-- profile picture -->
       <v-col cols="4" class="display-inline fit-content">
         <v-avatar :color="caseRed" :size="96">

@@ -1,5 +1,5 @@
 <template>
-  <v-card id="base-card">
+  <v-card id="base-card" class="ma-1">
     <v-card-title class="beta_header_style px-0 d-flex align-center">
       <v-container class="d-flex flex-nowrap justify-space-between">
         <!-- title -->
@@ -30,7 +30,7 @@
         </v-row>
       </v-container>
     </v-card-title>
-    <v-card-text>
+    <v-card-text :class="smAndDown ? 'pa-0' : ''">
       <!-- Default Slot -->
       <slot></slot>
     </v-card-text>
@@ -39,6 +39,7 @@
 
 <script setup>
 import { inject } from 'vue';
+import { useDisplay } from 'vuetify';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -46,6 +47,7 @@ import { inject } from 'vue';
 // |                                                  |
 // |--------------------------------------------------|
 
+const { smAndDown } = useDisplay();
 const emitter = inject('emitter');
 
 const props = defineProps({

@@ -1,6 +1,6 @@
 <template>
   <v-list>
-    <v-list-item v-for="(awards, index) in list" :key="awards.name + index">
+    <v-list-item v-for="(awards, index) in list" :key="awards.name + index" class="px-0">
       <v-list-item-title class="d-flex align-center pb-4">
         <v-icon class="mx-3">mdi-trophy-award</v-icon>
         <p class="mt-3">
