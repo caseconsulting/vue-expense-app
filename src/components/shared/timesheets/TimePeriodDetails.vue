@@ -38,7 +38,13 @@
       <div class="dotted-line"></div>
       <div class="ml-2">{{ formatNumber(futureHours) }}h</div>
     </div>
-    <div class="d-flex justify-space-between my-3 pointer" @click="showCustomWorkDayInput = true">
+    <div
+      class="d-flex justify-space-between my-3 pointer"
+      @click="
+        showCustomWorkDayInput = true;
+        customWorkDayInput = remainingWorkDays;
+      "
+    >
       <div class="mr-3">
         Work Days Remaining
         <span v-if="remainingWorkDaysTooltip" class="text-blue"> * </span>
@@ -47,7 +53,7 @@
         </v-tooltip>
       </div>
       <div class="dotted-line"></div>
-      <div class="ml-3">
+      <div class="ml-2">
         <div v-if="!showCustomWorkDayInput" class="work-days-box">
           {{ formatNumber(remainingWorkDays) }}
         </div>
@@ -57,7 +63,7 @@
           autofocus
           type="text"
           variant="outlined"
-          class="ma-0 pa-0 custom-input"
+          class="ma-0 pa-0 work-days-custom-input"
           @blur="showCustomWorkDayInput = false"
           hide-details
         ></v-text-field>
@@ -101,6 +107,8 @@ const emitter = inject('emitter');
 const clonedEmployee = ref(props.employee);
 const BONUS_YEAR_TOTAL = ref(1860);
 const WORK_HOURS_PER_DAY = ref(8); // normal hours per day for full time employees
+const customCompleted = ref(null);
+const customNeeded = ref(null);
 const customWorkDayInput = ref(null);
 const showCustomWorkDayInput = ref(false);
 const today = ref(format(getTodaysDate(), null, DEFAULT_ISOFORMAT));
@@ -122,6 +130,12 @@ onMounted(() => {
   });
   emitter.on('update-planned-pto-results-time-period', (data) => {
     clonedEmployee.value.plannedPto = data;
+  });
+  emitter.on('update-time-data-completed', (c) => {
+    customCompleted.value = c;
+  });
+  emitter.on('update-time-data-needed', (n) => {
+    customNeeded.value = n;
   });
 }); // mounted
 
@@ -172,7 +186,7 @@ const futureHours = computed(() => {
  * @returns Number - The number of hours an employee is behind schedule by
  */
 const hoursBehindBy = computed(() => {
-  return totalPeriodHours.value - remainingWorkDays.value * proRatedHours.value - periodHoursCompleted.value;
+  return remainingHours.value - remainingWorkDays.value * proRatedHours.value;
 }); // hoursBehindBy
 
 /**
@@ -188,7 +202,7 @@ const periodHoursCompleted = computed(() => {
     }
   });
   // convert to hours
-  return Number(total / 60 / 60);
+  return customCompleted.value ?? Number(total / 60 / 60);
 }); // periodHoursCompleted
 
 /**
@@ -211,7 +225,7 @@ const proRatedHours = computed(() => {
  */
 const remainingHours = computed(() => {
   let remaining = totalPeriodHours.value - periodHoursCompleted.value;
-  return remaining > 0 ? remaining : 0;
+  return Math.max(remaining, 0);
 }); // remainingHours
 
 /**
@@ -276,7 +290,8 @@ const remainingAverageHoursPerDay = computed(() => {
  */
 const totalPeriodHours = computed(() => {
   let total = totalWorkDays.value * proRatedHours.value;
-  return props.isYearly ? Math.round(total) : total;
+  total = props.isYearly ? Math.round(total) : total;
+  return customNeeded.value ?? total;
 }); // totalPeriodHours
 
 /**
@@ -365,7 +380,7 @@ function isWeekDay(day) {
 </script>
 
 <style>
-.custom-input input {
+.work-days-custom-input input {
   padding: 5px 10px 3px 9px;
   width: 45px;
   height: 10px;

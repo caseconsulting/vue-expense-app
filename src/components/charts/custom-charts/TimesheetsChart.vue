@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :key="updateKey">
     <doughnut-chart
       v-if="dataReceived"
       ref="doughnutChart"
@@ -8,8 +8,46 @@
       :chartData="chartData"
     >
       <div name="middle-text">
-        <div class="divider pb-1 font-weight-medium">{{ completed }}h</div>
-        <div class="pt-1 font-weight-medium">{{ needed }}h</div>
+        <div
+          class="pointer"
+          @click="
+            showCustomCompletedInput = true;
+            customCompletedInput = completed;
+          "
+        >
+          <div v-if="!showCustomCompletedInput" class="divider pb-1 font-weight-medium">{{ completed }}h</div>
+          <v-text-field
+            v-else
+            v-model="customCompletedInput"
+            autofocus
+            type="text"
+            variant="outlined"
+            class="divider ma-0 pa-1 custom-input"
+            hide-details
+            @keydown.enter="showCustomCompletedInput = false"
+            @blur="showCustomCompletedInput = false"
+          ></v-text-field>
+        </div>
+        <div
+          class="pointer"
+          @click="
+            showCustomNeededInput = true;
+            customNeededInput = needed;
+          "
+        >
+          <div v-if="!showCustomNeededInput" class="pt-1 font-weight-medium">{{ needed }}h</div>
+          <v-text-field
+            v-else
+            v-model="customNeededInput"
+            autofocus
+            type="text"
+            variant="outlined"
+            class="ma-0 pa-1 custom-input"
+            hide-details
+            @keydown.enter="showCustomNeededInput = false"
+            @blur="showCustomNeededInput = false"
+          ></v-text-field>
+        </div>
       </div>
     </doughnut-chart>
     <div v-else class="d-flex justify-center align-center mt-15">Error loading chart data...</div>
@@ -18,7 +56,7 @@
 
 <script setup>
 import DoughnutChart from '@/components/charts/base-charts/DoughnutChart.vue';
-import { inject, ref, onMounted, onBeforeUnmount } from 'vue';
+import { inject, ref, onMounted, onBeforeUnmount, watch } from 'vue';
 import { formatNumber } from '@/utils/utils.js';
 import _ from 'lodash';
 
@@ -34,7 +72,12 @@ const emitter = inject('emitter');
 const completed = ref(0);
 const needed = ref(0);
 const remainingHours = ref(0);
+const updateKey = ref(0);
 const options = ref(null);
+const customCompletedInput = ref(null);
+const customNeededInput = ref(null);
+const showCustomCompletedInput = ref(null);
+const showCustomNeededInput = ref(null);
 const chartData = ref(null);
 const dataReceived = ref(false);
 
@@ -99,9 +142,18 @@ async function fillData() {
     return formatNumber(Number(duration / 60 / 60));
   }); // removes decimals if a whole number
 
+  let jobCodeValuesSum = _.sum(_.map(jobCodeValues, (v) => Number(v)));
+  // user inputted custom data
+  let difference = Number(completed.value) - jobCodeValuesSum;
+  if (difference > 0) {
+    jobcodes['Custom Input'] = difference * 60 * 60;
+    jobCodeValues?.push(formatNumber(difference));
+  }
+
   for (let i = 0; i < jobCodeValues?.length / colorsOptions.length; i++) {
     colors = [...colors, ...colorsOptions];
   }
+
   colors = _.slice(colors, 0, jobCodeValues?.length);
   colors.push('#EAEAEA'); // push grey for remaining hours
 
@@ -164,7 +216,56 @@ async function fillData() {
   };
   dataReceived.value = true;
 } // fillData
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+watch(
+  () => [showCustomCompletedInput.value, showCustomNeededInput.value],
+  async () => {
+    if (!showCustomCompletedInput.value && !showCustomNeededInput.value) {
+      let customCompleted, customNeeded;
+      // evaluate custom input as expressions
+      try {
+        customCompleted = eval(customCompletedInput.value);
+      } catch (err) {
+        customCompleted = completed.value;
+      }
+      try {
+        customNeeded = eval(customNeededInput.value);
+      } catch (err) {
+        customNeeded = needed.value;
+      }
+      // emit to TimePeriodDetails if input has changed
+      if (customCompleted && !isNaN(customCompleted) && !isNaN(parseFloat(customCompleted))) {
+        completed.value = customCompleted;
+        emitter.emit('update-time-data-completed', completed.value);
+      }
+      if (customNeeded && !isNaN(customNeeded) && !isNaN(parseFloat(customNeeded))) {
+        needed.value = customNeeded;
+        emitter.emit('update-time-data-needed', needed.value);
+      }
+      // update chart with custom input
+      remainingHours.value = needed.value - completed.value;
+      await fillData();
+      updateKey.value++;
+    }
+  }
+);
 </script>
+
+<style>
+.custom-input input {
+  padding: 5px 10px 3px 9px;
+  width: 78px;
+  height: 10px;
+  min-height: 25px;
+  font-size: 12px;
+}
+</style>
 
 <style scoped>
 .divider {
