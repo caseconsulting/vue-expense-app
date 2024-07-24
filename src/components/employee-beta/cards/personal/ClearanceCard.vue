@@ -1,8 +1,13 @@
 <template>
   <div>
     <base-card title="Clearance">
-      <template v-if="!isEmpty(clearances)" #prependIcon>
-        <v-icon size="small" id="personal" color="white"> mdi-shield-account </v-icon>
+      <template #title>
+        <div class="d-flex align-center">
+          <v-icon v-if="!isEmpty(clearances)" style="margin-right: 10px" size="small" id="personal" color="white">
+            mdi-shield-account
+          </v-icon>
+          <h3 class="text-white">Clearance</h3>
+        </div>
       </template>
       <clearance-list
         v-if="!isEmpty(clearances)"

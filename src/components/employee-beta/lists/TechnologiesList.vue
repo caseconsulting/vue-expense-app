@@ -1,7 +1,7 @@
 <template>
   <v-list>
-    <v-list-item v-for="(technology, index) in list" :key="technology.name + index">
-      <v-row class="fit-content align-center" dense>
+    <v-list-item v-for="(technology, index) in list" :key="technology.name + index" class="px-2">
+      <v-row class="align-center" dense>
         <v-col cols="auto">
           <span v-if="technology.current">
             <v-icon>mdi-check</v-icon>
@@ -9,20 +9,18 @@
           </span>
           <v-spacer v-else style="min-width: 24px"></v-spacer>
         </v-col>
-        <v-col v-if="isModal && !isMobile()" class="margin-y ml-2 align-center" cols="9" style="width: 375px">
+        <v-col v-if="isModal && !isMobile()" class="margin-y ml-2 align-center" cols="10" style="width: 375px">
           <!-- there's margin on paragraphs that needs to be removed here -->
           <p class="title-text ma-0">
             <b>{{ technology.name }}</b>
           </p>
         </v-col>
-        <v-col v-else class="margin-y ml-2 d-flex align-center" cols="9">
+        <v-col v-else class="margin-y ml-2 d-flex align-center justify-space-between" cols="9">
           <!-- if a skill/tech has a long name then it gets cut off with a ... -->
           <p class="title-text ma-0" style="width: 16ch; overflow: hidden; text-overflow: ellipsis">
             <b>{{ technology.name }}</b>
           </p>
-        </v-col>
-        <v-col class="d-flex justify-end align-center" cols="1">
-          <p class="gray-text">{{ Number(technology.years).toFixed(1) }} years</p>
+          <p class="gray-text ma-0">{{ Number(technology.years).toFixed(1) }} years</p>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-5">

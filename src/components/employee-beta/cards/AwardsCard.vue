@@ -1,7 +1,7 @@
 <template>
   <div class="infoCard">
     <base-card title="Awards">
-      <v-card-text>
+      <div class="text-black">
         <!-- Employee has Awards -->
         <div v-if="!isEmpty(filteredList)">
           <!-- Loop Awards -->
@@ -16,7 +16,7 @@
             <v-btn @click="toggleAwardsModal()">View all {{ model.awards.length }} awards </v-btn>
           </v-card-actions>
         </div>
-      </v-card-text>
+      </div>
       <awards-modal v-model="toggleModal" :model="model"></awards-modal>
     </base-card>
   </div>

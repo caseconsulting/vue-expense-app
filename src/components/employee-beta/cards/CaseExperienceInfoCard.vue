@@ -1,5 +1,5 @@
 <template>
-  <v-card>
+  <v-card class="mx-2">
     <v-card-title class="d-flex align-center justify-space-between beta_header_style">
       <h3 class="text-white px-2">CASE Information</h3>
     </v-card-title>

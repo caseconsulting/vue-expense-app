@@ -1,13 +1,9 @@
 <template>
-  <v-card id="base-card">
+  <v-card id="base-card" class="ma-1">
     <v-card-title class="beta_header_style px-0 d-flex align-center">
       <v-container class="d-flex flex-nowrap justify-space-between">
         <!-- title -->
         <v-row no-gutters class="fit-content align-center">
-          <v-col v-if="$slots.prependIcon" class="mr-2">
-            <!-- Card Title Icon Slot -->
-            <slot name="prependIcon"></slot>
-          </v-col>
           <v-col>
             <!-- Custom Title Slot  -->
             <slot name="title">
@@ -30,7 +26,7 @@
         </v-row>
       </v-container>
     </v-card-title>
-    <v-card-text>
+    <v-card-text :class="smAndDown ? 'pa-0' : ''">
       <!-- Default Slot -->
       <slot></slot>
     </v-card-text>
@@ -39,6 +35,7 @@
 
 <script setup>
 import { inject } from 'vue';
+import { useDisplay } from 'vuetify';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -46,6 +43,7 @@ import { inject } from 'vue';
 // |                                                  |
 // |--------------------------------------------------|
 
+const { smAndDown } = useDisplay();
 const emitter = inject('emitter');
 
 const props = defineProps({
