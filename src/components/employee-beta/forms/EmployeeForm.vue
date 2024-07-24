@@ -57,7 +57,7 @@
             </base-form>
             <base-form title="Job Experience" value="Past Experience">
               <div>
-                <job-experience-tab :model="employee" :validating="validating.jobExperience"></job-experience-tab>
+                <job-experience-tab :model="model" :validating="validating.jobExperience"></job-experience-tab>
               </div>
             </base-form>
             <base-form title="Education" value="Education">
@@ -101,6 +101,7 @@ import PersonalInfoForm from './PersonalInfoForm.vue';
 import JobExperienceTab from '../form-tabs/JobExperienceTab.vue';
 import EducationTab from '../form-tabs/EducationTab.vue';
 import CertsAndAwardsTab from '../form-tabs/CertsAndAwardsTab.vue';
+import _ from 'lodash';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -115,7 +116,65 @@ const editedEmployee = ref(cloneDeep(props.employee));
 const isUser = inject('isUser');
 const editing = defineModel();
 const formTabs = ref([]); //TODO: Sync up current tabs on edit form and info cards
+const model = ref({
+  agencyIdentificationNumber: null,
+  awards: [],
+  birthday: null,
+  birthdayFeed: false,
+  certifications: [],
+  city: null,
+  clearances: [],
+  companies: [],
+  contract: null,
+  contracts: [],
+  country: null,
+  currentCity: null,
+  currentState: null,
+  currentStreet: null,
+  currentStreet2: null,
+  currentZIP: null,
+  customerOrgExp: [],
+  degrees: [],
+  deptDate: null,
+  email: '@consultwithcase.com',
+  employeeNumber: null,
+  employeeRole: 'user',
+  firstName: null,
+  github: null,
+  hireDate: null,
+  icTimeFrames: [],
+  id: null,
+  jobRole: null,
+  jobs: [],
+  languages: [],
+  lastName: null,
+  middleName: null,
+  nickname: null,
+  noMiddleName: false,
+  personalEmail: null,
+  privatePhoneNumbers: [],
+  publicPhoneNumbers: [],
+  prime: null,
+  education: [],
+  st: null,
+  technologies: [],
+  twitter: null,
+  workStatus: 100
+});
 const submitting = ref(false);
+const tabCreated = ref({
+  awards: false,
+  certifications: false,
+  clearance: false,
+  contracts: false,
+  customerOrgExp: false,
+  education: false,
+  employee: false,
+  jobExperience: false,
+  languages: false,
+  personal: false,
+  technologies: false
+}); // tab component created
 const toggleCancelConfirmation = ref(false);
 const valid = ref(false);
 const validating = ref({
@@ -162,6 +221,18 @@ onBeforeMount(() => {
     await cancel();
     editing.value = false;
   });
+  emitter.on('created', (tab) => {
+    tabCreated.value[tab] = true;
+  });
+  emitter.on('doneValidating', (params) => {
+    setFormData(params.tab, params.data); // sets the form data
+    validating.value[params.tab] = false;
+  });
+  model.value = _.cloneDeep(
+    _.mergeWith(model.value, props.employee, (modelValue, employeeValue) => {
+      return _.isNil(employeeValue) ? modelValue : employeeValue;
+    })
+  );
 });
 
 onBeforeUnmount(() => {
@@ -175,6 +246,13 @@ onBeforeUnmount(() => {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+function setFormData(tab, data) {
+  if (tab === 'jobExperience') {
+    model.value['icTimeFrames'] = data.icTimeFrames;
+    model.value['companies'] = data.companies;
+  }
+}
 
 //TODO: submit
 function submit() {}

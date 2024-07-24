@@ -364,6 +364,7 @@ onBeforeMount(async () => {
 
 /**
  * Adds an empty company to the bottom of the form list.
+ *
  */
 function addCompany() {
   if (!editedJobExperienceInfo.value) editedJobExperienceInfo.value = [];
@@ -383,7 +384,7 @@ function addCompany() {
 } // addCompany
 
 /**
- * Adds an IC Time Frame.
+ * Adds the IC Time Frame to the model
  */
 function addICTimeFrame() {
   editedJobExperienceInfo.value.icTimeFrames.push({
@@ -422,21 +423,6 @@ function checkPositionStatus(position) {
   }
 } // checkPositionStatus
 
-// TODO: finish the rules methods, might have to make them computed properties that call different methods.
-// /**
-//  * Rule for the ordering of the dates
-//  */
-// function dateOrderRule(compIndex, posIndex) {
-//   if (editedJobExperienceInfo.value !== undefined) {
-//     let position = editedJobExperienceInfo.value.companies[compIndex].positions[posIndex];
-//     return isEmpty(position.endDate) && position.startDate
-//       ? isAfter(add(position.endDate, 1, 'd'), position.startDate) || 'End date must be after start date'
-//       : true;
-//   } else {
-//     return true;
-//   }
-// }
-
 /**
  * Deletes a Company and its nested positions.
  *
@@ -470,35 +456,6 @@ function deletePosition(compIndex, posIndex) {
     editedJobExperienceInfo.value.companies[compIndex].positions.splice(posIndex, 1);
   }
 } // deletePosition
-
-// /**
-//  * Rule for Company Names
-//  */
-// function duplicateCompanyName(compIndex) {
-//   // return () => {
-//   let compNames = _.mapKeys(editedJobExperienceInfo.value.companies, (company) => company.companyName);
-//   let company = compNames[compIndex];
-//   compNames = Object.keys(compNames);
-//   compNames.splice(compIndex, 1);
-//   return !compNames.includes(company) || 'Duplicate company name';
-//   // };
-// }
-
-// /**
-//  * Rule for end dates
-//  */
-// function endDatePresentRule(compIndex, posIndex) {
-//   if (editedJobExperienceInfo.value !== undefined) {
-//     let position = editedJobExperienceInfo.value.companies[compIndex].positions[posIndex];
-//     if (position.presentDate == false && isEmpty(position.endDate)) {
-//       return 'End Date is required';
-//     } else {
-//       return true;
-//     }
-//   } else {
-//     return false;
-//   }
-// }
 
 /**
  * Format date range as 'Month YYYY' - 'Month YYYY' in chronological order.
