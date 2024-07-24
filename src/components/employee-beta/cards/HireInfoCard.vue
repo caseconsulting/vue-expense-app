@@ -1,14 +1,14 @@
 <template>
-  <v-card @click="toggleInfo" elevation="4" width="170px" rounded="1">
+  <v-card elevation="4" width="170px" rounded="1">
     <span style="background-color: red"></span>
     <div class="info-header font-weight-black" style="padding-top: 5px">Hire date</div>
     <div class="info-div">{{ monthDayYearFormat(model.hireDate) || 'No hire date 😫' }}</div>
-    <div v-if="wasIntern && moreInfo" class="info-header font-weight-black">Internship date</div>
-    <div v-if="wasIntern && moreInfo" class="info-div">
+    <div v-if="wasIntern" class="info-header font-weight-black">Internship date</div>
+    <div v-if="wasIntern" class="info-div">
       {{ internshipDate }}
     </div>
-    <div v-if="moreInfo" class="info-header font-weight-black">Time with CASE</div>
-    <div v-if="moreInfo" class="info-div">{{ getYearsWith }} {{ getDaysWith }}</div>
+    <div class="info-header font-weight-black">Time with CASE</div>
+    <div class="info-div">{{ getYearsWith }} {{ getDaysWith }}</div>
   </v-card>
 </template>
 
@@ -24,25 +24,8 @@ import { difference, format, getTodaysDate } from '@/shared/dateUtils';
 // |--------------------------------------------------|
 
 const props = defineProps(['model']);
-const wasIntern = ref(false);
-const internshipDate = ref(null);
-const moreInfo = ref(false);
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     METHODS                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Expands the card to show more info
- */
-function toggleInfo() {
-  moreInfo.value = !moreInfo.value;
-  //TEMPORARY: dummy data for internship date since there is no internship data fields
-  wasIntern.value = !wasIntern.value;
-  internshipDate.value = 'May 20, 2024';
-} // toggleInfo
+const wasIntern = ref(props.model.employeeRole === 'intern');
+const internshipDate = ref(monthDayYearFormat(props.model.hireDate)); //temp for now
 
 // |--------------------------------------------------|
 // |                                                  |

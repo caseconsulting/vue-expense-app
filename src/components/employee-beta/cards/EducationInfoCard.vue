@@ -1,8 +1,8 @@
 <template>
   <div class="eduTab">
     <base-card title="Education">
-      <v-card-text v-if="isEmpty(showableList)">
-        <p>No Education to display</p>
+      <v-card-text v-if="isEmpty(showableList)" style="text-align: center" class="pt-7">
+        <p>No Education Information</p>
       </v-card-text>
       <v-card-text v-else>
         <education-list :list="showableList"></education-list>
