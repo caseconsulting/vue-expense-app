@@ -83,14 +83,23 @@
             </base-form>
           </v-expansion-panels>
           <v-card-actions>
-            <!-- Form action buttons -->
-            <v-btn id="employeeCancelBtn" variant="text" class="ma-2" @click="toggleCancelConfirmation = true"
-              >Cancel</v-btn
-            >
-            <v-btn id="employeeSubmitBtn" variant="outlined" class="ma-2" color="success" @click="submit()">
-              <v-icon class="mr-1">mdi-content-save</v-icon>Submit
-            </v-btn>
-            <!-- End form action buttons -->
+            <v-row class="d-flex align-center">
+              <!-- Form action buttons -->
+              <v-col cols="auto">
+                <v-btn id="employeeCancelBtn" variant="text" class="ma-2" @click="toggleCancelConfirmation = true"
+                  >Cancel</v-btn
+                >
+              </v-col>
+              <v-col cols="auto">
+                <v-btn id="employeeSubmitBtn" variant="outlined" class="ma-2" color="success" @click="submit()">
+                  <v-icon class="mr-1">mdi-content-save</v-icon>Submit
+                </v-btn>
+              </v-col>
+              <!-- End form action buttons -->
+              <v-col cols="auto">
+                <p v-if="!valid" class="invalid mb-0">Cannot submit, there are invalid fields!</p>
+              </v-col>
+            </v-row>
           </v-card-actions>
         </v-form>
       </v-container>
@@ -221,6 +230,7 @@ let preparedTabs = {
 };
 
 // template refs
+const form = ref(null);
 const personalInfoFormRef = ref(null);
 const technologiesFormRef = ref(null);
 const languagesFormRef = ref(null);
@@ -288,7 +298,17 @@ function setFormData(tab, data) {
   }
 }
 
-function submit() {
+async function submit() {
+  if (!form.value) return;
+  const results = await form.value.validate();
+
+  if (!results.valid) {
+    console.log('Errors:', results.errors);
+    valid.value = false;
+    return;
+  }
+  valid.value = true;
+
   // allows other tabs to finalize data, if they're open. otherwise the data should already be finalized
   if (personalInfoFormRef.value) personalInfoFormRef.value.prepareSubmit();
   if (technologiesFormRef.value) technologiesFormRef.value.prepareSubmit();
@@ -297,10 +317,18 @@ function submit() {
   let changes = pickBy(editedEmployee.value, (value, key) => {
     const oldValue = props.employee[key];
     const newValue = value;
+    const changed = !isEqual(oldValue, newValue);
+    if (changed) {
+      // TODO for debugging/testing
+      console.log('Changed:', key);
+      console.log('\tOld:', oldValue);
+      console.log('\tNew:', newValue);
+    }
     return !isEqual(oldValue, newValue);
   });
 
   console.log('Changed values:', changes); // TODO for debugging/testing
+  editing.value = false; // close edit modal
 }
 
 //TODO: cancel
@@ -310,3 +338,9 @@ function collapseAllTabs() {
   formTabs.value = [];
 }
 </script>
+
+<style scoped>
+.invalid {
+  color: red;
+}
+</style>
