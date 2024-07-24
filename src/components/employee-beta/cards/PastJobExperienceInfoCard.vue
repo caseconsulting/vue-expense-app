@@ -1,7 +1,7 @@
 <template>
   <base-card title="Past Experience">
-    <v-card-text v-if="isEmpty(pageList)" class="mt-6" style="font-size: 18px">
-      <p class="ml-6">No past job experience to display</p>
+    <v-card-text v-if="isEmpty(pageList)" class="mt-6" style="text-align: center">
+      <p>No Past Job Experience Information</p>
     </v-card-text>
     <v-card-text v-else>
       <past-experience-list :list="pageList"></past-experience-list>
