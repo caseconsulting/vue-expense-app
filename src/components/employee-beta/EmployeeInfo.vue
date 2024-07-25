@@ -54,8 +54,9 @@
                       <v-list-item @click="selectDropDown('Tech, Skills, & Languages')"
                         >Tech, Skills, & Languages</v-list-item
                       >
-                      <v-list-item @click="selectDropDown('Job Experience')">Job Experience</v-list-item>
-                      <v-list-item @click="selectDropDown('Education')">Education</v-list-item>
+                      <v-list-item @click="selectDropDown('Job Experience & Education')"
+                        >Job Experience & Education</v-list-item
+                      >
                     </v-list>
                   </v-menu>
                   <v-tabs
@@ -70,8 +71,7 @@
                     <v-tab v-if="isUser || isAdmin" value="Personal">Personal</v-tab>
                     <v-tab value="Certifications & Awards">Certifications & Awards</v-tab>
                     <v-tab value="Tech, Skills, & Languages">Tech, Skills, & Languages</v-tab>
-                    <v-tab value="Job Experience">Job Experience</v-tab>
-                    <v-tab value="Education">Education</v-tab>
+                    <v-tab value="Job Experience & Education">Job Experience & Education</v-tab>
                   </v-tabs>
                   <v-divider></v-divider>
                 </v-col>
@@ -115,22 +115,18 @@
                     </v-col>
                   </v-row>
                 </v-tabs-window-item>
-                <v-tabs-window-item value="Job Experience">
+                <v-tabs-window-item value="Job Experience & Education">
                   <v-row class="my-2">
                     <!-- past experience -->
-                    <v-col>
+                    <v-col cols="12">
                       <past-job-experience-info-card
                         :model="model"
                         :isAdmin="isAdmin"
                         :isUser="isUser"
                       ></past-job-experience-info-card>
                     </v-col>
-                  </v-row>
-                </v-tabs-window-item>
-                <v-tabs-window-item value="Education">
-                  <!-- education and past experience -->
-                  <v-row class="my-2">
-                    <v-col>
+                    <!-- education and past experience -->
+                    <v-col cols="12">
                       <education-info-card :model="model" :isAdmin="isAdmin" :isUser="isUser"></education-info-card>
                     </v-col>
                   </v-row>

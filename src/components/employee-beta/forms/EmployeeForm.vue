@@ -48,7 +48,7 @@
                 ></contracts-tab>
               </div>
             </base-form>
-            <base-form title="Certifications + Awards" value="Certifications + Awards">
+            <base-form title="Certifications & Awards" value="Certifications & Awards">
               <div>
                 <certs-and-awards-tab
                   :certifications="employee.certifications"
