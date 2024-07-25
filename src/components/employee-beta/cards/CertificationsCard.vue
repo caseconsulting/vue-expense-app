@@ -8,10 +8,7 @@
         </div>
         <!-- Employee does not have Certifications -->
         <p v-else class="mt-6 ml-6">No Certification Information</p>
-        <div
-          v-if="!isEmpty(model.certifications) && Math.ceil(model.certifications.length / ITEMS_PER_PAGE) != 1"
-          class="text-center"
-        >
+        <div v-if="!isEmpty(model.certifications)" class="text-center">
           <v-card-actions class="d-flex justify-center">
             <v-btn @click="toggleCertificationsModal()"
               >View All {{ model.certifications.length }} Certifications</v-btn
@@ -37,7 +34,7 @@ import CertificationsModal from '@/components/employee-beta/modals/Certification
 // |                                                  |
 // |--------------------------------------------------|
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 5; //each page contains 5 certification entries
 
 const props = defineProps(['model']);
 const toggleModal = ref(false);
@@ -49,7 +46,7 @@ const toggleModal = ref(false);
 // |--------------------------------------------------|
 
 const filteredList = computed(() => {
-  const startIndex = 0; //each page contains 5 certification entries
+  const startIndex = 0;
   const endIndex = ITEMS_PER_PAGE;
   if (!isEmpty(props.model.certifications)) {
     return sortByDateReceived(props.model.certifications).slice(startIndex, endIndex);
