@@ -3,7 +3,7 @@
     <v-row class="mt-3 align-center justify-center">
       <!-- profile picture -->
       <v-col cols="4" class="display-inline fit-content">
-        <v-avatar :color="caseRed" :size="96">
+        <v-avatar class="cursor-pointer" :color="caseRed" :size="96" @click="toggleModal = true">
           <span class="text-h4 display-inline-block position-absolute">{{ initials }}</span>
           <v-img class="display-inline-block position-absolute" :src="avatar" :alt="altText" />
         </v-avatar>
@@ -122,6 +122,14 @@
         </v-row>
       </v-col>
     </v-row>
+    <profile-pic-modal
+      v-model="toggleModal"
+      :avatar="avatar"
+      :initials="initials"
+      :altText="altText"
+      :fullName="fullName"
+      :model="model"
+    ></profile-pic-modal>
   </div>
 </template>
 
@@ -130,6 +138,7 @@ import _ from 'lodash';
 import { computed, onMounted, ref } from 'vue';
 import { useStore } from 'vuex';
 import { updateStoreAvatars } from '../../../utils/storeUtils';
+import ProfilePicModal from '../modals/ProfilePicModal.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -147,6 +156,7 @@ const props = defineProps({
   }
 });
 const avatar = ref(null);
+const toggleModal = ref(false);
 
 onMounted(async () => {
   if (!store.getters.basecampAvatars) await updateStoreAvatars();
@@ -178,7 +188,11 @@ const nickname = computed(() => {
 });
 
 const altText = computed(() => {
-  return `${employeeName.value}'s Avatar'`;
+  return `${employeeName.value}'s Avatar`;
+});
+
+const fullName = computed(() => {
+  return props.model.nickname ? `${props.model.nickname} ${props.model.lastName}` : employeeName;
 });
 </script>
 
