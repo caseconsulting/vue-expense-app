@@ -32,8 +32,15 @@
         <v-progress-linear :indeterminate="true"></v-progress-linear>
       </div>
       <v-container v-else fluid>
-        <v-form ref="form" v-model="valid" lazy-validation class="my-1 mx-xl-5 mx-lg-5 mx-md-0">
-          <v-expansion-panels v-model="formTabs" variant="accordion" multiple>
+        <v-form
+          ref="form"
+          v-model="valid"
+          validate-on="blur"
+          :disabled="submitting"
+          class="my-1 mx-xl-5 mx-lg-5 mx-md-0"
+          @submit.prevent="submit($event)"
+        >
+          <v-expansion-panels v-model="formTabs" variant="accordion" multiple eager>
             <base-form title="Personal" value="Personal Information">
               <personal-info-form ref="personalInfoFormRef" v-model="editedEmployee"></personal-info-form>
             </base-form>
@@ -91,7 +98,7 @@
                 >
               </v-col>
               <v-col cols="auto">
-                <v-btn id="employeeSubmitBtn" variant="outlined" class="ma-2" color="success" @click="submit()">
+                <v-btn id="employeeSubmitBtn" variant="outlined" class="ma-2" color="success" type="submit">
                   <v-icon class="mr-1">mdi-content-save</v-icon>Submit
                 </v-btn>
               </v-col>
@@ -217,18 +224,6 @@ const validating = ref({
   technologies: false
 }); // signal to child tabs to validate
 
-// TODO might be able to remove the preparedTabs logic
-let preparedTabs = {
-  personal: true,
-  clearance: true,
-  contracts: true,
-  'Certifications + Awards': true,
-  technologies: true,
-  languages: true,
-  'Past Experience': true,
-  education: true
-};
-
 // template refs
 const form = ref(null);
 const personalInfoFormRef = ref(null);
@@ -298,20 +293,30 @@ function setFormData(tab, data) {
   }
 }
 
-async function submit() {
-  if (!form.value) return;
-  const results = await form.value.validate();
+/**
+ * Submits!!
+ *
+ * @param {SubmitEvent} event the SubmitEvent
+ */
+async function submit(event) {
+  submitting.value = true;
+  const validationResult = await Promise.resolve(event);
+  console.log('Validation result:', validationResult); // TODO debug
 
-  if (!results.valid) {
-    console.log('Errors:', results.errors);
-    valid.value = false;
+  // if form is invalid
+  if (!validationResult.valid) {
+    console.log('Form is invalid. Cancelling submit');
+    submitting.value = false;
     return;
   }
-  valid.value = true;
 
   // allows other tabs to finalize data, if they're open. otherwise the data should already be finalized
-  if (personalInfoFormRef.value) personalInfoFormRef.value.prepareSubmit();
-  if (technologiesFormRef.value) technologiesFormRef.value.prepareSubmit();
+  try {
+    personalInfoFormRef.value?.prepareSubmit();
+    technologiesFormRef.value?.prepareSubmit();
+  } catch (err) {
+    console.error(err);
+  }
 
   // picks out all the changed values to make the api call
   let changes = pickBy(editedEmployee.value, (value, key) => {
@@ -319,7 +324,7 @@ async function submit() {
     const newValue = value;
     const changed = !isEqual(oldValue, newValue);
     if (changed) {
-      // TODO for debugging/testing
+      // TODO test
       console.log('Changed:', key);
       console.log('\tOld:', oldValue);
       console.log('\tNew:', newValue);
@@ -327,7 +332,8 @@ async function submit() {
     return !isEqual(oldValue, newValue);
   });
 
-  console.log('Changed values:', changes); // TODO for debugging/testing
+  console.log('Changed values:', changes); // TODO test
+  submitting.value = false;
   editing.value = false; // close edit modal
 }
 
@@ -341,6 +347,6 @@ function collapseAllTabs() {
 
 <style scoped>
 .invalid {
-  color: red;
+  color: #b00020;
 }
 </style>
