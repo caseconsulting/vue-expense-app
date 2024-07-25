@@ -50,9 +50,13 @@
                     label="Search Employees"
                     density="comfortable"
                     hide-details
+                    menu
                     return-object
                     autofocus
-                    @update:model-value="onSearchUpdate()"
+                    @update:model-value="
+                      onSearchUpdate();
+                      inSearchMode = false;
+                    "
                   ></v-autocomplete>
                 </v-responsive>
               </v-scroll-y-transition>
