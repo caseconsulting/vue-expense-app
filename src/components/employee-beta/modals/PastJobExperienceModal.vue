@@ -1,7 +1,7 @@
 <template>
   <base-info-modal title="Past Job Experience">
     <div class="ml-4" v-if="!isEmpty(filteredList)">
-      <past-experience-list :list="filteredList"></past-experience-list>
+      <past-experience-list :list="filteredList" :model="model" :onModal="onModal"></past-experience-list>
     </div>
     <div
       v-if="!isEmpty(model.companies) && Math.ceil(model.companies.length / ITEMS_PER_PAGE) != 1"
@@ -30,7 +30,7 @@ import PastExperienceList from '../lists/PastExperienceList.vue';
 
 const ITEMS_PER_PAGE = 5;
 
-const props = defineProps(['model']);
+const props = defineProps(['model', 'onModal']);
 const page = ref(1);
 
 // |--------------------------------------------------|

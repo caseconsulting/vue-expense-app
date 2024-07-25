@@ -205,11 +205,7 @@ onBeforeMount(async () => {
   if (storeIsPopulated) {
     await getProfileData();
   }
-  console.log('employee pre beta');
-  console.log(model);
   if (!store.getters.employees) await updateStoreEmployees();
-  console.log('employee beta');
-  console.log(model);
 });
 
 onMounted(() => {
