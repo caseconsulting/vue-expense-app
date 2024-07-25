@@ -17,7 +17,7 @@
             ></university-form>
           </v-col>
           <v-col cols="1" v-if="edu.type === 'university'">
-            <v-btn @click="deleteEducation(index)" variant="text" icon="">
+            <v-btn @click="deleteEducation(index)" variant="text" icon="" class="mt-6">
               <v-tooltip activator="parent" location="bottom"> Delete Education </v-tooltip>
               <v-icon class="case-gray">mdi-delete</v-icon></v-btn
             >
@@ -34,7 +34,7 @@
             <military-form :service="edu" :militaryIndex="index" :validating="validating"></military-form>
           </v-col>
           <v-col cols="1" v-if="edu.type === 'military'">
-            <v-btn @click="deleteEducation(index)" variant="text" icon="">
+            <v-btn @click="deleteEducation(index)" variant="text" icon="" class="mt-6">
               <v-tooltip activator="parent" location="bottom"> Delete Service </v-tooltip>
               <v-icon class="case-gray">mdi-delete</v-icon></v-btn
             >
@@ -51,7 +51,7 @@
             <high-school-form :school="edu" :schoolIndex="index" :validating="validating"></high-school-form>
           </v-col>
           <v-col cols="1" v-if="edu.type === 'highSchool'">
-            <v-btn @click="deleteEducation(index)" variant="text" icon="">
+            <v-btn @click="deleteEducation(index)" variant="text" icon="" class="mt-6">
               <v-tooltip activator="parent" location="bottom"> Delete Education </v-tooltip>
               <v-icon class="case-gray pr-1">mdi-delete</v-icon></v-btn
             >
