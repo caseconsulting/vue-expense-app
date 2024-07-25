@@ -67,8 +67,7 @@
       </v-col>
       <!-- End Left Side -->
 
-      <!-- Spacer -->
-      <!-- <v-col cols="1"></v-col> -->
+      <v-divider :thickness="4" class="border-opacity-25 mr-4" vertical></v-divider>
 
       <!-- Start Right side -->
       <v-col>
