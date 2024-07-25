@@ -16,7 +16,7 @@
               v-model="technology.name"
               label="Tech/Skill"
               :items="dropdownItems"
-              :rules="[...getRequiredRules(), getDuplicateTechRules()]"
+              :rules="[...getRequiredRules(), ...getDuplicateTechRules(technologies)]"
               hide-details="auto"
               style="min-width: 180px"
               @update:search="updateDropdownItems($event)"
@@ -85,7 +85,7 @@
 
 <script setup>
 import api from '@/shared/api';
-import { getRequiredRules } from '@/shared/validationUtils';
+import { getDuplicateTechRules, getRequiredRules } from '@/shared/validationUtils';
 import { isEmpty, map } from 'lodash';
 import { onBeforeUnmount, ref } from 'vue';
 
@@ -174,19 +174,6 @@ async function updateDropdownItems(query) {
   } else {
     dropdownItems.value = [];
   }
-}
-
-/**
- * Gets validation rules for duplicate tech items
- */
-function getDuplicateTechRules() {
-  return (v) => {
-    let count = 0;
-    for (let i = 0; i < technologies.value.length && count <= 2; i++) {
-      if (technologies.value[i].name === v) count++;
-    }
-    return count <= 1 || 'Duplicate technology found, please remove duplicate entries';
-  };
 }
 
 /**

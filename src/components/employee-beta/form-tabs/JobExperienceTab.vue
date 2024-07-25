@@ -18,10 +18,9 @@
 
         <v-row>
           <v-col>
-            <div v-for="(timeFrame, index) in editedJobExperienceInfo.icTimeFrames" :key="index">
+            <div v-for="(timeFrame, index) in editedEmployee.icTimeFrames" :key="index">
               <v-text-field
                 :model-value="formatRange(timeFrame.range)"
-                ref="formFields"
                 :rules="getRequiredRules()"
                 label="Date Range"
                 readonly
@@ -38,7 +37,7 @@
                   <v-date-picker
                     v-model="timeFrame.range"
                     multiple
-                    :max="today"
+                    :max="getTodaysDate('MM/DD/YYYY')"
                     show-adjacent-months
                     hide-actions
                     keyboard-icon=""
@@ -86,7 +85,7 @@
 
           <v-col>
             <v-text-field
-              v-model="editedJobExperienceInfo.jobRole"
+              v-model="editedEmployee.jobRole"
               disabled
               label="Position"
               data-vv-name="Position"
@@ -102,8 +101,7 @@
         <v-row>
           <v-col>
             <v-text-field
-              ref="formFields"
-              :model-value="format(editedJobExperienceInfo.hireDate, null, 'MM/DD/YYYY')"
+              :model-value="format(editedEmployee.hireDate, null, 'MM/DD/YYYY')"
               label="Start Date"
               prepend-icon="mdi-calendar"
               disabled
@@ -122,16 +120,15 @@
       </v-col>
     </v-row>
 
-    <v-row v-for="(company, compIndex) in editedJobExperienceInfo.companies" :key="compIndex">
+    <v-row v-for="(company, compIndex) in editedCompanies" :key="compIndex">
       <v-col>
         <v-row>
           <!-- Company name -->
           <v-col>
             <v-combobox
-              ref="formFields"
               :id="'comp-' + compIndex"
               v-model.trim="company.companyName"
-              :rules="[...getRequiredRules(), duplicateCompanyName(compIndex)]"
+              :rules="[...getRequiredRules(), getDuplicateCompanyNameRule(editedCompanies)]"
               :items="companyDropDown"
               label="Company"
               data-vv-name="Company"
@@ -154,7 +151,6 @@
           <!-- Position -->
           <v-col cols="4" class="groove">
             <v-text-field
-              ref="formFields"
               :id="'pos-field' + compIndex + '-' + index"
               v-model.trim="position.title"
               :rules="getRequiredRules()"
@@ -162,7 +158,7 @@
               data-vv-name="Position"
               clearable
             >
-              <template v-slot:append v-if="editedJobExperienceInfo.companies[compIndex].positions.length > 1">
+              <template v-slot:append v-if="editedCompanies[compIndex].positions.length > 1">
                 <v-btn variant="text" icon="" density="comfortable" @click="deletePosition(compIndex, index)">
                   <v-tooltip activator="parent" location="bottom">Delete Position</v-tooltip>
                   <v-icon class="case-gray">mdi-delete</v-icon>
@@ -176,7 +172,6 @@
           <v-col>
             <v-text-field
               :id="'start-field-' + compIndex + '-' + index"
-              ref="formFields"
               :model-value="format(position.startDate, null, 'MM/YYYY')"
               label="Start Date"
               hint="MM/YYYY format"
@@ -186,7 +181,6 @@
               @update:focused="position.startDate = parseEventDate($event)"
               @click:prepend="position.showStartMenu = true"
               @keypress="position.showStartMenu = false"
-              @focus="setIndices(compIndex, index)"
               clearable
               autocomplete="off"
             >
@@ -215,10 +209,9 @@
           <v-col>
             <v-text-field
               :id="'end-field-' + compIndex + '-' + index"
-              ref="formFields"
               :model-value="format(position.endDate, null, 'MM/YYYY')"
               :label="position.presentDate ? 'Currently active' : 'End Date'"
-              :rules="[...getDateMonthYearOptionalRules(), endDatePresentRule(compIndex, index)]"
+              :rules="[...getDateMonthYearOptionalRules(), getEndDatePresentRule(position)]"
               hint="MM/YYYY format"
               v-mask="'##/####'"
               clearable
@@ -227,13 +220,12 @@
               @update:focused="position.endDate = parseEventDate($event)"
               @click:prepend="position.showEndMenu = true"
               @keypress="position.showEndMenu = false"
-              @focus="setIndices(compIndex, index)"
               @update:model-value="
                 position.endDate && position.endDate.length > 0 ? (position.presentDate = false) : ''
               "
               autocomplete="off"
             >
-              <template v-if="endDatePresentRule(compIndex, index) !== true" v-slot:message>
+              <template v-if="getEndDatePresentRule(position) !== true" v-slot:message>
                 End Date is required (click <v-icon color="black" icon="mdi-check-circle-outline" /> to mark active)
               </template>
               <v-menu
@@ -303,17 +295,17 @@
 </template>
 
 <script setup>
-import _, { isEmpty } from 'lodash';
-import { ref } from 'vue';
-import { inject, onBeforeMount } from 'vue';
-import { useStore } from 'vuex';
+import { format, getTodaysDate, isAfter } from '@/shared/dateUtils';
 import {
-  getDateMonthYearRules,
   getDateMonthYearOptionalRules,
+  getDateMonthYearRules,
+  getDuplicateCompanyNameRule,
   getRequiredRules
-} from '../../../shared/validationUtils';
-import { format, getTodaysDate, isAfter } from '../../../shared/dateUtils';
+} from '@/shared/validationUtils';
+import _, { isEmpty, map } from 'lodash';
+import { ref } from 'vue';
 import { mask } from 'vue-the-mask';
+import { useStore } from 'vuex';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -321,47 +313,16 @@ import { mask } from 'vue-the-mask';
 // |                                                  |
 // |--------------------------------------------------|
 
-const emitter = inject('emitter');
-const props = defineProps(['model', 'validating']);
 const store = useStore();
 const vMask = mask; // custom directive
 
+const editedEmployee = defineModel({ required: true });
+defineExpose({ prepareSubmit });
+
+const editedCompanies = ref(editedEmployee.value.companies);
 const companyDropDown = ref([]);
-const companyIndex = ref(0);
-const duplicateCompanyName = (compIndex) => {
-  let compNames = _.map(editedJobExperienceInfo.value.companies, (company) => company.companyName);
-  let company = compNames[compIndex];
-  compNames.splice(compIndex, 1);
-  return !compNames.includes(company) || 'Duplicate company name';
-};
-const endDatePresentRule = (compIndex, posIndex) => {
-  if (editedJobExperienceInfo.value !== undefined) {
-    let position = editedJobExperienceInfo.value.companies[compIndex].positions[posIndex];
-    if (position.presentDate == false && isEmpty(position.endDate)) {
-      return 'End Date is required';
-    } else {
-      return true;
-    }
-  } else {
-    return true;
-  }
-};
-const editedJobExperienceInfo = ref(_.cloneDeep(props.model));
-const employees = ref(null);
-const positionIndex = ref(0);
-const today = getTodaysDate('MM/DD/YYYY');
 
-// |--------------------------------------------------|
-// |                                                  |
-// |                 LIFECYCLE HOOKS                  |
-// |                                                  |
-// |--------------------------------------------------|
-
-onBeforeMount(async () => {
-  emitter.emit('created', 'jobExperience'); // emit jobExperience tab was created
-  employees.value = store.getters.employees; // get all employees
-  populateDropDowns(); // get autocomplete drop down data
-});
+populateDropDowns();
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -369,20 +330,40 @@ onBeforeMount(async () => {
 // |                                                  |
 // |--------------------------------------------------|
 
+function prepareSubmit() {
+  // delete properties from positions that should not be stored in the database
+  editedEmployee.value.companies = map(editedCompanies, (company) => {
+    company.positions = map(company.positions, (position) => {
+      delete position.showStartMenu;
+      delete position.showEndMenu;
+    });
+  });
+}
+
+/**
+ * Rule that specifies that the end date is present if job is not currently active
+ * @param position The position object
+ */
+function getEndDatePresentRule(position) {
+  return () => {
+    if (!position.presentDate && isEmpty(position.endDate)) return 'End Date is required';
+    else return true;
+  };
+}
+
 /**
  * Adds an empty company to the bottom of the form list.
- *
  */
 function addCompany() {
-  if (!editedJobExperienceInfo.value) editedJobExperienceInfo.value = [];
-  editedJobExperienceInfo.value.companies.push({
+  if (!editedCompanies.value) editedCompanies.value = [];
+  editedCompanies.value.push({
     companyName: null,
     positions: [
       {
-        title: null,
         endDate: null,
         presentDate: false,
         startDate: null,
+        title: null,
         showStartMenu: false,
         showEndMenu: false
       }
@@ -394,7 +375,7 @@ function addCompany() {
  * Adds the IC Time Frame to the model
  */
 function addICTimeFrame() {
-  editedJobExperienceInfo.value.icTimeFrames.push({
+  editedEmployee.value.icTimeFrames.push({
     range: [],
     showRangeMenu: false
   });
@@ -406,7 +387,7 @@ function addICTimeFrame() {
  * @param compIndex - company to place the position under
  */
 function addPosition(compIndex) {
-  editedJobExperienceInfo.value.companies[compIndex].positions.push({
+  editedCompanies.value[compIndex].positions.push({
     title: null,
     endDate: null,
     startDate: null,
@@ -436,7 +417,7 @@ function checkPositionStatus(position) {
  * @param index - array index of company to delete
  */
 function deleteCompany(index) {
-  editedJobExperienceInfo.value.companies.splice(index, 1);
+  editedCompanies.value.splice(index, 1);
 } // deleteCompany
 
 /**
@@ -445,7 +426,7 @@ function deleteCompany(index) {
  * @param index - array index of IC time frame to delete
  */
 function deleteICTimeFrame(index) {
-  editedJobExperienceInfo.value.icTimeFrames.splice(index, 1);
+  editedEmployee.value.icTimeFrames.splice(index, 1);
 } // deleteICTimeFrame
 
 /**
@@ -456,11 +437,11 @@ function deleteICTimeFrame(index) {
  * @param posIndex - index of the position form
  */
 function deletePosition(compIndex, posIndex) {
-  if (editedJobExperienceInfo.value.companies[compIndex].positions.length === 1) {
+  if (editedCompanies.value[compIndex].positions.length === 1) {
     //Should never enter here
-    editedJobExperienceInfo.value.companies.splice(compIndex, 1);
+    editedCompanies.value.splice(compIndex, 1);
   } else {
-    editedJobExperienceInfo.value.companies[compIndex].positions.splice(posIndex, 1);
+    editedCompanies.value[compIndex].positions.splice(posIndex, 1);
   }
 } // deletePosition
 
@@ -504,7 +485,7 @@ function parseEventDate() {
  * Populate drop downs with information that other employees have filled out.
  */
 function populateDropDowns() {
-  let employeesJobs = _.map(employees.value, (employee) => employee.companies); //extract jobs
+  let employeesJobs = _.map(store.getters.employees, (employee) => employee.companies); //extract jobs
   employeesJobs = _.compact(employeesJobs); //remove falsey values
   // loop employees
   _.forEach(employeesJobs, (jobs) => {
@@ -514,15 +495,4 @@ function populateDropDowns() {
     });
   });
 } // populateDropDowns
-
-/**
- * Sets the indexes for purposes of validating date fields.
- *
- * @param companyIndex - The index of the company
- * @param positionIndex - The index of the position
- */
-function setIndices(companyIdx, positionIdx) {
-  companyIndex.value = companyIdx;
-  positionIndex.value = positionIdx;
-} // setIndices
 </script>

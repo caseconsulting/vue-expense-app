@@ -1,7 +1,8 @@
-import { isEmpty } from '@/utils/utils';
 import { getTodaysDate, isAfter, isBefore, isSameOrBefore, isValid } from '@/shared/dateUtils';
+import { isEmpty } from '@/utils/utils';
+import _, { some } from 'lodash';
 import store from '../../store/index';
-import _ from 'lodash';
+import { add } from './dateUtils';
 
 /**
  * Gets the rules for valid AIN number, where it must be 7 digits that can lead with 0s, and not required
@@ -85,6 +86,28 @@ export function getDateMonthYearRules() {
     (v) => (!isEmpty(v) && /[\d]{2}\/[\d]{4}/.test(v) && isValid(v, 'MM/YYYY')) || 'Date must be valid. Format: MM/YYYY'
   ];
 } // getDateMonthYearRules
+
+/**
+ * Rule to ensure a date occurs before the specified date
+ * @param {string} date Date to occur before
+ */
+export function getDateBeforeRule(date) {
+  return (v) => {
+    if (isEmpty(v) || isEmpty(date)) return true;
+    return isAfter(add(date, 1, 'd'), v) || 'End date must be at or before start date';
+  };
+}
+
+/**
+ * Rule to ensure a date occurs after the specified date
+ * @param {string} date Date to occur after
+ */
+export function getDateAfterRule(date) {
+  return (v) => {
+    if (isEmpty(v) || isEmpty(date)) return true;
+    return isAfter(add(v, 1, 'd'), date) || 'End date must be at or before start date';
+  };
+}
 
 /**
  * Gets the rules for a valid email address.
@@ -198,6 +221,21 @@ export function duplicateTechnologyRules() {
   ];
 }
 
+/**
+ * Rules for no duplication of tech/skill names (used in employee beta profile)
+ */
+export function getDuplicateTechRules(technologies) {
+  return [
+    (v) => {
+      let count = 0;
+      for (let i = 0; i < technologies.length && count <= 2; i++) {
+        if (technologies[i].name === v) count++;
+      }
+      return count <= 1 || 'Duplicate technology found, please remove duplicate entries';
+    }
+  ];
+}
+
 export function technologyExperienceRules() {
   return [
     (v) => v === Number(v) || 'Value must be a number',
@@ -246,6 +284,23 @@ export function getAfterSubmissionRules(clearance) {
 }
 
 /**
+ * Rules preventing duplicate clearanace types
+ *
+ * @param clearanceTypes List of all an employee's clearances
+ */
+export function getDuplicateClearanceRules(clearances) {
+  return [
+    (v) => {
+      let count = 0;
+      for (let i = 0; i < clearances.length && count <= 2; i++) {
+        if (clearances[i].type === v) count++;
+      }
+      return count <= 1 || 'Cannot have two of the same clearance type';
+    }
+  ];
+}
+
+/**
  * Gets the rules for validating employee PTO Cash Out request
  * @param ptoLimit employee's available PTO
  * @param employeeId employee's ID
@@ -278,6 +333,48 @@ export function getBadgeNumberRules(clearance) {
       : true;
 } //getBadgeNumberRules
 
+/**
+ * Rule that specifies that no two contracts can have both the same contract and prime name
+ * @param {*} contract The contract object
+ */
+export function getDuplicateContractAndPrimeRule(contract) {
+  return () => {
+    let found = some(
+      store.getters.contracts,
+      (c) => c.contractName === contract.contractName && c.primeName === contract.primeName
+    );
+    return !found || 'Duplicate contract and prime combination';
+  };
+}
+
+/**
+ * Rule that specifies that there can be no duplicate projects within the same contract
+ * @param {*} contract The contract object
+ */
+export function getDuplicateProjectRule(contract) {
+  return (v) => {
+    let count = 0;
+    for (let i = 0; i < contract.projects.length && count <= 2; i++) {
+      if (contract.projects[i] === v) count++;
+    }
+    return count <= 1 || 'Duplicate projects found within this contract, please remove duplicate entries';
+  };
+}
+
+/**
+ * Rule that specifies no dupilcate company names
+ * @param companies All companies of the employee
+ */
+export function getDuplicateCompanyNameRule(companies) {
+  return (v) => {
+    let count = 0;
+    for (let i = 0; i < companies && count <= 2; i++) {
+      if (companies[i].companyName === v) count++;
+    }
+    return count <= 1 || 'Duplicate company name found, please remove duplicate entries';
+  };
+}
+
 export default {
   getAINRules,
   getDateOptionalRules,
@@ -297,10 +394,14 @@ export default {
   getDateSubmissionRules,
   getDateGrantedRules,
   getAfterSubmissionRules,
+  getDuplicateClearanceRules,
   duplicateEmployeeNumberRule,
   duplicateTechnologyRules,
   technologyExperienceRules,
   getPTOCashOutRules,
   getBadgeNumberRules,
-  getCaseEmailRules
+  getCaseEmailRules,
+  getDuplicateContractAndPrimeRule,
+  getDuplicateProjectRule,
+  getDuplicateCompanyNameRule
 };

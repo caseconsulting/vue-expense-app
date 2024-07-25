@@ -5,14 +5,11 @@
         <v-row>
           <v-col>
             <v-select
-              ref="formFields"
+              :key="reloadKey"
               v-model="contract.contractName"
-              :rules="[...getRequiredRules(), duplicateContractPrimeCombo(index)]"
+              :rules="[...getRequiredRules(), getDuplicateContractAndPrimeRule(contract)]"
               :items="getContractsDropdownItems(contract)"
-              @update:model-value="
-                editedContracts.push(0); // force re-render for the items prop
-                editedContracts.pop(0);
-              "
+              @update:model-value="reloadKey++"
               label="Contract"
               data-vv-name="Contract"
               clearable
@@ -21,14 +18,11 @@
           </v-col>
           <v-col>
             <v-select
-              ref="formFields"
+              :key="reloadKey"
               v-model="contract.primeName"
-              :rules="getRequiredRules()"
+              :rules="[...getRequiredRules(), getDuplicateContractAndPrimeRule(contract)]"
               :items="getPrimesDropdownItems(contract)"
-              @update:model-value="
-                editedContracts.push(0); // force re-render for the items prop
-                editedContracts.pop(0);
-              "
+              @update:model-value="reloadKey++"
               label="Prime"
               data-vv-name="Prime"
               clearable
@@ -50,16 +44,13 @@
               <v-col cols="1"></v-col>
               <v-col class="groove">
                 <v-select
-                  ref="formFields"
+                  :key="reloadKey"
                   :id="'proj-' + projIndex + '-' + index"
                   v-model="project.projectName"
                   :items="getProjectsDropdownItems(contract)"
-                  :rules="[...getRequiredRules(), duplicateContractProjects(project, index)]"
+                  :rules="[...getRequiredRules(), getDuplicateProjectRule(contract)]"
                   :label="'Project ' + (projIndex + 1)"
-                  @update:model-value="
-                    editedContracts.push(0); // force re-render for the items prop
-                    editedContracts.pop(0);
-                  "
+                  @update:model-value="reloadKey++"
                   data-vv-name="Project"
                   clearable
                 >
@@ -79,13 +70,12 @@
               <v-col class="groove">
                 <v-text-field
                   :id="'start-field-' + index + '-' + projIndex"
-                  ref="formFields"
                   :model-value="format(project.startDate, null, 'MM/DD/YYYY')"
                   label="Start Date"
                   hint="MM/DD/YYYY format"
                   v-mask="'##/##/####'"
                   prepend-inner-icon="mdi-calendar"
-                  :rules="[...getRequiredRules(), ...getDateRules(), dateOrderRule(index, projIndex)]"
+                  :rules="[...getRequiredRules(), ...getDateRules(), getDateBeforeRule(project.endDate)]"
                   @update:focused="project.startDate = parseEventDate($event)"
                   clearable
                   @click:prepend="project.showStartMenu = true"
@@ -115,13 +105,12 @@
               <v-col>
                 <v-text-field
                   :id="'end-field-' + index + '-' + projIndex"
-                  ref="formFields"
                   :model-value="format(project.endDate, null, 'MM/DD/YYYY')"
                   :label="project.presentDate ? 'Currently active' : 'End Date'"
                   :rules="[
                     ...getDateOptionalRules(),
-                    dateOrderRule(index, projIndex),
-                    endDatePresentRule(index, projIndex)
+                    getDateAfterRule(project.startDate),
+                    getEndDatePresentRule(project)
                   ]"
                   hint="MM/DD/YYYY format"
                   prepend-inner-icon="mdi-calendar"
@@ -136,7 +125,7 @@
                   "
                   autocomplete="off"
                 >
-                  <template v-if="endDatePresentRule(index, projIndex) !== true" v-slot:message>
+                  <template v-if="!getEndDatePresentRule(project) !== true" v-slot:message>
                     End Date is required (click <v-icon color="black" icon="mdi-check-circle-outline" /> to mark active)
                   </template>
                   <template v-slot:append-inner>
@@ -202,14 +191,21 @@
 </template>
 
 <script setup>
-import { inject, onBeforeMount } from 'vue';
-import { useStore } from 'vuex';
-import _ from 'lodash';
+import { format } from '@/shared/dateUtils';
+import {
+  getDateAfterRule,
+  getDateBeforeRule,
+  getDateOptionalRules,
+  getDateRules,
+  getDuplicateContractAndPrimeRule,
+  getDuplicateProjectRule,
+  getRequiredRules
+} from '@/shared/validationUtils';
+import { isEmpty } from '@/utils/utils';
+import { find, map } from 'lodash';
 import { ref } from 'vue';
-import { getDateOptionalRules, getDateRules, getRequiredRules } from '../../../shared/validationUtils';
-import { add, format, isAfter } from '../../../shared/dateUtils';
 import { mask } from 'vue-the-mask';
-import { isEmpty } from '../../../utils/utils';
+import { useStore } from 'vuex';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -217,100 +213,18 @@ import { isEmpty } from '../../../utils/utils';
 // |                                                  |
 // |--------------------------------------------------|
 
-const emitter = inject('emitter');
-const props = defineProps(['contracts', 'model', 'validating']);
 const store = useStore();
 const vMask = mask; // custom directive
 
-const contractProjects = ref(props.contracts.map((c) => c.projects).flat());
-const editedContracts = ref(_.cloneDeep(props.model)); // stores edited contracts info
-const employees = ref(null);
+const editedEmployee = defineModel({ required: true });
+defineExpose({ prepareSubmit });
 
-// |--------------------------------------------------|
-// |                                                  |
-// |                       RULES                      |
-// |                                                  |
-// |--------------------------------------------------|
+const contracts = store.getters.contracts;
+const editedContracts = ref([]); // stores edited contracts info
+const contractProjects = ref(store.getters.contracts.map((c) => c.projects).flat());
+const reloadKey = ref(0); // value used to trigger component re-render
 
-const dateOrderRule = (compIndex, projIndex) => {
-  if (editedContracts.value) {
-    let project = editedContracts.value[compIndex].projects[projIndex];
-    return !isEmpty(project.endDate) && project.startDate
-      ? isAfter(add(project.endDate, 1, 'd'), project.startDate) || 'End date must be at or after start date'
-      : true;
-  } else {
-    return true;
-  }
-};
-
-const duplicateContractPrimeCombo = (conIndex) => {
-  let contract = editedContracts.value[conIndex];
-  let found = _.some(
-    props.contracts,
-    (c) => c.contractName === contract.contractName && c.primeName === contract.primeName
-  );
-  let filteredContracts = _.filter(
-    editedContracts.value,
-    (c) => c.contractName === contract.contractName && c.primeName === contract.primeName
-  );
-  return !found || filteredContracts.length === 1 || 'Duplicate contract and prime combination';
-};
-
-const duplicateContractProjects = (project, conIndex) => {
-  let filteredProjects = _.filter(
-    editedContracts.value[conIndex].projects,
-    (p) => p.projectName === project.projectName
-  );
-  return filteredProjects.length === 1 || 'Duplicate project within same contract';
-};
-
-const endDatePresentRule = (compIndex, projIndex) => {
-  if (editedContracts.value !== undefined) {
-    let position = editedContracts.value[compIndex].projects[projIndex];
-    if (!position.presentDate && isEmpty(position.endDate)) {
-      return 'End Date is required';
-    } else {
-      return true;
-    }
-  } else {
-    return false;
-  }
-};
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                 LIFECYCLE HOOKS                  |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Emits to parent the component was created and get data.
- */
-onBeforeMount(async () => {
-  emitter.emit('created', 'contracts'); // emit contracts tab was created
-  employees.value = store.getters.employees; // get all employees
-  editedContracts.value.forEach((contract) => {
-    contract.contractName = props.contracts.find((c) => c.id === contract.contractId).contractName;
-    contract.primeName = props.contracts.find((c) => c.id === contract.contractId).primeName;
-    if (!contract.projects) {
-      contract.projects = [
-        {
-          projectId: '',
-          projectName: '',
-          endDate: null,
-          presentDate: false,
-          startDate: null,
-          showStartMenu: false,
-          showEndMenu: false
-        }
-      ];
-    } else {
-      _.forEach(contract.projects, (proj) => [
-        (proj.projectName = contractProjects.value.find((p) => p.id === proj.projectId).projectName)
-      ]);
-    }
-  });
-}); // onBeforeMount
+initialize();
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -318,12 +232,73 @@ onBeforeMount(async () => {
 // |                                                  |
 // |--------------------------------------------------|
 
+function prepareSubmit() {
+  // delete keys that aren't stored in database
+  editedEmployee.value.contracts = map(editedContracts, (contract) => {
+    delete contract.contractName;
+    delete contract.primeName;
+
+    contract.projects = map(contract.projects, (project) => {
+      delete project.projectName;
+      return project;
+    });
+    return contract;
+  });
+}
+
+function initialize() {
+  // getting contract, prime, and project names and stores them with their respective object
+  editedContracts.value = map(editedEmployee.value.contracts, (employeeContract) => {
+    const contractObj = find(contracts, (c) => c.id === employeeContract.contractId);
+
+    if (!contractObj) {
+      console.warn(`Could not find contract with id: ${employeeContract.contractId}`);
+      return employeeContract;
+    }
+
+    // add contractName and primeName properties
+    employeeContract.contractName = contractObj.contractName;
+    employeeContract.primeName = contractObj.primeName;
+
+    // modify projects property to include projectName
+    employeeContract.projects = map(employeeContract.projects, (employeeProject) => {
+      const projectObj = find(contractObj.projects, (p) => p.id === employeeProject.projectId);
+
+      if (!projectObj) {
+        console.warn(
+          `Could not find project with id: ${employeeProject.projectId} within contract: ${contractObj.contractName}`
+        );
+        return employeeProject;
+      }
+
+      employeeProject.projectName = projectObj.projectName;
+      return employeeProject;
+    });
+
+    return employeeContract;
+  });
+}
+
+/**
+ * Rule that specifies that the end date is present if contract is not currently active
+ * @param project The project object
+ */
+function getEndDatePresentRule(project) {
+  return () => {
+    if (editedContracts.value) {
+      if (!project.presentDate && isEmpty(project.endDate)) return 'End Date is required';
+      else return true;
+    } else return false;
+  };
+}
+
 /**
  * Adds a Contract.
  */
 function addContract() {
+  console.log('add contract');
   if (!editedContracts.value) editedContracts.value = [];
-  this.editedContracts.push({
+  editedContracts.value.push({
     contractId: null,
     contractName: null,
     primeName: null,
@@ -404,25 +379,25 @@ function deleteProject(contractIndex, projectIndex) {
 function getContractsDropdownItems(contract) {
   if (!contract) {
     return [];
-  } else if (contract.primeName && contract.projects.length == 1 && _.isEmpty(contract.projects[0].projectName)) {
+  } else if (contract.primeName && contract.projects.length == 1 && isEmpty(contract.projects[0].projectName)) {
     // only prime name is filled out
-    let matchedContracts = props.contracts.filter((c) => c.primeName === contract.primeName);
+    let matchedContracts = contracts.filter((c) => c.primeName === contract.primeName);
     return matchedContracts.map((c) => c.contractName);
   } else if (contract.primeName) {
     // prime name and project names are filled out
     let project = contract.projects[0];
-    let matchedContracts = props.contracts.filter(
+    let matchedContracts = contracts.filter(
       (c) => c.primeName === contract.primeName && c.projects.some((p) => p.projectName === project.projectName)
     );
     return matchedContracts.map((c) => c.contractName);
-  } else if (_.isEmpty(contract.primeName) && !_.isEmpty(contract.projects[0].projectName)) {
+  } else if (isEmpty(contract.primeName) && !isEmpty(contract.projects[0].projectName)) {
     // only project names are filled out
     let project = contract.projects[0];
-    let matchedContracts = props.contracts.filter((c) => c.projects.some((p) => p.projectName === project.projectName));
+    let matchedContracts = contracts.filter((c) => c.projects.some((p) => p.projectName === project.projectName));
     return matchedContracts.map((c) => c.contractName);
   } else {
     // prime and projects fields are empty
-    return props.contracts.map((c) => c.contractName);
+    return contracts.map((c) => c.contractName);
   }
 } // getContractsDropdownItems
 
@@ -435,25 +410,25 @@ function getContractsDropdownItems(contract) {
 function getPrimesDropdownItems(contract) {
   if (!contract) {
     return [];
-  } else if (contract.contractName && contract.projects.length == 1 && _.isEmpty(contract.projects[0].projectName)) {
+  } else if (contract.contractName && contract.projects.length == 1 && isEmpty(contract.projects[0].projectName)) {
     // only contract name is filled out
-    let matchedContracts = props.contracts.filter((c) => c.contractName === contract.contractName);
+    let matchedContracts = contracts.filter((c) => c.contractName === contract.contractName);
     return matchedContracts.map((c) => c.primeName);
   } else if (contract.contractName) {
     // contract name and project names are filled out
     let project = contract.projects[0];
-    let matchedContracts = props.contracts.filter(
+    let matchedContracts = contracts.filter(
       (c) => c.contractName === contract.contractName && c.projects.some((p) => p.projectName === project.projectName)
     );
     return matchedContracts.map((c) => c.primeName);
-  } else if (_.isEmpty(contract.contractName) && !_.isEmpty(contract.projects[0].projectName)) {
+  } else if (isEmpty(contract.contractName) && !isEmpty(contract.projects[0].projectName)) {
     // only project names are filled out
     let project = contract.projects[0];
-    let matchedContracts = props.contracts.filter((c) => c.projects.some((p) => p.projectName === project.projectName));
+    let matchedContracts = contracts.filter((c) => c.projects.some((p) => p.projectName === project.projectName));
     return matchedContracts.map((c) => c.primeName);
   } else {
     // prime and projects fields are empty
-    return props.contracts.map((c) => c.primeName);
+    return contracts.map((c) => c.primeName);
   }
 } // getPrimesDropdownItems
 
@@ -468,21 +443,21 @@ function getProjectsDropdownItems(contract) {
     return [];
   } else if (contract.contractName && contract.primeName) {
     // both field filled out
-    let matchedContracts = props.contracts.filter(
+    let matchedContracts = contracts.filter(
       (c) => c.contractName === contract.contractName && c.primeName === contract.primeName
     );
     return matchedContracts.map((c) => c.projects.map((p) => p.projectName)).flat();
-  } else if (contract.contractName && _.isEmpty(contract.primeName)) {
+  } else if (contract.contractName && isEmpty(contract.primeName)) {
     // only contract name is filled out
-    let matchedContracts = props.contracts.filter((c) => c.contractName === contract.contractName);
+    let matchedContracts = contracts.filter((c) => c.contractName === contract.contractName);
     return matchedContracts.map((c) => c.projects.map((p) => p.projectName)).flat();
-  } else if (contract.primeName && _.isEmpty(contract.contractName)) {
+  } else if (contract.primeName && isEmpty(contract.contractName)) {
     // only prime name is filled out
-    let matchedContracts = props.contracts.filter((c) => c.primeName === contract.primeName);
+    let matchedContracts = contracts.filter((c) => c.primeName === contract.primeName);
     return matchedContracts.map((c) => c.projects.map((p) => p.projectName)).flat();
   } else {
     // prime and projects fields are empty
-    return this.contractProjects.map((p) => p.projectName);
+    return contractProjects.value.map((p) => p.projectName);
   }
 } // getProjectsDropdownItems
 
@@ -491,7 +466,7 @@ function getProjectsDropdownItems(contract) {
  *
  * @return String - The date in YYYY-MM format
  */
-function parseEventDate() {
-  return format(event.target.value, null, 'YYYY-MM-DD');
+function parseEventDate(event) {
+  return format(event.target, null, 'YYYY-MM-DD');
 } // parseEventDate
 </script>

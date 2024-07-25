@@ -34,8 +34,7 @@
       <v-container v-else fluid>
         <v-form
           ref="form"
-          v-model="valid"
-          validate-on="blur"
+          validate-on="lazy"
           :disabled="submitting"
           class="my-1 mx-xl-5 mx-lg-5 mx-md-0"
           @submit.prevent="submit($event)"
@@ -46,26 +45,21 @@
             </base-form>
             <base-form title="Clearance" value="Clearance">
               <div>
-                <clearance-tab :validating="validating.clearance" :model="employee.clearances"></clearance-tab>
+                <clearance-tab v-model="editedEmployee" :model="employee.clearances"></clearance-tab>
               </div>
             </base-form>
             <base-form title="Contracts" value="Contracts">
               <div>
                 <contracts-tab
-                  :contracts="contracts"
-                  :validating="validating.contracts"
+                  ref="contractsTabRef"
+                  v-model="editedEmployee"
                   :model="employee.contracts"
                 ></contracts-tab>
               </div>
             </base-form>
             <base-form title="Certifications & Awards" value="Certifications & Awards">
               <div>
-                <certs-and-awards-tab
-                  :certifications="employee.certifications"
-                  :awards="employee.awards"
-                  :validateCertifcations="validating.certifications"
-                  :validateAwards="validating.awards"
-                ></certs-and-awards-tab>
+                <certs-and-awards-tab v-model="editedEmployee"></certs-and-awards-tab>
               </div>
             </base-form>
             <base-form title="Tech and Skills" value="Tech and Skills">
@@ -76,14 +70,15 @@
             </base-form>
             <base-form title="Job Experience" value="Past Experience">
               <div>
-                <job-experience-tab :model="model" :validating="validating.jobExperience"></job-experience-tab>
+                <job-experience-tab ref="jobExperienceTabRef" v-model="editedEmployee"></job-experience-tab>
               </div>
             </base-form>
             <base-form title="Education" value="Education">
               <div>
                 <education-tab
+                  ref="educationTabRef"
+                  v-model="editedEmployee"
                   :model="employee.education"
-                  :validating="validating.education"
                   :allowAdditions="true"
                 ></education-tab>
               </div>
@@ -123,16 +118,15 @@ import BaseForm from '@/components/employee-beta/forms/BaseForm.vue';
 import FormCancelConfirmation from '@/components/modals/FormCancelConfirmation.vue';
 import { cloneDeep, isEqual, pickBy } from 'lodash';
 import { computed, inject, onBeforeMount, onBeforeUnmount, ref } from 'vue';
-import LanguagesForm from './LanguagesForm.vue';
-import PersonalInfoForm from './PersonalInfoForm.vue';
-import TechnologiesForm from './TechnologiesForm.vue';
-import JobExperienceTab from '../form-tabs/JobExperienceTab.vue';
-import EducationTab from '../form-tabs/EducationTab.vue';
+import { useDisplay } from 'vuetify';
 import CertsAndAwardsTab from '../form-tabs/CertsAndAwardsTab.vue';
 import ClearanceTab from '../form-tabs/ClearanceTab.vue';
 import ContractsTab from '../form-tabs/ContractsTab.vue';
-import _ from 'lodash';
-import { useDisplay } from 'vuetify';
+import EducationTab from '../form-tabs/EducationTab.vue';
+import JobExperienceTab from '../form-tabs/JobExperienceTab.vue';
+import LanguagesForm from './LanguagesForm.vue';
+import PersonalInfoForm from './PersonalInfoForm.vue';
+import TechnologiesForm from './TechnologiesForm.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -147,88 +141,21 @@ const { smAndDown } = useDisplay();
 const props = defineProps(['employee', 'contracts']);
 const editedEmployee = ref(cloneDeep(props.employee));
 const isUser = inject('isUser');
+
+// state
 const editing = defineModel();
 const formTabs = ref([]); //TODO: Sync up current tabs on edit form and info cards
-const model = ref({
-  agencyIdentificationNumber: null,
-  awards: [],
-  birthday: null,
-  birthdayFeed: false,
-  certifications: [],
-  city: null,
-  clearances: [],
-  companies: [],
-  contract: null,
-  contracts: [],
-  country: null,
-  currentCity: null,
-  currentState: null,
-  currentStreet: null,
-  currentStreet2: null,
-  currentZIP: null,
-  customerOrgExp: [],
-  degrees: [],
-  deptDate: null,
-  email: '@consultwithcase.com',
-  employeeNumber: null,
-  employeeRole: 'user',
-  firstName: null,
-  github: null,
-  hireDate: null,
-  icTimeFrames: [],
-  id: null,
-  jobRole: null,
-  jobs: [],
-  languages: [],
-  lastName: null,
-  middleName: null,
-  nickname: null,
-  noMiddleName: false,
-  personalEmail: null,
-  privatePhoneNumbers: [],
-  publicPhoneNumbers: [],
-  prime: null,
-  education: [],
-  st: null,
-  technologies: [],
-  twitter: null,
-  workStatus: 100
-});
 const submitting = ref(false);
-const tabCreated = ref({
-  awards: false,
-  certifications: false,
-  clearance: false,
-  contracts: false,
-  customerOrgExp: false,
-  education: false,
-  employee: false,
-  jobExperience: false,
-  languages: false,
-  personal: false,
-  technologies: false
-}); // tab component created
 const toggleCancelConfirmation = ref(false);
-const valid = ref(false);
-const validating = ref({
-  awards: false,
-  certifications: false,
-  clearance: false,
-  contracts: false,
-  customerOrgExp: false,
-  education: false,
-  employee: false,
-  jobExperience: false,
-  languages: false,
-  personal: false,
-  technologies: false
-}); // signal to child tabs to validate
+const valid = ref(true);
 
 // template refs
 const form = ref(null);
 const personalInfoFormRef = ref(null);
 const technologiesFormRef = ref(null);
-const languagesFormRef = ref(null);
+const contractsTabRef = ref(null);
+const educationTabRef = ref(null);
+const jobExperienceTabRef = ref(null);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -257,21 +184,8 @@ onBeforeMount(() => {
   });
   emitter.on('confirmed-cancel', async () => {
     toggleCancelConfirmation.value = false;
-    await cancel();
     editing.value = false;
   });
-  emitter.on('created', (tab) => {
-    tabCreated.value[tab] = true;
-  });
-  emitter.on('doneValidating', (params) => {
-    setFormData(params.tab, params.data); // sets the form data
-    validating.value[params.tab] = false;
-  });
-  model.value = _.cloneDeep(
-    _.mergeWith(model.value, props.employee, (modelValue, employeeValue) => {
-      return _.isNil(employeeValue) ? modelValue : employeeValue;
-    })
-  );
 });
 
 onBeforeUnmount(() => {
@@ -286,13 +200,6 @@ onBeforeUnmount(() => {
 // |                                                  |
 // |--------------------------------------------------|
 
-function setFormData(tab, data) {
-  if (tab === 'jobExperience') {
-    model.value['icTimeFrames'] = data.icTimeFrames;
-    model.value['companies'] = data.companies;
-  }
-}
-
 /**
  * Submits!!
  *
@@ -306,16 +213,24 @@ async function submit(event) {
   // if form is invalid
   if (!validationResult.valid) {
     console.log('Form is invalid. Cancelling submit');
+    valid.value = false;
     submitting.value = false;
     return;
   }
+
+  valid.value = true;
 
   // allows other tabs to finalize data, if they're open. otherwise the data should already be finalized
   try {
     personalInfoFormRef.value?.prepareSubmit();
     technologiesFormRef.value?.prepareSubmit();
+    contractsTabRef.value?.prepareSubmit();
+    educationTabRef.value?.prepareSubmit();
+    jobExperienceTabRef.value?.prepareSubmit();
   } catch (err) {
     console.error(err);
+    submitting.value = false;
+    return;
   }
 
   // picks out all the changed values to make the api call
@@ -334,11 +249,8 @@ async function submit(event) {
 
   console.log('Changed values:', changes); // TODO test
   submitting.value = false;
-  editing.value = false; // close edit modal
+  // editing.value = false; // close edit modal
 }
-
-//TODO: cancel
-function cancel() {}
 
 function collapseAllTabs() {
   formTabs.value = [];
