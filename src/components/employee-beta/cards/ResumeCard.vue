@@ -15,7 +15,7 @@
       <v-btn color="white" variant="text" @click="clearStatus()"> Close </v-btn>
     </v-snackbar>
     <v-btn v-if="useDropDown && (isAdmin || isUser) && !editing" variant="text" icon="" density="comfortable">
-      <v-icon icon="mdi-chevron-down" size="large"></v-icon>
+      <v-icon icon="mdi-chevron-down" size="large">mdi-file-arrow-up-down</v-icon>
       <v-menu activator="parent" location="bottom" origin="start top">
         <v-list>
           <v-list-item class="px-2">
@@ -25,7 +25,7 @@
               @click="toggleResumeParser = !toggleResumeParser"
               variant="text"
               density="comfortable"
-              prepend-icon="mdi-upload"
+              prepend-icon="mdi-file-upload"
             >
               Upload Resume
             </v-btn>
@@ -39,7 +39,7 @@
               @click="toggleDeleteModal = !toggleDeleteModal"
               variant="text"
               density="comfortable"
-              prepend-icon="mdi-delete"
+              prepend-icon="mdi-file-remove"
             >
               Delete Resume
             </v-btn>
@@ -78,7 +78,7 @@
           <v-tooltip activator="parent" location="top">
             <p class="ma-0 pa-0">Upload Resume</p>
           </v-tooltip>
-          <v-icon icon="mdi-upload"></v-icon>
+          <v-icon icon="mdi-file-upload"></v-icon>
         </v-btn>
         <v-btn
           class="text-white mx-1 fit-content"
@@ -93,7 +93,7 @@
           <v-tooltip activator="parent" location="top">
             <p class="ma-0 pa-0">Delete Resume</p>
           </v-tooltip>
-          <v-icon icon="mdi-delete"></v-icon>
+          <v-icon icon="mdi-file-remove"></v-icon>
         </v-btn>
         <v-btn
           class="text-white"
