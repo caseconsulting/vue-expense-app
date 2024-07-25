@@ -35,10 +35,18 @@
               <personal-info-form v-model="editedEmployee"></personal-info-form>
             </base-form>
             <base-form title="Clearance" value="Clearance">
-              <div>Editing: {{ formTabs }}</div>
+              <div>
+                <clearance-tab :validating="validating.clearance" :model="employee.clearances"></clearance-tab>
+              </div>
             </base-form>
             <base-form title="Contracts" value="Contracts">
-              <div>Editing: {{ formTabs }}</div>
+              <div>
+                <contracts-tab
+                  :contracts="contracts"
+                  :validating="validating.contracts"
+                  :model="employee.contracts"
+                ></contracts-tab>
+              </div>
             </base-form>
             <base-form title="Certifications + Awards" value="Certifications + Awards">
               <div>
@@ -107,6 +115,8 @@ import PersonalInfoForm from './PersonalInfoForm.vue';
 import JobExperienceTab from '../form-tabs/JobExperienceTab.vue';
 import EducationTab from '../form-tabs/EducationTab.vue';
 import CertsAndAwardsTab from '../form-tabs/CertsAndAwardsTab.vue';
+import ClearanceTab from '../form-tabs/ClearanceTab.vue';
+import ContractsTab from '../form-tabs/ContractsTab.vue';
 import _ from 'lodash';
 
 // |--------------------------------------------------|
