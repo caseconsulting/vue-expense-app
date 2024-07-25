@@ -62,7 +62,7 @@ const isUser = inject('isUser');
 // |--------------------------------------------------|
 
 function toggleEdit() {
-  if (props.title === 'Personal Information' || props.title === 'Employee') {
+  if (props.title === 'Personal Information' || props.title === 'Employee' || props.title === 'Other Information') {
     emitter.emit('editing', 'Personal Information');
   } else if (props.title === 'Clearance') {
     emitter.emit('editing', 'Clearance');
