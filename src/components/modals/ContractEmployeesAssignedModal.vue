@@ -216,7 +216,6 @@ function getPastEmployeesAssignedToContract() {
 function getProject(contractId, projectId) {
   return store.getters.contracts.find((c) => c.id == contractId).projects.find((p) => p.id == projectId);
 } // getProject
-<<<<<<< HEAD
 
 /**
  * Gets the current project aligned with a given contract
@@ -238,8 +237,6 @@ function getPastProject(employee) {
     return 'project no longer exists';
   }
 } // getPastProject
-=======
->>>>>>> 95406fae (POR 2720 - sync with master (#232))
 </script>
 
 <style scoped>

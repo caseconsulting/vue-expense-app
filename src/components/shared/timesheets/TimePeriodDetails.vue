@@ -262,11 +262,7 @@ const remainingWorkDaysTooltip = computed(() => {
   }
   if (futureDays.value > 0) {
     if (tooltip.length > 0) tooltip += 'NEWLINE';
-<<<<<<< HEAD
     tooltip += `${futureDays.value} ${futureDays.value === 1 ? 'day' : 'days'} subtracted to account for future timesheets`;
-=======
-    tooltip += `${futureDays.value} ${futureDays.value.length === 1 ? 'day' : 'days'} subtracted to account for future timesheets`;
->>>>>>> 95406fae (POR 2720 - sync with master (#232))
     if (getPlannedPTO() > 0) {
       tooltip += `,NEWLINEincluding ${getPlannedPTO(true)} ${getPlannedPTO(true) > 1 ? 'days' : 'day'} of planned PTO/Holiday`;
     }
