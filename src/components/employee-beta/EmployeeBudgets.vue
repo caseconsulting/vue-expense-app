@@ -7,7 +7,7 @@
         </router-link>
         <h3 v-else class="text-white px-2">Available Budgets</h3>
       </v-card-title>
-      <v-card-text class="px-7 pt-5 pb-1 text-black">
+      <v-card-text class="px-0 pt-5 pb-1 text-black">
         <div v-if="loading || employeeDataLoading" class="pb-4">
           <v-progress-linear :indeterminate="true"></v-progress-linear>
         </div>
@@ -37,7 +37,7 @@
               v-for="budget in budgets"
               :key="budget.expenseTypeId"
               @click="selectBudget(budget)"
-              class="px-1 py-2"
+              class="px-7 py-2"
               density="compact"
             >
               <div class="d-flex justify-space-between">
@@ -48,16 +48,21 @@
             </v-list-item>
             <div class="mt-2"></div>
             <!-- End Loop all budgets -->
-          </div>
-          <div v-if="isAdmin || isUser" class="mt-4">
-            <budget-chart
-              :refreshKey="refreshKey"
-              :employee="employee"
-              :accessible-budgets="accessibleBudgets"
-              :expenses="expenses"
-              :expense-types="expenseTypes"
-              :fiscal-date-view="fiscalDateView"
-            />
+            <v-expansion-panels v-model="budgetChartDropdown" multiple elevation="0" class="pa-0">
+              <v-expansion-panel value="open" :title="dropdownTitle">
+                <v-expansion-panel-text v-if="isAdmin || isUser" class="pa-0 ma-0">
+                  <budget-chart
+                    :refreshKey="refreshKey"
+                    :employee="employee"
+                    :accessible-budgets="accessibleBudgets"
+                    :expenses="expenses"
+                    :expense-types="expenseTypes"
+                    :fiscal-date-view="fiscalDateView"
+                    class="ma-0"
+                  />
+                </v-expansion-panel-text>
+              </v-expansion-panel>
+            </v-expansion-panels>
           </div>
         </div>
       </v-card-text>
@@ -73,7 +78,7 @@ import AvailableBudgetSummary from '@/components/shared/AvailableBudgetSummary.v
 import BudgetChart from '@/components/charts/custom-charts/BudgetChart.vue';
 import { convertToMoneyString, getCurrentBudgetYear, isFullTime } from '@/utils/utils';
 import { getTodaysDate, getYear, isBetween } from '@/shared/dateUtils';
-import { inject, onBeforeMount, onBeforeUnmount, ref, watch } from 'vue';
+import { inject, onBeforeMount, onBeforeUnmount, ref, watch, computed } from 'vue';
 import { useStore } from 'vuex';
 
 // |--------------------------------------------------|
@@ -98,6 +103,7 @@ const isAdmin = inject('isAdmin');
 const isUser = inject('isUser');
 const allUserBudgets = ref([]);
 const budgets = ref([]);
+const budgetChartDropdown = ref(JSON.parse(localStorage.getItem('budgetChartDropdown') ?? '[]'));
 const currentUser = ref(null);
 const date = ref('');
 const hireDate = ref('');
@@ -105,6 +111,10 @@ const loading = ref(true);
 const selectedBudget = ref(null);
 const selectReceipt = ref(false);
 const showDialog = ref(false);
+
+window.addEventListener('beforeunload', () => {
+  localStorage.setItem('budgetChartDropdown', JSON.stringify(budgetChartDropdown.value));
+});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -132,6 +142,7 @@ onBeforeMount(async () => {
  */
 onBeforeUnmount(() => {
   emitter.off('close-summary');
+  localStorage.setItem('budgetChartDropdown', JSON.stringify(budgetChartDropdown.value));
 }); //beforeUnmount
 
 // // |--------------------------------------------------|
@@ -139,6 +150,10 @@ onBeforeUnmount(() => {
 // // |                     COMPUTED                     |
 // // |                                                  |
 // // |--------------------------------------------------|
+
+const dropdownTitle = computed(
+  () => `Budget Chart for ${props.fiscalDateView.split('-')[0]} - ${Number(props.fiscalDateView.split('-')[0]) + 1}`
+);
 
 // /**
 //  * returns as true if the current signed in user has the same id as the employee prop
