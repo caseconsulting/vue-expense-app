@@ -25,11 +25,12 @@
             <employee-info-card :model="model"></employee-info-card>
             <!-- hire and contract info -->
             <v-row class="ma-2">
-              <v-col class="pa-3" style="max-width: fit-content">
-                <contract-info-card :contracts="contracts" :model="model"></contract-info-card>
+              <!-- case info -->
+              <v-col>
+                <case-experience-info-card :model="model"></case-experience-info-card>
               </v-col>
-              <v-col class="pa-3" style="max-width: fit-content">
-                <hire-info-card :model="model"></hire-info-card>
+              <v-col style="max-width: fit-content">
+                <contract-info-card :contracts="contracts" :model="model"></contract-info-card>
               </v-col>
             </v-row>
           </div>
@@ -116,10 +117,6 @@
                 </v-tabs-window-item>
                 <v-tabs-window-item value="Job Experience">
                   <v-row class="my-2">
-                    <!-- case info -->
-                    <v-col>
-                      <case-experience-info-card :model="model"></case-experience-info-card>
-                    </v-col>
                     <!-- past experience -->
                     <v-col>
                       <past-job-experience-info-card
@@ -162,7 +159,6 @@ import ConvertEmployeeToCsv from '@/components/employees/csv/ConvertEmployeeToCs
 import EducationInfoCard from '@/components/employee-beta/cards/EducationInfoCard.vue';
 import EmployeeForm from '@/components/employee-beta/forms/EmployeeForm.vue';
 import EmployeeInfoCard from '@/components/employee-beta/cards/EmployeeInfoCard.vue';
-import HireInfoCard from '@/components/employee-beta/cards/HireInfoCard.vue';
 import LanguagesCard from '@/components/employee-beta/cards/LanguagesCard.vue';
 import OtherInfoCard from '@/components/employee-beta/cards/personal/OtherInfoCard.vue';
 import PastJobExperienceInfoCard from '@/components/employee-beta/cards/PastJobExperienceInfoCard.vue';
