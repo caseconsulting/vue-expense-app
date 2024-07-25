@@ -4,8 +4,8 @@
       <employee-page-loader />
     </v-row>
     <div v-else>
-      <v-row align="center" class="pt-3">
-        <v-col class="pa-0 pl-4" cols="3">
+      <v-row align="center" class="pt-3" :justify="displayTimeAndBalances ? 'start' : 'center'">
+        <v-col class="pa-0 pl-4" :cols="displayTimeAndBalances ? 3 : 11">
           <v-btn id="backBtn" elevation="2" :size="isMobile() ? 'x-small' : 'default'" @click="router.back()">
             <v-icon size="large" class="pr-1"> mdi-arrow-left-thin </v-icon>
             Back
@@ -71,7 +71,7 @@
           </v-row>
         </v-col>
       </v-row>
-      <v-row class="pa-0 ma-0">
+      <v-row class="pa-0 ma-0" justify="center">
         <!-- Timesheets and Budgets-->
         <v-col v-if="displayTimeAndBalances" cols="12" lg="4" class="pt-0" height>
           <time-data :key="model" :employee="model" class="my-4" />
@@ -86,7 +86,7 @@
             :fiscal-date-view="fiscalDateView"
           />
         </v-col>
-        <v-col cols="12" :lg="displayTimeAndBalances ? 8 : 12" class="pa-0">
+        <v-col cols="12" :lg="displayTimeAndBalances ? 8 : 11" class="pa-0">
           <employee-info
             v-model="model"
             :contracts="contracts"
