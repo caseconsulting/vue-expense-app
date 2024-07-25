@@ -78,7 +78,7 @@ const icExperience = computed(() => {
     previousVal = ranges[ranges.length - 1];
     if (ranges.length != 0 && isBefore(d[0], previousVal[1])) {
       // overlap combination
-      firstStart = minimum(previousVal[0], d[0]);
+      firstStart = minimum([previousVal[0], d[0]]);
       lastEnd = maximum([previousVal[1], d[1]]);
       ranges[ranges.length - 1] = [firstStart, lastEnd];
     } else {
