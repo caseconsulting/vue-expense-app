@@ -12,11 +12,15 @@
             <v-img v-else class="display-inline-block position-absolute" :src="theAvatar" :alt="altText" />
           </v-avatar>
 
+          <v-divider class="mt-4"></v-divider>
+
           <p class="pt-4 pb-0">
-            Change your profile picture on <a :href="'https://3.basecamp.com/3097063'" target="_blank"><u>basecamp</u></a>
+            Want to change your picture on
+            <a class="text-primary" :href="'https://3.basecamp.com/3097063'" target="_blank"><u>basecamp</u></a
+            >?
           </p>
-          <p>
-            Click profile icon on the top right > click 'profile, password, 2FA' > Click 'Change your avatar' button
+          <p class="text-start pt-2">
+            Click on your profile icon → Click 'profile, password, 2FA' → Click 'Change your avatar' button
           </p>
         </v-card-text>
       </v-card>
