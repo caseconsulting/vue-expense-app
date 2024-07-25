@@ -278,7 +278,7 @@
         </v-row>
         <!-- End add postion -->
         <v-row no-gutters class="mx-5">
-          <v-divider class="mt-8 mb-4" opacity="100" v-if="compIndex < editedJobExperienceInfo.companies.length - 1" />
+          <v-divider class="mt-8 mb-4" opacity="100" v-if="compIndex < editedEmployee.companies.length - 1" />
         </v-row>
       </v-col>
     </v-row>

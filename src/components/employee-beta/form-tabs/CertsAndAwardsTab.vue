@@ -220,7 +220,7 @@
 import { format, getTodaysDate } from '@/shared/dateUtils';
 import { getDateMonthYearRules, getDateOptionalRules, getDateRules, getRequiredRules } from '@/shared/validationUtils';
 import _ from 'lodash';
-import { inject, onBeforeMount, onBeforeUnmount, ref } from 'vue';
+import { inject, onBeforeMount, ref } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
 
@@ -249,9 +249,7 @@ defineExpose({ prepareSubmit });
 // |                                                  |
 // |--------------------------------------------------|
 
-onBeforeMount(() => {
-  populateDropDowns(); // get autocomplete drop down data
-});
+onBeforeMount(populateDropDowns);
 
 onBeforeUnmount(prepareSubmit);
 
