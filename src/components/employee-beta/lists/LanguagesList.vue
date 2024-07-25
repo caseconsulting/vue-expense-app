@@ -2,15 +2,13 @@
   <v-list>
     <v-list-item v-for="(language, index) in list" :key="language.name + index">
       <v-row no-gutters>
-        <v-col class="d-flex">
-          <v-col>
-            <p>
-              <b>{{ language.name }}</b>
-            </p>
-          </v-col>
-          <v-col>
-            <p class="gray-text"><b>Fluency: </b>{{ shortenProficiency(language.proficiency) }}</p>
-          </v-col>
+        <v-col>
+          <p class="mt-3">
+            <b>{{ language.name }}</b>
+          </p>
+        </v-col>
+        <v-col>
+          <p class="gray-text mt-3"><b>Fluency: </b>{{ shortenProficiency(language.proficiency) }}</p>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-5 mb-3">
