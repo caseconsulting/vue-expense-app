@@ -18,9 +18,9 @@
         <!-- Employee has Technology Experience -->
         <div v-if="!isEmpty(model.technologies)">
           <technologies-list :list="filteredList" :isModal="false"></technologies-list>
-          <div v-if="!isEmpty(model.technologies) && Math.ceil(model.technologies.length / 5) != 1" class="text-center">
+          <div v-if="!isEmpty(model.technologies)" class="text-center">
             <v-card-actions class="d-flex justify-center">
-              <v-btn @click="toggleTechnologiesModal()">Click To See More</v-btn>
+              <v-btn @click="toggleTechnologiesModal()">View All {{ model.technologies.length }} Skills</v-btn>
             </v-card-actions>
           </div>
         </div>

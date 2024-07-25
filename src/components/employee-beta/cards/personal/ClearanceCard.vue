@@ -15,7 +15,7 @@
         :toggleModal="displayedClearance.awaitingClearance"
       ></clearance-list>
       <p v-if="isEmpty(clearances)" class="text-center mt-6 mx-2">No Clearance Information</p>
-      <div v-if="!isEmpty(clearances) && clearances.length != 1" class="text-center">
+      <div v-if="!isEmpty(clearances)" class="text-center">
         <v-card-actions class="d-flex justify-center">
           <v-btn @click="toggleClearanceModal()">Click To See More</v-btn>
         </v-card-actions>
