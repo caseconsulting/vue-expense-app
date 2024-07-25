@@ -2,8 +2,8 @@
   <v-container>
     <v-row>
       <v-col>
-        <!-- University -->
         <v-row v-for="i in [0]" :key="i">
+          <!-- Start university name -->
           <v-col>
             <v-autocomplete
               ref="formFields"
@@ -12,15 +12,17 @@
               :items="schoolDropDown"
               label="School"
               data-vv-name="School"
-              variant="underlined"
               clearable
             ></v-autocomplete>
           </v-col>
+          <!-- End university name -->
         </v-row>
 
+        <!-- Start degree loop -->
         <v-row v-for="(degree, dIndex) in uni.degrees" :key="`${dIndex}`">
           <v-col>
             <v-row>
+              <!-- Start Degree name -->
               <v-col>
                 <v-select
                   ref="formFields"
@@ -29,7 +31,6 @@
                   :items="degreeDropDown"
                   label="Degree"
                   data-vv-name="Degree"
-                  variant="underlined"
                   clearable
                 >
                   <template v-if="uni.degrees.length > 1" v-slot:append>
@@ -40,7 +41,9 @@
                   </template>
                 </v-select>
               </v-col>
+              <!-- End degree name -->
 
+              <!-- Start degree completion date -->
               <v-col>
                 <v-text-field
                   ref="formFields"
@@ -49,11 +52,10 @@
                   :rules="getDateMonthYearOptionalRules()"
                   hint="MM/YYYY format"
                   v-mask="'##/####'"
-                  variant="underlined"
                   persistent-hint
                   @update:focused="degree.completionDate = parseEventDate($event)"
                   clearable
-                  prepend-icon="mdi-calendar"
+                  prepend-inner-icon="mdi-calendar"
                   @click:prepend="degree.showEducationMenu = true"
                   @keypress="degree.showEducationMenu = false"
                   autocomplete="off"
@@ -77,9 +79,11 @@
                   </v-menu>
                 </v-text-field>
               </v-col>
+              <!-- End completion date -->
             </v-row>
 
             <v-row>
+              <!-- Start major loop -->
               <v-col cols="6" v-for="(major, mIndex) in degree.majors" :key="'major: ' + major + mIndex">
                 <!-- Majors -->
                 <v-autocomplete
@@ -88,7 +92,6 @@
                   :rules="[...getRequiredRules(), duplicateDiscipline('majors', major, dIndex)]"
                   :items="majorDropDown"
                   label="Major"
-                  variant="underlined"
                   data-vv-name="Major"
                   clearable
                 >
@@ -106,7 +109,9 @@
                   </template>
                 </v-autocomplete>
               </v-col>
+              <!-- End major loop -->
 
+              <!-- Start minor loop -->
               <v-col cols="6" v-for="(minor, minIndex) in degree.minors" :key="'minor ' + minor + minIndex">
                 <v-autocomplete
                   ref="formFields"
@@ -114,7 +119,6 @@
                   :rules="[...getRequiredRules(), duplicateDiscipline('minors', minor, dIndex)]"
                   :items="minorDropDown"
                   label="Minor"
-                  variant="underlined"
                   data-vv-name="Minor"
                   clearable
                 >
@@ -126,7 +130,9 @@
                   </template>
                 </v-autocomplete>
               </v-col>
+              <!-- End minor loop -->
 
+              <!-- Start concentration loop -->
               <v-col
                 cols="6"
                 v-for="(concentration, cIndex) in degree.concentrations"
@@ -137,7 +143,6 @@
                   v-model="degree.concentrations[cIndex]"
                   :rules="[...getRequiredRules(), duplicateDiscipline('concentrations', concentration, dIndex)]"
                   :items="concentrationDropDown"
-                  variant="underlined"
                   data-vv-name="Concentration"
                   clearable
                   label="Concentration"
@@ -155,26 +160,36 @@
                   </template>
                 </v-autocomplete>
               </v-col>
+              <!-- End concentration loop -->
             </v-row>
 
             <v-row>
-              <v-col cols="4" align="center">
+              <!-- Start add major button -->
+              <v-col cols="5" align="end">
                 <v-btn @click="addItem(degree.majors)" variant="outlined" size="small">Add a Major</v-btn>
               </v-col>
+              <!-- End add major button -->
 
-              <v-col cols="4" align="center">
+              <!-- Start add minor button -->
+              <v-col cols="2" align="center">
                 <v-btn @click="addItem(degree.minors)" variant="outlined" size="small">Add a Minor</v-btn>
               </v-col>
+              <!-- End add minor button -->
 
-              <v-col cols="4" align="center">
+              <!-- Start add concentration button -->
+              <v-col cols="5" align="start">
                 <v-btn @click="addItem(degree.concentrations)" variant="outlined" size="small"
                   >Add a Concentration</v-btn
                 >
               </v-col>
+              <!-- Start add concentration button -->
             </v-row>
           </v-col>
         </v-row>
+        <!-- End degree loop -->
+
         <v-row>
+          <!-- Start add degree button -->
           <v-col align="center">
             <v-btn @click="addDegree()" elevation="2">
               <template v-slot:prepend>
@@ -183,9 +198,11 @@
               Degree
             </v-btn>
           </v-col>
+          <!-- End add degreee button -->
         </v-row>
       </v-col>
     </v-row>
+    <v-divider class="border-opacity-25 mt-5"></v-divider>
   </v-container>
 </template>
 
@@ -353,5 +370,5 @@ function updateDropdowns() {
   concentrationDropDown.value = _.uniq([...concentrationDropDown.value, ...majorsAndMinors]);
   majorDropDown.value = _.uniq([...majorDropDown.value, ...majorsAndMinors]);
   minorDropDown.value = _.uniq([...minorDropDown.value, ...majorsAndMinors]);
-}
+} // titleCases
 </script>

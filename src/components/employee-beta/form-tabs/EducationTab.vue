@@ -7,6 +7,7 @@
             <b>University Information:</b>
           </v-col>
         </v-row>
+        <!-- Start University loop -->
         <v-row v-for="(edu, index) in editedEducation" :key="edu.id">
           <v-col v-if="edu.type === 'university'">
             <university-form
@@ -16,47 +17,66 @@
               :schoolIndex="index"
             ></university-form>
           </v-col>
+          <!-- Start delete university -->
           <v-col cols="1" v-if="edu.type === 'university'">
             <v-btn @click="deleteEducation(index)" variant="text" icon="">
               <v-tooltip activator="parent" location="bottom"> Delete Education </v-tooltip>
               <v-icon class="case-gray">mdi-delete</v-icon></v-btn
             >
           </v-col>
+          <!-- End delete university -->
         </v-row>
+        <!-- End University loop -->
+
+        <v-divider :thickness="4" class="border-opacity-25 mb-5"></v-divider>
 
         <v-row>
           <v-col>
             <b>Military Information:</b>
           </v-col>
         </v-row>
+        <!-- Start military lopp -->
         <v-row v-for="(edu, index) in editedEducation" :key="edu.id">
           <v-col v-if="edu.type === 'military'">
             <military-form :service="edu" :militaryIndex="index" :validating="validating"></military-form>
           </v-col>
+          <!-- Start delete military -->
           <v-col cols="1" v-if="edu.type === 'military'">
             <v-btn @click="deleteEducation(index)" variant="text" icon="">
               <v-tooltip activator="parent" location="bottom"> Delete Service </v-tooltip>
               <v-icon class="case-gray">mdi-delete</v-icon></v-btn
             >
           </v-col>
+          <!-- End delete militart -->
         </v-row>
+        <!-- End military loop -->
+
+        <v-divider :thickness="4" class="border-opacity-25 my-5"></v-divider>
 
         <v-row>
           <v-col>
             <b>High School Information</b>
           </v-col>
         </v-row>
+        <!-- Start high school loop -->
         <v-row v-for="(edu, index) in editedEducation" :key="edu.id">
           <v-col v-if="edu.type === 'highSchool'">
             <high-school-form :school="edu" :schoolIndex="index" :validating="validating"></high-school-form>
           </v-col>
+          <!-- Start delete high school -->
           <v-col cols="1" v-if="edu.type === 'highSchool'">
             <v-btn @click="deleteEducation(index)" variant="text" icon="">
               <v-tooltip activator="parent" location="bottom"> Delete Education </v-tooltip>
               <v-icon class="case-gray pr-1">mdi-delete</v-icon></v-btn
             >
           </v-col>
+          <!-- End delete high school -->
         </v-row>
+        <!-- End high school loop -->
+
+        <v-divider :thickness="4" class="border-opacity-25 my-5"></v-divider>
+
+        <!-- Start add education -->
         <v-row>
           <v-col align="center">
             <v-menu location="bottom">
@@ -80,6 +100,7 @@
             </v-menu>
           </v-col>
         </v-row>
+        <!-- End add education -->
       </v-col>
     </v-row>
   </v-container>
