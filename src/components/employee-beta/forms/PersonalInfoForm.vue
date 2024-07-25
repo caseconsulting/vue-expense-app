@@ -7,25 +7,26 @@
         <v-text-field v-model="editedEmployee.firstName" label="First Name" :rules="getRequiredRules()"></v-text-field>
       </v-col>
       <!-- middle name -->
-      <v-col cols="auto">
-        <v-row class="d-flex">
-          <v-col>
-            <v-text-field
-              v-model="middleName"
-              :label="hasMiddleName ? 'Middle Name' : 'No Middle Name'"
-              :rules="middleNameRules"
-              :disabled="!hasMiddleName"
-            >
-            </v-text-field>
-          </v-col>
-          <v-col>
-            <v-tooltip text="Please enable if you have a middle name" location="top">
-              <template #activator="{ props }">
-                <v-switch v-bind="props" v-model="hasMiddleName" class="ml-3" color="primary"></v-switch>
-              </template>
-            </v-tooltip>
-          </v-col>
-        </v-row>
+      <v-col>
+        <v-text-field
+          v-model.trim="middleName"
+          :label="hasMiddleName ? 'Middle Name' : 'No Middle Name'"
+          :rules="hasMiddleName ? middleNameRules : []"
+          :hide-details="hasMiddleName ? 'auto' : true"
+          @update:model-value="hasMiddleName = true"
+        >
+          <template v-slot:append-inner>
+            <v-btn v-if="hasMiddleName" @click="(hasMiddleName = false), (middleName = '')" variant="text" icon="">
+              <v-tooltip text="Please disable if you do not have a middle name" location="top" activator="parent">
+              </v-tooltip>
+              <v-icon>mdi-check-circle</v-icon>
+            </v-btn>
+            <v-btn v-else @click="hasMiddleName = true" variant="text" icon="">
+              <v-tooltip text="Please enable if you have a middle name" location="top" activator="parent"> </v-tooltip>
+              <v-icon>mdi-close-circle</v-icon>
+            </v-btn>
+          </template>
+        </v-text-field>
       </v-col>
       <!-- last name -->
       <v-col>
