@@ -53,7 +53,7 @@
                   persistent-hint
                   @update:focused="degree.completionDate = parseEventDate($event)"
                   clearable
-                  prepend-icon="mdi-calendar"
+                  prepend-inner-icon="mdi-calendar"
                   @click:prepend="degree.showEducationMenu = true"
                   @keypress="degree.showEducationMenu = false"
                   autocomplete="off"
