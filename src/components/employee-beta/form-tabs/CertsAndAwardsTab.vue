@@ -1,13 +1,16 @@
 <template>
   <v-container>
     <v-row>
+      <!-- Start Certifications -->
       <v-col>
         <v-row>
           <v-col>
             <b>Certifications:</b>
           </v-col>
         </v-row>
+        <!-- Start Cert Loop -->
         <v-row v-for="(certification, index) in editedCertifications" :key="index">
+          <!-- Start Cert Name -->
           <v-col cols="5">
             <v-combobox
               ref="formFields"
@@ -15,13 +18,14 @@
               :rules="getRequiredRules()"
               :items="certificationDropDown"
               label="Certification"
-              variant="underlined"
               data-vv-name="Certification"
               clearable
             >
             </v-combobox>
           </v-col>
+          <!-- End Cert Name -->
 
+          <!-- Start Cert recieved date -->
           <v-col cols="3">
             <v-text-field
               ref="formFields"
@@ -30,8 +34,7 @@
               :rules="[...getDateRules()]"
               hint="MM/DD/YYYY format"
               v-mask="'##/##/####'"
-              variant="underlined"
-              prepend-icon="mdi-calendar"
+              prepend-inner-icon="mdi-calendar"
               @update:focused="certification.dateReceived = parseEventDate()"
               @focus="certificationIndex = index"
               @click:prepend="certification.showReceivedMenu = true"
@@ -58,7 +61,9 @@
               </v-menu>
             </v-text-field>
           </v-col>
+          <!-- End Cert received date -->
 
+          <!-- Start Cert expiration date -->
           <v-col cols="3">
             <v-text-field
               ref="formFields"
@@ -67,9 +72,8 @@
               :rules="[...getDateOptionalRules()]"
               hint="MM/DD/YYYY format"
               v-mask="'##/##/####'"
-              variant="underlined"
               clearable
-              prepend-icon="mdi-calendar"
+              prepend-inner-icon="mdi-calendar"
               @update:focused="certification.expirationDate = parseEventDate()"
               @click:prepend="certification.showExpirationMenu = true"
               @keypress="certification.showExpirationMenu = false"
@@ -95,13 +99,20 @@
               </v-menu>
             </v-text-field>
           </v-col>
+          <!-- End Cert expiration date -->
+
+          <!-- Start Delete Cert -->
           <v-col>
             <v-btn @click="deleteCertification(index)" icon variant="text">
               <v-tooltip activator="parent" location="bottom">Delete Certification</v-tooltip>
               <v-icon class="case-gray">mdi-delete</v-icon>
             </v-btn>
           </v-col>
+          <!-- End Delete Cert -->
         </v-row>
+        <!-- End Cert Loop -->
+
+        <!-- Start Add Cert -->
         <v-row>
           <v-col align="center">
             <v-btn @click="addCertification()" elevation="2">
@@ -110,9 +121,14 @@
             </v-btn>
           </v-col>
         </v-row>
+        <!-- End Add Cert -->
       </v-col>
     </v-row>
+    <!-- End Certifications -->
 
+    <v-divider :thickness="4" class="border-opacity-25 my-8"></v-divider>
+
+    <!-- Start Awards -->
     <v-row>
       <v-col>
         <v-row>
@@ -120,20 +136,23 @@
             <b>Awards:</b>
           </v-col>
         </v-row>
+        <!-- Start Award Loop -->
         <v-row v-for="(award, index) in editedAwards" :key="index">
+          <!-- Start Award Name -->
           <v-col cols="6">
             <v-text-field
               ref="formFields"
               v-model="award.name"
               :rules="getRequiredRules()"
               label="Award"
-              variant="underlined"
               data-vv-name="Award"
               clearable
             >
             </v-text-field>
           </v-col>
+          <!-- End Award Name -->
 
+          <!-- Start Award received date -->
           <v-col cols="5">
             <v-text-field
               ref="formFields"
@@ -142,11 +161,10 @@
               :rules="getDateMonthYearRules()"
               hint="MM/YYYY format"
               v-mask="'##/####'"
-              variant="underlined"
               persistent-hint
               @update:focused="award.dateReceived = parseAwardEventDate()"
               clearable
-              prepend-icon="mdi-calendar"
+              prepend-inner-icon="mdi-calendar"
               @click:prepend="award.showReceivedMenu = true"
               @keypress="award.showReceivedMenu = false"
               autocomplete="off"
@@ -169,14 +187,20 @@
               </v-menu>
             </v-text-field>
           </v-col>
+          <!-- End award recieved date -->
 
+          <!-- Start delete award -->
           <v-col>
             <v-btn @click="deleteAward(index)" icon variant="text">
               <v-tooltip activator="parent" location="bottom">Delete Award</v-tooltip>
               <v-icon class="case-gray pr-1">mdi-delete</v-icon>
             </v-btn>
           </v-col>
+          <!-- End delete award -->
         </v-row>
+        <!-- End Award Loop -->
+
+        <!-- Start Add Award -->
         <v-row>
           <v-col align="center">
             <v-btn @click="addAward()" elevation="2">
@@ -185,8 +209,10 @@
             </v-btn>
           </v-col>
         </v-row>
+        <!-- End Add Award -->
       </v-col>
     </v-row>
+    <!-- End Awards -->
   </v-container>
 </template>
 
