@@ -258,6 +258,17 @@ async function updateAttribute(type, value, attribute) {
 } // updateAttribute
 
 /**
+ *
+ * @param {string} type - the route denoting the dynamodb database to change
+ * @param {string} id - key of the object in the table
+ * @param {object} values - object with attribute keys with values to update
+ * @returns if it was a successful update
+ */
+async function updateAttributes(type, id, values) {
+  return await execute('patch', `/${type}/attributes/${id}`, values);
+}
+
+/**
  * updates the item in the database based on the type
  * @param type - the route denoting the dynamodb database to change
  * @param data - the new data
@@ -524,6 +535,7 @@ export default {
   getZipCode,
   getUser,
   updateAttribute,
+  updateAttributes,
   updateItem,
   uploadResume,
   processHighFive,
