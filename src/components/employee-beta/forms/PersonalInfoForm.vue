@@ -157,7 +157,7 @@
     <v-row><h3>Personal Information</h3></v-row>
     <v-row>
       <!-- birthday -->
-      <v-col cols="4">
+      <v-col>
         <v-text-field
           v-model="formattedBirthday"
           label="Birthday"
@@ -189,7 +189,12 @@
       </v-col>
       <!-- personal email -->
       <v-col>
-        <v-text-field v-model="personalEmail.emailValue" label="Personal Email" :rules="getEmailRules()">
+        <v-text-field
+          v-model="personalEmail.emailValue"
+          label="Personal Email"
+          :rules="getEmailRules()"
+          style="min-width: 350px"
+        >
           <template #prepend-inner><v-icon>mdi-email</v-icon></template>
           <template #append-inner>
             <private-button v-model="personalEmail.private"></private-button>
@@ -335,7 +340,7 @@ import {
 } from '@/shared/validationUtils';
 import { COUNTRIES, isMobile, STATES } from '@/utils/utils';
 import { cloneDeep, filter, forEach, includes, isEmpty, lowerCase, some, startCase } from 'lodash';
-import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, ref } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
 import PrivateButton from '../PrivateButton.vue';
@@ -425,12 +430,22 @@ const userIsAdminOrManager = computed(() => {
  * Uses the formatted/transformed data from the form and loads it into the edited employee
  */
 function prepareSubmit() {
-  editedEmployee.value.email = emailUsername.value + CASE_EMAIL_DOMAIN;
-
   editedEmployee.value.noMiddleName = !hasMiddleName.value;
   editedEmployee.value.middleName = hasMiddleName.value ? middleName.value : undefined;
 
+  editedEmployee.value.email = emailUsername.value + CASE_EMAIL_DOMAIN;
+
   editedEmployee.value.employeeRole = lowerCase(employeeRole.value);
+
+  editedEmployee.value.birthday = format(formattedBirthday.value, FORMATTED_ISOFORMAT, ISO8601);
+
+  editedEmployee.value.personalEmail = personalEmail.value.emailValue;
+  // leave this unchanged if no email is entered
+  if (!isEmpty(personalEmail.value.emailValue)) {
+    editedEmployee.value.personalEmailHidden = personalEmail.value.private;
+  }
+
+  if (editedEmployee.value.country !== 'United States') editedEmployee.value.st = undefined;
 
   editedEmployee.value.privatePhoneNumbers = [];
   editedEmployee.value.publicPhoneNumbers = [];
@@ -439,12 +454,6 @@ function prepareSubmit() {
     if (phoneNumber.private) editedEmployee.value.privatePhoneNumbers.push(phoneNumber);
     else editedEmployee.value.publicPhoneNumbers.push(phoneNumber);
   });
-
-  editedEmployee.value.personalEmail = personalEmail.value.emailValue;
-
-  if (editedEmployee.value.country !== 'United States') editedEmployee.value.st = undefined;
-
-  editedEmployee.value.birthday = format(formattedBirthday.value, FORMATTED_ISOFORMAT, ISO8601);
 }
 
 /**
