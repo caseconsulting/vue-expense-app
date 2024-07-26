@@ -112,10 +112,10 @@
 <script setup>
 import BaseForm from '@/components/employee-beta/forms/BaseForm.vue';
 import FormCancelConfirmation from '@/components/modals/FormCancelConfirmation.vue';
+import api from '@/shared/api';
 import { cloneDeep, forOwn, isEqual, isUndefined, pickBy } from 'lodash';
 import { computed, inject, onBeforeMount, onBeforeUnmount, reactive, ref } from 'vue';
 import { useDisplay } from 'vuetify/lib/framework.mjs';
-import api from '../../../shared/api';
 import CertsAndAwardsTab from '../form-tabs/CertsAndAwardsTab.vue';
 import ClearanceTab from '../form-tabs/ClearanceTab.vue';
 import ContractsTab from '../form-tabs/ContractsTab.vue';

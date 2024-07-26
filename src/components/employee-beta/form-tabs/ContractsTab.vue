@@ -203,7 +203,7 @@ import {
 } from '@/shared/validationUtils';
 import { isEmpty } from '@/utils/utils';
 import { find, map } from 'lodash';
-import { ref } from 'vue';
+import { inject, onBeforeUnmount, ref } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
 
@@ -318,7 +318,6 @@ function getEndDatePresentRule(project) {
  * Adds a Contract.
  */
 function addContract() {
-  console.log('add contract');
   if (!editedContracts.value) editedContracts.value = [];
   editedContracts.value.push({
     contractId: null,
