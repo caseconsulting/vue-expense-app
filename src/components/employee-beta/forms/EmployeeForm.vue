@@ -58,16 +58,11 @@
                 ></certs-and-awards-tab>
               </div>
             </base-form>
-            <base-form title="Tech, Skills, and Languages" value="Tech, Skills, and Languages">
-              <v-row style="overflow-x: auto">
-                <v-col style="min-width: 380px">
-                  <technologies-form v-model="editedEmployee"></technologies-form>
-                </v-col>
-                <v-divider vertical inset></v-divider>
-                <v-col style="min-width: 380px">
-                  <languages-form v-model="editedEmployee"></languages-form>
-                </v-col>
-              </v-row>
+            <base-form title="Tech and Skills" value="Tech and Skills">
+              <technologies-form v-model="editedEmployee"></technologies-form>
+            </base-form>
+            <base-form title="Languages" value="Languages">
+              <languages-form v-model="editedEmployee"></languages-form>
             </base-form>
             <base-form title="Job Experience" value="Past Experience">
               <div>
