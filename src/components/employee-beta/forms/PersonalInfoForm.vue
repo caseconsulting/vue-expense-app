@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-form ref="form" validate-on="lazy">
     <v-row><h3>Basic Information</h3></v-row>
     <v-row>
       <!-- first name -->
@@ -320,7 +320,7 @@
         <v-btn prepend-icon="mdi-plus" @click="addPhoneNumber()">Add Number</v-btn>
       </v-col>
     </v-row>
-  </v-container>
+  </v-form>
 </template>
 
 <script setup>
@@ -340,7 +340,7 @@ import {
 } from '@/shared/validationUtils';
 import { COUNTRIES, isMobile, STATES } from '@/utils/utils';
 import { cloneDeep, filter, forEach, includes, isEmpty, lowerCase, some, startCase } from 'lodash';
-import { computed, onBeforeUnmount, ref } from 'vue';
+import { computed, inject, onBeforeUnmount, ref } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
 import PrivateButton from '../PrivateButton.vue';
@@ -352,9 +352,11 @@ import _ from 'lodash';
 // |                                                  |
 // |--------------------------------------------------|
 
-const editedEmployee = defineModel({ required: true });
 const store = useStore();
-defineExpose({ prepareSubmit }); // allows parent to use refs to call prepareSubmit()
+const emitter = inject('emitter');
+
+const editedEmployee = defineModel({ required: true });
+const form = ref(null); // template ref to form
 
 const vMask = mask; // import v mask directive
 
@@ -378,7 +380,10 @@ const searchString = ref(''); // user input for searching address
 const placeIds = ref({}); // for address autocomplete
 const predictions = ref({}); // for POB autocomplete
 
+// other refs
 const phoneAutofocus = ref(false);
+
+defineExpose({ prepareSubmit }); // allows parent to use refs to call prepareSubmit()
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -386,7 +391,9 @@ const phoneAutofocus = ref(false);
 // |                                                  |
 // |--------------------------------------------------|
 
-onBeforeUnmount(() => {
+onBeforeUnmount(async () => {
+  const result = await validate();
+  emitter.emit('beta-validate', { tab: 'personal', result });
   prepareSubmit();
 });
 
@@ -454,6 +461,11 @@ function prepareSubmit() {
     if (phoneNumber.private) editedEmployee.value.privatePhoneNumbers.push(phoneNumber);
     else editedEmployee.value.publicPhoneNumbers.push(phoneNumber);
   });
+}
+
+async function validate() {
+  if (form.value) return await form.value.validate();
+  return null;
 }
 
 /**

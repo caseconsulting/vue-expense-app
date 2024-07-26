@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-form ref="form" validate-on="lazy">
     <v-row><h3>Tech and Skills</h3></v-row>
     <v-row>
       <v-col class="d-flex justify-center">
@@ -80,14 +80,14 @@
         <v-btn prepend-icon="mdi-plus" @click="addTechnology(false)">Add Tech/Skill</v-btn>
       </v-col>
     </v-row>
-  </v-container>
+  </v-form>
 </template>
 
 <script setup>
 import api from '@/shared/api';
 import { getDuplicateTechRules, getRequiredRules } from '@/shared/validationUtils';
 import { isEmpty, map } from 'lodash';
-import { onBeforeUnmount, ref } from 'vue';
+import { inject, onBeforeUnmount, ref } from 'vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -95,8 +95,10 @@ import { onBeforeUnmount, ref } from 'vue';
 // |                                                  |
 // |--------------------------------------------------|
 
+const emitter = inject('emitter');
+
 const editedEmployee = defineModel({ required: true });
-defineExpose({ prepareSubmit });
+const form = ref(null); // template ref
 
 const technologies = ref(
   map(editedEmployee.value.technologies, (value) => {
@@ -105,8 +107,9 @@ const technologies = ref(
     return { name: value.name, time: getYearsAndMonths(value.years), current: value.current };
   })
 );
-
 const dropdownItems = ref([]);
+
+defineExpose({ prepareSubmit });
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -114,8 +117,11 @@ const dropdownItems = ref([]);
 // |                                                  |
 // |--------------------------------------------------|
 
-onBeforeUnmount(() => {
-  prepareSubmit();
+onBeforeUnmount(prepareSubmit);
+
+onBeforeUnmount(async () => {
+  const result = await validate();
+  emitter.emit('beta-validate', { tab: 'technologies', result });
 });
 
 // |--------------------------------------------------|
@@ -141,6 +147,11 @@ function prepareSubmit() {
       current: value.current
     };
   });
+}
+
+async function validate() {
+  if (form.value) return await form.value.validate();
+  return null;
 }
 
 /**

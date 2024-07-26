@@ -39,7 +39,7 @@
           class="my-1 mx-xl-5 mx-lg-5 mx-md-0"
           @submit.prevent="submit($event)"
         >
-          <v-expansion-panels v-model="formTabs" variant="accordion" multiple eager>
+          <v-expansion-panels v-model="formTabs" variant="accordion" multiple>
             <base-form title="Personal" value="Personal Information">
               <personal-info-form ref="personalInfoFormRef" v-model="editedEmployee"></personal-info-form>
             </base-form>
@@ -116,8 +116,8 @@
 <script setup>
 import BaseForm from '@/components/employee-beta/forms/BaseForm.vue';
 import FormCancelConfirmation from '@/components/modals/FormCancelConfirmation.vue';
-import { cloneDeep, isEqual, pickBy } from 'lodash';
-import { computed, inject, onBeforeMount, onBeforeUnmount, ref } from 'vue';
+import { cloneDeep, forOwn, isEqual, pickBy } from 'lodash';
+import { computed, inject, onBeforeMount, onBeforeUnmount, reactive, ref } from 'vue';
 import { useDisplay } from 'vuetify';
 import CertsAndAwardsTab from '../form-tabs/CertsAndAwardsTab.vue';
 import ClearanceTab from '../form-tabs/ClearanceTab.vue';
@@ -149,6 +149,17 @@ const submitting = ref(false);
 const toggleCancelConfirmation = ref(false);
 const valid = ref(true);
 
+const validTabs = reactive({
+  personal: true,
+  certsAndAwards: true,
+  clearance: true,
+  contracts: true,
+  education: true,
+  jobExperience: true,
+  technologies: true,
+  languages: true
+});
+
 // template refs
 const form = ref(null);
 const personalInfoFormRef = ref(null);
@@ -156,16 +167,6 @@ const technologiesFormRef = ref(null);
 const contractsTabRef = ref(null);
 const educationTabRef = ref(null);
 const jobExperienceTabRef = ref(null);
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     COMPUTED                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-const fullName = computed(() => {
-  return `${props.employee.firstName} ${props.employee.lastName}`;
-});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -186,13 +187,26 @@ onBeforeMount(() => {
     toggleCancelConfirmation.value = false;
     editing.value = false;
   });
+
+  emitter.on('beta-validate', (event) => {
+    validTabs[event.tab] = event.result.valid;
+  });
 });
 
 onBeforeUnmount(() => {
   emitter.off('editing');
   emitter.off('canceled-cancel');
   emitter.off('confirmed-cancel');
+  emitter.off('beta-valdiate');
 });
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+const fullName = computed(() => `${props.employee.firstName} ${props.employee.lastName}`);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -207,18 +221,9 @@ onBeforeUnmount(() => {
  */
 async function submit(event) {
   submitting.value = true;
-  const validationResult = await Promise.resolve(event);
-  console.log('Validation result:', validationResult); // TODO debug
 
-  // if form is invalid
-  if (!validationResult.valid) {
-    console.log('Form is invalid. Cancelling submit');
-    valid.value = false;
-    submitting.value = false;
-    return;
-  }
-
-  valid.value = true;
+  valid.value = await validate(event);
+  if (!valid.value) return cancelSubmit();
 
   // allows other tabs to finalize data, if they're open. otherwise the data should already be finalized
   try {
@@ -250,6 +255,30 @@ async function submit(event) {
   console.log('Changed values:', changes); // TODO test
   submitting.value = false;
   // editing.value = false; // close edit modal
+}
+
+/**
+ * Checks validation of all tabs
+ * @param {SubmitEvent} event The submit event
+ */
+async function validate(event) {
+  const result = await Promise.resolve(event);
+  let valid = result.valid;
+
+  // iterates through each tab to make sure they are all valid
+  forOwn(validTabs, (value) => {
+    valid = valid && value;
+  });
+  return valid;
+}
+
+/**
+ * Called if the form is invalid after trying to submit
+ */
+function cancelSubmit() {
+  console.log('Form is invalid. Cancelling submit'); // TODO debug
+  valid.value = false;
+  submitting.value = false;
 }
 
 function collapseAllTabs() {

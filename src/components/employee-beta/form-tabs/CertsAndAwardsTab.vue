@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-form ref="form" validate-on="lazy">
     <v-row>
       <!-- Start Certifications -->
       <v-col>
@@ -213,14 +213,14 @@
       </v-col>
     </v-row>
     <!-- End Awards -->
-  </v-container>
+  </v-form>
 </template>
 
 <script setup>
 import { format, getTodaysDate } from '@/shared/dateUtils';
 import { getDateMonthYearRules, getDateOptionalRules, getDateRules, getRequiredRules } from '@/shared/validationUtils';
 import _ from 'lodash';
-import { onBeforeMount, ref } from 'vue';
+import { inject, onBeforeMount, onBeforeUnmount, ref } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
 
@@ -230,9 +230,12 @@ import { useStore } from 'vuex';
 // |                                                  |
 // |--------------------------------------------------|
 
-const editedEmployee = defineModel({ required: true });
 const store = useStore();
+const emitter = inject('emitter');
 const vMask = mask;
+
+const editedEmployee = defineModel({ required: true });
+const form = ref(null); // template ref
 
 const certificationDropDown = ref([]); // autocomplete certification name options
 const certificationIndex = ref(0);
@@ -244,8 +247,13 @@ const employees = store.getters.employees;
 // |                                                  |
 // |--------------------------------------------------|
 
-onBeforeMount(async () => {
+onBeforeMount(() => {
   populateDropDowns(); // get autocomplete drop down data
+});
+
+onBeforeUnmount(async () => {
+  const result = await validate();
+  emitter.emit('beta-validate', { tab: 'certsAndAwards', result });
 });
 
 // |--------------------------------------------------|
@@ -253,6 +261,11 @@ onBeforeMount(async () => {
 // |                      METHODS                     |
 // |                                                  |
 // |--------------------------------------------------|
+
+async function validate() {
+  if (form.value) return await form.value.validate();
+  return null;
+}
 
 /**
  * Add an award.

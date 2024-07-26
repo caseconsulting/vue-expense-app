@@ -1,6 +1,11 @@
 <template>
-  <v-container>
+  <v-form ref="form" validate-on="lazy">
     <v-row><h3>Foreign Languages</h3></v-row>
+    <v-row>
+      <v-col class="d-flex justify-center">
+        <v-btn prepend-icon="mdi-plus" @click="addLanguage()">Add Language</v-btn>
+      </v-col>
+    </v-row>
     <v-row v-for="(language, index) in editedEmployee.languages" :key="language + index">
       <v-col>
         <v-row>
@@ -33,13 +38,15 @@
         <v-btn prepend-icon="mdi-plus" @click="addLanguage(false)">Add Language</v-btn>
       </v-col>
     </v-row>
-  </v-container>
+  </v-form>
 </template>
 
 <script setup>
 import { getRequiredRules } from '@/shared/validationUtils';
 import { isEmpty } from 'lodash';
 import { LANGUAGES, PROFICIENCIES } from '@/shared/employeeUtils';
+import { inject, onBeforeUnmount } from 'vue';
+import { ref } from 'vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -47,13 +54,32 @@ import { LANGUAGES, PROFICIENCIES } from '@/shared/employeeUtils';
 // |                                                  |
 // |--------------------------------------------------|
 
+const emitter = inject('emitter');
+
 const editedEmployee = defineModel();
+const form = ref(null); // template ref
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+onBeforeUnmount(async () => {
+  const result = await validate();
+  emitter.emit('beta-validate', { tab: 'languages', result });
+});
 
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+async function validate() {
+  if (form.value) return await form.value.validate();
+  return null;
+}
 
 /**
  * Gets validation rules for languages: no duplicate languages and no english

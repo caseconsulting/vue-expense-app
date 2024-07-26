@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-form ref="form" validate-on="lazy">
     <v-row v-for="(clearance, cIndex) in editedEmployee.clearances" :key="cIndex">
       <v-col>
         <v-row>
@@ -293,11 +293,12 @@
         <v-btn @click="addClearance()"><v-icon>mdi-plus</v-icon>Clearance</v-btn>
       </v-col>
     </v-row>
-  </v-container>
+  </v-form>
 </template>
 
 <script setup>
 import { DEFAULT_ISOFORMAT, format, FORMATTED_ISOFORMAT, isBefore } from '@/shared/dateUtils';
+import { CLEARANCE_TYPES } from '@/shared/employeeUtils';
 import {
   getBadgeNumberRules,
   getDateBadgeRules,
@@ -308,9 +309,9 @@ import {
   getRequiredRules
 } from '@/shared/validationUtils';
 import _ from 'lodash';
+import { inject, onBeforeUnmount, ref } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useDisplay } from 'vuetify/lib/framework.mjs';
-import { CLEARANCE_TYPES } from '../../../shared/employeeUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -321,14 +322,33 @@ import { CLEARANCE_TYPES } from '../../../shared/employeeUtils';
 const ISOFORMAT = 'YYYY-MM-DD';
 
 const { name } = useDisplay();
-const editedEmployee = defineModel({ required: true });
+const emitter = inject('emitter');
 const vMask = mask; // custom directive
+
+const editedEmployee = defineModel({ required: true });
+const form = ref(null); // template ref
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+onBeforeUnmount(async () => {
+  const result = await validate();
+  emitter.emit('beta-validate', { tab: 'clearance', result });
+});
 
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+async function validate() {
+  if (form.value) return await form.value.validate();
+  return null;
+}
 
 /**
  * Adds a clearance.

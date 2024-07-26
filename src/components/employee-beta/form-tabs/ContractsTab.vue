@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-form ref="form" validate-on="lazy">
     <v-row v-for="(contract, index) in editedContracts" :key="index">
       <v-col>
         <v-row>
@@ -187,7 +187,7 @@
         </v-btn>
       </v-col>
     </v-row>
-  </v-container>
+  </v-form>
 </template>
 
 <script setup>
@@ -203,7 +203,7 @@ import {
 } from '@/shared/validationUtils';
 import { isEmpty } from '@/utils/utils';
 import { find, map } from 'lodash';
-import { ref } from 'vue';
+import { inject, onBeforeUnmount, ref } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
 
@@ -214,10 +214,11 @@ import { useStore } from 'vuex';
 // |--------------------------------------------------|
 
 const store = useStore();
+const emitter = inject('emitter')
 const vMask = mask; // custom directive
 
 const editedEmployee = defineModel({ required: true });
-defineExpose({ prepareSubmit });
+const form = ref(null); // template ref
 
 const contracts = store.getters.contracts;
 const editedContracts = ref([]); // stores edited contracts info
@@ -225,6 +226,21 @@ const contractProjects = ref(store.getters.contracts.map((c) => c.projects).flat
 const reloadKey = ref(0); // value used to trigger component re-render
 
 initialize();
+
+defineExpose({ prepareSubmit });
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+onBeforeUnmount(prepareSubmit);
+
+onBeforeUnmount(async () => {
+  const result = await validate();
+  emitter.emit('beta-validate', { tab: 'contracts', result });
+});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -234,7 +250,7 @@ initialize();
 
 function prepareSubmit() {
   // delete keys that aren't stored in database
-  editedEmployee.value.contracts = map(editedContracts, (contract) => {
+  editedEmployee.value.contracts = map(editedContracts.value, (contract) => {
     delete contract.contractName;
     delete contract.primeName;
 
@@ -244,6 +260,11 @@ function prepareSubmit() {
     });
     return contract;
   });
+}
+
+async function validate() {
+  if (form.value) return await form.value.validate();
+  return null;
 }
 
 function initialize() {
@@ -296,7 +317,6 @@ function getEndDatePresentRule(project) {
  * Adds a Contract.
  */
 function addContract() {
-  console.log('add contract');
   if (!editedContracts.value) editedContracts.value = [];
   editedContracts.value.push({
     contractId: null,

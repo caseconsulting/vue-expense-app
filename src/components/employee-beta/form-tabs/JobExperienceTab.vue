@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-form ref="form" validate-on="lazy">
     <v-row>
       <!-- Left side of the edit page -->
       <v-col cols="5">
@@ -291,7 +291,7 @@
         </v-btn>
       </v-col>
     </v-row>
-  </v-container>
+  </v-form>
 </template>
 
 <script setup>
@@ -303,7 +303,7 @@ import {
   getRequiredRules
 } from '@/shared/validationUtils';
 import _, { isEmpty, map } from 'lodash';
-import { ref } from 'vue';
+import { inject, onBeforeUnmount, ref } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
 
@@ -314,15 +314,31 @@ import { useStore } from 'vuex';
 // |--------------------------------------------------|
 
 const store = useStore();
+const emitter = inject('emitter');
 const vMask = mask; // custom directive
 
 const editedEmployee = defineModel({ required: true });
-defineExpose({ prepareSubmit });
+const form = ref(null); // template ref
 
 const editedCompanies = ref(editedEmployee.value.companies);
 const companyDropDown = ref([]);
 
 populateDropDowns();
+
+defineExpose({ prepareSubmit });
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+onBeforeUnmount(prepareSubmit);
+
+onBeforeUnmount(async () => {
+  const result = await validate();
+  emitter.emit('beta-validate', { tab: 'jobExperience', result });
+});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -332,12 +348,19 @@ populateDropDowns();
 
 function prepareSubmit() {
   // delete properties from positions that should not be stored in the database
-  editedEmployee.value.companies = map(editedCompanies, (company) => {
+  editedEmployee.value.companies = map(editedCompanies.value, (company) => {
     company.positions = map(company.positions, (position) => {
       delete position.showStartMenu;
       delete position.showEndMenu;
+      return position;
     });
+    return company;
   });
+}
+
+async function validate() {
+  if (form.value) return await form.value.validate();
+  return null;
 }
 
 /**

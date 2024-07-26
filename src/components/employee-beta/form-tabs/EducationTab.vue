@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-form ref="form" validate-on="lazy">
     <v-row>
       <v-col>
         <v-row>
@@ -98,12 +98,12 @@
         <!-- End add education -->
       </v-col>
     </v-row>
-  </v-container>
+  </v-form>
 </template>
 
 <script setup>
 import { map } from 'lodash';
-import { ref } from 'vue';
+import { inject, onBeforeUnmount, ref } from 'vue';
 import HighSchoolForm from '../forms/education-forms/HighSchoolForm.vue';
 import MilitaryForm from '../forms/education-forms/MilitaryForm.vue';
 import UniversityForm from '../forms/education-forms/UniversityForm.vue';
@@ -114,15 +114,17 @@ import UniversityForm from '../forms/education-forms/UniversityForm.vue';
 // |                                                  |
 // |--------------------------------------------------|
 
-defineProps(['allowAdditions']);
-const editedEmployee = defineModel({ required: true });
-defineExpose({ prepareSubmit });
-
 const EDU_TYPES = [
   { display: 'University', value: 'university' },
   { display: 'Military', value: 'military' },
   { display: 'High School', value: 'highSchool' }
 ];
+
+defineProps(['allowAdditions']);
+const emitter = inject('emitter');
+
+const editedEmployee = defineModel({ required: true });
+const form = ref(null); // template ref
 
 const editedEducation = ref(
   map(editedEmployee.value.education, (item) => {
@@ -130,6 +132,19 @@ const editedEducation = ref(
     return item;
   })
 ); // stores edited education info
+
+defineExpose({ prepareSubmit });
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+onBeforeUnmount(async () => {
+  const result = await validate();
+  emitter.emit('beta-validate', { tab: 'education', result });
+});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -143,6 +158,11 @@ function prepareSubmit() {
     delete education.id;
     return education;
   });
+}
+
+async function validate() {
+  if (form.value) return await form.value.validate();
+  return null;
 }
 
 /**
