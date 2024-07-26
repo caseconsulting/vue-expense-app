@@ -35,9 +35,8 @@
             >
             </v-select>
           </v-col>
-
-          <v-col cols="1" align="center">
-            <v-btn @click="deleteContract(index)" icon variant="text">
+          <v-col cols="1" align="center" class="pl-0">
+            <v-btn @click="deleteContract(index)" icon="" variant="text">
               <v-tooltip activator="parent" location="bottom">Delete Contract</v-tooltip>
               <v-icon class="case-gray pr-1">mdi-delete</v-icon>
             </v-btn>
