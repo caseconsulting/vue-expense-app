@@ -3,7 +3,7 @@
     <v-row>
       <v-col>
         <v-row>
-          <v-col>
+          <v-col v-if="displayUni">
             <b>University Information:</b>
           </v-col>
         </v-row>
@@ -28,10 +28,10 @@
         </v-row>
         <!-- End University loop -->
 
-        <v-divider :thickness="4" class="border-opacity-25 mb-5"></v-divider>
+        <v-divider v-if="displayUni" :thickness="4" class="border-opacity-25 mb-5"></v-divider>
 
         <v-row>
-          <v-col>
+          <v-col v-if="displayMilitary">
             <b>Military Information:</b>
           </v-col>
         </v-row>
@@ -51,9 +51,9 @@
         </v-row>
         <!-- End military loop -->
 
-        <v-divider :thickness="4" class="border-opacity-25 my-5"></v-divider>
+        <v-divider v-if="displayMilitary" :thickness="4" class="border-opacity-25 my-5"></v-divider>
 
-        <v-row>
+        <v-row v-if="displayHS">
           <v-col>
             <b>High School Information</b>
           </v-col>
@@ -74,7 +74,7 @@
         </v-row>
         <!-- End high school loop -->
 
-        <v-divider :thickness="4" class="border-opacity-25 my-5"></v-divider>
+        <v-divider v-if="displayHS" :thickness="4" class="border-opacity-25 my-5"></v-divider>
 
         <!-- Start add education -->
         <v-row>
@@ -112,6 +112,7 @@ import { inject, onBeforeMount, ref } from 'vue';
 import UniversityForm from '../forms/education-forms/UniversityForm.vue';
 import MilitaryForm from '../forms/education-forms/MilitaryForm.vue';
 import HighSchoolForm from '../forms/education-forms/HighSchoolForm.vue';
+import { computed } from 'vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -161,6 +162,39 @@ onBeforeMount(async () => {
     }
   });
 }); // onBeforeMount
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                   COMPUTED                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const displayHS = computed(() => {
+  for (let i = 0; i < editedEducation.value.length; i++) {
+    if (editedEducation.value[i].type === 'highSchool') {
+      return true;
+    }
+  }
+  return false;
+});
+
+const displayUni = computed(() => {
+  for (let i = 0; i < editedEducation.value.length; i++) {
+    if (editedEducation.value[i].type === 'university') {
+      return true;
+    }
+  }
+  return false;
+});
+
+const displayMilitary = computed(() => {
+  for (let i = 0; i < editedEducation.value.length; i++) {
+    if (editedEducation.value[i].type === 'military') {
+      return true;
+    }
+  }
+  return false;
+});
 
 // |--------------------------------------------------|
 // |                                                  |
