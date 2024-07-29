@@ -74,8 +74,10 @@ function toggleEdit() {
     emitter.emit('editing', 'Certifications + Awards');
   } else if (props.title === 'Education') {
     emitter.emit('editing', 'Education');
-  } else if (props.title === 'Technologies and Skills' || props.title === 'Foreign Languages') {
-    emitter.emit('editing', 'Tech, Skills, and Languages');
+  } else if (props.title === 'Technologies and Skills') {
+    emitter.emit('editing', 'Tech and Skills');
+  } else if (props.title === 'Foreign Languages') {
+    emitter.emit('editing', 'Languages');
   } else {
     emitter.emit('Personal Information');
   }
