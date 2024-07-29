@@ -3,24 +3,20 @@
     <v-list-item v-for="(technology, index) in list" :key="technology.name + index" class="px-2">
       <v-row class="align-center" dense>
         <v-col cols="auto">
-          <span v-if="technology.current">
+          <span class="d-inline" v-if="technology.current">
             <v-icon>mdi-check</v-icon>
             <v-tooltip activator="parent" location="left">Current Skill</v-tooltip>
           </span>
           <v-spacer v-else style="min-width: 24px"></v-spacer>
         </v-col>
-        <v-col v-if="isModal && !isMobile()" class="margin-y ml-2 align-center" cols="10" style="width: 375px">
+        <v-col class="margin-y mx-2 align-center">
           <!-- there's margin on paragraphs that needs to be removed here -->
-          <p class="title-text ma-0">
+          <p class="d-inline title-text ma-0">
             <b>{{ technology.name }}</b>
           </p>
         </v-col>
-        <v-col v-else class="margin-y ml-2 d-flex align-center justify-space-between" cols="9">
-          <!-- if a skill/tech has a long name then it gets cut off with a ... -->
-          <p class="title-text ma-0" style="width: 16ch; overflow: hidden; text-overflow: ellipsis">
-            <b>{{ technology.name }}</b>
-          </p>
-          <p class="gray-text ma-0">{{ Number(technology.years).toFixed(1) }} years</p>
+        <v-col cols="4">
+          <p class="gray-text my-0 mx-4 d-inline">{{ Number(technology.years).toFixed(1) }} years</p>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-5">
@@ -52,7 +48,6 @@ defineProps({
 <style scoped>
 .title-text {
   color: black;
-  text-wrap: nowrap;
 }
 
 .gray-text {

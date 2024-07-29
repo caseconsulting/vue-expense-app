@@ -8,7 +8,7 @@
     </template>
     <v-card-text class="px-7 pt-5 pb-1 text-black">
       <p v-if="!isEmpty(getAIN())"><b>AIN:</b> {{ getAIN() }}</p>
-      <p v-if="!isEmpty(getEmployeeRole())"><b>EMP ROLE:</b> {{ _.startCase(getEmployeeRole()) }}</p>
+      <p v-if="!isEmpty(getEmployeeRole())"><b>Employee Role:</b> {{ _.startCase(getEmployeeRole()) }}</p>
       <p><b>EEO Status:</b> {{ eeoStatus() }}</p>
       <div class="text-center" style="padding-bottom: 5px">
         <v-btn size="small" variant="tonal" @click="toggleView()" v-if="getEEOFilled()">View EEO Data</v-btn>
