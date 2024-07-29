@@ -10,10 +10,10 @@
         </p>
       </div>
       <div v-else style="font-size: 15px; text-align: center" class="mt-3">
-        <p><b>No contracts are currently active, to view past assignments click below.</b></p>
+        <p>No current contracts</p>
       </div>
     </v-card-text>
-    <v-card-text style="text-align: center" v-else> No contract Information </v-card-text>
+    <v-card-text style="text-align: center" v-else> No Contract Information </v-card-text>
     <v-card-actions>
       <v-btn block @click="open">Click to see more</v-btn>
     </v-card-actions>

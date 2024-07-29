@@ -3,12 +3,12 @@
     <v-list-item v-for="(edu, index) in list" :key="edu + index">
       <!-- START UNIVERSITY SECTION -->
       <div v-if="edu.type === 'university'">
-        <v-list-item-title class="d-flex align-center">
-          <v-icon class="mx-3">mdi-school-outline</v-icon>
-          <p class="mt-3">
+        <v-list-item-title class="align-center">
+          <v-icon class="d-inline mx-3">mdi-school-outline</v-icon>
+          <p class="d-inline mt-3">
             <b>{{ edu.name }}</b>
           </p>
-          <p class="my-2 mx-6 date-text" v-if="edu.degrees.length === 1 && edu.degrees[0].completionDate">
+          <p class="my-2 mx-6 px-6 date-text" v-if="edu.degrees.length === 1 && edu.degrees[0].completionDate">
             {{ monthYearFormatBETA(edu.degrees[0].completionDate) }}
           </p>
         </v-list-item-title>
@@ -25,12 +25,12 @@
 
       <!-- START MILITARY SECTION -->
       <div v-if="edu.type === 'military'">
-        <v-list-item-title class="d-flex align-center">
-          <v-icon class="mx-3">mdi-school-outline</v-icon>
-          <p class="mt-3">
+        <v-list-item-title class="align-center">
+          <v-icon class="d-inline mx-3">mdi-school-outline</v-icon>
+          <p class="d-inline mt-3">
             <b>{{ edu.branch }} (Military Service)</b>
           </p>
-          <p class="my-2 mx-6" style="color: #828282" v-if="edu.completeDate">
+          <p class="my-2 mx-6 px-6" style="color: #828282" v-if="edu.completeDate">
             {{ monthYearFormatBETA(edu.startDate) }} - {{ monthYearFormatBETA(edu.completeDate) }}
           </p>
           <p v-else>{{ monthYearFormatBETA(edu.startDate) }} - Present</p>
@@ -40,12 +40,12 @@
 
       <!-- START HIGHSCHOOL SECTION -->
       <div v-if="edu.type === 'highSchool'">
-        <v-list-item-title class="d-flex align-center">
-          <v-icon class="mx-3">mdi-school-outline</v-icon>
-          <p class="mt-3">
+        <v-list-item-title class="align-center">
+          <v-icon class="d-inline mx-3">mdi-school-outline</v-icon>
+          <p class="d-inline mt-3">
             <b>{{ edu.name }}</b>
           </p>
-          <p class="my-2 mx-6" style="color: #828282" v-if="edu.gradDate">
+          <p class="my-2 mx-6 px-6" style="color: #828282" v-if="edu.gradDate">
             {{ monthYearFormatBETA(edu.gradDate) }}
           </p>
         </v-list-item-title>
