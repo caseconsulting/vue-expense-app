@@ -1,14 +1,18 @@
 <template v-slot="{ active }">
   <div id="available-budgets">
     <v-card>
-      <v-card-title class="d-flex align-center header_style">
-        <router-link class="no-decoration" v-if="isUser" to="/myBudgets">
+      <v-card-title class="d-flex align-center justify-space-between header_style">
+        <h4 v-if="budgets.length > 0 && !viewingCurrentBudgetYear" class="text-white text-wrap px-2">
+          {{ viewingBudgetYear }}
+        </h4>
+        <router-link v-else-if="isUser" class="no-decoration" to="/myBudgets">
           <h3 id="link" class="text-white px-2">Available Budgets</h3>
         </router-link>
         <h3 v-else class="text-white px-2">Available Budgets</h3>
+        <v-icon @click="changingBudgetView = !changingBudgetView" icon="mdi-history" class="pr-4" />
       </v-card-title>
       <v-card-text class="px-0 pt-5 pb-1 text-black">
-        <div v-if="loading || employeeDataLoading" class="pb-4">
+        <div v-if="loading || employeeDataLoading" class="pb-4 px-4">
           <v-progress-linear :indeterminate="true"></v-progress-linear>
         </div>
         <div v-else>
@@ -68,6 +72,12 @@
       </v-card-text>
     </v-card>
     <available-budget-summary :activator="showDialog" :selectedBudget="selectedBudget"></available-budget-summary>
+    <budget-select-modal
+      :toggleBudgetSelectModal="changingBudgetView"
+      :budgetYears="budgetYears"
+      :current="fiscalDateView"
+      :hireDate="hireDate"
+    ></budget-select-modal>
   </div>
 </template>
 
@@ -76,8 +86,9 @@ import _ from 'lodash';
 import api from '@/shared/api.js';
 import AvailableBudgetSummary from '@/components/shared/AvailableBudgetSummary.vue';
 import BudgetChart from '@/components/charts/custom-charts/BudgetChart.vue';
+import BudgetSelectModal from '@/components/modals/BudgetSelectModal.vue';
 import { convertToMoneyString, getCurrentBudgetYear, isFullTime } from '@/utils/utils';
-import { getTodaysDate, getYear, isBetween } from '@/shared/dateUtils';
+import { format, getTodaysDate, getYear, isBetween, DEFAULT_ISOFORMAT } from '@/shared/dateUtils';
 import { inject, onBeforeMount, onBeforeUnmount, ref, watch, computed } from 'vue';
 import { useStore } from 'vuex';
 
@@ -94,6 +105,7 @@ const props = defineProps([
   'accessibleBudgets',
   'fiscalDateView',
   'employeeDataLoading',
+  'viewingCurrentBudgetYear',
   'refreshKey'
 ]);
 const emitter = inject('emitter');
@@ -103,7 +115,9 @@ const isAdmin = inject('isAdmin');
 const isUser = inject('isUser');
 const allUserBudgets = ref([]);
 const budgets = ref([]);
+const budgetYears = ref([]);
 const budgetChartDropdown = ref(JSON.parse(localStorage.getItem('budgetChartDropdown') ?? '[]'));
+const changingBudgetView = ref(false);
 const currentUser = ref(null);
 const date = ref('');
 const hireDate = ref('');
@@ -132,9 +146,9 @@ onBeforeMount(async () => {
   currentUser.value = store.getters.user;
   if (props.accessibleBudgets && props.expenseTypes) {
     await refreshEmployee();
-    await refreshBudget();
+  } else {
+    loading.value = false;
   }
-  loading.value = false;
 }); // created
 
 /**
@@ -155,15 +169,13 @@ const dropdownTitle = computed(
   () => `Budget Chart for ${props.fiscalDateView.split('-')[0]} - ${Number(props.fiscalDateView.split('-')[0]) + 1}`
 );
 
-// /**
-//  * returns as true if the current signed in user has the same id as the employee prop
-//  *
-//  * @return boolean - current signed in user has the same id as the employee prop
-//  */
-// const isUser = computed(() => {
-//   return props.employee && currentUser.value && props.employee.id == currentUser.value.id;
-// }); // isUser
-
+const viewingBudgetYear = computed(() => {
+  const getFiscalYearView = parseInt(props.fiscalDateView.split('-')[0]);
+  if (!props.viewingCurrentBudgetYear) {
+    return `Viewing inactive budgets from ${getFiscalYearView} - ${getFiscalYearView + 1}`;
+  }
+  return 'Available Budgets';
+});
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -196,7 +208,7 @@ async function refreshBudget() {
   let budgetsVar;
   let existingBudgets;
 
-  if (props.fiscalDateView == getCurrentBudgetYear(hireDate.value)) {
+  if (props.viewingCurrentBudgetYear) {
     // viewing active budget year
     budgetsVar = props.accessibleBudgets;
   } else {
@@ -252,14 +264,40 @@ async function refreshBudget() {
  * Refresh and sets employee information.
  */
 async function refreshEmployee() {
+  loading.value = true;
+
   date.value = props.fiscalDateView;
-  hireDate.value = props.employee.hireDate;
+  hireDate.value = format(props.employee.hireDate, null, DEFAULT_ISOFORMAT);
   if (!date.value) {
     date.value = getCurrentBudgetYear(hireDate.value);
   }
   let [tempAllUserBudgets] = await Promise.all([api.getEmployeeBudgets(props.employee.id), refreshBudget()]);
   allUserBudgets.value = tempAllUserBudgets;
+  refreshBudgetYears();
+
+  loading.value = false;
 } // refreshEmployee
+
+/**
+ * Refresh and sets the budget year view options for the employee.
+ */
+function refreshBudgetYears() {
+  let tempBudgetYears = [];
+  // push all employee budget years
+  let budgetDates = _.uniqBy(_.map(allUserBudgets.value, 'fiscalStartDate'));
+  budgetDates.forEach((date) => {
+    const [year] = date.split('-');
+    tempBudgetYears.push(parseInt(year));
+  });
+  // push active budget year
+  let [currYear] = getCurrentBudgetYear(hireDate.value).split('-');
+  tempBudgetYears.push(parseInt(currYear));
+  // remove duplicate years and filter to include only active and previous years
+  tempBudgetYears = _.filter(_.uniqBy(tempBudgetYears), (year) => {
+    return parseInt(year) <= parseInt(currYear);
+  });
+  budgetYears.value = _.reverse(_.sortBy(tempBudgetYears)); // sort budgets from current to past
+} // refreshBudgetYears
 
 /**
  * Selects the budget for the dialog box.
