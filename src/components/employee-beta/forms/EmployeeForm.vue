@@ -243,6 +243,7 @@ async function submit(event) {
     const oldValue = props.employee[key];
     const newValue = value;
     const changed = !isEqual(oldValue, newValue);
+
     if (changed) {
       // TODO test
       console.log('Changed:', key);

@@ -167,18 +167,17 @@
           prepend-inner-icon="mdi-calendar"
           autocomplete="off"
           style="min-width: 200px"
-          @update:focused="editedEmployee.birthday = format(formattedBirthday, null, 'YYYY-MM-DD')"
           @keypress="birthdayMenu = false"
         >
           <v-menu activator="parent" :close-on-content-click="false" v-model="birthdayMenu" location="start center">
             <v-date-picker
-              v-model="formattedBirthday"
-              @update:model-value="birthdayMenu = false"
+              v-model="birthday"
               show-adjacent-months
               hide-actions
               keyboard-icon=""
               color="#bc3825"
               title="Birthday"
+              @update:model-value="onUpdateDatePicker($event)"
             >
             </v-date-picker>
           </v-menu>
@@ -339,6 +338,7 @@ import {
   getURLRules
 } from '@/shared/validationUtils';
 import { COUNTRIES, isMobile, STATES } from '@/utils/utils';
+import dayjs from 'dayjs';
 import { cloneDeep, filter, forEach, includes, isEmpty, lowerCase, some, startCase } from 'lodash';
 import { computed, inject, onBeforeUnmount, ref } from 'vue';
 import { mask } from 'vue-the-mask';
@@ -368,7 +368,6 @@ const hasMiddleName = ref(!editedEmployee.value.noMiddleName);
 const middleName = ref(editedEmployee.value.middleName);
 const employeeRole = ref(startCase(editedEmployee.value.employeeRole));
 const tags = ref(getEmployeeTags());
-const formattedBirthday = ref(format(editedEmployee.value.birthday, ISO8601, FORMATTED_ISOFORMAT));
 const phoneNumbers = ref(initPhoneNumbers());
 const personalEmail = ref({ emailValue: editedEmployee.value.personalEmail, private: true });
 
@@ -425,6 +424,28 @@ const employeeNumberRules = computed(() => [
 const userIsAdminOrManager = computed(() => {
   const role = store.getters.user.employeeRole;
   return role === 'admin' || role === 'manager';
+});
+
+/**
+ * Dayjs object that wraps the birthday
+ *
+ * @type {import('vue').WritableComputedRef<import('dayjs').Dayjs>}
+ */
+const birthday = computed({
+  get: () => dayjs(editedEmployee.value.birthday, ISO8601),
+  set: (val) => (editedEmployee.value.birthday = val.format(ISO8601))
+});
+
+/**
+ * Formatted string of the employee's birthday
+ *
+ * @type {import('vue').WritableComputedRef<string>}
+ */
+const formattedBirthday = computed({
+  get: () => birthday.value.format(FORMATTED_ISOFORMAT),
+  set: (val) => {
+    birthday.value = dayjs(val);
+  }
 });
 
 // |--------------------------------------------------|
