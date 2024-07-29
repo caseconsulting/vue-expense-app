@@ -1,6 +1,7 @@
 <template>
   <div id="app" @mousedown="refreshSession()">
     <v-app>
+      <status-snackbar></status-snackbar>
       <v-icon color="purple-lighten-5" id="jellyfish">mdi-jellyfish</v-icon>
       <v-navigation-drawer
         v-if="isLoggedIn()"
@@ -169,6 +170,7 @@ import MainNav from '@/components/utils/MainNav.vue';
 import NotificationBanners from '@/components/utils/NotificationBanners.vue';
 import SwitchRoleModal from '@/components/modals/SwitchRoleModal.vue';
 import TimeOutWarningModal from '@/components/modals/TimeOutWarningModal.vue';
+import StatusSnackbar from '@/components/shared/StatusSnackbar.vue';
 import { onBeforeMount, onBeforeUnmount, ref, computed, inject, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';

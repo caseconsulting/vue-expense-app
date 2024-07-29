@@ -26,8 +26,18 @@
         v-for="(position, posIndex) in company.positions"
         :key="position.title + posIndex"
       >
-        <p class="d-inline">{{ position.title }}</p>
-        <p class="my-2 mx-6 months-text">{{ getDurationOfPosition(position) }} months</p>
+        <p class="d-inline">{{ position.title }}:</p>
+        <p class="my-2 mx-5 months-text">
+          <a v-if="Math.floor(getDurationOfPosition(position) / 12) > 1"
+            >{{ Math.floor(getDurationOfPosition(position) / 12) }} Years and</a
+          >
+          <a v-else-if="Math.floor(getDurationOfPosition(position) / 12) == 1"
+            >{{ Math.floor(getDurationOfPosition(position) / 12) }} Year and</a
+          >
+          {{ getDurationOfPosition(position) % 12 }}
+          <a v-if="getDurationOfPosition(position) % 12 != 1"> Months </a>
+          <a v-else-if="getDurationOfPosition(position) % 12 == 1"> Month</a>
+        </p>
       </div>
       <v-row no-gutters class="mx-5">
         <v-divider v-if="index < list.length - 1" />

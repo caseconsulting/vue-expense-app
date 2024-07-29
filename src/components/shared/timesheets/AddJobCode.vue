@@ -1,0 +1,132 @@
+<template>
+  <v-form v-model="valid" lazy-validation>
+    <v-row class="d-flex justify-space-between">
+      <v-col cols="4" class="pl-1 pb-0">
+        <v-text-field
+          v-model="jobCode"
+          :rules="[...jobCodeRules(), ...getRequiredRules()]"
+          label="Job code"
+          density="compact"
+          variant="outlined"
+        ></v-text-field>
+      </v-col>
+      <v-col cols="4" class="pb-0">
+        <v-text-field
+          v-model="duration"
+          :rules="[...durationRules(), ...getRequiredRules()]"
+          label="Duration (h)"
+          density="compact"
+          variant="outlined"
+        ></v-text-field>
+      </v-col>
+      <v-col cols="4" class="d-flex justify-end pb-0 pr-0">
+        <v-btn
+          icon
+          color="green"
+          density="comfortable"
+          :disabled="!valid || loading"
+          :loading="loading"
+          variant="text"
+          @click="save()"
+        >
+          <v-icon>mdi-content-save</v-icon>
+          <v-tooltip activator="parent">Save job code</v-tooltip>
+        </v-btn>
+        <v-btn
+          icon
+          class="ml-1"
+          color="gray"
+          density="comfortable"
+          :disabled="loading"
+          variant="text"
+          @click="cancel()"
+        >
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+      </v-col>
+    </v-row>
+  </v-form>
+</template>
+
+<script setup>
+import { ref, inject } from 'vue';
+import { getRequiredRules } from '@/shared/validationUtils';
+import api from '@/shared/api';
+import _ from 'lodash';
+import { useStore } from 'vuex';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const props = defineProps(['employee', 'timeData']);
+const emitter = inject('emitter');
+const store = useStore();
+
+const localEmployee = ref(_.cloneDeep(props.employee));
+const duration = ref(null);
+const jobCode = ref(null);
+const loading = ref(false);
+const valid = ref(false);
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Emits to parent to close add job code logic.
+ */
+function cancel() {
+  emitter.emit('close-add-job-code');
+} // cancel
+
+/**
+ * Saves the added job code to the employee object and updates the store.
+ */
+async function save() {
+  if (valid.value) {
+    loading.value = true;
+    let attribute = 'legacyJobCodes';
+    let legacyJobCodes = localEmployee.value[attribute] || {};
+    // set object exactly how it is set in the jobcodes section
+    let jobCodeObject = { [`${jobCode.value}`]: Number(duration.value) * 60 * 60 };
+    localEmployee.value[attribute] = { ...legacyJobCodes, ...jobCodeObject };
+    let value = { id: props.employee.id, [`${attribute}`]: localEmployee.value[attribute] };
+    await api.updateAttribute(api.EMPLOYEES, value, attribute);
+    let employees = store.getters.employees;
+    let index = _.findIndex(employees, (e) => e.id === localEmployee.value.id);
+    // update store
+    store.getters.employees[index] = localEmployee.value;
+    loading.value = false;
+    emitter.emit('close-add-job-code');
+  }
+} // save
+
+/**
+ * Only allows positive numbers with up to 2 decimal places.
+ *
+ * @returns Array - the duration rules
+ */
+function durationRules() {
+  return [
+    (v) => /^\d+(?:\.\d{0,2})?$/.test(v) || 'Must be a valid number',
+    (v) => Number(v) < 10000000000 || 'Duration is too large'
+  ];
+} // durationRules
+
+/**
+ * Only unique job code names.
+ *
+ * @returns Array - the job code rules
+ */
+function jobCodeRules() {
+  return [
+    (v) => !(v in props.timeData) || 'Job code already exists',
+    (v) => v?.length < 41 || 'Job code has too many characters'
+  ];
+} // jobCodeRules
+</script>

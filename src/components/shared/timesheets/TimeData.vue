@@ -22,13 +22,13 @@
           </div>
           <div v-else>
             <time-period-hours
-              :employee="employee"
+              :employee="clonedEmployee"
               :timesheets="timesheets || {}"
               :ptoBalances="ptoBalances || {}"
               :supplementalData="supplementalData || {}"
             ></time-period-hours>
             <hr class="mt-3 mb-5 mx-7" />
-            <p-t-o-hours :employee="employee" :ptoBalances="ptoBalances || {}" :system="system"></p-t-o-hours>
+            <p-t-o-hours :employee="clonedEmployee" :ptoBalances="ptoBalances || {}" :system="system"></p-t-o-hours>
           </div>
         </div>
       </v-card-text>
@@ -41,7 +41,7 @@ import TimePeriodHours from '@/components/shared/timesheets/TimePeriodHours.vue'
 import PTOHours from '@/components/shared/timesheets/PTOHours.vue';
 import _ from 'lodash';
 import api from '@/shared/api';
-import { computed, inject, ref, onBeforeMount, onBeforeUnmount } from 'vue';
+import { computed, inject, ref, watch, onBeforeMount, onBeforeUnmount } from 'vue';
 import { useStore } from 'vuex';
 import { difference, getTodaysDate, isBefore, isSameOrBefore, now } from '@/shared/dateUtils';
 import { updateStoreContracts } from '@/utils/storeUtils';
@@ -142,7 +142,7 @@ const getLastUpdatedText = computed(() => {
  * @returns Boolean - Whether or not the employee prop is the user
  */
 function employeeIsUser() {
-  return props.employee.id === store.getters.user.id;
+  return clonedEmployee.value.id === store.getters.user.id;
 } // employeeIsUser
 
 /**
@@ -225,7 +225,7 @@ function addPlanToBalances(balanceKey, itemsKey, planResults, planKey) {
  */
 function refreshPlannedPto() {
   // set plan to employee object
-  let employeePlan = props.employee.plannedPto;
+  let employeePlan = clonedEmployee.value.plannedPto;
   let planResults = {
     pto: Number(employeePlan?.results?.pto),
     holiday: Number(employeePlan?.results?.holiday),
@@ -276,10 +276,14 @@ async function resetData() {
  */
 async function setDataFromApi(isCalendarYear, isYearly) {
   let code = !isYearly ? 2 : null;
-  let period = isYearly ? (isCalendarYear ? getCalendarYearPeriod() : getContractYearPeriod(props.employee)) : null;
-  let timesheetsData = await api.getTimesheetsData(props.employee.employeeNumber, {
+  let period = isYearly
+    ? isCalendarYear
+      ? getCalendarYearPeriod()
+      : getContractYearPeriod(clonedEmployee.value)
+    : null;
+  let timesheetsData = await api.getTimesheetsData(clonedEmployee.value.employeeNumber, {
     code,
-    employeeId: props.employee.id,
+    employeeId: clonedEmployee.value.id,
     ...(period || {})
   });
   if (!hasError(timesheetsData)) {
@@ -356,6 +360,20 @@ async function setData(isCalendarYear, isYearly) {
 async function setInitialData() {
   await Promise.all([setData(), !store.getters.contracts ? updateStoreContracts() : _]);
 } // setInitialData
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+watch(
+  () => store.getters.employees,
+  () => {
+    clonedEmployee.value = _.find(store.getters.employees, (e) => e.id === clonedEmployee.value.id);
+  },
+  { deep: true }
+);
 </script>
 
 <style scoped>

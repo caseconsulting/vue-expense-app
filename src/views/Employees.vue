@@ -1,20 +1,6 @@
 <!-- eslint-disable vue/no-v-model-argument -->
 <template>
   <div>
-    <!-- Status Alert -->
-    <v-snackbar
-      v-model="status.show"
-      :color="status.color"
-      :multi-line="true"
-      location="top end"
-      :timeout="5000"
-      :vertical="true"
-    >
-      <v-card-text color="white">
-        <span class="text-h6 font-weight-medium">{{ status.statusMessage }}</span>
-      </v-card-text>
-      <v-btn color="white" variant="text" @click="clearStatus()"> Close </v-btn>
-    </v-snackbar>
     <v-card>
       <v-container fluid class="px-0 px-md-4">
         <!-- Title -->
@@ -320,6 +306,7 @@ import { format } from '../shared/dateUtils';
 import { ref, inject, onBeforeMount, onBeforeUnmount, computed, watch } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import { useDisplaySuccess, useDisplayError } from '@/components/shared/StatusSnackbar.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -424,11 +411,6 @@ const model = ref({
 }); // selected employee
 const search = ref(null); // query text for datatable search field
 const sortBy = ref([{ key: 'hireDate', order: 'asc' }]); // sort datatable items
-const status = ref({
-  statusType: undefined,
-  statusMessage: null,
-  color: null
-}); // snackbar action status
 const showExportDataModal = ref(false);
 const syncing = ref(false);
 const tags = ref([]);
@@ -445,16 +427,6 @@ const toggleEmployeesSyncModal = ref(false);
 // |--------------------------------------------------|
 
 /**
- * Clear the action status that is displayed in the snackbar.
- */
-function clearStatus() {
-  status.value['show'] = false;
-  status.value['statusType'] = undefined;
-  status.value['statusMessage'] = null;
-  status.value['color'] = null;
-} // clearStatus
-
-/**
  * Delete an employee and display status.
  */
 async function deleteEmployee() {
@@ -464,7 +436,7 @@ async function deleteEmployee() {
     await deleteModelFromTable();
   } else {
     // display error if failed to deleted employee
-    displayError(e.response.data.message);
+    useDisplayError(e.response.data.message);
   }
   midAction.value = false;
 } // deleteEmployee
@@ -475,23 +447,8 @@ async function deleteEmployee() {
 async function deleteModelFromTable() {
   await refreshEmployees();
 
-  status.value['show'] = true;
-  status.value['statusType'] = 'SUCCESS';
-  status.value['statusMessage'] = 'Employee was successfully deleted!';
-  status.value['color'] = 'green';
+  useDisplaySuccess('Employee was successfully deleted!', 5000, 'top right', 'green');
 } // deleteModelFromTable
-
-/**
- * Set and display an error action status in the snackbar.
- *
- * @param err - String error message
- */
-function displayError(err) {
-  status.value['show'] = true;
-  status.value['statusType'] = 'ERROR';
-  status.value['statusMessage'] = err;
-  status.value['color'] = 'red';
-} // displayError
 
 /**
  * sets midAction boolean to false
@@ -670,7 +627,7 @@ async function validateDelete(item) {
       invalidDelete.value = !invalidDelete.value;
     }
   } catch (err) {
-    displayError(err);
+    useDisplayError(err);
   }
 } // validateDelete
 

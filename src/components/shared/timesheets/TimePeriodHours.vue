@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :key="refreshKey">
     <v-row class="bottom-border d-flex justify-space-evenly pa-0 pb-2 my-1 mx-7">
       <v-btn
         variant="text"
@@ -141,6 +141,7 @@
         <v-skeleton-loader v-if="timePeriodLoading" type="list-item@4"></v-skeleton-loader>
         <time-period-job-codes
           v-else
+          :employee="employee"
           :isCalendarYear="isCalendarYear"
           :isYearly="isYearly"
           :supplementalData="supplementalDataWithPlan"
@@ -175,6 +176,7 @@ const periodIndex = ref(props.timesheets.length - 1);
 const isYearly = ref(false);
 const isCalendarYear = ref(false);
 const timePeriodLoading = ref(false);
+const refreshKey = ref(0);
 let plannedTimeData = reactive({});
 
 // |--------------------------------------------------|
@@ -218,6 +220,8 @@ const dateIsCurrentPeriod = computed(() => {
  */
 const timeData = computed(() => {
   let timesheets = { ...props.timesheets[periodIndex.value].timesheets };
+  if (isYearly.value && !isCalendarYear.value && props.employee.legacyJobCodes)
+    timesheets = { ...timesheets, ...props.employee.legacyJobCodes };
   // add in planned pto/holiday
   if (plannedTimeData) {
     if (plannedTimeData.PTO) {

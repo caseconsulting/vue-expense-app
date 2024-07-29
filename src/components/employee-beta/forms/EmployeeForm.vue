@@ -5,6 +5,8 @@
     scrollable
     @click:outside="toggleCancelConfirmation = true"
     @keydown.esc="toggleCancelConfirmation = true"
+    id="employee-form"
+    :width="smAndDown ? '100%' : '70%'"
   >
     <v-card>
       <v-card-title
@@ -48,7 +50,7 @@
                 ></contracts-tab>
               </div>
             </base-form>
-            <base-form title="Certifications + Awards" value="Certifications + Awards">
+            <base-form title="Certifications & Awards" value="Certifications & Awards">
               <div>
                 <certs-and-awards-tab
                   :certifications="employee.certifications"
@@ -58,16 +60,11 @@
                 ></certs-and-awards-tab>
               </div>
             </base-form>
-            <base-form title="Tech, Skills, and Languages" value="Tech, Skills, and Languages">
-              <v-row style="overflow-x: auto">
-                <v-col style="min-width: 380px">
-                  <technologies-form v-model="editedEmployee"></technologies-form>
-                </v-col>
-                <v-divider vertical inset></v-divider>
-                <v-col style="min-width: 380px">
-                  <languages-form v-model="editedEmployee"></languages-form>
-                </v-col>
-              </v-row>
+            <base-form title="Tech and Skills" value="Tech and Skills">
+              <technologies-form v-model="editedEmployee"></technologies-form>
+            </base-form>
+            <base-form title="Languages" value="Languages">
+              <languages-form v-model="editedEmployee"></languages-form>
             </base-form>
             <base-form title="Job Experience" value="Past Experience">
               <div>
@@ -118,6 +115,7 @@ import CertsAndAwardsTab from '../form-tabs/CertsAndAwardsTab.vue';
 import ClearanceTab from '../form-tabs/ClearanceTab.vue';
 import ContractsTab from '../form-tabs/ContractsTab.vue';
 import _ from 'lodash';
+import { useDisplay } from 'vuetify';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -126,6 +124,7 @@ import _ from 'lodash';
 // |--------------------------------------------------|
 
 const emitter = inject('emitter');
+const { smAndDown } = useDisplay();
 
 const props = defineProps(['employee', 'contracts']);
 const editedEmployee = ref(cloneDeep(props.employee));

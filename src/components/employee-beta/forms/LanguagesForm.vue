@@ -1,11 +1,6 @@
 <template>
   <v-container>
     <v-row><h3>Languages</h3></v-row>
-    <v-row>
-      <v-col class="d-flex justify-center">
-        <v-btn prepend-icon="mdi-plus" @click="addLanguage()">Add Language</v-btn>
-      </v-col>
-    </v-row>
     <v-row v-for="(language, index) in editedEmployee.languages" :key="language + index">
       <v-col>
         <v-row>
@@ -29,7 +24,7 @@
           </v-col>
         </v-row>
         <v-row v-if="index < editedEmployee.languages.length - 1" class="pb-4">
-          <v-divider></v-divider>
+          <v-divider class="border-opacity-25"></v-divider>
         </v-row>
       </v-col>
     </v-row>
