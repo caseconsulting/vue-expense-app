@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <v-row><h3>Languages</h3></v-row>
+    <v-row><h3>Foreign Languages</h3></v-row>
     <v-row v-for="(language, index) in editedEmployee.languages" :key="language + index">
       <v-col>
         <v-row>

@@ -63,7 +63,7 @@
             <base-form title="Tech and Skills" value="Tech and Skills">
               <technologies-form v-model="editedEmployee"></technologies-form>
             </base-form>
-            <base-form title="Languages" value="Languages">
+            <base-form title="Foreign Languages" value="Languages">
               <languages-form v-model="editedEmployee"></languages-form>
             </base-form>
             <base-form title="Job Experience" value="Past Experience">
