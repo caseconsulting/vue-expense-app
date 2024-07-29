@@ -9,7 +9,7 @@
     <v-card-text class="px-7 pt-5 pb-1 text-black">
       <p v-if="!isEmpty(getAIN())"><b>AIN:</b> {{ getAIN() }}</p>
       <p v-if="!isEmpty(getEmployeeRole())"><b>EMP ROLE:</b> {{ _.startCase(getEmployeeRole()) }}</p>
-      <p><b>EEO Status:</b> {{ eeoStatus() }}</p>
+      <p><b>EEO Status:</b> {{ getSelfIdentified() }} {{ eeoStatus() }}</p>
       <div class="text-center" style="padding-bottom: 5px">
         <v-btn size="small" variant="tonal" @click="toggleView()" v-if="getEEOFilled()">View EEO Data</v-btn>
         <v-btn size="small" @click="toggleEdit()" v-else>Complete EEO Form</v-btn>
@@ -96,6 +96,15 @@ function getEEOFilled() {
     !isEmpty(props.model.eeoHasDisability) &&
     !isEmpty(props.model.eeoIsProtectedVeteran)
   );
+}
+
+/**
+ * Return whether employee declined self identification
+ *
+ * @return String - self identified or not
+ */
+function getSelfIdentified() {
+  return props.model.eeoDeclineSelfIdentify ? 'Declined self-identify, Form ' : 'Form';
 }
 
 /**
