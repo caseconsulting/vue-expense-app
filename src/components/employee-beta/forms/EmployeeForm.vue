@@ -5,6 +5,8 @@
     scrollable
     @click:outside="toggleCancelConfirmation = true"
     @keydown.esc="toggleCancelConfirmation = true"
+    id="employee-form"
+    :width="smAndDown ? '100%' : '70%'"
   >
     <v-card>
       <v-card-title
@@ -118,6 +120,7 @@ import CertsAndAwardsTab from '../form-tabs/CertsAndAwardsTab.vue';
 import ClearanceTab from '../form-tabs/ClearanceTab.vue';
 import ContractsTab from '../form-tabs/ContractsTab.vue';
 import _ from 'lodash';
+import { useDisplay } from 'vuetify';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -126,6 +129,7 @@ import _ from 'lodash';
 // |--------------------------------------------------|
 
 const emitter = inject('emitter');
+const { smAndDown } = useDisplay();
 
 const props = defineProps(['employee', 'contracts']);
 const editedEmployee = ref(cloneDeep(props.employee));
