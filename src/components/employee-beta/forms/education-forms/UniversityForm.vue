@@ -33,8 +33,8 @@
                   clearable
                 >
                   <template v-if="uni.degrees.length > 1" v-slot:append>
-                    <v-btn @click="deleteDegree(dIndex)" variant="text" density="comfortable" icon="">
-                      <v-tooltip activator="parent" location="bottom">Delete Degree</v-tooltip>
+                    <v-btn @click="deleteDegree(dIndex)" variant="text" density="compact" icon="">
+                      <v-tooltip activator="parent">Delete Degree</v-tooltip>
                       <v-icon :color="caseGray" class="pr-1">mdi-delete</v-icon>
                     </v-btn>
                   </template>
@@ -97,10 +97,10 @@
                       v-if="degree.majors.length > 1"
                       variant="text"
                       icon=""
-                      density="comfortable"
+                      density="compact"
                       @click="deleteItem(degree.majors, mIndex)"
                     >
-                      <v-tooltip activator="parent" location="bottom">Delete Major</v-tooltip>
+                      <v-tooltip activator="parent">Delete Major</v-tooltip>
                       <v-icon :color="caseGray">mdi-delete</v-icon>
                     </v-btn>
                   </template>
@@ -119,8 +119,8 @@
                   clearable
                 >
                   <template v-slot:append>
-                    <v-btn variant="text" icon="" density="comfortable" @click="deleteItem(degree.minors, minIndex)">
-                      <v-tooltip activator="parent" location="bottom">Delete Minor</v-tooltip>
+                    <v-btn variant="text" icon="" density="compact" @click="deleteItem(degree.minors, minIndex)">
+                      <v-tooltip activator="parent">Delete Minor</v-tooltip>
                       <v-icon :color="caseGray">mdi-delete</v-icon>
                     </v-btn>
                   </template>
@@ -145,11 +145,11 @@
                   <template v-slot:append>
                     <v-btn
                       variant="text"
-                      density="comfortable"
+                      density="compact"
                       icon=""
                       @click="deleteItem(degree.concentrations, cIndex)"
                     >
-                      <v-tooltip activator="parent" location="bottom">Delete Concentration</v-tooltip>
+                      <v-tooltip activator="parent">Delete Concentration</v-tooltip>
                       <v-icon :color="caseGray">mdi-delete</v-icon>
                     </v-btn>
                   </template>
@@ -196,7 +196,7 @@ import { onBeforeMount, ref } from 'vue';
 import { getDateMonthYearOptionalRules, getRequiredRules } from '../../../../shared/validationUtils';
 import { SCHOOLS } from '../../../employees/form-tabs/dropdown-info/schools';
 import { useStore } from 'vuex';
-import majorsAndMinors from '../../../employees/form-tabs/dropdown-info/majorsAndMinors';
+import { majorsAndMinors } from '../../../employees/form-tabs/dropdown-info/majorsAndMinors';
 import { mask } from 'vue-the-mask';
 import { computed } from 'vue';
 
