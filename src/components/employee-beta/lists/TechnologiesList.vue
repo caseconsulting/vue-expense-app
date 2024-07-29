@@ -27,7 +27,6 @@
 </template>
 
 <script setup>
-import { isMobile } from '@/utils/utils';
 // |--------------------------------------------------|
 // |                                                  |
 // |                      SETUP                       |

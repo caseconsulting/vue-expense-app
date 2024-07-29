@@ -11,7 +11,7 @@
           <p class="gray-text mt-3"><b>Fluency: </b>{{ shortenProficiency(language.proficiency) }}</p>
         </v-col>
       </v-row>
-      <v-row no-gutters class="mx-5 mb-3">
+      <v-row no-gutters class="mx-5 my-2">
         <v-divider v-if="index < list.length - 1" />
       </v-row>
     </v-list-item>
