@@ -109,7 +109,7 @@
         <v-text-field
           v-model="emailUsername"
           label="CASE Email"
-          @blur="removeEmailDomain()"
+          @update:model-value="removeEmailDomain()"
           :suffix="CASE_EMAIL_DOMAIN"
           :rules="getCaseEmailRules()"
         ></v-text-field>
