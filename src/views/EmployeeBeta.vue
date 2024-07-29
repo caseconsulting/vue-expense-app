@@ -76,14 +76,15 @@
         <v-col v-if="displayTimeAndBalances" cols="12" lg="4" class="pt-0" height>
           <time-data :key="model" :employee="model" class="my-4" />
           <employee-budgets
-            :refreshKey="refreshKey"
-            class="mb-4"
             :employee="model"
             :expenses="expenses"
             :expense-types="expenseTypes"
             :accessible-budgets="accessibleBudgets"
             :employee-data-loading="loading"
             :fiscal-date-view="fiscalDateView"
+            :viewing-current-budget-year="viewingCurrentBudgetYear"
+            :refreshKey="refreshKey"
+            class="mb-4"
           />
         </v-col>
         <v-col cols="12" :lg="displayTimeAndBalances ? 8 : 11" class="pa-0">
@@ -194,6 +195,7 @@ const refreshKey = readonly({
 const user = ref(null);
 const inSearchMode = ref(false);
 const dropdownEmployee = ref(null);
+const viewingCurrentBudgetYear = ref(true);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -214,6 +216,12 @@ onMounted(() => {
   emitter.on('update', (updatedEmployee) => {
     if (updatedEmployee) {
       model.value = updatedEmployee;
+    }
+  });
+  emitter.on('selected-budget-year', (date) => {
+    if (date != fiscalDateView.value) {
+      fiscalDateView.value = date;
+      viewingCurrentBudgetYear.value = false;
     }
   });
 });
@@ -292,7 +300,7 @@ async function getProfileData() {
   isUser.value = userIsEmployee();
   basicEmployeeDataLoading.value = false;
   if (model.value) {
-    refreshExpenseData(true); //TODO: Implement Expenses
+    refreshExpenseData(true);
   }
   loading.value = false;
 } // getProfileData

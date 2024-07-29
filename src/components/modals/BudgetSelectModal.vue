@@ -54,8 +54,7 @@ const props = defineProps([
   'toggleBudgetSelectModal', // dialog activator
   'budgetYears', // all budget years
   'current', // current fiscal date view
-  'hireDate', // employee hire date
-  'hasBudgets'
+  'hireDate' // employee hire date
 ]);
 const emitter = inject('emitter');
 
