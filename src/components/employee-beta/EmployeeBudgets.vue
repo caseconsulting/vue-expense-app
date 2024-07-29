@@ -2,9 +2,9 @@
   <div id="available-budgets">
     <v-card>
       <v-card-title class="d-flex align-center justify-space-between header_style">
-        <h4 v-if="budgets.length > 0 && !viewingCurrentBudgetYear" class="text-white text-wrap px-2">
+        <h3 v-if="budgets.length > 0 && !viewingCurrentBudgetYear" class="text-white text-wrap px-2">
           {{ viewingBudgetYear }}
-        </h4>
+        </h3>
         <router-link v-else-if="isUser" class="no-decoration" to="/myBudgets">
           <h3 id="link" class="text-white px-2">Available Budgets</h3>
         </router-link>
@@ -91,7 +91,7 @@ import { convertToMoneyString, getCurrentBudgetYear, isFullTime } from '@/utils/
 import { format, getTodaysDate, getYear, isBetween, DEFAULT_ISOFORMAT } from '@/shared/dateUtils';
 import { inject, onBeforeMount, onBeforeUnmount, ref, watch, computed } from 'vue';
 import { useStore } from 'vuex';
-
+import { useDisplay } from 'vuetify';
 // |--------------------------------------------------|
 // |                                                  |
 // |                       SETUP                      |
@@ -110,6 +110,7 @@ const props = defineProps([
 ]);
 const emitter = inject('emitter');
 const store = useStore();
+const { smAndDown } = useDisplay();
 
 const isAdmin = inject('isAdmin');
 const isUser = inject('isUser');
@@ -169,12 +170,17 @@ const dropdownTitle = computed(
   () => `Budget Chart for ${props.fiscalDateView.split('-')[0]} - ${Number(props.fiscalDateView.split('-')[0]) + 1}`
 );
 
+/**
+ * Title string for budgets based on budget year selected.
+ */
 const viewingBudgetYear = computed(() => {
   const getFiscalYearView = parseInt(props.fiscalDateView.split('-')[0]);
-  if (!props.viewingCurrentBudgetYear) {
+  if (props.fiscalDateView != getCurrentBudgetYear(hireDate.value)) {
+    if (smAndDown.value) {
+      return `${getFiscalYearView}-${getFiscalYearView + 1} Budgets`;
+    }
     return `Viewing inactive budgets from ${getFiscalYearView} - ${getFiscalYearView + 1}`;
-  }
-  return 'Available Budgets';
+  } else return 'Available Budgets';
 });
 // |--------------------------------------------------|
 // |                                                  |
