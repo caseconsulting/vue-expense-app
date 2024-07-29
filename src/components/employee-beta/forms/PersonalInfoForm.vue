@@ -109,6 +109,7 @@
         <v-text-field
           v-model="emailUsername"
           label="CASE Email"
+          @blur="removeEmailDomain()"
           :suffix="CASE_EMAIL_DOMAIN"
           :rules="getCaseEmailRules()"
         ></v-text-field>
@@ -513,6 +514,18 @@ async function autofillLocation(item) {
     search = null;
   }
 } // autofillLocation
+
+/**
+ * Removes any text after the '@' symbol on the email username input once the user clicks away.
+ * This should help prevent any double domain issues for the CASE email.
+ */
+function removeEmailDomain() {
+  let atIndex = emailUsername.value.indexOf('@');
+
+  if (atIndex !== -1) {
+    emailUsername.value = emailUsername.value.substring(0, atIndex);
+  }
+} // removeEmailDomain
 </script>
 
 <style scoped>
