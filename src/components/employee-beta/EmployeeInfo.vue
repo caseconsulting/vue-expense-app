@@ -43,20 +43,14 @@
                   <v-menu v-if="useDropDown">
                     <template v-slot:activator="{ props }">
                       <v-btn variant="text" size="large" class="text-subtitle-1 font-weight-bold" v-bind="props"
-                        >{{ infoTab || 'Select Info' }} <v-icon size="large">mdi-chevron-down</v-icon>
+                        >{{ menuBtn }} <v-icon size="large">mdi-chevron-down</v-icon>
                       </v-btn>
                     </template>
                     <v-list>
-                      <v-list-item v-if="isUser || isAdmin" @click="selectDropDown('Personal')">Personal</v-list-item>
-                      <v-list-item @click="selectDropDown('Certifications & Awards')"
-                        >Certifications & Awards</v-list-item
-                      >
-                      <v-list-item @click="selectDropDown('Tech, Skills, & Languages')"
-                        >Tech, Skills, & Languages</v-list-item
-                      >
-                      <v-list-item @click="selectDropDown('Job Experience & Education')"
-                        >Job Experience & Education</v-list-item
-                      >
+                      <v-list-item v-if="isUser || isAdmin" @click="selectTab('personal')">Personal</v-list-item>
+                      <v-list-item @click="selectTab('certifications+awards')">Certifications & Awards</v-list-item>
+                      <v-list-item @click="selectTab('tech+skills+languages')">Tech, Skills, & Languages</v-list-item>
+                      <v-list-item @click="selectTab('experience+education')">Job Experience & Education</v-list-item>
                     </v-list>
                   </v-menu>
                   <v-tabs
@@ -68,10 +62,16 @@
                     color="blue"
                     class="mx-4"
                   >
-                    <v-tab v-if="isUser || isAdmin" value="Personal">Personal</v-tab>
-                    <v-tab value="Certifications & Awards">Certifications & Awards</v-tab>
-                    <v-tab value="Tech, Skills, & Languages">Tech, Skills, & Languages</v-tab>
-                    <v-tab value="Job Experience & Education">Job Experience & Education</v-tab>
+                    <v-tab v-if="isUser || isAdmin" value="personal" @click="selectTab('personal')">Personal</v-tab>
+                    <v-tab value="certifications+awards" @click="selectTab('certifications+awards')"
+                      >Certifications & Awards</v-tab
+                    >
+                    <v-tab value="tech+skills+languages" @click="selectTab('tech+skills+languages')"
+                      >Tech, Skills, & Languages</v-tab
+                    >
+                    <v-tab value="experience+education" @click="selectTab('experience+education')"
+                      >Job Experience & Education</v-tab
+                    >
                   </v-tabs>
                   <v-divider></v-divider>
                 </v-col>
@@ -79,7 +79,7 @@
             </v-card-title>
             <v-card-text class="px-2 pb-2">
               <v-tabs-window v-model="infoTab">
-                <v-tabs-window-item value="Personal">
+                <v-tabs-window-item value="personal">
                   <!-- personal info -->
                   <v-row class="my-2" v-if="isUser || isAdmin">
                     <v-col>
@@ -93,7 +93,7 @@
                     </v-col>
                   </v-row>
                 </v-tabs-window-item>
-                <v-tabs-window-item value="Certifications & Awards">
+                <v-tabs-window-item value="certifications+awards">
                   <!-- certifications and awards -->
                   <v-row class="my-2">
                     <v-col>
@@ -104,7 +104,7 @@
                     </v-col>
                   </v-row>
                 </v-tabs-window-item>
-                <v-tabs-window-item value="Tech, Skills, & Languages">
+                <v-tabs-window-item value="tech+skills+languages">
                   <!-- tech, skills, languages -->
                   <v-row class="my-2">
                     <v-col>
@@ -115,7 +115,7 @@
                     </v-col>
                   </v-row>
                 </v-tabs-window-item>
-                <v-tabs-window-item value="Job Experience & Education">
+                <v-tabs-window-item value="experience+education">
                   <v-row class="my-2">
                     <!-- past experience -->
                     <v-col cols="12">
@@ -145,6 +145,7 @@
 import { computed, ref, inject } from 'vue';
 import { useDisplay } from 'vuetify';
 import { useStore } from 'vuex';
+import { useRoute, useRouter } from 'vue-router';
 import AwardsCard from '@/components/employee-beta/cards/AwardsCard.vue';
 import BaseCard from '@/components/employee-beta/cards/BaseCard.vue';
 import CaseExperienceInfoCard from '@/components/employee-beta/cards/CaseExperienceInfoCard.vue';
@@ -170,6 +171,8 @@ import TechnologiesCard from '@/components/employee-beta/cards/TechnologiesCard.
 
 const display = useDisplay();
 const store = useStore();
+const route = useRoute();
+const router = useRouter();
 
 const model = defineModel();
 defineProps(['contracts', 'loading']);
@@ -177,13 +180,31 @@ const isAdmin = inject('isAdmin');
 const isUser = inject('isUser');
 
 const editing = ref(false);
-const infoTab = ref(null); //currently active tab
+const infoTab = ref(route.hash.substring(1)); //currently active tab
 
 // |--------------------------------------------------|
 // |                                                  |
 // |                    COMPUTED                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * menu button title for mobile interface.
+ */
+const menuBtn = computed(() => {
+  switch (infoTab.value) {
+    case 'personal':
+      return 'Personal';
+    case 'certifications+awards':
+      return 'Certifications & Awards';
+    case 'tech+skill+languages':
+      return 'Tech, Skills, & Languages';
+    case 'experience+education':
+      return 'Job Experience & Education';
+    default:
+      return 'Select Info';
+  }
+});
 
 /**
  * computed title for employee header
@@ -217,7 +238,8 @@ const useDropDown = computed(() => {
 /**
  * This is used to select the correct tab on mobile devices.
  */
-function selectDropDown(name) {
+function selectTab(name) {
   infoTab.value = name;
-} // selectDropDown
+  router.replace({ hash: '#' + name });
+} // selectTab
 </script>
