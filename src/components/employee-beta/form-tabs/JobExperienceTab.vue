@@ -337,7 +337,7 @@ onBeforeUnmount(prepareSubmit);
 
 onBeforeUnmount(async () => {
   const result = await validate();
-  emitter.emit('beta-validate', { tab: 'jobExperience', result });
+  emitter.emit('validating', { tab: 'jobExperience', valid: result.valid });
 });
 
 // |--------------------------------------------------|

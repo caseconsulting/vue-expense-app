@@ -392,7 +392,7 @@ defineExpose({ prepareSubmit }); // allows parent to use refs to call prepareSub
 
 onBeforeUnmount(async () => {
   const result = await validate();
-  emitter.emit('beta-validate', { tab: 'personal', result });
+  emitter.emit('validating', { tab: 'personal', valid: result.valid });
   prepareSubmit();
 });
 

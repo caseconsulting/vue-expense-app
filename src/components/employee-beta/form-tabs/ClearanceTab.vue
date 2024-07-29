@@ -336,7 +336,7 @@ const form = ref(null); // template ref
 
 onBeforeUnmount(async () => {
   const result = await validate();
-  emitter.emit('beta-validate', { tab: 'clearance', result });
+  emitter.emit('validating', { tab: 'clearance', valid: result.valid });
 });
 
 // |--------------------------------------------------|

@@ -67,7 +67,7 @@ const form = ref(null); // template ref
 
 onBeforeUnmount(async () => {
   const result = await validate();
-  emitter.emit('beta-validate', { tab: 'languages', result });
+  emitter.emit('validating', { tab: 'languages', valid: result.valid });
 });
 
 // |--------------------------------------------------|

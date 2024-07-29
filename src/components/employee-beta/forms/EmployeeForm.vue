@@ -180,17 +180,19 @@ onBeforeMount(() => {
     formTabs.value = [cardName];
     editing.value = true;
   });
+
   // Starts listener to see if the user cancelled to submit the form
   emitter.on('canceled-cancel', () => {
     toggleCancelConfirmation.value = false;
   });
+
   emitter.on('confirmed-cancel', async () => {
     toggleCancelConfirmation.value = false;
     editing.value = false;
   });
 
-  emitter.on('beta-validate', (event) => {
-    validTabs[event.tab] = event.result.valid;
+  emitter.on('validating', (event) => {
+    validTabs[event.tab] = event.valid;
   });
 });
 
@@ -198,7 +200,7 @@ onBeforeUnmount(() => {
   emitter.off('editing');
   emitter.off('canceled-cancel');
   emitter.off('confirmed-cancel');
-  emitter.off('beta-valdiate');
+  emitter.off('validating');
 });
 
 // |--------------------------------------------------|

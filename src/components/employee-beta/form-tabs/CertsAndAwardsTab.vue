@@ -253,7 +253,7 @@ onBeforeMount(() => {
 
 onBeforeUnmount(async () => {
   const result = await validate();
-  emitter.emit('beta-validate', { tab: 'certsAndAwards', result });
+  emitter.emit('validating', { tab: 'certsAndAwards', valid: result.valid });
 });
 
 // |--------------------------------------------------|
