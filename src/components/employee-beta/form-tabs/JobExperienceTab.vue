@@ -263,6 +263,12 @@
                       </span>
                     </v-avatar>
                   </template>
+                  <template #append v-if="isMobile() && editedCompanies[compIndex].positions.length > 1">
+                    <v-btn variant="text" icon="" density="comfortable" @click="deletePosition(compIndex, index)">
+                      <v-tooltip activator="parent" location="bottom">Delete Position</v-tooltip>
+                      <v-icon class="case-gray">mdi-delete</v-icon>
+                    </v-btn>
+                  </template>
                 </v-text-field>
               </v-col>
               <!-- End end date -->
@@ -531,3 +537,9 @@ function populateDropDowns() {
   });
 } // populateDropDowns
 </script>
+
+<style scoped>
+.append-text-field {
+  min-width: 250px;
+}
+</style>
