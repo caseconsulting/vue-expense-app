@@ -19,8 +19,8 @@
           <p v-if="toggleModal && !isEmpty(getAdjudicationDates(clearance))" class="gray-text ml-6">
             <b>Adjudication Dates: </b>{{ getAdjudicationDates(clearance) }}
           </p>
-          <p v-if="toggleModal && !isEmpty(getBiDates(clearance))" class="gray-text ml-6">
-            <b>Bi Dates: </b>{{ getBiDates(clearance) }}
+          <p v-if="toggleModal && !isEmpty(getBIDates(clearance))" class="gray-text ml-6">
+            <b>BI Dates: </b>{{ getBIDates(clearance) }}
           </p>
           <p v-if="toggleModal && !isEmpty(getPolyDates(clearance))" class="gray-text ml-6">
             <b>Poly Dates: </b>{{ getPolyDates(clearance) }}
@@ -130,12 +130,12 @@ function getAdjudicationDates(clearance) {
 }
 
 /**
- * Returns clearance bi dates
+ * Returns clearance BI dates
  *
  * @param {*} clearance The clearance object
- * @return String - bi dates
+ * @return String - Bi dates
  */
-function getBiDates(clearance) {
+function getBIDates(clearance) {
   let dates = null;
   if (!isEmpty(clearance.biDates)) {
     clearance.biDates.forEach((biDate) => {
