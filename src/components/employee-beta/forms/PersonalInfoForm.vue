@@ -1,5 +1,5 @@
 <template>
-  <v-form ref="form" validate-on="lazy">
+  <v-form ref="form" validate-on="input">
     <v-row><h3>Basic Information</h3></v-row>
     <v-row>
       <!-- first name -->
@@ -11,11 +11,11 @@
         <v-text-field
           v-model.trim="middleName"
           :label="hasMiddleName ? 'Middle Name' : 'No Middle Name'"
-          :rules="hasMiddleName ? middleNameRules : []"
+          :rules="middleNameRules"
           :hide-details="hasMiddleName ? 'auto' : true"
           @update:model-value="hasMiddleName = true"
         >
-          <template v-slot:append-inner>
+          <template #append-inner>
             <v-btn v-if="hasMiddleName" @click="(hasMiddleName = false), (middleName = '')" variant="text" icon="">
               <v-tooltip text="Please disable if you do not have a middle name" location="top" activator="parent">
               </v-tooltip>
@@ -402,25 +402,6 @@ onBeforeUnmount(async () => {
 // |                                                  |
 // |--------------------------------------------------|
 
-/** @type {import('vue').ComputedRef<((v: any) => true | string[]>} */
-const middleNameRules = computed(() => {
-  if (hasMiddleName.value) return getRequiredRules();
-  return [() => true];
-});
-
-/** @type {import('vue').ComputedRef<((v: any) => true | string[]>} */
-const employeeNumberRules = computed(() => [
-  ...getRequiredRules(),
-  ...getNumberRules(),
-  (v) => {
-    let duplicate = some(store.getters.employees, (employee) => {
-      // ensures that the employee number being set is not the same as another employee
-      employee.employeeNumber === Number(v) && employee.employeeNumber !== store.getters.user.employeeNumber;
-    });
-    return !duplicate || 'This employee id is already in use';
-  }
-]);
-
 const userIsAdminOrManager = computed(() => {
   const role = store.getters.user.employeeRole;
   return role === 'admin' || role === 'manager';
@@ -447,6 +428,24 @@ const formattedBirthday = computed({
     birthday.value = dayjs(val);
   }
 });
+
+/** @type {import('vue').ComputedRef<((v: any) => true | string)[]>} */
+const middleNameRules = computed(() => {
+  return hasMiddleName.value ? getRequiredRules() : [() => true];
+});
+
+/** @type {import('vue').ComputedRef<((v: any) => true | string)[]>} */
+const employeeNumberRules = computed(() => [
+  ...getRequiredRules(),
+  ...getNumberRules(),
+  (v) => {
+    let duplicate = some(store.getters.employees, (employee) => {
+      // ensures that the employee number being set is not the same as another employee
+      employee.employeeNumber === Number(v) && employee.employeeNumber !== store.getters.user.employeeNumber;
+    });
+    return !duplicate || 'This employee id is already in use';
+  }
+]);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -542,7 +541,7 @@ async function updateAddressDropDown(query) {
 
 /**
  * Finds the city, street, state, and zip code current address fields based on an address
- * @param {Ref<any>} item The ref to the search string
+ * @param {import('vue').Ref<any>} item The ref to the search string
  */
 async function autofillLocation(item) {
   let search = item.value;

@@ -116,7 +116,8 @@
 <script setup>
 import BaseForm from '@/components/employee-beta/forms/BaseForm.vue';
 import FormCancelConfirmation from '@/components/modals/FormCancelConfirmation.vue';
-import { cloneDeep, forOwn, isEqual, pickBy } from 'lodash';
+import api from '@/shared/api';
+import { cloneDeep, forOwn, isEmpty, isEqual, pickBy } from 'lodash';
 import { computed, inject, onBeforeMount, onBeforeUnmount, reactive, ref } from 'vue';
 import { useDisplay } from 'vuetify';
 import CertsAndAwardsTab from '../form-tabs/CertsAndAwardsTab.vue';
@@ -239,23 +240,18 @@ async function submit(event) {
   }
 
   // picks out all the changed values to make the api call
-  let changes = pickBy(editedEmployee.value, (value, key) => {
-    const oldValue = props.employee[key];
-    const newValue = value;
-    const changed = !isEqual(oldValue, newValue);
-
-    if (changed) {
-      // TODO test
-      console.log('Changed:', key);
-      console.log('\tOld:', oldValue);
-      console.log('\tNew:', newValue);
-    }
-    return !isEqual(oldValue, newValue);
-  });
+  let changes = getChanges();
 
   console.log('Changed values:', changes); // TODO test
+
+  // if there are any changes
+  if (!isEmpty(Object.keys(changes))) {
+    const updated = await api.updateAttributes(api.EMPLOYEES, props.employee.id, changes);
+    emitter.emit('update', updated);
+  }
+
   submitting.value = false;
-  // editing.value = false; // close edit modal
+  editing.value = false; // close edit modal
 }
 
 /**
@@ -274,10 +270,29 @@ async function validate(event) {
 }
 
 /**
+ * Gets an object containing only the fields that were edited by the user
+ */
+function getChanges() {
+  return pickBy(editedEmployee.value, (value, key) => {
+    const oldValue = props.employee[key];
+    const newValue = value;
+    const changed = !isEqual(oldValue, newValue);
+
+    if (changed) {
+      // TODO test
+      console.log('Changed:', key);
+      console.log('\tOld:', oldValue);
+      console.log('\tNew:', newValue);
+    }
+    return !isEqual(oldValue, newValue);
+  });
+}
+
+/**
  * Called if the form is invalid after trying to submit
  */
 function cancelSubmit() {
-  console.log('Form is invalid. Cancelling submit'); // TODO debug
+  console.log('Form is invalid. Cancelling submit'); // TODO test
   valid.value = false;
   submitting.value = false;
 }
