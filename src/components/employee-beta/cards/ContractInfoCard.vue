@@ -38,7 +38,7 @@
                 <span
                   v-if="
                     contract.projects.some((p) => !p.endDate) ||
-                    contract.projects.some((p) => difference(p.endDate, getTodaysDate(), 'days') > 0)
+                    contract.projects.some((p) => difference(p.endDate, getTodaysDate(), 'days') >= 0)
                   "
                 >
                   <v-tooltip activator="parent" location="right">Current Contract</v-tooltip>
@@ -194,7 +194,7 @@ function getCurrentAssignment() {
     for (let p in props.model.contracts[c].projects) {
       if (
         !props.model.contracts[c].projects[p].endDate ||
-        difference(props.model.contracts[c].projects[p].endDate, getTodaysDate(), 'days') > 0
+        difference(props.model.contracts[c].projects[p].endDate, getTodaysDate(), 'days') >= 0
       ) {
         currentProjects.value = _.reverse(_.orderBy(props.model.contracts[c].projects, ['popStartDate'])); //Sorts the projects from most recent to oldest
         currentContractId.value = props.model.contracts[c].contractId;
@@ -253,7 +253,7 @@ function getProjectStartDate(project) {
  * @return the project end date
  */
 function getProjectEndDate(project) {
-  if (project.endDate === null) {
+  if (project.endDate === null || difference(project.endDate, getTodaysDate(), 'days') >= 0) {
     return 'Present';
   }
   return monthDayYearFormat(project.endDate);
