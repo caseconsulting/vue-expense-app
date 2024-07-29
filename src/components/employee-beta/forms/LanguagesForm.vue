@@ -24,7 +24,7 @@
           </v-col>
         </v-row>
         <v-row v-if="index < editedEmployee.languages.length - 1" class="pb-4">
-          <v-divider class="border-opacity-25"></v-divider>
+          <v-divider class="border-opacity-25" thickness="3"></v-divider>
         </v-row>
       </v-col>
     </v-row>
