@@ -276,7 +276,9 @@ function getChanges() {
   return pickBy(editedEmployee.value, (value, key) => {
     const oldValue = props.employee[key];
     const newValue = value;
-    const changed = !isEqual(oldValue, newValue);
+
+    // if both values are empty (i.e. empty string, null, or undefined) they are treated as equal
+    let changed = !isEqual(oldValue, newValue) && !(isEmpty(oldValue) && isEmpty(newValue));
 
     if (changed) {
       // TODO test
@@ -284,7 +286,7 @@ function getChanges() {
       console.log('\tOld:', oldValue);
       console.log('\tNew:', newValue);
     }
-    return !isEqual(oldValue, newValue);
+    return changed;
   });
 }
 

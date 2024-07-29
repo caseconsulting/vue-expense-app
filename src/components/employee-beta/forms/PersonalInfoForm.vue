@@ -16,7 +16,7 @@
           @update:model-value="hasMiddleName = true"
         >
           <template #append-inner>
-            <v-btn v-if="hasMiddleName" @click="(hasMiddleName = false), (middleName = '')" variant="text" icon="">
+            <v-btn v-if="hasMiddleName" @click="disableMiddleName()" variant="text" icon="">
               <v-tooltip text="Please disable if you do not have a middle name" location="top" activator="parent">
               </v-tooltip>
               <v-icon>mdi-check-circle</v-icon>
@@ -458,7 +458,7 @@ const employeeNumberRules = computed(() => [
  */
 function prepareSubmit() {
   editedEmployee.value.noMiddleName = !hasMiddleName.value;
-  editedEmployee.value.middleName = hasMiddleName.value ? middleName.value : undefined;
+  editedEmployee.value.middleName = hasMiddleName.value ? middleName.value : '';
 
   editedEmployee.value.email = emailUsername.value + CASE_EMAIL_DOMAIN;
 
@@ -472,7 +472,7 @@ function prepareSubmit() {
     editedEmployee.value.personalEmailHidden = personalEmail.value.private;
   }
 
-  if (editedEmployee.value.country !== 'United States') editedEmployee.value.st = undefined;
+  if (editedEmployee.value.country !== 'United States') editedEmployee.value.st = '';
 
   editedEmployee.value.privatePhoneNumbers = [];
   editedEmployee.value.publicPhoneNumbers = [];
@@ -495,6 +495,11 @@ async function validate() {
  */
 function getEmployeeTags() {
   return cloneDeep(filter(store.getters.tags, (tag) => includes(tag.employees, editedEmployee.value.id)));
+}
+
+function disableMiddleName() {
+  hasMiddleName.value = false;
+  middleName.value = '';
 }
 
 /**
