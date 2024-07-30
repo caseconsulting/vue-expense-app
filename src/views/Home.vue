@@ -109,11 +109,7 @@ import {
   endOf,
   DEFAULT_ISOFORMAT
 } from '../shared/dateUtils';
-<<<<<<< HEAD
 import { ref, onBeforeMount, computed, watch } from 'vue';
-=======
-import { ref, inject, onBeforeUnmount, onBeforeMount, computed, watch } from 'vue';
->>>>>>> 87210601 (POR 2746 - sync changes with master (#272))
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 
@@ -125,10 +121,6 @@ import { useRouter } from 'vue-router';
 
 const store = useStore();
 const router = useRouter();
-<<<<<<< HEAD
-=======
-const emitter = inject('emitter');
->>>>>>> 87210601 (POR 2746 - sync changes with master (#272))
 const accessibleBudgets = ref(null);
 const aggregatedAwards = ref([]);
 const aggregatedExpenses = ref([]);
@@ -145,14 +137,6 @@ const loadingBudgets = ref(true);
 const loadingEvents = ref(true);
 const scheduleEntries = ref([]);
 const textMaxLength = ref(110);
-<<<<<<< HEAD
-=======
-const status = ref({
-  statusType: undefined,
-  statusMessage: '',
-  color: ''
-});
->>>>>>> 87210601 (POR 2746 - sync changes with master (#272))
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -164,12 +148,6 @@ const status = ref({
  *  Set budget information for employee. Creates event listeners.
  */
 onBeforeMount(async () => {
-<<<<<<< HEAD
-=======
-  emitter.on('status-alert', (status) => {
-    status.value = status;
-  });
->>>>>>> 87210601 (POR 2746 - sync changes with master (#272))
   if (store.getters.storeIsPopulated) {
     loading.value = false;
     await loadHomePageData();
@@ -182,18 +160,6 @@ onBeforeMount(async () => {
 // |                                                  |
 // |--------------------------------------------------|
 
-<<<<<<< HEAD
-=======
-/**
- * Checks if the store is populated from initial page load.
- *
- * @returns boolean - True if the store is populated
- */
-// store.getters.storeIsPopulated = computed(() => {
-//   return store.getters.storeIsPopulated;
-// }); // storeIsPopulated
-
->>>>>>> 87210601 (POR 2746 - sync changes with master (#272))
 computed(store.getters.storeIsPopulated);
 
 // |--------------------------------------------------|
@@ -427,10 +393,6 @@ async function createEvents() {
 
   // generate schedules
   let schedules = _.map(scheduleEntries.value, (a) => {
-<<<<<<< HEAD
-=======
-    let now = getTodaysDate();
->>>>>>> 87210601 (POR 2746 - sync changes with master (#272))
     let cutOff = startOf(subtract(now, 6, 'months'), 'day');
 
     let startDate = a.starts_at;
@@ -508,7 +470,6 @@ async function createEvents() {
     return wantToDisplay ? cert : null;
   });
 
-<<<<<<< HEAD
   let announcements = _.map(eventData.announcements, (announcement) => {
     const date = startOf(announcement.createdAt, 'day');
     return {
@@ -533,9 +494,6 @@ async function createEvents() {
     ...certs,
     ...announcements
   ]; // merges lists
-=======
-  let mergedEventsList = [...anniversaries, ...newHires, ...birthdays, ...expenses, ...schedules, ...awards, ...certs]; // merges lists
->>>>>>> 87210601 (POR 2746 - sync changes with master (#272))
   events.value = _.sortBy(_.compact(mergedEventsList), 'daysFromToday'); //sorts by days from today
   store.dispatch('setEvents', { events: events.value });
   loadingEvents.value = false;
@@ -659,25 +617,6 @@ async function refreshEmployee() {
   loadingBudgets.value = false;
 } // refreshEmployee
 
-<<<<<<< HEAD
-=======
-/**
- * Clear the action status that is displayed in the snackbar.
- */
-function clearStatus() {
-  status.value['statusType'] = undefined;
-  status.value['statusMessage'] = '';
-  status.value['color'] = '';
-} // clearStatus
-
-/**
- * Before destroy lifecycle hook. Destroys listeners.
- */
-onBeforeUnmount(() => {
-  emitter.off('status-alert');
-}); // beforeUnmount
-
->>>>>>> 87210601 (POR 2746 - sync changes with master (#272))
 // |--------------------------------------------------|
 // |                                                  |
 // |                     WATCHERS                     |

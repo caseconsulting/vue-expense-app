@@ -589,6 +589,7 @@ async function updateCityBoxes(item) {
   }
 } // updateCityBoxes
 
+/**
  * Removes any text after the '@' symbol on the email username input once the user clicks away.
  * This should help prevent any double domain issues for the CASE email.
  */

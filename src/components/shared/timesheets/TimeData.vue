@@ -225,11 +225,7 @@ function addPlanToBalances(balanceKey, itemsKey, planResults, planKey) {
  */
 function refreshPlannedPto() {
   // set plan to employee object
-<<<<<<< HEAD
   let employeePlan = clonedEmployee.value.plannedPto;
-=======
-  let employeePlan = props.employee.plannedPto;
->>>>>>> 95406fae (POR 2720 - sync with master (#232))
   let planResults = {
     pto: Number(employeePlan?.results?.pto),
     holiday: Number(employeePlan?.results?.holiday),
