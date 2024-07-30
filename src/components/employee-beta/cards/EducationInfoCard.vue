@@ -8,7 +8,7 @@
         <education-list :list="showableList"></education-list>
         <div v-if="!isEmpty(showableList) && Math.ceil(totalList.length / 2) != 1" class="text-center">
           <v-card-actions class="d-flex justify-center">
-            <v-btn @click="toggleModal = true">Click to see more</v-btn>
+            <v-btn variant="flat" color="#F3F3F3" @click="toggleModal = true">Click to see more</v-btn>
           </v-card-actions>
         </div>
       </v-card-text>

@@ -14,8 +14,8 @@
       </div>
     </v-card-text>
     <v-card-text style="text-align: center" v-else> No Contract Information </v-card-text>
-    <v-card-actions>
-      <v-btn block @click="open">Click to see more</v-btn>
+    <v-card-actions class="justify-center">
+      <v-btn variant="flat" color="#F3F3F3" @click="open">Click to see more</v-btn>
     </v-card-actions>
     <v-dialog v-model="dialog" max-width="600">
       <template v-slot:default>
