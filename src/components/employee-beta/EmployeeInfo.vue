@@ -29,7 +29,7 @@
               <v-col>
                 <case-experience-info-card :model="model"></case-experience-info-card>
               </v-col>
-              <v-col style="max-width: fit-content">
+              <v-col>
                 <contract-info-card :contracts="contracts" :model="model"></contract-info-card>
               </v-col>
             </v-row>

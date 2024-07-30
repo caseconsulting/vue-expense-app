@@ -1,7 +1,7 @@
 <template>
   <v-card>
     <v-card-title class="d-flex align-center justify-space-between beta_header_style">
-      <h3 class="text-white px-2">CASE Information</h3>
+      <h3 class="text-white">CASE Information</h3>
     </v-card-title>
 
     <!-- Job Role and Hire Date information -->
