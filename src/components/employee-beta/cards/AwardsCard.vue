@@ -13,7 +13,9 @@
         <!-- Pagination -->
         <div v-if="!isEmpty(model.awards)" class="text-center">
           <v-card-actions class="d-flex justify-center">
-            <v-btn @click="toggleAwardsModal()">View all {{ model.awards.length }} awards </v-btn>
+            <v-btn variant="flat" color="#F3F3F3" @click="toggleAwardsModal()"
+              >View all {{ model.awards.length }} awards
+            </v-btn>
           </v-card-actions>
         </div>
       </div>

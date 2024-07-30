@@ -8,7 +8,9 @@
         <p v-else class="mt-6 ml-6">No Foreign Language Information</p>
         <div v-if="!isEmpty(languages)" class="text-center">
           <v-card-actions class="d-flex justify-center">
-            <v-btn @click="activateModal()">View All {{ languages.length }} Languages</v-btn>
+            <v-btn variant="flat" color="#F3F3F3" @click="activateModal()"
+              >View All {{ languages.length }} Languages</v-btn
+            >
           </v-card-actions>
         </div>
       </v-card-text>
