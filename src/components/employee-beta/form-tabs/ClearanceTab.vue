@@ -1,14 +1,13 @@
 <template>
-  <v-container>
-    <v-row v-for="(clearance, cIndex) in editedClearances" :key="cIndex">
+  <v-form ref="form" validate-on="lazy">
+    <v-row v-for="(clearance, cIndex) in editedEmployee.clearances" :key="cIndex">
       <v-col>
         <v-row>
           <v-col>
             <v-autocomplete
-              ref="formFields"
               v-model="clearance.type"
-              :rules="[...getRequiredRules(), duplicateClearanceTypes(cIndex)]"
-              :items="clearanceTypeDropDown"
+              :rules="[...getRequiredRules(), ...getDuplicateClearanceRules(editedEmployee.clearances)]"
+              :items="CLEARANCE_TYPES"
               label="Type"
               data-vv-name="Type"
               clearable
@@ -51,11 +50,10 @@
           <v-col cols="1"></v-col>
           <v-col class="groove">
             <v-text-field
-              ref="formFields"
               :model-value="format(clearance.submissionDate, null, 'MM/DD/YYYY')"
               label="Submission Date"
               clearable
-              :rules="[...getDateOptionalRules(), dateSubmissionRules(cIndex)]"
+              :rules="[...getDateOptionalRules(), ...getDateSubmissionRules(clearance)]"
               hint="MM/DD/YYYY format"
               v-mask="'##/##/####'"
               prepend-inner-icon="mdi-calendar"
@@ -104,11 +102,10 @@
             </v-menu>
 
             <v-text-field
-              ref="formFields"
               :model-value="format(clearance.grantedDate, null, 'MM/DD/YYYY')"
               label="Granted Date"
               clearable
-              :rules="[...getDateOptionalRules(), dateGrantedRules(cIndex)]"
+              :rules="[...getDateOptionalRules(), ...getDateGrantedRules(clearance)]"
               hint="MM/DD/YYYY format"
               v-mask="'##/##/####'"
               :disabled="clearance.awaitingClearance"
@@ -145,11 +142,10 @@
 
           <v-col>
             <v-text-field
-              ref="formFields"
               :model-value="format(clearance.badgeExpirationDate, null, 'MM/DD/YYYY')"
               label="Badge Expiration Date"
               clearable
-              :rules="[...getDateOptionalRules(), dateBadgeRules(cIndex)]"
+              :rules="[...getDateOptionalRules(), ...getDateBadgeRules(clearance)]"
               hint="MM/DD/YYYY format"
               v-mask="'##/##/####'"
               :disabled="clearance.awaitingClearance"
@@ -297,18 +293,25 @@
         <v-btn @click="addClearance()"><v-icon>mdi-plus</v-icon>Clearance</v-btn>
       </v-col>
     </v-row>
-  </v-container>
+  </v-form>
 </template>
 
 <script setup>
+import { DEFAULT_ISOFORMAT, format, FORMATTED_ISOFORMAT, isBefore } from '@/shared/dateUtils';
+import { CLEARANCE_TYPES } from '@/shared/employeeUtils';
+import {
+  getBadgeNumberRules,
+  getDateBadgeRules,
+  getDateGrantedRules,
+  getDateOptionalRules,
+  getDateSubmissionRules,
+  getDuplicateClearanceRules,
+  getRequiredRules
+} from '@/shared/validationUtils';
 import _ from 'lodash';
+import { inject, onBeforeUnmount, ref } from 'vue';
 import { mask } from 'vue-the-mask';
-import { DEFAULT_ISOFORMAT, format, FORMATTED_ISOFORMAT, isAfter, isBefore } from '../../../shared/dateUtils';
-import { getBadgeNumberRules, getDateOptionalRules, getRequiredRules } from '../../../shared/validationUtils';
 import { useDisplay } from 'vuetify/lib/framework.mjs';
-import { inject, onBeforeMount, ref, watch } from 'vue';
-import { useStore } from 'vuex';
-import { asyncForEach } from '../../../utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -318,51 +321,14 @@ import { asyncForEach } from '../../../utils/utils';
 
 const ISOFORMAT = 'YYYY-MM-DD';
 
-const emitter = inject('emitter');
 const { name } = useDisplay();
-const props = defineProps(['model', 'validating']);
-const store = useStore();
+const emitter = inject('emitter');
 const vMask = mask; // custom directive
 
-const clearanceTypeDropDown = ['TS/SCI - Full Scope', 'TS/SCI - CI Poly', 'TS/SCI - No Poly', 'Top Secret', 'Secret']; // autocomplete clearance type options
-const editedClearances = ref(_.cloneDeep(props.model));
-const employees = ref(null);
-const formFields = ref(null);
+const editedEmployee = defineModel({ required: true });
+const form = ref(null); // template ref
 
-// |--------------------------------------------------|
-// |                                                  |
-// |                    RULES                         |
-// |                                                  |
-// |--------------------------------------------------|
-
-const dateBadgeRules = (index) => {
-  let currClearance = editedClearances.value[index];
-  return currClearance.grantedDate && currClearance.badgeExpirationDate && currClearance.submissionDate
-    ? (isAfter(currClearance.badgeExpirationDate, currClearance.grantedDate) &&
-        isAfter(currClearance.badgeExpirationDate, currClearance.submissionDate)) ||
-        'Badge expiration date must come after grant and submission date'
-    : true;
-};
-const dateSubmissionRules = (index) => {
-  let currClearance = editedClearances.value[index];
-  return currClearance.grantedDate && currClearance.submissionDate
-    ? isBefore(currClearance.submissionDate, currClearance.grantedDate) || 'Submission date must be before grant date'
-    : true;
-};
-
-const dateGrantedRules = (index) => {
-  let currClearance = editedClearances.value[index];
-  return currClearance.grantedDate && currClearance.submissionDate
-    ? isAfter(currClearance.grantedDate, currClearance.submissionDate) || 'Grant date must be after the submission date'
-    : true;
-};
-
-const duplicateClearanceTypes = (cIndex) => {
-  let clearanceNames = _.map(editedClearances.value, (clearance) => clearance.type);
-  let clearanceName = clearanceNames[cIndex];
-  clearanceNames.splice(cIndex, 1);
-  return !clearanceNames.includes(clearanceName) || 'Duplicate clearance name';
-};
+defineExpose({ prepareSubmit });
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -370,13 +336,7 @@ const duplicateClearanceTypes = (cIndex) => {
 // |                                                  |
 // |--------------------------------------------------|
 
-/**
- * Emits to parent the component was created and get data.
- */
-onBeforeMount(async () => {
-  emitter.emit('created', 'clearance'); // emit clearance tab was created
-  employees.value = store.getters.employees; // get all employees
-}); // onBeforeMount
+onBeforeUnmount(prepareSubmit);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -384,12 +344,21 @@ onBeforeMount(async () => {
 // |                                                  |
 // |--------------------------------------------------|
 
+async function prepareSubmit() {
+  if (form.value) {
+    const result = await form.value.validate();
+    emitter.emit('validating', { tab: 'clearance', valid: result.valid });
+    return result;
+  }
+  return null;
+}
+
 /**
  * Adds a clearance.
  */
 function addClearance() {
-  if (!editedClearances.value) editedClearances.value = [];
-  editedClearances.value.push({
+  if (!editedEmployee.value.clearances) editedEmployee.value.clearances = [];
+  editedEmployee.value.clearances.push({
     adjudicationDates: [],
     awaitingClearance: false,
     biDates: [],
@@ -424,7 +393,7 @@ function capitalizeBadges(clearance) {
  * @param cIndex - array index of clearance to remove.
  */
 function deleteClearance(cIndex) {
-  editedClearances.value.splice(cIndex, 1);
+  editedEmployee.value.clearances.splice(cIndex, 1);
 } // deleteClearance
 
 /**
@@ -448,17 +417,17 @@ function formatDates(array) {
  */
 function maxSubmission(cIndex) {
   let max;
-  if (editedClearances.value[cIndex].grantedDate) {
+  if (editedEmployee.value.clearances[cIndex].grantedDate) {
     // submission date is before granted date
-    max = format(editedClearances.value[cIndex].grantedDate, null, DEFAULT_ISOFORMAT);
+    max = format(editedEmployee.value.clearances[cIndex].grantedDate, null, DEFAULT_ISOFORMAT);
   }
 
   // check submission date is before any poly dates
-  if (!_.isEmpty(editedClearances.value[cIndex].polyDates)) {
+  if (!_.isEmpty(editedEmployee.value.clearances[cIndex].polyDates)) {
     // poly dates exist
     let earliest = _.first(
       // get earliest poly date
-      _.sortBy(editedClearances.value[cIndex].polyDates, (date) => {
+      _.sortBy(editedEmployee.value.clearances[cIndex].polyDates, (date) => {
         // sort poly dates
         return format(date, null, ISOFORMAT);
       })
@@ -471,11 +440,11 @@ function maxSubmission(cIndex) {
   }
 
   // check submission date is before any adjudication dates
-  if (!_.isEmpty(editedClearances.value[cIndex].adjudicationDates)) {
+  if (!_.isEmpty(editedEmployee.value.clearances[cIndex].adjudicationDates)) {
     // adjudication dates exist
     let earliest = _.first(
       // get earliest adjudication date
-      _.sortBy(editedClearances.value[cIndex].adjudicationDates, (date) => {
+      _.sortBy(editedEmployee.value.clearances[cIndex].adjudicationDates, (date) => {
         // sort adjudication dates
         return format(date, null, ISOFORMAT);
       })
@@ -498,10 +467,10 @@ function maxSubmission(cIndex) {
  * @return string - minimum (earliest possible) date
  */
 function minExpiration(cIndex) {
-  if (editedClearances.value[cIndex].grantedDate) {
-    return editedClearances.value[cIndex].grantedDate;
-  } else if (editedClearances.value[cIndex].submissionDate) {
-    return editedClearances.value[cIndex].submissionDate;
+  if (editedEmployee.value.clearances[cIndex].grantedDate) {
+    return editedEmployee.value.clearances[cIndex].grantedDate;
+  } else if (editedEmployee.value.clearances[cIndex].submissionDate) {
+    return editedEmployee.value.clearances[cIndex].submissionDate;
   }
 } // minExpiration
 
@@ -523,7 +492,9 @@ function parseEventDate() {
 function removeAdjDate(item, index) {
   item = item.raw;
   const itemDate = format(item, null, FORMATTED_ISOFORMAT);
-  editedClearances.value[index].adjudicationDates = editedClearances.value[index].adjudicationDates.filter((date) => {
+  editedEmployee.value.clearances[index].adjudicationDates = editedEmployee.value.clearances[
+    index
+  ].adjudicationDates.filter((date) => {
     let dateConvert = format(date, null, FORMATTED_ISOFORMAT);
     return dateConvert !== itemDate;
   });
@@ -538,7 +509,7 @@ function removeAdjDate(item, index) {
 function removeBiDate(item, index) {
   item = item.raw;
   const itemDate = format(item, null, FORMATTED_ISOFORMAT);
-  editedClearances.value[index].biDates = editedClearances.value[index].biDates.filter((date) => {
+  editedEmployee.value.clearances[index].biDates = editedEmployee.value.clearances[index].biDates.filter((date) => {
     let dateConvert = format(date, null, FORMATTED_ISOFORMAT);
     return dateConvert !== itemDate;
   });
@@ -553,49 +524,9 @@ function removeBiDate(item, index) {
 function removePolyDate(item, index) {
   item = item.raw;
   const itemDate = format(item, null, FORMATTED_ISOFORMAT);
-  editedClearances.value[index].polyDates = editedClearances.value[index].polyDates.filter((date) => {
+  editedEmployee.value.clearances[index].polyDates = editedEmployee.value.clearances[index].polyDates.filter((date) => {
     let dateConvert = format(date, null, FORMATTED_ISOFORMAT);
     return dateConvert !== itemDate;
   });
 } // removePolyDate
-
-/**
- * Validate all input fields are valid. Emit to parent the error status.
- *
- * TODO: I included this in hopes that it would help with submission... IDK if we actually need it
- */
-async function validateFields() {
-  let errorCount = 0;
-  //ensures that refs are put in an array so we can reuse forEach loop
-  let components = !_.isArray(formFields.value) ? [formFields.value] : formFields.value;
-  await asyncForEach(components, async (field) => {
-    if (field && (await field.validate()).length > 0) errorCount++;
-  });
-
-  await editedClearances.value.forEach((clearance) => {
-    //goes through each clearance and ensures it follows validation
-    let badgeValidation = getBadgeNumberRules(clearance);
-    if (badgeValidation(clearance) === 'Invalid Badge #, Must be 5 characters') errorCount++;
-  });
-
-  emitter.emit('doneValidating', { tab: 'clearance', data: editedClearances.value }); // emit done validating and sends edited data back to parent
-  emitter.emit('clearanceStatus', errorCount); // emit error status
-} // validateFields
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     WATCHERS                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * watcher for validating - validates fields
- */
-watch(
-  () => props.validating,
-  () => {
-    // parent component triggers validation
-    validateFields();
-  }
-); // watchValidating
 </script>

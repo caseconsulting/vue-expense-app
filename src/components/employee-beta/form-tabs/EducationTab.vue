@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-form ref="form" validate-on="lazy">
     <v-row>
       <v-col>
         <v-row>
@@ -10,12 +10,7 @@
         <!-- Start University loop -->
         <v-row v-for="(edu, index) in editedEducation" :key="edu.id">
           <v-col v-if="edu.type === 'university'">
-            <university-form
-              :school="edu"
-              :allowAdditions="allowAdditions"
-              :validating="validating"
-              :schoolIndex="index"
-            ></university-form>
+            <university-form :school="edu" :allowAdditions="allowAdditions" :schoolIndex="index"></university-form>
           </v-col>
           <!-- Start delete university -->
           <v-col cols="1" v-if="edu.type === 'university'">
@@ -38,7 +33,7 @@
         <!-- Start military lopp -->
         <v-row v-for="(edu, index) in editedEducation" :key="edu.id">
           <v-col v-if="edu.type === 'military'">
-            <military-form :service="edu" :militaryIndex="index" :validating="validating"></military-form>
+            <military-form :service="edu" :militaryIndex="index"></military-form>
           </v-col>
           <!-- Start delete military -->
           <v-col cols="1" v-if="edu.type === 'military'">
@@ -61,7 +56,7 @@
         <!-- Start high school loop -->
         <v-row v-for="(edu, index) in editedEducation" :key="edu.id">
           <v-col v-if="edu.type === 'highSchool'">
-            <high-school-form :school="edu" :schoolIndex="index" :validating="validating"></high-school-form>
+            <high-school-form :school="edu" :schoolIndex="index"></high-school-form>
           </v-col>
           <!-- Start delete high school -->
           <v-col cols="1" v-if="edu.type === 'highSchool'">
@@ -89,7 +84,7 @@
               <v-list class="py-0 pointer">
                 <v-list-item
                   ripple
-                  v-for="item in eduTypes"
+                  v-for="item in EDU_TYPES"
                   :key="item.value"
                   class="eduSelector"
                   @click="addSchool(item.value)"
@@ -103,16 +98,15 @@
         <!-- End add education -->
       </v-col>
     </v-row>
-  </v-container>
+  </v-form>
 </template>
 
 <script setup>
-import _ from 'lodash';
-import { inject, onBeforeMount, ref } from 'vue';
-import UniversityForm from '../forms/education-forms/UniversityForm.vue';
-import MilitaryForm from '../forms/education-forms/MilitaryForm.vue';
+import { map } from 'lodash';
+import { inject, ref } from 'vue';
 import HighSchoolForm from '../forms/education-forms/HighSchoolForm.vue';
-import { computed } from 'vue';
+import MilitaryForm from '../forms/education-forms/MilitaryForm.vue';
+import UniversityForm from '../forms/education-forms/UniversityForm.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -120,24 +114,26 @@ import { computed } from 'vue';
 // |                                                  |
 // |--------------------------------------------------|
 
-const emitter = inject('emitter');
-const props = defineProps(['model', 'allowAdditions', 'validating']);
-
-const editedEducation = ref(
-  _.map(props.model, (item) => {
-    return {
-      ...item,
-      id: getRandId()
-    };
-  })
-); // stores edited education info
-const eduCount = ref(0);
-const eduTypes = ref([
+const EDU_TYPES = [
   { display: 'University', value: 'university' },
   { display: 'Military', value: 'military' },
   { display: 'High School', value: 'highSchool' }
-]);
-const numErrors = ref(0);
+];
+
+defineProps(['allowAdditions']);
+const emitter = inject('emitter');
+
+const editedEmployee = defineModel({ required: true });
+const form = ref(null); // template ref
+
+const editedEducation = ref(
+  map(editedEmployee.value.education, (item) => {
+    item.id = getRandId();
+    return item;
+  })
+); // stores edited education info
+
+defineExpose({ prepareSubmit });
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -145,62 +141,32 @@ const numErrors = ref(0);
 // |                                                  |
 // |--------------------------------------------------|
 
-onBeforeMount(async () => {
-  emitter.emit('created', 'education');
-
-  emitter.on('doneValidatingEducation', async (data) => {
-    editedEducation.value[data.index] = data.content;
-    eduCount.value++;
-    numErrors.value += data.errors;
-
-    if (eduCount.value === editedEducation.value.length) {
-      emitter.emit('educationStatus', numErrors.value); // emit error status
-      emitter.emit('doneValidating', { tab: 'education', data: editedEducation.value }); // emit done validating
-      if (numErrors.value === 0) emitter.off('doneValidatingEducation');
-      numErrors.value = 0;
-      eduCount.value = 0;
-    }
-  });
-}); // onBeforeMount
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                   COMPUTED                       |
-// |                                                  |
-// |--------------------------------------------------|
-
-const displayHS = computed(() => {
-  for (let i = 0; i < editedEducation.value.length; i++) {
-    if (editedEducation.value[i].type === 'highSchool') {
-      return true;
-    }
-  }
-  return false;
-});
-
-const displayUni = computed(() => {
-  for (let i = 0; i < editedEducation.value.length; i++) {
-    if (editedEducation.value[i].type === 'university') {
-      return true;
-    }
-  }
-  return false;
-});
-
-const displayMilitary = computed(() => {
-  for (let i = 0; i < editedEducation.value.length; i++) {
-    if (editedEducation.value[i].type === 'military') {
-      return true;
-    }
-  }
-  return false;
-});
+onBeforeUnmount(prepareSubmit);
 
 // |--------------------------------------------------|
 // |                                                  |
 // |                    METHODS                       |
 // |                                                  |
 // |--------------------------------------------------|
+
+async function prepareSubmit() {
+  await validate();
+
+  // remove id that was generated for use in this file
+  editedEmployee.value.education = map(editedEducation.value, (education) => {
+    delete education.id;
+    return education;
+  });
+}
+
+async function validate() {
+  if (form.value) {
+    const result = await form.value.validate();
+    emitter.emit('validating', { tab: 'education', valid: result.valid });
+    return result;
+  }
+  return null;
+}
 
 /**
  * Adds a school.

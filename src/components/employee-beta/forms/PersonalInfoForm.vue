@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-form ref="form" validate-on="input">
     <v-row><h3>Basic Information</h3></v-row>
     <v-row>
       <!-- first name -->
@@ -9,19 +9,24 @@
       <!-- middle name -->
       <v-col>
         <v-text-field
-          v-model.trim="middleName"
-          :label="hasMiddleName ? 'Middle Name' : 'No Middle Name'"
-          :rules="hasMiddleName ? middleNameRules : []"
-          :hide-details="hasMiddleName ? 'auto' : true"
-          @update:model-value="hasMiddleName = true"
+          v-model.trim="editedEmployee.middleName"
+          :label="editedEmployee.noMiddleName ? 'No Middle Name' : 'Middle Name'"
+          :rules="editedEmployee.noMiddleName ? [() => true] : getRequiredRules()"
+          :hide-details="editedEmployee.noMiddleName ? true : 'auto'"
+          @update:model-value="if (!isEmpty(editedEmployee.middleName)) editedEmployee.noMiddleName = false;"
         >
-          <template v-slot:append-inner>
-            <v-btn v-if="hasMiddleName" @click="(hasMiddleName = false), (middleName = '')" variant="text" icon="">
+          <template #append-inner>
+            <v-btn
+              v-if="!editedEmployee.noMiddleName"
+              @click="editedEmployee.noMiddleName = true"
+              variant="text"
+              icon=""
+            >
               <v-tooltip text="Please disable if you do not have a middle name" location="top" activator="parent">
               </v-tooltip>
               <v-icon>mdi-check-circle</v-icon>
             </v-btn>
-            <v-btn v-else @click="hasMiddleName = true" variant="text" icon="">
+            <v-btn v-else @click="editedEmployee.noMiddleName = false" variant="text" icon="">
               <v-tooltip text="Please enable if you have a middle name" location="top" activator="parent"> </v-tooltip>
               <v-icon>mdi-close-circle</v-icon>
             </v-btn>
@@ -157,30 +162,27 @@
     <v-row><h3>Personal Information</h3></v-row>
     <v-row>
       <!-- birthday -->
-      <v-col cols="4">
+      <v-col>
         <v-text-field
           v-model="formattedBirthday"
           label="Birthday"
           v-mask="'##/##/####'"
           hint="MM/DD/YYYY"
-          :rules="[...getDateOptionalRules(), ...getNonFutureDateRules()]"
-          prepend-icon="mdi-calendar"
-          @update:focused="editedEmployee.birthday = format(formattedBirthday, null, 'YYYY-MM-DD')"
-          @click:prepend="birthdayMenu = true"
-          @keypress="birthdayMenu = false"
+          :rules="[getBirthdayRules()]"
+          prepend-inner-icon="mdi-calendar"
           autocomplete="off"
-          class="flex-grow"
-          style="min-width: 250px"
+          style="min-width: 200px"
+          @keypress="birthdayMenu = false"
         >
           <v-menu activator="parent" :close-on-content-click="false" v-model="birthdayMenu" location="start center">
             <v-date-picker
-              v-model="editedEmployee.birthday"
-              @update:model-value="birthdayMenu = false"
+              v-model="birthday"
               show-adjacent-months
               hide-actions
               keyboard-icon=""
               color="#bc3825"
               title="Birthday"
+              @update:model-value="onUpdateDatePicker($event)"
             >
             </v-date-picker>
           </v-menu>
@@ -191,7 +193,12 @@
       </v-col>
       <!-- personal email -->
       <v-col>
-        <v-text-field v-model="personalEmail.emailValue" label="Personal Email" :rules="getEmailRules()">
+        <v-text-field
+          v-model="personalEmail.emailValue"
+          label="Personal Email"
+          :rules="getEmailRules()"
+          style="min-width: 350px"
+        >
           <template #prepend-inner><v-icon>mdi-email</v-icon></template>
           <template #append-inner>
             <private-button v-model="personalEmail.private"></private-button>
@@ -317,7 +324,7 @@
         <v-btn prepend-icon="mdi-plus" @click="addPhoneNumber()">Add Number</v-btn>
       </v-col>
     </v-row>
-  </v-container>
+  </v-form>
 </template>
 
 <script setup>
@@ -326,10 +333,9 @@ import api from '@/shared/api';
 import { format, FORMATTED_ISOFORMAT, ISO8601 } from '@/shared/dateUtils';
 import { CASE_EMAIL_DOMAIN, EMPLOYEE_ROLES, PHONE_TYPES } from '@/shared/employeeUtils';
 import {
+  getBirthdayRules,
   getCaseEmailRules,
-  getDateOptionalRules,
   getEmailRules,
-  getNonFutureDateRules,
   getNumberRules,
   getPhoneNumberRules,
   getPhoneNumberTypeRules,
@@ -337,8 +343,9 @@ import {
   getURLRules
 } from '@/shared/validationUtils';
 import { COUNTRIES, isMobile, STATES } from '@/utils/utils';
+import dayjs from 'dayjs';
 import { cloneDeep, filter, forEach, includes, isEmpty, lowerCase, some, startCase } from 'lodash';
-import { computed, ref, watch } from 'vue';
+import { computed, inject, onBeforeUnmount, ref } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
 import PrivateButton from '../PrivateButton.vue';
@@ -350,8 +357,11 @@ import _ from 'lodash';
 // |                                                  |
 // |--------------------------------------------------|
 
-const editedEmployee = defineModel();
 const store = useStore();
+const emitter = inject('emitter');
+
+const editedEmployee = defineModel({ required: true });
+const form = ref(null); // template ref to form
 
 const vMask = mask; // import v mask directive
 
@@ -359,15 +369,12 @@ const vMask = mask; // import v mask directive
 const emailUsername = ref(
   editedEmployee.value.email ? editedEmployee.value.email.slice(0, editedEmployee.value.email.indexOf('@')) : ''
 );
-const hasMiddleName = ref(!editedEmployee.value.noMiddleName);
-const middleName = ref(editedEmployee.value.middleName);
 const employeeRole = ref(startCase(editedEmployee.value.employeeRole));
 const tags = ref(getEmployeeTags());
-const formattedBirthday = ref(format(editedEmployee.value.birthday, ISO8601, FORMATTED_ISOFORMAT));
 const phoneNumbers = ref(initPhoneNumbers());
 const personalEmail = ref({ emailValue: editedEmployee.value.personalEmail, private: true });
 
-// values only used for form, not for employee model
+// other refs
 const birthdayMenu = ref(false);
 const citySearchString = ref(null); // user input for searching POB
 const searchString = ref(''); // user input for searching address
@@ -375,7 +382,18 @@ const searchString = ref(''); // user input for searching address
 const placeIds = ref({}); // for address autocomplete
 const predictions = ref({}); // for POB autocomplete
 
+// other refs
 const phoneAutofocus = ref(false);
+
+defineExpose({ prepareSubmit }); // allows parent to use refs to call prepareSubmit()
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+onBeforeUnmount(prepareSubmit);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -383,17 +401,34 @@ const phoneAutofocus = ref(false);
 // |                                                  |
 // |--------------------------------------------------|
 
-/**
- * @type {ComputedRef<((v: any) => true | string)[]>}
- */
-const middleNameRules = computed(() => {
-  if (hasMiddleName.value) return getRequiredRules();
-  return [() => true];
+const userIsAdminOrManager = computed(() => {
+  const role = store.getters.user.employeeRole;
+  return role === 'admin' || role === 'manager';
 });
 
 /**
- * @type {ComputedRef<((v: any) => true | string)[]>}
+ * Dayjs object that wraps the birthday
+ *
+ * @type {import('vue').WritableComputedRef<import('dayjs').Dayjs>}
  */
+const birthday = computed({
+  get: () => dayjs(editedEmployee.value.birthday, ISO8601),
+  set: (val) => (editedEmployee.value.birthday = val.format(ISO8601))
+});
+
+/**
+ * Formatted string of the employee's birthday
+ *
+ * @type {import('vue').WritableComputedRef<string>}
+ */
+const formattedBirthday = computed({
+  get: () => birthday.value.format(FORMATTED_ISOFORMAT),
+  set: (val) => {
+    birthday.value = dayjs(val);
+  }
+});
+
+/** @type {import('vue').ComputedRef<((v: any) => true | string)[]>} */
 const employeeNumberRules = computed(() => [
   ...getRequiredRules(),
   ...getNumberRules(),
@@ -406,24 +441,6 @@ const employeeNumberRules = computed(() => [
   }
 ]);
 
-const userIsAdminOrManager = computed(() => {
-  const role = store.getters.user.employeeRole;
-  return role === 'admin' || role === 'manager';
-});
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     WATCHERS                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-watch(
-  () => editedEmployee.value.birthday,
-  (newValue) => {
-    formattedBirthday.value = format(newValue, null, FORMATTED_ISOFORMAT);
-  }
-);
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -433,13 +450,24 @@ watch(
 /**
  * Uses the formatted/transformed data from the form and loads it into the edited employee
  */
-function prepareSubmit() {
+async function prepareSubmit() {
+  await validate();
+
+  if (editedEmployee.value.noMiddleName) editedEmployee.value.middleName = '';
+
   editedEmployee.value.email = emailUsername.value + CASE_EMAIL_DOMAIN;
 
-  editedEmployee.value.noMiddleName = !hasMiddleName.value;
-  editedEmployee.value.middleName = hasMiddleName.value ? middleName.value : '';
-
   editedEmployee.value.employeeRole = lowerCase(employeeRole.value);
+
+  editedEmployee.value.birthday = format(formattedBirthday.value, FORMATTED_ISOFORMAT, ISO8601);
+
+  editedEmployee.value.personalEmail = personalEmail.value.emailValue;
+  // leave this unchanged if no email is entered
+  if (!isEmpty(personalEmail.value.emailValue)) {
+    editedEmployee.value.personalEmailHidden = personalEmail.value.private;
+  }
+
+  if (editedEmployee.value.country !== 'United States') editedEmployee.value.st = '';
 
   editedEmployee.value.privatePhoneNumbers = [];
   editedEmployee.value.publicPhoneNumbers = [];
@@ -448,10 +476,15 @@ function prepareSubmit() {
     if (phoneNumber.private) editedEmployee.value.privatePhoneNumbers.push(phoneNumber);
     else editedEmployee.value.publicPhoneNumbers.push(phoneNumber);
   });
+}
 
-  editedEmployee.value.personalEmail = personalEmail.value.emailValue;
-
-  if (editedEmployee.value.country !== 'United States') editedEmployee.value.st = '';
+async function validate() {
+  if (form.value) {
+    const result = await form.value.validate();
+    emitter.emit('validating', { tab: 'personal', valid: result.valid });
+    return result;
+  }
+  return null;
 }
 
 /**
@@ -507,7 +540,7 @@ async function updateAddressDropDown(query) {
 
 /**
  * Finds the city, street, state, and zip code current address fields based on an address
- * @param {Ref<any>} item The ref to the search string
+ * @param {import('vue').Ref<any>} item The ref to the search string
  */
 async function autofillLocation(item) {
   let search = item.value;
@@ -538,6 +571,14 @@ async function autofillLocation(item) {
     search = null;
   }
 } // autofillLocation
+
+/**
+ * Run when the model value of the birthday date picker is updated
+ */
+function onUpdateDatePicker(event) {
+  birthdayMenu.value = false;
+  formattedBirthday.value = event;
+}
 
 /**
  * Updates the city dropdown according to the user's input.

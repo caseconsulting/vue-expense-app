@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-form ref="form" validate-on="lazy">
     <v-row>
       <!-- Start Certifications -->
       <v-col>
@@ -9,7 +9,7 @@
           </v-col>
         </v-row>
         <!-- Start Cert Loop -->
-        <v-row v-for="(certification, index) in editedCertifications" :key="index">
+        <v-row v-for="(certification, index) in editedEmployee.certifications" :key="index">
           <!-- Start Cert Name -->
           <v-col cols="5">
             <v-combobox
@@ -137,7 +137,7 @@
           </v-col>
         </v-row>
         <!-- Start Award Loop -->
-        <v-row v-for="(award, index) in editedAwards" :key="index">
+        <v-row v-for="(award, index) in editedEmployee.awards" :key="index">
           <!-- Start Award Name -->
           <v-col cols="6">
             <v-text-field
@@ -213,20 +213,15 @@
       </v-col>
     </v-row>
     <!-- End Awards -->
-  </v-container>
+  </v-form>
 </template>
 
 <script setup>
+import { format, getTodaysDate } from '@/shared/dateUtils';
+import { getDateMonthYearRules, getDateOptionalRules, getDateRules, getRequiredRules } from '@/shared/validationUtils';
 import _ from 'lodash';
-import { inject, onBeforeMount, ref } from 'vue';
-import {
-  getDateMonthYearRules,
-  getDateOptionalRules,
-  getDateRules,
-  getRequiredRules
-} from '../../../shared/validationUtils';
+import { inject, onBeforeMount, onBeforeUnmount, ref } from 'vue';
 import { mask } from 'vue-the-mask';
-import { format, getTodaysDate } from '../../../shared/dateUtils';
 import { useStore } from 'vuex';
 
 // |--------------------------------------------------|
@@ -235,16 +230,18 @@ import { useStore } from 'vuex';
 // |                                                  |
 // |--------------------------------------------------|
 
-const emitter = inject('emitter');
-const props = defineProps(['certifications', 'awards', 'validateCertifications', 'validateAwards']);
 const store = useStore();
+const emitter = inject('emitter');
 const vMask = mask;
+
+const editedEmployee = defineModel({ required: true });
+const form = ref(null); // template ref
 
 const certificationDropDown = ref([]); // autocomplete certification name options
 const certificationIndex = ref(0);
-const editedAwards = ref(_.cloneDeep(props.awards)); // stores edited awards info
-const editedCertifications = ref(_.cloneDeep(props.certifications));
-const employees = ref(null);
+const employees = store.getters.employees;
+
+defineExpose({ prepareSubmit });
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -252,12 +249,9 @@ const employees = ref(null);
 // |                                                  |
 // |--------------------------------------------------|
 
-onBeforeMount(async () => {
-  emitter.emit('created', 'certifications'); // emit certifications tab was created
-  emitter.emit('created', 'awards'); // emit awards tab was created
-  employees.value = store.getters.employees; // get all employees
-  populateDropDowns(); // get autocomplete drop down data
-});
+onBeforeMount(populateDropDowns);
+
+onBeforeUnmount(prepareSubmit);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -265,12 +259,21 @@ onBeforeMount(async () => {
 // |                                                  |
 // |--------------------------------------------------|
 
+async function prepareSubmit() {
+  if (form.value) {
+    const result = await form.value.validate();
+    emitter.emit('validating', { tab: 'certsAndAwards', valid: result.valid });
+    return result;
+  }
+  return null;
+}
+
 /**
  * Add an award.
  */
 function addAward() {
-  if (!editedAwards.value) editedAwards.value = [];
-  editedAwards.value.push({
+  if (!editedEmployee.value.awards) editedEmployee.value.awards = [];
+  editedEmployee.value.awards.push({
     name: null,
     dateReceived: null,
     expirationDate: null,
@@ -284,8 +287,8 @@ function addAward() {
  * Adds a certification.
  */
 function addCertification() {
-  if (!editedCertifications.value) editedCertifications.value = [];
-  editedCertifications.value.push({
+  if (!editedEmployee.value.certifications) editedEmployee.value.certifications = [];
+  editedEmployee.value.certifications.push({
     name: null,
     dateReceived: null,
     dateSubmitted: getTodaysDate(),
@@ -301,7 +304,7 @@ function addCertification() {
  * @param index - The index of the award to delete
  */
 function deleteAward(index) {
-  editedAwards.value.splice(index, 1);
+  editedEmployee.value.awards.splice(index, 1);
 } // deleteAward
 
 /**
@@ -310,7 +313,7 @@ function deleteAward(index) {
  * @param index - array index of certification to delete
  */
 function deleteCertification(index) {
-  editedCertifications.value.splice(index, 1);
+  editedEmployee.value.certifications.splice(index, 1);
 } // deleteCertification
 
 /**
@@ -318,7 +321,7 @@ function deleteCertification(index) {
  *
  * @return String - The date in YYYY-MM-DD format
  */
-function parseEventDate() {
+function parseEventDate(event) {
   return format(event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD');
 } //parseEventDate
 
@@ -327,7 +330,7 @@ function parseEventDate() {
  *
  * @return String - The date in YYYY-MM format
  */
-function parseAwardEventDate() {
+function parseAwardEventDate(event) {
   return this.format(event.target.value, 'MM/YYYY', 'YYYY-MM');
 } // parseEventDate
 
@@ -335,7 +338,7 @@ function parseAwardEventDate() {
  * Populate drop downs with information that other employees have filled out.
  */
 function populateDropDowns() {
-  let employeesCertifications = _.map(employees.value, (employee) => employee.certifications); // extract certifications
+  let employeesCertifications = _.map(employees, (employee) => employee.certifications); // extract certifications
   employeesCertifications = _.compact(employeesCertifications); // remove falsey values
   // loop employees
   _.forEach(employeesCertifications, (certifications) => {

@@ -87,6 +87,8 @@ export const PROFICIENCIES = [
   'Literacy - fluency and broad vocabulary associated with high levels of education'
 ];
 
+export const CLEARANCE_TYPES = ['TS/SCI - Full Scope', 'TS/SCI - CI Poly', 'TS/SCI - No Poly', 'Top Secret', 'Secret'];
+
 /**
  * Given an employee returns the employee's full name. Ex. John Jacob Doe
  * @param {JSON} employee - employee object
@@ -202,10 +204,11 @@ export function selectedTagsHasEmployee(employeeId, tagsInfo) {
 } // selectedTagsHasEmployee
 
 export default {
-  EMPLOYEE_ROLES,
-  PHONE_TYPES,
   CASE_EMAIL_DOMAIN,
+  CLEARANCE_TYPES,
+  EMPLOYEE_ROLES,
   LANGUAGES,
+  PHONE_TYPES,
   PROFICIENCIES,
   fullName,
   firstAndLastName,
