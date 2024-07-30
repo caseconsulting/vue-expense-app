@@ -352,8 +352,6 @@ const dateSubmissionRules = (index) => {
 
 const dateGrantedRules = (index) => {
   let currClearance = editedClearances.value[index];
-  console.log(currClearance.grantedDate);
-  console.log(currClearance.submissionDate);
   return currClearance.grantedDate && currClearance.submissionDate
     ? isAfter(currClearance.grantedDate, currClearance.submissionDate) || 'Grant date must be after the submission date'
     : true;
