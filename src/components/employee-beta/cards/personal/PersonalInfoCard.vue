@@ -23,9 +23,19 @@
         </p>
         <v-icon style="margin-left: auto; margin-right: 0">mdi-shield</v-icon>
       </div>
-      <p v-if="!isEmpty(getPlaceOfBirth() && (isAdmin || isUser))">
-        <b>Place of Birth: </b> {{ getPlaceOfBirth() }}<v-icon class="text-align: float-right">mdi-shield</v-icon>
-      </p>
+      <v-row dense v-if="!isEmpty(getPlaceOfBirth() && (isAdmin || isUser))">
+        <v-col cols="auto">
+          <p class="d-inline text-align: float-left">
+            <b>Place of Birth: </b>
+          </p>
+        </v-col>
+        <v-col>
+          <p class="d-inline">{{ getPlaceOfBirth() }}</p>
+        </v-col>
+        <v-col cols="2">
+          <v-icon class="d-inline text-align: float-right">mdi-shield</v-icon>
+        </v-col>
+      </v-row>
     </v-card-text>
     <p
       v-if="

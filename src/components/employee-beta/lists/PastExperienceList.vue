@@ -8,32 +8,34 @@
       <v-divider class="mt-2" />
     </v-row>
     <v-list-item v-for="(company, index) in list" :key="company.companyName + index">
-      <v-list-item-title class="d-flex align-center">
-        <v-icon class="mx-3">mdi-briefcase-outline</v-icon>
-        <p class="mt-3">
+      <v-list-item-title class="align-center">
+        <v-icon class="d-inline mx-3">mdi-briefcase-outline</v-icon>
+        <p class="d-inline mt-3">
           <b>{{ company.companyName }}</b>
         </p>
-        <p class="my-2 mx-6 gray-text" v-if="company.positions.length === 1">
+        <p class="my-2 ml-12 gray-text" v-if="company.positions.length === 1">
           {{ monthYearFormatBETA(company.positions[0].startDate) }} -
           {{ monthYearFormatBETA(company.positions[0].endDate) }}
         </p>
-        <p class="my-2 mx-6 gray-text" v-else>
+        <p class="my-2 ml-12 gray-text" v-else>
           {{ monthYearFormatBETA(getTotalTimeAtCompany(company)) }} - {{ monthYearFormatBETA(endDate) }}
         </p>
       </v-list-item-title>
       <div
-        class="ml-12 mb-2 px-6 position-text"
+        class="ml-12 mb-2 position-text"
         v-for="(position, posIndex) in company.positions"
         :key="position.title + posIndex"
       >
         <p class="d-inline">{{ position.title }}:</p>
-        <p class="my-2 mx-5 months-text">
+        <p class="my-2 ml-5 months-text d-inline">
           <a v-if="Math.floor(getDurationOfPosition(position) / 12) > 1"
             >{{ Math.floor(getDurationOfPosition(position) / 12) }} Years and</a
           >
           <a v-else-if="Math.floor(getDurationOfPosition(position) / 12) == 1"
             >{{ Math.floor(getDurationOfPosition(position) / 12) }} Year and</a
           >
+        </p>
+        <p class="d-inline ml-1">
           {{ getDurationOfPosition(position) % 12 }}
           <a v-if="getDurationOfPosition(position) % 12 != 1"> Months </a>
           <a v-else-if="getDurationOfPosition(position) % 12 == 1"> Month</a>
