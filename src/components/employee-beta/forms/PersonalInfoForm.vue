@@ -374,7 +374,7 @@ const tags = ref(getEmployeeTags());
 const phoneNumbers = ref(initPhoneNumbers());
 const personalEmail = ref({ emailValue: editedEmployee.value.personalEmail, private: true });
 
-// values only used for form, not for employee model
+// other refs
 const birthdayMenu = ref(false);
 const citySearchString = ref(null); // user input for searching POB
 const searchString = ref(''); // user input for searching address
