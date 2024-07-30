@@ -9,19 +9,24 @@
       <!-- middle name -->
       <v-col>
         <v-text-field
-          v-model.trim="middleName"
-          :label="hasMiddleName ? 'Middle Name' : 'No Middle Name'"
+          v-model.trim="editedEmployee.middleName"
+          :label="editedEmployee.noMiddleName ? 'No Middle Name' : 'Middle Name'"
           :rules="middleNameRules"
-          :hide-details="hasMiddleName ? 'auto' : true"
-          @update:model-value="hasMiddleName = true"
+          :hide-details="editedEmployee.noMiddleName ? true : 'auto'"
+          @update:model-value="if (!isEmpty(editedEmployee.middleName)) editedEmployee.noMiddleName = false;"
         >
           <template #append-inner>
-            <v-btn v-if="hasMiddleName" @click="disableMiddleName()" variant="text" icon="">
+            <v-btn
+              v-if="!editedEmployee.noMiddleName"
+              @click="editedEmployee.noMiddleName = true"
+              variant="text"
+              icon=""
+            >
               <v-tooltip text="Please disable if you do not have a middle name" location="top" activator="parent">
               </v-tooltip>
               <v-icon>mdi-check-circle</v-icon>
             </v-btn>
-            <v-btn v-else @click="hasMiddleName = true" variant="text" icon="">
+            <v-btn v-else @click="editedEmployee.noMiddleName = false" variant="text" icon="">
               <v-tooltip text="Please enable if you have a middle name" location="top" activator="parent"> </v-tooltip>
               <v-icon>mdi-close-circle</v-icon>
             </v-btn>
@@ -364,8 +369,6 @@ const vMask = mask; // import v mask directive
 const emailUsername = ref(
   editedEmployee.value.email ? editedEmployee.value.email.slice(0, editedEmployee.value.email.indexOf('@')) : ''
 );
-const hasMiddleName = ref(!editedEmployee.value.noMiddleName);
-const middleName = ref(editedEmployee.value.middleName);
 const employeeRole = ref(startCase(editedEmployee.value.employeeRole));
 const tags = ref(getEmployeeTags());
 const phoneNumbers = ref(initPhoneNumbers());
@@ -431,7 +434,7 @@ const formattedBirthday = computed({
 
 /** @type {import('vue').ComputedRef<((v: any) => true | string)[]>} */
 const middleNameRules = computed(() => {
-  return hasMiddleName.value ? getRequiredRules() : [() => true];
+  return editedEmployee.value.noMiddleName ? [() => true] : getRequiredRules();
 });
 
 /** @type {import('vue').ComputedRef<((v: any) => true | string)[]>} */
@@ -457,8 +460,7 @@ const employeeNumberRules = computed(() => [
  * Uses the formatted/transformed data from the form and loads it into the edited employee
  */
 function prepareSubmit() {
-  editedEmployee.value.noMiddleName = !hasMiddleName.value;
-  editedEmployee.value.middleName = hasMiddleName.value ? middleName.value : '';
+  if (editedEmployee.value.noMiddleName) editedEmployee.value.middleName = '';
 
   editedEmployee.value.email = emailUsername.value + CASE_EMAIL_DOMAIN;
 
@@ -495,11 +497,6 @@ async function validate() {
  */
 function getEmployeeTags() {
   return cloneDeep(filter(store.getters.tags, (tag) => includes(tag.employees, editedEmployee.value.id)));
-}
-
-function disableMiddleName() {
-  hasMiddleName.value = false;
-  middleName.value = '';
 }
 
 /**

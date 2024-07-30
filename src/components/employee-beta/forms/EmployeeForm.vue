@@ -31,7 +31,7 @@
       <div v-if="submitting" class="py-10 px-6">
         <v-progress-linear :indeterminate="true"></v-progress-linear>
       </div>
-      <v-container v-else fluid>
+      <v-container v-show="!submitting" fluid>
         <v-form
           ref="form"
           validate-on="lazy"
@@ -117,7 +117,7 @@
 import BaseForm from '@/components/employee-beta/forms/BaseForm.vue';
 import FormCancelConfirmation from '@/components/modals/FormCancelConfirmation.vue';
 import api from '@/shared/api';
-import { cloneDeep, forOwn, isEmpty, isEqual, pickBy } from 'lodash';
+import { cloneDeep, forOwn, isEqual, isUndefined, pickBy } from 'lodash';
 import { computed, inject, onBeforeMount, onBeforeUnmount, reactive, ref } from 'vue';
 import { useDisplay } from 'vuetify';
 import CertsAndAwardsTab from '../form-tabs/CertsAndAwardsTab.vue';
@@ -229,17 +229,11 @@ async function submit(event) {
   if (!valid.value) return cancelSubmit();
 
   // allows other tabs to finalize data, if they're open. otherwise the data should already be finalized
-  try {
-    personalInfoFormRef.value?.prepareSubmit();
-    technologiesFormRef.value?.prepareSubmit();
-    contractsTabRef.value?.prepareSubmit();
-    educationTabRef.value?.prepareSubmit();
-    jobExperienceTabRef.value?.prepareSubmit();
-  } catch (err) {
-    console.error(err);
-    submitting.value = false;
-    return;
-  }
+  personalInfoFormRef.value?.prepareSubmit();
+  technologiesFormRef.value?.prepareSubmit();
+  contractsTabRef.value?.prepareSubmit();
+  educationTabRef.value?.prepareSubmit();
+  jobExperienceTabRef.value?.prepareSubmit();
 
   // picks out all the changed values to make the api call
   let changes = getChanges();
@@ -303,6 +297,13 @@ function cancelSubmit() {
 
 function collapseAllTabs() {
   formTabs.value = [];
+}
+
+/**
+ * Returns true only if the value is undefined, null, or empty string
+ */
+function isEmpty(value) {
+  return isUndefined(value) || value === null || value === '';
 }
 </script>
 
