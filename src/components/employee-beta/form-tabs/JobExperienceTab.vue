@@ -92,6 +92,11 @@
               data-vv-name="Position"
             ></v-text-field>
           </v-col>
+
+          <v-col cols="auto">
+            <v-icon class="pt-7 case-gray">mdi-information</v-icon>
+            <v-tooltip activator="parent" location="right"> Change Job Role in Personal Edit Tab </v-tooltip>
+          </v-col>
         </v-row>
 
         <v-row>
