@@ -219,37 +219,57 @@
 
       <!-- place of birth -->
       <v-col class="pt-0" cols="12">
-        <v-row class="ml-0"><h4>Place of Birth</h4></v-row>
-        <v-row>
-          <v-col class="d-flex align-center" cols="auto">
-            <v-tooltip location="top" text="Place of birth is always hidden from other users">
-              <template #activator="{ props }">
-                <v-btn v-bind="props" icon="mdi-shield" variant="text" v-ripple="false"></v-btn>
-              </template>
-            </v-tooltip>
-          </v-col>
-          <!-- city of birth -->
+        <v-row><h3>Place of Birth</h3></v-row>
+        <v-row class="groove pb-2">
           <v-col>
-            <v-text-field v-model="editedEmployee.city" label="City" hide-details="auto"></v-text-field>
-          </v-col>
-          <!-- state of birth -->
-          <v-col>
-            <v-autocomplete
-              v-model="editedEmployee.st"
-              label="State"
-              :items="Object.values(STATES)"
-              hide-details="auto"
-              :disabled="editedEmployee.country !== 'United States'"
-            ></v-autocomplete>
-          </v-col>
-          <!-- country of birth -->
-          <v-col>
-            <v-autocomplete
-              v-model="editedEmployee.country"
-              label="Country"
-              :items="COUNTRIES"
-              hide-details="auto"
-            ></v-autocomplete>
+            <v-row align="center">
+              <v-col class="pb-0">
+                <v-autocomplete
+                  prepend-inner-icon="mdi-magnify"
+                  label="City Locations"
+                  @update:search="updateCityDropDown($event)"
+                  :items="Object.keys(predictions)"
+                  v-model="citySearchString"
+                  no-data-text="Start searching..."
+                  persitent-hint="Search city and select option to auto-fill fields below."
+                  persistent-hint
+                >
+                  <template #prepend>
+                    <v-tooltip location="top" text="Place of birth is always hidden from other users">
+                      <template #activator="{ props }">
+                        <v-btn v-bind="props" icon="mdi-shield" variant="text" v-ripple="false"></v-btn>
+                      </template>
+                    </v-tooltip>
+                  </template>
+                  <template #item="{ item, props }">
+                    <v-list-item @click="updateCityBoxes(item, props)">{{ item.value }}</v-list-item>
+                  </template>
+                </v-autocomplete>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="4">
+                <v-text-field v-model.trim="editedEmployee.city" label="City" data-vv-name="City"></v-text-field>
+              </v-col>
+              <v-col>
+                <v-autocomplete
+                  v-model="editedEmployee.st"
+                  label="State"
+                  :items="Object.values(STATES)"
+                  hide-details="auto"
+                  :disabled="editedEmployee.country !== 'United States'"
+                ></v-autocomplete>
+              </v-col>
+              <!-- country of birth -->
+              <v-col>
+                <v-autocomplete
+                  v-model="editedEmployee.country"
+                  label="Country"
+                  :items="COUNTRIES"
+                  hide-details="auto"
+                ></v-autocomplete>
+              </v-col>
+            </v-row>
           </v-col>
         </v-row>
       </v-col>
@@ -322,6 +342,7 @@ import { computed, ref, watch } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
 import PrivateButton from '../PrivateButton.vue';
+import _ from 'lodash';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -348,8 +369,11 @@ const personalEmail = ref({ emailValue: editedEmployee.value.personalEmail, priv
 
 // values only used for form, not for employee model
 const birthdayMenu = ref(false);
-const searchString = ref('');
-const placeIds = ref({});
+const citySearchString = ref(null); // user input for searching POB
+const searchString = ref(''); // user input for searching address
+// const states = STATES; // states
+const placeIds = ref({}); // for address autocomplete
+const predictions = ref({}); // for POB autocomplete
 
 const phoneAutofocus = ref(false);
 
@@ -516,6 +540,55 @@ async function autofillLocation(item) {
 } // autofillLocation
 
 /**
+ * Updates the city dropdown according to the user's input.
+ */
+async function updateCityDropDown(query) {
+  if (query.length > 2) {
+    let locations = await api.getCity(query);
+    //object used to contain addresses and their respective ID's
+    //needed later to obtain the selected address's zip code
+    predictions.value = {};
+    _.forEach(locations.predictions, (location) => {
+      predictions.value[location.description] = location.predictions;
+    });
+  } else {
+    predictions.value = {};
+  }
+} //updateCityDropDown
+
+/**
+ * Once a city has been selected, it will update the fields.
+ */
+async function updateCityBoxes(item) {
+  citySearchString.value = item.value;
+  let country = '';
+  let state = '';
+  if (!isEmpty(citySearchString.value)) {
+    let birthInfo = citySearchString.value.split(', ');
+    let city = birthInfo[0];
+
+    // a city outside the US with no state/region
+    if (birthInfo.length == 2) {
+      country = birthInfo[1];
+    } else {
+      state = birthInfo[1];
+      country = birthInfo[2];
+    }
+
+    if (country === 'USA') {
+      country = 'United States';
+    }
+    //fills in the first three fields
+    editedEmployee.value.city = city;
+    editedEmployee.value.country = country;
+    editedEmployee.value.st = STATES[state];
+
+    //resets predictions and ID's in dropdown
+    predictions.value = {};
+    citySearchString.value = null;
+  }
+} // updateCityBoxes
+
  * Removes any text after the '@' symbol on the email username input once the user clicks away.
  * This should help prevent any double domain issues for the CASE email.
  */
