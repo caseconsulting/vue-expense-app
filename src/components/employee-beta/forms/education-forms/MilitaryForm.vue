@@ -1,7 +1,7 @@
 <template>
   <v-container>
-    <!-- Military Branch -->
     <v-row v-for="i in [0]" :key="i">
+      <!-- Start military branch -->
       <v-col>
         <v-autocomplete
           ref="formFields"
@@ -9,11 +9,13 @@
           v-model="military.branch"
           :rules="getRequiredRules()"
           label="Military Branch"
-          variant="underlined"
           auto-select-first
           clearable
         ></v-autocomplete>
       </v-col>
+      <!-- End military branch -->
+
+      <!-- Start military start date -->
       <v-col>
         <v-text-field
           ref="formFields"
@@ -22,8 +24,7 @@
           label="Starting Date"
           hint="MM/YYYY format"
           v-mask="'##/####'"
-          variant="underlined"
-          prepend-icon="mdi-calendar"
+          prepend-inner-icon="mdi-calendar"
           @update:focused="military.startDate = parseEventDate($event)"
           @click:prepend="military.showStartMenu = true"
           @keypress="military.showStartMenu = false"
@@ -50,7 +51,9 @@
           </v-menu>
         </v-text-field>
       </v-col>
+      <!-- End military start date -->
 
+      <!-- Start military end date -->
       <v-col>
         <v-text-field
           ref="formFields"
@@ -59,8 +62,7 @@
           label="Completion Date"
           hint="MM/YYYY format"
           v-mask="'##/####'"
-          variant="underlined"
-          prepend-icon="mdi-calendar"
+          prepend-inner-icon="mdi-calendar"
           @update:focused="military.completeDate = parseEventDate($event)"
           @click:prepend="military.showCompleteMenu = true"
           @keypress="military.showCompleteMenu = false"
@@ -87,17 +89,23 @@
           </v-menu>
         </v-text-field>
       </v-col>
+      <!-- End military end date -->
     </v-row>
   </v-container>
 </template>
 
 <script setup>
 import _ from 'lodash';
-import { ref } from 'vue';
 import { getDateMonthYearOptionalRules, getRequiredRules } from '../../../../shared/validationUtils';
 import { mask } from 'vue-the-mask';
 import { format } from '../../../../shared/dateUtils';
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     SETUP                        |
+// |                                                  |
+// |--------------------------------------------------|
 
 const props = defineProps(['service', 'militaryIndex', 'validating', 'attach', 'index']);
 const vMask = mask; // custom directive
@@ -117,6 +125,12 @@ const military = ref({ ..._.cloneDeep(props.service), showStartMenu: false, show
 const isAttached = computed(() => {
   return props.attach;
 }); // isAttached
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
  * Parse the date after losing focus.

@@ -3,17 +3,19 @@
     <v-row>
       <v-col>
         <v-row v-for="i in [0]" :key="i">
+          <!-- Start high school name -->
           <v-col>
             <v-text-field
               ref="formFields"
               v-model="highSchool.name"
               :rules="getRequiredRules()"
-              variant="underlined"
               label="High School"
               clearable
             ></v-text-field>
           </v-col>
+          <!-- End high school name -->
 
+          <!-- Start graduation date -->
           <v-col>
             <v-text-field
               :model-value="format(highSchool.gradDate, null, 'MM/YYYY')"
@@ -23,10 +25,9 @@
               hint="MM/YYYY format"
               v-mask="'##/####'"
               persistent-hint
-              variant="underlined"
               @update:focused="highSchool.gradDate = parseEventDate($event)"
               clearable
-              prepend-icon="mdi-calendar"
+              prepend-inner-icon="mdi-calendar"
               @click:prepend="highSchool.showReceivedMenu = true"
               @keypress="highSchool.showReceivedMenu = false"
               autocomplete="off"
@@ -50,6 +51,7 @@
               </v-menu>
             </v-text-field>
           </v-col>
+          <!-- End graduation date -->
         </v-row>
       </v-col>
     </v-row>
@@ -63,6 +65,12 @@ import { ref } from 'vue';
 import { format } from '../../../../shared/dateUtils';
 import { computed } from 'vue';
 import { mask } from 'vue-the-mask';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     SETUP                        |
+// |                                                  |
+// |--------------------------------------------------|
 
 const props = defineProps(['school', 'schoolIndex', 'validating', 'attach']);
 const vMask = mask; // custom directive
