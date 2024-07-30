@@ -17,29 +17,35 @@
           or send a message to Paul Farmer.
         </v-card-text>
         <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn
-            color="red"
-            variant="text"
-            @click="
-              emit(`cancel-decline-self-identify`);
-              activate = false;
-            "
-          >
-            No, take me back.
-          </v-btn>
-          <v-spacer></v-spacer>
-          <v-btn
-            color="green-darken-1"
-            variant="text"
-            @click="
-              emit(`confirm-decline-self-identify`);
-              activate = false;
-            "
-          >
-            Yes, decline self-identify.
-          </v-btn>
-          <v-spacer></v-spacer>
+          <v-row no-gutters>
+            <v-col :cols="isMobile() ? '12' : '5'">
+              <v-btn
+                color="red"
+                variant="text"
+                class="d-flex flex-row"
+                :class="!isMobile() ? 'ml-5' : ''"
+                @click="
+                  emit(`cancel-decline-self-identify`);
+                  activate = false;
+                "
+              >
+                No, take me back.
+              </v-btn>
+            </v-col>
+            <v-col>
+              <v-btn
+                color="green-darken-1"
+                variant="text"
+                class="d-flex flex-row"
+                @click="
+                  emit(`confirm-decline-self-identify`);
+                  activate = false;
+                "
+              >
+                Yes, decline self-identify.
+              </v-btn>
+            </v-col>
+          </v-row>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -48,6 +54,7 @@
 
 <script setup>
 import { inject, ref, watch } from 'vue';
+import { isMobile } from '../../utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
