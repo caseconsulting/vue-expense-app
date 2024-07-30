@@ -335,18 +335,15 @@ defineExpose({ prepareSubmit });
 
 onBeforeUnmount(prepareSubmit);
 
-onBeforeUnmount(async () => {
-  const result = await validate();
-  emitter.emit('validating', { tab: 'jobExperience', valid: result.valid });
-});
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
 
-function prepareSubmit() {
+async function prepareSubmit() {
+  await validate();
+
   // delete properties from positions that should not be stored in the database
   editedEmployee.value.companies = map(editedCompanies.value, (company) => {
     company.positions = map(company.positions, (position) => {
@@ -359,7 +356,11 @@ function prepareSubmit() {
 }
 
 async function validate() {
-  if (form.value) return await form.value.validate();
+  if (form.value) {
+    const result = await form.value.validate();
+    emitter.emit('validating', { tab: 'jobExperience', valid: result.valid });
+    return result;
+  }
   return null;
 }
 

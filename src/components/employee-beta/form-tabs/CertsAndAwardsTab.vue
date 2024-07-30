@@ -241,6 +241,8 @@ const certificationDropDown = ref([]); // autocomplete certification name option
 const certificationIndex = ref(0);
 const employees = store.getters.employees;
 
+defineExpose({ prepareSubmit });
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -251,10 +253,7 @@ onBeforeMount(() => {
   populateDropDowns(); // get autocomplete drop down data
 });
 
-onBeforeUnmount(async () => {
-  const result = await validate();
-  emitter.emit('validating', { tab: 'certsAndAwards', valid: result.valid });
-});
+onBeforeUnmount(prepareSubmit);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -262,8 +261,12 @@ onBeforeUnmount(async () => {
 // |                                                  |
 // |--------------------------------------------------|
 
-async function validate() {
-  if (form.value) return await form.value.validate();
+async function prepareSubmit() {
+  if (form.value) {
+    const result = await form.value.validate();
+    emitter.emit('validating', { tab: 'certsAndAwards', valid: result.valid });
+    return result;
+  }
   return null;
 }
 

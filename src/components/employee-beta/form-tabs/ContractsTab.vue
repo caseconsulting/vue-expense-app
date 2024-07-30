@@ -214,7 +214,7 @@ import { useStore } from 'vuex';
 // |--------------------------------------------------|
 
 const store = useStore();
-const emitter = inject('emitter')
+const emitter = inject('emitter');
 const vMask = mask; // custom directive
 
 const editedEmployee = defineModel({ required: true });
@@ -237,18 +237,15 @@ defineExpose({ prepareSubmit });
 
 onBeforeUnmount(prepareSubmit);
 
-onBeforeUnmount(async () => {
-  const result = await validate();
-  emitter.emit('validating', { tab: 'contracts', valid: result.valid });
-});
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                    METHODS                       |
 // |                                                  |
 // |--------------------------------------------------|
 
-function prepareSubmit() {
+async function prepareSubmit() {
+  await validate();
+
   // delete keys that aren't stored in database
   editedEmployee.value.contracts = map(editedContracts.value, (contract) => {
     delete contract.contractName;
@@ -263,7 +260,11 @@ function prepareSubmit() {
 }
 
 async function validate() {
-  if (form.value) return await form.value.validate();
+  if (form.value) {
+    const result = await form.value.validate();
+    emitter.emit('validating', { tab: 'contracts', valid: result.valid });
+    return result;
+  }
   return null;
 }
 

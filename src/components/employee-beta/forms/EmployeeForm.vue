@@ -41,42 +41,38 @@
         >
           <v-expansion-panels v-model="formTabs" variant="accordion" multiple>
             <base-form title="Personal" value="Personal Information">
-              <personal-info-form ref="personalInfoFormRef" v-model="editedEmployee"></personal-info-form>
+              <personal-info-form ref="personalInfoRef" v-model="editedEmployee"></personal-info-form>
             </base-form>
             <base-form title="Clearance" value="Clearance">
               <div>
-                <clearance-tab v-model="editedEmployee" :model="employee.clearances"></clearance-tab>
+                <clearance-tab ref="clearanceRef" v-model="editedEmployee" :model="employee.clearances"></clearance-tab>
               </div>
             </base-form>
             <base-form title="Contracts" value="Contracts">
               <div>
-                <contracts-tab
-                  ref="contractsTabRef"
-                  v-model="editedEmployee"
-                  :model="employee.contracts"
-                ></contracts-tab>
+                <contracts-tab ref="contractsRef" v-model="editedEmployee" :model="employee.contracts"></contracts-tab>
               </div>
             </base-form>
             <base-form title="Certifications & Awards" value="Certifications & Awards">
               <div>
-                <certs-and-awards-tab v-model="editedEmployee"></certs-and-awards-tab>
+                <certs-and-awards-tab ref="certsAndAwardsRef" v-model="editedEmployee"></certs-and-awards-tab>
               </div>
             </base-form>
             <base-form title="Tech and Skills" value="Tech and Skills">
-              <technologies-form ref="technologiesFormRef" v-model="editedEmployee"></technologies-form>
+              <technologies-form ref="technologiesRef" v-model="editedEmployee"></technologies-form>
             </base-form>
             <base-form title="Foreign Languages" value="Languages">
-              <languages-form ref="languagesFormRef" v-model="editedEmployee"></languages-form>
+              <languages-form ref="languagesRef" v-model="editedEmployee"></languages-form>
             </base-form>
             <base-form title="Job Experience" value="Past Experience">
               <div>
-                <job-experience-tab ref="jobExperienceTabRef" v-model="editedEmployee"></job-experience-tab>
+                <job-experience-tab ref="jobExperienceRef" v-model="editedEmployee"></job-experience-tab>
               </div>
             </base-form>
             <base-form title="Education" value="Education">
               <div>
                 <education-tab
-                  ref="educationTabRef"
+                  ref="educationRef"
                   v-model="editedEmployee"
                   :model="employee.education"
                   :allowAdditions="true"
@@ -163,11 +159,14 @@ const validTabs = reactive({
 
 // template refs
 const form = ref(null);
-const personalInfoFormRef = ref(null);
-const technologiesFormRef = ref(null);
-const contractsTabRef = ref(null);
-const educationTabRef = ref(null);
-const jobExperienceTabRef = ref(null);
+const certsAndAwardsRef = ref(null);
+const clearanceRef = ref(null);
+const contractsRef = ref(null);
+const educationRef = ref(null);
+const jobExperienceRef = ref(null);
+const languagesRef = ref(null);
+const personalInfoRef = ref(null);
+const technologiesRef = ref(null);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -225,15 +224,21 @@ const fullName = computed(() => `${props.employee.firstName} ${props.employee.la
 async function submit(event) {
   submitting.value = true;
 
+  // validate each tab
+  await Promise.allSettled([
+    certsAndAwardsRef.value?.prepareSubmit(),
+    clearanceRef.value?.prepareSubmit(),
+    contractsRef.value?.prepareSubmit(),
+    educationRef.value?.prepareSubmit(),
+    jobExperienceRef.value?.prepareSubmit(),
+    languagesRef.value?.prepareSubmit(),
+    personalInfoRef.value?.prepareSubmit(),
+    technologiesRef.value?.prepareSubmit()
+  ]);
+
+  // validating the whole form (even after validating the tabs) is still needed. it doesn't work otherwise
   valid.value = await validate(event);
   if (!valid.value) return cancelSubmit();
-
-  // allows other tabs to finalize data, if they're open. otherwise the data should already be finalized
-  personalInfoFormRef.value?.prepareSubmit();
-  technologiesFormRef.value?.prepareSubmit();
-  contractsTabRef.value?.prepareSubmit();
-  educationTabRef.value?.prepareSubmit();
-  jobExperienceTabRef.value?.prepareSubmit();
 
   // picks out all the changed values to make the api call
   let changes = getChanges();

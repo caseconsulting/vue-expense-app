@@ -59,16 +59,15 @@ const emitter = inject('emitter');
 const editedEmployee = defineModel();
 const form = ref(null); // template ref
 
+defineExpose({ prepareSubmit });
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
 // |                                                  |
 // |--------------------------------------------------|
 
-onBeforeUnmount(async () => {
-  const result = await validate();
-  emitter.emit('validating', { tab: 'languages', valid: result.valid });
-});
+onBeforeUnmount(prepareSubmit);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -76,8 +75,12 @@ onBeforeUnmount(async () => {
 // |                                                  |
 // |--------------------------------------------------|
 
-async function validate() {
-  if (form.value) return await form.value.validate();
+async function prepareSubmit() {
+  if (form.value) {
+    const result = await form.value.validate();
+    emitter.emit('validating', { tab: 'languages', valid: result.valid });
+    return result;
+  }
   return null;
 }
 

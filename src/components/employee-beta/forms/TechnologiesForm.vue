@@ -119,18 +119,15 @@ defineExpose({ prepareSubmit });
 
 onBeforeUnmount(prepareSubmit);
 
-onBeforeUnmount(async () => {
-  const result = await validate();
-  emitter.emit('validating', { tab: 'technologies', valid: result.valid });
-});
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
 
-function prepareSubmit() {
+async function prepareSubmit() {
+  await validate();
+
   editedEmployee.value.technologies = map(technologies.value, (value) => {
     let years = value.time.years + value.time.months / 12;
 
@@ -150,7 +147,11 @@ function prepareSubmit() {
 }
 
 async function validate() {
-  if (form.value) return await form.value.validate();
+  if (form.value) {
+    const result = await form.value.validate();
+    emitter.emit('validating', { tab: 'technologies', valid: result.valid });
+    return result;
+  }
   return null;
 }
 

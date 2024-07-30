@@ -11,7 +11,7 @@
         <v-text-field
           v-model.trim="editedEmployee.middleName"
           :label="editedEmployee.noMiddleName ? 'No Middle Name' : 'Middle Name'"
-          :rules="middleNameRules"
+          :rules="editedEmployee.noMiddleName ? [() => true] : getRequiredRules()"
           :hide-details="editedEmployee.noMiddleName ? true : 'auto'"
           @update:model-value="if (!isEmpty(editedEmployee.middleName)) editedEmployee.noMiddleName = false;"
         >
@@ -393,11 +393,7 @@ defineExpose({ prepareSubmit }); // allows parent to use refs to call prepareSub
 // |                                                  |
 // |--------------------------------------------------|
 
-onBeforeUnmount(async () => {
-  const result = await validate();
-  emitter.emit('validating', { tab: 'personal', valid: result.valid });
-  prepareSubmit();
-});
+onBeforeUnmount(prepareSubmit);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -433,11 +429,6 @@ const formattedBirthday = computed({
 });
 
 /** @type {import('vue').ComputedRef<((v: any) => true | string)[]>} */
-const middleNameRules = computed(() => {
-  return editedEmployee.value.noMiddleName ? [() => true] : getRequiredRules();
-});
-
-/** @type {import('vue').ComputedRef<((v: any) => true | string)[]>} */
 const employeeNumberRules = computed(() => [
   ...getRequiredRules(),
   ...getNumberRules(),
@@ -459,7 +450,9 @@ const employeeNumberRules = computed(() => [
 /**
  * Uses the formatted/transformed data from the form and loads it into the edited employee
  */
-function prepareSubmit() {
+async function prepareSubmit() {
+  await validate();
+
   if (editedEmployee.value.noMiddleName) editedEmployee.value.middleName = '';
 
   editedEmployee.value.email = emailUsername.value + CASE_EMAIL_DOMAIN;
@@ -486,7 +479,11 @@ function prepareSubmit() {
 }
 
 async function validate() {
-  if (form.value) return await form.value.validate();
+  if (form.value) {
+    const result = await form.value.validate();
+    emitter.emit('validating', { tab: 'personal', valid: result.valid });
+    return result;
+  }
   return null;
 }
 

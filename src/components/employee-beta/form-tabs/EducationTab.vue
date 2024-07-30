@@ -141,10 +141,7 @@ defineExpose({ prepareSubmit });
 // |                                                  |
 // |--------------------------------------------------|
 
-onBeforeUnmount(async () => {
-  const result = await validate();
-  emitter.emit('validating', { tab: 'education', valid: result.valid });
-});
+onBeforeUnmount(prepareSubmit);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -152,16 +149,22 @@ onBeforeUnmount(async () => {
 // |                                                  |
 // |--------------------------------------------------|
 
-function prepareSubmit() {
+async function prepareSubmit() {
+  await validate();
+
   // remove id that was generated for use in this file
-  editedEmployee.value.education = map(editedEducation, (education) => {
+  editedEmployee.value.education = map(editedEducation.value, (education) => {
     delete education.id;
     return education;
   });
 }
 
 async function validate() {
-  if (form.value) return await form.value.validate();
+  if (form.value) {
+    const result = await form.value.validate();
+    emitter.emit('validating', { tab: 'education', valid: result.valid });
+    return result;
+  }
   return null;
 }
 
