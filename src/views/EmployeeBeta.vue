@@ -228,6 +228,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   emitter.off('update');
+  emitter.off('selected-budget-year');
 });
 
 // |--------------------------------------------------|
@@ -361,7 +362,6 @@ function onSearchButton() {
 async function onSearchUpdate() {
   if (dropdownEmployee.value) {
     await router.push({ path: `/employee-beta/${dropdownEmployee.value.employeeNumber}`, hash: route.hash });
-    getProfileData();
   }
 }
 /**
@@ -402,9 +402,19 @@ async function navEmployee(num) {
 watch(
   storeIsPopulated,
   async () => {
-    if (storeIsPopulated) {
+    if (storeIsPopulated && !basicEmployeeDataLoading.value) {
       await getProfileData();
     }
   } // watchStoreisPopulated
+);
+
+/**
+ * Load profile data if routed to different employee
+ */
+watch(
+  () => route.params.id,
+  async () => {
+    await getProfileData();
+  }
 );
 </script>
