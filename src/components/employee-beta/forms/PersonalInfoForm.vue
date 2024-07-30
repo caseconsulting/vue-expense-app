@@ -573,6 +573,14 @@ async function autofillLocation(item) {
 } // autofillLocation
 
 /**
+ * Run when the model value of the birthday date picker is updated
+ */
+function onUpdateDatePicker(event) {
+  birthdayMenu.value = false;
+  formattedBirthday.value = event;
+}
+
+/**
  * Updates the city dropdown according to the user's input.
  */
 async function updateCityDropDown(query) {
@@ -621,6 +629,18 @@ async function updateCityBoxes(item) {
     citySearchString.value = null;
   }
 } // updateCityBoxes
+
+/**
+ * Removes any text after the '@' symbol on the email username input once the user clicks away.
+ * This should help prevent any double domain issues for the CASE email.
+ */
+function removeEmailDomain() {
+  let atIndex = emailUsername.value.indexOf('@');
+
+  if (atIndex !== -1) {
+    emailUsername.value = emailUsername.value.substring(0, atIndex);
+  }
+} // removeEmailDomain
 
 /**
  * Removes any text after the '@' symbol on the email username input once the user clicks away.
