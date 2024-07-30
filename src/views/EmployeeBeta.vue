@@ -360,7 +360,7 @@ function onSearchButton() {
  */
 async function onSearchUpdate() {
   if (dropdownEmployee.value) {
-    await router.push(`${dropdownEmployee.value.employeeNumber}`);
+    await router.push({ path: `/employee-beta/${dropdownEmployee.value.employeeNumber}`, hash: route.hash });
     getProfileData();
   }
 }
