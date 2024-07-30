@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-form ref="form" validate-on="lazy">
     <v-row><h3>Tech and Skills</h3></v-row>
     <v-row>
       <v-col class="d-flex justify-center">
@@ -16,7 +16,7 @@
               v-model="technology.name"
               label="Tech/Skill"
               :items="dropdownItems"
-              :rules="[...getRequiredRules(), getDuplicateTechRules()]"
+              :rules="[...getRequiredRules(), ...getDuplicateTechRules(technologies)]"
               hide-details="auto"
               style="min-width: 180px"
               @update:search="updateDropdownItems($event)"
@@ -80,14 +80,14 @@
         <v-btn prepend-icon="mdi-plus" @click="addTechnology(false)">Add Tech/Skill</v-btn>
       </v-col>
     </v-row>
-  </v-container>
+  </v-form>
 </template>
 
 <script setup>
-import { getRequiredRules } from '@/shared/validationUtils';
-import { isEmpty, map } from 'lodash';
-import { ref } from 'vue';
 import api from '@/shared/api';
+import { getDuplicateTechRules, getRequiredRules } from '@/shared/validationUtils';
+import { isEmpty, map } from 'lodash';
+import { inject, onBeforeUnmount, ref } from 'vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -95,17 +95,29 @@ import api from '@/shared/api';
 // |                                                  |
 // |--------------------------------------------------|
 
-const editedEmployee = defineModel();
+const emitter = inject('emitter');
+
+const editedEmployee = defineModel({ required: true });
+const form = ref(null); // template ref
 
 const technologies = ref(
   map(editedEmployee.value.technologies, (value) => {
     // adds a 'time' key to each technology, containing an integer value for both years and months
-    value.time = getYearsAndMonths(value.years);
-    return value;
+    // omits the 'years' key as the time key replaces it
+    return { name: value.name, time: getYearsAndMonths(value.years), current: value.current };
   })
 );
-
 const dropdownItems = ref([]);
+
+defineExpose({ prepareSubmit });
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                 LIFECYCLE HOOKS                  |
+// |                                                  |
+// |--------------------------------------------------|
+
+onBeforeUnmount(prepareSubmit);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -113,14 +125,34 @@ const dropdownItems = ref([]);
 // |                                                  |
 // |--------------------------------------------------|
 
-function prepareSubmit() {
+async function prepareSubmit() {
+  await validate();
+
   editedEmployee.value.technologies = map(technologies.value, (value) => {
-    // convert integer months and years back to fractional years
-    value.years = value.time.years + value.time.months / 12;
-    // remove 'time' key as it's not meant to be stored in the database
-    delete value.time;
-    return value;
+    let years = value.time.years + value.time.months / 12;
+
+    // if years is not an integer
+    if (Math.round(years) !== years) {
+      // convert to fixed string if it's a float, otherwise leave it as a number
+      // this is how the database stores this data initially
+      // this needs to be in the same format so that changes can be accurately tracked
+      years = years.toFixed(2);
+    }
+    return {
+      name: value.name,
+      years,
+      current: value.current
+    };
   });
+}
+
+async function validate() {
+  if (form.value) {
+    const result = await form.value.validate();
+    emitter.emit('validating', { tab: 'technologies', valid: result.valid });
+    return result;
+  }
+  return null;
 }
 
 /**
@@ -154,19 +186,6 @@ async function updateDropdownItems(query) {
   } else {
     dropdownItems.value = [];
   }
-}
-
-/**
- * Gets validation rules for duplicate tech items
- */
-function getDuplicateTechRules() {
-  return (v) => {
-    let count = 0;
-    for (let i = 0; i < technologies.value.length && count <= 2; i++) {
-      if (technologies.value[i].name === v) count++;
-    }
-    return count <= 1 || 'Duplicate technology found, please remove duplicate entries';
-  };
 }
 
 /**

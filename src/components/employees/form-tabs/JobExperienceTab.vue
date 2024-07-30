@@ -293,7 +293,6 @@ async function created() {
   this.emitter.emit('created', 'jobExperience'); // emit education tab was created
   this.employees = this.$store.getters.employees; // get all employees
   this.populateDropDowns(); // get autocomplete drop down data
-  console.log(this.editedJobExperienceInfo);
 } // created
 
 // |--------------------------------------------------|
