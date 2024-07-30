@@ -103,7 +103,7 @@
 
 <script setup>
 import { map } from 'lodash';
-import { inject, onBeforeUnmount, ref } from 'vue';
+import { inject, ref } from 'vue';
 import HighSchoolForm from '../forms/education-forms/HighSchoolForm.vue';
 import MilitaryForm from '../forms/education-forms/MilitaryForm.vue';
 import UniversityForm from '../forms/education-forms/UniversityForm.vue';
