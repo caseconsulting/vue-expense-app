@@ -306,7 +306,10 @@ import { format } from '../shared/dateUtils';
 import { ref, inject, onBeforeMount, onBeforeUnmount, computed, watch } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+<<<<<<< HEAD
 import { useDisplaySuccess, useDisplayError } from '@/components/shared/StatusSnackbar.vue';
+=======
+>>>>>>> 87210601 (POR 2746 - sync changes with master (#272))
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -411,6 +414,14 @@ const model = ref({
 }); // selected employee
 const search = ref(null); // query text for datatable search field
 const sortBy = ref([{ key: 'hireDate', order: 'asc' }]); // sort datatable items
+<<<<<<< HEAD
+=======
+const status = ref({
+  statusType: undefined,
+  statusMessage: null,
+  color: null
+}); // snackbar action status
+>>>>>>> 87210601 (POR 2746 - sync changes with master (#272))
 const showExportDataModal = ref(false);
 const syncing = ref(false);
 const tags = ref([]);
@@ -427,6 +438,19 @@ const toggleEmployeesSyncModal = ref(false);
 // |--------------------------------------------------|
 
 /**
+<<<<<<< HEAD
+=======
+ * Clear the action status that is displayed in the snackbar.
+ */
+function clearStatus() {
+  status.value['show'] = false;
+  status.value['statusType'] = undefined;
+  status.value['statusMessage'] = null;
+  status.value['color'] = null;
+} // clearStatus
+
+/**
+>>>>>>> 87210601 (POR 2746 - sync changes with master (#272))
  * Delete an employee and display status.
  */
 async function deleteEmployee() {
@@ -436,7 +460,11 @@ async function deleteEmployee() {
     await deleteModelFromTable();
   } else {
     // display error if failed to deleted employee
+<<<<<<< HEAD
     useDisplayError(e.response.data.message);
+=======
+    displayError(e.response.data.message);
+>>>>>>> 87210601 (POR 2746 - sync changes with master (#272))
   }
   midAction.value = false;
 } // deleteEmployee
@@ -447,10 +475,32 @@ async function deleteEmployee() {
 async function deleteModelFromTable() {
   await refreshEmployees();
 
+<<<<<<< HEAD
   useDisplaySuccess('Employee was successfully deleted!', 5000, 'top right', 'green');
 } // deleteModelFromTable
 
 /**
+=======
+  status.value['show'] = true;
+  status.value['statusType'] = 'SUCCESS';
+  status.value['statusMessage'] = 'Employee was successfully deleted!';
+  status.value['color'] = 'green';
+} // deleteModelFromTable
+
+/**
+ * Set and display an error action status in the snackbar.
+ *
+ * @param err - String error message
+ */
+function displayError(err) {
+  status.value['show'] = true;
+  status.value['statusType'] = 'ERROR';
+  status.value['statusMessage'] = err;
+  status.value['color'] = 'red';
+} // displayError
+
+/**
+>>>>>>> 87210601 (POR 2746 - sync changes with master (#272))
  * sets midAction boolean to false
  *
  * @param item - the employee
@@ -627,7 +677,11 @@ async function validateDelete(item) {
       invalidDelete.value = !invalidDelete.value;
     }
   } catch (err) {
+<<<<<<< HEAD
     useDisplayError(err);
+=======
+    displayError(err);
+>>>>>>> 87210601 (POR 2746 - sync changes with master (#272))
   }
 } // validateDelete
 
