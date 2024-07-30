@@ -1,7 +1,7 @@
 <template>
   <base-info-modal title="Past Job Experience">
     <div class="ml-4" v-if="!isEmpty(filteredList)">
-      <past-experience-list :list="filteredList" :model="model" :onModal="onModal"></past-experience-list>
+      <job-experience-list :list="filteredList" :model="model" :onModal="onModal"></job-experience-list>
     </div>
     <div
       v-if="!isEmpty(model.companies) && Math.ceil(model.companies.length / ITEMS_PER_PAGE) != 1"
@@ -20,7 +20,7 @@
 import { ref, computed } from 'vue';
 import BaseInfoModal from './BaseInfoModal.vue';
 import { isEmpty } from '../../../utils/utils';
-import PastExperienceList from '../lists/PastExperienceList.vue';
+import JobExperienceList from '../lists/JobExperienceList.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
