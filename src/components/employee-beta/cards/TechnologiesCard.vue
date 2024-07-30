@@ -6,7 +6,7 @@
           <v-col class="mr-1">
             <h3 class="text-white">Tech and Skills</h3>
           </v-col>
-          <v-col>
+          <v-col v-if="!isMobile()">
             <v-tooltip activator="parent" location="right">
               Sorting by current skills, then by years of experience
             </v-tooltip>
@@ -41,6 +41,7 @@ import { isEmpty } from '@/utils/utils';
 import BaseCard from './BaseCard.vue';
 import TechnologiesList from '../lists/TechnologiesList.vue';
 import TechnologiesModal from '@/components/employee-beta/modals/TechnologiesModal.vue';
+import { isMobile } from '../../../utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
