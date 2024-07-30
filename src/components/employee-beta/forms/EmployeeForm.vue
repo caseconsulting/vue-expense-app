@@ -353,8 +353,4 @@ function isEmpty(value) {
   top: 45px;
   z-index: 2;
 }
-
-#form-tabs > * {
-  scroll-margin: 100px;
-}
 </style>
