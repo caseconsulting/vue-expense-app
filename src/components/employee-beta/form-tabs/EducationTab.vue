@@ -103,7 +103,7 @@
 
 <script setup>
 import { map } from 'lodash';
-import { inject, ref } from 'vue';
+import { computed, inject, onBeforeUnmount, ref } from 'vue';
 import HighSchoolForm from '../forms/education-forms/HighSchoolForm.vue';
 import MilitaryForm from '../forms/education-forms/MilitaryForm.vue';
 import UniversityForm from '../forms/education-forms/UniversityForm.vue';
@@ -142,6 +142,39 @@ defineExpose({ prepareSubmit });
 // |--------------------------------------------------|
 
 onBeforeUnmount(prepareSubmit);
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+const displayHS = computed(() => {
+  for (let i = 0; i < editedEducation.value.length; i++) {
+    if (editedEducation.value[i].type === 'highSchool') {
+      return true;
+    }
+  }
+  return false;
+});
+
+const displayUni = computed(() => {
+  for (let i = 0; i < editedEducation.value.length; i++) {
+    if (editedEducation.value[i].type === 'university') {
+      return true;
+    }
+  }
+  return false;
+});
+
+const displayMilitary = computed(() => {
+  for (let i = 0; i < editedEducation.value.length; i++) {
+    if (editedEducation.value[i].type === 'military') {
+      return true;
+    }
+  }
+  return false;
+});
 
 // |--------------------------------------------------|
 // |                                                  |
