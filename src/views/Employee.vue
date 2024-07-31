@@ -438,6 +438,11 @@ async function created() {
     await this.resumeReceived(result.newEmployeeForm, result.totalChanges);
     this.midAction = false;
   });
+  this.emitter.on('profile-clicked', async () => {
+    this.model = _.cloneDeep(this.$store.getters.user);
+    await this.refreshExpenseData();
+    this.pushHistoryState(this.$store.getters.user.employeeNumber);
+  });
 
   this.storeIsPopulated ? await this.getProfileData() : (this.loading = true);
   if (!this.$store.getters.employees) await this.updateStoreEmployees();
@@ -488,6 +493,7 @@ function beforeUnmount() {
   this.emitter.off('uploaded');
   this.emitter.off('tabChange');
   this.emitter.off('change-budget-year-employee-page');
+  this.emitter.off('profile-clicked');
 } // beforeUnmount
 
 // |--------------------------------------------------|

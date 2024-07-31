@@ -84,7 +84,7 @@
           </template>
           <v-list v-if="!(isMobile() || isSmallScreen())">
             <v-list-item>
-              <v-btn :disabled="onUserProfile" variant="text" @click="handleProfile()">Profile</v-btn>
+              <v-btn :disabled="onUserProfile()" variant="text" @click="handleProfile()">Profile</v-btn>
             </v-list-item>
             <v-list-item>
               <v-btn id="logoutBtn" variant="text" @click="handleLogout()">Logout</v-btn>
@@ -96,7 +96,7 @@
           <!--In MOBILE VIEW/Smaller Screen sizes display all links under the user image dropdown-->
           <v-list v-else class="scrollLink mx-1">
             <v-list-item>
-              <v-btn variant="text" :disabled="onUserProfile" @click="handleProfile()">Profile</v-btn>
+              <v-btn variant="text" :disabled="onUserProfile()" @click="handleProfile()">Profile</v-btn>
             </v-list-item>
             <v-list-item>
               <v-btn variant="text" @click="handleLogout()">Logout</v-btn>
@@ -171,7 +171,7 @@ import NotificationBanners from '@/components/utils/NotificationBanners.vue';
 import SwitchRoleModal from '@/components/modals/SwitchRoleModal.vue';
 import TimeOutWarningModal from '@/components/modals/TimeOutWarningModal.vue';
 import StatusSnackbar from '@/components/shared/StatusSnackbar.vue';
-import { onBeforeMount, onBeforeUnmount, ref, computed, inject, watch } from 'vue';
+import { onBeforeMount, onBeforeUnmount, ref, inject, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
@@ -303,24 +303,6 @@ onBeforeUnmount(() => {
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     COMPUTED                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Checks if the user is visiting their own profile or not
- *
- * @return boolean - if the user is visiting their profile
- */
-const onUserProfile = computed(() => {
-  if (userId.value == null) {
-    return false;
-  }
-  return route.params.id === userId.value.toString();
-}); // onUserProfile
-
-// |--------------------------------------------------|
-// |                                                  |
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
@@ -381,7 +363,21 @@ function handleLogout() {
 function handleProfile() {
   // We don't use userId.value becuase it may be null by the time we click the button
   router.push({ name: 'employee', params: { id: `${userId.value}`, replace: true } });
+  emitter.emit('profile-clicked');
 } // handleProfile
+
+/**
+ * Checks if the user is visiting their own profile or not
+ *
+ * @return boolean - if the user is visiting their profile
+ */
+function onUserProfile() {
+  let routeId = window.location.pathname?.split('/')?.pop();
+  if (userId.value == null) {
+    return false;
+  }
+  return routeId === userId.value.toString();
+} // onUserProfile
 
 /**
  * resize the window for small screens
