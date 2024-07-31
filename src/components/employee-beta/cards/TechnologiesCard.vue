@@ -20,7 +20,9 @@
           <technologies-list :list="filteredList" :isModal="false"></technologies-list>
           <div v-if="!isEmpty(model.technologies)" class="text-center">
             <v-card-actions class="d-flex justify-center">
-              <v-btn @click="toggleTechnologiesModal()">View All {{ model.technologies.length }} Skills</v-btn>
+              <v-btn variant="flat" color="#F3F3F3" @click="toggleTechnologiesModal()"
+                >View All {{ model.technologies.length }} Skills</v-btn
+              >
             </v-card-actions>
           </div>
         </div>

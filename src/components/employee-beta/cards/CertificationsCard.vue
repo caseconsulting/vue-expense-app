@@ -10,7 +10,7 @@
         <p v-else class="mt-6 ml-6">No Certification Information</p>
         <div v-if="!isEmpty(model.certifications)" class="text-center">
           <v-card-actions class="d-flex justify-center">
-            <v-btn @click="toggleCertificationsModal()"
+            <v-btn variant="flat" color="#F3F3F3" @click="toggleCertificationsModal()"
               >View All {{ model.certifications.length }} Certifications</v-btn
             >
           </v-card-actions>
