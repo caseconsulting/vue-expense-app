@@ -57,7 +57,7 @@ import BaseInfoModal from '@/components/employee-beta/modals/BaseInfoModal.vue';
 // |--------------------------------------------------|
 
 const search = ref(null);
-const ITEMS_PER_PAGE = 8;
+const ITEMS_PER_PAGE = 10;
 
 const props = defineProps(['model']);
 
