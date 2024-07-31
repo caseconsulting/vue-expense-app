@@ -19,7 +19,9 @@
       </v-card-text>
       <v-card-text class="mt-6 text-align: center" v-else> No contract Information </v-card-text>
       <v-card-actions class="justify-center">
-        <v-btn variant="flat" color="#F3F3F3" @click="open">Click to see more</v-btn>
+        <v-btn class="mb-4" variant="flat" color="#F3F3F3" @click="open"
+          >View All {{ contractsList.length }} Contracts</v-btn
+        >
       </v-card-actions>
     </v-card>
     <contracts-modal
