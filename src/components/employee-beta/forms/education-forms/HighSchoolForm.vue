@@ -4,7 +4,7 @@
       <v-col>
         <v-row v-for="i in [0]" :key="i">
           <!-- Start high school name -->
-          <v-col>
+          <v-col :cols="isMobile() ? '12' : ''">
             <v-text-field
               ref="formFields"
               v-model="highSchool.name"
@@ -16,7 +16,7 @@
           <!-- End high school name -->
 
           <!-- Start graduation date -->
-          <v-col>
+          <v-col :cols="isMobile() ? '12' : ''">
             <v-text-field
               :model-value="format(highSchool.gradDate, null, 'MM/YYYY')"
               ref="formFields"
@@ -65,6 +65,7 @@ import { ref } from 'vue';
 import { format } from '../../../../shared/dateUtils';
 import { computed } from 'vue';
 import { mask } from 'vue-the-mask';
+import { isMobile } from '../../../../utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
