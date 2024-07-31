@@ -5,7 +5,7 @@
       <p class="ic-text gray-text ml-3" align="right">{{ icExperience }}</p>
     </v-card-text>
     <v-row class="mx-12" v-if="onModal">
-      <v-divider class="mt-2" />
+      <v-divider class="mt-2 mb-6" />
     </v-row>
     <v-list-item v-for="(company, index) in list" :key="company.companyName + index">
       <v-list-item-title class="align-center">
