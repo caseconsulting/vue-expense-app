@@ -2,7 +2,7 @@
   <v-list>
     <v-list-item v-for="(technology, index) in list" :key="technology.name + index" class="px-2">
       <v-row class="align-center" dense>
-        <v-col cols="auto">
+        <v-col :cols="!isMobile() ? 'auto' : '1'" :class="isMobile() ? 'ml-10' : ''">
           <span class="d-inline" v-if="technology.current">
             <v-icon>mdi-check</v-icon>
             <v-tooltip activator="parent" location="left">Current Skill</v-tooltip>
@@ -19,7 +19,7 @@
           <p class="gray-text my-0 mx-4 d-inline">{{ Number(technology.years).toFixed(1) }} years</p>
         </v-col>
       </v-row>
-      <v-row no-gutters class="mx-5">
+      <v-row no-gutters :class="!isMobile() ? 'mx-5' : 'mx-7'">
         <v-divider v-if="index < list.length - 1" />
       </v-row>
     </v-list-item>
@@ -27,6 +27,8 @@
 </template>
 
 <script setup>
+import { isMobile } from '../../../utils/utils';
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      SETUP                       |
