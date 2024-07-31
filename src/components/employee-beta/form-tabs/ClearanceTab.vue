@@ -1,5 +1,5 @@
 <template>
-  <v-form ref="form" validate-on="lazy">
+  <v-form ref="form" v-model="valid" validate-on="lazy">
     <v-row v-for="(clearance, cIndex) in editedEmployee.clearances" :key="cIndex">
       <v-col>
         <v-row v-if="!isMobile()">
@@ -359,7 +359,7 @@ import {
   getRequiredRules
 } from '@/shared/validationUtils';
 import _ from 'lodash';
-import { inject, onBeforeUnmount, ref } from 'vue';
+import { inject, onBeforeUnmount, onMounted, ref } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useDisplay } from 'vuetify/lib/framework.mjs';
 import { isMobile } from '../../../utils/utils';
@@ -377,6 +377,7 @@ const emitter = inject('emitter');
 const vMask = mask; // custom directive
 
 const editedEmployee = defineModel({ required: true });
+const valid = defineModel('valid', { required: true });
 const form = ref(null); // template ref
 
 defineExpose({ prepareSubmit });
@@ -387,6 +388,7 @@ defineExpose({ prepareSubmit });
 // |                                                  |
 // |--------------------------------------------------|
 
+onMounted(prepareSubmit);
 onBeforeUnmount(prepareSubmit);
 
 // |--------------------------------------------------|

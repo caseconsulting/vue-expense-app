@@ -1,5 +1,5 @@
 <template>
-  <v-form ref="form" validate-on="lazy">
+  <v-form ref="form" v-model="valid" validate-on="lazy">
     <v-row>
       <v-col>
         <v-row>
@@ -103,7 +103,7 @@
 
 <script setup>
 import { map } from 'lodash';
-import { computed, inject, onBeforeUnmount, ref } from 'vue';
+import { computed, inject, onBeforeUnmount, onMounted, ref } from 'vue';
 import HighSchoolForm from '../forms/education-forms/HighSchoolForm.vue';
 import MilitaryForm from '../forms/education-forms/MilitaryForm.vue';
 import UniversityForm from '../forms/education-forms/UniversityForm.vue';
@@ -124,6 +124,7 @@ defineProps(['allowAdditions']);
 const emitter = inject('emitter');
 
 const editedEmployee = defineModel({ required: true });
+const valid = defineModel('valid', { type: Boolean, required: true });
 const form = ref(null); // template ref
 
 const editedEducation = ref(
@@ -141,6 +142,7 @@ defineExpose({ prepareSubmit });
 // |                                                  |
 // |--------------------------------------------------|
 
+onMounted(validate);
 onBeforeUnmount(prepareSubmit);
 
 // |--------------------------------------------------|

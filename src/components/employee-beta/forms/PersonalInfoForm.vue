@@ -1,5 +1,5 @@
 <template>
-  <v-form ref="form" validate-on="input">
+  <v-form ref="form" v-model="valid" validate-on="input">
     <v-row :class="isMobile() ? 'mt-3' : ''"><h3>Basic Information</h3></v-row>
     <v-row class="groove">
       <!-- first name -->
@@ -391,11 +391,10 @@ import {
 import { COUNTRIES, isMobile, STATES } from '@/utils/utils';
 import dayjs from 'dayjs';
 import { cloneDeep, filter, forEach, includes, isEmpty, lowerCase, some, startCase } from 'lodash';
-import { computed, inject, onBeforeUnmount, ref } from 'vue';
+import { computed, inject, onBeforeUnmount, onMounted, ref } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
 import PrivateButton from '../PrivateButton.vue';
-import _ from 'lodash';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -405,11 +404,11 @@ import _ from 'lodash';
 
 const store = useStore();
 const emitter = inject('emitter');
+const vMask = mask; // import v mask directive
 
 const editedEmployee = defineModel({ required: true });
+const valid = defineModel('valid', { type: Boolean, required: true });
 const form = ref(null); // template ref to form
-
-const vMask = mask; // import v mask directive
 
 // reformatted data for use in form
 const emailUsername = ref(
@@ -439,6 +438,7 @@ defineExpose({ prepareSubmit }); // allows parent to use refs to call prepareSub
 // |                                                  |
 // |--------------------------------------------------|
 
+onMounted(validate);
 onBeforeUnmount(prepareSubmit);
 
 // |--------------------------------------------------|
@@ -639,7 +639,7 @@ async function updateCityDropDown(query) {
     //object used to contain addresses and their respective ID's
     //needed later to obtain the selected address's zip code
     predictions.value = {};
-    _.forEach(locations.predictions, (location) => {
+    forEach(locations.predictions, (location) => {
       predictions.value[location.description] = location.predictions;
     });
   } else {

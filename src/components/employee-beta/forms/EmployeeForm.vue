@@ -63,49 +63,73 @@
               @submit.prevent="submit()"
             >
               <v-expansion-panels v-model="formTabs" variant="accordion" multiple>
-                <base-form title="Personal" value="Personal">
-                  <personal-info-form ref="personalInfoRef" v-model="editedEmployee"></personal-info-form>
+                <base-form title="Personal" value="Personal" :valid="validTabs.personal">
+                  <personal-info-form
+                    ref="personalInfoRef"
+                    v-model="editedEmployee"
+                    v-model:valid="validTabs.personal"
+                  ></personal-info-form>
                 </base-form>
-                <base-form title="Clearances" value="Clearances">
+                <base-form title="Clearances" value="Clearances" :valid="validTabs.clearance">
                   <div>
                     <clearance-tab
                       ref="clearanceRef"
                       v-model="editedEmployee"
-                      :model="employee.clearances"
+                      v-model:valid="validTabs.clearance"
                     ></clearance-tab>
                   </div>
                 </base-form>
-                <base-form title="Contracts" value="Contracts">
+                <base-form title="Contracts" value="Contracts" :valid="validTabs.contracts">
                   <div>
                     <contracts-tab
                       ref="contractsRef"
                       v-model="editedEmployee"
-                      :model="employee.contracts"
+                      v-model:valid="validTabs.contracts"
                     ></contracts-tab>
                   </div>
                 </base-form>
-                <base-form title="Certifications & Awards" value="Certifications & Awards">
+                <base-form
+                  title="Certifications & Awards"
+                  value="Certifications & Awards"
+                  :valid="validTabs.certsAndAwards"
+                >
                   <div>
-                    <certs-and-awards-tab ref="certsAndAwardsRef" v-model="editedEmployee"></certs-and-awards-tab>
+                    <certs-and-awards-tab
+                      ref="certsAndAwardsRef"
+                      v-model="editedEmployee"
+                      v-model:valid="validTabs.certsAndAwards"
+                    ></certs-and-awards-tab>
                   </div>
                 </base-form>
-                <base-form title="Tech and Skills" value="Tech & Skills">
-                  <technologies-form ref="technologiesRef" v-model="editedEmployee"></technologies-form>
+                <base-form title="Tech and Skills" value="Tech & Skills" :valid="validTabs.technologies">
+                  <technologies-form
+                    ref="technologiesRef"
+                    v-model="editedEmployee"
+                    v-model:valid="validTabs.technologies"
+                  ></technologies-form>
                 </base-form>
-                <base-form title="Foreign Languages" value="Languages">
-                  <languages-form ref="languagesRef" v-model="editedEmployee"></languages-form>
+                <base-form title="Foreign Languages" value="Languages" :valid="validTabs.languages">
+                  <languages-form
+                    ref="languagesRef"
+                    v-model="editedEmployee"
+                    v-model:valid="validTabs.languages"
+                  ></languages-form>
                 </base-form>
-                <base-form title="Job Experience" value="Job Experience">
+                <base-form title="Job Experience" value="Job Experience" :valid="validTabs.jobExperience">
                   <div>
-                    <job-experience-tab ref="jobExperienceRef" v-model="editedEmployee"></job-experience-tab>
+                    <job-experience-tab
+                      ref="jobExperienceRef"
+                      v-model="editedEmployee"
+                      v-model:valid="validTabs.jobExperience"
+                    ></job-experience-tab>
                   </div>
                 </base-form>
-                <base-form title="Education" value="Education">
+                <base-form title="Education" value="Education" :valid="validTabs.education">
                   <div>
                     <education-tab
                       ref="educationRef"
                       v-model="editedEmployee"
-                      :model="employee.education"
+                      v-model:valid="validTabs.education"
                       :allowAdditions="true"
                     ></education-tab>
                   </div>

@@ -1,5 +1,5 @@
 <template>
-  <v-form ref="form" validate-on="lazy">
+  <v-form ref="form" v-model="valid" validate-on="lazy">
     <v-row>
       <!-- Start Certifications -->
       <v-col>
@@ -237,7 +237,7 @@
 import { format, getTodaysDate } from '@/shared/dateUtils';
 import { getDateMonthYearRules, getDateOptionalRules, getDateRules, getRequiredRules } from '@/shared/validationUtils';
 import _ from 'lodash';
-import { inject, onBeforeMount, onBeforeUnmount, ref } from 'vue';
+import { inject, onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
 import { isMobile } from '../../../utils/utils';
@@ -253,6 +253,7 @@ const emitter = inject('emitter');
 const vMask = mask;
 
 const editedEmployee = defineModel({ required: true });
+const valid = defineModel('valid', { required: true });
 const form = ref(null); // template ref
 
 const certificationDropDown = ref([]); // autocomplete certification name options
@@ -268,6 +269,7 @@ defineExpose({ prepareSubmit });
 // |--------------------------------------------------|
 
 onBeforeMount(populateDropDowns);
+onMounted(prepareSubmit);
 onBeforeUnmount(prepareSubmit);
 
 // |--------------------------------------------------|
