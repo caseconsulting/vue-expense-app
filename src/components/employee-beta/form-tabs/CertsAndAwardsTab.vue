@@ -11,7 +11,7 @@
         <!-- Start Cert Loop -->
         <v-row v-for="(certification, index) in editedEmployee.certifications" :key="index">
           <!-- Start Cert Name -->
-          <v-col cols="5">
+          <v-col :cols="!isMobile() ? '5' : '10'">
             <v-combobox
               ref="formFields"
               v-model="certification.name"
@@ -25,8 +25,17 @@
           </v-col>
           <!-- End Cert Name -->
 
+          <!-- Start Delete Cert MOBILE -->
+          <v-col cols="2" v-if="isMobile()">
+            <v-btn @click="deleteCertification(index)" icon variant="text">
+              <v-tooltip activator="parent" location="bottom">Delete Certification</v-tooltip>
+              <v-icon class="case-gray">mdi-delete</v-icon>
+            </v-btn>
+          </v-col>
+          <!-- Start Delete Cert MOBILE -->
+
           <!-- Start Cert recieved date -->
-          <v-col cols="3">
+          <v-col :cols="!isMobile() ? '3' : '12'">
             <v-text-field
               ref="formFields"
               :model-value="format(certification.dateReceived, null, 'MM/DD/YYYY')"
@@ -64,7 +73,7 @@
           <!-- End Cert received date -->
 
           <!-- Start Cert expiration date -->
-          <v-col cols="3">
+          <v-col :cols="!isMobile() ? '3' : '12'">
             <v-text-field
               ref="formFields"
               :model-value="format(certification.expirationDate, null, 'MM/DD/YYYY')"
@@ -101,14 +110,15 @@
           </v-col>
           <!-- End Cert expiration date -->
 
-          <!-- Start Delete Cert -->
-          <v-col>
+          <!-- Start Delete Cert NORMAL -->
+          <v-col v-if="!isMobile()">
             <v-btn @click="deleteCertification(index)" icon variant="text">
               <v-tooltip activator="parent" location="bottom">Delete Certification</v-tooltip>
               <v-icon class="case-gray">mdi-delete</v-icon>
             </v-btn>
           </v-col>
-          <!-- End Delete Cert -->
+          <!-- End Delete Cert NORMAL-->
+          <v-divider v-if="isMobile() && index < editedEmployee.certifications.length - 1" :thickness="3"></v-divider>
         </v-row>
         <!-- End Cert Loop -->
 
@@ -126,7 +136,7 @@
     </v-row>
     <!-- End Certifications -->
 
-    <v-divider :thickness="4" class="border-opacity-25 my-8"></v-divider>
+    <v-divider :thickness="4" class="border-opacity-50 my-8"></v-divider>
 
     <!-- Start Awards -->
     <v-row>
@@ -139,7 +149,7 @@
         <!-- Start Award Loop -->
         <v-row v-for="(award, index) in editedEmployee.awards" :key="index">
           <!-- Start Award Name -->
-          <v-col cols="6">
+          <v-col :cols="!isMobile() ? '6' : '10'">
             <v-text-field
               ref="formFields"
               v-model="award.name"
@@ -152,8 +162,17 @@
           </v-col>
           <!-- End Award Name -->
 
+          <!-- Start delete award MOBILE -->
+          <v-col v-if="isMobile()" cols="2">
+            <v-btn @click="deleteAward(index)" icon variant="text">
+              <v-tooltip activator="parent" location="bottom">Delete Award</v-tooltip>
+              <v-icon class="case-gray">mdi-delete</v-icon>
+            </v-btn>
+          </v-col>
+          <!-- End delete award MOBILE -->
+
           <!-- Start Award received date -->
-          <v-col cols="5">
+          <v-col :cols="!isMobile() ? '5' : '12'">
             <v-text-field
               ref="formFields"
               :model-value="format(award.dateReceived, null, 'MM/YYYY')"
@@ -189,14 +208,15 @@
           </v-col>
           <!-- End award recieved date -->
 
-          <!-- Start delete award -->
+          <!-- Start delete award NORMAL-->
           <v-col>
-            <v-btn @click="deleteAward(index)" icon variant="text">
+            <v-btn v-if="!isMobile()" @click="deleteAward(index)" icon variant="text">
               <v-tooltip activator="parent" location="bottom">Delete Award</v-tooltip>
               <v-icon class="case-gray pr-1">mdi-delete</v-icon>
             </v-btn>
           </v-col>
-          <!-- End delete award -->
+          <!-- End delete award NORMAL -->
+          <v-divider v-if="isMobile() && index < editedEmployee.awards.length - 1" :thickness="3"></v-divider>
         </v-row>
         <!-- End Award Loop -->
 
@@ -223,6 +243,7 @@ import _ from 'lodash';
 import { inject, onBeforeMount, onBeforeUnmount, ref } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
+import { isMobile } from '../../../utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
