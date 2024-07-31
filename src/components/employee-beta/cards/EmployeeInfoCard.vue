@@ -28,13 +28,17 @@
             <h3 class="other-text" :style="`color: ${caseGray}`">EMPID: {{ model.employeeNumber }}</h3>
           </v-col>
           <!-- email -->
-          <v-col class="fit-content">
+          <v-col class="fit-content d-flex align-center">
             <a :href="`mailto:${model.email}`" class="text-caption clickable-h3">
               <v-tooltip activator="parent" location="bottom">
                 <p class="ma-0 pa-0">Email {{ employeeName }}</p>
               </v-tooltip>
               <h3 v-cloak>{{ model.email }}</h3>
             </a>
+            <v-btn @click="copyEmailList()" :size="isMobile() ? 'x-small' : 'x-small'" variant="text" icon="">
+              <v-icon v-if="copied" color="green">mdi-check</v-icon>
+              <v-icon v-else>mdi-content-copy</v-icon>
+            </v-btn>
           </v-col>
         </v-row>
         <!-- third row: personal email and links -->
@@ -135,9 +139,11 @@
 
 <script setup>
 import _ from 'lodash';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, inject, onBeforeUnmount } from 'vue';
 import { useStore } from 'vuex';
+import { isMobile } from '../../../utils/utils';
 import { updateStoreAvatars } from '../../../utils/storeUtils';
+import { useDisplayCustom } from '@/components/shared/StatusSnackbar.vue';
 import ProfilePicModal from '../modals/ProfilePicModal.vue';
 
 // |--------------------------------------------------|
@@ -148,6 +154,7 @@ import ProfilePicModal from '../modals/ProfilePicModal.vue';
 
 const buttonSize = 34;
 
+const emitter = inject('emitter');
 const store = useStore();
 const props = defineProps({
   model: {
@@ -156,6 +163,7 @@ const props = defineProps({
   }
 });
 const avatar = ref(null);
+const copied = ref(false);
 const toggleModal = ref(false);
 
 onMounted(async () => {
@@ -163,6 +171,14 @@ onMounted(async () => {
   let avatars = store.getters.basecampAvatars;
   const item = _.find(avatars, ['email_address', props.model.email]);
   avatar.value = item ? item.avatar_url : null;
+
+  emitter.on('status-close', () => {
+    copied.value = false;
+  });
+});
+
+onBeforeUnmount(() => {
+  emitter.off('status-close');
 });
 
 // |--------------------------------------------------|
@@ -194,6 +210,26 @@ const altText = computed(() => {
 const fullName = computed(() => {
   return props.model.nickname ? `${props.model.nickname} ${props.model.lastName}` : employeeName;
 });
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Copyies the list of employee emails to the user's clipboard.
+ */
+async function copyEmailList() {
+  await navigator.clipboard.writeText(props.model.email);
+
+  //display copied status
+  copied.value = true;
+  setTimeout(() => {
+    copied.value = false;
+  }, 3000);
+  useDisplayCustom('Copied email to clipboard', 'CUSTOM', 3000, 'black', 'red', 'bottom');
+} // copyEmailList
 </script>
 
 <style scoped>
