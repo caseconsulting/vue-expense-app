@@ -4,8 +4,8 @@
     v-model="editing"
     persistent
     scrollable
-    @click:outside="toggleCancelConfirmation = true"
-    @keydown.esc="toggleCancelConfirmation = true"
+    @click:outside="cancel()"
+    @keydown.esc="cancel()"
     id="employee-form"
     :width="isMobile() ? '100%' : '80%'"
   >
@@ -22,7 +22,7 @@
             <v-btn size="36" variant="text" icon @click="collapseAllTabs()">
               <v-icon>mdi-format-vertical-align-center</v-icon>
             </v-btn>
-            <v-btn id="modalCloseBtn" size="36" variant="text" icon="" @click="toggleCancelConfirmation = true"
+            <v-btn id="modalCloseBtn" size="36" variant="text" icon="" @click="cancel()"
               ><v-icon>mdi-window-close</v-icon></v-btn
             >
           </v-col>
@@ -50,16 +50,16 @@
             </v-list>
           </v-col>
           <v-divider v-if="!isMobile()" vertical thickness="1"></v-divider>
-          <v-col :cols="isMobile() ? 12 : 10" class="pl-0">
+          <v-col>
             <v-form
               ref="form"
               validate-on="lazy"
               :disabled="submitting"
               class="my-1 mx-xl-5 mx-lg-5 mx-md-0"
-              @submit.prevent="submit($event)"
+              @submit.prevent="submit()"
             >
               <v-expansion-panels v-model="formTabs" variant="accordion" multiple id="form-tabs">
-                <base-form title="Personal" value="Personal" id="Personal">
+                <base-form title="Personal" value="Personal Information" id="Personal">
                   <personal-info-form ref="personalInfoRef" v-model="editedEmployee"></personal-info-form>
                 </base-form>
                 <base-form title="Clearance" value="Clearance" id="Clearance">
@@ -85,7 +85,7 @@
                     <certs-and-awards-tab ref="certsAndAwardsRef" v-model="editedEmployee"></certs-and-awards-tab>
                   </div>
                 </base-form>
-                <base-form title="Tech & Skills" value="Tech & Skills" id="Tech & Skills">
+                <base-form title="Tech and Skills" value="Tech & Skills" id="Tech & Skills">
                   <technologies-form ref="technologiesRef" v-model="editedEmployee"></technologies-form>
                 </base-form>
                 <base-form title="Foreign Languages" value="Languages" id="Languages">
@@ -111,9 +111,7 @@
                 <v-row class="d-flex align-center">
                   <!-- Form action buttons -->
                   <v-col cols="auto">
-                    <v-btn id="employeeCancelBtn" variant="text" class="ma-2" @click="toggleCancelConfirmation = true"
-                      >Cancel</v-btn
-                    >
+                    <v-btn id="employeeCancelBtn" variant="text" class="ma-2" @click="cancel()">Cancel</v-btn>
                   </v-col>
                   <v-col cols="auto">
                     <v-btn id="employeeSubmitBtn" variant="outlined" class="ma-2" color="success" type="submit">
@@ -130,10 +128,11 @@
           </v-col>
         </v-row>
       </v-container>
-      <form-cancel-confirmation
-        :toggleSubmissionConfirmation="toggleCancelConfirmation"
-        type="cancel"
-      ></form-cancel-confirmation>
+      <form-cancel-confirmation :toggleSubmissionConfirmation="toggleCancelConfirmation" type="cancel">
+        <!-- in the future this could display the number of changes, but with the current logic the number can be confusing -->
+        <!-- (especially with arrays and nested objects) -->
+        <v-card-text v-if="numberOfChanges > 0" align="center">There are pending changes!</v-card-text>
+      </form-cancel-confirmation>
     </v-card>
   </v-dialog>
 </template>
@@ -143,7 +142,7 @@ import { isMobile } from '../../../utils/utils';
 import BaseForm from '@/components/employee-beta/forms/BaseForm.vue';
 import FormCancelConfirmation from '@/components/modals/FormCancelConfirmation.vue';
 import api from '@/shared/api';
-import { cloneDeep, forOwn, isEqual, isUndefined, pickBy } from 'lodash';
+import { cloneDeep, forOwn, isEqual, pickBy } from 'lodash';
 import { computed, inject, onBeforeMount, onBeforeUnmount, reactive, ref } from 'vue';
 import CertsAndAwardsTab from '../form-tabs/CertsAndAwardsTab.vue';
 import ClearanceTab from '../form-tabs/ClearanceTab.vue';
@@ -173,6 +172,7 @@ const formTabs = ref([]);
 const submitting = ref(false);
 const toggleCancelConfirmation = ref(false);
 const valid = ref(true);
+const numberOfChanges = ref(0);
 
 const validTabs = reactive({
   personal: true,
@@ -216,6 +216,7 @@ onBeforeMount(() => {
   emitter.on('confirmed-cancel', async () => {
     toggleCancelConfirmation.value = false;
     editing.value = false;
+    editedEmployee.value = cloneDeep(props.employee); // clears all changes
   });
 
   emitter.on('validating', (event) => {
@@ -246,32 +247,15 @@ const fullName = computed(() => `${props.employee.firstName} ${props.employee.la
 
 /**
  * Submits!!
- *
- * @param {SubmitEvent} event the SubmitEvent
  */
-async function submit(event) {
+async function submit() {
   submitting.value = true;
 
-  // validate each tab
-  await Promise.allSettled([
-    certsAndAwardsRef.value?.prepareSubmit(),
-    clearanceRef.value?.prepareSubmit(),
-    contractsRef.value?.prepareSubmit(),
-    educationRef.value?.prepareSubmit(),
-    jobExperienceRef.value?.prepareSubmit(),
-    languagesRef.value?.prepareSubmit(),
-    personalInfoRef.value?.prepareSubmit(),
-    technologiesRef.value?.prepareSubmit()
-  ]);
-
-  // validating the whole form (even after validating the tabs) is still needed. it doesn't work otherwise
-  valid.value = await validate(event);
+  valid.value = await validate();
   if (!valid.value) return cancelSubmit();
 
-  // picks out all the changed values to make the api call
-  let changes = getChanges();
-
-  console.log('Changed values:', changes); // TODO test
+  // scans for all changed attributes
+  const changes = getChanges();
 
   // if there are any changes
   if (!isEmpty(Object.keys(changes))) {
@@ -282,18 +266,31 @@ async function submit(event) {
   editing.value = false; // close edit modal
 }
 
-function selectTab(tabName) {
-  formTabs.value = [tabName];
-  document.getElementById(tabName).scrollIntoView({ behavior: 'smooth', block: 'end' });
+/**
+ * Validates each currently open tab and prepares/reformats data if applicable. Closed tabs should be
+ * validated/prepared before unmounting.
+ */
+async function prepareTabs() {
+  return Promise.allSettled([
+    certsAndAwardsRef.value?.prepareSubmit(),
+    clearanceRef.value?.prepareSubmit(),
+    contractsRef.value?.prepareSubmit(),
+    educationRef.value?.prepareSubmit(),
+    jobExperienceRef.value?.prepareSubmit(),
+    languagesRef.value?.prepareSubmit(),
+    personalInfoRef.value?.prepareSubmit(),
+    technologiesRef.value?.prepareSubmit()
+  ]);
 }
 
 /**
  * Checks validation of all tabs
  * @param {SubmitEvent} event The submit event
  */
-async function validate(event) {
-  const result = await Promise.resolve(event);
-  let valid = result.valid;
+async function validate() {
+  await prepareTabs();
+
+  let valid = true;
 
   // iterates through each tab to make sure they are all valid
   forOwn(validTabs, (value) => {
@@ -327,20 +324,34 @@ function getChanges() {
  * Called if the form is invalid after trying to submit
  */
 function cancelSubmit() {
-  console.log('Form is invalid. Cancelling submit'); // TODO test
+  console.log('Cannot submit, form is invalid!'); // TODO test
   valid.value = false;
   submitting.value = false;
+}
+
+/**
+ * Brings up the cancel confirmation modal
+ */
+async function cancel() {
+  await prepareTabs(); // need to prepare tabs to get the changes
+  numberOfChanges.value = Object.keys(getChanges()).length;
+  toggleCancelConfirmation.value = true;
 }
 
 function collapseAllTabs() {
   formTabs.value = [];
 }
 
+function selectTab(tabName) {
+  formTabs.value = [tabName];
+  document.getElementById(tabName).scrollIntoView({ behavior: 'smooth', block: 'end' });
+}
+
 /**
- * Returns true only if the value is undefined, null, or empty string
+ * Returns true only if the value is undefined, null, or an empty string
  */
 function isEmpty(value) {
-  return isUndefined(value) || value === null || value === '';
+  return value === undefined || value === null || value === '';
 }
 </script>
 
