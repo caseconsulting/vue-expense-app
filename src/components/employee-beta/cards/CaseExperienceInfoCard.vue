@@ -32,7 +32,7 @@
     </v-card-text>
 
     <!-- Anniversary Card -->
-    <v-card class="my-2 mx-4" elevation="4" style="background-color: #f8f8f8">
+    <v-card elevation="1" class="my-2 mx-4" style="background-color: #f8f8f8">
       <v-card-title class="pa-0">
         <div class="text-center">
           <p v-if="!model.hireDate" class="font-20 ma-2">0 Days until Anniversary</p>
