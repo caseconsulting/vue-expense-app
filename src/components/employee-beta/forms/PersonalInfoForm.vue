@@ -1,6 +1,6 @@
 <template>
   <v-form ref="form" validate-on="input">
-    <v-row><h3>Basic Information</h3></v-row>
+    <v-row :class="isMobile() ? 'mt-3' : ''"><h3>Basic Information</h3></v-row>
     <v-row class="groove">
       <!-- first name -->
       <v-col>
@@ -43,7 +43,7 @@
       </v-col>
     </v-row>
     <!-- current address -->
-    <v-row><h3>Current Address</h3></v-row>
+    <v-row :class="isMobile() ? 'mt-7' : ''"><h3>Current Address</h3></v-row>
     <v-row class="groove">
       <v-col>
         <!-- private icon and search bar -->
