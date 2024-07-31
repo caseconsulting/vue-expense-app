@@ -2,7 +2,10 @@
   <div id="available-budgets">
     <v-card>
       <v-card-title class="d-flex align-center justify-space-between header_style">
-        <h3 v-if="budgets.length > 0 && !viewingCurrentBudgetYear" class="text-white text-wrap px-2">
+        <h3
+          v-if="budgets.length > 0 && fiscalDateView != getCurrentBudgetYear(hireDate)"
+          class="text-white text-wrap px-2"
+        >
           {{ viewingBudgetYear }}
         </h3>
         <router-link v-else-if="isUser" class="no-decoration" to="/myBudgets">
@@ -90,7 +93,6 @@ import BudgetSelectModal from '@/components/modals/BudgetSelectModal.vue';
 import { convertToMoneyString, getCurrentBudgetYear, isFullTime } from '@/utils/utils';
 import { format, getTodaysDate, getYear, isBetween, DEFAULT_ISOFORMAT } from '@/shared/dateUtils';
 import { inject, onBeforeMount, onBeforeUnmount, ref, watch, computed } from 'vue';
-import { useStore } from 'vuex';
 import { useDisplay } from 'vuetify';
 // |--------------------------------------------------|
 // |                                                  |
@@ -105,11 +107,9 @@ const props = defineProps([
   'accessibleBudgets',
   'fiscalDateView',
   'employeeDataLoading',
-  'viewingCurrentBudgetYear',
   'refreshKey'
 ]);
 const emitter = inject('emitter');
-const store = useStore();
 const { smAndDown } = useDisplay();
 
 const isAdmin = inject('isAdmin');
@@ -119,8 +119,6 @@ const budgets = ref([]);
 const budgetYears = ref([]);
 const budgetChartDropdown = ref(JSON.parse(localStorage.getItem('budgetChartDropdown') ?? '[]'));
 const changingBudgetView = ref(false);
-const currentUser = ref(null);
-const date = ref('');
 const hireDate = ref('');
 const loading = ref(true);
 const selectedBudget = ref(null);
@@ -144,12 +142,6 @@ onBeforeMount(async () => {
   emitter.on('close-summary', () => {
     showDialog.value = false;
   });
-  currentUser.value = store.getters.user;
-  if (props.accessibleBudgets && props.expenseTypes) {
-    await refreshEmployee();
-  } else {
-    loading.value = false;
-  }
 }); // created
 
 /**
@@ -209,17 +201,17 @@ function calcRemaining(budget) {
  * Refresh and sets the aggregated budgets for the employee budget year view.
  */
 async function refreshBudget() {
-  if (!props.fiscalDateView || !props.employee) return;
-
+  if (!props.employee) return;
+  let date = props.fiscalDateView ? props.fiscalDateView : getCurrentBudgetYear(hireDate.value);
   let budgetsVar;
   let existingBudgets;
 
-  if (props.viewingCurrentBudgetYear) {
+  if (date == getCurrentBudgetYear(hireDate.value)) {
     // viewing active budget year
     budgetsVar = props.accessibleBudgets;
   } else {
     // get existing budgets for the budget year being viewed
-    existingBudgets = await api.getFiscalDateViewBudgets(props.employee.id, props.fiscalDateView);
+    existingBudgets = await api.getFiscalDateViewBudgets(props.employee.id, date);
     existingBudgets = _.filter(existingBudgets, (e) => !!e);
     budgetsVar = existingBudgets;
   }
@@ -232,13 +224,7 @@ async function refreshBudget() {
       (e) =>
         e.id == b.expenseTypeId &&
         (e.isInactive ||
-          !isBetween(
-            getYear(props.fiscalDateView),
-            getYear(budget.fiscalStartDate),
-            getYear(budget.fiscalEndDate),
-            'year',
-            '[]'
-          ))
+          !isBetween(getYear(date), getYear(budget.fiscalStartDate), getYear(budget.fiscalEndDate), 'year', '[]'))
     );
   });
   budgetsVar = _.sortBy(budgetsVar, (budget) => {
@@ -271,16 +257,10 @@ async function refreshBudget() {
  */
 async function refreshEmployee() {
   loading.value = true;
-
-  date.value = props.fiscalDateView;
   hireDate.value = format(props.employee.hireDate, null, DEFAULT_ISOFORMAT);
-  if (!date.value) {
-    date.value = getCurrentBudgetYear(hireDate.value);
-  }
   let [tempAllUserBudgets] = await Promise.all([api.getEmployeeBudgets(props.employee.id), refreshBudget()]);
   allUserBudgets.value = tempAllUserBudgets;
   refreshBudgetYears();
-
   loading.value = false;
 } // refreshEmployee
 
@@ -337,7 +317,10 @@ watch(
 watch(
   () => props.fiscalDateView,
   async () => {
-    await refreshBudget();
+    //only refresh if done initial load
+    if (!loading.value) {
+      await refreshBudget();
+    }
   }
 ); // watchFiscalDateView
 </script>
