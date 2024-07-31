@@ -24,13 +24,13 @@
           label="Starting Date"
           hint="MM/YYYY format"
           v-mask="'##/####'"
+          variant="underlined"
           prepend-inner-icon="mdi-calendar"
-          @update:focused="military.startDate = parseEventDate($event)"
-          @click:prepend="military.showStartMenu = true"
-          @keypress="military.showStartMenu = false"
           clearable
           persistent-hint
           autocomplete="off"
+          @update:focused="military.startDate = parseEventDate($event)"
+          @keypress="military.showStartMenu = false"
         >
           <v-menu
             activator="parent"
@@ -62,13 +62,13 @@
           label="Completion Date"
           hint="MM/YYYY format"
           v-mask="'##/####'"
+          variant="underlined"
           prepend-inner-icon="mdi-calendar"
-          @update:focused="military.completeDate = parseEventDate($event)"
-          @click:prepend="military.showCompleteMenu = true"
-          @keypress="military.showCompleteMenu = false"
           clearable
           persistent-hint
           autocomplete="off"
+          @update:focused="military.completeDate = parseEventDate($event)"
+          @keypress="military.showCompleteMenu = false"
         >
           <v-menu
             activator="parent"
@@ -96,12 +96,12 @@
 </template>
 
 <script setup>
+import { format } from '@/shared/dateUtils';
+import { getDateMonthYearOptionalRules, getRequiredRules } from '@/shared/validationUtils';
+import { isMobile } from '@/utils/utils';
 import _ from 'lodash';
-import { getDateMonthYearOptionalRules, getRequiredRules } from '../../../../shared/validationUtils';
+import { computed, ref } from 'vue';
 import { mask } from 'vue-the-mask';
-import { format } from '../../../../shared/dateUtils';
-import { ref, computed } from 'vue';
-import { isMobile } from '../../../../utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |

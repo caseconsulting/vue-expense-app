@@ -43,13 +43,13 @@
               :rules="[...getDateRules()]"
               hint="MM/DD/YYYY format"
               v-mask="'##/##/####'"
+              variant="underlined"
               prepend-inner-icon="mdi-calendar"
-              @update:focused="certification.dateReceived = parseEventDate()"
-              @focus="certificationIndex = index"
-              @click:prepend="certification.showReceivedMenu = true"
-              @keypress="certification.showReceivedMenu = false"
               clearable
               autocomplete="off"
+              @update:focused="certification.dateReceived = parseEventDate()"
+              @focus="certificationIndex = index"
+              @keypress="certification.showReceivedMenu = false"
             >
               <v-menu
                 activator="parent"
@@ -83,11 +83,10 @@
               v-mask="'##/##/####'"
               clearable
               prepend-inner-icon="mdi-calendar"
+              autocomplete="off"
               @update:focused="certification.expirationDate = parseEventDate()"
-              @click:prepend="certification.showExpirationMenu = true"
               @keypress="certification.showExpirationMenu = false"
               @focus="certificationIndex = index"
-              autocomplete="off"
             >
               <v-menu
                 activator="parent"
@@ -181,12 +180,11 @@
               hint="MM/YYYY format"
               v-mask="'##/####'"
               persistent-hint
-              @update:focused="award.dateReceived = parseAwardEventDate()"
               clearable
               prepend-inner-icon="mdi-calendar"
-              @click:prepend="award.showReceivedMenu = true"
-              @keypress="award.showReceivedMenu = false"
               autocomplete="off"
+              @update:focused="award.dateReceived = parseAwardEventDate()"
+              @keypress="award.showReceivedMenu = false"
             >
               <v-menu
                 activator="parent"
