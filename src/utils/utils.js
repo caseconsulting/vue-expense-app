@@ -164,12 +164,17 @@ export async function updateEmployeeLogin(employee) {
   await Promise.all([
     api.updateItem(api.EMPLOYEES, employee), // updates last logged in for employee
     api.createItem(api.AUDIT, {
-      id: generateUUID(),
-      type: 'login',
-      tags: ['account'],
+      type: 'LOGIN',
+      action: 'LOGIN',
       employeeId: employee.id,
-      description: `${employee.firstName} ${employee.lastName} has logged in`,
-      timeToLive: 60
+      supplemental: {
+        browserInfo: {
+          browser: window.navigator.userAgent,
+          isMobile: isMobile(),
+          width: window.innerWidth,
+          height: window.innerHeight
+        }
+      }
     })
   ]); // Create an audit of the success
   if (store.getters.employees) {
