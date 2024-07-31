@@ -397,7 +397,8 @@
 
 <script>
 import api from '@/shared/api.js';
-import { generateUUID, isEmpty, isSmallScreen } from '@/utils/utils';
+import { useRouter } from 'vue-router';
+import { isEmpty, isSmallScreen } from '@/utils/utils';
 import { SCHOOLS } from '@/components/employees/form-tabs/dropdown-info/schools';
 import _ from 'lodash';
 import CancelConfirmation from '@/components/modals/CancelConfirmation.vue';
@@ -418,13 +419,13 @@ import GeneralConfirmationModal from '@/components/modals/GeneralConfirmationMod
 async function created() {
   this.emitter.on('confirmed-parser', async () => {
     // Create an audit of the success
-    await api.createItem(api.AUDIT, {
-      id: generateUUID(),
-      type: 'resume',
-      tags: ['submit'],
+    api.createItem(api.AUDIT, {
+      type: 'RESUME',
       employeeId: this.employee.id,
-      description: `${this.employee.firstName} ${this.employee.lastName} made changes to their profile through the resume parser.`,
-      timeToLive: 60
+      action: 'CREATE',
+      supplemental: {
+        description: 'made changes to their profile through the resume parser.'
+      }
     });
 
     this.emitter.emit('resume', { newEmployeeForm: this.editedEmployeeForm, totalChanges: this.totalChanges });
@@ -727,26 +728,18 @@ async function submit() {
 
       // Create an audit of the timeout
       await api.createItem(api.AUDIT, {
-        id: generateUUID(),
-        type: 'resume',
-        tags: ['upload', 'failure'],
+        type: 'ERROR',
         employeeId: this.employee.id,
-        description: `${this.employee.firstName} ${this.employee.lastName} timed out on resume upload.`,
-        timeToLive: 60
+        supplemental: {
+          page: useRouter().currentPath,
+          message: 'timeout on resume upload'
+        }
       });
-
       return;
     }
 
     // Create an audit of the success
-    await api.createItem(api.AUDIT, {
-      id: generateUUID(),
-      type: 'resume',
-      tags: ['upload', 'success'],
-      employeeId: this.employee.id,
-      description: `${this.employee.firstName} ${this.employee.lastName} successfully uploaded a resume.`,
-      timeToLive: 60
-    });
+    await api.createItem(api.AUDIT, { type: 'RESUME', action: 'CREATE', employeeId: this.employee.id });
 
     // PERSONAL info
     let personalComprehend = this.resumeObject.filter((entity) => {
