@@ -2,7 +2,7 @@
   <v-container>
     <v-row v-for="i in [0]" :key="i">
       <!-- Start military branch -->
-      <v-col>
+      <v-col :cols="isMobile() ? '12' : ''">
         <v-autocomplete
           ref="formFields"
           :items="dodForces"
@@ -16,7 +16,7 @@
       <!-- End military branch -->
 
       <!-- Start military start date -->
-      <v-col>
+      <v-col :cols="isMobile() ? '12' : ''">
         <v-text-field
           ref="formFields"
           :model-value="format(military.startDate, null, 'MM/YYYY')"
@@ -54,7 +54,7 @@
       <!-- End military start date -->
 
       <!-- Start military end date -->
-      <v-col>
+      <v-col :cols="isMobile() ? '12' : ''">
         <v-text-field
           ref="formFields"
           :model-value="format(military.completeDate, null, 'MM/YYYY')"
@@ -90,6 +90,7 @@
         </v-text-field>
       </v-col>
       <!-- End military end date -->
+      <v-divider v-if="isMobile()" :thickness="3"></v-divider>
     </v-row>
   </v-container>
 </template>
@@ -100,6 +101,7 @@ import { getDateMonthYearOptionalRules, getRequiredRules } from '../../../../sha
 import { mask } from 'vue-the-mask';
 import { format } from '../../../../shared/dateUtils';
 import { ref, computed } from 'vue';
+import { isMobile } from '../../../../utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
