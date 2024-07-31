@@ -119,11 +119,11 @@
                   <v-row class="my-2">
                     <!-- past experience -->
                     <v-col cols="12">
-                      <past-job-experience-info-card
+                      <job-experience-info-card
                         :model="model"
                         :isAdmin="isAdmin"
                         :isUser="isUser"
-                      ></past-job-experience-info-card>
+                      ></job-experience-info-card>
                     </v-col>
                     <!-- education and past experience -->
                     <v-col cols="12">
@@ -158,7 +158,7 @@ import EmployeeForm from '@/components/employee-beta/forms/EmployeeForm.vue';
 import EmployeeInfoCard from '@/components/employee-beta/cards/EmployeeInfoCard.vue';
 import LanguagesCard from '@/components/employee-beta/cards/LanguagesCard.vue';
 import OtherInfoCard from '@/components/employee-beta/cards/personal/OtherInfoCard.vue';
-import PastJobExperienceInfoCard from '@/components/employee-beta/cards/PastJobExperienceInfoCard.vue';
+import JobExperienceInfoCard from '@/components/employee-beta/cards/JobExperienceInfoCard.vue';
 import PersonalInfoCard from '@/components/employee-beta/cards/personal/PersonalInfoCard.vue';
 import ResumeCard from '@/components/employee-beta/cards/ResumeCard.vue';
 import TechnologiesCard from '@/components/employee-beta/cards/TechnologiesCard.vue';

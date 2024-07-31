@@ -1,5 +1,5 @@
 <template>
-  <base-card title="Past Experience">
+  <base-card title="Job Experience">
     <v-card-text>
       <p class="ic-text mt-3 ml-7"><b>Experience in IC:</b></p>
       <p class="ic-text gray-text ml-3" align="right">{{ icExperience }}</p>
@@ -11,7 +11,7 @@
       <p>No Past Job Experience Information</p>
     </v-card-text>
     <v-card-text v-else>
-      <past-experience-list :list="pageList"></past-experience-list>
+      <job-experience-list :list="pageList"></job-experience-list>
       <div v-if="!isEmpty(model.companies)" class="text-center">
         <v-card-actions class="d-flex justify-center">
           <v-btn variant="flat" color="#F3F3F3" @click="toggleJobExpModal()"
@@ -19,7 +19,7 @@
           >
         </v-card-actions>
       </div>
-      <past-job-experience-modal v-model="toggleModal" :model="model" :onModal="onModal"></past-job-experience-modal>
+      <job-experience-modal v-model="toggleModal" :model="model" :onModal="onModal"></job-experience-modal>
     </v-card-text>
   </base-card>
 </template>
@@ -29,8 +29,8 @@ import { _ } from 'lodash';
 import { isEmpty } from '@/utils/utils';
 import { onBeforeMount, ref } from 'vue';
 import BaseCard from './BaseCard.vue';
-import PastExperienceList from '../lists/PastExperienceList.vue';
-import PastJobExperienceModal from '../modals/PastJobExperienceModal.vue';
+import JobExperienceList from '../lists/JobExperienceList.vue';
+import JobExperienceModal from '../modals/JobExperienceModal.vue';
 import { difference, format, getTodaysDate, isBefore, maximum, minimum } from '../../../shared/dateUtils';
 import { computed } from 'vue';
 
