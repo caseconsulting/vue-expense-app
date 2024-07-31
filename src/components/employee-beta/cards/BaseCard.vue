@@ -71,7 +71,7 @@ function toggleEdit() {
   } else if (props.title === 'Job Experience') {
     emitter.emit('editing', 'Job Experience');
   } else if (props.title === 'Certifications' || props.title === 'Awards') {
-    emitter.emit('editing', 'Certifications + Awards');
+    emitter.emit('editing', 'Certifications & Awards');
   } else if (props.title === 'Education') {
     emitter.emit('editing', 'Education');
   } else if (props.title === 'Technologies and Skills') {
