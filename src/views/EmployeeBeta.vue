@@ -30,7 +30,7 @@
           <v-row no-gutters class="fit-content d-flex-inline align-center">
             <v-col :cols="isMobile() ? 9 : ''" class="text-no-wrap d-flex align-center">
               <!-- if user is admin, show search button -->
-              <v-btn v-if="isAdmin" icon="" variant="text" @click="onSearchButton()">
+              <v-btn icon="" variant="text" @click="onSearchButton()">
                 <v-icon v-if="!inSearchMode" size="32" color="black">mdi-magnify</v-icon>
                 <v-icon v-else size="32" color="black">mdi-magnify-remove-outline</v-icon>
               </v-btn>
@@ -53,12 +53,8 @@
                     <b>Search Employees</b>
                   </p>
                 </div>
-                <!-- if user is admin and is searching -->
-                <v-responsive
-                  :style="{ minWidth: searchWidth }"
-                  class="d-flex align-center"
-                  v-else-if="isAdmin && inSearchMode"
-                >
+                <!-- if user is searching -->
+                <v-responsive min-width="250px" class="d-flex align-center" v-else-if="inSearchMode">
                   <v-autocomplete
                     v-model="dropdownEmployee"
                     :items="employeeNames"
@@ -273,13 +269,6 @@ const employeeNames = computed(() => {
       itemTitle: `${e.lastName}, ${e.nickname || e.firstName}`
     };
   });
-});
-
-/**
- * Gets the width of the search bar depending on if the user is in Mobile or Normal view
- */
-const searchWidth = computed(() => {
-  return isMobile() ? '220px' : '250px';
 });
 
 // |--------------------------------------------------|
