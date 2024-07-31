@@ -19,7 +19,8 @@
             <v-col class="text-no-wrap d-flex align-center">
               <!-- if user is admin, show search button -->
               <v-btn v-if="isAdmin" icon="" variant="text" @click="onSearchButton()">
-                <v-icon size="32" color="black">mdi-magnify</v-icon>
+                <v-icon v-if="!inSearchMode" size="32" color="black">mdi-magnify</v-icon>
+                <v-icon v-else size="32" color="black">mdi-magnify-remove-outline</v-icon>
               </v-btn>
               <!-- if user is not searching -->
               <v-scroll-y-transition mode="out-in">
