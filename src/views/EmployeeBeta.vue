@@ -52,6 +52,8 @@
                     hide-details
                     return-object
                     autofocus
+                    :menu="menuOpen"
+                    @blur="menuOpen = false"
                     @update:model-value="onSearchUpdate()"
                   ></v-autocomplete>
                 </v-responsive>
@@ -146,6 +148,7 @@ const expenses = ref(null);
 const expenseTypes = ref(null);
 const fiscalDateView = ref('');
 const loading = ref(true);
+const menuOpen = ref(true);
 const model = ref({
   awards: [],
   birthday: '',
@@ -354,6 +357,7 @@ function userIsEmployee() {
  */
 function onSearchButton() {
   inSearchMode.value = !inSearchMode.value;
+  menuOpen.value = true;
 }
 
 /**
