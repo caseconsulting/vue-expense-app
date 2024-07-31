@@ -31,7 +31,7 @@
       <div v-if="submitting" class="py-10 px-6">
         <v-progress-linear :indeterminate="true"></v-progress-linear>
       </div>
-      <v-container v-show="!submitting" fluid>
+      <v-container v-show="!submitting" fluid class="pt-0">
         <v-row>
           <v-col v-if="!isMobile()" cols="2">
             <v-list density="compact" nav id="edit-navigation">
