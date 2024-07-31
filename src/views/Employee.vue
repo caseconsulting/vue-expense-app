@@ -14,19 +14,6 @@
       <employee-page-loader />
     </v-row>
     <div v-else>
-      <v-snackbar
-        v-model="uploadStatus.statusType"
-        :color="uploadStatus.color"
-        :multi-line="true"
-        :timeout="3000"
-        :vertical="true"
-        location="top right"
-      >
-        <v-card-text color="white">
-          <span class="text-h6 font-weight-medium">{{ uploadStatus.statusMessage }}</span>
-        </v-card-text>
-        <v-btn color="white" variant="text" @click="clearStatus"> Close </v-btn>
-      </v-snackbar>
       <v-row class="pa-0">
         <v-col cols="3" align="left" justify="left">
           <v-btn id="backBtn" elevation="2" :size="isMobile ? 'x-small' : 'default'" @click="$router.back()">
@@ -236,6 +223,7 @@ import {
   updateStoreTags
 } from '@/utils/storeUtils';
 import { employeeFilter } from '@/shared/filterUtils';
+import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSnackbar.vue';
 import { format, getTodaysDate, FORMATTED_ISOFORMAT } from '@/shared/dateUtils';
 import _ from 'lodash';
 import ConvertEmployeeToCsv from '@/components/employees/csv/ConvertEmployeeToCsv.vue';
@@ -259,7 +247,7 @@ import EmployeePageLoader from '@/components/employees/EmployeePageLoader';
  */
 async function resumeReceived(newEmployeeForm, changes) {
   if (changes && changes > 0) {
-    this.displayMessage('SUCCESS', `Added ${changes} change(s) to profile!`, 'green');
+    useDisplaySuccess(`Added ${changes} change(s) to profile!`);
   }
   if (newEmployeeForm) {
     this.model = newEmployeeForm;
@@ -267,15 +255,6 @@ async function resumeReceived(newEmployeeForm, changes) {
     await api.updateItem(api.EMPLOYEES, this.model);
   }
 } // resumeReceived
-
-/**
- * Clears the status message of the uploadStatus
- */
-function clearStatus() {
-  this.uploadStatus['statusType'] = undefined;
-  this.uploadStatus['statusMessage'] = null;
-  this.uploadStatus['color'] = null;
-} // clearStatus
 
 /**
  * Downloads the resume of the employee
@@ -352,19 +331,6 @@ function userIsEmployee() {
 } // userIsEmployee
 
 /**
- * Displays the message
- *
- * @param type - the type of message
- * @param msg - the message to display
- * @param color - the color of the banner
- */
-function displayMessage(type, msg, color) {
-  this.uploadStatus['statusType'] = type;
-  this.uploadStatus['statusMessage'] = msg;
-  this.uploadStatus['color'] = color;
-} // displayMessage
-
-/**
  * Deletes the resume
  */
 async function deleteResume() {
@@ -373,9 +339,9 @@ async function deleteResume() {
   let updateEmpRes = await api.updateItem(api.EMPLOYEES, { ...this.model, resumeUpdated: null });
   if (!(deleteResult instanceof Error) || !(updateEmpRes instanceof Error)) {
     this.model.resumeUpdated = null;
-    this.displayMessage('SUCCESS', 'Successfully deleted resume', 'green');
+    useDisplaySuccess('Successfully deleted resume');
   } else {
-    this.displayMessage('ERROR', 'Failure to delete resume', 'red');
+    useDisplayError('Failure to delete resume');
   }
   this.deleteLoading = false;
 } // deleteResume
@@ -497,7 +463,7 @@ function mounted() {
   });
 
   this.emitter.on('uploaded', async (displayMessage) => {
-    if (displayMessage) this.displayMessage('SUCCESS', 'Successfully uploaded resume', 'green');
+    if (displayMessage) useDisplaySuccess('Successfully uploaded resume');
     this.model.resumeUpdated = getTodaysDate();
     this.model = _.cloneDeep(this.model); // force vue to reload the object
     await api.updateItem(api.EMPLOYEES, this.model);
@@ -659,18 +625,8 @@ export default {
         workStatus: 100
       }, // selected employee
       search: '', // query text for datatable search field
-      status: {
-        statusType: undefined,
-        statusMessage: '',
-        color: ''
-      }, // snackbar action status
       toggleDeleteModal: false,
       toggleResumeParser: false,
-      uploadStatus: {
-        statusType: undefined,
-        statusMessage: null,
-        color: null
-      },
       user: null
     };
   },
@@ -689,9 +645,7 @@ export default {
   created,
   mounted,
   methods: {
-    clearStatus,
     deleteResume,
-    displayMessage,
     downloadResume,
     employeeFilter,
     format,

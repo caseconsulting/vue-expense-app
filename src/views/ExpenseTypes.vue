@@ -11,21 +11,6 @@
       </v-col>
     </v-row>
     <v-row v-else>
-      <!-- Status Alert -->
-      <v-snackbar
-        v-model="status.show"
-        :color="status.color"
-        :multi-line="true"
-        location="top end"
-        :timeout="5000"
-        :vertical="true"
-      >
-        <v-card-text color="white">
-          <span class="text-h6 font-weight-medium">{{ status.statusMessage }}</span>
-        </v-card-text>
-        <v-btn color="white" variant="text" @click="clearStatus"> Close </v-btn>
-      </v-snackbar>
-
       <v-col cols="12" :lg="userRoleIsAdmin() ? 8 : 12">
         <v-card class="mt-3">
           <v-container fluid>
@@ -505,6 +490,7 @@ import {
 import { format } from '../shared/dateUtils';
 import { onBeforeMount, onBeforeUnmount, ref, watch, computed, inject } from 'vue';
 import { useStore } from 'vuex';
+import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSnackbar.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -584,12 +570,6 @@ const search = ref(''); // query text for datatable search field
 const showAccess = ref({}); // activate display for access list, object of ids to boolean
 const showAccessLength = ref(0); // number of employees with access
 const sortBy = ref([{ key: 'budgetName', order: 'asc' }]); // sort datatable items
-const status = ref({
-  show: false,
-  statusType: undefined,
-  statusMessage: '',
-  color: ''
-}); // snackbar action status
 const store = useStore();
 const userInfo = ref(null); // user information
 const deleteType = ref(''); // item.budgetName for when item is deleted
@@ -710,10 +690,7 @@ async function addModelToTable() {
   await updateStoreExpenseTypes();
   await refreshExpenseTypes();
 
-  status.value['show'] = true;
-  status.value['statusType'] = 'SUCCESS';
-  status.value['statusMessage'] = 'Item was successfully submitted!';
-  status.value['color'] = 'green';
+  useDisplaySuccess('Item was successfully submitted!');
 } // addModelToTable
 
 /**
@@ -830,16 +807,6 @@ function clearModel() {
 } // clearModel
 
 /**
- * Clear the action status that is displayed in the snackbar.
- */
-function clearStatus() {
-  status.value['show'] = false;
-  status.value['statusType'] = undefined;
-  status.value['statusMessage'] = '';
-  status.value['color'] = '';
-} // clearStatus
-
-/**
  * Delete an expense type and display status.
  */
 async function deleteExpenseType() {
@@ -849,7 +816,7 @@ async function deleteExpenseType() {
     await deleteModelFromTable();
   } else {
     // fails to delete expense type
-    displayError(et.response.data.message);
+    useDisplayError(et.response.data.message);
   }
   midAction.value = false;
 } // deleteExpenseType
@@ -861,23 +828,8 @@ async function deleteModelFromTable() {
   await updateStoreExpenseTypes();
   await refreshExpenseTypes();
 
-  status.value['show'] = true;
-  status.value['statusType'] = 'SUCCESS';
-  status.value['statusMessage'] = 'Item was successfully deleted!';
-  status.value['color'] = 'green';
+  useDisplaySuccess('Item was successfully deleted!');
 } // deleteModelFromTable
-
-/**
- * Set and display an error action status in the snackbar.
- *
- * @param err - String error message
- */
-function displayError(err) {
-  status.value['show'] = true;
-  status.value['statusType'] = 'ERROR';
-  status.value['statusMessage'] = err;
-  status.value['color'] = 'red';
-} // displayError
 
 /**
  * Sets inAction boolean to false.
@@ -888,7 +840,7 @@ function endAction() {
 
 /** Display error from expense form */
 function expenseFormError(msg) {
-  displayError(JSON.parse(msg));
+  useDisplayError(JSON.parse(msg));
 }
 
 /**
@@ -1096,7 +1048,6 @@ async function refreshExpenseTypes() {
   }
 
   filterExpenseTypes();
-
   loading.value = false; // set loading status to false
 } // refreshExpenseTypes
 
@@ -1121,10 +1072,7 @@ async function updateModelInTable() {
   await updateStoreExpenseTypes();
   await refreshExpenseTypes();
 
-  status.value['show'] = true;
-  status.value['statusType'] = 'SUCCESS';
-  status.value['statusMessage'] = 'Item was successfully updated!';
-  status.value['color'] = 'green';
+  useDisplaySuccess('Item was successfully updated!');
 } // updateModelInTable
 
 /**
@@ -1146,7 +1094,7 @@ async function validateDelete(item) {
       invalidDelete.value = true;
     }
   } catch (err) {
-    displayError(err);
+    useDisplayError(err);
   }
 } // validateDelete
 

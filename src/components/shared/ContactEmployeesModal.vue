@@ -1,13 +1,6 @@
 <!-- eslint-disable vue/no-v-model-argument -->
 <template>
   <div>
-    <!-- Status Alert -->
-    <v-snackbar v-model="copied" color="black" location="bottom" :timeout="3000">
-      Copied email list to clipboard
-      <template v-slot:actions>
-        <v-btn color="red" variant="text" @click="copied = false"> Close </v-btn>
-      </template>
-    </v-snackbar>
     <!-- Modal Card -->
     <v-card>
       <!-- Modal Title -->
@@ -84,6 +77,7 @@ import { useStore } from 'vuex';
 import { nicknameAndLastName } from '@/shared/employeeUtils';
 import { employeeFilter } from '@/shared/filterUtils';
 import { isMobile } from '@/utils/utils';
+import { useDisplayCustom } from '@/components/shared/StatusSnackbar.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -140,7 +134,13 @@ onMounted(() => {
 async function copyEmailList() {
   let list = getList();
   await navigator.clipboard.writeText(list);
+
+  //display copied status
   copied.value = true;
+  setTimeout(() => {
+    copied.value = false;
+  }, 3000);
+  useDisplayCustom('Copied email list to clipboard', 'CUSTOM', 3000, 'black', 'red', 'bottom');
 } // copyEmailList
 
 /**
