@@ -182,6 +182,7 @@
                 </v-btn>
               </v-col>
               <!-- end DELETE PROJECTS normal -->
+              <v-divider v-if="contract.projects.length > 1" :thickness="2"></v-divider>
             </v-row>
           </v-col>
         </v-row>
