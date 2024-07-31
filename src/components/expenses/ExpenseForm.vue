@@ -1099,9 +1099,12 @@ async function getRemainingBudget() {
         (currBudget) => currBudget.expenseTypeId === this.editedExpense.expenseTypeId
       );
 
+      let legacyCarryover = parseInt(budget.budgetObject.legacyCarryover ?? 0);
+
       if (budget) {
         this.remainingBudget =
-          budget.budgetObject.amount -
+          budget.budgetObject.amount +
+          legacyCarryover -
           budget.budgetObject.pendingAmount -
           budget.budgetObject.reimbursedAmount -
           this.editedExpense.cost;
