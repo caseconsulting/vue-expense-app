@@ -12,9 +12,11 @@
     </v-card-text>
     <v-card-text v-else>
       <past-experience-list :list="pageList"></past-experience-list>
-      <div v-if="!isEmpty(model.companies) && Math.ceil(model.companies.length / 4) != 1" class="text-center">
+      <div v-if="!isEmpty(model.companies)" class="text-center">
         <v-card-actions class="d-flex justify-center">
-          <v-btn variant="flat" color="#F3F3F3" @click="toggleJobExpModal()">Click To See More</v-btn>
+          <v-btn variant="flat" color="#F3F3F3" @click="toggleJobExpModal()"
+            >View All {{ filterCompanies.length }} Past Jobs</v-btn
+          >
         </v-card-actions>
       </div>
       <past-job-experience-modal v-model="toggleModal" :model="model" :onModal="onModal"></past-job-experience-modal>
@@ -50,7 +52,7 @@ const toggleModal = ref(false);
  */
 onBeforeMount(() => {
   if (!isEmpty(props.model.companies)) {
-    pageList.value = filterCompanies.value.slice(0, 4);
+    pageList.value = filterCompanies.value.slice(0, 2);
   }
 }); // created
 
@@ -124,7 +126,7 @@ const icExperience = computed(() => {
 
 function toggleJobExpModal() {
   toggleModal.value = !toggleModal.value;
-  onModal.value = !onModal.value;
+  onModal.value = true;
 }
 </script>
 

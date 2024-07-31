@@ -17,7 +17,9 @@
       <p v-if="isEmpty(clearances)" class="text-center mt-6 mx-2">No Clearance Information</p>
       <div v-if="!isEmpty(clearances)" class="text-center">
         <v-card-actions class="d-flex justify-center">
-          <v-btn variant="flat" color="#F3F3F3" @click="toggleClearanceModal()">Click To See More</v-btn>
+          <v-btn variant="flat" color="#F3F3F3" @click="toggleClearanceModal()"
+            >View All {{ clearances.length }} Clearances</v-btn
+          >
         </v-card-actions>
       </div>
       <clearance-modal v-model="toggleModal" :model="model"></clearance-modal>
