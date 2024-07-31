@@ -35,8 +35,5 @@ import { isEmpty } from '@/utils/utils';
 const props = defineProps(['avatar', 'initials', 'altText', 'fullName', 'model']);
 
 const theAvatar = ref('https://i.pinimg.com/originals/dd/3f/8f/dd3f8f13aecf1c3e441facf64961423f.png');
-const isProfile = ref(
-  (props.model.firstName === 'Chad' && props.model.lastName === 'Martin') ||
-    (props.model.firstName === 'Josiah' && props.model.lastName === 'Ogburn')
-);
+const isProfile = ref(props.model.employeeRole === 'intern');
 </script>
