@@ -1,6 +1,6 @@
 import { getTodaysDate, isAfter, isBefore, isSameOrBefore, isValid } from '@/shared/dateUtils';
 import { isEmpty } from '@/utils/utils';
-import _, { some } from 'lodash';
+import _ from 'lodash';
 import store from '../../store/index';
 import { add } from './dateUtils';
 
@@ -339,11 +339,13 @@ export function getBadgeNumberRules(clearance) {
  */
 export function getDuplicateContractAndPrimeRule(contract) {
   return () => {
-    let found = some(
-      store.getters.contracts,
-      (c) => c.contractName === contract.contractName && c.primeName === contract.primeName
-    );
-    return !found || 'Duplicate contract and prime combination';
+    const allContracts = store.getters.contracts;
+    let count = 0;
+    for (let i = 0; i < allContracts.length && count <= 2; i++) {
+      if (allContracts[i].contractName === contract.contractName && allContracts[i].primeName === contract.primeName)
+        count++;
+    }
+    return count <= 1 || 'Duplicate contract and prime combination';
   };
 }
 
