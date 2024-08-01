@@ -40,7 +40,7 @@
           <v-col v-if="!isMobile()" cols="2">
             <v-list density="compact" nav id="edit-navigation">
               <v-list-item @click="selectTab('Personal')" link title="Personal"></v-list-item>
-              <v-list-item @click="selectTab('Clearance')" link title="Clearance"></v-list-item>
+              <v-list-item @click="selectTab('Clearances')" link title="Clearances"></v-list-item>
               <v-list-item @click="selectTab('Contracts')" link title="Contracts"></v-list-item>
               <v-list-item
                 @click="selectTab('Certifications & Awards')"
@@ -66,7 +66,7 @@
                 <base-form title="Personal" value="Personal" id="Personal">
                   <personal-info-form ref="personalInfoRef" v-model="editedEmployee"></personal-info-form>
                 </base-form>
-                <base-form title="Clearance" value="Clearance" id="Clearance">
+                <base-form title="Clearances" value="Clearances" id="Clearances">
                   <div>
                     <clearance-tab
                       ref="clearanceRef"
@@ -157,6 +157,7 @@ import JobExperienceTab from '../form-tabs/JobExperienceTab.vue';
 import LanguagesForm from './LanguagesForm.vue';
 import PersonalInfoForm from './PersonalInfoForm.vue';
 import TechnologiesForm from './TechnologiesForm.vue';
+import { useDisplayError } from '../../shared/StatusSnackbar.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -208,6 +209,25 @@ const technologiesRef = ref(null);
 
 onBeforeMount(() => {
   emitter.on('editing', (cardName) => {
+    if (cardName === 'Personal Information' || cardName === 'Employee' || cardName === 'Other Information') {
+      cardName = 'Personal';
+    } else if (cardName === 'Clearance' || cardName === 'Clearances') {
+      cardName = 'Clearances';
+    } else if (cardName === 'Contracts' || cardName === 'All Contract Info') {
+      cardName = 'Contracts';
+    } else if (cardName === 'Job Experience') {
+      cardName = 'Job Experience';
+    } else if (cardName === 'Certifications' || cardName === 'Awards') {
+      cardName = 'Certifications & Awards';
+    } else if (cardName === 'Education') {
+      cardName = 'Education';
+    } else if (cardName === 'Technologies and Skills') {
+      cardName = 'Tech & Skills';
+    } else if (cardName === 'Foreign Languages') {
+      cardName = 'Languages';
+    } else {
+      cardName = 'Personal';
+    }
     formTabs.value = [cardName];
     editing.value = true;
   });
@@ -280,7 +300,11 @@ async function submit(event) {
   // if there are any changes
   if (!isEmpty(Object.keys(changes))) {
     const updated = await api.updateAttributes(api.EMPLOYEES, props.employee.id, changes);
-    emitter.emit('update', updated);
+    if (updated.id) {
+      emitter.emit('update', updated);
+    } else {
+      useDisplayError(updated.response.data.message);
+    }
   }
   submitting.value = false;
   editing.value = false; // close edit modal
