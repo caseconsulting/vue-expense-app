@@ -67,53 +67,60 @@
     </v-btn>
     <v-row v-else-if="(isAdmin || isUser) && !editing">
       <v-col align="right" class="px-2 py-0 ma-0">
-        <v-btn
-          color="#bc3825"
-          class="text-white"
-          @click="toggleResumeParser = !toggleResumeParser"
-          variant="text"
-          density="comfortable"
-          icon=""
-        >
-          <v-tooltip activator="parent" location="top">
-            <p class="ma-0 pa-0">Upload Resume</p>
-          </v-tooltip>
-          <v-icon icon="mdi-file-upload"></v-icon>
-        </v-btn>
-        <v-btn
-          class="text-white mx-1 fit-content"
-          color="#bc3825"
-          :disabled="model.resumeUpdated == null"
-          :loading="deleteLoading"
-          @click="toggleDeleteModal = !toggleDeleteModal"
-          variant="text"
-          density="comfortable"
-          icon=""
-        >
+        <div class="d-inline">
+          <v-btn
+            color="#bc3825"
+            class="text-white"
+            @click="toggleResumeParser = !toggleResumeParser"
+            variant="text"
+            density="comfortable"
+            icon=""
+          >
+            <v-tooltip activator="parent" location="top">
+              <p class="ma-0 pa-0">Upload Resume</p>
+            </v-tooltip>
+            <v-icon icon="mdi-file-upload"></v-icon>
+          </v-btn>
+        </div>
+        <div class="d-inline">
+          <v-btn
+            class="text-white mx-1 fit-content"
+            color="#bc3825"
+            :disabled="model.resumeUpdated == null"
+            :loading="deleteLoading"
+            @click="toggleDeleteModal = !toggleDeleteModal"
+            variant="text"
+            density="comfortable"
+            icon=""
+          >
+            <v-icon icon="mdi-file-remove"></v-icon>
+          </v-btn>
           <v-tooltip activator="parent" location="top">
             <p class="ma-0 pa-0">Delete Resume</p>
           </v-tooltip>
-          <v-icon icon="mdi-file-remove"></v-icon>
-        </v-btn>
-        <v-btn
-          class="text-white"
-          color="#bc3825"
-          :disabled="model.resumeUpdated == null"
-          @click="downloadResume()"
-          variant="text"
-          density="comfortable"
-          icon=""
-        >
-          <v-tooltip activator="parent" location="top">
-            <p class="ma-0 pa-0">
-              {{ model.resumeUpdated != null ? 'Download Resume' : 'No resume available' }}
-            </p>
-            <p class="ma-0 pa-0">
-              {{ model.resumeUpdated != null ? `Uploaded ${format(model.resumeUpdated, null, dateFormat)}` : '' }}
-            </p>
-          </v-tooltip>
-          <v-icon icon="mdi-file-download"></v-icon>
-        </v-btn>
+        </div>
+        <div class="d-inline">
+          <v-btn
+            class="text-white"
+            color="#bc3825"
+            :disabled="model.resumeUpdated == null"
+            @click="downloadResume()"
+            variant="text"
+            density="comfortable"
+            icon=""
+          >
+            <v-tooltip activator="parent" location="top">
+              <p class="ma-0 pa-0">
+                {{ model.resumeUpdated != null ? 'Download Resume' : 'No resume available' }}
+              </p>
+              <p class="ma-0 pa-0">
+                {{ model.resumeUpdated != null ? `Uploaded ${format(model.resumeUpdated, null, dateFormat)}` : '' }}
+              </p>
+            </v-tooltip>
+            <v-icon icon="mdi-file-download"></v-icon>
+          </v-btn>
+          <v-tooltip activator="parent" location="top" v-if="model.resumeUpdated == null">Download Resume</v-tooltip>
+        </div>
       </v-col>
     </v-row>
     <resume-parser
