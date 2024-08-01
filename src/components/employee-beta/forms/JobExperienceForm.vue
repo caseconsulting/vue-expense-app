@@ -322,9 +322,8 @@ import {
   getDuplicateCompanyNameRule,
   getRequiredRules
 } from '@/shared/validationUtils';
-import { isMobile } from '@/utils/utils';
-import { compact, forEach, isEmpty, map } from 'lodash';
-import { inject, onBeforeUnmount, onMounted, ref } from 'vue';
+import { isEmpty, map } from 'lodash';
+import { inject, onBeforeMount, onBeforeUnmount, ref } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
 
@@ -347,6 +346,12 @@ const companyDropDown = ref([]);
 
 populateDropDowns();
 
+let stopPrepare = false;
+const onDiscardEdits = (employee) => {
+  stopPrepare = true;
+  editedEmployee.value = employee;
+};
+
 defineExpose({ prepareSubmit });
 
 // |--------------------------------------------------|
@@ -355,7 +360,16 @@ defineExpose({ prepareSubmit });
 // |                                                  |
 // |--------------------------------------------------|
 
+onBeforeMount(() => {
+  emitter.on('discard-edits', onDiscardEdits);
+});
+
 onMounted(validate);
+
+onBeforeUnmount(() => {
+  emitter.off('discard-edits', onDiscardEdits);
+});
+
 onBeforeUnmount(prepareSubmit);
 
 // |--------------------------------------------------|
@@ -365,17 +379,19 @@ onBeforeUnmount(prepareSubmit);
 // |--------------------------------------------------|
 
 async function prepareSubmit() {
-  await validate();
+  if (!stopPrepare) {
+    await validate();
 
-  // delete properties from positions that should not be stored in the database
-  editedEmployee.value.companies = map(editedCompanies.value, (company) => {
-    company.positions = map(company.positions, (position) => {
-      delete position.showStartMenu;
-      delete position.showEndMenu;
-      return position;
+    // delete properties from positions that should not be stored in the database
+    editedEmployee.value.companies = map(editedCompanies.value, (company) => {
+      company.positions = map(company.positions, (position) => {
+        delete position.showStartMenu;
+        delete position.showEndMenu;
+        return position;
+      });
+      return company;
     });
-    return company;
-  });
+  }
 }
 
 async function validate() {
@@ -422,6 +438,7 @@ function addCompany() {
  * Adds the IC Time Frame to the model
  */
 function addICTimeFrame() {
+  if (!editedEmployee.value.icTimeFrames) editedEmployee.value.icTimeFrames = [];
   editedEmployee.value.icTimeFrames.push({
     range: [],
     showRangeMenu: false
