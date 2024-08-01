@@ -3,7 +3,7 @@
     <v-row class="mt-3 align-center justify-center">
       <!-- profile picture -->
       <v-col cols="4" class="display-inline fit-content">
-        <v-avatar class="cursor-pointer" :color="caseRed" :size="96" @click="toggleModal = true">
+        <v-avatar class="cursor-pointer" :color="caseRed" :size="picSize" @click="toggleModal = true">
           <span class="text-h4 display-inline-block position-absolute">{{ initials }}</span>
           <v-img class="display-inline-block position-absolute" :src="avatar" :alt="altText" />
         </v-avatar>
@@ -209,6 +209,16 @@ const altText = computed(() => {
 
 const fullName = computed(() => {
   return props.model.nickname ? `${props.model.nickname} ${props.model.lastName}` : employeeName;
+});
+
+const picSize = computed(() => {
+  if (window.innerWidth > 1660) {
+    return 128;
+  } else if (window.innerWidth > 500) {
+    return 96;
+  } else {
+    return 72;
+  }
 });
 
 // |--------------------------------------------------|
