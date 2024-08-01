@@ -473,7 +473,8 @@ const formattedBirthday = computed({
     return birthday.value.format(FORMATTED_ISOFORMAT);
   },
   set: (val) => {
-    birthday.value = dayjs(val);
+    const day = dayjs(val, FORMATTED_ISOFORMAT);
+    if (day.isValid()) birthday.value = day;
   }
 });
 

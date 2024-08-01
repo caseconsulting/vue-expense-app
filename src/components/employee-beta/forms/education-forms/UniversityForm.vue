@@ -53,12 +53,11 @@
                   hint="MM/YYYY format"
                   v-mask="'##/####'"
                   persistent-hint
-                  @update:focused="degree.completionDate = parseEventDate($event)"
                   clearable
                   prepend-inner-icon="mdi-calendar"
-                  @click:prepend="degree.showEducationMenu = true"
-                  @keypress="degree.showEducationMenu = false"
                   autocomplete="off"
+                  @update:focused="degree.completionDate = parseEventDate($event)"
+                  @keypress="degree.showEducationMenu = false"
                 >
                   <v-menu
                     activator="parent"
@@ -211,16 +210,15 @@
 </template>
 
 <script setup>
+import { majorsAndMinors } from '@/components/employees/form-tabs/dropdown-info/majorsAndMinors';
+import { SCHOOLS } from '@/components/employees/form-tabs/dropdown-info/schools';
+import { format } from '@/shared/dateUtils';
+import { getDateMonthYearOptionalRules, getRequiredRules } from '@/shared/validationUtils';
+import { isMobile } from '@/utils/utils';
 import _ from 'lodash';
-import { format } from '../../../../shared/dateUtils';
-import { onBeforeMount, ref } from 'vue';
-import { getDateMonthYearOptionalRules, getRequiredRules } from '../../../../shared/validationUtils';
-import { SCHOOLS } from '../../../employees/form-tabs/dropdown-info/schools';
-import { useStore } from 'vuex';
-import { majorsAndMinors } from '../../../employees/form-tabs/dropdown-info/majorsAndMinors';
+import { computed, onBeforeMount, ref } from 'vue';
 import { mask } from 'vue-the-mask';
-import { computed } from 'vue';
-import { isMobile } from '../../../../utils/utils';
+import { useStore } from 'vuex';
 
 // |--------------------------------------------------|
 // |                                                  |
