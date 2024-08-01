@@ -16,11 +16,12 @@
 
           <p class="pt-4 pb-0">
             Want to change your picture on
-            <a class="text-primary" :href="'https://3.basecamp.com/3097063'" target="_blank"><u>basecamp</u></a
+            <a class="text-primary" :href="'https://3.basecamp.com/3097063/my/profile'" target="_blank"
+              ><u>basecamp</u></a
             >?
           </p>
           <p class="text-start pt-2">
-            Click on your profile icon → Click 'profile, password, 2FA' → Click 'Change your avatar' button
+            <b><u>How To:</u></b> Click the above link → Click 'Change your avatar' button
           </p>
         </v-card-text>
       </v-card>
