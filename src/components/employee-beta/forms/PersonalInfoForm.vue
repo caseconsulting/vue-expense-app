@@ -468,7 +468,10 @@ const birthday = computed({
  * @type {import('vue').WritableComputedRef<string>}
  */
 const formattedBirthday = computed({
-  get: () => birthday.value.format(FORMATTED_ISOFORMAT),
+  get: () => {
+    if (!birthday.value.isValid()) return '';
+    return birthday.value.format(FORMATTED_ISOFORMAT);
+  },
   set: (val) => {
     birthday.value = dayjs(val);
   }

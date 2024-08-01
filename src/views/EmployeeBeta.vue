@@ -30,7 +30,7 @@
           <v-row no-gutters class="fit-content d-flex-inline align-center">
             <v-col :cols="isMobile() ? 9 : ''" class="text-no-wrap d-flex align-center">
               <!-- if user is admin, show search button -->
-              <v-btn v-if="isAdmin" icon="" variant="text" @click="onSearchButton()">
+              <v-btn icon="" variant="text" @click="onSearchButton()">
                 <v-icon v-if="!inSearchMode" size="32" color="black">mdi-magnify</v-icon>
                 <v-icon v-else size="32" color="black">mdi-magnify-remove-outline</v-icon>
               </v-btn>
@@ -39,14 +39,6 @@
                 <div v-if="!inSearchMode">
                   <!-- if user is viewing their own profile  -->
                   <p
-                    v-if="isUser"
-                    :class="!isMobile() ? 'text-h6 text-sm-h4 text-center mb-0' : 'text-center mb-0'"
-                    style="font-family: 'Avenir', Helvetica, Arial, sans-serif; font-size: 30px"
-                  >
-                    <b>{{ 'Hello, ' + model.firstName + '!' }}</b>
-                  </p>
-                  <p
-                    v-else-if="isAdmin"
                     :class="!isMobile() ? 'text-h6 text-sm-h4 text-center mb-0' : 'text-center mb-0'"
                     style="font-family: 'Avenir', Helvetica, Arial, sans-serif; font-size: 30px"
                   >
@@ -54,11 +46,7 @@
                   </p>
                 </div>
                 <!-- if user is admin and is searching -->
-                <v-responsive
-                  :style="{ minWidth: searchWidth }"
-                  class="d-flex align-center"
-                  v-else-if="isAdmin && inSearchMode"
-                >
+                <v-responsive :style="{ minWidth: searchWidth }" class="d-flex align-center" v-else-if="inSearchMode">
                   <v-autocomplete
                     v-model="dropdownEmployee"
                     :items="employeeNames"
@@ -104,7 +92,6 @@
             :accessible-budgets="accessibleBudgets"
             :employee-data-loading="loading"
             :fiscal-date-view="fiscalDateView"
-            :viewing-current-budget-year="viewingCurrentBudgetYear"
             :refreshKey="refreshKey"
             class="mb-4"
           />
@@ -142,6 +129,7 @@ import EmployeeInfo from '@/components/employee-beta/EmployeeInfo.vue';
 import EmployeePageLoader from '@/components/employee-beta/EmployeePageLoader.vue';
 import TimeData from '@/components/shared/timesheets/TimeData.vue';
 import { employeeFilter } from '@/shared/filterUtils';
+import { useDisplaySuccess } from '../components/shared/StatusSnackbar.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -218,7 +206,6 @@ const refreshKey = readonly({
 const user = ref(null);
 const inSearchMode = ref(false);
 const dropdownEmployee = ref(null);
-const viewingCurrentBudgetYear = ref(true);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -239,12 +226,12 @@ onMounted(() => {
   emitter.on('update', (updatedEmployee) => {
     if (updatedEmployee) {
       model.value = updatedEmployee;
+      useDisplaySuccess('Employee successfully updated!');
     }
   });
   emitter.on('selected-budget-year', (date) => {
     if (date != fiscalDateView.value) {
       fiscalDateView.value = date;
-      viewingCurrentBudgetYear.value = false;
     }
   });
 });
@@ -364,8 +351,8 @@ async function refreshExpenseData(full = false) {
     ]);
     expenseTypes.value = store.getters.expenseTypes;
   }
-  await checkForBudgetAccess();
   fiscalDateView.value = getCurrentBudgetYear(model.value.hireDate);
+  await checkForBudgetAccess();
 } // refreshExpenseData
 
 /**
