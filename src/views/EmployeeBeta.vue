@@ -18,7 +18,7 @@
           <v-row no-gutters class="fit-content d-flex-inline align-center">
             <v-col class="text-no-wrap d-flex align-center">
               <!-- if user is admin, show search button -->
-              <v-btn v-if="isAdmin" icon="" variant="text" @click="onSearchButton()">
+              <v-btn icon="" variant="text" @click="onSearchButton()">
                 <v-icon v-if="!inSearchMode" size="32" color="black">mdi-magnify</v-icon>
                 <v-icon v-else size="32" color="black">mdi-magnify-remove-outline</v-icon>
               </v-btn>
@@ -27,22 +27,14 @@
                 <div v-if="!inSearchMode">
                   <!-- if user is viewing their own profile  -->
                   <p
-                    v-if="isUser"
-                    class="text-h6 text-sm-h4 text-center mb-0"
-                    style="font-family: 'Avenir', Helvetica, Arial, sans-serif"
-                  >
-                    <b>{{ 'Hello, ' + model.firstName + '!' }}</b>
-                  </p>
-                  <p
-                    v-else-if="isAdmin"
                     class="text-h6 text-sm-h4 text-center mb-0"
                     style="font-family: 'Avenir', Helvetica, Arial, sans-serif"
                   >
                     <b>Search Employees</b>
                   </p>
                 </div>
-                <!-- if user is admin and is searching -->
-                <v-responsive min-width="250px" class="d-flex align-center" v-else-if="isAdmin && inSearchMode">
+                <!-- if user is searching -->
+                <v-responsive min-width="250px" class="d-flex align-center" v-else-if="inSearchMode">
                   <v-autocomplete
                     v-model="dropdownEmployee"
                     :items="employeeNames"
