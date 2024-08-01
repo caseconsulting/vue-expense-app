@@ -42,7 +42,7 @@
         </v-row>
       </v-col>
     </v-row>
-    <v-row v-if="editedEmployee.languages.length != 0">
+    <v-row v-if="editedEmployee.languages && editedEmployee.languages.length != 0">
       <v-col class="d-flex justify-center">
         <v-btn prepend-icon="mdi-plus" @click="addLanguage(false)">Add Language</v-btn>
       </v-col>
