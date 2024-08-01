@@ -1,5 +1,5 @@
 <template>
-  <base-info-modal title="Past Job Experience">
+  <base-info-modal :title="isMobile() ? 'Job Experience' : 'Past Job Experience'">
     <div class="ml-4" v-if="!isEmpty(filteredList)">
       <job-experience-list :list="filteredList" :model="model" :onModal="onModal"></job-experience-list>
     </div>
@@ -19,7 +19,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import BaseInfoModal from './BaseInfoModal.vue';
-import { isEmpty } from '../../../utils/utils';
+import { isEmpty, isMobile } from '../../../utils/utils';
 import JobExperienceList from '../lists/JobExperienceList.vue';
 
 // |--------------------------------------------------|

@@ -1,5 +1,5 @@
 <template>
-  <base-info-modal title="Technologies and Skills">
+  <base-info-modal :title="isMobile() ? 'Tech and Skills' : 'Technologies and Skills'">
     <v-card-text class="pt-0">
       <!-- Employee has Technology Experience -->
       <div v-if="!isEmpty(model.technologies)">
@@ -53,7 +53,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { isEmpty } from '@/utils/utils';
+import { isEmpty, isMobile } from '@/utils/utils';
 import BaseInfoModal from '@/components/employee-beta/modals/BaseInfoModal.vue';
 
 // |--------------------------------------------------|

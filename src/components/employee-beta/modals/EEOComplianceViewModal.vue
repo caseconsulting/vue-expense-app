@@ -4,7 +4,7 @@
       <v-card>
         <v-card-title class="d-flex align-center justify-space-between beta_header_style">
           <h3 v-if="!isMobile()" class="text-white px-2">EEO Compliance Information</h3>
-          <h3 v-else class="text-white px-2">EEO Compliance Info</h3>
+          <h3 v-else class="text-white px-2">EEO Info</h3>
           <div>
             <!-- Edit Button -->
             <v-btn v-if="isAdmin || isUser" @click="toggleEdit()" density="comfortable" variant="text" icon="">
@@ -59,11 +59,7 @@
             <!-- User declines to self identify -->
             <v-row v-if="model.eeoDeclineSelfIdentify">
               <v-col>
-                <sensitive-data-field
-                  class="ml-2 mb-1"
-                  label="Status"
-                  :value="`Declined to self-identify${declinedExtraText}.`"
-                />
+                <sensitive-data-field class="ml-2 mb-1" label="Status" :value="`Declined to self-identify.`" />
               </v-col>
             </v-row>
             <!-- End deny self identification -->

@@ -25,8 +25,8 @@
         <p class="ml-4"><b>Prime: </b>{{ getPrimeName(contract) }}</p>
         <p class="ml-4"><b>Time on Contract: </b>{{ getContractLengthInMonths(contract) }}</p>
         <div v-for="(project, index) in contract.projects" :key="project.projectId + index">
-          <p class="ml-8 d-inline ma-0"><b>Project Name: </b> {{ getProjectNameFromId(project.projectId) }}</p>
-          <p class="ml-8 project-text" align="right">
+          <p class="ml-8 d-inline"><b>Project Name: </b> {{ getProjectNameFromId(project.projectId) }}</p>
+          <p class="ml-8" :class="isMobile() ? 'project-mobile' : 'project-text'" :align="isMobile() ? '' : 'right'">
             ({{ getProjectStartDate(project) }} - {{ getProjectEndDate(project) }})
           </p>
         </div>
@@ -40,7 +40,7 @@
 import BaseInfoModal from './BaseInfoModal.vue';
 import { difference, getTodaysDate } from '@/shared/dateUtils';
 import { monthDayYearFormat } from '../../../utils/utils';
-import { isEmpty } from '@/utils/utils';
+import { isEmpty, isMobile } from '@/utils/utils';
 
 const props = defineProps(['contractsList', 'contracts', 'projectsList']);
 
@@ -183,6 +183,11 @@ function getProjectLength(project, duration) {
 .project-text {
   margin: 0;
   display: inline;
+  color: #828282;
+}
+
+.project-mobile {
+  margin: 0;
   color: #828282;
 }
 </style>

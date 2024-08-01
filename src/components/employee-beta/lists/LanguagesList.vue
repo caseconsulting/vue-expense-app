@@ -2,13 +2,15 @@
   <v-list>
     <v-list-item v-for="(language, index) in list" :key="language.name + index">
       <v-row no-gutters>
-        <v-col>
-          <p class="mt-3" :class="isMobile() ? 'ml-4' : ''">
+        <v-col :cols="isMobile() ? '6' : ''">
+          <p class="mt-3" :class="isMobile() ? 'ml-4 mobile-view' : ''">
             <b>{{ language.name }}</b>
           </p>
         </v-col>
         <v-col :cols="isMobile() ? '5' : ''">
-          <p class="gray-text mt-3"><b>Fluency: </b>{{ shortenProficiency(language.proficiency) }}</p>
+          <p class="gray-text mt-3" :class="isMobile() ? 'mobile-view' : ''">
+            <b>Fluency: </b>{{ shortenProficiency(language.proficiency) }}
+          </p>
         </v-col>
       </v-row>
       <v-row no-gutters class="my-2 mx-0">
@@ -54,5 +56,9 @@ function shortenProficiency(proficiency) {
 .gray-text {
   color: #828282;
   text-wrap: nowrap;
+}
+
+.mobile-view {
+  font-size: 13px;
 }
 </style>

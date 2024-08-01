@@ -28,15 +28,6 @@
           :cols="isMobile() ? 12 : 6"
         >
           <v-row no-gutters class="fit-content d-flex-inline align-center">
-            <!-- if in mobile view, left nav button -->
-            <v-col v-if="isMobile()" cols="1" class="mr-1">
-              <v-btn v-if="isAdmin" :disabled="loading" icon variant="text" @click="navEmployee(-1)">
-                <v-tooltip activator="parent" location="top"> Previous employee </v-tooltip>
-                <v-icon size="50px"> mdi-arrow-left-thin </v-icon>
-              </v-btn>
-            </v-col>
-            <!-- end left nav button for mobile -->
-
             <v-col :cols="isMobile() ? 9 : ''" class="text-no-wrap d-flex align-center">
               <!-- if user is admin, show search button -->
               <v-btn v-if="isAdmin" icon="" variant="text" @click="onSearchButton()">
@@ -85,15 +76,6 @@
                 </v-responsive>
               </v-scroll-y-transition>
             </v-col>
-
-            <!-- if mobile, right nav button -->
-            <v-col v-if="isMobile()" cols="1" class="ml-2">
-              <v-btn v-if="isAdmin" :disabled="loading" icon variant="text" @click="navEmployee(1)">
-                <v-tooltip activator="parent" location="top"> Next employee </v-tooltip>
-                <v-icon size="50px"> mdi-arrow-right-thin </v-icon>
-              </v-btn>
-            </v-col>
-            <!-- end right nav button for mobile -->
 
             <!-- Navigation Buttons for normal view (not in mobile)-->
             <v-col v-if="!isMobile()" class="pl-6">
