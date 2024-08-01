@@ -197,7 +197,7 @@ onMounted(() => {
   //TODO: add emitters with updating employee through the editing form
   emitter.on('update', (updatedEmployee) => {
     if (updatedEmployee) {
-      model.value = updatedEmployee;
+      model.value = new Employee(updatedEmployee);
       useDisplaySuccess('Employee successfully updated!');
     }
   });
