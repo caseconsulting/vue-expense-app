@@ -44,12 +44,11 @@
               hint="MM/DD/YYYY format"
               v-mask="'##/##/####'"
               prepend-inner-icon="mdi-calendar"
-              @update:focused="certification.dateReceived = parseEventDate()"
-              @focus="certificationIndex = index"
-              @click:prepend="certification.showReceivedMenu = true"
-              @keypress="certification.showReceivedMenu = false"
               clearable
               autocomplete="off"
+              @update:focused="certification.dateReceived = parseEventDate($event)"
+              @focus="certificationIndex = index"
+              @keypress="certification.showReceivedMenu = false"
             >
               <v-menu
                 activator="parent"
@@ -83,11 +82,10 @@
               v-mask="'##/##/####'"
               clearable
               prepend-inner-icon="mdi-calendar"
-              @update:focused="certification.expirationDate = parseEventDate()"
-              @click:prepend="certification.showExpirationMenu = true"
+              autocomplete="off"
+              @update:focused="certification.expirationDate = parseEventDate($event)"
               @keypress="certification.showExpirationMenu = false"
               @focus="certificationIndex = index"
-              autocomplete="off"
             >
               <v-menu
                 activator="parent"
@@ -181,12 +179,11 @@
               hint="MM/YYYY format"
               v-mask="'##/####'"
               persistent-hint
-              @update:focused="award.dateReceived = parseAwardEventDate()"
               clearable
               prepend-inner-icon="mdi-calendar"
-              @click:prepend="award.showReceivedMenu = true"
-              @keypress="award.showReceivedMenu = false"
               autocomplete="off"
+              @update:focused="award.dateReceived = parseAwardEventDate($event)"
+              @keypress="award.showReceivedMenu = false"
             >
               <v-menu
                 activator="parent"
@@ -271,7 +268,6 @@ defineExpose({ prepareSubmit });
 // |--------------------------------------------------|
 
 onBeforeMount(populateDropDowns);
-
 onBeforeUnmount(prepareSubmit);
 
 // |--------------------------------------------------|
@@ -343,8 +339,9 @@ function deleteCertification(index) {
  * @return String - The date in YYYY-MM-DD format
  */
 function parseEventDate(event) {
-  return format(event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD');
-} //parseEventDate
+  const result = format(event.target, 'MM/DD/YYYY', 'YYYY-MM-DD');
+  return result ?? event.target;
+} // parseEventDate
 
 /**
  * Parse the date after losing focus.
@@ -352,8 +349,8 @@ function parseEventDate(event) {
  * @return String - The date in YYYY-MM format
  */
 function parseAwardEventDate(event) {
-  return this.format(event.target.value, 'MM/YYYY', 'YYYY-MM');
-} // parseEventDate
+  return format(event.target.value, 'MM/YYYY', 'YYYY-MM');
+} // parseAwardEventDate
 
 /**
  * Populate drop downs with information that other employees have filled out.

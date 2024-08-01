@@ -25,12 +25,12 @@
               hint="MM/YYYY format"
               v-mask="'##/####'"
               persistent-hint
-              @update:focused="highSchool.gradDate = parseEventDate($event)"
+              variant="underlined"
               clearable
               prepend-inner-icon="mdi-calendar"
-              @click:prepend="highSchool.showReceivedMenu = true"
-              @keypress="highSchool.showReceivedMenu = false"
               autocomplete="off"
+              @update:focused="highSchool.gradDate = parseEventDate($event)"
+              @keypress="highSchool.showReceivedMenu = false"
             >
               <v-menu
                 activator="parent"
@@ -59,11 +59,10 @@
 </template>
 
 <script setup>
+import { format } from '@/shared/dateUtils';
+import { getDateMonthYearOptionalRules, getRequiredRules } from '@/shared/validationUtils';
 import _ from 'lodash';
-import { getDateMonthYearOptionalRules, getRequiredRules } from '../../../../shared/validationUtils';
-import { ref } from 'vue';
-import { format } from '../../../../shared/dateUtils';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { mask } from 'vue-the-mask';
 import { isMobile } from '../../../../utils/utils';
 

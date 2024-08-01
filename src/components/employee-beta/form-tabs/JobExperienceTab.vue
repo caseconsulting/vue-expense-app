@@ -263,6 +263,12 @@
                       </span>
                     </v-avatar>
                   </template>
+                  <template #append v-if="isMobile() && editedCompanies[compIndex].positions.length > 1">
+                    <v-btn variant="text" icon="" density="comfortable" @click="deletePosition(compIndex, index)">
+                      <v-tooltip activator="parent" location="bottom">Delete Position</v-tooltip>
+                      <v-icon class="case-gray">mdi-delete</v-icon>
+                    </v-btn>
+                  </template>
                 </v-text-field>
               </v-col>
               <!-- End end date -->
@@ -289,7 +295,11 @@
           </v-col>
         </v-row>
         <!-- End add postion -->
-        <v-divider thickness="4" class="border-opacity-50 mt-5" v-if="compIndex < editedEmployee.companies.length - 1" />
+        <v-divider
+          thickness="4"
+          class="border-opacity-50 mt-5"
+          v-if="compIndex < editedEmployee.companies.length - 1"
+        />
       </v-col>
     </v-row>
     <!-- End company -->
@@ -312,11 +322,11 @@ import {
   getDuplicateCompanyNameRule,
   getRequiredRules
 } from '@/shared/validationUtils';
-import _, { isEmpty, map } from 'lodash';
+import { isMobile } from '@/utils/utils';
+import _, { isEmpty } from 'lodash';
 import { inject, onBeforeUnmount, ref } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
-import { isMobile } from '../../../utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -356,8 +366,8 @@ async function prepareSubmit() {
   await validate();
 
   // delete properties from positions that should not be stored in the database
-  editedEmployee.value.companies = map(editedCompanies.value, (company) => {
-    company.positions = map(company.positions, (position) => {
+  editedEmployee.value.companies = _.map(editedCompanies.value, (company) => {
+    company.positions = _.map(company.positions, (position) => {
       delete position.showStartMenu;
       delete position.showEndMenu;
       return position;
@@ -531,3 +541,9 @@ function populateDropDowns() {
   });
 } // populateDropDowns
 </script>
+
+<style scoped>
+.append-text-field {
+  min-width: 250px;
+}
+</style>
