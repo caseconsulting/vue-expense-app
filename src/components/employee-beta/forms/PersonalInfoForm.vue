@@ -1,7 +1,7 @@
 <template>
   <v-form ref="form" validate-on="input">
-    <v-row class="mt-2"><h3>Basic Information</h3></v-row>
-    <v-row>
+    <v-row :class="isMobile() ? 'mt-3' : ''"><h3>Basic Information</h3></v-row>
+    <v-row class="groove">
       <!-- first name -->
       <v-col>
         <v-text-field v-model="editedEmployee.firstName" label="First Name" :rules="getRequiredRules()"></v-text-field>
@@ -43,7 +43,7 @@
       </v-col>
     </v-row>
     <!-- current address -->
-    <v-row><h3>Current Address</h3></v-row>
+    <v-row :class="isMobile() ? 'mt-7' : ''"><h3>Current Address</h3></v-row>
     <v-row class="groove">
       <v-col>
         <!-- private icon and search bar -->
@@ -72,14 +72,14 @@
         </v-row>
         <!-- actual address fields -->
         <v-row>
-          <v-col cols="6">
+          <v-col :cols="!isMobile() ? '6' : '12'">
             <v-text-field
               v-model.trim="editedEmployee.currentStreet"
               label="Street 1"
               data-vv-name="Street 1"
             ></v-text-field>
           </v-col>
-          <v-col cols="6">
+          <v-col :cols="!isMobile() ? '6' : '12'">
             <v-text-field
               v-model.trim="editedEmployee.currentStreet2"
               label="Street 2"
@@ -108,126 +108,134 @@
       </v-col>
     </v-row>
     <v-row class="mt-7"><h3>CASE Information</h3></v-row>
-    <v-row>
-      <!-- case email -->
+    <v-row class="groove">
       <v-col>
-        <v-text-field
-          v-model="emailUsername"
-          label="CASE Email"
-          @update:model-value="removeEmailDomain()"
-          :suffix="CASE_EMAIL_DOMAIN"
-          :rules="getCaseEmailRules()"
-        ></v-text-field>
-      </v-col>
-      <!-- employee number / employee id -->
-      <v-col v-if="userIsAdminOrManager">
-        <v-text-field
-          v-model="editedEmployee.employeeNumber"
-          label="Employee Number"
-          :rules="employeeNumberRules"
-        ></v-text-field>
-      </v-col>
-      <!-- job role -->
-      <v-col>
-        <v-combobox v-model="editedEmployee.jobRole" label="Job Role" :items="JOB_TITLES"></v-combobox>
+        <v-row>
+          <!-- case email -->
+          <v-col>
+            <v-text-field
+              v-model="emailUsername"
+              label="CASE Email"
+              @update:model-value="removeEmailDomain()"
+              :suffix="CASE_EMAIL_DOMAIN"
+              :rules="getCaseEmailRules()"
+            ></v-text-field>
+          </v-col>
+          <!-- employee number / employee id -->
+          <v-col v-if="userIsAdminOrManager">
+            <v-text-field
+              v-model="editedEmployee.employeeNumber"
+              label="Employee Number"
+              :rules="employeeNumberRules"
+            ></v-text-field>
+          </v-col>
+          <!-- job role -->
+          <v-col>
+            <v-combobox v-model="editedEmployee.jobRole" label="Job Role" :items="JOB_TITLES"></v-combobox>
+          </v-col>
+        </v-row>
+        <v-row>
+          <!-- ain / agency identification number -->
+          <v-col>
+            <v-text-field
+              v-model="editedEmployee.agencyIdentificationNumber"
+              label="Agency Identification Number"
+            ></v-text-field>
+          </v-col>
+          <!-- employee role -->
+          <v-col v-if="userIsAdminOrManager">
+            <v-combobox v-model="employeeRole" label="Employee Role" :items="EMPLOYEE_ROLES"></v-combobox>
+          </v-col>
+          <!-- tags -->
+          <v-col v-if="userIsAdminOrManager">
+            <v-autocomplete
+              v-model="tags"
+              label="Tags"
+              :items="store.getters.tags"
+              item-title="tagName"
+              return-object
+              multiple
+              chips
+              closeable-chips
+              clearable
+            ></v-autocomplete>
+          </v-col>
+        </v-row>
       </v-col>
     </v-row>
+    <v-row class="mt-7"><h3>Personal Information</h3></v-row>
     <v-row>
-      <!-- ain / agency identification number -->
       <v-col>
-        <v-text-field
-          v-model="editedEmployee.agencyIdentificationNumber"
-          label="Agency Identification Number"
-        ></v-text-field>
-      </v-col>
-      <!-- employee role -->
-      <v-col v-if="userIsAdminOrManager">
-        <v-combobox v-model="employeeRole" label="Employee Role" :items="EMPLOYEE_ROLES"></v-combobox>
-      </v-col>
-      <!-- tags -->
-      <v-col v-if="userIsAdminOrManager">
-        <v-autocomplete
-          v-model="tags"
-          label="Tags"
-          :items="store.getters.tags"
-          item-title="tagName"
-          return-object
-          multiple
-          chips
-          closeable-chips
-          clearable
-        ></v-autocomplete>
-      </v-col>
-    </v-row>
-    <v-row><h3>Personal Information</h3></v-row>
-    <v-row>
-      <!-- birthday -->
-      <v-col>
-        <v-text-field
-          v-model="formattedBirthday"
-          label="Birthday"
-          v-mask="'##/##/####'"
-          hint="MM/DD/YYYY"
-          :rules="[getBirthdayRules()]"
-          prepend-inner-icon="mdi-calendar"
-          autocomplete="off"
-          style="min-width: 200px"
-          @keypress="birthdayMenu = false"
-        >
-          <v-menu activator="parent" :close-on-content-click="false" v-model="birthdayMenu" location="start center">
-            <v-date-picker
-              v-model="birthday"
-              show-adjacent-months
-              hide-actions
-              keyboard-icon=""
-              color="#bc3825"
-              title="Birthday"
-              @update:model-value="onUpdateDatePicker($event)"
+        <v-row class="groove">
+          <!-- birthday -->
+          <v-col :cols="!isMobile() ? '4' : '12'">
+            <v-text-field
+              v-model="formattedBirthday"
+              label="Birthday"
+              v-mask="'##/##/####'"
+              hint="MM/DD/YYYY"
+              :rules="[getBirthdayRules()]"
+              prepend-inner-icon="mdi-calendar"
+              autocomplete="off"
+              style="min-width: 200px"
+              @keypress="birthdayMenu = false"
             >
-            </v-date-picker>
-          </v-menu>
-          <template #append-inner>
-            <private-button v-model="editedEmployee.birthdayFeed"></private-button>
-          </template>
-        </v-text-field>
-      </v-col>
-      <!-- personal email -->
-      <v-col>
-        <v-text-field
-          v-model="personalEmail.emailValue"
-          label="Personal Email"
-          :rules="getEmailRules()"
-          style="min-width: 350px"
-        >
-          <template #prepend-inner><v-icon>mdi-email</v-icon></template>
-          <template #append-inner>
-            <private-button v-model="personalEmail.private"></private-button>
-          </template>
-        </v-text-field>
-      </v-col>
-      <!-- github -->
-      <v-col>
-        <v-text-field v-model="editedEmployee.github" label="Github Username">
-          <template #prepend-inner><v-icon>$github</v-icon></template>
-        </v-text-field>
-      </v-col>
-      <!-- twitter / X -->
-      <v-col>
-        <v-text-field v-model="editedEmployee.twitter" label="X Username">
-          <template #prepend-inner><v-icon size="16">$twitter</v-icon></template>
-        </v-text-field>
-      </v-col>
-      <!-- linkedin -->
-      <v-col>
-        <v-text-field v-model="editedEmployee.linkedIn" label="LinkedIn Profile URL" :rules="getURLRules()">
-          <template #prepend-inner><v-icon>$linkedin</v-icon></template>
-        </v-text-field>
+              <v-menu activator="parent" :close-on-content-click="false" v-model="birthdayMenu" location="start center">
+                <v-date-picker
+                  v-model="birthday"
+                  show-adjacent-months
+                  hide-actions
+                  keyboard-icon=""
+                  color="#bc3825"
+                  title="Birthday"
+                  @update:model-value="onUpdateDatePicker($event)"
+                >
+                </v-date-picker>
+              </v-menu>
+              <template #append-inner>
+                <private-button v-model="editedEmployee.birthdayFeed"></private-button>
+              </template>
+            </v-text-field>
+          </v-col>
+          <!-- personal email -->
+          <v-col>
+            <v-text-field
+              v-model="personalEmail.emailValue"
+              label="Personal Email"
+              :rules="getEmailRules()"
+              style="min-width: 350px"
+            >
+              <template #prepend-inner><v-icon>mdi-email</v-icon></template>
+              <template #append-inner>
+                <private-button v-model="personalEmail.private"></private-button>
+              </template>
+            </v-text-field>
+          </v-col>
+          <!-- github -->
+          <v-col>
+            <v-text-field v-model="editedEmployee.github" label="Github Username">
+              <template #prepend-inner><v-icon>$github</v-icon></template>
+            </v-text-field>
+          </v-col>
+          <!-- twitter / X -->
+          <v-col>
+            <v-text-field v-model="editedEmployee.twitter" label="X Username">
+              <template #prepend-inner><v-icon size="16">$twitter</v-icon></template>
+            </v-text-field>
+          </v-col>
+          <!-- linkedin -->
+          <v-col>
+            <v-text-field v-model="editedEmployee.linkedIn" label="LinkedIn Profile URL" :rules="getURLRules()">
+              <template #prepend-inner><v-icon>$linkedin</v-icon></template>
+            </v-text-field>
+          </v-col>
+        </v-row>
       </v-col>
 
       <!-- place of birth -->
-      <v-col class="pt-0" cols="12">
+      <v-col class="pt-0 mt-7" cols="12">
         <v-row><h3>Place of Birth</h3></v-row>
-        <v-row class="groove pb-2">
+        <v-row class="groove">
           <v-col>
             <v-row align="center">
               <v-col class="pb-0">
@@ -255,10 +263,10 @@
               </v-col>
             </v-row>
             <v-row>
-              <v-col cols="4">
+              <v-col :cols="!isMobile() ? '4' : '12'">
                 <v-text-field v-model.trim="editedEmployee.city" label="City" data-vv-name="City"></v-text-field>
               </v-col>
-              <v-col>
+              <v-col :class="isMobile() ? 'mb-4' : ''">
                 <v-autocomplete
                   v-model="editedEmployee.st"
                   label="State"
@@ -282,7 +290,7 @@
       </v-col>
     </v-row>
     <!-- phone numbers -->
-    <v-row><h3>Phone Numbers</h3></v-row>
+    <v-row class="mt-7"><h3>Phone Numbers</h3></v-row>
     <v-row class="mb-4 groove d-flex justify-center">
       <!-- phone numbers -->
       <v-col cols="12" v-if="!isMobile()">
@@ -320,6 +328,44 @@
           </v-col>
         </v-row>
       </v-col>
+      <v-col v-else>
+        <v-row v-for="(phoneNumber, index) in phoneNumbers" :key="phoneNumber + index">
+          <v-col cols="12">
+            <v-autocomplete
+              v-model="phoneNumber.type"
+              label="Type"
+              :items="PHONE_TYPES"
+              :rules="getPhoneNumberTypeRules()"
+              :autofocus="phoneAutofocus"
+            >
+              <template #append>
+                <v-col class="d-flex align-center" cols="auto" style="max-height: 56px">
+                  <private-button v-model="phoneNumber.private"></private-button>
+                </v-col>
+                <v-col class="d-flex align-center" cols="auto" style="max-height: 56px">
+                  <v-tooltip text="Delete Number" location="top">
+                    <template #activator="{ props }">
+                      <v-btn v-bind="props" icon="mdi-delete" variant="text" @click="deletePhoneNumber(index)"></v-btn>
+                    </template>
+                  </v-tooltip>
+                </v-col>
+              </template>
+            </v-autocomplete>
+          </v-col>
+          <v-col class="flex-grow">
+            <v-text-field
+              v-model.trim="phoneNumber.number"
+              label="Phone Number"
+              v-mask="'###-###-####'"
+              :rules="getPhoneNumberRules()"
+              data-vv-name="Phone Number"
+            >
+            </v-text-field>
+          </v-col>
+        </v-row>
+      </v-col>
+    </v-row>
+    <v-row>
       <v-col class="d-flex justify-center">
         <v-btn prepend-icon="mdi-plus" @click="addPhoneNumber()">Add Number</v-btn>
       </v-col>

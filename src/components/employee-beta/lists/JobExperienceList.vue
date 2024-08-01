@@ -4,8 +4,8 @@
       <p class="ic-text mt-3 ml-7"><b>Experience in IC:</b></p>
       <p class="ic-text gray-text ml-3" align="right">{{ icExperience }}</p>
     </v-card-text>
-    <v-row class="mx-12" v-if="onModal">
-      <v-divider class="mt-2 mb-6" />
+    <v-row class="mx-8" v-if="onModal">
+      <v-divider class="mt-2 mb-4" />
     </v-row>
     <v-list-item v-for="(company, index) in list" :key="company.companyName + index">
       <v-list-item-title class="align-center">
@@ -23,6 +23,7 @@
       </v-list-item-title>
       <div
         class="ml-12 mb-2 position-text"
+        :class="isMobile() ? ' pl-4' : ''"
         v-for="(position, posIndex) in company.positions"
         :key="position.title + posIndex"
       >
@@ -55,6 +56,7 @@ import { ref } from 'vue';
 import { computed } from 'vue';
 import { format, getTodaysDate, isBefore, maximum } from '../../../shared/dateUtils';
 import _ from 'lodash';
+import { isMobile } from '../../../utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |

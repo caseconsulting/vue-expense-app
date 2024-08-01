@@ -14,11 +14,15 @@
         class="d-flex align-center justify-space-between beta_header_style"
         style="position: sticky; top: 0; z-index: 2"
       >
-        <v-row class="d-flex align-center">
-          <v-col>
+        <v-row class="align-center">
+          <v-col class="d-inline" v-if="!isMobile()">
             <h3 class="text-white px-2">Editing {{ isUser ? 'My Profile' : fullName }}</h3>
           </v-col>
-          <v-col class="d-flex align-center" cols="auto">
+          <v-col class="d-inline" v-else>
+            <h3 class="text-white px-2">Editing</h3>
+          </v-col>
+          <v-spacer></v-spacer>
+          <v-col class="d-inline align-center" cols="auto">
             <v-btn size="36" variant="text" icon @click="collapseAllTabs()">
               <v-icon>mdi-format-vertical-align-center</v-icon>
             </v-btn>

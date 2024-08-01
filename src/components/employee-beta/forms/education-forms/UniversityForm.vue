@@ -23,7 +23,7 @@
           <v-col>
             <v-row>
               <!-- Start Degree name -->
-              <v-col>
+              <v-col :cols="isMobile() ? '12' : ''">
                 <v-select
                   ref="formFields"
                   v-model="degree.degreeType"
@@ -44,7 +44,7 @@
               <!-- End degree name -->
 
               <!-- Start degree completion date -->
-              <v-col>
+              <v-col :cols="isMobile() ? '12' : ''">
                 <v-text-field
                   ref="formFields"
                   :model-value="format(degree.completionDate, null, 'MM/YYYY')"
@@ -84,7 +84,11 @@
 
             <v-row>
               <!-- Start major loop -->
-              <v-col cols="6" v-for="(major, mIndex) in degree.majors" :key="'major: ' + major + mIndex">
+              <v-col
+                :cols="isMobile() ? '12' : '6'"
+                v-for="(major, mIndex) in degree.majors"
+                :key="'major: ' + major + mIndex"
+              >
                 <!-- Majors -->
                 <v-autocomplete
                   ref="formFields"
@@ -112,7 +116,11 @@
               <!-- End major loop -->
 
               <!-- Start minor loop -->
-              <v-col cols="6" v-for="(minor, minIndex) in degree.minors" :key="'minor ' + minor + minIndex">
+              <v-col
+                :cols="isMobile() ? '12' : '6'"
+                v-for="(minor, minIndex) in degree.minors"
+                :key="'minor ' + minor + minIndex"
+              >
                 <v-autocomplete
                   ref="formFields"
                   v-model="degree.minors[minIndex]"
@@ -134,7 +142,7 @@
 
               <!-- Start concentration loop -->
               <v-col
-                cols="6"
+                :cols="isMobile() ? '12' : '6'"
                 v-for="(concentration, cIndex) in degree.concentrations"
                 :key="'conc: ' + concentration + cIndex"
               >
@@ -148,12 +156,7 @@
                   label="Concentration"
                 >
                   <template v-slot:append>
-                    <v-btn
-                      variant="text"
-                      density="compact"
-                      icon=""
-                      @click="deleteItem(degree.concentrations, cIndex)"
-                    >
+                    <v-btn variant="text" density="compact" icon="" @click="deleteItem(degree.concentrations, cIndex)">
                       <v-tooltip activator="parent">Delete Concentration</v-tooltip>
                       <v-icon :color="caseGray">mdi-delete</v-icon>
                     </v-btn>
@@ -165,19 +168,19 @@
 
             <v-row>
               <!-- Start add major button -->
-              <v-col cols="5" align="end">
+              <v-col :cols="!isMobile() ? '5' : '12'" :align="!isMobile() ? 'end' : 'center'">
                 <v-btn @click="addItem(degree.majors)" variant="outlined" size="small">Add a Major</v-btn>
               </v-col>
               <!-- End add major button -->
 
               <!-- Start add minor button -->
-              <v-col cols="2" align="center">
+              <v-col :cols="!isMobile() ? '2' : '12'" align="center">
                 <v-btn @click="addItem(degree.minors)" variant="outlined" size="small">Add a Minor</v-btn>
               </v-col>
               <!-- End add minor button -->
 
               <!-- Start add concentration button -->
-              <v-col cols="5" align="start">
+              <v-col :cols="!isMobile() ? '5' : '12'" :align="!isMobile() ? 'start' : 'center'">
                 <v-btn @click="addItem(degree.concentrations)" variant="outlined" size="small"
                   >Add a Concentration</v-btn
                 >
@@ -185,6 +188,7 @@
               <!-- Start add concentration button -->
             </v-row>
           </v-col>
+          <v-divider class="border-opacity-25 mt-5"></v-divider>
         </v-row>
         <!-- End degree loop -->
 
@@ -202,7 +206,7 @@
         </v-row>
       </v-col>
     </v-row>
-    <v-divider class="border-opacity-25 mt-5"></v-divider>
+    <v-divider class="border-opacity-50 mt-5"></v-divider>
   </v-container>
 </template>
 
@@ -216,6 +220,7 @@ import { useStore } from 'vuex';
 import { majorsAndMinors } from '../../../employees/form-tabs/dropdown-info/majorsAndMinors';
 import { mask } from 'vue-the-mask';
 import { computed } from 'vue';
+import { isMobile } from '../../../../utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |

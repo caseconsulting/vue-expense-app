@@ -3,7 +3,7 @@
     <v-row v-for="(contract, index) in editedContracts" :key="index">
       <v-col>
         <v-row>
-          <v-col>
+          <v-col :cols="isMobile() ? '10' : '6'">
             <v-select
               :key="reloadKey"
               v-model="contract.contractName"
@@ -16,7 +16,17 @@
             >
             </v-select>
           </v-col>
-          <v-col>
+
+          <!-- MOBILE delete contract -->
+          <v-col v-if="isMobile()" cols="2" align="center" class="pl-0">
+            <v-btn @click="deleteContract(index)" icon="" variant="text">
+              <v-tooltip activator="parent" location="bottom">Delete Contract</v-tooltip>
+              <v-icon class="case-gray pr-1">mdi-delete</v-icon>
+            </v-btn>
+          </v-col>
+          <!-- END MOBILE delete contract -->
+
+          <v-col :cols="isMobile() ? '12' : '5'">
             <v-select
               :key="reloadKey"
               v-model="contract.primeName"
@@ -29,7 +39,8 @@
             >
             </v-select>
           </v-col>
-          <v-col cols="1" align="center" class="pl-0">
+
+          <v-col v-if="!isMobile()" cols="1" align="center" class="pl-0">
             <v-btn @click="deleteContract(index)" icon="" variant="text">
               <v-tooltip activator="parent" location="bottom">Delete Contract</v-tooltip>
               <v-icon class="case-gray pr-1">mdi-delete</v-icon>
@@ -37,12 +48,11 @@
           </v-col>
         </v-row>
 
-        <v-row v-for="(project, projIndex) in contract.projects" :key="index + '-' + projIndex">
+        <v-row>
+          <v-col cols="1"></v-col>
           <v-col>
-            <v-row>
-              <!-- indent -->
-              <v-col cols="1"></v-col>
-              <v-col class="groove">
+            <v-row v-for="(project, projIndex) in contract.projects" :key="index + '-' + projIndex" class="groove">
+              <v-col :cols="isMobile() ? '11' : '5'">
                 <v-select
                   :key="reloadKey"
                   :id="'proj-' + projIndex + '-' + index"
@@ -57,17 +67,16 @@
                 </v-select>
               </v-col>
 
-              <v-col v-if="contract.projects.length > 1" cols="1" align="center">
+              <!-- DELETE PROJECTS MOBILE start -->
+              <v-col v-if="isMobile() && contract.projects.length > 1" cols="1" align="center" class="mt-1">
                 <v-btn variant="text" icon="" density="comfortable" @click="deleteProject(index, projIndex)">
                   <v-tooltip activator="parent" location="bottom">Delete Project</v-tooltip>
                   <v-icon class="case-gray">mdi-delete</v-icon>
                 </v-btn>
               </v-col>
-            </v-row>
+              <!-- DELETE PROJECTS MOBILE end -->
 
-            <v-row>
-              <v-col cols="1"></v-col>
-              <v-col class="groove">
+              <v-col :cols="isMobile() ? '12' : '3'">
                 <v-text-field
                   :id="'start-field-' + index + '-' + projIndex"
                   :model-value="format(project.startDate, null, 'MM/DD/YYYY')"
@@ -102,7 +111,7 @@
                 </v-text-field>
               </v-col>
 
-              <v-col>
+              <v-col :cols="isMobile() ? '12' : '3'">
                 <v-text-field
                   :id="'end-field-' + index + '-' + projIndex"
                   :model-value="format(project.endDate, null, 'MM/DD/YYYY')"
@@ -164,6 +173,16 @@
                   </v-menu>
                 </v-text-field>
               </v-col>
+
+              <!-- DELETE PROJECTS normal -->
+              <v-col v-if="!isMobile() && contract.projects.length > 1" cols="1" align="center">
+                <v-btn variant="text" icon="" density="comfortable" @click="deleteProject(index, projIndex)">
+                  <v-tooltip activator="parent" location="bottom">Delete Project {{ projIndex + 1 }}</v-tooltip>
+                  <v-icon class="case-gray">mdi-delete</v-icon>
+                </v-btn>
+              </v-col>
+              <!-- end DELETE PROJECTS normal -->
+              <v-divider v-if="contract.projects.length > 1" :thickness="2"></v-divider>
             </v-row>
           </v-col>
         </v-row>
@@ -206,6 +225,7 @@ import { find, map } from 'lodash';
 import { inject, onBeforeUnmount, ref } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
+import { isMobile } from '../../../utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |

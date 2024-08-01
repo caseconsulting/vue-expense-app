@@ -5,18 +5,30 @@
     </v-row>
     <div v-else>
       <v-row align="center" class="pt-3" :justify="displayTimeAndBalances ? 'start' : 'center'">
-        <v-col class="pa-0 pl-4" :cols="displayTimeAndBalances ? 3 : 11">
-          <v-btn id="backBtn" elevation="2" :size="isMobile() ? 'x-small' : 'default'" @click="router.back()">
+        <v-col class="pa-0 pl-4" :cols="displayTimeAndBalances && !isMobile() ? 3 : 12">
+          <v-btn id="backBtn" elevation="2" :size="isMobile() ? 'small' : 'default'" @click="router.back()">
             <v-icon size="large" class="pr-1"> mdi-arrow-left-thin </v-icon>
             Back
           </v-btn>
-          <v-btn rounded="xl" color="#bc3825" @click="goBackToAlphaProfile()" theme="dark" class="ma-2"
+          <v-btn
+            if="alphaBtn"
+            rounded="xl"
+            color="#bc3825"
+            :size="isMobile() ? 'small' : 'default'"
+            @click="goBackToAlphaProfile()"
+            theme="dark"
+            class="ma-2"
             ><v-icon>mdi-alpha</v-icon>view</v-btn
           >
         </v-col>
-        <v-col class="ml-4 pa-0 d-flex justify-center" cols="6">
+
+        <v-col
+          :class="!isMobile() ? 'ml-4 pa-0 d-flex justify-center' : ''"
+          :align="isMobile() ? 'center' : ''"
+          :cols="isMobile() ? 12 : 6"
+        >
           <v-row no-gutters class="fit-content d-flex-inline align-center">
-            <v-col class="text-no-wrap d-flex align-center">
+            <v-col :cols="isMobile() ? 9 : ''" class="text-no-wrap d-flex align-center">
               <!-- if user is admin, show search button -->
               <v-btn icon="" variant="text" @click="onSearchButton()">
                 <v-icon v-if="!inSearchMode" size="32" color="black">mdi-magnify</v-icon>
@@ -27,14 +39,14 @@
                 <div v-if="!inSearchMode">
                   <!-- if user is viewing their own profile  -->
                   <p
-                    class="text-h6 text-sm-h4 text-center mb-0"
-                    style="font-family: 'Avenir', Helvetica, Arial, sans-serif"
+                    :class="!isMobile() ? 'text-h6 text-sm-h4 text-center mb-0' : 'text-center mb-0'"
+                    style="font-family: 'Avenir', Helvetica, Arial, sans-serif; font-size: 30px"
                   >
                     <b>Search Employees</b>
                   </p>
                 </div>
-                <!-- if user is searching -->
-                <v-responsive min-width="250px" class="d-flex align-center" v-else-if="inSearchMode">
+                <!-- if user is admin and is searching -->
+                <v-responsive :style="{ minWidth: searchWidth }" class="d-flex align-center" v-else-if="inSearchMode">
                   <v-autocomplete
                     v-model="dropdownEmployee"
                     :items="employeeNames"
@@ -52,8 +64,9 @@
                 </v-responsive>
               </v-scroll-y-transition>
             </v-col>
-            <!-- Navigation Buttons -->
-            <v-col class="pl-6">
+
+            <!-- Navigation Buttons for normal view (not in mobile)-->
+            <v-col v-if="!isMobile()" class="pl-6">
               <v-btn v-if="isAdmin" :disabled="loading" icon variant="text" @click="navEmployee(-1)">
                 <v-tooltip activator="parent" location="top"> Previous employee </v-tooltip>
                 <v-icon size="50px"> mdi-arrow-left-thin </v-icon>
@@ -63,9 +76,11 @@
                 <v-icon size="50px"> mdi-arrow-right-thin </v-icon>
               </v-btn>
             </v-col>
+            <!-- End navigation buttons for normal view -->
           </v-row>
         </v-col>
       </v-row>
+
       <v-row class="pa-0 ma-0" justify="center">
         <!-- Timesheets and Budgets-->
         <v-col v-if="displayTimeAndBalances" cols="12" lg="4" class="pt-0" height>
@@ -245,6 +260,13 @@ const employeeNames = computed(() => {
       itemTitle: `${e.lastName}, ${e.nickname || e.firstName}`
     };
   });
+});
+
+/**
+ * Gets the width of the search bar depending on if the user is in Mobile or Normal view
+ */
+const searchWidth = computed(() => {
+  return isMobile() ? '220px' : '250px';
 });
 
 // |--------------------------------------------------|

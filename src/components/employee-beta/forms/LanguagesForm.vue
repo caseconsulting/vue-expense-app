@@ -9,7 +9,7 @@
     <v-row v-for="(language, index) in editedEmployee.languages" :key="language + index">
       <v-col>
         <v-row>
-          <v-col>
+          <v-col :cols="isMobile() ? '10' : ''">
             <v-combobox
               v-model="language.name"
               label-="Language"
@@ -17,10 +17,19 @@
               :items="LANGUAGES"
             ></v-combobox>
           </v-col>
-          <v-col>
+          <!-- IN MOBILE VIEW ONLY -->
+          <v-col v-if="isMobile()" cols="2">
+            <v-tooltip text="Delete Language" location="top">
+              <template #activator="{ props }">
+                <v-btn v-bind="props" icon="mdi-delete" variant="text" @click="deleteLanguage(index)"></v-btn>
+              </template>
+            </v-tooltip>
+          </v-col>
+          <!-- END IN MOBILE VIEW ONLY -->
+          <v-col :cols="isMobile() ? '12' : ''">
             <v-autocomplete v-model="language.proficiency" label="Proficiency" :items="PROFICIENCIES"></v-autocomplete>
           </v-col>
-          <v-col cols="auto">
+          <v-col v-if="!isMobile()" cols="auto">
             <v-tooltip text="Delete Language" location="top">
               <template #activator="{ props }">
                 <v-btn v-bind="props" icon="mdi-delete" variant="text" @click="deleteLanguage(index)"></v-btn>
@@ -47,6 +56,7 @@ import { isEmpty } from 'lodash';
 import { LANGUAGES, PROFICIENCIES } from '@/shared/employeeUtils';
 import { inject, onBeforeUnmount } from 'vue';
 import { ref } from 'vue';
+import { isMobile } from '../../../utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |

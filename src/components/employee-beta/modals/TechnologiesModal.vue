@@ -1,5 +1,5 @@
 <template>
-  <base-info-modal title="Technologies and Skills">
+  <base-info-modal :title="isMobile() ? 'Tech and Skills' : 'Technologies and Skills'">
     <v-card-text class="pt-0">
       <!-- Employee has Technology Experience -->
       <div v-if="!isEmpty(model.technologies)">
@@ -30,12 +30,18 @@
           ]"
           multi-sort
         >
-          <template #[`item.current`]="{ item }">
-            <span v-if="item.current">
-              <v-icon class="pl-6">mdi-check</v-icon>
-              <v-tooltip activator="parent" location="left">Current Skill</v-tooltip>
-            </span>
-            <v-spacer v-else style="min-width: 24px"></v-spacer>
+          <template #item="{ item }">
+            <tr>
+              <td align="start">{{ item.name }}</td>
+              <td align="center">{{ item.years }}</td>
+              <td align="start">
+                <span v-if="item.current">
+                  <v-icon class="pl-6">mdi-check</v-icon>
+                  <v-tooltip activator="parent" location="left">Current Skill</v-tooltip>
+                </span>
+                <v-spacer v-else style="min-width: 24px"></v-spacer>
+              </td>
+            </tr>
           </template>
         </v-data-table>
       </div>
@@ -47,7 +53,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { isEmpty } from '@/utils/utils';
+import { isEmpty, isMobile } from '@/utils/utils';
 import BaseInfoModal from '@/components/employee-beta/modals/BaseInfoModal.vue';
 
 // |--------------------------------------------------|

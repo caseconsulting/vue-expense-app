@@ -1,79 +1,102 @@
 <template>
   <v-form ref="form" validate-on="lazy">
-    <v-row class="mt-2"><h3>Tech & Skills</h3></v-row>
+    <v-row class="mt-2"><h3>Tech and Skills</h3></v-row>
     <v-row>
       <v-col class="d-flex justify-center">
         <v-btn prepend-icon="mdi-plus" @click="addTechnology()">Add Tech/Skill</v-btn>
       </v-col>
     </v-row>
     <v-row v-for="(technology, index) in technologies" :key="technology + index" class="d-flex align-center">
-      <!-- the row in column in row is weird but it works -->
-      <v-col>
-        <v-row>
-          <!-- name -->
-          <v-col>
-            <v-autocomplete
-              v-model="technology.name"
-              label="Tech/Skill"
-              :items="dropdownItems"
-              :rules="[...getRequiredRules(), ...getDuplicateTechRules(technologies)]"
-              hide-details="auto"
-              style="min-width: 180px"
-              @update:search="updateDropdownItems($event)"
-              @focus="updateDropdownItems()"
-            ></v-autocomplete>
-          </v-col>
-          <!-- current -->
-          <v-col cols="auto">
-            <v-tooltip text="Enabling this will automatically increment this skill each month" location="top">
-              <template #activator="{ props }">
-                <v-switch
-                  v-bind="props"
-                  v-model="technology.current"
-                  label="Currently using"
-                  color="primary"
-                  style="max-height: 50px"
-                ></v-switch>
-              </template>
-            </v-tooltip>
-          </v-col>
-        </v-row>
-        <v-row class="d-flex align-center">
-          <!-- number of years -->
-          <v-col>
-            <v-text-field
-              style="min-width: 100px"
-              v-model="technology.time.years"
-              suffix="Years"
-              type="number"
-              min="0"
-              max="99"
-              hide-details="auto"
-            ></v-text-field>
-          </v-col>
-          <v-col>
-            <v-text-field
-              style="min-width: 100px"
-              v-model="technology.time.months"
-              suffix="Months"
-              type="number"
-              min="0"
-              max="12"
-              hide-details="auto"
-            ></v-text-field>
-          </v-col>
-          <v-col cols="auto">
-            <v-tooltip text="Delete Tech/Skill" location="top">
-              <template #activator="{ props }">
-                <v-btn v-bind="props" icon="mdi-delete" variant="text" @click="deleteTechnology(index)"></v-btn>
-              </template>
-            </v-tooltip>
-          </v-col>
-        </v-row>
-        <v-row v-if="index < technologies.length - 1" class="py-5">
-          <v-divider class="border-opacity-25" thickness="3"></v-divider>
-        </v-row>
+      <!-- name -->
+      <v-col sm="10" md="8" lg="5">
+        <v-autocomplete
+          v-model="technology.name"
+          label="Tech/Skill"
+          :items="dropdownItems"
+          :rules="[...getRequiredRules(), ...getDuplicateTechRules(technologies)]"
+          hide-details="auto"
+          style="min-width: 180px"
+          @update:search="updateDropdownItems($event)"
+          @focus="updateDropdownItems()"
+        ></v-autocomplete>
       </v-col>
+
+      <!-- MOBILE delete tech/skill -->
+      <v-col v-if="isMobile()" sm="2" md="4">
+        <v-tooltip text="Delete Tech/Skill" location="top">
+          <template #activator="{ props }">
+            <v-btn v-bind="props" icon="mdi-delete" variant="text" @click="deleteTechnology(index)"></v-btn>
+          </template>
+        </v-tooltip>
+      </v-col>
+      <!-- end MOBILE delete tech/skill -->
+
+      <!-- current -->
+      <v-col v-if="!isMobile()" md="4" lg="2">
+        <v-tooltip text="Enabling this will automatically increment this skill each month" location="top">
+          <template #activator="{ props }">
+            <v-switch
+              v-bind="props"
+              v-model="technology.current"
+              label="Currently using"
+              color="primary"
+              style="max-height: 50px"
+            ></v-switch>
+          </template>
+        </v-tooltip>
+      </v-col>
+
+      <!-- number of years -->
+      <v-col sm="6" md="4" lg="2">
+        <v-text-field
+          style="min-width: 100px"
+          v-model="technology.time.years"
+          suffix="Years"
+          type="number"
+          min="0"
+          max="99"
+          hide-details="auto"
+        ></v-text-field>
+      </v-col>
+
+      <!-- number of months -->
+      <v-col sm="6" md="4" lg="2">
+        <v-text-field
+          style="min-width: 100px"
+          v-model="technology.time.months"
+          suffix="Months"
+          type="number"
+          min="0"
+          max="12"
+          hide-details="auto"
+        ></v-text-field>
+      </v-col>
+
+      <!-- NORMAL delete tech/skill -->
+      <v-col v-if="!isMobile()" cols="1">
+        <v-tooltip text="Delete Tech/Skill" location="top">
+          <template #activator="{ props }">
+            <v-btn v-bind="props" icon="mdi-delete" variant="text" @click="deleteTechnology(index)"></v-btn>
+          </template>
+        </v-tooltip>
+      </v-col>
+      <!-- end NORMAL delete tech/skill -->
+
+      <v-col v-if="isMobile()" cols="12" md="4">
+        <v-tooltip text="Enabling this will automatically increment this skill each month" location="top">
+          <template #activator="{ props }">
+            <v-switch
+              v-bind="props"
+              v-model="technology.current"
+              label="Currently using"
+              color="primary"
+              style="max-height: 50px"
+            ></v-switch>
+          </template>
+        </v-tooltip>
+      </v-col>
+
+      <v-divider v-if="index < technologies.length - 1" class="border-opacity-25 my-5" thickness="3"></v-divider>
     </v-row>
     <v-row v-if="technologies.length != 0">
       <v-col class="d-flex justify-center">
@@ -88,6 +111,7 @@ import api from '@/shared/api';
 import { getDuplicateTechRules, getRequiredRules } from '@/shared/validationUtils';
 import { isEmpty, map } from 'lodash';
 import { inject, onBeforeUnmount, ref } from 'vue';
+import { isMobile } from '../../../utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |

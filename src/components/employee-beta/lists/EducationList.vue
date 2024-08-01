@@ -8,7 +8,7 @@
           <p class="d-inline mt-3">
             <b>{{ edu.name }}</b>
           </p>
-          <p class="my-2 mx-6 px-6 date-text" v-if="edu.degrees.length === 1 && edu.degrees[0].completionDate">
+          <p class="my-2 ml-12 px-6 date-text" v-if="edu.degrees.length === 1 && edu.degrees[0].completionDate">
             {{ monthYearFormatBETA(edu.degrees[0].completionDate) }}
           </p>
         </v-list-item-title>
