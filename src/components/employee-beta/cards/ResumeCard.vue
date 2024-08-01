@@ -1,19 +1,5 @@
 <template>
   <v-container class="pa-2 ma-0">
-    <!-- Status Notification -->
-    <v-snackbar
-      v-model="uploadStatus.enabled"
-      :color="uploadStatus.color"
-      :multi-line="true"
-      :timeout="3000"
-      :vertical="true"
-      location="top right"
-    >
-      <v-card-text color="white">
-        <span class="text-h6 font-weight-medium">{{ uploadStatus.statusMessage }}</span>
-      </v-card-text>
-      <v-btn color="white" variant="text" @click="clearStatus()"> Close </v-btn>
-    </v-snackbar>
     <v-btn v-if="useDropDown && (isAdmin || isUser) && !editing" variant="text" icon="" density="comfortable">
       <v-icon icon="mdi-chevron-down" size="large">mdi-file-arrow-up-down</v-icon>
       <v-menu activator="parent" location="bottom" origin="start top">
@@ -136,6 +122,7 @@ import { inject, onBeforeUnmount, onMounted, ref, computed } from 'vue';
 import DeleteModal from '@/components/modals/DeleteModal';
 import UploadResume from '@/components/employee-beta/modals/UploadResume.vue';
 import { useDisplay } from 'vuetify';
+import { useDisplayError, useDisplaySuccess } from '../../shared/StatusSnackbar.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -155,12 +142,6 @@ const isUser = inject('isUser');
 const deleteLoading = ref(false);
 const toggleResumeParser = ref(false);
 const toggleDeleteModal = ref(false);
-const uploadStatus = ref({
-  enabled: false,
-  statusType: '',
-  statusMessage: '',
-  color: ''
-});
 
 /**
  * computed boolean to decide whether or not to use dropdown.
@@ -193,7 +174,7 @@ onMounted(() => {
     await resumeReceived(result.newEmployeeForm, result.totalChanges);
   });
   emitter.on('uploaded', async (message) => {
-    if (message) displayMessage('SUCCESS', 'Successfully uploaded resume', 'green');
+    if (message) useDisplaySuccess('Successfully uploaded resume', 3000);
     model.value.resumeUpdated = getTodaysDate();
     model.value = _.cloneDeep(model.value); // force vue to reload the object
     await api.updateAttributes(api.EMPLOYEES, model.value.id, { resumeUpdated: model.value.resumeUpdated });
@@ -214,16 +195,6 @@ onBeforeUnmount(() => {
 // |--------------------------------------------------|
 
 /**
- * Clears the status message of the uploadStatus
- */
-function clearStatus() {
-  uploadStatus.value['enabled'] = false;
-  uploadStatus.value['statusType'] = undefined;
-  uploadStatus.value['statusMessage'] = null;
-  uploadStatus.value['color'] = null;
-} // clearStatus
-
-/**
  * Deletes the resume
  */
 async function deleteResume() {
@@ -232,26 +203,12 @@ async function deleteResume() {
   let updateEmpRes = await api.updateItem(api.EMPLOYEES, { ...model.value, resumeUpdated: null });
   if (!(deleteResult instanceof Error) || !(updateEmpRes instanceof Error)) {
     model.value.resumeUpdated = null;
-    displayMessage('SUCCESS', 'Successfully deleted resume', 'green');
+    useDisplaySuccess('Successfully deleted resume', 3000);
   } else {
-    displayMessage('ERROR', 'Failure to delete resume', 'red');
+    useDisplayError('Failure to delete resume', 3000);
   }
   deleteLoading.value = false;
 } // deleteResume
-
-/**
- * Displays the message
- *
- * @param {string} type - the type of message
- * @param {string} msg - the message to display
- * @param {string} color - the color of the banner
- */
-function displayMessage(type, msg, color) {
-  uploadStatus.value['enabled'] = true;
-  uploadStatus.value['statusType'] = type;
-  uploadStatus.value['statusMessage'] = msg;
-  uploadStatus.value['color'] = color;
-} // displayMessage
 
 /**
  * Downloads the resume of the employee
@@ -269,7 +226,7 @@ async function downloadResume() {
  */
 async function resumeReceived(newEmployeeForm, changes) {
   if (changes && changes > 0) {
-    displayMessage('SUCCESS', `Added ${changes} change(s) to profile!`, 'green');
+    useDisplaySuccess(`Added ${changes} change(s) to profile!`, 3000);
   }
   if (newEmployeeForm) {
     model.value = newEmployeeForm;
