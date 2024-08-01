@@ -381,7 +381,7 @@ function selectTab(tabName, num) {
  * Returns true only if the value is undefined, null, or an empty string
  */
 function isEmpty(value) {
-  return value === undefined || value === null || value === '';
+  return value === undefined || value === null || value === '' || value == [];
 }
 </script>
 
