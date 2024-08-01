@@ -100,7 +100,6 @@
             :accessible-budgets="accessibleBudgets"
             :employee-data-loading="loading"
             :fiscal-date-view="fiscalDateView"
-            :viewing-current-budget-year="viewingCurrentBudgetYear"
             :refreshKey="refreshKey"
             class="mb-4"
           />
@@ -214,7 +213,6 @@ const refreshKey = readonly({
 const user = ref(null);
 const inSearchMode = ref(false);
 const dropdownEmployee = ref(null);
-const viewingCurrentBudgetYear = ref(true);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -240,7 +238,6 @@ onMounted(() => {
   emitter.on('selected-budget-year', (date) => {
     if (date != fiscalDateView.value) {
       fiscalDateView.value = date;
-      viewingCurrentBudgetYear.value = false;
     }
   });
 });
@@ -353,8 +350,8 @@ async function refreshExpenseData(full = false) {
     ]);
     expenseTypes.value = store.getters.expenseTypes;
   }
-  await checkForBudgetAccess();
   fiscalDateView.value = getCurrentBudgetYear(model.value.hireDate);
+  await checkForBudgetAccess();
 } // refreshExpenseData
 
 /**
