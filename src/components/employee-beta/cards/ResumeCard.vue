@@ -123,12 +123,7 @@
         </div>
       </v-col>
     </v-row>
-    <resume-parser
-      v-if="!loading && !editing"
-      :toggle-resume-parser="toggleResumeParser"
-      :key="model"
-      :employee="model"
-    />
+    <upload-resume v-if="!loading && !editing" v-model="toggleResumeParser" :employee="model" />
     <delete-modal :toggle-delete-modal="toggleDeleteModal" type="resume" />
   </v-container>
 </template>
@@ -139,7 +134,7 @@ import api from '@/shared/api.js';
 import { format, getTodaysDate, FORMATTED_ISOFORMAT } from '@/shared/dateUtils';
 import { inject, onBeforeUnmount, onMounted, ref, computed } from 'vue';
 import DeleteModal from '@/components/modals/DeleteModal';
-import ResumeParser from '@/components/modals/ResumeParser.vue';
+import UploadResume from '@/components/employee-beta/modals/UploadResume.vue';
 import { useDisplay } from 'vuetify';
 
 // |--------------------------------------------------|
@@ -201,7 +196,7 @@ onMounted(() => {
     if (message) displayMessage('SUCCESS', 'Successfully uploaded resume', 'green');
     model.value.resumeUpdated = getTodaysDate();
     model.value = _.cloneDeep(model.value); // force vue to reload the object
-    await api.updateItem(api.EMPLOYEES, model.value);
+    await api.updateAttributes(api.EMPLOYEES, model.value.id, { resumeUpdated: model.value.resumeUpdated });
   });
 });
 
