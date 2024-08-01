@@ -1,6 +1,6 @@
 <template>
   <v-form ref="form" validate-on="input">
-    <v-row><h3>Basic Information</h3></v-row>
+    <v-row class="mt-2"><h3>Basic Information</h3></v-row>
     <v-row>
       <!-- first name -->
       <v-col>

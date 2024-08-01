@@ -1,6 +1,6 @@
 <template>
   <v-form ref="form" validate-on="lazy">
-    <v-row><h3>Foreign Languages</h3></v-row>
+    <v-row class="mt-2"><h3>Foreign Languages</h3></v-row>
     <v-row>
       <v-col class="d-flex justify-center">
         <v-btn prepend-icon="mdi-plus" @click="addLanguage()">Add Language</v-btn>
@@ -33,7 +33,7 @@
         </v-row>
       </v-col>
     </v-row>
-    <v-row>
+    <v-row v-if="editedEmployee.languages && editedEmployee.languages.length != 0">
       <v-col class="d-flex justify-center">
         <v-btn prepend-icon="mdi-plus" @click="addLanguage(false)">Add Language</v-btn>
       </v-col>
