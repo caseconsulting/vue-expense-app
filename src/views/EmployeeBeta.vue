@@ -114,6 +114,7 @@ import EmployeeInfo from '@/components/employee-beta/EmployeeInfo.vue';
 import EmployeePageLoader from '@/components/employee-beta/EmployeePageLoader.vue';
 import TimeData from '@/components/shared/timesheets/TimeData.vue';
 import { employeeFilter } from '@/shared/filterUtils';
+import { useDisplaySuccess } from '../components/shared/StatusSnackbar.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -210,6 +211,7 @@ onMounted(() => {
   emitter.on('update', (updatedEmployee) => {
     if (updatedEmployee) {
       model.value = updatedEmployee;
+      useDisplaySuccess('Employee successfully updated!');
     }
   });
   emitter.on('selected-budget-year', (date) => {
