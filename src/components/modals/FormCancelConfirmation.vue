@@ -2,7 +2,8 @@
   <div>
     <v-dialog v-model="activate" persistent max-width="350">
       <v-card>
-        <v-card-text class="font-weight-medium text-h6">Are you sure you want to cancel?</v-card-text>
+        <v-card-title align="center">Are you sure you want to cancel?</v-card-title>
+        <slot></slot>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn
