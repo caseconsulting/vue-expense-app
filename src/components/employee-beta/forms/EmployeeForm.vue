@@ -9,7 +9,7 @@
     id="employee-form"
     :width="isMobile() ? '100%' : '80%'"
   >
-    <v-card>
+    <v-card id="employee-card">
       <v-card-title
         class="d-flex align-center justify-space-between beta_header_style"
         style="position: sticky; top: 0; z-index: 2"
@@ -35,18 +35,18 @@
         <v-row>
           <v-col v-if="!isMobile()" cols="2">
             <v-list density="compact" nav id="edit-navigation">
-              <v-list-item @click="selectTab('Personal')" link title="Personal"></v-list-item>
-              <v-list-item @click="selectTab('Clearances')" link title="Clearances"></v-list-item>
-              <v-list-item @click="selectTab('Contracts')" link title="Contracts"></v-list-item>
+              <v-list-item @click="selectTab('Personal', 0)" link title="Personal"></v-list-item>
+              <v-list-item @click="selectTab('Clearances', 1)" link title="Clearances"></v-list-item>
+              <v-list-item @click="selectTab('Contracts', 2)" link title="Contracts"></v-list-item>
               <v-list-item
-                @click="selectTab('Certifications & Awards')"
+                @click="selectTab('Certifications & Awards', 3)"
                 link
                 title="Certifications & Awards"
               ></v-list-item>
-              <v-list-item @click="selectTab('Tech & Skills')" link title="Tech & Skills"></v-list-item>
-              <v-list-item @click="selectTab('Languages')" link title="Foreign Languages"></v-list-item>
-              <v-list-item @click="selectTab('Job Experience')" link title="Job Experience"></v-list-item>
-              <v-list-item @click="selectTab('Education')" link title="Education"></v-list-item>
+              <v-list-item @click="selectTab('Tech & Skills', 4)" link title="Tech & Skills"></v-list-item>
+              <v-list-item @click="selectTab('Languages', 5)" link title="Foreign Languages"></v-list-item>
+              <v-list-item @click="selectTab('Job Experience', 6)" link title="Job Experience"></v-list-item>
+              <v-list-item @click="selectTab('Education', 7)" link title="Education"></v-list-item>
             </v-list>
           </v-col>
           <v-divider v-if="!isMobile()" vertical thickness="1"></v-divider>
@@ -58,11 +58,11 @@
               class="my-1 mx-xl-5 mx-lg-5 mx-md-0"
               @submit.prevent="submit()"
             >
-              <v-expansion-panels v-model="formTabs" variant="accordion" multiple id="form-tabs">
-                <base-form title="Personal" value="Personal Information" id="Personal">
+              <v-expansion-panels v-model="formTabs" variant="accordion" multiple>
+                <base-form title="Personal" value="Personal">
                   <personal-info-form ref="personalInfoRef" v-model="editedEmployee"></personal-info-form>
                 </base-form>
-                <base-form title="Clearances" value="Clearances" id="Clearances">
+                <base-form title="Clearances" value="Clearances">
                   <div>
                     <clearance-tab
                       ref="clearanceRef"
@@ -71,7 +71,7 @@
                     ></clearance-tab>
                   </div>
                 </base-form>
-                <base-form title="Contracts" value="Contracts" id="Contracts">
+                <base-form title="Contracts" value="Contracts">
                   <div>
                     <contracts-tab
                       ref="contractsRef"
@@ -80,23 +80,23 @@
                     ></contracts-tab>
                   </div>
                 </base-form>
-                <base-form title="Certifications & Awards" value="Certifications & Awards" id="Certifications & Awards">
+                <base-form title="Certifications & Awards" value="Certifications & Awards">
                   <div>
                     <certs-and-awards-tab ref="certsAndAwardsRef" v-model="editedEmployee"></certs-and-awards-tab>
                   </div>
                 </base-form>
-                <base-form title="Tech and Skills" value="Tech & Skills" id="Tech & Skills">
+                <base-form title="Tech and Skills" value="Tech & Skills">
                   <technologies-form ref="technologiesRef" v-model="editedEmployee"></technologies-form>
                 </base-form>
-                <base-form title="Foreign Languages" value="Languages" id="Languages">
+                <base-form title="Foreign Languages" value="Languages">
                   <languages-form ref="languagesRef" v-model="editedEmployee"></languages-form>
                 </base-form>
-                <base-form title="Job Experience" value="Job Experience" id="Job Experience">
+                <base-form title="Job Experience" value="Job Experience">
                   <div>
                     <job-experience-tab ref="jobExperienceRef" v-model="editedEmployee"></job-experience-tab>
                   </div>
                 </base-form>
-                <base-form title="Education" value="Education" id="Education">
+                <base-form title="Education" value="Education">
                   <div>
                     <education-tab
                       ref="educationRef"
@@ -366,9 +366,11 @@ function collapseAllTabs() {
   formTabs.value = [];
 }
 
-function selectTab(tabName) {
+function selectTab(tabName, num) {
   formTabs.value = [tabName];
-  document.getElementById(tabName).scrollIntoView({ behavior: 'smooth', block: 'end' });
+  let e = document.getElementById('employee-card');
+  let tabHeight = 60;
+  e.scroll({ top: tabHeight * num, behavior: 'smooth' });
 }
 
 /**
