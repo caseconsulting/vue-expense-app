@@ -1,6 +1,6 @@
 <template>
   <v-form ref="form" validate-on="lazy">
-    <v-row class="mt-5"><h3>Tech and Skills</h3></v-row>
+    <v-row class="mt-2"><h3>Tech and Skills</h3></v-row>
     <v-row>
       <v-col class="d-flex justify-center">
         <v-btn prepend-icon="mdi-plus" @click="addTechnology()">Add Tech/Skill</v-btn>
@@ -98,7 +98,7 @@
 
       <v-divider v-if="index < technologies.length - 1" class="border-opacity-25 my-5" thickness="3"></v-divider>
     </v-row>
-    <v-row>
+    <v-row v-if="technologies.length != 0">
       <v-col class="d-flex justify-center">
         <v-btn prepend-icon="mdi-plus" @click="addTechnology(false)">Add Tech/Skill</v-btn>
       </v-col>
