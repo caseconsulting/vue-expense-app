@@ -202,7 +202,7 @@ import {
   getRequiredRules
 } from '@/shared/validationUtils';
 import { isEmpty } from '@/utils/utils';
-import { find, map } from 'lodash';
+import { find, map, cloneDeep } from 'lodash';
 import { inject, onBeforeUnmount, ref } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
@@ -248,14 +248,15 @@ async function prepareSubmit() {
 
   // delete keys that aren't stored in database
   editedEmployee.value.contracts = map(editedContracts.value, (contract) => {
-    delete contract.contractName;
-    delete contract.primeName;
+    let newContract = cloneDeep(contract);
+    delete newContract.contractName;
+    delete newContract.primeName;
 
-    contract.projects = map(contract.projects, (project) => {
+    newContract.projects = map(newContract.projects, (project) => {
       delete project.projectName;
       return project;
     });
-    return contract;
+    return newContract;
   });
 }
 

@@ -209,7 +209,7 @@ export class Employee {
     this.schools = properties.schools ?? [];
 
     /** @type {Technology[]} */
-    this.technologies = properties.contracts ?? [];
+    this.technologies = properties.technologies ?? [];
 
     /** @type {string} */
     this.twitter = properties.twitter ?? '';
@@ -243,7 +243,7 @@ export class Employee {
     this.birthday = properties.birthday ?? '';
 
     /** @type {boolean} */
-    this.employeeRole = 'admin';
+    this.employeeRole = properties.employeeRole ?? 'intern';
 
     /** @type {PhoneNumber[]} */
     this.privatePhoneNumbers = properties.privatePhoneNumbers ?? [];
@@ -276,7 +276,7 @@ export class Employee {
     this.eeoHispanicOrLatino = properties.eeoHispanicOrLatino ?? null;
 
     /** @type {boolean} */
-    this.eeoIsProtectedVeteran = properties.eeoHasDisability ?? false;
+    this.eeoIsProtectedVeteran = properties.eeoIsProtectedVeteran ?? false;
 
     /** @type {{text: string, value: number}} */
     this.eeoJobCategory = properties.eeoJobCategory ?? null;
