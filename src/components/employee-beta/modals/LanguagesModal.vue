@@ -1,6 +1,6 @@
 <template>
   <base-info-modal title="Foreign Languages">
-    <v-card-text>
+    <v-card-text class="pa-0">
       <!-- Loop Languages -->
       <languages-list v-if="!isEmpty(filteredList)" :list="visibleItems"></languages-list>
       <!-- End Loop Languages -->
