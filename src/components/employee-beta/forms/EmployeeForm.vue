@@ -219,9 +219,9 @@ onBeforeMount(() => {
       cardName = 'Job Experience';
     } else if (cardName === 'Certifications' || cardName === 'Awards') {
       cardName = 'Certifications & Awards';
-    } else if (cardName === 'Education') {
+    } else if (cardName === 'Education' || cardName === 'All Education') {
       cardName = 'Education';
-    } else if (cardName === 'Technologies and Skills') {
+    } else if (cardName === 'Technologies and Skills' || cardName === 'Tech and Skills') {
       cardName = 'Tech & Skills';
     } else if (cardName === 'Foreign Languages') {
       cardName = 'Languages';
