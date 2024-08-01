@@ -101,7 +101,6 @@ import EmployeePageLoader from '@/components/employees/EmployeePageLoader.vue';
 import TimeData from '@/components/shared/timesheets/TimeData.vue';
 import api from '@/shared/api.js';
 import { employeeFilter } from '@/shared/filterUtils';
-import { Employee } from '@/shared/models/employeeTypes';
 import {
   updateStoreBudgets,
   updateStoreContracts,
@@ -115,12 +114,8 @@ import _ from 'lodash';
 import { computed, inject, onBeforeMount, onBeforeUnmount, onMounted, provide, readonly, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
-import EmployeeBudgets from '@/components/employee-beta/EmployeeBudgets.vue';
-import EmployeeInfo from '@/components/employee-beta/EmployeeInfo.vue';
-import EmployeePageLoader from '@/components/employee-beta/EmployeePageLoader.vue';
-import TimeData from '@/components/shared/timesheets/TimeData.vue';
-import { employeeFilter } from '@/shared/filterUtils';
 import { useDisplaySuccess } from '../components/shared/StatusSnackbar.vue';
+import { Employee } from '../shared/models/employeeTypes';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -139,6 +134,9 @@ provide('isAdmin', isAdmin);
 const isUser = ref(false);
 provide('isUser', isUser);
 
+/** @type {import('vue').Ref<Employee>} */
+const model = ref(null); // selected employee
+
 const accessibleBudgets = ref(null);
 const basicEmployeeDataLoading = ref(true);
 const contracts = ref(null);
@@ -148,46 +146,6 @@ const expenseTypes = ref(null);
 const fiscalDateView = ref('');
 const loading = ref(true);
 const menuOpen = ref(true);
-const model = ref({
-  awards: [],
-  birthday: '',
-  birthdayFeed: false,
-  certifications: [],
-  city: '',
-  contract: '',
-  country: '',
-  currentCity: '',
-  currentState: '',
-  currentStreet: '',
-  currentStreet2: '',
-  currentZIP: '',
-  degrees: [],
-  deptDate: '',
-  email: '@consultwithcase.com',
-  employeeNumber: null,
-  employeeRole: '',
-  firstName: '',
-  fiscalDateView: '',
-  github: '',
-  hireDate: null,
-  icTimeFrames: [],
-  id: null,
-  jobRole: '',
-  languages: [],
-  lastName: '',
-  linkedIn: '',
-  middleName: '',
-  nickname: '',
-  noMiddleName: false,
-  personalEmail: '',
-  phoneNumber: '',
-  prime: '',
-  resumeUpdated: null,
-  st: '',
-  technologies: [],
-  twitter: '',
-  workStatus: 100
-}); // selected employee
 const refreshKey = readonly({
   model,
   expenses,
@@ -287,13 +245,15 @@ async function getProfileData() {
   ]);
   if (store.getters.user.employeeNumber == route.params.id) {
     // user looking at their own profile
-    model.value = store.getters.user;
+    model.value = new Employee(store.getters.user);
   } else {
     // user looking at another employees profile
     let employees = store.getters.employees;
-    model.value = _.find(employees, (employee) => {
-      return employee.employeeNumber == route.params.id;
-    });
+    model.value = new Employee(
+      _.find(employees, (employee) => {
+        return employee.employeeNumber == route.params.id;
+      })
+    );
   }
   user.value = store.getters.user;
   contracts.value = store.getters.contracts;

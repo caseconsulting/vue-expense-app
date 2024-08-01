@@ -1,6 +1,3 @@
-/* eslint-disable no-unused-labels */
-// TODO remove this ^^
-
 // Defines several data types used in the employees database
 
 /**
@@ -105,121 +102,187 @@
 export class Employee {
   /**
    * Creates a new employee
-   * @param {{
-   * id: string,
-   * email: string,
-   * employeeNumber: number,
-   * firstName: string,
-   * lastName: string,
-   * hireDate: string,
-   * workStatus: number
-   * }} properties An object defining properties of this employee (only required properties are listed in the doc)
+   * @param {object} properties An object that contains properties of this employee (see the class definition for optional properties)
    */
   constructor(properties) {
-    // ==== required properties ====
+    // ==== REQUIRED PROPERTIES ====
 
-    /** @type {string} */ id: properties.id;
-    /** @type {string} */ email: properties.email;
-    /** @type {number} */ employeeNumber: properties.employeeNumber;
-    /** @type {string} */ firstName: properties.firstName;
-    /** @type {string} */ lastName: properties.lastName;
-    /** @type {string} */ hireDate: properties.hireDate;
-    /** @type {number} */ workStatus: properties.workStatus;
+    /** @type {string} */
+    this.id = properties.id;
 
-    // ==== optional properties ====
+    /** @type {string} */
+    this.email = properties.email;
 
-    agencyIdentificationNumber: properties.agencyIdentificationNumber ?? '';
+    /** @type {number} */
+    this.employeeNumber = properties.employeeNumber;
+
+    /** @type {string} */
+    this.firstName = properties.firstName;
+
+    /** @type {string} */
+    this.lastName = properties.lastName;
+
+    /** @type {string} */
+    this.hireDate = properties.hireDate;
+
+    /** @type {number} */
+    this.workStatus = properties.workStatus;
+
+    // ==== OPTIONAL PROPERTIES ====
+
+    /** @type {string} */
+    this.agencyIdentificationNumber = properties.agencyIdentificationNumber ?? '';
 
     /** @type {Award[]} */
-    awards: properties.awards ?? [];
+    this.awards = properties.awards ?? [];
 
-    birthdayFeed: properties.birthdayFeed ?? false;
+    /** @type {boolean} */
+    this.birthdayFeed = properties.birthdayFeed ?? false;
 
     /** @type {Certification[]} */
-    certifications: properties.certifications ?? [];
+    this.certifications = properties.certifications ?? [];
 
     /** @type {Clearance[]} */
-    clearances: properties.clearances ?? [];
+    this.clearances = properties.clearances ?? [];
 
     /** @type {Company[]} */
-    companies: properties.companies ?? [];
+    this.companies = properties.companies ?? [];
 
     /** @type {Contract} */
-    contract: properties.contract ?? '';
+    this.contract = properties.contract ?? '';
 
     /** @type {Contract[]} */
-    contracts: properties.contracts ?? [];
+    this.contracts = properties.contracts ?? [];
 
     /** @type {CustomerOrg[]} */
-    customerOrgExp: properties.customerOrgExp ?? '';
+    this.customerOrgExp = properties.customerOrgExp ?? '';
 
-    cykAoid: properties.cykAoid ?? '';
+    /** @type {string} */
+    this.cykAoid = properties.cykAoid ?? '';
 
-    degrees: properties.degrees ?? []; // note: this looks unused in the database
-
-    deptDate: properties.deptDate ?? '';
+    /** @type {string} */
+    this.deptDate = properties.deptDate ?? '';
 
     /** @type {Education[]} */
-    education: properties.education ?? [];
+    this.education = properties.education ?? [];
 
-    github: properties.github ?? '';
+    /** @type {string} */
+    this.github = properties.github ?? '';
 
-    /** @type {{range: string[]}} */
-    icTimeFrames: properties.icTimeFrames ?? [];
+    /** @type {{range = string[]}} */
+    this.icTimeFrames = properties.icTimeFrames ?? [];
 
-    jobRole: properties.jobRole ?? '';
-
-    jobs: properties.jobs ?? []; // note: this looks unused in the database
+    /** @type {string} */
+    this.jobRole = properties.jobRole ?? '';
 
     /** @type {Language[]} */
-    languages: properties.languages ?? [];
+    this.languages = properties.languages ?? [];
 
-    lastLogin: properties.lastLogin ?? '';
+    /** @type {string} */
+    this.lastLogin = properties.lastLogin ?? '';
 
-    linkedIn: properties.linkedIn ?? '';
+    /** @type {string} */
+    this.linkedIn = properties.linkedIn ?? '';
 
-    middleName: properties.middleName ?? '';
+    /** @type {string} */
+    this.middleName = properties.middleName ?? '';
 
-    nickname: properties.nickname ?? '';
+    /** @type {string} */
+    this.nickname = properties.nickname ?? '';
 
-    noMiddleName: properties.noMiddleName ?? '';
+    /** @type {string} */
+    this.noMiddleName = properties.noMiddleName ?? '';
 
-    prime: properties.prime ?? '';
+    /** @type {string} */
+    this.prime = properties.prime ?? '';
 
-    personalEmail: properties.personalEmail ?? '';
+    /** @type {string} */
+    this.personalEmail = properties.personalEmail ?? '';
 
     /** @type {PhoneNumber[]} */
-    publicPhoneNumbers: properties.publicPhoneNumbers ?? '';
+    this.publicPhoneNumbers = properties.publicPhoneNumbers ?? [];
 
-    resumeUpdated: properties.resumeUpdated ?? '';
+    /** @type {string} */
+    this.resumeUpdated = properties.resumeUpdated ?? '';
 
     /** @type {string[]} */
-    schools: properties.schools ?? [];
+    this.schools = properties.schools ?? [];
 
     /** @type {Technology[]} */
-    technologies: properties.contracts ?? [];
+    this.technologies = properties.contracts ?? [];
 
-    twitter: properties.twitter ?? '';
+    /** @type {string} */
+    this.twitter = properties.twitter ?? '';
 
-    mifiStatus: properties.mifiStatus ?? ''; // note: this one might not be needed
+    /** @type {string} */
+    this.mifiStatus = properties.mifiStatus ?? ''; // note: this one might not be needed
 
-    /**
-     * @type {{
-     *   date: string, holidayHours: number, ptoHours: number}[]
-     * }
-     */
-    plannedPto: properties.plannedPto ?? '';
+    /** @type {{date: string, holidayHours: number, ptoHours: number}[]} */
+    this.plannedPto = properties.plannedPto ?? '';
 
-    // place of birth
-    st: properties.st ?? '';
-    city: properties.city ?? '';
-    country: properties.country ?? '';
+    // current address fields
+    /** @type {string} */
+    this.currentStreet = properties.currentStreet ?? '';
 
-    // current address
-    currentStreet: properties.currentStreet ?? '';
-    currentStreet2: properties.currentStreet2 ?? '';
-    currentCity: properties.currentCity ?? '';
-    currentState: properties.currentState ?? '';
-    currentZIP: properties.currentZIP ?? '';
+    /** @type {string} */
+    this.currentStreet2 = properties.currentStreet2 ?? '';
+
+    /** @type {string} */
+    this.currentCity = properties.currentCity ?? '';
+
+    /** @type {string} */
+    this.currentState = properties.currentState ?? '';
+
+    /** @type {string} */
+    this.currentZIP = properties.currentZIP ?? '';
+    // end current address fields
+
+    // ==== SENSITIVE DATA ====
+
+    /** @type {string} */
+    this.birthday = properties.birthday ?? '';
+
+    /** @type {boolean} */
+    this.employeeRole = 'admin';
+
+    /** @type {PhoneNumber[]} */
+    this.privatePhoneNumbers = properties.privatePhoneNumbers ?? [];
+
+    // place of birth fields
+    /** @type {string} */
+    this.st = properties.st ?? '';
+
+    /** @type {string} */
+    this.city = properties.city ?? '';
+
+    /** @type {string} */
+    this.country = properties.country ?? '';
+    // end place of birth fields
+
+    // eeo fields
+    /** @type {boolean} */
+    this.eeoAdminHasFilledOutEeoForm = properties.eeoAdminHasFilledOutEeoForm ?? false;
+
+    /** @type {boolean} */
+    this.eeoDeclineSelfIdentify = properties.eeoDeclineSelfIdentify ?? false;
+
+    /** @type {{text: string, value: boolean}} */
+    this.eeoGender = properties.eeoGender ?? null;
+
+    /** @type {boolean} */
+    this.eeoHasDisability = properties.eeoHasDisability ?? false;
+
+    /** @type {{text: string, value: boolean}} */
+    this.eeoHispanicOrLatino = properties.eeoHispanicOrLatino ?? null;
+
+    /** @type {boolean} */
+    this.eeoIsProtectedVeteran = properties.eeoHasDisability ?? false;
+
+    /** @type {{text: string, value: number}} */
+    this.eeoJobCategory = properties.eeoJobCategory ?? null;
+
+    /** @type {{text: string, value: number}} */
+    this.eeoRaceOrEthnicity = properties.eeoRaceOrEthnicity ?? null;
+    // end eeo fields
   }
 }
