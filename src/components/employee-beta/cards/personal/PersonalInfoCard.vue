@@ -7,13 +7,18 @@
       </div>
     </template>
     <v-card-text class="px-7 pt-7 pb-1 text-black">
+      <p>
+        <b>Full Name: </b
+        >{{ model.firstName + ' ' + (!model.noMiddleName ? model.middleName + ' ' : '') + model.lastName }}
+      </p>
+
       <p v-if="!isEmpty(getPhoneNumber())">
         <b>Phone Number: </b>{{ getPhoneNumber() }}<v-icon class="text-align: float-right">mdi-shield-outline</v-icon>
       </p>
 
-      <p v-if="!isEmpty(getBirthday()) && props.model.birthdayFeed && (isAdmin || isUser)">
+      <p v-if="!isEmpty(getBirthday()) && model.birthdayFeed && (isAdmin || isUser)">
         <b>Birthday: </b>{{ getBirthday() }}
-        <v-icon class="text-align: float-right" v-if="!props.model.birthdayFeed">mdi-shield</v-icon>
+        <v-icon class="text-align: float-right" v-if="!model.birthdayFeed">mdi-shield</v-icon>
         <v-icon class="text-align: float-right" v-else>mdi-shield-outline</v-icon>
       </p>
       <div style="display: flex" v-if="!isEmpty(getCurrentAddress() && (isAdmin || isUser))">
@@ -37,17 +42,6 @@
         </v-col>
       </v-row>
     </v-card-text>
-    <p
-      v-if="
-        isEmpty(getPhoneNumber()) &&
-        (isEmpty(getBirthday()) || !props.model.birthdayFeed) &&
-        isEmpty(getCurrentAddress()) &&
-        isEmpty(getPlaceOfBirth())
-      "
-      style="text-align: center"
-    >
-      No Personal Information
-    </p>
   </base-card>
 </template>
 
