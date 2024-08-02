@@ -18,7 +18,13 @@
             </v-row>
             <v-row class="d-flex align-center justify-center">
               <v-col cols="9" xl="8" lg="8" md="8" sm="8" class="pr-0">
-                <v-file-input :rules="fileRules" variant="underlined" v-model="file" label="Resume"></v-file-input>
+                <v-file-input
+                  :rules="fileRules"
+                  :accept="acceptedFileTypes"
+                  variant="underlined"
+                  v-model="file"
+                  label="Resume"
+                ></v-file-input>
               </v-col>
               <v-col cols="2" xl="2" lg="2" md="2" sm="2" class="text-center mr-4">
                 <v-btn @click="submit()" color="green" variant="outlined" :disabled="!validFile || loading"
@@ -65,6 +71,7 @@ const props = defineProps({
 });
 
 const activate = defineModel();
+const acceptedFileTypes = ['application/pdf', 'image/png', 'image/jpeg'];
 const confirmBackingOut = ref(false);
 const file = ref(null);
 const loading = ref(false);
@@ -132,7 +139,10 @@ function clearForm() {
 async function uploadResume(eId) {
   try {
     loading.value = true;
-    await api.uploadResume(eId, file.value?.[0] || file.value); //uploads resume to s3
+    let result = await api.uploadResume(eId, file.value?.[0] || file.value); //uploads resume to s3
+    if (result.response) {
+      throw new Error(result.response.data);
+    }
     // Create an audit of the success
     await api.createItem(api.AUDIT, {
       id: generateUUID(),
