@@ -11,12 +11,21 @@
         <b>Full Name: </b
         >{{ model.firstName + ' ' + (!model.noMiddleName ? model.middleName + ' ' : '') + model.lastName }}
       </p>
-
-      <p v-if="!isEmpty(getPhoneNumber())">
-        <b>Phone Number: </b>{{ getPhoneNumber() }}<v-icon class="text-align: float-right">mdi-shield-outline</v-icon>
-      </p>
-
-      <p v-if="!isEmpty(getBirthday()) && model.birthdayFeed && (isAdmin || isUser)">
+      <v-row v-if="!isEmpty(getPhoneNumbers())">
+        <v-col cols="auto">
+          <b>Phone Numbers: </b>
+        </v-col>
+        <v-col>
+          <div v-for="phone in getPhoneNumbers()" :key="phone">
+            <p class="pa-0" v-if="!phone.private || isAdmin || isUser">
+              {{ phone.number }}
+              <v-icon v-if="!phone.private" class="text-align: float-right">mdi-shield-outline</v-icon>
+              <v-icon v-else class="text-align: float-right">mdi-shield</v-icon>
+            </p>
+          </div>
+        </v-col>
+      </v-row>
+      <p v-if="!isEmpty(getBirthday()) && props.model.birthdayFeed && (isAdmin || isUser)">
         <b>Birthday: </b>{{ getBirthday() }}
         <v-icon class="text-align: float-right" v-if="!model.birthdayFeed">mdi-shield</v-icon>
         <v-icon class="text-align: float-right" v-else>mdi-shield-outline</v-icon>
@@ -65,6 +74,8 @@ const isUser = inject('isUser');
 // |                      METHODS                     |
 // |                                                  |
 // |--------------------------------------------------|
+
+console.log(props.model);
 
 /**
  * Returns Employee's birthday
@@ -123,17 +134,15 @@ function getCurrentAddress() {
  *
  * @return String - phone number
  */
-function getPhoneNumber() {
-  let phoneNumbers = [];
-  let displayedNumber = null;
-  if (!isEmpty(props.model.publicPhoneNumbers)) {
-    props.model.publicPhoneNumbers.forEach((publicNumber) => {
-      phoneNumbers.push(publicNumber);
-    });
+function getPhoneNumbers() {
+  if (!isEmpty(props.model.publicPhoneNumbers) && !isEmpty(props.model.privatePhoneNumbers)) {
+    return props.model.publicPhoneNumbers.concat(props.model.privatePhoneNumbers);
+  } else if (!isEmpty(props.model.publicPhoneNumbers)) {
+    return props.model.publicPhoneNumbers;
+  } else if (!isEmpty(props.model.privatePhoneNumbers)) {
+    return props.model.privatePhoneNumbers;
+  } else {
+    return [];
   }
-  if (phoneNumbers.length > 0) {
-    displayedNumber = phoneNumbers[0].number;
-  }
-  return displayedNumber;
-} // getPhoneNumber
+} // getPhoneNumbers
 </script>
