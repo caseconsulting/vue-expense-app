@@ -278,7 +278,7 @@ export function sortLanguagesByProficiency(languages) {
     'Basic - most basic words that everyone uses'
   ];
   const compare = (languageA, languageB) => {
-    return levelProficiency.indexOf(languageB.proficiency) - levelProficiency.indexOf(languageA.proficiency);
+    return levelProficiency.indexOf(languageA.proficiency) - levelProficiency.indexOf(languageB.proficiency);
   };
   const sortedByProficiency = languages.toSorted(compare);
   return sortedByProficiency;
