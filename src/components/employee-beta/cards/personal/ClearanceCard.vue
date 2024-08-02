@@ -9,11 +9,7 @@
           <h3 class="text-white">Clearance</h3>
         </div>
       </template>
-      <clearance-list
-        v-if="!isEmpty(clearances)"
-        :list="[displayedClearance]"
-        :toggleModal="displayedClearance.awaitingClearance"
-      ></clearance-list>
+      <clearance-list v-if="!isEmpty(clearances)" :list="[displayedClearance]" :toggleModal="false"></clearance-list>
       <p v-if="isEmpty(clearances)" class="text-center mt-6 mx-2">No Clearance Information</p>
       <div v-if="!isEmpty(clearances)" class="text-center">
         <v-card-actions class="d-flex justify-center">
