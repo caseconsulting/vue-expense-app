@@ -75,8 +75,6 @@ const isUser = inject('isUser');
 // |                                                  |
 // |--------------------------------------------------|
 
-console.log(props.model);
-
 /**
  * Returns Employee's birthday
  *
