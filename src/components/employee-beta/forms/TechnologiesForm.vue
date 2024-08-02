@@ -122,7 +122,7 @@ import { inject, onBeforeUnmount, onMounted, ref } from 'vue';
 const emitter = inject('emitter');
 
 const editedEmployee = defineModel({ required: true });
-const valid = defineModel('valid', { type: Boolean, required: true });
+const valid = defineModel('valid', { required: true });
 const form = ref(null); // template ref
 
 const technologies = ref(

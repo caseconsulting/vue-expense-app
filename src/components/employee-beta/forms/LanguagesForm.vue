@@ -67,7 +67,7 @@ import { isMobile } from '../../../utils/utils';
 const emitter = inject('emitter');
 
 const editedEmployee = defineModel({ required: true });
-const valid = defineModel('valid', { type: Boolean, required: true });
+const valid = defineModel('valid', { required: true });
 const form = ref(null); // template ref
 
 defineExpose({ prepareSubmit });
