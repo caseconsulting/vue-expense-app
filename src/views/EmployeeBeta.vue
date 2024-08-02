@@ -65,6 +65,7 @@
                     hide-details
                     return-object
                     autofocus
+                    clearable
                     :menu="menuOpen"
                     @blur="menuOpen = false"
                     @update:model-value="onSearchUpdate()"
