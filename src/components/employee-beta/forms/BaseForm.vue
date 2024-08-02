@@ -20,7 +20,6 @@ defineProps({
     required: true
   },
   valid: {
-    type: Boolean,
     required: true
   }
 });

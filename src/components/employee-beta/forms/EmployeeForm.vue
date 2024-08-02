@@ -39,18 +39,54 @@
         <v-row>
           <v-col v-if="!isMobile()" cols="2">
             <v-list density="compact" nav id="edit-navigation">
-              <v-list-item @click="selectTab('Personal', 0)" link title="Personal"></v-list-item>
-              <v-list-item @click="selectTab('Clearances', 1)" link title="Clearances"></v-list-item>
-              <v-list-item @click="selectTab('Contracts', 2)" link title="Contracts"></v-list-item>
+              <v-list-item
+                @click="selectTab('Personal', 0)"
+                link
+                title="Personal"
+                :class="{ invalid: !validTabs.personal }"
+              ></v-list-item>
+              <v-list-item
+                @click="selectTab('Clearances', 1)"
+                link
+                title="Clearances"
+                :class="{ invalid: !validTabs.clearance }"
+              ></v-list-item>
+              <v-list-item
+                @click="selectTab('Contracts', 2)"
+                link
+                title="Contracts"
+                :class="{ invalid: !validTabs.contracts }"
+              ></v-list-item>
               <v-list-item
                 @click="selectTab('Certifications & Awards', 3)"
                 link
                 title="Certifications & Awards"
+                :class="{ invalid: !validTabs.certsAndAwards }"
               ></v-list-item>
-              <v-list-item @click="selectTab('Tech & Skills', 4)" link title="Tech & Skills"></v-list-item>
-              <v-list-item @click="selectTab('Languages', 5)" link title="Foreign Languages"></v-list-item>
-              <v-list-item @click="selectTab('Job Experience', 6)" link title="Job Experience"></v-list-item>
-              <v-list-item @click="selectTab('Education', 7)" link title="Education"></v-list-item>
+              <v-list-item
+                @click="selectTab('Tech & Skills', 4)"
+                link
+                title="Tech & Skills"
+                :class="{ invalid: !validTabs.technologies }"
+              ></v-list-item>
+              <v-list-item
+                @click="selectTab('Languages', 5)"
+                link
+                title="Foreign Languages"
+                :class="{ invalid: !validTabs.languages }"
+              ></v-list-item>
+              <v-list-item
+                @click="selectTab('Job Experience', 6)"
+                link
+                title="Job Experience"
+                :class="{ invalid: !validTabs.jobExperience }"
+              ></v-list-item>
+              <v-list-item
+                @click="selectTab('Education', 7)"
+                link
+                title="Education"
+                :class="{ invalid: !validTabs.education }"
+              ></v-list-item>
             </v-list>
           </v-col>
           <v-divider v-if="!isMobile()" vertical thickness="1"></v-divider>

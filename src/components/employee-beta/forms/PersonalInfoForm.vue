@@ -407,7 +407,7 @@ const emitter = inject('emitter');
 const vMask = mask; // import v mask directive
 
 const editedEmployee = defineModel({ required: true });
-const valid = defineModel('valid', { type: Boolean, required: true });
+const valid = defineModel('valid', { required: true });
 const form = ref(null); // template ref to form
 
 // reformatted data for use in form
