@@ -209,24 +209,31 @@ const technologiesRef = ref(null);
 
 onBeforeMount(() => {
   emitter.on('editing', (cardName) => {
-    if (cardName === 'Personal Information' || cardName === 'Employee' || cardName === 'Other Information') {
+    if (
+      cardName === 'Personal Information' ||
+      cardName === 'Employee' ||
+      cardName === 'Other Information' ||
+      cardName === 'Select Info'
+    ) {
       cardName = 'Personal';
     } else if (cardName === 'Clearance' || cardName === 'Clearances') {
       cardName = 'Clearances';
     } else if (cardName === 'Contracts' || cardName === 'All Contract Info') {
       cardName = 'Contracts';
-    } else if (cardName === 'Job Experience') {
+    } else if (cardName === 'Job Experience' || cardName === 'Job Experience & Education') {
       cardName = 'Job Experience';
     } else if (cardName === 'Certifications' || cardName === 'Awards') {
       cardName = 'Certifications & Awards';
     } else if (cardName === 'Education' || cardName === 'All Education') {
       cardName = 'Education';
-    } else if (cardName === 'Technologies and Skills' || cardName === 'Tech and Skills') {
+    } else if (
+      cardName === 'Technologies and Skills' ||
+      cardName === 'Tech and Skills' ||
+      cardName === 'Tech, Skills, & Languages'
+    ) {
       cardName = 'Tech & Skills';
     } else if (cardName === 'Foreign Languages') {
       cardName = 'Languages';
-    } else {
-      cardName = 'Personal';
     }
     formTabs.value = [cardName];
     editing.value = true;
