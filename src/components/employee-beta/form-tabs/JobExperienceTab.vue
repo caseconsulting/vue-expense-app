@@ -1,5 +1,5 @@
 <template>
-  <v-form ref="form" validate-on="lazy">
+  <v-form ref="form" v-model="valid" validate-on="lazy">
     <v-row>
       <!-- Left side of the edit page -->
       <v-col :cols="!isMobile() ? '5' : '12'">
@@ -323,8 +323,8 @@ import {
   getRequiredRules
 } from '@/shared/validationUtils';
 import { isMobile } from '@/utils/utils';
-import _, { isEmpty } from 'lodash';
-import { inject, onBeforeUnmount, ref } from 'vue';
+import { compact, forEach, isEmpty, map } from 'lodash';
+import { inject, onBeforeUnmount, onMounted, ref } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
 
@@ -339,6 +339,7 @@ const emitter = inject('emitter');
 const vMask = mask; // custom directive
 
 const editedEmployee = defineModel({ required: true });
+const valid = defineModel('valid', { required: true });
 const form = ref(null); // template ref
 
 const editedCompanies = ref(editedEmployee.value.companies);
@@ -354,6 +355,7 @@ defineExpose({ prepareSubmit });
 // |                                                  |
 // |--------------------------------------------------|
 
+onMounted(validate);
 onBeforeUnmount(prepareSubmit);
 
 // |--------------------------------------------------|
@@ -366,8 +368,8 @@ async function prepareSubmit() {
   await validate();
 
   // delete properties from positions that should not be stored in the database
-  editedEmployee.value.companies = _.map(editedCompanies.value, (company) => {
-    company.positions = _.map(company.positions, (position) => {
+  editedEmployee.value.companies = map(editedCompanies.value, (company) => {
+    company.positions = map(company.positions, (position) => {
       delete position.showStartMenu;
       delete position.showEndMenu;
       return position;
@@ -497,7 +499,7 @@ function deletePosition(compIndex, posIndex) {
  * @return String - 'Month YYYY' - 'Month YYYY' date range
  */
 function formatRange(range) {
-  if (_.isEmpty(range)) {
+  if (isEmpty(range)) {
     return null;
   }
   let start = format(range[0], null, 'YYYY-MM');
@@ -530,12 +532,12 @@ function parseEventDate() {
  * Populate drop downs with information that other employees have filled out.
  */
 function populateDropDowns() {
-  let employeesJobs = _.map(store.getters.employees, (employee) => employee.companies); //extract jobs
-  employeesJobs = _.compact(employeesJobs); //remove falsey values
+  let employeesJobs = map(store.getters.employees, (employee) => employee.companies); //extract jobs
+  employeesJobs = compact(employeesJobs); //remove falsey values
   // loop employees
-  _.forEach(employeesJobs, (jobs) => {
+  forEach(employeesJobs, (jobs) => {
     // loop jobs
-    _.forEach(jobs, (job) => {
+    forEach(jobs, (job) => {
       companyDropDown.value.push(job.companyName); // add company name
     });
   });

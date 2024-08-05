@@ -1,5 +1,5 @@
 <template>
-  <v-form ref="form" validate-on="lazy">
+  <v-form ref="form" v-model="valid" validate-on="lazy">
     <v-row v-for="(contract, index) in editedContracts" :key="index">
       <v-col>
         <v-row>
@@ -220,12 +220,11 @@ import {
   getDuplicateProjectRule,
   getRequiredRules
 } from '@/shared/validationUtils';
-import { isEmpty } from '@/utils/utils';
-import { find, map, cloneDeep } from 'lodash';
-import { inject, onBeforeUnmount, ref } from 'vue';
+import { isEmpty, isMobile } from '@/utils/utils';
+import { cloneDeep, find, map } from 'lodash';
+import { inject, onBeforeUnmount, onMounted, ref } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
-import { isMobile } from '../../../utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -238,6 +237,7 @@ const emitter = inject('emitter');
 const vMask = mask; // custom directive
 
 const editedEmployee = defineModel({ required: true });
+const valid = defineModel('valid', { required: true });
 const form = ref(null); // template ref
 
 const contracts = store.getters.contracts;
@@ -255,6 +255,7 @@ defineExpose({ prepareSubmit });
 // |                                                  |
 // |--------------------------------------------------|
 
+onMounted(validate);
 onBeforeUnmount(prepareSubmit);
 
 // |--------------------------------------------------|

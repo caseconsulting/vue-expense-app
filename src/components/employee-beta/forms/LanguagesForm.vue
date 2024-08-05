@@ -1,5 +1,5 @@
 <template>
-  <v-form ref="form" validate-on="lazy">
+  <v-form ref="form" v-model="valid" validate-on="lazy">
     <v-row class="mt-2"><h3>Foreign Languages</h3></v-row>
     <v-row>
       <v-col class="d-flex justify-center">
@@ -54,7 +54,7 @@
 import { getRequiredRules } from '@/shared/validationUtils';
 import { isEmpty } from 'lodash';
 import { LANGUAGES, PROFICIENCIES } from '@/shared/employeeUtils';
-import { inject, onBeforeUnmount } from 'vue';
+import { inject, onBeforeUnmount, onMounted } from 'vue';
 import { ref } from 'vue';
 import { isMobile } from '../../../utils/utils';
 
@@ -66,7 +66,8 @@ import { isMobile } from '../../../utils/utils';
 
 const emitter = inject('emitter');
 
-const editedEmployee = defineModel();
+const editedEmployee = defineModel({ required: true });
+const valid = defineModel('valid', { required: true });
 const form = ref(null); // template ref
 
 defineExpose({ prepareSubmit });
@@ -77,6 +78,7 @@ defineExpose({ prepareSubmit });
 // |                                                  |
 // |--------------------------------------------------|
 
+onMounted(prepareSubmit);
 onBeforeUnmount(prepareSubmit);
 
 // |--------------------------------------------------|
