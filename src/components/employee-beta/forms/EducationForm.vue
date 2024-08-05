@@ -103,7 +103,7 @@
 
 <script setup>
 import { map } from 'lodash';
-import { computed, inject, onBeforeMount, onBeforeUnmount, ref } from 'vue';
+import { computed, inject, onBeforeMount, onMounted, onBeforeUnmount, ref } from 'vue';
 import HighSchoolForm from './education-forms/HighSchoolForm.vue';
 import MilitaryForm from './education-forms/MilitaryForm.vue';
 import UniversityForm from './education-forms/UniversityForm.vue';
@@ -212,15 +212,14 @@ async function prepareSubmit() {
       return education;
     });
   }
-
-  async function validate() {
-    if (form.value) {
-      const result = await form.value.validate();
-      emitter.emit('validating', { tab: 'education', valid: result.valid });
-      return result;
-    }
-    return null;
+}
+async function validate() {
+  if (form.value) {
+    const result = await form.value.validate();
+    emitter.emit('validating', { tab: 'education', valid: result.valid });
+    return result;
   }
+  return null;
 }
 
 /**

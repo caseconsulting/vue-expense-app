@@ -111,7 +111,7 @@ import api from '@/shared/api';
 import { getDuplicateTechRules, getRequiredRules } from '@/shared/validationUtils';
 import { isMobile } from '@/utils/utils';
 import { isEmpty, map } from 'lodash';
-import { inject, onBeforeMount, onBeforeUnmount, ref } from 'vue';
+import { inject, onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue';
 
 // |--------------------------------------------------|
 // |                                                  |

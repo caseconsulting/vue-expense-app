@@ -322,10 +322,11 @@ import {
   getDuplicateCompanyNameRule,
   getRequiredRules
 } from '@/shared/validationUtils';
-import { isEmpty, map } from 'lodash';
-import { inject, onBeforeMount, onBeforeUnmount, ref } from 'vue';
+import { isEmpty, map, compact, forEach } from 'lodash';
+import { inject, onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
+import { isMobile } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
