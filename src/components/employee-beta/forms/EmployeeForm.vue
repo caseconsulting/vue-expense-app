@@ -108,20 +108,20 @@
                 </base-form>
                 <base-form title="Clearances" value="Clearances" :valid="validTabs.clearance">
                   <div>
-                    <clearance-tab
+                    <clearance-form
                       ref="clearanceRef"
                       v-model="editedEmployee"
                       v-model:valid="validTabs.clearance"
-                    ></clearance-tab>
+                    ></clearance-form>
                   </div>
                 </base-form>
                 <base-form title="Contracts" value="Contracts" :valid="validTabs.contracts">
                   <div>
-                    <contracts-tab
+                    <contracts-form
                       ref="contractsRef"
                       v-model="editedEmployee"
                       v-model:valid="validTabs.contracts"
-                    ></contracts-tab>
+                    ></contracts-form>
                   </div>
                 </base-form>
                 <base-form
@@ -130,11 +130,11 @@
                   :valid="validTabs.certsAndAwards"
                 >
                   <div>
-                    <certs-and-awards-tab
+                    <certs-and-awards-form
                       ref="certsAndAwardsRef"
                       v-model="editedEmployee"
                       v-model:valid="validTabs.certsAndAwards"
-                    ></certs-and-awards-tab>
+                    ></certs-and-awards-form>
                   </div>
                 </base-form>
                 <base-form title="Tech and Skills" value="Tech & Skills" :valid="validTabs.technologies">
@@ -153,21 +153,21 @@
                 </base-form>
                 <base-form title="Job Experience" value="Job Experience" :valid="validTabs.jobExperience">
                   <div>
-                    <job-experience-tab
+                    <job-experience-form
                       ref="jobExperienceRef"
                       v-model="editedEmployee"
                       v-model:valid="validTabs.jobExperience"
-                    ></job-experience-tab>
+                    ></job-experience-form>
                   </div>
                 </base-form>
                 <base-form title="Education" value="Education" :valid="validTabs.education">
                   <div>
-                    <education-tab
+                    <education-form
                       ref="educationRef"
                       v-model="editedEmployee"
                       v-model:valid="validTabs.education"
                       :allowAdditions="true"
-                    ></education-tab>
+                    ></education-form>
                   </div>
                 </base-form>
               </v-expansion-panels>
@@ -207,14 +207,14 @@ import FormCancelConfirmation from '@/components/modals/FormCancelConfirmation.v
 import { useDisplayError } from '@/components/shared/StatusSnackbar.vue';
 import api from '@/shared/api';
 import { isMobile } from '@/utils/utils';
+import { useStore } from 'vuex';
 import { cloneDeep, find, findIndex, forOwn, isEqual, map, pickBy } from 'lodash';
 import { computed, inject, onBeforeMount, onBeforeUnmount, reactive, ref, watch } from 'vue';
-import { useStore } from 'vuex';
-import CertsAndAwardsTab from '../form-tabs/CertsAndAwardsTab.vue';
-import ClearanceTab from '../form-tabs/ClearanceTab.vue';
-import ContractsTab from '../form-tabs/ContractsTab.vue';
-import EducationTab from '../form-tabs/EducationTab.vue';
-import JobExperienceTab from '../form-tabs/JobExperienceTab.vue';
+import CertsAndAwardsForm from './CertsAndAwardsForm.vue';
+import ClearanceForm from './ClearanceForm.vue';
+import ContractsForm from './ContractsForm.vue';
+import EducationForm from './EducationForm.vue';
+import JobExperienceForm from './JobExperienceForm.vue';
 import LanguagesForm from './LanguagesForm.vue';
 import PersonalInfoForm from './PersonalInfoForm.vue';
 import TechnologiesForm from './TechnologiesForm.vue';
