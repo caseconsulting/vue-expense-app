@@ -202,12 +202,14 @@
 </template>
 
 <script setup>
-import { isMobile } from '../../../utils/utils';
 import BaseForm from '@/components/employee-beta/forms/BaseForm.vue';
 import FormCancelConfirmation from '@/components/modals/FormCancelConfirmation.vue';
+import { useDisplayError } from '@/components/shared/StatusSnackbar.vue';
 import api from '@/shared/api';
-import { cloneDeep, forOwn, isEqual, pickBy } from 'lodash';
+import { isMobile } from '@/utils/utils';
+import { cloneDeep, find, findIndex, forOwn, isEqual, map, pickBy } from 'lodash';
 import { computed, inject, onBeforeMount, onBeforeUnmount, reactive, ref, watch } from 'vue';
+import { useStore } from 'vuex';
 import CertsAndAwardsTab from '../form-tabs/CertsAndAwardsTab.vue';
 import ClearanceTab from '../form-tabs/ClearanceTab.vue';
 import ContractsTab from '../form-tabs/ContractsTab.vue';
@@ -216,7 +218,6 @@ import JobExperienceTab from '../form-tabs/JobExperienceTab.vue';
 import LanguagesForm from './LanguagesForm.vue';
 import PersonalInfoForm from './PersonalInfoForm.vue';
 import TechnologiesForm from './TechnologiesForm.vue';
-import { useDisplayError } from '../../shared/StatusSnackbar.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -226,6 +227,7 @@ import { useDisplayError } from '../../shared/StatusSnackbar.vue';
 
 /** @type {import('mitt').Emitter} */
 const emitter = inject('emitter');
+const store = useStore();
 
 const props = defineProps(['employee', 'contracts']);
 const editedEmployee = ref(cloneDeep(props.employee));
@@ -350,6 +352,11 @@ async function submit() {
 
   // if there are any changes
   if (!isEmpty(Object.keys(changes))) {
+    if (changes.tags) {
+      submitTags(changes.tags);
+      delete changes.tags; // remove when we are done, we don't want to send this in api call
+    }
+
     const updated = await api.updateAttributes(api.EMPLOYEES, props.employee.id, changes);
     if (updated.id) {
       emitter.emit('update', updated);
@@ -360,6 +367,41 @@ async function submit() {
   submitting.value = false;
   editing.value = false; // close edit modal
 }
+
+/**
+ * Updates the tags that the employee was added to and removed from.
+ * If the employee is in a tag, they need to be removed.
+ * If the employee is not in a tag, they need to be added.
+ */
+async function submitTags(editedTags) {
+  let employeeId = props.employee.id;
+  let promises = [];
+
+  console.log(editedTags);
+
+  for (let tag of editedTags) {
+    // finds employee id on the given tag
+    const index = findIndex(tag.employees, (empId) => empId === employeeId);
+
+    // if desired id is found
+    if (index > -1) {
+      tag.employees.splice(index, 1); // remove employee from tag
+    } else {
+      tag.employees.push(employeeId); // add employee to tag
+    }
+
+    promises.push(api.updateItem(api.TAGS, tag));
+  }
+
+  await Promise.all(promises);
+
+  // update store tags
+  let updatedStoreTags = map(store.getters.tags, (tag) => {
+    let foundTag = find(editedTags, (t) => t.id === tag.id);
+    return foundTag ? foundTag : tag;
+  });
+  store.dispatch('setTags', { tags: updatedStoreTags });
+} // submitTags
 
 /**
  * Validates each currently open tab and prepares/reformats data if applicable. Closed tabs should be
@@ -398,12 +440,14 @@ async function validate() {
  * Gets an object containing only the fields that were edited by the user
  */
 function getChanges() {
-  return pickBy(editedEmployee.value, (value, key) => {
+  let changes = pickBy(editedEmployee.value, (value, key) => {
     const oldValue = props.employee[key];
     const newValue = value;
 
     // if both values are empty (i.e. empty string, null, or undefined) they are treated as equal
     let changed = !isEqual(oldValue, newValue) && !(isEmpty(oldValue) && isEmpty(newValue));
+
+    if (key === 'tags') return false; // tags are handled further down
 
     if (changed) {
       // TODO test
@@ -413,6 +457,11 @@ function getChanges() {
     }
     return changed;
   });
+
+  const editedTags = editedEmployee.value.tags;
+  if (editedTags && !isEmpty(editedTags)) changes.tags = cloneDeep(editedTags);
+
+  return changes;
 }
 
 /**

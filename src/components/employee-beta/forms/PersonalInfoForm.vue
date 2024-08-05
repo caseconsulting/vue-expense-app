@@ -149,7 +149,7 @@
           <!-- tags -->
           <v-col v-if="userIsAdminOrManager">
             <v-autocomplete
-              v-model="tags"
+              v-model="editedTags"
               label="Tags"
               :items="store.getters.tags"
               item-title="tagName"
@@ -390,8 +390,8 @@ import {
 } from '@/shared/validationUtils';
 import { COUNTRIES, isMobile, STATES } from '@/utils/utils';
 import dayjs from 'dayjs';
-import { cloneDeep, filter, forEach, includes, isEmpty, lowerCase, some, startCase } from 'lodash';
-import { computed, inject, onBeforeUnmount, onMounted, ref } from 'vue';
+import { cloneDeep, filter, forEach, includes, isEmpty, lowerCase, some, startCase, xorBy } from 'lodash';
+import { computed, inject, onBeforeUnmount, onMounted, readonly, ref } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
 import PrivateButton from '../PrivateButton.vue';
@@ -408,6 +408,8 @@ const vMask = mask; // import v mask directive
 
 const editedEmployee = defineModel({ required: true });
 const valid = defineModel('valid', { required: true });
+const uneditedTags = readonly(getEmployeeTags());
+const editedTags = ref(cloneDeep(editedEmployee.value.tags ?? getEmployeeTags()));
 const form = ref(null); // template ref to form
 
 // reformatted data for use in form
@@ -415,9 +417,8 @@ const emailUsername = ref(
   editedEmployee.value.email ? editedEmployee.value.email.slice(0, editedEmployee.value.email.indexOf('@')) : ''
 );
 const employeeRole = ref(startCase(editedEmployee.value.employeeRole));
-const tags = ref(getEmployeeTags());
-const phoneNumbers = ref(initPhoneNumbers());
 const personalEmail = ref({ emailValue: editedEmployee.value.personalEmail, private: true });
+const phoneNumbers = ref(initPhoneNumbers());
 
 // other refs
 const birthdayMenu = ref(false);
@@ -459,7 +460,9 @@ const userIsAdminOrManager = computed(() => {
  */
 const birthday = computed({
   get: () => dayjs(editedEmployee.value.birthday, ISO8601),
-  set: (val) => (editedEmployee.value.birthday = val.format(ISO8601))
+  set: (val) => {
+    editedEmployee.value.birthday = val.format(ISO8601);
+  }
 });
 
 /**
@@ -508,6 +511,10 @@ async function prepareSubmit() {
   editedEmployee.value.email = emailUsername.value + CASE_EMAIL_DOMAIN;
 
   editedEmployee.value.employeeRole = lowerCase(employeeRole.value);
+
+  // the xor/symmetric difference is just the elements that have changed
+  // this includes both tags the employee was added to and removed from, and no others
+  editedEmployee.value.tags = xorBy(editedTags.value, uneditedTags, 'id'); // xor by property 'id'
 
   editedEmployee.value.birthday = format(formattedBirthday.value, FORMATTED_ISOFORMAT, ISO8601);
 
