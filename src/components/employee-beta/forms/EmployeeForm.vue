@@ -218,11 +218,13 @@ import BaseForm from '@/components/employee-beta/forms/BaseForm.vue';
 import FormCancelConfirmation from '@/components/modals/FormCancelConfirmation.vue';
 import { useDisplayError } from '@/components/shared/StatusSnackbar.vue';
 import api from '@/shared/api';
-import { isMobile } from '@/utils/utils';
+import { updateStoreEmployees, updateStoreUser } from '@/utils/storeUtils';
+import { generateUUID, isMobile } from '@/utils/utils';
 import { cloneDeep, find, findIndex, forOwn, isEqual, map, pickBy } from 'lodash';
 import { computed, inject, onBeforeMount, onBeforeUnmount, reactive, ref, watch } from 'vue';
-import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 import { useDisplay } from 'vuetify';
+import { useStore } from 'vuex';
 import CertsAndAwardsForm from './CertsAndAwardsForm.vue';
 import ClearanceForm from './ClearanceForm.vue';
 import ContractsForm from './ContractsForm.vue';
@@ -231,9 +233,6 @@ import JobExperienceForm from './JobExperienceForm.vue';
 import LanguagesForm from './LanguagesForm.vue';
 import PersonalInfoForm from './PersonalInfoForm.vue';
 import TechnologiesForm from './TechnologiesForm.vue';
-import { generateUUID } from '../../../utils/utils';
-import { updateStoreEmployees, updateStoreUser } from '../../../utils/storeUtils';
-import { useRouter } from 'vue-router';
 
 // |--------------------------------------------------|
 // |                                                  |
