@@ -200,14 +200,14 @@
           <!-- personal email -->
           <v-col>
             <v-text-field
-              v-model="editedEmployee.value.personalEmail"
+              v-model="editedEmployee.personalEmail"
               label="Personal Email"
               :rules="getEmailRules()"
               style="min-width: 350px"
             >
               <template #prepend-inner><v-icon>mdi-email</v-icon></template>
               <template #append-inner>
-                <private-button v-model="editedEmployee.value.personalEmailHidden"></private-button>
+                <private-button v-model="editedEmployee.personalEmailHidden"></private-button>
               </template>
             </v-text-field>
           </v-col>
