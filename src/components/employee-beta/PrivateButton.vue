@@ -1,7 +1,7 @@
 <template>
   <v-tooltip location="top" :text="tooltipText">
     <template #activator="{ props }">
-      <v-btn v-bind="props" :icon="buttonIcon" variant="text" @click="secured = !secured"></v-btn>
+      <v-btn v-bind="props" :icon="buttonIcon" variant="text" @click.stop="secured = !secured"></v-btn>
     </template>
   </v-tooltip>
 </template>

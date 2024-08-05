@@ -48,8 +48,13 @@
       <v-col>
         <!-- private icon and search bar -->
         <v-row align="center">
-          <v-col class="pb-0">
+          <v-col class="pb-0 d-flex">
+            <div class="mt-4 mb-9 ml-3 mr-7 d-inline">
+              <v-icon color="black">mdi-shield</v-icon>
+              <v-tooltip activator="parent" location="top" text="Address is always hidden from other users"></v-tooltip>
+            </div>
             <v-autocomplete
+              class="d-inline"
               prepend-inner-icon="mdi-magnify"
               v-model="searchString"
               label="Search Locations"
@@ -57,13 +62,6 @@
               no-data-text="Start searching..."
               @update:search="updateAddressDropDown($event)"
             >
-              <template #prepend>
-                <v-tooltip location="top" text="Address is always hidden from other users">
-                  <template #activator="{ props }">
-                    <v-btn v-bind="props" icon="mdi-shield" variant="text" v-ripple="false"></v-btn>
-                  </template>
-                </v-tooltip>
-              </template>
               <template #item="{ item, props }">
                 <v-list-item @click="autofillLocation(item, props)">{{ item.value }}</v-list-item>
               </template>
@@ -238,7 +236,15 @@
         <v-row class="groove">
           <v-col>
             <v-row align="center">
-              <v-col class="pb-0">
+              <v-col class="d-flex pb-0">
+                <div class="mt-4 mb-9 ml-3 mr-7 d-inline">
+                  <v-icon color="black">mdi-shield</v-icon>
+                  <v-tooltip
+                    activator="parent"
+                    location="top"
+                    text="Place of birth is always hidden from other users"
+                  ></v-tooltip>
+                </div>
                 <v-autocomplete
                   prepend-inner-icon="mdi-magnify"
                   label="City Locations"
@@ -249,13 +255,6 @@
                   persitent-hint="Search city and select option to auto-fill fields below."
                   persistent-hint
                 >
-                  <template #prepend>
-                    <v-tooltip location="top" text="Place of birth is always hidden from other users">
-                      <template #activator="{ props }">
-                        <v-btn v-bind="props" icon="mdi-shield" variant="text" v-ripple="false"></v-btn>
-                      </template>
-                    </v-tooltip>
-                  </template>
                   <template #item="{ item, props }">
                     <v-list-item @click="updateCityBoxes(item, props)">{{ item.value }}</v-list-item>
                   </template>
