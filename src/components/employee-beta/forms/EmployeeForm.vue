@@ -111,23 +111,25 @@
                   </div>
                 </base-form>
               </v-expansion-panels>
-              <v-card-actions>
-                <v-row class="d-flex align-center">
-                  <!-- Form action buttons -->
-                  <v-col cols="auto">
-                    <v-btn id="employeeCancelBtn" variant="text" class="ma-2" @click="cancel()">Cancel</v-btn>
-                  </v-col>
-                  <v-col cols="auto">
-                    <v-btn id="employeeSubmitBtn" variant="outlined" class="ma-2" color="success" type="submit">
-                      <v-icon class="mr-1">mdi-content-save</v-icon>Submit
-                    </v-btn>
-                  </v-col>
-                  <!-- End form action buttons -->
-                  <v-col cols="auto">
-                    <p v-if="!valid" class="invalid mb-0">Cannot submit, there are invalid fields!</p>
-                  </v-col>
-                </v-row>
-              </v-card-actions>
+              <div class="sticky-actions">
+                <v-card-actions>
+                  <v-row class="d-flex align-center">
+                    <!-- Form action buttons -->
+                    <v-col cols="auto">
+                      <v-btn id="employeeCancelBtn" variant="text" class="ma-2" @click="cancel()">Cancel</v-btn>
+                    </v-col>
+                    <v-col cols="auto">
+                      <v-btn id="employeeSubmitBtn" variant="outlined" class="ma-2" color="success" type="submit">
+                        <v-icon class="mr-1">mdi-content-save</v-icon>Submit
+                      </v-btn>
+                    </v-col>
+                    <!-- End form action buttons -->
+                    <v-col cols="auto">
+                      <p v-if="!valid" class="invalid mb-0">Cannot submit, there are invalid fields!</p>
+                    </v-col>
+                  </v-row>
+                </v-card-actions>
+              </div>
             </v-form>
           </v-col>
         </v-row>
@@ -393,5 +395,11 @@ function isEmpty(value) {
   position: sticky;
   top: 45px;
   z-index: 2;
+}
+.sticky-actions {
+  position: sticky;
+  bottom: 0;
+  background: white;
+  z-index: 1;
 }
 </style>
