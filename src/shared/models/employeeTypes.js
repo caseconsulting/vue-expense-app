@@ -199,6 +199,9 @@ export class Employee {
     /** @type {string} */
     this.personalEmail = properties.personalEmail ?? '';
 
+    /** @type {boolean} */
+    this.personalEmailHidden = properties.personalEmailHidden ?? true;
+
     /** @type {PhoneNumber[]} */
     this.publicPhoneNumbers = properties.publicPhoneNumbers ?? [];
 
