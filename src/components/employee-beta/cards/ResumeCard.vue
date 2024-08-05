@@ -115,7 +115,6 @@
 </template>
 
 <script setup>
-import _ from 'lodash';
 import api from '@/shared/api.js';
 import { format, getTodaysDate, FORMATTED_ISOFORMAT } from '@/shared/dateUtils';
 import { inject, onBeforeUnmount, onMounted, ref, computed } from 'vue';
@@ -176,7 +175,6 @@ onMounted(() => {
   emitter.on('uploaded', async (message) => {
     if (message) useDisplaySuccess('Successfully uploaded resume', 3000);
     model.value.resumeUpdated = getTodaysDate();
-    model.value = _.cloneDeep(model.value); // force vue to reload the object
     await api.updateAttributes(api.EMPLOYEES, model.value.id, { resumeUpdated: model.value.resumeUpdated });
   });
 });
