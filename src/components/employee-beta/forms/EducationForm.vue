@@ -103,7 +103,7 @@
 
 <script setup>
 import { map } from 'lodash';
-import { computed, inject, onBeforeUnmount, ref } from 'vue';
+import { computed, inject, onBeforeMount, onMounted, onBeforeUnmount, ref } from 'vue';
 import HighSchoolForm from './education-forms/HighSchoolForm.vue';
 import MilitaryForm from './education-forms/MilitaryForm.vue';
 import UniversityForm from './education-forms/UniversityForm.vue';
@@ -120,11 +120,11 @@ const EDU_TYPES = [
   { display: 'High School', value: 'highSchool' }
 ];
 
-defineProps(['allowAdditions']);
 const emitter = inject('emitter');
 
 const editedEmployee = defineModel({ required: true });
 const valid = defineModel('valid', { required: true });
+defineProps({ allowAdditions: { type: Boolean } });
 const form = ref(null); // template ref
 
 const editedEducation = ref(
@@ -134,6 +134,12 @@ const editedEducation = ref(
   })
 ); // stores edited education info
 
+let stopPrepare = false;
+const onDiscardEdits = (employee) => {
+  stopPrepare = true;
+  editedEmployee.value = employee;
+};
+
 defineExpose({ prepareSubmit });
 
 // |--------------------------------------------------|
@@ -142,7 +148,16 @@ defineExpose({ prepareSubmit });
 // |                                                  |
 // |--------------------------------------------------|
 
+onBeforeMount(() => {
+  emitter.on('discard-edits', onDiscardEdits);
+});
+
 onMounted(validate);
+
+onBeforeUnmount(() => {
+  emitter.off('discard-edits', onDiscardEdits);
+});
+
 onBeforeUnmount(prepareSubmit);
 
 // |--------------------------------------------------|
@@ -152,6 +167,7 @@ onBeforeUnmount(prepareSubmit);
 // |--------------------------------------------------|
 
 const displayHS = computed(() => {
+  if (!editedEducation.value) return false;
   for (let i = 0; i < editedEducation.value.length; i++) {
     if (editedEducation.value[i].type === 'highSchool') {
       return true;
@@ -161,6 +177,7 @@ const displayHS = computed(() => {
 });
 
 const displayUni = computed(() => {
+  if (!editedEducation.value) return false;
   for (let i = 0; i < editedEducation.value.length; i++) {
     if (editedEducation.value[i].type === 'university') {
       return true;
@@ -170,6 +187,7 @@ const displayUni = computed(() => {
 });
 
 const displayMilitary = computed(() => {
+  if (!editedEducation.value) return false;
   for (let i = 0; i < editedEducation.value.length; i++) {
     if (editedEducation.value[i].type === 'military') {
       return true;
@@ -185,15 +203,16 @@ const displayMilitary = computed(() => {
 // |--------------------------------------------------|
 
 async function prepareSubmit() {
-  await validate();
+  if (!stopPrepare) {
+    await validate();
 
-  // remove id that was generated for use in this file
-  editedEmployee.value.education = map(editedEducation.value, (education) => {
-    delete education.id;
-    return education;
-  });
+    // remove id that was generated for use in this file
+    editedEmployee.value.education = map(editedEducation.value, (education) => {
+      delete education.id;
+      return education;
+    });
+  }
 }
-
 async function validate() {
   if (form.value) {
     const result = await form.value.validate();

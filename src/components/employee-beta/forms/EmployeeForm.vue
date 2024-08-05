@@ -209,9 +209,9 @@ import FormCancelConfirmation from '@/components/modals/FormCancelConfirmation.v
 import { useDisplayError } from '@/components/shared/StatusSnackbar.vue';
 import api from '@/shared/api';
 import { isMobile } from '@/utils/utils';
-import { useStore } from 'vuex';
 import { cloneDeep, find, findIndex, forOwn, isEqual, map, pickBy } from 'lodash';
 import { computed, inject, onBeforeMount, onBeforeUnmount, reactive, ref, watch } from 'vue';
+import { useStore } from 'vuex';
 import CertsAndAwardsForm from './CertsAndAwardsForm.vue';
 import ClearanceForm from './ClearanceForm.vue';
 import ContractsForm from './ContractsForm.vue';
@@ -283,10 +283,14 @@ onBeforeMount(() => {
     toggleCancelConfirmation.value = false;
   });
 
-  emitter.on('confirmed-cancel', async () => {
+  emitter.on('confirmed-cancel', () => {
+    // signals to tabs to NOT prepare, and provides them with the unedited employee object
+    // this is to fix a bug where tabs would prepare after the edit modal closed, causing editedEmployee
+    // to be overwritten with the edited data, even though we want to discard all edits
+    emitter.emit('discard-edits', props.employee);
+    editedEmployee.value = cloneDeep(props.employee);
     toggleCancelConfirmation.value = false;
     editing.value = false;
-    editedEmployee.value = cloneDeep(props.employee); // clears all changes
   });
 
   emitter.on('validating', (event) => {
@@ -428,7 +432,8 @@ function getChanges() {
 
     if (changed) {
       // TODO test
-      console.log('Changed:', key);
+      console.log('Key:', key);
+      console.log('\tChanged:', changed);
       console.log('\tOld:', oldValue);
       console.log('\tNew:', newValue);
     }
@@ -455,7 +460,8 @@ function cancelSubmit() {
  */
 async function cancel() {
   await prepareTabs(); // need to prepare tabs to get the changes
-  numberOfChanges.value = Object.keys(getChanges()).length;
+  const changes = getChanges();
+  numberOfChanges.value = Object.keys(changes).length;
   toggleCancelConfirmation.value = true;
 }
 
