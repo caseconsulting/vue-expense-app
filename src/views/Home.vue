@@ -152,6 +152,7 @@ onBeforeMount(async () => {
     loading.value = false;
     await loadHomePageData();
   }
+  throw new Error('Too many quamps');
 }); // created
 
 // |--------------------------------------------------|
