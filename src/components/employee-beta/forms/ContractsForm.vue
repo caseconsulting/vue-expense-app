@@ -222,7 +222,7 @@ import {
 } from '@/shared/validationUtils';
 import { isEmpty, isMobile } from '@/utils/utils';
 import { cloneDeep, find, map } from 'lodash';
-import { inject, onBeforeUnmount, onMounted, ref } from 'vue';
+import { inject, onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
 
@@ -245,6 +245,12 @@ const editedContracts = ref([]); // stores edited contracts info
 const contractProjects = ref(store.getters.contracts.map((c) => c.projects).flat());
 const reloadKey = ref(0); // value used to trigger component re-render
 
+let stopPrepare = false;
+const onDiscardEdits = (employee) => {
+  stopPrepare = true;
+  editedEmployee.value = employee;
+};
+
 initialize();
 
 defineExpose({ prepareSubmit });
@@ -255,7 +261,16 @@ defineExpose({ prepareSubmit });
 // |                                                  |
 // |--------------------------------------------------|
 
+onBeforeMount(() => {
+  emitter.on('discard-edits', onDiscardEdits);
+});
+
 onMounted(validate);
+
+onBeforeUnmount(() => {
+  emitter.off('discard-edits', onDiscardEdits);
+});
+
 onBeforeUnmount(prepareSubmit);
 
 // |--------------------------------------------------|
@@ -265,20 +280,22 @@ onBeforeUnmount(prepareSubmit);
 // |--------------------------------------------------|
 
 async function prepareSubmit() {
-  await validate();
+  if (!stopPrepare) {
+    await validate();
 
-  // delete keys that aren't stored in database
-  editedEmployee.value.contracts = map(editedContracts.value, (contract) => {
-    let newContract = cloneDeep(contract);
-    delete newContract.contractName;
-    delete newContract.primeName;
+    // delete keys that aren't stored in database
+    editedEmployee.value.contracts = map(editedContracts.value, (contract) => {
+      let newContract = cloneDeep(contract);
+      delete newContract.contractName;
+      delete newContract.primeName;
 
-    newContract.projects = map(newContract.projects, (project) => {
-      delete project.projectName;
-      return project;
+      newContract.projects = map(newContract.projects, (project) => {
+        delete project.projectName;
+        return project;
+      });
+      return newContract;
     });
-    return newContract;
-  });
+  }
 }
 
 async function validate() {

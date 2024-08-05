@@ -48,8 +48,13 @@
       <v-col>
         <!-- private icon and search bar -->
         <v-row align="center">
-          <v-col class="pb-0">
+          <v-col class="pb-0 d-flex">
+            <div class="mt-4 mb-9 ml-3 mr-7 d-inline">
+              <v-icon color="black">mdi-shield</v-icon>
+              <v-tooltip activator="parent" location="top" text="Address is always hidden from other users"></v-tooltip>
+            </div>
             <v-autocomplete
+              class="d-inline"
               prepend-inner-icon="mdi-magnify"
               label="Search Locations"
               :items="Object.keys(placeIds)"
@@ -57,13 +62,6 @@
               @update:search="updateAddressDropDown($event)"
               ref="addressSearch"
             >
-              <template #prepend>
-                <v-tooltip location="top" text="Address is always hidden from other users">
-                  <template #activator="{ props }">
-                    <v-btn v-bind="props" icon="mdi-shield" variant="text" v-ripple="false"></v-btn>
-                  </template>
-                </v-tooltip>
-              </template>
               <template #item="{ item, props }">
                 <v-list-item @click="autofillLocation(item, props)">{{ item.value }}</v-list-item>
               </template>
@@ -200,14 +198,14 @@
           <!-- personal email -->
           <v-col>
             <v-text-field
-              v-model="personalEmail.emailValue"
+              v-model="editedEmployee.personalEmail"
               label="Personal Email"
               :rules="getEmailRules()"
               style="min-width: 350px"
             >
               <template #prepend-inner><v-icon>mdi-email</v-icon></template>
               <template #append-inner>
-                <private-button v-model="personalEmail.private"></private-button>
+                <private-button v-model="editedEmployee.personalEmailHidden"></private-button>
               </template>
             </v-text-field>
           </v-col>
@@ -238,7 +236,15 @@
         <v-row class="groove">
           <v-col>
             <v-row align="center">
-              <v-col class="pb-0">
+              <v-col class="d-flex pb-0">
+                <div class="mt-4 mb-9 ml-3 mr-7 d-inline">
+                  <v-icon color="black">mdi-shield</v-icon>
+                  <v-tooltip
+                    activator="parent"
+                    location="top"
+                    text="Place of birth is always hidden from other users"
+                  ></v-tooltip>
+                </div>
                 <v-autocomplete
                   prepend-inner-icon="mdi-magnify"
                   label="City Locations"
@@ -249,13 +255,6 @@
                   persistent-hint
                   ref="birthPlaceSearch"
                 >
-                  <template #prepend>
-                    <v-tooltip location="top" text="Place of birth is always hidden from other users">
-                      <template #activator="{ props }">
-                        <v-btn v-bind="props" icon="mdi-shield" variant="text" v-ripple="false"></v-btn>
-                      </template>
-                    </v-tooltip>
-                  </template>
                   <template #item="{ item, props }">
                     <v-list-item @click="updateCityBoxes(item, props)">{{ item.value }}</v-list-item>
                   </template>
@@ -391,7 +390,7 @@ import {
 import { COUNTRIES, isMobile, STATES } from '@/utils/utils';
 import dayjs from 'dayjs';
 import { cloneDeep, filter, forEach, includes, isEmpty, lowerCase, some, startCase, xorBy } from 'lodash';
-import { computed, inject, onBeforeUnmount, onMounted, readonly, ref } from 'vue';
+import { computed, inject, onBeforeMount, onBeforeUnmount, onMounted, readonly, ref } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
 import PrivateButton from '../PrivateButton.vue';
@@ -417,19 +416,26 @@ const emailUsername = ref(
   editedEmployee.value.email ? editedEmployee.value.email.slice(0, editedEmployee.value.email.indexOf('@')) : ''
 );
 const employeeRole = ref(startCase(editedEmployee.value.employeeRole));
-const personalEmail = ref({ emailValue: editedEmployee.value.personalEmail, private: true });
 const phoneNumbers = ref(initPhoneNumbers());
 
 // other refs
 const addressSearch = ref(null); // current address search input
 const birthPlaceSearch = ref(null); // birth place search input
 const birthdayMenu = ref(false);
-// const states = STATES; // states
+const citySearchString = ref(null); // user input for searching POB
+const searchString = ref(''); // user input for searching address
 const placeIds = ref({}); // for address autocomplete
 const predictions = ref({}); // for POB autocomplete
 
 // other refs
 const phoneAutofocus = ref(false);
+
+// values to help with resetting edits after cancelling
+let stopPrepare = false;
+const onDiscardEdits = (employee) => {
+  stopPrepare = true;
+  editedEmployee.value = employee;
+};
 
 defineExpose({ prepareSubmit }); // allows parent to use refs to call prepareSubmit()
 
@@ -439,7 +445,16 @@ defineExpose({ prepareSubmit }); // allows parent to use refs to call prepareSub
 // |                                                  |
 // |--------------------------------------------------|
 
+onBeforeMount(() => {
+  emitter.on('discard-edits', onDiscardEdits);
+});
+
 onMounted(validate);
+
+onBeforeUnmount(() => {
+  emitter.off('discard-edits', onDiscardEdits);
+});
+
 onBeforeUnmount(prepareSubmit);
 
 // |--------------------------------------------------|
@@ -504,35 +519,31 @@ const employeeNumberRules = computed(() => [
  * Uses the formatted/transformed data from the form and loads it into the edited employee
  */
 async function prepareSubmit() {
-  await validate();
+  if (!stopPrepare) {
+    await validate();
 
-  if (editedEmployee.value.noMiddleName) editedEmployee.value.middleName = '';
+    if (editedEmployee.value.noMiddleName) editedEmployee.value.middleName = '';
 
-  editedEmployee.value.email = emailUsername.value + CASE_EMAIL_DOMAIN;
+    editedEmployee.value.email = emailUsername.value + CASE_EMAIL_DOMAIN;
 
-  editedEmployee.value.employeeRole = lowerCase(employeeRole.value);
+    editedEmployee.value.employeeRole = lowerCase(employeeRole.value);
 
-  // the xor/symmetric difference is just the elements that have changed
-  // this includes both tags the employee was added to and removed from, and no others
-  editedEmployee.value.tags = xorBy(editedTags.value, uneditedTags, 'id'); // xor by property 'id'
+    // the xor/symmetric difference is just the elements that have changed
+    // this includes both tags the employee was added to and removed from, and no others
+    editedEmployee.value.tags = xorBy(editedTags.value, uneditedTags, 'id'); // xor by property 'id'
 
-  editedEmployee.value.birthday = format(formattedBirthday.value, FORMATTED_ISOFORMAT, ISO8601);
+    editedEmployee.value.birthday = format(formattedBirthday.value, FORMATTED_ISOFORMAT, ISO8601);
 
-  editedEmployee.value.personalEmail = personalEmail.value.emailValue;
-  // leave this unchanged if no email is entered
-  if (!isEmpty(personalEmail.value.emailValue)) {
-    editedEmployee.value.personalEmailHidden = personalEmail.value.private;
+    if (editedEmployee.value.country !== 'United States') editedEmployee.value.st = '';
+
+    editedEmployee.value.privatePhoneNumbers = [];
+    editedEmployee.value.publicPhoneNumbers = [];
+
+    phoneNumbers.value.forEach((phoneNumber) => {
+      if (phoneNumber.private) editedEmployee.value.privatePhoneNumbers.push(phoneNumber);
+      else editedEmployee.value.publicPhoneNumbers.push(phoneNumber);
+    });
   }
-
-  if (editedEmployee.value.country !== 'United States') editedEmployee.value.st = '';
-
-  editedEmployee.value.privatePhoneNumbers = [];
-  editedEmployee.value.publicPhoneNumbers = [];
-
-  phoneNumbers.value.forEach((phoneNumber) => {
-    if (phoneNumber.private) editedEmployee.value.privatePhoneNumbers.push(phoneNumber);
-    else editedEmployee.value.publicPhoneNumbers.push(phoneNumber);
-  });
 }
 
 async function validate() {

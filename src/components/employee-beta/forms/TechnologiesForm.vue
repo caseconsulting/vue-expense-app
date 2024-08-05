@@ -6,14 +6,14 @@
         <v-btn prepend-icon="mdi-plus" @click="addTechnology()">Add Tech/Skill</v-btn>
       </v-col>
     </v-row>
-    <v-row v-for="(technology, index) in technologies" :key="technology + index" class="d-flex align-center">
+    <v-row v-for="(technology, index) in editedTechnologies" :key="technology + index" class="d-flex align-center">
       <!-- name -->
       <v-col sm="10" md="8" lg="5">
         <v-autocomplete
           v-model="technology.name"
           label="Tech/Skill"
           :items="dropdownItems"
-          :rules="[...getRequiredRules(), ...getDuplicateTechRules(technologies)]"
+          :rules="[...getRequiredRules(), ...getDuplicateTechRules(editedTechnologies)]"
           hide-details="auto"
           style="min-width: 180px"
           @update:search="updateDropdownItems($event)"
@@ -96,9 +96,9 @@
         </v-tooltip>
       </v-col>
 
-      <v-divider v-if="index < technologies.length - 1" class="border-opacity-25 my-5" thickness="3"></v-divider>
+      <v-divider v-if="index < editedTechnologies.length - 1" class="border-opacity-25 my-5" thickness="3"></v-divider>
     </v-row>
-    <v-row v-if="technologies.length != 0">
+    <v-row v-if="editedTechnologies.length != 0">
       <v-col class="d-flex justify-center">
         <v-btn prepend-icon="mdi-plus" @click="addTechnology(false)">Add Tech/Skill</v-btn>
       </v-col>
@@ -111,7 +111,7 @@ import api from '@/shared/api';
 import { getDuplicateTechRules, getRequiredRules } from '@/shared/validationUtils';
 import { isMobile } from '@/utils/utils';
 import { isEmpty, map } from 'lodash';
-import { inject, onBeforeUnmount, onMounted, ref } from 'vue';
+import { inject, onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -125,7 +125,7 @@ const editedEmployee = defineModel({ required: true });
 const valid = defineModel('valid', { required: true });
 const form = ref(null); // template ref
 
-const technologies = ref(
+const editedTechnologies = ref(
   map(editedEmployee.value.technologies, (value) => {
     // adds a 'time' key to each technology, containing an integer value for both years and months
     // omits the 'years' key as the time key replaces it
@@ -133,6 +133,12 @@ const technologies = ref(
   })
 );
 const dropdownItems = ref([]);
+
+let stopPrepare = false;
+const onDiscardEdits = (employee) => {
+  stopPrepare = true;
+  editedEmployee.value = employee;
+};
 
 defineExpose({ prepareSubmit });
 
@@ -142,7 +148,16 @@ defineExpose({ prepareSubmit });
 // |                                                  |
 // |--------------------------------------------------|
 
+onBeforeMount(() => {
+  emitter.on('discard-edits', onDiscardEdits);
+});
+
 onMounted(validate);
+
+onBeforeUnmount(() => {
+  emitter.off('discard-edits', onDiscardEdits);
+});
+
 onBeforeUnmount(prepareSubmit);
 
 // |--------------------------------------------------|
@@ -152,24 +167,27 @@ onBeforeUnmount(prepareSubmit);
 // |--------------------------------------------------|
 
 async function prepareSubmit() {
-  await validate();
+  if (!stopPrepare) {
+    await validate();
 
-  editedEmployee.value.technologies = map(technologies.value, (value) => {
-    let years = value.time.years + value.time.months / 12;
+    editedEmployee.value.technologies = map(editedTechnologies.value, (value) => {
+      let years = value.time.years + value.time.months / 12;
 
-    // if years is not an integer
-    if (Math.round(years) !== years) {
-      // convert to fixed string if it's a float, otherwise leave it as a number
-      // this is how the database stores this data initially
-      // this needs to be in the same format so that changes can be accurately tracked
-      years = years.toFixed(2);
-    }
-    return {
-      name: value.name,
-      years,
-      current: value.current
-    };
-  });
+      // if years is not an integer
+      if (Math.round(years) !== years) {
+        // convert to fixed string if it's a float, otherwise leave it as a number
+        // this is how the database stores this data initially
+        // this needs to be in the same format so that changes can be accurately tracked
+        years = Math.trunc(years * 100) / 100;
+        years = years.toFixed(2);
+      }
+      return {
+        name: value.name,
+        years,
+        current: value.current
+      };
+    });
+  }
 }
 
 async function validate() {
@@ -226,11 +244,11 @@ function addTechnology(addToTop = true) {
     time: { years: 0, months: 0 }
   };
 
-  if (addToTop) technologies.value.unshift(newTech);
-  else technologies.value.push(newTech);
+  if (addToTop) editedTechnologies.value.unshift(newTech);
+  else editedTechnologies.value.push(newTech);
 }
 
 function deleteTechnology(index) {
-  technologies.value.splice(index, 1);
+  editedTechnologies.value.splice(index, 1);
 }
 </script>
