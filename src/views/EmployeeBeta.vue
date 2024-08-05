@@ -35,7 +35,7 @@
                 <v-icon v-else size="32" color="black">mdi-magnify-remove-outline</v-icon>
               </v-btn>
               <!-- if user is not searching -->
-              <v-scroll-y-transition mode="out-in">
+              <v-scroll-y-transition mode="out-in" @after-enter="openMenu = true">
                 <div v-if="!inSearchMode">
                   <!-- if user is viewing their own profile  -->
                   <p
@@ -66,6 +66,8 @@
                     return-object
                     autofocus
                     clearable
+                    :menu="openMenu"
+                    @blur="openMenu = false"
                     @update:model-value="onSearchUpdate()"
                   ></v-autocomplete>
                 </v-responsive>
@@ -167,6 +169,7 @@ const expenses = ref(null);
 const expenseTypes = ref(null);
 const fiscalDateView = ref('');
 const loading = ref(true);
+const openMenu = ref(false);
 const refreshKey = readonly({
   model,
   expenses,
@@ -336,7 +339,7 @@ function userIsEmployee() {
  */
 function onSearchButton() {
   inSearchMode.value = !inSearchMode.value;
-  dropdownEmployee.value = `${model.value.lastName}, ${model.value.nickname || model.value.firstName}`;
+  openMenu.value = false;
 }
 
 /**

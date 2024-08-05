@@ -1,40 +1,38 @@
 <template>
   <v-container id="employee-container" class="px-1 pt-3" fluid>
     <v-card id="employee-info-card" class="ma-1" elevation="2">
-      <v-card-title class="header_style px-0 d-flex align-center">
-        <v-container class="d-flex flex-nowrap justify-space-between">
-          <!-- title -->
-          <v-row no-gutters class="fit-content align-center">
-            <v-col>
-              <!-- <div class="d-flex justify-lg-space-between align-center"> -->
-              <h3 class="text-white">{{ employeeTitle }}</h3>
-              <!-- </div> -->
-            </v-col>
-          </v-row>
-          <v-spacer></v-spacer>
-          <!-- action buttons -->
-          <v-row no-gutters class="fit-content d-flex align-center justify-end">
-            <v-col>
-              <div class="d-flex flex-row align-center">
-                <resume-card v-model="model" :editing="editing" :loading="loading"></resume-card>
-                <convert-employee-to-csv
-                  v-if="isAdmin"
-                  :contracts="contracts"
-                  :employee="model"
-                  :filename="`${model.nickname || model.firstName} ${model.lastName}`"
-                  :tags="store.getters.tags"
-                  color="white"
-                />
-              </div>
-            </v-col>
-            <v-col class="ml-2">
-              <v-btn v-if="isAdmin || isUser" @click="toggleEdit()" density="comfortable" variant="text" icon="">
-                <v-tooltip activator="parent" location="top"> Edit {{ menuBtn }} </v-tooltip>
-                <v-icon id="edit" color="white"> mdi-pencil </v-icon>
-              </v-btn>
-            </v-col>
-          </v-row>
-        </v-container>
+      <v-card-title class="header_style d-flex align-center">
+        <!-- title -->
+        <v-row no-gutters class="fit-content align-center">
+          <v-col>
+            <!-- <div class="d-flex justify-lg-space-between align-center"> -->
+            <h3 class="text-white">{{ employeeTitle }}</h3>
+            <!-- </div> -->
+          </v-col>
+        </v-row>
+        <v-spacer></v-spacer>
+        <!-- action buttons -->
+        <v-row no-gutters class="fit-content d-flex align-center justify-end">
+          <v-col>
+            <div class="d-flex flex-row align-center">
+              <resume-card v-model="model" :editing="editing" :loading="loading"></resume-card>
+              <convert-employee-to-csv
+                v-if="isAdmin"
+                :contracts="contracts"
+                :employee="model"
+                :filename="`${model.nickname || model.firstName} ${model.lastName}`"
+                :tags="store.getters.tags"
+                color="white"
+              />
+            </div>
+          </v-col>
+          <v-col class="ml-2">
+            <v-btn v-if="isAdmin || isUser" @click="toggleEdit()" density="comfortable" variant="text" icon="">
+              <v-tooltip activator="parent" location="top"> Edit {{ menuBtn }} </v-tooltip>
+              <v-icon id="edit" color="white"> mdi-pencil </v-icon>
+            </v-btn>
+          </v-col>
+        </v-row>
       </v-card-title>
       <v-card-text :class="useDropDown ? 'pa-0' : ''">
         <v-row justify="center">
@@ -65,7 +63,7 @@
                         </v-btn>
                       </template>
                       <v-list>
-                        <v-list-item v-if="isUser || isAdmin" @click="selectTab('personal')">Personal</v-list-item>
+                        <v-list-item @click="selectTab('personal')">Personal</v-list-item>
                         <v-list-item @click="selectTab('certifications+awards')">Certifications & Awards</v-list-item>
                         <v-list-item @click="selectTab('tech+skills+languages')">Tech, Skills, & Languages</v-list-item>
                         <v-list-item @click="selectTab('experience+education')">Job Experience & Education</v-list-item>
@@ -80,7 +78,7 @@
                       color="blue"
                       class="mx-4"
                     >
-                      <v-tab v-if="isUser || isAdmin" value="personal" @click="selectTab('personal')">Personal</v-tab>
+                      <v-tab value="personal" @click="selectTab('personal')">Personal</v-tab>
                       <v-tab value="certifications+awards" @click="selectTab('certifications+awards')"
                         >Certifications & Awards</v-tab
                       >
@@ -99,11 +97,11 @@
                 <v-tabs-window v-model="infoTab">
                   <v-tabs-window-item value="personal">
                     <!-- personal info -->
-                    <v-row class="my-2" v-if="isUser || isAdmin">
+                    <v-row class="my-2">
                       <v-col>
                         <personal-info-card style="padding-bottom: 10px" :model="model"></personal-info-card>
                       </v-col>
-                      <v-col>
+                      <v-col v-if="isUser || isAdmin">
                         <other-info-card style="padding-bottom: 10px" :model="model"></other-info-card>
                       </v-col>
                       <v-col v-if="isUser || isAdmin">
