@@ -51,11 +51,11 @@
           <v-col class="pb-0">
             <v-autocomplete
               prepend-inner-icon="mdi-magnify"
-              v-model="searchString"
               label="Search Locations"
               :items="Object.keys(placeIds)"
               no-data-text="Start searching..."
               @update:search="updateAddressDropDown($event)"
+              ref="addressSearch"
             >
               <template #prepend>
                 <v-tooltip location="top" text="Address is always hidden from other users">
@@ -244,10 +244,10 @@
                   label="City Locations"
                   @update:search="updateCityDropDown($event)"
                   :items="Object.keys(predictions)"
-                  v-model="citySearchString"
                   no-data-text="Start searching..."
                   persitent-hint="Search city and select option to auto-fill fields below."
                   persistent-hint
+                  ref="birthPlaceSearch"
                 >
                   <template #prepend>
                     <v-tooltip location="top" text="Place of birth is always hidden from other users">
@@ -421,9 +421,9 @@ const personalEmail = ref({ emailValue: editedEmployee.value.personalEmail, priv
 const phoneNumbers = ref(initPhoneNumbers());
 
 // other refs
+const addressSearch = ref(null); // current address search input
+const birthPlaceSearch = ref(null); // birth place search input
 const birthdayMenu = ref(false);
-const citySearchString = ref(null); // user input for searching POB
-const searchString = ref(''); // user input for searching address
 // const states = STATES; // states
 const placeIds = ref({}); // for address autocomplete
 const predictions = ref({}); // for POB autocomplete
@@ -626,6 +626,7 @@ async function autofillLocation(item) {
     //resets addresses and ID's in dropdown
     placeIds.value = {};
     search = null;
+    addressSearch.value.blur();
   }
 } // autofillLocation
 
@@ -658,11 +659,11 @@ async function updateCityDropDown(query) {
  * Once a city has been selected, it will update the fields.
  */
 async function updateCityBoxes(item) {
-  citySearchString.value = item.value;
+  let citySearchString = item.value;
   let country = '';
   let state = '';
-  if (!isEmpty(citySearchString.value)) {
-    let birthInfo = citySearchString.value.split(', ');
+  if (!isEmpty(citySearchString)) {
+    let birthInfo = citySearchString.split(', ');
     let city = birthInfo[0];
 
     // a city outside the US with no state/region
@@ -683,7 +684,7 @@ async function updateCityBoxes(item) {
 
     //resets predictions and ID's in dropdown
     predictions.value = {};
-    citySearchString.value = null;
+    birthPlaceSearch.value.blur();
   }
 } // updateCityBoxes
 
