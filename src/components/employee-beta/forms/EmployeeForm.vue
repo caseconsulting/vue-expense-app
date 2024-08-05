@@ -40,49 +40,49 @@
           <v-col v-if="!isMobile()" cols="2">
             <v-list density="compact" nav id="edit-navigation">
               <v-list-item
-                @click="selectTab('Personal', 0)"
+                @click="cardName = 'Personal'"
                 link
                 title="Personal"
                 :class="{ invalid: !validTabs.personal }"
               ></v-list-item>
               <v-list-item
-                @click="selectTab('Clearances', 1)"
+                @click="cardName = 'Clearances'"
                 link
                 title="Clearances"
                 :class="{ invalid: !validTabs.clearance }"
               ></v-list-item>
               <v-list-item
-                @click="selectTab('Contracts', 2)"
+                @click="cardName = 'Contracts'"
                 link
                 title="Contracts"
                 :class="{ invalid: !validTabs.contracts }"
               ></v-list-item>
               <v-list-item
-                @click="selectTab('Certifications & Awards', 3)"
+                @click="cardName = 'Certifications & Awards'"
                 link
                 title="Certifications & Awards"
                 :class="{ invalid: !validTabs.certsAndAwards }"
               ></v-list-item>
               <v-list-item
-                @click="selectTab('Tech & Skills', 4)"
+                @click="cardName = 'Tech & Skills'"
                 link
                 title="Tech & Skills"
                 :class="{ invalid: !validTabs.technologies }"
               ></v-list-item>
               <v-list-item
-                @click="selectTab('Languages', 5)"
+                @click="cardName = 'Languages'"
                 link
                 title="Foreign Languages"
                 :class="{ invalid: !validTabs.languages }"
               ></v-list-item>
               <v-list-item
-                @click="selectTab('Job Experience', 6)"
+                @click="cardName = 'Job Experience'"
                 link
                 title="Job Experience"
                 :class="{ invalid: !validTabs.jobExperience }"
               ></v-list-item>
               <v-list-item
-                @click="selectTab('Education', 7)"
+                @click="cardName = 'Education'"
                 link
                 title="Education"
                 :class="{ invalid: !validTabs.education }"
@@ -232,6 +232,7 @@ const editedEmployee = ref(cloneDeep(props.employee));
 const isUser = inject('isUser');
 
 // state
+const cardName = ref('');
 const editing = defineModel();
 const formTabs = ref([]);
 const submitting = ref(false);
@@ -268,34 +269,8 @@ const technologiesRef = ref(null);
 // |--------------------------------------------------|
 
 onBeforeMount(() => {
-  emitter.on('editing', (cardName) => {
-    if (
-      cardName === 'Personal Information' ||
-      cardName === 'Employee' ||
-      cardName === 'Other Information' ||
-      cardName === 'Select Info'
-    ) {
-      cardName = 'Personal';
-    } else if (cardName === 'Clearance' || cardName === 'Clearances') {
-      cardName = 'Clearances';
-    } else if (cardName === 'Contracts' || cardName === 'All Contract Info') {
-      cardName = 'Contracts';
-    } else if (cardName === 'Job Experience' || cardName === 'Job Experience & Education') {
-      cardName = 'Job Experience';
-    } else if (cardName === 'Certifications' || cardName === 'Awards') {
-      cardName = 'Certifications & Awards';
-    } else if (cardName === 'Education' || cardName === 'All Education') {
-      cardName = 'Education';
-    } else if (
-      cardName === 'Technologies and Skills' ||
-      cardName === 'Tech and Skills' ||
-      cardName === 'Tech, Skills, & Languages'
-    ) {
-      cardName = 'Tech & Skills';
-    } else if (cardName === 'Foreign Languages') {
-      cardName = 'Languages';
-    }
-    formTabs.value = [cardName];
+  emitter.on('editing', (card) => {
+    cardName.value = card;
     editing.value = true;
   });
 
@@ -437,18 +412,96 @@ function collapseAllTabs() {
   formTabs.value = [];
 }
 
-function selectTab(tabName, num) {
-  formTabs.value = [tabName];
-  let e = document.getElementById('employee-card');
-  let tabHeight = 60;
-  e.scroll({ top: tabHeight * num, behavior: 'smooth' });
-}
-
 /**
  * Returns true only if the value is undefined, null, or an empty string
  */
 function isEmpty(value) {
   return value === undefined || value === null || value === '' || value == [];
+}
+
+/**
+ * Opens only cardName tab and scrolls to tab header
+ */
+async function selectTab() {
+  let num = 0;
+  let card = '';
+  switch (cardName.value) {
+    case 'Personal':
+    case 'Personal Information':
+    case 'Employee':
+    case 'Other Information':
+    case 'Select Info':
+      num = 0;
+      card = 'Personal';
+      break;
+    case 'Clearance':
+    case 'Clearances':
+      num = 1;
+      card = 'Clearances';
+      break;
+    case 'Contracts':
+    case 'All Contract Info':
+      num = 2;
+      card = 'Contracts';
+      break;
+    case 'Certifications':
+    case 'Awards':
+    case 'Certifications & Awards':
+      num = 3;
+      card = 'Certifications & Awards';
+      break;
+    case 'Technologies and Skills':
+    case 'Tech and Skills':
+    case 'Tech, Skills, & Languages':
+    case 'Tech & Skills':
+      num = 4;
+      card = 'Tech & Skills';
+      break;
+    case 'Languages':
+    case 'Foreign Languages':
+      num = 5;
+      card = 'Languages';
+      break;
+    case 'Job Experience':
+    case 'Job Experience & Education':
+      num = 6;
+      card = 'Job Experience';
+      break;
+    case 'Education':
+    case 'All Education':
+      num = 7;
+      card = 'Education';
+      break;
+    default:
+      num = 0;
+      card = 'Personal';
+  }
+  cardName.value = card;
+  formTabs.value = [card];
+  // wait for element to exist https://stackoverflow.com/questions/5525071/how-to-wait-until-an-element-exists
+  function waitForElm(selector) {
+    return new Promise((resolve) => {
+      if (document.getElementById(selector)) {
+        return resolve(document.getElementById(selector));
+      }
+
+      const observer = new MutationObserver(() => {
+        if (document.getElementById(selector)) {
+          observer.disconnect();
+          resolve(document.getElementById(selector));
+        }
+      });
+
+      // If you get "parameter 1 is not of type 'Node'" error, see https://stackoverflow.com/a/77855838/492336
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
+    });
+  }
+  let e = await waitForElm('employee-card');
+  let tabHeight = 60;
+  e?.scroll({ top: tabHeight * num, behavior: 'smooth' });
 }
 
 // |--------------------------------------------------|
@@ -461,6 +514,10 @@ watch(validTabs, () => {
   if (Object.values(validTabs).every((tab) => tab == true)) {
     valid.value = true;
   }
+});
+
+watch(cardName, () => {
+  selectTab();
 });
 </script>
 
