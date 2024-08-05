@@ -18,8 +18,10 @@
       </div>
       <p><b>EEO Status:</b> {{ getSelfIdentified() }} {{ eeoStatus() }}</p>
       <div class="text-center" style="padding-bottom: 5px">
-        <v-btn size="small" variant="tonal" @click="toggleView()" v-if="getEEOFilled()">View EEO Data</v-btn>
-        <v-btn size="small" @click="toggleEdit()" v-else>Complete EEO Form</v-btn>
+        <v-btn size="small" variant="flat" color="#F3F3F3" @click="toggleView()" v-if="getEEOFilled()"
+          >View EEO Data</v-btn
+        >
+        <v-btn size="small" variant="flat" color="#F3F3F3" @click="toggleEdit()" v-else>Complete EEO Form</v-btn>
       </div>
       <e-e-o-compliance-edit-modal v-model="toggleForm" :model="model"></e-e-o-compliance-edit-modal>
       <e-e-o-compliance-view-modal v-model="viewForm" :model="model"></e-e-o-compliance-view-modal>
