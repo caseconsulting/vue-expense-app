@@ -203,7 +203,7 @@ export class Employee {
     this.publicPhoneNumbers = properties.publicPhoneNumbers ?? [];
 
     /** @type {string} */
-    this.resumeUpdated = properties.resumeUpdated ?? '';
+    this.resumeUpdated = properties.resumeUpdated ?? null;
 
     /** @type {string[]} */
     this.schools = properties.schools ?? [];
