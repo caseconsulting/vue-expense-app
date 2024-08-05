@@ -464,6 +464,7 @@ async function selectTab() {
       break;
     case 'Job Experience':
     case 'Job Experience & Education':
+    case 'Past Job Experience':
       num = 6;
       card = 'Job Experience';
       break;
