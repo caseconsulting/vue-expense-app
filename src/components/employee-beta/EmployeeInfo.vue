@@ -77,17 +77,33 @@
                       color="blue"
                       class="mx-4"
                     >
-                      <v-tab value="personal" @click="selectTab('personal')">Personal</v-tab>
-                      <v-tab value="certifications+awards" @click="selectTab('certifications+awards')"
-                        >Certifications & Awards</v-tab
+                      <v-tab value="personal" @click="selectTab('personal')">
+                        <div class="tab-content"><span>Personal</span><span>Info</span></div>
+                      </v-tab>
+                      <v-tab value="certifications+awards" @click="selectTab('certifications+awards')">
+                        <div class="tab-content">
+                          <span>Certifications</span>
+                          <span>& Awards</span>
+                        </div>
+                      </v-tab>
+                      <v-tab value="tech+skills+languages" @click="selectTab('tech+skills+languages')">
+                        <div class="tab-content">
+                          <span>Tech, Skills,</span>
+                          <span>& Languages</span>
+                        </div>
+                      </v-tab>
+                      <v-tab value="experience+education" @click="selectTab('experience+education')">
+                        <div class="tab-content">
+                          <span>Job Experience</span>
+                          <span>& Education</span>
+                        </div>
+                      </v-tab>
+                      <v-tab value="customer+orgs" @click="selectTab('customer+orgs')">
+                        <div class="tab-content">
+                          <span>Customer</span>
+                          <span>Orgs</span>
+                        </div></v-tab
                       >
-                      <v-tab value="tech+skills+languages" @click="selectTab('tech+skills+languages')"
-                        >Tech, Skills, & Languages</v-tab
-                      >
-                      <v-tab value="experience+education" @click="selectTab('experience+education')"
-                        >Job Experience & Education</v-tab
-                      >
-                      <v-tab value="customer+orgs" @click="selectTab('customer+orgs')">Customer Orgs</v-tab>
                     </v-tabs>
                     <v-divider></v-divider>
                   </v-col>
@@ -273,3 +289,10 @@ function toggleEdit() {
   emitter.emit('editing', menuBtn.value);
 }
 </script>
+
+<style scoped>
+.tab-content span {
+  display: block;
+  text-align: start;
+}
+</style>
