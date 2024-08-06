@@ -570,6 +570,12 @@ function getEmployeeTags() {
  * @return {any[]} A concatenated list of pubic and private phone numbers
  */
 function initPhoneNumbers() {
+  if (editedEmployee.value.privatePhoneNumbers === undefined) {
+    editedEmployee.value.privatePhoneNumbers = [];
+  }
+  if (editedEmployee.value.publicPhoneNumbers === undefined) {
+    editedEmployee.value.publicPhoneNumbers = [];
+  }
   return editedEmployee.value.publicPhoneNumbers.concat(editedEmployee.value.privatePhoneNumbers);
 }
 

@@ -15,8 +15,11 @@
         style="position: sticky; top: 0; z-index: 2"
       >
         <v-row class="align-center">
-          <v-col class="d-inline" v-if="!isMobile()">
+          <v-col class="d-inline" v-if="!isMobile() && !creatingEmployee">
             <h3 class="text-white px-2">Editing {{ isUser ? 'My Profile' : fullName }}</h3>
+          </v-col>
+          <v-col class="d-inline" v-else-if="creatingEmployee">
+            <h3 class="text-white px-2">Create new Employee</h3>
           </v-col>
           <v-col class="d-inline" v-else>
             <h3 class="text-white px-2">Editing</h3>
@@ -220,6 +223,9 @@ import JobExperienceForm from './JobExperienceForm.vue';
 import LanguagesForm from './LanguagesForm.vue';
 import PersonalInfoForm from './PersonalInfoForm.vue';
 import TechnologiesForm from './TechnologiesForm.vue';
+import { generateUUID } from '../../../utils/utils';
+import { updateStoreEmployees, updateStoreUser } from '../../../utils/storeUtils';
+import { useRouter } from 'vue-router';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -231,12 +237,14 @@ import TechnologiesForm from './TechnologiesForm.vue';
 const emitter = inject('emitter');
 const store = useStore();
 
+const router = useRouter();
 const props = defineProps(['employee', 'contracts']);
 const editedEmployee = ref(cloneDeep(props.employee));
 const isUser = inject('isUser');
 
 // state
 const cardName = ref('');
+const creatingEmployee = ref(false);
 const editing = defineModel();
 const formTabs = ref([]);
 const submitting = ref(false);
@@ -296,6 +304,11 @@ onBeforeMount(() => {
   emitter.on('validating', (event) => {
     validTabs[event.tab] = event.valid;
   });
+
+  emitter.on('create-new-employee', () => {
+    creatingEmployee.value = true;
+    emitter.emit('editing', 'Personal'); // opens the personal tab when creating a new employee
+  });
 });
 
 onBeforeUnmount(() => {
@@ -303,6 +316,7 @@ onBeforeUnmount(() => {
   emitter.off('canceled-cancel');
   emitter.off('confirmed-cancel');
   emitter.off('validating');
+  emitter.off('create-new-employee');
 });
 
 // |--------------------------------------------------|
@@ -328,23 +342,44 @@ async function submit() {
   valid.value = await validate();
   if (!valid.value) return cancelSubmit();
 
-  // scans for all changed attributes
-  const changes = getChanges();
+  //if updating a current employee
+  if (!creatingEmployee.value) {
+    // scans for all changed attributes
+    const changes = getChanges();
 
-  // if there are any changes
-  if (!isEmpty(Object.keys(changes))) {
-    if (changes.tags) {
-      submitTags(changes.tags);
-      delete changes.tags; // remove when we are done, we don't want to send this in api call
+    // if there are any changes
+    if (!isEmpty(Object.keys(changes))) {
+      if (changes.tags) {
+        submitTags(changes.tags);
+        delete changes.tags; // remove when we are done, we don't want to send this in api call
+      }
+      const updated = await api.updateAttributes(api.EMPLOYEES, props.employee.id, changes);
+      if (updated.id) {
+        emitter.emit('update', updated);
+        // getEmployees and update store with latest data
+        if (editedEmployee.value.id === store.getters.user.id) await updateStoreUser();
+        await updateStoreEmployees();
+      } else {
+        useDisplayError(updated.response.data.message);
+      }
     }
-
-    const updated = await api.updateAttributes(api.EMPLOYEES, props.employee.id, changes);
-    if (updated.id) {
-      emitter.emit('update', updated);
+  } else {
+    //creating a new employee
+    editedEmployee.value.id = generateUUID();
+    let newEmployee = await api.createItem(api.EMPLOYEES, editedEmployee.value);
+    // update the store with the latest data
+    await updateStoreEmployees();
+    //reroute to the newly created employee
+    if (newEmployee.id) {
+      router.push(`/employee/${newEmployee.employeeNumber}`);
     } else {
-      useDisplayError(updated.response.data.message);
+      // shows an error message with why the employee creation was failed
+      emitter.emit('error', newEmployee.response.data.message);
+      useDisplayError(newEmployee.response.data.message);
+      editedEmployee.value.id = null; // reset id
     }
   }
+
   submitting.value = false;
   editing.value = false; // close edit modal
 }
