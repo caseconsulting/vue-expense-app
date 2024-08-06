@@ -458,6 +458,9 @@ defineExpose({ prepareSubmit }); // allows parent to use refs to call prepareSub
 
 onBeforeMount(() => {
   emitter.on('discard-edits', onDiscardEdits);
+  emitter.on('confirmed-cancel-eeo', () => {
+    toggleForm.value = false;
+  });
 });
 
 onMounted(validate);
@@ -730,7 +733,7 @@ function removeEmailDomain() {
 
 function toggleEdit() {
   emitter.emit('open-dialog');
-  toggleForm.value = !toggleForm.value;
+  toggleForm.value = true;
 }
 </script>
 
