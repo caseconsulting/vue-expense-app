@@ -131,6 +131,15 @@
               :rules="employeeNumberRules"
             ></v-text-field>
           </v-col>
+          <!-- hire date -->
+          <v-col>
+            <date-picker-field
+              v-model="editedEmployee.hireDate"
+              label="Hire Date *"
+              :rules="getRequiredRules()"
+              text-field-classes="v-text-field"
+            ></date-picker-field>
+          </v-col>
           <!-- job role -->
           <v-col>
             <v-combobox v-model="editedEmployee.jobRole" label="Job Role" :items="JOB_TITLES"></v-combobox>
@@ -171,33 +180,16 @@
         <v-row class="groove">
           <!-- birthday -->
           <v-col :cols="!isMobile() ? '4' : '12'">
-            <v-text-field
-              v-model="formattedBirthday"
+            <date-picker-field
+              v-model="editedEmployee.birthday"
               label="Birthday"
-              v-mask="'##/##/####'"
-              hint="MM/DD/YYYY"
               :rules="[getBirthdayRules()]"
-              prepend-inner-icon="mdi-calendar"
-              autocomplete="off"
-              style="min-width: 200px"
-              @keypress="birthdayMenu = false"
+              text-field-classes="v-text-field"
             >
-              <v-menu activator="parent" :close-on-content-click="false" v-model="birthdayMenu" location="start center">
-                <v-date-picker
-                  v-model="birthday"
-                  show-adjacent-months
-                  hide-actions
-                  keyboard-icon=""
-                  color="#bc3825"
-                  title="Birthday"
-                  @update:model-value="onUpdateDatePicker($event)"
-                >
-                </v-date-picker>
-              </v-menu>
               <template #append-inner>
                 <private-button v-model="editedEmployee.birthdayFeed"></private-button>
               </template>
-            </v-text-field>
+            </date-picker-field>
           </v-col>
           <!-- personal email -->
           <v-col>
@@ -385,8 +377,8 @@
 
 <script setup>
 import { JOB_TITLES } from '@/components/employees/form-tabs/dropdown-info/jobTitles';
+import DatePickerField from '@/components/shared/DatePickerField.vue';
 import api from '@/shared/api';
-import { format, FORMATTED_ISOFORMAT, ISO8601 } from '@/shared/dateUtils';
 import { CASE_EMAIL_DOMAIN, EMPLOYEE_ROLES, PHONE_TYPES } from '@/shared/employeeUtils';
 import {
   getBirthdayRules,
@@ -399,7 +391,6 @@ import {
   getURLRules
 } from '@/shared/validationUtils';
 import { COUNTRIES, isMobile, STATES } from '@/utils/utils';
-import dayjs from 'dayjs';
 import { cloneDeep, filter, forEach, includes, isEmpty, lowerCase, some, startCase, xorBy } from 'lodash';
 import { computed, inject, onBeforeMount, onBeforeUnmount, onMounted, readonly, ref } from 'vue';
 import { mask } from 'vue-the-mask';
@@ -433,12 +424,9 @@ const phoneNumbers = ref(initPhoneNumbers());
 // other refs
 const addressSearch = ref(null); // current address search input
 const birthPlaceSearch = ref(null); // birth place search input
-const birthdayMenu = ref(false);
 const placeIds = ref({}); // for address autocomplete
 const predictions = ref({}); // for POB autocomplete
 const toggleForm = ref(false); // for EEO data
-
-// other refs
 const phoneAutofocus = ref(false);
 
 // values to help with resetting edits after cancelling
@@ -482,34 +470,6 @@ const userIsAdminOrManager = computed(() => {
   return role === 'admin' || role === 'manager';
 });
 
-/**
- * Dayjs object that wraps the birthday
- *
- * @type {import('vue').WritableComputedRef<import('dayjs').Dayjs>}
- */
-const birthday = computed({
-  get: () => dayjs(editedEmployee.value.birthday, ISO8601),
-  set: (val) => {
-    editedEmployee.value.birthday = val.format(ISO8601);
-  }
-});
-
-/**
- * Formatted string of the employee's birthday
- *
- * @type {import('vue').WritableComputedRef<string>}
- */
-const formattedBirthday = computed({
-  get: () => {
-    if (!birthday.value.isValid()) return '';
-    return birthday.value.format(FORMATTED_ISOFORMAT);
-  },
-  set: (val) => {
-    const day = dayjs(val, FORMATTED_ISOFORMAT);
-    if (day.isValid()) birthday.value = day;
-  }
-});
-
 /** @type {import('vue').ComputedRef<((v: any) => true | string)[]>} */
 const employeeNumberRules = computed(() => [
   ...getRequiredRules(),
@@ -545,8 +505,6 @@ async function prepareSubmit() {
     // the xor/symmetric difference is just the elements that have changed
     // this includes both tags the employee was added to and removed from, and no others
     editedEmployee.value.tags = xorBy(editedTags.value, uneditedTags, 'id'); // xor by property 'id'
-
-    editedEmployee.value.birthday = format(formattedBirthday.value, FORMATTED_ISOFORMAT, ISO8601);
 
     if (editedEmployee.value.country !== 'United States') editedEmployee.value.st = '';
 
@@ -660,14 +618,6 @@ async function autofillLocation(item) {
     addressSearch.value.blur();
   }
 } // autofillLocation
-
-/**
- * Run when the model value of the birthday date picker is updated
- */
-function onUpdateDatePicker(event) {
-  birthdayMenu.value = false;
-  formattedBirthday.value = event;
-}
 
 /**
  * Updates the city dropdown according to the user's input.
