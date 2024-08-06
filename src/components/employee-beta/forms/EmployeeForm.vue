@@ -498,6 +498,7 @@ async function selectTab() {
       card = 'Clearances';
       break;
     case 'Contracts':
+    case 'Current Contract Info':
     case 'All Contract Info':
       num = 2;
       card = 'Contracts';
