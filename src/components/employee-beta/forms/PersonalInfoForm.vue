@@ -4,13 +4,17 @@
     <v-row class="groove">
       <!-- first name -->
       <v-col>
-        <v-text-field v-model="editedEmployee.firstName" label="First Name" :rules="getRequiredRules()"></v-text-field>
+        <v-text-field
+          v-model="editedEmployee.firstName"
+          label="First Name *"
+          :rules="getRequiredRules()"
+        ></v-text-field>
       </v-col>
       <!-- middle name -->
       <v-col>
         <v-text-field
           v-model.trim="editedEmployee.middleName"
-          :label="editedEmployee.noMiddleName ? 'No Middle Name' : 'Middle Name'"
+          :label="editedEmployee.noMiddleName ? 'No Middle Name' : 'Middle Name *'"
           :rules="editedEmployee.noMiddleName ? [() => true] : getRequiredRules()"
           :hide-details="editedEmployee.noMiddleName ? true : 'auto'"
           @update:model-value="if (!isEmpty(editedEmployee.middleName)) editedEmployee.noMiddleName = false;"
@@ -35,7 +39,7 @@
       </v-col>
       <!-- last name -->
       <v-col>
-        <v-text-field v-model="editedEmployee.lastName" label="Last Name" :rules="getRequiredRules()"></v-text-field>
+        <v-text-field v-model="editedEmployee.lastName" label="Last Name *" :rules="getRequiredRules()"></v-text-field>
       </v-col>
       <!-- nickname -->
       <v-col>
@@ -113,7 +117,7 @@
           <v-col>
             <v-text-field
               v-model="emailUsername"
-              label="CASE Email"
+              label="CASE Email *"
               @update:model-value="removeEmailDomain()"
               :suffix="CASE_EMAIL_DOMAIN"
               :rules="getCaseEmailRules()"
@@ -123,7 +127,7 @@
           <v-col v-if="userIsAdminOrManager">
             <v-text-field
               v-model="editedEmployee.employeeNumber"
-              label="Employee Number"
+              label="Employee Number *"
               :rules="employeeNumberRules"
             ></v-text-field>
           </v-col>
