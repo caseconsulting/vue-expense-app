@@ -27,40 +27,36 @@
 <script setup>
 import { _ } from 'lodash';
 import { isEmpty } from '@/utils/utils';
-import { onBeforeMount, ref } from 'vue';
+import { computed, ref } from 'vue';
 import BaseCard from './BaseCard.vue';
 import JobExperienceList from '../lists/JobExperienceList.vue';
 import JobExperienceModal from '../modals/JobExperienceModal.vue';
 import { difference, format, getTodaysDate, isBefore, maximum, minimum } from '../../../shared/dateUtils';
-import { computed } from 'vue';
 
 const props = defineProps(['model']);
 
-const filterCompanies = ref(_.cloneDeep(props.model.companies));
 const onModal = ref(false);
-const pageList = ref([]);
 const toggleModal = ref(false);
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                 LIFESTYLE HOOKS                  |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Emits to parent the component was created and get data for the list.
- */
-onBeforeMount(() => {
-  if (!isEmpty(props.model.companies)) {
-    pageList.value = filterCompanies.value.slice(0, 2);
-  }
-}); // created
 
 // |--------------------------------------------------|
 // |                                                  |
 // |                     COMPUTED                     |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Emits to parent the component was created and get data for the list.
+ */
+const pageList = computed(() => {
+  if (!isEmpty(props.model.companies)) {
+    return filterCompanies.value.slice(0, 2);
+  }
+  return [];
+});
+
+const filterCompanies = computed(() => {
+  return _.cloneDeep(props.model.companies);
+});
 
 const icExperience = computed(() => {
   // get values from input, convert to array, and then sort them
