@@ -1,9 +1,6 @@
 <template>
   <div>
-    <v-card>
-      <v-card-title class="d-flex align-center justify-space-between beta_header_style">
-        <h3 class="text-white">Current Contract Info</h3>
-      </v-card-title>
+    <base-card title="Current Contract Info">
       <v-card-text class="pb-0 pt-3" v-if="!isEmpty(contractsList)">
         <div v-if="!noneActive">
           <p><b>Contract: </b>{{ getContractNameFromId(currentContractId) }}</p>
@@ -19,11 +16,9 @@
       </v-card-text>
       <v-card-text class="mt-6 text-align: center" v-else> No contract Information </v-card-text>
       <v-card-actions class="justify-center">
-        <v-btn class="mb-4" variant="flat" color="#F3F3F3" @click="open"
-          >View All {{ contractsList.length }} Contracts</v-btn
-        >
+        <v-btn variant="flat" color="#F3F3F3" @click="open">View All {{ contractsList.length }} Contracts</v-btn>
       </v-card-actions>
-    </v-card>
+    </base-card>
     <contracts-modal
       v-model="dialog"
       :contracts="contracts"
@@ -40,6 +35,7 @@ import _ from 'lodash';
 import { isEmpty } from '@/utils/utils';
 import { monthDayYearFormat } from '../../../utils/utils';
 import ContractsModal from '@/components/employee-beta/modals/ContractsModal.vue';
+import BaseCard from '@/components/employee-beta/cards/BaseCard.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
