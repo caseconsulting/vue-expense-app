@@ -8,7 +8,7 @@
 </template>
 
 <script setup>
-import { onBeforeMount, ref } from 'vue';
+import { computed } from 'vue';
 import { isEmpty } from '@/utils/utils';
 import EducationList from '../lists/EducationList.vue';
 import BaseInfoModal from '@/components/employee-beta/modals/BaseInfoModal.vue';
@@ -21,20 +21,19 @@ import BaseInfoModal from '@/components/employee-beta/modals/BaseInfoModal.vue';
 
 const props = defineProps(['model']);
 
-const totalList = ref([]);
-
 // |--------------------------------------------------|
 // |                                                  |
-// |                LIFESTYLE HOOKS                   |
+// |                    COMPUTED                      |
 // |                                                  |
 // |--------------------------------------------------|
 
 /**
  * Emits to parent the component was created and get data for the list.
  */
-onBeforeMount(() => {
+const totalList = computed(() => {
   if (!isEmpty(props.model.education)) {
-    totalList.value = props.model.education; // gets all education
+    return props.model.education; // gets all education
   }
-}); // created
+  return [];
+});
 </script>

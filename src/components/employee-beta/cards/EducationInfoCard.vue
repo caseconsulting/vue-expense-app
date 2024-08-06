@@ -20,7 +20,7 @@
 </template>
 
 <script setup>
-import { onBeforeMount, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { isEmpty } from '@/utils/utils';
 import BaseCard from './BaseCard.vue';
 import EducationList from '../lists/EducationList.vue';
@@ -33,23 +33,25 @@ import EducationModal from '../modals/EducationModal.vue';
 // |--------------------------------------------------|
 
 const toggleModal = ref(false);
-const showableList = ref([]);
-const totalList = ref([]);
 const props = defineProps(['model']);
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                LIFESTYLE HOOKS                   |
+// |                     COMPUTED                     |
 // |                                                  |
 // |--------------------------------------------------|
 
-/**
- * Emits to parent the component was created and get data for the list.
- */
-onBeforeMount(() => {
+const showableList = computed(() => {
   if (!isEmpty(props.model.education)) {
-    showableList.value = props.model.education.slice(0, 2); // only shows 2 educations at a time
-    totalList.value = props.model.education; // gets all education
+    return props.model.education.slice(0, 2);
   }
-}); // created
+  return [];
+});
+
+const totalList = computed(() => {
+  if (!isEmpty(props.model.education)) {
+    return props.model.education;
+  }
+  return [];
+});
 </script>

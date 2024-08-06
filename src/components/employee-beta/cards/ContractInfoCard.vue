@@ -29,7 +29,7 @@
 </template>
 
 <script setup>
-import { ref, onBeforeMount } from 'vue';
+import { ref, computed } from 'vue';
 import { difference, getTodaysDate } from '@/shared/dateUtils';
 import _ from 'lodash';
 import { isEmpty } from '@/utils/utils';
@@ -45,34 +45,62 @@ import BaseCard from '@/components/employee-beta/cards/BaseCard.vue';
 
 const props = defineProps(['contracts', 'model']);
 
-const contractsList = ref([]);
-const currentContractId = ref('');
-const currentProjects = ref([]);
 const dialog = ref(false);
-const noneActive = ref(false);
-const projectsList = ref([]);
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                 LIFECYCLE HOOKS                  |
+// |                    COMPUTED                      |
 // |                                                  |
 // |--------------------------------------------------|
 
-/**
- * Emits to parent the component was created and get data for the list.
- */
-onBeforeMount(() => {
+const contractsList = computed(() => {
   if (!isEmpty(props.model.contracts)) {
-    contractsList.value = props.model.contracts.slice(0, 10);
-    projectsList.value = props.contracts.map((c) => c.projects).flat();
-    getCurrentAssignment();
-    // sort the filtered list by start date, descending (current contract on top)
-    contractsList.value = _.reverse(_.sortBy(contractsList.value, (o) => getContractEarliestDate(o)));
-    contractsList.value.forEach((contract) => {
-      contract.projects = _.reverse(_.orderBy(contract.projects, ['popStartDate'])); //Sorts each contract's projects from most recent to oldest
-    });
+    return _.reverse(_.sortBy(props.model.contracts, (o) => getContractEarliestDate(o)));
   }
-}); // created
+  return [];
+});
+
+const projectsList = computed(() => {
+  if (!isEmpty(contractsList)) {
+    return props.contracts.map((c) => c.projects).flat();
+  }
+  return [];
+});
+
+const noneActive = computed(() => {
+  if (!currentContractId.value) {
+    return true;
+  }
+  return false;
+});
+
+const currentContractId = computed(() => {
+  for (let c in props.model.contracts) {
+    for (let p in props.model.contracts[c].projects) {
+      if (
+        !props.model.contracts[c].projects[p].endDate ||
+        difference(props.model.contracts[c].projects[p].endDate, getTodaysDate(), 'days') >= 0
+      ) {
+        return props.model.contracts[c].contractId;
+      }
+    }
+  }
+  return '';
+});
+
+const currentProjects = computed(() => {
+  for (let c in props.model.contracts) {
+    for (let p in props.model.contracts[c].projects) {
+      if (
+        !props.model.contracts[c].projects[p].endDate ||
+        difference(props.model.contracts[c].projects[p].endDate, getTodaysDate(), 'days') >= 0
+      ) {
+        return _.reverse(_.orderBy(props.model.contracts[c].projects, ['popStartDate'])); //Sorts the projects from most recent to oldest
+      }
+    }
+  }
+  return [];
+});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -124,27 +152,6 @@ function getContractNameFromId(contractId) {
 function getContractObjectFromId(contractId) {
   return props.model.contracts.find((c) => c.contractId === contractId);
 }
-
-/**
- * Finds the name of the project that is currently active.
- */
-function getCurrentAssignment() {
-  for (let c in props.model.contracts) {
-    for (let p in props.model.contracts[c].projects) {
-      if (
-        !props.model.contracts[c].projects[p].endDate ||
-        difference(props.model.contracts[c].projects[p].endDate, getTodaysDate(), 'days') >= 0
-      ) {
-        currentProjects.value = _.reverse(_.orderBy(props.model.contracts[c].projects, ['popStartDate'])); //Sorts the projects from most recent to oldest
-        currentContractId.value = props.model.contracts[c].contractId;
-        return;
-      }
-    }
-  }
-  if (!currentContractId.value) {
-    noneActive.value = true;
-  }
-} // getCurrentProject
 
 /**
  * Current prime name from ID
