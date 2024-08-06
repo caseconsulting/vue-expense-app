@@ -379,6 +379,7 @@
 import { JOB_TITLES } from '@/components/employees/form-tabs/dropdown-info/jobTitles';
 import DatePickerField from '@/components/shared/DatePickerField.vue';
 import api from '@/shared/api';
+import { isSame } from '@/shared/dateUtils';
 import { CASE_EMAIL_DOMAIN, EMPLOYEE_ROLES, PHONE_TYPES } from '@/shared/employeeUtils';
 import {
   getBirthdayRules,
@@ -412,6 +413,7 @@ const editedEmployee = defineModel({ required: true });
 const valid = defineModel('valid', { required: true });
 const uneditedTags = readonly(getEmployeeTags());
 const editedTags = ref(cloneDeep(editedEmployee.value.tags ?? getEmployeeTags()));
+const uneditedHireDate = editedEmployee.value.hireDate;
 const form = ref(null); // template ref to form
 
 // reformatted data for use in form
@@ -499,6 +501,10 @@ async function prepareSubmit() {
     if (editedEmployee.value.noMiddleName) editedEmployee.value.middleName = '';
 
     editedEmployee.value.email = emailUsername.value + CASE_EMAIL_DOMAIN;
+
+    // if formatting has changed but date hasn't, reset it back
+    if (isSame(uneditedHireDate, editedEmployee.value.hireDate, 'day'))
+      editedEmployee.value.hireDate = uneditedHireDate;
 
     editedEmployee.value.employeeRole = lowerCase(employeeRole.value);
 
