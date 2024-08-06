@@ -286,10 +286,16 @@ async function prepareSubmit() {
     // delete keys that aren't stored in database
     editedEmployee.value.contracts = map(editedContracts.value, (contract) => {
       let newContract = cloneDeep(contract);
+      if (!newContract.contractId) {
+        newContract.contractId = find(contracts, (c) => c.contractName === newContract.contractName).id;
+      }
       delete newContract.contractName;
       delete newContract.primeName;
 
       newContract.projects = map(newContract.projects, (project) => {
+        if (!project.projectId) {
+          project.projectId = find(contractProjects.value, (p) => p.projectName === project.projectName).id;
+        }
         delete project.projectName;
         return project;
       });
