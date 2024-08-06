@@ -18,7 +18,14 @@
             <slot name="actions"></slot>
           </v-col>
           <v-col class="ml-2">
-            <v-btn v-if="isAdmin || isUser" @click="toggleEdit()" density="comfortable" variant="text" icon="">
+            <v-btn
+              v-if="isAdmin || isUser"
+              @click="toggleEdit()"
+              density="comfortable"
+              variant="text"
+              icon=""
+              id="editButton"
+            >
               <v-tooltip activator="parent" location="top"> Edit {{ title }} </v-tooltip>
               <v-icon id="edit" color="white"> mdi-pencil </v-icon>
             </v-btn>
