@@ -109,7 +109,7 @@
           <!-- End Cert expiration date -->
 
           <!-- Start Delete Cert NORMAL -->
-          <v-col v-if="!isMobile()">
+          <v-col v-if="!isMobile()" cols="1">
             <v-btn @click="deleteCertification(index)" icon variant="text">
               <v-tooltip activator="parent" location="bottom">Delete Certification</v-tooltip>
               <v-icon class="case-gray">mdi-delete</v-icon>
@@ -206,8 +206,8 @@
           <!-- End award recieved date -->
 
           <!-- Start delete award NORMAL-->
-          <v-col>
-            <v-btn v-if="!isMobile()" @click="deleteAward(index)" icon variant="text">
+          <v-col v-if="!isMobile()" cols="1">
+            <v-btn @click="deleteAward(index)" icon variant="text">
               <v-tooltip activator="parent" location="bottom">Delete Award</v-tooltip>
               <v-icon class="case-gray pr-1">mdi-delete</v-icon>
             </v-btn>

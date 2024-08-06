@@ -422,8 +422,6 @@ const phoneNumbers = ref(initPhoneNumbers());
 const addressSearch = ref(null); // current address search input
 const birthPlaceSearch = ref(null); // birth place search input
 const birthdayMenu = ref(false);
-const citySearchString = ref(null); // user input for searching POB
-const searchString = ref(''); // user input for searching address
 const placeIds = ref({}); // for address autocomplete
 const predictions = ref({}); // for POB autocomplete
 

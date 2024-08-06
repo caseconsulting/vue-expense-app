@@ -37,7 +37,7 @@
       </div>
       <v-container v-show="!submitting" fluid class="pt-0">
         <v-row>
-          <v-col v-if="!isMobile()" cols="2">
+          <v-col v-if="mdAndUp" cols="auto" class="pr-0">
             <v-list density="compact" nav id="edit-navigation">
               <v-list-item
                 @click="cardName = 'Personal'"
@@ -89,7 +89,6 @@
               ></v-list-item>
             </v-list>
           </v-col>
-          <v-divider v-if="!isMobile()" vertical thickness="1"></v-divider>
           <v-col>
             <v-form
               ref="form"
@@ -212,6 +211,7 @@ import { isMobile } from '@/utils/utils';
 import { cloneDeep, find, findIndex, forOwn, isEqual, map, pickBy } from 'lodash';
 import { computed, inject, onBeforeMount, onBeforeUnmount, reactive, ref, watch } from 'vue';
 import { useStore } from 'vuex';
+import { useDisplay } from 'vuetify';
 import CertsAndAwardsForm from './CertsAndAwardsForm.vue';
 import ClearanceForm from './ClearanceForm.vue';
 import ContractsForm from './ContractsForm.vue';
@@ -230,6 +230,7 @@ import TechnologiesForm from './TechnologiesForm.vue';
 /** @type {import('mitt').Emitter} */
 const emitter = inject('emitter');
 const store = useStore();
+const { mdAndUp } = useDisplay();
 
 const props = defineProps(['employee', 'contracts']);
 const editedEmployee = ref(cloneDeep(props.employee));
@@ -473,7 +474,7 @@ function collapseAllTabs() {
  * Returns true only if the value is undefined, null, or an empty string
  */
 function isEmpty(value) {
-  return value === undefined || value === null || value === '' || value == [];
+  return value === undefined || value === null || value === '' || value?.length === 0;
 }
 
 /**
