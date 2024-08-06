@@ -132,7 +132,7 @@
       <form-cancel-confirmation
         :cancelling="cancelling"
         :toggleSubmissionConfirmation="confirmingValid"
-        type="cancel"
+        type="cancel-eeo"
       ></form-cancel-confirmation>
     </v-card>
   </base-info-modal>
@@ -243,8 +243,8 @@ onBeforeUnmount(() => {
   emitter.off('cancel-decline-self-identify');
   emitter.off('confirm-decline-self-identify');
   emitter.off('open-dialog');
-  emitter.off('confirmed-cancel');
-  emitter.off('canceled-cancel');
+  emitter.off('confirmed-cancel-eeo');
+  emitter.off('canceled-cancel-eeo');
 }); // beforeUnmount
 
 /**
@@ -272,12 +272,12 @@ onBeforeMount(async () => {
   emitter.on('open-dialog', () => {
     close.value = false;
   });
-  emitter.on('confirmed-cancel', () => {
+  emitter.on('confirmed-cancel-eeo', () => {
     close.value = true;
     confirmingValid.value = false;
     emitter.emit('done');
   });
-  emitter.on('canceled-cancel', () => {
+  emitter.on('canceled-cancel-eeo', () => {
     confirmingValid.value = false;
     emitter.emit('done');
   });
@@ -329,7 +329,6 @@ async function submit() {
     let updatedEmployee = await api.updateItem(api.EMPLOYEES, editedEmployee.value);
     if (updatedEmployee.id) {
       // successfully updated employee
-      // this.fullName = `${updatedEmployee.firstName} ${updatedEmployee.lastName}`;
       emitter.emit('update', updatedEmployee);
       // getEmployees and update store with latest data
       if (props.model.id === store.getters.user.id) await updateStoreUser();

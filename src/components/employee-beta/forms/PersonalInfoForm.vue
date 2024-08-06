@@ -373,6 +373,13 @@
         <v-btn prepend-icon="mdi-plus" @click="addPhoneNumber()">Add Number</v-btn>
       </v-col>
     </v-row>
+    <v-row><h3>Edit EEO Information</h3></v-row>
+    <v-row class="groove">
+      <v-col align="center">
+        <v-btn @click="toggleEdit()">Click to Edit EEO Form</v-btn>
+        <e-e-o-compliance-edit-modal v-model="toggleForm" :model="editedEmployee"></e-e-o-compliance-edit-modal>
+      </v-col>
+    </v-row>
   </v-form>
 </template>
 
@@ -398,6 +405,7 @@ import { computed, inject, onBeforeMount, onBeforeUnmount, onMounted, readonly, 
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
 import PrivateButton from '../PrivateButton.vue';
+import EEOComplianceEditModal from '../modals/EEOComplianceEditModal.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -428,6 +436,7 @@ const birthPlaceSearch = ref(null); // birth place search input
 const birthdayMenu = ref(false);
 const placeIds = ref({}); // for address autocomplete
 const predictions = ref({}); // for POB autocomplete
+const toggleForm = ref(false); // for EEO data
 
 // other refs
 const phoneAutofocus = ref(false);
@@ -449,6 +458,9 @@ defineExpose({ prepareSubmit }); // allows parent to use refs to call prepareSub
 
 onBeforeMount(() => {
   emitter.on('discard-edits', onDiscardEdits);
+  emitter.on('confirmed-cancel-eeo', () => {
+    toggleForm.value = false;
+  });
 });
 
 onMounted(validate);
@@ -718,6 +730,11 @@ function removeEmailDomain() {
     emailUsername.value = emailUsername.value.substring(0, atIndex);
   }
 } // removeEmailDomain
+
+function toggleEdit() {
+  emitter.emit('open-dialog');
+  toggleForm.value = true;
+}
 </script>
 
 <style scoped>
