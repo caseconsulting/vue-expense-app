@@ -1,3 +1,94 @@
+export const EMPLOYEE_ROLES = ['Admin', 'User', 'Intern', 'Manager'];
+export const PHONE_TYPES = ['Home', 'Cell', 'Work'];
+export const CASE_EMAIL_DOMAIN = '@consultwithcase.com';
+
+export const LANGUAGES = [
+  'Afrikaans',
+  'Arabic',
+  'Bengali',
+  'Catalan',
+  'Cantonese',
+  'Croatian',
+  'Czech',
+  'Danish',
+  'Dutch',
+  'Lithuanian',
+  'Malay',
+  'Malayalam',
+  'Panjabi',
+  'Tamil',
+  'Finnish',
+  'French',
+  'German',
+  'Greek',
+  'Hebrew',
+  'Hindi',
+  'Hungarian',
+  'Indonesian',
+  'Italian',
+  'Japanese',
+  'Javanese',
+  'Korean',
+  'Norwegian',
+  'Polish',
+  'Portuguese',
+  'Romanian',
+  'Russian',
+  'Serbian',
+  'Slovak',
+  'Slovene',
+  'Spanish',
+  'Swedish',
+  'Telugu',
+  'Thai',
+  'Turkish',
+  'Ukrainian',
+  'Vietnamese',
+  'Welsh',
+  'Sign language',
+  'Algerian',
+  'Aramaic',
+  'Armenian',
+  'Berber',
+  'Burmese',
+  'Bosnian',
+  'Brazilian',
+  'Bulgarian',
+  'Cypriot',
+  'Corsica',
+  'Creole',
+  'Scottish',
+  'Egyptian',
+  'Esperanto',
+  'Estonian',
+  'Finn',
+  'Flemish',
+  'Georgian',
+  'Hawaiian',
+  'Indonesian',
+  'Inuit',
+  'Irish',
+  'Icelandic',
+  'Latin',
+  'Mandarin',
+  'Nepalese',
+  'Sanskrit',
+  'Tagalog',
+  'Tahitian',
+  'Tibetan',
+  'Gypsy',
+  'Wu'
+];
+
+export const PROFICIENCIES = [
+  'Basic - most basic words that everyone uses',
+  'Personal - words you know depending on your day-to-day activities (experiences, work, country, friends)',
+  'Native-like - ability to use the language like a native speaker',
+  'Literacy - fluency and broad vocabulary associated with high levels of education'
+];
+
+export const CLEARANCE_TYPES = ['TS/SCI - Full Scope', 'TS/SCI - CI Poly', 'TS/SCI - No Poly', 'Top Secret', 'Secret'];
+
 /**
  * Given an employee returns the employee's full name. Ex. John Jacob Doe
  * @param {JSON} employee - employee object
@@ -113,6 +204,12 @@ export function selectedTagsHasEmployee(employeeId, tagsInfo) {
 } // selectedTagsHasEmployee
 
 export default {
+  CASE_EMAIL_DOMAIN,
+  CLEARANCE_TYPES,
+  EMPLOYEE_ROLES,
+  LANGUAGES,
+  PHONE_TYPES,
+  PROFICIENCIES,
   fullName,
   firstAndLastName,
   nicknameAndLastName,

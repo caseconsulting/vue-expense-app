@@ -1,20 +1,6 @@
 <!-- eslint-disable vue/no-v-model-argument -->
 <template>
   <div>
-    <!-- Status Alert -->
-    <v-snackbar
-      v-model="status.show"
-      :color="status.color"
-      :multi-line="true"
-      location="top end"
-      :timeout="5000"
-      :vertical="true"
-    >
-      <v-card-text color="white">
-        <span class="text-h6 font-weight-medium">{{ status.statusMessage }}</span>
-      </v-card-text>
-      <v-btn color="white" variant="text" @click="clearStatus()"> Close </v-btn>
-    </v-snackbar>
     <v-card>
       <v-container fluid class="px-0 px-md-4">
         <!-- Title -->
@@ -276,9 +262,7 @@
         </div>
       </v-container>
     </v-card>
-    <v-dialog v-model="createEmployee" @click:outside="clearCreateEmployee()" :width="isMobile() ? '100%' : '80%'">
-      <employee-form :key="childKey" :contracts="contracts" :model="model" />
-    </v-dialog>
+    <employee-form v-model="createEmployee" :contracts="contracts" :employee="model" />
     <v-dialog v-model="manageTags" scrollable :width="isMobile() ? '100%' : '70%'" persistent>
       <tag-manager :key="childKey" />
     </v-dialog>
@@ -293,11 +277,13 @@
 
 <script setup>
 import api from '@/shared/api.js';
+// import BaseCard from '../components/employee-beta/cards/BaseCard.vue';
 import { updateStoreEmployees, updateStoreAvatars, updateStoreContracts, updateStoreTags } from '@/utils/storeUtils';
 import ExportEmployeeData from '@/components/employees/csv/ExportEmployeeData.vue';
 import DeleteErrorModal from '@/components/modals/DeleteErrorModal.vue';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
-import EmployeeForm from '@/components/employees/EmployeeForm.vue';
+// import EmployeeForm from '../components/employees/EmployeeForm.vue'
+import EmployeeForm from '../components/employee-beta/forms/EmployeeForm.vue';
 import _ from 'lodash';
 import ConvertEmployeeToCsv from '@/components/employees/csv/ConvertEmployeeToCsv.vue';
 import PowerEditContainer from '@/components/employees/power-edit/PowerEditContainer.vue';
@@ -317,9 +303,10 @@ import {
 } from '@/utils/utils';
 import { employeeFilter } from '@/shared/filterUtils';
 import { format } from '../shared/dateUtils';
-import { ref, inject, onBeforeMount, onBeforeUnmount, computed, watch } from 'vue';
+import { ref, inject, onBeforeMount, onBeforeUnmount, computed, watch, provide } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import { useDisplaySuccess, useDisplayError } from '@/components/shared/StatusSnackbar.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -330,6 +317,13 @@ import { useRouter } from 'vue-router';
 const store = useStore();
 const emitter = inject('emitter');
 const router = useRouter();
+
+//provide roles
+const isAdmin = ref(false);
+provide('isAdmin', isAdmin);
+const isUser = ref(false);
+provide('isUser', isUser);
+
 const applicationSyncData = ref(null);
 const childKey = ref(0);
 const contracts = ref([]);
@@ -424,11 +418,6 @@ const model = ref({
 }); // selected employee
 const search = ref(null); // query text for datatable search field
 const sortBy = ref([{ key: 'hireDate', order: 'asc' }]); // sort datatable items
-const status = ref({
-  statusType: undefined,
-  statusMessage: null,
-  color: null
-}); // snackbar action status
 const showExportDataModal = ref(false);
 const syncing = ref(false);
 const tags = ref([]);
@@ -445,16 +434,6 @@ const toggleEmployeesSyncModal = ref(false);
 // |--------------------------------------------------|
 
 /**
- * Clear the action status that is displayed in the snackbar.
- */
-function clearStatus() {
-  status.value['show'] = false;
-  status.value['statusType'] = undefined;
-  status.value['statusMessage'] = null;
-  status.value['color'] = null;
-} // clearStatus
-
-/**
  * Delete an employee and display status.
  */
 async function deleteEmployee() {
@@ -464,7 +443,7 @@ async function deleteEmployee() {
     await deleteModelFromTable();
   } else {
     // display error if failed to deleted employee
-    displayError(e.response.data.message);
+    useDisplayError(e.response.data.message);
   }
   midAction.value = false;
 } // deleteEmployee
@@ -475,23 +454,8 @@ async function deleteEmployee() {
 async function deleteModelFromTable() {
   await refreshEmployees();
 
-  status.value['show'] = true;
-  status.value['statusType'] = 'SUCCESS';
-  status.value['statusMessage'] = 'Employee was successfully deleted!';
-  status.value['color'] = 'green';
+  useDisplaySuccess('Employee was successfully deleted!', 5000, 'top right', 'green');
 } // deleteModelFromTable
-
-/**
- * Set and display an error action status in the snackbar.
- *
- * @param err - String error message
- */
-function displayError(err) {
-  status.value['show'] = true;
-  status.value['statusType'] = 'ERROR';
-  status.value['statusMessage'] = err;
-  status.value['color'] = 'red';
-} // displayError
 
 /**
  * sets midAction boolean to false
@@ -591,6 +555,7 @@ async function refreshEmployees() {
 function renderCreateEmployee() {
   createEmployee.value = true;
   childKey.value++;
+  emitter.emit('create-new-employee');
 } // renderCreateEmployee
 
 /**
@@ -670,7 +635,7 @@ async function validateDelete(item) {
       invalidDelete.value = !invalidDelete.value;
     }
   } catch (err) {
-    displayError(err);
+    useDisplayError(err);
   }
 } // validateDelete
 

@@ -1,4 +1,5 @@
 $case-red: #bc3825;
+$case-red-beta: #c23010;
 $case-darkgray: #415364;
 
 .case-red-text {
@@ -45,6 +46,15 @@ $case-darkgray: #415364;
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
 }
 
+.beta_header_style {
+  /* border-radius: 5px; */
+  background-color: $case-red-beta;
+  color: white;
+  font-size: 16px;
+  height: 45px;
+  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+}
+
 .reimburse_button {
   background-color: $case-red !important;
   color: white !important;
@@ -52,8 +62,26 @@ $case-darkgray: #415364;
   padding: 4px 2px;
 }
 
+.beta_reimburse_button {
+  background-color: $case-red-beta !important;
+  color: white !important;
+  fill: white !important;
+  padding: 4px 2px;
+}
+
 .home_buttons {
   color: $case-red !important;
+  background-color: white !important;
+  padding: 8px 8px;
+  margin-bottom: 16px;
+  border: 0.5px solid $case-red;
+  border-radius: 5px;
+  text-transform: uppercase;
+  text-emphasis: bold;
+  font-weight: bold;
+}
+.beta_home_buttons {
+  color: $case-red-beta !important;
   background-color: white !important;
   padding: 8px 8px;
   margin-bottom: 16px;
@@ -93,6 +121,10 @@ $case-darkgray: #415364;
 /* end of themes */
 .form_padding {
   padding-top: 20px;
+}
+
+.fit-content {
+  max-width: fit-content;
 }
 
 .login_e {

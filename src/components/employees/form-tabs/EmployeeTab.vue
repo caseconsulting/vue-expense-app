@@ -100,7 +100,7 @@
         ref="formFields"
         v-model.trim="emailUsername"
         suffix="@consultwithcase.com"
-        :rules="emailRules"
+        :rules="getCaseEmailRules()"
         label="Email*"
         variant="underlined"
         data-vv-name="Email"
@@ -412,33 +412,33 @@
     </div>
   </div>
 </template>
+
 <script>
 import api from '@/shared/api.js';
-import _ from 'lodash';
+import { format } from '@/shared/dateUtils';
 import {
   getAINRules,
+  getCaseEmailRules,
   getDateRules,
   getNumberRules,
   getRequiredRules,
   getValidateFalse
-} from '@/shared/validationUtils.js';
+} from '@/shared/validationUtils';
 import {
   asyncForEach,
   isEmpty,
   isMobile,
   userRoleIsAdmin,
+  userRoleIsIntern,
   userRoleIsManager,
-  userRoleIsUser,
-  userRoleIsIntern
+  userRoleIsUser
 } from '@/utils/utils';
-import { JOB_TITLES } from './dropdown-info/jobTitles';
-import { format } from '@/shared/dateUtils';
+import _ from 'lodash';
 import { mask } from 'vue-the-mask';
 import EEODeclineSelfIdentify from '../../modals/EEODeclineSelfIdentify.vue';
+import { JOB_TITLES } from './dropdown-info/jobTitles';
 
 const caseEmailDomain = '@consultwithcase.com';
-
-const regex = /^[a-zA-Z]+$/;
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -808,10 +808,6 @@ export default {
       departureMenu: false, // display depature menu
       editedEmployee: _.cloneDeep(this.model), //employee that can be edited
       emailUsername: '',
-      emailRules: [
-        (v) => !this.isEmpty(v) || 'Email is required',
-        (v) => regex.test(v) || 'Not a valid @consultwithcase email address'
-      ], // rules for an employee email
       employeeTags: null,
       employeeEditedTags: null,
       employeeRoleFormatted: null,
@@ -921,6 +917,7 @@ export default {
     format,
     formatKebabCase,
     getAINRules,
+    getCaseEmailRules,
     getDateRules,
     getNumberRules,
     getRequiredRules,
