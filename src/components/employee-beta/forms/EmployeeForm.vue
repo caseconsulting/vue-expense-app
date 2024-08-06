@@ -454,7 +454,6 @@ async function validate() {
 
   // iterates through each tab to make sure they are all valid
   forOwn(validTabs, (value) => {
-    console.log('')
     valid = valid && value;
   });
   return valid;

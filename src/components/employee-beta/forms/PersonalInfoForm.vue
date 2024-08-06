@@ -139,7 +139,7 @@
                   <date-picker-field
                     v-model="editedEmployee.hireDate"
                     label="Hire Date *"
-                    :rules="getRequiredRules()"
+                    :rules="[...getRequiredRules(), ...getDateRules()]"
                     text-field-classes="v-text-field"
                     :disabled="hasBudgets"
                   ></date-picker-field>
@@ -384,13 +384,15 @@
 
 <script setup>
 import { JOB_TITLES } from '@/components/employees/form-tabs/dropdown-info/jobTitles';
-import DatePickerField from '@/components/shared/DatePickerField.vue';
+import DatePickerField from '@/components/shared/edit-fields/DatePickerField.vue';
+import PrivateButton from '@/components/shared/edit-fields/PrivateButton.vue';
 import api from '@/shared/api';
 import { isSame } from '@/shared/dateUtils';
 import { CASE_EMAIL_DOMAIN, EMPLOYEE_ROLES, PHONE_TYPES } from '@/shared/employeeUtils';
 import {
   getBirthdayRules,
   getCaseEmailRules,
+  getDateRules,
   getEmailRules,
   getNumberRules,
   getPhoneNumberRules,
@@ -403,7 +405,6 @@ import { cloneDeep, filter, forEach, includes, isEmpty, lowerCase, some, startCa
 import { computed, inject, onBeforeMount, onBeforeUnmount, onMounted, readonly, ref } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
-import PrivateButton from '../PrivateButton.vue';
 import EEOComplianceEditModal from '../modals/EEOComplianceEditModal.vue';
 
 // |--------------------------------------------------|
@@ -440,8 +441,10 @@ const toggleForm = ref(false); // for EEO data
 const phoneAutofocus = ref(false);
 let hasBudgets = ref(false);
 
-for (const budget of store.getters.budgets) {
-  if (budget.budgetObject.employeeId === employeeId) hasBudgets.value = true;
+if (store.getters.budgets) {
+  for (const budget of store.getters.budgets) {
+    if (budget.budgetObject.employeeId === employeeId) hasBudgets.value = true;
+  }
 }
 
 // values to help with resetting edits after cancelling
