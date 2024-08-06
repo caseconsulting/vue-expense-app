@@ -110,7 +110,7 @@
 import api from '@/shared/api';
 import { getDuplicateTechRules, getRequiredRules } from '@/shared/validationUtils';
 import { isMobile } from '@/utils/utils';
-import { isEmpty, map } from 'lodash';
+import { isEmpty, isEqual, map } from 'lodash';
 import { inject, onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue';
 
 // |--------------------------------------------------|
@@ -171,16 +171,14 @@ async function prepareSubmit() {
     await validate();
 
     editedEmployee.value.technologies = map(editedTechnologies.value, (value) => {
-      let years = value.time.years + value.time.months / 12;
-
-      // if years is not an integer
-      if (Math.round(years) !== years) {
-        // convert to fixed string if it's a float, otherwise leave it as a number
-        // this is how the database stores this data initially
-        // this needs to be in the same format so that changes can be accurately tracked
-        years = Math.trunc(years * 100) / 100;
-        years = years.toFixed(2);
-      }
+      // use old time if same years and months to prevent changing time by less than 1 month increments
+      let newYears = Number(value.time.years) + Number(value.time.months) / 12;
+      let oldYears = editedEmployee.value.technologies.find((t) => t.name === value.name)?.years;
+      let years = isEqual(getYearsAndMonths(newYears), getYearsAndMonths(Number(oldYears)))
+        ? oldYears
+        : Number(value.time.months) // store integer year for 0 months
+          ? newYears.toFixed(2)
+          : Number(newYears);
       return {
         name: value.name,
         years,

@@ -357,7 +357,7 @@ export function getDuplicateProjectRule(contract) {
   return (v) => {
     let count = 0;
     for (let i = 0; i < contract.projects.length && count <= 2; i++) {
-      if (contract.projects[i] === v) count++;
+      if (contract.projects[i].projectName === v) count++;
     }
     return count <= 1 || 'Duplicate projects found within this contract, please remove duplicate entries';
   };
