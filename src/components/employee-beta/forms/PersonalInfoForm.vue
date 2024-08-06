@@ -162,7 +162,7 @@
           </v-col>
           <!-- employee role -->
           <v-col v-if="userIsAdminOrManager">
-            <v-combobox v-model="employeeRole" label="Employee Role" :items="EMPLOYEE_ROLES"></v-combobox>
+            <v-combobox v-model="employeeRole" label="Employee Role *" :items="EMPLOYEE_ROLES"></v-combobox>
           </v-col>
           <!-- tags -->
           <v-col v-if="userIsAdminOrManager">
