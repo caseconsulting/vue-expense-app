@@ -1,5 +1,5 @@
 <template>
-  <v-container class="pa-2 ma-0">
+  <v-container class="pa-0 ma-0">
     <v-btn v-if="useDropDown && (isAdmin || isUser) && !editing" variant="text" icon="" density="comfortable">
       <v-icon icon="mdi-chevron-down" size="large">mdi-file-arrow-up-down</v-icon>
       <v-menu activator="parent" location="bottom" origin="start top">

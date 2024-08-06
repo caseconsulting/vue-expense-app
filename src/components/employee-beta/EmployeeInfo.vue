@@ -5,16 +5,14 @@
         <!-- title -->
         <v-row no-gutters class="fit-content align-center">
           <v-col>
-            <!-- <div class="d-flex justify-lg-space-between align-center"> -->
-            <h3 class="text-white">{{ employeeTitle }}</h3>
-            <!-- </div> -->
+            <h3 class="text-white" :class="isMobile() ? 'text-h6' : ''">{{ employeeTitle }}</h3>
           </v-col>
         </v-row>
         <v-spacer></v-spacer>
         <!-- action buttons -->
-        <v-row no-gutters class="fit-content d-flex align-center justify-end">
-          <v-col>
-            <div class="d-flex flex-row align-center">
+        <v-row no-gutters class="fit-content d-flex align-center justify-start">
+          <v-col cols="auto">
+            <div class="d-flex flex-row align-center fit-content ml-1">
               <resume-card v-model="model" :editing="editing" :loading="loading"></resume-card>
               <convert-employee-to-csv
                 v-if="isAdmin"
@@ -26,7 +24,7 @@
               />
             </div>
           </v-col>
-          <v-col class="ml-2">
+          <v-col :class="isMobile() ? '' : 'ml-2'" cols="auto">
             <v-btn v-if="isAdmin || isUser" @click="toggleEdit()" density="comfortable" variant="text" icon="">
               <v-tooltip activator="parent" location="top"> Edit {{ menuBtn }} </v-tooltip>
               <v-icon id="edit" color="white"> mdi-pencil </v-icon>
@@ -159,6 +157,7 @@
 </template>
 
 <script setup>
+import { isMobile } from '@/utils/utils';
 import { computed, ref, inject } from 'vue';
 import { useDisplay } from 'vuetify';
 import { useStore } from 'vuex';
