@@ -369,6 +369,13 @@
         <v-btn prepend-icon="mdi-plus" @click="addPhoneNumber()">Add Number</v-btn>
       </v-col>
     </v-row>
+    <v-row><h3>Edit EEO Information</h3></v-row>
+    <v-row class="groove">
+      <v-col align="center">
+        <v-btn @click="toggleEdit()">Click to Edit EEO Form</v-btn>
+        <e-e-o-compliance-edit-modal v-model="toggleForm" :model="editedEmployee"></e-e-o-compliance-edit-modal>
+      </v-col>
+    </v-row>
   </v-form>
 </template>
 
@@ -394,6 +401,7 @@ import { computed, inject, onBeforeMount, onBeforeUnmount, onMounted, readonly, 
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
 import PrivateButton from '../PrivateButton.vue';
+import EEOComplianceEditModal from '../modals/EEOComplianceEditModal.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -422,10 +430,9 @@ const phoneNumbers = ref(initPhoneNumbers());
 const addressSearch = ref(null); // current address search input
 const birthPlaceSearch = ref(null); // birth place search input
 const birthdayMenu = ref(false);
-const citySearchString = ref(null); // user input for searching POB
-const searchString = ref(''); // user input for searching address
 const placeIds = ref({}); // for address autocomplete
 const predictions = ref({}); // for POB autocomplete
+const toggleForm = ref(false); // for EEO data
 
 // other refs
 const phoneAutofocus = ref(false);
@@ -710,6 +717,11 @@ function removeEmailDomain() {
     emailUsername.value = emailUsername.value.substring(0, atIndex);
   }
 } // removeEmailDomain
+
+function toggleEdit() {
+  emitter.emit('open-dialog');
+  toggleForm.value = !toggleForm.value;
+}
 </script>
 
 <style scoped>

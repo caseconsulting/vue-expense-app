@@ -49,7 +49,6 @@ const emitter = inject('emitter');
 const props = defineProps(['model']);
 const isAdmin = inject('isAdmin');
 
-// const copy = _.cloneDeep(props.model);
 const toggleForm = ref(false);
 const viewForm = ref(false);
 

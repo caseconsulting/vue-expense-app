@@ -272,15 +272,6 @@ onBeforeMount(async () => {
   emitter.on('open-dialog', () => {
     close.value = false;
   });
-  emitter.on('confirmed-cancel', () => {
-    close.value = true;
-    confirmingValid.value = false;
-    emitter.emit('done');
-  });
-  emitter.on('canceled-cancel', () => {
-    confirmingValid.value = false;
-    emitter.emit('done');
-  });
   // EEO reporting section
   // disable race and ethnicity field if "Hispanic and Latino" is selected.
   if (!isEmpty(editedEmployee.value.eeoHispanicOrLatino && editedEmployee.value.eeoRaceOrEthnicity)) {
@@ -329,7 +320,6 @@ async function submit() {
     let updatedEmployee = await api.updateItem(api.EMPLOYEES, editedEmployee.value);
     if (updatedEmployee.id) {
       // successfully updated employee
-      // this.fullName = `${updatedEmployee.firstName} ${updatedEmployee.lastName}`;
       emitter.emit('update', updatedEmployee);
       // getEmployees and update store with latest data
       if (props.model.id === store.getters.user.id) await updateStoreUser();
