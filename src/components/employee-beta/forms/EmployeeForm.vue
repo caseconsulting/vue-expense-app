@@ -181,9 +181,17 @@
                       <v-btn id="employeeCancelBtn" variant="text" class="ma-2" @click="cancel()">Cancel</v-btn>
                     </v-col>
                     <v-col cols="auto">
-                      <v-btn id="employeeSubmitBtn" variant="outlined" class="ma-2" color="success" type="submit">
-                        <v-icon class="mr-1">mdi-content-save</v-icon>Submit
-                      </v-btn>
+                      <div :class="{ shake: invalidButton }">
+                        <v-btn
+                          id="employeeSubmitBtn"
+                          variant="outlined"
+                          class="ma-2"
+                          :color="invalidButton ? 'error' : 'success'"
+                          type="submit"
+                        >
+                          <v-icon class="mr-1">mdi-content-save</v-icon>Submit
+                        </v-btn>
+                      </div>
                     </v-col>
                     <!-- End form action buttons -->
                     <v-col cols="auto">
@@ -251,6 +259,7 @@ const formTabs = ref([]);
 const submitting = ref(false);
 const toggleCancelConfirmation = ref(false);
 const valid = ref(true);
+const invalidButton = ref(false);
 const numberOfChanges = ref(0);
 
 const validTabs = reactive({
@@ -488,6 +497,10 @@ function getChanges() {
 function cancelSubmit() {
   console.log('Cannot submit, form is invalid!'); // TODO test
   valid.value = false;
+  invalidButton.value = true;
+  setTimeout(() => {
+    invalidButton.value = false;
+  }, 820);
   submitting.value = false;
 }
 
@@ -630,5 +643,33 @@ watch(cardName, () => {
   bottom: 0;
   background: white;
   z-index: 1;
+}
+
+.shake {
+  animation: shake 0.82s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  transform: translate3d(0, 0, 0);
+}
+
+@keyframes shake {
+  10%,
+  90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+
+  20%,
+  80% {
+    transform: translate3d(2px, 0, 0);
+  }
+
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+
+  40%,
+  60% {
+    transform: translate3d(4px, 0, 0);
+  }
 }
 </style>
