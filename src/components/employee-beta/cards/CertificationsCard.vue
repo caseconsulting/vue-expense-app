@@ -7,7 +7,7 @@
           <certifications-list :list="filteredList"></certifications-list>
         </div>
         <!-- Employee does not have Certifications -->
-        <p v-else class="mt-6 ml-6">No Certification Information</p>
+        <p v-else class="mt-2 text-align: center">No Certification Information</p>
         <div v-if="!isEmpty(model.certifications)" class="text-center">
           <v-card-actions class="d-flex justify-center">
             <v-btn variant="flat" color="#F3F3F3" @click="toggleCertificationsModal()"
