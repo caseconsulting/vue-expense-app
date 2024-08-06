@@ -67,6 +67,7 @@
                         <v-list-item @click="selectTab('certifications+awards')">Certifications & Awards</v-list-item>
                         <v-list-item @click="selectTab('tech+skills+languages')">Tech, Skills, & Languages</v-list-item>
                         <v-list-item @click="selectTab('experience+education')">Job Experience & Education</v-list-item>
+                        <v-list-item @click="selectTab('customer+orgs')">Customer Orgs</v-list-item>
                       </v-list>
                     </v-menu>
                     <v-tabs
@@ -88,6 +89,7 @@
                       <v-tab value="experience+education" @click="selectTab('experience+education')"
                         >Job Experience & Education</v-tab
                       >
+                      <v-tab value="customer+orgs" @click="selectTab('customer+orgs')">Customer Orgs</v-tab>
                     </v-tabs>
                     <v-divider></v-divider>
                   </v-col>
@@ -147,6 +149,13 @@
                       </v-col>
                     </v-row>
                   </v-tabs-window-item>
+                  <v-tabs-window-item value="customer+orgs">
+                    <v-row class="my-2">
+                      <v-col>
+                        <customer-orgs-card :model="model"></customer-orgs-card>
+                      </v-col>
+                    </v-row>
+                  </v-tabs-window-item>
                 </v-tabs-window>
               </v-card-text>
             </v-card>
@@ -178,6 +187,7 @@ import JobExperienceInfoCard from '@/components/employee-beta/cards/JobExperienc
 import PersonalInfoCard from '@/components/employee-beta/cards/personal/PersonalInfoCard.vue';
 import ResumeCard from '@/components/employee-beta/cards/ResumeCard.vue';
 import TechnologiesCard from '@/components/employee-beta/cards/TechnologiesCard.vue';
+import CustomerOrgsCard from '@/components/employee-beta/cards/CustomerOrgsCard.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
