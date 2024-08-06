@@ -5,6 +5,7 @@
     v-mask="'##/##/####'"
     hint="MM/DD/YYYY"
     :rules="rules"
+    :disabled="disabled"
     prepend-inner-icon="mdi-calendar"
     autocomplete="off"
     :class="textFieldClasses"
@@ -47,7 +48,8 @@ const props = defineProps({
   rules: { type: Array },
   formats: { type: Array },
   textFieldClasses: { type: String || Object },
-  datePickerClasses: { type: String || Object }
+  datePickerClasses: { type: String || Object },
+  disabled: { type: Boolean }
 });
 const menu = ref(false);
 

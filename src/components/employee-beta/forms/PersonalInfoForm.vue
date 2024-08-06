@@ -132,13 +132,20 @@
             ></v-text-field>
           </v-col>
           <!-- hire date -->
-          <v-col>
-            <date-picker-field
-              v-model="editedEmployee.hireDate"
-              label="Hire Date *"
-              :rules="getRequiredRules()"
-              text-field-classes="v-text-field"
-            ></date-picker-field>
+          <v-col v-if="userIsAdminOrManager">
+            <v-tooltip text="Cannot edit if employee has budgets" location="top" :open-on-hover="hasBudgets">
+              <template #activator="{ props }">
+                <div v-bind="props">
+                  <date-picker-field
+                    v-model="editedEmployee.hireDate"
+                    label="Hire Date *"
+                    :rules="getRequiredRules()"
+                    text-field-classes="v-text-field"
+                    :disabled="hasBudgets"
+                  ></date-picker-field>
+                </div>
+              </template>
+            </v-tooltip>
           </v-col>
           <!-- job role -->
           <v-col>
@@ -410,6 +417,7 @@ const emitter = inject('emitter');
 const vMask = mask; // import v mask directive
 
 const editedEmployee = defineModel({ required: true });
+const employeeId = editedEmployee.value.id;
 const valid = defineModel('valid', { required: true });
 const uneditedTags = readonly(getEmployeeTags());
 const editedTags = ref(cloneDeep(editedEmployee.value.tags ?? getEmployeeTags()));
@@ -430,6 +438,11 @@ const placeIds = ref({}); // for address autocomplete
 const predictions = ref({}); // for POB autocomplete
 const toggleForm = ref(false); // for EEO data
 const phoneAutofocus = ref(false);
+let hasBudgets = ref(false);
+
+for (const budget of store.getters.budgets) {
+  if (budget.budgetObject.employeeId === employeeId) hasBudgets.value = true;
+}
 
 // values to help with resetting edits after cancelling
 let stopPrepare = false;
@@ -539,7 +552,7 @@ async function validate() {
  * @return {any} A deep clone of the employee tags
  */
 function getEmployeeTags() {
-  return cloneDeep(filter(store.getters.tags, (tag) => includes(tag.employees, editedEmployee.value.id)));
+  return cloneDeep(filter(store.getters.tags, (tag) => includes(tag.employees, employeeId)));
 }
 
 /**
