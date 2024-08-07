@@ -127,7 +127,7 @@ function open() {
 }
 
 function getContractLatestDate(contract) {
-  return _.orderBy(contract.projects, ['endDate'])[0].endDate;
+  return _.orderBy(contract.projects, ['endDate'], ['desc'])[0].endDate;
 }
 
 /**
