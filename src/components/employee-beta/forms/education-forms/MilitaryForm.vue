@@ -95,7 +95,7 @@
 
 <script setup>
 import { format } from '@/shared/dateUtils';
-import { getDateMonthYearOptionalRules, getRequiredRules } from '@/shared/validationUtils';
+import { getDateMonthYearOptionalRules, getRequiredRules, getDateMonthYearRules } from '@/shared/validationUtils';
 import { isMobile } from '@/utils/utils';
 import { computed } from 'vue';
 import { mask } from 'vue-the-mask';
