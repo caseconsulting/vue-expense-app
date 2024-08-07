@@ -1,6 +1,9 @@
 <template>
   <base-info-modal v-if="!close" title="Edit EEO Compliance Form">
-    <v-card>
+    <div v-if="submitting" class="py-10 px-6">
+      <v-progress-linear :indeterminate="true"></v-progress-linear>
+    </div>
+    <v-card v-show="!submitting">
       <v-card-text>
         <p class="mb-0 mt-5">
           EEO Compliance Reporting
