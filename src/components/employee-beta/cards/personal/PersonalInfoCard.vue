@@ -25,7 +25,7 @@
           </div>
         </v-col>
       </v-row>
-      <p v-if="!isEmpty(getBirthday()) && props.model.birthdayFeed && (isAdmin || isUser)">
+      <p v-if="!isEmpty(getBirthday()) && (isAdmin || isUser)">
         <b>Birthday: </b>{{ getBirthday() }}
         <v-icon class="text-align: float-right" v-if="!model.birthdayFeed">mdi-shield</v-icon>
         <v-icon class="text-align: float-right" v-else>mdi-shield-outline</v-icon>

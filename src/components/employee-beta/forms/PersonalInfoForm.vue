@@ -201,7 +201,7 @@
               text-field-classes="v-text-field"
             >
               <template #append-inner>
-                <private-button v-model="editedEmployee.birthdayFeed"></private-button>
+                <private-button v-model="birthdayFeed"></private-button>
               </template>
             </date-picker-field>
           </v-col>
@@ -442,6 +442,7 @@ const phoneNumbers = ref(initPhoneNumbers());
 
 // other refs
 const addressSearch = ref(null); // current address search input
+const birthdayFeed = ref(!editedEmployee.value.birthdayFeed);
 const birthPlaceSearch = ref(null); // birth place search input
 const placeIds = ref({}); // for address autocomplete
 const predictions = ref({}); // for POB autocomplete
@@ -536,6 +537,8 @@ async function prepareSubmit() {
     editedEmployee.value.tags = xorBy(editedTags.value, uneditedTags, 'id'); // xor by property 'id'
 
     if (editedEmployee.value.country !== 'United States') editedEmployee.value.st = '';
+
+    editedEmployee.value.birthdayFeed = !birthdayFeed.value;
 
     editedEmployee.value.privatePhoneNumbers = [];
     editedEmployee.value.publicPhoneNumbers = [];
