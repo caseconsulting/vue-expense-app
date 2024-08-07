@@ -1,6 +1,16 @@
 <template>
-  <base-info-modal v-if="!close" title="Edit EEO Compliance Form">
+  <v-dialog v-if="!close" max-width="650">
     <v-card>
+      <v-card-title
+        style="position: sticky; top: 0; z-index: 1"
+        class="d-flex align-center justify-space-between beta_header_style"
+      >
+        <h3 class="text-white px-2">Edit EEO Compliance Form</h3>
+        <v-btn @click="close = true" variant="text" icon="">
+          <v-tooltip activator="parent" location="top"> Collapse </v-tooltip>
+          <v-icon id="collapseEEO" color="white">mdi-arrow-collapse</v-icon>
+        </v-btn>
+      </v-card-title>
       <v-card-text>
         <p class="mb-0 mt-5">
           EEO Compliance Reporting
@@ -120,14 +130,16 @@
         ></e-e-o-decline-self-identify>
         <!-- END EEO Compliance Reporting Section -->
       </v-card-text>
-      <v-card-actions>
-        <!-- Form action buttons -->
-        <v-btn id="employeeCancelBtn" variant="text" class="ma-2" @click="cancelA">Cancel</v-btn>
-        <v-btn id="employeeSubmitBtn" variant="outlined" class="ma-2" color="success" @click="submit">
-          <v-icon class="mr-1">mdi-content-save</v-icon>Submit
-        </v-btn>
-        <!-- End form action buttons -->
-      </v-card-actions>
+      <div class="align-start">
+        <v-card-actions>
+          <!-- Form action buttons -->
+          <v-btn id="EEOCancelBtn" variant="text" class="ma-2" @click="cancelA">Cancel</v-btn>
+          <v-btn id="EEOSubmitBtn" variant="outlined" class="ma-2" color="success" @click="submit">
+            <v-icon class="mr-1">mdi-content-save</v-icon>Submit
+          </v-btn>
+          <!-- End form action buttons -->
+        </v-card-actions>
+      </div>
       <!-- Confirmation Model -->
       <form-cancel-confirmation
         :cancelling="cancelling"
@@ -135,7 +147,7 @@
         type="cancel-eeo"
       ></form-cancel-confirmation>
     </v-card>
-  </base-info-modal>
+  </v-dialog>
 </template>
 
 <script setup>
@@ -145,7 +157,6 @@ import { inject, onBeforeUnmount, onBeforeMount, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 import { isEmpty, userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
-import BaseInfoModal from './BaseInfoModal.vue';
 import EEODeclineSelfIdentify from '../../modals/EEODeclineSelfIdentify.vue';
 import FormCancelConfirmation from '../../modals/FormCancelConfirmation.vue';
 import { updateStoreEmployees, updateStoreUser } from '@/utils/storeUtils';
@@ -308,8 +319,7 @@ function adminCanEditEeo() {
 } //adminCanEditEeo
 
 /**
- * Resets back to employee info. Also deletes resume when creating an employee if
- * you decide to cancel your submission
+ * Resets back to employee info
  */
 function cancelA() {
   //creating an employee
