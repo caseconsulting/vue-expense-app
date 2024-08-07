@@ -142,6 +142,8 @@
             <v-text-field
               v-model="editedEmployee.agencyIdentificationNumber"
               label="Agency Identification Number"
+              :rules="getAINRules()"
+              maxLength="7"
             ></v-text-field>
           </v-col>
           <!-- employee role -->
@@ -406,6 +408,7 @@ import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
 import PrivateButton from '../PrivateButton.vue';
 import EEOComplianceEditModal from '../modals/EEOComplianceEditModal.vue';
+import { getAINRules } from '../../../shared/validationUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
