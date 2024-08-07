@@ -368,6 +368,7 @@ async function submit() {
         if (editedEmployee.value.id === store.getters.user.id) await updateStoreUser();
         await updateStoreEmployees();
       } else {
+        emitter.emit('discard-edits', props.employee);
         useDisplayError(updated.response.data.message);
       }
     }
