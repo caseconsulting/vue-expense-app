@@ -158,11 +158,18 @@
             <v-text-field
               v-model="editedEmployee.agencyIdentificationNumber"
               label="Agency Identification Number"
+              :rules="getAINRules()"
+              v-mask="'#######'"
             ></v-text-field>
           </v-col>
           <!-- employee role -->
           <v-col v-if="userIsAdminOrManager">
-            <v-combobox v-model="employeeRole" label="Employee Role *" :items="EMPLOYEE_ROLES"></v-combobox>
+            <v-combobox
+              v-model="employeeRole"
+              label="Employee Role *"
+              :items="EMPLOYEE_ROLES"
+              :rules="getRequiredRules()"
+            ></v-combobox>
           </v-col>
           <!-- tags -->
           <v-col v-if="userIsAdminOrManager">
@@ -390,6 +397,7 @@ import api from '@/shared/api';
 import { isSame } from '@/shared/dateUtils';
 import { CASE_EMAIL_DOMAIN, EMPLOYEE_ROLES, PHONE_TYPES } from '@/shared/employeeUtils';
 import {
+  getAINRules,
   getBirthdayRules,
   getCaseEmailRules,
   getDateRules,
