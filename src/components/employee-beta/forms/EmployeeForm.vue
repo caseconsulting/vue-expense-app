@@ -307,6 +307,7 @@ onBeforeMount(() => {
     // to be overwritten with the edited data, even though we want to discard all edits
     emitter.emit('discard-edits', props.employee);
     editedEmployee.value = cloneDeep(props.employee);
+    Object.keys(validTabs).forEach((key) => (validTabs[key] = true)); //reset validation
     toggleCancelConfirmation.value = false;
     editing.value = false;
   });
