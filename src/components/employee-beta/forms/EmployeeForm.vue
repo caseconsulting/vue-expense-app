@@ -617,7 +617,7 @@ async function selectTab() {
 // |--------------------------------------------------|
 
 watch(validTabs, () => {
-  if (Object.values(validTabs).every((tab) => tab == true)) {
+  if (Object.values(validTabs).every((tab) => tab === true)) {
     valid.value = true;
   }
 });

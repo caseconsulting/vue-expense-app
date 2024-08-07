@@ -6,7 +6,7 @@
         <v-autocomplete
           ref="formFields"
           :items="dodForces"
-          v-model="military.branch"
+          v-model="editedEducation[militaryIndex].branch"
           :rules="getRequiredRules()"
           label="Military Branch"
           auto-select-first
@@ -19,29 +19,28 @@
       <v-col :cols="isMobile() ? '12' : ''">
         <v-text-field
           ref="formFields"
-          :model-value="format(military.startDate, null, 'MM/YYYY')"
+          :model-value="format(editedEducation[militaryIndex].startDate, null, 'MM/YYYY')"
           :rules="getDateMonthYearOptionalRules()"
           label="Starting Date"
           hint="MM/YYYY format"
           v-mask="'##/####'"
-          variant="underlined"
           prepend-inner-icon="mdi-calendar"
           clearable
           persistent-hint
           autocomplete="off"
-          @update:focused="military.startDate = parseEventDate($event)"
-          @keypress="military.showStartMenu = false"
+          @update:focused="editedEducation[militaryIndex].startDate = parseEventDate($event)"
+          @keypress="editedEducation[militaryIndex].showStartMenu = false"
         >
           <v-menu
             activator="parent"
-            v-model="military.showStartMenu"
+            v-model="editedEducation[militaryIndex].showStartMenu"
             :close-on-content-click="false"
             :attach="isAttached"
             location="start center"
           >
             <v-date-picker
-              v-model="military.startDate"
-              @update:model-value="military.showStartMenu = false"
+              v-model="editedEducation[militaryIndex].startDate"
+              @update:model-value="editedEducation[militaryIndex].showStartMenu = false"
               show-adjacent-months
               hide-actions
               keyboard-icon=""
@@ -57,29 +56,28 @@
       <v-col :cols="isMobile() ? '12' : ''">
         <v-text-field
           ref="formFields"
-          :model-value="format(military.completeDate, null, 'MM/YYYY')"
+          :model-value="format(editedEducation[militaryIndex].completeDate, null, 'MM/YYYY')"
           :rules="getDateMonthYearOptionalRules()"
           label="Completion Date"
           hint="MM/YYYY format"
           v-mask="'##/####'"
-          variant="underlined"
           prepend-inner-icon="mdi-calendar"
           clearable
           persistent-hint
           autocomplete="off"
-          @update:focused="military.completeDate = parseEventDate($event)"
-          @keypress="military.showCompleteMenu = false"
+          @update:focused="editedEducation[militaryIndex].completeDate = parseEventDate()"
+          @keypress="editedEducation[militaryIndex].showCompleteMenu = false"
         >
           <v-menu
             activator="parent"
-            v-model="military.showCompleteMenu"
+            v-model="editedEducation[militaryIndex].showCompleteMenu"
             :close-on-content-click="false"
             :attach="isAttached"
             location="start center"
           >
             <v-date-picker
-              v-model="military.completeDate"
-              @update:model-value="military.showCompleteMenu = false"
+              v-model="editedEducation[militaryIndex].completeDate"
+              @update:model-value="editedEducation[militaryIndex].showCompleteMenu = false"
               show-adjacent-months
               hide-actions
               keyboard-icon=""
@@ -99,8 +97,7 @@
 import { format } from '@/shared/dateUtils';
 import { getDateMonthYearOptionalRules, getRequiredRules } from '@/shared/validationUtils';
 import { isMobile } from '@/utils/utils';
-import _ from 'lodash';
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import { mask } from 'vue-the-mask';
 
 // |--------------------------------------------------|
@@ -109,11 +106,11 @@ import { mask } from 'vue-the-mask';
 // |                                                  |
 // |--------------------------------------------------|
 
-const props = defineProps(['service', 'militaryIndex', 'validating', 'attach', 'index']);
+const editedEducation = defineModel({ required: true });
+const props = defineProps(['militaryIndex', 'attach']);
 const vMask = mask; // custom directive
 
 const dodForces = ['Army', 'Marine Corps', 'Navy', 'Air Force', 'Space Force', 'Coast Guard', 'National Guard']; // subject to change per Paul
-const military = ref({ ..._.cloneDeep(props.service), showStartMenu: false, showCompleteMenu: false });
 
 // |--------------------------------------------------|
 // |                                                  |
