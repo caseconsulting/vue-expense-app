@@ -414,7 +414,6 @@ import { computed, inject, onBeforeMount, onBeforeUnmount, onMounted, readonly, 
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
 import EEOComplianceEditModal from '../modals/EEOComplianceEditModal.vue';
-import { getAINRules } from '../../../shared/validationUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
