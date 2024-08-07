@@ -20,7 +20,7 @@
         <v-text-field
           ref="formFields"
           :model-value="format(editedEducation[militaryIndex].startDate, null, 'MM/YYYY')"
-          :rules="getDateMonthYearOptionalRules()"
+          :rules="getDateMonthYearRules()"
           label="Starting Date"
           hint="MM/YYYY format"
           v-mask="'##/####'"
