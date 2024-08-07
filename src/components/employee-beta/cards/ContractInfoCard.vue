@@ -44,7 +44,6 @@ import BaseCard from '@/components/employee-beta/cards/BaseCard.vue';
 // |--------------------------------------------------|
 
 const props = defineProps(['contracts', 'model']);
-
 const dialog = ref(false);
 
 // |--------------------------------------------------|
@@ -55,7 +54,9 @@ const dialog = ref(false);
 
 const contractsList = computed(() => {
   if (!isEmpty(props.model.contracts)) {
-    return _.reverse(_.sortBy(props.model.contracts, (o) => getContractEarliestDate(o)));
+    return _.sortBy(props.model.contracts, (o) => {
+      _.orderBy(o, ['endDate']);
+    });
   }
   return [];
 });
