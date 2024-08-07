@@ -348,7 +348,6 @@ const fullName = computed(() => `${props.employee.firstName} ${props.employee.la
  * Submits!!
  */
 async function submit() {
-  console.log('in employee form submit function');
   submitting.value = true;
 
   valid.value = await validate();
@@ -508,8 +507,6 @@ function cancelSubmit() {
  * Brings up the cancel confirmation modal
  */
 async function cancel() {
-  console.log('in employee form cancel function');
-  console.log('i am wondering if we need to emit one of the eeo cancels things');
   await prepareTabs(); // need to prepare tabs to get the changes
   const changes = getChanges();
   numberOfChanges.value = Object.keys(changes).length;
