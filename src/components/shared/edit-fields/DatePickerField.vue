@@ -66,7 +66,7 @@ const menu = ref(false);
 const date = computed({
   get: () => dayjs(rawDate.value, props.formats ?? [ISO8601, DEFAULT_ISOFORMAT]),
   set: (val) => {
-    rawDate.value = val.format(ISO8601);
+    rawDate.value = val.toISOString();
   }
 });
 
