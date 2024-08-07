@@ -46,7 +46,7 @@
                     <b>{{ 'Hello, ' + model.firstName + '!' }}</b>
                   </p>
                   <p
-                    v-else-if="isAdmin"
+                    v-else
                     :class="!isMobile() ? 'text-h6 text-sm-h4 text-center mb-0' : 'text-center mb-0'"
                     style="font-family: 'Avenir', Helvetica, Arial, sans-serif; font-size: 30px"
                   >
