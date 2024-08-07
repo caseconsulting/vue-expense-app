@@ -133,7 +133,7 @@
           </v-col>
           <!-- hire date -->
           <v-col v-if="userIsAdminOrManager">
-            <v-tooltip text="Cannot edit if employee has budgets" location="top" :open-on-hover="hasBudgets">
+            <v-tooltip text="Cannot edit if employee has budgets" location="top" :open-on-hover="hasExpenses">
               <template #activator="{ props }">
                 <div v-bind="props">
                   <date-picker-field
@@ -141,7 +141,7 @@
                     label="Hire Date *"
                     :rules="[...getRequiredRules(), ...getDateRules()]"
                     text-field-classes="v-text-field"
-                    :disabled="hasBudgets"
+                    :disabled="hasExpenses"
                   ></date-picker-field>
                 </div>
               </template>
@@ -409,7 +409,7 @@ import {
   getURLRules
 } from '@/shared/validationUtils';
 import { COUNTRIES, isMobile, STATES } from '@/utils/utils';
-import { cloneDeep, filter, forEach, includes, isEmpty, lowerCase, some, startCase, xorBy } from 'lodash';
+import { cloneDeep, filter, forEach, includes, isEmpty, lowerCase, some, startCase, xorBy, size } from 'lodash';
 import { computed, inject, onBeforeMount, onBeforeUnmount, onMounted, readonly, ref } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
@@ -447,13 +447,7 @@ const placeIds = ref({}); // for address autocomplete
 const predictions = ref({}); // for POB autocomplete
 const toggleForm = ref(false); // for EEO data
 const phoneAutofocus = ref(false);
-let hasBudgets = ref(false);
-
-if (store.getters.budgets) {
-  for (const budget of store.getters.budgets) {
-    if (budget.budgetObject.employeeId === employeeId) hasBudgets.value = true;
-  }
-}
+let hasExpenses = ref(false);
 
 // values to help with resetting edits after cancelling
 let stopPrepare = false;
@@ -470,11 +464,16 @@ defineExpose({ prepareSubmit }); // allows parent to use refs to call prepareSub
 // |                                                  |
 // |--------------------------------------------------|
 
-onBeforeMount(() => {
+onBeforeMount(async () => {
   emitter.on('discard-edits', onDiscardEdits);
   emitter.on('confirmed-cancel-eeo', () => {
     toggleForm.value = false;
   });
+
+  // determine if employee has expenses
+  hasExpenses.value = editedEmployee.value.id
+    ? size(await api.getAllEmployeeExpenses(editedEmployee.value.id)) > 0
+    : false;
 });
 
 onMounted(validate);
