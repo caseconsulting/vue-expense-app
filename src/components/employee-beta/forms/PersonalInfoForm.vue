@@ -490,6 +490,7 @@ const placeIds = ref({}); // for address autocomplete
 const predictions = ref({}); // for POB autocomplete
 const toggleForm = ref(false); // for EEO data
 const phoneAutofocus = ref(false);
+let hasExpenses = ref(false);
 
 // values to help with resetting edits after cancelling
 let stopPrepare = false;
@@ -530,6 +531,11 @@ onBeforeMount(async () => {
   emitter.on('confirmed-cancel-eeo', () => {
     toggleForm.value = false;
   });
+
+  // determine if employee has expenses
+  hasExpenses.value = editedEmployee.value.id
+    ? size(await api.getAllEmployeeExpenses(editedEmployee.value.id)) > 0
+    : false;
 });
 
 onMounted(validate);
