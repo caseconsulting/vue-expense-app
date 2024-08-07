@@ -480,6 +480,7 @@ onMounted(validate);
 
 onBeforeUnmount(() => {
   emitter.off('discard-edits', onDiscardEdits);
+  emitter.off('confirmed-cancel-eeo');
 });
 
 onBeforeUnmount(prepareSubmit);
