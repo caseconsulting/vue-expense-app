@@ -560,6 +560,18 @@ async function prepareSubmit() {
       if (phoneNumber.private) editedEmployee.value.privatePhoneNumbers.push(phoneNumber);
       else editedEmployee.value.publicPhoneNumbers.push(phoneNumber);
     });
+
+    // extract username from github and twitter
+    if (editedEmployee.value.github && editedEmployee.value.github.indexOf('/') != -1) {
+      editedEmployee.value.github = editedEmployee.value.github.substring(
+        editedEmployee.value.github.lastIndexOf('/') + 1
+      );
+    }
+    if (editedEmployee.value.twitter && editedEmployee.value.twitter.indexOf('/') != -1) {
+      editedEmployee.value.twitter = editedEmployee.value.twitter.substring(
+        editedEmployee.value.twitter.lastIndexOf('/') + 1
+      );
+    }
   }
 }
 
