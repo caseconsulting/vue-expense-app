@@ -37,21 +37,22 @@
 </template>
 
 <script setup>
-import { ref, computed, onBeforeUnmount, inject, onBeforeMount } from 'vue';
 import BudgetSelectModal from '@/components/modals/BudgetSelectModal.vue';
-import _ from 'lodash';
 import api from '@/shared/api.js';
-import { getCurrentBudgetYear } from '@/utils/utils';
 import {
   add,
+  DEFAULT_ISOFORMAT,
   difference,
   format,
   getTodaysDate,
   isAfter,
+  ISO8601,
   isValid,
-  setYear,
-  DEFAULT_ISOFORMAT
+  setYear
 } from '@/shared/dateUtils';
+import { getCurrentBudgetYear } from '@/utils/utils';
+import _ from 'lodash';
+import { computed, inject, onBeforeMount, onBeforeUnmount, ref } from 'vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -149,6 +150,8 @@ const getAnniversary = computed(() => {
  * @return number - returns the number of days until next anniversary
  */
 const getDaysUntil = computed(() => {
+  if (!hireDate.value) return 0; // fail safe
+
   let now = getTodaysDate();
   let curYear = now.split('-')[0];
 
@@ -188,7 +191,7 @@ const getFiscalYearView = computed(() => {
  * load the data and api call to get budgets
  */
 async function loadData() {
-  hireDate.value = format(props.employee.hireDate, null, DEFAULT_ISOFORMAT);
+  hireDate.value = format(props.employee.hireDate, [ISO8601, DEFAULT_ISOFORMAT], DEFAULT_ISOFORMAT);
   fiscalDateView.value = getCurrentBudgetYear(hireDate.value);
   allUserBudgets.value = await api.getEmployeeBudgets(props.employee.id);
   refreshBudgetYears();
