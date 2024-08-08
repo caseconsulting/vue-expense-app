@@ -7,7 +7,7 @@
           <v-col>
             <v-autocomplete
               ref="formFields"
-              v-model="uni.name"
+              v-model="editedEducation[schoolIndex].name"
               :rules="getRequiredRules()"
               :items="schoolDropDown"
               label="School"
@@ -19,7 +19,7 @@
         </v-row>
 
         <!-- Start degree loop -->
-        <v-row v-for="(degree, dIndex) in uni.degrees" :key="`${dIndex}`">
+        <v-row v-for="(degree, dIndex) in editedEducation[schoolIndex].degrees" :key="`${dIndex}`">
           <v-col>
             <v-row>
               <!-- Start Degree name -->
@@ -33,7 +33,7 @@
                   data-vv-name="Degree"
                   clearable
                 >
-                  <template v-if="uni.degrees.length > 1" v-slot:append>
+                  <template v-if="editedEducation[schoolIndex].degrees.length > 1" v-slot:append>
                     <v-btn @click="deleteDegree(dIndex)" variant="text" density="compact" icon="">
                       <v-tooltip activator="parent">Delete Degree</v-tooltip>
                       <v-icon :color="caseGray" class="pr-1">mdi-delete</v-icon>
@@ -56,7 +56,7 @@
                   clearable
                   prepend-inner-icon="mdi-calendar"
                   autocomplete="off"
-                  @update:focused="degree.completionDate = parseEventDate($event)"
+                  @update:focused="degree.completionDate = parseEventDate()"
                   @keypress="degree.showEducationMenu = false"
                 >
                   <v-menu
@@ -216,7 +216,8 @@ import { format } from '@/shared/dateUtils';
 import { getDateMonthYearOptionalRules, getRequiredRules } from '@/shared/validationUtils';
 import { isMobile } from '@/utils/utils';
 import _ from 'lodash';
-import { computed, onBeforeMount, ref } from 'vue';
+import { computed } from 'vue';
+import { onBeforeMount, ref } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
 
@@ -226,7 +227,8 @@ import { useStore } from 'vuex';
 // |                                                  |
 // |--------------------------------------------------|
 
-const props = defineProps(['validating', 'allowAdditions', 'school', 'schoolIndex', 'attach', 'index']);
+const editedEducation = defineModel({ required: true });
+const props = defineProps(['schoolIndex', 'attach']);
 const store = useStore();
 const vMask = mask; // custom directive
 
@@ -236,10 +238,9 @@ const employees = ref(null);
 const majorDropDown = ref(_.map(majorsAndMinors, (elem) => titleCase(elem))); // autocomplete major options
 const minorDropDown = ref(_.map(majorsAndMinors, (elem) => titleCase(elem))); // autocomplete minor options
 const schoolDropDown = SCHOOLS;
-const uni = ref(_.cloneDeep(props.school));
 
 const duplicateDiscipline = (title, discipline, degreeIndex) => {
-  let disciplines = uni.value.degrees[degreeIndex][title];
+  let disciplines = editedEducation.value[props.schoolIndex].degrees[degreeIndex][title];
   let count = _.countBy(disciplines, (dis) => {
     return dis === discipline;
   });
@@ -280,7 +281,7 @@ const isAttached = computed(() => {
  * Add an empty Degree for a school.
  */
 function addDegree() {
-  uni.value.degrees.push({
+  editedEducation.value[props.schoolIndex].degrees.push({
     completionDate: null,
     concentrations: [],
     degreeType: null,
@@ -305,7 +306,7 @@ function addItem(array) {
  * @param dIndex - array index of degree to delete
  */
 function deleteDegree(dIndex) {
-  uni.value.degrees.splice(dIndex, 1);
+  editedEducation.value[props.schoolIndex].degrees.splice(dIndex, 1);
 } // deleteDegree
 
 /**

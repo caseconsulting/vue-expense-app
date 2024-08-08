@@ -10,7 +10,7 @@
         <!-- Start University loop -->
         <v-row v-for="(edu, index) in editedEducation" :key="edu.id">
           <v-col v-if="edu.type === 'university'">
-            <university-form :school="edu" :allowAdditions="allowAdditions" :schoolIndex="index"></university-form>
+            <university-form v-model="editedEducation" :schoolIndex="index"></university-form>
           </v-col>
           <!-- Start delete university -->
           <v-col cols="1" v-if="edu.type === 'university'">
@@ -33,7 +33,7 @@
         <!-- Start military lopp -->
         <v-row v-for="(edu, index) in editedEducation" :key="edu.id">
           <v-col v-if="edu.type === 'military'">
-            <military-form :service="edu" :militaryIndex="index"></military-form>
+            <military-form v-model="editedEducation" :militaryIndex="index"></military-form>
           </v-col>
           <!-- Start delete military -->
           <v-col cols="1" v-if="edu.type === 'military'">
@@ -56,7 +56,7 @@
         <!-- Start high school loop -->
         <v-row v-for="(edu, index) in editedEducation" :key="edu.id">
           <v-col v-if="edu.type === 'highSchool'">
-            <high-school-form :school="edu" :schoolIndex="index"></high-school-form>
+            <high-school-form v-model="editedEducation" :school="edu" :schoolIndex="index"></high-school-form>
           </v-col>
           <!-- Start delete high school -->
           <v-col cols="1" v-if="edu.type === 'highSchool'">
@@ -103,7 +103,7 @@
 
 <script setup>
 import { map } from 'lodash';
-import { computed, inject, onBeforeMount, onMounted, onBeforeUnmount, ref } from 'vue';
+import { computed, inject, onBeforeMount, onMounted, onBeforeUnmount, ref, watch } from 'vue';
 import HighSchoolForm from './education-forms/HighSchoolForm.vue';
 import MilitaryForm from './education-forms/MilitaryForm.vue';
 import UniversityForm from './education-forms/UniversityForm.vue';
@@ -198,6 +198,17 @@ const displayMilitary = computed(() => {
 
 // |--------------------------------------------------|
 // |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+watch(valid, async (val) => {
+  // fixes a bug where validation would be null when submit button is pressed, just need to re-validate
+  if (val === null) await prepareSubmit();
+});
+
+// |--------------------------------------------------|
+// |                                                  |
 // |                    METHODS                       |
 // |                                                  |
 // |--------------------------------------------------|
@@ -206,13 +217,30 @@ async function prepareSubmit() {
   if (!stopPrepare) {
     await validate();
 
-    // remove id that was generated for use in this file
+    // remove properties that were used for editing
     editedEmployee.value.education = map(editedEducation.value, (education) => {
       delete education.id;
+
+      // high school properties
+      delete education.showReceivedMenu;
+
+      // military properties
+      delete education.showStartMenu;
+      delete education.showCompleteMenu;
+
+      // university properties
+      if (education.degrees) {
+        education.degrees = map(education.degrees, (degree) => {
+          delete degree.showEducationMenu;
+          return degree;
+        });
+      }
+
       return education;
     });
   }
 }
+
 async function validate() {
   if (form.value) {
     const result = await form.value.validate();

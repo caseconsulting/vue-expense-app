@@ -158,6 +158,17 @@ onBeforeUnmount(() => {
   emitter.off('discard-edits', onDiscardEdits);
 });
 
+onBeforeMount(() => {
+  emitter.on('discard-edits', onDiscardEdits);
+});
+
+onMounted(validate);
+
+onBeforeUnmount(() => {
+  emitter.off('discard-edits', onDiscardEdits);
+});
+
+onMounted(validate);
 onBeforeUnmount(prepareSubmit);
 
 // |--------------------------------------------------|
