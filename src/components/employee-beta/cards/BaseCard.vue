@@ -1,5 +1,5 @@
 <template>
-  <v-card id="base-card" class="ma-1">
+  <v-card id="base-card" class="ma-0">
     <v-card-title class="beta_header_style px-0 d-flex align-center">
       <v-container class="d-flex flex-nowrap justify-space-between">
         <!-- title -->
