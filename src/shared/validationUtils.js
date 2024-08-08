@@ -160,7 +160,10 @@ export function getNumberRules() {
  * @return Array - The array of rule functions
  */
 export function getPhoneNumberRules() {
-  return [(v) => (!isEmpty(v) && v.length === 12) || 'Phone number must be valid. Format: ###-###-####'];
+  return [
+    (v) =>
+      /^\d{3}-\d{3}-\d{4}(?:, ext. \d{3})?$/.test(v) || 'Phone number must be valid. Format: ###-###-####, ext. ###'
+  ];
 } // getPhoneNumberRules
 
 /**
