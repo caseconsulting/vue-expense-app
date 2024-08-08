@@ -341,7 +341,7 @@
     <!-- phone numbers -->
     <v-row class="mt-7"><h3>Phone Numbers</h3></v-row>
     <v-row class="mb-4 groove d-flex justify-center">
-      <!-- phone numbers -->
+      <!-- phone numbers desktop -->
       <v-col cols="12" v-if="!isMobile()">
         <v-row v-for="(phoneNumber, index) in phoneNumbers" :key="phoneNumber + index">
           <v-col cols="2">
@@ -357,7 +357,7 @@
             <v-text-field
               v-model.trim="phoneNumber.number"
               label="Phone Number"
-              v-mask="'###-###-####'"
+              v-mask="'###-###-####, ext. ###'"
               :rules="getPhoneNumberRules()"
               data-vv-name="Phone Number"
             >
@@ -377,6 +377,7 @@
           </v-col>
         </v-row>
       </v-col>
+      <!-- phone numbers mobile -->
       <v-col v-else>
         <v-row v-for="(phoneNumber, index) in phoneNumbers" :key="phoneNumber + index">
           <v-col cols="12">
@@ -405,7 +406,7 @@
             <v-text-field
               v-model.trim="phoneNumber.number"
               label="Phone Number"
-              v-mask="'###-###-####'"
+              v-mask="'###-###-####, ext. ###'"
               :rules="getPhoneNumberRules()"
               data-vv-name="Phone Number"
             >
