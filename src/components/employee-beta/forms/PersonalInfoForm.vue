@@ -317,7 +317,7 @@
             <v-text-field
               v-model.trim="phoneNumber.number"
               label="Phone Number"
-              v-mask="'###-###-####'"
+              v-mask="'###-###-####, ext. ###'"
               :rules="getPhoneNumberRules()"
               data-vv-name="Phone Number"
             >
