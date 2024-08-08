@@ -401,8 +401,6 @@ async function submitTags(editedTags) {
   let employeeId = props.employee.id;
   let promises = [];
 
-  console.log(editedTags);
-
   for (let tag of editedTags) {
     // finds employee id on the given tag
     const index = findIndex(tag.employees, (empId) => empId === employeeId);
@@ -468,19 +466,10 @@ function getChanges() {
     const oldValue = props.employee[key];
     const newValue = value;
 
+    if (key === 'tags') return false; // tags are handled after the pickBy
+
     // if both values are empty (i.e. empty string, null, or undefined) they are treated as equal
-    let changed = !isEqual(oldValue, newValue) && !(isEmpty(oldValue) && isEmpty(newValue));
-
-    if (key === 'tags') return false; // tags are handled further down
-
-    if (changed) {
-      // TODO test
-      console.log('Key:', key);
-      console.log('\tChanged:', changed);
-      console.log('\tOld:', oldValue);
-      console.log('\tNew:', newValue);
-    }
-    return changed;
+    return !isEqual(oldValue, newValue) && !(isEmpty(oldValue) && isEmpty(newValue));
   });
 
   const editedTags = editedEmployee.value.tags;
@@ -493,7 +482,6 @@ function getChanges() {
  * Called if the form is invalid after trying to submit
  */
 function cancelSubmit() {
-  console.log('Cannot submit, form is invalid!'); // TODO test
   valid.value = false;
   invalidButton.value = true;
   setTimeout(() => {
@@ -517,7 +505,7 @@ function collapseAllTabs() {
 }
 
 /**
- * Returns true only if the value is undefined, null, or an empty string
+ * Returns true only if the value is undefined, null, an empty string, or an empty array
  */
 function isEmpty(value) {
   return value === undefined || value === null || value === '' || value?.length === 0;
