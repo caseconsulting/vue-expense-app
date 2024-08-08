@@ -211,7 +211,7 @@
               v-model="editedEmployee.personalEmail"
               label="Personal Email"
               :rules="getEmailRules()"
-              style="min-width: 350px"
+              :style="!isMobile() ? 'min-width: 350px' : ''"
             >
               <template #prepend-inner><v-icon>mdi-email</v-icon></template>
               <template #append-inner>
