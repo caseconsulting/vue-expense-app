@@ -12,7 +12,10 @@
           <h3 id="link" class="text-white px-2">Available Budgets</h3>
         </router-link>
         <h3 v-else class="text-white px-2">Available Budgets</h3>
-        <v-icon @click="changingBudgetView = !changingBudgetView" icon="mdi-history" class="pr-4" />
+        <v-btn :color="caseRed" icon="" variant="flat" @click="changingBudgetView = !changingBudgetView" class="">
+          <v-icon color="white" size="x-large" icon="mdi-history" />
+          <v-tooltip activator="parent" location="top">View Past Budget Years</v-tooltip>
+        </v-btn>
       </v-card-title>
       <v-card-text class="px-0 pt-5 pb-1 text-black">
         <div v-if="loading || employeeDataLoading" class="pb-4 px-4">
