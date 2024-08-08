@@ -409,7 +409,7 @@ import {
   getURLRules
 } from '@/shared/validationUtils';
 import { COUNTRIES, isMobile, STATES } from '@/utils/utils';
-import { cloneDeep, filter, forEach, includes, isEmpty, lowerCase, some, startCase, xorBy, size } from 'lodash';
+import { cloneDeep, filter, forEach, includes, isEmpty, lowerCase, size, some, startCase, xorBy } from 'lodash';
 import { computed, inject, onBeforeMount, onBeforeUnmount, onMounted, readonly, ref } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
@@ -483,6 +483,25 @@ onBeforeUnmount(() => {
   emitter.off('confirmed-cancel-eeo');
 });
 
+onBeforeMount(async () => {
+  emitter.on('discard-edits', onDiscardEdits);
+  emitter.on('confirmed-cancel-eeo', () => {
+    toggleForm.value = false;
+  });
+
+  // determine if employee has expenses
+  hasExpenses.value = editedEmployee.value.id
+    ? size(await api.getAllEmployeeExpenses(editedEmployee.value.id)) > 0
+    : false;
+});
+
+onMounted(validate);
+
+onBeforeUnmount(() => {
+  emitter.off('discard-edits', onDiscardEdits);
+});
+
+onMounted(validate);
 onBeforeUnmount(prepareSubmit);
 
 // |--------------------------------------------------|

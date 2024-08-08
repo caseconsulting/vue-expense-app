@@ -7,7 +7,7 @@
           <v-col :cols="isMobile() ? '12' : ''">
             <v-text-field
               ref="formFields"
-              v-model="highSchool.name"
+              v-model="editedEducation[schoolIndex].name"
               :rules="getRequiredRules()"
               label="High School"
               clearable
@@ -18,30 +18,29 @@
           <!-- Start graduation date -->
           <v-col :cols="isMobile() ? '12' : ''">
             <v-text-field
-              :model-value="format(highSchool.gradDate, null, 'MM/YYYY')"
+              :model-value="format(editedEducation[schoolIndex].gradDate, null, 'MM/YYYY')"
               ref="formFields"
               :rules="getDateMonthYearOptionalRules()"
               label="Graduation Date"
               hint="MM/YYYY format"
               v-mask="'##/####'"
               persistent-hint
-              variant="underlined"
               clearable
               prepend-inner-icon="mdi-calendar"
               autocomplete="off"
-              @update:focused="highSchool.gradDate = parseEventDate($event)"
-              @keypress="highSchool.showReceivedMenu = false"
+              @update:focused="editedEducation[schoolIndex].gradDate = parseEventDate()"
+              @keypress="editedEducation[schoolIndex].showReceivedMenu = false"
             >
               <v-menu
                 activator="parent"
-                v-model="highSchool.showReceivedMenu"
+                v-model="editedEducation[schoolIndex].showReceivedMenu"
                 :close-on-content-click="false"
                 :attach="isAttached"
                 location="start center"
               >
                 <v-date-picker
-                  v-model="highSchool.gradDate"
-                  @update:model-value="highSchool.showReceivedMenu = false"
+                  v-model="editedEducation[schoolIndex].gradDate"
+                  @update:model-value="editedEducation[schoolIndex].showReceivedMenu = false"
                   show-adjacent-months
                   hide-actions
                   keyboard-icon=""
@@ -61,10 +60,9 @@
 <script setup>
 import { format } from '@/shared/dateUtils';
 import { getDateMonthYearOptionalRules, getRequiredRules } from '@/shared/validationUtils';
-import _ from 'lodash';
-import { computed, ref } from 'vue';
+import { isMobile } from '@/utils/utils';
+import { computed } from 'vue';
 import { mask } from 'vue-the-mask';
-import { isMobile } from '../../../../utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -72,10 +70,9 @@ import { isMobile } from '../../../../utils/utils';
 // |                                                  |
 // |--------------------------------------------------|
 
-const props = defineProps(['school', 'schoolIndex', 'validating', 'attach']);
+const editedEducation = defineModel({ required: true });
+const props = defineProps(['schoolIndex', 'attach']);
 const vMask = mask; // custom directive
-
-const highSchool = ref({ ..._.cloneDeep(props.school), showRecievedMenu: false });
 
 // |--------------------------------------------------|
 // |                                                  |
