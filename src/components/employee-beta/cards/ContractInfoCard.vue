@@ -30,7 +30,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { difference, getTodaysDate } from '@/shared/dateUtils';
+import { difference, getTodaysDate, format } from '@/shared/dateUtils';
 import _ from 'lodash';
 import { isEmpty } from '@/utils/utils';
 import { monthDayYearFormat } from '../../../utils/utils';
@@ -44,7 +44,6 @@ import BaseCard from '@/components/employee-beta/cards/BaseCard.vue';
 // |--------------------------------------------------|
 
 const props = defineProps(['contracts', 'model']);
-
 const dialog = ref(false);
 
 // |--------------------------------------------------|
@@ -55,7 +54,19 @@ const dialog = ref(false);
 
 const contractsList = computed(() => {
   if (!isEmpty(props.model.contracts)) {
-    return _.reverse(_.sortBy(props.model.contracts, (o) => getContractEarliestDate(o)));
+    let contracts = _.cloneDeep(props.model.contracts);
+    for (let c in contracts) {
+      for (let p in contracts[c].projects) {
+        //checks if endDate is null and sets it to the current date
+        if (typeof contracts[c].projects[p].endDate === 'object') {
+          //gives the current project an end date
+          contracts[c].projects[p].endDate = getTodaysDate();
+        }
+        //formats all the end dates so they are the same
+        contracts[c].projects[p].endDate = format(contracts[c].projects[p].endDate, null, 'YYYY-MM-DD');
+      }
+    }
+    return _.reverse(_.sortBy(contracts, (o) => getContractLatestDate(o))); //sorts the contracts by most recent to oldest
   }
   return [];
 });
@@ -113,6 +124,10 @@ const currentProjects = computed(() => {
  */
 function open() {
   dialog.value = true;
+}
+
+function getContractLatestDate(contract) {
+  return _.orderBy(contract.projects, ['endDate'], ['desc'])[0].endDate;
 }
 
 /**

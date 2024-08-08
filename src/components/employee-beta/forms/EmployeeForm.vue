@@ -218,11 +218,13 @@ import BaseForm from '@/components/employee-beta/forms/BaseForm.vue';
 import FormCancelConfirmation from '@/components/modals/FormCancelConfirmation.vue';
 import { useDisplayError } from '@/components/shared/StatusSnackbar.vue';
 import api from '@/shared/api';
-import { isMobile } from '@/utils/utils';
+import { updateStoreEmployees, updateStoreUser } from '@/utils/storeUtils';
+import { generateUUID, isMobile } from '@/utils/utils';
 import { cloneDeep, find, findIndex, forOwn, isEqual, map, pickBy } from 'lodash';
-import { computed, inject, onBeforeMount, onBeforeUnmount, reactive, ref, watch } from 'vue';
-import { useStore } from 'vuex';
+import { computed, inject, onBeforeMount, onBeforeUnmount, provide, reactive, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { useDisplay } from 'vuetify';
+import { useStore } from 'vuex';
 import CertsAndAwardsForm from './CertsAndAwardsForm.vue';
 import ClearanceForm from './ClearanceForm.vue';
 import ContractsForm from './ContractsForm.vue';
@@ -231,9 +233,6 @@ import JobExperienceForm from './JobExperienceForm.vue';
 import LanguagesForm from './LanguagesForm.vue';
 import PersonalInfoForm from './PersonalInfoForm.vue';
 import TechnologiesForm from './TechnologiesForm.vue';
-import { generateUUID } from '../../../utils/utils';
-import { updateStoreEmployees, updateStoreUser } from '../../../utils/storeUtils';
-import { useRouter } from 'vue-router';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -254,6 +253,7 @@ const isUser = inject('isUser');
 // state
 const cardName = ref('');
 const creatingEmployee = ref(false);
+provide('creatingEmployee', creatingEmployee);
 const editing = defineModel();
 const formTabs = ref([]);
 const submitting = ref(false);
@@ -307,6 +307,7 @@ onBeforeMount(() => {
     // to be overwritten with the edited data, even though we want to discard all edits
     emitter.emit('discard-edits', props.employee);
     editedEmployee.value = cloneDeep(props.employee);
+    Object.keys(validTabs).forEach((key) => (validTabs[key] = true)); //reset validation
     toggleCancelConfirmation.value = false;
     editing.value = false;
   });
@@ -351,12 +352,10 @@ async function submit() {
 
   valid.value = await validate();
   if (!valid.value) return cancelSubmit();
-
   //if updating a current employee
   if (!creatingEmployee.value) {
     // scans for all changed attributes
     const changes = getChanges();
-
     // if there are any changes
     if (!isEmpty(Object.keys(changes))) {
       if (changes.tags) {
@@ -370,6 +369,7 @@ async function submit() {
         if (editedEmployee.value.id === store.getters.user.id) await updateStoreUser();
         await updateStoreEmployees();
       } else {
+        emitter.emit('discard-edits', props.employee);
         useDisplayError(updated.response.data.message);
       }
     }
@@ -389,7 +389,6 @@ async function submit() {
       editedEmployee.value.id = null; // reset id
     }
   }
-
   submitting.value = false;
   editing.value = false; // close edit modal
 }
@@ -402,8 +401,6 @@ async function submit() {
 async function submitTags(editedTags) {
   let employeeId = props.employee.id;
   let promises = [];
-
-  console.log(editedTags);
 
   for (let tag of editedTags) {
     // finds employee id on the given tag
@@ -470,19 +467,10 @@ function getChanges() {
     const oldValue = props.employee[key];
     const newValue = value;
 
+    if (key === 'tags') return false; // tags are handled after the pickBy
+
     // if both values are empty (i.e. empty string, null, or undefined) they are treated as equal
-    let changed = !isEqual(oldValue, newValue) && !(isEmpty(oldValue) && isEmpty(newValue));
-
-    if (key === 'tags') return false; // tags are handled further down
-
-    if (changed) {
-      // TODO test
-      console.log('Key:', key);
-      console.log('\tChanged:', changed);
-      console.log('\tOld:', oldValue);
-      console.log('\tNew:', newValue);
-    }
-    return changed;
+    return !isEqual(oldValue, newValue) && !(isEmpty(oldValue) && isEmpty(newValue));
   });
 
   const editedTags = editedEmployee.value.tags;
@@ -495,7 +483,6 @@ function getChanges() {
  * Called if the form is invalid after trying to submit
  */
 function cancelSubmit() {
-  console.log('Cannot submit, form is invalid!'); // TODO test
   valid.value = false;
   invalidButton.value = true;
   setTimeout(() => {
@@ -519,7 +506,7 @@ function collapseAllTabs() {
 }
 
 /**
- * Returns true only if the value is undefined, null, or an empty string
+ * Returns true only if the value is undefined, null, an empty string, or an empty array
  */
 function isEmpty(value) {
   return value === undefined || value === null || value === '' || value?.length === 0;
@@ -619,7 +606,7 @@ async function selectTab() {
 // |--------------------------------------------------|
 
 watch(validTabs, () => {
-  if (Object.values(validTabs).every((tab) => tab == true)) {
+  if (Object.values(validTabs).every((tab) => tab === true)) {
     valid.value = true;
   }
 });
@@ -649,24 +636,20 @@ watch(cardName, () => {
   animation: shake 0.82s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
   transform: translate3d(0, 0, 0);
 }
-
 @keyframes shake {
   10%,
   90% {
     transform: translate3d(-1px, 0, 0);
   }
-
   20%,
   80% {
     transform: translate3d(2px, 0, 0);
   }
-
   30%,
   50%,
   70% {
     transform: translate3d(-4px, 0, 0);
   }
-
   40%,
   60% {
     transform: translate3d(4px, 0, 0);

@@ -1,5 +1,15 @@
 <template>
-  <v-container fluid class="pa-0">
+  <div v-if="model == null && !loading" class="text-center">
+    <h1>Invalid Employee!</h1>
+    <v-container class="invalid-results-gif">
+      <v-img
+        src="https://media.giphy.com/media/fnuSiwXMTV3zmYDf6k/giphy.gif"
+        alt="GIF of Kazoo Kid saying 'Wait a minute, who are you?'"
+        aspect-ratio="4/3"
+      ></v-img>
+    </v-container>
+  </div>
+  <v-container v-else fluid class="pa-0">
     <v-row v-if="basicEmployeeDataLoading" class="pt-0">
       <employee-page-loader />
     </v-row>
@@ -46,7 +56,7 @@
                     <b>{{ 'Hello, ' + model.firstName + '!' }}</b>
                   </p>
                   <p
-                    v-else-if="isAdmin"
+                    v-else
                     :class="!isMobile() ? 'text-h6 text-sm-h4 text-center mb-0' : 'text-center mb-0'"
                     style="font-family: 'Avenir', Helvetica, Arial, sans-serif; font-size: 30px"
                   >
@@ -273,11 +283,10 @@ async function getProfileData() {
   } else {
     // user looking at another employees profile
     let employees = store.getters.employees;
-    model.value = new Employee(
-      _.find(employees, (employee) => {
-        return employee.employeeNumber == route.params.id;
-      })
-    );
+    let found = _.find(employees, (employee) => {
+      return employee.employeeNumber == route.params.id;
+    });
+    model.value = found ? new Employee(found) : undefined;
   }
   user.value = store.getters.user;
   contracts.value = store.getters.contracts;
@@ -404,3 +413,9 @@ watch(
   }
 );
 </script>
+
+<style scoped>
+.invalid-results-gif {
+  max-width: 80%;
+}
+</style>

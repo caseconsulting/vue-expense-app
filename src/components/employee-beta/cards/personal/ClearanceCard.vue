@@ -24,9 +24,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { isEmpty } from '@/utils/utils';
 import BaseCard from '../BaseCard.vue';
+import { orderBy } from 'lodash';
 import ClearanceList from '@/components/employee-beta/lists/ClearanceList.vue';
 import ClearanceModal from '@/components/employee-beta/modals/ClearanceModal.vue';
 
@@ -38,22 +39,21 @@ import ClearanceModal from '@/components/employee-beta/modals/ClearanceModal.vue
 
 const props = defineProps(['model']);
 const toggleModal = ref(false);
-const clearances = ref([]);
-const displayedClearance = ref([]);
 
 // Gets the employee's clearances - prioritizes granted over awaited clearances
-clearances.value = props.model.clearances;
-if (!isEmpty(clearances.value)) {
-  clearances.value.forEach((clearance) => {
-    if (!clearance.awaitingClearance) {
-      displayedClearance.value = clearance;
-      return;
-    }
-  });
-  if (isEmpty(displayedClearance.value)) {
-    displayedClearance.value = clearances.value[0];
+const clearances = computed(() => {
+  if (!isEmpty(props.model.clearances)) {
+    return orderBy(props.model.clearances, ['badgeExpirationDate'], ['asc']);
   }
-}
+  return [];
+});
+
+const displayedClearance = computed(() => {
+  if (!isEmpty(clearances.value)) {
+    return orderBy(clearances.value, ['awaitingClearance', 'badgeExpirationDate'], ['asc', 'desc'])[0]; //displays clearance with the latest expiration date
+  }
+  return [];
+});
 
 // |--------------------------------------------------|
 // |                                                  |
