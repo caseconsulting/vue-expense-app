@@ -28,8 +28,9 @@
             @click="goBackToAlphaProfile()"
             theme="dark"
             class="ma-2"
-            ><v-icon>mdi-alpha</v-icon>view</v-btn
           >
+            old view
+          </v-btn>
         </v-col>
 
         <v-col
@@ -304,7 +305,7 @@ async function getProfileData() {
  * Routes user to their employee page
  */
 function goBackToAlphaProfile() {
-  router.push(`/employee/${route.params.id}`);
+  router.push(`/employee-old/${route.params.id}`);
 } // handleProfile
 
 /**

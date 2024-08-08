@@ -20,11 +20,8 @@
             <v-icon size="large" class="pr-1"> mdi-arrow-left-thin </v-icon>
             Back
           </v-btn>
-          <!---------------------- FOR BETA TESTING!!! ---------------------------->
-          <v-btn rounded="xl" color="#bc3825" @click="handleProfileBeta()" theme="dark" class="ma-2"
-            ><v-icon>mdi-beta</v-icon>view</v-btn
-          >
-          <!-- END BETA TESTING -->
+          <!-- BUTTON TO CHANGE TO NEW/BETA VIEW -->
+          <v-btn rounded="xl" color="#bc3825" @click="handleProfileBeta()" theme="dark" class="ma-2"> new view </v-btn>
         </v-col>
         <v-col
           v-if="hasAdminPermissions() || userIsEmployee()"
@@ -378,7 +375,7 @@ function pushHistoryState(employeeNumber) {
  * Routes user to their employee page
  */
 function handleProfileBeta() {
-  this.$router.push(`/employee-beta/${this.model.employeeNumber}`);
+  this.$router.push(`/employee/${this.model.employeeNumber}`);
 } // handleProfile
 
 /**
