@@ -3,7 +3,7 @@
     <template #title>
       <div class="d-flex align-center">
         <v-icon size="small" style="margin-right: 10px" id="personal" color="white"> mdi-information </v-icon>
-        <h3 class="text-white">Other Information</h3>
+        <h3 class="text-white">Other Info</h3>
       </div>
     </template>
     <v-card-text class="px-7 pt-5 pb-1 text-black">

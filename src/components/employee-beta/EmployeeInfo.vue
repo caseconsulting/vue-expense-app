@@ -113,7 +113,7 @@
                 <v-tabs-window v-model="infoTab">
                   <v-tabs-window-item value="personal">
                     <!-- personal info -->
-                    <v-row class="my-2">
+                    <v-row class="my-2 mx-1">
                       <v-col>
                         <personal-info-card style="padding-bottom: 10px" :model="model"></personal-info-card>
                       </v-col>
@@ -127,7 +127,7 @@
                   </v-tabs-window-item>
                   <v-tabs-window-item value="certifications+awards">
                     <!-- certifications and awards -->
-                    <v-row class="my-2">
+                    <v-row class="my-2 mx-1">
                       <v-col>
                         <certifications-card :model="model"></certifications-card>
                       </v-col>
@@ -138,7 +138,7 @@
                   </v-tabs-window-item>
                   <v-tabs-window-item value="tech+skills+languages">
                     <!-- tech, skills, languages -->
-                    <v-row class="my-2">
+                    <v-row class="my-2 mx-1">
                       <v-col>
                         <technologies-card :model="model"></technologies-card>
                       </v-col>
@@ -148,7 +148,7 @@
                     </v-row>
                   </v-tabs-window-item>
                   <v-tabs-window-item value="experience+education">
-                    <v-row class="my-2">
+                    <v-row class="my-2 mx-1">
                       <!-- past experience -->
                       <v-col cols="12">
                         <job-experience-info-card
@@ -164,7 +164,7 @@
                     </v-row>
                   </v-tabs-window-item>
                   <v-tabs-window-item value="customer+orgs">
-                    <v-row class="my-2">
+                    <v-row class="my-2 mx-1">
                       <v-col>
                         <customer-orgs-card :model="model"></customer-orgs-card>
                       </v-col>
