@@ -221,7 +221,7 @@ import api from '@/shared/api';
 import { updateStoreEmployees, updateStoreUser } from '@/utils/storeUtils';
 import { generateUUID, isMobile } from '@/utils/utils';
 import { cloneDeep, find, findIndex, forOwn, isEqual, map, pickBy } from 'lodash';
-import { computed, inject, onBeforeMount, onBeforeUnmount, reactive, ref, watch } from 'vue';
+import { computed, inject, onBeforeMount, onBeforeUnmount, provide, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useDisplay } from 'vuetify';
 import { useStore } from 'vuex';
@@ -253,6 +253,7 @@ const isUser = inject('isUser');
 // state
 const cardName = ref('');
 const creatingEmployee = ref(false);
+provide('creatingEmployee', creatingEmployee);
 const editing = defineModel();
 const formTabs = ref([]);
 const submitting = ref(false);

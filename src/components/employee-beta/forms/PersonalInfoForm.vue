@@ -133,33 +133,27 @@
           </v-col>
           <!-- hire date -->
           <v-col>
+            <!-- note that only admins can create an employee, so this is essentially only visible to admins -->
             <v-text-field
+              v-if="creatingEmployee"
               id="employeeHireDateField"
               v-model="hireDateFormatted"
               :rules="getDateRules()"
               v-mask="'##/##/####'"
               prepend-inner-icon="mdi-calendar"
-              label="Hire Date*"
+              label="Hire Date *"
               hint="MM/DD/YYYY format"
               persistent-hint
-              :disabled="hasExpenses || !userIsAdminOrManager"
               @update:focused="editedEmployee.hireDate = format(hireDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
               @click:prepend="hireMenu = true"
               @keypress="hireMenu = false"
               autocomplete="off"
             >
-              <v-menu
-                activator="parent"
-                location="start center"
-                :close-on-content-click="false"
-                v-model="hireMenu"
-                :disabled="!userIsAdminOrManager"
-              >
+              <v-menu activator="parent" location="start center" :close-on-content-click="false" v-model="hireMenu">
                 <v-date-picker
                   v-model="editedEmployee.hireDate"
                   @update:model-value="hireMenu = false"
                   :max="editedEmployee.deptDate"
-                  :disabled="!userIsAdminOrManager"
                   show-adjacent-months
                   hide-actions
                   keyboard-icon=""
@@ -434,13 +428,15 @@
 import { JOB_TITLES } from '@/components/employees/form-tabs/dropdown-info/jobTitles';
 import PrivateButton from '@/components/shared/edit-fields/PrivateButton.vue';
 import api from '@/shared/api';
-import { isSame } from '@/shared/dateUtils';
+import { format, isSame } from '@/shared/dateUtils';
 import { CASE_EMAIL_DOMAIN, EMPLOYEE_ROLES, PHONE_TYPES } from '@/shared/employeeUtils';
 import {
   getAINRules,
   getCaseEmailRules,
+  getDateOptionalRules,
   getDateRules,
   getEmailRules,
+  getNonFutureDateRules,
   getNumberRules,
   getPhoneNumberRules,
   getPhoneNumberTypeRules,
@@ -448,14 +444,11 @@ import {
   getURLRules
 } from '@/shared/validationUtils';
 import { COUNTRIES, isMobile, STATES } from '@/utils/utils';
-import { cloneDeep, filter, forEach, includes, isEmpty, lowerCase, size, some, startCase, xorBy } from 'lodash';
+import { cloneDeep, filter, forEach, includes, isEmpty, lowerCase, some, startCase, xorBy } from 'lodash';
 import { computed, inject, onBeforeMount, onBeforeUnmount, onMounted, readonly, ref, watch } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
 import EEOComplianceEditModal from '../modals/EEOComplianceEditModal.vue';
-import { getDateOptionalRules, getNonFutureDateRules } from '../../../shared/validationUtils';
-import { format } from '../../../shared/dateUtils';
-import _ from 'lodash';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -468,6 +461,7 @@ const emitter = inject('emitter');
 const vMask = mask; // import v mask directive
 
 const editedEmployee = defineModel({ required: true });
+const creatingEmployee = inject('creatingEmployee');
 const employeeId = editedEmployee.value.id;
 const valid = defineModel('valid', { required: true });
 const uneditedTags = readonly(getEmployeeTags());
@@ -494,7 +488,6 @@ const placeIds = ref({}); // for address autocomplete
 const predictions = ref({}); // for POB autocomplete
 const toggleForm = ref(false); // for EEO data
 const phoneAutofocus = ref(false);
-let hasExpenses = ref(false);
 
 // values to help with resetting edits after cancelling
 let stopPrepare = false;
@@ -517,10 +510,6 @@ onBeforeMount(async () => {
     toggleForm.value = false;
   });
 
-  // determine if employee has expenses
-  hasExpenses.value = editedEmployee.value.id
-    ? size(await api.getAllEmployeeExpenses(editedEmployee.value.id)) > 0
-    : false;
   // set formatted birthday date
   birthdayFormat.value = format(editedEmployee.value.birthday, null, 'MM/DD/YYYY') || birthdayFormat.value;
   // set formatted hire date
@@ -539,11 +528,6 @@ onBeforeMount(async () => {
   emitter.on('confirmed-cancel-eeo', () => {
     toggleForm.value = false;
   });
-
-  // determine if employee has expenses
-  hasExpenses.value = editedEmployee.value.id
-    ? size(await api.getAllEmployeeExpenses(editedEmployee.value.id)) > 0
-    : false;
 });
 
 onMounted(validate);
@@ -821,9 +805,6 @@ watch(
 watch(
   () => editedEmployee.value.hireDate,
   async () => {
-    hasExpenses.value = editedEmployee.value.id
-      ? _.size(await api.getAllEmployeeExpenses(editedEmployee.value.id)) > 0
-      : false;
     hireDateFormatted.value = format(editedEmployee.value.hireDate, null, 'MM/DD/YYYY') || hireDateFormatted.value;
     //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
     if (editedEmployee.value.hireDate !== null && !format(editedEmployee.value.hireDate, null, 'MM/DD/YYYY')) {
