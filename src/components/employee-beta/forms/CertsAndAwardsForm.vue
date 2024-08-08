@@ -43,11 +43,11 @@
               :rules="[...getDateRules()]"
               hint="MM/DD/YYYY format"
               v-mask="'##/##/####'"
-              prepend-inner-icon="mdi-calendar"
+              persistent-hint
               clearable
+              prepend-inner-icon="mdi-calendar"
               autocomplete="off"
               @update:focused="certification.dateReceived = parseEventDate($event)"
-              @focus="certificationIndex = index"
               @keypress="certification.showReceivedMenu = false"
             >
               <v-menu
@@ -341,8 +341,7 @@ function deleteCertification(index) {
  * @return String - The date in YYYY-MM-DD format
  */
 function parseEventDate(event) {
-  const result = format(event.target, 'MM/DD/YYYY', 'YYYY-MM-DD');
-  return result ?? event.target;
+  return format(event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD');
 } // parseEventDate
 
 /**
