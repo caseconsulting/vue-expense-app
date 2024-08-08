@@ -132,10 +132,9 @@
             ></v-text-field>
           </v-col>
           <!-- hire date -->
-          <v-col>
+          <v-col v-if="creatingEmployee">
             <!-- note that only admins can create an employee, so this is essentially only visible to admins -->
             <v-text-field
-              v-if="creatingEmployee"
               id="employeeHireDateField"
               v-model="hireDateFormatted"
               :rules="getDateRules()"
