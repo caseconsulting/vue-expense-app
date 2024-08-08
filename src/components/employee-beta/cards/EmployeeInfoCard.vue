@@ -142,7 +142,7 @@
 
 <script setup>
 import _ from 'lodash';
-import { computed, onMounted, ref, onBeforeUnmount } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useStore } from 'vuex';
 import { isMobile } from '../../../utils/utils';
 import { updateStoreAvatars } from '../../../utils/storeUtils';
@@ -172,9 +172,6 @@ onMounted(async () => {
   let avatars = store.getters.basecampAvatars;
   const item = _.find(avatars, ['email_address', props.model.email]);
   avatar.value = item ? item.avatar_url : null;
-});
-
-onBeforeUnmount(() => {
 });
 
 // |--------------------------------------------------|

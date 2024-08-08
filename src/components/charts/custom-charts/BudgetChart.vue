@@ -345,20 +345,18 @@ async function refreshBudgets() {
   // remove inactive budgets (exception: there contains a pending expense under that budget)
   budgetsVar = _.filter(budgetsVar, (b) => {
     let budget = b.budgetObject;
-    return (
-      !_.some(
-        props.expenseTypes,
-        (e) =>
-          e.id == budget.expenseTypeId &&
-          (e.isInactive ||
-            !isBetween(
-              getYear(props.fiscalDateView),
-              getYear(budget.fiscalStartDate),
-              getYear(budget.fiscalEndDate),
-              'year',
-              '[]'
-            ))
-      ) || _.some(props.expenses, (e) => e.expenseTypeId == budget.expenseTypeId && _.isEmpty(e.reimbursedDate))
+    return !_.some(
+      props.expenseTypes,
+      (e) =>
+        e.id == budget.expenseTypeId &&
+        (e.isInactive ||
+          !isBetween(
+            getYear(props.fiscalDateView),
+            getYear(budget.fiscalStartDate),
+            getYear(budget.fiscalEndDate),
+            'year',
+            '[]'
+          ))
     );
   });
 
@@ -368,6 +366,9 @@ async function refreshBudgets() {
       budget.odFlag = false;
     }
   });
+
+  // filter out diplicate expense types
+  budgetsVar = _.uniqBy(budgetsVar, 'expenseTypeId');
 
   // remove any budgets where budget amount is 0 and 0 total expenses
   expenseTypeData.value = _.filter(budgetsVar, (data) => {
