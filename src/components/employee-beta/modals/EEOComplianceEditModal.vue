@@ -11,7 +11,10 @@
           <v-icon id="collapseEEO" color="white">mdi-arrow-collapse</v-icon>
         </v-btn>
       </v-card-title>
-      <v-card-text>
+      <div v-if="submitting" class="py-10 px-6">
+        <v-progress-linear :indeterminate="true"></v-progress-linear>
+      </div>
+      <v-card-text v-else>
         <p class="mb-0 mt-5">
           EEO Compliance Reporting
           <span>
@@ -130,7 +133,7 @@
         ></e-e-o-decline-self-identify>
         <!-- END EEO Compliance Reporting Section -->
       </v-card-text>
-      <div class="align-start">
+      <div class="align-start" v-if="!submitting">
         <v-card-actions>
           <!-- Form action buttons -->
           <v-btn id="EEOCancelBtn" variant="text" class="ma-2" @click="cancelA">Cancel</v-btn>
