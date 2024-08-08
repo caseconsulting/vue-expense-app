@@ -236,6 +236,9 @@
                 >
                 </v-date-picker>
               </v-menu>
+              <template #append-inner>
+                <private-button v-model="birthdayFeed"></private-button>
+              </template>
             </v-text-field>
           </v-col>
           <!-- personal email -->
