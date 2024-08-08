@@ -132,20 +132,42 @@
             ></v-text-field>
           </v-col>
           <!-- hire date -->
-          <v-col v-if="userIsAdminOrManager">
-            <v-tooltip text="Cannot edit if employee has budgets" location="top" :open-on-hover="hasExpenses">
-              <template #activator="{ props }">
-                <div v-bind="props">
-                  <date-picker-field
-                    v-model="editedEmployee.hireDate"
-                    label="Hire Date *"
-                    :rules="[...getRequiredRules(), ...getDateRules()]"
-                    text-field-classes="v-text-field"
-                    :disabled="hasExpenses"
-                  ></date-picker-field>
-                </div>
-              </template>
-            </v-tooltip>
+          <v-col>
+            <v-text-field
+              id="employeeHireDateField"
+              v-model="hireDateFormatted"
+              :rules="getDateRules()"
+              v-mask="'##/##/####'"
+              prepend-inner-icon="mdi-calendar"
+              label="Hire Date*"
+              hint="MM/DD/YYYY format"
+              persistent-hint
+              :disabled="hasExpenses || !userIsAdminOrManager"
+              @update:focused="editedEmployee.hireDate = format(hireDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
+              @click:prepend="hireMenu = true"
+              @keypress="hireMenu = false"
+              autocomplete="off"
+            >
+              <v-menu
+                activator="parent"
+                location="start center"
+                :close-on-content-click="false"
+                v-model="hireMenu"
+                :disabled="!userIsAdminOrManager"
+              >
+                <v-date-picker
+                  v-model="editedEmployee.hireDate"
+                  @update:model-value="hireMenu = false"
+                  :max="editedEmployee.deptDate"
+                  :disabled="!userIsAdminOrManager"
+                  show-adjacent-months
+                  hide-actions
+                  keyboard-icon=""
+                  color="#bc3825"
+                  title="Hire Date"
+                ></v-date-picker>
+              </v-menu>
+            </v-text-field>
           </v-col>
           <!-- job role -->
           <v-col>
@@ -194,16 +216,34 @@
         <v-row class="groove">
           <!-- birthday -->
           <v-col :cols="!isMobile() ? '4' : '12'">
-            <date-picker-field
-              v-model="editedEmployee.birthday"
+            <v-text-field
+              ref="formFields"
+              v-mask="'##/##/####'"
+              v-model="birthdayFormat"
+              :rules="[...getDateOptionalRules(), ...getNonFutureDateRules()]"
               label="Birthday"
-              :rules="[getBirthdayRules()]"
-              text-field-classes="v-text-field"
+              hint="MM/DD/YYYY format"
+              prepend-inner-icon="mdi-calendar"
+              clearable
+              persistent-hint
+              @update:focused="editedEmployee.birthday = format(birthdayFormat, null, 'YYYY-MM-DD')"
+              @click:prepend="birthdayMenu = true"
+              @keypress="birthdayMenu = false"
+              autocomplete="off"
             >
-              <template #append-inner>
-                <private-button v-model="birthdayFeed"></private-button>
-              </template>
-            </date-picker-field>
+              <v-menu activator="parent" :close-on-content-click="false" v-model="birthdayMenu" location="start center">
+                <v-date-picker
+                  v-model="editedEmployee.birthday"
+                  @update:model-value="birthdayMenu = false"
+                  show-adjacent-months
+                  hide-actions
+                  keyboard-icon=""
+                  color="#bc3825"
+                  title="Birthday"
+                >
+                </v-date-picker>
+              </v-menu>
+            </v-text-field>
           </v-col>
           <!-- personal email -->
           <v-col>
@@ -391,14 +431,12 @@
 
 <script setup>
 import { JOB_TITLES } from '@/components/employees/form-tabs/dropdown-info/jobTitles';
-import DatePickerField from '@/components/shared/edit-fields/DatePickerField.vue';
 import PrivateButton from '@/components/shared/edit-fields/PrivateButton.vue';
 import api from '@/shared/api';
 import { isSame } from '@/shared/dateUtils';
 import { CASE_EMAIL_DOMAIN, EMPLOYEE_ROLES, PHONE_TYPES } from '@/shared/employeeUtils';
 import {
   getAINRules,
-  getBirthdayRules,
   getCaseEmailRules,
   getDateRules,
   getEmailRules,
@@ -410,10 +448,13 @@ import {
 } from '@/shared/validationUtils';
 import { COUNTRIES, isMobile, STATES } from '@/utils/utils';
 import { cloneDeep, filter, forEach, includes, isEmpty, lowerCase, size, some, startCase, xorBy } from 'lodash';
-import { computed, inject, onBeforeMount, onBeforeUnmount, onMounted, readonly, ref } from 'vue';
+import { computed, inject, onBeforeMount, onBeforeUnmount, onMounted, readonly, ref, watch } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
 import EEOComplianceEditModal from '../modals/EEOComplianceEditModal.vue';
+import { getDateOptionalRules, getNonFutureDateRules } from '../../../shared/validationUtils';
+import { format } from '../../../shared/dateUtils';
+import _ from 'lodash';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -443,7 +484,11 @@ const phoneNumbers = ref(initPhoneNumbers());
 // other refs
 const addressSearch = ref(null); // current address search input
 const birthdayFeed = ref(!editedEmployee.value.birthdayFeed);
+const birthdayFormat = ref(null); // formatted birthday
+const birthdayMenu = ref(false); // shows the birthday menu
 const birthPlaceSearch = ref(null); // birth place search input
+const hireDateFormatted = ref(null); // formatted hireDate
+const hireMenu = ref(false); // display hire menu
 const placeIds = ref({}); // for address autocomplete
 const predictions = ref({}); // for POB autocomplete
 const toggleForm = ref(false); // for EEO data
@@ -475,6 +520,10 @@ onBeforeMount(async () => {
   hasExpenses.value = editedEmployee.value.id
     ? size(await api.getAllEmployeeExpenses(editedEmployee.value.id)) > 0
     : false;
+  // set formatted birthday date
+  birthdayFormat.value = format(editedEmployee.value.birthday, null, 'MM/DD/YYYY') || birthdayFormat.value;
+  // set formatted hire date
+  hireDateFormatted.value = format(editedEmployee.value.hireDate, null, 'MM/DD/YYYY') || hireDateFormatted.value;
 });
 
 onMounted(validate);
@@ -744,6 +793,43 @@ function removeEmailDomain() {
     emailUsername.value = emailUsername.value.substring(0, atIndex);
   }
 } // removeEmailDomain
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * watcher for editedEmployee.value.birthday
+ */
+watch(
+  () => editedEmployee.value.birthday,
+  () => {
+    birthdayFormat.value = format(editedEmployee.value.birthday, null, 'MM/DD/YYYY') || birthdayFormat.value;
+    //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+    if (editedEmployee.value.birthday !== null && !format(editedEmployee.value.birthday, null, 'MM/DD/YYYY')) {
+      editedEmployee.value.birthday = null;
+    }
+  }
+); // watchEditedPersonalInfoBirthday
+
+/**
+ * watcher for editedEmployee.value.hireDate - format date on change.
+ */
+watch(
+  () => editedEmployee.value.hireDate,
+  async () => {
+    hasExpenses.value = editedEmployee.value.id
+      ? _.size(await api.getAllEmployeeExpenses(editedEmployee.value.id)) > 0
+      : false;
+    hireDateFormatted.value = format(editedEmployee.value.hireDate, null, 'MM/DD/YYYY') || hireDateFormatted.value;
+    //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+    if (editedEmployee.value.hireDate !== null && !format(editedEmployee.value.hireDate, null, 'MM/DD/YYYY')) {
+      editedEmployee.value.hireDate = null;
+    }
+  }
+); // watchEditedEmployeeHireDate
 
 function toggleEdit() {
   emitter.emit('open-dialog');
