@@ -33,7 +33,7 @@
           <template #item="{ item }">
             <tr>
               <td align="start">{{ item.name }}</td>
-              <td align="center">{{ item.years }}</td>
+              <td align="start">{{ item.years }}</td>
               <td align="start">
                 <span v-if="item.current">
                   <v-icon class="pl-6">mdi-check</v-icon>
