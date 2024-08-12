@@ -54,7 +54,11 @@
 import { inject, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 import { duplicateTechnologyRules, getRequiredRules, technologyExperienceRules } from '@/shared/validationUtils.js';
-import _ from 'lodash';
+import _cloneDeep from 'lodash/cloneDeep';
+import _map from 'lodash/map';
+import _compact from 'lodash/compact';
+import _forEach from 'lodash/forEach';
+import _uniq from 'lodash/uniq';
 import api from '@/shared/api.js';
 
 // |--------------------------------------------------|
@@ -73,7 +77,7 @@ const model = ref({
   years: 0
 });
 const valid = ref(false);
-const technologies = ref(_.cloneDeep(props.item[props.field.key]));
+const technologies = ref(_cloneDeep(props.item[props.field.key]));
 const techDropdown = ref([]);
 populateDropDown();
 
@@ -84,9 +88,9 @@ populateDropDown();
 // |--------------------------------------------------|
 
 // const unsavedTechnologies = computed(() => {
-//   let originalEmp = _.find(store.getters.employees, (e) => e.id === props.item.id);
-//   let addedTechs = _.xorBy(originalEmp[props.field.key], technologies.value, 'name');
-//   return _.map(addedTechs, (t) => t.name)?.join(' & ');
+//   let originalEmp = _find(store.getters.employees, (e) => e.id === props.item.id);
+//   let addedTechs = _xorBy(originalEmp[props.field.key], technologies.value, 'name');
+//   return _map(addedTechs, (t) => t.name)?.join(' & ');
 // });
 
 // |--------------------------------------------------|
@@ -131,13 +135,13 @@ async function addTech() {
  * Gets information that other employees have filled out.
  */
 function populateDropDown() {
-  let technologies = _.map(store.getters.employees, (employee) => employee.technologies)?.flat(); //extract technology
-  technologies = _.compact(technologies); //remove falsey values
+  let technologies = _map(store.getters.employees, (employee) => employee.technologies)?.flat(); //extract technology
+  technologies = _compact(technologies); //remove falsey values
   // loop employees
-  _.forEach(technologies, (t) => {
+  _forEach(technologies, (t) => {
     techDropdown.value.push(t.name); // add technology name
   });
-  techDropdown.value = _.uniq(techDropdown.value);
+  techDropdown.value = _uniq(techDropdown.value);
   techDropdown.value.sort((a, b) => a.length - b.length);
 } // populateDropDowns
 

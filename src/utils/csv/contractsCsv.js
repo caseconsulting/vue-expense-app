@@ -1,4 +1,5 @@
-import _ from 'lodash';
+import _forEach from 'lodash/forEach';
+import _orderBy from 'lodash/orderBy';
 import { nicknameAndLastName } from '@/shared/employeeUtils.js';
 import { getProjectCurrentEmployees, getProjectPastEmployees } from '@/shared/contractUtils.js';
 import csvUtils from './baseCsv.js';
@@ -12,8 +13,8 @@ export function download(contracts, employees) {
 
 export function convertContracts(contracts, employees) {
   let tempContracts = [];
-  contracts = _.orderBy(contracts, ['primeName'], ['asc']);
-  _.forEach(contracts, (contract) => {
+  contracts = _orderBy(contracts, ['primeName'], ['asc']);
+  _forEach(contracts, (contract) => {
     tempContracts.push({
       'Prime contractor': contract.primeName || '',
       'Contract name': contract.contractName || '',
@@ -26,7 +27,7 @@ export function convertContracts(contracts, employees) {
       'Active Employees': '',
       'Past Employees': ''
     });
-    _.forEach(contract.projects, (project) => {
+    _forEach(contract.projects, (project) => {
       tempContracts.push({
         'Prime contractor': '',
         'Contract name': '',
@@ -61,7 +62,7 @@ export function convertContracts(contracts, employees) {
  */
 function getCurrentProjectEmployees(contract, project, employees) {
   let employeesList = [];
-  _.forEach(getProjectCurrentEmployees(contract, project, employees), (employee) => {
+  _forEach(getProjectCurrentEmployees(contract, project, employees), (employee) => {
     employeesList.push(nicknameAndLastName(employee));
   });
   return employeesList.join(', ');
@@ -72,7 +73,7 @@ function getCurrentProjectEmployees(contract, project, employees) {
  */
 function getPassedProjectEmployees(contract, project, employees) {
   let employeesList = [];
-  _.forEach(getProjectPastEmployees(contract, project, employees), (employee) => {
+  _forEach(getProjectPastEmployees(contract, project, employees), (employee) => {
     employeesList.push(nicknameAndLastName(employee));
   });
   return employeesList.join(', ');

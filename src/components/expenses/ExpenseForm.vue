@@ -415,7 +415,16 @@ import { isBetween, getTodaysDate, format } from '../../shared/dateUtils';
 import { employeeFilter } from '@/shared/filterUtils';
 import { mask } from 'vue-the-mask';
 
-import _ from 'lodash';
+import _find from 'lodash/find';
+import _cloneDeep from 'lodash/cloneDeep';
+import _forEach from 'lodash/forEach';
+import _map from 'lodash/map';
+import _filter from 'lodash/filter';
+import _isEmpty from 'lodash/isEmpty';
+import _includes from 'lodash/includes';
+import _compact from 'lodash/compact';
+import _isEqual from 'lodash/isEqual';
+import _isNil from 'lodash/isNil';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -470,7 +479,7 @@ function isReimbursed() {
  * @return boolean - receipt is required
  */
 function receiptRequired() {
-  this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
+  this.selectedExpenseType = _find(this.expenseTypes, (expenseType) => {
     if (expenseType.value === this.editedExpense.expenseTypeId) {
       return expenseType;
     }
@@ -486,7 +495,7 @@ function receiptRequired() {
   }
   // otherwise, does one of it's categories require a receipt
   if (this.editedExpense.category) {
-    let category = _.find(this.selectedExpenseType.categories, (cat) => {
+    let category = _find(this.selectedExpenseType.categories, (cat) => {
       return cat.name === this.editedExpense.category;
     });
     return category.requireReceipt;
@@ -593,7 +602,7 @@ async function checkCoverage() {
     if (this.editedExpense) {
       // expense exists
       // get expense type
-      let expenseType = _.find(this.expenseTypes, (type) => this.editedExpense.expenseTypeId === type.value);
+      let expenseType = _find(this.expenseTypes, (type) => this.editedExpense.expenseTypeId === type.value);
 
       // get employee
       if (this.asUser) {
@@ -601,7 +610,7 @@ async function checkCoverage() {
         this.employee = this.$store.getters.user;
       } else {
         // creating or updating an expense as an admin
-        this.employee = _.find(this.$store.getters.employees, (e) => e.id === this.editedExpense.employeeId);
+        this.employee = _find(this.$store.getters.employees, (e) => e.id === this.editedExpense.employeeId);
       }
 
       // get budget
@@ -614,7 +623,7 @@ async function checkCoverage() {
       let budgetExists = budget ? true : false;
 
       // get the budget amount, including legacyCarryover
-      let budgetObject = _.find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id).budgetObject;
+      let budgetObject = _find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id).budgetObject;
       let budgetAmount = parseInt(budgetObject.amount);
       let legacyCarryover = parseInt(budgetObject.legacyCarryover ?? 0);
 
@@ -671,7 +680,7 @@ async function checkCoverage() {
           // BRANCH 1.1 if the matching budget exists
           let committedAmount = budget.pendingAmount + budget.reimbursedAmount;
           let allExpenses = await api.getAllAggregateExpenses();
-          let match = _.find(allExpenses, (entry) => {
+          let match = _find(allExpenses, (entry) => {
             return entry.id === this.editedExpense.id;
           });
           // for subsequent calculations, remove matched entry cost from committed amount
@@ -818,7 +827,7 @@ function clearForm() {
 
   this.reqRecipient = false;
   this.recipientPlaceholder = null;
-  this.editedExpense = _.cloneDeep(this.expense);
+  this.editedExpense = _cloneDeep(this.expense);
   this.originalExpense = this.editedExpense;
   this.purchaseDateFormatted = null;
   this.file = null;
@@ -854,7 +863,7 @@ function costHint() {
       str += this.convertToMoneyString(this.remainingBudget);
       return str;
     }
-    let employee = _.find(this.$store.getters.employees, (e) => e.id === this.editedExpense.employeeId);
+    let employee = _find(this.$store.getters.employees, (e) => e.id === this.editedExpense.employeeId);
     let isOverdraftable =
       (this.selectedExpenseType.proRated && this.isFullTime(employee) && this.selectedExpenseType.odFlag) ||
       (!this.selectedExpenseType.proRated && this.selectedExpenseType.odFlag);
@@ -966,10 +975,10 @@ function encodeUrl(url) {
  */
 function filteredExpenseTypes() {
   let filteredExpType = [];
-  let selectedEmployee = _.find(this.employees, ['value', this.editedExpense.employeeId]);
+  let selectedEmployee = _find(this.employees, ['value', this.editedExpense.employeeId]);
   if (!this.asUser) {
     // creating or updating an expense as an admin
-    _.forEach(this.expenseTypes, (expenseType) => {
+    _forEach(this.expenseTypes, (expenseType) => {
       if (!expenseType.isInactive) {
         // expense type is active
         if (!selectedEmployee) {
@@ -978,7 +987,7 @@ function filteredExpenseTypes() {
           filteredExpType.push(expenseType);
         } else if (this.hasAccess(selectedEmployee, expenseType)) {
           // add expense type if the employee is selected and has access
-          let budget = _.find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id);
+          let budget = _find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id);
           let amount = budget ? budget.budgetObject.amount : this.calcAdjustedBudget(selectedEmployee, expenseType); // calculate budget
           expenseType.text = `${expenseType.budgetName} - $${Number(amount).toLocaleString().toString()}`;
           filteredExpType.push(expenseType);
@@ -988,7 +997,7 @@ function filteredExpenseTypes() {
   } else {
     // creating or updating an expense as a user
     let employee = this.userInfo;
-    _.forEach(this.expenseTypes, (expenseType) => {
+    _forEach(this.expenseTypes, (expenseType) => {
       if (!expenseType.isInactive) {
         // expense type is active
         if (this.hasAccess(employee, expenseType)) {
@@ -998,7 +1007,7 @@ function filteredExpenseTypes() {
             isBetween(getTodaysDate(), expenseType.startDate, expenseType.endDate, 'day', '[]')
           ) {
             // expense type is active
-            let budget = _.find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id);
+            let budget = _find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id);
             let amount = budget ? budget.budgetObject.amount : expenseType.budgetAmount;
             expenseType.text = `${expenseType.budgetName} - $${Number(amount).toLocaleString().toString()}`;
             filteredExpType.push(expenseType);
@@ -1050,7 +1059,7 @@ function formatCost(e) {
 function getCategories() {
   let categories = [];
   if (this.selectedExpenseType) {
-    categories = _.map(this.selectedExpenseType.categories, (category) => {
+    categories = _map(this.selectedExpenseType.categories, (category) => {
       return category.name;
     });
   }
@@ -1067,7 +1076,7 @@ function getCategories() {
 function getExpenseTypeSelected(expenseTypeId) {
   this.editedExpense.category = null; // clear expense category (not type) to prevent it persisting
   this.$refs.form.resetValidation(); // avoid validation errors after changing category
-  return (this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
+  return (this.selectedExpenseType = _find(this.expenseTypes, (expenseType) => {
     if (expenseType.value === expenseTypeId) {
       return expenseType;
     }
@@ -1085,12 +1094,12 @@ async function getRemainingBudget() {
     } else {
       this.employeeBudgets = await api.getAllActiveEmployeeBudgets(this.editedExpense.employeeId);
     }
-    let employee = _.find(this.$store.getters.employees, (e) => e.id === this.editedExpense.employeeId);
+    let employee = _find(this.$store.getters.employees, (e) => e.id === this.editedExpense.employeeId);
     // filter out expense types that an employee does not have a budget to
-    this.expenseTypes = _.filter(
+    this.expenseTypes = _filter(
       this.expenseTypes,
       (expenseType) =>
-        this.hasAccess(employee, expenseType) && _.find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id)
+        this.hasAccess(employee, expenseType) && _find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id)
     );
   }
   if (this.editedExpense.expenseTypeId && this.editedExpense.employeeId) {
@@ -1136,7 +1145,7 @@ function getRequireURL() {
     return getRequiredRules();
   }
   if (this.selectedExpenseType.categories.length != 0 && this.editedExpense.category) {
-    let selectedCategory = _.find(this.selectedExpenseType.categories, (category) => {
+    let selectedCategory = _find(this.selectedExpenseType.categories, (category) => {
       if (category.name === this.editedExpense.category) {
         return category;
       }
@@ -1195,7 +1204,7 @@ async function incrementURLHits() {
  * @return boolean - receipt is required
  */
 function isReceiptRequired() {
-  this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
+  this.selectedExpenseType = _find(this.expenseTypes, (expenseType) => {
     if (expenseType.value === this.editedExpense.expenseTypeId) {
       return expenseType;
     }
@@ -1207,7 +1216,7 @@ function isReceiptRequired() {
   }
   // otherwise, does one of it's categories require a receipt
   if (this.editedExpense.category) {
-    let category = _.find(this.selectedExpenseType.categories, (cat) => {
+    let category = _find(this.selectedExpenseType.categories, (cat) => {
       return cat.name === this.editedExpense.category;
     });
     return category.requireReceipt;
@@ -1232,7 +1241,7 @@ function notesRules() {
  * @return String - The cost without formatting
  */
 function parseCost(cost) {
-  if (cost && !_.isEmpty(cost)) {
+  if (cost && !_isEmpty(cost)) {
     return cost.replace(/[,\s]/g, '');
   } else {
     return cost || '';
@@ -1309,24 +1318,24 @@ async function scanFile() {
     let totalPrice;
     let failed = false;
 
-    _.forEach(this.receiptObject.KeyValueSets, (relationship) => {
+    _forEach(this.receiptObject.KeyValueSets, (relationship) => {
       //loop through keyvaluesets
 
       let keys = Object.values(relationship.Keys); //grab the text and confidence objects
       let keyText = '';
-      _.forEach(keys, (key) => {
+      _forEach(keys, (key) => {
         // loop through each one
         keyText += key.Text.toLowerCase() + ' ';
       });
 
-      if (_.includes(keyText, 'total') && !_.includes(keyText, 'sub') && !_.includes(keyText, 'tax')) {
+      if (_includes(keyText, 'total') && !_includes(keyText, 'sub') && !_includes(keyText, 'tax')) {
         //check if there is a total in any relationship
         //if there is loop throught the values in that relationship, and build the text.
 
         let valText = '';
         let valConfidence = 100;
         //build value string
-        _.forEach(relationship.Values, (value) => {
+        _forEach(relationship.Values, (value) => {
           valText += value.Text + '';
           valConfidence = Math.min(valConfidence, value.Confidence); //key: Total: Values: USD confidence 99 141500 confidence 50
         });
@@ -1344,7 +1353,7 @@ async function scanFile() {
     let currentTotal = null;
     if (totalPrice == null) {
       //if there was no relationship that included total do it with words
-      _.forEach(this.receiptObject.Words, (word) => {
+      _forEach(this.receiptObject.Words, (word) => {
         //loop through word object
         if (isTotal) {
           //if the previous word was total
@@ -1365,7 +1374,7 @@ async function scanFile() {
           isTotal = false;
         }
         let wordText = word.Text.toLowerCase();
-        if (_.includes(wordText, 'total') && !_.includes(wordText, 'sub') && !_.includes(wordText, 'tax')) {
+        if (_includes(wordText, 'total') && !_includes(wordText, 'sub') && !_includes(wordText, 'tax')) {
           //if the current word is total
           isTotal = true;
         }
@@ -1394,7 +1403,7 @@ async function scanFile() {
     let organization = '';
     // TITLE
     let title = '';
-    _.forEach(this.receiptObject.comprehend.Entities, (entity) => {
+    _forEach(this.receiptObject.comprehend.Entities, (entity) => {
       if (entity.Type == 'DATE') {
         if (entity.Score > 0.9 && firstDate == null) {
           firstDate = entity.Text;
@@ -1465,7 +1474,7 @@ async function scanFile() {
  */
 function setDefaultExpenseTypeData() {
   let expenseTypes = this.$store.getters.expenseTypes;
-  this.expenseTypes = _.map(expenseTypes, (expenseType) => {
+  this.expenseTypes = _map(expenseTypes, (expenseType) => {
     return {
       text: `${expenseType.budgetName} - $${expenseType.budget}`,
       value: expenseType.id,
@@ -1479,7 +1488,7 @@ function setDefaultExpenseTypeData() {
  */
 function setRecipientOptions() {
   // creating or updating an expense as an admin
-  this.recipientOptions = _.compact(
+  this.recipientOptions = _compact(
     this.activeEmployees.map((employee) => {
       if (
         employee.value == this.userInfo.id ||
@@ -1686,7 +1695,7 @@ function created() {
       return employee;
     }
   });
-  this.activeEmployees = _.compact(this.activeEmployees);
+  this.activeEmployees = _compact(this.activeEmployees);
 
   this.setRecipientOptions();
 
@@ -1745,8 +1754,8 @@ Number.prototype.pad = function (size) {
  * watcher for expense.id - sets the edited expense and original expense and determines if it is being edited.
  */
 function watchExpenseID() {
-  this.editedExpense = _.cloneDeep(this.expense);
-  this.originalExpense = _.cloneDeep(this.editedExpense);
+  this.editedExpense = _cloneDeep(this.expense);
+  this.originalExpense = _cloneDeep(this.editedExpense);
   //when model id is not empty then must be editing an expense
   if (!this.isEmpty(this.expense.id)) {
     this.emitter.emit('editing-expense'); //notify parent that expense is being edited
@@ -1756,7 +1765,7 @@ function watchExpenseID() {
     this.clearForm();
   }
 
-  this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
+  this.selectedExpenseType = _find(this.expenseTypes, (expenseType) => {
     if (expenseType.value === this.editedExpense.expenseTypeId) {
       return expenseType;
     }
@@ -1781,7 +1790,7 @@ async function watchEditedExpenseCost() {
  * watcher for editedExpense.expenseTypeId - set fields for the that expenseType.
  */
 async function watchEditedExpenseExpenseTypeID() {
-  this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
+  this.selectedExpenseType = _find(this.expenseTypes, (expenseType) => {
     return expenseType.value === this.editedExpense.expenseTypeId;
   });
   this.requireURLET = this.selectedExpenseType && this.selectedExpenseType.requireURL;
@@ -1812,13 +1821,13 @@ async function watchEditedExpenseExpenseTypeID() {
     // set requires recipient
     this.reqRecipient = this.selectedExpenseType.hasRecipient;
 
-    let localRecipient = _.find(this.employees, (employee) => employee.value == this.editedExpense.recipient);
+    let localRecipient = _find(this.employees, (employee) => employee.value == this.editedExpense.recipient);
     this.recipientPlaceholder = localRecipient ? localRecipient.text : '';
     // set show on company feed and require url
     if (
-      !_.isEqual(this.originalExpense, this.editedExpense) ||
-      _.isNil(this.editedExpense.id) ||
-      _.isEmpty(this.editedExpense.id)
+      !_isEqual(this.originalExpense, this.editedExpense) ||
+      _isNil(this.editedExpense.id) ||
+      _isEmpty(this.editedExpense.id)
     ) {
       // changing the expense type
       if (!this.isEdit && this.selectedExpenseType.alwaysOnFeed) {
@@ -1826,9 +1835,9 @@ async function watchEditedExpenseExpenseTypeID() {
         this.editedExpense.showOnFeed = true;
       } else {
         // if expense type is not always on feed
-        if (!_.isEmpty(this.selectedExpenseType.categories)) {
+        if (!_isEmpty(this.selectedExpenseType.categories)) {
           // expense type has categories
-          let category = _.find(this.selectedExpenseType.categories, (category) => {
+          let category = _find(this.selectedExpenseType.categories, (category) => {
             return category == this.editedExpense.category;
           });
           this.editedExpense.showOnFeed = category ? category.showOnFeed : false;
@@ -1841,18 +1850,18 @@ async function watchEditedExpenseExpenseTypeID() {
       this.editedExpense.requireURL = true;
     } else {
       // if expense type does not always require url
-      if (_.isEmpty(this.selectedExpenseType.categories)) {
+      if (_isEmpty(this.selectedExpenseType.categories)) {
         // expense type does not have categories
         this.editedExpense.requireURL = false;
       } else {
         // expense type has categories
-        let category = _.find(this.selectedExpenseType.categories, (category) => {
+        let category = _find(this.selectedExpenseType.categories, (category) => {
           return category == this.editedExpense.category;
         });
         this.editedExpense.requireURL = category ? category.requireURL : false;
       }
     }
-    this.editedExpense = _.cloneDeep(this.editedExpense); //need to clone editedExpense in order to see label URL changes
+    this.editedExpense = _cloneDeep(this.editedExpense); //need to clone editedExpense in order to see label URL changes
   } else {
     this.hint = '';
   }
@@ -1866,10 +1875,10 @@ async function watchEditedExpenseExpenseTypeID() {
  */
 function watchEditedExpenseCategory() {
   if (
-    !_.isNil(this.selectedExpenseType) &&
-    (!_.isEqual(this.originalExpense.category, this.editedExpense.category) ||
-      !_.isEqual(this.originalExpense.expenseTypeId, this.editedExpense.expenseTypeId) ||
-      _.isNil(this.editedExpense.id))
+    !_isNil(this.selectedExpenseType) &&
+    (!_isEqual(this.originalExpense.category, this.editedExpense.category) ||
+      !_isEqual(this.originalExpense.expenseTypeId, this.editedExpense.expenseTypeId) ||
+      _isNil(this.editedExpense.id))
   ) {
     // category or expense type is changed
     if (this.selectedExpenseType.alwaysOnFeed) {
@@ -1877,12 +1886,12 @@ function watchEditedExpenseCategory() {
       this.editedExpense.showOnFeed = true;
     } else {
       // if expense type is not always on feed
-      if (_.isEmpty(this.selectedExpenseType.categories)) {
+      if (_isEmpty(this.selectedExpenseType.categories)) {
         // expense type does not have categories
         this.editedExpense.showOnFeed = false;
       } else {
         // expense type has categories
-        let category = _.find(this.selectedExpenseType.categories, (category) => {
+        let category = _find(this.selectedExpenseType.categories, (category) => {
           return category.name == this.editedExpense.category;
         });
         this.editedExpense.showOnFeed = category ? category.showOnFeed : false;
@@ -1893,24 +1902,24 @@ function watchEditedExpenseCategory() {
     this.editedExpense.showOnFeed = this.originalExpense.showOnFeed;
   }
 
-  if (!_.isNil(this.selectedExpenseType)) {
+  if (!_isNil(this.selectedExpenseType)) {
     if (this.selectedExpenseType.requireURL) {
       // if expense type requires url
       this.editedExpense.requireURL = true;
     } else {
       // if expense type does not always require url
-      if (_.isEmpty(this.selectedExpenseType.categories)) {
+      if (_isEmpty(this.selectedExpenseType.categories)) {
         // expense type does not have categories
         this.editedExpense.requireURL = false;
       } else {
         // expense type has categories
-        let category = _.find(this.selectedExpenseType.categories, (category) => {
+        let category = _find(this.selectedExpenseType.categories, (category) => {
           return category.name == this.editedExpense.category;
         });
         this.editedExpense.requireURL = category ? category.requireURL : false;
       }
     }
-    this.editedExpense = _.cloneDeep(this.editedExpense); //need to clone editedExpense in order to see label URL changes
+    this.editedExpense = _cloneDeep(this.editedExpense); //need to clone editedExpense in order to see label URL changes
   }
 } // watchEditedExpenseCategory
 
@@ -2010,7 +2019,7 @@ export default {
       ], // rules for cost
       disableScan: true, // receipt scanned disabled
       //editedExpense: {}, // data being edited --
-      editedExpense: _.cloneDeep(this.expense),
+      editedExpense: _cloneDeep(this.expense),
       employee: null, // employee selected
       employeeBudgets: null, // selected employee's budgets
       employeeRole: '', // employee role

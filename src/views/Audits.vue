@@ -91,7 +91,7 @@
 <script setup>
 import ResumeParserAudits from '@/components/audits/ResumeParserAudits.vue';
 import LoginAudits from '@/components/audits/LoginAudits.vue';
-import _ from 'lodash';
+import _isEmpty from 'lodash/isEmpty';
 import { storeIsPopulated } from '@/utils/utils';
 import { updateStoreEmployees } from '@/utils/storeUtils';
 import { isAfter, format, subtract, getTodaysDate } from '../shared/dateUtils';
@@ -113,7 +113,7 @@ const firstLoad = ref(true); // this is used to set chart titles to "last 24 hou
 const queryA = ref(subtract(getTodaysDate('YYYY-MM-DDTHH:mm:ssZ'), 1, 'd', 'YYYY-MM-DDTHH:mm:ssZ'));
 const queryB = ref(getTodaysDate('YYYY-MM-DDTHH:mm:ssZ'));
 const reloader = ref(0);
-const requiredRules = ref([(v) => !_.isEmpty(v) || 'This field is required']); // rules for a required field
+const requiredRules = ref([(v) => !_isEmpty(v) || 'This field is required']); // rules for a required field
 const selectedDropdown = ref('User Logins');
 const today = getTodaysDate();
 const dateRange = ref(null);
@@ -169,7 +169,7 @@ function setDateRange() {
  * @return String - 'DD/MM/YY' - 'DD/MM/YY' date range
  */
 function formatRange(range) {
-  if (_.isEmpty(range)) {
+  if (_isEmpty(range)) {
     return null;
   }
   let start = range[0];

@@ -6,7 +6,8 @@
 
 <script setup>
 import BarChart from '../base-charts/BarChart.vue';
-import _ from 'lodash';
+import _forEach from 'lodash/forEach';
+import _first from 'lodash/first';
 import { onMounted, ref } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
@@ -55,7 +56,7 @@ function fetchData() {
   let employeesCustOrg = {};
   employees.forEach((e) => {
     if (e.customerOrgExp && e.workStatus != 0) {
-      _.forEach(e.customerOrgExp, (org) => {
+      _forEach(e.customerOrgExp, (org) => {
         if ((org.years || org.years == 0) && org.current) {
           let orgName = org.name;
           if (employeesCustOrg[orgName]) {
@@ -142,8 +143,8 @@ function fillData() {
       }
     },
     onClick: (x, y) => {
-      if (_.first(y)) {
-        let index = _.first(y).index;
+      if (_first(y)) {
+        let index = _first(y).index;
         let labelClicked = chartData.value.labels[index];
         localStorage.setItem('requestedDataType', 'customerOrgs');
         localStorage.setItem('requestedFilter', labelClicked);

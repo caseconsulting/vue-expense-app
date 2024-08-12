@@ -48,7 +48,7 @@
 </template>
 
 <script setup>
-import _ from 'lodash';
+import _map from 'lodash/map';
 import { computed, inject, ref } from 'vue';
 
 // |--------------------------------------------------|
@@ -87,7 +87,7 @@ const reason = ref('');
  * @returns String - The list of employee names
  */
 const employeeNames = computed(() => {
-  let names = Array.from(new Set(_.map(props.expenses, (e) => e.employeeName)));
+  let names = Array.from(new Set(_map(props.expenses, (e) => e.employeeName)));
   return names?.join(', ');
 }); // employeeNames
 </script>

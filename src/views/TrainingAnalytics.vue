@@ -103,7 +103,11 @@
 <script setup>
 import api from '@/shared/api.js';
 import caseLogo from '@/assets/img/logo-big.png';
-import _ from 'lodash';
+import _forEach from 'lodash/forEach';
+import _filter from 'lodash/filter';
+import _cloneDeep from 'lodash/cloneDeep';
+import _findIndex from 'lodash/findIndex';
+import _sortBy from 'lodash/sortBy';
 import { isEmpty } from '@/utils/utils';
 import { ref, onBeforeMount, computed } from 'vue';
 
@@ -154,7 +158,7 @@ const categories = ref([
  */
 onBeforeMount(async () => {
   let allURLS = await api.getItems(api.TRAINING_URLS);
-  urlsOriginal.value = _.forEach(allURLS, (urlObject) => {
+  urlsOriginal.value = _forEach(allURLS, (urlObject) => {
     urlObject.title = titleFormat(urlObject.title);
     if (urlObject.logo != null) {
       urlObject.display = urlObject.logo;
@@ -182,15 +186,15 @@ const urls = computed(() => {
   let filteredUrls = [];
   if (categoryFilter.value != 'All') {
     // filter by category
-    filteredUrls = _.filter(urlsOriginal.value, (url) => {
+    filteredUrls = _filter(urlsOriginal.value, (url) => {
       return url.category === categoryFilter.value;
     });
   } else {
     // creates new list with no url duplicates and adds all hits for same url
-    let urls = _.cloneDeep(urlsOriginal.value);
-    _.forEach(urls, (urlObject) => {
+    let urls = _cloneDeep(urlsOriginal.value);
+    _forEach(urls, (urlObject) => {
       let url = urlObject.id;
-      let dupIndex = _.findIndex(filteredUrls, (duplicate) => {
+      let dupIndex = _findIndex(filteredUrls, (duplicate) => {
         return url === duplicate.id;
       });
 
@@ -206,7 +210,7 @@ const urls = computed(() => {
 
   if (!isEmpty(search.value)) {
     // filter by serach
-    filteredUrls = _.filter(filteredUrls, (url) => {
+    filteredUrls = _filter(filteredUrls, (url) => {
       let includes =
         (url.title && url.title.toLowerCase().includes(search.value.toLowerCase())) ||
         (url.description && url.description.toLowerCase().includes(search.value.toLowerCase())) ||
@@ -216,7 +220,7 @@ const urls = computed(() => {
     });
   }
 
-  return _.sortBy(filteredUrls, ['hits', 'id']).reverse(); // sort by most hits
+  return _sortBy(filteredUrls, ['hits', 'id']).reverse(); // sort by most hits
 }); // urls
 
 // |--------------------------------------------------|
@@ -233,7 +237,7 @@ const urls = computed(() => {
  * @param item - training url
  */
 function changeDisplay(item) {
-  let index = _.findIndex(urlsOriginal.value, (url) => {
+  let index = _findIndex(urlsOriginal.value, (url) => {
     return url.id === item.id && url.category === item.category;
   });
 

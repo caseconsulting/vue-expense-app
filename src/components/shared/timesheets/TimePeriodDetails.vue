@@ -73,7 +73,7 @@
 </template>
 
 <script setup>
-import _ from 'lodash';
+import _forEach from 'lodash/forEach';
 import { computed, inject, ref, onMounted, onBeforeUnmount } from 'vue';
 import { formatNumber, openLink } from '@/utils/utils';
 import {
@@ -196,7 +196,7 @@ const hoursBehindBy = computed(() => {
  */
 const periodHoursCompleted = computed(() => {
   let total = 0;
-  _.forEach(props.timeData, (duration, jobName) => {
+  _forEach(props.timeData, (duration, jobName) => {
     if (!props.isYearly || (props.isYearly && !props.supplementalData.nonBillables?.includes(jobName))) {
       total += duration;
     }

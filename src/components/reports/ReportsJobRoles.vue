@@ -82,7 +82,10 @@
 </template>
 
 <script setup>
-import _ from 'lodash';
+import _map from 'lodash/map';
+import _compact from 'lodash/compact';
+import _forEach from 'lodash/forEach';
+import _filter from 'lodash/filter';
 import { employeeFilter } from '@/shared/filterUtils';
 import { getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
 import { onMounted, ref, inject, watch } from 'vue';
@@ -175,9 +178,9 @@ function handleClick(_, { item }) {
  */
 function populateJobRoleDropdown() {
   jobRoles.value = [];
-  let employeeJobRoles = _.map(filteredEmployees.value, (employee) => employee.jobRole);
-  employeeJobRoles = _.compact(employeeJobRoles);
-  _.forEach(employeeJobRoles, (jobRole) => jobRoles.value.push(jobRole));
+  let employeeJobRoles = _map(filteredEmployees.value, (employee) => employee.jobRole);
+  employeeJobRoles = _compact(employeeJobRoles);
+  _forEach(employeeJobRoles, (jobRole) => jobRoles.value.push(jobRole));
   jobRoles.value = Array.from(new Set(jobRoles.value));
 } // populateJobRoleDropdown
 
@@ -198,7 +201,7 @@ function populateDropdowns(emps) {
 function refreshDropdownItems() {
   filteredEmployees.value = employeesInfo.value;
   if (search.value) {
-    filteredEmployees.value = _.filter(filteredEmployees.value, (employee) => {
+    filteredEmployees.value = _filter(filteredEmployees.value, (employee) => {
       return employee.employeeNumber == search.value;
     });
   }
@@ -206,7 +209,7 @@ function refreshDropdownItems() {
     searchJobRoles();
   }
   if (tagsInfo.value.selected.length > 0) {
-    filteredEmployees.value = _.filter(filteredEmployees.value, (employee) => {
+    filteredEmployees.value = _filter(filteredEmployees.value, (employee) => {
       return selectedTagsHasEmployee(employee.id, tagsInfo.value);
     });
   }
@@ -218,7 +221,7 @@ function refreshDropdownItems() {
  * Filters employees on the data table by the job role entered by the user.
  */
 function searchJobRoles() {
-  filteredEmployees.value = _.filter(employeesInfo.value, (employee) => {
+  filteredEmployees.value = _filter(employeesInfo.value, (employee) => {
     if (employee.jobRole) {
       return employee.jobRole.includes(jobRoleSearch.value);
     } else {
@@ -227,7 +230,7 @@ function searchJobRoles() {
   });
   if (search.value) {
     // if there is a desired employee search then only show that employee
-    filteredEmployees.value = _.filter(employeesInfo.value, (employee) => {
+    filteredEmployees.value = _filter(employeesInfo.value, (employee) => {
       return employee.employeeNumber == search.value;
     });
   }

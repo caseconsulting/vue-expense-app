@@ -2,7 +2,9 @@
  * Utilities to convert expense objects into objects passable to
  * csv.js
  */
-import _ from 'lodash';
+import _forEach from 'lodash/forEach';
+import _cloneDeep from 'lodash/cloneDeep';
+import _find from 'lodash/find';
 import store from '../../../store/index.js';
 import { format, DEFAULT_ISOFORMAT } from '../../shared/dateUtils';
 import csvUtils from './baseCsv.js';
@@ -30,11 +32,11 @@ export function convertExpenses(expenses) {
   let tempExpenses = [];
   let employees = store.getters.employees;
   let expenseTypes = store.getters.expenseTypes;
-  _.forEach(expenses, (expense) => {
-    let tempExpense = _.cloneDeep(expense);
+  _forEach(expenses, (expense) => {
+    let tempExpense = _cloneDeep(expense);
 
     // add first name, last name, and employee #
-    _.forEach(employees, (employee) => {
+    _forEach(employees, (employee) => {
       if (employee.id === tempExpense.employeeId) {
         tempExpense.employeeNumber = employee.employeeNumber;
         tempExpense.lastname = employee.lastName;
@@ -44,7 +46,7 @@ export function convertExpenses(expenses) {
     });
 
     // add expense type
-    _.forEach(expenseTypes, (type) => {
+    _forEach(expenseTypes, (type) => {
       if (type.id === tempExpense.expenseTypeId) {
         tempExpense.expenseType = type.budgetName;
       }
@@ -82,7 +84,7 @@ export function convertExpenses(expenses) {
  * @returns String - The employees preferred name
  */
 function getRecipientName(employeeId) {
-  let employee = _.find(store.getters.employees, (e) => e.id === employeeId);
+  let employee = _find(store.getters.employees, (e) => e.id === employeeId);
   return employee ? `${employee.nickname || employee.firstName} ${employee.lastName}` : null;
 } // getRecipientName
 

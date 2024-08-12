@@ -1,7 +1,9 @@
 import { isEmpty } from '@/utils/utils';
 import { getTodaysDate, isAfter, isBefore, isSameOrBefore, isValid } from '@/shared/dateUtils';
 import store from '../../store/index';
-import _ from 'lodash';
+import _some from 'lodash/some';
+import _find from 'lodash/find';
+import _filter from 'lodash/filter';
 
 /**
  * Gets the rules for valid AIN number, where it must be 7 digits that can lead with 0s, and not required
@@ -32,7 +34,7 @@ export function getDateOptionalRules() {
 export function getDatesArrayOptionalRules() {
   return [
     (v) => {
-      let allValid = _.some(v, (date) => /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(date) && isValid(date, 'MM/DD/YYYY'));
+      let allValid = _some(v, (date) => /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(date) && isValid(date, 'MM/DD/YYYY'));
       return !isEmpty(v) ? allValid || 'All Dates must be valid. Format: MM/DD/YYYY' : true;
     }
   ]; // rules for an optional date
@@ -157,8 +159,8 @@ export function getValidateFalse() {
 export function duplicateEmployeeNumberRule() {
   return [
     (v, employee) => {
-      let emp = _.find(store.getters.employees, (e) => e.id === employee.id);
-      let duplicate = _.some(store.getters.employees, (e) => {
+      let emp = _find(store.getters.employees, (e) => e.id === employee.id);
+      let duplicate = _some(store.getters.employees, (e) => {
         return Number(e.employeeNumber) === Number(v) && Number(emp.employeeNumber) !== Number(v);
       });
       return !duplicate || 'This employee id is already in use';
@@ -169,7 +171,7 @@ export function duplicateEmployeeNumberRule() {
 export function duplicateTechnologyRules() {
   return [
     (v, employee, technologies) => {
-      let duplicates = _.filter(technologies, (t) => t.name === v);
+      let duplicates = _filter(technologies, (t) => t.name === v);
       return duplicates.length === 0 || 'Duplicate technology found';
     }
   ];
@@ -217,7 +219,7 @@ export function getAfterSubmissionRules(clearance) {
   return [
     (v) =>
       !isEmpty(v)
-        ? !_.some(v, (date) => isBefore(date, clearance.submissionDate)) || 'Dates must come after submission date'
+        ? !_some(v, (date) => isBefore(date, clearance.submissionDate)) || 'Dates must come after submission date'
         : true
   ];
 }
@@ -230,7 +232,7 @@ export function getAfterSubmissionRules(clearance) {
  * @returns Array - The array of rule functions
  */
 export function getPTOCashOutRules(ptoLimit, employeeId, originalAmount) {
-  let pendingCashOuts = _.filter(store.getters.ptoCashOuts, (p) => !p.approvedDate && employeeId === p.employeeId);
+  let pendingCashOuts = _filter(store.getters.ptoCashOuts, (p) => !p.approvedDate && employeeId === p.employeeId);
   let pendingAmount = pendingCashOuts.reduce((n, { amount }) => n + amount, 0);
   return [
     (v) => (!isEmpty(v) && v > 0) || `PTO cash out amount must be greater than 0`,

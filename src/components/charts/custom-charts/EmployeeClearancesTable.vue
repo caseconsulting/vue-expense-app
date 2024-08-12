@@ -24,7 +24,9 @@
 </template>
 
 <script setup>
-import _ from 'lodash';
+import _reduce from 'lodash/reduce';
+import _some from 'lodash/some';
+import _map from 'lodash/map';
 import { onBeforeMount, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
@@ -83,10 +85,10 @@ function clickedRow(_, { item }) {
  * @returns Number - The total amount of users that actively hold that type of clearance
  */
 function getClearanceCount(type) {
-  let num = _.reduce(
+  let num = _reduce(
     employees.value,
     (a, b) => {
-      return b.clearances && _.some(b.clearances, (c) => c.type === type && !c.awaitingClearance) ? a + 1 : a + 0;
+      return b.clearances && _some(b.clearances, (c) => c.type === type && !c.awaitingClearance) ? a + 1 : a + 0;
     },
     0
   );
@@ -104,7 +106,7 @@ function fillData() {
   employees.value = employees.value.filter((emp) => emp.workStatus != 0);
 
   const CLEARANCE_TYPES = ['TS/SCI - Full Scope', 'TS/SCI - CI Poly', 'TS/SCI - No Poly', 'Top Secret', 'Secret'];
-  tableContents.value = _.map(CLEARANCE_TYPES, (type) => ({ title: type, value: getClearanceCount(type) }));
+  tableContents.value = _map(CLEARANCE_TYPES, (type) => ({ title: type, value: getClearanceCount(type) }));
 
   headers.value = [
     {

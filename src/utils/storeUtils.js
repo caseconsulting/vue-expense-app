@@ -7,7 +7,7 @@
 import api from '@/shared/api.js';
 import store from '../../store/index.js';
 import { userRoleIsAdmin, userRoleIsManager, userRoleIsUser } from '@/utils/utils';
-import _ from 'lodash';
+import _filter from 'lodash/filter';
 
 /**
  * Update store with latest user data
@@ -29,7 +29,7 @@ export async function updateStoreEmployees() {
   try {
     // getEmployees
     let employees = await api.getItems(api.EMPLOYEES);
-    employees = _.filter(employees, (e) => e.email !== 'info@consultwithcase.com');
+    employees = _filter(employees, (e) => e.email !== 'info@consultwithcase.com');
     store.dispatch('setEmployees', { employees });
   } catch (err) {
     console.error(err);

@@ -87,7 +87,14 @@
 import api from '@/shared/api.js';
 import ActivityFeed from '@/components/home/ActivityFeed.vue';
 import AvailableBudgets from '@/components/shared/AvailableBudgets.vue';
-import _ from 'lodash';
+import _flatten from 'lodash/flatten';
+import _forEach from 'lodash/forEach';
+import _truncate from 'lodash/truncate';
+import _filter from 'lodash/filter';
+import _map from 'lodash/map';
+import _find from 'lodash/find';
+import _sortBy from 'lodash/sortBy';
+import _compact from 'lodash/compact';
 import { isEmpty, getCurrentBudgetYear } from '@/utils/utils';
 import { updateStoreExpenseTypes, updateStoreBudgets } from '@/utils/storeUtils';
 import TimeData from '@/components/shared/timesheets/TimeData';
@@ -217,7 +224,7 @@ async function createEvents() {
   }
   let eventData = await api.getAllEvents();
   employees.value = eventData.employees;
-  scheduleEntries.value = _.flatten(eventData.schedules);
+  scheduleEntries.value = _flatten(eventData.schedules);
   aggregatedExpenses.value = eventData.expenses;
   aggregatedAwards.value = getEmployeeAwards();
   aggregatedCerts.value = getEmployeeCerts();
@@ -231,7 +238,7 @@ async function createEvents() {
   // created empty two-dimensional array
   let anniversaries = [...Array(monthsBack)].map(() => Array(monthsBack));
   let newHires = [];
-  _.forEach(employees.value, (a) => {
+  _forEach(employees.value, (a) => {
     let hireDate = format(a.hireDate, null, 'YYYY-MM-DD');
     let todaysDate = getTodaysDate();
     let event = {};
@@ -270,7 +277,7 @@ async function createEvents() {
           event.daysFromToday = difference(startOf(todaysDate, 'day'), startOf(anniversary, 'day'), 'day');
           event.color = '#bc3825';
           if (textMaxLength.value < event.text.length) {
-            event.truncatedText = _.truncate(event.text, { length: textMaxLength.value });
+            event.truncatedText = _truncate(event.text, { length: textMaxLength.value });
           }
           if (event.type === 'New Hire') {
             event.color = '#415364';
@@ -298,12 +305,12 @@ async function createEvents() {
     }
   });
   // filter out empty arrays
-  anniversaries = _.filter(anniversaries, (a) => a.date);
+  anniversaries = _filter(anniversaries, (a) => a.date);
 
   const now = getTodaysDate();
 
   // generate birthdays
-  let birthdays = _.map(employees.value, (b) => {
+  let birthdays = _map(employees.value, (b) => {
     if (b.birthdayFeed && !isEmpty(b.birthday) && b.workStatus != 0) {
       let event = {};
       let cutOff = startOf(subtract(now, 6, 'months'), 'day');
@@ -331,7 +338,7 @@ async function createEvents() {
       event.daysFromToday = difference(startOf(now, 'day'), startOf(birthday, 'day'), 'day');
       event.birthdayCampfire = 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726';
       if (textMaxLength.value < event.text.length) {
-        event.truncatedText = _.truncate(event.text, { length: textMaxLength.value });
+        event.truncatedText = _truncate(event.text, { length: textMaxLength.value });
       }
       return event;
     }
@@ -339,7 +346,7 @@ async function createEvents() {
   });
 
   // generate expenses
-  let expenses = _.map(aggregatedExpenses.value, (a) => {
+  let expenses = _map(aggregatedExpenses.value, (a) => {
     if (!isEmpty(a.showOnFeed) && a.showOnFeed) {
       //value of showOnFeed is true
       let reimbursedDate = format(a.reimbursedDate, 'YYYY-MM-DD', 'YYYY-MM-DD');
@@ -355,7 +362,7 @@ async function createEvents() {
         event.icon = 'mdi-hands-pray';
         event.type = 'High Five';
         event.color = '#167c80'; // like a dark teal kinda color
-        const recipient = _.find(employees.value, (e) => {
+        const recipient = _find(employees.value, (e) => {
           return e.id === a.recipient;
         });
         if (recipient) {
@@ -382,7 +389,7 @@ async function createEvents() {
         event.color = 'green';
       }
       if (textMaxLength.value < event.text.length) {
-        event.truncatedText = _.truncate(event.text, { length: textMaxLength.value });
+        event.truncatedText = _truncate(event.text, { length: textMaxLength.value });
       }
       return event;
     } else {
@@ -392,7 +399,7 @@ async function createEvents() {
   });
 
   // generate schedules
-  let schedules = _.map(scheduleEntries.value, (a) => {
+  let schedules = _map(scheduleEntries.value, (a) => {
     let cutOff = startOf(subtract(now, 6, 'months'), 'day');
 
     let startDate = a.starts_at;
@@ -419,13 +426,13 @@ async function createEvents() {
     event.eventScheduled = a.app_url;
     event.color = 'blue darken-3';
     if (textMaxLength.value < event.text.length) {
-      event.truncatedText = _.truncate(event.text, { length: textMaxLength.value });
+      event.truncatedText = _truncate(event.text, { length: textMaxLength.value });
     }
     return event;
   });
 
   // generate awards
-  let awards = _.map(aggregatedAwards.value, (a) => {
+  let awards = _map(aggregatedAwards.value, (a) => {
     // get award information
     const dateSubmitted = a.dateSubmitted || a.dateReceived;
     let award = {
@@ -450,7 +457,7 @@ async function createEvents() {
   });
 
   // generate certs
-  let certs = _.map(aggregatedCerts.value, (c) => {
+  let certs = _map(aggregatedCerts.value, (c) => {
     // get cert information
     const dateSubmitted = c.dateSubmitted || c.dateReceived;
     let cert = {
@@ -470,7 +477,7 @@ async function createEvents() {
     return wantToDisplay ? cert : null;
   });
 
-  let announcements = _.map(eventData.announcements, (announcement) => {
+  let announcements = _map(eventData.announcements, (announcement) => {
     const date = startOf(announcement.createdAt, 'day');
     return {
       type: 'Announcement',
@@ -494,7 +501,7 @@ async function createEvents() {
     ...certs,
     ...announcements
   ]; // merges lists
-  events.value = _.sortBy(_.compact(mergedEventsList), 'daysFromToday'); //sorts by days from today
+  events.value = _sortBy(_compact(mergedEventsList), 'daysFromToday'); //sorts by days from today
   store.dispatch('setEvents', { events: events.value });
   loadingEvents.value = false;
 } //createEvents

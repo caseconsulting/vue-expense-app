@@ -192,7 +192,12 @@
 </template>
 
 <script>
-import _ from 'lodash';
+import _forEach from 'lodash/forEach';
+import _isEmpty from 'lodash/isEmpty';
+import _isArray from 'lodash/isArray';
+import _some from 'lodash/some';
+import _filter from 'lodash/filter';
+import _cloneDeep from 'lodash/cloneDeep';
 import { mask } from 'vue-the-mask';
 import { getDateRules, getDateOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
 import { asyncForEach, isEmpty, isMobile, userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
@@ -226,7 +231,7 @@ async function created() {
         }
       ];
     } else {
-      _.forEach(contract.projects, (proj) => [
+      _forEach(contract.projects, (proj) => [
         (proj.projectName = this.contractProjects.find((p) => p.id === proj.projectId).projectName)
       ]);
     }
@@ -325,7 +330,7 @@ function deleteProject(contractIndex, projectIndex) {
 function getContractsDropdownItems(contract) {
   if (!contract) {
     return [];
-  } else if (contract.primeName && contract.projects.length == 1 && _.isEmpty(contract.projects[0].projectName)) {
+  } else if (contract.primeName && contract.projects.length == 1 && _isEmpty(contract.projects[0].projectName)) {
     // only prime name is filled out
     let matchedContracts = this.contracts.filter((c) => c.primeName === contract.primeName);
     return matchedContracts.map((c) => c.contractName);
@@ -336,7 +341,7 @@ function getContractsDropdownItems(contract) {
       (c) => c.primeName === contract.primeName && c.projects.some((p) => p.projectName === project.projectName)
     );
     return matchedContracts.map((c) => c.contractName);
-  } else if (_.isEmpty(contract.primeName) && !_.isEmpty(contract.projects[0].projectName)) {
+  } else if (_isEmpty(contract.primeName) && !_isEmpty(contract.projects[0].projectName)) {
     // only project names are filled out
     let project = contract.projects[0];
     let matchedContracts = this.contracts.filter((c) => c.projects.some((p) => p.projectName === project.projectName));
@@ -356,7 +361,7 @@ function getContractsDropdownItems(contract) {
 function getPrimesDropdownItems(contract) {
   if (!contract) {
     return [];
-  } else if (contract.contractName && contract.projects.length == 1 && _.isEmpty(contract.projects[0].projectName)) {
+  } else if (contract.contractName && contract.projects.length == 1 && _isEmpty(contract.projects[0].projectName)) {
     // only contract name is filled out
     let matchedContracts = this.contracts.filter((c) => c.contractName === contract.contractName);
     return matchedContracts.map((c) => c.primeName);
@@ -367,7 +372,7 @@ function getPrimesDropdownItems(contract) {
       (c) => c.contractName === contract.contractName && c.projects.some((p) => p.projectName === project.projectName)
     );
     return matchedContracts.map((c) => c.primeName);
-  } else if (_.isEmpty(contract.contractName) && !_.isEmpty(contract.projects[0].projectName)) {
+  } else if (_isEmpty(contract.contractName) && !_isEmpty(contract.projects[0].projectName)) {
     // only project names are filled out
     let project = contract.projects[0];
     let matchedContracts = this.contracts.filter((c) => c.projects.some((p) => p.projectName === project.projectName));
@@ -393,11 +398,11 @@ function getProjectsDropdownItems(contract) {
       (c) => c.contractName === contract.contractName && c.primeName === contract.primeName
     );
     return matchedContracts.map((c) => c.projects.map((p) => p.projectName)).flat();
-  } else if (contract.contractName && _.isEmpty(contract.primeName)) {
+  } else if (contract.contractName && _isEmpty(contract.primeName)) {
     // only contract name is filled out
     let matchedContracts = this.contracts.filter((c) => c.contractName === contract.contractName);
     return matchedContracts.map((c) => c.projects.map((p) => p.projectName)).flat();
-  } else if (contract.primeName && _.isEmpty(contract.contractName)) {
+  } else if (contract.primeName && _isEmpty(contract.contractName)) {
     // only prime name is filled out
     let matchedContracts = this.contracts.filter((c) => c.primeName === contract.primeName);
     return matchedContracts.map((c) => c.projects.map((p) => p.projectName)).flat();
@@ -415,7 +420,7 @@ function getProjectsDropdownItems(contract) {
  */
 function hasEndDatesFilled(index) {
   let hasEndDatesFilled = true;
-  _.forEach(this.editedContracts[index].projects, (position) => {
+  _forEach(this.editedContracts[index].projects, (position) => {
     hasEndDatesFilled &= !!position.endDate;
   });
 
@@ -437,14 +442,14 @@ function parseEventDate() {
 async function validateFields() {
   let errorCount = 0;
   //ensures that refs are put in an array so we can reuse forEach loop
-  let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
+  let components = !_isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
   await asyncForEach(components, async (field) => {
     if (field && (await field.validate()).length > 0) errorCount++;
   });
 
   // fail safe if someone tries to force a contract that's present and has an end date
-  _.forEach(this.editedContracts, (contract) => {
-    _.forEach(contract.projects, (project) => {
+  _forEach(this.editedContracts, (contract) => {
+    _forEach(contract.projects, (project) => {
       if (project.endDate && project.presentDate) {
         project.presentDate = false;
       }
@@ -499,24 +504,24 @@ export default {
       },
       duplicateContractPrimeCombo: (conIndex) => {
         let contract = this.editedContracts[conIndex];
-        let found = _.some(
+        let found = _some(
           this.contracts,
           (c) => c.contractName === contract.contractName && c.primeName === contract.primeName
         );
-        let filteredContracts = _.filter(
+        let filteredContracts = _filter(
           this.editedContracts,
           (c) => c.contractName === contract.contractName && c.primeName === contract.primeName
         );
         return !found || filteredContracts.length === 1 || 'Duplicate contract and prime combination';
       },
       duplicateContractProjects: (project, conIndex) => {
-        let filteredProjects = _.filter(
+        let filteredProjects = _filter(
           this.editedContracts[conIndex].projects,
           (p) => p.projectName === project.projectName
         );
         return filteredProjects.length === 1 || 'Duplicate project within the same contract';
       },
-      editedContracts: _.cloneDeep(this.model), // stores edited contracts info
+      editedContracts: _cloneDeep(this.model), // stores edited contracts info
       endDatePresentRule: (compIndex, projIndex) => {
         if (this.editedContracts !== undefined) {
           let position = this.editedContracts[compIndex].projects[projIndex];
