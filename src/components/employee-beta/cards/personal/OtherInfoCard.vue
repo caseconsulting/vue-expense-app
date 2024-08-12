@@ -7,16 +7,26 @@
       </div>
     </template>
     <v-card-text class="px-7 pt-5 pb-1 text-black">
-      <p v-if="!isEmpty(getAIN())"><b>AIN:</b> {{ getAIN() }}</p>
-      <p v-if="!isEmpty(getEmployeeRole())"><b>Employee Role:</b> {{ _.startCase(getEmployeeRole()) }}</p>
-      <div v-if="isAdmin" class="pb-2">
-        <p class="d-inline"><b>Employee Tags:</b></p>
-        <p class="d-inline-flex pl-1" v-for="tag in getTags()" :key="tag.id">
-          <v-icon size="small" color="brown-lighten-1">mdi-tag</v-icon> {{ tag.tagName }}
-        </p>
-        <p v-if="isEmpty(getTags())" class="d-inline pl-1">None</p>
-      </div>
-      <p><b>EEO Status:</b> {{ getSelfIdentified() }} {{ eeoStatus() }}</p>
+      <v-row>
+        <v-col>
+          <p v-if="!isEmpty(getAIN())"><b>AIN:</b> {{ getAIN() }}</p>
+          <p v-if="!isEmpty(getEmployeeRole())"><b>Employee Role:</b> {{ _.startCase(getEmployeeRole()) }}</p>
+          <div v-if="isAdmin" class="pb-2">
+            <p class="d-inline"><b>Employee Tags:</b></p>
+            <p class="d-inline-flex pl-1" v-for="tag in getTags()" :key="tag.id">
+              <v-icon size="small" color="brown-lighten-1">mdi-tag</v-icon> {{ tag.tagName }}
+            </p>
+            <p v-if="isEmpty(getTags())" class="d-inline pl-1">None</p>
+          </div>
+          <p><b>EEO Status:</b> {{ getSelfIdentified() }} {{ eeoStatus() }}</p>
+        </v-col>
+        <v-col cols="auto">
+          <div>
+            <v-icon>mdi-shield</v-icon>
+            <v-tooltip activator="parent" location="top">All information here is hidden from other employees</v-tooltip>
+          </div>
+        </v-col>
+      </v-row>
       <div class="text-center" style="padding-bottom: 5px">
         <v-btn size="small" variant="flat" color="#F3F3F3" @click="toggleView()" v-if="getEEOFilled()"
           >View EEO Data</v-btn
