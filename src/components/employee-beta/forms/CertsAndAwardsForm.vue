@@ -36,76 +36,30 @@
 
           <!-- Start Cert recieved date -->
           <v-col :cols="!isMobile() ? '3' : '12'">
-            <v-text-field
-              :model-value="format(certification.dateReceived, null, 'MM/DD/YYYY')"
-              label="Date Received"
+            <date-picker-field
+              v-model="certification.dateReceived"
               :rules="[...getDateRules()]"
-              hint="MM/DD/YYYY format"
-              v-mask="'##/##/####'"
-              prepend-inner-icon="mdi-calendar"
-              autocomplete="off"
+              :max="certification.expirationDate"
+              textFormat="MM/DD/YYYY"
+              dateFormat="YYYY-MM-DD"
+              label="Date Received"
+              title="Date Received"
               clearable
-              @click:clear="certification.dateReceived = null"
-              @keypress="certification.showReceivedMenu = false"
-            >
-              <v-menu
-                activator="parent"
-                v-model="certification.showReceivedMenu"
-                :close-on-content-click="false"
-                location="start center"
-              >
-                <v-date-picker
-                  v-model="certification.dateReceived"
-                  :max="certification.expirationDate"
-                  @update:model-value="
-                    certification.showReceivedMenu = false;
-                    certification.dateReceived = parseCertEventDate(certification.dateReceived);
-                  "
-                  show-adjacent-months
-                  hide-actions
-                  keyboard-icon=""
-                  color="#bc3825"
-                  title="Date Received"
-                ></v-date-picker>
-              </v-menu>
-            </v-text-field>
+            />
           </v-col>
           <!-- End Cert received date -->
 
           <!-- Start Cert expiration date -->
           <v-col :cols="!isMobile() ? '3' : '12'">
-            <v-text-field
-              ref="formFields"
-              :model-value="format(certification.expirationDate, null, 'MM/DD/YYYY')"
-              label="Expiration Date (optional)"
+            <date-picker-field
+              v-model="certification.expirationDate"
               :rules="[...getDateOptionalRules()]"
-              hint="MM/DD/YYYY format"
-              v-mask="'##/##/####'"
+              textFormat="MM/DD/YYYY"
+              dateFormat="YYYY-MM-DD"
+              label="Expiration Date (optional)"
+              title="Expiration Date"
               clearable
-              prepend-inner-icon="mdi-calendar"
-              autocomplete="off"
-              @update:focused="certification.expirationDate = parseCertEventDate(date)"
-              @keypress="certification.showExpirationMenu = false"
-              @focus="certificationIndex = index"
-            >
-              <v-menu
-                activator="parent"
-                v-model="certification.showExpirationMenu"
-                :close-on-content-click="false"
-                location="start center"
-              >
-                <v-date-picker
-                  v-model="certification.expirationDate"
-                  :min="certification.dateReceived"
-                  @update:model-value="certification.showExpirationMenu = false"
-                  show-adjacent-months
-                  hide-actions
-                  keyboard-icon=""
-                  color="#bc3825"
-                  title="Expiration Date"
-                ></v-date-picker>
-              </v-menu>
-            </v-text-field>
+            />
           </v-col>
           <!-- End Cert expiration date -->
 
@@ -172,37 +126,17 @@
 
           <!-- Start Award received date -->
           <v-col :cols="!isMobile() ? '5' : '12'">
-            <v-text-field
-              ref="formFields"
-              :model-value="format(award.dateReceived, null, 'MM/YYYY')"
-              label="Date Received"
+            <date-picker-field
+              v-model="award.dateReceived"
               :rules="getDateMonthYearRules()"
+              mask="##/####"
+              dateFormat="YYYY-MM"
+              textFormat="MM/YYYY"
+              label="Date Received"
+              title="Date Received"
               hint="MM/YYYY format"
-              v-mask="'##/####'"
-              persistent-hint
               clearable
-              prepend-inner-icon="mdi-calendar"
-              autocomplete="off"
-              @update:focused="award.dateReceived = parseAwardEventDate($event)"
-              @keypress="award.showReceivedMenu = false"
-            >
-              <v-menu
-                activator="parent"
-                v-model="award.showReceivedMenu"
-                :close-on-content-click="false"
-                location="start center"
-              >
-                <v-date-picker
-                  v-model="award.dateReceived"
-                  @update:model-value="award.showReceivedMenu = false"
-                  show-adjacent-months
-                  hide-actions
-                  keyboard-icon=""
-                  color="#bc3825"
-                  title="Date Received"
-                ></v-date-picker>
-              </v-menu>
-            </v-text-field>
+            />
           </v-col>
           <!-- End award recieved date -->
 
@@ -235,13 +169,13 @@
 </template>
 
 <script setup>
-import { format, getTodaysDate } from '@/shared/dateUtils';
+import { getTodaysDate } from '@/shared/dateUtils';
 import { getDateMonthYearRules, getDateOptionalRules, getDateRules, getRequiredRules } from '@/shared/validationUtils';
 import _ from 'lodash';
 import { inject, onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue';
-import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
 import { isMobile } from '../../../utils/utils';
+import DatePickerField from '../../shared/edit-fields/DatePickerField.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -251,14 +185,12 @@ import { isMobile } from '../../../utils/utils';
 
 const store = useStore();
 const emitter = inject('emitter');
-const vMask = mask;
 
 const editedEmployee = defineModel({ required: true });
 const valid = defineModel('valid', { required: true });
 const form = ref(null); // template ref
 
 const certificationDropDown = ref([]); // autocomplete certification name options
-const certificationIndex = ref(0);
 const employees = store.getters.employees;
 
 defineExpose({ prepareSubmit });
@@ -284,14 +216,15 @@ async function prepareSubmit() {
     const result = await form.value.validate();
 
     editedEmployee.value.awards.forEach((award) => {
-      award.dateReceived = parseAwardEventDate(award.dateReceived);
       delete award.showReceivedMenu;
-      delete award.showExpirationMenu;
     });
     editedEmployee.value.certifications.forEach((cert) => {
-      cert.dateReceived = parseCertEventDate(cert.dateReceived);
-      delete cert.showReceivedMenu;
+      if (!cert.expirationDate) {
+        delete cert.expirationDate;
+        delete cert.expirationWasSeen;
+      }
       delete cert.showExpirationMenu;
+      delete cert.showReceivedMenu;
     });
 
     emitter.emit('validating', { tab: 'certsAndAwards', valid: result.valid });
@@ -347,24 +280,6 @@ function deleteAward(index) {
 function deleteCertification(index) {
   editedEmployee.value.certifications.splice(index, 1);
 } // deleteCertification
-
-/**
- * Parse the date after losing focus.
- *
- * @return String - The date in YYYY-MM-DD format
- */
-function parseCertEventDate(date) {
-  return format(date, null, 'YYYY-MM-DD');
-} // parseCertEventDate
-
-/**
- * Parse the date after losing focus.
- *
- * @return String - The date in YYYY-MM format
- */
-function parseAwardEventDate(date) {
-  return format(date, null, 'YYYY-MM');
-} // parseAwardEventDate
 
 /**
  * Populate drop downs with information that other employees have filled out.
