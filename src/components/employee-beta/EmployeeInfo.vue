@@ -243,6 +243,8 @@ const menuBtn = computed(() => {
       return 'Tech, Skills, & Languages';
     case 'experience+education':
       return 'Job Experience & Education';
+    case 'customer+orgs':
+      return 'Customer Orgs';
     default:
       return 'Select Info';
   }

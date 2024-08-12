@@ -373,10 +373,20 @@ export function getDuplicateProjectRule(contract) {
 export function getDuplicateCompanyNameRule(companies) {
   return (v) => {
     let count = 0;
-    for (let i = 0; i < companies && count <= 2; i++) {
+    for (let i = 0; i < companies.length && count <= 2; i++) {
       if (companies[i].companyName === v) count++;
     }
     return count <= 1 || 'Duplicate company name found, please remove duplicate entries';
+  };
+}
+
+export function getDuplicateCustomerOrgRule(customerOrgs) {
+  return (v) => {
+    let count = 0;
+    for (let i = 0; i < customerOrgs.length && count <= 2; i++) {
+      if (customerOrgs[i].name === v) count++;
+    }
+    return count <= 1 || 'Duplicate customer org found, please remove duplicate entries';
   };
 }
 

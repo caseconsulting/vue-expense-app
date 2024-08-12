@@ -90,6 +90,12 @@
                 title="Education"
                 :class="{ invalid: !validTabs.education }"
               ></v-list-item>
+              <v-list-item
+                @click="cardName = 'Customer Orgs'"
+                link
+                title="Customer Orgs"
+                :class="{ invalid: !validTabs.customerOrgs }"
+              ></v-list-item>
             </v-list>
           </v-col>
           <v-col>
@@ -103,7 +109,7 @@
               <v-expansion-panels v-model="formTabs" variant="accordion" multiple>
                 <base-form title="Personal" value="Personal" :valid="validTabs.personal">
                   <personal-info-form
-                    ref="personalInfoRef"
+                    :ref="tabRefs.personalInfo"
                     v-model="editedEmployee"
                     v-model:valid="validTabs.personal"
                   ></personal-info-form>
@@ -111,7 +117,7 @@
                 <base-form title="Clearances" value="Clearances" :valid="validTabs.clearance">
                   <div>
                     <clearance-form
-                      ref="clearanceRef"
+                      :ref="tabRefs.clearances"
                       v-model="editedEmployee"
                       v-model:valid="validTabs.clearance"
                     ></clearance-form>
@@ -120,7 +126,7 @@
                 <base-form title="Contracts" value="Contracts" :valid="validTabs.contracts">
                   <div>
                     <contracts-form
-                      ref="contractsRef"
+                      :ref="tabRefs.contracts"
                       v-model="editedEmployee"
                       v-model:valid="validTabs.contracts"
                     ></contracts-form>
@@ -133,7 +139,7 @@
                 >
                   <div>
                     <certs-and-awards-form
-                      ref="certsAndAwardsRef"
+                      :ref="tabRefs.certsAndAwards"
                       v-model="editedEmployee"
                       v-model:valid="validTabs.certsAndAwards"
                     ></certs-and-awards-form>
@@ -141,14 +147,14 @@
                 </base-form>
                 <base-form title="Tech and Skills" value="Tech & Skills" :valid="validTabs.technologies">
                   <technologies-form
-                    ref="technologiesRef"
+                    :ref="tabRefs.technologies"
                     v-model="editedEmployee"
                     v-model:valid="validTabs.technologies"
                   ></technologies-form>
                 </base-form>
                 <base-form title="Foreign Languages" value="Languages" :valid="validTabs.languages">
                   <languages-form
-                    ref="languagesRef"
+                    :ref="tabRefs.languages"
                     v-model="editedEmployee"
                     v-model:valid="validTabs.languages"
                   ></languages-form>
@@ -156,7 +162,7 @@
                 <base-form title="Job Experience" value="Job Experience" :valid="validTabs.jobExperience">
                   <div>
                     <job-experience-form
-                      ref="jobExperienceRef"
+                      :ref="tabRefs.jobExperience"
                       v-model="editedEmployee"
                       v-model:valid="validTabs.jobExperience"
                     ></job-experience-form>
@@ -165,12 +171,19 @@
                 <base-form title="Education" value="Education" :valid="validTabs.education">
                   <div>
                     <education-form
-                      ref="educationRef"
+                      :ref="tabRefs.education"
                       v-model="editedEmployee"
                       v-model:valid="validTabs.education"
                       :allowAdditions="true"
                     ></education-form>
                   </div>
+                </base-form>
+                <base-form title="Customer Orgs" value="Customer Orgs" :valid="validTabs.customerOrgs">
+                  <customer-orgs-form
+                    :ref="tabRefs.customerOrgs"
+                    v-model="editedEmployee"
+                    v-model:valid="validTabs.customerOrgs"
+                  ></customer-orgs-form>
                 </base-form>
               </v-expansion-panels>
               <div class="sticky-actions">
@@ -228,6 +241,7 @@ import { useStore } from 'vuex';
 import CertsAndAwardsForm from './CertsAndAwardsForm.vue';
 import ClearanceForm from './ClearanceForm.vue';
 import ContractsForm from './ContractsForm.vue';
+import CustomerOrgsForm from './CustomerOrgsForm.vue';
 import EducationForm from './EducationForm.vue';
 import JobExperienceForm from './JobExperienceForm.vue';
 import LanguagesForm from './LanguagesForm.vue';
@@ -267,6 +281,7 @@ const validTabs = reactive({
   certsAndAwards: true,
   clearance: true,
   contracts: true,
+  customerOrgs: true,
   education: true,
   jobExperience: true,
   technologies: true,
@@ -275,14 +290,17 @@ const validTabs = reactive({
 
 // template refs
 const form = ref(null);
-const certsAndAwardsRef = ref(null);
-const clearanceRef = ref(null);
-const contractsRef = ref(null);
-const educationRef = ref(null);
-const jobExperienceRef = ref(null);
-const languagesRef = ref(null);
-const personalInfoRef = ref(null);
-const technologiesRef = ref(null);
+const tabRefs = reactive({
+  certsAndAwards: null,
+  clearances: null,
+  contracts: null,
+  customerOrgs: null,
+  education: null,
+  jobExperience: null,
+  languages: null,
+  personalInfo: null,
+  technologies: null
+});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -432,20 +450,20 @@ async function submitTags(editedTags) {
  */
 async function prepareTabs() {
   return Promise.allSettled([
-    certsAndAwardsRef.value?.prepareSubmit(),
-    clearanceRef.value?.prepareSubmit(),
-    contractsRef.value?.prepareSubmit(),
-    educationRef.value?.prepareSubmit(),
-    jobExperienceRef.value?.prepareSubmit(),
-    languagesRef.value?.prepareSubmit(),
-    personalInfoRef.value?.prepareSubmit(),
-    technologiesRef.value?.prepareSubmit()
+    tabRefs.certsAndAwards?.prepareSubmit(),
+    tabRefs.clearances?.prepareSubmit(),
+    tabRefs.contracts?.prepareSubmit(),
+    tabRefs.customerOrgs?.prepareSubmit(),
+    tabRefs.education?.prepareSubmit(),
+    tabRefs.jobExperience?.prepareSubmit(),
+    tabRefs.languages?.prepareSubmit(),
+    tabRefs.personalInfo?.prepareSubmit(),
+    tabRefs.technologies?.prepareSubmit()
   ]);
 }
 
 /**
  * Checks validation of all tabs
- * @param {SubmitEvent} event The submit event
  */
 async function validate() {
   await prepareTabs();
@@ -518,6 +536,7 @@ function isEmpty(value) {
 async function selectTab() {
   let num = 0;
   let card = '';
+
   switch (cardName.value) {
     case 'Personal':
     case 'Personal Information':
@@ -567,12 +586,20 @@ async function selectTab() {
       num = 7;
       card = 'Education';
       break;
+    case 'Customer Orgs':
+    case 'Customer Org Experience':
+    case 'Customer Org Exp':
+      num = 8;
+      card = 'Customer Orgs';
+      break;
     default:
       num = 0;
       card = 'Personal';
   }
+
   cardName.value = card;
   formTabs.value = [card];
+
   // wait for element to exist https://stackoverflow.com/questions/5525071/how-to-wait-until-an-element-exists
   function waitForElm(selector) {
     return new Promise((resolve) => {
@@ -594,6 +621,7 @@ async function selectTab() {
       });
     });
   }
+
   let e = await waitForElm('employee-card');
   let tabHeight = 60;
   e?.scroll({ top: tabHeight * num, behavior: 'smooth' });

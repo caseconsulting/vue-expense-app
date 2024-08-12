@@ -89,6 +89,26 @@ export const PROFICIENCIES = [
 
 export const CLEARANCE_TYPES = ['TS/SCI - Full Scope', 'TS/SCI - CI Poly', 'TS/SCI - No Poly', 'Top Secret', 'Secret'];
 
+export const CUSTOMER_ORGS = [
+  'DIR',
+  'DDI',
+  'DDI/ITE',
+  'DDI/ADO',
+  'DDI/OSE',
+  'DDI/CCI',
+  'DA',
+  'DO',
+  'DST',
+  'DS',
+  'Talent',
+  'Mission Center',
+  'DNI',
+  'NGA',
+  'NRO',
+  'DoD',
+  'Other'
+];
+
 /**
  * Given an employee returns the employee's full name. Ex. John Jacob Doe
  * @param {JSON} employee - employee object
