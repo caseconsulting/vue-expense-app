@@ -397,6 +397,16 @@ export function getWorkStatusRules() {
   ];
 }
 
+export function getDuplicateCustomerOrgRule(customerOrgs) {
+  return (v) => {
+    let count = 0;
+    for (let i = 0; i < customerOrgs.length && count <= 2; i++) {
+      if (customerOrgs[i].name === v) count++;
+    }
+    return count <= 1 || 'Duplicate customer org found, please remove duplicate entries';
+  };
+}
+
 export default {
   getAINRules,
   getDateOptionalRules,
