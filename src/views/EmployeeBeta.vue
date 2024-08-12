@@ -357,7 +357,7 @@ function onSearchButton() {
  */
 async function onSearchUpdate() {
   if (dropdownEmployee.value) {
-    await router.push({ path: `/employee-beta/${dropdownEmployee.value.employeeNumber}`, hash: route.hash });
+    await router.push({ path: `/employee/${dropdownEmployee.value.employeeNumber}`, hash: route.hash });
   }
 }
 /**
