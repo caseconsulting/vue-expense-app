@@ -390,6 +390,13 @@ export function getDuplicateCustomerOrgRule(customerOrgs) {
   };
 }
 
+export function getWorkStatusRules() {
+  return [
+    (v) => !isEmpty(v) || 'This field is required',
+    (v) => (v !== '0' && v !== '00') || 'Value cannot be 0 (set to inactive instead)'
+  ];
+}
+
 export default {
   getAINRules,
   getDateOptionalRules,
@@ -418,5 +425,7 @@ export default {
   getCaseEmailRules,
   getDuplicateContractAndPrimeRule,
   getDuplicateProjectRule,
-  getDuplicateCompanyNameRule
+  getDuplicateCompanyNameRule,
+  getDuplicateCustomerOrgRule,
+  getWorkStatusRules
 };
