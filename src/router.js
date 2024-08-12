@@ -135,14 +135,6 @@ const router = createRouter({
       component: EmployeeBeta,
       beforeEnter: requireAuth
     },
-    // beta employee profile page
-    // remove this once we're sure its not referenced anywhere
-    {
-      path: '/employee-beta/:id',
-      name: 'employee-beta',
-      component: EmployeeBeta,
-      beforeEnter: requireAuth
-    },
     // remove this once the new profile is 100% functional
     {
       path: '/employee-old/:id',
