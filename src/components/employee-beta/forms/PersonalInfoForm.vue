@@ -201,6 +201,25 @@
             ></v-autocomplete>
           </v-col>
         </v-row>
+        <v-row v-if="editedEmployee.employeeRole === 'admin'">
+          <!-- work status / full time / part time / inactive -->
+          <v-col>
+            <v-radio-group v-model="workStatus" :inline="!isMobile()">
+              <v-radio value="Full Time" label="Full Time"></v-radio>
+              <v-radio value="Part Time" label="Part Time"></v-radio>
+              <v-radio value="Inactive" label="Inactive"></v-radio>
+              <v-text-field
+                v-if="workStatus === 'Part Time'"
+                v-model="partTimeNumber"
+                :rules="getWorkStatusRules()"
+                suffix="%"
+                v-mask="'##'"
+                hide-details="auto"
+                class="work-status-box ma-4"
+              ></v-text-field>
+            </v-radio-group>
+          </v-col>
+        </v-row>
       </v-col>
     </v-row>
     <v-row class="mt-7"><h3>Personal Information</h3></v-row>
@@ -443,7 +462,8 @@ import {
   getPhoneNumberRules,
   getPhoneNumberTypeRules,
   getRequiredRules,
-  getURLRules
+  getURLRules,
+  getWorkStatusRules
 } from '@/shared/validationUtils';
 import { COUNTRIES, isMobile, STATES } from '@/utils/utils';
 import { cloneDeep, filter, forEach, includes, isEmpty, lowerCase, some, startCase, xorBy } from 'lodash';
@@ -476,6 +496,11 @@ const emailUsername = ref(
   editedEmployee.value.email ? editedEmployee.value.email.slice(0, editedEmployee.value.email.indexOf('@')) : ''
 );
 const employeeRole = ref(startCase(editedEmployee.value.employeeRole));
+const partTimeNumber = ref(
+  editedEmployee.value.workStatus === 100 || editedEmployee.value.workStatus === 0
+    ? 50
+    : editedEmployee.value.workStatus
+);
 const phoneNumbers = ref(initPhoneNumbers());
 
 // other refs
@@ -565,6 +590,27 @@ const employeeNumberRules = computed(() => [
   }
 ]);
 
+const workStatus = computed({
+  get: () => {
+    if (editedEmployee.value.workStatus === 100) return 'Full Time';
+    if (editedEmployee.value.workStatus === 0) return 'Inactive';
+    return 'Part Time';
+  },
+  set: (val) => {
+    switch (val) {
+      case 'Full Time':
+        editedEmployee.value.workStatus = 100;
+        break;
+      case 'Part Time':
+        editedEmployee.value.workStatus = partTimeNumber.value;
+        break;
+      case 'Inactive':
+        editedEmployee.value.workStatus = 0;
+        break;
+    }
+  }
+});
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
@@ -587,6 +633,8 @@ async function prepareSubmit() {
       editedEmployee.value.hireDate = uneditedHireDate;
 
     editedEmployee.value.employeeRole = lowerCase(employeeRole.value);
+
+    if (workStatus.value === 'Part Time') editedEmployee.value.workStatus = partTimeNumber.value;
 
     // the xor/symmetric difference is just the elements that have changed
     // this includes both tags the employee was added to and removed from, and no others
@@ -828,5 +876,10 @@ function toggleEdit() {
 
 .v-col {
   min-width: min-content;
+}
+
+.work-status-box {
+  min-width: 70px;
+  max-width: fit-content;
 }
 </style>
