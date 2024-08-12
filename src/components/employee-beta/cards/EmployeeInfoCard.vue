@@ -17,7 +17,7 @@
             <h3 class="name-text">{{ employeeName }}</h3>
           </v-col>
           <!-- nickname -->
-          <v-col class="fit-content">
+          <v-col v-if="nickname" class="fit-content">
             <h3 class="nickname-text" :style="`color: ${caseGray}`">{{ nickname }}</h3>
           </v-col>
         </v-row>
