@@ -114,7 +114,7 @@
       <v-col>
         <v-row>
           <!-- case email -->
-          <v-col>
+          <v-col v-if="editedEmployee.employeeRole === 'admin'">
             <v-text-field
               v-model="emailUsername"
               label="CASE Email *"
