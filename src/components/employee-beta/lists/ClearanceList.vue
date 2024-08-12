@@ -1,7 +1,7 @@
 <template>
   <v-list>
-    <v-list-item v-for="(clearance, index) in list" :key="clearance + index">
-      <v-row no-gutters>
+    <v-list-item class="pr-0" v-for="(clearance, index) in list" :key="clearance + index">
+      <v-row no-gutters class="pa-0">
         <v-card-text class="pb-0">
           <p v-if="!isEmpty(getClearanceType(clearance))" class="clearance-type-text">
             <b>{{ getClearanceType(clearance) }}</b>
@@ -22,7 +22,7 @@
           <p v-if="toggleModal && !isEmpty(getBIDates(clearance))" class="gray-text ml-6">
             <b>BI Dates: </b>{{ getBIDates(clearance) }}
           </p>
-          <p v-if="toggleModal && !isEmpty(getPolyDates(clearance))" class="gray-text ml-6">
+          <p v-if="toggleModal && !isEmpty(getPolyDates(clearance))" class="gray-text ml-6 pb-2">
             <b>Poly Dates: </b>{{ getPolyDates(clearance) }}
           </p>
         </v-card-text>
