@@ -612,9 +612,11 @@ async function checkCoverage() {
         return b.expenseTypeId == expenseType.value && isActiveBudget;
       });
       let budgetExists = budget ? true : false;
-      let budgetAmount = parseInt(
-        _.find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id).budgetObject.amount
-      );
+
+      // get the budget amount, including legacyCarryover
+      let budgetObject = _.find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id).budgetObject;
+      let budgetAmount = parseInt(budgetObject.amount);
+      let legacyCarryover = parseInt(budgetObject.legacyCarryover ?? 0);
 
       if (this.employee.workStatus == 0) {
         // emit error if user is inactive
@@ -680,15 +682,15 @@ async function checkCoverage() {
           }
           if (expenseType.odFlag && this.isFullTime(this.employee)) {
             // BRANCH 2.1 selected expense type allows overdraft and employee is full time
-            if (budgetAmount > newCommittedAmount) {
-              //BRANCH 3.1 under initial budget (not including overdraft)
-              if (newCommittedAmount + cost <= budgetAmount) {
+            if (budgetAmount + legacyCarryover > newCommittedAmount) {
+              // BRANCH 3.1 under initial budget (not including overdraft)
+              if (newCommittedAmount + cost <= budgetAmount + legacyCarryover) {
                 // BRANCH 4.1 under initial budget and not going into overdraft after applying expense
                 await this.submit();
-              } else if (newCommittedAmount + cost <= 2 * budgetAmount) {
+              } else if (newCommittedAmount + cost <= 2 * budgetAmount + legacyCarryover) {
                 // BRANCH 4.2 goes over initial budget with new expense but stays below overdraft budget
                 this.editedExpense['budget'] = budgetAmount;
-                this.editedExpense['remaining'] = budgetAmount - newCommittedAmount;
+                this.editedExpense['remaining'] = budgetAmount + legacyCarryover - newCommittedAmount;
                 this.editedExpense['od'] = true;
                 this.isCovered = true;
                 this.isOverCovered = false;
@@ -696,18 +698,18 @@ async function checkCoverage() {
               } else {
                 // BRANCH 4.3 goes over overdraft budget completely
                 this.editedExpense['budget'] = budgetAmount;
-                this.editedExpense['remaining'] = 2 * budgetAmount - newCommittedAmount;
+                this.editedExpense['remaining'] = 2 * budgetAmount + legacyCarryover - newCommittedAmount;
                 this.editedExpense['od'] = true;
                 this.isCovered = false;
                 this.isOverCovered = false;
                 this.confirming = !this.confirming;
               }
-            } else if (2 * budgetAmount > newCommittedAmount) {
+            } else if (2 * budgetAmount + legacyCarryover > newCommittedAmount) {
               // BRANCH 3.2 under overdraft budget -- expense is able to be made
-              if (newCommittedAmount + cost <= 2 * budgetAmount) {
+              if (newCommittedAmount + cost <= 2 * budgetAmount + legacyCarryover) {
                 // BRANCH 5.1 above initial budget but below overdraft budget TODO: add condirmation box handling? new flag?
                 this.editedExpense['budget'] = budgetAmount;
-                this.editedExpense['remaining'] = 2 * budgetAmount - newCommittedAmount;
+                this.editedExpense['remaining'] = 2 * budgetAmount + legacyCarryover - newCommittedAmount;
                 this.editedExpense['od'] = true;
                 this.isCovered = true;
                 this.isOverCovered = true;
@@ -715,7 +717,7 @@ async function checkCoverage() {
               } else {
                 // BRANCH 5.2 budget not maxed out before this expense (going over overdraft) but expense not fully covered. Show adusted confirmation dialog
                 this.editedExpense['budget'] = budgetAmount;
-                this.editedExpense['remaining'] = 2 * budgetAmount - newCommittedAmount;
+                this.editedExpense['remaining'] = 2 * budgetAmount + legacyCarryover - newCommittedAmount;
                 this.editedExpense['od'] = true;
                 this.isCovered = false;
                 this.isOverCovered = false;
@@ -730,16 +732,16 @@ async function checkCoverage() {
           } else {
             // BRANCH 2.2 selected expense type does not allow overdraft or employee is not full time
             this.editedExpense['od'] = false;
-            if (newCommittedAmount < budgetAmount) {
+            if (newCommittedAmount < budgetAmount + legacyCarryover) {
               // BRANCH 6.1 starts under initial budget
-              if (newCommittedAmount + cost <= budgetAmount) {
+              if (newCommittedAmount + cost <= budgetAmount + legacyCarryover) {
                 // BRANCH 7.1 doesnt go over budget
                 // reimburse the full expense
                 await this.submit();
               } else {
                 // BRANCH 7.2 goes over budget
                 this.editedExpense['budget'] = budgetAmount;
-                this.editedExpense['remaining'] = budgetAmount - newCommittedAmount;
+                this.editedExpense['remaining'] = budgetAmount + legacyCarryover - newCommittedAmount;
                 this.isCovered = false;
                 this.isOverCovered = false;
                 this.confirming = !this.confirming;
@@ -755,13 +757,13 @@ async function checkCoverage() {
           // BRANCH 1.2 budget for this expense does not exist
           if (expenseType.odFlag && this.isFullTime(this.employee)) {
             // Branch 8.1 selected expense type allows overdraft and employee is full time
-            if (cost <= budgetAmount) {
+            if (cost <= budgetAmount + legacyCarryover) {
               // full amount reimbursed
               await this.submit();
-            } else if (cost <= 2 * budgetAmount) {
+            } else if (cost <= 2 * budgetAmount + legacyCarryover) {
               // the expense goes into overdraft but fully covered
               this.editedExpense['budget'] = budgetAmount;
-              this.editedExpense['remaining'] = budgetAmount;
+              this.editedExpense['remaining'] = budgetAmount + legacyCarryover;
               this.editedExpense['od'] = true;
               this.isCovered = true;
               this.isOverCovered = false;
@@ -769,7 +771,7 @@ async function checkCoverage() {
             } else {
               // expense goes past overdraft budget completely and is partially covered
               this.editedExpense['budget'] = budgetAmount;
-              this.editedExpense['remaining'] = 2 * budgetAmount;
+              this.editedExpense['remaining'] = 2 * budgetAmount + legacyCarryover;
               this.editedExpense['od'] = true;
               this.isCovered = false;
               this.isOverCovered = false;
@@ -778,13 +780,13 @@ async function checkCoverage() {
           } else {
             // BRANCH 8.2 selected expense type does not allow overdraft or employee is not full time
             this.editedExpense['od'] = false;
-            if (cost <= budgetAmount) {
+            if (cost <= budgetAmount + legacyCarryover) {
               // reimburse the full expense
               await this.submit();
             } else {
               // expense exceeds the budget but the expense not fully covered
               this.editedExpense['budget'] = budgetAmount;
-              this.editedExpense['remaining'] = budgetAmount;
+              this.editedExpense['remaining'] = budgetAmount + legacyCarryover;
               this.isCovered = false;
               this.isOverCovered = false;
               this.confirming = !this.confirming;
@@ -1097,9 +1099,12 @@ async function getRemainingBudget() {
         (currBudget) => currBudget.expenseTypeId === this.editedExpense.expenseTypeId
       );
 
+      let legacyCarryover = parseInt(budget.budgetObject.legacyCarryover ?? 0);
+
       if (budget) {
         this.remainingBudget =
-          budget.budgetObject.amount -
+          budget.budgetObject.amount +
+          legacyCarryover -
           budget.budgetObject.pendingAmount -
           budget.budgetObject.reimbursedAmount -
           this.editedExpense.cost;
