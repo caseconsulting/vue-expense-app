@@ -9,7 +9,17 @@
           <h3 class="text-white">Clearance</h3>
         </div>
       </template>
-      <clearance-list v-if="!isEmpty(clearances)" :list="[displayedClearance]" :toggleModal="false"></clearance-list>
+      <v-row class="" v-if="!isEmpty(clearances)">
+        <v-col class="d-inline-block fit-content">
+          <clearance-list :list="[displayedClearance]" :toggleModal="false"></clearance-list>
+        </v-col>
+        <v-col class="pt-9" cols="auto">
+          <div class="pr-7">
+            <v-icon>mdi-shield</v-icon>
+            <v-tooltip activator="parent" location="top">All information here is hidden from other employees</v-tooltip>
+          </div>
+        </v-col>
+      </v-row>
       <p v-if="isEmpty(clearances)" class="text-center mt-6 mx-2">No Clearance Information</p>
       <div v-if="!isEmpty(clearances)" class="text-center">
         <v-card-actions class="d-flex justify-center">
