@@ -132,14 +132,14 @@ const router = createRouter({
     {
       path: '/employee/:id',
       name: 'employee',
-      component: Employee,
+      component: EmployeeBeta,
       beforeEnter: requireAuth
     },
-    // beta employee profile page
+    // remove this once the new profile is 100% functional
     {
-      path: '/employee-beta/:id',
-      name: 'employee-beta',
-      component: EmployeeBeta,
+      path: '/employee-old/:id',
+      name: 'employee-old',
+      component: Employee,
       beforeEnter: requireAuth
     },
     //Below catch-all code works for Vue 2
