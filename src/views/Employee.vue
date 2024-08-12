@@ -14,8 +14,8 @@
       <employee-page-loader />
     </v-row>
     <div v-else>
-      <v-row class="pa-0">
-        <v-col cols="3" align="left" justify="left">
+      <v-row class="pa-0 d-flex justify-space-between">
+        <v-col cols="auto" class="d-flex align-center">
           <v-btn id="backBtn" elevation="2" :size="isMobile ? 'x-small' : 'default'" @click="$router.back()">
             <v-icon size="large" class="pr-1"> mdi-arrow-left-thin </v-icon>
             Back
@@ -23,13 +23,7 @@
           <!-- BUTTON TO CHANGE TO NEW/BETA VIEW -->
           <v-btn rounded="xl" color="#bc3825" @click="handleProfileBeta()" theme="dark" class="ma-2"> new view </v-btn>
         </v-col>
-        <v-col
-          v-if="hasAdminPermissions() || userIsEmployee()"
-          cols="9"
-          align="right"
-          justify="right"
-          class="px-0 pr-3 ma-0"
-        >
+        <v-col v-if="hasAdminPermissions() || userIsEmployee()" cols="auto" class="px-0 pr-3 ma-0 d-flex align-center">
           <v-btn
             v-if="!editing"
             :size="isMobile ? 'x-small' : 'default'"
