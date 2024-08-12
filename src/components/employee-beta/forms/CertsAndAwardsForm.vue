@@ -37,17 +37,15 @@
           <!-- Start Cert recieved date -->
           <v-col :cols="!isMobile() ? '3' : '12'">
             <v-text-field
-              ref="formFields"
               :model-value="format(certification.dateReceived, null, 'MM/DD/YYYY')"
               label="Date Received"
               :rules="[...getDateRules()]"
               hint="MM/DD/YYYY format"
               v-mask="'##/##/####'"
-              persistent-hint
-              clearable
               prepend-inner-icon="mdi-calendar"
               autocomplete="off"
-              @update:focused="certification.dateReceived = parseEventDate($event)"
+              clearable
+              @click:clear="certification.dateReceived = null"
               @keypress="certification.showReceivedMenu = false"
             >
               <v-menu
@@ -59,7 +57,10 @@
                 <v-date-picker
                   v-model="certification.dateReceived"
                   :max="certification.expirationDate"
-                  @update:model-value="certification.showReceivedMenu = false"
+                  @update:model-value="
+                    certification.showReceivedMenu = false;
+                    certification.dateReceived = parseCertEventDate(certification.dateReceived);
+                  "
                   show-adjacent-months
                   hide-actions
                   keyboard-icon=""
@@ -83,7 +84,7 @@
               clearable
               prepend-inner-icon="mdi-calendar"
               autocomplete="off"
-              @update:focused="certification.expirationDate = parseEventDate($event)"
+              @update:focused="certification.expirationDate = parseCertEventDate(date)"
               @keypress="certification.showExpirationMenu = false"
               @focus="certificationIndex = index"
             >
@@ -281,6 +282,18 @@ onBeforeUnmount(prepareSubmit);
 async function prepareSubmit() {
   if (form.value) {
     const result = await form.value.validate();
+
+    editedEmployee.value.awards.forEach((award) => {
+      award.dateReceived = parseAwardEventDate(award.dateReceived);
+      delete award.showReceivedMenu;
+      delete award.showExpirationMenu;
+    });
+    editedEmployee.value.certifications.forEach((cert) => {
+      cert.dateReceived = parseCertEventDate(cert.dateReceived);
+      delete cert.showReceivedMenu;
+      delete cert.showExpirationMenu;
+    });
+
     emitter.emit('validating', { tab: 'certsAndAwards', valid: result.valid });
     return result;
   }
@@ -340,17 +353,17 @@ function deleteCertification(index) {
  *
  * @return String - The date in YYYY-MM-DD format
  */
-function parseEventDate(event) {
-  return format(event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD');
-} // parseEventDate
+function parseCertEventDate(date) {
+  return format(date, null, 'YYYY-MM-DD');
+} // parseCertEventDate
 
 /**
  * Parse the date after losing focus.
  *
  * @return String - The date in YYYY-MM format
  */
-function parseAwardEventDate(event) {
-  return format(event.target.value, 'MM/YYYY', 'YYYY-MM');
+function parseAwardEventDate(date) {
+  return format(date, null, 'YYYY-MM');
 } // parseAwardEventDate
 
 /**
