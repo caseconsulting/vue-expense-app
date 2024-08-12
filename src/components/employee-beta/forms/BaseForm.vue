@@ -1,7 +1,7 @@
 <template>
   <v-expansion-panel :value="value">
     <v-expansion-panel-title class="bg-grey-lighten-4 form-title">
-      <h3 class="text-subtitle-1" :class="{ invalid: !valid }">{{ title }}</h3>
+      <h3 class="text-subtitle-1" :class="{ invalid: valid === false }">{{ title }}</h3>
     </v-expansion-panel-title>
     <v-expansion-panel-text>
       <slot></slot>

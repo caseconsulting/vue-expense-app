@@ -46,49 +46,49 @@
                 @click="cardName = 'Personal'"
                 link
                 title="Personal"
-                :class="{ invalid: !validTabs.personal }"
+                :class="{ invalid: validTabs.personal === false }"
               ></v-list-item>
               <v-list-item
                 @click="cardName = 'Clearances'"
                 link
                 title="Clearances"
-                :class="{ invalid: !validTabs.clearance }"
+                :class="{ invalid: validTabs.clearance === false }"
               ></v-list-item>
               <v-list-item
                 @click="cardName = 'Contracts'"
                 link
                 title="Contracts"
-                :class="{ invalid: !validTabs.contracts }"
+                :class="{ invalid: validTabs.contracts === false }"
               ></v-list-item>
               <v-list-item
                 @click="cardName = 'Certifications & Awards'"
                 link
                 title="Certifications & Awards"
-                :class="{ invalid: !validTabs.certsAndAwards }"
+                :class="{ invalid: validTabs.certsAndAwards === false }"
               ></v-list-item>
               <v-list-item
                 @click="cardName = 'Tech & Skills'"
                 link
                 title="Tech & Skills"
-                :class="{ invalid: !validTabs.technologies }"
+                :class="{ invalid: validTabs.technologies === false }"
               ></v-list-item>
               <v-list-item
                 @click="cardName = 'Languages'"
                 link
                 title="Foreign Languages"
-                :class="{ invalid: !validTabs.languages }"
+                :class="{ invalid: validTabs.languages === false }"
               ></v-list-item>
               <v-list-item
                 @click="cardName = 'Job Experience'"
                 link
                 title="Job Experience"
-                :class="{ invalid: !validTabs.jobExperience }"
+                :class="{ invalid: validTabs.jobExperience === false }"
               ></v-list-item>
               <v-list-item
                 @click="cardName = 'Education'"
                 link
                 title="Education"
-                :class="{ invalid: !validTabs.education }"
+                :class="{ invalid: validTabs.education === false }"
               ></v-list-item>
               <v-list-item
                 @click="cardName = 'Customer Orgs'"

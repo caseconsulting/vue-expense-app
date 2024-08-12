@@ -58,6 +58,12 @@ const textDate = ref(format(rawDate.value, null, props.textFormat));
 const pickerDate = ref(format(rawDate.value, null, props.dateFormat));
 const menu = ref(false);
 
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
 watch(pickerDate, () => {
   rawDate.value = format(pickerDate.value, null, props.dateFormat);
   textDate.value = format(pickerDate.value, null, props.textFormat);

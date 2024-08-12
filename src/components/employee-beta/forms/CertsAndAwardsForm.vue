@@ -100,56 +100,62 @@
           </v-col>
         </v-row>
         <!-- Start Award Loop -->
-        <v-row v-for="(award, index) in editedEmployee.awards" :key="index">
-          <!-- Start Award Name -->
-          <v-col :cols="!isMobile() ? '6' : '10'">
-            <v-text-field
-              ref="formFields"
-              v-model="award.name"
-              :rules="getRequiredRules()"
-              label="Award"
-              data-vv-name="Award"
-              clearable
-            >
-            </v-text-field>
-          </v-col>
-          <!-- End Award Name -->
+        <div v-for="(award, index) in editedEmployee.awards" :key="index">
+          <v-sheet min-height="100" class="fill-height">
+            <v-lazy class="fill-height" :options="{ rootMargin: '500px' }">
+              <v-row class="fill-height">
+                <!-- Start Award Name -->
+                <v-col :cols="!isMobile() ? '6' : '10'">
+                  <v-text-field
+                    ref="formFields"
+                    v-model="award.name"
+                    :rules="getRequiredRules()"
+                    label="Award"
+                    data-vv-name="Award"
+                    clearable
+                  >
+                  </v-text-field>
+                </v-col>
+                <!-- End Award Name -->
 
-          <!-- Start delete award MOBILE -->
-          <v-col v-if="isMobile()" cols="2">
-            <v-btn @click="deleteAward(index)" icon variant="text">
-              <v-tooltip activator="parent" location="bottom">Delete Award</v-tooltip>
-              <v-icon class="case-gray">mdi-delete</v-icon>
-            </v-btn>
-          </v-col>
-          <!-- End delete award MOBILE -->
+                <!-- Start delete award MOBILE -->
+                <v-col v-if="isMobile()" cols="2">
+                  <v-btn @click="deleteAward(index)" icon variant="text">
+                    <v-tooltip activator="parent" location="bottom">Delete Award</v-tooltip>
+                    <v-icon class="case-gray">mdi-delete</v-icon>
+                  </v-btn>
+                </v-col>
+                <!-- End delete award MOBILE -->
 
-          <!-- Start Award received date -->
-          <v-col :cols="!isMobile() ? '5' : '12'">
-            <date-picker-field
-              v-model="award.dateReceived"
-              :rules="getDateMonthYearRules()"
-              mask="##/####"
-              dateFormat="YYYY-MM"
-              textFormat="MM/YYYY"
-              label="Date Received"
-              title="Date Received"
-              hint="MM/YYYY format"
-              clearable
-            />
-          </v-col>
-          <!-- End award recieved date -->
+                <!-- Start Award received date -->
+                <v-col :cols="!isMobile() ? '5' : '12'">
+                  <date-picker-field
+                    v-model="award.dateReceived"
+                    :rules="getDateMonthYearRules()"
+                    mask="##/####"
+                    dateFormat="YYYY-MM"
+                    textFormat="MM/YYYY"
+                    label="Date Received"
+                    title="Date Received"
+                    hint="MM/YYYY format"
+                    clearable
+                  />
+                </v-col>
+                <!-- End award recieved date -->
 
-          <!-- Start delete award NORMAL-->
-          <v-col v-if="!isMobile()" cols="1">
-            <v-btn @click="deleteAward(index)" icon variant="text">
-              <v-tooltip activator="parent" location="bottom">Delete Award</v-tooltip>
-              <v-icon class="case-gray pr-1">mdi-delete</v-icon>
-            </v-btn>
-          </v-col>
-          <!-- End delete award NORMAL -->
-          <v-divider v-if="isMobile() && index < editedEmployee.awards.length - 1" :thickness="3"></v-divider>
-        </v-row>
+                <!-- Start delete award NORMAL-->
+                <v-col v-if="!isMobile()" cols="1">
+                  <v-btn @click="deleteAward(index)" icon variant="text">
+                    <v-tooltip activator="parent" location="bottom">Delete Award</v-tooltip>
+                    <v-icon class="case-gray pr-1">mdi-delete</v-icon>
+                  </v-btn>
+                </v-col>
+                <!-- End delete award NORMAL -->
+                <v-divider v-if="isMobile() && index < editedEmployee.awards.length - 1" :thickness="3"></v-divider>
+              </v-row>
+            </v-lazy>
+          </v-sheet>
+        </div>
         <!-- End Award Loop -->
 
         <!-- Start Add Award -->
