@@ -236,7 +236,10 @@
 <script setup>
 import { format, getTodaysDate } from '@/shared/dateUtils';
 import { getDateMonthYearRules, getDateOptionalRules, getDateRules, getRequiredRules } from '@/shared/validationUtils';
-import _ from 'lodash';
+import _compact from 'lodash/compact';
+import _forEach from 'lodash/forEach';
+import _map from 'lodash/map';
+import _uniq from 'lodash/uniq';
 import { inject, onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
@@ -357,14 +360,16 @@ function parseAwardEventDate(event) {
  * Populate drop downs with information that other employees have filled out.
  */
 function populateDropDowns() {
-  let employeesCertifications = _.map(employees, (employee) => employee.certifications); // extract certifications
-  employeesCertifications = _.compact(employeesCertifications); // remove falsey values
+  let employeesCertifications = _map(employees, (employee) => employee.certifications); // extract certifications
+  employeesCertifications = _compact(employeesCertifications); // remove falsey values
   // loop employees
-  _.forEach(employeesCertifications, (certifications) => {
+  _forEach(employeesCertifications, (certifications) => {
     // loop certifications
-    _.forEach(certifications, (certification) => {
+    _forEach(certifications, (certification) => {
       certificationDropDown.value.push(certification.name); // add certification name
     });
   });
+  // remove duplicates
+  certificationDropDown.value = _uniq(certificationDropDown.value);
 } // populateDropDowns
 </script>
