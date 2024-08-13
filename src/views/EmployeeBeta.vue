@@ -270,7 +270,6 @@ async function checkForBudgetAccess() {
  * Get employee data.
  */
 async function getProfileData() {
-  console.log('getProfileData');
   loading.value = true;
   basicEmployeeDataLoading.value = true;
   await Promise.all([
@@ -300,7 +299,6 @@ async function getProfileData() {
     refreshExpenseData(true);
   }
   loading.value = false;
-  console.log('done loading');
 } // getProfileData
 
 /**

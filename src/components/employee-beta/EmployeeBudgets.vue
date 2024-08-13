@@ -257,14 +257,12 @@ async function refreshBudget() {
  * Refresh and sets employee information.
  */
 async function refreshEmployee() {
-  console.log('refresh employee');
   loading.value = true;
   hireDate.value = format(props.employee.hireDate, null, DEFAULT_ISOFORMAT);
   let [tempAllUserBudgets] = await Promise.all([api.getEmployeeBudgets(props.employee.id), refreshBudget()]);
   allUserBudgets.value = tempAllUserBudgets;
   refreshBudgetYears();
   loading.value = false;
-  console.log('done refresh');
 } // refreshEmployee
 
 /**
