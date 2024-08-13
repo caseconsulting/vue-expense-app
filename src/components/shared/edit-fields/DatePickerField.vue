@@ -1,25 +1,27 @@
 <template>
   <v-text-field
-    v-model="formattedDate"
-    :label="label"
-    v-mask="'##/##/####'"
-    hint="MM/DD/YYYY"
+    v-model="textDate"
+    @update:focused="pickerDate = format(textDate, null, dateFormat)"
+    @keypress="menu = false"
+    @click:prepend="menu = true"
     :rules="rules"
+    :label="label"
     :disabled="disabled"
+    v-mask="mask"
+    hint="MM/DD/YYYY format"
     prepend-inner-icon="mdi-calendar"
     autocomplete="off"
-    :class="textFieldClasses"
-    @keypress="menu = false"
   >
     <v-menu activator="parent" :close-on-content-click="false" v-model="menu" location="start center">
       <v-date-picker
-        v-model="date"
+        v-model="pickerDate"
+        @update:model-value="menu = false"
+        :title="title"
+        :max="max"
         show-adjacent-months
         hide-actions
-        keyboard-icon
+        keyboard-icon=""
         color="#bc3825"
-        :title="label"
-        @update:model-value="menu = false"
       >
       </v-date-picker>
     </v-menu>
@@ -29,10 +31,9 @@
 </template>
 
 <script setup>
-import { DEFAULT_ISOFORMAT, FORMATTED_ISOFORMAT, ISO8601 } from '@/shared/dateUtils';
-import dayjs from 'dayjs';
-import { computed, ref } from 'vue';
-import { mask } from 'vue-the-mask';
+import { format } from '@/shared/dateUtils';
+import { ref, watch } from 'vue';
+import { mask as useMask } from 'vue-the-mask';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -40,48 +41,31 @@ import { mask } from 'vue-the-mask';
 // |                                                  |
 // |--------------------------------------------------|
 
-const vMask = mask;
+const vMask = useMask;
 
 const rawDate = defineModel({ required: true });
 const props = defineProps({
   label: { type: String },
   rules: { type: Array },
-  formats: { type: Array },
-  textFieldClasses: { type: String || Object },
-  datePickerClasses: { type: String || Object },
-  disabled: { type: Boolean }
+  dateFormat: { type: String, required: true }, //date format of rawDate
+  textFormat: { type: String, default: 'MM/DD/YYYY' }, //date format of textDate
+  disabled: { type: Boolean, default: false },
+  title: { type: String, default: 'Select Date' },
+  max: { type: String },
+  mask: { type: String, default: '##/##/####' }
 });
+const textDate = ref(format(rawDate.value, null, props.textFormat));
+const pickerDate = ref(format(rawDate.value, null, props.dateFormat));
 const menu = ref(false);
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     COMPUTED                     |
+// |                     WATCHERS                     |
 // |                                                  |
 // |--------------------------------------------------|
 
-/**
- * Dayjs wrapper for the date. This is used as the model for the date picker, since that also uses dayjs objects
- * @type {import('vue').WritableComputedRef<import('dayjs').Dayjs>}
- */
-const date = computed({
-  get: () => dayjs(rawDate.value, props.formats ?? [ISO8601, DEFAULT_ISOFORMAT]),
-  set: (val) => {
-    rawDate.value = val.toISOString();
-  }
-});
-
-/**
- * The date in MM/DD/YYYY format
- * @type {import('vue').WritableComputedRef<string>}
- */
-const formattedDate = computed({
-  get: () => {
-    if (!date.value.isValid()) return '';
-    return date.value.format(FORMATTED_ISOFORMAT);
-  },
-  set: (val) => {
-    const day = dayjs(val, FORMATTED_ISOFORMAT);
-    if (day.isValid()) date.value = day;
-  }
+watch(pickerDate, () => {
+  rawDate.value = format(pickerDate.value, null, props.dateFormat);
+  textDate.value = format(pickerDate.value, null, props.textFormat);
 });
 </script>

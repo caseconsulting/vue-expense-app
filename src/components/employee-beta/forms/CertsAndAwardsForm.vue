@@ -36,75 +36,30 @@
 
           <!-- Start Cert recieved date -->
           <v-col :cols="!isMobile() ? '3' : '12'">
-            <v-text-field
-              ref="formFields"
-              :model-value="format(certification.dateReceived, null, 'MM/DD/YYYY')"
-              label="Date Received"
+            <date-picker-field
+              v-model="certification.dateReceived"
               :rules="[...getDateRules()]"
-              hint="MM/DD/YYYY format"
-              v-mask="'##/##/####'"
-              persistent-hint
+              :max="certification.expirationDate"
+              textFormat="MM/DD/YYYY"
+              dateFormat="YYYY-MM-DD"
+              label="Date Received"
+              title="Date Received"
               clearable
-              prepend-inner-icon="mdi-calendar"
-              autocomplete="off"
-              @update:focused="certification.dateReceived = parseEventDate($event)"
-              @keypress="certification.showReceivedMenu = false"
-            >
-              <v-menu
-                activator="parent"
-                v-model="certification.showReceivedMenu"
-                :close-on-content-click="false"
-                location="start center"
-              >
-                <v-date-picker
-                  v-model="certification.dateReceived"
-                  :max="certification.expirationDate"
-                  @update:model-value="certification.showReceivedMenu = false"
-                  show-adjacent-months
-                  hide-actions
-                  keyboard-icon=""
-                  color="#bc3825"
-                  title="Date Received"
-                ></v-date-picker>
-              </v-menu>
-            </v-text-field>
+            />
           </v-col>
           <!-- End Cert received date -->
 
           <!-- Start Cert expiration date -->
           <v-col :cols="!isMobile() ? '3' : '12'">
-            <v-text-field
-              ref="formFields"
-              :model-value="format(certification.expirationDate, null, 'MM/DD/YYYY')"
-              label="Expiration Date (optional)"
+            <date-picker-field
+              v-model="certification.expirationDate"
               :rules="[...getDateOptionalRules()]"
-              hint="MM/DD/YYYY format"
-              v-mask="'##/##/####'"
+              textFormat="MM/DD/YYYY"
+              dateFormat="YYYY-MM-DD"
+              label="Expiration Date (optional)"
+              title="Expiration Date"
               clearable
-              prepend-inner-icon="mdi-calendar"
-              autocomplete="off"
-              @update:focused="certification.expirationDate = parseEventDate($event)"
-              @keypress="certification.showExpirationMenu = false"
-              @focus="certificationIndex = index"
-            >
-              <v-menu
-                activator="parent"
-                v-model="certification.showExpirationMenu"
-                :close-on-content-click="false"
-                location="start center"
-              >
-                <v-date-picker
-                  v-model="certification.expirationDate"
-                  :min="certification.dateReceived"
-                  @update:model-value="certification.showExpirationMenu = false"
-                  show-adjacent-months
-                  hide-actions
-                  keyboard-icon=""
-                  color="#bc3825"
-                  title="Expiration Date"
-                ></v-date-picker>
-              </v-menu>
-            </v-text-field>
+            />
           </v-col>
           <!-- End Cert expiration date -->
 
@@ -145,76 +100,62 @@
           </v-col>
         </v-row>
         <!-- Start Award Loop -->
-        <v-row v-for="(award, index) in editedEmployee.awards" :key="index">
-          <!-- Start Award Name -->
-          <v-col :cols="!isMobile() ? '6' : '10'">
-            <v-text-field
-              ref="formFields"
-              v-model="award.name"
-              :rules="getRequiredRules()"
-              label="Award"
-              data-vv-name="Award"
-              clearable
-            >
-            </v-text-field>
-          </v-col>
-          <!-- End Award Name -->
+        <div v-for="(award, index) in editedEmployee.awards" :key="index">
+          <v-sheet min-height="100" class="fill-height">
+            <v-lazy class="fill-height" :options="{ rootMargin: '500px' }">
+              <v-row class="fill-height">
+                <!-- Start Award Name -->
+                <v-col :cols="!isMobile() ? '6' : '10'">
+                  <v-text-field
+                    ref="formFields"
+                    v-model="award.name"
+                    :rules="getRequiredRules()"
+                    label="Award"
+                    data-vv-name="Award"
+                    clearable
+                  >
+                  </v-text-field>
+                </v-col>
+                <!-- End Award Name -->
 
-          <!-- Start delete award MOBILE -->
-          <v-col v-if="isMobile()" cols="2">
-            <v-btn @click="deleteAward(index)" icon variant="text">
-              <v-tooltip activator="parent" location="bottom">Delete Award</v-tooltip>
-              <v-icon class="case-gray">mdi-delete</v-icon>
-            </v-btn>
-          </v-col>
-          <!-- End delete award MOBILE -->
+                <!-- Start delete award MOBILE -->
+                <v-col v-if="isMobile()" cols="2">
+                  <v-btn @click="deleteAward(index)" icon variant="text">
+                    <v-tooltip activator="parent" location="bottom">Delete Award</v-tooltip>
+                    <v-icon class="case-gray">mdi-delete</v-icon>
+                  </v-btn>
+                </v-col>
+                <!-- End delete award MOBILE -->
 
-          <!-- Start Award received date -->
-          <v-col :cols="!isMobile() ? '5' : '12'">
-            <v-text-field
-              ref="formFields"
-              :model-value="format(award.dateReceived, null, 'MM/YYYY')"
-              label="Date Received"
-              :rules="getDateMonthYearRules()"
-              hint="MM/YYYY format"
-              v-mask="'##/####'"
-              persistent-hint
-              clearable
-              prepend-inner-icon="mdi-calendar"
-              autocomplete="off"
-              @update:focused="award.dateReceived = parseAwardEventDate($event)"
-              @keypress="award.showReceivedMenu = false"
-            >
-              <v-menu
-                activator="parent"
-                v-model="award.showReceivedMenu"
-                :close-on-content-click="false"
-                location="start center"
-              >
-                <v-date-picker
-                  v-model="award.dateReceived"
-                  @update:model-value="award.showReceivedMenu = false"
-                  show-adjacent-months
-                  hide-actions
-                  keyboard-icon=""
-                  color="#bc3825"
-                  title="Date Received"
-                ></v-date-picker>
-              </v-menu>
-            </v-text-field>
-          </v-col>
-          <!-- End award recieved date -->
+                <!-- Start Award received date -->
+                <v-col :cols="!isMobile() ? '5' : '12'">
+                  <date-picker-field
+                    v-model="award.dateReceived"
+                    :rules="getDateMonthYearRules()"
+                    mask="##/####"
+                    dateFormat="YYYY-MM"
+                    textFormat="MM/YYYY"
+                    label="Date Received"
+                    title="Date Received"
+                    hint="MM/YYYY format"
+                    clearable
+                  />
+                </v-col>
+                <!-- End award recieved date -->
 
-          <!-- Start delete award NORMAL-->
-          <v-col v-if="!isMobile()" cols="1">
-            <v-btn @click="deleteAward(index)" icon variant="text">
-              <v-tooltip activator="parent" location="bottom">Delete Award</v-tooltip>
-              <v-icon class="case-gray pr-1">mdi-delete</v-icon>
-            </v-btn>
-          </v-col>
-          <!-- End delete award NORMAL -->
-          <v-divider v-if="isMobile() && index < editedEmployee.awards.length - 1" :thickness="3"></v-divider>
-        </v-row>
+                <!-- Start delete award NORMAL-->
+                <v-col v-if="!isMobile()" cols="1">
+                  <v-btn @click="deleteAward(index)" icon variant="text">
+                    <v-tooltip activator="parent" location="bottom">Delete Award</v-tooltip>
+                    <v-icon class="case-gray pr-1">mdi-delete</v-icon>
+                  </v-btn>
+                </v-col>
+                <!-- End delete award NORMAL -->
+                <v-divider v-if="isMobile() && index < editedEmployee.awards.length - 1" :thickness="3"></v-divider>
+              </v-row>
+            </v-lazy>
+          </v-sheet>
+        </div>
         <!-- End Award Loop -->
 
         <!-- Start Add Award -->
@@ -234,13 +175,13 @@
 </template>
 
 <script setup>
-import { format, getTodaysDate } from '@/shared/dateUtils';
+import { getTodaysDate } from '@/shared/dateUtils';
 import { getDateMonthYearRules, getDateOptionalRules, getDateRules, getRequiredRules } from '@/shared/validationUtils';
 import _ from 'lodash';
 import { inject, onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue';
-import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
 import { isMobile } from '../../../utils/utils';
+import DatePickerField from '../../shared/edit-fields/DatePickerField.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -250,14 +191,12 @@ import { isMobile } from '../../../utils/utils';
 
 const store = useStore();
 const emitter = inject('emitter');
-const vMask = mask;
 
 const editedEmployee = defineModel({ required: true });
 const valid = defineModel('valid', { required: true });
 const form = ref(null); // template ref
 
 const certificationDropDown = ref([]); // autocomplete certification name options
-const certificationIndex = ref(0);
 const employees = store.getters.employees;
 
 defineExpose({ prepareSubmit });
@@ -281,6 +220,19 @@ onBeforeUnmount(prepareSubmit);
 async function prepareSubmit() {
   if (form.value) {
     const result = await form.value.validate();
+
+    editedEmployee.value.awards.forEach((award) => {
+      delete award.showReceivedMenu;
+    });
+    editedEmployee.value.certifications.forEach((cert) => {
+      if (!cert.expirationDate) {
+        delete cert.expirationDate;
+        delete cert.expirationWasSeen;
+      }
+      delete cert.showExpirationMenu;
+      delete cert.showReceivedMenu;
+    });
+
     emitter.emit('validating', { tab: 'certsAndAwards', valid: result.valid });
     return result;
   }
@@ -334,24 +286,6 @@ function deleteAward(index) {
 function deleteCertification(index) {
   editedEmployee.value.certifications.splice(index, 1);
 } // deleteCertification
-
-/**
- * Parse the date after losing focus.
- *
- * @return String - The date in YYYY-MM-DD format
- */
-function parseEventDate(event) {
-  return format(event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD');
-} // parseEventDate
-
-/**
- * Parse the date after losing focus.
- *
- * @return String - The date in YYYY-MM format
- */
-function parseAwardEventDate(event) {
-  return format(event.target.value, 'MM/YYYY', 'YYYY-MM');
-} // parseAwardEventDate
 
 /**
  * Populate drop downs with information that other employees have filled out.

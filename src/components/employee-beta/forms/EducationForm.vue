@@ -103,7 +103,7 @@
 
 <script setup>
 import { map } from 'lodash';
-import { computed, inject, onBeforeMount, onMounted, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, inject, onBeforeMount, onMounted, onBeforeUnmount, ref } from 'vue';
 import HighSchoolForm from './education-forms/HighSchoolForm.vue';
 import MilitaryForm from './education-forms/MilitaryForm.vue';
 import UniversityForm from './education-forms/UniversityForm.vue';
@@ -194,17 +194,6 @@ const displayMilitary = computed(() => {
     }
   }
   return false;
-});
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     WATCHERS                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-watch(valid, async (val) => {
-  // fixes a bug where validation would be null when submit button is pressed, just need to re-validate
-  if (val === null) await prepareSubmit();
 });
 
 // |--------------------------------------------------|
