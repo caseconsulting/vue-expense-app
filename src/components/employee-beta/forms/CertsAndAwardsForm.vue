@@ -175,6 +175,8 @@
 </template>
 
 <script setup>
+import DatePickerField from '@/components/shared/edit-fields/DatePickerField.vue';
+import { usePrepareSubmit } from '@/composables/editTabCommunication';
 import { getTodaysDate } from '@/shared/dateUtils';
 import { getDateMonthYearRules, getDateOptionalRules, getDateRules, getRequiredRules } from '@/shared/validationUtils';
 import { isMobile } from '@/utils/utils';
@@ -184,7 +186,6 @@ import _map from 'lodash/map';
 import _uniq from 'lodash/uniq';
 import { onBeforeMount, ref } from 'vue';
 import { useStore } from 'vuex';
-import DatePickerField from '../../shared/edit-fields/DatePickerField.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -201,6 +202,8 @@ const editedEmployee = ref(slotProps.editedEmployee);
 const certificationDropDown = ref([]); // autocomplete certification name options
 const employees = store.getters.employees;
 
+usePrepareSubmit('certsAndAwards', prepareSubmit);
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -214,6 +217,25 @@ onBeforeMount(populateDropDowns);
 // |                      METHODS                     |
 // |                                                  |
 // |--------------------------------------------------|
+
+async function prepareSubmit() {
+  if (!slotProps.stopPrepare) {
+    await slotProps.validate();
+
+    editedEmployee.value.awards.forEach((award) => {
+      delete award.showReceivedMenu;
+    });
+
+    editedEmployee.value.certifications.forEach((cert) => {
+      if (!cert.expirationDate) {
+        delete cert.expirationDate;
+        delete cert.expirationWasSeen;
+      }
+      delete cert.showExpirationMenu;
+      delete cert.showReceivedMenu;
+    });
+  }
+}
 
 /**
  * Add an award.

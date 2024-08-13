@@ -5,7 +5,7 @@
     </v-expansion-panel-title>
     <v-expansion-panel-text>
       <v-container>
-        <v-form ref="form" v-model="validModel" validate-on="blur">
+        <v-form ref="form" v-model="validModel" validate-on="input">
           <slot :props="{ editedEmployee, stopPrepare, validate }"></slot>
         </v-form>
       </v-container>
