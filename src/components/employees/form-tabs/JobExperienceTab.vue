@@ -273,7 +273,12 @@
 </template>
 
 <script>
-import _ from 'lodash';
+import _isEmpty from 'lodash/isEmpty';
+import _forEach from 'lodash/forEach';
+import _map from 'lodash/map';
+import _compact from 'lodash/compact';
+import _isArray from 'lodash/isArray';
+import _cloneDeep from 'lodash/cloneDeep';
 import { getDateMonthYearRules, getDateMonthYearOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
 import { asyncForEach, isEmpty, isMobile } from '@/utils/utils';
 import { add, format, getTodaysDate, isAfter } from '@/shared/dateUtils';
@@ -402,7 +407,7 @@ function deletePosition(compIndex, posIndex) {
  * @return String - 'Month YYYY' - 'Month YYYY' date range
  */
 function formatRange(range) {
-  if (_.isEmpty(range)) {
+  if (_isEmpty(range)) {
     return null;
   }
   let start = format(range[0], null, 'YYYY-MM');
@@ -430,7 +435,7 @@ function formatRange(range) {
  */
 function hasEndDatesFilled(index) {
   let hasEndDatesFilled = true;
-  _.forEach(this.editedJobExperienceInfo.companies[index].positions, (position) => {
+  _forEach(this.editedJobExperienceInfo.companies[index].positions, (position) => {
     hasEndDatesFilled &= !!position.endDate;
   });
 
@@ -450,12 +455,12 @@ function parseEventDate() {
  * Populate drop downs with information that other employees have filled out.
  */
 function populateDropDowns() {
-  let employeesJobs = _.map(this.employees, (employee) => employee.companies); //extract jobs
-  employeesJobs = _.compact(employeesJobs); //remove falsey values
+  let employeesJobs = _map(this.employees, (employee) => employee.companies); //extract jobs
+  employeesJobs = _compact(employeesJobs); //remove falsey values
   // loop employees
-  _.forEach(employeesJobs, (jobs) => {
+  _forEach(employeesJobs, (jobs) => {
     // loop jobs
-    _.forEach(jobs, (job) => {
+    _forEach(jobs, (job) => {
       this.companyDropDown.push(job.companyName); // add company name
     });
   });
@@ -478,7 +483,7 @@ function setIndices(companyIndex, positionIndex) {
 async function validateFields() {
   let errorCount = 0;
   //ensures that refs are put in an array so we can reuse forEach loop
-  let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
+  let components = !_isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
   await asyncForEach(components, async (field) => {
     if (field && (await field.validate()).length > 0) errorCount++;
   });
@@ -489,8 +494,8 @@ async function validateFields() {
     this.editedJobExperienceInfo.hireDate = this.model.hireDate;
   }
 
-  _.forEach(this.editedJobExperienceInfo.companies, (company) => {
-    _.forEach(company.positions, (position) => {
+  _forEach(this.editedJobExperienceInfo.companies, (company) => {
+    _forEach(company.positions, (position) => {
       if (position.endDate && position.presentDate) {
         position.presentDate = false;
       }
@@ -546,7 +551,7 @@ export default {
         }
       },
       duplicateCompanyName: (compIndex) => {
-        let compNames = _.map(this.editedJobExperienceInfo.companies, (company) => company.companyName);
+        let compNames = _map(this.editedJobExperienceInfo.companies, (company) => company.companyName);
         let company = compNames[compIndex];
         compNames.splice(compIndex, 1);
         return !compNames.includes(company) || 'Duplicate company name';
@@ -563,7 +568,7 @@ export default {
           return false;
         }
       },
-      editedJobExperienceInfo: _.cloneDeep(this.model), //edited job experience info
+      editedJobExperienceInfo: _cloneDeep(this.model), //edited job experience info
       today: getTodaysDate('MM/DD/YYYY')
     };
   },

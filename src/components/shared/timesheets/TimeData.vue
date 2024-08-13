@@ -39,7 +39,9 @@
 <script setup>
 import TimePeriodHours from '@/components/shared/timesheets/TimePeriodHours.vue';
 import PTOHours from '@/components/shared/timesheets/PTOHours.vue';
-import _ from 'lodash';
+import _isEmpty from 'lodash/isEmpty';
+import _forEach from 'lodash/forEach';
+import _find from 'lodash/find';
 import api from '@/shared/api';
 import { computed, inject, ref, watch, onBeforeMount, onBeforeUnmount } from 'vue';
 import { useStore } from 'vuex';
@@ -154,7 +156,7 @@ function employeeIsUser() {
 function hasError(timesheetsData) {
   if (timesheetsData?.name === 'AxiosError' || timesheetsData.code >= 400) {
     errorMessage.value = timesheetsData?.response?.data?.message;
-    if (_.isEmpty(errorMessage.value) || typeof errorMessage.value === 'object') {
+    if (_isEmpty(errorMessage.value) || typeof errorMessage.value === 'object') {
       errorMessage.value = 'An error has occurred, try refreshing the widget';
     }
     return true;
@@ -186,7 +188,7 @@ function qbStorageExists() {
  * Removes a jobcode key value pair from PTO balances object if it is not relevant to a user.
  */
 function removeExcludedPtoBalances() {
-  _.forEach(ptoBalances.value, (balance, jobcode) => {
+  _forEach(ptoBalances.value, (balance, jobcode) => {
     if (excludeIfZero.value.includes(jobcode) && balance === 0) delete ptoBalances.value[jobcode];
   });
 } // removeExcludedPtoBalances
@@ -358,7 +360,7 @@ async function setData(isCalendarYear, isYearly) {
  * Sets the timesheets data on initial load based on a time period (current and previous pay period displayed).
  */
 async function setInitialData() {
-  await Promise.all([setData(), !store.getters.contracts ? updateStoreContracts() : _]);
+  await Promise.all([setData(), !store.getters.contracts ? updateStoreContracts() : '']);
 } // setInitialData
 
 // |--------------------------------------------------|
@@ -370,7 +372,7 @@ async function setInitialData() {
 watch(
   () => store.getters.employees,
   () => {
-    clonedEmployee.value = _.find(store.getters.employees, (e) => e.id === clonedEmployee.value.id);
+    clonedEmployee.value = _find(store.getters.employees, (e) => e.id === clonedEmployee.value.id);
   },
   { deep: true }
 );

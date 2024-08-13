@@ -15,7 +15,8 @@
 
 <script setup>
 import api from '@/shared/api';
-import _ from 'lodash';
+import _forEach from 'lodash/forEach';
+import _find from 'lodash/find';
 import PieChart from '@/components/charts/base-charts/PieChart.vue';
 import AuditsTable from '@/components/audits/AuditsTable.vue';
 import { storeIsPopulated } from '@/utils/utils.js';
@@ -54,9 +55,9 @@ const resumeChart2Data = ref(null);
 async function fillData() {
   let resumeData = await api.getAudits('resume', props.queryStartDate, props.queryEndDate);
 
-  _.forEach(resumeData, (audit) => {
+  _forEach(resumeData, (audit) => {
     audit.dateCreated = format(audit.dateCreated, null, IsoFormat);
-    let employee = _.find(employees.value, (emp) => {
+    let employee = _find(employees.value, (emp) => {
       return emp.id === audit.employeeId;
     });
 

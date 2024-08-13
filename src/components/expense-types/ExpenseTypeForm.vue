@@ -396,7 +396,15 @@ import api from '@/shared/api.js';
 import { getRequiredRules } from '../../shared/validationUtils';
 import { getDateRules } from '../../shared/validationUtils';
 import GeneralConfirmationModal from '@/components/modals/GeneralConfirmationModal.vue';
-import _ from 'lodash';
+import _cloneDeep from 'lodash/cloneDeep';
+import _forEach from 'lodash/forEach';
+import _sortBy from 'lodash/sortBy';
+import _isEmpty from 'lodash/isEmpty';
+import _find from 'lodash/find';
+import _union from 'lodash/union';
+import _map from 'lodash/map';
+import _filter from 'lodash/filter';
+import _findIndex from 'lodash/findIndex';
 import { generateUUID, isEmpty } from '@/utils/utils';
 import { format } from '@/shared/dateUtils';
 import { updateStoreExpenseTypes } from '@/utils/storeUtils';
@@ -447,7 +455,7 @@ const endDateRules = ref([
 const endDateFormatted = ref(null); // formatted end date
 const expenseTypeForm = ref(null); // filled in from the template
 const props = defineProps(['model']); // expense type to be created/updated
-const editedExpenseType = ref(_.cloneDeep(props.model)); // used to store edits made to an expense type or when creating new expense type
+const editedExpenseType = ref(_cloneDeep(props.model)); // used to store edits made to an expense type or when creating new expense type
 const router = useRouter();
 const searchString = ref('');
 const showStartMenu = ref(false); // boolean for showing date picker
@@ -499,7 +507,7 @@ onMounted(async () => {
   let sortedActiveEmployees = [];
 
   // populate list of active employees
-  _.forEach(employees, (employee) => {
+  _forEach(employees, (employee) => {
     if (employee.workStatus > 0) {
       sortedActiveEmployees.push({
         value: employee.id,
@@ -508,10 +516,10 @@ onMounted(async () => {
     }
   });
 
-  sortedActiveEmployees = _.sortBy(sortedActiveEmployees, ['text']); // sort employees alphabetically
+  sortedActiveEmployees = _sortBy(sortedActiveEmployees, ['text']); // sort employees alphabetically
   activeEmployees.value = sortedActiveEmployees;
   campfires.value = store.getters.basecampCampfires;
-  editedExpenseType.value = _.cloneDeep(props.model);
+  editedExpenseType.value = _cloneDeep(props.model);
 
   clearForm();
 }); // created
@@ -549,11 +557,11 @@ const checkBoxRule = computed(() => {
  * Set required receipt for expense type if all category required receipt checkboxes are enabled. If there are no categories, make sure the main toggle is false.
  */
 function checkRequireReceipt() {
-  if (_.isEmpty(editedExpenseType.value.categories)) {
+  if (_isEmpty(editedExpenseType.value.categories)) {
     editedExpenseType.value.requireURL = false;
   } else {
     // check if any categories do not require a receipt
-    let somethingIsFalse = _.find(editedExpenseType.value.categories, (category) => {
+    let somethingIsFalse = _find(editedExpenseType.value.categories, (category) => {
       return !category.requireReceipt;
     });
 
@@ -570,11 +578,11 @@ function checkRequireReceipt() {
  * Set required url for expense type if all category required url checkboxes are enabled. If there are no categories, make sure the main toggle is false.
  */
 function checkRequireURL() {
-  if (_.isEmpty(editedExpenseType.value.categories)) {
+  if (_isEmpty(editedExpenseType.value.categories)) {
     editedExpenseType.value.requireURL = false;
   } else {
     // check if any categories do not require a url
-    let somethingIsFalse = _.find(editedExpenseType.value.categories, (category) => {
+    let somethingIsFalse = _find(editedExpenseType.value.categories, (category) => {
       return !category.requireURL;
     });
 
@@ -591,11 +599,11 @@ function checkRequireURL() {
  * Set always on feed for expense type if all category show on feed checkboxes are enabled. If there are no categories, make sure the main toggle is false.
  */
 function checkSelection() {
-  if (_.isEmpty(editedExpenseType.value.categories)) {
+  if (_isEmpty(editedExpenseType.value.categories)) {
     editedExpenseType.value.requireURL = false;
   } else {
     // check if any categories are hidden on feed
-    let somethingIsFalse = _.find(editedExpenseType.value.categories, (category) => {
+    let somethingIsFalse = _find(editedExpenseType.value.categories, (category) => {
       return !category.showOnFeed;
     });
 
@@ -665,7 +673,7 @@ function odFlagHint() {
  * @return String - The budget without formatting
  */
 function parseBudget(budget) {
-  if (budget && !_.isEmpty(budget)) {
+  if (budget && !_isEmpty(budget)) {
     return budget.replace(/[,\s]/g, '');
   } else {
     return budget;
@@ -709,7 +717,7 @@ async function submit() {
 
   // set accessibleBy based on access radio
   if (isCustomSelected()) {
-    editedExpenseType.value.accessibleBy = _.union(editedExpenseType.value.accessibleBy, customAccess.value); // merge unique vals
+    editedExpenseType.value.accessibleBy = _union(editedExpenseType.value.accessibleBy, customAccess.value); // merge unique vals
   }
 
   // convert budget input into a floating point number
@@ -801,7 +809,7 @@ function toggleShowAllCategories() {
   if (!submitting.value) {
     let alwaysOF = editedExpenseType.value.alwaysOnFeed;
 
-    _.forEach(editedExpenseType.value.categories, (category) => {
+    _forEach(editedExpenseType.value.categories, (category) => {
       category.showOnFeed = alwaysOF;
     });
   }
@@ -814,7 +822,7 @@ function toggleRequireURL() {
   if (!submitting.value) {
     let requireURL = editedExpenseType.value.requireURL;
 
-    _.forEach(editedExpenseType.value.categories, (category) => {
+    _forEach(editedExpenseType.value.categories, (category) => {
       category.requireURL = requireURL;
     });
   }
@@ -827,7 +835,7 @@ function toggleRequireReceipt() {
   if (!submitting.value) {
     let requireReceipt = editedExpenseType.value.requiredFlag;
 
-    _.forEach(editedExpenseType.value.categories, (category) => {
+    _forEach(editedExpenseType.value.categories, (category) => {
       category.requireReceipt = requireReceipt;
     });
   }
@@ -939,7 +947,7 @@ function moveTagBudgetDown(index) {
 watch(
   () => props.model.id,
   () => {
-    editedExpenseType.value = _.cloneDeep(props.model); //set editedExpense to new value of model
+    editedExpenseType.value = _cloneDeep(props.model); //set editedExpense to new value of model
 
     // set array used for custom access chip-selector to previously saved data but without the access strings
     // This code sucks
@@ -967,7 +975,7 @@ watch(
     }
     if (editedExpenseType.value.id != null) {
       //map categories
-      categories.value = _.map(editedExpenseType.value.categories, (category) => {
+      categories.value = _map(editedExpenseType.value.categories, (category) => {
         return category.name;
       });
     }
@@ -994,11 +1002,11 @@ watch(categories, (val) => {
   // update categories checkboxes
   if (val.length > editedExpenseType.value.categories.length) {
     // category was added
-    let c = _.map(editedExpenseType.value.categories, (category) => {
+    let c = _map(editedExpenseType.value.categories, (category) => {
       return category.name;
     });
 
-    let index = _.findIndex(val, (x) => {
+    let index = _findIndex(val, (x) => {
       return !c.includes(x);
     });
 
@@ -1010,7 +1018,7 @@ watch(categories, (val) => {
     });
   } else if (val.length < editedExpenseType.value.categories.length) {
     // category was removed
-    editedExpenseType.value.categories = _.filter(editedExpenseType.value.categories, (category) => {
+    editedExpenseType.value.categories = _filter(editedExpenseType.value.categories, (category) => {
       return val.includes(category.name);
     });
   }

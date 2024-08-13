@@ -12,7 +12,7 @@
 
 <script setup>
 import PieChart from '../base-charts/PieChart.vue';
-import _ from 'lodash';
+import _isEmpty from 'lodash/isEmpty';
 import { onMounted, onBeforeMount, onBeforeUnmount, ref, inject } from 'vue';
 
 // |--------------------------------------------------|
@@ -84,7 +84,7 @@ onBeforeUnmount(() => {
  */
 function fetchData(concentrations) {
   if (concentrations) {
-    if (_.isEmpty(concentrations)) {
+    if (_isEmpty(concentrations)) {
       text.value = `There are no concentrations for an education of ${degree.value}`;
       quantities.value.push(1);
       enabled.value = false;
@@ -118,7 +118,7 @@ function fetchData(concentrations) {
     }
   } else {
     // these presets are when a degree has not been selected OR if there are no concentrations
-    if (!_.isEmpty(concentrations)) {
+    if (!_isEmpty(concentrations)) {
       text.value = 'There are no concentrations for this type of degree';
     } else {
       text.value = 'Click on an Education To See Concentrations';

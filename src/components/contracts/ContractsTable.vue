@@ -335,7 +335,11 @@
   </div>
 </template>
 <script setup>
-import _ from 'lodash';
+import _cloneDeep from 'lodash/cloneDeep';
+import _merge from 'lodash/merge';
+import _forEach from 'lodash/forEach';
+import _some from 'lodash/some';
+import _map from 'lodash/map';
 import api from '@/shared/api';
 import { updateStoreEmployees } from '@/utils/storeUtils';
 import { asyncForEach, isMobile } from '@/utils/utils';
@@ -363,7 +367,7 @@ import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSn
 const store = useStore();
 const emitter = inject('emitter');
 const duplicateContractPrimeCombo = ref(() => {
-  let found = _.some(store.getters.contracts, (c) => {
+  let found = _some(store.getters.contracts, (c) => {
     if (c.id == editingItem.value.id) return false;
     return c.contractName === editingItem.value.contractName && c.primeName === editingItem.value.primeName;
   });
@@ -492,7 +496,7 @@ onBeforeMount(async () => {
     toggleProjectCheckBox(contract, project);
   });
   resetAllCheckBoxes();
-  expanded.value = _.map(store.getters.contracts, 'id'); // expands all contracts in table
+  expanded.value = _map(store.getters.contracts, 'id'); // expands all contracts in table
 }); // created
 
 /**
@@ -531,7 +535,7 @@ async function updateContractPrime() {
     if (response.name === 'AxiosError') {
       throw new Error(response.response.data.message);
     }
-    let contracts = _.cloneDeep(store.getters.contracts);
+    let contracts = _cloneDeep(store.getters.contracts);
     let itemIndex = contracts.findIndex((item) => item.id == editingItem.value.id);
     contracts[itemIndex] = editingItem.value;
     store.dispatch('setContracts', { contracts });
@@ -551,7 +555,7 @@ async function updateContractPrime() {
 async function deleteItems(items) {
   isDeleting.value = true;
   try {
-    let contracts = _.cloneDeep(store.getters.contracts);
+    let contracts = _cloneDeep(store.getters.contracts);
     let deleteContractPromises = [];
     let deleteProjectPromises = [];
     items.contracts.forEach((c) => {
@@ -593,7 +597,7 @@ async function deleteItems(items) {
  * @param item item that is being edited
  */
 function clickedEdit(item) {
-  editingItem.value = _.cloneDeep(item);
+  editingItem.value = _cloneDeep(item);
 } // clickedEdit
 
 /**
@@ -678,7 +682,7 @@ async function updateStatus(status) {
   }
   try {
     let updatePromises = [];
-    let contracts = _.cloneDeep(store.getters.contracts);
+    let contracts = _cloneDeep(store.getters.contracts);
     let selectedItems = getSelectedItems();
 
     selectedItems.contracts.forEach((c) => {
@@ -846,7 +850,7 @@ function isDeletingOrUpdatingStatus(contractItem = null) {
 function resetAllCheckBoxes() {
   let uncheckedBox = { all: false, indeterminate: false };
   for (let i = 0; i < store.getters.contracts.length; i++) {
-    contractsCheckBoxes.value[i] = _.cloneDeep(uncheckedBox);
+    contractsCheckBoxes.value[i] = _cloneDeep(uncheckedBox);
     contractsCheckBoxes.value[i].contractId = store.getters.contracts[i].id;
     contractsCheckBoxes.value[i].projectsCheckBoxes = store.getters.contracts[i].projects.map((p) => ({
       projectId: p.id,
@@ -914,7 +918,7 @@ function toggleProjectCheckBox(contract, projectItem) {
 function determineCheckBox(contractCheckBox) {
   let checkBox = { all: true, indeterminate: false };
 
-  _.forEach(contractCheckBox.projectsCheckBoxes, (project) => {
+  _forEach(contractCheckBox.projectsCheckBoxes, (project) => {
     if (!project.checkBox) {
       // at least one project is not selected
       checkBox.all = false;
@@ -998,9 +1002,9 @@ computed(isMobile);
  * @return filtered out unstaffed items
  */
 const storeContracts = computed(() => {
-  let mergedCheckBoxContractsData = _.merge(store.getters.contracts, contractsCheckBoxes.value);
+  let mergedCheckBoxContractsData = _merge(store.getters.contracts, contractsCheckBoxes.value);
   mergedCheckBoxContractsData.forEach((c) => {
-    c.projects = _.merge(c.projects, c.projectsCheckBoxes);
+    c.projects = _merge(c.projects, c.projectsCheckBoxes);
   });
   return mergedCheckBoxContractsData
     .filter((c) => filter.value.includes(c.status))

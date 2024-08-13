@@ -225,7 +225,13 @@ import {
 import { employeeFilter } from '@/shared/filterUtils';
 import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSnackbar.vue';
 import { format, getTodaysDate, FORMATTED_ISOFORMAT } from '@/shared/dateUtils';
-import _ from 'lodash';
+import _find from 'lodash/find';
+import _isNil from 'lodash/isNil';
+import _sortBy from 'lodash/sortBy';
+import _cloneDeep from 'lodash/cloneDeep';
+import _findIndex from 'lodash/findIndex';
+import _filter from 'lodash/filter';
+import _map from 'lodash/map';
 import ConvertEmployeeToCsv from '@/components/employees/csv/ConvertEmployeeToCsv.vue';
 import AnniversaryCard from '@/components/shared/AnniversaryCard.vue';
 import BudgetChart from '@/components/charts/custom-charts/BudgetChart.vue';
@@ -282,7 +288,7 @@ async function getProfileData() {
   } else {
     // user looking at another employees profile
     let employees = this.$store.getters.employees;
-    this.model = _.find(employees, (employee) => {
+    this.model = _find(employees, (employee) => {
       return employee.employeeNumber == this.$route.params.id;
     });
   }
@@ -327,7 +333,7 @@ function hasAdminPermissions() {
  * @return boolean - user is the employee that is displayed
  */
 function userIsEmployee() {
-  return !_.isNil(this.model) && !_.isNil(this.user) ? this.user.employeeNumber === this.model.employeeNumber : false;
+  return !_isNil(this.model) && !_isNil(this.user) ? this.user.employeeNumber === this.model.employeeNumber : false;
 } // userIsEmployee
 
 /**
@@ -383,14 +389,14 @@ async function navEmployee(num) {
   // create 'loop' of employees in order of their employee number
   loop = this.$store.getters.employees || (await this.updateStoreEmployees());
   loop = loop.filter((e) => e.workStatus !== 0);
-  loop = _.sortBy(loop, ['employeeNumber']);
+  loop = _sortBy(loop, ['employeeNumber']);
 
   // get the employee we're currently at and grab the employee `num` after in
   // the loop (this can be negative to go backwards, and can be more than 1)
-  pos = _.findIndex(loop, (e) => e.employeeNumber == currId);
+  pos = _findIndex(loop, (e) => e.employeeNumber == currId);
   res = (pos + num) % loop.length;
   if (res < 0) res = loop.length - 1;
-  this.model = _.cloneDeep(loop[res]); // this updates everything
+  this.model = _cloneDeep(loop[res]); // this updates everything
 
   // budget information needs to be reloaded specifically as it does not update
   // when the model does
@@ -439,7 +445,7 @@ async function created() {
     this.midAction = false;
   });
   this.emitter.on('profile-clicked', async () => {
-    this.model = _.cloneDeep(this.$store.getters.user);
+    this.model = _cloneDeep(this.$store.getters.user);
     await this.refreshExpenseData();
     this.pushHistoryState(this.$store.getters.user.employeeNumber);
   });
@@ -465,7 +471,7 @@ function mounted() {
   this.emitter.on('uploaded', async (displayMessage) => {
     if (displayMessage) useDisplaySuccess('Successfully uploaded resume');
     this.model.resumeUpdated = getTodaysDate();
-    this.model = _.cloneDeep(this.model); // force vue to reload the object
+    this.model = _cloneDeep(this.model); // force vue to reload the object
     await api.updateItem(api.EMPLOYEES, this.model);
   });
 
@@ -506,8 +512,8 @@ function beforeUnmount() {
  * Returns all employees with an item title for the autocomplete
  */
 function dropdownEmployees() {
-  let employees = _.filter(this.$store.getters.employees, (e) => e.workStatus > 0);
-  return _.map(employees, (e) => {
+  let employees = _filter(this.$store.getters.employees, (e) => e.workStatus > 0);
+  return _map(employees, (e) => {
     return {
       ...e,
       itemTitle: `${e.lastName}, ${e.nickname || e.firstName}`
@@ -539,7 +545,7 @@ function refreshKey() {
 function watchModel() {
   if (!this.model) return;
   this.dropdownEmployee = {
-    ..._.cloneDeep(this.model),
+    ..._cloneDeep(this.model),
     itemTitle: `${this.model.lastName}, ${this.model.nickname || this.model.firstName}`
   };
 } // watchModel

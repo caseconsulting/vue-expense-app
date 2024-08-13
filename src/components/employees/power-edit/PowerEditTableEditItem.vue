@@ -51,7 +51,7 @@ import DefaultEditItem from '@/components/employees/power-edit/edit-items/Defaul
 import DateEditItem from '@/components/employees/power-edit/edit-items/DateItem.vue';
 import CustomEditItem from '@/components/employees/power-edit/edit-items/CustomItem.vue';
 import PowerEditTableInfoItem from '@/components/employees/power-edit/PowerEditTableInfoItem.vue';
-import _ from 'lodash';
+import _forEach from 'lodash/forEach';
 import { inject, ref, onBeforeUnmount, onMounted } from 'vue';
 import { TYPES } from '@/components/employees/power-edit/js/fieldTypes.js';
 
@@ -76,7 +76,7 @@ onMounted(() => {
   window.setTimeout(() => {
     emitter.on('update-item', ({ item, field }) => {
       if (field.group && field.subkeys) {
-        _.forEach(field.subkeys, (key) => {
+        _forEach(field.subkeys, (key) => {
           clonedItem.value[key] = item[key];
         });
       } else {

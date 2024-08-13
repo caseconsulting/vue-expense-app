@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _forEach from 'lodash/forEach';
 
 /**
  * Gets the projects current employees in the form of a list.
@@ -10,7 +10,7 @@ import _ from 'lodash';
  */
 export function getProjectCurrentEmployees(contract, project, employees) {
   let employeesList = [];
-  _.forEach(employees, (employee) => {
+  _forEach(employees, (employee) => {
     if (employee.contracts && employee.workStatus > 0) {
       if (
         employee.contracts.some(
@@ -34,7 +34,7 @@ export function getProjectCurrentEmployees(contract, project, employees) {
  */
 export function getProjectPastEmployees(contract, project, employees) {
   let employeesList = [];
-  _.forEach(employees, (employee) => {
+  _forEach(employees, (employee) => {
     if (employee.contracts && employee.workStatus > 0) {
       if (
         employee.contracts.some(

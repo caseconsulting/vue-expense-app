@@ -195,7 +195,9 @@
   </td>
 </template>
 <script setup>
-import _ from 'lodash';
+import _find from 'lodash/find';
+import _some from 'lodash/some';
+import _cloneDeep from 'lodash/cloneDeep';
 import api from '@/shared/api';
 import { nicknameAndLastName } from '@/shared/employeeUtils';
 import ProjectsEmployeesAssignedModal from '../modals/ProjectsEmployeesAssignedModal.vue';
@@ -221,10 +223,10 @@ const props = defineProps([
 const emitter = inject('emitter');
 const duplicateProjects = ref((contractOfProject) => {
   if (contractOfProject) {
-    let contract = _.find(store.getters.contracts, (c) => {
+    let contract = _find(store.getters.contracts, (c) => {
       return c.id == contractOfProject.id;
     });
-    let found = _.some(contract.projects, (p) => {
+    let found = _some(contract.projects, (p) => {
       if (p.id == editingProjectItem.value.id) return false;
       return p.projectName === editingProjectItem.value.projectName;
     });
@@ -301,7 +303,7 @@ onBeforeMount(() => {
  * @param item item that is being edited
  */
 function clickedEdit(item) {
-  editingProjectItem.value = _.cloneDeep(item);
+  editingProjectItem.value = _cloneDeep(item);
   emitter.emit('is-editing-project-item', true);
 } // clickedEdit
 
@@ -323,14 +325,14 @@ async function updateProject(contract) {
   if (!valid.value) return;
   try {
     projectLoading.value = true;
-    let contractObj = _.cloneDeep(contract);
+    let contractObj = _cloneDeep(contract);
     let projectIndex = contractObj.projects.findIndex((item) => item.id == editingProjectItem.value.id);
     contractObj.projects[projectIndex] = editingProjectItem.value;
     let response = await api.updateItem(api.CONTRACTS, contractObj);
     if (response.name === 'AxiosError') {
       throw new Error(response.response.data.message);
     }
-    let contracts = _.cloneDeep(store.getters.contracts);
+    let contracts = _cloneDeep(store.getters.contracts);
     let contractIndex = contracts.findIndex((c) => c.id == contractObj.id);
     contracts[contractIndex] = contractObj;
     store.dispatch('setContracts', { contracts });

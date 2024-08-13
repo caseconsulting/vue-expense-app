@@ -101,7 +101,10 @@
 </template>
 
 <script setup>
-import _ from 'lodash';
+import _map from 'lodash/map';
+import _compact from 'lodash/compact';
+import _forEach from 'lodash/forEach';
+import _filter from 'lodash/filter';
 import { employeeFilter } from '@/shared/filterUtils';
 import { selectedTagsHasEmployee } from '@/shared/employeeUtils';
 import { getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
@@ -241,8 +244,8 @@ function populateContractsAndPrimesDropdown(employees) {
   contractsDropDown.value = [];
   primesDropDown.value = [];
 
-  let origContracts = _.map(employees, (employee) => employee.contracts); // extract contracts
-  let employeesContracts = _.compact(origContracts); // remove falsey values
+  let origContracts = _map(employees, (employee) => employee.contracts); // extract contracts
+  let employeesContracts = _compact(origContracts); // remove falsey values
 
   // if there were any employees without a contract they would have been filtered out
   // and we want to show No Contract as an option in the dropdown
@@ -251,14 +254,14 @@ function populateContractsAndPrimesDropdown(employees) {
   }
 
   // loop employees
-  _.forEach(employeesContracts, (contracts) => {
+  _forEach(employeesContracts, (contracts) => {
     // loop contracts
-    _.forEach(contracts, (contract) => {
+    _forEach(contracts, (contract) => {
       // loop through projects to test if contract is current
       // (was.value added to make sure only current contracts/primes were listed in Reports autocomplete dropdowns)
-      _.forEach(contract, (projects) => {
+      _forEach(contract, (projects) => {
         // loop project
-        _.forEach(projects, (project) => {
+        _forEach(projects, (project) => {
           if (project.presentDate) {
             let fullContract = store.getters.contracts.find((c) => c.id === contract.contractId);
             if (contract.value) {
@@ -309,12 +312,12 @@ function refreshDropdownItems() {
     searchPrimes();
   }
   if (search.value) {
-    filteredEmployees.value = _.filter(filteredEmployees.value, (employee) => {
+    filteredEmployees.value = _filter(filteredEmployees.value, (employee) => {
       return employee.employeeNumber == search.value;
     });
   }
   if (tagsInfo.value.selected.length > 0) {
-    filteredEmployees.value = _.filter(filteredEmployees.value, (employee) => {
+    filteredEmployees.value = _filter(filteredEmployees.value, (employee) => {
       return selectedTagsHasEmployee(employee.id, tagsInfo.value);
     });
   }
@@ -328,7 +331,7 @@ function refreshDropdownItems() {
 function searchContract() {
   if (contractSearch.value) {
     if (primeSearch.value) {
-      filteredEmployees.value = _.filter(employeesInfo.value, (employee) => {
+      filteredEmployees.value = _filter(employeesInfo.value, (employee) => {
         if (employee.contractNames) {
           return (
             employee.contractNames.split(' & ').findIndex((element) => element.includes(contractSearch.value)) > -1 &&
@@ -337,11 +340,11 @@ function searchContract() {
         } else return false;
       });
     } else if (contractSearch.value === noContractPlaceholder.value) {
-      filteredEmployees.value = _.filter(employeesInfo.value, (employee) => {
+      filteredEmployees.value = _filter(employeesInfo.value, (employee) => {
         return !employee.contractNames;
       });
     } else {
-      filteredEmployees.value = _.filter(employeesInfo.value, (employee) => {
+      filteredEmployees.value = _filter(employeesInfo.value, (employee) => {
         if (employee.contractNames) {
           return (
             employee.contractNames.split(' & ').findIndex((element) => element.includes(contractSearch.value)) > -1
@@ -358,7 +361,7 @@ function searchContract() {
 function searchPrimes() {
   if (primeSearch.value) {
     if (contractSearch.value) {
-      filteredEmployees.value = _.filter(employeesInfo.value, (employee) => {
+      filteredEmployees.value = _filter(employeesInfo.value, (employee) => {
         if (employee.primeNames) {
           return (
             employee.contractNames.split(' & ').findIndex((element) => element.includes(contractSearch.value)) > -1 &&
@@ -367,7 +370,7 @@ function searchPrimes() {
         } else return false;
       });
     } else {
-      filteredEmployees.value = _.filter(employeesInfo.value, (employee) => {
+      filteredEmployees.value = _filter(employeesInfo.value, (employee) => {
         if (employee.primeNames) {
           return employee.primeNames.split(' & ').findIndex((element) => element.includes(primeSearch.value)) > -1;
         } else return false;

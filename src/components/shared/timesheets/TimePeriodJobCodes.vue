@@ -71,7 +71,9 @@
 <script setup>
 import { onBeforeMount, onBeforeUnmount, inject, ref } from 'vue';
 import { formatNumber, openLink } from '@/utils/utils';
-import _ from 'lodash';
+import _cloneDeep from 'lodash/cloneDeep';
+import _isEmpty from 'lodash/isEmpty';
+import _findIndex from 'lodash/findIndex';
 import api from '@/shared/api';
 import AddJobCode from '@/components/shared/timesheets/AddJobCode';
 import { useStore } from 'vuex';
@@ -116,14 +118,14 @@ onBeforeUnmount(() => {
  */
 async function deleteJobCode(jobcode) {
   let attribute = 'legacyJobCodes';
-  let emp = _.cloneDeep(props.employee);
+  let emp = _cloneDeep(props.employee);
   delete emp[attribute][jobcode];
-  if (_.isEmpty(emp[attribute])) emp[attribute] = null;
+  if (_isEmpty(emp[attribute])) emp[attribute] = null;
   let value = { id: emp.id, [`${attribute}`]: emp[attribute] };
   await api.updateAttribute(api.EMPLOYEES, value, attribute);
   // update store
   let employees = store.getters.employees;
-  let index = _.findIndex(employees, (e) => e.id === emp.id);
+  let index = _findIndex(employees, (e) => e.id === emp.id);
   employees[index] = emp;
 } // deleteJobCode
 

@@ -5,7 +5,7 @@
 </template>
 
 <script setup>
-import _ from 'lodash';
+import _first from 'lodash/first';
 import BarChart from '../base-charts/BarChart.vue';
 import { isEmpty } from '@/utils/utils';
 import { onMounted, ref, watch } from 'vue';
@@ -138,8 +138,8 @@ function fillData() {
       }
     },
     onClick: (x, y) => {
-      if (_.first(y)) {
-        let index = _.first(y).index;
+      if (_first(y)) {
+        let index = _first(y).index;
         localStorage.setItem('requestedDataType', 'foreignLanguages');
         localStorage.setItem('requestedFilter', chartData.value.labels[index]);
         router.push({

@@ -15,7 +15,9 @@
 
 <script setup>
 import PieChart from '../base-charts/PieChart.vue';
-import _ from 'lodash';
+import _forEach from 'lodash/forEach';
+import _isEmpty from 'lodash/isEmpty';
+import _first from 'lodash/first';
 import { onBeforeMount, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
@@ -69,7 +71,7 @@ function fetchData() {
   // tally up customer org experience for active employees
   employees.value.forEach((emp) => {
     if (emp.customerOrgExp && emp.workStatus != 0) {
-      _.forEach(emp.customerOrgExp, (org) => {
+      _forEach(emp.customerOrgExp, (org) => {
         let orgName = org.name;
         let orgYears = org.years;
         // We get whether or not we want to show current or past info
@@ -89,7 +91,7 @@ function fetchData() {
   let labels = Object.keys(allCompOrgExp);
   quantities.value = [];
 
-  _.forEach(labels, (label) => {
+  _forEach(labels, (label) => {
     quantities.value.push(allCompOrgExp[label]);
   });
   label.value = labels;
@@ -102,7 +104,7 @@ function fillData() {
   let text = '';
   let colors = [];
   let enabled = true;
-  if (_.isEmpty(quantities.value)) {
+  if (_isEmpty(quantities.value)) {
     text = 'No Customer Org Data Found';
     quantities.value.push(1);
     enabled = false;
@@ -133,7 +135,7 @@ function fillData() {
 
   option.value = {
     onClick: (x, y) => {
-      let index = _.first(y).index;
+      let index = _first(y).index;
       let labelClicked = chartData.value.labels[index];
       localStorage.setItem('requestedDataType', 'customerOrgs');
       localStorage.setItem('requestedFilter', labelClicked);

@@ -57,7 +57,11 @@
 </template>
 
 <script setup>
-import _ from 'lodash';
+import _filter from 'lodash/filter';
+import _sortBy from 'lodash/sortBy';
+import _some from 'lodash/some';
+import _forEach from 'lodash/forEach';
+import _uniqBy from 'lodash/uniqBy';
 import api from '@/shared/api.js';
 import AvailableBudgetSummary from '@/components/shared/AvailableBudgetSummary.vue';
 import { convertToMoneyString, getCurrentBudgetYear, isFullTime } from '@/utils/utils';
@@ -166,14 +170,14 @@ async function refreshBudget() {
   } else {
     // get existing budgets for the budget year being viewed
     existingBudgets = await api.getFiscalDateViewBudgets(props.employee.id, props.fiscalDateView);
-    existingBudgets = _.filter(existingBudgets, (e) => !!e);
+    existingBudgets = _filter(existingBudgets, (e) => !!e);
     budgetsVar = existingBudgets;
   }
 
   // remove inactive budgets
-  budgetsVar = _.filter(budgetsVar, (b) => {
+  budgetsVar = _filter(budgetsVar, (b) => {
     let budget = b.budgetObject;
-    return !_.some(
+    return !_some(
       props.expenseTypes,
       (e) =>
         e.id == b.expenseTypeId &&
@@ -187,12 +191,12 @@ async function refreshBudget() {
           ))
     );
   });
-  budgetsVar = _.sortBy(budgetsVar, (budget) => {
+  budgetsVar = _sortBy(budgetsVar, (budget) => {
     return budget.expenseTypeName;
   }); // sort by expense type name
 
   // prohibit overdraft if employee is not full time
-  _.forEach(budgetsVar, async (budget) => {
+  _forEach(budgetsVar, async (budget) => {
     if (!isFullTime(props.employee)) {
       budget.odFlag = false;
     }
@@ -203,10 +207,10 @@ async function refreshBudget() {
   });
 
   // filter out diplicate expense types
-  budgetsVar = _.uniqBy(budgetsVar, 'expenseTypeId');
+  budgetsVar = _uniqBy(budgetsVar, 'expenseTypeId');
 
   // remove any budgets where budget amount is 0 and 0 total expenses
-  budgets.value = _.filter(budgetsVar, (data) => {
+  budgets.value = _filter(budgetsVar, (data) => {
     let budget = data.budgetObject;
     return budget.amount != 0 || budget.reimbursedAmount != 0 || budget.pendingAmount != 0;
   });

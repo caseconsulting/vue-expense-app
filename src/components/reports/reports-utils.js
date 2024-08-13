@@ -1,11 +1,13 @@
-import _ from 'lodash';
+import _filter from 'lodash/filter';
+import _sortBy from 'lodash/sortBy';
+import _map from 'lodash/map';
 
 /**
  * Returns a filtered list of the input with all inactive
  * employees removed
  */
 export function getActive(employees) {
-  return _.filter(employees, (e) => {
+  return _filter(employees, (e) => {
     return e.workStatus > 0;
   });
 } // getActive
@@ -27,8 +29,8 @@ export function getFullName(item) {
  * @param empData - The list of employees
  */
 export function populateEmployeesDropdown(empData) {
-  return _.sortBy(
-    _.map(empData, (data) => {
+  return _sortBy(
+    _map(empData, (data) => {
       if (data && data.firstName && (data.nickname || data.lastName) && data.employeeNumber) {
         return {
           text: `${data.nickname || data.firstName} ${data.lastName}`,

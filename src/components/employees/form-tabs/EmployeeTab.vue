@@ -414,7 +414,19 @@
 </template>
 <script>
 import api from '@/shared/api.js';
-import _ from 'lodash';
+import _filter from 'lodash/filter';
+import _includes from 'lodash/includes';
+import _cloneDeep from 'lodash/cloneDeep';
+import _startCase from 'lodash/startCase';
+import _size from 'lodash/size';
+import _kebabCase from 'lodash/kebabCase';
+import _map from 'lodash/map';
+import _compact from 'lodash/compact';
+import _forEach from 'lodash/forEach';
+import _isArray from 'lodash/isArray';
+import _xor from 'lodash/xor';
+import _find from 'lodash/find';
+import _some from 'lodash/some';
 import {
   getAINRules,
   getDateRules,
@@ -489,14 +501,14 @@ async function created() {
   }
   this.populateJobRoleDropdown();
   // find an employees tags
-  this.employeeTags = _.filter(this.$store.getters.tags, (tag) => _.includes(tag.employees, this.model.id));
+  this.employeeTags = _filter(this.$store.getters.tags, (tag) => _includes(tag.employees, this.model.id));
   // using this field to determine if an api call to update tags is needed
-  this.employeeEditedTags = _.cloneDeep(this.employeeTags);
+  this.employeeEditedTags = _cloneDeep(this.employeeTags);
   // capitalize the employee role
-  this.employeeRoleFormatted = _.startCase(this.editedEmployee.employeeRole);
+  this.employeeRoleFormatted = _startCase(this.editedEmployee.employeeRole);
   // determine if employee has expenses
   this.hasExpenses = this.editedEmployee.id
-    ? _.size(await api.getAllEmployeeExpenses(this.editedEmployee.id)) > 0
+    ? _size(await api.getAllEmployeeExpenses(this.editedEmployee.id)) > 0
     : false;
 
   if (this.editedEmployee.workStatus != null) {
@@ -559,7 +571,7 @@ function combineEmailUsernameAndDomain() {
  * @return String - String in kebab case
  */
 function formatKebabCase(value) {
-  return _.kebabCase(value);
+  return _kebabCase(value);
 } // formatKebabCase
 
 /**
@@ -584,9 +596,9 @@ function isPartTime() {
  * Populates the job roles dropdown with employee data.
  */
 function populateJobRoleDropdown() {
-  let employeeJobTitles = _.map(this.employees, (e) => e.jobRole);
-  employeeJobTitles = _.compact(employeeJobTitles);
-  _.forEach(employeeJobTitles, (jobTitle) => this.jobTitles.push(jobTitle));
+  let employeeJobTitles = _map(this.employees, (e) => e.jobRole);
+  employeeJobTitles = _compact(employeeJobTitles);
+  _forEach(employeeJobTitles, (jobTitle) => this.jobTitles.push(jobTitle));
   this.jobTitles = Array.from(new Set(this.jobTitles)); // remove duplicates
   this.jobTitles?.sort();
 } // populateJobRoleDropdown
@@ -610,22 +622,22 @@ function thisIsMyProfile() {
 async function validateFields() {
   let errorCount = 0;
   //ensures that refs are put in an array so we can reuse forEach loop
-  let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
+  let components = !_isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
   await asyncForEach(components, async (field) => {
     if (field && (await field.validate()).length > 0) errorCount++;
   });
 
   // get symmetric difference of tags to determine which tags need to update
-  this.employeeEditedTags = _.xor(
-    _.map(this.employeeTags, (t) => t.id),
-    _.map(this.employeeEditedTags, (t) => t.id)
+  this.employeeEditedTags = _xor(
+    _map(this.employeeTags, (t) => t.id),
+    _map(this.employeeEditedTags, (t) => t.id)
   );
   // turn array of ids back into their original objects
-  this.employeeEditedTags = _.filter(this.$store.getters.tags, (tag) =>
-    _.find(this.employeeEditedTags, (t) => t === tag.id)
+  this.employeeEditedTags = _filter(this.$store.getters.tags, (tag) =>
+    _find(this.employeeEditedTags, (t) => t === tag.id)
   );
   // employee will be added to tags in EmployeeForm when all fields are successfully validated
-  this.editedEmployee.editedTags = _.cloneDeep(this.employeeEditedTags);
+  this.editedEmployee.editedTags = _cloneDeep(this.employeeEditedTags);
 
   // Fail safe in case users or interns somehow change their disabled info
   // Without this, they could change the html to change their data
@@ -669,7 +681,7 @@ function duplicateEmployeeNum() {
  * watcher for model.id - update the edited employee with the new model.
  */
 function watchModelID() {
-  this.editedEmployee = _.cloneDeep(this.model);
+  this.editedEmployee = _cloneDeep(this.model);
 } // watchModelID
 
 /**
@@ -677,7 +689,7 @@ function watchModelID() {
  */
 function watchEditedEmployeeEmployeeRole() {
   if (this.editedEmployee.employeeRole != 'User') {
-    this.employeeRoleFormatted = _.startCase(this.editedEmployee.employeeRole);
+    this.employeeRoleFormatted = _startCase(this.editedEmployee.employeeRole);
   }
 } // watchEditedEmployeeEmployeeRole
 
@@ -697,7 +709,7 @@ function watchEditedEmployeeDeptDate() {
  */
 async function watchEditedEmployeeHireDate() {
   this.hasExpenses = this.editedEmployee.id
-    ? _.size(await api.getAllEmployeeExpenses(this.editedEmployee.id)) > 0
+    ? _size(await api.getAllEmployeeExpenses(this.editedEmployee.id)) > 0
     : false;
   this.hireDateFormatted = this.format(this.editedEmployee.hireDate, null, 'MM/DD/YYYY') || this.hireDateFormatted;
   //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
@@ -806,7 +818,7 @@ export default {
       agencyIdentificationNumber: '',
       deptDateFormatted: null, // formatted departure date
       departureMenu: false, // display depature menu
-      editedEmployee: _.cloneDeep(this.model), //employee that can be edited
+      editedEmployee: _cloneDeep(this.model), //employee that can be edited
       emailUsername: '',
       emailRules: [
         (v) => !this.isEmpty(v) || 'Email is required',
@@ -823,7 +835,7 @@ export default {
       loading: true,
       duplicateEmployeeNumberRule: [
         (v) => {
-          this.duplicate = _.some(
+          this.duplicate = _some(
             this.employees,
             (e) => e.employeeNumber === Number(v) && e.employeeNumber !== this.userId
           );

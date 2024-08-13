@@ -125,7 +125,9 @@
 <script>
 import { userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
 import employeeUtils from '@/shared/employeeUtils';
-import _ from 'lodash';
+import _filter from 'lodash/filter';
+import _includes from 'lodash/includes';
+import _startCase from 'lodash/startCase';
 import { isEmpty, monthDayYearFormat } from '@/utils/utils';
 import SensitiveDataField from '../SensitiveDataField.vue';
 
@@ -229,7 +231,7 @@ function declinedExtraText() {
  * @return Array - The list of tags an employee is in
  */
 function getEmployeeTags() {
-  return _.filter(this.$store.getters.tags, (tag) => _.includes(tag.employees, this.model.id));
+  return _filter(this.$store.getters.tags, (tag) => _includes(tag.employees, this.model.id));
 } // getEmployeeTags
 
 // |--------------------------------------------------|
@@ -279,7 +281,7 @@ function getWorkStatus(workStatus) {
  * @return string - capitalized string
  */
 function startCase(value) {
-  return _.startCase(value);
+  return _startCase(value);
 } // startCase
 
 // |--------------------------------------------------|

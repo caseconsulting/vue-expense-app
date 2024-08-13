@@ -134,7 +134,8 @@
 </template>
 
 <script setup>
-import _ from 'lodash';
+import _isNil from 'lodash/isNil';
+import _filter from 'lodash/filter';
 import AnniversariesModal from './AnniversariesModal.vue';
 import { inject, ref } from 'vue';
 
@@ -178,7 +179,7 @@ function filterEvents() {
       activeFilters.value.push(event);
     }
   });
-  var filteredEvents = _.filter(props.events, (event) => activeFilters.value.some((f) => f.type === event.type));
+  var filteredEvents = _filter(props.events, (event) => activeFilters.value.some((f) => f.type === event.type));
   return filteredEvents;
 } // filterEvents
 
@@ -189,12 +190,12 @@ function filterEvents() {
  * @return String - basecamp url
  */
 function getURL(item) {
-  if (!_.isNil(item.newCampfire)) return item.newCampfire;
-  else if (!_.isNil(item.congratulateCampfire)) return item.congratulateCampfire;
-  else if (!_.isNil(item.birthdayCampfire)) return item.birthdayCampfire;
-  else if (!_.isNil(item.campfire)) return item.campfire;
-  else if (!_.isNil(item.eventScheduled)) return item.eventScheduled;
-  else if (!_.isNil(item.basecampLink)) return item.basecampLink;
+  if (!_isNil(item.newCampfire)) return item.newCampfire;
+  else if (!_isNil(item.congratulateCampfire)) return item.congratulateCampfire;
+  else if (!_isNil(item.birthdayCampfire)) return item.birthdayCampfire;
+  else if (!_isNil(item.campfire)) return item.campfire;
+  else if (!_isNil(item.eventScheduled)) return item.eventScheduled;
+  else if (!_isNil(item.basecampLink)) return item.basecampLink;
 } // getURL
 
 /**

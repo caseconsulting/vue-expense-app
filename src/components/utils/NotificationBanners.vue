@@ -42,7 +42,10 @@ import api from '@/shared/api.js';
 import { add, format, getTodaysDate, isBefore } from '@/shared/dateUtils';
 import { updateStoreExpenseTypes } from '@/utils/storeUtils';
 import { asyncForEach, isMobile, isSmallScreen, userRoleIsIntern } from '@/utils/utils.js';
-import _ from 'lodash';
+import _filter from 'lodash/filter';
+import _map from 'lodash/map';
+import _forEach from 'lodash/forEach';
+import _find from 'lodash/find';
 import { onBeforeMount, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -171,11 +174,11 @@ async function checkReimbursements() {
     !store.getters.expenseTypes ? updateStoreExpenseTypes() : ''
   ]);
 
-  let activeExpenseTypes = _.filter(store.getters.expenseTypes, (t) => {
+  let activeExpenseTypes = _filter(store.getters.expenseTypes, (t) => {
     return !t.isInactive;
   });
-  let expenseTypes = _.map(activeExpenseTypes, 'id');
-  expenses = _.filter(expenses, (e) => {
+  let expenseTypes = _map(activeExpenseTypes, 'id');
+  expenses = _filter(expenses, (e) => {
     return expenseTypes.includes(e.expenseTypeId);
   });
   let reimbusementsCount = 0;
@@ -190,7 +193,7 @@ async function checkReimbursements() {
         reimbusementsCount++;
         expense.reimbursementWasSeen = true;
         // if expense doesnt have reciept and expense type requires a reciept then set reciept to a dummy reciept
-        let expenseType = _.filter(activeExpenseTypes, (t) => {
+        let expenseType = _filter(activeExpenseTypes, (t) => {
           return t.id == expense.expenseTypeId;
         })[0];
         if (!expense.receipt && expenseType.requiredFlag) {
@@ -229,12 +232,12 @@ async function checkReimbursements() {
  */
 async function checkPtoCashOuts() {
   let cashOuts = await api.getEmployeePtoCashOuts(user.value.id);
-  let unseenApprovedCashOuts = _.filter(cashOuts, (c) => c.approvedDate && !c.approvalWasSeen);
+  let unseenApprovedCashOuts = _filter(cashOuts, (c) => c.approvedDate && !c.approvalWasSeen);
 
   if (unseenApprovedCashOuts && unseenApprovedCashOuts.length > 0) {
     let promises = [];
     let cashOutAmount = 0;
-    _.forEach(unseenApprovedCashOuts, async (cashOut) => {
+    _forEach(unseenApprovedCashOuts, async (cashOut) => {
       // determines if a user has an unseen cash out approval
       if (!cashOut.approvalWasSeen && cashOut.approvedDate) {
         cashOutAmount += cashOut.amount;
@@ -294,7 +297,7 @@ async function handleMarkSeen(type, item, id) {
   let cert;
   switch (type) {
     case 'certification':
-      cert = _.find(user.value.certifications, (c) => {
+      cert = _find(user.value.certifications, (c) => {
         return c === item;
       });
       cert.expirationWasSeen = true;

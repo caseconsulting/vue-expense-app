@@ -114,7 +114,8 @@
 
 <script>
 import { getRole } from '@/utils/auth';
-import _ from 'lodash';
+import _isNil from 'lodash/isNil';
+import _isEqual from 'lodash/isEqual';
 import AwardsTab from '@/components/employees/info-tabs/AwardsTab';
 import CertificationsTab from '@/components/employees/info-tabs/CertificationsTab';
 import ClearanceTab from '@/components/employees/info-tabs/ClearanceTab';
@@ -143,7 +144,7 @@ function hasAdminPermissions() {
  * @return boolean - user is the employee displayed
  */
 function userIsEmployee() {
-  return !_.isNil(this.model) && !_.isNil(this.user) ? this.user.employeeNumber === this.model.employeeNumber : false;
+  return !_isNil(this.model) && !_isNil(this.user) ? this.user.employeeNumber === this.model.employeeNumber : false;
 } // userIsEmployee
 
 /**
@@ -217,7 +218,7 @@ function parsedInfoTab() {
 function watchInfoTab(val) {
   // track current tab when switching between info and form
   if (this.afterCreate) {
-    if (!_.isEqual(val, this.currentTab)) {
+    if (!_isEqual(val, this.currentTab)) {
       this.emitter.emit('tabChange', val);
     }
   }

@@ -35,7 +35,11 @@
 <script setup>
 import api from '@/shared/api.js';
 import pattern from 'patternomaly';
-import _ from 'lodash';
+import _forEach from 'lodash/forEach';
+import _some from 'lodash/some';
+import _filter from 'lodash/filter';
+import _first from 'lodash/first';
+import _isEmpty from 'lodash/isEmpty';
 import BarChart from '@/components/charts/base-charts/BarChart.vue';
 import { isFullTime, getCurrentBudgetYear } from '@/utils/utils';
 import { getYear, isBetween } from '@/shared/dateUtils';
@@ -96,7 +100,7 @@ const budget = computed(() => {
   let odUnreimbursed = []; // pending overdraft amount
   if (expenseTypeData.value !== undefined) {
     let expenseTypes = expenseTypeData.value;
-    _.forEach(expenseTypes, (expenseType) => {
+    _forEach(expenseTypes, (expenseType) => {
       if (selectedBudgets.value.includes(expenseType.expenseTypeName)) {
         budgetNames.push(expenseType.expenseTypeName);
         let budget = expenseType.budgetObject;
@@ -237,8 +241,8 @@ function drawGraph() {
       }
     },
     onClick: (x, y) => {
-      if (_.first(y)) {
-        let index = _.first(y).index;
+      if (_first(y)) {
+        let index = _first(y).index;
         // redirect to expenses page
         localStorage.setItem(
           'requestedFilter',
@@ -338,15 +342,15 @@ async function refreshBudgets() {
   } else {
     // get existing budgets for the budget year being viewed
     let existingBudgets = await api.getFiscalDateViewBudgets(props.employee.id, props.fiscalDateView);
-    existingBudgets = _.filter(existingBudgets, (e) => !!e);
+    existingBudgets = _filter(existingBudgets, (e) => !!e);
 
     budgetsVar = existingBudgets;
   }
   // remove inactive budgets (exception: there contains a pending expense under that budget)
-  budgetsVar = _.filter(budgetsVar, (b) => {
+  budgetsVar = _filter(budgetsVar, (b) => {
     let budget = b.budgetObject;
     return (
-      !_.some(
+      !_some(
         props.expenseTypes,
         (e) =>
           e.id == budget.expenseTypeId &&
@@ -358,19 +362,19 @@ async function refreshBudgets() {
               'year',
               '[]'
             ))
-      ) || _.some(props.expenses, (e) => e.expenseTypeId == budget.expenseTypeId && _.isEmpty(e.reimbursedDate))
+      ) || _some(props.expenses, (e) => e.expenseTypeId == budget.expenseTypeId && _isEmpty(e.reimbursedDate))
     );
   });
 
   // prohibit overdraft if employee is not full time
-  _.forEach(budgetsVar, async (budget) => {
+  _forEach(budgetsVar, async (budget) => {
     if (!isFullTime(props.employee)) {
       budget.odFlag = false;
     }
   });
 
   // remove any budgets where budget amount is 0 and 0 total expenses
-  expenseTypeData.value = _.filter(budgetsVar, (data) => {
+  expenseTypeData.value = _filter(budgetsVar, (data) => {
     let budget = data.budgetObject;
     return budget.amount != 0 || budget.reimbursedAmount != 0 || budget.pendingAmount != 0;
   });

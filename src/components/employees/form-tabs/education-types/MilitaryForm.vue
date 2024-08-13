@@ -108,7 +108,8 @@
 </template>
 
 <script>
-import _ from 'lodash';
+import _isArray from 'lodash/isArray';
+import _cloneDeep from 'lodash/cloneDeep';
 import { mask } from 'vue-the-mask';
 import { getDateMonthYearOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
 import { format, isBefore } from '@/shared/dateUtils';
@@ -159,7 +160,7 @@ function parseEventDate() {
 async function validateFields() {
   let errorCount = 0;
   //ensures that refs are put in an array so we can reuse forEach loop
-  let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
+  let components = !_isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
   await asyncForEach(components, async (field) => {
     if (field && (await field.validate()).length > 0) errorCount++;
   });
@@ -221,7 +222,7 @@ export default {
   data() {
     return {
       dodForces: ['Army', 'Marine Corps', 'Navy', 'Air Force', 'Space Force', 'Coast Guard', 'National Guard'], // subject to change per Paul
-      military: { ..._.cloneDeep(this.$props.service), showStartMenu: false, showCompleteMenu: false }
+      military: { ..._cloneDeep(this.$props.service), showStartMenu: false, showCompleteMenu: false }
     };
   },
   watch: {

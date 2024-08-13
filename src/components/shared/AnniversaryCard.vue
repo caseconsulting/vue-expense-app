@@ -39,7 +39,11 @@
 <script setup>
 import { ref, computed, onBeforeUnmount, inject, onBeforeMount } from 'vue';
 import BudgetSelectModal from '@/components/modals/BudgetSelectModal.vue';
-import _ from 'lodash';
+import _uniqBy from 'lodash/uniqBy';
+import _map from 'lodash/map';
+import _filter from 'lodash/filter';
+import _reverse from 'lodash/reverse';
+import _sortBy from 'lodash/sortBy';
 import api from '@/shared/api.js';
 import { getCurrentBudgetYear } from '@/utils/utils';
 import {
@@ -200,7 +204,7 @@ async function loadData() {
 function refreshBudgetYears() {
   let tempBudgetYears = [];
   // push all employee budget years
-  let budgetDates = _.uniqBy(_.map(allUserBudgets.value, 'fiscalStartDate'));
+  let budgetDates = _uniqBy(_map(allUserBudgets.value, 'fiscalStartDate'));
   budgetDates.forEach((date) => {
     const [year] = date.split('-');
     tempBudgetYears.push(parseInt(year));
@@ -209,9 +213,9 @@ function refreshBudgetYears() {
   let [currYear] = getCurrentBudgetYear(hireDate.value).split('-');
   tempBudgetYears.push(parseInt(currYear));
   // remove duplicate years and filter to include only active and previous years
-  tempBudgetYears = _.filter(_.uniqBy(tempBudgetYears), (year) => {
+  tempBudgetYears = _filter(_uniqBy(tempBudgetYears), (year) => {
     return parseInt(year) <= parseInt(currYear);
   });
-  budgetYears.value = _.reverse(_.sortBy(tempBudgetYears)); // sort budgets from current to past
+  budgetYears.value = _reverse(_sortBy(tempBudgetYears)); // sort budgets from current to past
 } // refreshBudgetYears
 </script>

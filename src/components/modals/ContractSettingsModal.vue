@@ -61,7 +61,9 @@
 </template>
 
 <script setup>
-import _ from 'lodash';
+import _cloneDeep from 'lodash/cloneDeep';
+import _findIndex from 'lodash/findIndex';
+import _set from 'lodash/set';
 import api from '@/shared/api.js';
 import { inject, onMounted, ref, watch } from 'vue';
 import { useStore } from 'vuex';
@@ -79,7 +81,7 @@ const store = useStore();
 
 const loading = ref(false);
 const activate = ref(false);
-const model = ref(_.cloneDeep(props.contract));
+const model = ref(_cloneDeep(props.contract));
 const timesheetsContractViewOptions = ref({
   0: {
     title: 'Employee current project start date',
@@ -113,7 +115,7 @@ onMounted(() => {
 watch(
   () => props.toggleModal,
   () => {
-    model.value = _.cloneDeep(props.contract);
+    model.value = _cloneDeep(props.contract);
     activate.value = props.toggleModal;
   }
 );
@@ -132,8 +134,8 @@ async function save() {
   let data = { id: props.contract.id, settings: model.value.settings };
   await api.updateAttribute(api.CONTRACTS, data, 'settings');
   let contracts = store.getters.contracts;
-  let i = _.findIndex(contracts, (c) => c.id === model.value.id);
-  contracts[i] = _.cloneDeep(model.value);
+  let i = _findIndex(contracts, (c) => c.id === model.value.id);
+  contracts[i] = _cloneDeep(model.value);
   store.dispatch('setContracts', { contracts });
   emitter.emit('closed-contract-settings-modal');
   loading.value = false;
@@ -146,7 +148,7 @@ async function save() {
  * @param {Number} key - The timesheetsContractViewOptions key
  */
 function updateSettings(__, key) {
-  _.set(
+  _set(
     model.value,
     'settings.timesheetsContractViewOption',
     model.value.settings?.timesheetsContractViewOption === key ? null : key

@@ -13,7 +13,7 @@
 </template>
 
 <script setup>
-import _ from 'lodash';
+import _first from 'lodash/first';
 import BarChart from '../base-charts/BarChart.vue';
 import DownloadCSV from '@/components/utils/DownloadCSV.vue';
 import { userRoleIsAdmin } from '@/utils/utils';
@@ -163,8 +163,8 @@ function fillCertData() {
       }
     },
     onClick: (x, y) => {
-      if (_.first(y)) {
-        let index = _.first(y).index;
+      if (_first(y)) {
+        let index = _first(y).index;
         let label = Array.isArray(chartData.value.labels[index])
           ? chartData.value.labels[index].join(' ')
           : chartData.value.labels[index];
