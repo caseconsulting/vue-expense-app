@@ -1,5 +1,5 @@
 <template>
-  <v-form ref="form" v-model="valid" validate-on="lazy">
+  <div>
     <v-row>
       <!-- Left side of the edit page -->
       <v-col :cols="!isMobile() ? '5' : '12'">
@@ -311,7 +311,7 @@
         </v-btn>
       </v-col>
     </v-row>
-  </v-form>
+  </div>
 </template>
 
 <script setup>
@@ -322,11 +322,14 @@ import {
   getDuplicateCompanyNameRule,
   getRequiredRules
 } from '@/shared/validationUtils';
-import { isEmpty, map, compact, forEach } from 'lodash';
-import { inject, onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue';
+import { isMobile } from '@/utils/utils';
+import _compact from 'lodash/compact';
+import _forEach from 'lodash/forEach';
+import _isEmpty from 'lodash/isEmpty';
+import _map from 'lodash/map';
+import { inject, onBeforeUnmount, onMounted, ref } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
-import { isMobile } from '@/utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -338,22 +341,14 @@ const store = useStore();
 const emitter = inject('emitter');
 const vMask = mask; // custom directive
 
-const editedEmployee = defineModel({ required: true });
-const valid = defineModel('valid', { required: true });
-const form = ref(null); // template ref
+// passes in all slot props as a single object
+const { slotProps } = defineProps(['slotProps']);
+const editedEmployee = ref(slotProps.editedEmployee);
 
 const editedCompanies = ref(editedEmployee.value.companies);
 const companyDropDown = ref([]);
 
 populateDropDowns();
-
-let stopPrepare = false;
-const onDiscardEdits = (employee) => {
-  stopPrepare = true;
-  editedEmployee.value = employee;
-};
-
-defineExpose({ prepareSubmit });
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -361,14 +356,12 @@ defineExpose({ prepareSubmit });
 // |                                                  |
 // |--------------------------------------------------|
 
-onBeforeMount(() => {
-  emitter.on('discard-edits', onDiscardEdits);
+onMounted(() => {
+  emitter.emit('edit-tab-opened', { name: 'jobExperience', value: { prepareSubmit } });
 });
 
-onMounted(validate);
-
 onBeforeUnmount(() => {
-  emitter.off('discard-edits', onDiscardEdits);
+  emitter.emit('edit-tab-closed', { name: 'jobExperience' });
 });
 
 onBeforeUnmount(prepareSubmit);
@@ -380,12 +373,12 @@ onBeforeUnmount(prepareSubmit);
 // |--------------------------------------------------|
 
 async function prepareSubmit() {
-  if (!stopPrepare) {
-    await validate();
+  if (!slotProps.stopPrepare) {
+    await slotProps.validate();
 
     // delete properties from positions that should not be stored in the database
-    editedEmployee.value.companies = map(editedCompanies.value, (company) => {
-      company.positions = map(company.positions, (position) => {
+    editedEmployee.value.companies = _map(editedCompanies.value, (company) => {
+      company.positions = _map(company.positions, (position) => {
         delete position.showStartMenu;
         delete position.showEndMenu;
         return position;
@@ -395,22 +388,13 @@ async function prepareSubmit() {
   }
 }
 
-async function validate() {
-  if (form.value) {
-    const result = await form.value.validate();
-    emitter.emit('validating', { tab: 'jobExperience', valid: result.valid });
-    return result;
-  }
-  return null;
-}
-
 /**
  * Rule that specifies that the end date is present if job is not currently active
  * @param position The position object
  */
 function getEndDatePresentRule(position) {
   return () => {
-    if (!position.presentDate && isEmpty(position.endDate)) return 'End Date is required';
+    if (!position.presentDate && _isEmpty(position.endDate)) return 'End Date is required';
     else return true;
   };
 }
@@ -517,7 +501,7 @@ function deletePosition(compIndex, posIndex) {
  * @return String - 'Month YYYY' - 'Month YYYY' date range
  */
 function formatRange(range) {
-  if (isEmpty(range)) {
+  if (_isEmpty(range)) {
     return null;
   }
   let start = format(range[0], null, 'YYYY-MM');
@@ -550,12 +534,12 @@ function parseEventDate() {
  * Populate drop downs with information that other employees have filled out.
  */
 function populateDropDowns() {
-  let employeesJobs = map(store.getters.employees, (employee) => employee.companies); //extract jobs
-  employeesJobs = compact(employeesJobs); //remove falsey values
+  let employeesJobs = _map(store.getters.employees, (employee) => employee.companies); //extract jobs
+  employeesJobs = _compact(employeesJobs); //remove falsey values
   // loop employees
-  forEach(employeesJobs, (jobs) => {
+  _forEach(employeesJobs, (jobs) => {
     // loop jobs
-    forEach(jobs, (job) => {
+    _forEach(jobs, (job) => {
       companyDropDown.value.push(job.companyName); // add company name
     });
   });

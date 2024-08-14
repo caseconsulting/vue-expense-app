@@ -1,6 +1,6 @@
 <template>
-  <v-form ref="form" v-model="valid" validate-on="lazy">
-    <v-row class="mt-2"><h3>Tech and Skills</h3></v-row>
+  <div>
+    <v-row><h3>Tech and Skills</h3></v-row>
     <v-row>
       <v-col class="d-flex justify-center">
         <v-btn prepend-icon="mdi-plus" @click="addTechnology()">Add Tech/Skill</v-btn>
@@ -103,15 +103,17 @@
         <v-btn prepend-icon="mdi-plus" @click="addTechnology(false)">Add Tech/Skill</v-btn>
       </v-col>
     </v-row>
-  </v-form>
+  </div>
 </template>
 
 <script setup>
 import api from '@/shared/api';
 import { getDuplicateTechRules, getRequiredRules } from '@/shared/validationUtils';
 import { isMobile } from '@/utils/utils';
-import { isEmpty, isEqual, map } from 'lodash';
-import { inject, onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue';
+import _isEmpty from 'lodash/isEmpty';
+import _isEqual from 'lodash/isEqual';
+import _map from 'lodash/map';
+import { inject, onBeforeUnmount, onMounted, ref } from 'vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -121,26 +123,21 @@ import { inject, onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue';
 
 const emitter = inject('emitter');
 
-const editedEmployee = defineModel({ required: true });
-const valid = defineModel('valid', { required: true });
-const form = ref(null); // template ref
-
+// passes in all slot props as a single object
+const { slotProps } = defineProps(['slotProps']);
+const editedEmployee = ref(slotProps.editedEmployee);
 const editedTechnologies = ref(
-  map(editedEmployee.value.technologies, (value) => {
+  _map(slotProps.editedEmployee.technologies, (value) => {
     // adds a 'time' key to each technology, containing an integer value for both years and months
     // omits the 'years' key as the time key replaces it
-    return { name: value.name, time: getYearsAndMonths(value.years), current: value.current };
+    return {
+      name: value.name,
+      time: getYearsAndMonths(value.years),
+      current: value.current
+    };
   })
 );
 const dropdownItems = ref([]);
-
-let stopPrepare = false;
-const onDiscardEdits = (employee) => {
-  stopPrepare = true;
-  editedEmployee.value = employee;
-};
-
-defineExpose({ prepareSubmit });
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -148,27 +145,14 @@ defineExpose({ prepareSubmit });
 // |                                                  |
 // |--------------------------------------------------|
 
-onBeforeMount(() => {
-  emitter.on('discard-edits', onDiscardEdits);
+onMounted(() => {
+  emitter.emit('edit-tab-opened', { name: 'technologies', value: { prepareSubmit } });
 });
-
-onMounted(validate);
 
 onBeforeUnmount(() => {
-  emitter.off('discard-edits', onDiscardEdits);
+  emitter.emit('edit-tab-closed', { name: 'technologies' });
 });
 
-onBeforeMount(() => {
-  emitter.on('discard-edits', onDiscardEdits);
-});
-
-onMounted(validate);
-
-onBeforeUnmount(() => {
-  emitter.off('discard-edits', onDiscardEdits);
-});
-
-onMounted(validate);
 onBeforeUnmount(prepareSubmit);
 
 // |--------------------------------------------------|
@@ -178,18 +162,19 @@ onBeforeUnmount(prepareSubmit);
 // |--------------------------------------------------|
 
 async function prepareSubmit() {
-  if (!stopPrepare) {
-    await validate();
+  if (!slotProps.stopPrepare) {
+    await slotProps.validate();
 
-    editedEmployee.value.technologies = map(editedTechnologies.value, (value) => {
+    editedEmployee.value.technologies = _map(editedTechnologies.value, (value) => {
       // use old time if same years and months to prevent changing time by less than 1 month increments
       let newYears = Number(value.time.years) + Number(value.time.months) / 12;
       let oldYears = editedEmployee.value.technologies.find((t) => t.name === value.name)?.years;
-      let years = isEqual(getYearsAndMonths(newYears), getYearsAndMonths(Number(oldYears)))
+      let years = _isEqual(getYearsAndMonths(newYears), getYearsAndMonths(Number(oldYears)))
         ? oldYears
         : Number(value.time.months) // store integer year for 0 months
           ? newYears.toFixed(2)
           : Number(newYears);
+
       return {
         name: value.name,
         years,
@@ -197,15 +182,6 @@ async function prepareSubmit() {
       };
     });
   }
-}
-
-async function validate() {
-  if (form.value) {
-    const result = await form.value.validate();
-    emitter.emit('validating', { tab: 'technologies', valid: result.valid });
-    return result;
-  }
-  return null;
 }
 
 /**
@@ -229,7 +205,7 @@ function getYearsAndMonths(years) {
  * @param {string} query The search query
  */
 async function updateDropdownItems(query) {
-  if (!isEmpty(query)) {
+  if (!_isEmpty(query)) {
     try {
       let res = await api.getTechSkills(query);
       dropdownItems.value = res;

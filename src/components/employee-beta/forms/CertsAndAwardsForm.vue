@@ -1,5 +1,5 @@
 <template>
-  <v-form ref="form" v-model="valid" validate-on="lazy">
+  <div>
     <v-row>
       <!-- Start Certifications -->
       <v-col>
@@ -171,19 +171,19 @@
       </v-col>
     </v-row>
     <!-- End Awards -->
-  </v-form>
+  </div>
 </template>
 
 <script setup>
 import { getTodaysDate } from '@/shared/dateUtils';
 import { getDateMonthYearRules, getDateOptionalRules, getDateRules, getRequiredRules } from '@/shared/validationUtils';
+import { isMobile } from '@/utils/utils';
 import _compact from 'lodash/compact';
 import _forEach from 'lodash/forEach';
 import _map from 'lodash/map';
 import _uniq from 'lodash/uniq';
-import { inject, onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue';
+import { onBeforeMount, ref } from 'vue';
 import { useStore } from 'vuex';
-import { isMobile } from '../../../utils/utils';
 import DatePickerField from '../../shared/edit-fields/DatePickerField.vue';
 
 // |--------------------------------------------------|
@@ -193,16 +193,13 @@ import DatePickerField from '../../shared/edit-fields/DatePickerField.vue';
 // |--------------------------------------------------|
 
 const store = useStore();
-const emitter = inject('emitter');
 
-const editedEmployee = defineModel({ required: true });
-const valid = defineModel('valid', { required: true });
-const form = ref(null); // template ref
+// passes in all slot props as a single object
+const { slotProps } = defineProps(['slotProps']);
+const editedEmployee = ref(slotProps.editedEmployee);
 
 const certificationDropDown = ref([]); // autocomplete certification name options
 const employees = store.getters.employees;
-
-defineExpose({ prepareSubmit });
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -211,36 +208,12 @@ defineExpose({ prepareSubmit });
 // |--------------------------------------------------|
 
 onBeforeMount(populateDropDowns);
-onMounted(prepareSubmit);
-onBeforeUnmount(prepareSubmit);
 
 // |--------------------------------------------------|
 // |                                                  |
 // |                      METHODS                     |
 // |                                                  |
 // |--------------------------------------------------|
-
-async function prepareSubmit() {
-  if (form.value) {
-    const result = await form.value.validate();
-
-    editedEmployee.value.awards.forEach((award) => {
-      delete award.showReceivedMenu;
-    });
-    editedEmployee.value.certifications.forEach((cert) => {
-      if (!cert.expirationDate) {
-        delete cert.expirationDate;
-        delete cert.expirationWasSeen;
-      }
-      delete cert.showExpirationMenu;
-      delete cert.showReceivedMenu;
-    });
-
-    emitter.emit('validating', { tab: 'certsAndAwards', valid: result.valid });
-    return result;
-  }
-  return null;
-}
 
 /**
  * Add an award.

@@ -1,5 +1,5 @@
 <template>
-  <v-form ref="form" v-model="valid" validate-on="lazy">
+  <div>
     <v-row v-for="(clearance, cIndex) in editedEmployee.clearances" :key="cIndex">
       <v-col>
         <v-row v-if="!isMobile()">
@@ -343,7 +343,7 @@
         <v-btn @click="addClearance()"><v-icon>mdi-plus</v-icon>Clearance</v-btn>
       </v-col>
     </v-row>
-  </v-form>
+  </div>
 </template>
 
 <script setup>
@@ -358,11 +358,13 @@ import {
   getDuplicateClearanceRules,
   getRequiredRules
 } from '@/shared/validationUtils';
-import _ from 'lodash';
-import { inject, onBeforeUnmount, onMounted, ref } from 'vue';
+import { isMobile } from '@/utils/utils';
+import _first from 'lodash/first';
+import _isEmpty from 'lodash/isEmpty';
+import _sortBy from 'lodash/sortBy';
+import { ref } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useDisplay } from 'vuetify/lib/framework.mjs';
-import { isMobile } from '../../../utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -370,41 +372,18 @@ import { isMobile } from '../../../utils/utils';
 // |                                                  |
 // |--------------------------------------------------|
 
-const ISOFORMAT = 'YYYY-MM-DD';
-
 const { name } = useDisplay();
-const emitter = inject('emitter');
 const vMask = mask; // custom directive
 
-const editedEmployee = defineModel({ required: true });
-const valid = defineModel('valid', { required: true });
-const form = ref(null); // template ref
-
-defineExpose({ prepareSubmit });
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                 LIFECYCLE HOOKS                  |
-// |                                                  |
-// |--------------------------------------------------|
-
-onMounted(prepareSubmit);
-onBeforeUnmount(prepareSubmit);
+// passes in all slot props as a single object
+const { slotProps } = defineProps(['slotProps']);
+const editedEmployee = ref(slotProps.editedEmployee);
 
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
-
-async function prepareSubmit() {
-  if (form.value) {
-    const result = await form.value.validate();
-    emitter.emit('validating', { tab: 'clearance', valid: result.valid });
-    return result;
-  }
-  return null;
-}
 
 /**
  * Adds a clearance.
@@ -476,13 +455,13 @@ function maxSubmission(cIndex) {
   }
 
   // check submission date is before any poly dates
-  if (!_.isEmpty(editedEmployee.value.clearances[cIndex].polyDates)) {
+  if (!_isEmpty(editedEmployee.value.clearances[cIndex].polyDates)) {
     // poly dates exist
-    let earliest = _.first(
+    let earliest = _first(
       // get earliest poly date
-      _.sortBy(editedEmployee.value.clearances[cIndex].polyDates, (date) => {
+      _sortBy(editedEmployee.value.clearances[cIndex].polyDates, (date) => {
         // sort poly dates
-        return format(date, null, ISOFORMAT);
+        return format(date, null, DEFAULT_ISOFORMAT);
       })
     );
 
@@ -493,13 +472,13 @@ function maxSubmission(cIndex) {
   }
 
   // check submission date is before any adjudication dates
-  if (!_.isEmpty(editedEmployee.value.clearances[cIndex].adjudicationDates)) {
+  if (!_isEmpty(editedEmployee.value.clearances[cIndex].adjudicationDates)) {
     // adjudication dates exist
-    let earliest = _.first(
+    let earliest = _first(
       // get earliest adjudication date
-      _.sortBy(editedEmployee.value.clearances[cIndex].adjudicationDates, (date) => {
+      _sortBy(editedEmployee.value.clearances[cIndex].adjudicationDates, (date) => {
         // sort adjudication dates
-        return format(date, null, ISOFORMAT);
+        return format(date, null, DEFAULT_ISOFORMAT);
       })
     );
     if (isBefore(earliest, max)) {
@@ -508,7 +487,7 @@ function maxSubmission(cIndex) {
     }
   }
 
-  return max ? format(max, null, ISOFORMAT) : null;
+  return max ? format(max, null, DEFAULT_ISOFORMAT) : null;
 } // maxSubmission
 
 /**
