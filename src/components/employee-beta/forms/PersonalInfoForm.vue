@@ -448,6 +448,7 @@
 <script setup>
 import { JOB_TITLES } from '@/components/employees/form-tabs/dropdown-info/jobTitles';
 import PrivateButton from '@/components/shared/edit-fields/PrivateButton.vue';
+import { usePrepareSubmit } from '@/composables/editTabCommunication';
 import api from '@/shared/api';
 import { format, isSame } from '@/shared/dateUtils';
 import { CASE_EMAIL_DOMAIN, EMPLOYEE_ROLES, PHONE_TYPES } from '@/shared/employeeUtils';
@@ -475,7 +476,7 @@ import _lowerCase from 'lodash/lowerCase';
 import _some from 'lodash/some';
 import _startCase from 'lodash/startCase';
 import _xorBy from 'lodash/xor';
-import { computed, inject, onBeforeMount, onBeforeUnmount, onMounted, readonly, ref, watch } from 'vue';
+import { computed, inject, onBeforeMount, onBeforeUnmount, readonly, ref, watch } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
 import EEOComplianceEditModal from '../modals/EEOComplianceEditModal.vue';
@@ -525,6 +526,8 @@ const predictions = ref({}); // for POB autocomplete
 const toggleForm = ref(false); // for EEO data
 const phoneAutofocus = ref(false);
 
+usePrepareSubmit('personal', prepareSubmit);
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -537,17 +540,9 @@ onBeforeMount(async () => {
   });
 });
 
-onMounted(() => {
-  // provides access to the prepareSubmit method to EmployeeForm
-  emitter.emit('edit-tab-opened', { name: 'personal', value: { prepareSubmit } });
-});
-
 onBeforeUnmount(() => {
-  emitter.emit('edit-tab-closed', { name: 'personal' });
   emitter.off('confirmed-cancel-eeo');
 });
-
-onBeforeUnmount(prepareSubmit);
 
 // |--------------------------------------------------|
 // |                                                  |

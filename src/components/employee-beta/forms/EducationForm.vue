@@ -102,8 +102,9 @@
 </template>
 
 <script setup>
+import { usePrepareSubmit } from '@/composables/editTabCommunication';
 import _map from 'lodash/map';
-import { computed, inject, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, ref } from 'vue';
 import HighSchoolForm from './education-forms/HighSchoolForm.vue';
 import MilitaryForm from './education-forms/MilitaryForm.vue';
 import UniversityForm from './education-forms/UniversityForm.vue';
@@ -120,8 +121,6 @@ const EDU_TYPES = [
   { display: 'High School', value: 'highSchool' }
 ];
 
-const emitter = inject('emitter');
-
 // passes in all slot props as a single object
 const props = defineProps(['slotProps', 'allowAdditions']);
 const slotProps = props.slotProps;
@@ -134,21 +133,7 @@ const editedEducation = ref(
   })
 ); // stores edited education info
 
-// |--------------------------------------------------|
-// |                                                  |
-// |                 LIFECYCLE HOOKS                  |
-// |                                                  |
-// |--------------------------------------------------|
-
-onMounted(() => {
-  emitter.emit('edit-tab-opened', { name: 'education', value: { prepareSubmit } });
-});
-
-onBeforeUnmount(() => {
-  emitter.emit('edit-tab-closed', { name: 'education' });
-});
-
-onBeforeUnmount(prepareSubmit);
+usePrepareSubmit('education', prepareSubmit);
 
 // |--------------------------------------------------|
 // |                                                  |

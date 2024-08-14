@@ -609,7 +609,7 @@ async function selectTab() {
     case 'Languages':
     case 'Foreign Languages':
       num = 5;
-      card = 'Languages';
+      card = 'Foreign Languages';
       break;
     case 'Job Experience':
     case 'Job Experience & Education':

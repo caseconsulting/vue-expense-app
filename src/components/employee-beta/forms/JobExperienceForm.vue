@@ -315,6 +315,7 @@
 </template>
 
 <script setup>
+import { usePrepareSubmit } from '@/composables/editTabCommunication';
 import { format, getTodaysDate, isAfter } from '@/shared/dateUtils';
 import {
   getDateMonthYearOptionalRules,
@@ -327,7 +328,7 @@ import _compact from 'lodash/compact';
 import _forEach from 'lodash/forEach';
 import _isEmpty from 'lodash/isEmpty';
 import _map from 'lodash/map';
-import { inject, onBeforeUnmount, onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
 
@@ -338,7 +339,6 @@ import { useStore } from 'vuex';
 // |--------------------------------------------------|
 
 const store = useStore();
-const emitter = inject('emitter');
 const vMask = mask; // custom directive
 
 // passes in all slot props as a single object
@@ -349,22 +349,7 @@ const editedCompanies = ref(editedEmployee.value.companies);
 const companyDropDown = ref([]);
 
 populateDropDowns();
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                 LIFECYCLE HOOKS                  |
-// |                                                  |
-// |--------------------------------------------------|
-
-onMounted(() => {
-  emitter.emit('edit-tab-opened', { name: 'jobExperience', value: { prepareSubmit } });
-});
-
-onBeforeUnmount(() => {
-  emitter.emit('edit-tab-closed', { name: 'jobExperience' });
-});
-
-onBeforeUnmount(prepareSubmit);
+usePrepareSubmit('jobExperience', prepareSubmit);
 
 // |--------------------------------------------------|
 // |                                                  |

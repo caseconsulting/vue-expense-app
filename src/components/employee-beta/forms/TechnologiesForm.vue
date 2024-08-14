@@ -107,21 +107,20 @@
 </template>
 
 <script setup>
+import { usePrepareSubmit } from '@/composables/editTabCommunication';
 import api from '@/shared/api';
 import { getDuplicateTechRules, getRequiredRules } from '@/shared/validationUtils';
 import { isMobile } from '@/utils/utils';
 import _isEmpty from 'lodash/isEmpty';
 import _isEqual from 'lodash/isEqual';
 import _map from 'lodash/map';
-import { inject, onBeforeUnmount, onMounted, ref } from 'vue';
+import { ref } from 'vue';
 
 // |--------------------------------------------------|
 // |                                                  |
 // |                      SETUP                       |
 // |                                                  |
 // |--------------------------------------------------|
-
-const emitter = inject('emitter');
 
 // passes in all slot props as a single object
 const { slotProps } = defineProps(['slotProps']);
@@ -139,21 +138,7 @@ const editedTechnologies = ref(
 );
 const dropdownItems = ref([]);
 
-// |--------------------------------------------------|
-// |                                                  |
-// |                 LIFECYCLE HOOKS                  |
-// |                                                  |
-// |--------------------------------------------------|
-
-onMounted(() => {
-  emitter.emit('edit-tab-opened', { name: 'technologies', value: { prepareSubmit } });
-});
-
-onBeforeUnmount(() => {
-  emitter.emit('edit-tab-closed', { name: 'technologies' });
-});
-
-onBeforeUnmount(prepareSubmit);
+usePrepareSubmit('technologies', prepareSubmit);
 
 // |--------------------------------------------------|
 // |                                                  |

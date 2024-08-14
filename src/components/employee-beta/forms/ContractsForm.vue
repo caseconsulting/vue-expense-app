@@ -210,6 +210,7 @@
 </template>
 
 <script setup>
+import { usePrepareSubmit } from '@/composables/editTabCommunication';
 import { format } from '@/shared/dateUtils';
 import {
   getDateAfterRule,
@@ -224,7 +225,7 @@ import { isEmpty, isMobile } from '@/utils/utils';
 import _cloneDeep from 'lodash/cloneDeep';
 import _find from 'lodash/find';
 import _map from 'lodash/map';
-import { inject, onBeforeUnmount, onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
 
@@ -235,7 +236,6 @@ import { useStore } from 'vuex';
 // |--------------------------------------------------|
 
 const store = useStore();
-const emitter = inject('emitter');
 const vMask = mask; // custom directive
 
 // passes in all slot props as a single object
@@ -247,23 +247,8 @@ const editedContracts = ref([]); // stores edited contracts info
 const contractProjects = ref(store.getters.contracts.map((c) => c.projects).flat());
 const reloadKey = ref(0); // value used to trigger component re-render
 
+usePrepareSubmit('contracts', prepareSubmit);
 initialize();
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                 LIFECYCLE HOOKS                  |
-// |                                                  |
-// |--------------------------------------------------|
-
-onMounted(() => {
-  emitter.emit('edit-tab-opened', { name: 'contracts', value: { prepareSubmit } });
-});
-
-onBeforeUnmount(() => {
-  emitter.emit('edit-tab-closed', { name: 'contracts' });
-});
-
-onBeforeUnmount(prepareSubmit);
 
 // |--------------------------------------------------|
 // |                                                  |
