@@ -121,7 +121,7 @@
       </v-app-bar>
       <v-main :style="{ padding: getMainPadding() }" class="app-bg-color">
         <v-container fluid grid-list-lg class="px-2 px-md-4">
-          <notification-banners v-if="isLoggedIn() && storeIsPopulated()" />
+          <notification-banners v-if="isLoggedIn() && storeIsPopulated() && !isTimedOut()" />
           <router-view></router-view>
         </v-container>
       </v-main>
