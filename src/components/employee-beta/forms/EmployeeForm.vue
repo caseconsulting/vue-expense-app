@@ -220,7 +220,7 @@
       <form-cancel-confirmation :toggleSubmissionConfirmation="toggleCancelConfirmation" type="cancel">
         <!-- in the future this could display the number of changes, but with the current logic the number can be confusing -->
         <!-- (especially with arrays and nested objects) -->
-        <v-card-text v-if="numberOfChanges > 0" align="center">There are pending changes!</v-card-text>
+        <!-- <v-card-text v-if="numberOfChanges > 0" align="center">There are pending changes!</v-card-text> -->
       </form-cancel-confirmation>
     </v-card>
   </v-dialog>
