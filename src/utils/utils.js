@@ -151,6 +151,27 @@ export function monthYearFormat(date) {
 } // monthYearFormat
 
 /**
+ * Returns a date formated as 'MMM YYYY' (Aug 2020).
+ *
+ * @param date - date to format in string form
+ * @return String - date formated
+ */
+export function monthYearFormatFromString(stringDate) {
+  let pieces = stringDate.split('/');
+  return MONTHS[parseInt(pieces[0])] + ' ' + pieces[1];
+} // monthYearFormat
+
+/**
+ * Returns a date formated as 'MMM, YYYY' (Aug, 2020).
+ *
+ * @param date - date to format
+ * @return String - date formated
+ */
+export function monthYearFormatBETA(date) {
+  return !isEmpty(date) ? format(date, null, 'MMM, YYYY') : '';
+} // monthYearFormat
+
+/**
  * Opens a link in a new tab.
  *
  * @param link String - the link to open
@@ -233,6 +254,38 @@ export function userRoleIsUser() {
 export function userRoleIsIntern() {
   return getRole() === 'intern';
 } //userRoleIsIntern
+
+/**
+ * Helper function to sort Items by their dataReceieved property
+ * @param {*} items - A list of objects each incluing the dateReceived property
+ * @returns sortedList - A list of items sorted by their dateReceived properties in decending order
+ */
+export function sortByDateReceived(items) {
+  const dateToNumber = (date) => (date ? Number(format(date, null, 'YYYYMMDD')) : 0);
+  const sortedItems = items.toSorted((itemA, itemB) => {
+    return dateToNumber(itemB.dateReceived) - dateToNumber(itemA.dateReceived);
+  });
+  return sortedItems;
+}
+
+/**
+ * Helper function to sort languages by proficiency, highest to lowest: Literacy, Native-like, Personal, Basic
+ * @param {object[]} languages - List of known languages
+ * @return filteredList - A list of languages sorted by proficiency
+ */
+export function sortLanguagesByProficiency(languages) {
+  const levelProficiency = [
+    'Literacy - fluency and broad vocabulary associated with high levels of education',
+    'Native-like - ability to use the language like a native speaker',
+    'Personal - words you know depending on your day-to-day activities (experiences, work, country, friends)',
+    'Basic - most basic words that everyone uses'
+  ];
+  const compare = (languageA, languageB) => {
+    return levelProficiency.indexOf(languageA.proficiency) - levelProficiency.indexOf(languageB.proficiency);
+  };
+  const sortedByProficiency = languages.toSorted(compare);
+  return sortedByProficiency;
+}
 
 export const STATES = {
   AL: 'Alabama',
@@ -573,6 +626,21 @@ export const COUNTRIES = [
   'Zimbabwe'
 ]; //countries list
 
+export const MONTHS = {
+  1: 'Jan',
+  2: 'Feb',
+  3: 'Mar',
+  4: 'Apr',
+  5: 'May',
+  6: 'Jun',
+  7: 'Jul',
+  8: 'Aug',
+  9: 'Sep',
+  10: 'Oct',
+  11: 'Nov',
+  12: 'Dec'
+};
+
 export default {
   asyncForEach,
   formatNumber,
@@ -590,9 +658,12 @@ export default {
   openLink,
   updateEmployeeLogin,
   storeIsPopulated,
+  sortByDateReceived,
+  sortLanguagesByProficiency,
   userRoleIsAdmin,
   userRoleIsManager,
   userRoleIsUser,
   userRoleIsIntern,
-  COUNTRIES
+  COUNTRIES,
+  MONTHS
 };

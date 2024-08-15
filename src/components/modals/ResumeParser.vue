@@ -455,6 +455,7 @@ async function created() {
  * destroy listeners
  */
 function beforeUnmount() {
+  this.emitter.off('deny');
   this.emitter.off('confirmed-parser');
   this.emitter.off('canceled-parser');
   this.emitter.off('backout-canceled-parser');

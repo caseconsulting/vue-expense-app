@@ -14,7 +14,7 @@
         <span class="text-h6 font-weight-medium">{{ status.statusMessage }}</span>
       </v-card-text>
     </div>
-    <div v-else class="font-weight-bold text-body-2 text-center">
+    <div v-else class="font-weight-bold text-body-2 text-center pa-0">
       {{ status.statusMessage }}
     </div>
     <template v-slot:actions v-if="status.closeColor">
@@ -71,6 +71,8 @@ function clearStatus() {
   status.value['closeColor'] = 'white';
   status.value['location'] = '';
   status.value['timeout'] = 5000;
+
+  emitter.emit('status-close');
 } // clearStatus
 
 /**

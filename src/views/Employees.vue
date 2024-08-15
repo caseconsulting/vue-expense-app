@@ -262,9 +262,7 @@
         </div>
       </v-container>
     </v-card>
-    <v-dialog v-model="createEmployee" @click:outside="clearCreateEmployee()" :width="isMobile() ? '100%' : '80%'">
-      <employee-form :key="childKey" :contracts="contracts" :model="model" />
-    </v-dialog>
+    <employee-form v-model="createEmployee" :contracts="contracts" :employee="model" />
     <v-dialog v-model="manageTags" scrollable :width="isMobile() ? '100%' : '70%'" persistent>
       <tag-manager :key="childKey" />
     </v-dialog>
@@ -279,38 +277,38 @@
 
 <script setup>
 import api from '@/shared/api.js';
-import { updateStoreEmployees, updateStoreAvatars, updateStoreContracts, updateStoreTags } from '@/utils/storeUtils';
+// import BaseCard from '../components/employee-beta/cards/BaseCard.vue';
+import EmployeeForm from '@/components/employee-beta/forms/EmployeeForm.vue';
 import ExportEmployeeData from '@/components/employees/csv/ExportEmployeeData.vue';
 import DeleteErrorModal from '@/components/modals/DeleteErrorModal.vue';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
-import EmployeeForm from '@/components/employees/EmployeeForm.vue';
+import { updateStoreAvatars, updateStoreContracts, updateStoreEmployees, updateStoreTags } from '@/utils/storeUtils';
 import _filter from 'lodash/filter';
-import _map from 'lodash/map';
 import _find from 'lodash/find';
+import _map from 'lodash/map';
 
 import ConvertEmployeeToCsv from '@/components/employees/csv/ConvertEmployeeToCsv.vue';
 import PowerEditContainer from '@/components/employees/power-edit/PowerEditContainer.vue';
 import TagManager from '@/components/employees/tags/TagManager.vue';
-import TagsFilter from '@/components/shared/TagsFilter.vue';
 import EmployeesSyncModal from '@/components/modals/EmployeesSyncModal.vue';
+import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSnackbar.vue';
+import TagsFilter from '@/components/shared/TagsFilter.vue';
+import { format } from '@/shared/dateUtils';
 import { selectedTagsHasEmployee } from '@/shared/employeeUtils';
+import { employeeFilter } from '@/shared/filterUtils';
 import {
   isFullTime,
   isInactive,
-  isPartTime,
   isMobile,
+  isPartTime,
   monthDayYearFormat,
   storeIsPopulated,
   userRoleIsAdmin,
   userRoleIsManager
 } from '@/utils/utils';
-import { employeeFilter } from '@/shared/filterUtils';
-import { format } from '../shared/dateUtils';
-import { ref, inject, onBeforeMount, onBeforeUnmount, computed, watch } from 'vue';
-import { useStore } from 'vuex';
+import { computed, inject, onBeforeMount, onBeforeUnmount, provide, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
-
-import { useDisplaySuccess, useDisplayError } from '@/components/shared/StatusSnackbar.vue';
+import { useStore } from 'vuex';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -321,6 +319,13 @@ import { useDisplaySuccess, useDisplayError } from '@/components/shared/StatusSn
 const store = useStore();
 const emitter = inject('emitter');
 const router = useRouter();
+
+//provide roles
+const isAdmin = ref(false);
+provide('isAdmin', isAdmin);
+const isUser = ref(false);
+provide('isUser', isUser);
+
 const applicationSyncData = ref(null);
 const childKey = ref(0);
 const contracts = ref([]);
@@ -552,6 +557,7 @@ async function refreshEmployees() {
 function renderCreateEmployee() {
   createEmployee.value = true;
   childKey.value++;
+  emitter.emit('create-new-employee');
 } // renderCreateEmployee
 
 /**

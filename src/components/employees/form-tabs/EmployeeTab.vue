@@ -100,7 +100,7 @@
         ref="formFields"
         v-model.trim="emailUsername"
         suffix="@consultwithcase.com"
-        :rules="emailRules"
+        :rules="getCaseEmailRules()"
         label="Email*"
         variant="underlined"
         data-vv-name="Email"
@@ -412,45 +412,44 @@
     </div>
   </div>
 </template>
+
 <script>
 import api from '@/shared/api.js';
-import _filter from 'lodash/filter';
-import _includes from 'lodash/includes';
-import _cloneDeep from 'lodash/cloneDeep';
-import _startCase from 'lodash/startCase';
-import _size from 'lodash/size';
-import _kebabCase from 'lodash/kebabCase';
-import _map from 'lodash/map';
-import _compact from 'lodash/compact';
-import _forEach from 'lodash/forEach';
-import _isArray from 'lodash/isArray';
-import _xor from 'lodash/xor';
-import _find from 'lodash/find';
-import _some from 'lodash/some';
+import { format } from '@/shared/dateUtils/filter';
 import {
   getAINRules,
+  getCaseEmailRules,
   getDateRules,
   getNumberRules,
   getRequiredRules,
   getValidateFalse
-} from '@/shared/validationUtils.js';
+} from '@/shared/validationUtils';
 import {
   asyncForEach,
   isEmpty,
   isMobile,
   userRoleIsAdmin,
+  userRoleIsIntern,
   userRoleIsManager,
-  userRoleIsUser,
-  userRoleIsIntern
+  userRoleIsUser
 } from '@/utils/utils';
-import { JOB_TITLES } from './dropdown-info/jobTitles';
-import { format } from '@/shared/dateUtils';
+import _cloneDeep from 'lodash/cloneDeep';
+import _compact from 'lodash/compact';
+import _find from 'lodash/find';
+import _forEach from 'lodash/forEach';
+import _includes from 'lodash/includes';
+import _isArray from 'lodash/isArray';
+import _kebabCase from 'lodash/kebabCase';
+import _map from 'lodash/map';
+import _size from 'lodash/size';
+import _some from 'lodash/some';
+import _startCase from 'lodash/startCase';
+import _xor from 'lodash/xor';
 import { mask } from 'vue-the-mask';
 import EEODeclineSelfIdentify from '../../modals/EEODeclineSelfIdentify.vue';
+import { JOB_TITLES } from './dropdown-info/jobTitles';
 
 const caseEmailDomain = '@consultwithcase.com';
-
-const regex = /^[a-zA-Z]+$/;
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -820,10 +819,6 @@ export default {
       departureMenu: false, // display depature menu
       editedEmployee: _cloneDeep(this.model), //employee that can be edited
       emailUsername: '',
-      emailRules: [
-        (v) => !this.isEmpty(v) || 'Email is required',
-        (v) => regex.test(v) || 'Not a valid @consultwithcase email address'
-      ], // rules for an employee email
       employeeTags: null,
       employeeEditedTags: null,
       employeeRoleFormatted: null,
@@ -933,6 +928,7 @@ export default {
     format,
     formatKebabCase,
     getAINRules,
+    getCaseEmailRules,
     getDateRules,
     getNumberRules,
     getRequiredRules,

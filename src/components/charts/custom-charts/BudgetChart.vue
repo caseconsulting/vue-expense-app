@@ -1,6 +1,6 @@
 <template>
   <div v-if="dataReceived">
-    <v-card class="px-10 pt-5 my-7 pointer">
+    <v-card class="pointer" :class="isMobile() ? 'pa-0 ma-0' : 'px-5 pt-5 my-7'">
       <bar-chart
         ref="barChart"
         :key="chartKey"
@@ -45,6 +45,7 @@ import { isFullTime, getCurrentBudgetYear } from '@/utils/utils';
 import { getYear, isBetween } from '@/shared/dateUtils';
 import { onMounted, ref, watch, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { isMobile } from '../../../utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -372,6 +373,9 @@ async function refreshBudgets() {
       budget.odFlag = false;
     }
   });
+
+  // filter out diplicate expense types
+  budgetsVar = _.uniqBy(budgetsVar, 'expenseTypeId');
 
   // remove any budgets where budget amount is 0 and 0 total expenses
   expenseTypeData.value = _filter(budgetsVar, (data) => {
