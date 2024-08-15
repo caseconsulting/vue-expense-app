@@ -12,7 +12,7 @@
 
 <script setup>
 import PieChart from '../base-charts/PieChart.vue';
-import _ from 'lodash';
+import _isEmpty from 'lodash/isEmpty';
 import { onBeforeMount, onBeforeUnmount, onMounted, ref, inject } from 'vue';
 
 // |--------------------------------------------------|
@@ -83,7 +83,7 @@ onBeforeMount(async () => {
  */
 function fetchData(minors) {
   if (minors) {
-    if (_.isEmpty(minors)) {
+    if (_isEmpty(minors)) {
       text.value = `There are no minors for an education of ${degree.value}`;
       quantities.value.push(1);
       enabled.value = false;
@@ -116,7 +116,7 @@ function fetchData(minors) {
     }
   } else {
     // these presets are when a degree has not been selected OR if there are no minors
-    if (!_.isEmpty(minors)) {
+    if (!_isEmpty(minors)) {
       text.value = 'There are no minors for this type of education';
     } else {
       text.value = 'Click on an Education To See Minors';

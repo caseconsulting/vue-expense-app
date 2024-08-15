@@ -87,7 +87,12 @@
 
 <script>
 import api from '@/shared/api.js';
-import _ from 'lodash';
+import _isArray from 'lodash/isArray';
+import _map from 'lodash/map';
+import _compact from 'lodash/compact';
+import _forEach from 'lodash/forEach';
+import _uniq from 'lodash/uniq';
+import _cloneDeep from 'lodash/cloneDeep';
 import { asyncForEach } from '@/utils/utils';
 import { getRequiredRules } from '@/shared/validationUtils.js';
 
@@ -163,7 +168,7 @@ function isDuplicate(tech) {
   let duplicates = this.duplicateTechEntries();
 
   //checks to see if tech is in duplicates array
-  if (duplicates && _.isArray(duplicates) && duplicates.length > 0) {
+  if (duplicates && _isArray(duplicates) && duplicates.length > 0) {
     return duplicates.includes(tech);
   }
   return false;
@@ -173,15 +178,15 @@ function isDuplicate(tech) {
  * Gets information that other employees have filled out.
  */
 function populateDropDowns() {
-  let employeesTechnology = _.map(this.employees, (employee) => employee.technologies); //extract technology
-  employeesTechnology = _.compact(employeesTechnology); //remove falsey values
+  let employeesTechnology = _map(this.employees, (employee) => employee.technologies); //extract technology
+  employeesTechnology = _compact(employeesTechnology); //remove falsey values
   // loop employees
-  _.forEach(employeesTechnology, (technologies) => {
+  _forEach(employeesTechnology, (technologies) => {
     // loop technologies
-    _.forEach(technologies, (technology) => {
+    _forEach(technologies, (technology) => {
       this.technologyDropDown.push(technology.name); // add technology name
     });
-    this.technologyDropDown = _.uniq(this.technologyDropDown);
+    this.technologyDropDown = _uniq(this.technologyDropDown);
   });
   this.technologyDropDown.sort((a, b) => a.length - b.length);
 } // populateDropDowns
@@ -209,7 +214,7 @@ async function updateTechDropDown(query) {
 async function validateFields() {
   let errorCount = 0;
   //ensures that refs are put in an array so we can reuse forEach loop
-  let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
+  let components = !_isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
   await asyncForEach(components, async (field) => {
     if (field && (await field.validate()).length > 0) {
       errorCount++;
@@ -250,7 +255,7 @@ export default {
   data() {
     return {
       technologyDropDown: [], // autocomplete technology name options
-      editedTechnologies: _.cloneDeep(this.model), //stores edited technology info
+      editedTechnologies: _cloneDeep(this.model), //stores edited technology info
       duplicateRules: (tech) => {
         return !this.isDuplicate(tech) || 'Duplicate technology found, please remove duplicate entries';
       },

@@ -145,7 +145,18 @@ import ReimburseModal from '@/components/modals/ReimburseModal.vue';
 import UnreimbursedExpensesExpandedTable from '@/components/reimbursements/UnreimbursedExpensesExpandedTable.vue';
 
 import api from '@/shared/api.js';
-import _ from 'lodash';
+import _filter from 'lodash/filter';
+import _forEach from 'lodash/forEach';
+import _some from 'lodash/some';
+import _map from 'lodash/map';
+import _uniqBy from 'lodash/uniqBy';
+import _find from 'lodash/find';
+import _merge from 'lodash/merge';
+import _uniqWith from 'lodash/uniqWith';
+import _get from 'lodash/get';
+import _set from 'lodash/set';
+import _findIndex from 'lodash/findIndex';
+import _cloneDeep from 'lodash/cloneDeep';
 import { asyncForEach, convertToMoneyString } from '@/utils/utils';
 import { storeIsPopulated } from '@/utils/utils';
 import { updateStoreEmployees, updateStoreTags } from '@/utils/storeUtils';
@@ -263,11 +274,11 @@ computed(storeIsPopulated);
  */
 const filteredItems = computed(() => {
   let data = empBudgets.value;
-  data = _.filter(data, (budget) => {
+  data = _filter(data, (budget) => {
     if (tagsInfo.value.selected.length == 0) return true;
     return selectedTagsHasEmployee(budget.employeeId, tagsInfo.value);
   });
-  data = _.filter(data, (budget) => {
+  data = _filter(data, (budget) => {
     if (!employee.value && !expenseType.value) {
       return true;
     } else if (!employee.value && expenseType.value) {
@@ -288,7 +299,7 @@ const filteredItems = computed(() => {
  * @return array - the filtered pending expenses that are just selected
  */
 function getSelectedExpensesToReimburse() {
-  return _.filter(pendingExpenses.value, (expense) => {
+  return _filter(pendingExpenses.value, (expense) => {
     if (expense.selected) {
       return true;
     }
@@ -306,11 +317,11 @@ const mainCheckBox = computed(() => {
     indeterminate: false
   };
 
-  _.forEach(empBudgets.value, (budget) => {
-    if (_.some(budget.expenses, { selected: false })) {
+  _forEach(empBudgets.value, (budget) => {
+    if (_some(budget.expenses, { selected: false })) {
       checkBox.all = false;
     }
-    if (_.some(budget.expenses, { selected: true })) {
+    if (_some(budget.expenses, { selected: true })) {
       checkBox.indeterminate = true;
     }
   });
@@ -331,10 +342,10 @@ const mainCheckBox = computed(() => {
  * Check all expenses and boxes.
  */
 function checkAllBoxes() {
-  _.forEach(filteredItems.value, (budget) => {
+  _forEach(filteredItems.value, (budget) => {
     budget.checkBox.all = true;
     budget.checkBox.indeterminate = false;
-    return _.forEach(budget.expenses, (expense) => {
+    return _forEach(budget.expenses, (expense) => {
       emitSelectionChange(expense, true);
       expense.selected = true;
       determineShowOnFeed(expense);
@@ -349,7 +360,7 @@ function checkAllBoxes() {
  */
 function constructAutoComplete(aggregatedData) {
   // set employees
-  employees.value = _.map(aggregatedData, (data) => {
+  employees.value = _map(aggregatedData, (data) => {
     if (data && data.employeeName && data.employeeId) {
       return {
         text: data.employeeName,
@@ -362,9 +373,9 @@ function constructAutoComplete(aggregatedData) {
   }).filter((data) => {
     return data != null;
   });
-  employees.value = _.uniqBy(employees.value, (e) => e.value);
+  employees.value = _uniqBy(employees.value, (e) => e.value);
   // set expense types
-  expenseTypes.value = _.map(aggregatedData, (data) => {
+  expenseTypes.value = _map(aggregatedData, (data) => {
     if (data && data.budgetName && data.expenseTypeId) {
       return {
         text: data.budgetName,
@@ -374,7 +385,7 @@ function constructAutoComplete(aggregatedData) {
   }).filter((data) => {
     return data != null;
   });
-  expenseTypes.value = _.uniqBy(expenseTypes.value, (e) => e.value);
+  expenseTypes.value = _uniqBy(expenseTypes.value, (e) => e.value);
 } // constructAutoComplete
 
 /**
@@ -384,7 +395,7 @@ function constructAutoComplete(aggregatedData) {
  * @return Array - List of aggregated expenses
  */
 function createExpenses(aggregatedData) {
-  return _.map(aggregatedData, (expense) => {
+  return _map(aggregatedData, (expense) => {
     let additionalAttributes = {
       checkBox: {
         all: false,
@@ -395,8 +406,8 @@ function createExpenses(aggregatedData) {
       failed: false
     };
     const employees = store.getters.employees;
-    let employee = _.find(employees, (emp) => emp.id === expense.employeeId);
-    let expenseType = _.find(expenseTypes.value, (expenseType) => expenseType.id === expense.expenseTypeId);
+    let employee = _find(employees, (emp) => emp.id === expense.employeeId);
+    let expenseType = _find(expenseTypes.value, (expenseType) => expenseType.id === expense.expenseTypeId);
     expense.budgetName = expenseType.budgetName;
     expense.employeeName = employeeUtils.firstAndLastName(employee);
     expense.firstName = employee.firstName;
@@ -407,11 +418,11 @@ function createExpenses(aggregatedData) {
     // high fives should have a dynamic description
     if (expense.budgetName == 'High Five') {
       // get high fiver
-      const giver = _.find(employees, (e) => {
+      const giver = _find(employees, (e) => {
         return e.id === expense.employeeId;
       });
       // get the high fivee
-      const recipient = _.find(employees, (e) => {
+      const recipient = _find(employees, (e) => {
         return e.id === expense.recipient;
       });
       if (giver && recipient) {
@@ -420,7 +431,7 @@ function createExpenses(aggregatedData) {
         )} a High Five`;
       }
     }
-    return _.merge(expense, additionalAttributes);
+    return _merge(expense, additionalAttributes);
   });
 } // createExpenses
 
@@ -437,7 +448,7 @@ function determineCheckBox(budget) {
   };
 
   // determine if all expenses in group are selected or not
-  _.forEach(budget.expenses, (expense) => {
+  _forEach(budget.expenses, (expense) => {
     if (!expense.selected) {
       // at least one of the expenses is not selected
       checkBox.all = false;
@@ -467,7 +478,7 @@ function determineCheckBox(budget) {
 function determineShowSwitch(budget) {
   let showSwitch = true;
 
-  _.forEach(budget.expenses, (expense) => {
+  _forEach(budget.expenses, (expense) => {
     if (!expense.showOnFeed) {
       // at least one of the expenses is not selected to show on feed
       showSwitch = false;
@@ -497,7 +508,7 @@ function emitSelectionChange(expense, newSelect) {
  */
 function getBudgetTotal(expenses) {
   let total = 0;
-  _.forEach(expenses, (expense) => (total += expense.cost));
+  _forEach(expenses, (expense) => (total += expense.cost));
   return total;
 } // getBudgetTotal
 
@@ -508,18 +519,18 @@ function getBudgetTotal(expenses) {
  * @return Array - list of grouped expenses
  */
 function groupEmployeeExpenses(expenses) {
-  let data = _.forEach(expenses, (expense) => {
+  let data = _forEach(expenses, (expense) => {
     expense.key = `${expense.employeeId}${expense.expenseTypeId}`;
   });
 
   // Create a list of expenses under each group
-  data = _.forEach(data, (item) => {
-    return (item.expenses = _.filter(expenses, (expense) => {
+  data = _forEach(data, (item) => {
+    return (item.expenses = _filter(expenses, (expense) => {
       return matchingEmployeeAndExpenseType(expense, item);
     }));
   });
 
-  data = _.uniqWith(data, (el1, el2) => el1.key === el2.key);
+  data = _uniqWith(data, (el1, el2) => el1.key === el2.key);
 
   return data;
 } // groupEmployeeExpenses
@@ -540,8 +551,8 @@ function matchingEmployeeAndExpenseType(expense, item) {
  */
 function refreshExpenses() {
   pendingExpenses.value = [];
-  _.forEach(empBudgets.value, (budget) => {
-    _.forEach(budget.expenses, (budgetExpense) => {
+  _forEach(empBudgets.value, (budget) => {
+    _forEach(budget.expenses, (budgetExpense) => {
       if (!budgetExpense.reimbursedDate) {
         pendingExpenses.value.push(budgetExpense);
       }
@@ -562,16 +573,16 @@ function refreshExpenses() {
  */
 async function rejectExpenses(field, reason) {
   loading.value = true;
-  let selectedExpenses = _.filter(pendingExpenses.value, (e) => e.selected);
+  let selectedExpenses = _filter(pendingExpenses.value, (e) => e.selected);
   await asyncForEach(selectedExpenses, async (expense) => {
     // to remove the expense type data in the ExpenseTypeTotal modal
     emitter.emit('expenseChange', expense);
     emitter.emit('expenseClicked', undefined);
     // set reasoning in rejection object
-    let reasons = _.get(expense, field + '.reasons');
+    let reasons = _get(expense, field + '.reasons');
     reasons = [...(reasons || []), reason];
-    _.set(expense, field + '.reasons', reasons);
-    _.set(expense, field + '.revised', false);
+    _set(expense, field + '.reasons', reasons);
+    _set(expense, field + '.revised', false);
     let baseExpense = removeAggregateExpenseData(expense);
     let rejectedExpense = await api.updateItem(api.EXPENSES, baseExpense);
     if (!rejectedExpense.id) {
@@ -600,8 +611,8 @@ async function reimburseExpenses() {
   let expensesToReimburse = [];
 
   // get selected expenses and set reimburse date
-  empBudgets.value = _.forEach(empBudgets.value, (budget) => {
-    return _.forEach(budget.expenses, (expense) => {
+  empBudgets.value = _forEach(empBudgets.value, (budget) => {
+    return _forEach(budget.expenses, (expense) => {
       if (expense.selected) {
         //to remove the expense type data in the ExpenseTypeTotal modal
         emitter.emit('expenseChange', expense);
@@ -615,7 +626,7 @@ async function reimburseExpenses() {
 
   // reimburse expense on back end
   await asyncForEach(expensesToReimburse, async (expense) => {
-    let expenseType = _.find(expenseTypes.value, (et) => et.value === expense.expenseTypeId);
+    let expenseType = _find(expenseTypes.value, (et) => et.value === expense.expenseTypeId);
     let isHighFive = !!expenseType && expenseType.text === 'High Five';
     let reimbursedExpense;
     if (isHighFive && isGeneratingGiftCard.value) {
@@ -631,11 +642,11 @@ async function reimburseExpenses() {
       setTimeout(() => alerts.value.shift(), 20000);
 
       // revert reimburse date change
-      let groupIndex = _.findIndex(empBudgets.value, {
+      let groupIndex = _findIndex(empBudgets.value, {
         employeeId: expense.employeeId,
         expenseTypeId: expense.expenseTypeId
       });
-      let expenseIndex = _.findIndex(empBudgets.value[groupIndex].expenses, { id: expense.id });
+      let expenseIndex = _findIndex(empBudgets.value[groupIndex].expenses, { id: expense.id });
       empBudgets.value[groupIndex].expenses[expenseIndex].reimbursedDate = null;
       empBudgets.value[groupIndex].expenses[expenseIndex].failed = true;
       empBudgets.value[groupIndex].expenses[expenseIndex].selected = false;
@@ -665,9 +676,9 @@ async function reimburseExpenses() {
  * @param expense - expense selected
  */
 function selectExpense(expense) {
-  empBudgets.value = _.forEach(empBudgets.value, (budget) => {
+  empBudgets.value = _forEach(empBudgets.value, (budget) => {
     if (expense.key === budget.key) {
-      return _.forEach(budget.expenses, (budgetExpense) => {
+      return _forEach(budget.expenses, (budgetExpense) => {
         if (expense === budgetExpense) {
           budgetExpense.selected = !budgetExpense.selected;
           if (!budgetExpense.selected) {
@@ -681,7 +692,7 @@ function selectExpense(expense) {
     }
   });
 
-  empBudgets.value = _.forEach(empBudgets.value, (budget) => {
+  empBudgets.value = _forEach(empBudgets.value, (budget) => {
     if (expense.key === budget.key) {
       budget.checkBox = determineCheckBox(budget);
     }
@@ -694,9 +705,9 @@ function selectExpense(expense) {
  * @param expense - expense toggled
  */
 function toggleShowOnFeed(expense) {
-  empBudgets.value = _.forEach(empBudgets.value, (budget) => {
+  empBudgets.value = _forEach(empBudgets.value, (budget) => {
     if (expense.key === budget.key) {
-      return _.forEach(budget.expenses, (budgetExpense) => {
+      return _forEach(budget.expenses, (budgetExpense) => {
         if (expense === budgetExpense) {
           budgetExpense.showOnFeed = !budgetExpense.showOnFeed;
         }
@@ -704,7 +715,7 @@ function toggleShowOnFeed(expense) {
     }
   });
 
-  empBudgets.value = _.forEach(empBudgets.value, (budget) => {
+  empBudgets.value = _forEach(empBudgets.value, (budget) => {
     if (expense.key === budget.key) {
       budget.showSwitch = determineShowSwitch(budget);
     }
@@ -717,7 +728,7 @@ function toggleShowOnFeed(expense) {
  * @param expense - expense toggled
  */
 function determineShowOnFeed(expense) {
-  empBudgets.value = _.forEach(empBudgets.value, (budget) => {
+  empBudgets.value = _forEach(empBudgets.value, (budget) => {
     if (expense.key === budget.key) {
       budget.showSwitch = determineShowSwitch(budget);
     }
@@ -731,7 +742,7 @@ function determineShowOnFeed(expense) {
  * @returns Array - The array of unreimbursed, non-rejected expenses
  */
 function getNonRejectedExpenses(unreimbursedExpenses) {
-  return _.filter(unreimbursedExpenses, (expense) => {
+  return _filter(unreimbursedExpenses, (expense) => {
     let rejections = expense.rejections;
     return !(
       rejections?.hardRejections?.reasons?.length > 0 ||
@@ -760,7 +771,7 @@ function loadExpensesData(unreimbursedExpenses) {
  * @return Object - simplified expense object
  */
 function removeAggregateExpenseData(expense) {
-  let localExpense = _.cloneDeep(expense);
+  let localExpense = _cloneDeep(expense);
   delete localExpense.expenses;
   delete localExpense.checkBox;
   delete localExpense.failed;
@@ -773,7 +784,7 @@ function removeAggregateExpenseData(expense) {
  * Resets show on feed toggles when page is created
  */
 function resetShowOnFeedToggles() {
-  empBudgets.value = _.forEach(empBudgets.value, (budget) => {
+  empBudgets.value = _forEach(empBudgets.value, (budget) => {
     budget.showSwitch = false;
   });
 } // resetShowOnFeedToggles
@@ -801,18 +812,18 @@ function toggleAll() {
  */
 function toggleGroup(value) {
   // updated group expenses selected
-  empBudgets.value = _.forEach(empBudgets.value, (budget) => {
+  empBudgets.value = _forEach(empBudgets.value, (budget) => {
     if (value === budget) {
       // matching budget
       if (determineCheckBox(budget).all) {
         // unselect all expenses
-        return _.forEach(budget.expenses, (expense) => {
+        return _forEach(budget.expenses, (expense) => {
           emitSelectionChange(expense, false);
           expense.selected = false;
         });
       } else {
         // select all expenses
-        return _.forEach(budget.expenses, (expense) => {
+        return _forEach(budget.expenses, (expense) => {
           emitSelectionChange(expense, true);
           expense.selected = true;
         });
@@ -821,7 +832,7 @@ function toggleGroup(value) {
   });
 
   // set the group check box
-  empBudgets.value = _.forEach(empBudgets.value, (budget) => {
+  empBudgets.value = _forEach(empBudgets.value, (budget) => {
     if (value === budget) {
       budget.checkBox = determineCheckBox(budget);
     }
@@ -834,7 +845,7 @@ function toggleGroup(value) {
  * @param value - expense group toggled
  */
 function toggleShowOnFeedGroup(value) {
-  empBudgets.value = _.forEach(empBudgets.value, (budget) => {
+  empBudgets.value = _forEach(empBudgets.value, (budget) => {
     if (value === budget) {
       let check = true;
       for (let i = 0; i < budget.expenses.length; i++) {
@@ -842,14 +853,14 @@ function toggleShowOnFeedGroup(value) {
           check = false;
         }
       }
-      _.forEach(budget.expenses, (expense) => {
+      _forEach(budget.expenses, (expense) => {
         expense.showOnFeed = !check;
       });
     }
   });
 
   // set the group check box
-  empBudgets.value = _.forEach(empBudgets.value, (budget) => {
+  empBudgets.value = _forEach(empBudgets.value, (budget) => {
     if (value === budget) {
       budget.showSwitch = determineShowSwitch(budget);
     }
@@ -860,10 +871,10 @@ function toggleShowOnFeedGroup(value) {
  * Uncheck all expenses and boxes
  */
 function unCheckAllBoxes() {
-  _.forEach(filteredItems.value, (budget) => {
+  _forEach(filteredItems.value, (budget) => {
     budget.checkBox.all = false;
     budget.checkBox.indeterminate = false;
-    return _.forEach(budget.expenses, (expense) => {
+    return _forEach(budget.expenses, (expense) => {
       emitSelectionChange(expense, false);
       expense.selected = false;
     });

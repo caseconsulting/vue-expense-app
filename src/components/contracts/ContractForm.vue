@@ -110,7 +110,7 @@
 </template>
 
 <script setup>
-import _ from 'lodash';
+import _some from 'lodash/some';
 import api from '@/shared/api.js';
 import { generateUUID } from '@/utils/utils';
 import { useStore } from 'vuex';
@@ -136,7 +136,7 @@ const dialog = ref(false);
 const loading = ref(false);
 const valid = ref(false);
 const duplicateContractPrimeCombo = ref(() => {
-  let found = _.some(
+  let found = _some(
     store.getters.contracts,
     (c) => c.contractName === contractName.value && c.primeName === primeName.value
   );

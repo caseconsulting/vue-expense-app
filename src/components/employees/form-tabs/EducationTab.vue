@@ -60,7 +60,7 @@
 import UniversityForm from './education-types/UniversityForm.vue';
 import HighSchoolForm from './education-types/HighSchoolForm.vue';
 import MilitaryForm from './education-types/MilitaryForm.vue';
-import _ from 'lodash';
+import _map from 'lodash/map';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -190,7 +190,7 @@ export default {
         { display: 'High School', value: 'highSchool' }
       ],
       eduCount: 0,
-      editedEducation: _.map(this.$props.model, (item) => {
+      editedEducation: _map(this.$props.model, (item) => {
         return {
           ...item,
           id: this.getRandId()

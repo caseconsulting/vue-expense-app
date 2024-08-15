@@ -3,7 +3,9 @@
 </template>
 
 <script setup>
-import _ from 'lodash';
+import _map from 'lodash/map';
+import _compact from 'lodash/compact';
+import _forEach from 'lodash/forEach';
 import { computed, inject, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 import { JOB_TITLES } from '@/components/employees/form-tabs/dropdown-info/jobTitles.js';
@@ -43,9 +45,9 @@ watch(
 
 const jobTitles = computed(() => {
   let jobTitles = JOB_TITLES;
-  let employeeJobTitles = _.map(store.getters.employees, (e) => e.jobRole);
-  employeeJobTitles = _.compact(employeeJobTitles);
-  _.forEach(employeeJobTitles, (jobTitle) => jobTitles.push(jobTitle));
+  let employeeJobTitles = _map(store.getters.employees, (e) => e.jobRole);
+  employeeJobTitles = _compact(employeeJobTitles);
+  _forEach(employeeJobTitles, (jobTitle) => jobTitles.push(jobTitle));
   jobTitles = Array.from(new Set(jobTitles)); // remove duplicates
   return jobTitles.sort();
 });

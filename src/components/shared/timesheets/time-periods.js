@@ -1,4 +1,6 @@
-import _ from 'lodash';
+import _find from 'lodash/find';
+import _forEach from 'lodash/forEach';
+import _cloneDeep from 'lodash/cloneDeep';
 import store from '../../../../store/index.js';
 import {
   add,
@@ -35,8 +37,8 @@ export function getCalendarYearPeriod() {
  */
 export function getContractYearPeriod(employee) {
   let period = null;
-  let curContract = _.find(employee.contracts, (c) => _.find(c.projects, (p) => !p.endDate));
-  let contract = _.find(store.getters.contracts, (c) => c.id === curContract?.contractId);
+  let curContract = _find(employee.contracts, (c) => _find(c.projects, (p) => !p.endDate));
+  let contract = _find(store.getters.contracts, (c) => c.id === curContract?.contractId);
   switch (contract.settings?.timesheetsContractViewOption) {
     case '0':
       period = _getContractCurrentProjectPeriod(employee);
@@ -104,9 +106,9 @@ function _getYearPeriod(sDate) {
  */
 function _getCurrentProject(employee) {
   let currentProject = null;
-  _.forEach(employee.contracts, (c) => {
-    let project = _.find(c.projects, (p) => !p.endDate);
-    if (project) currentProject = _.cloneDeep(project);
+  _forEach(employee.contracts, (c) => {
+    let project = _find(c.projects, (p) => !p.endDate);
+    if (project) currentProject = _cloneDeep(project);
   });
   return currentProject;
 } // _getCurrentProject

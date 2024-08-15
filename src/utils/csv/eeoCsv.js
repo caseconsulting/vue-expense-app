@@ -8,7 +8,7 @@
  * Utilities to download EEO reports of employees
  */
 import csvUtils from './baseCsv.js';
-import _ from 'lodash';
+import _forEach from 'lodash/forEach';
 
 // some useful constants as the exact strings might change
 const HISPANIC_LATINO = 'Hispanic or Latino';
@@ -230,7 +230,7 @@ export function convertEmployees(employees) {
   fill(0, 1, 2, 3, '', true);
 
   // fill in EEO data
-  _.forEach(employees, (employee) => {
+  _forEach(employees, (employee) => {
     function nullOrUndefined(item) {
       return item == undefined || item == null;
     }

@@ -56,7 +56,14 @@
 
 <script setup>
 import ExpenseRejectionModal from '@/components/modals/ExpenseRejectionModal.vue';
-import _ from 'lodash';
+import _map from 'lodash/map';
+import _uniqWith from 'lodash/uniqWith';
+import _isEqual from 'lodash/isEqual';
+import _forEach from 'lodash/forEach';
+import _isArray from 'lodash/isArray';
+import _xor from 'lodash/xor';
+import _flatten from 'lodash/flatten';
+import _indexOf from 'lodash/indexOf';
 import { convertToMoneyString } from '@/utils/utils';
 import { ref, onBeforeMount, onBeforeUnmount, computed, inject } from 'vue';
 
@@ -108,16 +115,16 @@ onBeforeUnmount(() => {
  */
 const totals = computed(() => {
   let theTotals = [];
-  theTotals = _.map(selected.value, (item) => {
+  theTotals = _map(selected.value, (item) => {
     return {
       name: item.budgetName,
       id: item.expenseTypeId,
       costTotal: 0
     };
   });
-  theTotals = _.uniqWith(theTotals, _.isEqual);
-  _.forEach(selected.value, (expense) => {
-    _.forEach(theTotals, (total) => {
+  theTotals = _uniqWith(theTotals, _isEqual);
+  _forEach(selected.value, (expense) => {
+    _forEach(theTotals, (total) => {
       if (total.id === expense.expenseTypeId) {
         total.costTotal += parseFloat(expense.cost);
       }
@@ -138,20 +145,20 @@ const totals = computed(() => {
  * @param item - expense types being added or removed
  */
 function updateSelected(item) {
-  if (_.isArray(item)) {
+  if (_isArray(item)) {
     // item is an array
     if (item.length < selected.value.length) {
       // remove items
-      selected.value = _.xor(selected.value, _.xor(item, selected.value));
+      selected.value = _xor(selected.value, _xor(item, selected.value));
     } else {
       // add items
       selected.value.push(item);
-      selected.value = _.flatten(selected.value);
-      selected.value = _.uniqWith(selected.value, _.isEqual);
+      selected.value = _flatten(selected.value);
+      selected.value = _uniqWith(selected.value, _isEqual);
     }
   } else if (item) {
     // item is not an array
-    let indexOfItem = _.indexOf(selected.value, item);
+    let indexOfItem = _indexOf(selected.value, item);
     if (indexOfItem > -1) {
       // remove item
       selected.value.splice(indexOfItem, 1);

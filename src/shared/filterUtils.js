@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _find from 'lodash/find';
 import store from '../../store/index';
 
 /**
@@ -12,7 +12,7 @@ import store from '../../store/index';
 export function employeeFilter(__, search, item) {
   item = item?.raw || item;
   item.id = item.id || item.value;
-  item = _.find(store.getters.employees, (e) => e.id === item.id);
+  item = _find(store.getters.employees, (e) => e.id === item.id);
 
   if (!item) return false;
 

@@ -278,35 +278,37 @@
 <script setup>
 import api from '@/shared/api.js';
 // import BaseCard from '../components/employee-beta/cards/BaseCard.vue';
-import { updateStoreEmployees, updateStoreAvatars, updateStoreContracts, updateStoreTags } from '@/utils/storeUtils';
+import EmployeeForm from '@/components/employee-beta/forms/EmployeeForm.vue';
 import ExportEmployeeData from '@/components/employees/csv/ExportEmployeeData.vue';
 import DeleteErrorModal from '@/components/modals/DeleteErrorModal.vue';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
-// import EmployeeForm from '../components/employees/EmployeeForm.vue'
-import EmployeeForm from '../components/employee-beta/forms/EmployeeForm.vue';
-import _ from 'lodash';
+import { updateStoreAvatars, updateStoreContracts, updateStoreEmployees, updateStoreTags } from '@/utils/storeUtils';
+import _filter from 'lodash/filter';
+import _find from 'lodash/find';
+import _map from 'lodash/map';
+
 import ConvertEmployeeToCsv from '@/components/employees/csv/ConvertEmployeeToCsv.vue';
 import PowerEditContainer from '@/components/employees/power-edit/PowerEditContainer.vue';
 import TagManager from '@/components/employees/tags/TagManager.vue';
-import TagsFilter from '@/components/shared/TagsFilter.vue';
 import EmployeesSyncModal from '@/components/modals/EmployeesSyncModal.vue';
+import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSnackbar.vue';
+import TagsFilter from '@/components/shared/TagsFilter.vue';
+import { format } from '@/shared/dateUtils';
 import { selectedTagsHasEmployee } from '@/shared/employeeUtils';
+import { employeeFilter } from '@/shared/filterUtils';
 import {
   isFullTime,
   isInactive,
-  isPartTime,
   isMobile,
+  isPartTime,
   monthDayYearFormat,
   storeIsPopulated,
   userRoleIsAdmin,
   userRoleIsManager
 } from '@/utils/utils';
-import { employeeFilter } from '@/shared/filterUtils';
-import { format } from '../shared/dateUtils';
-import { ref, inject, onBeforeMount, onBeforeUnmount, computed, watch, provide } from 'vue';
-import { useStore } from 'vuex';
+import { computed, inject, onBeforeMount, onBeforeUnmount, provide, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { useDisplaySuccess, useDisplayError } from '@/components/shared/StatusSnackbar.vue';
+import { useStore } from 'vuex';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -372,14 +374,14 @@ const headers = ref([
         title: 'Last Login',
         key: 'lastLoginSeconds'
       }
-    : _,
+    : '',
   userRoleIsAdmin() || userRoleIsManager()
     ? {
         title: 'Actions',
         key: 'actions',
         sortable: false
       }
-    : _
+    : ''
 ]); // datatable headers
 const midAction = ref(false);
 const powerEdit = ref(false);
@@ -472,7 +474,7 @@ function employeePath(item) {
  */
 function filterEmployees() {
   //filter for Active Expense Types
-  filteredEmployees.value = _.filter(employees.value, (employee) => {
+  filteredEmployees.value = _filter(employees.value, (employee) => {
     let fullCheck = filter.value.active.includes('full') && isFullTime(employee);
     let partCheck = filter.value.active.includes('part') && isPartTime(employee);
     let inactiveCheck = filter.value.active.includes('inactive') && isInactive(employee);
@@ -520,8 +522,8 @@ function hasAdminPermissions() {
 async function loadBasecampAvatars() {
   if (!store.getters.basecampAvatars) await updateStoreAvatars();
   let avatars = store.getters.basecampAvatars;
-  _.map(employees.value, (employee) => {
-    let avatar = _.find(avatars, ['email_address', employee.email]);
+  _map(employees.value, (employee) => {
+    let avatar = _find(avatars, ['email_address', employee.email]);
     let avatarUrl = avatar ? avatar.avatar_url : null;
     employee.avatar = avatarUrl;
     return employee;
@@ -707,12 +709,12 @@ onBeforeMount(async () => {
   const adminSpecific = ['lastLoginSeconds']; // requires admin role, NOT manager
   const adminPermissions = ['actions']; // requires admin level, including manager
   if (!hasAdminPermissions()) {
-    headers.value = _.filter(headers.value, (header) => {
+    headers.value = _filter(headers.value, (header) => {
       return !adminPermissions.includes(header.value);
     });
   }
   if (!userRoleIsAdmin()) {
-    headers.value = _.filter(headers.value, (header) => {
+    headers.value = _filter(headers.value, (header) => {
       return !adminSpecific.includes(header.value);
     });
   }

@@ -85,7 +85,8 @@
 import { onMounted, ref, inject, watch } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-import _ from 'lodash';
+import _forEach from 'lodash/forEach';
+import _filter from 'lodash/filter';
 import { employeeFilter } from '@/shared/filterUtils';
 import { getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
 import { selectedTagsHasEmployee } from '@/shared/employeeUtils';
@@ -197,8 +198,8 @@ function handleClick(_, { item }) {
  */
 function populateAwardsDropdown() {
   awards.value = [];
-  _.forEach(filteredEmployees.value, (employee) =>
-    _.forEach(employee.awards, (award) => {
+  _forEach(filteredEmployees.value, (employee) =>
+    _forEach(employee.awards, (award) => {
       awards.value.push(award.name);
     })
   );
@@ -222,7 +223,7 @@ function populateDropdowns(emps) {
 function refreshDropdownItems() {
   filteredEmployees.value = employeesInfo.value;
   if (search.value) {
-    filteredEmployees.value = _.filter(filteredEmployees.value, (employee) => {
+    filteredEmployees.value = _filter(filteredEmployees.value, (employee) => {
       return employee.employeeNumber == search.value;
     });
   }
@@ -230,7 +231,7 @@ function refreshDropdownItems() {
     searchAwards();
   }
   if (tagsInfo.value.selected.length > 0) {
-    filteredEmployees.value = _.filter(filteredEmployees.value, (employee) => {
+    filteredEmployees.value = _filter(filteredEmployees.value, (employee) => {
       return selectedTagsHasEmployee(employee.id, tagsInfo.value);
     });
   }
@@ -242,7 +243,7 @@ function refreshDropdownItems() {
  * Filters employees on the data table by the award entered by the user.
  */
 function searchAwards() {
-  filteredEmployees.value = _.filter(filteredEmployees.value, (employee) => {
+  filteredEmployees.value = _filter(filteredEmployees.value, (employee) => {
     if (employee.awardNames) {
       return employee.awardNames.includes(awardSearch.value);
     } else {

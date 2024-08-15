@@ -287,7 +287,10 @@
 
 <script>
 import api from '@/shared/api.js';
-import _ from 'lodash';
+import _forEach from 'lodash/forEach';
+import _isArray from 'lodash/isArray';
+import _filter from 'lodash/filter';
+import _cloneDeep from 'lodash/cloneDeep';
 import github from '@/assets/img/trademarks/github.png';
 import linkedin from '@/assets/img/trademarks/linkedin.png';
 import x from '@/assets/img/trademarks/x.png';
@@ -380,7 +383,7 @@ async function updateAddressDropDown(query) {
     //object used to contain addresses and their respective ID's
     //needed later to obtain the selected address's zip code
     this.placeIds = {};
-    _.forEach(locations.predictions, (location) => {
+    _forEach(locations.predictions, (location) => {
       this.placeIds[location.description] = location.place_id;
     });
   } else {
@@ -397,7 +400,7 @@ async function updateCityDropDown(query) {
     //object used to contain addresses and their respective ID's
     //needed later to obtain the selected address's zip code
     this.predictions = {};
-    _.forEach(locations.predictions, (location) => {
+    _forEach(locations.predictions, (location) => {
       this.predictions[location.description] = location.predictions;
     });
   } else {
@@ -426,7 +429,7 @@ async function updateAddressBoxes(item) {
     //a field title 'type'. 'Type' is another array and we want the one
     //containing the postal_code string
     this.editedPersonalInfo.currentZIP = '';
-    _.forEach(res.result.address_components, (field) => {
+    _forEach(res.result.address_components, (field) => {
       if (field.types.includes('postal_code')) {
         this.editedPersonalInfo.currentZIP = field.short_name;
       }
@@ -500,7 +503,7 @@ async function validateFields() {
 
   let errorCount = 0;
   //ensures that refs are put in an array so we can reuse forEach loop
-  let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
+  let components = !_isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
 
   // for some reason, this page didn't overwrote the elements as formFields like the other pages did so
   // we added individual refs and put them into the components list manually
@@ -537,8 +540,8 @@ function addPhoneInput() {
  * Sorts phone numbers into two lists based on private or public.
  */
 function sortPhoneNumbers() {
-  this.editedPersonalInfo.privatePhoneNumbers = _.filter(this.phoneNumbers, (num) => num.private);
-  this.editedPersonalInfo.publicPhoneNumbers = _.filter(this.phoneNumbers, (num) => !num.private);
+  this.editedPersonalInfo.privatePhoneNumbers = _filter(this.phoneNumbers, (num) => num.private);
+  this.editedPersonalInfo.publicPhoneNumbers = _filter(this.phoneNumbers, (num) => !num.private);
 } // sortPhoneNumbers
 
 /**
@@ -575,7 +578,7 @@ function changeNumberVisibility(index) {
  */
 function watchModelID() {
   //when select an employee with a different ID the personal info reflects the employee that was chosen
-  this.editedPersonalInfo = _.cloneDeep(this.model);
+  this.editedPersonalInfo = _cloneDeep(this.model);
 } // watchModelID
 
 /**
@@ -615,7 +618,7 @@ export default {
   },
   data() {
     return {
-      editedPersonalInfo: _.cloneDeep(this.model), //employee personal info that can be edited
+      editedPersonalInfo: _cloneDeep(this.model), //employee personal info that can be edited
       addressDropDown: [],
       birthdayFormat: null, // formatted birthday
       BirthdayMenu: false, // display birthday menu

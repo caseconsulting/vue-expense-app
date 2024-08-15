@@ -93,7 +93,8 @@
 
 <script setup>
 import { nicknameAndLastName } from '@/shared/employeeUtils';
-import _ from 'lodash';
+import _forEach from 'lodash/forEach';
+import _find from 'lodash/find';
 import { onMounted, ref, watch, inject } from 'vue';
 import { useStore } from 'vuex';
 
@@ -153,7 +154,7 @@ function emit(msg, data) {
 function getName(employeeNumber) {
   let employees = store.getters.employees;
   if (employees) {
-    let employee = _.find(employees, (e) => e.employeeNumber === parseInt(employeeNumber));
+    let employee = _find(employees, (e) => e.employeeNumber === parseInt(employeeNumber));
     return employee ? nicknameAndLastName(employee) : employeeNumber;
   }
   return employeeNumber;
@@ -166,7 +167,7 @@ function setUpdates() {
   updatesToUsers.value = {};
 
   let bambooUpdates = props.syncData.caseAndBambooSyncResult.fieldsUpdated;
-  _.forEach(bambooUpdates, (record) => {
+  _forEach(bambooUpdates, (record) => {
     const [eNum, fieldName] = Object.entries(record)[0];
     if (updatesToUsers.value[eNum]) {
       updatesToUsers.value[eNum].add(fieldName);
@@ -175,7 +176,7 @@ function setUpdates() {
     }
   });
   let adpUpdates = props.syncData.bambooAndADPSyncResult.fieldsUpdated;
-  _.forEach(adpUpdates, (record) => {
+  _forEach(adpUpdates, (record) => {
     const [eNum, fieldName] = Object.entries(record)[0];
     if (updatesToUsers.value[eNum]) {
       updatesToUsers.value[eNum].add(fieldName);
@@ -201,7 +202,7 @@ function setFailures() {
     ...props.syncData.bambooAndADPSyncResult.failures
   ];
   failures.value = [];
-  _.forEach(failures, (f) => {
+  _forEach(failures, (f) => {
     const [eNum, error] = Object.entries(f)[0];
     failures.value.push({ [getName(eNum)]: error });
   });

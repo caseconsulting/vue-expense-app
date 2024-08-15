@@ -6,7 +6,9 @@
 
 <script setup>
 import { computed, onMounted } from 'vue';
-import _ from 'lodash';
+import _forEach from 'lodash/forEach';
+import _cloneDeep from 'lodash/cloneDeep';
+import _sortBy from 'lodash/sortBy';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -24,7 +26,7 @@ const props = defineProps(['field', 'item']);
 
 onMounted(() => {
   let elements = document.getElementsByClassName('tech-field');
-  _.forEach(elements, (e) => {
+  _forEach(elements, (e) => {
     e.style.maxWidth = props.field.maxWidth;
   });
 });
@@ -37,9 +39,9 @@ onMounted(() => {
 
 const techString = computed(() => {
   let str = '';
-  let techs = _.cloneDeep(props.item.technologies);
-  techs = _.sortBy(techs, (t) => t.name);
-  _.forEach(techs, (t) => {
+  let techs = _cloneDeep(props.item.technologies);
+  techs = _sortBy(techs, (t) => t.name);
+  _forEach(techs, (t) => {
     if (str.length > 0) str += ` & ${t.name}`;
     else if (str.length === 0) str += t.name;
   });
