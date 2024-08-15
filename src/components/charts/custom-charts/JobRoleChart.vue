@@ -6,7 +6,7 @@
 
 <script setup>
 import BarChart from '../base-charts/BarChart.vue';
-import _ from 'lodash';
+import _first from 'lodash/first';
 import { onMounted, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
@@ -132,8 +132,8 @@ function fillData() {
       }
     },
     onClick: (x, y) => {
-      if (_.first(y)) {
-        let index = _.first(y).index;
+      if (_first(y)) {
+        let index = _first(y).index;
         localStorage.setItem('requestedDataType', 'jobRoles');
         localStorage.setItem('requestedFilter', chartData.value.labels[index]);
         router.push({

@@ -28,8 +28,9 @@
             @click="goBackToAlphaProfile()"
             theme="dark"
             class="ma-2"
-            ><v-icon>mdi-alpha</v-icon>view</v-btn
           >
+            old view
+          </v-btn>
         </v-col>
 
         <v-col
@@ -304,7 +305,7 @@ async function getProfileData() {
  * Routes user to their employee page
  */
 function goBackToAlphaProfile() {
-  router.push(`/employee/${route.params.id}`);
+  router.push(`/employee-old/${route.params.id}`);
 } // handleProfile
 
 /**
@@ -356,7 +357,7 @@ function onSearchButton() {
  */
 async function onSearchUpdate() {
   if (dropdownEmployee.value) {
-    await router.push({ path: `/employee-beta/${dropdownEmployee.value.employeeNumber}`, hash: route.hash });
+    await router.push({ path: `/employee/${dropdownEmployee.value.employeeNumber}`, hash: route.hash });
   }
 }
 /**
@@ -382,6 +383,11 @@ async function navEmployee(num) {
   if (res < 0) res = loop.length - 1;
   dropdownEmployee.value = _.cloneDeep(loop[res]);
   dropdownEmployee.value.itemTitle = `${dropdownEmployee.value.lastName}, ${dropdownEmployee.value.nickname || dropdownEmployee.value.firstName}`; //add the itemTitle for the searchbar
+
+  // budget information needs to be reloaded specifically as it does not update
+  // when the model does
+  await refreshExpenseData();
+
   onSearchUpdate();
 } // navEmployee
 

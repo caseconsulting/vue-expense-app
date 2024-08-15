@@ -24,7 +24,9 @@
 </template>
 
 <script setup>
-import _ from 'lodash';
+import _map from 'lodash/map';
+import _forEach from 'lodash/forEach';
+import _remove from 'lodash/remove';
 import { onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -92,21 +94,21 @@ function fillData() {
   let overheadAwaitingClearanceCount = 0;
   let internsAwaitingClearanceCount = 0;
   let [billableEmployeeNames, internEmployeeNames] = [[], []];
-  let overheadEmployeeNames = _.map(employees.value, (e) => {
+  let overheadEmployeeNames = _map(employees.value, (e) => {
     return { name: `${e.nickname || e.firstName} ${e.lastName}` };
   });
   // tally up counts
-  _.forEach(employees.value, (e) => {
+  _forEach(employees.value, (e) => {
     let name = `${e.nickname || e.firstName} ${e.lastName}`;
     let awaitingClearance = e.clearances && e.clearances.some((c) => c.awaitingClearance);
     if (e.contracts && e.contracts.some((c) => c.projects.some((p) => !p.endDate))) {
       let isBillable = false;
-      _.forEach(e.contracts, (contract) => {
-        _.forEach(contract.projects, (project) => {
+      _forEach(e.contracts, (contract) => {
+        _forEach(contract.projects, (project) => {
           if (!project.endDate && !isBillable) {
             // employee is active on a contract
             billableEmployeeNames.push(name);
-            _.remove(overheadEmployeeNames, (x) => name === x.name);
+            _remove(overheadEmployeeNames, (x) => name === x.name);
             billableCount++;
             isBillable = true;
           }
@@ -117,7 +119,7 @@ function fillData() {
         internsAwaitingClearanceCount++;
       }
       internEmployeeNames.push(name);
-      _.remove(overheadEmployeeNames, (x) => name === x.name);
+      _remove(overheadEmployeeNames, (x) => name === x.name);
       internCount++;
     } else if (awaitingClearance) {
       overheadAwaitingClearanceCount++;
@@ -125,7 +127,7 @@ function fillData() {
   });
 
   overheadCount = employees.value.length - billableCount - internCount;
-  overheadEmployeeNames = _.map(overheadEmployeeNames, (x) => {
+  overheadEmployeeNames = _map(overheadEmployeeNames, (x) => {
     return x.name;
   });
 

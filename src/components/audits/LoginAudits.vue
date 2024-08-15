@@ -16,7 +16,8 @@
 </template>
 
 <script setup>
-import _ from 'lodash';
+import _forEach from 'lodash/forEach';
+import _find from 'lodash/find';
 import api from '@/shared/api';
 import BarChart from '../charts/base-charts/BarChart.vue';
 import AuditsTable from '@/components/audits/AuditsTable.vue';
@@ -106,9 +107,9 @@ async function fillData() {
   loginAudits.value = [];
   let loginData = await api.getAudits('login', props.queryStartDate, props.queryEndDate);
 
-  _.forEach(loginData, (audit) => {
+  _forEach(loginData, (audit) => {
     audit.dateCreated = format(audit.dateCreated, null, IsoFormat);
-    let employee = _.find(employees.value, (emp) => {
+    let employee = _find(employees.value, (emp) => {
       return emp.id === audit.employeeId;
     });
     let employeeName = '';
@@ -150,7 +151,7 @@ async function fillData() {
   let hoursAndLogins = generateTimeLabels(props.queryStartDate, props.queryEndDate);
   //gets the dateCreated attribute for each login audit and grabs the hour and meidiem (am or pm)
   //to accumulate on the hoursAndLogins map
-  _.forEach(loginAudits.value, (login) => {
+  _forEach(loginAudits.value, (login) => {
     let time = login.dateCreated.split(', ')[1];
     let hour = time.split(':')[0];
     let meridiem = time.split(' ')[1];

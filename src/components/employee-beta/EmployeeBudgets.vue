@@ -3,7 +3,7 @@
     <v-card>
       <v-card-title class="d-flex align-center justify-space-between header_style">
         <h3
-          v-if="budgets.length > 0 && fiscalDateView != getCurrentBudgetYear(hireDate)"
+          v-if="fiscalDateView && hireDate && fiscalDateView != getCurrentBudgetYear(hireDate)"
           class="text-white text-wrap px-2"
         >
           {{ viewingBudgetYear }}
@@ -170,12 +170,10 @@ const dropdownTitle = computed(
  */
 const viewingBudgetYear = computed(() => {
   const getFiscalYearView = parseInt(props.fiscalDateView.split('-')[0]);
-  if (props.fiscalDateView != getCurrentBudgetYear(hireDate.value)) {
-    if (smAndDown.value) {
-      return `${getFiscalYearView}-${getFiscalYearView + 1} Budgets`;
-    }
-    return `Viewing inactive budgets from ${getFiscalYearView} - ${getFiscalYearView + 1}`;
-  } else return 'Available Budgets';
+  if (smAndDown.value) {
+    return `${getFiscalYearView}-${getFiscalYearView + 1} Budgets`;
+  }
+  return `Viewing inactive budgets from ${getFiscalYearView} - ${getFiscalYearView + 1}`;
 });
 // |--------------------------------------------------|
 // |                                                  |
@@ -305,14 +303,11 @@ function selectBudget(budget) {
 // |--------------------------------------------------|
 
 /**
- * When the accessible budgets change refresh to employee to show changes.
+ * When the accessible budgets or expenses (from changing employee) change refresh to employee to show changes.
  */
-watch(
-  () => props.accessibleBudgets,
-  async () => {
-    await refreshEmployee();
-  }
-); // watchAccessibleBudgets
+watch([() => props.accessibleBudgets, () => props.expenses], async () => {
+  await refreshEmployee();
+}); // watchAccessibleBudgets
 
 /**
  * watcher for fiscalDateView - refresh budgets and draw graph

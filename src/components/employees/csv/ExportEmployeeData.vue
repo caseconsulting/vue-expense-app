@@ -65,7 +65,10 @@
 
 <script setup>
 import { getTodaysDate, format, startOf, endOf, subtract, isSameOrBefore, isSameOrAfter } from '@/shared/dateUtils';
-import _ from 'lodash';
+import _uniq from 'lodash/uniq';
+import _map from 'lodash/map';
+import _orderBy from 'lodash/orderBy';
+import _filter from 'lodash/filter';
 import baseCsv from '@/utils/csv/baseCsv.js';
 import employeeCsv from '@/utils/csv/employeeCsv.js';
 import eeoCsv from '@/utils/csv/eeoCsv.js';
@@ -123,8 +126,8 @@ onBeforeMount(async () => {
   exportType.value = exportTypes.value[0];
 
   // fill in year options
-  let years = _.uniq(_.map(props.employees, (e) => format(e.hireDate, null, 'YYYY'))); // get unique hire dates
-  years = _.orderBy(years, null, ['desc']); // sort
+  let years = _uniq(_map(props.employees, (e) => format(e.hireDate, null, 'YYYY'))); // get unique hire dates
+  years = _orderBy(years, null, ['desc']); // sort
   years.push('All'); // add "All" to beginning
   filterOptions.value.year = years;
 
@@ -233,7 +236,7 @@ function filterDeclined(employees) {
   function nullOrUndefined(item) {
     return item == undefined || item == null;
   }
-  return _.filter(employees, (e) => {
+  return _filter(employees, (e) => {
     return (
       !nullOrUndefined(e.eeoGender) &&
       !nullOrUndefined(e.eeoJobCategory) &&
@@ -256,7 +259,7 @@ function filterEmployees(employees) {
   let f = filters.value;
 
   // return all employees that pass the filters
-  return _.filter(employees, (e) => {
+  return _filter(employees, (e) => {
     // - YEAR FILTER -
     // remove employees that were hired after given year, or departed before given year
     let yearFilterExclusions = ['ppto']; // periodTypes to exclude

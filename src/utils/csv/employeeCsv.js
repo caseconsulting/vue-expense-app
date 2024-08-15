@@ -2,7 +2,11 @@
  * Utilities to convert employee objects into objects passable to
  * csv.js
  */
-import _ from 'lodash';
+import _forEach from 'lodash/forEach';
+import _orderBy from 'lodash/orderBy';
+import _map from 'lodash/map';
+import _isEmpty from 'lodash/isEmpty';
+import _sortBy from 'lodash/sortBy';
 import { difference, format, getTodaysDate, minimum } from '@/shared/dateUtils';
 import csvUtils from './baseCsv.js';
 
@@ -42,7 +46,7 @@ export function download(employees, contracts, tags, filename = null) {
 export function convertEmployees(employees, contracts, tags, includeEeoData = false) {
   if (!Array.isArray(employees)) employees = [employees];
   let tempEmployees = [];
-  _.forEach(employees, (employee) => {
+  _forEach(employees, (employee) => {
     try {
       let placeOfBirth = [employee.city, employee.st, employee.country];
       let contractsPrimesProjects = getContractPrimeProject(employee.contracts, contracts);
@@ -338,11 +342,11 @@ export function getContractPrimeProject(employeeContracts, allContracts) {
   let toReturn = {};
   let allProjects = allContracts.map((c) => c.projects).flat();
   if (employeeContracts) {
-    _.forEach(employeeContracts, (contract) => {
+    _forEach(employeeContracts, (contract) => {
       let earliestDate = getTodaysDate(); // keep track of earliest start date
       // create array of project strings
       let projects = [];
-      _.forEach(contract.projects, (project) => {
+      _forEach(contract.projects, (project) => {
         let p = allProjects.find((p) => p.id === project.projectId);
         projects.push(`${p.projectName} - ${(getProjectLengthInYears(project) / 12).toFixed(1)} years`);
         let endDate = format(project.endDate || getTodaysDate(), null, 'YYYY-MM-DD');
@@ -357,16 +361,16 @@ export function getContractPrimeProject(employeeContracts, allContracts) {
       });
     });
     // sort contracts by their earliest project start date
-    result = _.orderBy(result, 'd', 'desc');
+    result = _orderBy(result, 'd', 'desc');
     // extract contracts, primes, and projects into separate strings
     toReturn = {
-      contracts: _.map(result, (r) => {
+      contracts: _map(result, (r) => {
         return r.contract.name;
       }).join(', '),
-      primes: _.map(result, (r) => {
+      primes: _map(result, (r) => {
         return r.contract.prime;
       }).join(', '),
-      projects: _.map(result, (r) => {
+      projects: _map(result, (r) => {
         return r.projects.join(', ');
       }).join(', ')
     };
@@ -406,7 +410,7 @@ export function getEducation(education) {
   let military = [];
   let highSchool = [];
   if (education) {
-    _.forEach(education, (edu) => {
+    _forEach(education, (edu) => {
       // university type
       if (edu.type === 'university') {
         edu.degrees.forEach((degree) => {
@@ -422,7 +426,7 @@ export function getEducation(education) {
           });
 
           // add concentrations
-          if (!_.isEmpty(degree.concentrations)) {
+          if (!_isEmpty(degree.concentrations)) {
             str += ' (Concentrations: ';
             degree.concentrations.forEach((concentration, i) => {
               if (i != 0) {
@@ -434,7 +438,7 @@ export function getEducation(education) {
           }
 
           // add minors
-          if (!_.isEmpty(degree.minors)) {
+          if (!_isEmpty(degree.minors)) {
             str += ' (Minors: ';
             degree.minors.forEach((minor, i) => {
               if (i != 0) {
@@ -468,17 +472,17 @@ export function getEducation(education) {
     });
   }
   // sort entries, filter out string, and combine
-  university = _.sortBy(university, ['date']);
-  military = _.sortBy(military, ['date']);
-  highSchool = _.sortBy(highSchool, ['date']);
+  university = _sortBy(university, ['date']);
+  military = _sortBy(military, ['date']);
+  highSchool = _sortBy(highSchool, ['date']);
   let result = [
-    ..._.map(university, (item) => {
+    ..._map(university, (item) => {
       return item.str;
     }),
-    ..._.map(military, (item) => {
+    ..._map(military, (item) => {
       return item.str;
     }),
-    ..._.map(highSchool, (item) => {
+    ..._map(highSchool, (item) => {
       return item.str;
     })
   ];

@@ -60,7 +60,7 @@
 
 <script>
 import { isEmpty } from '@/utils/utils';
-import _ from 'lodash';
+import _sortBy from 'lodash/sortBy';
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -96,7 +96,7 @@ function onPageChange() {
  */
 function sortByName() {
   const iteratees = (obj) => obj.name;
-  this.sortedTech = _.sortBy(this.model.technologies, iteratees);
+  this.sortedTech = _sortBy(this.model.technologies, iteratees);
   this.page = 1;
   this.pageList = this.sortedTech.slice(0, 5);
 } //sortByName
@@ -127,7 +127,7 @@ function sortByCurrent() {
  */
 function sortByDate() {
   const iteratees = (obj) => -obj.years;
-  this.sortedTech = _.sortBy(this.model.technologies, iteratees);
+  this.sortedTech = _sortBy(this.model.technologies, iteratees);
 
   this.page = 1;
   this.pageList = this.sortedTech.slice(0, 5);

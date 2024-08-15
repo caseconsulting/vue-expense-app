@@ -215,9 +215,13 @@ import { SCHOOLS } from '@/components/employees/form-tabs/dropdown-info/schools'
 import { format } from '@/shared/dateUtils';
 import { getDateMonthYearOptionalRules, getRequiredRules } from '@/shared/validationUtils';
 import { isMobile } from '@/utils/utils';
-import _ from 'lodash';
-import { computed } from 'vue';
-import { onBeforeMount, ref } from 'vue';
+import _compact from 'lodash/compact';
+import _countBy from 'lodash/countBy';
+import _flattenDeep from 'lodash/flattenDeep';
+import _map from 'lodash/map';
+import _remove from 'lodash/remove';
+import _uniq from 'lodash/uniq';
+import { computed, onBeforeMount, ref } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
 
@@ -232,16 +236,16 @@ const props = defineProps(['schoolIndex', 'attach']);
 const store = useStore();
 const vMask = mask; // custom directive
 
-const concentrationDropDown = ref(_.map(majorsAndMinors, (elem) => titleCase(elem))); //autocomplete concentration options
+const concentrationDropDown = ref(_map(majorsAndMinors, (elem) => titleCase(elem))); //autocomplete concentration options
 const degreeDropDown = ref(['Associates', 'Bachelors', 'Masters', 'PhD/Doctorate', 'Other (trade school, etc)']); // autocomplete degree name opt
 const employees = ref(null);
-const majorDropDown = ref(_.map(majorsAndMinors, (elem) => titleCase(elem))); // autocomplete major options
-const minorDropDown = ref(_.map(majorsAndMinors, (elem) => titleCase(elem))); // autocomplete minor options
+const majorDropDown = ref(_map(majorsAndMinors, (elem) => titleCase(elem))); // autocomplete major options
+const minorDropDown = ref(_map(majorsAndMinors, (elem) => titleCase(elem))); // autocomplete minor options
 const schoolDropDown = SCHOOLS;
 
 const duplicateDiscipline = (title, discipline, degreeIndex) => {
   let disciplines = editedEducation.value[props.schoolIndex].degrees[degreeIndex][title];
-  let count = _.countBy(disciplines, (dis) => {
+  let count = _countBy(disciplines, (dis) => {
     return dis === discipline;
   });
   return count.true === 1 || 'Duplicate field found, please remove duplicate entries';
@@ -344,10 +348,10 @@ function titleCase(s) {
 } // titleCase
 
 function updateDropdowns() {
-  let employeesMajorsAndMinors = _.map(employees.value, (employee) => {
-    let majorsAndMinors = _.map(employee.education, (edu) => {
+  let employeesMajorsAndMinors = _map(employees.value, (employee) => {
+    let majorsAndMinors = _map(employee.education, (edu) => {
       if (edu.type === 'university') {
-        return _.map(edu.degrees, (degree) => {
+        return _map(edu.degrees, (degree) => {
           if (degree.majors && degree.minors) {
             return degree.majors.concat(degree.minors);
           } else if (degree.majors) {
@@ -359,20 +363,20 @@ function updateDropdowns() {
       }
     });
 
-    return _.flattenDeep(majorsAndMinors);
+    return _flattenDeep(majorsAndMinors);
   });
 
   //remove empty arrays
-  let majorsAndMinors = _.remove(employeesMajorsAndMinors, (degrees) => {
+  let majorsAndMinors = _remove(employeesMajorsAndMinors, (degrees) => {
     return degrees.length != 0;
   });
 
-  majorsAndMinors = _.flattenDeep(majorsAndMinors);
-  majorsAndMinors = _.compact(majorsAndMinors);
+  majorsAndMinors = _flattenDeep(majorsAndMinors);
+  majorsAndMinors = _compact(majorsAndMinors);
 
   // //combine with no duplicates
-  concentrationDropDown.value = _.uniq([...concentrationDropDown.value, ...majorsAndMinors]);
-  majorDropDown.value = _.uniq([...majorDropDown.value, ...majorsAndMinors]);
-  minorDropDown.value = _.uniq([...minorDropDown.value, ...majorsAndMinors]);
+  concentrationDropDown.value = _uniq([...concentrationDropDown.value, ...majorsAndMinors]);
+  majorDropDown.value = _uniq([...majorDropDown.value, ...majorsAndMinors]);
+  minorDropDown.value = _uniq([...minorDropDown.value, ...majorsAndMinors]);
 } // titleCases
 </script>

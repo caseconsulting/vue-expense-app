@@ -187,7 +187,15 @@
 </template>
 
 <script>
-import _ from 'lodash';
+import _isEmpty from 'lodash/isEmpty';
+import _isArray from 'lodash/isArray';
+import _map from 'lodash/map';
+import _uniq from 'lodash/uniq';
+import _flattenDeep from 'lodash/flattenDeep';
+import _remove from 'lodash/remove';
+import _compact from 'lodash/compact';
+import _countBy from 'lodash/countBy';
+import _cloneDeep from 'lodash/cloneDeep';
 import { getDateMonthYearOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
 import { format } from '@/shared/dateUtils';
 import { mask } from 'vue-the-mask';
@@ -285,7 +293,7 @@ function deleteItem(array, index) {
  * @returns one-item array or result of getColleges API call
  */
 function schoolNamePlaceholder(schoolName) {
-  return _.isEmpty(this.schoolDropDown) ? [schoolName] : this.schoolDropDown;
+  return _isEmpty(this.schoolDropDown) ? [schoolName] : this.schoolDropDown;
 } // confirmEducation
 
 /**
@@ -306,10 +314,10 @@ function titleCase(str) {
  * updates the dropdowns with employee data.
  */
 function updateDropdowns() {
-  let employeesMajorsAndMinors = _.map(this.employees, (employee) => {
-    let majorsAndMinors = _.map(employee.education, (edu) => {
+  let employeesMajorsAndMinors = _map(this.employees, (employee) => {
+    let majorsAndMinors = _map(employee.education, (edu) => {
       if (edu.type === 'university') {
-        return _.map(edu.degrees, (degree) => {
+        return _map(edu.degrees, (degree) => {
           if (degree.majors && degree.minors) {
             return degree.majors.concat(degree.minors);
           } else if (degree.majors) {
@@ -321,21 +329,21 @@ function updateDropdowns() {
       }
     });
 
-    return _.flattenDeep(majorsAndMinors);
+    return _flattenDeep(majorsAndMinors);
   }); //extract technology
 
   //remove empty arrays
-  let majorsAndMinors = _.remove(employeesMajorsAndMinors, (degrees) => {
+  let majorsAndMinors = _remove(employeesMajorsAndMinors, (degrees) => {
     return degrees.length != 0;
   });
 
-  majorsAndMinors = _.flattenDeep(majorsAndMinors);
-  majorsAndMinors = _.compact(majorsAndMinors);
+  majorsAndMinors = _flattenDeep(majorsAndMinors);
+  majorsAndMinors = _compact(majorsAndMinors);
 
   // //combine with no duplicates
-  this.concentrationDropDown = _.uniq([...this.concentrationDropDown, ...majorsAndMinors]);
-  this.majorDropDown = _.uniq([...this.majorDropDown, ...majorsAndMinors]);
-  this.minorDropDown = _.uniq([...this.minorDropDown, ...majorsAndMinors]);
+  this.concentrationDropDown = _uniq([...this.concentrationDropDown, ...majorsAndMinors]);
+  this.majorDropDown = _uniq([...this.majorDropDown, ...majorsAndMinors]);
+  this.minorDropDown = _uniq([...this.minorDropDown, ...majorsAndMinors]);
 } // updateDropdowns
 
 /**
@@ -344,7 +352,7 @@ function updateDropdowns() {
 async function validateFields() {
   let errorCount = 0;
   //ensures that refs are put in an array so we can reuse forEach loop
-  let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
+  let components = !_isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
   await asyncForEach(components, async (field) => {
     if (field && (await field.validate()).length > 0) errorCount++;
   });
@@ -391,18 +399,18 @@ export default {
   created,
   data() {
     return {
-      concentrationDropDown: _.map(majorsAndMinors, (elem) => titleCase(elem)), // autocomplete concentration options
+      concentrationDropDown: _map(majorsAndMinors, (elem) => titleCase(elem)), // autocomplete concentration options
       duplicateDiscipline: (title, discipline, degreeIndex) => {
         let disciplines = this.uni.degrees[degreeIndex][title];
-        let count = _.countBy(disciplines, (dis) => {
+        let count = _countBy(disciplines, (dis) => {
           return dis === discipline;
         });
         return count.true === 1 || 'Duplicate field found, please remove duplicate entries';
       },
-      uni: _.cloneDeep(this.$props.school),
+      uni: _cloneDeep(this.$props.school),
       degreeDropDown: ['Associates', 'Bachelors', 'Masters', 'PhD/Doctorate', 'Other (trade school, etc)'], // autocomplete degree name options
-      majorDropDown: _.map(majorsAndMinors, (elem) => titleCase(elem)), // autocomplete major options
-      minorDropDown: _.map(majorsAndMinors, (elem) => titleCase(elem)), // autocomplete minor options
+      majorDropDown: _map(majorsAndMinors, (elem) => titleCase(elem)), // autocomplete major options
+      minorDropDown: _map(majorsAndMinors, (elem) => titleCase(elem)), // autocomplete minor options
       schoolDropDown: SCHOOLS // autocomplete school options
     };
   },

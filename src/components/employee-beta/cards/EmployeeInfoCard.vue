@@ -14,10 +14,12 @@
         <v-row class="mr-5 align-baseline" no-gutters>
           <!-- name -->
           <v-col class="mr-3 fit-content">
-            <h3 class="name-text">{{ employeeName }}</h3>
+            <h3 class="name-text" :style="employeeName.length >= 14 ? 'font-size: 21px' : 'font-size: 32px'">
+              {{ employeeName }}
+            </h3>
           </v-col>
           <!-- nickname -->
-          <v-col class="fit-content">
+          <v-col v-if="nickname" class="fit-content">
             <h3 class="nickname-text" :style="`color: ${caseGray}`">{{ nickname }}</h3>
           </v-col>
         </v-row>
@@ -241,7 +243,6 @@ async function copyEmailList() {
 }
 
 .name-text {
-  font-size: xx-large;
   color: black;
   display: inline-block;
   white-space: nowrap;

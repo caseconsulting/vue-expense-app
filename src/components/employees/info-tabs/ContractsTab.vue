@@ -66,7 +66,8 @@
 <script>
 import { isEmpty, monthDayYearFormat } from '@/utils/utils';
 import { difference, getTodaysDate } from '@/shared/dateUtils';
-import _ from 'lodash';
+import _sortBy from 'lodash/sortBy';
+import _orderBy from 'lodash/orderBy';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -82,7 +83,7 @@ function created() {
     this.filteredList = this.model.contracts.slice(0, 5);
   }
   // sort the filtered list by start date, ascending
-  this.filteredList = _.sortBy(this.filteredList, (o) => this.getContractEarliestDate(o));
+  this.filteredList = _sortBy(this.filteredList, (o) => this.getContractEarliestDate(o));
 } // created
 
 // |--------------------------------------------------|
@@ -124,7 +125,7 @@ function getContractLengthInYears(contract) {
  * @return the earliest date
  */
 function getContractEarliestDate(contract) {
-  return _.orderBy(contract.projects, ['startDate'])[0].startDate;
+  return _orderBy(contract.projects, ['startDate'])[0].startDate;
 } // getContractEarliestDate
 
 /**

@@ -1,5 +1,5 @@
 <template>
-  <v-form ref="form" v-model="valid" validate-on="lazy">
+  <div>
     <v-row class="mt-2"><h3>Foreign Languages</h3></v-row>
     <v-row>
       <v-col class="d-flex justify-center">
@@ -47,16 +47,15 @@
         <v-btn prepend-icon="mdi-plus" @click="addLanguage(false)">Add Language</v-btn>
       </v-col>
     </v-row>
-  </v-form>
+  </div>
 </template>
 
 <script setup>
-import { getRequiredRules } from '@/shared/validationUtils';
-import { isEmpty } from 'lodash';
 import { LANGUAGES, PROFICIENCIES } from '@/shared/employeeUtils';
-import { inject, onBeforeUnmount, onMounted } from 'vue';
+import { getRequiredRules } from '@/shared/validationUtils';
+import { isMobile } from '@/utils/utils';
+import _isEmpty from 'lodash/isEmpty';
 import { ref } from 'vue';
-import { isMobile } from '../../../utils/utils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -64,37 +63,15 @@ import { isMobile } from '../../../utils/utils';
 // |                                                  |
 // |--------------------------------------------------|
 
-const emitter = inject('emitter');
-
-const editedEmployee = defineModel({ required: true });
-const valid = defineModel('valid', { required: true });
-const form = ref(null); // template ref
-
-defineExpose({ prepareSubmit });
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                 LIFECYCLE HOOKS                  |
-// |                                                  |
-// |--------------------------------------------------|
-
-onMounted(prepareSubmit);
-onBeforeUnmount(prepareSubmit);
+// passes in all slot props as a single object
+const { slotProps } = defineProps(['slotProps']);
+const editedEmployee = ref(slotProps.editedEmployee);
 
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
-
-async function prepareSubmit() {
-  if (form.value) {
-    const result = await form.value.validate();
-    emitter.emit('validating', { tab: 'languages', valid: result.valid });
-    return result;
-  }
-  return null;
-}
 
 /**
  * Gets validation rules for languages: no duplicate languages and no english
@@ -111,7 +88,7 @@ function getLanguageRules() {
     },
     // no english
     (v) => {
-      return (!isEmpty(v) && v.toLowerCase() !== 'english') || 'English is not a foreign language';
+      return (!_isEmpty(v) && v.toLowerCase() !== 'english') || 'English is not a foreign language';
     }
   ];
 }

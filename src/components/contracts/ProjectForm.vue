@@ -75,7 +75,9 @@
 
 <script setup>
 import api from '../../shared/api';
-import _ from 'lodash';
+import _find from 'lodash/find';
+import _some from 'lodash/some';
+import _cloneDeep from 'lodash/cloneDeep';
 import { generateUUID } from '@/utils/utils';
 import { ref, watch, inject } from 'vue';
 import { useStore } from 'vuex';
@@ -93,8 +95,8 @@ const directorate = ref(null);
 const loading = ref(false);
 const duplicateProjects = ref(() => {
   if (props.contract) {
-    let contract = _.find(store.getters.contracts, (c) => c.id == props.contract.id);
-    let found = _.some(contract.projects, (p) => p.projectName === projectName.value);
+    let contract = _find(store.getters.contracts, (c) => c.id == props.contract.id);
+    let found = _some(contract.projects, (p) => p.projectName === projectName.value);
     return !found || 'Duplicate project names';
   }
 });
@@ -139,10 +141,10 @@ async function createProject() {
     description: description.value,
     status: api.CONTRACT_STATUSES.ACTIVE
   };
-  let contract = _.cloneDeep(props.contract);
+  let contract = _cloneDeep(props.contract);
   contract.projects = [project, ...contract.projects];
   await api.updateItem(api.CONTRACTS, contract);
-  let contracts = _.cloneDeep(store.getters.contracts);
+  let contracts = _cloneDeep(store.getters.contracts);
   let contractIndex = contracts.findIndex((c) => c.id == contract.id);
   contracts[contractIndex] = contract;
   store.dispatch('setContracts', { contracts: contracts });

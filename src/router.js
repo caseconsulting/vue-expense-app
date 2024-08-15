@@ -1,23 +1,23 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import Reimbursements from '@/views/Reimbursements.vue';
-import Login from '@/views/Login.vue';
-import LoginFailed from '@/views/LoginFailed.vue';
-import ExpenseTypes from '@/views/ExpenseTypes.vue';
-import PTOCashOuts from '@/views/PTOCashOuts.vue';
-import Employees from '@/views/Employees.vue';
-import Employee from '@/views/Employee.vue';
-import StatsDashboard from '@/views/StatsDashboard.vue';
-import Audits from '@/views/Audits.vue';
-import Expenses from '@/views/MyExpenses.vue';
-import Help from '@/views/Help.vue';
-import Reports from '@/views/Reports.vue';
-import Callback from '@/views/Callback';
-import EmployeeHome from '@/views/MyBudgets.vue';
-import Home from '@/views/Home.vue';
-import TrainingAnalytics from '@/views/TrainingAnalytics';
-import PageNotFound from '@/views/PageNotFound';
-import Contracts from '@/views/Contracts.vue';
-import EmployeeBeta from '@/views/EmployeeBeta.vue';
+const Reimbursements = () => import('@/views/Reimbursements.vue');
+const Login = () => import('@/views/Login.vue');
+const LoginFailed = () => import('@/views/LoginFailed.vue');
+const ExpenseTypes = () => import('@/views/ExpenseTypes.vue');
+const PTOCashOuts = () => import('@/views/PTOCashOuts.vue');
+const Employees = () => import('@/views/Employees.vue');
+const Employee = () => import('@/views/Employee.vue');
+const StatsDashboard = () => import('@/views/StatsDashboard.vue');
+const Audits = () => import('@/views/Audits.vue');
+const Expenses = () => import('@/views/MyExpenses.vue');
+const Help = () => import('@/views/Help.vue');
+const Reports = () => import('@/views/Reports.vue');
+const Callback = () => import('@/views/Callback');
+const EmployeeHome = () => import('@/views/MyBudgets.vue');
+const Home = () => import('@/views/Home.vue');
+const TrainingAnalytics = () => import('@/views/TrainingAnalytics');
+const PageNotFound = () => import('@/views/PageNotFound.vue');
+const Contracts = () => import('@/views/Contracts.vue');
+const EmployeeBeta = () => import('@/views/EmployeeBeta.vue');
 import { requireAuth, isAdminOrManager } from '@/utils/auth';
 import multiguard from 'vue-router-multiguard';
 
@@ -132,14 +132,14 @@ const router = createRouter({
     {
       path: '/employee/:id',
       name: 'employee',
-      component: Employee,
+      component: EmployeeBeta,
       beforeEnter: requireAuth
     },
-    // beta employee profile page
+    // remove this once the new profile is 100% functional
     {
-      path: '/employee-beta/:id',
-      name: 'employee-beta',
-      component: EmployeeBeta,
+      path: '/employee-old/:id',
+      name: 'employee-old',
+      component: Employee,
       beforeEnter: requireAuth
     },
     //Below catch-all code works for Vue 2

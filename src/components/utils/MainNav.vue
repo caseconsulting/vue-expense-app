@@ -64,7 +64,10 @@
 <script setup>
 // @ is an alias to /src
 import { getRole } from '@/utils/auth';
-import _ from 'lodash';
+import _isNil from 'lodash/isNil';
+import _find from 'lodash/find';
+import _filter from 'lodash/filter';
+import _includes from 'lodash/includes';
 import { ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -216,8 +219,8 @@ watch(
       } else {
         items.value[i].active = route.name
           ? route.name.includes(items.value[i].route) ||
-            !_.isNil(
-              _.find(items.value[i].alias, (alias) => {
+            !_isNil(
+              _find(items.value[i].alias, (alias) => {
                 return route.name.includes(alias);
               })
             )
@@ -248,12 +251,12 @@ function handleNavigation(item) {
  * @return Array - Filtered items
  */
 function getVisibleTiles() {
-  return _.filter(items.value, (item) => {
+  return _filter(items.value, (item) => {
     if (item.subItems) {
-      if (_.includes(item.permission, permissions.value)) {
-        item.subItems = _.filter(item.subItems, (subItem) => {
+      if (_includes(item.permission, permissions.value)) {
+        item.subItems = _filter(item.subItems, (subItem) => {
           {
-            return _.includes(subItem.permission, permissions.value);
+            return _includes(subItem.permission, permissions.value);
           }
         });
         return true;
@@ -261,7 +264,7 @@ function getVisibleTiles() {
         return false;
       }
     } else {
-      return _.includes(item.permission, permissions.value);
+      return _includes(item.permission, permissions.value);
     }
   });
 } // visibleTiles
