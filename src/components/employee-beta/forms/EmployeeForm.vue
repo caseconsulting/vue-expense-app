@@ -41,60 +41,71 @@
       <v-container v-show="!submitting" fluid class="pt-0">
         <v-row>
           <v-col v-if="mdAndUp" cols="auto" class="pr-0">
-            <v-list density="compact" nav id="edit-navigation">
+            <v-list density="compact" nav id="edit-navigation" class="pr-0">
               <v-list-item
                 @click="cardName = 'Personal'"
                 link
                 title="Personal"
                 :class="{ invalid: validTabs.personal === false }"
+                :border="cardName == 'Personal' ? (validTabs.personal === false ? 'error md' : 'md') : '0'"
               ></v-list-item>
               <v-list-item
                 @click="cardName = 'Clearances'"
                 link
                 title="Clearances"
                 :class="{ invalid: validTabs.clearance === false }"
+                :border="cardName == 'Clearances' ? (validTabs.clearance === false ? 'error md' : 'md') : '0'"
               ></v-list-item>
               <v-list-item
                 @click="cardName = 'Contracts'"
                 link
                 title="Contracts"
                 :class="{ invalid: validTabs.contracts === false }"
+                :border="cardName == 'Contracts' ? (validTabs.contracts === false ? 'error md' : 'md') : '0'"
               ></v-list-item>
               <v-list-item
                 @click="cardName = 'Certifications & Awards'"
                 link
                 title="Certifications & Awards"
                 :class="{ invalid: validTabs.certsAndAwards === false }"
+                :border="
+                  cardName == 'Certifications & Awards' ? (validTabs.certsAndAwards === false ? 'error md' : 'md') : '0'
+                "
               ></v-list-item>
               <v-list-item
                 @click="cardName = 'Tech & Skills'"
                 link
                 title="Tech & Skills"
                 :class="{ invalid: validTabs.technologies === false }"
+                :border="cardName == 'Tech & Skills' ? (validTabs.technologies === false ? 'error md' : 'md') : '0'"
               ></v-list-item>
               <v-list-item
                 @click="cardName = 'Languages'"
                 link
                 title="Foreign Languages"
                 :class="{ invalid: validTabs.languages === false }"
+                :border="cardName == 'Languages' ? (validTabs.languages === false ? 'error md' : 'md') : '0'"
               ></v-list-item>
               <v-list-item
                 @click="cardName = 'Job Experience'"
                 link
                 title="Job Experience"
                 :class="{ invalid: validTabs.jobExperience === false }"
+                :border="cardName == 'Job Experience' ? (validTabs.jobExperience === false ? 'error md' : 'md') : '0'"
               ></v-list-item>
               <v-list-item
                 @click="cardName = 'Education'"
                 link
                 title="Education"
                 :class="{ invalid: validTabs.education === false }"
+                :border="cardName == 'Education' ? (validTabs.education === false ? 'error md' : 'md') : '0'"
               ></v-list-item>
               <v-list-item
                 @click="cardName = 'Customer Orgs'"
                 link
                 title="Customer Orgs"
                 :class="{ invalid: !validTabs.customerOrgs }"
+                :border="cardName == 'Customer Orgs' ? (validTabs.customerOrgs === false ? 'error md' : 'md') : '0'"
               ></v-list-item>
             </v-list>
           </v-col>
@@ -470,6 +481,8 @@ async function validate() {
 
   let valid = true;
 
+  console.log(validTabs);
+
   // iterates through each tab to make sure they are all valid
   forOwn(validTabs, (value) => {
     valid = valid && value;
@@ -624,7 +637,7 @@ async function selectTab() {
 
   let e = await waitForElm('employee-card');
   let tabHeight = 60;
-  e?.scroll({ top: tabHeight * num, behavior: 'smooth' });
+  e?.scrollTo({ top: tabHeight * num, behavior: 'smooth' });
 }
 
 // |--------------------------------------------------|
