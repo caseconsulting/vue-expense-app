@@ -7,11 +7,18 @@
       </div>
     </template>
     <v-card-text class="px-7 pt-7 pb-1 text-black">
-      <p>
-        <b>Full Name: </b
-        >{{ model.firstName + ' ' + (!model.noMiddleName ? model.middleName + ' ' : '') + model.lastName }}
-      </p>
-      <v-row v-if="!isEmpty(getPhoneNumbers())">
+      <!-- full name -->
+      <v-row dense>
+        <v-col>
+          <p>
+            <b>Full Name: </b
+            >{{ model.firstName + ' ' + (!model.noMiddleName ? model.middleName + ' ' : '') + model.lastName }}
+          </p>
+        </v-col>
+      </v-row>
+
+      <!-- phone numbers -->
+      <v-row dense v-if="!isEmpty(getPhoneNumbers())">
         <v-col class="pr-0" cols="auto">
           <b class="d-inline-flex">Phone Numbers:</b>
         </v-col>
@@ -31,35 +38,55 @@
           </div>
         </v-col>
       </v-row>
-      <div v-if="!isEmpty(getBirthday()) && (isAdmin || isUser)">
-        <p class="d-inline-flex"><b class="pr-1">Birthday: </b> {{ getBirthday() }}</p>
-        <div class="d-inline float-right">
+
+      <!-- birthday -->
+      <v-row dense v-if="!isEmpty(getBirthday()) && (isAdmin || isUser)">
+        <v-col class="d-inline-flex">
+          <p><b class="pr-1">Birthday: </b> {{ getBirthday() }}</p>
+        </v-col>
+        <v-col class="d-inline float-right" cols="auto">
           <v-icon v-if="!model.birthdayFeed">mdi-shield</v-icon>
           <v-icon v-else>mdi-shield-outline</v-icon>
           <v-tooltip activator="parent" location="top">{{
             !model.birthdayFeed ? 'Hidden from other employees' : 'Visible to other employees'
           }}</v-tooltip>
-        </div>
-      </div>
-      <div class="d-flex flex-row" v-if="!isEmpty(getCurrentAddress() && (isAdmin || isUser))">
-        <p class="d-inline-flex pr-1"><b>Address:</b></p>
-        <p class="d-inline-flex">
-          {{ getCurrentAddress() }}
-        </p>
+        </v-col>
+      </v-row>
+
+      <!-- current address -->
+      <v-row dense class="d-flex flex-row" v-if="!isEmpty(getCurrentAddress() && (isAdmin || isUser))">
+        <v-col cols="8">
+          <v-row no-gutters>
+            <v-col cols="auto" class="pb-2">
+              <p class="d-inline-flex pr-1"><b>Address:</b></p>
+            </v-col>
+            <v-col cols="auto">
+              <p class="d-inline-flex text-wrap">
+                {{ getCurrentAddress() }}
+              </p>
+            </v-col>
+          </v-row>
+        </v-col>
         <v-spacer></v-spacer>
-        <div class="d-inline">
+        <v-col class="d-flex d-inline flex-nowrap" cols="auto">
           <v-icon>mdi-shield</v-icon>
           <v-tooltip activator="parent" location="top">Always hidden from other employees</v-tooltip>
-        </div>
-      </div>
-      <v-row dense v-if="!isEmpty(getPlaceOfBirth() && (isAdmin || isUser))">
-        <v-col cols="auto">
-          <p class="d-inline text-align: float-left">
-            <b>Place of Birth: </b>
-          </p>
         </v-col>
+      </v-row>
+
+      <!-- place of birth -->
+      <v-row dense v-if="!isEmpty(getPlaceOfBirth() && (isAdmin || isUser))">
         <v-col>
-          <p class="d-inline">{{ getPlaceOfBirth() }}</p>
+          <v-row no-gutters>
+            <v-col cols="auto">
+              <p class="pr-1 d-inline text-align float-left">
+                <b>Place of Birth: </b>
+              </p>
+            </v-col>
+            <v-col>
+              <p class="d-inline">{{ getPlaceOfBirth() }}</p>
+            </v-col>
+          </v-row>
         </v-col>
         <v-col cols="auto">
           <div class="d-inline-flex float-right">
@@ -162,3 +189,9 @@ function getPhoneNumbers() {
   }
 } // getPhoneNumbers
 </script>
+
+<style scoped>
+.current-address {
+  min-width: 100% - 21px;
+}
+</style>
