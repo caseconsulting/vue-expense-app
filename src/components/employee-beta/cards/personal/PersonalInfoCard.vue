@@ -31,10 +31,8 @@
           </div>
         </v-col>
       </v-row>
-      <div>
-        <p class="d-inline-flex" v-if="!isEmpty(getBirthday()) && (isAdmin || isUser)">
-          <b class="pr-1">Birthday: </b> {{ getBirthday() }}
-        </p>
+      <div v-if="!isEmpty(getBirthday()) && (isAdmin || isUser)">
+        <p class="d-inline-flex"><b class="pr-1">Birthday: </b> {{ getBirthday() }}</p>
         <div class="d-inline float-right">
           <v-icon v-if="!model.birthdayFeed">mdi-shield</v-icon>
           <v-icon v-else>mdi-shield-outline</v-icon>

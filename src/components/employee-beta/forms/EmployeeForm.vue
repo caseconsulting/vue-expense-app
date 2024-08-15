@@ -231,7 +231,6 @@ import BaseForm from '@/components/employee-beta/forms/BaseForm.vue';
 import FormCancelConfirmation from '@/components/modals/FormCancelConfirmation.vue';
 import { useDisplayError } from '@/components/shared/StatusSnackbar.vue';
 import api from '@/shared/api';
-import { updateStoreEmployees, updateStoreUser } from '@/utils/storeUtils';
 import { generateUUID, isMobile } from '@/utils/utils';
 import { cloneDeep, find, findIndex, forOwn, isEqual, map, pickBy } from 'lodash';
 import { computed, inject, onBeforeMount, onBeforeUnmount, provide, reactive, ref, watch } from 'vue';
@@ -311,6 +310,7 @@ const tabRefs = reactive({
 onBeforeMount(() => {
   emitter.on('editing', (card) => {
     cardName.value = card;
+    submitting.value = false;
     editing.value = true;
   });
 
@@ -382,10 +382,13 @@ async function submit() {
       }
       const updated = await api.updateAttributes(api.EMPLOYEES, props.employee.id, changes);
       if (updated.id) {
-        emitter.emit('update', updated);
         // getEmployees and update store with latest data
-        if (editedEmployee.value.id === store.getters.user.id) await updateStoreUser();
-        await updateStoreEmployees();
+        if (editedEmployee.value.id === store.getters.user.id) store.dispatch('setUser', { user: updated });
+        let employees = store.getters.employees;
+        let employeeIdx = findIndex(employees, (e) => e.id === updated.id);
+        employees[employeeIdx] = updated;
+        store.dispatch('setEmployees', { employees });
+        emitter.emit('update', updated);
       } else {
         emitter.emit('discard-edits', props.employee);
         useDisplayError(updated.response.data.message);
@@ -396,7 +399,9 @@ async function submit() {
     editedEmployee.value.id = generateUUID();
     let newEmployee = await api.createItem(api.EMPLOYEES, editedEmployee.value);
     // update the store with the latest data
-    await updateStoreEmployees();
+    let employees = store.getters.employees;
+    employees.push(newEmployee);
+    store.dispatch('setEmployees', { employees });
     //reroute to the newly created employee
     if (newEmployee.id) {
       router.push(`/employee/${newEmployee.employeeNumber}`);
@@ -407,7 +412,6 @@ async function submit() {
       editedEmployee.value.id = null; // reset id
     }
   }
-  submitting.value = false;
   editing.value = false; // close edit modal
 }
 
