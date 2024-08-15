@@ -22,7 +22,7 @@
     <div class="d-flex justify-space-between my-3">
       <div class="mr-2">Remaining Avg/Day</div>
       <div class="dotted-line"></div>
-      <div :class="remainingAverageHoursPerDay > WORK_HOURS_PER_DAY ? 'text-red font-weight-bold' : ''" class="ml-2">
+      <div :class="remainingAverageHoursPerDay > WORK_HOURS_PER_DAY ? avgDayColor : ''" class="ml-2">
         {{ formatNumber(remainingAverageHoursPerDay) }}h
       </div>
     </div>
@@ -152,6 +152,14 @@ onBeforeUnmount(() => {
 // |                    COMPUTED                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+const avgDayColor = computed(() => {
+  if (remainingAverageHoursPerDay.value < 9) {
+    return 'text-orange font-weight-bold';
+  } else {
+    return 'text-red font-weight-bold';
+  }
+});
 
 /**
  * The amount of different days timesheets were entered in the future.
