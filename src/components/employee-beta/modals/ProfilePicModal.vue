@@ -2,7 +2,7 @@
   <v-dialog max-width="300">
     <template v-slot:default>
       <v-card class="text-center">
-        <v-card-title class="h-50 text-h4 beta_header_style">{{ fullName }}</v-card-title>
+        <v-card-title class="pa-3 h-50 beta_header_style header-style no-overflow">{{ fullName }}</v-card-title>
         <v-card-text class="pb-4">
           <v-avatar v-if="isEmpty(avatar)" :color="caseRed" :size="200">
             <span class="text-h1 display-inline-block position-absolute">{{ initials }}</span>
@@ -38,3 +38,15 @@ const props = defineProps(['avatar', 'initials', 'altText', 'fullName', 'model']
 const theAvatar = ref('https://i.pinimg.com/originals/dd/3f/8f/dd3f8f13aecf1c3e441facf64961423f.png');
 const isProfile = ref(props.model.employeeRole === 'intern');
 </script>
+
+<style scoped>
+.header-style {
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1.25 !important;
+  letter-spacing: 0.0073529412em;
+}
+.no-overflow {
+  white-space: initial;
+}
+</style>
