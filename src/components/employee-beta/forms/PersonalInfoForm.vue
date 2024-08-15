@@ -1,5 +1,5 @@
 <template>
-  <v-form ref="form" v-model="valid" validate-on="input">
+  <div>
     <v-row :class="isMobile() ? 'mt-3' : ''"><h3>Basic Information</h3></v-row>
     <v-row class="groove">
       <!-- first name -->
@@ -17,7 +17,7 @@
           :label="editedEmployee.noMiddleName ? 'No Middle Name' : 'Middle Name *'"
           :rules="editedEmployee.noMiddleName ? [() => true] : getRequiredRules()"
           :hide-details="editedEmployee.noMiddleName ? true : 'auto'"
-          @update:model-value="if (!isEmpty(editedEmployee.middleName)) editedEmployee.noMiddleName = false;"
+          @update:model-value="if (!_isEmpty(editedEmployee.middleName)) editedEmployee.noMiddleName = false;"
         >
           <template #append-inner>
             <v-btn
@@ -114,7 +114,7 @@
       <v-col>
         <v-row>
           <!-- case email -->
-          <v-col v-if="editedEmployee.employeeRole === 'admin'">
+          <v-col v-if="userIsAdminOrManager">
             <v-text-field
               v-model="emailUsername"
               label="CASE Email *"
@@ -256,7 +256,7 @@
                 </v-date-picker>
               </v-menu>
               <template #append-inner>
-                <private-button v-model="birthdayFeed"></private-button>
+                <private-button v-model="birthdayHidden"></private-button>
               </template>
             </v-text-field>
           </v-col>
@@ -442,12 +442,13 @@
         <e-e-o-compliance-edit-modal v-model="toggleForm" :model="editedEmployee"></e-e-o-compliance-edit-modal>
       </v-col>
     </v-row>
-  </v-form>
+  </div>
 </template>
 
 <script setup>
 import { JOB_TITLES } from '@/components/employees/form-tabs/dropdown-info/jobTitles';
 import PrivateButton from '@/components/shared/edit-fields/PrivateButton.vue';
+import { usePrepareSubmit } from '@/composables/editTabCommunication';
 import api from '@/shared/api';
 import { format, isSame } from '@/shared/dateUtils';
 import { CASE_EMAIL_DOMAIN, EMPLOYEE_ROLES, PHONE_TYPES } from '@/shared/employeeUtils';
@@ -465,8 +466,16 @@ import {
   getWorkStatusRules
 } from '@/shared/validationUtils';
 import { COUNTRIES, isMobile, STATES } from '@/utils/utils';
-import { cloneDeep, filter, forEach, includes, isEmpty, lowerCase, size, some, startCase, xorBy } from 'lodash';
-import { computed, inject, onBeforeMount, onBeforeUnmount, onMounted, readonly, ref, watch } from 'vue';
+import _cloneDeep from 'lodash/cloneDeep';
+import _filter from 'lodash/filter';
+import _forEach from 'lodash/forEach';
+import _includes from 'lodash/includes';
+import _isEmpty from 'lodash/isEmpty';
+import _lowerCase from 'lodash/lowerCase';
+import _some from 'lodash/some';
+import _startCase from 'lodash/startCase';
+import _xorBy from 'lodash/xor';
+import { computed, inject, onBeforeMount, onBeforeUnmount, readonly, ref, watch } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
 import EEOComplianceEditModal from '../modals/EEOComplianceEditModal.vue';
@@ -481,20 +490,21 @@ const store = useStore();
 const emitter = inject('emitter');
 const vMask = mask; // import v mask directive
 
-const editedEmployee = defineModel({ required: true });
+// passes in all slot props as a single object
+const { slotProps } = defineProps(['slotProps']);
+const editedEmployee = ref(slotProps.editedEmployee);
+
 const creatingEmployee = inject('creatingEmployee');
 const employeeId = editedEmployee.value.id;
-const valid = defineModel('valid', { required: true });
 const uneditedTags = readonly(getEmployeeTags());
-const editedTags = ref(cloneDeep(editedEmployee.value.tags ?? getEmployeeTags()));
+const editedTags = ref(_cloneDeep(editedEmployee.value.tags ?? getEmployeeTags()));
 const uneditedHireDate = editedEmployee.value.hireDate;
-const form = ref(null); // template ref to form
 
 // reformatted data for use in form
 const emailUsername = ref(
   editedEmployee.value.email ? editedEmployee.value.email.slice(0, editedEmployee.value.email.indexOf('@')) : ''
 );
-const employeeRole = ref(startCase(editedEmployee.value.employeeRole));
+const employeeRole = ref(_startCase(editedEmployee.value.employeeRole));
 const partTimeNumber = ref(
   editedEmployee.value.workStatus === 100 || editedEmployee.value.workStatus === 0
     ? 50
@@ -504,26 +514,18 @@ const phoneNumbers = ref(initPhoneNumbers());
 
 // other refs
 const addressSearch = ref(null); // current address search input
-const birthdayFeed = ref(!editedEmployee.value.birthdayFeed);
-const birthdayFormat = ref(null); // formatted birthday
+const birthdayHidden = ref(!editedEmployee.value.birthdayFeed);
+const birthdayFormat = ref(format(editedEmployee.value.birthday, null, 'MM/DD/YYYY')); // formatted birthday
 const birthdayMenu = ref(false); // shows the birthday menu
 const birthPlaceSearch = ref(null); // birth place search input
-const hireDateFormatted = ref(null); // formatted hireDate
+const hireDateFormatted = ref(format(editedEmployee.value.hireDate, null, 'MM/DD/YYYY')); // formatted hireDate
 const hireMenu = ref(false); // display hire menu
 const placeIds = ref({}); // for address autocomplete
 const predictions = ref({}); // for POB autocomplete
 const toggleForm = ref(false); // for EEO data
 const phoneAutofocus = ref(false);
-let hasExpenses = ref(false);
 
-// values to help with resetting edits after cancelling
-let stopPrepare = false;
-const onDiscardEdits = (employee) => {
-  stopPrepare = true;
-  editedEmployee.value = employee;
-};
-
-defineExpose({ prepareSubmit }); // allows parent to use refs to call prepareSubmit()
+usePrepareSubmit('personal', prepareSubmit);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -532,44 +534,14 @@ defineExpose({ prepareSubmit }); // allows parent to use refs to call prepareSub
 // |--------------------------------------------------|
 
 onBeforeMount(async () => {
-  emitter.on('discard-edits', onDiscardEdits);
   emitter.on('confirmed-cancel-eeo', () => {
     toggleForm.value = false;
   });
-
-  // set formatted birthday date
-  birthdayFormat.value = format(editedEmployee.value.birthday, null, 'MM/DD/YYYY') || birthdayFormat.value;
-  // set formatted hire date
-  hireDateFormatted.value = format(editedEmployee.value.hireDate, null, 'MM/DD/YYYY') || hireDateFormatted.value;
 });
 
-onMounted(validate);
-
 onBeforeUnmount(() => {
-  emitter.off('discard-edits', onDiscardEdits);
   emitter.off('confirmed-cancel-eeo');
 });
-
-onBeforeMount(async () => {
-  emitter.on('discard-edits', onDiscardEdits);
-  emitter.on('confirmed-cancel-eeo', () => {
-    toggleForm.value = false;
-  });
-
-  // determine if employee has expenses
-  hasExpenses.value = editedEmployee.value.id
-    ? size(await api.getAllEmployeeExpenses(editedEmployee.value.id)) > 0
-    : false;
-});
-
-onMounted(validate);
-
-onBeforeUnmount(() => {
-  emitter.off('discard-edits', onDiscardEdits);
-});
-
-onMounted(validate);
-onBeforeUnmount(prepareSubmit);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -587,7 +559,7 @@ const employeeNumberRules = computed(() => [
   ...getRequiredRules(),
   ...getNumberRules(),
   (v) => {
-    let duplicate = some(store.getters.employees, (employee) => {
+    let duplicate = _some(store.getters.employees, (employee) => {
       // ensures that the employee number being set is not the same as another employee
       employee.employeeNumber === Number(v) && employee.employeeNumber !== store.getters.user.employeeNumber;
     });
@@ -626,8 +598,8 @@ const workStatus = computed({
  * Uses the formatted/transformed data from the form and loads it into the edited employee
  */
 async function prepareSubmit() {
-  if (!stopPrepare) {
-    await validate();
+  if (!slotProps.stopPrepare) {
+    await slotProps.validate();
 
     if (editedEmployee.value.noMiddleName) editedEmployee.value.middleName = '';
 
@@ -637,17 +609,17 @@ async function prepareSubmit() {
     if (isSame(uneditedHireDate, editedEmployee.value.hireDate, 'day'))
       editedEmployee.value.hireDate = uneditedHireDate;
 
-    editedEmployee.value.employeeRole = lowerCase(employeeRole.value);
+    editedEmployee.value.employeeRole = _lowerCase(employeeRole.value);
 
     if (workStatus.value === 'Part Time') editedEmployee.value.workStatus = partTimeNumber.value;
 
     // the xor/symmetric difference is just the elements that have changed
     // this includes both tags the employee was added to and removed from, and no others
-    editedEmployee.value.tags = xorBy(editedTags.value, uneditedTags, 'id'); // xor by property 'id'
+    editedEmployee.value.tags = _xorBy(editedTags.value, uneditedTags, 'id'); // xor by property 'id'
 
     if (editedEmployee.value.country !== 'United States') editedEmployee.value.st = '';
 
-    editedEmployee.value.birthdayFeed = !birthdayFeed.value;
+    editedEmployee.value.birthdayFeed = !birthdayHidden.value;
 
     editedEmployee.value.privatePhoneNumbers = [];
     editedEmployee.value.publicPhoneNumbers = [];
@@ -671,22 +643,13 @@ async function prepareSubmit() {
   }
 }
 
-async function validate() {
-  if (form.value) {
-    const result = await form.value.validate();
-    emitter.emit('validating', { tab: 'personal', valid: result.valid });
-    return result;
-  }
-  return null;
-}
-
 /**
  * Gets tags of edited employee
  *
  * @return {any} A deep clone of the employee tags
  */
 function getEmployeeTags() {
-  return cloneDeep(filter(store.getters.tags, (tag) => includes(tag.employees, employeeId)));
+  return _cloneDeep(_filter(store.getters.tags, (tag) => _includes(tag.employees, employeeId)));
 }
 
 /**
@@ -729,7 +692,7 @@ async function updateAddressDropDown(query) {
     //object used to contain addresses and their respective ID's
     //needed later to obtain the selected address's zip code
     placeIds.value = {};
-    forEach(locations.predictions, (location) => {
+    _forEach(locations.predictions, (location) => {
       placeIds.value[location.description] = location.place_id;
     });
   } else {
@@ -744,7 +707,7 @@ async function updateAddressDropDown(query) {
 async function autofillLocation(item) {
   let search = item.value;
 
-  if (!isEmpty(search)) {
+  if (!_isEmpty(search)) {
     let fullAddress = search.split(', ');
     // fills in the first three fields
     editedEmployee.value.currentCity = fullAddress[1];
@@ -760,7 +723,7 @@ async function autofillLocation(item) {
     let res = await api.getZipCode(selectedAddress);
 
     editedEmployee.value.currentZIP = '';
-    forEach(res.result.address_components, (field) => {
+    _forEach(res.result.address_components, (field) => {
       if (field.types.includes('postal_code')) {
         editedEmployee.value.currentZIP = field.short_name;
       }
@@ -781,7 +744,7 @@ async function updateCityDropDown(query) {
     //object used to contain addresses and their respective ID's
     //needed later to obtain the selected address's zip code
     predictions.value = {};
-    forEach(locations.predictions, (location) => {
+    _forEach(locations.predictions, (location) => {
       predictions.value[location.description] = location.predictions;
     });
   } else {
@@ -796,7 +759,7 @@ async function updateCityBoxes(item) {
   let citySearchString = item.value;
   let country = '';
   let state = '';
-  if (!isEmpty(citySearchString)) {
+  if (!_isEmpty(citySearchString)) {
     let birthInfo = citySearchString.split(', ');
     let city = birthInfo[0];
 
@@ -834,6 +797,11 @@ function removeEmailDomain() {
   }
 } // removeEmailDomain
 
+function toggleEdit() {
+  emitter.emit('open-dialog');
+  toggleForm.value = true;
+}
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     WATCHERS                     |
@@ -867,11 +835,6 @@ watch(
     }
   }
 ); // watchEditedEmployeeHireDate
-
-function toggleEdit() {
-  emitter.emit('open-dialog');
-  toggleForm.value = true;
-}
 </script>
 
 <style scoped>

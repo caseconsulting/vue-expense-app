@@ -1,5 +1,5 @@
 <template>
-  <v-form ref="form" v-model="valid" validate-on="lazy">
+  <div>
     <v-row>
       <v-col>
         <v-row>
@@ -98,12 +98,13 @@
         <!-- End add education -->
       </v-col>
     </v-row>
-  </v-form>
+  </div>
 </template>
 
 <script setup>
-import { map } from 'lodash';
-import { computed, inject, onBeforeMount, onMounted, onBeforeUnmount, ref } from 'vue';
+import { usePrepareSubmit } from '@/composables/editTabCommunication';
+import _map from 'lodash/map';
+import { computed, ref } from 'vue';
 import HighSchoolForm from './education-forms/HighSchoolForm.vue';
 import MilitaryForm from './education-forms/MilitaryForm.vue';
 import UniversityForm from './education-forms/UniversityForm.vue';
@@ -120,45 +121,19 @@ const EDU_TYPES = [
   { display: 'High School', value: 'highSchool' }
 ];
 
-const emitter = inject('emitter');
-
-const editedEmployee = defineModel({ required: true });
-const valid = defineModel('valid', { required: true });
-defineProps({ allowAdditions: { type: Boolean } });
-const form = ref(null); // template ref
+// passes in all slot props as a single object
+const props = defineProps(['slotProps', 'allowAdditions']);
+const slotProps = props.slotProps;
+const editedEmployee = ref(slotProps.editedEmployee);
 
 const editedEducation = ref(
-  map(editedEmployee.value.education, (item) => {
+  _map(editedEmployee.value.education, (item) => {
     if (!item.id) item.id = getRandId();
     return item;
   })
 ); // stores edited education info
 
-let stopPrepare = false;
-const onDiscardEdits = (employee) => {
-  stopPrepare = true;
-  editedEmployee.value = employee;
-};
-
-defineExpose({ prepareSubmit });
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                 LIFECYCLE HOOKS                  |
-// |                                                  |
-// |--------------------------------------------------|
-
-onBeforeMount(() => {
-  emitter.on('discard-edits', onDiscardEdits);
-});
-
-onMounted(validate);
-
-onBeforeUnmount(() => {
-  emitter.off('discard-edits', onDiscardEdits);
-});
-
-onBeforeUnmount(prepareSubmit);
+usePrepareSubmit('education', prepareSubmit);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -203,11 +178,11 @@ const displayMilitary = computed(() => {
 // |--------------------------------------------------|
 
 async function prepareSubmit() {
-  if (!stopPrepare) {
-    await validate();
+  if (!slotProps.stopPrepare) {
+    await slotProps.validate();
 
     // remove properties that were used for editing
-    editedEmployee.value.education = map(editedEducation.value, (education) => {
+    editedEmployee.value.education = _map(editedEducation.value, (education) => {
       delete education.id;
 
       // high school properties
@@ -219,7 +194,7 @@ async function prepareSubmit() {
 
       // university properties
       if (education.degrees) {
-        education.degrees = map(education.degrees, (degree) => {
+        education.degrees = _map(education.degrees, (degree) => {
           delete degree.showEducationMenu;
           return degree;
         });
@@ -228,15 +203,6 @@ async function prepareSubmit() {
       return education;
     });
   }
-}
-
-async function validate() {
-  if (form.value) {
-    const result = await form.value.validate();
-    emitter.emit('validating', { tab: 'education', valid: result.valid });
-    return result;
-  }
-  return null;
 }
 
 /**
