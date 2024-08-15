@@ -128,7 +128,7 @@ const editedEmployee = ref(slotProps.editedEmployee);
 
 const editedEducation = ref(
   _map(editedEmployee.value.education, (item) => {
-    item.id = getRandId();
+    if (!item.id) item.id = getRandId();
     return item;
   })
 ); // stores edited education info

@@ -228,7 +228,7 @@
       <form-cancel-confirmation :toggleSubmissionConfirmation="toggleCancelConfirmation" type="cancel">
         <!-- in the future this could display the number of changes, but with the current logic the number can be confusing -->
         <!-- (especially with arrays and nested objects) -->
-        <v-card-text v-if="numberOfChanges > 0" align="center">There are pending changes!</v-card-text>
+        <!-- <v-card-text v-if="numberOfChanges > 0" align="center">There are pending changes!</v-card-text> -->
       </form-cancel-confirmation>
     </v-card>
   </v-dialog>
@@ -239,7 +239,6 @@ import BaseForm from '@/components/employee-beta/forms/BaseForm.vue';
 import FormCancelConfirmation from '@/components/modals/FormCancelConfirmation.vue';
 import { useDisplayError } from '@/components/shared/StatusSnackbar.vue';
 import api from '@/shared/api';
-import { updateStoreEmployees, updateStoreUser } from '@/utils/storeUtils';
 import { generateUUID, isMobile } from '@/utils/utils';
 import _cloneDeep from 'lodash/cloneDeep';
 import _find from 'lodash/find';
@@ -328,6 +327,7 @@ const tabs = reactive({
 onBeforeMount(() => {
   emitter.on('editing', (card) => {
     cardName.value = card;
+    submitting.value = false;
     editing.value = true;
   });
 
@@ -418,10 +418,13 @@ async function submit() {
 
       // if a valid employee is returned
       if (updated.id) {
-        emitter.emit('update', updated);
         // getEmployees and update store with latest data
-        if (editedEmployee.value.id === store.getters.user.id) await updateStoreUser();
-        await updateStoreEmployees();
+        if (editedEmployee.value.id === store.getters.user.id) store.dispatch('setUser', { user: updated });
+        let employees = store.getters.employees;
+        let employeeIdx = findIndex(employees, (e) => e.id === updated.id);
+        employees[employeeIdx] = updated;
+        store.dispatch('setEmployees', { employees });
+        emitter.emit('update', updated);
       } else {
         emitter.emit('discard-edits', props.employee);
         useDisplayError(updated.response.data.message);
@@ -432,7 +435,9 @@ async function submit() {
     editedEmployee.value.id = generateUUID();
     let newEmployee = await api.createItem(api.EMPLOYEES, editedEmployee.value);
     // update the store with the latest data
-    await updateStoreEmployees();
+    let employees = store.getters.employees;
+    employees.push(newEmployee);
+    store.dispatch('setEmployees', { employees });
     //reroute to the newly created employee
     if (newEmployee.id) {
       router.push(`/employee/${newEmployee.employeeNumber}`);
@@ -443,7 +448,6 @@ async function submit() {
       editedEmployee.value.id = null; // reset id
     }
   }
-  submitting.value = false;
   editing.value = false; // close edit modal
 }
 

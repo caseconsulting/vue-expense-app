@@ -232,7 +232,7 @@
               ref="formFields"
               v-mask="'##/##/####'"
               v-model="birthdayFormat"
-              :rules="[...getDateOptionalRules(), ...getNonFutureDateRules()]"
+              :rules="[getBirthdayRules()]"
               label="Birthday"
               hint="MM/DD/YYYY format"
               prepend-inner-icon="mdi-calendar"
@@ -454,11 +454,10 @@ import { format, isSame } from '@/shared/dateUtils';
 import { CASE_EMAIL_DOMAIN, EMPLOYEE_ROLES, PHONE_TYPES } from '@/shared/employeeUtils';
 import {
   getAINRules,
+  getBirthdayRules,
   getCaseEmailRules,
-  getDateOptionalRules,
   getDateRules,
   getEmailRules,
-  getNonFutureDateRules,
   getNumberRules,
   getPhoneNumberRules,
   getPhoneNumberTypeRules,

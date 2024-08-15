@@ -274,6 +274,8 @@ async function prepareSubmit() {
           project.projectId = _find(contractProjects.value, (p) => p.projectName === project.projectName).id;
         }
         delete project.projectName;
+        delete project.showStartMenu;
+        delete project.showEndMenu;
         return project;
       });
       return newContract;
