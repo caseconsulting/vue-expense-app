@@ -421,7 +421,7 @@ async function submit() {
         // getEmployees and update store with latest data
         if (editedEmployee.value.id === store.getters.user.id) store.dispatch('setUser', { user: updated });
         let employees = store.getters.employees;
-        let employeeIdx = findIndex(employees, (e) => e.id === updated.id);
+        let employeeIdx = _findIndex(employees, (e) => e.id === updated.id);
         employees[employeeIdx] = updated;
         store.dispatch('setEmployees', { employees });
         emitter.emit('update', updated);
