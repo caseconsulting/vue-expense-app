@@ -1,8 +1,8 @@
-import { getTodaysDate, isAfter, isBefore, isSameOrBefore, isValid } from '@/shared/dateUtils';
+import { add, getTodaysDate, isAfter, isBefore, isSameOrBefore, isValid } from '@/shared/dateUtils';
 import { isEmpty } from '@/utils/utils';
 import _filter from 'lodash/filter';
 import _find from 'lodash/find';
-import _some, { add } from 'lodash/some';
+import _some from 'lodash/some';
 import store from '../../store/index';
 
 /**
