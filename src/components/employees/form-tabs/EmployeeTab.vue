@@ -415,7 +415,7 @@
 
 <script>
 import api from '@/shared/api.js';
-import { format } from '@/shared/dateUtils/filter';
+import { format } from '@/shared/dateUtils';
 import {
   getAINRules,
   getCaseEmailRules,
@@ -435,6 +435,7 @@ import {
 } from '@/utils/utils';
 import _cloneDeep from 'lodash/cloneDeep';
 import _compact from 'lodash/compact';
+import _filter from 'lodash/filter';
 import _find from 'lodash/find';
 import _forEach from 'lodash/forEach';
 import _includes from 'lodash/includes';
