@@ -40,6 +40,7 @@ import _some from 'lodash/some';
 import _filter from 'lodash/filter';
 import _first from 'lodash/first';
 import _isEmpty from 'lodash/isEmpty';
+import _uniqBy from 'lodash/uniqBy';
 import BarChart from '@/components/charts/base-charts/BarChart.vue';
 import { isFullTime, getCurrentBudgetYear } from '@/utils/utils';
 import { getYear, isBetween } from '@/shared/dateUtils';
@@ -375,7 +376,7 @@ async function refreshBudgets() {
   });
 
   // filter out diplicate expense types
-  budgetsVar = _.uniqBy(budgetsVar, 'expenseTypeId');
+  budgetsVar = _uniqBy(budgetsVar, 'expenseTypeId');
 
   // remove any budgets where budget amount is 0 and 0 total expenses
   expenseTypeData.value = _filter(budgetsVar, (data) => {
