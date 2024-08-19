@@ -201,10 +201,10 @@
             ></v-autocomplete>
           </v-col>
         </v-row>
-        <v-row v-if="editedEmployee.employeeRole === 'admin'">
+        <v-row v-if="userIsAdminOrManager">
           <!-- work status / full time / part time / inactive -->
           <v-col>
-            <v-radio-group v-model="workStatus" label="Work Status" :inline="!isMobile()">
+            <v-radio-group v-model="workStatus" label="Work Status *" :inline="!isMobile()">
               <v-radio value="Full Time" label="Full Time"></v-radio>
               <v-radio value="Part Time" label="Part Time"></v-radio>
               <v-radio value="Inactive" label="Inactive"></v-radio>
