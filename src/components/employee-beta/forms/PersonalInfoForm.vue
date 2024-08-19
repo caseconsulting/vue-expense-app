@@ -201,10 +201,10 @@
             ></v-autocomplete>
           </v-col>
         </v-row>
-        <v-row v-if="editedEmployee.employeeRole === 'admin'">
+        <v-row v-if="userIsAdminOrManager">
           <!-- work status / full time / part time / inactive -->
           <v-col>
-            <v-radio-group v-model="workStatus" :inline="!isMobile()">
+            <v-radio-group v-model="workStatus" label="Work Status *" :inline="!isMobile()">
               <v-radio value="Full Time" label="Full Time"></v-radio>
               <v-radio value="Part Time" label="Part Time"></v-radio>
               <v-radio value="Inactive" label="Inactive"></v-radio>
@@ -474,7 +474,8 @@ import _isEmpty from 'lodash/isEmpty';
 import _lowerCase from 'lodash/lowerCase';
 import _some from 'lodash/some';
 import _startCase from 'lodash/startCase';
-import _xorBy from 'lodash/xor';
+import _uniqBy from 'lodash/uniqBy';
+import _xorBy from 'lodash/xorBy';
 import { computed, inject, onBeforeMount, onBeforeUnmount, readonly, ref, watch } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
@@ -497,7 +498,7 @@ const editedEmployee = ref(slotProps.editedEmployee);
 const creatingEmployee = inject('creatingEmployee');
 const employeeId = editedEmployee.value.id;
 const uneditedTags = readonly(getEmployeeTags());
-const editedTags = ref(_cloneDeep(editedEmployee.value.tags ?? getEmployeeTags()));
+const editedTags = ref(_cloneDeep(getEmployeeTags()));
 const uneditedHireDate = editedEmployee.value.hireDate;
 
 // reformatted data for use in form
@@ -616,6 +617,7 @@ async function prepareSubmit() {
     // the xor/symmetric difference is just the elements that have changed
     // this includes both tags the employee was added to and removed from, and no others
     editedEmployee.value.tags = _xorBy(editedTags.value, uneditedTags, 'id'); // xor by property 'id'
+    editedEmployee.value.tags = _uniqBy(editedEmployee.value.tags, 'id');
 
     if (editedEmployee.value.country !== 'United States') editedEmployee.value.st = '';
 
