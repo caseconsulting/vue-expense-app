@@ -410,7 +410,7 @@ async function submit() {
     // if there are any changes
     if (!isEmpty(Object.keys(changes))) {
       if (changes.tags) {
-        submitTags(changes.tags);
+        await submitTags(changes.tags);
         delete changes.tags; // remove when we are done, we don't want to send this in api call
       }
 

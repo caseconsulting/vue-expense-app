@@ -13,6 +13,7 @@
           <p class="pt-2" v-if="!isEmpty(getEmployeeRole())">
             <b>Employee Role:</b> {{ _.startCase(getEmployeeRole()) }}
           </p>
+          <p class="pt-2" v-if="!isEmpty(getWorkStatusLabel())"><b>Work Status:</b> {{ getWorkStatusLabel() }}</p>
           <div v-if="isAdmin" class="pt-2">
             <p class="d-inline"><b>Employee Tags:</b></p>
             <p class="d-inline-flex pl-1" v-for="tag in getTags()" :key="tag.id">
@@ -137,6 +138,18 @@ function getTags() {
  */
 function getSelfIdentified() {
   return props.model.eeoDeclineSelfIdentify ? 'Declined self-identify, Form ' : 'Form';
+}
+
+/**
+ * Return the info label of the employee work status
+ *
+ * @return String - the employee info work status label
+ */
+function getWorkStatusLabel() {
+  const workStatus = props.model.workStatus;
+  if (workStatus === 100) return 'Full Time';
+  else if (workStatus > 0 && workStatus < 100) return `Part Time (${workStatus}%)`;
+  else return 'Inactive';
 }
 
 /**
