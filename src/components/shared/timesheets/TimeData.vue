@@ -33,6 +33,16 @@
         </div>
       </v-card-text>
     </v-card>
+    <PTOPlanningForm
+      v-if="store.getters.employees"
+      v-show="false"
+      style="display: none"
+      ref="hiddenPtoPlanningFormRef"
+      :employeeId="employee.id"
+      :isCyk="system === 'ADP'"
+      :pto="convertToHours(ptoBalances?.['PTO']?.value ?? ptoBalances?.['PTO'] ?? 0)"
+      :holiday="convertToHours(ptoBalances?.['Holiday']?.value ?? ptoBalances?.['Holiday'] ?? 0)"
+    />
   </div>
 </template>
 
@@ -42,6 +52,7 @@ import PTOHours from '@/components/shared/timesheets/PTOHours.vue';
 import _isEmpty from 'lodash/isEmpty';
 import _forEach from 'lodash/forEach';
 import _find from 'lodash/find';
+import PTOPlanningForm from '@/components/shared/PTOPlanningForm.vue';
 import api from '@/shared/api';
 import { computed, inject, onBeforeMount, onBeforeUnmount, ref, unref, watch } from 'vue';
 import { useStore } from 'vuex';
@@ -54,6 +65,8 @@ import { getCalendarYearPeriod, getContractYearPeriod } from './time-periods';
 // |                      SETUP                       |
 // |                                                  |
 // |--------------------------------------------------|
+
+const hiddenPtoPlanningFormRef = ref(null);
 
 const props = defineProps(['employee']);
 const emitter = inject('emitter');
@@ -86,6 +99,7 @@ const KEYS = ref({
  */
 onBeforeUnmount(() => {
   emitter.off('get-period-data');
+  emitter.off('auto-save-pto-planner');
 }); // beforeUnmount
 
 /**
@@ -97,13 +111,24 @@ onBeforeMount(async () => {
   });
   await setInitialData();
 
-  // add planned PTO and Holiday to ptoBalances
+  // intial set of getting planned PTO data
   refreshPlannedPto();
 
   // listen for planned PTO results
   emitter.on('update-planned-pto-results-time-data', (data) => {
-    clonedEmployee.value.plannedPto = data;
+    if (data) clonedEmployee.value.plannedPto = data;
     refreshPlannedPto();
+  });
+
+  // listen for ability to refresh PTO plan results
+  emitter.on('auto-save-pto-planner', () => {
+    // if there are previous months, resave the plan to get rid of them properly
+    if (isSameOrBefore(clonedEmployee.value.plannedPto.plan[0].date, getTodaysDate(), 'month')) {
+      hiddenPtoPlanningFormRef.value.save();
+    } else {
+      console.log(clonedEmployee.value.plannedPto.plan);
+      console.log('no months to remove');
+    }
   });
 
   loading.value = false;
@@ -111,7 +136,7 @@ onBeforeMount(async () => {
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                 COMPUTED                         |
+// |                     COMPUTED                     |
 // |                                                  |
 // |--------------------------------------------------|
 
@@ -205,6 +230,17 @@ function convertToSeconds(hours) {
 } // convertToSeconds
 
 /**
+ * Converts seconds to hours with 2 decimal places if needed.
+ *
+ * @param {Number} seconds - The number of seconds
+ */
+function convertToHours(seconds) {
+  return Number(seconds / 60 / 60)
+    ?.toFixed(2)
+    ?.replace(/[.,]00$/, ''); // removes decimals if a whole number
+} // convertToHours
+
+/**
  * Helper to add items to the ptoBalances object
  * @param balanceKey key in ptoBalances to modify
  * @param itemsKey key in ptoBalances[balanceKey].items object to add
@@ -222,10 +258,8 @@ function addPlanToBalances(balanceKey, itemsKey, planResults, planKey) {
 /**
  * Refreshes the PTO plan to put in the ptoBalances object, based on the
  * employee's plannedPto in their employee object by default.
- *
- * @param planResults (optional) object of results of planned PTO
  */
-function refreshPlannedPto() {
+async function refreshPlannedPto() {
   // set plan to employee object
   let employeePlan = clonedEmployee.value.plannedPto;
   let planResults = {
@@ -239,13 +273,7 @@ function refreshPlannedPto() {
     delete ptoBalances.value?.['Holiday']?.items?.['Holiday after plan'];
     return;
   }
-  // negate any balances that are from the past
-  for (let month of employeePlan.plan) {
-    if (isSameOrBefore(month.date, getTodaysDate(), 'month')) {
-      planResults.pto += Number(month.ptoHours);
-      planResults.holiday += Number(month.holidayHours);
-    } else break; // months are sorted, can just break if current month is today or future
-  }
+
   // set planned PTO and Holiday balances
   addPlanToBalances('PTO', 'PTO after plan', planResults, 'pto');
   addPlanToBalances('Holiday', 'Holiday after plan', planResults, 'holiday');
@@ -267,6 +295,7 @@ async function resetData() {
   }
   emitter.emit('reset-data');
   await setInitialData(false);
+  refreshPlannedPto();
   loading.value = false;
 } // resetData
 
@@ -353,7 +382,6 @@ async function setData(isCalendarYear, isYearly) {
   } else {
     await setDataFromApi(isCalendarYear, isYearly);
   }
-  refreshPlannedPto();
 } // setData
 
 /**
