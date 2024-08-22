@@ -11,20 +11,6 @@
       </v-col>
     </v-row>
     <v-row v-else>
-      <!-- Status Alert -->
-      <v-snackbar
-        v-model="status.statusType"
-        :color="status.color"
-        multi-line
-        location="top right"
-        :timeout="5000"
-        vertical
-      >
-        <v-card-text headline color="white">
-          <span class="text-h6 font-weight-medium">{{ status.statusMessage }}</span>
-        </v-card-text>
-        <v-btn color="white" variant="text" @click="clearStatus()"> Close </v-btn>
-      </v-snackbar>
       <v-col cols="12" xl="8" lg="7">
         <p-t-o-cash-outs-table />
       </v-col>
@@ -41,7 +27,6 @@ import TimeData from '@/components/shared/timesheets/TimeData';
 import { onBeforeMount, onBeforeUnmount, onMounted, inject, watch, ref } from 'vue';
 import { useStore } from 'vuex';
 import { storeIsPopulated } from '../utils/utils';
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                      SETUP                       |
@@ -52,11 +37,6 @@ const emitter = inject('emitter');
 const store = useStore();
 
 const loading = ref(true);
-const status = ref({
-  statusType: undefined,
-  statusMessage: '',
-  color: ''
-});
 const employee = ref(null);
 
 // |--------------------------------------------------|
@@ -78,11 +58,6 @@ onBeforeMount(() => {
  * Mounted lifecycle hook
  */
 onMounted(() => {
-  emitter.on('status-alert', (stat) => {
-    status.value.statusType = stat.statusType;
-    status.value.statusMessage = stat.statusMessage;
-    status.value.color = stat.color;
-  });
   emitter.on('change-timesheets-employee', (emp) => {
     employee.value = emp;
   });
@@ -92,7 +67,7 @@ onMounted(() => {
  * before destroy lifecycle hook
  */
 onBeforeUnmount(() => {
-  emitter.off('status-alert');
+  emitter.off('change-timesheets-employee');
 }); // beforeUnmount
 
 // |--------------------------------------------------|
@@ -110,19 +85,4 @@ watch(storeIsPopulated, async () => {
     loading.value = false;
   }
 }); // watchStoreIsPopulated
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     METHODS                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Clear the action status that is displayed in the snackbar.
- */
-function clearStatus() {
-  status.value.statusType = undefined;
-  status.value.statusMessage = '';
-  status.value.color = '';
-} // clearStatus
 </script>

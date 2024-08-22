@@ -39,19 +39,24 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import api from '@/shared/api';
+import { ref, watch, inject } from 'vue';
 
-export default {
-  data() {
-    return {
-      filter: [api.CONTRACT_STATUSES.ACTIVE]
-    };
-  },
-  watch: {
-    filter: function () {
-      this.emitter.emit('filter', this.filter);
-    }
-  }
-};
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const emitter = inject('emitter');
+const filter = ref(api.CONTRACT_STATUSES.ACTIVE);
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+watch(filter, () => emitter.emit('filter', filter.value));
 </script>

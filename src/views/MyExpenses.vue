@@ -11,21 +11,6 @@
       </v-col>
     </v-row>
     <v-row v-else>
-      <!-- Status Alert -->
-      <v-snackbar
-        v-model="status.show"
-        :color="status.color"
-        :multi-line="true"
-        location="top end"
-        :timeout="5000"
-        :vertical="true"
-      >
-        <v-card-text color="white">
-          <span class="text-h6 font-weight-medium">{{ status.statusMessage }}</span>
-        </v-card-text>
-        <v-btn color="white" variant="text" @click="clearStatus()"> Close </v-btn>
-      </v-snackbar>
-
       <v-col cols="12" lg="8">
         <v-card class="mt-3">
           <v-container fluid>
@@ -518,7 +503,16 @@ import employeeUtils from '@/shared/employeeUtils';
 import ExpenseForm from '@/components/expenses/ExpenseForm.vue';
 import TagsFilter from '@/components/shared/TagsFilter.vue';
 import UnreimburseModal from '@/components/modals/UnreimburseModal.vue';
-import _ from 'lodash';
+import _isEmpty from 'lodash/isEmpty';
+import _cloneDeep from 'lodash/cloneDeep';
+import _mapValues from 'lodash/mapValues';
+import _sortBy from 'lodash/sortBy';
+import _map from 'lodash/map';
+import _filter from 'lodash/filter';
+import _some from 'lodash/some';
+import _find from 'lodash/find';
+import _mergeWith from 'lodash/mergeWith';
+import _isNil from 'lodash/isNil';
 import {
   isEmpty,
   monthDayYearFormat,
@@ -535,7 +529,7 @@ import { mask } from 'vue-the-mask';
 import { onBeforeMount, onBeforeUnmount, ref, watch, computed, inject } from 'vue';
 import { useStore } from 'vuex';
 import { storeIsPopulated } from '../utils/utils';
-
+import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSnackbar.vue';
 // |--------------------------------------------------|
 // |                                                  |
 // |                      SETUP                       |
@@ -635,12 +629,6 @@ const search = ref(null); // query text for datatable search field
 const toSort = ref([{ key: 'createdAt', order: 'desc' }]); // default sort datatable items
 const startDateFilter = ref(null);
 const startDateFilterMenu = ref(null);
-const status = ref({
-  show: false,
-  statusType: undefined,
-  statusMessage: '',
-  color: ''
-}); // snackbar action status
 const tagsInfo = ref({
   selected: [],
   flipped: []
@@ -673,7 +661,7 @@ onBeforeMount(async () => {
     updateModelInTable();
   });
   emitter.on('error', (msg) => {
-    displayError(msg);
+    useDisplayError(msg);
   });
 
   //no longer editing an expense (clear model and enable buttons)
@@ -712,7 +700,7 @@ onBeforeMount(async () => {
   }
 
   // if coming from budgets chart scroll to top and fill in filter data
-  if (!_.isEmpty(localStorage.getItem('requestedFilter'))) {
+  if (!_isEmpty(localStorage.getItem('requestedFilter'))) {
     window.scrollTo(0, 0);
     let storedInfo = JSON.parse(localStorage.getItem('requestedFilter'));
     [search.value, filter.value.reimbursed, employee.value] = [
@@ -758,7 +746,7 @@ const roleHeaders = computed(() => {
   return userRoleIsAdmin() || userRoleIsManager()
     ? headers.value
     : (function getUserHeaders(headers) {
-        let localHeaders = _.cloneDeep(headers); // create a local copy of all headers
+        let localHeaders = _cloneDeep(headers); // create a local copy of all headers
         localHeaders.splice(1, 1); // remove the employee header
         return localHeaders; // return the remaining headers
       })(headers.value);
@@ -811,10 +799,7 @@ function moneyFilter(value) {
 async function addModelToTable() {
   await refreshExpenses();
 
-  status.value['show'] = true;
-  status.value['statusType'] = 'SUCCESS';
-  status.value['statusMessage'] = 'Item was successfully submitted!';
-  status.value['color'] = 'green';
+  useDisplaySuccess('Item was successfully submitted!');
 } // addModelToTable
 
 /**
@@ -823,22 +808,12 @@ async function addModelToTable() {
  */
 function clearExpense() {
   expense.value['description'] = null;
-  expense.value = _.mapValues(expense.value, () => {
+  expense.value = _mapValues(expense.value, () => {
     return null;
   });
   expense.value['employeeId'] = null;
   expense.value['employeeName'] = null;
 } // clearExpense
-
-/**
- * Clear the action status that is displayed in the snackbar.
- */
-function clearStatus() {
-  status.value['show'] = false;
-  status.value['statusType'] = undefined;
-  status.value['statusMessage'] = '';
-  status.value['color'] = '';
-} // clearStatus
 
 /**
  * Sets a mapping of employee name to employee id of an expense for
@@ -848,8 +823,8 @@ function clearStatus() {
  */
 function constructAutoComplete(aggregatedData) {
   let seenEmployees = new Set(); // used to not add duplicates
-  employees.value = _.sortBy(
-    _.map(aggregatedData, (data) => {
+  employees.value = _sortBy(
+    _map(aggregatedData, (data) => {
       if (data && data.employeeName && data.employeeId && !seenEmployees.has(data.employeeId)) {
         seenEmployees.add(data.employeeId);
         return {
@@ -884,12 +859,12 @@ async function deleteExpense() {
         let deletedAttachment = await api.deleteAttachment(deleted);
         if (deletedAttachment.code) {
           // emit alert if error deleting file
-          displayError(`Error Deleting Receipt: ${deletedAttachment.message}`);
+          useDisplayError(`Error Deleting Receipt: ${deletedAttachment.message}`);
         }
       }
     } else {
       // fails to delete expense
-      displayError('Error Deleting Expense');
+      useDisplayError('Error Deleting Expense');
     }
     // update budgets in store
     await updateStoreBudgets();
@@ -906,23 +881,8 @@ async function deleteExpense() {
 async function deleteModelFromTable() {
   await refreshExpenses();
 
-  status.value['show'] = true;
-  status.value['statusType'] = 'SUCCESS';
-  status.value['statusMessage'] = 'Item was successfully deleted!';
-  status.value['color'] = 'green';
+  useDisplaySuccess('Item was successfully deleted!');
 } // deleteModelFromTable
-
-/**
- * Set and display an error action status in the snackbar.
- *
- * @param err - String error message
- */
-function displayError(err) {
-  status.value['show'] = true;
-  status.value['statusType'] = 'ERROR';
-  status.value['statusMessage'] = err;
-  status.value['color'] = 'red';
-} // displayError
 
 /**
  * Filters expenses based on filter selections.
@@ -932,34 +892,34 @@ function filterExpenses() {
 
   if (employee.value) {
     // filter expenses by employee
-    filteredExpenses.value = _.filter(filteredExpenses.value, (expense) => {
+    filteredExpenses.value = _filter(filteredExpenses.value, (expense) => {
       return expense.employeeId === employee.value;
     });
   }
 
   if (tagsInfo.value.selected?.length > 0) {
-    filteredExpenses.value = _.filter(filteredExpenses.value, (expense) => {
+    filteredExpenses.value = _filter(filteredExpenses.value, (expense) => {
       return employeeUtils.selectedTagsHasEmployee(expense.employeeId, tagsInfo.value);
     });
   }
 
   if (search.value) {
-    let headerKeys = _.map(headers.value, (object) => object.key);
-    filteredExpenses.value = _.filter(filteredExpenses.value, (expense) => {
-      return _.some(Object.entries(expense), ([key, value]) => {
+    let headerKeys = _map(headers.value, (object) => object.key);
+    filteredExpenses.value = _filter(filteredExpenses.value, (expense) => {
+      return _some(Object.entries(expense), ([key, value]) => {
         return String(value)?.toLowerCase().includes(search.value?.toLowerCase()) && headerKeys?.includes(key);
       });
     });
   }
 
   if (startDateFilter.value && endDateFilter.value) {
-    filteredExpenses.value = _.filter(filteredExpenses.value, (expense) =>
+    filteredExpenses.value = _filter(filteredExpenses.value, (expense) =>
       isBetween(expense.reimbursedDate, startDateFilter.value, endDateFilter.value, 'days', '[]')
     );
   }
   if (filter.value.status !== 'all') {
     // filter expenses by reimburse date
-    filteredExpenses.value = _.filter(filteredExpenses.value, (expense) => {
+    filteredExpenses.value = _filter(filteredExpenses.value, (expense) => {
       if (filter.value.status === 'pending') {
         // filter for pending expenses
         return !isReimbursed(expense) && !(expense?.rejections?.hardRejections?.reasons?.length > 0);
@@ -975,8 +935,8 @@ function filterExpenses() {
 
   if (filter.value.active !== 'both') {
     // filter expenses by active or inactive expense types (available to admin only)
-    filteredExpenses.value = _.filter(filteredExpenses.value, (expense) => {
-      let expenseType = _.find(expenseTypes.value, (type) => expense.expenseTypeId === type.value);
+    filteredExpenses.value = _filter(filteredExpenses.value, (expense) => {
+      let expenseType = _find(expenseTypes.value, (type) => expense.expenseTypeId === type.value);
       if (filter.value.active == 'active') {
         // filter for active expenses
         return expenseType && !expenseType.isInactive;
@@ -995,7 +955,7 @@ function filterExpenses() {
  * @return string - the name of the high five recipient
  */
 function getEmployee(eId) {
-  let employee = _.find(store.getters.employees, ['id', eId]);
+  let employee = _find(store.getters.employees, ['id', eId]);
   return employeeUtils.nicknameAndLastName(employee);
 } // getEmployee
 
@@ -1039,7 +999,7 @@ async function loadMyExpensesData() {
 
   // get expense types
   let temporaryExpenseTypes = store.getters.expenseTypes;
-  expenseTypes.value = _.map(temporaryExpenseTypes, (expenseType) => {
+  expenseTypes.value = _map(temporaryExpenseTypes, (expenseType) => {
     return {
       /* beautify preserve:start */
       text: `${expenseType.budgetName} - $${expenseType.budget}`,
@@ -1083,8 +1043,8 @@ function canDelete(expense) {
  */
 function onSelect(item) {
   clearExpense();
-  expense.value = _.mergeWith(expense.value, item, (expenseValue, itemValue) => {
-    return _.isNil(itemValue) ? expenseValue : itemValue;
+  expense.value = _mergeWith(expense.value, item, (expenseValue, itemValue) => {
+    return _isNil(itemValue) ? expenseValue : itemValue;
   });
   isEditing.value = true;
   expense.value.edit = true;
@@ -1153,13 +1113,10 @@ async function unreimburseExpense() {
 
   if (updatedExpense.id) {
     // successfully unreimburses expense
-    status.value['show'] = true;
-    status.value['statusType'] = 'SUCCESS';
-    status.value['statusMessage'] = 'Item was successfully unreimbursed!';
-    status.value['color'] = 'green';
+    useDisplaySuccess('Item was successfully unreimbursed!');
   } else {
     // fails to unreimburse expense
-    displayError('Error Unreimburseing Expense');
+    useDisplayError('Error Unreimburseing Expense');
   }
 
   await refreshExpenses();
@@ -1174,10 +1131,7 @@ async function unreimburseExpense() {
 async function updateModelInTable() {
   await refreshExpenses();
 
-  status.value['show'] = true;
-  status.value['statusType'] = 'SUCCESS';
-  status.value['statusMessage'] = 'Item was successfully updated!';
-  status.value['color'] = 'green';
+  useDisplaySuccess('Item was successfully updated!');
 } // updateModelInTable
 
 /**
@@ -1190,7 +1144,7 @@ async function updateModelInTable() {
 function useInactiveStyle(expense) {
   if (userRoleIsAdmin() || userRoleIsManager()) {
     // admin view
-    let expenseType = _.find(expenseTypes.value, (type) => expense.expenseTypeId === type.value);
+    let expenseType = _find(expenseTypes.value, (type) => expense.expenseTypeId === type.value);
     return expenseType && expenseType.isInactive;
   }
 

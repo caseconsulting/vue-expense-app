@@ -158,7 +158,8 @@ import TimesheetsChart from '@/components/charts/custom-charts/TimesheetsChart.v
 import TimePeriodDetails from '@/components/shared/timesheets/TimePeriodDetails.vue';
 import TimePeriodJobCodes from '@/components/shared/timesheets/TimePeriodJobCodes.vue';
 import { isAfter, isBefore, isSameOrBefore, getTodaysDate } from '@/shared/dateUtils';
-import _ from 'lodash';
+import _find from 'lodash/find';
+import _forEach from 'lodash/forEach';
 import { computed, inject, ref, reactive, watch, onMounted, onBeforeUnmount } from 'vue';
 import { useStore } from 'vuex';
 
@@ -239,7 +240,7 @@ const timeData = computed(() => {
   });
   // reassign object in sorted key value pairs
   let orderedTimeData = {};
-  _.forEach(orderedKeys, (jobcode) => {
+  _forEach(orderedKeys, (jobcode) => {
     orderedTimeData[jobcode] = timesheets[jobcode];
   });
   return orderedTimeData;
@@ -266,8 +267,8 @@ const supplementalDataWithPlan = computed(() => {
  * @returns Boolean - True if an admin has selected to show a users contract year for a project.
  */
 function showContractYear() {
-  let empCurContract = _.find(props.employee.contracts, (c) => _.find(c.projects, (p) => !p.endDate));
-  let contract = _.find(store.getters.contracts, (c) => c.id === empCurContract?.contractId);
+  let empCurContract = _find(props.employee.contracts, (c) => _find(c.projects, (p) => !p.endDate));
+  let contract = _find(store.getters.contracts, (c) => c.id === empCurContract?.contractId);
   return contract?.settings?.timesheetsContractViewOption;
 } // showContractYear
 

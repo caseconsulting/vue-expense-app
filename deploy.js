@@ -1,4 +1,5 @@
-const _ = require('lodash');
+const _each = require('lodash/each');
+const _compact = require('lodash/compact');
 const fs = require('fs');
 const exec = require('child_process').exec;
 
@@ -52,9 +53,9 @@ function deploy(stage) {
   const security = '--acl private';
   const cacheControl = 'max-age=600,s-maxage=300';
   const metadata = `--metadata-directive REPLACE --cache-control ${cacheControl}`;
-  _.each(paths, (source, destination) => {
+  _each(paths, (source, destination) => {
     commands.push(
-      _.compact([
+      _compact([
         `aws s3 cp dist/${source} s3://${bucket}/${destination}`,
         _isFile(source) ? '' : recursive,
         security,

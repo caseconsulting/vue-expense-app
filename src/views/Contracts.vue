@@ -1,19 +1,5 @@
 <template>
   <div>
-    <!-- Status Alert -->
-    <v-snackbar
-      v-model="status.statusType"
-      :color="status.color"
-      :multi-line="true"
-      location="top right"
-      :timeout="5000"
-      :vertical="true"
-    >
-      <v-card-text color="white">
-        <span class="text-h6 font-weight-medium">{{ status.statusMessage }}</span>
-      </v-card-text>
-      <v-btn color="white" variant="text" @click="clearStatus()"> Close </v-btn>
-    </v-snackbar>
     <v-card>
       <v-card color="#bc3825">
         <v-card-title class="d-flex align-center header_style">
@@ -66,11 +52,6 @@ const emitter = inject('emitter');
 const midAction = ref(false);
 const loading = ref(false);
 const toggleContractForm = ref(false);
-const status = ref({
-  statusType: undefined,
-  statusMessage: '',
-  color: ''
-});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -84,7 +65,6 @@ const status = ref({
 onBeforeUnmount(() => {
   emitter.off('canceled-contract-form');
   emitter.off('submitted-contract-form');
-  emitter.off('status-alert');
 }); // beforeUnmount
 
 /**
@@ -94,11 +74,6 @@ onBeforeMount(async () => {
   loading.value = true;
   emitter.on('canceled-contract-form', () => (toggleContractForm.value = false));
   emitter.on('submitted-contract-form', () => (toggleContractForm.value = false));
-  emitter.on('status-alert', (currStatus) => {
-    status.value['statusType'] = currStatus.statusType;
-    status.value['statusMessage'] = currStatus.statusMessage;
-    status.value['color'] = currStatus.color;
-  });
 
   await Promise.all([
     !store.getters.contracts ? await updateStoreContracts() : null,
@@ -106,15 +81,6 @@ onBeforeMount(async () => {
   ]);
   loading.value = false;
 }); // created
-
-/**
- * Clear the action status that is displayed in the snackbar.
- */
-function clearStatus() {
-  status.value['statusType'] = undefined;
-  status.value['statusMessage'] = '';
-  status.value['color'] = '';
-} // clearStatus
 
 // |--------------------------------------------------|
 // |                                                  |

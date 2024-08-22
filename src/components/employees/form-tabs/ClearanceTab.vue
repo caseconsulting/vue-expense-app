@@ -309,7 +309,12 @@
 </template>
 
 <script>
-import _ from 'lodash';
+import _isEmpty from 'lodash/isEmpty';
+import _first from 'lodash/first';
+import _sortBy from 'lodash/sortBy';
+import _isArray from 'lodash/isArray';
+import _cloneDeep from 'lodash/cloneDeep';
+import _map from 'lodash/map';
 import { getDateOptionalRules, getRequiredRules, getBadgeNumberRules } from '@/shared/validationUtils.js';
 import { asyncForEach, isEmpty } from '@/utils/utils';
 import { format, isAfter, isBefore, DEFAULT_ISOFORMAT, FORMATTED_ISOFORMAT } from '@/shared/dateUtils';
@@ -395,11 +400,11 @@ function maxSubmission(cIndex) {
   }
 
   // check submission date is before any poly dates
-  if (!_.isEmpty(this.editedClearances[cIndex].polyDates)) {
+  if (!_isEmpty(this.editedClearances[cIndex].polyDates)) {
     // poly dates exist
-    let earliest = _.first(
+    let earliest = _first(
       // get earliest poly date
-      _.sortBy(this.editedClearances[cIndex].polyDates, (date) => {
+      _sortBy(this.editedClearances[cIndex].polyDates, (date) => {
         // sort poly dates
         return format(date, null, ISOFORMAT);
       })
@@ -412,11 +417,11 @@ function maxSubmission(cIndex) {
   }
 
   // check submission date is before any adjudication dates
-  if (!_.isEmpty(this.editedClearances[cIndex].adjudicationDates)) {
+  if (!_isEmpty(this.editedClearances[cIndex].adjudicationDates)) {
     // adjudication dates exist
-    let earliest = _.first(
+    let earliest = _first(
       // get earliest adjudication date
-      _.sortBy(this.editedClearances[cIndex].adjudicationDates, (date) => {
+      _sortBy(this.editedClearances[cIndex].adjudicationDates, (date) => {
         // sort adjudication dates
         return format(date, null, ISOFORMAT);
       })
@@ -506,7 +511,7 @@ function removePolyDate(item, index) {
 async function validateFields() {
   let errorCount = 0;
   //ensures that refs are put in an array so we can reuse forEach loop
-  let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
+  let components = !_isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
   await asyncForEach(components, async (field) => {
     if (field && (await field.validate()).length > 0) errorCount++;
   });
@@ -583,7 +588,7 @@ export default {
               'Submission date must be before grant date'
           : true;
       },
-      editedClearances: _.cloneDeep(this.model), // stores edited clearances info
+      editedClearances: _cloneDeep(this.model), // stores edited clearances info
       dateGrantedRules: (index) => {
         let currClearance = this.editedClearances[index];
         return currClearance.grantedDate && currClearance.submissionDate
@@ -592,7 +597,7 @@ export default {
           : true;
       },
       duplicateClearanceTypes: (cIndex) => {
-        let clearanceNames = _.map(this.editedClearances, (clearance) => clearance.type);
+        let clearanceNames = _map(this.editedClearances, (clearance) => clearance.type);
         let clearanceName = clearanceNames[cIndex];
         clearanceNames.splice(cIndex, 1);
         return !clearanceNames.includes(clearanceName) || 'Duplicate clearance name';

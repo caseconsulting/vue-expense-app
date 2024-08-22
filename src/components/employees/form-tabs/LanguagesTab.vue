@@ -55,7 +55,11 @@
 </template>
 
 <script>
-import _ from 'lodash';
+import _isArray from 'lodash/isArray';
+import _map from 'lodash/map';
+import _forEach from 'lodash/forEach';
+import _compact from 'lodash/compact';
+import _cloneDeep from 'lodash/cloneDeep';
 import { getRequiredRules } from '@/shared/validationUtils.js';
 import { isEmpty } from '@/utils/utils';
 import { asyncForEach } from '@/utils/utils';
@@ -130,7 +134,7 @@ function isDuplicate(lang) {
   let duplicates = this.duplicateLangEntries();
 
   //checks to see if the language is in duplicates array
-  if (duplicates && _.isArray(duplicates) && duplicates.length > 0) {
+  if (duplicates && _isArray(duplicates) && duplicates.length > 0) {
     return duplicates.includes(lang);
   }
   return false;
@@ -140,12 +144,12 @@ function isDuplicate(lang) {
  * Gets information that other employees have filled out.
  */
 function populateDropDowns() {
-  let employeesLanguage = _.map(this.employees, (employee) => employee.languages); //extract languages
-  employeesLanguage = _.compact(employeesLanguage); //remove falsey values
+  let employeesLanguage = _map(this.employees, (employee) => employee.languages); //extract languages
+  employeesLanguage = _compact(employeesLanguage); //remove falsey values
   // loop employees
-  _.forEach(employeesLanguage, (languages) => {
+  _forEach(employeesLanguage, (languages) => {
     // loop languages
-    _.forEach(languages, (languages) => {
+    _forEach(languages, (languages) => {
       this.languageDropDown.push(languages.name); // add language name
     });
   });
@@ -158,7 +162,7 @@ function populateDropDowns() {
 async function validateFields() {
   let errorCount = 0;
   //ensures that refs are put in an array so we can reuse forEach loop
-  let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
+  let components = !_isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
   await asyncForEach(components, async (field) => {
     if (field && (await field.validate()).length > 0) {
       errorCount++;
@@ -211,7 +215,7 @@ export default {
   data() {
     return {
       languageDropDown: [],
-      editedLanguages: _.cloneDeep(this.model), //stores edited languages info
+      editedLanguages: _cloneDeep(this.model), //stores edited languages info
       languagesList: [
         'Afrikaans',
         'Arabic',

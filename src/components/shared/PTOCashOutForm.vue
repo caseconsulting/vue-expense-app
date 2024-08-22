@@ -121,10 +121,11 @@ import { updateStoreEmployees, updateStorePtoCashOuts } from '../../utils/storeU
 import { format } from '../../shared/dateUtils';
 import { mask } from 'vue-the-mask';
 import { nicknameAndLastName } from '../../shared/employeeUtils';
-import _ from 'lodash';
+import _find from 'lodash/find';
+import _cloneDeep from 'lodash/cloneDeep';
 import { computed, onBeforeMount, inject, ref, watch } from 'vue';
 import { useStore } from 'vuex';
-
+import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSnackbar.vue';
 // |--------------------------------------------------|
 // |                                                  |
 // |                       SETUP                      |
@@ -158,9 +159,9 @@ onBeforeMount(async () => {
     !store.getters.employees ? updateStoreEmployees() : '',
     !store.getters.ptoCashOuts ? updateStorePtoCashOuts() : ''
   ]);
-  employee.value = _.find(store.getters.employees, (e) => e.id === props.employeeId);
+  employee.value = _find(store.getters.employees, (e) => e.id === props.employeeId);
   if (props.item) {
-    let editingItem = _.cloneDeep(props.item);
+    let editingItem = _cloneDeep(props.item);
     ptoCashOutObj.value['id'] = editingItem.id;
     ptoCashOutObj.value['employeeId'] = editingItem.employeeId;
     ptoCashOutObj.value['amount'] = Number(editingItem.amount);
@@ -209,7 +210,7 @@ watch(
   () => props.item,
   () => {
     if (props.item) {
-      let editingItem = _.cloneDeep(props.item);
+      let editingItem = _cloneDeep(props.item);
       ptoCashOutObj.value['employeeId'] = editingItem.employeeId;
       ptoCashOutObj.value['id'] = editingItem.id;
       ptoCashOutObj.value['amount'] = Number(editingItem.amount);
@@ -245,16 +246,16 @@ async function submit() {
       clearForm();
       isSubmitting.value = false;
       if (props.item) {
-        displaySuccess('Successfully edited PTO Cash Out request!');
+        useDisplaySuccess('Successfully edited PTO Cash Out request!');
       } else {
-        displaySuccess('Successfully created PTO Cash Out request!');
+        useDisplaySuccess('Successfully created PTO Cash Out request!');
       }
     }
   } catch (err) {
     emitCloseForm();
     clearForm();
     isSubmitting.value = false;
-    displayError(err);
+    useDisplayError(err);
   }
 } // submit
 
@@ -279,33 +280,6 @@ function clearForm() {
   form.value.reset();
   form.value.resetValidation();
 } // clearForm
-
-/**
- * Displays error snackbar
- *
- * @param err error message to display
- */
-function displayError(err) {
-  let status = {
-    statusType: 'ERROR',
-    statusMessage: err,
-    color: 'red'
-  };
-  emitter.emit('status-alert', status);
-} // displayError
-
-/**
- * Displays success message
- * @param msg success message to display
- */
-function displaySuccess(msg) {
-  let status = {
-    statusType: 'SUCCESS',
-    statusMessage: msg,
-    color: 'green'
-  };
-  emitter.emit('status-alert', status);
-} // displaySuccess
 
 /**
  * Emits close form events
@@ -342,7 +316,7 @@ function cashOutHint() {
  * Creates a PTO Cash Out record in the database.
  */
 async function createPTOCashOutRequest() {
-  let newItem = _.cloneDeep(ptoCashOutObj.value);
+  let newItem = _cloneDeep(ptoCashOutObj.value);
   let ptoCashOut = await api.createItem(api.PTO_CASH_OUTS, {
     id: generateUUID(),
     amount: Number(newItem.amount),
@@ -357,8 +331,8 @@ async function createPTOCashOutRequest() {
  * Update PTO Cash Out record in the database.
  */
 async function updatePTOCashOutRequest() {
-  let ptoCashOuts = _.cloneDeep(store.getters.ptoCashOuts);
-  let editedItem = _.cloneDeep(ptoCashOutObj.value);
+  let ptoCashOuts = _cloneDeep(store.getters.ptoCashOuts);
+  let editedItem = _cloneDeep(ptoCashOutObj.value);
   let index = ptoCashOuts.findIndex((p) => p.id == editedItem.id);
   ptoCashOuts[index] = editedItem;
   await api.updateItem(api.PTO_CASH_OUTS, {

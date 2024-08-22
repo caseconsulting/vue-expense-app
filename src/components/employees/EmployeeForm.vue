@@ -1,21 +1,5 @@
 <template>
   <div :class="!model.id ? 'overflow' : ''">
-    <!-- Status Alert -->
-    <v-snackbar
-      v-model="errorStatus.statusType"
-      :color="errorStatus.color"
-      :multi-line="true"
-      location="top right"
-      :timeout="5000"
-      :vertical="true"
-    >
-      <v-card-text color="white">
-        <span class="text-h6 font-weight-medium">{{ errorStatus.statusMessage }}</span>
-      </v-card-text>
-      <v-btn color="white" variant="text" @click="clearStatus"> Close </v-btn>
-    </v-snackbar>
-    <!-- End Status Alert -->
-
     <v-card>
       <!-- Form Header -->
       <v-card-title class="d-flex align-center header_style">
@@ -356,7 +340,18 @@ import { updateStoreEmployees, updateStoreUser } from '@/utils/storeUtils';
 import { format } from '@/shared/dateUtils';
 import { getRole } from '@/utils/auth';
 import { generateUUID } from '@/utils/utils';
-import _ from 'lodash';
+import _isEmpty from 'lodash/isEmpty';
+import _map from 'lodash/map';
+import _forEach from 'lodash/forEach';
+import _isNil from 'lodash/isNil';
+import _reverse from 'lodash/reverse';
+import _sortBy from 'lodash/sortBy';
+import _cloneDeep from 'lodash/cloneDeep';
+import _mergeWith from 'lodash/mergeWith';
+import _find from 'lodash/find';
+import _isEqual from 'lodash/isEqual';
+import _findIndex from 'lodash/findIndex';
+import { useDisplayError } from '@/components/shared/StatusSnackbar.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -408,14 +403,14 @@ async function cancelB() {
  */
 function cleanUpData() {
   // certifications
-  if (!_.isEmpty(this.model.certifications)) {
-    this.model.certifications = _.map(this.model.certifications, (certification) => {
+  if (!_isEmpty(this.model.certifications)) {
+    this.model.certifications = _map(this.model.certifications, (certification) => {
       // remove date picker menu booleans
       delete certification.showReceivedMenu;
       delete certification.showExpirationMenu;
       // delete null attributes
-      _.forEach(certification, (value, key) => {
-        if (_.isNil(value)) {
+      _forEach(certification, (value, key) => {
+        if (_isNil(value)) {
           delete certification[key];
         }
       });
@@ -426,13 +421,13 @@ function cleanUpData() {
     this.model.certifications = null;
   }
   // awards
-  if (!_.isEmpty(this.model.awards)) {
-    this.model.awards = _.map(this.model.awards, (award) => {
+  if (!_isEmpty(this.model.awards)) {
+    this.model.awards = _map(this.model.awards, (award) => {
       // remove date picker menu booleans
       delete award.showReceivedMenu;
       // delete null attributes
-      _.forEach(award, (value, key) => {
-        if (_.isNil(value)) {
+      _forEach(award, (value, key) => {
+        if (_isNil(value)) {
           delete award[key];
         }
       });
@@ -443,21 +438,21 @@ function cleanUpData() {
     this.model.awards = null;
   }
   // technologies
-  if (_.isEmpty(this.model.technologies)) {
+  if (_isEmpty(this.model.technologies)) {
     this.model.technologies = null;
   }
-  if (_.isEmpty(this.model.languages)) {
+  if (_isEmpty(this.model.languages)) {
     this.model.languages = null;
   }
   // customer Org
-  if (_.isEmpty(this.model.customerOrgExp)) {
+  if (_isEmpty(this.model.customerOrgExp)) {
     this.model.customerOrgExp = null;
   }
   // contracts
-  if (!_.isEmpty(this.model.contracts)) {
+  if (!_isEmpty(this.model.contracts)) {
     // delete name attributes since the names are stored in the contracts DynamoDB table
     // this will connect the IDs between employee contracts and the contracts table
-    _.forEach(this.model.contracts, (contract) => {
+    _forEach(this.model.contracts, (contract) => {
       if (contract.contractName && contract.primeName) {
         contract.contractId = this.contracts.find(
           (c) => c.contractName === contract.contractName && c.primeName === contract.primeName
@@ -465,7 +460,7 @@ function cleanUpData() {
         delete contract.contractName;
         delete contract.primeName;
       }
-      _.forEach(contract.projects, (project) => {
+      _forEach(contract.projects, (project) => {
         if (project.projectName) {
           let c;
           if (contract.contractName && contract.primeName) {
@@ -484,9 +479,9 @@ function cleanUpData() {
     this.model.contracts = null;
   }
   // jobs
-  if (!_.isEmpty(this.model.companies)) {
-    this.model.companies = _.forEach(this.model.companies, (company) => {
-      _.forEach(company.positions, (pos) => {
+  if (!_isEmpty(this.model.companies)) {
+    this.model.companies = _forEach(this.model.companies, (company) => {
+      _forEach(company.positions, (pos) => {
         delete pos.showStartMenu;
         delete pos.showEndMenu;
       });
@@ -495,14 +490,14 @@ function cleanUpData() {
     this.model.companies = null;
   }
   // IC time frames
-  if (!_.isEmpty(this.model.icTimeFrames)) {
-    this.model.icTimeFrames = _.reverse(
-      _.sortBy(
-        _.map(this.model.icTimeFrames, (timeFrame) => {
+  if (!_isEmpty(this.model.icTimeFrames)) {
+    this.model.icTimeFrames = _reverse(
+      _sortBy(
+        _map(this.model.icTimeFrames, (timeFrame) => {
           // remove date picker menu booleans
           delete timeFrame.showRangeMenu;
           // sort range dates
-          let chronologicalRange = _.sortBy(timeFrame.range, (monthYear) => {
+          let chronologicalRange = _sortBy(timeFrame.range, (monthYear) => {
             return format(monthYear, null, 'YYYY-MM');
           });
           timeFrame.range = chronologicalRange;
@@ -518,10 +513,10 @@ function cleanUpData() {
     this.model.icTimeFrames = null;
   }
   // clearances
-  if (!_.isEmpty(this.model.clearances)) {
-    this.model.clearances = _.reverse(
-      _.sortBy(
-        _.map(this.model.clearances, (clearance) => {
+  if (!_isEmpty(this.model.clearances)) {
+    this.model.clearances = _reverse(
+      _sortBy(
+        _map(this.model.clearances, (clearance) => {
           // remove date picker menu booleans
           delete clearance.showGrantedMenu;
           delete clearance.showExpirationMenu;
@@ -531,26 +526,26 @@ function cleanUpData() {
           delete clearance.showBadgeMenu;
           delete clearance.showBIMenu;
           // delete null attributes
-          _.forEach(clearance, (value, key) => {
-            if (_.isNil(value)) {
+          _forEach(clearance, (value, key) => {
+            if (_isNil(value)) {
               delete clearance[key];
             }
           });
           // sort bi dates
-          clearance.biDates = _.reverse(
-            _.sortBy(clearance.biDates, (date) => {
+          clearance.biDates = _reverse(
+            _sortBy(clearance.biDates, (date) => {
               return format(date, null, 'YYYY-MM-DD');
             })
           );
           // sort adjudication dates
-          clearance.adjudicationDates = _.reverse(
-            _.sortBy(clearance.adjudicationDates, (date) => {
+          clearance.adjudicationDates = _reverse(
+            _sortBy(clearance.adjudicationDates, (date) => {
               return format(date, null, 'YYYY-MM-DD');
             })
           );
           // sort poly dates
-          clearance.polyDates = _.reverse(
-            _.sortBy(clearance.polyDates, (date) => {
+          clearance.polyDates = _reverse(
+            _sortBy(clearance.polyDates, (date) => {
               return format(date, null, 'YYYY-MM-DD');
             })
           );
@@ -566,26 +561,6 @@ function cleanUpData() {
     this.model.clearances = null;
   }
 } // cleanUpData
-
-/**
- * Clear the action status that is displayed in the snackbar.
- */
-function clearStatus() {
-  this.errorStatus['statusType'] = undefined;
-  this.errorStatus['statusMessage'] = null;
-  this.errorStatus['color'] = null;
-} // clearStatus
-
-/**
- * Set and display an error action status in the snackbar.
- *
- * @param err - String error message
- */
-function displayError(err) {
-  this.errorStatus['statusType'] = 'ERROR';
-  this.errorStatus['statusMessage'] = err;
-  this.errorStatus['color'] = 'red';
-} // displayError
 
 /**
  * Check if the user has admin privileges
@@ -620,7 +595,7 @@ function hasTabError() {
 async function confirm() {
   this.tabErrorMessage = null;
   this.confirmingError = false;
-  await _.forEach(this.tabCreated, (value, key) => {
+  await _forEach(this.tabCreated, (value, key) => {
     if (value) {
       this.validating[key] = true;
     }
@@ -668,7 +643,7 @@ async function submit() {
       } else {
         // failed to update employee
         this.emitter.emit('error', updatedEmployee.response.data.message);
-        this.displayError(updatedEmployee.response.data.message);
+        useDisplayError(updatedEmployee.response.data.message);
       }
     } else {
       // creating employee
@@ -682,7 +657,7 @@ async function submit() {
       } else {
         // failed to create employee
         this.emitter.emit('error', newEmployee.response.data.message);
-        this.displayError(newEmployee.response.data.message);
+        useDisplayError(newEmployee.response.data.message);
         this.model['id'] = null; // reset id
       }
     }
@@ -705,8 +680,8 @@ async function submit() {
 async function updateTags() {
   let employeeId = this.model.id;
   let promises = [];
-  _.forEach(this.tagsToUpdate, (tag) => {
-    let index = _.findIndex(tag.employees, (eId) => eId === employeeId);
+  _forEach(this.tagsToUpdate, (tag) => {
+    let index = _findIndex(tag.employees, (eId) => eId === employeeId);
     if (index > -1) {
       // remove employee from tag
       tag.employees.splice(index, 1);
@@ -719,8 +694,8 @@ async function updateTags() {
   // update db tags
   await Promise.all(promises);
   // update store tags
-  let updatedStoreTags = _.map(this.$store.getters.tags, (tag) => {
-    let foundTag = _.find(this.tagsToUpdate, (t) => t.id === tag.id);
+  let updatedStoreTags = _map(this.$store.getters.tags, (tag) => {
+    let foundTag = _find(this.tagsToUpdate, (t) => t.id === tag.id);
     return foundTag ? foundTag : tag;
   });
   this.$store.dispatch('setTags', { tags: updatedStoreTags });
@@ -833,7 +808,7 @@ function setFormData(tab, data) {
     this.model['eeoIsProtectedVeteran'] = data.eeoIsProtectedVeteran;
     if (this.hasAdminPermissions()) {
       this.model['eeoAdminHasFilledOutEeoForm'] = true;
-      this.tagsToUpdate = _.cloneDeep(data.editedTags);
+      this.tagsToUpdate = _cloneDeep(data.editedTags);
     } else {
       this.model['eeoAdminHasFilledOutEeoForm'] = false;
     }
@@ -916,7 +891,7 @@ async function openUpload() {
     //let err = 'duplicate ID found'
     let message = 'Duplicate employee number, please change to a unique employee number to upload resume';
     this.uploadDisabled = true;
-    this.displayError(message);
+    useDisplayError(message);
   } else {
     //if no error
     this.toggleResumeParser = !this.toggleResumeParser;
@@ -1032,9 +1007,9 @@ async function created() {
     this.addErrorTab('Technologies and Skills', errorCount);
   });
   // fills model in with populated fields in employee prop
-  this.model = _.cloneDeep(
-    _.mergeWith(this.model, this.employee, (modelValue, employeeValue) => {
-      return _.isNil(employeeValue) ? modelValue : employeeValue;
+  this.model = _cloneDeep(
+    _mergeWith(this.model, this.employee, (modelValue, employeeValue) => {
+      return _isNil(employeeValue) ? modelValue : employeeValue;
     })
   );
   if (this.employee) {
@@ -1120,7 +1095,7 @@ function parsedInfoTab() {
 function watchFormTab(val) {
   // track current tab when switching between form and info
   if (this.afterCreate) {
-    if (!_.isEqual(val, this.currentTab)) {
+    if (!_isEqual(val, this.currentTab)) {
       this.emitter.emit('tabChange', val); // emit to parent tab was changed
     }
   }
@@ -1160,11 +1135,6 @@ export default {
       contractProjects: this.contracts.map((c) => c.projects).flat(),
       deleteLoading: false,
       disableEmpNum: false,
-      errorStatus: {
-        statusType: undefined,
-        statusMessage: null,
-        color: null
-      }, // snack bar error
       errorTabNames: {},
       formTab: null, // currently active tab
       fullName: '', // employee's first and last name
@@ -1266,11 +1236,9 @@ export default {
     cancelA,
     cancelB,
     cleanUpData,
-    clearStatus,
     checkEmployeeDeactivation,
     confirm,
     convertAutocompleteToTitlecase,
-    displayError,
     format, // dateUtils
     getRole,
     hasAdminPermissions,

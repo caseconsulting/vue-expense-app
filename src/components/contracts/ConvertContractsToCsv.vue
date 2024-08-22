@@ -4,9 +4,19 @@
     >Download All<i class="material-icons ml-2">download</i></v-btn
   >
 </template>
-<script>
+<script setup>
 import { isMobile, isSmallScreen } from '@/utils/utils';
 import contractsCsv from '@/utils/csv/contractsCsv.js';
+import { computed } from 'vue';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                       SETUP                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+const props = defineProps(['contracts', 'employees', 'midAction']);
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      METHODS                     |
@@ -17,25 +27,17 @@ import contractsCsv from '@/utils/csv/contractsCsv.js';
  * Downloads employees as CSV
  */
 function download() {
-  contractsCsv.download(this.contracts, this.employees);
+  contractsCsv.download(props.contracts, props.employees);
 } // download
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                      EXPORT                      |
+// |                    COMPUTED                      |
 // |                                                  |
 // |--------------------------------------------------|
 
-export default {
-  computed: {
-    isMobile,
-    isSmallScreen
-  },
-  methods: {
-    download
-  },
-  props: ['contracts', 'employees', 'midAction']
-};
+computed(isMobile);
+computed(isSmallScreen);
 </script>
 <style scoped>
 .download {

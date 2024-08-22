@@ -82,7 +82,9 @@
 </template>
 
 <script>
-import _ from 'lodash';
+import _filter from 'lodash/filter';
+import _isArray from 'lodash/isArray';
+import _cloneDeep from 'lodash/cloneDeep';
 import { getRequiredRules } from '@/shared/validationUtils.js';
 import { asyncForEach } from '@/utils/utils';
 
@@ -131,7 +133,7 @@ function deleteExperience(index) {
  * Checks if a customer org name is duplicated.
  */
 function isDuplicate(custOrgName) {
-  return _.filter(this.editedCustomerOrgExp, (custOrg) => custOrg.name === custOrgName).length > 1;
+  return _filter(this.editedCustomerOrgExp, (custOrg) => custOrg.name === custOrgName).length > 1;
 } // isDuplicate
 
 /**
@@ -140,7 +142,7 @@ function isDuplicate(custOrgName) {
 async function validateFields() {
   let errorCount = 0;
   //ensures that refs are put in an array so we can reuse forEach loop
-  let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
+  let components = !_isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
   await asyncForEach(components, async (field) => {
     if (field && (await field.validate()).length > 0) errorCount++;
   });
@@ -198,7 +200,7 @@ export default {
         'DoD',
         'Other'
       ], // autocomplete customer organization name options
-      editedCustomerOrgExp: _.cloneDeep(this.model), //stores edited customer orgs info
+      editedCustomerOrgExp: _cloneDeep(this.model), //stores edited customer orgs info
       experienceRequired: [
         (v, index) => v > 0 || this.editedCustomerOrgExp[index].current || 'Value must be greater than 0',
         (v) => v < 100 || 'Value must be less than 100'

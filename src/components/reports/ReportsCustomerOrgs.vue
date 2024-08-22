@@ -88,7 +88,8 @@
 </template>
 
 <script setup>
-import _ from 'lodash';
+import _forEach from 'lodash/forEach';
+import _filter from 'lodash/filter';
 import { employeeFilter } from '@/shared/filterUtils';
 import { getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
 import { onMounted, ref, inject, watch } from 'vue';
@@ -211,8 +212,8 @@ function handleClick(_, { item }) {
  */
 function populateCustomerOrgsDropdown() {
   custOrgs.value = [];
-  _.forEach(filteredEmployees.value, (employee) =>
-    _.forEach(employee.customerOrgExp, (org) => {
+  _forEach(filteredEmployees.value, (employee) =>
+    _forEach(employee.customerOrgExp, (org) => {
       if (org.current) custOrgs.value.push(org.name);
     })
   );
@@ -236,7 +237,7 @@ function populateDropdowns(emps) {
 function refreshDropdownItems() {
   filteredEmployees.value = employeesInfo.value;
   if (search.value) {
-    filteredEmployees.value = _.filter(filteredEmployees.value, (employee) => {
+    filteredEmployees.value = _filter(filteredEmployees.value, (employee) => {
       return employee.employeeNumber == search.value;
     });
   }
@@ -244,7 +245,7 @@ function refreshDropdownItems() {
     searchCustomerOrgs();
   }
   if (tagsInfo.value.selected.length > 0) {
-    filteredEmployees.value = _.filter(filteredEmployees.value, (employee) => {
+    filteredEmployees.value = _filter(filteredEmployees.value, (employee) => {
       return selectedTagsHasEmployee(employee.id, tagsInfo.value);
     });
   }
@@ -256,7 +257,7 @@ function refreshDropdownItems() {
  * Filters employees on the data table by the customer org entered by the user.
  */
 function searchCustomerOrgs() {
-  filteredEmployees.value = _.filter(employeesInfo.value, (employee) => {
+  filteredEmployees.value = _filter(employeesInfo.value, (employee) => {
     if (employee.customerOrgExp) {
       return employee.customerOrgExp.find((org) => org.current && org.name === custOrgSearch.value);
     } else {
@@ -265,7 +266,7 @@ function searchCustomerOrgs() {
   });
   if (search.value) {
     // if there is a desired employee search then only show that employee
-    filteredEmployees.value = _.filter(employeesInfo.value, (employee) => {
+    filteredEmployees.value = _filter(employeesInfo.value, (employee) => {
       return employee.employeeNumber == search.value;
     });
   }

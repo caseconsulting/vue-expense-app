@@ -1,13 +1,6 @@
 <!-- eslint-disable vue/no-v-model-argument -->
 <template>
   <div>
-    <!-- Status Alert -->
-    <v-snackbar v-model="copied" color="black" location="bottom" :timeout="3000">
-      Copied email list to clipboard
-      <template v-slot:actions>
-        <v-btn color="red" variant="text" @click="copied = false"> Close </v-btn>
-      </template>
-    </v-snackbar>
     <!-- Modal Card -->
     <v-card>
       <!-- Modal Title -->
@@ -78,12 +71,16 @@
 </template>
 
 <script setup>
-import _ from 'lodash';
+import _filter from 'lodash/filter';
+import _map from 'lodash/map';
+import _cloneDeep from 'lodash/cloneDeep';
+import _forEach from 'lodash/forEach';
 import { computed, ref, onMounted, inject } from 'vue';
 import { useStore } from 'vuex';
 import { nicknameAndLastName } from '@/shared/employeeUtils';
 import { employeeFilter } from '@/shared/filterUtils';
 import { isMobile } from '@/utils/utils';
+import { useDisplayCustom } from '@/components/shared/StatusSnackbar.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -107,10 +104,10 @@ const listLimit = ref(2000);
 // |--------------------------------------------------|
 
 const filteredEmployees = computed(() => {
-  let employees = _.filter(store.getters.employees, (e) => {
+  let employees = _filter(store.getters.employees, (e) => {
     return e.workStatus > 0;
   });
-  return _.map(employees, (e) => {
+  return _map(employees, (e) => {
     return {
       ...e,
       employeeName: nicknameAndLastName(e)
@@ -122,8 +119,8 @@ const filteredEmployees = computed(() => {
  * Mounted life cycle hook
  */
 onMounted(() => {
-  employees.value = _.cloneDeep(props.passedEmployees);
-  employees.value = _.map(employees.value, (e) => {
+  employees.value = _cloneDeep(props.passedEmployees);
+  employees.value = _map(employees.value, (e) => {
     return { ...e, employeeName: nicknameAndLastName(e) };
   });
 }); // mounted
@@ -140,7 +137,13 @@ onMounted(() => {
 async function copyEmailList() {
   let list = getList();
   await navigator.clipboard.writeText(list);
+
+  //display copied status
   copied.value = true;
+  setTimeout(() => {
+    copied.value = false;
+  }, 3000);
+  useDisplayCustom('Copied email list to clipboard', 'CUSTOM', 3000, 'black', 'red', 'bottom');
 } // copyEmailList
 
 /**
@@ -172,7 +175,7 @@ function emit(msg, data) {
  */
 function getList() {
   let list = '';
-  _.forEach(employees.value, (e) => {
+  _forEach(employees.value, (e) => {
     if (e.employeeNumber < 90000) {
       // do not include fake employee emails
       list += e.email ? `${e.email},` : '';

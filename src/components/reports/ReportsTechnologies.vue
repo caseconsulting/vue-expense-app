@@ -87,7 +87,8 @@
 </template>
 
 <script setup>
-import _ from 'lodash';
+import _forEach from 'lodash/forEach';
+import _filter from 'lodash/filter';
 import { employeeFilter } from '@/shared/filterUtils';
 import { getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
 import { onMounted, ref, inject, watch } from 'vue';
@@ -202,8 +203,8 @@ function handleClick(_, { item }) {
  */
 function populateTechnologiesDropdown() {
   technologies.value = [];
-  _.forEach(filteredEmployees.value, (employee) =>
-    _.forEach(employee.technologies, (tech) => {
+  _forEach(filteredEmployees.value, (employee) =>
+    _forEach(employee.technologies, (tech) => {
       if (showAllTechnologies.value || tech.current) {
         technologies.value.push(tech.name);
       } else {
@@ -234,7 +235,7 @@ function populateDropdowns(emps) {
 function refreshDropdownItems() {
   filteredEmployees.value = employeesInfo.value;
   if (search.value) {
-    filteredEmployees.value = _.filter(filteredEmployees.value, (employee) => {
+    filteredEmployees.value = _filter(filteredEmployees.value, (employee) => {
       return employee.employeeNumber == search.value;
     });
   }
@@ -242,7 +243,7 @@ function refreshDropdownItems() {
     searchTechnologies();
   }
   if (tagsInfo.value.selected.length > 0) {
-    filteredEmployees.value = _.filter(filteredEmployees.value, (employee) => {
+    filteredEmployees.value = _filter(filteredEmployees.value, (employee) => {
       return selectedTagsHasEmployee(employee.id, tagsInfo.value);
     });
   }
@@ -254,7 +255,7 @@ function refreshDropdownItems() {
  * Filters employees on the data table by the technology entered by the user.
  */
 function searchTechnologies() {
-  filteredEmployees.value = _.filter(employeesInfo.value, (employee) => {
+  filteredEmployees.value = _filter(employeesInfo.value, (employee) => {
     if (employee.technologyNames) {
       if (employee.technologyNames.includes('&')) {
         return employee.technologyNames.split(' & ').find((t) => t.trim() === technologySearch.value);
@@ -267,7 +268,7 @@ function searchTechnologies() {
   });
   if (search.value) {
     // if there is a desired employee search then only show that employee
-    filteredEmployees.value = _.filter(employeesInfo.value, (employee) => {
+    filteredEmployees.value = _filter(employeesInfo.value, (employee) => {
       return employee.employeeNumber == search.value;
     });
   }

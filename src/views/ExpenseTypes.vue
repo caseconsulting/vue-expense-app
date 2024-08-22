@@ -11,21 +11,6 @@
       </v-col>
     </v-row>
     <v-row v-else>
-      <!-- Status Alert -->
-      <v-snackbar
-        v-model="status.show"
-        :color="status.color"
-        :multi-line="true"
-        location="top end"
-        :timeout="5000"
-        :vertical="true"
-      >
-        <v-card-text color="white">
-          <span class="text-h6 font-weight-medium">{{ status.statusMessage }}</span>
-        </v-card-text>
-        <v-btn color="white" variant="text" @click="clearStatus"> Close </v-btn>
-      </v-snackbar>
-
       <v-col cols="12" :lg="userRoleIsAdmin() ? 8 : 12">
         <v-card class="mt-3">
           <v-container fluid>
@@ -492,7 +477,13 @@ import api from '@/shared/api.js';
 import DeleteErrorModal from '@/components/modals/DeleteErrorModal.vue';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
 import ExpenseTypeForm from '@/components/expense-types/ExpenseTypeForm.vue';
-import _ from 'lodash';
+import _map from 'lodash/map';
+import _filter from 'lodash/filter';
+import _find from 'lodash/find';
+import _sortBy from 'lodash/sortBy';
+import _cloneDeep from 'lodash/cloneDeep';
+import _union from 'lodash/union';
+import _uniq from 'lodash/uniq';
 import { convertToMoneyString, userRoleIsAdmin } from '@/utils/utils';
 import {
   updateStoreExpenseTypes,
@@ -505,6 +496,7 @@ import {
 import { format } from '../shared/dateUtils';
 import { onBeforeMount, onBeforeUnmount, ref, watch, computed, inject } from 'vue';
 import { useStore } from 'vuex';
+import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSnackbar.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -584,12 +576,6 @@ const search = ref(''); // query text for datatable search field
 const showAccess = ref({}); // activate display for access list, object of ids to boolean
 const showAccessLength = ref(0); // number of employees with access
 const sortBy = ref([{ key: 'budgetName', order: 'asc' }]); // sort datatable items
-const status = ref({
-  show: false,
-  statusType: undefined,
-  statusMessage: '',
-  color: ''
-}); // snackbar action status
 const store = useStore();
 const userInfo = ref(null); // user information
 const deleteType = ref(''); // item.budgetName for when item is deleted
@@ -710,10 +696,7 @@ async function addModelToTable() {
   await updateStoreExpenseTypes();
   await refreshExpenseTypes();
 
-  status.value['show'] = true;
-  status.value['statusType'] = 'SUCCESS';
-  status.value['statusMessage'] = 'Item was successfully submitted!';
-  status.value['color'] = 'green';
+  useDisplaySuccess('Item was successfully submitted!');
 } // addModelToTable
 
 /**
@@ -790,8 +773,8 @@ function categoriesReqReceipt(categories) {
   let string = '';
   //first filter out those that have a receipt required. then map each match to just it's name (now it's a list).
   //finally join the array items with a comma.
-  string = _.map(
-    _.filter(categories, (cat) => {
+  string = _map(
+    _filter(categories, (cat) => {
       return cat.requireReceipt;
     }),
     (match) => {
@@ -830,16 +813,6 @@ function clearModel() {
 } // clearModel
 
 /**
- * Clear the action status that is displayed in the snackbar.
- */
-function clearStatus() {
-  status.value['show'] = false;
-  status.value['statusType'] = undefined;
-  status.value['statusMessage'] = '';
-  status.value['color'] = '';
-} // clearStatus
-
-/**
  * Delete an expense type and display status.
  */
 async function deleteExpenseType() {
@@ -849,7 +822,7 @@ async function deleteExpenseType() {
     await deleteModelFromTable();
   } else {
     // fails to delete expense type
-    displayError(et.response.data.message);
+    useDisplayError(et.response.data.message);
   }
   midAction.value = false;
 } // deleteExpenseType
@@ -861,23 +834,8 @@ async function deleteModelFromTable() {
   await updateStoreExpenseTypes();
   await refreshExpenseTypes();
 
-  status.value['show'] = true;
-  status.value['statusType'] = 'SUCCESS';
-  status.value['statusMessage'] = 'Item was successfully deleted!';
-  status.value['color'] = 'green';
+  useDisplaySuccess('Item was successfully deleted!');
 } // deleteModelFromTable
-
-/**
- * Set and display an error action status in the snackbar.
- *
- * @param err - String error message
- */
-function displayError(err) {
-  status.value['show'] = true;
-  status.value['statusType'] = 'ERROR';
-  status.value['statusMessage'] = err;
-  status.value['color'] = 'red';
-} // displayError
 
 /**
  * Sets inAction boolean to false.
@@ -888,7 +846,7 @@ function endAction() {
 
 /** Display error from expense form */
 function expenseFormError(msg) {
-  displayError(JSON.parse(msg));
+  useDisplayError(JSON.parse(msg));
 }
 
 /**
@@ -898,7 +856,7 @@ function filterExpenseTypes() {
   filteredExpenseTypes.value = { ...expenseTypes.value };
 
   // filter expense types by active or inactive
-  filteredExpenseTypes.value = _.filter(filteredExpenseTypes.value, (expenseType) => {
+  filteredExpenseTypes.value = _filter(filteredExpenseTypes.value, (expenseType) => {
     return filter.value.active == 'active'
       ? !expenseType.isInactive
       : filter.value.active == 'notActive'
@@ -907,7 +865,7 @@ function filterExpenseTypes() {
   });
 
   // filter expense types by overdraft
-  filteredExpenseTypes.value = _.filter(filteredExpenseTypes.value, (expenseType) => {
+  filteredExpenseTypes.value = _filter(filteredExpenseTypes.value, (expenseType) => {
     return filter.value.overdraft == 'overdraft'
       ? expenseType.odFlag
       : filter.value.overdraft == 'noOverdraft'
@@ -916,7 +874,7 @@ function filterExpenseTypes() {
   });
 
   // filter expense types by recurring
-  filteredExpenseTypes.value = _.filter(filteredExpenseTypes.value, (expenseType) => {
+  filteredExpenseTypes.value = _filter(filteredExpenseTypes.value, (expenseType) => {
     return filter.value.recurring == 'recurring'
       ? expenseType.recurringFlag
       : filter.value.recurring == 'notRecurring'
@@ -932,7 +890,7 @@ function filterExpenseTypes() {
  * @return String - accessible by description
  */
 function getAccess(expenseType) {
-  let accessList = _.filter(expenseType.accessibleBy, (accessType) => {
+  let accessList = _filter(expenseType.accessibleBy, (accessType) => {
     return accessType == 'FullTime' || accessType == 'PartTime' || accessType == 'Intern' || accessType == 'Custom';
   });
   return accessList.join(', ');
@@ -945,7 +903,7 @@ function getAccess(expenseType) {
  * @return Object - basecamp name and url data
  */
 function getCampfire(url) {
-  return _.find(campfires.value, (campfire) => {
+  return _find(campfires.value, (campfire) => {
     return campfire.url == url;
   });
 } // getCampfire
@@ -961,7 +919,7 @@ function getEmployeeList(accessibleBy) {
   if (accessibleBy.includes('FullTime')) {
     // accessible by all employees
     employeesList = employeesList.concat(
-      _.filter(employees.value, (employee) => {
+      _filter(employees.value, (employee) => {
         return employee.workStatus == 100 && employee.employeeRole != 'intern';
       })
     );
@@ -969,7 +927,7 @@ function getEmployeeList(accessibleBy) {
   if (accessibleBy.includes('PartTime')) {
     // accessible by full time employees only
     employeesList = employeesList.concat(
-      _.filter(employees.value, (employee) => {
+      _filter(employees.value, (employee) => {
         return employee.workStatus < 100 && employee.workStatus > 0 && employee.employeeRole != 'intern';
       })
     );
@@ -977,7 +935,7 @@ function getEmployeeList(accessibleBy) {
   if (accessibleBy.includes('Intern')) {
     // accessible by full time employees only
     employeesList = employeesList.concat(
-      _.filter(employees.value, (employee) => {
+      _filter(employees.value, (employee) => {
         return employee.workStatus > 0 && employee.employeeRole == 'intern';
       })
     );
@@ -985,14 +943,14 @@ function getEmployeeList(accessibleBy) {
   if (accessibleBy.includes('Custom')) {
     // custom access list
     employeesList = employeesList.concat(
-      _.filter(employees.value, (employee) => {
+      _filter(employees.value, (employee) => {
         return accessibleBy.includes(employee.id);
       })
     );
   }
   employeesList = [...new Set(employeesList)];
   showAccessLength.value = employeesList.length;
-  return _.sortBy(employeesList, [
+  return _sortBy(employeesList, [
     (employee) => employee.firstName.toLowerCase(),
     (employee) => employee.lastName.toLowerCase()
   ]); // sort by first name then last name
@@ -1005,7 +963,7 @@ function getEmployeeList(accessibleBy) {
  * @return String - employee full name
  */
 function getEmployeeName(employeeId) {
-  let localEmployee = _.find(employees.value, ['id', employeeId]);
+  let localEmployee = _find(employees.value, ['id', employeeId]);
   return `${localEmployee.firstName} ${localEmployee.lastName}`;
 } // getEmployeeName
 
@@ -1017,9 +975,9 @@ async function loadExpenseTypesData() {
   userInfo.value = store.getters.user;
   [campfires.value] = await Promise.all([
     userRoleIsAdmin() ? api.getBasecampCampfires() : '',
-    userRoleIsAdmin() && !store.getters.tags ? updateStoreTags() : _,
-    userRoleIsAdmin() && !store.getters.employees ? updateStoreEmployees() : _,
-    userRoleIsAdmin() && !store.getters.avatars ? updateStoreAvatars() : _,
+    userRoleIsAdmin() && !store.getters.tags ? updateStoreTags() : _find && _map,
+    userRoleIsAdmin() && !store.getters.employees ? updateStoreEmployees() : _find && _map,
+    userRoleIsAdmin() && !store.getters.avatars ? updateStoreAvatars() : _find && _map,
     refreshExpenseTypes(),
     updateStoreCampfires()
   ]);
@@ -1028,8 +986,8 @@ async function loadExpenseTypesData() {
     employees.value = store.getters.employees;
     // set employee avatar
     let avatars = store.getters.basecampAvatars;
-    _.map(employees.value, (employee) => {
-      let avatar = _.find(avatars, ['email_address', employee.email]);
+    _map(employees.value, (employee) => {
+      let avatar = _find(avatars, ['email_address', employee.email]);
       let avatarUrl = avatar ? avatar.avatar_url : null;
       employee.avatar = avatarUrl;
       return employee;
@@ -1055,7 +1013,7 @@ function limitedText(val) {
  * @param item - expense type selected
  */
 function onSelect(item) {
-  model.value = _.cloneDeep(item);
+  model.value = _cloneDeep(item);
 } // onSelect
 
 /**
@@ -1078,25 +1036,24 @@ async function refreshExpenseTypes() {
     // get the active budgets for the employee
     let activeBudgets = store.getters.budgets;
     // map the active budgets
-    let activeExpTypes = _.map(activeBudgets, (budget) => {
+    let activeExpTypes = _map(activeBudgets, (budget) => {
       return budget.expenseTypeId;
     });
     // map the budgets with expenses
-    let budExpTypes = _.map(budgetsWithExpenses, (budget) => {
+    let budExpTypes = _map(budgetsWithExpenses, (budget) => {
       return budget.expenseTypeId;
     });
     // combine the two types of expenses
-    expenseTypesFiltered = _.union(activeExpTypes, budExpTypes);
+    expenseTypesFiltered = _union(activeExpTypes, budExpTypes);
     // get rid of duplicates
-    expenseTypesFiltered = _.uniq(expenseTypesFiltered);
+    expenseTypesFiltered = _uniq(expenseTypesFiltered);
     // set expenseTypes.value to only have those the user should see (expenseTypesFiltered)
-    expenseTypes.value = _.filter(expenseTypes.value, (expenseType) => {
+    expenseTypes.value = _filter(expenseTypes.value, (expenseType) => {
       return expenseTypesFiltered.includes(expenseType.id);
     });
   }
 
   filterExpenseTypes();
-
   loading.value = false; // set loading status to false
 } // refreshExpenseTypes
 
@@ -1121,10 +1078,7 @@ async function updateModelInTable() {
   await updateStoreExpenseTypes();
   await refreshExpenseTypes();
 
-  status.value['show'] = true;
-  status.value['statusType'] = 'SUCCESS';
-  status.value['statusMessage'] = 'Item was successfully updated!';
-  status.value['color'] = 'green';
+  useDisplaySuccess('Item was successfully updated!');
 } // updateModelInTable
 
 /**
@@ -1146,7 +1100,7 @@ async function validateDelete(item) {
       invalidDelete.value = true;
     }
   } catch (err) {
-    displayError(err);
+    useDisplayError(err);
   }
 } // validateDelete
 

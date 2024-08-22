@@ -193,7 +193,10 @@ import { getEmployeeByID, nicknameAndLastName } from '@/shared/employeeUtils';
 import { employeeFilter } from '@/shared/filterUtils';
 import api from '@/shared/api.js';
 import { updateStoreUser, updateStoreEmployees, updateStorePtoCashOuts, updateStoreTags } from '@/utils/storeUtils';
-import _ from 'lodash';
+import _cloneDeep from 'lodash/cloneDeep';
+import _filter from 'lodash/filter';
+import _map from 'lodash/map';
+import _find from 'lodash/find';
 import GeneralConfirmationModal from '../modals/GeneralConfirmationModal.vue';
 import dateUtils from '@/shared/dateUtils';
 import DeleteModal from '../modals/DeleteModal.vue';
@@ -201,6 +204,7 @@ import PTOCashOutForm from './PTOCashOutForm.vue';
 import TagsFilter from '@/components/shared/TagsFilter.vue';
 import { computed, inject, onBeforeMount, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useStore } from 'vuex';
+import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSnackbar.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -311,14 +315,14 @@ onMounted(async () => {
  * @return Array - filtered PTO cash outs
  */
 const filteredPtoCashOuts = computed(() => {
-  let filteredPtoCashOuts = _.cloneDeep(store.getters.ptoCashOuts);
+  let filteredPtoCashOuts = _cloneDeep(store.getters.ptoCashOuts);
 
   if (filteredEmployee.value) {
-    filteredPtoCashOuts = _.filter(filteredPtoCashOuts, (p) => p.employeeId == filteredEmployee.value);
+    filteredPtoCashOuts = _filter(filteredPtoCashOuts, (p) => p.employeeId == filteredEmployee.value);
   }
   // filter tags
   if (tagsInfo.value.selected.length > 0) {
-    filteredPtoCashOuts = _.filter(filteredPtoCashOuts, (p) => {
+    filteredPtoCashOuts = _filter(filteredPtoCashOuts, (p) => {
       let inTag, tagFlipped;
       for (let i = 0; i < tagsInfo.value.selected.length; i++) {
         inTag = tagsInfo.value.selected[i].employees.includes(p.employeeId);
@@ -332,9 +336,9 @@ const filteredPtoCashOuts = computed(() => {
   }
 
   if (filter.value.approved === 'notApproved' || props.unapprovedOnly) {
-    filteredPtoCashOuts = _.filter(filteredPtoCashOuts, (p) => p.approvedDate == null);
+    filteredPtoCashOuts = _filter(filteredPtoCashOuts, (p) => p.approvedDate == null);
   } else if (filter.value.approved === 'approved') {
-    filteredPtoCashOuts = _.filter(filteredPtoCashOuts, (p) => p.approvedDate != null);
+    filteredPtoCashOuts = _filter(filteredPtoCashOuts, (p) => p.approvedDate != null);
   }
   if (store.getters.employees) {
     filteredPtoCashOuts.forEach((p, index) => {
@@ -353,13 +357,13 @@ const filteredPtoCashOuts = computed(() => {
  * @return Array - datatable headers
  */
 const roleHeaders = computed(() => {
-  let headers = _.cloneDeep(headersList);
+  let headers = _cloneDeep(headersList);
   if (!(userRoleIsAdmin() || userRoleIsManager())) {
-    headers = _.filter(headers, (h) => h.title != 'Employee');
+    headers = _filter(headers, (h) => h.title != 'Employee');
   }
 
   if (props.unapprovedOnly) {
-    headers = _.filter(headers, (h) => h.title != 'actions');
+    headers = _filter(headers, (h) => h.title != 'actions');
   }
   return headers;
 }); // roleHeaders
@@ -371,8 +375,8 @@ const roleHeaders = computed(() => {
  */
 const employees = computed(() => {
   let employeeIdsWithPTOCashOuts = store.getters.ptoCashOuts ? store.getters.ptoCashOuts.map((p) => p.employeeId) : [];
-  return _.map(
-    _.filter(store.getters.employees, (e) => employeeIdsWithPTOCashOuts.includes(e.id)),
+  return _map(
+    _filter(store.getters.employees, (e) => employeeIdsWithPTOCashOuts.includes(e.id)),
     (e) => ({
       text: nicknameAndLastName(e),
       value: e.id,
@@ -412,7 +416,7 @@ watch(selected, () => {
 async function approveSelectedPTOCashOuts() {
   let promises = [];
   selected.value.forEach((e) => {
-    let item = _.find(filteredPtoCashOuts.value, (f) => f.id === e);
+    let item = _find(filteredPtoCashOuts.value, (f) => f.id === e);
     item['approvedDate'] = dateUtils.getTodaysDate();
     item['approvalWasSeen'] = false;
     promises.push(api.updateItem(api.PTO_CASH_OUTS, item));
@@ -429,11 +433,11 @@ async function clickedConfirmApprove() {
     await approveSelectedPTOCashOuts();
     await updateStorePtoCashOuts();
     isApproving.value = false;
-    displaySuccess('Successfully approved PTO cash outs!');
+    useDisplaySuccess('Successfully approved PTO cash outs!');
     uncheckAllBoxes();
   } catch (err) {
     isApproving.value = false;
-    displayError(err);
+    useDisplayError(err);
   }
   toggleApproveModal.value = false;
 } // clickedConfirmApprove
@@ -457,10 +461,10 @@ async function clickedConfirmDelete() {
     loading.value = true;
     await deletePTOCashOut(clickedDeleteItem.value);
     loading.value = false;
-    displaySuccess('Successfully deleted PTO cash out!');
+    useDisplaySuccess('Successfully deleted PTO cash out!');
   } catch (err) {
     loading.value = false;
-    displayError(err);
+    useDisplayError(err);
   }
   isDeleting.value = false;
   clickedDeleteItem.value = null;
@@ -481,40 +485,12 @@ function clickedCancelDelete() {
  * @param item PTO cash out item to delete
  */
 async function deletePTOCashOut(item) {
-  let ptoCashOuts = _.cloneDeep(store.getters.ptoCashOuts);
-  ptoCashOuts = _.filter(ptoCashOuts, (p) => p.id != item.id);
+  let ptoCashOuts = _cloneDeep(store.getters.ptoCashOuts);
+  ptoCashOuts = _filter(ptoCashOuts, (p) => p.id != item.id);
   let deletedPTOCashOut = await api.deleteItem(api.PTO_CASH_OUTS, item.id);
   store.dispatch('setPtoCashOuts', { ptoCashOuts });
   return deletedPTOCashOut;
 } // deletePTOCashOut
-
-/**
- * Displays error snackbar
- *
- * @param err error message to display
- */
-function displayError(err) {
-  let status = {
-    statusType: 'ERROR',
-    statusMessage: err,
-    color: 'red'
-  };
-
-  emitter.emit('status-alert', status);
-} // displayError
-
-/**
- * Displays success message
- * @param msg success message to display
- */
-function displaySuccess(msg) {
-  let status = {
-    statusType: 'SUCCESS',
-    statusMessage: msg,
-    color: 'green'
-  };
-  emitter.emit('status-alert', status);
-} // displaySuccess
 
 /**
  * Changes the timesheets employee when a row is clicked
@@ -541,7 +517,7 @@ function uncheckAllBoxes() {
 async function clickedEdit(item) {
   clickedEditItem.value = item;
   toggleEditModal.value = true;
-  let tempEmployee = _.find(store.getters.employees, (e) => e.id === item.employeeId);
+  let tempEmployee = _find(store.getters.employees, (e) => e.id === item.employeeId);
   let employeeBalances = await api.getTimesheetsData(tempEmployee.employeeNumber, {
     code: 1,
     employeeId: tempEmployee.id

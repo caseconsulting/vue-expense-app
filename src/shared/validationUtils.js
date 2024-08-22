@@ -1,7 +1,9 @@
+import { add, getTodaysDate, isAfter, isBefore, isSameOrBefore, isValid } from '@/shared/dateUtils';
 import { isEmpty } from '@/utils/utils';
-import { getTodaysDate, isAfter, isBefore, isSameOrBefore, isValid } from '@/shared/dateUtils';
+import _filter from 'lodash/filter';
+import _find from 'lodash/find';
+import _some from 'lodash/some';
 import store from '../../store/index';
-import _ from 'lodash';
 
 /**
  * Gets the rules for valid AIN number, where it must be 7 digits that can lead with 0s, and not required
@@ -26,13 +28,24 @@ export function getDateOptionalRules() {
 } // getDateOptionalRules
 
 /**
+ * Birthday is valid if it's not specified or it's a valid date format
+ */
+export function getBirthdayRules() {
+  const [nonFutureDateRule] = getNonFutureDateRules();
+  return (v) => {
+    if (isEmpty(v)) return true;
+    return nonFutureDateRule(v);
+  };
+}
+
+/**
  * Gets the optional dates rules for an array in MM/DD/YYYY format.
  * @return Array - The array of rule functions
  */
 export function getDatesArrayOptionalRules() {
   return [
     (v) => {
-      let allValid = _.some(v, (date) => /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(date) && isValid(date, 'MM/DD/YYYY'));
+      let allValid = _some(v, (date) => /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(date) && isValid(date, 'MM/DD/YYYY'));
       return !isEmpty(v) ? allValid || 'All Dates must be valid. Format: MM/DD/YYYY' : true;
     }
   ]; // rules for an optional date
@@ -76,6 +89,28 @@ export function getDateMonthYearRules() {
 } // getDateMonthYearRules
 
 /**
+ * Rule to ensure a date occurs before the specified date
+ * @param {string} date Date to occur before
+ */
+export function getDateBeforeRule(date) {
+  return (v) => {
+    if (isEmpty(v) || isEmpty(date)) return true;
+    return isAfter(add(date, 1, 'd'), v) || 'End date must be at or before start date';
+  };
+}
+
+/**
+ * Rule to ensure a date occurs after the specified date
+ * @param {string} date Date to occur after
+ */
+export function getDateAfterRule(date) {
+  return (v) => {
+    if (isEmpty(v) || isEmpty(date)) return true;
+    return isAfter(add(v, 1, 'd'), date) || 'End date must be at or before start date';
+  };
+}
+
+/**
  * Gets the rules for a valid email address.
  *
  * @returns Array- the array of rule functions
@@ -84,7 +119,7 @@ export function getEmailRules() {
   return [
     (v) =>
       !isEmpty(v)
-        ? String(v)
+        ? !!String(v)
             .toLowerCase()
             .match(
               /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
@@ -92,6 +127,18 @@ export function getEmailRules() {
         : true
   ];
 } // getEmailRules
+
+/**
+ * Gets the rules for a valid employee email address
+ *
+ * @return {((v: any) => Boolean | String)[]} The array of rule functions
+ */
+export function getCaseEmailRules() {
+  return [
+    (v) => !isEmpty(v) || 'Email is required',
+    (v) => /^[a-zA-Z]+$/.test(v) || 'Not a valid @consultwithcase email address'
+  ];
+}
 
 /**
  * Gets the rules where a date must come before today's date.
@@ -114,7 +161,10 @@ export function getNumberRules() {
  * @return Array - The array of rule functions
  */
 export function getPhoneNumberRules() {
-  return [(v) => (!this.isEmpty(v) && v.length === 12) || 'Phone number must be valid. Format: ###-###-####'];
+  return [
+    (v) =>
+      /^\d{3}-\d{3}-\d{4}(?:, ext. \d{3})?$/.test(v) || 'Phone number must be valid. Format: ###-###-####, ext. ###'
+  ];
 } // getPhoneNumberRules
 
 /**
@@ -157,8 +207,8 @@ export function getValidateFalse() {
 export function duplicateEmployeeNumberRule() {
   return [
     (v, employee) => {
-      let emp = _.find(store.getters.employees, (e) => e.id === employee.id);
-      let duplicate = _.some(store.getters.employees, (e) => {
+      let emp = _find(store.getters.employees, (e) => e.id === employee.id);
+      let duplicate = _some(store.getters.employees, (e) => {
         return Number(e.employeeNumber) === Number(v) && Number(emp.employeeNumber) !== Number(v);
       });
       return !duplicate || 'This employee id is already in use';
@@ -169,8 +219,23 @@ export function duplicateEmployeeNumberRule() {
 export function duplicateTechnologyRules() {
   return [
     (v, employee, technologies) => {
-      let duplicates = _.filter(technologies, (t) => t.name === v);
+      let duplicates = _filter(technologies, (t) => t.name === v);
       return duplicates.length === 0 || 'Duplicate technology found';
+    }
+  ];
+}
+
+/**
+ * Rules for no duplication of tech/skill names (used in employee beta profile)
+ */
+export function getDuplicateTechRules(technologies) {
+  return [
+    (v) => {
+      let count = 0;
+      for (let i = 0; i < technologies.length && count <= 2; i++) {
+        if (technologies[i].name === v) count++;
+      }
+      return count <= 1 || 'Duplicate technology found, please remove duplicate entries';
     }
   ];
 }
@@ -217,8 +282,25 @@ export function getAfterSubmissionRules(clearance) {
   return [
     (v) =>
       !isEmpty(v)
-        ? !_.some(v, (date) => isBefore(date, clearance.submissionDate)) || 'Dates must come after submission date'
+        ? !_some(v, (date) => isBefore(date, clearance.submissionDate)) || 'Dates must come after submission date'
         : true
+  ];
+}
+
+/**
+ * Rules preventing duplicate clearanace types
+ *
+ * @param clearanceTypes List of all an employee's clearances
+ */
+export function getDuplicateClearanceRules(clearances) {
+  return [
+    (v) => {
+      let count = 0;
+      for (let i = 0; i < clearances.length && count <= 2; i++) {
+        if (clearances[i].type === v) count++;
+      }
+      return count <= 1 || 'Cannot have two of the same clearance type';
+    }
   ];
 }
 
@@ -230,7 +312,7 @@ export function getAfterSubmissionRules(clearance) {
  * @returns Array - The array of rule functions
  */
 export function getPTOCashOutRules(ptoLimit, employeeId, originalAmount) {
-  let pendingCashOuts = _.filter(store.getters.ptoCashOuts, (p) => !p.approvedDate && employeeId === p.employeeId);
+  let pendingCashOuts = _filter(store.getters.ptoCashOuts, (p) => !p.approvedDate && employeeId === p.employeeId);
   let pendingAmount = pendingCashOuts.reduce((n, { amount }) => n + amount, 0);
   return [
     (v) => (!isEmpty(v) && v > 0) || `PTO cash out amount must be greater than 0`,
@@ -255,6 +337,67 @@ export function getBadgeNumberRules(clearance) {
       : true;
 } //getBadgeNumberRules
 
+/**
+ * Rule that specifies that no two contracts can have both the same contract and prime name
+ * @param {*} contract The contract object
+ */
+export function getDuplicateContractAndPrimeRule(contract) {
+  return () => {
+    const allContracts = store.getters.contracts;
+    let count = 0;
+    for (let i = 0; i < allContracts.length && count <= 2; i++) {
+      if (allContracts[i].contractName === contract.contractName && allContracts[i].primeName === contract.primeName)
+        count++;
+    }
+    return count <= 1 || 'Duplicate contract and prime combination';
+  };
+}
+
+/**
+ * Rule that specifies that there can be no duplicate projects within the same contract
+ * @param {*} contract The contract object
+ */
+export function getDuplicateProjectRule(contract) {
+  return (v) => {
+    let count = 0;
+    for (let i = 0; i < contract.projects.length && count <= 2; i++) {
+      if (contract.projects[i].projectName === v) count++;
+    }
+    return count <= 1 || 'Duplicate projects found within this contract, please remove duplicate entries';
+  };
+}
+
+/**
+ * Rule that specifies no dupilcate company names
+ * @param companies All companies of the employee
+ */
+export function getDuplicateCompanyNameRule(companies) {
+  return (v) => {
+    let count = 0;
+    for (let i = 0; i < companies.length && count <= 2; i++) {
+      if (companies[i].companyName === v) count++;
+    }
+    return count <= 1 || 'Duplicate company name found, please remove duplicate entries';
+  };
+}
+
+export function getDuplicateCustomerOrgRule(customerOrgs) {
+  return (v) => {
+    let count = 0;
+    for (let i = 0; i < customerOrgs.length && count <= 2; i++) {
+      if (customerOrgs[i].name === v) count++;
+    }
+    return count <= 1 || 'Duplicate customer org found, please remove duplicate entries';
+  };
+}
+
+export function getWorkStatusRules() {
+  return [
+    (v) => !isEmpty(v) || 'This field is required',
+    (v) => (v !== '0' && v !== '00') || 'Value cannot be 0 (set to inactive instead)'
+  ];
+}
+
 export default {
   getAINRules,
   getDateOptionalRules,
@@ -274,9 +417,16 @@ export default {
   getDateSubmissionRules,
   getDateGrantedRules,
   getAfterSubmissionRules,
+  getDuplicateClearanceRules,
   duplicateEmployeeNumberRule,
   duplicateTechnologyRules,
   technologyExperienceRules,
   getPTOCashOutRules,
-  getBadgeNumberRules
+  getBadgeNumberRules,
+  getCaseEmailRules,
+  getDuplicateContractAndPrimeRule,
+  getDuplicateProjectRule,
+  getDuplicateCompanyNameRule,
+  getDuplicateCustomerOrgRule,
+  getWorkStatusRules
 };

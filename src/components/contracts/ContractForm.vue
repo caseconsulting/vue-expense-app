@@ -109,11 +109,40 @@
   </v-form>
 </template>
 
-<script>
-import _ from 'lodash';
+<script setup>
+import _some from 'lodash/some';
 import api from '@/shared/api.js';
-import { updateStoreContracts } from '@/utils/storeUtils';
 import { generateUUID } from '@/utils/utils';
+import { useStore } from 'vuex';
+import { ref, watch, inject } from 'vue';
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                      SETUP                       |
+// |                                                  |
+// |--------------------------------------------------|
+
+const props = defineProps(['toggleContractForm']);
+const store = useStore();
+const emitter = inject('emitter');
+const contractName = ref(null);
+const primeName = ref(null);
+const directorate = ref(null);
+const popStartDate = ref(null);
+const popEndDate = ref(null);
+const projects = ref([]);
+const description = ref(null);
+const dialog = ref(false);
+const loading = ref(false);
+const valid = ref(false);
+const duplicateContractPrimeCombo = ref(() => {
+  let found = _some(
+    store.getters.contracts,
+    (c) => c.contractName === contractName.value && c.primeName === primeName.value
+  );
+  return !found || 'Duplicate contract and prime combination';
+});
+const form = ref(null);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -125,10 +154,10 @@ import { generateUUID } from '@/utils/utils';
  * Resets the form and closes the form dialog.
  */
 function cancel() {
-  this.dialog = false;
-  this.emitter.emit('canceled-contract-form');
-  this.$refs.form.reset();
-  this.$refs.form.resetValidation();
+  dialog.value = false;
+  emitter.emit('canceled-contract-form');
+  form.value.reset();
+  form.value.resetValidation();
 } // cancel
 
 /**
@@ -137,36 +166,36 @@ function cancel() {
  * @returns Object - The contract that was created
  */
 async function createContract() {
-  let contractProjects = this.projects.map((project) => {
+  let contractProjects = projects.value.map((project) => {
     return { id: generateUUID(), projectName: project, status: api.CONTRACT_STATUSES.ACTIVE };
   });
   let contract = await api.createItem(api.CONTRACTS, {
     id: generateUUID(),
-    contractName: this.contractName,
-    primeName: this.primeName,
-    directorate: this.directorate,
-    popStartDate: this.popStartDate,
-    popEndDate: this.popEndDate,
+    contractName: contractName.value,
+    primeName: primeName.value,
+    directorate: directorate.value,
+    popStartDate: popStartDate.value,
+    popEndDate: popEndDate.value,
     projects: contractProjects,
-    description: this.description,
+    description: description.value,
     status: api.CONTRACT_STATUSES.ACTIVE
   });
-  this.$store.dispatch('setContracts', { contracts: [contract, ...this.$store.getters.contracts] });
+  store.dispatch('setContracts', { contracts: [contract, ...store.getters.contracts] });
 } // createContract
 
 /**
  * Creates a validated contract.
  */
 async function submit() {
-  this.valid = this.$refs.form.validate();
-  if (this.valid) {
-    this.loading = true;
-    let contract = await this.createContract();
-    this.$refs.form.reset();
-    this.$refs.form.resetValidation();
-    this.dialog = false;
-    this.loading = false;
-    this.emitter.emit('submitted-contract-form', contract);
+  valid.value = form.value.validate();
+  if (valid.value) {
+    loading.value = true;
+    let contract = await createContract();
+    form.value.reset();
+    form.value.resetValidation();
+    dialog.value = false;
+    loading.value = false;
+    emitter.emit('submitted-contract-form', contract);
   }
 } // submit
 
@@ -176,50 +205,15 @@ async function submit() {
 // |                                                  |
 // |--------------------------------------------------|
 
+watch(
+  () => props.toggleContractForm,
+  () => watchToggleContractForm()
+);
+
 /**
  * Watches the dialog toggle from the Contracts.vue page.
  */
 function watchToggleContractForm() {
-  this.dialog = this.toggleContractForm;
+  dialog.value = props.toggleContractForm;
 } // watchToggleContractForm
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                      EXPORT                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-export default {
-  data() {
-    return {
-      contractName: null,
-      primeName: null,
-      directorate: null,
-      popStartDate: null,
-      popEndDate: null,
-      projects: [],
-      description: null,
-      dialog: false,
-      loading: false,
-      valid: false,
-      duplicateContractPrimeCombo: () => {
-        let found = _.some(
-          this.$store.getters.contracts,
-          (c) => c.contractName === this.contractName && c.primeName === this.primeName
-        );
-        return !found || 'Duplicate contract and prime combination';
-      }
-    };
-  },
-  methods: {
-    cancel,
-    createContract,
-    submit,
-    updateStoreContracts
-  },
-  props: ['toggleContractForm'],
-  watch: {
-    toggleContractForm: watchToggleContractForm
-  }
-};
 </script>

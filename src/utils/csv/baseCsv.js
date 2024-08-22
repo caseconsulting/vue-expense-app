@@ -7,7 +7,9 @@
  */
 
 // Imports and constants for all functions
-import _ from 'lodash';
+import _forEach from 'lodash/forEach';
+import _map from 'lodash/map';
+import _sortBy from 'lodash/sortBy';
 import { parse as papaParse } from 'papaparse';
 import { utils, write } from 'xlsx';
 const NEW_LINE = '\n';
@@ -103,7 +105,7 @@ export function download(csvText, filename = null, asXlsx = true) {
 export function escape(item, quotify = false) {
   let to_return;
   if (Array.isArray(item)) {
-    to_return = _.map(item, (s) => {
+    to_return = _map(item, (s) => {
       s = `${s || ''}`;
       to_return = s.replaceAll('"', '""');
       if (quotify) to_return = `"${to_return}"`;
@@ -126,10 +128,10 @@ export function escape(item, quotify = false) {
 export function filterHeaders(objects, desired_headers) {
   let new_objects = [];
   // go through each object...
-  _.forEach(objects, (object) => {
+  _forEach(objects, (object) => {
     // extract headers we want
     let new_object = {};
-    _.forEach(desired_headers, (h) => {
+    _forEach(desired_headers, (h) => {
       if (object[h] != undefined) new_object[h] = object[h];
       else new_object[h] = '';
     });
@@ -151,8 +153,8 @@ export function generate(object_array, delimiter = ', ') {
   // construct headers, preserving order
   let headers = [];
   let seent = new Set();
-  _.forEach(object_array, (object) => {
-    _.forEach(Object.keys(object), (key, index) => {
+  _forEach(object_array, (object) => {
+    _forEach(Object.keys(object), (key, index) => {
       if (!seent.has(key)) {
         seent.add(key);
         headers.splice(index + 1, 0, key);
@@ -164,11 +166,11 @@ export function generate(object_array, delimiter = ', ') {
   final_csv += `${this.escape(headers, true).join(',')}${NEW_LINE}`;
 
   // foreach line of file...
-  _.forEach(object_array, (object) => {
+  _forEach(object_array, (object) => {
     let current;
     let line = [];
     // foreach item (box) in line...
-    _.forEach(headers, (header) => {
+    _forEach(headers, (header) => {
       // iteration vars
       current = object[header];
       // add line, supporting arrays and escaping characters
@@ -214,7 +216,7 @@ export function generateFrom2dArray(arrays) {
  */
 export function sort(objects, key) {
   if (!Array.isArray(key)) key = [key];
-  return _.sortBy(objects, key);
+  return _sortBy(objects, key);
 } // sort
 
 export default {

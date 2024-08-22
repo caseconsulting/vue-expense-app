@@ -399,7 +399,11 @@
 import api from '@/shared/api.js';
 import { generateUUID, isEmpty, isSmallScreen } from '@/utils/utils';
 import { SCHOOLS } from '@/components/employees/form-tabs/dropdown-info/schools';
-import _ from 'lodash';
+import _forEach from 'lodash/forEach';
+import _isEmpty from 'lodash/isEmpty';
+import _isEqual from 'lodash/isEqual';
+import _cloneDeep from 'lodash/cloneDeep';
+import _filter from 'lodash/filter';
 import CancelConfirmation from '@/components/modals/CancelConfirmation.vue';
 import UniversityForm from '@/components/employees/form-tabs/education-types/UniversityForm.vue';
 import MilitaryForm from '@/components/employees/form-tabs/education-types/MilitaryForm.vue';
@@ -451,6 +455,7 @@ async function created() {
  * destroy listeners
  */
 function beforeUnmount() {
+  this.emitter.off('deny');
   this.emitter.off('confirmed-parser');
   this.emitter.off('canceled-parser');
   this.emitter.off('backout-canceled-parser');
@@ -469,7 +474,7 @@ function beforeUnmount() {
  * @return boolean - if the changes have been submitted
  */
 function changesMade() {
-  return !_.isEqual(this.editedEmployeeForm, this.employee);
+  return !_isEqual(this.editedEmployeeForm, this.employee);
 } // changesMade
 
 /**
@@ -612,12 +617,12 @@ function getOldPhoneNums() {
   let nums = [];
   switch (this.phoneNumAction) {
     case 'Replace from Public':
-      _.forEach(this.employee.publicPhoneNumbers, (number) => {
+      _forEach(this.employee.publicPhoneNumbers, (number) => {
         nums.push(number.number);
       });
       break;
     case 'Replace from Private':
-      _.forEach(this.employee.privatePhoneNumbers, (number) => {
+      _forEach(this.employee.privatePhoneNumbers, (number) => {
         nums.push(number.number);
       });
       break;
@@ -633,10 +638,10 @@ function getOldPhoneNums() {
  */
 function getPhoneNumActionDropdowns() {
   let options = ['Add to Private', 'Add to Public'];
-  if (!_.isEmpty(this.employee.publicPhoneNumbers)) {
+  if (!_isEmpty(this.employee.publicPhoneNumbers)) {
     options.unshift('Replace from Public');
   }
-  if (!_.isEmpty(this.employee.privatePhoneNumbers)) {
+  if (!_isEmpty(this.employee.privatePhoneNumbers)) {
     options.unshift('Replace from Private');
   }
   return options;
@@ -689,7 +694,7 @@ async function submit() {
   this.addressCanceled = false;
   this.phoneCanceled = false;
   this.timeoutError = false;
-  this.editedEmployeeForm = _.cloneDeep(this.employee);
+  this.editedEmployeeForm = _cloneDeep(this.employee);
 
   // checks if the file uploaded is a pdf/png/jpg
   if (this.validFile) {
@@ -755,7 +760,7 @@ async function submit() {
 
     let location = [];
     let locationCounter = 0;
-    _.forEach(personalComprehend, async (personalEntity) => {
+    _forEach(personalComprehend, async (personalEntity) => {
       // // Links
 
       if (personalEntity.Text.includes('github')) {
@@ -819,7 +824,7 @@ async function submit() {
       // a field title 'type'. 'Type' is another array and we want the one
       // containing the postal_code string
       let currentZIP = '';
-      _.forEach(res.result.address_components, (field) => {
+      _forEach(res.result.address_components, (field) => {
         if (field.types.includes('postal_code')) {
           currentZIP = field.short_name;
         }
@@ -889,7 +894,7 @@ async function submit() {
         });
       } else {
         // check all military
-        let mil = _.filter(dodForces, (f) => {
+        let mil = _filter(dodForces, (f) => {
           return educationEntity.Text.toLowerCase().includes(f.toLowerCase());
         });
         if (
@@ -1101,7 +1106,7 @@ function clearForm() {
   };
   this.addressCanceled = false;
   this.phoneCanceled = false;
-  this.editedEmployeeForm = _.cloneDeep(this.employee);
+  this.editedEmployeeForm = _cloneDeep(this.employee);
   this.file = null;
   this.loading = false;
   this.validFile = false;
@@ -1143,7 +1148,7 @@ function watchFile() {
  */
 function watchActivate() {
   if (this.activate) {
-    this.editedEmployeeForm = _.cloneDeep(this.employee);
+    this.editedEmployeeForm = _cloneDeep(this.employee);
   }
 } // watchActivate
 

@@ -44,7 +44,9 @@
 </template>
 
 <script setup>
-import _ from 'lodash';
+import _cloneDeep from 'lodash/cloneDeep';
+import _filter from 'lodash/filter';
+import _forEach from 'lodash/forEach';
 import { inject, ref } from 'vue';
 import { useStore } from 'vuex';
 import { DEFAULT_ISOFORMAT, add, difference, format, getMonth, getYear, setYear, subtract } from '@/shared/dateUtils';
@@ -62,7 +64,7 @@ const emitter = inject('emitter');
 const date = ref(null);
 const anniversaries = ref(null);
 
-anniversaries.value = _.cloneDeep(props.item.events);
+anniversaries.value = _cloneDeep(props.item.events);
 date.value = format(props.item.date.split(' in ')[1], 'MMM YYYY', DEFAULT_ISOFORMAT);
 
 // |--------------------------------------------------|
@@ -93,8 +95,8 @@ function isEmployeeAnniversaryMonth(employee) {
 
 function populateAnniversaries() {
   anniversaries.value = [];
-  let activeEmployees = _.filter(store.getters.employees, (e) => e.workStatus > 0);
-  _.forEach(activeEmployees, (e) => {
+  let activeEmployees = _filter(store.getters.employees, (e) => e.workStatus > 0);
+  _forEach(activeEmployees, (e) => {
     if (isEmployeeAnniversaryMonth(e)) {
       let hireDate = format(e.hireDate, null, DEFAULT_ISOFORMAT);
       let anniversary = setYear(hireDate, getYear(date.value));

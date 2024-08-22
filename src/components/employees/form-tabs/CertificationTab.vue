@@ -114,7 +114,11 @@
 </template>
 
 <script>
-import _ from 'lodash';
+import _map from 'lodash/map';
+import _compact from 'lodash/compact';
+import _forEach from 'lodash/forEach';
+import _isArray from 'lodash/isArray';
+import _cloneDeep from 'lodash/cloneDeep';
 import { getDateRules, getDateOptionalRules, getRequiredRules } from '@/shared/validationUtils.js';
 import { asyncForEach, isEmpty, isMobile } from '@/utils/utils';
 import { add, format, getTodaysDate, isAfter } from '@/shared/dateUtils';
@@ -178,12 +182,12 @@ function parseEventDate() {
  * Populate drop downs with information that other employees have filled out.
  */
 function populateDropDowns() {
-  let employeesCertifications = _.map(this.employees, (employee) => employee.certifications); // extract certifications
-  employeesCertifications = _.compact(employeesCertifications); // remove falsey values
+  let employeesCertifications = _map(this.employees, (employee) => employee.certifications); // extract certifications
+  employeesCertifications = _compact(employeesCertifications); // remove falsey values
   // loop employees
-  _.forEach(employeesCertifications, (certifications) => {
+  _forEach(employeesCertifications, (certifications) => {
     // loop certifications
-    _.forEach(certifications, (certification) => {
+    _forEach(certifications, (certification) => {
       this.certificationDropDown.push(certification.name); // add certification name
     });
   });
@@ -195,7 +199,7 @@ function populateDropDowns() {
 async function validateFields() {
   let errorCount = 0;
   //ensures that refs are put in an array so we can reuse forEach loop
-  let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
+  let components = !_isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
   await asyncForEach(components, async (field) => {
     if (field && (await field.validate()).length > 0) errorCount++;
   });
@@ -252,7 +256,7 @@ export default {
         }
       },
       dateSubmitted: getTodaysDate(),
-      editedCertifications: _.cloneDeep(this.model) // stores edited certifications info
+      editedCertifications: _cloneDeep(this.model) // stores edited certifications info
     };
   },
   directives: { mask },

@@ -14,33 +14,16 @@
       <employee-page-loader />
     </v-row>
     <div v-else>
-      <v-snackbar
-        v-model="uploadStatus.statusType"
-        :color="uploadStatus.color"
-        :multi-line="true"
-        :timeout="3000"
-        :vertical="true"
-        location="top right"
-      >
-        <v-card-text color="white">
-          <span class="text-h6 font-weight-medium">{{ uploadStatus.statusMessage }}</span>
-        </v-card-text>
-        <v-btn color="white" variant="text" @click="clearStatus"> Close </v-btn>
-      </v-snackbar>
-      <v-row class="pa-0">
-        <v-col cols="3" align="left" justify="left">
+      <v-row class="pa-0 d-flex justify-space-between">
+        <v-col cols="auto" class="d-flex align-center">
           <v-btn id="backBtn" elevation="2" :size="isMobile ? 'x-small' : 'default'" @click="$router.back()">
             <v-icon size="large" class="pr-1"> mdi-arrow-left-thin </v-icon>
             Back
           </v-btn>
+          <!-- BUTTON TO CHANGE TO NEW/BETA VIEW -->
+          <v-btn rounded="xl" color="#bc3825" @click="handleProfileBeta()" theme="dark" class="ma-2"> new view </v-btn>
         </v-col>
-        <v-col
-          v-if="hasAdminPermissions() || userIsEmployee()"
-          cols="9"
-          align="right"
-          justify="right"
-          class="px-0 pr-3 ma-0"
-        >
+        <v-col v-if="hasAdminPermissions() || userIsEmployee()" cols="auto" class="px-0 pr-3 ma-0 d-flex align-center">
           <v-btn
             v-if="!editing"
             :size="isMobile ? 'x-small' : 'default'"
@@ -236,8 +219,15 @@ import {
   updateStoreTags
 } from '@/utils/storeUtils';
 import { employeeFilter } from '@/shared/filterUtils';
+import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSnackbar.vue';
 import { format, getTodaysDate, FORMATTED_ISOFORMAT } from '@/shared/dateUtils';
-import _ from 'lodash';
+import _find from 'lodash/find';
+import _isNil from 'lodash/isNil';
+import _sortBy from 'lodash/sortBy';
+import _cloneDeep from 'lodash/cloneDeep';
+import _findIndex from 'lodash/findIndex';
+import _filter from 'lodash/filter';
+import _map from 'lodash/map';
 import ConvertEmployeeToCsv from '@/components/employees/csv/ConvertEmployeeToCsv.vue';
 import AnniversaryCard from '@/components/shared/AnniversaryCard.vue';
 import BudgetChart from '@/components/charts/custom-charts/BudgetChart.vue';
@@ -259,7 +249,7 @@ import EmployeePageLoader from '@/components/employees/EmployeePageLoader';
  */
 async function resumeReceived(newEmployeeForm, changes) {
   if (changes && changes > 0) {
-    this.displayMessage('SUCCESS', `Added ${changes} change(s) to profile!`, 'green');
+    useDisplaySuccess(`Added ${changes} change(s) to profile!`);
   }
   if (newEmployeeForm) {
     this.model = newEmployeeForm;
@@ -267,15 +257,6 @@ async function resumeReceived(newEmployeeForm, changes) {
     await api.updateItem(api.EMPLOYEES, this.model);
   }
 } // resumeReceived
-
-/**
- * Clears the status message of the uploadStatus
- */
-function clearStatus() {
-  this.uploadStatus['statusType'] = undefined;
-  this.uploadStatus['statusMessage'] = null;
-  this.uploadStatus['color'] = null;
-} // clearStatus
 
 /**
  * Downloads the resume of the employee
@@ -303,7 +284,7 @@ async function getProfileData() {
   } else {
     // user looking at another employees profile
     let employees = this.$store.getters.employees;
-    this.model = _.find(employees, (employee) => {
+    this.model = _find(employees, (employee) => {
       return employee.employeeNumber == this.$route.params.id;
     });
   }
@@ -348,21 +329,8 @@ function hasAdminPermissions() {
  * @return boolean - user is the employee that is displayed
  */
 function userIsEmployee() {
-  return !_.isNil(this.model) && !_.isNil(this.user) ? this.user.employeeNumber === this.model.employeeNumber : false;
+  return !_isNil(this.model) && !_isNil(this.user) ? this.user.employeeNumber === this.model.employeeNumber : false;
 } // userIsEmployee
-
-/**
- * Displays the message
- *
- * @param type - the type of message
- * @param msg - the message to display
- * @param color - the color of the banner
- */
-function displayMessage(type, msg, color) {
-  this.uploadStatus['statusType'] = type;
-  this.uploadStatus['statusMessage'] = msg;
-  this.uploadStatus['color'] = color;
-} // displayMessage
 
 /**
  * Deletes the resume
@@ -373,9 +341,9 @@ async function deleteResume() {
   let updateEmpRes = await api.updateItem(api.EMPLOYEES, { ...this.model, resumeUpdated: null });
   if (!(deleteResult instanceof Error) || !(updateEmpRes instanceof Error)) {
     this.model.resumeUpdated = null;
-    this.displayMessage('SUCCESS', 'Successfully deleted resume', 'green');
+    useDisplaySuccess('Successfully deleted resume');
   } else {
-    this.displayMessage('ERROR', 'Failure to delete resume', 'red');
+    useDisplayError('Failure to delete resume');
   }
   this.deleteLoading = false;
 } // deleteResume
@@ -404,6 +372,13 @@ function pushHistoryState(employeeNumber) {
 } // pushHistoryState
 
 /**
+ * Routes user to their employee page
+ */
+function handleProfileBeta() {
+  this.$router.push(`/employee/${this.model.employeeNumber}`);
+} // handleProfile
+
+/**
  * Navigates to an employee
  * future: support custom loops
  *
@@ -417,14 +392,14 @@ async function navEmployee(num) {
   // create 'loop' of employees in order of their employee number
   loop = this.$store.getters.employees || (await this.updateStoreEmployees());
   loop = loop.filter((e) => e.workStatus !== 0);
-  loop = _.sortBy(loop, ['employeeNumber']);
+  loop = _sortBy(loop, ['employeeNumber']);
 
   // get the employee we're currently at and grab the employee `num` after in
   // the loop (this can be negative to go backwards, and can be more than 1)
-  pos = _.findIndex(loop, (e) => e.employeeNumber == currId);
+  pos = _findIndex(loop, (e) => e.employeeNumber == currId);
   res = (pos + num) % loop.length;
   if (res < 0) res = loop.length - 1;
-  this.model = _.cloneDeep(loop[res]); // this updates everything
+  this.model = _cloneDeep(loop[res]); // this updates everything
 
   // budget information needs to be reloaded specifically as it does not update
   // when the model does
@@ -472,6 +447,11 @@ async function created() {
     await this.resumeReceived(result.newEmployeeForm, result.totalChanges);
     this.midAction = false;
   });
+  this.emitter.on('profile-clicked', async () => {
+    this.model = _cloneDeep(this.$store.getters.user);
+    await this.refreshExpenseData();
+    this.pushHistoryState(this.$store.getters.user.employeeNumber);
+  });
 
   this.storeIsPopulated ? await this.getProfileData() : (this.loading = true);
   if (!this.$store.getters.employees) await this.updateStoreEmployees();
@@ -492,9 +472,9 @@ function mounted() {
   });
 
   this.emitter.on('uploaded', async (displayMessage) => {
-    if (displayMessage) this.displayMessage('SUCCESS', 'Successfully uploaded resume', 'green');
+    if (displayMessage) useDisplaySuccess('Successfully uploaded resume');
     this.model.resumeUpdated = getTodaysDate();
-    this.model = _.cloneDeep(this.model); // force vue to reload the object
+    this.model = _cloneDeep(this.model); // force vue to reload the object
     await api.updateItem(api.EMPLOYEES, this.model);
   });
 
@@ -522,6 +502,7 @@ function beforeUnmount() {
   this.emitter.off('uploaded');
   this.emitter.off('tabChange');
   this.emitter.off('change-budget-year-employee-page');
+  this.emitter.off('profile-clicked');
 } // beforeUnmount
 
 // |--------------------------------------------------|
@@ -534,8 +515,8 @@ function beforeUnmount() {
  * Returns all employees with an item title for the autocomplete
  */
 function dropdownEmployees() {
-  let employees = _.filter(this.$store.getters.employees, (e) => e.workStatus > 0);
-  return _.map(employees, (e) => {
+  let employees = _filter(this.$store.getters.employees, (e) => e.workStatus > 0);
+  return _map(employees, (e) => {
     return {
       ...e,
       itemTitle: `${e.lastName}, ${e.nickname || e.firstName}`
@@ -567,7 +548,7 @@ function refreshKey() {
 function watchModel() {
   if (!this.model) return;
   this.dropdownEmployee = {
-    ..._.cloneDeep(this.model),
+    ..._cloneDeep(this.model),
     itemTitle: `${this.model.lastName}, ${this.model.nickname || this.model.firstName}`
   };
 } // watchModel
@@ -653,18 +634,8 @@ export default {
         workStatus: 100
       }, // selected employee
       search: '', // query text for datatable search field
-      status: {
-        statusType: undefined,
-        statusMessage: '',
-        color: ''
-      }, // snackbar action status
       toggleDeleteModal: false,
       toggleResumeParser: false,
-      uploadStatus: {
-        statusType: undefined,
-        statusMessage: null,
-        color: null
-      },
       user: null
     };
   },
@@ -683,12 +654,11 @@ export default {
   created,
   mounted,
   methods: {
-    clearStatus,
     deleteResume,
-    displayMessage,
     downloadResume,
     employeeFilter,
     format,
+    handleProfileBeta,
     hasAdminPermissions,
     getProfileData,
     getCurrentBudgetYear,
