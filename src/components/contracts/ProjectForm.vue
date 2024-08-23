@@ -24,7 +24,7 @@
               <v-col cols="12" sm="6" md="6">
                 <v-combobox
                   v-model="directorate"
-                  :items="getComboboxOrgList('directorate')"
+                  :items="getOrgList('directorate')"
                   label="Directorate (Org 1)"
                   variant="underlined"
                   prepend-icon="mdi-office-building-outline"
@@ -34,7 +34,7 @@
               <v-col cols="12" sm="6" md="6">
                 <v-combobox
                   v-model="org2"
-                  :items="getComboboxOrgList('org2')"
+                  :items="getOrgList('org2')"
                   label="Org 2"
                   variant="underlined"
                   prepend-icon="mdi-office-building-outline"
@@ -44,7 +44,7 @@
               <v-col cols="12" sm="6" md="6">
                 <v-combobox
                   v-model="org3"
-                  :items="getComboboxOrgList('org3')"
+                  :items="getOrgList('org3')"
                   label="Org 3"
                   variant="underlined"
                   prepend-icon="mdi-office-building-outline"
@@ -97,12 +97,12 @@
 <script setup>
 import api from '../../shared/api';
 import _find from 'lodash/find';
-import _forEach from 'lodash/forEach';
 import _some from 'lodash/some';
 import _cloneDeep from 'lodash/cloneDeep';
 import { generateUUID } from '@/utils/utils';
 import { ref, watch, inject } from 'vue';
 import { useStore } from 'vuex';
+import { getOrgList } from '@/shared/contractUtils';
 
 const props = defineProps(['toggleProjectForm', 'contract']);
 const emitter = inject('emitter');
@@ -135,23 +135,6 @@ function cancel() {
   form.value.reset();
   form.value.resetValidation();
 } // cancel
-
-/**
- * Gets a list of orgs from a sepcific level from all projects
- *
- * @param {String} field - The org (directorate, org2, or org3)
- * @returns Array - The list of orgs
- */
-function getComboboxOrgList(field) {
-  let set = new Set();
-  _forEach(store.getters.contracts, (c) => {
-    _forEach(c.projects, (p) => {
-      let org = p[field];
-      if (org) set.add(org);
-    });
-  });
-  return Array.from(set);
-} // getComboboxOrgList
 
 /**
  * Creates a validated project.

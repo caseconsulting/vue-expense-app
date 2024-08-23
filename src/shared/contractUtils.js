@@ -1,4 +1,22 @@
 import _forEach from 'lodash/forEach';
+import store from '../../store/index';
+
+/**
+ * Gets a list of orgs from a sepcific level from all projects
+ *
+ * @param {String} field - The org (directorate, org2, or org3)
+ * @returns Array - The list of orgs
+ */
+export function getOrgList(field) {
+  let set = new Set();
+  _forEach(store.getters.contracts, (c) => {
+    _forEach(c.projects, (p) => {
+      let org = p[field];
+      if (org) set.add(org);
+    });
+  });
+  return Array.from(set);
+} // getComboboxOrgList
 
 /**
  * Gets the projects current employees in the form of a list.
@@ -62,6 +80,7 @@ export function getProject(contractId, projectId, contracts) {
 } // getProject
 
 export default {
+  getOrgList,
   getProjectCurrentEmployees,
   getProjectPastEmployees,
   getProject

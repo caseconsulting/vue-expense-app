@@ -7,6 +7,7 @@
           :headers="projectHeaders"
           :items="contract.item.projects"
           :row-props="rowProps"
+          :cellProps="cellProps"
           class="projects-table"
           hide-default-footer
           hide-default-header
@@ -46,7 +47,7 @@
             <v-combobox
               v-if="editingProjectItem && editingProjectItem.id == item.id"
               v-model="editingProjectItem.directorate"
-              :items="getComboboxOrgList('directorate')"
+              :items="getOrgList('directorate')"
               label="Directorate (Org 1)"
               variant="underlined"
             ></v-combobox>
@@ -58,7 +59,7 @@
             <v-combobox
               v-if="editingProjectItem && editingProjectItem.id == item.id"
               v-model="editingProjectItem.org2"
-              :items="getComboboxOrgList('org2')"
+              :items="getOrgList('org2')"
               label="Org 2"
               variant="underlined"
             ></v-combobox>
@@ -70,7 +71,7 @@
             <v-combobox
               v-if="editingProjectItem && editingProjectItem.id == item.id"
               v-model="editingProjectItem.org3"
-              :items="getComboboxOrgList('org3')"
+              :items="getOrgList('org3')"
               label="Org 3"
               variant="underlined"
             ></v-combobox>
@@ -221,13 +222,12 @@
 </template>
 <script setup>
 import _find from 'lodash/find';
-import _forEach from 'lodash/forEach';
 import _some from 'lodash/some';
 import _cloneDeep from 'lodash/cloneDeep';
 import api from '@/shared/api';
 import { nicknameAndLastName } from '@/shared/employeeUtils';
 import ProjectsEmployeesAssignedModal from '../modals/ProjectsEmployeesAssignedModal.vue';
-import { getProjectCurrentEmployees } from '@/shared/contractUtils';
+import { getOrgList, getProjectCurrentEmployees } from '@/shared/contractUtils';
 import { ref, onBeforeMount, inject } from 'vue';
 import { useStore } from 'vuex';
 import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSnackbar.vue';
@@ -244,6 +244,7 @@ const props = defineProps([
   'isEditingContractItem',
   'isContractDeletingOrUpdatingStatus',
   'colspan',
+  'cellProps',
   'rowProps'
 ]);
 const emitter = inject('emitter');
@@ -268,44 +269,62 @@ const valid = ref(true);
 const projectHeaders = ref([
   {
     text: '',
-    value: 'spacer'
+    value: 'spacer',
+    customWidth: 'small'
   },
   {
     text: 'Project',
-    value: 'projectName'
+    value: 'projectName',
+    align: 'start',
+    customWidth: 'small'
   },
   {
     text: 'Directorate',
-    value: 'directorate'
+    value: 'directorate',
+    align: 'start',
+    customWidth: 'x-small'
   },
   {
     text: 'Org 2',
-    value: 'org2'
+    value: 'org2',
+    align: 'start',
+    customWidth: 'x-small'
   },
   {
     text: 'Org 3',
-    value: 'org3'
+    value: 'org3',
+    align: 'start',
+    customWidth: 'x-small'
   },
   {
     text: 'PoP-Start Date',
-    value: 'popStartDate'
+    value: 'popStartDate',
+    align: 'start',
+    customWidth: 'medium'
   },
   {
     text: 'PoP-End Date',
-    value: 'popEndDate'
+    value: 'popEndDate',
+    align: 'start',
+    customWidth: 'medium'
   },
   {
     text: 'Description',
-    value: 'description'
+    value: 'description',
+    align: 'start',
+    customWidth: 'large'
   },
   {
     text: 'Active Employees',
-    value: 'projectActiveEmployees'
+    value: 'projectActiveEmployees',
+    align: 'start',
+    customWidth: 'large'
   },
   {
     value: 'actions',
     sortable: false,
-    align: 'end'
+    align: 'end',
+    customWidth: 'small'
   }
 ]);
 const projectForm = ref(null);
@@ -348,23 +367,6 @@ function clickedCancel() {
   editingProjectItem.value = null;
   emitter.emit('is-editing-project-item', false);
 } // clickedCancel
-
-/**
- * Gets a list of orgs from a sepcific level from all projects
- *
- * @param {String} field - The org (directorate, org2, or org3)
- * @returns Array - The list of orgs
- */
-function getComboboxOrgList(field) {
-  let set = new Set();
-  _forEach(store.getters.contracts, (c) => {
-    _forEach(c.projects, (p) => {
-      let org = p[field];
-      if (org) set.add(org);
-    });
-  });
-  return Array.from(set);
-} // getComboboxOrgList
 
 /**
  * Updates project in inline row edit (expandable row)
@@ -410,24 +412,24 @@ function toggleProjectCheckBox(projectItem) {
 <style lang="scss">
 @import 'src/assets/styles/styles';
 
-.projects-table > div {
-  overflow-y: hidden !important;
+.projects-table > div > table > tbody > tr > td {
+  padding: 0px 12px 0px 12px !important;
 }
 
-.highlight-project-row {
-  background-color: rgb(255, 255, 255) !important;
-}
-
-.smaller-text {
-  display: block;
-  font-size: 11px;
-  line-height: 1.2;
+.projects-table > div > table > tbody > tr > td:first-of-type {
+  min-width: 70px !important;
 }
 
 .description textarea {
   line-height: 1.2;
   font-size: 11px;
   padding-top: 18px !important;
+}
+
+.smaller-text {
+  display: block;
+  font-size: 11px;
+  line-height: 1.2;
 }
 </style>
 
