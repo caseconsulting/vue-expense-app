@@ -22,12 +22,33 @@
               </v-col>
               <!-- Directorate -->
               <v-col cols="12" sm="6" md="6">
-                <v-text-field
+                <v-combobox
                   v-model="directorate"
-                  label="Directorate"
+                  :items="getComboboxOrgList('directorate')"
+                  label="Directorate (Org 1)"
                   variant="underlined"
                   prepend-icon="mdi-office-building-outline"
-                ></v-text-field>
+                ></v-combobox>
+              </v-col>
+              <!-- Org 2 -->
+              <v-col cols="12" sm="6" md="6">
+                <v-combobox
+                  v-model="org2"
+                  :items="getComboboxOrgList('org2')"
+                  label="Org 2"
+                  variant="underlined"
+                  prepend-icon="mdi-office-building-outline"
+                ></v-combobox>
+              </v-col>
+              <!-- Org 3 -->
+              <v-col cols="12" sm="6" md="6">
+                <v-combobox
+                  v-model="org3"
+                  :items="getComboboxOrgList('org3')"
+                  label="Org 3"
+                  variant="underlined"
+                  prepend-icon="mdi-office-building-outline"
+                ></v-combobox>
               </v-col>
               <!-- PoP Start Date  -->
               <v-col cols="12" sm="6" md="6">
@@ -76,6 +97,7 @@
 <script setup>
 import api from '../../shared/api';
 import _find from 'lodash/find';
+import _forEach from 'lodash/forEach';
 import _some from 'lodash/some';
 import _cloneDeep from 'lodash/cloneDeep';
 import { generateUUID } from '@/utils/utils';
@@ -92,6 +114,8 @@ const projectName = ref(null);
 const description = ref(null);
 const dialog = ref(false);
 const directorate = ref(null);
+const org2 = ref(null);
+const org3 = ref(null);
 const loading = ref(false);
 const duplicateProjects = ref(() => {
   if (props.contract) {
@@ -111,6 +135,23 @@ function cancel() {
   form.value.reset();
   form.value.resetValidation();
 } // cancel
+
+/**
+ * Gets a list of orgs from a sepcific level from all projects
+ *
+ * @param {String} field - The org (directorate, org2, or org3)
+ * @returns Array - The list of orgs
+ */
+function getComboboxOrgList(field) {
+  let set = new Set();
+  _forEach(store.getters.contracts, (c) => {
+    _forEach(c.projects, (p) => {
+      let org = p[field];
+      if (org) set.add(org);
+    });
+  });
+  return Array.from(set);
+} // getComboboxOrgList
 
 /**
  * Creates a validated project.
@@ -136,6 +177,8 @@ async function createProject() {
     id: generateUUID(),
     projectName: projectName.value,
     directorate: directorate.value,
+    org2: org2.value,
+    org3: org3.value,
     popStartDate: popStartDate.value,
     popEndDate: popEndDate.value,
     description: description.value,

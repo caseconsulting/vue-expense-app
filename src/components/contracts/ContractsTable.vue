@@ -134,6 +134,32 @@
               <span v-else :class="{ 'font-weight-bold': true }">{{ item.directorate }}</span>
             </template>
 
+            <!-- Org 2 -->
+            <template v-slot:[`item.org2`]="{ item }">
+              <v-text-field
+                name="org2"
+                v-if="editingItem && editingItem.id == item.id"
+                v-model="editingItem.org2"
+                label="Org 2"
+                variant="underlined"
+                @click.stop
+              ></v-text-field>
+              <span v-else :class="{ 'font-weight-bold': true }">{{ item.org2 }}</span>
+            </template>
+
+            <!-- Org 3 -->
+            <template v-slot:[`item.org3`]="{ item }">
+              <v-text-field
+                name="org3"
+                v-if="editingItem && editingItem.id == item.id"
+                v-model="editingItem.org3"
+                label="Org 3"
+                variant="underlined"
+                @click.stop
+              ></v-text-field>
+              <span v-else :class="{ 'font-weight-bold': true }">{{ item.org3 }}</span>
+            </template>
+
             <!-- PoP Start Date Slot -->
             <template v-slot:[`item.popStartDate`]="{ item }">
               <v-text-field
@@ -415,6 +441,16 @@ const contractHeaders = ref([
   {
     title: 'Directorate',
     key: 'directorate',
+    align: 'start'
+  },
+  {
+    title: 'Org 2',
+    key: 'org2',
+    align: 'start'
+  },
+  {
+    title: 'Org 3',
+    key: 'org3',
     align: 'start'
   },
   {

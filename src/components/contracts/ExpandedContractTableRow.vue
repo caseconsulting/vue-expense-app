@@ -43,13 +43,38 @@
 
           <!-- Directorate -->
           <template v-slot:[`item.directorate`]="{ item }">
-            <v-text-field
+            <v-combobox
               v-if="editingProjectItem && editingProjectItem.id == item.id"
               v-model="editingProjectItem.directorate"
-              label="Directorate"
+              :items="getComboboxOrgList('directorate')"
+              label="Directorate (Org 1)"
               variant="underlined"
-            ></v-text-field>
+            ></v-combobox>
             <span v-else>{{ item.directorate }}</span>
+          </template>
+
+          <!-- Org 2 -->
+          <template v-slot:[`item.org2`]="{ item }">
+            <v-combobox
+              v-if="editingProjectItem && editingProjectItem.id == item.id"
+              v-model="editingProjectItem.org2"
+              :items="getComboboxOrgList('org2')"
+              label="Org 2"
+              variant="underlined"
+            ></v-combobox>
+            <span v-else>{{ item.org2 }}</span>
+          </template>
+
+          <!-- Org 3 -->
+          <template v-slot:[`item.org3`]="{ item }">
+            <v-combobox
+              v-if="editingProjectItem && editingProjectItem.id == item.id"
+              v-model="editingProjectItem.org3"
+              :items="getComboboxOrgList('org3')"
+              label="Org 3"
+              variant="underlined"
+            ></v-combobox>
+            <span v-else>{{ item.org3 }}</span>
           </template>
 
           <!-- PoP Start Date Slot -->
@@ -196,6 +221,7 @@
 </template>
 <script setup>
 import _find from 'lodash/find';
+import _forEach from 'lodash/forEach';
 import _some from 'lodash/some';
 import _cloneDeep from 'lodash/cloneDeep';
 import api from '@/shared/api';
@@ -251,6 +277,14 @@ const projectHeaders = ref([
   {
     text: 'Directorate',
     value: 'directorate'
+  },
+  {
+    text: 'Org 2',
+    value: 'org2'
+  },
+  {
+    text: 'Org 3',
+    value: 'org3'
   },
   {
     text: 'PoP-Start Date',
@@ -314,6 +348,23 @@ function clickedCancel() {
   editingProjectItem.value = null;
   emitter.emit('is-editing-project-item', false);
 } // clickedCancel
+
+/**
+ * Gets a list of orgs from a sepcific level from all projects
+ *
+ * @param {String} field - The org (directorate, org2, or org3)
+ * @returns Array - The list of orgs
+ */
+function getComboboxOrgList(field) {
+  let set = new Set();
+  _forEach(store.getters.contracts, (c) => {
+    _forEach(c.projects, (p) => {
+      let org = p[field];
+      if (org) set.add(org);
+    });
+  });
+  return Array.from(set);
+} // getComboboxOrgList
 
 /**
  * Updates project in inline row edit (expandable row)
