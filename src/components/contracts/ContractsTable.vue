@@ -16,7 +16,7 @@
         <v-col cols="12" md="5" class="d-flex justify-center">
           <ContractFilter />
         </v-col>
-        <v-col cols="12" md="4" class="d-flex align-center">
+        <v-col cols="12" md="4" class="d-flex align-center justify-end">
           <v-btn
             color="#bc3825"
             :loading="isDeleting"
@@ -116,6 +116,20 @@
             ></v-text-field>
             <!-- </v-form> -->
             <span v-else :class="{ 'font-weight-bold': true }">{{ item.contractName }}</span>
+          </template>
+
+          <!-- Customer Org Slot -->
+          <template v-slot:[`item.customerOrg`]="{ item }">
+            <v-combobox
+              name="customerOrg"
+              v-if="editingItem && editingItem.id == item.id"
+              v-model="editingItem.customerOrg"
+              :items="getOrgList('customerOrg')"
+              label="Customer Org"
+              variant="underlined"
+              @click.stop
+            ></v-combobox>
+            <span v-else :class="{ 'font-weight-bold': true }">{{ item.customerOrg }}</span>
           </template>
 
           <!-- Directorate Slot -->
@@ -439,6 +453,12 @@ const contractHeaders = ref([
     key: 'contractName',
     align: 'start',
     customWidth: 'small'
+  },
+  {
+    title: 'Cust. Org',
+    key: 'customerOrg',
+    align: 'start',
+    customWidth: 'x-small'
   },
   {
     title: 'Directorate',

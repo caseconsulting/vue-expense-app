@@ -10,6 +10,8 @@ import store from '../../store/index';
 export function getOrgList(field) {
   let set = new Set();
   _forEach(store.getters.contracts, (c) => {
+    let org = c[field];
+    if (org) set.add(org);
     _forEach(c.projects, (p) => {
       let org = p[field];
       if (org) set.add(org);

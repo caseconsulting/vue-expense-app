@@ -33,17 +33,48 @@
                     required
                   ></v-text-field>
                 </v-col>
-                <!-- Directorate -->
-                <v-col cols="12" sm="6" md="4">
-                  <v-text-field
+                <!-- Customer Org -->
+                <v-col cols="12" sm="6" md="6">
+                  <v-combobox
+                    v-model="customerOrg"
+                    :items="getOrgList('customerOrg')"
+                    label="Customer Org"
                     variant="underlined"
-                    v-model="directorate"
-                    label="Directorate"
                     prepend-icon="mdi-office-building-outline"
-                  ></v-text-field>
+                  ></v-combobox>
+                </v-col>
+                <!-- Directorate -->
+                <v-col cols="12" sm="6" md="6">
+                  <v-combobox
+                    v-model="directorate"
+                    :items="getOrgList('directorate')"
+                    label="Directorate (Org 1)"
+                    variant="underlined"
+                    prepend-icon="mdi-office-building-outline"
+                  ></v-combobox>
+                </v-col>
+                <!-- Org 2 -->
+                <v-col cols="12" sm="6" md="6">
+                  <v-combobox
+                    v-model="org2"
+                    :items="getOrgList('org2')"
+                    label="Org 2"
+                    variant="underlined"
+                    prepend-icon="mdi-office-building-outline"
+                  ></v-combobox>
+                </v-col>
+                <!-- Org 3 -->
+                <v-col cols="12" sm="6" md="6">
+                  <v-combobox
+                    v-model="org3"
+                    :items="getOrgList('org3')"
+                    label="Org 3"
+                    variant="underlined"
+                    prepend-icon="mdi-office-building-outline"
+                  ></v-combobox>
                 </v-col>
                 <!-- PoP Start Date  -->
-                <v-col cols="12" sm="6" md="4">
+                <v-col cols="12" sm="6" md="6">
                   <v-text-field
                     variant="underlined"
                     v-model="popStartDate"
@@ -52,7 +83,7 @@
                   ></v-text-field>
                 </v-col>
                 <!-- Pop End Date -->
-                <v-col cols="12" sm="6" md="4">
+                <v-col cols="12" sm="6" md="6">
                   <v-text-field
                     variant="underlined"
                     v-model="popEndDate"
@@ -115,6 +146,7 @@ import api from '@/shared/api.js';
 import { generateUUID } from '@/utils/utils';
 import { useStore } from 'vuex';
 import { ref, watch, inject } from 'vue';
+import { getOrgList } from '@/shared/contractUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -127,7 +159,10 @@ const store = useStore();
 const emitter = inject('emitter');
 const contractName = ref(null);
 const primeName = ref(null);
+const customerOrg = ref(null);
 const directorate = ref(null);
+const org2 = ref(null);
+const org3 = ref(null);
 const popStartDate = ref(null);
 const popEndDate = ref(null);
 const projects = ref([]);
@@ -173,7 +208,10 @@ async function createContract() {
     id: generateUUID(),
     contractName: contractName.value,
     primeName: primeName.value,
+    customerOrg: customerOrg.value,
     directorate: directorate.value,
+    org2: org2.value,
+    org3: org3.value,
     popStartDate: popStartDate.value,
     popEndDate: popEndDate.value,
     projects: contractProjects,

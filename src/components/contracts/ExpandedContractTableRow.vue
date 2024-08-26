@@ -42,6 +42,18 @@
             <span v-else>{{ item.projectName }}</span>
           </template>
 
+          <!-- Customer Org -->
+          <template v-slot:[`item.customerOrg`]="{ item }">
+            <v-combobox
+              v-if="editingProjectItem && editingProjectItem.id == item.id"
+              v-model="editingProjectItem.customerOrg"
+              :items="getOrgList('customerOrg')"
+              label="Customer Org"
+              variant="underlined"
+            ></v-combobox>
+            <span v-else>{{ item.customerOrg }}</span>
+          </template>
+
           <!-- Directorate -->
           <template v-slot:[`item.directorate`]="{ item }">
             <v-combobox
@@ -277,6 +289,12 @@ const projectHeaders = ref([
     value: 'projectName',
     align: 'start',
     customWidth: 'small'
+  },
+  {
+    title: 'Customer Org',
+    key: 'customerOrg',
+    align: 'start',
+    customWidth: 'x-small'
   },
   {
     text: 'Directorate',

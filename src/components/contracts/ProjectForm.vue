@@ -20,8 +20,18 @@
                   :rules="[(v) => !!v || 'Field is required', duplicateProjects()]"
                 ></v-text-field>
               </v-col>
-              <!-- Directorate -->
+              <!-- Customer Org -->
               <v-col cols="12" sm="6" md="6">
+                <v-combobox
+                  v-model="customerOrg"
+                  :items="getOrgList('customerOrg')"
+                  label="Customer Org"
+                  variant="underlined"
+                  prepend-icon="mdi-office-building-outline"
+                ></v-combobox>
+              </v-col>
+              <!-- Directorate -->
+              <v-col cols="12" sm="6" md="4">
                 <v-combobox
                   v-model="directorate"
                   :items="getOrgList('directorate')"
@@ -31,7 +41,7 @@
                 ></v-combobox>
               </v-col>
               <!-- Org 2 -->
-              <v-col cols="12" sm="6" md="6">
+              <v-col cols="12" sm="6" md="4">
                 <v-combobox
                   v-model="org2"
                   :items="getOrgList('org2')"
@@ -41,7 +51,7 @@
                 ></v-combobox>
               </v-col>
               <!-- Org 3 -->
-              <v-col cols="12" sm="6" md="6">
+              <v-col cols="12" sm="6" md="4">
                 <v-combobox
                   v-model="org3"
                   :items="getOrgList('org3')"
@@ -113,6 +123,7 @@ const popEndDate = ref(null);
 const projectName = ref(null);
 const description = ref(null);
 const dialog = ref(false);
+const customerOrg = ref(null);
 const directorate = ref(null);
 const org2 = ref(null);
 const org3 = ref(null);
@@ -159,6 +170,7 @@ async function createProject() {
   let project = {
     id: generateUUID(),
     projectName: projectName.value,
+    customerOrg: customerOrg.value,
     directorate: directorate.value,
     org2: org2.value,
     org3: org3.value,
