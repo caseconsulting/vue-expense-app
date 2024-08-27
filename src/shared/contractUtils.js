@@ -2,23 +2,37 @@ import _forEach from 'lodash/forEach';
 import store from '../../store/index';
 
 /**
- * Gets a list of orgs from a sepcific level from all projects
+ * Gets a list of orgs from a sepcific level from all contracts/projects.
+ * Example: field = 'directorate' orgs = {customerOrg: 'Mission Center', org2: 'LEM'}
+ * This will return all directorate orgs from contracts and projects that also contain customerOrg = 'Mission Center' AND org2 = 'LEM'
  *
- * @param {String} field - The org (directorate, org2, or org3)
- * @returns Array - The list of orgs
+ * @param {String} field - The org level (customerOrg, directorate, org2, or org3)
+ * * @param {Object} orgs - The orgs (customerOrg, directorate, org2, org3) this should NOT include what is in 'field' param
+ * @returns Array - The list of orgs from 'field' level
  */
-export function getOrgList(field) {
+export function getOrgList(field, orgs) {
+  const { customerOrg, directorate, org2, org3 } = orgs || {};
   let set = new Set();
   _forEach(store.getters.contracts, (c) => {
-    let org = c[field];
-    if (org) set.add(org);
+    if (
+      (!customerOrg || customerOrg === c.customerOrg) &&
+      (!directorate || directorate === c.directorate) &&
+      (!org2 || org2 === c.org2) &&
+      (!org3 || org3 === c.org3)
+    )
+      if (c[field]) set.add(c[field]);
     _forEach(c.projects, (p) => {
-      let org = p[field];
-      if (org) set.add(org);
+      if (
+        (!customerOrg || customerOrg === p.customerOrg) &&
+        (!directorate || directorate === p.directorate) &&
+        (!org2 || org2 === p.org2) &&
+        (!org3 || org3 === p.org3)
+      )
+        if (p[field]) set.add(p[field]);
     });
   });
   return Array.from(set);
-} // getComboboxOrgList
+} // getOrgList
 
 /**
  * Gets the projects current employees in the form of a list.

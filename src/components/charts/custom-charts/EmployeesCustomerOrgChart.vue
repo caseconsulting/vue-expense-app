@@ -27,6 +27,7 @@ const option = ref(null);
 const router = useRouter();
 const store = useStore();
 const colors = [
+  // each array is a gradient of a color from darker to lighter
   ['#5E35B1', '#9575CD', '#D1C4E9', '#EDE7F6'],
   ['#3949AB', '#7986CB', '#C5CAE9', '#E8EAF6'],
   ['#1E88E5', '#64B5F6', '#BBDEFB', '#E3F2FD'],
@@ -140,20 +141,26 @@ function fillData() {
   dataReceived.value = true;
 } // fillData
 
+/**
+ * Gets the labels and data sets for the stacked bar chart.
+ */
 function getChartData() {
   let datasets = [];
   let orgBreakdowns = {};
   let labels = getSortedLabels();
+  // set all org breakdowns in a non-nested object
   _forEach(labels, (label) => {
     orgBreakdowns = { ...orgBreakdowns, ...customerOrgs.value[label] };
   });
   let i = 0;
   let j = 0;
   _forEach(labels, (label) => {
+    // sort each customer org by total employees attached to an org breakdown
     let sortedOrgBreakdowns = Object.keys(customerOrgs.value[label]).sort(
       (a, b) => customerOrgs.value[label][b] - customerOrgs.value[label][a]
     );
     _forEach(sortedOrgBreakdowns, (key) => {
+      // create a dataset for each org breakdown
       datasets.push({
         label: key,
         data: getDataValues(labels, key),
@@ -168,8 +175,13 @@ function getChartData() {
     labels,
     datasets
   };
-}
+} // getChartData
 
+/**
+ * Gets the sorted customer orgs by total employees connected to the org.
+ *
+ * @returns {Array} - The sorted customer org labels by total employees
+ */
 function getSortedLabels() {
   let sortedLabelMap = {};
   _forEach(customerOrgs.value, (orgBreakdowns, customerOrg) => {
@@ -180,20 +192,35 @@ function getSortedLabels() {
     sortedLabelMap[customerOrg] = total;
   });
   return Object.keys(sortedLabelMap).sort((a, b) => sortedLabelMap[b] - sortedLabelMap[a]);
-}
+} // getSortedLabels
 
+/**
+ * Gets an array of total employees for each customer org with the org breakdown.
+ *
+ * @param {Array} labels - The customer orgs
+ * @param {String} orgBreakdown - The lowest level customer org breakdown
+ * @returns {Array} - The total number of employees for each customer org breakdown
+ */
 function getDataValues(labels, orgBreakdown) {
   let data = [];
   _forEach(labels, (label) => {
     data.push(customerOrgs.value[label]?.[orgBreakdown] || 0);
   });
   return data;
-}
+} // getDataValues
 
+/**
+ * Add the org breakdown from a customer org. The org will breakdown to the lowest level org that.
+ * The number of total employees will be the value of the org breakdown.
+ *
+ * @param {Object} c - The contract
+ * @param {Object} p - The project
+ */
 function addCustomerOrg(c, p) {
   let customerOrg, nextOrg;
   let count = getProjectCurrentEmployees(c, p, store.getters.employees)?.length || 0;
   if (!p.customerOrg && c.customerOrg) {
+    // if project does not have a customer org, inherit it from contract
     customerOrg = c.customerOrg;
     if (getOrgBreakdown(p)) nextOrg = getOrgBreakdown(p);
     else nextOrg = getOrgBreakdown(c);
@@ -211,9 +238,14 @@ function addCustomerOrg(c, p) {
       customerOrgs.value[customerOrg] = { [`${nextOrg}`]: count };
     }
   }
-}
+} // addCustomerOrg
 
+/**
+ * Gets the lowest level org that exists in the contract or project.
+ *
+ * @param {Object} item - The contract or project
+ */
 function getOrgBreakdown(item) {
   return item.org3 || item.org2 || item.directorate || item.customerOrg;
-}
+} // getOrgBreakdown
 </script>

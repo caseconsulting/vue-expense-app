@@ -47,7 +47,13 @@
             <v-combobox
               v-if="editingProjectItem && editingProjectItem.id == item.id"
               v-model="editingProjectItem.customerOrg"
-              :items="getOrgList('customerOrg')"
+              :items="
+                getOrgList('customerOrg', {
+                  directorate: editingProjectItem.directorate,
+                  org2: editingProjectItem.org2,
+                  org3: editingProjectItem.org3
+                })
+              "
               label="Customer Org"
               variant="underlined"
             ></v-combobox>
@@ -59,7 +65,13 @@
             <v-combobox
               v-if="editingProjectItem && editingProjectItem.id == item.id"
               v-model="editingProjectItem.directorate"
-              :items="getOrgList('directorate')"
+              :items="
+                getOrgList('directorate', {
+                  customerOrg: editingProjectItem.customerOrg,
+                  org2: editingProjectItem.org2,
+                  org3: editingProjectItem.org3
+                })
+              "
               label="Directorate (Org 1)"
               variant="underlined"
             ></v-combobox>
@@ -71,7 +83,13 @@
             <v-combobox
               v-if="editingProjectItem && editingProjectItem.id == item.id"
               v-model="editingProjectItem.org2"
-              :items="getOrgList('org2')"
+              :items="
+                getOrgList('org2', {
+                  customerOrg: editingProjectItem.customerOrg,
+                  directorate: editingProjectItem.directorate,
+                  org3: editingProjectItem.org3
+                })
+              "
               label="Org 2"
               variant="underlined"
             ></v-combobox>
@@ -83,7 +101,13 @@
             <v-combobox
               v-if="editingProjectItem && editingProjectItem.id == item.id"
               v-model="editingProjectItem.org3"
-              :items="getOrgList('org3')"
+              :items="
+                getOrgList('org3', {
+                  customerOrg: editingProjectItem.customerOrg,
+                  directorate: editingProjectItem.directorate,
+                  org2: editingProjectItem.org2
+                })
+              "
               label="Org 3"
               variant="underlined"
             ></v-combobox>

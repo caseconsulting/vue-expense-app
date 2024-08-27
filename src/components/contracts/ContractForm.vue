@@ -37,7 +37,7 @@
                 <v-col cols="12" sm="6" md="6">
                   <v-combobox
                     v-model="customerOrg"
-                    :items="getOrgList('customerOrg')"
+                    :items="getOrgList('customerOrg', { directorate, org2, org3 })"
                     label="Customer Org"
                     variant="underlined"
                     prepend-icon="mdi-office-building-outline"
@@ -47,7 +47,7 @@
                 <v-col cols="12" sm="6" md="6">
                   <v-combobox
                     v-model="directorate"
-                    :items="getOrgList('directorate')"
+                    :items="getOrgList('directorate', { customerOrg, org2, org3 })"
                     label="Directorate (Org 1)"
                     variant="underlined"
                     prepend-icon="mdi-office-building-outline"
@@ -57,7 +57,7 @@
                 <v-col cols="12" sm="6" md="6">
                   <v-combobox
                     v-model="org2"
-                    :items="getOrgList('org2')"
+                    :items="getOrgList('org2', { customerOrg, directorate, org3 })"
                     label="Org 2"
                     variant="underlined"
                     prepend-icon="mdi-office-building-outline"
@@ -67,7 +67,7 @@
                 <v-col cols="12" sm="6" md="6">
                   <v-combobox
                     v-model="org3"
-                    :items="getOrgList('org3')"
+                    :items="getOrgList('org3', { customerOrg, directorate, org2 })"
                     label="Org 3"
                     variant="underlined"
                     prepend-icon="mdi-office-building-outline"

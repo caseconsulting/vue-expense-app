@@ -124,7 +124,13 @@
               name="customerOrg"
               v-if="editingItem && editingItem.id == item.id"
               v-model="editingItem.customerOrg"
-              :items="getOrgList('customerOrg')"
+              :items="
+                getOrgList('customerOrg', {
+                  directorate: editingItem.directorate,
+                  org2: editingItem.org2,
+                  org3: editingItem.org3
+                })
+              "
               label="Customer Org"
               variant="underlined"
               @click.stop
@@ -138,7 +144,13 @@
               name="directorate"
               v-if="editingItem && editingItem.id == item.id"
               v-model="editingItem.directorate"
-              :items="getOrgList('directorate')"
+              :items="
+                getOrgList('directorate', {
+                  customerOrg: editingItem.customerOrg,
+                  org2: editingItem.org2,
+                  org3: editingItem.org3
+                })
+              "
               label="Directorate (Org 1)"
               variant="underlined"
               @click.stop
@@ -152,7 +164,13 @@
               name="org2"
               v-if="editingItem && editingItem.id == item.id"
               v-model="editingItem.org2"
-              :items="getOrgList('org2')"
+              :items="
+                getOrgList('org2', {
+                  customerOrg: editingItem.customerOrg,
+                  directorate: editingItem.directorate,
+                  org3: editingItem.org3
+                })
+              "
               label="Org 2"
               variant="underlined"
               @click.stop
@@ -166,7 +184,13 @@
               name="org3"
               v-if="editingItem && editingItem.id == item.id"
               v-model="editingItem.org3"
-              :items="getOrgList('org3')"
+              :items="
+                getOrgList('org3', {
+                  customerOrg: editingItem.customerOrg,
+                  directorate: editingItem.directorate,
+                  org2: editingItem.org2
+                })
+              "
               label="Org 3"
               variant="underlined"
               @click.stop
@@ -928,12 +952,11 @@ function resetAllCheckBoxes() {
 /**
  * Sets the props for a cell in the data table.
  *
- * @param item - The cell item
+ * @param column - The cell header
  * @returns Object - The cell class
  */
 function cellProps({ column }) {
   return { class: `cell-width-${column.customWidth}` };
-  //return { class: `${item.status}-status` };
 } // cellProps
 
 /**
@@ -1151,7 +1174,6 @@ watch(
 }
 
 .contracts-table {
-  max-height: 80vh;
   overflow-x: scroll;
 }
 
