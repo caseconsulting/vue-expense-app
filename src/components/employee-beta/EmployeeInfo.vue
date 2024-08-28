@@ -14,18 +14,38 @@
           <v-col cols="auto">
             <div class="d-flex flex-row align-center fit-content ml-1">
               <resume-card v-model="model" :editing="editing" :loading="loading"></resume-card>
-              <convert-employee-to-csv
-                v-if="isAdmin"
-                :contracts="contracts"
-                :employee="model"
-                :filename="`${model.nickname || model.firstName} ${model.lastName}`"
-                :tags="store.getters.tags"
-                color="white"
-              />
             </div>
           </v-col>
           <v-col :class="isMobile() ? '' : 'ml-2'" cols="auto">
-            <v-btn v-if="isAdmin || isUser" @click="toggleEdit()" density="comfortable" variant="text" icon="">
+            <span class="border-e-thin ml-1 mr-2"></span>
+            <v-btn
+              v-if="isAdmin"
+              @click="toggleEmployeeNotes()"
+              density="comfortable"
+              variant="text"
+              class="px-1"
+              icon=""
+            >
+              <v-tooltip activator="parent" location="top"> Employee Notes </v-tooltip>
+              <v-icon color="white"> mdi-notebook </v-icon>
+            </v-btn>
+            <convert-employee-to-csv
+              v-if="isAdmin"
+              class="px-1"
+              :contracts="contracts"
+              :employee="model"
+              :filename="`${model.nickname || model.firstName} ${model.lastName}`"
+              :tags="store.getters.tags"
+              color="white"
+            />
+            <v-btn
+              v-if="isAdmin || isUser"
+              @click="toggleEdit()"
+              density="comfortable"
+              variant="text"
+              class="px-1"
+              icon=""
+            >
               <v-tooltip activator="parent" location="top"> Edit {{ menuBtn }} </v-tooltip>
               <v-icon id="edit" color="white"> mdi-pencil </v-icon>
             </v-btn>
@@ -176,6 +196,7 @@
           </v-col>
         </v-row>
         <employee-form v-model="editing" :employee="model" :contracts="contracts"></employee-form>
+        <employee-notes v-model="showEmployeeNotes" :employee="model"></employee-notes>
       </v-card-text>
     </v-card>
   </v-container>
@@ -196,6 +217,7 @@ import ConvertEmployeeToCsv from '@/components/employees/csv/ConvertEmployeeToCs
 import EducationInfoCard from '@/components/employee-beta/cards/EducationInfoCard.vue';
 import EmployeeForm from '@/components/employee-beta/forms/EmployeeForm.vue';
 import EmployeeInfoCard from '@/components/employee-beta/cards/EmployeeInfoCard.vue';
+import EmployeeNotes from '@/components/employee-beta/notes/EmployeeNotes.vue';
 import LanguagesCard from '@/components/employee-beta/cards/LanguagesCard.vue';
 import OtherInfoCard from '@/components/employee-beta/cards/personal/OtherInfoCard.vue';
 import JobExperienceInfoCard from '@/components/employee-beta/cards/JobExperienceInfoCard.vue';
@@ -222,7 +244,8 @@ const isAdmin = inject('isAdmin');
 const isUser = inject('isUser');
 
 const editing = ref(false);
-const infoTab = ref(route.hash.substring(1)); //currently active tab
+const infoTab = ref(route.hash.substring(1)); // currently active tab
+const showEmployeeNotes = ref(false);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -289,6 +312,10 @@ function selectTab(name) {
 
 function toggleEdit() {
   emitter.emit('editing', menuBtn.value);
+}
+
+function toggleEmployeeNotes() {
+  showEmployeeNotes.value = true;
 }
 </script>
 
