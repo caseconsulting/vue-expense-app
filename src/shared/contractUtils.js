@@ -35,6 +35,21 @@ export function getOrgList(field, orgs) {
 } // getOrgList
 
 /**
+ * Gets all project locations.
+ *
+ * @returns Array - The list of unique project locations
+ */
+export function getProjectLocations() {
+  let set = new Set();
+  _forEach(store.getters.contracts, (c) => {
+    _forEach(c.projects, (p) => {
+      if (p.location) set.add(p.location);
+    });
+  });
+  return Array.from(set);
+} // getProjectLocations
+
+/**
  * Gets the projects current employees in the form of a list.
  *
  * @param {JSON} contract - contract object pertaining to project

@@ -57,11 +57,12 @@
         <v-data-table
           :headers="contractHeaders"
           :items="storeContracts"
-          :items-per-page="-1"
+          items-per-page="-1"
           :search="search"
           :expanded="expanded"
           :cell-props="cellProps"
           :row-props="rowProps"
+          :custom-filter="contractFilter"
           class="contracts-table text-body-2"
           density="compact"
           fixed-header
@@ -114,7 +115,6 @@
               required
               @click.stop
             ></v-text-field>
-            <!-- </v-form> -->
             <span v-else :class="{ 'font-weight-bold': true }">{{ item.contractName }}</span>
           </template>
 
@@ -408,6 +408,7 @@ import api from '@/shared/api';
 import { updateStoreEmployees } from '@/utils/storeUtils';
 import { asyncForEach, isMobile } from '@/utils/utils';
 import { getOrgList, getProject } from '@/shared/contractUtils';
+import { contractFilter } from '@/shared/filterUtils';
 
 import DeleteModal from '../modals/DeleteModal.vue';
 import ContractFilter from './ContractFilter.vue';
@@ -419,6 +420,7 @@ import ContractEmployeesAssignedModal from '../modals/ContractEmployeesAssignedM
 import ExpandedContractTableRow from './ExpandedContractTableRow.vue';
 
 import { ref, inject, onBeforeMount, onBeforeUnmount, computed, watch } from 'vue';
+import { useDisplay } from 'vuetify';
 import { useStore } from 'vuex';
 import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSnackbar.vue';
 
@@ -430,6 +432,7 @@ import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSn
 
 const store = useStore();
 const emitter = inject('emitter');
+const { lgAndDown } = useDisplay();
 const duplicateContractPrimeCombo = ref(() => {
   let found = _some(store.getters.contracts, (c) => {
     if (c.id == editingItem.value.id) return false;
@@ -503,16 +506,28 @@ const contractHeaders = ref([
     customWidth: 'x-small'
   },
   {
+    title: 'Location',
+    key: 'location',
+    align: 'start',
+    customWidth: 'x-small'
+  },
+  {
+    title: 'Work Type',
+    key: 'workType',
+    align: 'start',
+    customWidth: 'x-small'
+  },
+  {
     title: 'PoP-Start Date',
     key: 'popStartDate',
     align: 'start',
-    customWidth: 'medium'
+    customWidth: lgAndDown.value ? 'x-small' : 'medium'
   },
   {
     title: 'PoP-End Date',
     key: 'popEndDate',
     align: 'start',
-    customWidth: 'medium'
+    customWidth: lgAndDown.value ? 'x-small' : 'medium'
   },
   {
     title: 'Description',
@@ -530,7 +545,7 @@ const contractHeaders = ref([
     key: 'actions',
     sortable: false,
     align: 'end',
-    customWidth: 'small'
+    customWidth: lgAndDown.value ? 'x-small' : 'large'
   }
 ]);
 const form = ref(null);
@@ -1174,7 +1189,8 @@ watch(
 }
 
 .contracts-table {
-  overflow-x: scroll;
+  max-height: 85vh;
+  overflow-x: auto;
 }
 
 .closed-status > td:first-of-type {

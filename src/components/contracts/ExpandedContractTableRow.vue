@@ -114,6 +114,31 @@
             <span v-else>{{ item.org3 }}</span>
           </template>
 
+          <!-- Location -->
+          <template v-slot:[`item.location`]="{ item }">
+            <v-combobox
+              v-if="editingProjectItem && editingProjectItem.id == item.id"
+              v-model="editingProjectItem.location"
+              :items="getProjectLocations()"
+              label="Location"
+              variant="underlined"
+            ></v-combobox>
+            <span v-else>{{ item.location }}</span>
+          </template>
+
+          <!-- Work Type -->
+          <template v-slot:[`item.workType`]="{ item }">
+            <v-select
+              v-if="editingProjectItem && editingProjectItem.id == item.id"
+              v-model="editingProjectItem.workType"
+              :items="['On-site', 'Hybrid', 'Remote']"
+              label="Work Type"
+              variant="underlined"
+              clearable
+            ></v-select>
+            <span v-else>{{ item.workType }}</span>
+          </template>
+
           <!-- PoP Start Date Slot -->
           <template v-slot:[`item.popStartDate`]="{ item }">
             <v-text-field
@@ -263,10 +288,11 @@ import _cloneDeep from 'lodash/cloneDeep';
 import api from '@/shared/api';
 import { nicknameAndLastName } from '@/shared/employeeUtils';
 import ProjectsEmployeesAssignedModal from '../modals/ProjectsEmployeesAssignedModal.vue';
-import { getOrgList, getProjectCurrentEmployees } from '@/shared/contractUtils';
+import { getOrgList, getProjectCurrentEmployees, getProjectLocations } from '@/shared/contractUtils';
 import { ref, onBeforeMount, inject } from 'vue';
 import { useStore } from 'vuex';
 import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSnackbar.vue';
+import { useDisplay } from 'vuetify';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -283,6 +309,7 @@ const props = defineProps([
   'cellProps',
   'rowProps'
 ]);
+const { lgAndDown } = useDisplay();
 const emitter = inject('emitter');
 const duplicateProjects = ref((contractOfProject) => {
   if (contractOfProject) {
@@ -339,16 +366,28 @@ const projectHeaders = ref([
     customWidth: 'x-small'
   },
   {
+    title: 'Location',
+    key: 'location',
+    align: 'start',
+    customWidth: 'x-small'
+  },
+  {
+    title: 'Work Type',
+    key: 'workType',
+    align: 'start',
+    customWidth: 'x-small'
+  },
+  {
     text: 'PoP-Start Date',
     value: 'popStartDate',
     align: 'start',
-    customWidth: 'medium'
+    customWidth: lgAndDown.value ? 'x-small' : 'medium'
   },
   {
     text: 'PoP-End Date',
     value: 'popEndDate',
     align: 'start',
-    customWidth: 'medium'
+    customWidth: lgAndDown.value ? 'x-small' : 'medium'
   },
   {
     text: 'Description',
@@ -366,7 +405,7 @@ const projectHeaders = ref([
     value: 'actions',
     sortable: false,
     align: 'end',
-    customWidth: 'small'
+    customWidth: lgAndDown.value ? 'x-small' : 'large'
   }
 ]);
 const projectForm = ref(null);
