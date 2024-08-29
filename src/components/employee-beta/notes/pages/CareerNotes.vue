@@ -1,12 +1,17 @@
 <template>
   <v-col>
     <v-row>
-      <v-checkbox hide-details v-model="desireToMove" class="font-black" label="Desires to move jobs"></v-checkbox>
+      <v-checkbox
+        hide-details
+        v-model="notes.desireToMove"
+        class="font-black"
+        label="Desires to move jobs"
+      ></v-checkbox>
     </v-row>
-    <v-row v-if="desireToMove">
-      <v-col cols="5">
+    <v-row v-if="notes.desireToMove">
+      <v-col class="pl-0" cols="5">
         <v-textarea
-          v-model="moveTo"
+          v-model="notes.moveTo"
           label="Desired location"
           auto-grow
           rows="1"
@@ -14,9 +19,9 @@
           variant="outlined"
         ></v-textarea>
       </v-col>
-      <v-col cols="7">
+      <v-col class="pr-0" cols="7">
         <v-textarea
-          v-model="moveReason"
+          v-model="notes.moveReason"
           label="Reason for move"
           auto-grow
           rows="1"
@@ -27,7 +32,7 @@
     </v-row>
     <v-row>
       <v-textarea
-        v-model="jobDescription"
+        v-model="notes.jobDescription"
         variant="outlined"
         label="Job Description"
         auto-grow
@@ -38,7 +43,7 @@
     </v-row>
     <v-row>
       <v-textarea
-        v-model="misc"
+        v-model="notes.misc"
         variant="outlined"
         label="Miscellaneous"
         auto-grow
@@ -50,13 +55,36 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, onBeforeUnmount, inject, watch } from 'vue';
 
-// var props = defineProps('notes');
+const emitter = inject('emitter');
+const props = defineProps(['notesModel', 'user']);
+const notes = ref({});
 
-var desireToMove = ref(false);
-var moveTo = ref('');
-var moveReason = ref('');
-var jobDescription = ref('');
-var misc = ref('');
+onMounted(() => {
+  notes.value = { ...props.notesModel };
+});
+
+onBeforeUnmount(() => {
+  // autosave(true);
+});
+
+var saveTimer = null;
+function autosave(saveNow = false) {
+  // set timeout duration
+  const bufferTime = saveNow ? 0 : 5000;
+
+  // stop any old saves, make a new one
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(function () {
+    console.log('A');
+    emitter.emit('save-notes', {
+      from: 'career',
+      notes: notes.value
+    });
+  }, bufferTime);
+}
+
+// autosave if the notes var is changed at all
+watch(() => notes.value, autosave(), { deep: true });
 </script>

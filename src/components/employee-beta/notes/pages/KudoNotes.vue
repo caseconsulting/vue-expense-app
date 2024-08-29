@@ -2,13 +2,14 @@
   <v-col>
     <v-row>
       <v-textarea
-        v-model="misc"
+        v-model="notes.misc"
         variant="outlined"
         label="Miscellaneous"
         auto-grow
-        rows="5"
+        rows="3"
         max-rows="8"
         class="w-100"
+        @update:model-value="autosave()"
       ></v-textarea>
     </v-row>
     <v-row>
@@ -17,9 +18,10 @@
           <p>
             <v-icon icon="mdi-hands-pray" class="mr-2"></v-icon>
             <span class="cursor-default">High Five from {{ hf.from }}</span>
-            <v-icon icon="mdi-text-box-outline" class="ml-2">
+            <v-avatar class="mb-1 pointer" density="compact">
               <v-tooltip activator="parent" location="top" max-width="600">{{ hf.desc }}</v-tooltip>
-            </v-icon>
+              <v-icon size="small">mdi-text-box-outline</v-icon>
+            </v-avatar>
           </p>
         </v-row>
       </v-col>
@@ -28,9 +30,19 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { onMounted, ref, onBeforeUnmount, inject } from 'vue';
 
-const props = defineProps(['notes', 'user']);
+const emitter = inject('emitter');
+const props = defineProps(['notesModel', 'user']);
+const notes = ref({});
+
+onMounted(() => {
+  notes.value = { ...props.notesModel };
+});
+
+onBeforeUnmount(() => {
+  autosave(true);
+});
 
 let highFives = [
   {
@@ -49,18 +61,36 @@ let highFives = [
     date: '04/29/2024'
   }
 ];
-let awards = [
-  {
-    title: 'Best Product',
-    desc: 'Chad Martin',
-    date: '01/01/2024'
-  },
-  {
-    title: 'Most Valuable Customer',
-    desc: 'Alissa Bendele',
-    date: '01/04/2024'
-  }
-];
+// let awards = [
+//   {
+//     title: 'Best Product',
+//     desc: 'Chad Martin',
+//     date: '01/01/2024'
+//   },
+//   {
+//     title: 'Most Valuable Customer',
+//     desc: 'Alissa Bendele',
+//     date: '01/04/2024'
+//   }
+// ];
 
-var misc = ref('');
+/**
+ * Autosaves the notes. Default is to set a timer of 5 seconds and save after the timer is up,
+ * but setting `saveNow` to true will skip this timer.
+ * @param saveNow whether or not to skip the timer
+ */
+var saveTimer = null;
+function autosave(saveNow = false) {
+  // set timeout duration
+  const bufferTime = saveNow ? 0 : 5000;
+
+  // stop any old saves, make a new one
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    emitter.emit('save-notes', {
+      from: 'kudos',
+      notes: notes.value
+    });
+  }, bufferTime);
+}
 </script>

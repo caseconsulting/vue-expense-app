@@ -4,9 +4,7 @@
       <!-- header -->
       <v-card-title class="header_style d-flex align-center justify-space-between py-0 pt-2">
         <h3 class="text-white">
-          <v-icon icon="mdi-shield-lock" size="30" class="mb-1">
-            <v-tooltip activator="parent"></v-tooltip>
-          </v-icon>
+          <v-icon icon="mdi-shield-lock" size="30" class="mb-1"> </v-icon>
           Admin Notes: {{ empName }}
         </h3>
         <v-spacer></v-spacer>
@@ -46,10 +44,14 @@
           </v-btn>
         </v-col>
 
-        <!-- right-side: notes -->
+        <!-- right-side: notes-->
         <v-col cols="9" class="pr-10">
           <h2 class="my-4">{{ pages[pageIndex].name }} Notes</h2>
-          <component :is="pages[pageIndex].component" :user="employee" />
+          <component
+            :is="pages[pageIndex].component"
+            :user="employee"
+            :notesModel="notes.pages[pages[pageIndex].key]"
+          />
         </v-col>
       </v-row>
     </v-card>
@@ -59,7 +61,6 @@
 <script setup>
 /**
  * TODO
- * - flesh out pages
  * - make backend
  *   - only visible to admins, even in `network` tab
  * - make save functionality
@@ -69,33 +70,15 @@
  *   - what employees want to move
  *   - what people haven't been contacted in a while (break up into quarters)
  *   - whose PoP is ending soon
- *
- * PAGES
- * - General
- *   - freeform notes
- * - Career
- *   - Wants to move jobs?
- *     - where to?
- *     - reason
- *   - what they're currently working on
- *   - misc
- * - Personal
- *   - Family
- *   - Medical
- *   - Misc
- * - Kudos
- *   - when and what kudos were given
- *   - sometimes classified, allow for vague name
- *   - also show high-fives
-
  */
 
 // general imports
-import { ref, computed } from 'vue';
+import { ref, computed, inject, onMounted } from 'vue';
 import { format } from '@/shared/dateUtils';
 import { useStore } from 'vuex';
 
 const store = useStore();
+const emitter = inject('emitter');
 
 // import note pages
 import GeneralNotes from './pages/GeneralNotes.vue';
@@ -110,6 +93,26 @@ let notes = {
   updated: {
     author: '42832a16-d933-44b3-bee5-14d21678c99b',
     date: '2024-02-05T09:05:35'
+  },
+  pages: {
+    general: {
+      misc: ''
+    },
+    career: {
+      desireToMove: false,
+      moveTo: '',
+      moveReason: '',
+      jobDescription: '',
+      misc: ''
+    },
+    personal: {
+      familial: '',
+      medical: '',
+      misc: ''
+    },
+    kudos: {
+      misc: ''
+    }
   }
 };
 
@@ -119,18 +122,22 @@ const pageIndex = ref(0);
 const pages = ref([
   {
     name: 'General',
+    key: 'general',
     component: GeneralNotes
   },
   {
     name: 'Career',
+    key: 'career',
     component: CareerNotes
   },
   {
     name: 'Personal',
+    key: 'personal',
     component: PersonalNotes
   },
   {
     name: 'Kudos',
+    key: 'kudos',
     component: KudoNotes
   }
 ]);
@@ -140,6 +147,12 @@ const getLastUpdatedText = computed(() => {
   author = `${author.nickname || author.firstName} ${author.lastName}`;
   let date = format(notes.updated.date, null, 'MM/DD/YYYY H:mm');
   return `Last updated ${date} by ${author}`;
+});
+
+onMounted(() => {
+  emitter.on('save-notes', (data) => {
+    notes.pages[data.from] = data.notes;
+  });
 });
 </script>
 
