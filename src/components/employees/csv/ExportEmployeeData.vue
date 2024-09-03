@@ -13,14 +13,14 @@
         </v-radio-group>
 
         <!-- Period selector -->
-        <h3 :class="exportType.periodType ? '' : 'disabled'" class="cap-first mt-4">
-          Report {{ exportType.periodType || 'Period' }}
+        <h3 :class="exportType?.periodType ? '' : 'disabled'" class="cap-first mt-4">
+          Report {{ exportType?.periodType || 'Period' }}
         </h3>
         <v-select
-          :disabled="loading || !exportType.periodType"
+          :disabled="loading || !exportType?.periodType"
           class="d-inline-block w-100"
           v-model="filters.period"
-          :items="filterOptions[exportType.periodType]"
+          :items="filterOptions[exportType?.periodType]"
           item-title="text"
           item-value="value"
           variant="underlined"
@@ -77,6 +77,7 @@ import pptoCsv from '@/utils/csv/pptoCsv.js';
 import TagsFilter from '@/components/shared/TagsFilter.vue';
 import { ref, inject, onBeforeUnmount, watch, onBeforeMount } from 'vue';
 import { useStore } from 'vuex';
+import { updateStoreContracts, updateStoreTags } from '@/utils/storeUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -85,7 +86,7 @@ import { useStore } from 'vuex';
 // |--------------------------------------------------|
 
 const emitter = inject('emitter');
-const props = defineProps(['employees', 'contracts']);
+const props = defineProps(['employees']);
 const store = useStore();
 const exportType = ref(null);
 const exportTypes = ref([
@@ -120,6 +121,10 @@ const loading = ref(false);
  */
 onBeforeMount(async () => {
   // fill in tag options
+  await Promise.all([
+    !store.getters.contracts ? updateStoreContracts() : '',
+    !store.getters.tags ? updateStoreTags() : ''
+  ]);
   filterOptions.value.tags = store.getters.tags;
 
   // default export type
@@ -191,11 +196,11 @@ async function download() {
   let startDate, endDate;
   if (exportType.value.value === 'emp') {
     filename = `Employee Export - ${filters.value.period}`;
-    employeeCsv.download(csvInfo, props.contracts, filterOptions.value.tags, filename);
+    employeeCsv.download(csvInfo, store.getters.contracts, filterOptions.value.tags, filename);
   } else if (exportType.value.value === 'eeo') {
     let eeo = eeoCsv.fileString(csvInfo);
     csvInfo = filterDeclined(csvInfo);
-    let emp = employeeCsv.fileString(csvInfo, props.contracts, filterOptions.value.tags, true);
+    let emp = employeeCsv.fileString(csvInfo, store.getters.contracts, filterOptions.value.tags, true);
     let csvText = [
       {
         name: 'EEO Compliance Report',

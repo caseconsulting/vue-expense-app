@@ -182,8 +182,6 @@
                   v-if="userRoleIsAdmin()"
                   :mid-action="midAction"
                   :employee="item"
-                  :contracts="contracts"
-                  :tags="tags"
                   :filename="`${item.nickname || item.firstName} ${item.lastName}`"
                 />
                 <span>
@@ -262,7 +260,7 @@
         </div>
       </v-container>
     </v-card>
-    <employee-form v-model="createEmployee" :contracts="contracts" :employee="model" />
+    <employee-form v-model="createEmployee" :employee="model" />
     <v-dialog v-model="manageTags" scrollable :width="isMobile() ? '100%' : '70%'" persistent>
       <tag-manager :key="childKey" />
     </v-dialog>
@@ -270,7 +268,7 @@
       <employees-sync-modal :key="childKey" :sync-data="applicationSyncData" />
     </v-dialog>
     <v-dialog v-model="showExportDataModal" :width="isMobile() ? '100%' : '50%'" persistent>
-      <export-employee-data :employees="employees" :contracts="contracts" :key="childKey" :tags="tags" />
+      <export-employee-data :employees="employees" :key="childKey" />
     </v-dialog>
   </div>
 </template>
@@ -282,7 +280,7 @@ import EmployeeForm from '@/components/employee-beta/forms/EmployeeForm.vue';
 import ExportEmployeeData from '@/components/employees/csv/ExportEmployeeData.vue';
 import DeleteErrorModal from '@/components/modals/DeleteErrorModal.vue';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
-import { updateStoreAvatars, updateStoreContracts, updateStoreEmployees, updateStoreTags } from '@/utils/storeUtils';
+import { updateStoreAvatars, updateStoreEmployees, updateStoreTags } from '@/utils/storeUtils';
 import _filter from 'lodash/filter';
 import _find from 'lodash/find';
 import _map from 'lodash/map';
@@ -302,11 +300,10 @@ import {
   isMobile,
   isPartTime,
   monthDayYearFormat,
-  storeIsPopulated,
   userRoleIsAdmin,
   userRoleIsManager
 } from '@/utils/utils';
-import { computed, inject, onBeforeMount, onBeforeUnmount, provide, ref, watch } from 'vue';
+import { inject, onBeforeMount, onBeforeUnmount, provide, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
@@ -328,7 +325,6 @@ provide('isUser', isUser);
 
 const applicationSyncData = ref(null);
 const childKey = ref(0);
-const contracts = ref([]);
 const createEmployee = ref(false);
 const deleteModel = ref({
   id: null
@@ -422,7 +418,6 @@ const search = ref(null); // query text for datatable search field
 const sortBy = ref([{ key: 'hireDate', order: 'asc' }]); // sort datatable items
 const showExportDataModal = ref(false);
 const syncing = ref(false);
-const tags = ref([]);
 const tagsInfo = ref({
   selected: [],
   flipped: []
@@ -535,20 +530,16 @@ async function loadBasecampAvatars() {
  */
 async function refreshEmployees() {
   loading.value = true; // set loading status to true
-
   // assets to wait for load
-  await Promise.all([
-    !store.getters.employees ? updateStoreEmployees() : '',
-    !store.getters.contracts && (userRoleIsAdmin() || userRoleIsManager()) ? updateStoreContracts() : '',
-    !store.getters.tags && (userRoleIsAdmin() || userRoleIsManager()) ? updateStoreTags() : ''
-  ]);
+  !store.getters.employees ? await updateStoreEmployees() : '';
   employees.value = store.getters.employees; // get all employees
-  contracts.value = store.getters.contracts;
-  tags.value = store.getters.tags;
-  // assets that don't need to be awaited on, but need data that is awaited on
-  Promise.all([loadBasecampAvatars()]);
   filterEmployees(); // filter employees
   loading.value = false; // set loading status to false
+  // assets that don't need to be awaited on, but need data that is awaited on
+  Promise.all([
+    loadBasecampAvatars(),
+    !store.getters.tags && (userRoleIsAdmin() || userRoleIsManager()) ? updateStoreTags() : ''
+  ]);
 } // refreshEmployees
 
 /**
@@ -576,7 +567,7 @@ function renderManageTags() {
  */
 function employeeIsOnTag(e) {
   if (e.id) e = e.id; // just use the id
-  for (let t of tags.value) {
+  for (let t of store.getters.tags) {
     if (t.employees.includes(e)) return true;
   }
   return false;
@@ -613,7 +604,7 @@ async function validateDelete(item) {
   if (employeeIsOnTag(item.id)) {
     // remove them from the tag
     let tagPromises = [];
-    for (let t of tags.value) {
+    for (let t of store.getters.tags) {
       if (t.employees.includes(item.id)) {
         let index = t.employees.indexOf(item.id);
         t.employees.splice(index, 1);
@@ -703,7 +694,7 @@ onBeforeMount(async () => {
   }
 
   // only refresh employees if data is in store. Otherwise, set loading and wait in watcher
-  storeIsPopulated ? await refreshEmployees() : (loading.value = true);
+  await refreshEmployees();
 
   // remove admin-only actions if user is not admin (by default everything is included)
   const adminSpecific = ['lastLoginSeconds']; // requires admin role, NOT manager
@@ -750,24 +741,7 @@ function watchFilterActive() {
   filterEmployees();
 } // watchFilterActive
 
-/**
- * In the case that the page has been force reloaded (and the store cleared)
- * this watcher will be activated when the store is populated again.
- */
-async function watchStoreIsPopulated() {
-  if (storeIsPopulated) await refreshEmployees();
-} // watchStoreIsPopulated
-
 watch(filter.value.active, () => watchFilterActive());
-watch(storeIsPopulated, () => watchStoreIsPopulated());
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                    COMPUTED                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-computed(storeIsPopulated);
 </script>
 
 <style>

@@ -275,9 +275,8 @@ onBeforeMount(async () => {
     //stores the employee number
     userId.value = store.getters.employeeNumber;
 
-    store.getters.loginTime ? updateEmployeeLogin(store.getters.user) : '';
     // run API calls in background
-    Promise.all([updateStoreEmployees()]);
+    Promise.all([updateStoreEmployees(), store.getters.loginTime ? updateEmployeeLogin(store.getters.user) : '']);
   }
 
   let pic = getProfile();
