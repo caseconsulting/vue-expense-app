@@ -10,7 +10,7 @@
       <!-- full name -->
       <v-row dense>
         <v-col>
-          <p>
+          <p class="mb-1">
             <b>Full Name: </b
             >{{ model.firstName + ' ' + (!model.noMiddleName ? model.middleName + ' ' : '') + model.lastName }}
           </p>
@@ -18,31 +18,32 @@
       </v-row>
 
       <!-- phone numbers -->
-      <v-row dense v-if="!isEmpty(getPhoneNumbers())">
-        <v-col class="pr-0" cols="auto">
+      <v-col dense v-if="!isEmpty(getPhoneNumbers())">
+        <v-row class="pr-0 pb-1">
           <b class="d-inline-flex">Phone Numbers:</b>
-        </v-col>
-        <v-col>
-          <div class="d-flex flex-row" v-for="phone in getPhoneNumbers()" :key="phone">
-            <p class="d-inline-flex pa-0" v-if="!phone.private || isAdmin || isUser">
+        </v-row>
+        <v-row class="pb-1" v-for="phone in getPhoneNumbers()" :key="phone">
+          <v-col class="pa-0">
+            <p class="d-inline pa-0" v-if="!phone.private || isAdmin || isUser">
               {{ phone.number }}
             </p>
-            <v-spacer></v-spacer>
-            <div class="d-inline-flex float-right">
+          </v-col>
+          <v-col cols="auto" class="pa-0">
+            <div class="d-inline float-right">
               <v-icon v-if="!phone.private">mdi-shield-outline</v-icon>
               <v-icon v-else>mdi-shield</v-icon>
               <v-tooltip activator="parent" location="top">{{
                 phone.private ? 'Hidden from other employees' : 'Visible to other employees'
               }}</v-tooltip>
             </div>
-          </div>
-        </v-col>
-      </v-row>
+          </v-col>
+        </v-row>
+      </v-col>
 
       <!-- birthday -->
       <v-row dense v-if="!isEmpty(getBirthday()) && (isAdmin || isUser)">
         <v-col class="d-inline-flex">
-          <p><b class="pr-1">Birthday: </b> {{ getBirthday() }}</p>
+          <p class="mb-1"><b>Birthday: </b> {{ getBirthday() }}</p>
         </v-col>
         <v-col class="d-inline float-right" cols="auto">
           <v-icon v-if="!model.birthdayFeed">mdi-shield</v-icon>
@@ -54,47 +55,40 @@
       </v-row>
 
       <!-- current address -->
-      <v-row dense class="d-flex flex-row" v-if="!isEmpty(getCurrentAddress()) && (isAdmin || isUser)">
-        <v-col cols="8">
-          <v-row no-gutters>
-            <v-col cols="auto" class="pb-2">
-              <p class="d-inline-flex pr-1"><b>Address:</b></p>
-            </v-col>
-            <v-col cols="auto">
-              <p class="d-inline-flex text-wrap">
-                {{ getCurrentAddress() }}
-              </p>
-            </v-col>
-          </v-row>
-        </v-col>
-        <v-spacer></v-spacer>
-        <v-col class="d-flex d-inline flex-nowrap" cols="auto">
-          <v-icon>mdi-shield</v-icon>
-          <v-tooltip activator="parent" location="top">Always hidden from other employees</v-tooltip>
-        </v-col>
-      </v-row>
+      <v-col dense v-if="!isEmpty(getCurrentAddress() && (isAdmin || isUser))">
+        <v-row no-gutter cols="auto">
+          <b>Address:</b>
+        </v-row>
+        <v-row class="py-1">
+          <v-col class="pa-0">
+            <p class="d-inline text-wrap">
+              {{ getCurrentAddress() }}
+            </p>
+          </v-col>
+          <v-col class="pa-0" cols="1">
+            <div class="float-right">
+              <v-icon>mdi-shield</v-icon>
+              <v-tooltip activator="parent" location="top">Always hidden from other employees</v-tooltip>
+            </div>
+          </v-col>
+        </v-row>
+      </v-col>
 
       <!-- place of birth -->
-      <v-row dense v-if="!isEmpty(getPlaceOfBirth() && (isAdmin || isUser))">
-        <v-col>
-          <v-row no-gutters>
-            <v-col cols="auto">
-              <p class="pr-1 d-inline text-align float-left">
-                <b>Place of Birth: </b>
-              </p>
-            </v-col>
-            <v-col>
-              <p class="d-inline">{{ getPlaceOfBirth() }}</p>
-            </v-col>
-          </v-row>
-        </v-col>
-        <v-col cols="auto">
-          <div class="d-inline-flex float-right">
-            <v-icon>mdi-shield</v-icon>
-            <v-tooltip activator="parent" location="top">Always hidden from other employees</v-tooltip>
-          </div>
-        </v-col>
-      </v-row>
+      <v-col dense v-if="!isEmpty(getPlaceOfBirth() && (isAdmin || isUser))">
+        <v-row>
+          <b class="pr-1">Place of Birth: </b>
+        </v-row>
+        <v-row>
+          <v-col class="pa-0 d-inline"> {{ getPlaceOfBirth() }} </v-col>
+          <v-col class="pa-0" cols="1">
+            <div class="float-right">
+              <v-icon>mdi-shield</v-icon>
+              <v-tooltip activator="parent" location="top">Always hidden from other employees</v-tooltip>
+            </div>
+          </v-col>
+        </v-row>
+      </v-col>
     </v-card-text>
   </base-card>
 </template>
