@@ -57,7 +57,7 @@ defineProps({
 }
 
 .margin-y {
-  margin-top: 18px;
-  margin-bottom: 18px;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 </style>
