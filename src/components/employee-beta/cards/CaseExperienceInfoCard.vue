@@ -6,14 +6,14 @@
 
     <!-- Job Role and Hire Date information -->
     <v-card-text class="pb-0">
-      <div v-if="props.model.jobRole" class="">
-        <h2 class="mt-4 fit-content" style="font-size: x-large">{{ props.model.jobRole }}</h2>
-        <p v-if="!model.deptDate" class="info-header">Since {{ monthDayYearFormat(model.hireDate) }}</p>
-        <p v-else>{{ monthDayYearFormat(model.hireDate) - monthDayYearFormat(model.deptDate) }}</p>
+      <div v-if="props.model.jobRole">
+        <h2 class="mt-4 fit-content" style="font-size: large">{{ props.model.jobRole }}</h2>
+        <p v-if="!model.deptDate" class="mb-1 info-header">Since {{ monthDayYearFormat(model.hireDate) }}</p>
+        <p class="mb-1" v-else>{{ monthDayYearFormat(model.hireDate) - monthDayYearFormat(model.deptDate) }}</p>
       </div>
       <div v-else>
         <!-- For testing beta purposes:) -->
-        <h2 class="mt-4" style="font-size: x-large">Software Dev Intern</h2>
+        <h2 class="mt-2" style="font-size: large">Software Dev Intern</h2>
         <p v-if="!model.deptDate" class="info-header">Since {{ monthDayYearFormat(model.hireDate) }}</p>
         <p v-else>{{ monthDayYearFormat(model.hireDate) - monthDayYearFormat(model.deptDate) }}</p>
       </div>
@@ -29,17 +29,12 @@
           <div class="info-div">{{ getYearsWith }} {{ getDaysWith }}</div>
         </v-col>
       </v-row>
+      <div>
+        <h2 style="font-size: large">Anniversary Countdown <v-icon size="small">mdi-balloon</v-icon></h2>
+        <p class="info-header" v-if="!model.hireDate">It's your Anniversary!</p>
+        <p class="info-header" v-else>{{ getDaysUntil }} Days until Anniversary</p>
+      </div>
     </v-card-text>
-
-    <!-- Anniversary Card -->
-    <v-card elevation="1" class="my-2 mx-4" style="background-color: #f8f8f8">
-      <v-card-title class="pa-0">
-        <div class="text-center">
-          <p v-if="!model.hireDate" class="font-20 ma-2">0 Days until Anniversary</p>
-          <p v-else class="font-20 ma-2">{{ getDaysUntil }} Days until Anniversary</p>
-        </div>
-      </v-card-title>
-    </v-card>
   </v-card>
 </template>
 
