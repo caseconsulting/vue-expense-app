@@ -30,7 +30,9 @@
             v-slot:[`item.${header.key}`]="{ item }"
           >
             <contracts-edit-item
-              v-if="editItem?.item?.id === item.id && editItem?.header?.key === header.key"
+              v-if="
+                editItem?.item?.id === item.id && editItem?.header?.key === header.key && editItem?.type === 'project'
+              "
               :key="header + _random()"
               :header="header"
               :item="item"
@@ -40,6 +42,7 @@
               :key="_random() + header"
               :header="header"
               :item="item"
+              type="project"
               @click="handleItemClick(item, header)"
               class="d-flex align-center w-100 h-100"
             ></contracts-info-item>
@@ -101,6 +104,7 @@
   </td>
 </template>
 <script setup>
+import _findIndex from 'lodash/findIndex';
 import _random from 'lodash/random';
 import _filter from 'lodash/filter';
 import _some from 'lodash/some';
@@ -109,7 +113,7 @@ import ContractsEditItem from './ContractsEditItem.vue';
 import ContractsInfoItem from './ContractsInfoItem.vue';
 import ProjectsEmployeesAssignedModal from '../modals/ProjectsEmployeesAssignedModal.vue';
 import { getProjectCurrentEmployees } from '@/shared/contractUtils';
-import { ref, onBeforeMount, inject } from 'vue';
+import { ref, onBeforeMount, inject, watch } from 'vue';
 import { useDisplay } from 'vuetify';
 
 // |--------------------------------------------------|
@@ -118,14 +122,7 @@ import { useDisplay } from 'vuetify';
 // |                                                  |
 // |--------------------------------------------------|
 
-const props = defineProps([
-  'contract',
-  'isEditingContractItem',
-  'isContractDeletingOrUpdatingStatus',
-  'colspan',
-  'cellProps',
-  'rowProps'
-]);
+const props = defineProps(['contract', 'colspan', 'rowProps', 'editItem']);
 const { lgAndDown } = useDisplay();
 const emitter = inject('emitter');
 const duplicateProjects = ref((v) => {
@@ -140,7 +137,7 @@ const duplicateProjects = ref((v) => {
   }
 });
 const projectLoading = ref(false);
-const editItem = ref(null);
+const editItem = ref(props.editItem);
 const toggleProjectEmployeesModal = ref(false);
 const contractEmployeesAssigned = ref(null);
 const projectEmployeesAsseigned = ref(null);
@@ -160,7 +157,7 @@ const projectHeaders = ref([
     rules: [(v) => !!v || 'Field is required', duplicateProjects.value]
   },
   {
-    title: 'Customer Org',
+    title: 'Cust. Org',
     key: 'customerOrg',
     align: 'start',
     customWidth: 'x-small',
@@ -259,8 +256,26 @@ onBeforeMount(() => {
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * Sets the props for a cell in the data table.
+ *
+ * @param column - The cell header
+ * @returns Object - The cell class
+ */
+function cellProps({ column }) {
+  let editColumn = projectHeaders.value[editItem.value?.headerIndex];
+  console.log(column);
+  return {
+    class: `${column.key === editColumn?.key ? `cell-width-x-large` : `cell-width-${column.customWidth}`}`
+  };
+} // cellProps
+
 function handleItemClick(item, header) {
-  if (!header.disableEdit) editItem.value = { item, header };
+  if (!header.disableEdit) {
+    let headerIndex = _findIndex(projectHeaders.value, (h) => header.key === h.key);
+    editItem.value = { item, header, type: 'project', headerIndex };
+    emitter.emit('change-contracts-edit-item', editItem.value);
+  }
 }
 
 /**
@@ -271,6 +286,13 @@ function handleItemClick(item, header) {
 function toggleProjectCheckBox(projectItem) {
   emitter.emit('toggle-project-checkBox', { contract: props.contract, project: projectItem });
 } // toggleProjectCheckBox
+
+watch(
+  () => props.editItem,
+  () => {
+    editItem.value = props.editItem;
+  }
+);
 </script>
 
 <style lang="scss">

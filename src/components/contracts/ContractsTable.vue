@@ -60,8 +60,8 @@
           items-per-page="-1"
           :search="search"
           :expanded="expanded"
-          :cell-props="cellProps"
           :row-props="rowProps"
+          :cellProps="cellProps"
           :custom-filter="contractFilter"
           class="contracts-table text-body-2"
           density="compact"
@@ -92,7 +92,9 @@
             v-slot:[`item.${header.key}`]="{ item }"
           >
             <contracts-edit-item
-              v-if="editItem?.item?.id === item.id && editItem?.header?.key === header.key"
+              v-if="
+                editItem?.item?.id === item.id && editItem?.header?.key === header.key && editItem?.type === 'contract'
+              "
               :key="header + _random()"
               :header="header"
               :item="item"
@@ -102,6 +104,7 @@
               :key="_random() + header"
               :header="header"
               :item="item"
+              type="contract"
               @click="handleItemClick(item, header)"
               class="d-flex align-center w-100 h-100 font-weight-bold"
             ></contracts-info-item>
@@ -115,7 +118,7 @@
               :colspan="columns.length"
               :isContractDeletingOrUpdatingStatus="isDeletingOrUpdatingStatus()"
               :rowProps="rowProps"
-              :cellProps="cellProps"
+              :editItem="editItem"
             />
           </template>
 
@@ -214,6 +217,7 @@
   </div>
 </template>
 <script setup>
+import _findIndex from 'lodash/findIndex';
 import _random from 'lodash/random';
 import _filter from 'lodash/filter';
 import _cloneDeep from 'lodash/cloneDeep';
@@ -409,6 +413,9 @@ onBeforeMount(async () => {
     deletingItems.value = null;
     toggleContractDeleteModal.value = false;
   });
+  emitter.on('change-contracts-edit-item', (item) => {
+    editItem.value = item;
+  });
   emitter.on('confirmed-contract-status', () => {
     updateStatus(statusItemClicked.value);
     toggleContractStatusModal.value = false;
@@ -421,6 +428,9 @@ onBeforeMount(async () => {
   });
   emitter.on('canceled-project-form', () => {
     toggleProjectForm.value = false;
+  });
+  emitter.on('saved-contract-item', () => {
+    editItem.value = null;
   });
   emitter.on('submitted-project-form', () => {
     toggleProjectForm.value = false;
@@ -447,6 +457,7 @@ onBeforeMount(async () => {
 onBeforeUnmount(() => {
   emitter.off('confirm-delete-contract');
   emitter.off('canceled-delete-contract');
+  emitter.off('change-contracts-edit-item');
   emitter.off('confirmed-contract-status');
   emitter.off('canceled-contract-status');
   emitter.off('canceled-project-form');
@@ -455,7 +466,6 @@ onBeforeUnmount(() => {
   emitter.off('closed-contract-settings-modal');
   emitter.off('contract-project-validate-error-acknowledged');
   emitter.off('filter');
-  emitter.off('is-editing-project-item');
   emitter.off('toggle-project-checkbox');
 }); // beforeUnmount
 
@@ -466,7 +476,11 @@ onBeforeUnmount(() => {
 // |--------------------------------------------------|
 
 function handleItemClick(item, header) {
-  if (!header.disableEdit) editItem.value = { item, header };
+  if (!header.disableEdit) {
+    let headerIndex = _findIndex(contractHeaders.value, (h) => header.key === h.key);
+    editItem.value = { item, header, type: 'contract', headerIndex };
+    emitter.emit('update-project-headers', { headerIndex });
+  }
 }
 
 /**
@@ -778,7 +792,10 @@ function resetAllCheckBoxes() {
  * @returns Object - The cell class
  */
 function cellProps({ column }) {
-  return { class: `cell-width-${column.customWidth}` };
+  let editColumn = contractHeaders.value[editItem.value?.headerIndex];
+  return {
+    class: `${column.key === editColumn?.key ? `cell-width-x-large` : `cell-width-${column.customWidth}`}`
+  };
 } // cellProps
 
 /**

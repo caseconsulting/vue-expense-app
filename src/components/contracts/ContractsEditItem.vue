@@ -1,12 +1,12 @@
 <template>
-  <v-form class="d-flex align-center" v-model="valid">
+  <v-form class="d-flex align-center" v-model="valid" @keyup.enter="saveItem()">
     <v-combobox
       v-if="props.header.type === 'combobox'"
       v-model="model"
       autofocus
       :rules="props.header.rules"
       :class="props.header.class"
-      :items="getItems()"
+      :items="getDropdownItems()"
       :label="props.header.title"
       variant="underlined"
     ></v-combobox>
@@ -39,7 +39,14 @@
       :label="props.header.title"
       variant="underlined"
     ></v-text-field>
-    <v-btn density="comfortable" :disabled="!valid" icon variant="text">
+    <v-btn
+      density="comfortable"
+      @click="saveItem()"
+      :disabled="!valid || loading"
+      :loading="loading"
+      icon
+      variant="text"
+    >
       <v-tooltip activator="parent">Save {{ props.header.title }}</v-tooltip>
       <v-icon>mdi-content-save</v-icon>
     </v-btn>
@@ -47,22 +54,34 @@
 </template>
 
 <script setup>
-import { onBeforeUnmount, ref } from 'vue';
+import _find from 'lodash/find';
+import _findIndex from 'lodash/findIndex';
+import api from '@/shared/api';
+import { onBeforeUnmount, ref, inject, onBeforeMount } from 'vue';
 import { getOrgList, getProjectLocations } from '@/shared/contractUtils';
+import { useStore } from 'vuex';
 
-const props = defineProps(['header', 'item']);
+const props = defineProps(['header', 'item', 'type']);
+const emitter = inject('emitter');
+const store = useStore();
+
 const model = ref(props.item[props.header.key]);
 const header = ref(props.header);
+const item = ref(props.item);
+const loading = ref(false);
 const valid = ref(false);
 
-const originalHeaderWidth = header.value.customWidth;
-header.value.customWidth = 'x-large';
+header.value.editing = true;
 
-onBeforeUnmount(() => {
-  header.value.customWidth = originalHeaderWidth;
+onBeforeMount(() => {
+  emitter.emit(`editing-${props.type}-item`);
 });
 
-function getItems() {
+onBeforeUnmount(() => {
+  header.value.editing = false;
+});
+
+function getDropdownItems() {
   let items = [];
   let key = props.header.key;
   if (key === 'location') {
@@ -76,5 +95,28 @@ function getItems() {
     });
   }
   return items;
+}
+
+async function saveItem() {
+  if (valid.value) {
+    loading.value = true;
+    let key = props.header.key;
+    console.log(item.value);
+    if (item.value.contractId) {
+      // update contract
+      item.value[key] = model.value;
+      await api.updateAttribute(api.CONTRACTS, { id: item.value.id, [`${key}`]: item.value[key] }, key);
+    } else {
+      // update projects field
+      let contract = _find(store.getters.contracts, (c) => _find(c.projects, (p) => p.id === item.value.id));
+      let pIndex = _findIndex(contract.projects, (p) => p.id === item.value.id);
+      item.value[key] = model.value;
+      contract.projects[pIndex] = item.value;
+      await api.updateAttribute(api.CONTRACTS, { id: contract.id, projects: contract.projects }, 'projects');
+    }
+    //store.dispatch('setContracts', { contracts: [...store.getters.contracts] });
+    emitter.emit('saved-contract-item');
+    loading.value = false;
+  }
 }
 </script>
