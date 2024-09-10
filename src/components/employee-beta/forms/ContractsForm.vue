@@ -413,28 +413,30 @@ function deleteProject(contractIndex, projectIndex) {
  * @return Array - An array of contract names
  */
 function getContractsDropdownItems(contract) {
+  let toReturn = null;
   if (!contract) {
-    return [];
+    toReturn = [];
   } else if (contract.primeName && contract.projects.length == 1 && isEmpty(contract.projects[0].projectName)) {
     // only prime name is filled out
     let matchedContracts = contracts.filter((c) => c.primeName === contract.primeName);
-    return matchedContracts.map((c) => c.contractName);
+    toReturn = matchedContracts.map((c) => c.contractName);
   } else if (contract.primeName) {
     // prime name and project names are filled out
     let project = contract.projects[0];
     let matchedContracts = contracts.filter(
       (c) => c.primeName === contract.primeName && c.projects.some((p) => p.projectName === project.projectName)
     );
-    return matchedContracts.map((c) => c.contractName);
+    toReturn = matchedContracts.map((c) => c.contractName);
   } else if (isEmpty(contract.primeName) && !isEmpty(contract.projects[0].projectName)) {
     // only project names are filled out
     let project = contract.projects[0];
     let matchedContracts = contracts.filter((c) => c.projects.some((p) => p.projectName === project.projectName));
-    return matchedContracts.map((c) => c.contractName);
+    toReturn = matchedContracts.map((c) => c.contractName);
   } else {
     // prime and projects fields are empty
-    return contracts.map((c) => c.contractName);
+    toReturn = contracts.map((c) => c.contractName);
   }
+  return Array.from(new Set(toReturn));
 } // getContractsDropdownItems
 
 /**
@@ -444,28 +446,30 @@ function getContractsDropdownItems(contract) {
  * @return Array - An array of prime names
  */
 function getPrimesDropdownItems(contract) {
+  let toReturn = null;
   if (!contract) {
-    return [];
+    toReturn = [];
   } else if (contract.contractName && contract.projects.length == 1 && isEmpty(contract.projects[0].projectName)) {
     // only contract name is filled out
     let matchedContracts = contracts.filter((c) => c.contractName === contract.contractName);
-    return matchedContracts.map((c) => c.primeName);
+    toReturn = matchedContracts.map((c) => c.primeName);
   } else if (contract.contractName) {
     // contract name and project names are filled out
     let project = contract.projects[0];
     let matchedContracts = contracts.filter(
       (c) => c.contractName === contract.contractName && c.projects.some((p) => p.projectName === project.projectName)
     );
-    return matchedContracts.map((c) => c.primeName);
+    toReturn = matchedContracts.map((c) => c.primeName);
   } else if (isEmpty(contract.contractName) && !isEmpty(contract.projects[0].projectName)) {
     // only project names are filled out
     let project = contract.projects[0];
     let matchedContracts = contracts.filter((c) => c.projects.some((p) => p.projectName === project.projectName));
-    return matchedContracts.map((c) => c.primeName);
+    toReturn = matchedContracts.map((c) => c.primeName);
   } else {
     // prime and projects fields are empty
-    return contracts.map((c) => c.primeName);
+    toReturn = contracts.map((c) => c.primeName);
   }
+  return Array.from(new Set(toReturn));
 } // getPrimesDropdownItems
 
 /**
@@ -475,26 +479,28 @@ function getPrimesDropdownItems(contract) {
  * @return Array - An array of project names
  */
 function getProjectsDropdownItems(contract) {
+  let toReturn = null;
   if (!contract) {
-    return [];
+    toReturn = [];
   } else if (contract.contractName && contract.primeName) {
     // both field filled out
     let matchedContracts = contracts.filter(
       (c) => c.contractName === contract.contractName && c.primeName === contract.primeName
     );
-    return matchedContracts.map((c) => c.projects.map((p) => p.projectName)).flat();
+    toReturn = matchedContracts.map((c) => c.projects.map((p) => p.projectName)).flat();
   } else if (contract.contractName && isEmpty(contract.primeName)) {
     // only contract name is filled out
     let matchedContracts = contracts.filter((c) => c.contractName === contract.contractName);
-    return matchedContracts.map((c) => c.projects.map((p) => p.projectName)).flat();
+    toReturn = matchedContracts.map((c) => c.projects.map((p) => p.projectName)).flat();
   } else if (contract.primeName && isEmpty(contract.contractName)) {
     // only prime name is filled out
     let matchedContracts = contracts.filter((c) => c.primeName === contract.primeName);
-    return matchedContracts.map((c) => c.projects.map((p) => p.projectName)).flat();
+    toReturn = matchedContracts.map((c) => c.projects.map((p) => p.projectName)).flat();
   } else {
     // prime and projects fields are empty
-    return contractProjects.value.map((p) => p.projectName);
+    toReturn = contractProjects.value.map((p) => p.projectName);
   }
+  return Array.from(new Set(toReturn));
 } // getProjectsDropdownItems
 
 /**
