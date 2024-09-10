@@ -196,7 +196,7 @@
           </v-col>
         </v-row>
         <employee-form v-model="editing" :employee="model" :contracts="contracts"></employee-form>
-        <employee-notes v-model="showEmployeeNotes" :employee="model"></employee-notes>
+        <employee-notes v-model="showEmployeeNotes" :employee="model" :key="model"></employee-notes>
       </v-card-text>
     </v-card>
   </v-container>
@@ -204,7 +204,7 @@
 
 <script setup>
 import { isMobile } from '@/utils/utils';
-import { computed, ref, inject } from 'vue';
+import { computed, ref, inject, onMounted } from 'vue';
 import { useDisplay } from 'vuetify';
 import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
@@ -246,6 +246,12 @@ const isUser = inject('isUser');
 const editing = ref(false);
 const infoTab = ref(route.hash.substring(1)); // currently active tab
 const showEmployeeNotes = ref(false);
+
+onMounted(() => {
+  emitter.on('close-notes', () => {
+    showEmployeeNotes.value = false;
+  });
+});
 
 // |--------------------------------------------------|
 // |                                                  |

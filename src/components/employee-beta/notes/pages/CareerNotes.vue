@@ -9,17 +9,18 @@
       ></v-checkbox>
     </v-row>
     <v-row v-if="notes.desireToMove">
-      <v-col class="pl-0" cols="5">
+      <v-col class="pl-0" :cols="isMobile() ? '12' : '5'" :class="isMobile() ? 'pr-0' : ''">
         <v-textarea
           v-model="notes.moveTo"
           label="Desired location"
+          hide-details
           auto-grow
           rows="1"
           max-rows="3"
           variant="outlined"
         ></v-textarea>
       </v-col>
-      <v-col class="pr-0" cols="7">
+      <v-col class="pr-0" :cols="isMobile() ? '12' : '7'" :class="isMobile() ? 'pl-0' : ''">
         <v-textarea
           v-model="notes.moveReason"
           label="Reason for move"
@@ -55,36 +56,20 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, inject, watch } from 'vue';
+import { ref, watch } from 'vue';
+import { isMobile } from '@/utils/utils';
 
-const emitter = inject('emitter');
-const props = defineProps(['notesModel', 'user']);
-const notes = ref({});
+const props = defineProps(['modelValue']);
+const notes = ref(props.modelValue);
 
-onMounted(() => {
-  notes.value = { ...props.notesModel };
-});
-
-onBeforeUnmount(() => {
-  // autosave(true);
-});
-
-var saveTimer = null;
-function autosave(saveNow = false) {
-  // set timeout duration
-  const bufferTime = saveNow ? 0 : 5000;
-
-  // stop any old saves, make a new one
-  if (saveTimer) clearTimeout(saveTimer);
-  saveTimer = setTimeout(function () {
-    console.log('A');
-    emitter.emit('save-notes', {
-      from: 'career',
-      notes: notes.value
-    });
-  }, bufferTime);
-}
-
-// autosave if the notes var is changed at all
-watch(() => notes.value, autosave(), { deep: true });
+// if desire to move is set to false, reset the desired location and reason for move to null
+watch(
+  () => notes.value.desireToMove,
+  () => {
+    if (notes.value.desireToMove === false) {
+      notes.value.moveTo = null;
+      notes.value.moveReason = null;
+    }
+  }
+);
 </script>

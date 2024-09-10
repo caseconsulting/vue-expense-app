@@ -9,20 +9,64 @@
         rows="3"
         max-rows="8"
         class="w-100"
-        @update:model-value="autosave()"
       ></v-textarea>
     </v-row>
     <v-row>
-      <v-col>
-        <v-row v-for="hf in highFives" :key="hf.desc" class="mb-2">
-          <p>
-            <v-icon icon="mdi-hands-pray" class="mr-2"></v-icon>
-            <span class="cursor-default">High Five from {{ hf.from }}</span>
-            <v-avatar class="mb-1 pointer" density="compact">
-              <v-tooltip activator="parent" location="top" max-width="600">{{ hf.desc }}</v-tooltip>
-              <v-icon size="small">mdi-text-box-outline</v-icon>
+      <v-col class="pl-0" :cols="isMobile() ? '12' : '7'" :class="isMobile() ? 'pb-0' : ''">
+        <v-text-field v-model="customKudo.title" variant="outlined" label="Record kudo"></v-text-field>
+      </v-col>
+      <v-col :cols="isMobile() ? '9' : '4'" :class="isMobile() ? 'pt-0 pl-0' : ''">
+        <v-text-field
+          :model-value="format(customKudo.date, null, 'MM/DD/YYYY')"
+          :class="isMobile() ? 'pt-0' : ''"
+          label="Date"
+          hint="MM/DD/YYYY format"
+          v-mask="'##/##/####'"
+          prepend-inner-icon="mdi-calendar"
+          @update:focused="customKudo.date = parseEventDate($event)"
+          clearable
+          @click:prepend="showDateMenu = true"
+          @keypress="showDateMenu = false"
+          autocomplete="off"
+          variant="outlined"
+        >
+          <v-menu activator="parent" v-model="showDateMenu" :close-on-content-click="false" location="start center">
+            <v-date-picker
+              v-model="customKudo.date"
+              @update:model-value="showDateMenu = false"
+              show-adjacent-months
+              hide-actions
+              keyboard-icon=""
+              color="#bc3825"
+              title="Date"
+            ></v-date-picker>
+          </v-menu>
+        </v-text-field>
+      </v-col>
+      <v-col class="pr-0" :cols="isMobile() ? '3' : '1'" :class="isMobile() ? 'pt-0 pr-0' : ''">
+        <v-btn icon="mdi-plus" :class="isMobile() ? 'pt-0' : ''" @click="addCustomKudo()"></v-btn>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col class="pl-6">
+        <v-row v-if="kudosLoading">
+          <v-progress-linear indeterminate></v-progress-linear>
+        </v-row>
+        <v-row v-else v-for="kudo in kudos" :key="kudo.desc" class="my-2">
+          <div class="mb-1">
+            <span class="text-grey font-italic">{{ format(kudo.date, 'YYYY-MM-DD', 'MM/DD/YYYY') }}</span>
+            <v-icon
+              :icon="kudosIcons[kudo.type]"
+              :class="`rounded-circle mx-2 mb-1 pa-3 ${kudo.type}-icon`"
+              :size="kudosIconSizes[kudo.type] ?? 'small'"
+            />
+            <br v-if="isMobile()" />
+            <span class="cursor-default">{{ kudoText(kudo) }}</span>
+            <v-avatar :class="kudo.desc ? 'pointer' : ''" density="compact">
+              <v-tooltip v-if="kudo.desc" activator="parent" location="top" max-width="600">{{ kudo.desc }}</v-tooltip>
+              <v-icon v-if="kudo.desc" size="x-small">mdi-text</v-icon>
             </v-avatar>
-          </p>
+          </div>
         </v-row>
       </v-col>
     </v-row>
@@ -30,67 +74,137 @@
 </template>
 
 <script setup>
-import { onMounted, ref, onBeforeUnmount, inject } from 'vue';
+import { onMounted, ref } from 'vue';
+import { startOf, format, getTodaysDate } from '@/shared/dateUtils';
+import { updateStoreEmployees, updateStoreExpenseTypes } from '@/utils/storeUtils';
+import api from '@/shared/api';
+import { useStore } from 'vuex';
+import { isMobile } from '@/utils/utils';
 
-const emitter = inject('emitter');
-const props = defineProps(['notesModel', 'user']);
-const notes = ref({});
+const store = useStore();
+const props = defineProps(['modelValue', 'user']);
+const notes = ref(props.modelValue);
 
-onMounted(() => {
-  notes.value = { ...props.notesModel };
+const kudos = ref([]);
+const customKudo = ref({ date: getTodaysDate('YYYY-MM-DD') });
+const showDateMenu = ref(false);
+const kudosLoading = ref(false);
+
+onMounted(async () => {
+  buildKudos();
 });
-
-onBeforeUnmount(() => {
-  autosave(true);
-});
-
-let highFives = [
-  {
-    from: 'Chad Martin',
-    desc: 'Congrats on the thing :)',
-    date: '01/01/2024'
-  },
-  {
-    from: 'Alissa Bendele',
-    desc: 'Good job on the Demo!',
-    date: '01/04/2024'
-  },
-  {
-    from: 'Amy Farmer',
-    desc: 'This is a longer text to see what it looks like when you type a lot. There is some things over here too, and the fact that it is really long is not a coincidence because you did such a great job on the thing. Wowie such a good job. Congrats on doing a good job and keep up the good job with the thing!',
-    date: '04/29/2024'
-  }
-];
-// let awards = [
-//   {
-//     title: 'Best Product',
-//     desc: 'Chad Martin',
-//     date: '01/01/2024'
-//   },
-//   {
-//     title: 'Most Valuable Customer',
-//     desc: 'Alissa Bendele',
-//     date: '01/04/2024'
-//   }
-// ];
 
 /**
- * Autosaves the notes. Default is to set a timer of 5 seconds and save after the timer is up,
- * but setting `saveNow` to true will skip this timer.
- * @param saveNow whether or not to skip the timer
+ * All kudos should have a `date` (YYYY-MM-DD) and a `type`.
+ * Adding a `desc` will add the little note thing with hover.
  */
-var saveTimer = null;
-function autosave(saveNow = false) {
-  // set timeout duration
-  const bufferTime = saveNow ? 0 : 5000;
+async function buildKudos() {
+  kudosLoading.value = true;
+  kudos.value = [];
 
-  // stop any old saves, make a new one
-  if (saveTimer) clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => {
-    emitter.emit('save-notes', {
-      from: 'kudos',
-      notes: notes.value
+  // fetch data while doing other things
+  let expenseTypes = store.getters.expenseTypes ?? updateStoreExpenseTypes();
+  let employees = store.getters.employees ?? updateStoreEmployees();
+
+  // build awards
+  for (let award of props.user.awards ?? []) {
+    kudos.value.push({
+      type: 'award',
+      title: award.name,
+      date: format(startOf(award.dateReceived, 'month'), null, 'YYYY-MM-DD')
     });
-  }, bufferTime);
+  }
+
+  // build custom kudos
+  for (let c of notes.value.custom ?? []) {
+    kudos.value.push({
+      type: 'custom',
+      title: c.title,
+      date: format(c.date, null, 'YYYY-MM-DD')
+    });
+  }
+
+  // build high fives
+  // get all high fives
+  await expenseTypes, employees;
+  let highFiveET = expenseTypes.find((et) => et.budgetName === 'High Five');
+  let highFives = await api.getAllExpenseTypeExpenses(highFiveET.id);
+  // filter down to only ones the user received
+  highFives = highFives.filter((hf) => hf.recipient === props.user.id);
+  let from;
+  for (let hf of highFives ?? []) {
+    from = employees.find((e) => e.id === hf.employeeId);
+    kudos.value.push({
+      type: 'high-five',
+      from: `${from.nickname || from.firstName} ${from.lastName}`,
+      desc: hf.note,
+      date: format(hf.reimbursedDate, null, 'YYYY-MM-DD')
+    });
+  }
+
+  // sort everything based on date (desc)
+  kudos.value.sort((a, b) => {
+    return a.date < b.date;
+  });
+
+  kudosLoading.value = false;
+}
+
+/**
+ * Parse the date after losing focus.
+ *
+ * @return String - The date in YYYY-MM-DD format
+ */
+function parseEventDate() {
+  return format(event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD');
+} // parseEventDate
+
+let kudosIcons = {
+  'high-five': 'mdi-hands-pray',
+  award: 'mdi-trophy-award',
+  custom: 'mdi-hand-heart'
+};
+
+// default is small
+let kudosIconSizes = {
+  custom: 'x-small'
+};
+
+function kudoText(kudo) {
+  switch (kudo.type) {
+    case 'high-five':
+      return `High-Five from ${kudo.from}`;
+    case 'award':
+      return `Received award: ${kudo.title}`;
+    case 'custom':
+      return `Kudo: ${kudo.title}`;
+    default:
+      return '';
+  }
+}
+
+function addCustomKudo() {
+  notes.value.custom.push({
+    type: 'custom',
+    date: customKudo.value.date,
+    title: customKudo.value.title
+  });
+  customKudo.value = { date: getTodaysDate('YYYY-MM-DD') };
+  buildKudos();
 }
 </script>
+
+<style scoped>
+.high-five-icon {
+  background: #328b8f;
+  color: white;
+}
+.award-icon {
+  background: #f9c64e;
+  color: white;
+}
+.custom-icon {
+  background: #f53b3b;
+  color: white;
+}
+</style>
