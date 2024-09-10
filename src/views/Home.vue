@@ -230,7 +230,7 @@ async function createEvents() {
   aggregatedCerts.value = getEmployeeCerts();
 
   //we want to use their nicknames if they have one
-  employees.value.forEach((employee) => {
+  _forEach(employees.value, (employee) => {
     employee.firstName = getEmployeePreferredName(employee);
   });
 
@@ -541,11 +541,11 @@ function getEmployeeAwards() {
   let namedAwards = []; // temp variable for adding employee name
 
   // for each employee, get their awards
-  employees.value.forEach((e) => {
+  _forEach(employees.value, (e) => {
     if (e.awards) {
       // add their name to the award
       namedAwards = [];
-      e.awards.forEach((a) => {
+      _forEach(e.awards, (a) => {
         a.employee = e;
         namedAwards.push(a);
       });
@@ -567,10 +567,10 @@ function getEmployeeCerts() {
   let certs = []; // will be returned
 
   // for each employee, get their certs
-  employees.value.forEach((e) => {
+  _forEach(employees.value, (e) => {
     if (e.certifications) {
       // add their name to the cert
-      e.certifications.forEach((c) => {
+      _forEach(e.certifications, (c) => {
         c.employee = e;
       });
 
@@ -581,7 +581,7 @@ function getEmployeeCerts() {
 
   // :)
   return certs;
-}
+} // getEmployeeCerts
 
 /**
  * Returns the name of an employee based on their preference
