@@ -263,15 +263,23 @@ async function prepareSubmit() {
     // delete keys that aren't stored in database
     editedEmployee.value.contracts = _map(editedContracts.value, (contract) => {
       let newContract = _cloneDeep(contract);
-      if (newContract.contractName) {
-        newContract.contractId = _find(contracts, (c) => c.contractName === newContract.contractName).id;
+      if (newContract.contractName || newContract.primeName) {
+        newContract.contractId = _find(
+          contracts,
+          (c) => c.contractName === newContract.contractName && c.primeName === newContract.primeName
+        ).id;
       }
       delete newContract.contractName;
       delete newContract.primeName;
 
+      // get all the projects on the selected contract
+      let newContractAllProjects = store.getters.contracts.find((c) => {
+        return c.id === newContract.contractId;
+      }).projects;
+
       newContract.projects = _map(newContract.projects, (project) => {
         if (project.projectName) {
-          project.projectId = _find(contractProjects.value, (p) => p.projectName === project.projectName).id;
+          project.projectId = _find(newContractAllProjects, (p) => p.projectName === project.projectName).id;
         }
         delete project.projectName;
         delete project.showStartMenu;
