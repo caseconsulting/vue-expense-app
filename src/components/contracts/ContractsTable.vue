@@ -61,7 +61,7 @@
           :search="search"
           :expanded="expanded"
           :row-props="rowProps"
-          :cellProps="cellProps"
+          :cellProps="(item) => cellProps(item, contractHeaders)"
           :custom-filter="contractFilter"
           class="contracts-table text-body-2"
           density="compact"
@@ -118,6 +118,7 @@
               :colspan="columns.length"
               :isContractDeletingOrUpdatingStatus="isDeletingOrUpdatingStatus()"
               :rowProps="rowProps"
+              :cellProps="cellProps"
               :editItem="editItem"
             />
           </template>
@@ -429,8 +430,20 @@ onBeforeMount(async () => {
   emitter.on('canceled-project-form', () => {
     toggleProjectForm.value = false;
   });
-  emitter.on('saved-contract-item', () => {
+  emitter.on('saved-contract-item', async ({ key, item, promise }) => {
+    let saveStatus = { key, status: 'saving' };
+    item.saveStatuses ? item.saveStatuses.unshift(saveStatus) : (item.saveStatuses = [saveStatus]);
     editItem.value = null;
+    let resp = await promise;
+    if (resp.message) {
+      saveStatus.status = 'fail';
+      useDisplayError(resp?.response?.data?.message || resp?.message);
+    } else saveStatus.status = 'success';
+    item.saveStatuses = [...item.saveStatuses];
+    setTimeout(() => {
+      item.saveStatuses.pop();
+      if (item.saveStatuses?.length === 0) delete item.saveStatuses;
+    }, 1500);
   });
   emitter.on('submitted-project-form', () => {
     toggleProjectForm.value = false;
@@ -791,10 +804,13 @@ function resetAllCheckBoxes() {
  * @param column - The cell header
  * @returns Object - The cell class
  */
-function cellProps({ column }) {
-  let editColumn = contractHeaders.value[editItem.value?.headerIndex];
+function cellProps({ item, column }, headers) {
+  let editColumn = headers[editItem.value?.headerIndex];
+  let classes = `${column.key === editColumn?.key ? `cell-width-x-large` : `cell-width-${column.customWidth}`}`;
+  let idx = _findIndex(item.saveStatuses, (s) => s.key === column.key);
+  if (idx > -1) classes += ` item-${item.saveStatuses[idx].status}`;
   return {
-    class: `${column.key === editColumn?.key ? `cell-width-x-large` : `cell-width-${column.customWidth}`}`
+    class: classes
   };
 } // cellProps
 
@@ -1016,6 +1032,23 @@ watch(
   min-width: 200px !important;
   width: 200px !important;
   max-width: 200px !important;
+}
+
+.item-saving {
+  font-weight: bold;
+  color: darkgray;
+}
+.item-success {
+  font-weight: bold;
+  color: green !important;
+  transition: color 1s ease-in !important;
+  -webkit-transition: color 1s ease-in !important;
+}
+.item-fail {
+  font-weight: bold;
+  color: red !important;
+  transition: color 1s ease-out !important;
+  -webkit-transition: color 1s ease-out !important;
 }
 
 .contracts-table {

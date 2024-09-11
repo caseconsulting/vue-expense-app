@@ -47,6 +47,7 @@
 </template>
 
 <script setup>
+import _forEach from 'lodash/forEach';
 import _find from 'lodash/find';
 import _findIndex from 'lodash/findIndex';
 import api from '@/shared/api';
@@ -92,19 +93,21 @@ function getDropdownItems() {
 async function saveItem() {
   if (valid.value) {
     let key = props.header.key;
+    let promise = null;
     if (item.value.contractId) {
       // update contract
       item.value[key] = model.value;
-      api.updateAttribute(api.CONTRACTS, { id: item.value.id, [`${key}`]: item.value[key] }, key);
+      promise = api.updateAttribute(api.CONTRACTS, { id: item.value.id, [`${key}`]: item.value[key] }, key);
     } else {
       // update projects field
       let contract = _find(store.getters.contracts, (c) => _find(c.projects, (p) => p.id === item.value.id));
       let pIndex = _findIndex(contract.projects, (p) => p.id === item.value.id);
       item.value[key] = model.value;
       contract.projects[pIndex] = item.value;
-      api.updateAttribute(api.CONTRACTS, { id: contract.id, projects: contract.projects }, 'projects');
+      _forEach(contract.projects, (p) => delete p.saveStatuses);
+      promise = api.updateAttribute(api.CONTRACTS, { id: contract.id, projects: contract.projects }, 'projects');
     }
-    emitter.emit('saved-contract-item');
+    emitter.emit('saved-contract-item', { key, item: item.value, promise });
   }
 }
 </script>

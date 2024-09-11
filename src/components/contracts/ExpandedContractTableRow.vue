@@ -7,7 +7,7 @@
           :headers="projectHeaders"
           :items="contract.item.projects"
           :row-props="rowProps"
-          :cellProps="cellProps"
+          :cellProps="(item) => cellProps(item, projectHeaders)"
           class="projects-table"
           hide-default-footer
           hide-default-header
@@ -122,7 +122,7 @@ import { useDisplay } from 'vuetify';
 // |                                                  |
 // |--------------------------------------------------|
 
-const props = defineProps(['contract', 'colspan', 'rowProps', 'editItem']);
+const props = defineProps(['contract', 'colspan', 'rowProps', 'cellProps', 'editItem']);
 const { lgAndDown } = useDisplay();
 const emitter = inject('emitter');
 const duplicateProjects = ref((v) => {
@@ -255,20 +255,6 @@ onBeforeMount(() => {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
-
-/**
- * Sets the props for a cell in the data table.
- *
- * @param column - The cell header
- * @returns Object - The cell class
- */
-function cellProps({ column }) {
-  let editColumn = projectHeaders.value[editItem.value?.headerIndex];
-  console.log(column);
-  return {
-    class: `${column.key === editColumn?.key ? `cell-width-x-large` : `cell-width-${column.customWidth}`}`
-  };
-} // cellProps
 
 function handleItemClick(item, header) {
   if (!header.disableEdit) {
