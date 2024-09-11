@@ -4,7 +4,7 @@
       <!-- START EXPANDED PROJECTS DATA TABLE-->
       <v-form ref="projectForm" v-model="valid" lazy-validation>
         <v-data-table
-          :headers="projectHeaders"
+          :headers="_filter(projectHeaders, (h) => props.expandOrgs || (!props.expandOrgs && !h.expandableOrg))"
           :items="contract.item.projects"
           :row-props="rowProps"
           :cellProps="(item) => cellProps(item, projectHeaders)"
@@ -122,7 +122,7 @@ import { useDisplay } from 'vuetify';
 // |                                                  |
 // |--------------------------------------------------|
 
-const props = defineProps(['contract', 'colspan', 'rowProps', 'cellProps', 'editItem']);
+const props = defineProps(['contract', 'colspan', 'rowProps', 'cellProps', 'editItem', 'expandOrgs']);
 const { lgAndDown } = useDisplay();
 const emitter = inject('emitter');
 const duplicateProjects = ref((v) => {
@@ -167,7 +167,7 @@ const projectHeaders = ref([
     title: 'Directorate',
     key: 'directorate',
     align: 'start',
-    customWidth: 'x-small',
+    customWidth: 'small',
     type: 'combobox'
   },
   {
@@ -175,14 +175,16 @@ const projectHeaders = ref([
     key: 'org2',
     align: 'start',
     customWidth: 'x-small',
-    type: 'combobox'
+    type: 'combobox',
+    expandableOrg: true
   },
   {
     title: 'Org 3',
     key: 'org3',
     align: 'start',
     customWidth: 'x-small',
-    type: 'combobox'
+    type: 'combobox',
+    expandableOrg: true
   },
   {
     title: 'Location',

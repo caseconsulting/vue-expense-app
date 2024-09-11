@@ -55,7 +55,7 @@
       <!-- START CONTRACTS DATA TABLE -->
       <v-form ref="form" v-model="valid" lazy-validation>
         <v-data-table
-          :headers="contractHeaders"
+          :headers="_filter(contractHeaders, (h) => expandOrgs || (!expandOrgs && !h.expandableOrg))"
           :items="storeContracts"
           items-per-page="-1"
           :search="search"
@@ -85,6 +85,19 @@
               @click.stop="toggleContractCheckBox(item)"
             >
             </v-checkbox>
+          </template>
+
+          <template v-slot:[`header.directorate`]="{ column }">
+            <tr>
+              <td>
+                <span class="mr-2 cursor-pointer">{{ column.title }}</span>
+                <v-icon
+                  @click="expandOrgs = !expandOrgs"
+                  :icon="expandOrgs ? 'mdi-chevron-left' : 'mdi-chevron-right'"
+                  v-tooltip="expandOrgs ? 'hide orgs' : 'show orgs'"
+                ></v-icon>
+              </td>
+            </tr>
           </template>
 
           <template
@@ -120,6 +133,7 @@
               :rowProps="rowProps"
               :cellProps="cellProps"
               :editItem="editItem"
+              :expandOrgs="expandOrgs"
             />
           </template>
 
@@ -276,6 +290,7 @@ const duplicateContractPrimeComboFromContract = ref((v) => {
 const contractStatuses = ref(api.CONTRACT_STATUSES);
 const clickedContract = ref(null);
 const contractStatusItem = ref(null);
+const expandOrgs = ref(false);
 const addProjectUnderContract = ref(null);
 const toggleProjectForm = ref(false);
 const relationships = ref([]);
@@ -326,7 +341,8 @@ const contractHeaders = ref([
     title: 'Directorate',
     key: 'directorate',
     align: 'start',
-    customWidth: 'x-small',
+    sortable: false,
+    customWidth: 'small',
     type: 'combobox'
   },
   {
@@ -334,14 +350,16 @@ const contractHeaders = ref([
     key: 'org2',
     align: 'start',
     customWidth: 'x-small',
-    type: 'combobox'
+    type: 'combobox',
+    expandableOrg: true
   },
   {
     title: 'Org 3',
     key: 'org3',
     align: 'start',
     customWidth: 'x-small',
-    type: 'combobox'
+    type: 'combobox',
+    expandableOrg: true
   },
   {
     title: 'Location',
