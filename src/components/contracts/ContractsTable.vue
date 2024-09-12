@@ -94,7 +94,7 @@
                 <v-icon
                   @click="expandOrgs = !expandOrgs"
                   :icon="expandOrgs ? 'mdi-chevron-left' : 'mdi-chevron-right'"
-                  v-tooltip="expandOrgs ? 'hide orgs' : 'show orgs'"
+                  v-tooltip="expandOrgs ? 'Hide orgs' : 'Show orgs'"
                 ></v-icon>
               </td>
             </tr>
@@ -456,8 +456,10 @@ onBeforeMount(async () => {
     if (resp.message) {
       saveStatus.status = 'fail';
       useDisplayError(resp?.response?.data?.message || resp?.message);
-    } else saveStatus.status = 'success';
-    item.saveStatuses = [...item.saveStatuses];
+    } else {
+      saveStatus.status = 'success';
+    }
+    item.saveStatuses = [...item.saveStatuses]; // refreshes the cellProps
     setTimeout(() => {
       item.saveStatuses.pop();
       if (item.saveStatuses?.length === 0) delete item.saveStatuses;
@@ -492,6 +494,7 @@ onBeforeUnmount(() => {
   emitter.off('confirmed-contract-status');
   emitter.off('canceled-contract-status');
   emitter.off('canceled-project-form');
+  emitter.off('saved-contract-item');
   emitter.off('submitted-project-form');
   emitter.off('closed-project-employees-assigned-modal');
   emitter.off('closed-contract-settings-modal');
@@ -506,13 +509,18 @@ onBeforeUnmount(() => {
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * Sets the item to be edited.
+ *
+ * @param item - The row item clicked
+ * @param header - The header of the cell that was clicked
+ */
 function handleItemClick(item, header) {
   if (!header.disableEdit) {
     let headerIndex = _findIndex(contractHeaders.value, (h) => header.key === h.key);
     editItem.value = { item, header, type: 'contract', headerIndex };
-    emitter.emit('update-project-headers', { headerIndex });
   }
-}
+} // handleItemClick
 
 /**
  * Delete items

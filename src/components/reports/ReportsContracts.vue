@@ -130,7 +130,7 @@ import _filter from 'lodash/filter';
 import _find from 'lodash/find';
 import _uniq from 'lodash/uniq';
 import { employeeFilter } from '@/shared/filterUtils';
-import { selectedTagsHasEmployee } from '@/shared/employeeUtils';
+import { getEmployeeCurrentAddress, selectedTagsHasEmployee } from '@/shared/employeeUtils';
 import { getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
 import { onMounted, ref, inject, watch } from 'vue';
 import { useStore } from 'vuex';
@@ -170,7 +170,8 @@ const headers = ref([
   },
   {
     title: 'Location',
-    key: 'locations'
+    key: 'locations',
+    width: '200px'
   },
   {
     title: 'Work Type',
@@ -232,11 +233,12 @@ onMounted(() => {
  */
 function buildContractsColumn() {
   employeesInfo.value.forEach((currentEmp) => {
+    let hasCurrentContract = false;
+    let contractNames = '';
+    let primeNames = '';
+    let locations = '';
+    let workTypes = '';
     if (currentEmp.contracts) {
-      let contractNames = '';
-      let primeNames = '';
-      let locations = '';
-      let workTypes = '';
       currentEmp.contracts.forEach((currentCon) => {
         // find current contracts
         let current = false;
@@ -255,6 +257,7 @@ function buildContractsColumn() {
         }
         // add current contracts
         if (current) {
+          hasCurrentContract = true;
           let contract = store.getters.contracts.find((c) => c.id === currentCon.contractId);
           contractNames += `${contract.contractName} & `;
           primeNames += `${contract.primeName} & `;
@@ -265,11 +268,15 @@ function buildContractsColumn() {
       primeNames = primeNames.slice(0, -2);
       locations = locations.slice(0, -2);
       workTypes = workTypes.slice(0, -2);
-      currentEmp.contractNames = contractNames;
-      currentEmp.primeNames = primeNames;
-      currentEmp.locations = locations;
-      currentEmp.workTypes = workTypes;
     }
+    if (!hasCurrentContract) {
+      workTypes += 'Remote';
+      locations += userRoleIsAdmin() || userRoleIsManager() ? getEmployeeCurrentAddress(currentEmp) : '';
+    }
+    currentEmp.contractNames = contractNames;
+    currentEmp.primeNames = primeNames;
+    currentEmp.locations = locations;
+    currentEmp.workTypes = workTypes;
   });
 } // buildContractsColumn
 
@@ -291,6 +298,8 @@ function populateOtherDropdowns() {
   primesDropDown.value = [];
   locationsDropDown.value = [];
   workTypesDropDown.value = [];
+  if (filteredEmployees.value?.length === _filter(store.getters.employees, (e) => e.workStatus !== 0).length)
+    contractsDropDown.value.push(noContractPlaceholder.value); // add placeholder if no one has been filtered out
   _forEach(filteredEmployees.value, (e) => {
     _forEach(e.contracts, (c) => {
       // get actual contract from employee contract id

@@ -258,13 +258,19 @@ onBeforeMount(() => {
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * Sets the item to be edited.
+ *
+ * @param item - The row item clicked
+ * @param header - The header of the cell that was clicked
+ */
 function handleItemClick(item, header) {
   if (!header.disableEdit) {
     let headerIndex = _findIndex(projectHeaders.value, (h) => header.key === h.key);
     editItem.value = { item, header, type: 'project', headerIndex };
     emitter.emit('change-contracts-edit-item', editItem.value);
   }
-}
+} // handleItemClick
 
 /**
  * Toggles project checkBox item
@@ -278,6 +284,7 @@ function toggleProjectCheckBox(projectItem) {
 watch(
   () => props.editItem,
   () => {
+    // sets the edit item from the contracts row so multiple items cannot be edited
     editItem.value = props.editItem;
   }
 );

@@ -8,6 +8,7 @@ import _map from 'lodash/map';
 import _isEmpty from 'lodash/isEmpty';
 import _sortBy from 'lodash/sortBy';
 import { difference, format, getTodaysDate, minimum } from '@/shared/dateUtils';
+import { getEmployeeCurrentAddress } from '@/shared/employeeUtils.js';
 import csvUtils from './baseCsv.js';
 
 /**
@@ -49,7 +50,7 @@ export function convertEmployees(employees, contracts, tags, includeEeoData = fa
   _forEach(employees, (employee) => {
     try {
       let placeOfBirth = [employee.city, employee.st, employee.country];
-      let contractsInfo = getContractsInfo(employee.contracts, contracts);
+      let contractsInfo = getContractsInfo(employee, contracts);
       let clearanceData = getClearancesData(employee.clearances);
       let data = {
         // NOTE: if you change this, please also change in the catch{} below
@@ -337,14 +338,15 @@ export function getProjectLengthInYears(project) {
  *
  * @param employeeContracts - An array of objects.
  * @param allContracts - the contracts from DyanmoDB to connect employee contract IDs to
+ * @param
  * @return String - contract
  */
-export function getContractsInfo(employeeContracts, allContracts) {
+export function getContractsInfo(employee, allContracts) {
   let result = [];
   let toReturn = {};
   let allProjects = allContracts.map((c) => c.projects).flat();
-  if (employeeContracts) {
-    _forEach(employeeContracts, (contract) => {
+  if (employee.contracts) {
+    _forEach(employee.contracts, (contract) => {
       let earliestDate = getTodaysDate(); // keep track of earliest start date
       // create array of project strings
       let projects = [];
@@ -387,6 +389,12 @@ export function getContractsInfo(employeeContracts, allContracts) {
       workTypes: _map(result, (r) => {
         return r.workTypes.join(', ');
       }).join(', ')
+    };
+  } else {
+    // employees not on a contract are assumed to be remote
+    toReturn = {
+      workLocations: getEmployeeCurrentAddress(employee),
+      workTypes: 'Remote'
     };
   }
   return toReturn;

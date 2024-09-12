@@ -51,7 +51,7 @@ import _forEach from 'lodash/forEach';
 import _find from 'lodash/find';
 import _findIndex from 'lodash/findIndex';
 import api from '@/shared/api';
-import { onBeforeUnmount, ref, inject, onBeforeMount } from 'vue';
+import { ref, inject } from 'vue';
 import { getOrgList, getProjectLocations } from '@/shared/contractUtils';
 import { useStore } from 'vuex';
 
@@ -60,20 +60,14 @@ const emitter = inject('emitter');
 const store = useStore();
 
 const model = ref(props.item[props.header.key]);
-const header = ref(props.header);
 const item = ref(props.item);
 const valid = ref(false);
 
-header.value.editing = true;
-
-onBeforeMount(() => {
-  emitter.emit(`editing-${props.type}-item`);
-});
-
-onBeforeUnmount(() => {
-  header.value.editing = false;
-});
-
+/**
+ * Gets the dropdown items for combobox and select components.
+ *
+ * @returns Array - An array of unique items
+ */
 function getDropdownItems() {
   let items = [];
   let key = props.header.key;
@@ -88,9 +82,12 @@ function getDropdownItems() {
     });
   }
   return items;
-}
+} // getDropdownItems
 
-async function saveItem() {
+/**
+ * Saves a contract/project item that is being edited
+ */
+function saveItem() {
   if (valid.value) {
     let key = props.header.key;
     let promise = null;
@@ -109,5 +106,5 @@ async function saveItem() {
     }
     emitter.emit('saved-contract-item', { key, item: item.value, promise });
   }
-}
+} // saveItem
 </script>

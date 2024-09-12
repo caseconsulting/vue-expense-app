@@ -1,3 +1,5 @@
+import _isEmpty from 'lodash/isEmpty';
+
 export const EMPLOYEE_ROLES = ['Admin', 'User', 'Intern', 'Manager'];
 export const PHONE_TYPES = ['Home', 'Cell', 'Work'];
 export const CASE_EMAIL_DOMAIN = '@consultwithcase.com';
@@ -149,6 +151,37 @@ export function getEmployeeByID(employeeId, employees) {
 } // getEmployeeByID
 
 /**
+ * Returns Employee's Current Address.
+ *
+ * @return String - current address.
+ */
+export function getEmployeeCurrentAddress(employee) {
+  let currentAddress = '';
+  if (!_isEmpty(employee.currentStreet)) {
+    if (!_isEmpty(employee.currentStreet2)) {
+      currentAddress += `${employee.currentStreet} ${employee.currentStreet2}, `;
+    } else {
+      currentAddress += `${employee.currentStreet}, `;
+    }
+  }
+  if (!_isEmpty(employee.currentCity)) {
+    currentAddress += `${employee.currentCity}, `;
+  }
+  if (!_isEmpty(employee.currentState)) {
+    currentAddress += `${employee.currentState} `;
+  }
+  if (!_isEmpty(employee.currentZIP)) {
+    currentAddress += `${employee.currentZIP} `;
+  }
+  if (currentAddress[currentAddress.length - 2] === ',') {
+    currentAddress = currentAddress.slice(0, -2);
+  } else {
+    currentAddress = currentAddress.slice(0, -1);
+  }
+  return currentAddress;
+} // getCurrentAddress
+
+/**
  * Returns an array of employees current contracts
  *
  * @param employeeId - employee ID to find contracts for
@@ -234,6 +267,7 @@ export default {
   firstAndLastName,
   nicknameAndLastName,
   getEmployeeByID,
+  getEmployeeCurrentAddress,
   getEmployeeCurrentContracts,
   getEmployeeCurrentProjects,
   selectedTagsHasEmployee
