@@ -108,13 +108,13 @@
               v-if="
                 editItem?.item?.id === item.id && editItem?.header?.key === header.key && editItem?.type === 'contract'
               "
-              :key="header + _random()"
+              :key="item[header.key]"
               :header="header"
               :item="item"
             ></contracts-edit-item>
             <contracts-info-item
               v-else
-              :key="_random() + header"
+              :key="item[header.title]"
               :header="header"
               :item="item"
               type="contract"
@@ -233,7 +233,6 @@
 </template>
 <script setup>
 import _findIndex from 'lodash/findIndex';
-import _random from 'lodash/random';
 import _filter from 'lodash/filter';
 import _cloneDeep from 'lodash/cloneDeep';
 import _merge from 'lodash/merge';

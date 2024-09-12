@@ -47,6 +47,7 @@
 </template>
 
 <script setup>
+import _cloneDeep from 'lodash/cloneDeep';
 import _forEach from 'lodash/forEach';
 import _find from 'lodash/find';
 import _findIndex from 'lodash/findIndex';
@@ -101,8 +102,9 @@ function saveItem() {
       let pIndex = _findIndex(contract.projects, (p) => p.id === item.value.id);
       item.value[key] = model.value;
       contract.projects[pIndex] = item.value;
-      _forEach(contract.projects, (p) => delete p.saveStatuses);
-      promise = api.updateAttribute(api.CONTRACTS, { id: contract.id, projects: contract.projects }, 'projects');
+      let projects = _cloneDeep(contract.projects);
+      _forEach(projects, (p) => delete p.saveStatuses);
+      promise = api.updateAttribute(api.CONTRACTS, { id: contract.id, projects: projects }, 'projects');
     }
     emitter.emit('saved-contract-item', { key, item: item.value, promise });
   }
