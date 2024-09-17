@@ -26,7 +26,9 @@
               class="px-1"
               icon=""
             >
-              <v-tooltip activator="parent" location="top"> Employee Notes </v-tooltip>
+              <v-tooltip activator="parent" location="top">
+                {{ notesTooltip }}
+              </v-tooltip>
               <v-icon color="white"> mdi-notebook </v-icon>
             </v-btn>
             <convert-employee-to-csv
@@ -277,6 +279,15 @@ const menuBtn = computed(() => {
     default:
       return 'Select Info';
   }
+});
+
+const notesTooltip = computed(() => {
+  let maxChars = 40;
+  let miscNotes = model.value.notes?.pages?.general?.misc;
+  if (!miscNotes) return 'Employee Notes';
+  let tooltip = miscNotes.substring(0, maxChars);
+  if (miscNotes.length > maxChars) tooltip += '...';
+  return tooltip;
 });
 
 /**

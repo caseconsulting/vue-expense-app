@@ -20,7 +20,7 @@
           "
         ></v-autocomplete>
       </v-col>
-      <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
+      <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
         <tags-filter v-model="tagsInfo" @update:modelValue="refreshDropdownItems()"></tags-filter>
       </v-col>
       <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
@@ -56,14 +56,45 @@
           {{ format(item.notes?.updated?.date, null, 'MM/DD/YYYY') || '' }}
         </p>
       </template>
-      <!-- Email Name Slot -->
-      <template v-slot:[`item.email`]="{ item }">
+      <!-- Desire to move -->
+      <template v-slot:[`item.notes.pages.career.desireToMove`]="{ item }">
         <p :class="{ inactive: item.workStatus <= 0 }" class="mb-0">
-          {{ item.email }}
+          {{ item.notes?.pages?.career?.desireToMove ? 'YES' : '' }}
         </p>
+      </template>
+      <!-- Kudo Date Slot -->
+      <template v-slot:[`item.notes.kudos`]="{ item }">
+        <p :class="{ inactive: item.workStatus <= 0 }" class="mb-0">
+          {{ getLastKudoDate(item.id) }}
+        </p>
+      </template>
+      <!-- Medical notes -->
+      <template v-slot:[`item.notes.pages.personal.medical`]="{ item }">
+        <p :class="{ inactive: item.workStatus <= 0 }" class="mb-0">
+          {{ item.notes?.pages?.personal?.medical ? 'YES' : '' }}
+        </p>
+      </template>
+      <!-- Family notes -->
+      <template v-slot:[`item.notes.pages.personal.familial`]="{ item }">
+        <p :class="{ inactive: item.workStatus <= 0 }" class="mb-0">
+          {{ item.notes?.pages?.personal?.familial ? 'YES' : '' }}
+        </p>
+      </template>
+      <!-- Buttons -->
+      <template #[`item.actions`]="{ item }">
+        <span>
+          <v-tooltip activator="parent" location="top" :text="getNotesTooltip(item)" />
+          <v-btn variant="text" icon="mdi-notebook" @click.stop="openNotebook(item)" />
+        </span>
       </template>
     </v-data-table>
     <!-- END EMPLOYEE TABLE -->
+    <employee-notes
+      v-if="focusedEmployee"
+      v-model="showEmployeeNotes"
+      :employee="focusedEmployee"
+      :key="focusedEmployee"
+    ></employee-notes>
   </div>
 </template>
 <script setup>
@@ -73,10 +104,12 @@ import { useRouter } from 'vue-router';
 import _forEach from 'lodash/forEach';
 import _filter from 'lodash/filter';
 import { employeeFilter } from '@/shared/filterUtils';
-import { format } from '@/shared/dateUtils';
+import { format, isAfter } from '@/shared/dateUtils';
+import api from '@/shared/api.js';
 import { getActive, getFullName, populateEmployeesDropdown } from '@/components/reports/reports-utils';
+import EmployeeNotes from '@/components/employee-beta/notes/EmployeeNotes.vue';
 import { selectedTagsHasEmployee } from '@/shared/employeeUtils';
-import { userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
+import { updateStoreExpenseTypes, updateStoreEmployees } from '@/utils/storeUtils';
 import TagsFilter from '@/components/shared/TagsFilter.vue';
 const emitter = inject('emitter');
 const store = useStore();
@@ -105,20 +138,26 @@ const headers = ref([
     key: 'notes.updated.date'
   },
   {
+    title: 'Last Kudo',
+    key: 'notes.kudos',
+    value: (item) => getLastKudoDate(item.id, false)
+  },
+  {
     title: 'Desires to Move?',
-    key: 'notes.career.desireToMove'
+    key: 'notes.pages.career.desireToMove'
   },
   {
     title: 'Medical Notes?',
-    key: 'notes.personal.medical'
+    key: 'notes.pages.personal.medical'
   },
-  // {
-  //   title: 'Last Kudo',
-  //   key: 'notes.kudos.custom'
-  // },
   {
-    title: 'Email',
-    key: 'email'
+    title: 'Family Notes?',
+    key: 'notes.pages.personal.familial'
+  },
+  {
+    title: 'Notes',
+    key: 'actions',
+    sortable: false
   }
 ]); // datatable headers
 const awardSearch = ref(null);
@@ -130,6 +169,10 @@ const tagsInfo = ref({
   selected: [],
   flipped: []
 });
+const focusedEmployee = ref(null);
+const showEmployeeNotes = ref(false);
+let kudos = ref({});
+let emptyKudos = {};
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -143,6 +186,7 @@ const tagsInfo = ref({
 onMounted(() => {
   employeesInfo.value = getActive(store.getters.employees); // default to filtered
   filteredEmployees.value = employeesInfo.value; // this one is shown
+  emptyKudos = Object.fromEntries(employeesInfo.value.map((e) => [e.id, undefined]));
   populateDropdowns(employeesInfo.value);
   buildAwardsColumns();
   if (localStorage.getItem('requestedFilter')) {
@@ -151,8 +195,25 @@ onMounted(() => {
     localStorage.removeItem('requestedFilter');
   }
 
+  // set default employee to not error notes modal
+  focusedEmployee.value = filteredEmployees.value[0];
+
   // initial set of table download data
   updateTableInfo(filteredEmployees.value);
+
+  // build kudos for all employees
+  buildKudos();
+
+  // emitter catches
+  emitter.on('saved-notes', ({ empId, notes }) => {
+    let empIndex = filteredEmployees.value.findIndex((e) => e.id == empId);
+    if (empIndex > -1) {
+      // update their notes info
+      filteredEmployees.value[empIndex].notes = notes;
+      // also update their last kudo date
+      buildKudos(empId);
+    }
+  });
 }); // created
 
 // |--------------------------------------------------|
@@ -160,6 +221,74 @@ onMounted(() => {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+function getLastKudoDate(employeeId, shouldFormat = true) {
+  let date = kudos.value[employeeId];
+  if (date === undefined) return '...';
+  if (date === null) return '';
+  return shouldFormat ? format(date, null, 'MM/DD/YYYY') : date;
+}
+
+function getNotesTooltip(empObj) {
+  let maxChars = 40;
+  let miscNotes = empObj.notes?.pages?.general?.misc;
+  if (!miscNotes) return 'Employee Notes';
+  let tooltip = miscNotes.substring(0, maxChars);
+  if (miscNotes.length > maxChars) tooltip += '...';
+  return tooltip;
+}
+
+/**
+ * Creates object of last kudo for each employee.
+ * eg { 'a1ac...': '2024-09-11' }
+ *
+ * @param empId (optional) - id of employee to update. if null, will calculate for all employees
+ */
+async function buildKudos(empId) {
+  if (empId === undefined) kudos.value = emptyKudos;
+
+  // fetch data while doing other things
+  let expenseTypes = store.getters.expenseTypes ?? (await updateStoreExpenseTypes());
+  let employees = store.getters.employees ?? (await updateStoreEmployees());
+
+  // helper that returns the most recent date
+  const mostRecent = (a, b, g = 'day') => {
+    let result;
+    if (!a || !b) result = a || b;
+    else result = isAfter(a, b, g) ? a : b;
+    return format(result, null, 'YYYY-MM-DD');
+  };
+
+  let employeesToBuild = empId ? [filteredEmployees.value.find((e) => e.id == empId)] : employees;
+  for (let e of employeesToBuild) {
+    // find from awards
+    for (let award of e.awards ?? []) {
+      kudos.value[e.id] = mostRecent(kudos.value[e.id], award.dateReceived);
+    }
+
+    // find from custom kudos
+    for (let kudo of e.notes?.pages?.kudos?.custom ?? []) {
+      kudos.value[e.id] = mostRecent(kudos.value[e.id], kudo.date);
+    }
+
+    // find from high fives
+    // get all high fives
+    let highFiveET = expenseTypes.find((et) => et.budgetName === 'High Five');
+    let highFives = await api.getAllExpenseTypeExpenses(highFiveET.id);
+    // filter down to only ones the user received
+    highFives = highFives.filter((hf) => hf.recipient === e.id);
+    // extract as kudo if it was reimbursed
+    for (let hf of highFives ?? []) {
+      if (hf.reimbursedDate) kudos.value[e.id] = mostRecent(kudos.value[e.id], hf.reimbursedDate);
+    }
+    if (kudos.value[e.id] === undefined) kudos.value[e.id] = null;
+  }
+}
+
+function openNotebook(employee) {
+  focusedEmployee.value = employee;
+  showEmployeeNotes.value = true;
+}
 
 /**
  * Gets all of the active awards for each employee and displays the column on the table.

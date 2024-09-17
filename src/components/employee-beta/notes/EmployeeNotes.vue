@@ -142,6 +142,7 @@ import { useStore } from 'vuex';
 import api from '@/shared/api';
 import { isMobile } from '@/utils/utils';
 import _cloneDeep from 'lodash/cloneDeep';
+import _isEqual from 'lodash/isEqual';
 
 const store = useStore();
 const emitter = inject('emitter');
@@ -237,7 +238,12 @@ function discard() {
  * @param manual whether or not the save was initiated manually
  */
 async function save(manual = false) {
-  if (manual) saving.value = true;
+  // if no changes, do nothing
+  if (oldNotes && _isEqual(notes.value, oldNotes)) return;
+
+  if (manual)
+    // set saving state
+    saving.value = true;
 
   // set new value
   let value = {
@@ -253,6 +259,9 @@ async function save(manual = false) {
 
   // also update the notes variable with the new updated value
   notes.value.updated = value.notes.updated;
+
+  // emit for anything that needs it
+  emitter.emit('saved-notes', { empId: props.employee.id, notes: notes.value });
 
   // inform user that plan was saved successfully
   saving.value = false;
@@ -292,7 +301,6 @@ function autosave() {
   if (saveTimer) clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
     save();
-    console.log('auto-saved');
   }, bufferTime);
 }
 
