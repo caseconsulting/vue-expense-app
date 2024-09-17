@@ -1,5 +1,5 @@
 <template>
-  <v-form class="d-flex align-center" v-model="valid" @keyup.enter="saveItem()">
+  <v-form class="d-flex align-center" v-model="valid" @submit.prevent @keyup.enter="saveItem()">
     <v-combobox
       v-if="props.header.type === 'combobox'"
       v-model="model"
