@@ -80,6 +80,7 @@ import { updateStoreEmployees, updateStoreExpenseTypes } from '@/utils/storeUtil
 import api from '@/shared/api';
 import { useStore } from 'vuex';
 import { isMobile } from '@/utils/utils';
+import _orderBy from 'lodash/orderBy';
 
 const store = useStore();
 const props = defineProps(['modelValue', 'user']);
@@ -147,6 +148,8 @@ async function buildKudos() {
     return a.date < b.date;
   });
 
+  kudos.value = _orderBy(kudos.value, 'date', 'desc');
+
   kudosLoading.value = false;
 }
 
@@ -186,7 +189,7 @@ function kudoText(kudo) {
 function addCustomKudo() {
   notes.value.custom.push({
     type: 'custom',
-    date: customKudo.value.date,
+    date: customKudo.value.date || getTodaysDate('YYYY-MM-DD'),
     title: customKudo.value.title
   });
   customKudo.value = { date: getTodaysDate('YYYY-MM-DD') };
