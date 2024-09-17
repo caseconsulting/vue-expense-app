@@ -94,7 +94,9 @@ function saveItem() {
     let promise = null;
     if (item.value.contractId) {
       // update contract
+      let idx = _findIndex(store.getters.contracts, (c) => c.id === item.value.id);
       item.value[key] = model.value;
+      store.getters.contracts[idx] = item.value;
       promise = api.updateAttribute(api.CONTRACTS, { id: item.value.id, [`${key}`]: item.value[key] }, key);
     } else {
       // update projects field

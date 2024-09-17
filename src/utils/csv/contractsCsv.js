@@ -16,9 +16,9 @@ export function convertContracts(contracts, employees) {
   contracts = _orderBy(contracts, ['primeName'], ['asc']);
   _forEach(contracts, (contract) => {
     tempContracts.push({
-      'Prime contractor': contract.primeName || '',
-      'Contract name': contract.contractName || '',
-      'Project name': '',
+      'Prime Contractor': contract.primeName || '',
+      'Contract Name': contract.contractName || '',
+      'Project Name': '',
       'Customer Org': contract.customerOrg || '',
       Directorate: contract.directorate || '',
       'Org 2': contract.org2 || '',
@@ -26,17 +26,17 @@ export function convertContracts(contracts, employees) {
       Location: contract.location || '',
       'Work Type': contract.workType || '',
       Status: contract.status || '',
-      'PoP-Start date': contract.popStartDate || '',
-      'PoP-End date': contract.popEndDate || '',
+      'PoP-Start Date': contract.popStartDate || '',
+      'PoP-End Date': contract.popEndDate || '',
       Description: contract.description || '',
       'Active Employees': '',
       'Past Employees': ''
     });
     _forEach(contract.projects, (project) => {
       tempContracts.push({
-        'Prime contractor': '',
-        'Contract name': '',
-        'Project name': project.projectName || '',
+        'Prime Contractor': '',
+        'Contract Name': '',
+        'Project Name': project.projectName || '',
         'Customer Org': project.customerOrg || '',
         Directorate: project.directorate || '',
         'Org 2': project.org2 || '',
@@ -44,8 +44,8 @@ export function convertContracts(contracts, employees) {
         Location: project.location || '',
         'Work Type': project.workType || '',
         Status: project.status || '',
-        'PoP-Start date': project.popStartDate || '',
-        'PoP-End date': project.popEndDate || '',
+        'PoP-Start Date': project.popStartDate || '',
+        'PoP-End Date': project.popEndDate || '',
         Description: project.description || '',
         'Active Employees': getCurrentProjectEmployees(contract, project, employees),
         'Past Employees': getPassedProjectEmployees(contract, project, employees)
