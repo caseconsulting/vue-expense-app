@@ -130,7 +130,7 @@ import _filter from 'lodash/filter';
 import _find from 'lodash/find';
 import _uniq from 'lodash/uniq';
 import { employeeFilter } from '@/shared/filterUtils';
-import { getEmployeeCurrentAddress, selectedTagsHasEmployee } from '@/shared/employeeUtils';
+import { selectedTagsHasEmployee } from '@/shared/employeeUtils';
 import { getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
 import { onMounted, ref, inject, watch } from 'vue';
 import { useStore } from 'vuex';
@@ -271,7 +271,7 @@ function buildContractsColumn() {
     }
     if (!hasCurrentContract) {
       workTypes += 'Remote';
-      locations += userRoleIsAdmin() || userRoleIsManager() ? getEmployeeCurrentAddress(currentEmp) : '';
+      locations += userRoleIsAdmin() || userRoleIsManager() ? getLocation(currentEmp) : '';
     }
     currentEmp.contractNames = contractNames;
     currentEmp.primeNames = primeNames;
@@ -279,6 +279,16 @@ function buildContractsColumn() {
     currentEmp.workTypes = workTypes;
   });
 } // buildContractsColumn
+
+/**
+ * Gets the city and state of an employee
+ *
+ * @param employee - The employee object
+ */
+function getLocation(employee) {
+  if (!employee.currentCity || !employee.currentState) return '';
+  else return `${employee.currentCity}, ${employee.currentState}`;
+} // getLocation
 
 /**
  * handles click event of the employee table entry
