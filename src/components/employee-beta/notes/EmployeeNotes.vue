@@ -158,7 +158,7 @@ const saving = ref(false);
 const saveButtonText = ref('Save');
 
 // blank notes template
-let notes = ref({
+const notesTemplate = {
   updated: {
     author: '',
     date: ''
@@ -184,7 +184,8 @@ let notes = ref({
       custom: []
     }
   }
-});
+};
+let notes = ref(notesTemplate);
 // save old version of notes for the ability to discard
 let oldNotes = null;
 
@@ -228,7 +229,7 @@ const getLastUpdatedText = computed(() => {
  * Discards current changes and resets them
  */
 function discard() {
-  notes.value = _cloneDeep(oldNotes);
+  notes.value = _cloneDeep(oldNotes ?? notesTemplate);
   emitter.emit('close-notes');
 }
 
