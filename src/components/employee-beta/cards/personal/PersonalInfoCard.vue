@@ -154,22 +154,13 @@ function getPlaceOfBirth() {
  * @return String - Current Address.
  */
 function getCurrentAddress() {
-  let address = '';
-  if (!isEmpty(props.model.currentStreet)) {
-    address += `${props.model.currentStreet}, `;
-  }
-  if (!isEmpty(props.model.currentCity)) {
-    address += `${props.model.currentCity}, `;
-  }
-  if (!isEmpty(props.model.currentState)) {
-    address += `${props.model.currentState} `;
-  }
-  if (!isEmpty(props.model.currentZIP)) {
-    address += `${props.model.currentZIP}, `;
-  }
-
-  address = address.slice(0, -2);
-  return address;
+  let address = [];
+  if (!isEmpty(props.model.currentStreet)) address.push(props.model.currentStreet);
+  if (!isEmpty(props.model.currentStreet2)) address.push(props.model.currentStreet2);
+  if (!isEmpty(props.model.currentCity)) address.push(props.model.currentCity);
+  if (!isEmpty(props.model.currentState)) address.push(props.model.currentState);
+  if (!isEmpty(props.model.currentZIP)) address.push(props.model.currentZIP);
+  return address.join(', ');
 } // getCurrentAddress
 
 /**
