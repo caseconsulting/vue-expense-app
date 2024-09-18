@@ -247,9 +247,13 @@ function getNotesTooltip(empObj) {
 async function buildKudos(empId) {
   if (empId === undefined) kudos.value = emptyKudos;
 
-  // fetch data while doing other things
-  let expenseTypes = store.getters.expenseTypes ?? (await updateStoreExpenseTypes());
-  let employees = store.getters.employees ?? (await updateStoreEmployees());
+  // fetch data
+  await Promise.all([
+    store.getters.expenseTypes ? '' : updateStoreExpenseTypes(),
+    store.getters.employees ? '' : updateStoreEmployees()
+  ]);
+  let expenseTypes = store.getters.expenseTypes;
+  let employees = store.getters.employees;
 
   // helper that returns the most recent date
   const mostRecent = (a, b, g = 'day') => {
