@@ -8,7 +8,7 @@
         auto-grow
         rows="2"
         max-rows="8"
-        class="w-100"
+        class="w-100 pt-1"
       ></v-textarea>
     </v-row>
     <v-row>

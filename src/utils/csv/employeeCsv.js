@@ -97,11 +97,11 @@ export function convertEmployees(employees, contracts, tags, includeEeoData = fa
         data = {
           ...data,
           'Admin filled out form?': employee.eeoAdminHasFilledOutEeoForm ? 'Yes' : 'No',
-          'Declined to self-identify?': employee.declinedToSelfIdentify ? 'Yes' : 'No',
+          'Declined to self-identify?': employee.eeoDeclineSelfIdentify ? 'Yes' : 'No',
           Gender: employee.eeoGender?.text,
           'Has Disability?': employee.eeoHasDisability ? 'Yes' : 'No',
-          'Hispanic or Latino?': employee.eeoHispanicOrLatino ? 'Yes' : 'No',
-          'Protected Veteran?': employee.eeoProtectedVeteran ? 'Yes' : 'No',
+          'Hispanic or Latino?': employee.eeoHispanicOrLatino.value ? 'Yes' : 'No',
+          'Protected Veteran?': employee.eeoIsProtectedVeteran ? 'Yes' : 'No',
           'Job Category': employee.eeoJobCategory?.text,
           'Race/Ethnicity': employee.eeoRaceOrEthnicity?.text
         };

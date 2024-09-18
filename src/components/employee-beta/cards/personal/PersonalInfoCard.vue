@@ -155,11 +155,8 @@ function getPlaceOfBirth() {
  */
 function getCurrentAddress() {
   let address = [];
-  if (!isEmpty(props.model.currentStreet)) address.push(props.model.currentStreet);
-  if (!isEmpty(props.model.currentStreet2)) address.push(props.model.currentStreet2);
-  if (!isEmpty(props.model.currentCity)) address.push(props.model.currentCity);
-  if (!isEmpty(props.model.currentState)) address.push(props.model.currentState);
-  if (!isEmpty(props.model.currentZIP)) address.push(props.model.currentZIP);
+  let toAdd = ['currentStreet', 'currentStreet2', 'currentCity', 'currentState', 'currentZIP'];
+  for (let item in toAdd) if (!isEmpty(props.model[item])) address.push(props.model[item]);
   return address.join(', ');
 } // getCurrentAddress
 

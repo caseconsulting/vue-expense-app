@@ -6,7 +6,7 @@
       auto-grow
       rows="15"
       max-rows="15"
-      class="w-100"
+      class="w-100 pt-1"
       whatever
     ></v-textarea>
   </div>

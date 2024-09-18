@@ -239,12 +239,23 @@ function discard() {
  * @param manual whether or not the save was initiated manually
  */
 async function save(manual = false) {
-  // if no changes, do nothing
-  if (oldNotes && _isEqual(notes.value, oldNotes)) return;
+  // update button to let the user know that the notes saved
+  function giveSaveFeedback() {
+    saving.value = false;
+    saveButtonText.value = 'Saved!';
+    setTimeout(() => {
+      saveButtonText.value = 'Save';
+    }, 2500);
+  }
 
-  if (manual)
-    // set saving state
-    saving.value = true;
+  // set saving state
+  if (manual) saving.value = true;
+
+  // if no changes, do nothing
+  if (oldNotes && _isEqual(notes.value, oldNotes)) {
+    giveSaveFeedback();
+    return;
+  }
 
   // set new value
   let value = {
@@ -264,12 +275,8 @@ async function save(manual = false) {
   // emit for anything that needs it
   emitter.emit('saved-notes', { empId: props.employee.id, notes: notes.value });
 
-  // inform user that plan was saved successfully
-  saving.value = false;
-  saveButtonText.value = 'Saved!';
-  setTimeout(() => {
-    saveButtonText.value = 'Save';
-  }, 2500);
+  // update button
+  giveSaveFeedback();
 }
 
 // fetch notes from the database, if existing
