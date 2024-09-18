@@ -1116,6 +1116,6 @@ watch(
   display: block;
   font-size: 11px;
   line-height: 1.2;
-  word-break: break-all;
+  overflow: hidden;
 }
 </style>
