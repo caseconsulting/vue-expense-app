@@ -272,7 +272,7 @@ async function prepareSubmit() {
       let newContract = _cloneDeep(contract);
       if (newContract.contractName || newContract.primeName) {
         newContract.contractId = _find(
-          contracts,
+          contracts.value,
           (c) => c.contractName === newContract.contractName && c.primeName === newContract.primeName
         ).id;
       }
