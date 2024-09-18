@@ -2,7 +2,7 @@
   <div>
     <v-container fluid class="px-1 px-md-4">
       <v-row>
-        <v-col cols="12" xl="3" lg="3" md="3" sm="12" class="my-0 py-0">
+        <v-col cols="12" xl="2" lg="2" md="3" sm="12" class="my-0 py-0">
           <v-autocomplete
             id="employeesSearch"
             v-model="search"
@@ -21,7 +21,7 @@
             "
           ></v-autocomplete>
         </v-col>
-        <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
+        <v-col cols="6" xl="2" lg="2" md="3" sm="6" class="my-0 py-0">
           <v-autocomplete
             v-model="contractSearch"
             :items="contractsDropDown"
@@ -34,7 +34,7 @@
           >
           </v-autocomplete>
         </v-col>
-        <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
+        <v-col cols="6" xl="2" lg="2" md="3" sm="6" class="my-0 py-0">
           <v-autocomplete
             v-model="primeSearch"
             :items="primesDropDown"
@@ -46,10 +46,34 @@
             @click:clear="primeSearch = null"
           ></v-autocomplete>
         </v-col>
-        <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
+        <v-col cols="6" xl="2" lg="2" md="3" sm="6" class="my-0 py-0">
+          <v-autocomplete
+            v-model="locationSearch"
+            :items="locationsDropDown"
+            label="Search By Location"
+            variant="underlined"
+            clearable
+            auto-select-first
+            @update:model-value="refreshDropdownItems()"
+            @click:clear="locationSearch = null"
+          ></v-autocomplete>
+        </v-col>
+        <v-col cols="6" xl="2" lg="2" md="3" sm="6" class="my-0 py-0">
+          <v-autocomplete
+            v-model="workTypeSearch"
+            :items="workTypesDropDown"
+            label="Search By Work Type"
+            variant="underlined"
+            clearable
+            auto-select-first
+            @update:model-value="refreshDropdownItems()"
+            @click:clear="workTypeSearch = null"
+          ></v-autocomplete>
+        </v-col>
+        <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="6" xl="2" lg="2" md="3" sm="6" class="my-0 py-0">
           <tags-filter v-model="tagsInfo" @update:modelValue="refreshDropdownItems()"></tags-filter>
         </v-col>
-        <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
+        <v-col cols="6" xl="2" lg="2" md="2" sm="6" class="my-0 py-0">
           <v-checkbox v-model="showInactiveEmployees" label="Show Inactive Users"></v-checkbox>
         </v-col>
       </v-row>
@@ -101,10 +125,10 @@
 </template>
 
 <script setup>
-import _map from 'lodash/map';
-import _compact from 'lodash/compact';
 import _forEach from 'lodash/forEach';
 import _filter from 'lodash/filter';
+import _find from 'lodash/find';
+import _uniq from 'lodash/uniq';
 import { employeeFilter } from '@/shared/filterUtils';
 import { selectedTagsHasEmployee } from '@/shared/employeeUtils';
 import { getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
@@ -145,12 +169,23 @@ const headers = ref([
     key: 'primeNames'
   },
   {
+    title: 'Location',
+    key: 'locations',
+    width: '200px'
+  },
+  {
+    title: 'Work Type',
+    key: 'workTypes'
+  },
+  {
     title: 'Email',
     key: 'email'
   }
 ]); // datatable headers
 const itemsPerPage = ref(-1);
 const noContractPlaceholder = ref(' — No Contract — ');
+const locationSearch = ref(null);
+const locationsDropDown = ref([]);
 const primeSearch = ref(null);
 const primesDropDown = ref([]);
 const search = ref(null); // query text for datatable search fiel)
@@ -160,6 +195,8 @@ const tagsInfo = ref({
   selected: [],
   flipped: []
 });
+const workTypeSearch = ref(null);
+const workTypesDropDown = ref([]);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -196,9 +233,12 @@ onMounted(() => {
  */
 function buildContractsColumn() {
   employeesInfo.value.forEach((currentEmp) => {
+    let hasCurrentContract = false;
+    let contractNames = '';
+    let primeNames = '';
+    let locations = '';
+    let workTypes = '';
     if (currentEmp.contracts) {
-      let contractNames = '';
-      let primeNames = '';
       currentEmp.contracts.forEach((currentCon) => {
         // find current contracts
         let current = false;
@@ -206,11 +246,18 @@ function buildContractsColumn() {
           currentCon.projects.forEach((currProj) => {
             if (!currProj.endDate) {
               current = true;
+              let contract = store.getters.contracts.find((c) => c.id === currentCon.contractId);
+              let project = contract?.projects?.find((p) => p.id === currProj.projectId);
+              if (project) {
+                if (project.location) locations += `${project.location} & `;
+                if (project.workType) workTypes += `${project.workType} & `;
+              }
             }
           });
         }
         // add current contracts
         if (current) {
+          hasCurrentContract = true;
           let contract = store.getters.contracts.find((c) => c.id === currentCon.contractId);
           contractNames += `${contract.contractName} & `;
           primeNames += `${contract.primeName} & `;
@@ -219,11 +266,29 @@ function buildContractsColumn() {
       // remove & at the end
       contractNames = contractNames.slice(0, -2);
       primeNames = primeNames.slice(0, -2);
-      currentEmp.contractNames = contractNames;
-      currentEmp.primeNames = primeNames;
+      locations = locations.slice(0, -2);
+      workTypes = workTypes.slice(0, -2);
     }
+    if (!hasCurrentContract) {
+      workTypes += 'Remote';
+      locations += userRoleIsAdmin() || userRoleIsManager() ? getLocation(currentEmp) : '';
+    }
+    currentEmp.contractNames = contractNames;
+    currentEmp.primeNames = primeNames;
+    currentEmp.locations = locations;
+    currentEmp.workTypes = workTypes;
   });
 } // buildContractsColumn
+
+/**
+ * Gets the city and state of an employee
+ *
+ * @param employee - The employee object
+ */
+function getLocation(employee) {
+  if (!employee.currentCity || !employee.currentState) return '';
+  else return `${employee.currentCity}, ${employee.currentState}`;
+} // getLocation
 
 /**
  * handles click event of the employee table entry
@@ -235,59 +300,37 @@ function handleClick(_, { item }) {
 } //handleClick
 
 /**
- * Populate contracts and primes dropdown items that match the searches.
+ * Populate contracts, primes, locations, and work types dropdown items that match the searches.
  *
- * @param employees - array of employees for dropdown and to get contracts
  */
-function populateContractsAndPrimesDropdown(employees) {
-  //resets dropdowns after each query
+function populateOtherDropdowns() {
   contractsDropDown.value = [];
   primesDropDown.value = [];
-
-  let origContracts = _map(employees, (employee) => employee.contracts); // extract contracts
-  let employeesContracts = _compact(origContracts); // remove falsey values
-
-  // if there were any employees without a contract they would have been filtered out
-  // and we want to show No Contract as an option in the dropdown
-  if (origContracts.length !== employeesContracts.length) {
-    contractsDropDown.value.push(noContractPlaceholder.value);
-  }
-
-  // loop employees
-  _forEach(employeesContracts, (contracts) => {
-    // loop contracts
-    _forEach(contracts, (contract) => {
-      // loop through projects to test if contract is current
-      // (was.value added to make sure only current contracts/primes were listed in Reports autocomplete dropdowns)
-      _forEach(contract, (projects) => {
-        // loop project
-        _forEach(projects, (project) => {
-          if (project.presentDate) {
-            let fullContract = store.getters.contracts.find((c) => c.id === contract.contractId);
-            if (contract.value) {
-              // limit the prime dropdown to only those that belong to the contract
-              if (fullContract.contractName === contractSearch.value) {
-                contractsDropDown.value.push(fullContract.contractName);
-                primesDropDown.value.push(fullContract.primeName);
-              }
-            } else if (primeSearch.value) {
-              // limit the contract dropdown to only those that belong to the prime
-              if (fullContract.primeName === primeSearch.value) {
-                contractsDropDown.value.push(fullContract.contractName);
-                primesDropDown.value.push(primeSearch.value);
-              }
-            } else {
-              contractsDropDown.value.push(fullContract.contractName); // add contract name
-              primesDropDown.value.push(fullContract.primeName); // add contract prime
-            }
-          }
-        });
+  locationsDropDown.value = [];
+  workTypesDropDown.value = [];
+  if (filteredEmployees.value?.length === _filter(store.getters.employees, (e) => e.workStatus !== 0).length)
+    contractsDropDown.value.push(noContractPlaceholder.value); // add placeholder if no one has been filtered out
+  _forEach(filteredEmployees.value, (e) => {
+    _forEach(e.contracts, (c) => {
+      // get actual contract from employee contract id
+      let contract = _find(store.getters.contracts, (contract) => contract.id === c.contractId);
+      _forEach(c.projects, (p) => {
+        // get actual project from employee project id
+        let project = _find(contract.projects, (project) => project.id === p.projectId);
+        if (!p.endDate) {
+          contractsDropDown.value.push(contract.contractName);
+          primesDropDown.value.push(contract.primeName);
+          if (project?.location) locationsDropDown.value.push(project.location);
+          if (project?.workType) workTypesDropDown.value.push(project.workType);
+        }
       });
     });
   });
-  contractsDropDown.value = Array.from(new Set(contractsDropDown.value));
-  primesDropDown.value = Array.from(new Set(primesDropDown.value));
-} // populateContractsAndPrimesDropdown
+  contractsDropDown.value = _uniq(contractsDropDown.value);
+  primesDropDown.value = _uniq(primesDropDown.value);
+  locationsDropDown.value = _uniq(locationsDropDown.value);
+  workTypesDropDown.value = _uniq(workTypesDropDown.value);
+} // populateOtherDropdowns
 
 /**
  * Populate all dropdown items.
@@ -297,7 +340,7 @@ function populateContractsAndPrimesDropdown(employees) {
 function populateDropdowns(emps) {
   // refresh the employees autocomplete list to be those that match the query
   employees.value = populateEmployeesDropdown(emps);
-  populateContractsAndPrimesDropdown(emps);
+  populateOtherDropdowns();
 } // populateDropdowns
 
 /**
@@ -310,6 +353,12 @@ function refreshDropdownItems() {
   }
   if (primeSearch.value) {
     searchPrimes();
+  }
+  if (locationSearch.value) {
+    searchLocations();
+  }
+  if (workTypeSearch.value) {
+    searchWorkTypes();
   }
   if (search.value) {
     filteredEmployees.value = _filter(filteredEmployees.value, (employee) => {
@@ -329,29 +378,16 @@ function refreshDropdownItems() {
  * Clears the other search forms and searches the table by contract
  */
 function searchContract() {
-  if (contractSearch.value) {
-    if (primeSearch.value) {
-      filteredEmployees.value = _filter(employeesInfo.value, (employee) => {
-        if (employee.contractNames) {
-          return (
-            employee.contractNames.split(' & ').findIndex((element) => element.includes(contractSearch.value)) > -1 &&
-            employee.primeNames.split(' & ').findIndex((element) => element.includes(primeSearch.value)) > -1
-          );
-        } else return false;
-      });
-    } else if (contractSearch.value === noContractPlaceholder.value) {
-      filteredEmployees.value = _filter(employeesInfo.value, (employee) => {
-        return !employee.contractNames;
-      });
-    } else {
-      filteredEmployees.value = _filter(employeesInfo.value, (employee) => {
-        if (employee.contractNames) {
-          return (
-            employee.contractNames.split(' & ').findIndex((element) => element.includes(contractSearch.value)) > -1
-          );
-        } else return false;
-      });
-    }
+  if (contractSearch.value === noContractPlaceholder.value) {
+    filteredEmployees.value = _filter(filteredEmployees.value, (employee) => {
+      return !employee.contractNames;
+    });
+  } else {
+    filteredEmployees.value = _filter(filteredEmployees.value, (employee) => {
+      if (employee.contractNames) {
+        return employee.contractNames.split(' & ').findIndex((element) => element.includes(contractSearch.value)) > -1;
+      } else return false;
+    });
   }
 } // searchContract
 
@@ -359,25 +395,38 @@ function searchContract() {
  * Clears the other search forms and searches the table by prime
  */
 function searchPrimes() {
-  if (primeSearch.value) {
-    if (contractSearch.value) {
-      filteredEmployees.value = _filter(employeesInfo.value, (employee) => {
-        if (employee.primeNames) {
-          return (
-            employee.contractNames.split(' & ').findIndex((element) => element.includes(contractSearch.value)) > -1 &&
-            employee.primeNames.split(' & ').findIndex((element) => element.includes(primeSearch.value)) > -1
-          );
-        } else return false;
-      });
-    } else {
-      filteredEmployees.value = _filter(employeesInfo.value, (employee) => {
-        if (employee.primeNames) {
-          return employee.primeNames.split(' & ').findIndex((element) => element.includes(primeSearch.value)) > -1;
-        } else return false;
-      });
-    }
-  }
+  filteredEmployees.value = _filter(filteredEmployees.value, (employee) => {
+    if (employee.primeNames) {
+      return employee.primeNames.split(' & ').findIndex((element) => element.includes(primeSearch.value)) > -1;
+    } else return false;
+  });
 } // searchPrimes
+
+/**
+ * Clears the other search forms and searches the table by location
+ */
+function searchLocations() {
+  filteredEmployees.value = _filter(filteredEmployees.value, (employee) => {
+    if (employee.locations) {
+      return employee.locations.split(' & ').findIndex((element) => element.includes(locationSearch.value)) > -1;
+    } else {
+      return false;
+    }
+  });
+} // searchLocations
+
+/**
+ * Clears the other search forms and searches the table by work type
+ */
+function searchWorkTypes() {
+  filteredEmployees.value = _filter(filteredEmployees.value, (employee) => {
+    if (employee.workTypes) {
+      return employee.workTypes.split(' & ').findIndex((element) => element.includes(workTypeSearch.value)) > -1;
+    } else {
+      return false;
+    }
+  });
+} // searchWorkTypes
 
 /**
  * Emit new data for tab.value
@@ -386,7 +435,7 @@ function searchPrimes() {
  */
 function updateTableDownload(event) {
   emitter.emit('reports-table-update', { tab: 'contracts', table: event, headers: headers });
-}
+} // updateTableDownload
 
 // |--------------------------------------------------|
 // |                                                  |

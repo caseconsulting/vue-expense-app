@@ -86,6 +86,7 @@
 
 /**
  * @typedef {Object} PhoneNumber
+ * @typedef {Object} NotesObject
  * @property {string} number
  * @property {boolean} private
  * @property {string} type
@@ -250,6 +251,9 @@ export class Employee {
 
     /** @type {PhoneNumber[]} */
     this.privatePhoneNumbers = properties.privatePhoneNumbers ?? [];
+
+    /** @type {NotesObject[]} */
+    this.notes = properties.notes ?? [];
 
     // place of birth fields
     /** @type {string} */

@@ -4,24 +4,19 @@
       <v-card color="#bc3825">
         <v-card-title class="d-flex align-center header_style">
           <h2 class="text-white">Contracts</h2>
+          <v-spacer />
+          <v-btn class="mr-3" :disabled="!store.getters.contracts" @click="toggleContractForm = true">
+            add contract <v-icon end> mdi-file-document-plus </v-icon>
+          </v-btn>
+          <!-- Download contracts CSV button -->
+          <convert-contracts-to-csv
+            :mid-action="midAction"
+            :contracts="store.getters.contracts"
+            :employees="store.getters.employees"
+          />
         </v-card-title>
       </v-card>
-      <v-container fluid class="px-0 px-md-4">
-        <v-btn
-          :disabled="!store.getters.contracts"
-          :size="isMobile() ? 'small' : 'default'"
-          class="my-2 mr-2"
-          @click="toggleContractForm = true"
-        >
-          Create a contract <v-icon end> mdi-file-document-plus </v-icon>
-        </v-btn>
-        <!-- Download contracts CSV button -->
-        <convert-contracts-to-csv
-          :mid-action="midAction"
-          :contracts="store.getters.contracts"
-          :employees="store.getters.employees"
-        />
-
+      <v-container fluid class="px-0 px-md-2">
         <contracts-page-loader v-if="loading" />
         <contracts-table v-else />
 

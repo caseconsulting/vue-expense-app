@@ -1,4 +1,53 @@
 import _forEach from 'lodash/forEach';
+import store from '../../store/index';
+
+/**
+ * Gets a list of orgs from a sepcific level from all contracts/projects.
+ * Example: field = 'directorate' orgs = {customerOrg: 'Mission Center', org2: 'LEM'}
+ * This will return all directorate orgs from contracts and projects that also contain customerOrg = 'Mission Center' AND org2 = 'LEM'
+ *
+ * @param {String} field - The org level (customerOrg, directorate, org2, or org3)
+ * * @param {Object} orgs - The orgs (customerOrg, directorate, org2, org3) this should NOT include what is in 'field' param
+ * @returns Array - The list of orgs from 'field' level
+ */
+export function getOrgList(field, orgs) {
+  const { customerOrg, directorate, org2, org3 } = orgs || {};
+  let set = new Set();
+  _forEach(store.getters.contracts, (c) => {
+    if (
+      (!customerOrg || customerOrg === c.customerOrg) &&
+      (!directorate || directorate === c.directorate) &&
+      (!org2 || org2 === c.org2) &&
+      (!org3 || org3 === c.org3)
+    )
+      if (c[field]) set.add(c[field]);
+    _forEach(c.projects, (p) => {
+      if (
+        (!customerOrg || customerOrg === p.customerOrg) &&
+        (!directorate || directorate === p.directorate) &&
+        (!org2 || org2 === p.org2) &&
+        (!org3 || org3 === p.org3)
+      )
+        if (p[field]) set.add(p[field]);
+    });
+  });
+  return Array.from(set);
+} // getOrgList
+
+/**
+ * Gets all project locations.
+ *
+ * @returns Array - The list of unique project locations
+ */
+export function getProjectLocations() {
+  let set = new Set();
+  _forEach(store.getters.contracts, (c) => {
+    _forEach(c.projects, (p) => {
+      if (p.location) set.add(p.location);
+    });
+  });
+  return Array.from(set);
+} // getProjectLocations
 
 /**
  * Gets the projects current employees in the form of a list.
@@ -62,6 +111,7 @@ export function getProject(contractId, projectId, contracts) {
 } // getProject
 
 export default {
+  getOrgList,
   getProjectCurrentEmployees,
   getProjectPastEmployees,
   getProject

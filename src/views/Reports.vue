@@ -90,6 +90,7 @@ import ReportsForeignLanguages from '@/components/reports/ReportsForeignLanguage
 import ReportsJobRoles from '@/components/reports/ReportsJobRoles.vue';
 import ReportsTechnologies from '@/components/reports/ReportsTechnologies.vue';
 import ReportsSecurityInfo from '@/components/reports/ReportsSecurityInfo.vue';
+import ReportsEmployeeNotes from '@/components/reports/ReportsEmployeeNotes.vue';
 import { updateStoreEmployees, updateStoreContracts, updateStoreTags } from '@/utils/storeUtils';
 import { isMobile, userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
 import { getEmployeeCurrentProjects } from '@/shared/employeeUtils';
@@ -152,6 +153,11 @@ const tabs = shallowRef([
     key: 'securityInfo',
     title: 'Security Info',
     component: ReportsSecurityInfo
+  },
+  {
+    key: 'employeeNotes',
+    title: 'Employee Notes',
+    component: ReportsEmployeeNotes
   }
 ]);
 const props = ref();

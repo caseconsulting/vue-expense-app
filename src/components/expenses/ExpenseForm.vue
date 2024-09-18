@@ -58,6 +58,15 @@
           class="form_padding"
         ></v-autocomplete>
 
+        <!-- Expense Type Description -->
+        <div
+          v-if="selectedExpenseType"
+          class="d-flex align-center pa-1 mt-1 text-caption text-grey-darken-2 bg-blue-lighten-5 border-dashed border-thin rounded-sm"
+        >
+          <v-icon class="mr-1">mdi-information-slab-box-outline</v-icon>
+          {{ selectedExpenseType.description }}
+        </div>
+
         <!-- Category -->
         <v-select
           variant="underlined"

@@ -8,6 +8,7 @@ import _map from 'lodash/map';
 import _isEmpty from 'lodash/isEmpty';
 import _sortBy from 'lodash/sortBy';
 import { difference, format, getTodaysDate, minimum } from '@/shared/dateUtils';
+import { getEmployeeCurrentAddress } from '@/shared/employeeUtils.js';
 import csvUtils from './baseCsv.js';
 
 /**
@@ -49,7 +50,7 @@ export function convertEmployees(employees, contracts, tags, includeEeoData = fa
   _forEach(employees, (employee) => {
     try {
       let placeOfBirth = [employee.city, employee.st, employee.country];
-      let contractsPrimesProjects = getContractPrimeProject(employee.contracts, contracts);
+      let contractsInfo = getContractsInfo(employee, contracts);
       let clearanceData = getClearancesData(employee.clearances);
       let data = {
         // NOTE: if you change this, please also change in the catch{} below
@@ -80,9 +81,11 @@ export function convertEmployees(employees, contracts, tags, includeEeoData = fa
         'Adjudication Dates': clearanceData.adjudicationDates || '',
         'Badge Number': clearanceData.badgeNum || '',
         'Badge Expiration Date': clearanceData.badgeExpDate || '',
-        Contracts: contractsPrimesProjects.contracts || '',
-        Primes: contractsPrimesProjects.primes || '',
-        Projects: contractsPrimesProjects.projects || '',
+        Contracts: contractsInfo.contracts || '',
+        Primes: contractsInfo.primes || '',
+        Projects: contractsInfo.projects || '',
+        'Work Locations': contractsInfo.workLocations || '',
+        'Work Types': contractsInfo.workTypes || '',
         'Customer Org': filterUndefined(employee.customerOrgExp, getCustomerOrgExp) || '',
         Education: filterUndefined(employee.education, getEducation) || '',
         'Job Experience': filterUndefined(employee.companies, getCompanies) || '',
@@ -94,11 +97,11 @@ export function convertEmployees(employees, contracts, tags, includeEeoData = fa
         data = {
           ...data,
           'Admin filled out form?': employee.eeoAdminHasFilledOutEeoForm ? 'Yes' : 'No',
-          'Declined to self-identify?': employee.declinedToSelfIdentify ? 'Yes' : 'No',
+          'Declined to self-identify?': employee.eeoDeclineSelfIdentify ? 'Yes' : 'No',
           Gender: employee.eeoGender?.text,
           'Has Disability?': employee.eeoHasDisability ? 'Yes' : 'No',
-          'Hispanic or Latino?': employee.eeoHispanicOrLatino ? 'Yes' : 'No',
-          'Protected Veteran?': employee.eeoProtectedVeteran ? 'Yes' : 'No',
+          'Hispanic or Latino?': employee.eeoHispanicOrLatino.value ? 'Yes' : 'No',
+          'Protected Veteran?': employee.eeoIsProtectedVeteran ? 'Yes' : 'No',
           'Job Category': employee.eeoJobCategory?.text,
           'Race/Ethnicity': employee.eeoRaceOrEthnicity?.text
         };
@@ -335,20 +338,25 @@ export function getProjectLengthInYears(project) {
  *
  * @param employeeContracts - An array of objects.
  * @param allContracts - the contracts from DyanmoDB to connect employee contract IDs to
+ * @param
  * @return String - contract
  */
-export function getContractPrimeProject(employeeContracts, allContracts) {
+export function getContractsInfo(employee, allContracts) {
   let result = [];
   let toReturn = {};
   let allProjects = allContracts.map((c) => c.projects).flat();
-  if (employeeContracts) {
-    _forEach(employeeContracts, (contract) => {
+  if (employee.contracts) {
+    _forEach(employee.contracts, (contract) => {
       let earliestDate = getTodaysDate(); // keep track of earliest start date
       // create array of project strings
       let projects = [];
+      let workLocations = [];
+      let workTypes = [];
       _forEach(contract.projects, (project) => {
         let p = allProjects.find((p) => p.id === project.projectId);
         projects.push(`${p.projectName} - ${(getProjectLengthInYears(project) / 12).toFixed(1)} years`);
+        workLocations.push(p.location || 'No Location');
+        workTypes.push(p.workType || 'No Work Type');
         let endDate = format(project.endDate || getTodaysDate(), null, 'YYYY-MM-DD');
         earliestDate = minimum([earliestDate, endDate]);
       });
@@ -357,6 +365,8 @@ export function getContractPrimeProject(employeeContracts, allContracts) {
       result.push({
         contract: { name: c.contractName, prime: c.primeName },
         projects: projects,
+        workLocations: workLocations,
+        workTypes: workTypes,
         d: format(earliestDate, null, 'YYYYMMDD')
       });
     });
@@ -372,11 +382,23 @@ export function getContractPrimeProject(employeeContracts, allContracts) {
       }).join(', '),
       projects: _map(result, (r) => {
         return r.projects.join(', ');
+      }).join(', '),
+      workLocations: _map(result, (r) => {
+        return r.workLocations.join(', ');
+      }).join(', '),
+      workTypes: _map(result, (r) => {
+        return r.workTypes.join(', ');
       }).join(', ')
+    };
+  } else {
+    // employees not on a contract are assumed to be remote
+    toReturn = {
+      workLocations: getEmployeeCurrentAddress(employee),
+      workTypes: 'Remote'
     };
   }
   return toReturn;
-} // getContracts
+} // getContractsInfo
 
 /**
  * Returns experience data for employee
@@ -561,7 +583,7 @@ export default {
   getClearancesData,
   getContractLengthInYears,
   getProjectLengthInYears,
-  getContractPrimeProject,
+  getContractsInfo,
   getCustomerOrgExp,
   getCompanies,
   getEducation,

@@ -273,7 +273,7 @@ const store = useStore();
 const { mdAndUp } = useDisplay();
 
 const router = useRouter();
-const props = defineProps(['employee', 'contracts']);
+const props = defineProps(['employee']);
 const editedEmployee = ref(_cloneDeep(props.employee));
 const isUser = inject('isUser');
 

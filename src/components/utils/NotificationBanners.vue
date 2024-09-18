@@ -71,14 +71,19 @@ const user = ref(null);
 
 // Checks if there are any expiring cert and sorts by days until expiration.
 onBeforeMount(async () => {
-  user.value = store.getters.user;
-  checkBadges();
-  checkCertifications();
-  await checkReimbursements();
-  //interns don't have access to pto
-  if (!userRoleIsIntern()) {
-    await checkPtoCashOuts();
-  }
+  // wait to load data until router page is almost finished
+  await setTimeout(async () => {
+    user.value = store.getters.user;
+    checkBadges();
+    checkCertifications();
+    let promises = [];
+    promises.push(checkReimbursements());
+    //interns don't have access to pto
+    if (!userRoleIsIntern()) {
+      promises.push(checkPtoCashOuts());
+    }
+    await Promise.all(promises);
+  }, 5000);
 });
 
 // |--------------------------------------------------|
