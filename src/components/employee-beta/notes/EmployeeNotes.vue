@@ -240,9 +240,10 @@ function discard() {
  */
 async function save(manual = false) {
   // update button to let the user know that the notes saved
-  function giveSaveFeedback() {
+  function giveSaveFeedback(manual) {
+    let msg = manual ? 'Saved!' : 'Auto-saved';
     saving.value = false;
-    saveButtonText.value = 'Saved!';
+    saveButtonText.value = msg ?? 'Saved!';
     setTimeout(() => {
       saveButtonText.value = 'Save';
     }, 2500);
@@ -253,8 +254,9 @@ async function save(manual = false) {
 
   // if no changes, do nothing
   if (oldNotes && _isEqual(notes.value, oldNotes)) {
-    giveSaveFeedback();
-    return;
+    giveSaveFeedback(manual);
+    if (manual) emitter.emit('close-notes');
+    else return;
   }
 
   // set new value
@@ -276,7 +278,13 @@ async function save(manual = false) {
   emitter.emit('saved-notes', { empId: props.employee.id, notes: notes.value });
 
   // update button
-  giveSaveFeedback();
+  giveSaveFeedback(manual);
+
+  // update oldNotes for future discards and close modal
+  if (manual) {
+    oldNotes = _cloneDeep(notes.value);
+    emitter.emit('close-notes');
+  }
 }
 
 // fetch notes from the database, if existing
@@ -303,7 +311,7 @@ function getPageName(pageIndex) {
 var saveTimer = null;
 function autosave() {
   // set timeout duration
-  const bufferTime = 5000;
+  const bufferTime = 1500;
 
   // stop any old saves, make a new one
   if (saveTimer) clearTimeout(saveTimer);
