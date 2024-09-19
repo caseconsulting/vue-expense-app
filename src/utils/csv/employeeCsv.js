@@ -390,7 +390,8 @@ export function getContractsInfo(employee, allContracts) {
         return r.workTypes.join(', ');
       }).join(', ')
     };
-  } else {
+  }
+  if (!employee.contracts || employee.contracts?.length === 0) {
     // employees not on a contract are assumed to be remote
     toReturn = {
       workLocations: getEmployeeCurrentAddress(employee),
