@@ -225,9 +225,10 @@ import { isEmpty, isMobile } from '@/utils/utils';
 import _cloneDeep from 'lodash/cloneDeep';
 import _find from 'lodash/find';
 import _map from 'lodash/map';
-import { ref } from 'vue';
+import { onBeforeMount, ref } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
+import { updateStoreContracts } from '../../../utils/storeUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -242,13 +243,19 @@ const vMask = mask; // custom directive
 const { slotProps } = defineProps(['slotProps']);
 const editedEmployee = ref(slotProps.editedEmployee);
 
-const contracts = store.getters.contracts;
+const contracts = ref(store.getters.contracts || []);
 const editedContracts = ref([]); // stores edited contracts info
-const contractProjects = ref(store.getters.contracts.map((c) => c.projects).flat());
 const reloadKey = ref(0); // value used to trigger component re-render
+const contractProjects = ref([]);
 
 usePrepareSubmit('contracts', prepareSubmit);
 initialize();
+
+onBeforeMount(async () => {
+  !store.getters.contracts ? await updateStoreContracts() : '';
+  contracts.value = store.getters.contracts;
+  contractProjects.value = store.getters.contracts?.map((c) => c.projects).flat();
+});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -265,7 +272,7 @@ async function prepareSubmit() {
       let newContract = _cloneDeep(contract);
       if (newContract.contractName || newContract.primeName) {
         newContract.contractId = _find(
-          contracts,
+          contracts.value,
           (c) => c.contractName === newContract.contractName && c.primeName === newContract.primeName
         ).id;
       }
@@ -294,7 +301,7 @@ async function prepareSubmit() {
 function initialize() {
   // getting contract, prime, and project names and stores them with their respective object
   editedContracts.value = _map(editedEmployee.value.contracts, (employeeContract) => {
-    const contractObj = _find(contracts, (c) => c.id === employeeContract.contractId);
+    const contractObj = _find(contracts.value, (c) => c.id === employeeContract.contractId);
 
     if (!contractObj) {
       console.warn(`Could not find contract with id: ${employeeContract.contractId}`);
@@ -426,23 +433,23 @@ function getContractsDropdownItems(contract) {
     toReturn = [];
   } else if (contract.primeName && contract.projects.length == 1 && isEmpty(contract.projects[0].projectName)) {
     // only prime name is filled out
-    let matchedContracts = contracts.filter((c) => c.primeName === contract.primeName);
+    let matchedContracts = contracts.value.filter((c) => c.primeName === contract.primeName);
     toReturn = matchedContracts.map((c) => c.contractName);
   } else if (contract.primeName) {
     // prime name and project names are filled out
     let project = contract.projects[0];
-    let matchedContracts = contracts.filter(
+    let matchedContracts = contracts.value.filter(
       (c) => c.primeName === contract.primeName && c.projects.some((p) => p.projectName === project.projectName)
     );
     toReturn = matchedContracts.map((c) => c.contractName);
   } else if (isEmpty(contract.primeName) && !isEmpty(contract.projects[0].projectName)) {
     // only project names are filled out
     let project = contract.projects[0];
-    let matchedContracts = contracts.filter((c) => c.projects.some((p) => p.projectName === project.projectName));
+    let matchedContracts = contracts.value.filter((c) => c.projects.some((p) => p.projectName === project.projectName));
     toReturn = matchedContracts.map((c) => c.contractName);
   } else {
     // prime and projects fields are empty
-    toReturn = contracts.map((c) => c.contractName);
+    toReturn = contracts.value.map((c) => c.contractName);
   }
   return Array.from(new Set(toReturn));
 } // getContractsDropdownItems
@@ -459,23 +466,23 @@ function getPrimesDropdownItems(contract) {
     toReturn = [];
   } else if (contract.contractName && contract.projects.length == 1 && isEmpty(contract.projects[0].projectName)) {
     // only contract name is filled out
-    let matchedContracts = contracts.filter((c) => c.contractName === contract.contractName);
+    let matchedContracts = contracts.value.filter((c) => c.contractName === contract.contractName);
     toReturn = matchedContracts.map((c) => c.primeName);
   } else if (contract.contractName) {
     // contract name and project names are filled out
     let project = contract.projects[0];
-    let matchedContracts = contracts.filter(
+    let matchedContracts = contracts.value.filter(
       (c) => c.contractName === contract.contractName && c.projects.some((p) => p.projectName === project.projectName)
     );
     toReturn = matchedContracts.map((c) => c.primeName);
   } else if (isEmpty(contract.contractName) && !isEmpty(contract.projects[0].projectName)) {
     // only project names are filled out
     let project = contract.projects[0];
-    let matchedContracts = contracts.filter((c) => c.projects.some((p) => p.projectName === project.projectName));
+    let matchedContracts = contracts.value.filter((c) => c.projects.some((p) => p.projectName === project.projectName));
     toReturn = matchedContracts.map((c) => c.primeName);
   } else {
     // prime and projects fields are empty
-    toReturn = contracts.map((c) => c.primeName);
+    toReturn = contracts.value.map((c) => c.primeName);
   }
   return Array.from(new Set(toReturn));
 } // getPrimesDropdownItems
@@ -492,17 +499,17 @@ function getProjectsDropdownItems(contract) {
     toReturn = [];
   } else if (contract.contractName && contract.primeName) {
     // both field filled out
-    let matchedContracts = contracts.filter(
+    let matchedContracts = contracts.value.filter(
       (c) => c.contractName === contract.contractName && c.primeName === contract.primeName
     );
     toReturn = matchedContracts.map((c) => c.projects.map((p) => p.projectName)).flat();
   } else if (contract.contractName && isEmpty(contract.primeName)) {
     // only contract name is filled out
-    let matchedContracts = contracts.filter((c) => c.contractName === contract.contractName);
+    let matchedContracts = contracts.value.filter((c) => c.contractName === contract.contractName);
     toReturn = matchedContracts.map((c) => c.projects.map((p) => p.projectName)).flat();
   } else if (contract.primeName && isEmpty(contract.contractName)) {
     // only prime name is filled out
-    let matchedContracts = contracts.filter((c) => c.primeName === contract.primeName);
+    let matchedContracts = contracts.value.filter((c) => c.primeName === contract.primeName);
     toReturn = matchedContracts.map((c) => c.projects.map((p) => p.projectName)).flat();
   } else {
     // prime and projects fields are empty

@@ -4,9 +4,10 @@
       <!-- START EXPANDED PROJECTS DATA TABLE-->
       <v-form ref="projectForm" v-model="valid" lazy-validation>
         <v-data-table
-          :headers="projectHeaders"
+          :headers="_filter(projectHeaders, (h) => props.expandOrgs || (!props.expandOrgs && !h.expandableOrg))"
           :items="contract.item.projects"
           :row-props="rowProps"
+          :cellProps="(item) => cellProps(item, projectHeaders)"
           class="projects-table"
           hide-default-footer
           hide-default-header
@@ -18,76 +19,33 @@
           <template v-slot:headers></template>
           <template v-slot:bottom></template>
 
-          <!-- Just a spacer -->
-          <template v-if="!editingProjectItem" v-slot:[`item.spacer`]="{ item }">
-            <span>{{ item.spacer }}</span>
-          </template>
-
           <!-- Item CheckBox Slot -->
           <template v-slot:[`item.data-table-select`]="{ item }">
             <v-checkbox :model-value="item.checkBox" primary hide-details @click.stop="toggleProjectCheckBox(item)">
             </v-checkbox>
           </template>
 
-          <!-- Project Name Slot -->
-          <template v-slot:[`item.projectName`]="{ item }">
-            <v-text-field
-              :rules="[(v) => !!v || 'Field is required', duplicateProjects(contract.item)]"
-              v-if="editingProjectItem && editingProjectItem.id == item.id"
-              v-model="editingProjectItem.projectName"
-              label="Project Name"
-              variant="underlined"
-            ></v-text-field>
-            <span v-else>{{ item.projectName }}</span>
-          </template>
-
-          <!-- Directorate -->
-          <template v-slot:[`item.directorate`]="{ item }">
-            <v-text-field
-              v-if="editingProjectItem && editingProjectItem.id == item.id"
-              v-model="editingProjectItem.directorate"
-              label="Directorate"
-              variant="underlined"
-            ></v-text-field>
-            <span v-else>{{ item.directorate }}</span>
-          </template>
-
-          <!-- PoP Start Date Slot -->
-          <template v-slot:[`item.popStartDate`]="{ item }">
-            <v-text-field
-              v-if="editingProjectItem && editingProjectItem.id == item.id"
-              v-model="editingProjectItem.popStartDate"
-              label="PoP Start Date"
-              variant="underlined"
-            ></v-text-field>
-            <span v-else>{{ item.popStartDate }}</span>
-          </template>
-
-          <!-- PoP End Date Slot -->
-          <template v-slot:[`item.popEndDate`]="{ item }">
-            <v-text-field
-              v-if="editingProjectItem && editingProjectItem.id == item.id"
-              v-model="editingProjectItem.popEndDate"
-              label="PoP End Date"
-              variant="underlined"
-            ></v-text-field>
-            <span v-else>{{ item.popEndDate }}</span>
-          </template>
-
-          <!-- Project Description Slot -->
-          <template v-slot:[`item.description`]="{ item }">
-            <v-textarea
-              v-if="editingProjectItem && editingProjectItem.id == item.id"
-              v-model="editingProjectItem.description"
-              name="description"
-              auto-grow
-              label="Description"
-              variant="underlined"
-              class="smaller-text description"
-              rows="2"
-              @click.stop
-            ></v-textarea>
-            <span v-else class="smaller-text">{{ item.description }}</span>
+          <template
+            v-for="header in _filter(projectHeaders, (h) => !h.disableEdit)"
+            v-slot:[`item.${header.key}`]="{ item }"
+          >
+            <contracts-edit-item
+              v-if="
+                editItem?.item?.id === item.id && editItem?.header?.key === header.key && editItem?.type === 'project'
+              "
+              :key="item[header.key]"
+              :header="header"
+              :item="item"
+            ></contracts-edit-item>
+            <contracts-info-item
+              v-else
+              :key="item[header.title]"
+              :header="header"
+              :item="item"
+              type="project"
+              @click="handleItemClick(item, header)"
+              class="d-flex align-center w-100 h-100"
+            ></contracts-info-item>
           </template>
 
           <!-- Project Active Employees Slot -->
@@ -109,78 +67,29 @@
 
           <!-- Actions -->
           <template v-slot:[`item.actions`]="{ item }">
-            <div v-if="editingProjectItem && editingProjectItem.id == item.id">
-              <div v-if="!projectLoading">
-                <!-- Save Project -->
-                <v-tooltip location="top">
-                  <template v-slot:activator="{ props }">
-                    <v-btn
-                      @click.stop="updateProject(contract.item)"
-                      :disabled="!valid"
-                      icon
-                      variant="text"
-                      v-bind="props"
-                    >
-                      <v-icon class="case-gray" icon="mdi-content-save" />
-                    </v-btn>
-                  </template>
-                  <span>Save</span>
-                </v-tooltip>
-
-                <!-- Cancel Project Edit -->
-                <v-tooltip location="top">
-                  <template v-slot:activator="{ props }">
-                    <v-btn icon variant="text" @click.stop="clickedCancel()" v-bind="props">
-                      <v-icon class="case-gray" icon="mdi-close-circle" />
-                    </v-btn>
-                  </template>
-                  <span>Cancel</span>
-                </v-tooltip>
-              </div>
-              <div v-else><v-progress-circular color="#bc3825" indeterminate /></div>
-            </div>
-            <div v-else>
-              <div>
-                <!-- Employees Assigned -->
-                <v-tooltip location="top">
-                  <template v-slot:activator="{ props }">
-                    <v-btn
-                      :disabled="editingProjectItem != null || isEditingContractItem || projectLoading"
-                      @click.stop="
-                        () => {
-                          toggleProjectEmployeesModal = true;
-                          contractEmployeesAssigned = contract.item;
-                          projectEmployeesAsseigned = item;
-                        }
-                      "
-                      icon
-                      density="comfortable"
-                      variant="text"
-                      v-bind="props"
-                    >
-                      <v-icon class="case-gray" icon="mdi-account-group" />
-                    </v-btn>
-                  </template>
-                  <span>View Employees Assigned to Project</span>
-                </v-tooltip>
-
-                <!-- Edit Project -->
-                <v-tooltip location="top">
-                  <template v-slot:activator="{ props }">
-                    <v-btn
-                      :disabled="editingProjectItem != null || isEditingContractItem || projectLoading"
-                      icon
-                      variant="text"
-                      density="comfortable"
-                      @click.stop="clickedEdit(item)"
-                      v-bind="props"
-                    >
-                      <v-icon class="case-gray" icon="mdi-pencil" />
-                    </v-btn>
-                  </template>
-                  <span>Edit</span>
-                </v-tooltip>
-              </div>
+            <div>
+              <!-- Employees Assigned -->
+              <v-tooltip location="top">
+                <template v-slot:activator="{ props }">
+                  <v-btn
+                    :disabled="projectLoading"
+                    @click.stop="
+                      () => {
+                        toggleProjectEmployeesModal = true;
+                        contractEmployeesAssigned = contract.item;
+                        projectEmployeesAsseigned = item;
+                      }
+                    "
+                    icon
+                    density="comfortable"
+                    variant="text"
+                    v-bind="props"
+                  >
+                    <v-icon class="case-gray" icon="mdi-account-group" />
+                  </v-btn>
+                </template>
+                <span>View Employees Assigned to Project</span>
+              </v-tooltip>
             </div>
           </template>
         </v-data-table>
@@ -195,16 +104,16 @@
   </td>
 </template>
 <script setup>
-import _find from 'lodash/find';
+import _findIndex from 'lodash/findIndex';
+import _filter from 'lodash/filter';
 import _some from 'lodash/some';
-import _cloneDeep from 'lodash/cloneDeep';
-import api from '@/shared/api';
 import { nicknameAndLastName } from '@/shared/employeeUtils';
+import ContractsEditItem from './ContractsEditItem.vue';
+import ContractsInfoItem from './ContractsInfoItem.vue';
 import ProjectsEmployeesAssignedModal from '../modals/ProjectsEmployeesAssignedModal.vue';
 import { getProjectCurrentEmployees } from '@/shared/contractUtils';
-import { ref, onBeforeMount, inject } from 'vue';
-import { useStore } from 'vuex';
-import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSnackbar.vue';
+import { ref, onBeforeMount, inject, watch } from 'vue';
+import { useDisplay } from 'vuetify';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -212,66 +121,117 @@ import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSn
 // |                                                  |
 // |--------------------------------------------------|
 
-const store = useStore();
-const props = defineProps([
-  'contract',
-  'isEditingContractItem',
-  'isContractDeletingOrUpdatingStatus',
-  'colspan',
-  'rowProps'
-]);
+const props = defineProps(['contract', 'colspan', 'rowProps', 'cellProps', 'editItem', 'expandOrgs']);
+const { lgAndDown } = useDisplay();
 const emitter = inject('emitter');
-const duplicateProjects = ref((contractOfProject) => {
-  if (contractOfProject) {
-    let contract = _find(store.getters.contracts, (c) => {
-      return c.id == contractOfProject.id;
-    });
+const duplicateProjects = ref((v) => {
+  let item = editItem.value.item;
+  if (item) {
+    let contract = props.contract.item;
     let found = _some(contract.projects, (p) => {
-      if (p.id == editingProjectItem.value.id) return false;
-      return p.projectName === editingProjectItem.value.projectName;
+      if (p.id == item.id) return false;
+      return p.projectName === v;
     });
     return !found || 'Duplicate project names';
   }
 });
 const projectLoading = ref(false);
-const editingProjectItem = ref(null);
+const editItem = ref(props.editItem);
 const toggleProjectEmployeesModal = ref(false);
 const contractEmployeesAssigned = ref(null);
 const projectEmployeesAsseigned = ref(null);
 const valid = ref(true);
 const projectHeaders = ref([
   {
-    text: '',
-    value: 'spacer'
+    title: '',
+    key: 'spacer',
+    customWidth: 'small',
+    disableEdit: true
   },
   {
-    text: 'Project',
-    value: 'projectName'
+    title: 'Project',
+    key: 'projectName',
+    align: 'start',
+    customWidth: 'small',
+    rules: [(v) => !!v || 'Field is required', duplicateProjects.value]
   },
   {
-    text: 'Directorate',
-    value: 'directorate'
+    title: 'Cust. Org',
+    key: 'customerOrg',
+    align: 'start',
+    customWidth: 'x-small',
+    type: 'combobox'
   },
   {
-    text: 'PoP-Start Date',
-    value: 'popStartDate'
+    title: 'Directorate',
+    key: 'directorate',
+    align: 'start',
+    customWidth: 'small',
+    type: 'combobox'
   },
   {
-    text: 'PoP-End Date',
-    value: 'popEndDate'
+    title: 'Org 2',
+    key: 'org2',
+    align: 'start',
+    customWidth: 'x-small',
+    type: 'combobox',
+    expandableOrg: true
   },
   {
-    text: 'Description',
-    value: 'description'
+    title: 'Org 3',
+    key: 'org3',
+    align: 'start',
+    customWidth: 'x-small',
+    type: 'combobox',
+    expandableOrg: true
   },
   {
-    text: 'Active Employees',
-    value: 'projectActiveEmployees'
+    title: 'Location',
+    key: 'location',
+    align: 'start',
+    customWidth: 'x-small',
+    type: 'combobox'
   },
   {
-    value: 'actions',
+    title: 'Work Type',
+    key: 'workType',
+    align: 'start',
+    customWidth: 'x-small',
+    type: 'select'
+  },
+  {
+    title: 'PoP-Start Date',
+    key: 'popStartDate',
+    align: 'start',
+    customWidth: lgAndDown.value ? 'x-small' : 'medium'
+  },
+  {
+    title: 'PoP-End Date',
+    key: 'popEndDate',
+    align: 'start',
+    customWidth: lgAndDown.value ? 'x-small' : 'medium'
+  },
+  {
+    title: 'Description',
+    key: 'description',
+    align: 'start',
+    customWidth: 'large',
+    class: 'smaller-text description',
+    type: 'textarea'
+  },
+  {
+    title: 'Active Employees',
+    key: 'projectActiveEmployees',
+    align: 'start',
+    customWidth: 'large',
+    disableEdit: true
+  },
+  {
+    key: 'actions',
     sortable: false,
-    align: 'end'
+    align: 'end',
+    customWidth: lgAndDown.value ? 'medium' : 'large',
+    disableEdit: true
   }
 ]);
 const projectForm = ref(null);
@@ -298,53 +258,18 @@ onBeforeMount(() => {
 // |--------------------------------------------------|
 
 /**
- * Click edit handler
+ * Sets the item to be edited.
  *
- * @param item item that is being edited
+ * @param item - The row item clicked
+ * @param header - The header of the cell that was clicked
  */
-function clickedEdit(item) {
-  editingProjectItem.value = _cloneDeep(item);
-  emitter.emit('is-editing-project-item', true);
-} // clickedEdit
-
-/**
- * Handler for clicked cancel
- */
-function clickedCancel() {
-  editingProjectItem.value = null;
-  emitter.emit('is-editing-project-item', false);
-} // clickedCancel
-
-/**
- * Updates project in inline row edit (expandable row)
- *
- * @param contract contract object that project is under
- */
-async function updateProject(contract) {
-  valid.value = projectForm.value.validate();
-  if (!valid.value) return;
-  try {
-    projectLoading.value = true;
-    let contractObj = _cloneDeep(contract);
-    let projectIndex = contractObj.projects.findIndex((item) => item.id == editingProjectItem.value.id);
-    contractObj.projects[projectIndex] = editingProjectItem.value;
-    let response = await api.updateItem(api.CONTRACTS, contractObj);
-    if (response.name === 'AxiosError') {
-      throw new Error(response.response.data.message);
-    }
-    let contracts = _cloneDeep(store.getters.contracts);
-    let contractIndex = contracts.findIndex((c) => c.id == contractObj.id);
-    contracts[contractIndex] = contractObj;
-    store.dispatch('setContracts', { contracts });
-    useDisplaySuccess('Item was successfully saved!');
-    projectLoading.value = false;
-  } catch (err) {
-    useDisplayError(err);
-    projectLoading.value = false;
+function handleItemClick(item, header) {
+  if (!header.disableEdit) {
+    let headerIndex = _findIndex(projectHeaders.value, (h) => header.key === h.key);
+    editItem.value = { item, header, type: 'project', headerIndex };
+    emitter.emit('change-contracts-edit-item', editItem.value);
   }
-  editingProjectItem.value = null;
-  emitter.emit('is-editing-project-item', false);
-} // updateProject
+} // handleItemClick
 
 /**
  * Toggles project checkBox item
@@ -354,29 +279,25 @@ async function updateProject(contract) {
 function toggleProjectCheckBox(projectItem) {
   emitter.emit('toggle-project-checkBox', { contract: props.contract, project: projectItem });
 } // toggleProjectCheckBox
+
+watch(
+  () => props.editItem,
+  () => {
+    // sets the edit item from the contracts row so multiple items cannot be edited
+    editItem.value = props.editItem;
+  }
+);
 </script>
 
 <style lang="scss">
 @import 'src/assets/styles/styles';
 
-.projects-table > div {
-  overflow-y: hidden !important;
+.projects-table > div > table > tbody > tr > td {
+  padding: 0px 12px 0px 12px !important;
 }
 
-.highlight-project-row {
-  background-color: rgb(255, 255, 255) !important;
-}
-
-.smaller-text {
-  display: block;
-  font-size: 11px;
-  line-height: 1.2;
-}
-
-.description textarea {
-  line-height: 1.2;
-  font-size: 11px;
-  padding-top: 18px !important;
+.projects-table > div > table > tbody > tr > td:first-of-type {
+  min-width: 70px !important;
 }
 </style>
 

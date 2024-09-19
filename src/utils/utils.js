@@ -185,17 +185,8 @@ export function openLink(link) {
  * @param {employee} employee the employee to update
  */
 export async function updateEmployeeLogin(employee) {
-  await Promise.all([
-    api.updateItem(api.EMPLOYEES, employee), // updates last logged in for employee
-    api.createItem(api.AUDIT, {
-      id: generateUUID(),
-      type: 'login',
-      tags: ['account'],
-      employeeId: employee.id,
-      description: `${employee.firstName} ${employee.lastName} has logged in`,
-      timeToLive: 60
-    })
-  ]); // Create an audit of the success
+  await api.updateAttribute(api.EMPLOYEES, { id: employee.id, lastLogin: employee.lastLogin }, 'lastLogin'); // updates last logged in for employee
+  // Create an audit of the success
   if (store.getters.employees) {
     let employees = store.getters.employees;
     let i = employees.findIndex((emp) => emp.id === employee.id);

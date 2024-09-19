@@ -273,7 +273,7 @@ const store = useStore();
 const { mdAndUp } = useDisplay();
 
 const router = useRouter();
-const props = defineProps(['employee', 'contracts']);
+const props = defineProps(['employee']);
 const editedEmployee = ref(_cloneDeep(props.employee));
 const isUser = inject('isUser');
 
@@ -436,7 +436,7 @@ async function submit() {
     let newEmployee = await api.createItem(api.EMPLOYEES, editedEmployee.value);
     // update the store with the latest data
     let employees = store.getters.employees;
-    employees.push(newEmployee);
+    employees.push(editedEmployee.value);
     store.dispatch('setEmployees', { employees });
     //reroute to the newly created employee
     if (newEmployee.id) {

@@ -9,14 +9,39 @@ import store from '../../store/index.js';
 import { userRoleIsAdmin, userRoleIsManager, userRoleIsUser } from '@/utils/utils';
 import _filter from 'lodash/filter';
 
+let isUserLoading = false;
+let isEmployeesLoading = false;
+let isAvatarsLoading = false;
+let isCampfiresLoading = false;
+let isContractsLoading = false;
+let isBudgetsLoading = false;
+let isPtoCashOutsLoading = false;
+let isExpenseTypesLoading = false;
+let isTagsLoading = false;
+
+let employees = null;
+let user = null;
+let avatars = null;
+let campfires = null;
+let contracts = null;
+let budgets = null;
+let ptoCashOuts = null;
+let expenseTypes = null;
+let tags = null;
+
 /**
  * Update store with latest user data
  */
 export async function updateStoreUser() {
   // getUser
   try {
-    let user = await api.getUser();
+    if (!isUserLoading) {
+      isUserLoading = true;
+      user = api.getUser();
+    }
+    user = await user;
     store.dispatch('setUser', { user });
+    isUserLoading = false;
   } catch (err) {
     console.error(err);
   }
@@ -27,10 +52,15 @@ export async function updateStoreUser() {
  */
 export async function updateStoreEmployees() {
   try {
-    // getEmployees
-    let employees = await api.getItems(api.EMPLOYEES);
+    if (!isEmployeesLoading) {
+      // getEmployees
+      isEmployeesLoading = true;
+      employees = api.getItems(api.EMPLOYEES);
+    }
+    employees = await employees;
     employees = _filter(employees, (e) => e.email !== 'info@consultwithcase.com');
     store.dispatch('setEmployees', { employees });
+    isEmployeesLoading = false;
   } catch (err) {
     console.error(err);
   }
@@ -41,8 +71,13 @@ export async function updateStoreEmployees() {
  */
 export async function updateStoreAvatars() {
   try {
-    let avatars = await api.getBasecampAvatars();
+    if (!isAvatarsLoading) {
+      isAvatarsLoading = true;
+      avatars = api.getBasecampAvatars();
+    }
+    avatars = await avatars;
     store.dispatch('setBasecampAvatars', { basecampAvatars: avatars });
+    isAvatarsLoading = false;
   } catch (err) {
     console.error(err);
   }
@@ -53,9 +88,14 @@ export async function updateStoreAvatars() {
  */
 export async function updateStoreCampfires() {
   try {
-    let campfires = await api.getBasecampCampfires();
+    if (!isCampfiresLoading) {
+      isCampfiresLoading = true;
+      campfires = api.getBasecampCampfires();
+    }
+    campfires = await campfires;
     if (campfires instanceof Error) campfires = [];
     store.dispatch('setBasecampCampfires', { basecampCampfires: campfires });
+    isCampfiresLoading = false;
   } catch (err) {
     console.error(err);
   }
@@ -66,8 +106,13 @@ export async function updateStoreCampfires() {
  */
 export async function updateStoreContracts() {
   try {
-    let contracts = await api.getItems(api.CONTRACTS);
+    if (!isContractsLoading) {
+      isContractsLoading = true;
+      contracts = api.getItems(api.CONTRACTS);
+    }
+    contracts = await contracts;
     store.dispatch('setContracts', { contracts });
+    isContractsLoading = false;
   } catch (err) {
     console.error(err);
   }
@@ -79,8 +124,13 @@ export async function updateStoreContracts() {
 export async function updateStoreBudgets() {
   try {
     let user = store.getters.user;
-    let budgets = await api.getAllActiveEmployeeBudgets(user.id);
+    if (!isBudgetsLoading) {
+      isBudgetsLoading = true;
+      budgets = api.getAllActiveEmployeeBudgets(user.id);
+    }
+    budgets = await budgets;
     store.dispatch('setBudgets', { budgets: budgets });
+    isBudgetsLoading = false;
   } catch (err) {
     console.error(err);
   }
@@ -92,13 +142,17 @@ export async function updateStoreBudgets() {
 export async function updateStorePtoCashOuts() {
   try {
     let user = store.getters.user;
-    let ptoCashOuts = [];
-    if (userRoleIsAdmin() || userRoleIsManager()) {
-      ptoCashOuts = await api.getItems(api.PTO_CASH_OUTS);
-    } else if (userRoleIsUser()) {
-      ptoCashOuts = await api.getEmployeePtoCashOuts(user.id);
+    if (!isPtoCashOutsLoading) {
+      isPtoCashOutsLoading = true;
+      if (userRoleIsAdmin() || userRoleIsManager()) {
+        ptoCashOuts = api.getItems(api.PTO_CASH_OUTS);
+      } else if (userRoleIsUser()) {
+        ptoCashOuts = api.getEmployeePtoCashOuts(user.id);
+      }
     }
+    ptoCashOuts = await ptoCashOuts;
     store.dispatch('setPtoCashOuts', { ptoCashOuts: ptoCashOuts });
+    isPtoCashOutsLoading = false;
   } catch (err) {
     console.error(err);
   }
@@ -112,13 +166,17 @@ export async function updateStoreExpenseTypes() {
     // getExpenseTypes
     let user = store.getters.user;
     let employeeRole = user.employeeRole;
-    if (employeeRole == 'admin' || employeeRole == 'manager') {
-      let expenseTypes = await api.getItems(api.EXPENSE_TYPES);
-      store.dispatch('setExpenseTypes', { expenseTypes });
-    } else if (employeeRole == 'intern' || employeeRole == 'user') {
-      let expenseTypes = await api.getEmployeeExpenseTypes();
-      store.dispatch('setExpenseTypes', { expenseTypes });
+    if (!isExpenseTypesLoading) {
+      isExpenseTypesLoading = true;
+      if (employeeRole == 'admin' || employeeRole == 'manager') {
+        expenseTypes = api.getItems(api.EXPENSE_TYPES);
+      } else if (employeeRole == 'intern' || employeeRole == 'user') {
+        expenseTypes = api.getEmployeeExpenseTypes();
+      }
     }
+    expenseTypes = await expenseTypes;
+    store.dispatch('setExpenseTypes', { expenseTypes });
+    isExpenseTypesLoading = false;
   } catch (err) {
     console.error(err);
   }
@@ -129,8 +187,13 @@ export async function updateStoreExpenseTypes() {
  */
 export async function updateStoreTags() {
   try {
-    let tags = await api.getItems(api.TAGS);
+    if (!isTagsLoading) {
+      isTagsLoading = true;
+      tags = api.getItems(api.TAGS);
+    }
+    tags = await tags;
     store.dispatch('setTags', { tags });
+    isTagsLoading = false;
   } catch (err) {
     console.error(err);
   }

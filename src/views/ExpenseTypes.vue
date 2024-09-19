@@ -647,7 +647,7 @@ onBeforeMount(async () => {
   });
 
   if (store.getters.storeIsPopulated) {
-    loadExpenseTypesData();
+    await loadExpenseTypesData();
   }
 }); // created
 
@@ -981,7 +981,8 @@ async function loadExpenseTypesData() {
     refreshExpenseTypes(),
     updateStoreCampfires()
   ]);
-
+  expenseTypes.value = store.getters.expenseTypes;
+  filterExpenseTypes();
   if (userRoleIsAdmin()) {
     employees.value = store.getters.employees;
     // set employee avatar
@@ -1131,9 +1132,9 @@ watch(
 /**
  * Watcher for storeIsPopulated
  */
-watch(storeIsPopulated, (newValue) => {
+watch(storeIsPopulated, async (newValue) => {
   if (newValue) {
-    loadExpenseTypesData();
+    await loadExpenseTypesData();
   }
 });
 </script>

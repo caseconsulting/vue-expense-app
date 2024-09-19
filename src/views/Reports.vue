@@ -90,12 +90,12 @@ import ReportsForeignLanguages from '@/components/reports/ReportsForeignLanguage
 import ReportsJobRoles from '@/components/reports/ReportsJobRoles.vue';
 import ReportsTechnologies from '@/components/reports/ReportsTechnologies.vue';
 import ReportsSecurityInfo from '@/components/reports/ReportsSecurityInfo.vue';
+import ReportsEmployeeNotes from '@/components/reports/ReportsEmployeeNotes.vue';
 import { updateStoreEmployees, updateStoreContracts, updateStoreTags } from '@/utils/storeUtils';
 import { isMobile, userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
 import { getEmployeeCurrentProjects } from '@/shared/employeeUtils';
 import { useRouter } from 'vue-router';
 import baseCsv from '@/utils/csv/baseCsv.js';
-import { shallowRef } from 'vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -112,7 +112,7 @@ const tableData = reactive({});
 const store = useStore();
 const emitter = inject('emitter');
 const router = useRouter();
-const tabs = shallowRef([
+const tabs = ref([
   {
     key: 'contracts',
     title: 'Contracts',
@@ -154,6 +154,15 @@ const tabs = shallowRef([
     component: ReportsSecurityInfo
   }
 ]);
+
+if (userRoleIsAdmin()) {
+  tabs.value.push({
+    key: 'employeeNotes',
+    title: 'Employee Notes',
+    component: ReportsEmployeeNotes
+  });
+}
+
 const props = ref();
 const currentTab = ref(tabs.value[0]);
 const currentWindow = ref(0);

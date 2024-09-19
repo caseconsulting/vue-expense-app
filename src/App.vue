@@ -131,7 +131,7 @@
             id="P"
             class="text-black"
             target="_blank"
-            href="https://3.basecamp.com/3097063/buckets/4708396/documents/7711838514"
+            href="https://3.basecamp.com/3097063/buckets/4708396/documents/7828405304"
           >
             <v-tooltip activator="parent" location="top">View Release Notes</v-tooltip>
             <strong>Version</strong> {{ version }}
@@ -275,9 +275,8 @@ onBeforeMount(async () => {
     //stores the employee number
     userId.value = store.getters.employeeNumber;
 
-    store.getters.loginTime ? updateEmployeeLogin(store.getters.user) : '';
     // run API calls in background
-    Promise.all([updateStoreEmployees()]);
+    Promise.all([updateStoreEmployees(), store.getters.loginTime ? updateEmployeeLogin(store.getters.user) : '']);
   }
 
   let pic = getProfile();

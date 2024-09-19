@@ -1,4 +1,6 @@
 import _find from 'lodash/find';
+import _forEach from 'lodash/forEach';
+import _map from 'lodash/map';
 import store from '../../store/index';
 
 /**
@@ -78,6 +80,65 @@ export function employeeFilter(__, search, item) {
   return false;
 } // employeeFilter
 
+export function contractFilter(__, search, item) {
+  item = item?.raw || item;
+  item.id = item.id || item.value;
+  item = _find(store.getters.contracts, (e) => e.id === item.id);
+
+  if (!item) return false;
+
+  /**
+   * Bounce conditions:
+   *  - nothing is being searched
+   *  - the search is only one character and one term
+   *  - searching something that's not the employee object
+   *  - the employee has been searched before
+   */
+  let terms = search.split(','); // used for searching later, search is split by comma
+  if (search === null || (terms.length === 1 && terms[0].length < 2)) return true;
+  let employees = [];
+  _forEach(store.getters.employees, (e) => {
+    if (_find(e.contracts, (c) => c.contractId === item.id)) {
+      employees.push(`${e.firstName} ${e.lastName}`);
+      if (e.nickname) employees.push(`${e.nickname} ${e.lastName}`);
+    }
+  });
+  let searchableTerms = [
+    `${item.primeName}`,
+    `${item.contractName}`,
+    `${item.primeName} ${item.contractName}`,
+    `${item.contractName} ${item.primeName}`,
+    `${item.customerOrg}`,
+    `${item.directorate}`,
+    `${item.org2}`,
+    `${item.org3}`,
+    `${item.description}`,
+    `${_map(item.projects, (p) => p.projectName)?.join('')}`,
+    `${_map(item.projects, (p) => p.customerOrg)?.join('')}`,
+    `${_map(item.projects, (p) => p.directorate)?.join('')}`,
+    `${_map(item.projects, (p) => p.org2)?.join('')}`,
+    `${_map(item.projects, (p) => p.org3)?.join('')}`,
+    `${_map(item.projects, (p) => p.location)?.join('')}`,
+    `${_map(item.projects, (p) => p.workType)?.join('')}`,
+    `${_map(item.projects, (p) => p.description)?.join('')}`,
+    `${employees.join('')}`
+  ];
+  // search through all searchable terms with all search terms
+  for (let t of terms) {
+    t = t.toLowerCase().trim();
+    if (t.length < 2) continue;
+    for (let s of searchableTerms) {
+      s = s.toLowerCase();
+      if (s && s.includes(t)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
 export default {
-  employeeFilter
+  employeeFilter,
+  contractFilter
 };
