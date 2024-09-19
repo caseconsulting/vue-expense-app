@@ -478,7 +478,7 @@ import { JOB_TITLES } from '@/components/employees/form-tabs/dropdown-info/jobTi
 import PrivateButton from '@/components/shared/edit-fields/PrivateButton.vue';
 import { usePrepareSubmit } from '@/composables/editTabCommunication';
 import api from '@/shared/api';
-import { format, isSame, ISO8601 } from '@/shared/dateUtils';
+import { format, isSame } from '@/shared/dateUtils';
 import { CASE_EMAIL_DOMAIN, EMPLOYEE_ROLES, PHONE_TYPES } from '@/shared/employeeUtils';
 import {
   getAINRules,
