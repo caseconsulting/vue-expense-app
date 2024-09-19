@@ -54,7 +54,7 @@
       </v-row>
 
       <!-- current address -->
-      <v-row dense class="d-flex flex-row" v-if="!isEmpty(getCurrentAddress() && (isAdmin || isUser))">
+      <v-row dense class="d-flex flex-row" v-if="!isEmpty(getCurrentAddress()) && (isAdmin || isUser)">
         <v-col cols="8">
           <v-row no-gutters>
             <v-col cols="auto" class="pb-2">
@@ -156,7 +156,7 @@ function getPlaceOfBirth() {
 function getCurrentAddress() {
   let address = [];
   let toAdd = ['currentStreet', 'currentStreet2', 'currentCity', 'currentState', 'currentZIP'];
-  for (let item in toAdd) if (!isEmpty(props.model[item])) address.push(props.model[item]);
+  for (let item of toAdd) if (!isEmpty(props.model[item])) address.push(props.model[item]);
   return address.join(', ');
 } // getCurrentAddress
 
