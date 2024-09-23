@@ -5,7 +5,7 @@
     <v-card-title class="d-flex align-center text-h5 header_style">Employee Export</v-card-title>
     <!-- Modal Content -->
     <v-card-text class="d-flex justify-center">
-      <div class="w-75">
+      <div class="w-100">
         <!-- EEO vs Employee export type -->
         <h3 class="mt-4">Export Type</h3>
         <v-radio-group :disabled="loading" hide-details v-model="exportType">
@@ -33,6 +33,20 @@
           label="Filter by status"
           v-model="filters.statuses"
           :items="filterOptions.statuses"
+          multiple
+          variant="underlined"
+          chips
+          closable-chips
+        >
+        </v-autocomplete>
+
+        <!-- Employee Role selector -->
+        <h3 class="mt-4">Filter by Employee Role</h3>
+        <v-autocomplete
+          :disabled="loading"
+          label="Filter by employee role"
+          v-model="filters.employeeRoles"
+          :items="filterOptions.employeeRoles"
           multiple
           variant="underlined"
           chips
@@ -100,10 +114,11 @@ const tagsInfo = ref({
   flipped: []
 });
 const filterOptions = ref({
-  statuses: ['Full Time', 'Part Time', 'Inactive'], // order matters to filterEmployees() > status filter
+  statuses: ['Full Time', 'Part Time', 'Inactive'], // order matters to filterEmployees() -> status filter
   tagsInfo: null,
   year: [],
-  month: []
+  month: [],
+  employeeRoles: ['Admin', 'User', 'Manager', 'Intern']
 });
 const filters = ref({
   statuses: ['Full Time', 'Part Time'],
@@ -111,7 +126,8 @@ const filters = ref({
     selected: [],
     flipped: []
   },
-  period: 'All'
+  period: 'All',
+  employeeRoles: ['Admin', 'User', 'Manager']
 });
 const status = ref(false);
 const loading = ref(false);
@@ -275,6 +291,25 @@ function filterEmployees(employees) {
       if (!hireYearValid || !deptYearValid) return false;
     }
 
+    // - STATUS FILTER -
+    // remove employees that do not have the status
+    let statusOpts = filterOptions.value.statuses; // ['Full Time', 'Part Time', 'Inactive']
+    // mini function to map employee status (integer) to text used in form (string)
+    let statusString = (s) => {
+      if (s == 0) return statusOpts[2];
+      else if (s == 100) return statusOpts[0];
+      else return statusOpts[1];
+    };
+    // return false if status array does not include the employee's status
+    if (!f.statuses.includes(statusString(e.workStatus))) return false;
+
+    // - ROLE FILTER -
+    // remove employees that are not in the given roles
+    let lowercaseRoles = f.employeeRoles.map((role) => role.toLowerCase());
+    if (!lowercaseRoles.includes(e.employeeRole)) {
+      return false;
+    }
+
     // - TAG FILTER -
     // remove employees that do not have a given tag, or who do have a given negated tag
     let tag, tagHasEmployee;
@@ -288,18 +323,6 @@ function filterEmployees(employees) {
       if (employeeHasTag) i = tagsInfo.value.selected.length; // exit loop early if employee is on a tag
     }
     if (tagsInfo.value.selected.length > 0 && !employeeHasTag) return false;
-
-    // - STATUS FILTER -
-    // remove employees that do not have the status
-    let statusOpts = filterOptions.value.statuses; // ['Full Time', 'Part Time', 'Inactive']
-    // mini function to map employee status (integer) to text used in form (string)
-    let statusString = (s) => {
-      if (s == 0) return statusOpts[2];
-      else if (s == 100) return statusOpts[0];
-      else return statusOpts[1];
-    };
-    // return false if status array does not include the employee's status
-    if (!f.statuses.includes(statusString(e.workStatus))) return false;
 
     // passed all conditions, return this employee
     return true;
