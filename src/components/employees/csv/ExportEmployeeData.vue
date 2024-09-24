@@ -13,7 +13,7 @@
         </v-radio-group>
 
         <!-- Period selector -->
-        <h3 :class="exportType?.periodType ? '' : 'disabled'" class="cap-first mt-4">
+        <!-- <h3 :class="exportType?.periodType ? '' : 'disabled'" class="cap-first mt-4">
           Report {{ exportType?.periodType || 'Period' }}
         </h3>
         <v-select
@@ -24,7 +24,18 @@
           item-title="text"
           item-value="value"
           variant="underlined"
-        />
+        /> -->
+
+        <!-- Start date selector -->
+        <h3 class="mt-4">Timeframe</h3>
+        <v-row>
+          <v-col>
+            <date-picker v-model="filters.periodStart" :label="filters.periodStart" />
+          </v-col>
+          <v-col>
+            <date-picker v-model="filters.periodEnd" :label="filters.periodEnd" />
+          </v-col>
+        </v-row>
 
         <!-- Status selector -->
         <h3 class="mt-4">Filter by status</h3>
@@ -41,7 +52,7 @@
         </v-autocomplete>
 
         <!-- Employee Role selector -->
-        <h3 class="mt-4">Filter by Employee Role</h3>
+        <h3 class="mt-4">Filter by employee role</h3>
         <v-autocomplete
           :disabled="loading"
           label="Filter by employee role"
@@ -92,6 +103,7 @@ import TagsFilter from '@/components/shared/TagsFilter.vue';
 import { ref, inject, onBeforeUnmount, watch, onBeforeMount } from 'vue';
 import { useStore } from 'vuex';
 import { updateStoreContracts, updateStoreTags } from '@/utils/storeUtils';
+import DatePicker from '@/components/shared/DatePicker.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -127,6 +139,8 @@ const filters = ref({
     flipped: []
   },
   period: 'All',
+  periodStart: '2024-09-01',
+  periodEnd: '2024-09-30',
   employeeRoles: ['Admin', 'User', 'Manager']
 });
 const status = ref(false);
