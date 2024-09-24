@@ -30,10 +30,11 @@
         <h3 class="mt-4">Timeframe</h3>
         <v-row>
           <v-col>
-            <date-picker v-model="filters.periodStart" :label="filters.periodStart" />
+            <date-picker v-model="filters.periodStart" label="Start Date" />
           </v-col>
           <v-col>
-            <date-picker v-model="filters.periodEnd" :label="filters.periodEnd" />
+            <div>date: {{ filters.periodEnd }}</div>
+            <date-picker v-model="filters.periodEnd" label="End Date" />
           </v-col>
         </v-row>
 
@@ -139,8 +140,8 @@ const filters = ref({
     flipped: []
   },
   period: 'All',
-  periodStart: '2024-09-01',
-  periodEnd: '2024-09-30',
+  periodStart: startOf(getTodaysDate(), 'year', 'YYYY-MM-DD'),
+  periodEnd: getTodaysDate('YYYY-MM-DD'),
   employeeRoles: ['Admin', 'User', 'Manager']
 });
 const status = ref(false);

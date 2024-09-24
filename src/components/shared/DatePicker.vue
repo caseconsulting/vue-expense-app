@@ -1,43 +1,36 @@
 <template>
   <v-text-field
-    v-mask="maskRules ?? defaults.maskRules"
     v-model="formattedDate"
-    :rules="rules"
-    validate-on="input"
     :label="label"
     :hint="hint ?? defaults.hint"
     :prepend-inner-icon="icon"
+    :variant="variant"
+    :rules="rules"
+    v-mask="mask ?? defaults.mask"
+    :autocomplete="autocomplete"
+    :persistent-hint="persistentHint"
+    :clearable="clearable"
+    @update:focused="onFocusChange"
+    validate-on="input"
     @click:prepend="showMenu = true"
     @keypress="showMenu = false"
-    @update:focused="onFocusChange"
-    :autocomplete="autocomplete"
-    :clearable="clearable"
-    :persistent-hint="persistentHint"
-    :variant="variant"
   >
     <v-menu activator="parent" :close-on-content-click="false" v-model="showMenu" location="start center">
       <v-date-picker
         v-model="date"
-        :show-adjacent-months="adjacentDays"
-        hide-actions
-        keyboard-icon=""
-        color="#bc3825"
         :title="label"
+        :show-adjacent-months="adjacentDays"
+        color="#bc3825"
+        keyboard-icon=""
+        hide-actions
       />
     </v-menu>
   </v-text-field>
 </template>
 
 <script setup>
-/**
- * POINTS OF ISSUE:
- * - how does this manage timezones?
- * - how does this manage formats that include the time?
- */
-
 import { ref, watch } from 'vue';
 import { format } from '@/shared/dateUtils';
-// import { mask } from 'vue-the-mask';
 
 const props = defineProps({
   // DISPLAY
@@ -49,7 +42,7 @@ const props = defineProps({
 
   // LOGIC/CONFIG
   rules: { type: Array, default: () => [] },
-  maskRules: { type: String, default: undefined },
+  mask: { type: String, default: undefined },
 
   // FUNCTIONALITY
   returnFormat: { type: String, default: 'YYYY-MM-DD' },
@@ -68,14 +61,13 @@ const props = defineProps({
 // custom defualts that rely on other props
 let defaults = {
   hint: props.displayFormat,
-  maskRules: props.displayFormat.replaceAll(/\w/gi, '#')
+  mask: props.displayFormat.replaceAll(/\w/gi, '#')
 };
 
 // define refs
 const date = defineModel(); // v-model
 const formattedDate = ref(format(date.value, null, props.displayFormat));
 const showMenu = ref(false);
-// const vMask = mask; // custom directive
 
 /**
  * Action(s) to take when the user clicks in/out of the box
