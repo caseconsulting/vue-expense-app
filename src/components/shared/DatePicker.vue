@@ -5,6 +5,8 @@
     :hint="hint ?? defaults.hint"
     :prepend-inner-icon="icon"
     :variant="variant"
+    :hide-details="hideDetails"
+    :disabled="disabled"
     :rules="rules"
     v-mask="mask ?? defaults.mask"
     :autocomplete="autocomplete"
@@ -39,6 +41,8 @@ const props = defineProps({
   icon: { type: String, default: 'mdi-calendar' },
   variant: { type: String, default: 'underlined' },
   adjacentDays: { type: Boolean, default: false },
+  hideDetails: { type: Boolean, default: false },
+  disabled: { type: Boolean, default: false },
 
   // LOGIC/CONFIG
   rules: { type: Array, default: () => [] },
