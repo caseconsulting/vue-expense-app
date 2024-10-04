@@ -176,7 +176,7 @@ async function fillData() {
       title: 'Total Employees',
       value: getEmployeeCount(nonInternEmployees, false),
       employeeNames: getEmployeeNames(nonInternEmployees),
-      info: 'Excludes interns'
+      info: "Excludes 'Intern' job role"
     }
   ];
 

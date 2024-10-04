@@ -298,7 +298,7 @@ function filterEmployees(employees) {
     // remove employees that were hired after given year, or departed before given year
     let yearFilterExclusions = ['ppto']; // export types to exclude from year filter
     if (!yearFilterExclusions.includes(exportType.value.value)) {
-      let hireDateValid = !!e.hireDate && isSameOrBefore(e.hireDate, f.periodEnd, 'day');
+      let hireDateValid = e.hireDate && isSameOrBefore(e.hireDate, f.periodEnd, 'day');
       let deptDateValid = !e.deptDate || isAfter(e.deptDate, f.periodStart, 'day');
       if (!hireDateValid || !deptDateValid) return false;
     }
