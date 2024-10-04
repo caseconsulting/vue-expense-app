@@ -397,9 +397,10 @@ function cancel() {
 /**
  * Save info to database and emit to other components. Note that this is called from TimeData.vue
  * as a recalculation method to ensure that people don't have previous months in their plan
+ *
+ * @param preventUpload - whether or not to prevent uploading the new PTO value to the DB
  */
-async function save() {
-  console.log('saving');
+async function save(preventUpload = false) {
   // set loading status
   loading.value = true;
 
@@ -416,7 +417,7 @@ async function save() {
       }
     }
   };
-  await api.updateAttribute(api.EMPLOYEES, data, 'plannedPto');
+  if (!preventUpload) await api.updateAttribute(api.EMPLOYEES, data, 'plannedPto');
 
   // refresh store user from DB and reset emitter
   await updateStoreUser();

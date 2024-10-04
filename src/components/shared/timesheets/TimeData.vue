@@ -56,7 +56,7 @@ import PTOPlanningForm from '@/components/shared/PTOPlanningForm.vue';
 import api from '@/shared/api';
 import { computed, inject, onBeforeMount, onBeforeUnmount, ref, unref, watch } from 'vue';
 import { useStore } from 'vuex';
-import { difference, getTodaysDate, isBefore, isSameOrBefore, now } from '@/shared/dateUtils';
+import { difference, isBefore, now } from '@/shared/dateUtils';
 import { updateStoreContracts } from '@/utils/storeUtils';
 import { getCalendarYearPeriod, getContractYearPeriod } from './time-periods';
 
@@ -87,6 +87,7 @@ const KEYS = ref({
   CALENDAR_YEAR: 'calendarYear',
   CONTRACT_YEAR: 'contractYear'
 });
+let hasSavedPlannedPto = false;
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -122,12 +123,10 @@ onBeforeMount(async () => {
 
   // listen for ability to refresh PTO plan results
   emitter.on('auto-save-pto-planner', () => {
-    // if there are previous months, resave the plan to get rid of them properly
-    if (isSameOrBefore(clonedEmployee.value.plannedPto.plan[0].date, getTodaysDate(), 'month')) {
-      hiddenPtoPlanningFormRef.value.save();
-    } else {
-      console.log(clonedEmployee.value.plannedPto.plan);
-      console.log('no months to remove');
+    // run the PTO planner save function
+    if (!hasSavedPlannedPto) {
+      hiddenPtoPlanningFormRef.value.save(true);
+      hasSavedPlannedPto = true;
     }
   });
 

@@ -606,7 +606,6 @@ function handleProfile() {
  */
 async function loadHomePageData() {
   await Promise.all([refreshEmployee(), createEvents()]);
-  console.log(employee.value.plannedPto.plan);
   emitter.emit('auto-save-pto-planner');
 } // loadHomePageData
 
