@@ -43,7 +43,6 @@ const CONTRACT_STATUSES = {
 async function execute(method, resource, data, params) {
   // inject the accessToken for each request
   let accessToken = getAccessToken();
-
   try {
     let c = await client({
       method,
@@ -423,8 +422,9 @@ async function getResume(employeeId) {
  */
 async function createAttachment(expense, file) {
   let formData = new FormData();
-  formData.append('receipt', file);
-
+  for (let i = 0; i < file.length; i++) {
+    formData.append('receipt', file[i], file[i].name);
+  }
   return await execute('post', `/attachment/${expense.employeeId}/${expense.id}`, formData);
 } // createAttachment
 
@@ -435,7 +435,16 @@ async function createAttachment(expense, file) {
  * @return - success code
  */
 async function deleteAttachment(expense) {
-  return await execute('delete', `attachment/${expense.employeeId}/${expense.id}/${expense.receipt}`);
+  let result;
+  let length = Array.isArray(expense.receipt) ? expense.receipt.length : 1; //check if it's multiple or a single file
+  for (let i = 0; i < length; i++) {
+    if (length > 1) {
+      result = await execute('delete', `attachment/${expense.employeeId}/${expense.id}/${expense.receipt[i].name}`);
+    } else {
+      result = await execute('delete', `attachment/${expense.employeeId}/${expense.id}/${expense.receipt.name}`);
+    }
+  }
+  return result;
 } // deleteAttachment
 
 /**
