@@ -2,11 +2,12 @@
   <div class="text-sm-center text-md-center text-lg-center">
     <!-- Receipt Input -->
     <v-file-input
-      v-model="inputFile"
+      v-model="inputFiles"
       :rules="[...passedRules, ...fileSizeRule()]"
       :label="label"
       :accept="acceptedFileTypes"
       :disabled="disabled"
+      multiple
       variant="underlined"
     ></v-file-input>
   </div>
@@ -26,7 +27,7 @@ const emitter = inject('emitter');
 
 const fileSizeLimit = ref(3);
 const previewURL = ref('');
-const inputFile = ref([]);
+const inputFiles = ref([]);
 const label = ref('Select Receipt (3.0 MB limit)');
 
 // set label
@@ -48,7 +49,20 @@ const fileTooBig = computed(() => megabytes.value > fileSizeLimit.value);
 /**
  * File size in megabytes
  */
-const megabytes = computed(() => (inputFile.value && inputFile.value[0] ? inputFile.value[0].size / 1000000 : 0));
+const megabytes = computed(() => {
+  if (inputFiles.value) {
+    let size = 0;
+    for (let i = 0; i < inputFiles.value.length; i++) {
+      if (inputFiles.value[i] / 1000000 > fileSizeLimit.value) {
+        size = inputFiles.value[i] / 1000000;
+        return size;
+      }
+    }
+    return size;
+  } else {
+    return 0;
+  }
+});
 
 /**
  * Computed array of the accepted file types
@@ -81,7 +95,7 @@ const acceptedFileTypes = computed(() => {
 // |--------------------------------------------------|
 
 watch(
-  inputFile,
+  inputFiles,
   () => {
     receiptChange();
   },
@@ -92,7 +106,7 @@ watch(
   () => props.receipt,
   () => {
     if (props.receipt == null) {
-      inputFile.value[0] = null;
+      inputFiles.value = [];
     }
   }
 );
@@ -110,7 +124,7 @@ function fileSizeRule() {
   return [
     () =>
       !fileTooBig.value ||
-      `The selected file (${megabytes.value.toFixed(2)} MB) exceeds the size limit of ${fileSizeLimit.value.toFixed(1)} MB`
+      `One of the selected files (${megabytes.value.toFixed(2)} MB) exceeds the size limit of ${fileSizeLimit.value.toFixed(1)} MB`
   ];
 } // fileSizeRule
 
@@ -118,17 +132,19 @@ function fileSizeRule() {
  * Set file data.
  */
 function receiptChange() {
-  if (inputFile.value && inputFile.value[0]) {
+  if (inputFiles.value) {
     // file exists
-    if (inputFile.value[0].name.lastIndexOf('.') <= 0 || fileTooBig.value) {
-      // end if file name is missing or file is too large
-      return;
+    for (let i = 0; i < inputFiles.value.length; i++) {
+      if (inputFiles.value[i].name.lastIndexOf('.') <= 0 || fileTooBig.value) {
+        // end if file name is missing or file is too large
+        return;
+      }
     }
     const fr = new FileReader();
-    fr.readAsDataURL(inputFile.value[0]);
+    fr.readAsDataURL(inputFiles.value[0]);
     fr.addEventListener('load', () => {
       previewURL.value = fr.result;
-      emitter.emit('fileSelected', inputFile.value[0]);
+      emitter.emit('fileSelected', inputFiles.value);
     });
   } else {
     // file does not exist
