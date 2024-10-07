@@ -17,20 +17,18 @@
         <p v-if="!model.deptDate" class="info-header">Since {{ monthDayYearFormat(model.hireDate) }}</p>
         <p v-else>{{ monthDayYearFormat(model.hireDate) - monthDayYearFormat(model.deptDate) }}</p>
       </div>
-      <v-row>
-        <v-col v-if="wasIntern" class="pa-0 pt-3 ma-0">
-          <div class="info-header font-weight-black">Internship date</div>
-          <div class="info-div">
-            {{ internshipDate }}
-          </div>
-        </v-col>
-        <v-col>
-          <div class="info-header font-weight-black">Time with CASE</div>
-          <div class="info-div">{{ getYearsWith }} {{ getDaysWith }}</div>
-        </v-col>
-      </v-row>
+      <div v-if="wasIntern">
+        <h2 class="fit-content" style="font-size: large">Internship date</h2>
+        <div class="info-div">
+          {{ internshipDate }}
+        </div>
+      </div>
       <div>
-        <h2 style="font-size: large">Anniversary Countdown <v-icon size="small">mdi-balloon</v-icon></h2>
+        <h2 class="fit-content" style="font-size: large">Time with CASE</h2>
+        <div class="info-div">{{ getYearsWith }} {{ getDaysWith }}</div>
+      </div>
+      <div>
+        <h2 style="font-size: large">Anniversary Countdown</h2>
         <p class="info-header" v-if="!model.hireDate">It's your Anniversary!</p>
         <p class="info-header" v-else>{{ getDaysUntil }} Days until Anniversary</p>
       </div>
@@ -50,7 +48,7 @@ import { computed, ref } from 'vue';
 // |--------------------------------------------------|
 
 const props = defineProps(['model']);
-const wasIntern = ref(props.model.employeeRole === 'intern');
+const wasIntern = ref(props.model.employeeRole === 'intern'); //temp for now until intern start date and start date are separated
 const internshipDate = ref(monthDayYearFormat(props.model.hireDate)); //temp for now
 
 // |--------------------------------------------------|
