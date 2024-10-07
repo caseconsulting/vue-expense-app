@@ -355,8 +355,12 @@ export function getContractsInfo(employee, allContracts) {
       _forEach(contract.projects, (project) => {
         let p = allProjects.find((p) => p.id === project.projectId);
         projects.push(`${p.projectName} - ${(getProjectLengthInYears(project) / 12).toFixed(1)} years`);
-        workLocations.push(p.workType === 'Remote' ? getEmployeeCurrentAddress(employee) : p.location || 'No Location');
-        workTypes.push(p.workType || 'No Work Type');
+        workLocations.push(
+          project.workType === 'Remote' || (!project.workType && p.workType === 'Remote')
+            ? getEmployeeCurrentAddress(employee)
+            : project.location || p.location || 'No Location'
+        );
+        workTypes.push(project.workType || p.workType || 'No Work Type');
         let endDate = format(project.endDate || getTodaysDate(), null, 'YYYY-MM-DD');
         earliestDate = minimum([earliestDate, endDate]);
       });
