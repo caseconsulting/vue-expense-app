@@ -28,7 +28,7 @@ const emitter = inject('emitter');
 const fileSizeLimit = ref(3);
 const previewURL = ref('');
 const inputFiles = ref([]);
-const label = ref('Select Receipt (3.0 MB limit)');
+const label = ref('Select Receipt(s) (3.0 MB limit)');
 
 // set label
 if (props.customLabel) {
@@ -132,7 +132,7 @@ function fileSizeRule() {
  * Set file data.
  */
 function receiptChange() {
-  if (inputFiles.value) {
+  if (inputFiles.value && inputFiles.value.length > 0) {
     // file exists
     for (let i = 0; i < inputFiles.value.length; i++) {
       if (inputFiles.value[i].name.lastIndexOf('.') <= 0 || fileTooBig.value) {
