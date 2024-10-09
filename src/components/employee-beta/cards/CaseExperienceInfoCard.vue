@@ -6,40 +6,33 @@
 
     <!-- Job Role and Hire Date information -->
     <v-card-text class="pb-0">
-      <div v-if="props.model.jobRole" class="">
-        <h2 class="mt-4 fit-content" style="font-size: x-large">{{ props.model.jobRole }}</h2>
-        <p v-if="!model.deptDate" class="info-header">Since {{ monthDayYearFormat(model.hireDate) }}</p>
-        <p v-else>{{ monthDayYearFormat(model.hireDate) - monthDayYearFormat(model.deptDate) }}</p>
+      <div v-if="props.model.jobRole">
+        <h2 class="mt-4 fit-content" style="font-size: large">{{ props.model.jobRole }}</h2>
+        <p v-if="!model.deptDate" class="mb-1 info-header">Since {{ monthDayYearFormat(model.hireDate) }}</p>
+        <p class="mb-1 info-header" v-else>Departed {{ monthDayYearFormat(model.deptDate) }}</p>
       </div>
       <div v-else>
         <!-- For testing beta purposes:) -->
-        <h2 class="mt-4" style="font-size: x-large">Software Dev Intern</h2>
+        <h2 class="mt-2" style="font-size: large">Software Dev Intern</h2>
         <p v-if="!model.deptDate" class="info-header">Since {{ monthDayYearFormat(model.hireDate) }}</p>
-        <p v-else>{{ monthDayYearFormat(model.hireDate) - monthDayYearFormat(model.deptDate) }}</p>
+        <p class="info-header" v-else>Departed {{ monthDayYearFormat(model.deptDate) }}</p>
       </div>
-      <v-row>
-        <v-col v-if="wasIntern" class="pa-0 pt-3 ma-0">
-          <div class="info-header font-weight-black">Internship date</div>
-          <div class="info-div">
-            {{ internshipDate }}
-          </div>
-        </v-col>
-        <v-col>
-          <div class="info-header font-weight-black">Time with CASE</div>
-          <div class="info-div">{{ getYearsWith }} {{ getDaysWith }}</div>
-        </v-col>
-      </v-row>
-    </v-card-text>
-
-    <!-- Anniversary Card -->
-    <v-card elevation="1" class="my-2 mx-4" style="background-color: #f8f8f8">
-      <v-card-title class="pa-0">
-        <div class="text-center">
-          <p v-if="!model.hireDate" class="font-20 ma-2">0 Days until Anniversary</p>
-          <p v-else class="font-20 ma-2">{{ getDaysUntil }} Days until Anniversary</p>
+      <div v-if="wasIntern">
+        <h2 class="fit-content" style="font-size: large">Internship date</h2>
+        <div class="info-div">
+          {{ internshipDate }}
         </div>
-      </v-card-title>
-    </v-card>
+      </div>
+      <div>
+        <h2 class="fit-content" style="font-size: large">Time with CASE</h2>
+        <div class="info-div">{{ getYearsWith }} {{ getDaysWith }}</div>
+      </div>
+      <div>
+        <h2 style="font-size: large">Anniversary Countdown</h2>
+        <p class="info-header" v-if="!model.hireDate">It's your Anniversary!</p>
+        <p class="info-header" v-else>{{ getDaysUntil }} Days until Anniversary</p>
+      </div>
+    </v-card-text>
   </v-card>
 </template>
 
@@ -55,7 +48,7 @@ import { computed, ref } from 'vue';
 // |--------------------------------------------------|
 
 const props = defineProps(['model']);
-const wasIntern = ref(props.model.employeeRole === 'intern');
+const wasIntern = ref(props.model.employeeRole === 'intern'); //temp for now until intern start date and start date are separated
 const internshipDate = ref(monthDayYearFormat(props.model.hireDate)); //temp for now
 
 // |--------------------------------------------------|
