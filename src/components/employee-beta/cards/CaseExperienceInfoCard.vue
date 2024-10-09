@@ -9,13 +9,13 @@
       <div v-if="props.model.jobRole">
         <h2 class="mt-4 fit-content" style="font-size: large">{{ props.model.jobRole }}</h2>
         <p v-if="!model.deptDate" class="mb-1 info-header">Since {{ monthDayYearFormat(model.hireDate) }}</p>
-        <p class="mb-1" v-else>{{ monthDayYearFormat(model.hireDate) - monthDayYearFormat(model.deptDate) }}</p>
+        <p class="mb-1 info-header" v-else>Departed {{ monthDayYearFormat(model.deptDate) }}</p>
       </div>
       <div v-else>
         <!-- For testing beta purposes:) -->
         <h2 class="mt-2" style="font-size: large">Software Dev Intern</h2>
         <p v-if="!model.deptDate" class="info-header">Since {{ monthDayYearFormat(model.hireDate) }}</p>
-        <p v-else>{{ monthDayYearFormat(model.hireDate) - monthDayYearFormat(model.deptDate) }}</p>
+        <p class="info-header" v-else>Departed {{ monthDayYearFormat(model.deptDate) }}</p>
       </div>
       <div v-if="wasIntern">
         <h2 class="fit-content" style="font-size: large">Internship date</h2>
