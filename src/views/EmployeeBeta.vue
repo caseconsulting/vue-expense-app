@@ -119,6 +119,7 @@
         <v-col cols="12" :lg="displayTimeAndBalances ? 8 : 11" class="pa-0">
           <employee-info
             v-model="model"
+            :key="model"
             :contracts="contracts"
             :loading="loading"
             :refreshKey="refreshKey"
@@ -210,6 +211,7 @@ onMounted(() => {
   emitter.on('update', (updatedEmployee) => {
     if (updatedEmployee) {
       model.value = new Employee(updatedEmployee);
+      console.log(model.value);
       useDisplaySuccess('Employee successfully updated!');
     }
   });

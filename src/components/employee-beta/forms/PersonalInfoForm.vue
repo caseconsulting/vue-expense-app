@@ -467,7 +467,12 @@
     <v-row class="groove">
       <v-col align="center">
         <v-btn @click="toggleEdit()">Click to Edit EEO Form</v-btn>
-        <e-e-o-compliance-edit-modal v-model="toggleForm" :model="editedEmployee"></e-e-o-compliance-edit-modal>
+        <e-e-o-compliance-edit-modal
+          v-model="toggleForm"
+          :preventModalRefresh="true"
+          :model="editedEmployee"
+          :key="editedEmployee"
+        ></e-e-o-compliance-edit-modal>
       </v-col>
     </v-row>
   </div>

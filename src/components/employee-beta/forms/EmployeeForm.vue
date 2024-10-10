@@ -521,6 +521,18 @@ async function validate() {
  * Gets an object containing only the fields that were edited by the user
  */
 function getChanges() {
+  // values to not allow the normal form to edit
+  let blacklist = new Set([
+    'eeoAdminHasFilledOutEeoForm',
+    'eeoDeclineSelfIdentify',
+    'eeoGender',
+    'eeoHasDisability',
+    'eeoHispanicOrLatino',
+    'eeoIsProtectedVeteran',
+    'eeoJobCategory',
+    'eeoRaceOrEthnicity'
+  ]);
+
   let changes = _pickBy(editedEmployee.value, (value, key) => {
     const oldValue = props.employee[key];
     const newValue = value;
@@ -528,7 +540,7 @@ function getChanges() {
     if (key === 'tags') return false; // tags are handled after the pickBy
 
     // if both values are empty (i.e. empty string, null, or undefined) they are treated as equal
-    return !_isEqual(oldValue, newValue) && !(isEmpty(oldValue) && isEmpty(newValue));
+    return !blacklist.has(key) && !_isEqual(oldValue, newValue) && !(isEmpty(oldValue) && isEmpty(newValue));
   });
 
   const editedTags = editedEmployee.value.tags;
