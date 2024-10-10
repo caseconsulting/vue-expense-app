@@ -13,7 +13,16 @@
         </v-radio-group>
 
         <!-- Start and End Date selectors -->
-        <h3 class="mt-4">Timeframe</h3>
+        <h3 class="mt-4">
+          Timeframe
+          <v-icon
+            class="pb-2 pointer"
+            color="#3f51b5"
+            size="x-small"
+            icon="mdi-information"
+            v-tooltip="'Include only employees who were active at least 1 day between these dates'"
+          />
+        </h3>
         <v-row>
           <v-col cols="12" sm="6">
             <date-picker
