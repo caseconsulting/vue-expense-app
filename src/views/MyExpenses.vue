@@ -428,7 +428,7 @@
                           {{ getEmployee(item.recipient) }}
                         </p>
                         <p v-if="!isEmpty(item.note)"><b>Notes: </b>{{ item.note }}</p>
-                        <p v-if="!isEmpty(item.receipt)"><b>Receipt: </b>{{ item.receipt }}</p>
+                        <p v-if="!isEmpty(item.receipt)"><b>Receipt(s): </b>{{ item.receipt }}</p>
                         <p v-if="!isEmpty(item.url)">
                           <b>Url: </b> <a v-if="item.url" :href="item.url" target="_blank">{{ item.url }}</a>
                         </p>
@@ -553,7 +553,7 @@ const expense = ref({
   note: null,
   url: null,
   createdAt: null,
-  receipt: null,
+  receipt: [],
   cost: null,
   description: null,
   employeeId: null,
@@ -620,7 +620,7 @@ const propExpense = ref({
   purchaseDate: null,
   reimbursedDate: null,
   note: null,
-  receipt: null,
+  receipt: [],
   recipient: null,
   url: null,
   showOnFeed: null

@@ -52,7 +52,10 @@ const props = defineProps([
  * Opens a new windows tab displaying the signed url of the expense selected.
  */
 async function openDownloadTab() {
-  let signedURL = await api.getAttachment(props.expense.employeeId, props.expense.id);
-  window.open(signedURL, '_blank');
+  let signedURLs;
+  signedURLs = await api.getAttachment(props.expense.employeeId, props.expense.id);
+  for (let i = 0; i < signedURLs.length; i++) {
+    window.open(signedURLs[i], '_blank');
+  }
 } // openDownloadTab
 </script>

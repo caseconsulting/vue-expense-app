@@ -839,7 +839,7 @@ function clearForm() {
   this.editedExpense = _cloneDeep(this.expense);
   this.originalExpense = this.editedExpense;
   this.purchaseDateFormatted = null;
-  this.file = null;
+  this.files = [];
 
   this.urlInfo['url'] = '';
   this.urlInfo['category'] = '';
@@ -903,13 +903,17 @@ async function createNewEntry() {
   let newUUID = generateUUID();
   this.editedExpense['id'] = newUUID;
   this.editedExpense['createdAt'] = getTodaysDate();
-  if (this.isReceiptRequired() && this.file) {
+  if (this.isReceiptRequired() && this.files) {
     // if receipt required and updating receipt
-    // stores file name for lookup later
-    this.editedExpense['receipt'] = this.file.name;
+    // stores files name for lookup later
+    let fileNames = [];
+    for (let i = 0; i < this.files.length; i++) {
+      fileNames[i] = this.files[i].name;
+    }
+    this.editedExpense['receipt'] = fileNames;
     // upload attachment to S3
-    updatedAttachment = await api.createAttachment(this.editedExpense, this.file);
-    if (updatedAttachment.key) {
+    updatedAttachment = await api.createAttachment(this.editedExpense, this.files);
+    if (updatedAttachment[0].key) {
       // successfully uploads file
       updatedExpense = await api.createItem(api.EXPENSES, this.editedExpense);
 
@@ -936,7 +940,7 @@ async function createNewEntry() {
   } else {
     // if receipt not required or not updating receipt
     if (!this.isReceiptRequired()) {
-      this.file = null;
+      this.files = [];
       this.editedExpense['receipt'] = null;
     }
     updatedExpense = await api.createItem(api.EXPENSES, this.editedExpense);
@@ -1289,18 +1293,23 @@ function preformatFloat(float) {
 } // preformatFloat
 
 /**
- * Sets the file.
+ * Sets the files.
  *
- * @param file - receipt
+ * @param files - receipt
  */
-function setFile(file) {
-  if (file) {
+function setFile(files) {
+  if (files) {
     this.isInactive = true;
-    this.file = file;
-    this.editedExpense['receipt'] = file.name;
+    this.files = files;
+    let fileNames = [];
+    for (let i = 0; i < files.length; i++) {
+      fileNames[i] = files[i].name;
+    }
+    this.editedExpense['receipt'] = fileNames;
+    this.receipt = fileNames;
     this.isInactive = false;
   } else {
-    this.file = null;
+    this.files = [];
     this.editedExpense['receipt'] = null;
     this.receipt = null;
   }
@@ -1311,7 +1320,7 @@ function setFile(file) {
  */
 async function scanFile() {
   this.scanLoading = true;
-  let file = this.file;
+  let file = this.files;
   if (file) {
     this.isInactive = true;
     //go get text data from textract and comprehend
@@ -1561,13 +1570,18 @@ async function updateExistingEntry() {
   let updatedExpense;
 
   // if updating an expense
-  if (this.isReceiptRequired() && this.file) {
+  if (this.isReceiptRequired() && this.files) {
     // if receipt required and updating receipt
     // stores file name for lookup later
-    this.editedExpense['receipt'] = this.file.name;
+
+    let fileNames = [];
+    for (let i = 0; i < this.files.length; i++) {
+      fileNames[i] = this.files[i].name;
+    }
+    this.editedExpense['receipt'] = fileNames;
     // upload attachment to S3
-    updatedAttachment = await api.createAttachment(this.editedExpense, this.file);
-    if (updatedAttachment.key) {
+    updatedAttachment = await api.createAttachment(this.editedExpense, this.files);
+    if (updatedAttachment[0].key) {
       // successfully uploaded file
       // update item in database
       updatedExpense = await api.updateItem(api.EXPENSES, this.editedExpense);
@@ -1588,12 +1602,13 @@ async function updateExistingEntry() {
       }
     } else {
       // error uploading file
+      console.log(updatedAttachment);
       this.emitter.emit('error', updatedAttachment.response.data.message);
     }
   } else {
     // if not updating receipt
     if (!this.isReceiptRequired()) {
-      this.file = null;
+      this.files = [];
       this.editedExpense['receipt'] = null;
     }
 
@@ -1971,16 +1986,23 @@ function watchEditedExpenseReimbursedDate() {
 /**
  * watcher for file -  decides whether to disable scan button.
  */
-function watchFile() {
+function watchFiles() {
   //for disabling the scan button
-  if (this.file == null) {
+  if (this.files == [] || this.files == null) {
     //if no file
-    this.disableScan = true;
-  } else if (this.file.type != 'image/jpeg' && this.file.type != 'image/png' && this.file.type != 'application/pdf') {
-    //if file isn't jpg or png
     this.disableScan = true;
   } else {
     this.disableScan = false;
+  }
+  for (let i = 0; i < this.files.length; i++) {
+    if (
+      this.files[i].type != 'image/jpeg' &&
+      this.files[i].type != 'image/png' &&
+      this.files[i].type != 'application/pdf'
+    ) {
+      //if file isn't jpg or png
+      this.disableScan = true;
+    }
   }
 } // watchFile
 
@@ -2036,7 +2058,7 @@ export default {
       errorSubmitting: false, // avoid clearing fields if error exists
       expenseTypes: [], // expense types
       expenseTypeName: null, //expense type name for budget
-      file: undefined, // receipt
+      files: [], // receipts
       hint: '', // form hints
       isCovered: false, // expense is fully covered
       isHighFive: false, // expense is a high five
@@ -2125,7 +2147,7 @@ export default {
     'editedExpense.employeeId': watchEditedExpenseEmployeeID,
     'editedExpense.purchaseDate': watchEditedExpensePurchaseDate,
     'editedExpense.reimbursedDate': watchEditedExpenseReimbursedDate,
-    file: watchFile
+    files: watchFiles
   }
 };
 </script>
