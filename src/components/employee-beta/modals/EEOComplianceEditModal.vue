@@ -171,7 +171,7 @@ import { updateStoreEmployees, updateStoreUser } from '@/utils/storeUtils';
 // |--------------------------------------------------|
 
 const emitter = inject('emitter');
-const props = defineProps(['model']);
+const props = defineProps(['model', 'preventModalRefresh']);
 const route = useRoute();
 const store = useStore();
 
@@ -339,10 +339,20 @@ async function submit() {
   emitter.emit('startAction');
   if (props.model.id) {
     // updating employee
-    let updatedEmployee = await api.updateItem(api.EMPLOYEES, editedEmployee.value);
+    let eeoData = {
+      eeoAdminHasFilledOutEeoForm: editedEmployee.value.eeoAdminHasFilledOutEeoForm,
+      eeoDeclineSelfIdentify: editedEmployee.value.eeoDeclineSelfIdentify,
+      eeoGender: editedEmployee.value.eeoGender,
+      eeoHasDisability: editedEmployee.value.eeoHasDisability,
+      eeoHispanicOrLatino: editedEmployee.value.eeoHispanicOrLatino,
+      eeoIsProtectedVeteran: editedEmployee.value.eeoIsProtectedVeteran,
+      eeoJobCategory: editedEmployee.value.eeoJobCategory,
+      eeoRaceOrEthnicity: editedEmployee.value.eeoRaceOrEthnicity
+    };
+    let updatedEmployee = await api.updateAttributes(api.EMPLOYEES, editedEmployee.value.id, eeoData);
     if (updatedEmployee.id) {
       // successfully updated employee
-      emitter.emit('update', updatedEmployee);
+      emitter.emit('update', props.preventModalRefresh ? undefined : updatedEmployee);
       // getEmployees and update store with latest data
       if (props.model.id === store.getters.user.id) await updateStoreUser();
       await updateStoreEmployees();
