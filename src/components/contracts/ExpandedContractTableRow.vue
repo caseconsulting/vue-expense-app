@@ -58,7 +58,11 @@
                 <a
                   @click="$router.push(`/employee/${emp.employeeNumber}`)"
                   class="pointer"
-                  :class="_isEmpty(getOverridenValues(emp, item)) ? 'text-blue-darken-2' : 'text-purple-darken-2'"
+                  :class="
+                    _isEmpty(getOverridenValues(emp, item))
+                      ? 'text-blue-darken-4'
+                      : 'font-weight-bold text-blue-lighten-1'
+                  "
                 >
                   {{ nicknameAndLastName(emp) }}
                   <v-tooltip v-if="!_isEmpty(getOverridenValues(emp, item))" activator="parent">
