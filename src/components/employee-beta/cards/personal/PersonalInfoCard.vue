@@ -6,7 +6,7 @@
         <h3 class="text-white">Personal Info</h3>
       </div>
     </template>
-    <v-card-text class="px-7 pt-7 pb-1 text-black">
+    <v-card-text class="px-7 pt-4 pb-1 text-black">
       <!-- full name -->
       <v-row dense>
         <v-col>

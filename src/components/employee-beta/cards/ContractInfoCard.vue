@@ -4,7 +4,7 @@
       <v-card-text class="pb-0 pt-3" v-if="!isEmpty(contractsList)">
         <div v-if="!noneActive">
           <p><b>Contract: </b>{{ getContractNameFromId(currentContractId) }}</p>
-          <p class="ml-4">Start Date: {{ getContractStartDate(currentContractId) }}</p>
+          <p><b>Start Date: </b>{{ getContractStartDate(currentContractId) }}</p>
           <p><b>Prime: </b>{{ getPrimeNameFromId(currentContractId) }}</p>
           <p v-for="(project, index) in currentProjects" :key="project.projectId + index" class="ml-4">
             Project: {{ getProjectNameFromId(project.projectId) }}
