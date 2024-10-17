@@ -41,26 +41,28 @@
       </v-col>
 
       <!-- birthday -->
-      <b class="mb-1">Birthday: </b>
-      <v-row dense v-if="!isEmpty(getBirthday()) && (isAdmin || isUser)">
-        <v-col class="d-inline-flex">
-          <p class="mb-1">{{ getBirthday() }}</p>
-        </v-col>
-        <v-col class="d-inline float-right" cols="auto">
-          <v-icon v-if="!model.birthdayFeed">mdi-shield</v-icon>
-          <v-icon v-else>mdi-shield-outline</v-icon>
-          <v-tooltip activator="parent" location="top">{{
-            !model.birthdayFeed ? 'Hidden from other employees' : 'Visible to other employees'
-          }}</v-tooltip>
-        </v-col>
-      </v-row>
+      <div v-if="!isEmpty(getBirthday()) && (isAdmin || isUser)">
+        <b class="mb-1">Birthday: </b>
+        <v-row dense>
+          <v-col class="d-inline-flex">
+            <p class="mb-1">{{ getBirthday() }}</p>
+          </v-col>
+          <v-col class="d-inline float-right" cols="auto">
+            <v-icon v-if="!model.birthdayFeed">mdi-shield</v-icon>
+            <v-icon v-else>mdi-shield-outline</v-icon>
+            <v-tooltip activator="parent" location="top">{{
+              !model.birthdayFeed ? 'Hidden from other employees' : 'Visible to other employees'
+            }}</v-tooltip>
+          </v-col>
+        </v-row>
+      </div>
 
       <!-- current address -->
       <v-col dense v-if="!isEmpty(getCurrentAddress() && (isAdmin || isUser))">
         <v-row no-gutter cols="auto">
           <b>Address:</b>
         </v-row>
-        <v-row class="py-1">
+        <v-row class="pb-1">
           <v-col class="pa-0">
             <p class="d-inline text-wrap">
               {{ getCurrentAddress() }}
