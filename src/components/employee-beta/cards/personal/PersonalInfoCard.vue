@@ -10,9 +10,9 @@
       <!-- full name -->
       <v-row dense>
         <v-col>
+          <b class="mb-1">Full Name: </b>
           <p class="mb-1">
-            <b>Full Name: </b
-            >{{ model.firstName + ' ' + (!model.noMiddleName ? model.middleName + ' ' : '') + model.lastName }}
+            {{ model.firstName + ' ' + (!model.noMiddleName ? model.middleName + ' ' : '') + model.lastName }}
           </p>
         </v-col>
       </v-row>
@@ -41,9 +41,10 @@
       </v-col>
 
       <!-- birthday -->
+      <b class="mb-1">Birthday: </b>
       <v-row dense v-if="!isEmpty(getBirthday()) && (isAdmin || isUser)">
         <v-col class="d-inline-flex">
-          <p class="mb-1"><b>Birthday: </b> {{ getBirthday() }}</p>
+          <p class="mb-1">{{ getBirthday() }}</p>
         </v-col>
         <v-col class="d-inline float-right" cols="auto">
           <v-icon v-if="!model.birthdayFeed">mdi-shield</v-icon>

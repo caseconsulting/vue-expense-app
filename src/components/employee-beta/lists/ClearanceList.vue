@@ -2,32 +2,36 @@
   <v-list>
     <v-list-item class="pr-0" v-for="(clearance, index) in list" :key="clearance + index">
       <v-row no-gutters class="pa-0">
-        <v-card-text class="pb-0">
-          <p v-if="!isEmpty(getClearanceType(clearance))" class="clearance-type-text">
+        <v-card-text class="pb-0 pt-2">
+          <p v-if="!isEmpty(getClearanceType(clearance))" class="mb-1 clearance-type-text">
             <b>{{ getClearanceType(clearance) }}</b>
           </p>
-          <div class="gray-text ml-6">
-            <p v-if="!isEmpty(getSubmissionDate(clearance))"><b>Submission: </b>{{ getSubmissionDate(clearance) }}</p>
-            <p v-if="!isEmpty(getGrantedDate(clearance))"><b>Granted: </b>{{ getGrantedDate(clearance) }}</p>
+          <div>
+            <p class="mb-1" v-if="!isEmpty(getSubmissionDate(clearance))">
+              <b>Submission: </b>{{ getSubmissionDate(clearance) }}
+            </p>
+            <p class="mb-1" v-if="!isEmpty(getGrantedDate(clearance))">
+              <b>Granted: </b>{{ getGrantedDate(clearance) }}
+            </p>
           </div>
-          <p v-if="!isEmpty(getBadgeNumber(clearance))" class="gray-text ml-6">
+          <p class="mb-1" v-if="!isEmpty(getBadgeNumber(clearance))">
             <b>Badge Number: </b>{{ getBadgeNumber(clearance) }}
           </p>
-          <p v-if="!isEmpty(getBadgeExpirationDate(clearance))" class="gray-text ml-6">
+          <p class="mb-1" v-if="!isEmpty(getBadgeExpirationDate(clearance))">
             <b>Expiration: </b>{{ getBadgeExpirationDate(clearance) }}
           </p>
-          <p v-if="toggleModal && !isEmpty(getAdjudicationDates(clearance))" class="gray-text ml-6">
+          <p class="mb-1" v-if="toggleModal && !isEmpty(getAdjudicationDates(clearance))">
             <b>Adjudication Dates: </b>{{ getAdjudicationDates(clearance) }}
           </p>
-          <p v-if="toggleModal && !isEmpty(getBIDates(clearance))" class="gray-text ml-6">
+          <p class="mb-1" v-if="toggleModal && !isEmpty(getBIDates(clearance))">
             <b>BI Dates: </b>{{ getBIDates(clearance) }}
           </p>
-          <p v-if="toggleModal && !isEmpty(getPolyDates(clearance))" class="gray-text ml-6 pb-2">
+          <p v-if="toggleModal && !isEmpty(getPolyDates(clearance))" class="pb-1">
             <b>Poly Dates: </b>{{ getPolyDates(clearance) }}
           </p>
         </v-card-text>
       </v-row>
-      <v-row no-gutters class="mx-5">
+      <v-row no-gutters class="mx-2">
         <v-divider v-if="index < list.length - 1" />
       </v-row>
     </v-list-item>
@@ -167,9 +171,5 @@ function getPolyDates(clearance) {
 <style scoped>
 .clearance-type-text {
   font-size: 16px;
-}
-
-.gray-text {
-  color: #828282;
 }
 </style>
