@@ -9,11 +9,11 @@
           <h3 class="text-white">Clearance</h3>
         </div>
       </template>
-      <v-row class="" v-if="!isEmpty(clearances)">
-        <v-col class="d-inline-block fit-content">
+      <v-row class="pb-0" v-if="!isEmpty(clearances)">
+        <v-col class="d-inline-block fit-content pb-0">
           <clearance-list :list="[displayedClearance]" :toggleModal="false"></clearance-list>
         </v-col>
-        <v-col class="pt-9" cols="auto">
+        <v-col class="pt-8 pb-0" cols="auto">
           <div class="pr-7">
             <v-icon>mdi-shield</v-icon>
             <v-tooltip activator="parent" location="top">All information here is hidden from other employees</v-tooltip>

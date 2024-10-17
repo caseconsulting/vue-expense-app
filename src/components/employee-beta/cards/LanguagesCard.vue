@@ -1,7 +1,7 @@
 <template>
   <div class="infoCard">
     <base-card title="Foreign Languages">
-      <v-card-text class="px-2 pt-0 pb-0 text-black">
+      <v-card-text class="px-2 pt-1 pb-0 text-black">
         <!-- Employee has entered languages-->
         <languages-list v-if="!isEmpty(model.languages)" :list="filteredList"></languages-list>
         <!-- Employee does not have Language Experience -->

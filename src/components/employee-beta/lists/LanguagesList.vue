@@ -3,17 +3,17 @@
     <v-list-item v-for="(language, index) in list" :key="language.name + index">
       <v-row no-gutters>
         <v-col :cols="isMobile() ? '6' : ''">
-          <p class="mt-3" :class="isMobile() ? 'ml-4 mobile-view' : ''">
+          <p class="my-1" :class="isMobile() ? 'ml-4 mobile-view' : ''">
             <b>{{ language.name }}</b>
           </p>
         </v-col>
         <v-col :cols="isMobile() ? '5' : ''">
-          <p class="gray-text mt-3" :class="isMobile() ? 'mobile-view' : ''">
+          <p class="gray-text my-1" :class="isMobile() ? 'mobile-view' : ''">
             <b>Fluency: </b>{{ shortenProficiency(language.proficiency) }}
           </p>
         </v-col>
       </v-row>
-      <v-row no-gutters class="my-2 mx-0">
+      <v-row no-gutters class="mt-2 mx-0">
         <v-divider v-if="index < list.length - 1" />
       </v-row>
     </v-list-item>

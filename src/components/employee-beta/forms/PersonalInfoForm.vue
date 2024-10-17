@@ -57,7 +57,8 @@
               v-model="emailUsername"
               label="CASE Email *"
               @update:model-value="removeEmailDomain()"
-              :suffix="CASE_EMAIL_DOMAIN"
+              :hint="CASE_EMAIL_DOMAIN"
+              persistent-hint
               :rules="getCaseEmailRules()"
             ></v-text-field>
           </v-col>
