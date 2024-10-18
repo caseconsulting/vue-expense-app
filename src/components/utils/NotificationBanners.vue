@@ -285,7 +285,7 @@ function getButtonStyling() {
  * accomplish this but I've been on this story for too long so.
  */
 function handleClick(pageName, extras = {}) {
-  router.push({ name: pageName, params: extras });
+  router.push({ name: pageName, params: extras, hash: '#certifications+awards' });
 } // handleClick
 
 /**
