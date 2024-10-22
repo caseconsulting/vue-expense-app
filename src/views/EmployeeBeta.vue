@@ -211,7 +211,6 @@ onMounted(() => {
   emitter.on('update', (updatedEmployee) => {
     if (updatedEmployee) {
       model.value = new Employee(updatedEmployee);
-      console.log(model.value);
       useDisplaySuccess('Employee successfully updated!');
     }
   });

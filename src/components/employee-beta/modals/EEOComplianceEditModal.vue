@@ -352,7 +352,7 @@ async function submit() {
     let updatedEmployee = await api.updateAttributes(api.EMPLOYEES, editedEmployee.value.id, eeoData);
     if (updatedEmployee.id) {
       // successfully updated employee
-      emitter.emit('update', props.preventModalRefresh ? undefined : updatedEmployee);
+      emitter.emit('update', props.preventModalRefresh ? undefined : updatedEmployee); // update editing model
       // getEmployees and update store with latest data
       if (props.model.id === store.getters.user.id) await updateStoreUser();
       await updateStoreEmployees();

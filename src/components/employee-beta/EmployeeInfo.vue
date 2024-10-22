@@ -124,8 +124,8 @@
                         <div class="tab-content">
                           <span>Customer</span>
                           <span>Orgs</span>
-                        </div></v-tab
-                      >
+                        </div>
+                      </v-tab>
                     </v-tabs>
                     <v-divider></v-divider>
                   </v-col>
