@@ -14,7 +14,7 @@
         </v-list-item-title>
         <div class="ml-12 degree-text" v-for="(degree, index) in edu.degrees" :key="degree + index">
           <p><b>Degree: </b>{{ degree.degreeType }}</p>
-          <div v-for="(major, majorIndex) in degree.majors" :key="major + majorIndex">
+          <div class="ml-6" v-for="(major, majorIndex) in degree.majors" :key="major + majorIndex">
             <p><b>Major(s): </b> {{ major }}</p>
             <p v-if="degree.minors.length > 1"><b>Minor(s): </b>{{ getMinors(degree) }}</p>
             <p v-else-if="degree.minors.length === 1"><b>Minor(s): </b>{{ degree.minors[0] }}</p>
