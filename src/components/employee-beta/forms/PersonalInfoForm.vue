@@ -419,6 +419,24 @@
               </template>
             </v-text-field>
           </v-col>
+          <v-col v-if="phoneNumber.type === 'Cell'" cols="2">
+            <v-checkbox
+              :model-value="!phoneNumber.smsOptedOut"
+              @update:model-value="phoneNumber.smsOptedOut = !phoneNumber.smsOptedOut"
+              label="Opt-in"
+            >
+              <v-tooltip activator="parent" location="top">
+                <div>
+                  I consent to receive up to two monthly text message reminders for payroll time sheets on the last work
+                  day of the pay period
+                </div>
+                <div>Text 'HELP' for support</div>
+                <div>To opt-out, uncheck the box or text 'STOP'</div>
+                <div>Message and data rates may apply</div>
+                <div>NOTE: Opted-out phone numbers can be opted-in only once in 30 days</div>
+              </v-tooltip>
+            </v-checkbox>
+          </v-col>
         </v-row>
       </v-col>
       <!-- phone numbers mobile -->
@@ -445,6 +463,24 @@
                 </v-col>
               </template>
             </v-autocomplete>
+          </v-col>
+          <v-col v-if="phoneNumber.type === 'Cell'" cols="auto">
+            <v-checkbox
+              :model-value="!phoneNumber.smsOptedOut"
+              @update:model-value="phoneNumber.smsOptedOut = !phoneNumber.smsOptedOut"
+              label="Opt-in"
+            >
+              <v-tooltip activator="parent" location="top">
+                <div>
+                  I consent to receive up to two monthly text message reminders for payroll time sheets on the last work
+                  day of the pay period
+                </div>
+                <div>Text 'HELP' for support</div>
+                <div>To opt-out, uncheck the box or text 'STOP'</div>
+                <div>Message and data rates may apply</div>
+                <div>NOTE: Opted-out phone numbers can be opted-in only once in 30 days</div>
+              </v-tooltip>
+            </v-checkbox>
           </v-col>
           <v-col class="flex-grow">
             <v-text-field
