@@ -18,23 +18,22 @@
       </v-row>
 
       <!-- phone numbers -->
-      <v-row dense v-if="!isEmpty(getPhoneNumbers())">
-        <v-col class="pr-0" cols="auto">
-          <b class="d-inline-flex">Phone Numbers:</b>
+      <v-row class="py-0 my-0" dense v-if="!isEmpty(getPhoneNumbers())">
+        <v-col class="pb-0">
+          <b class="pa-0 ma-0 d-inline-flex">Phone Numbers:</b>
         </v-col>
-        <v-col>
-          <div class="d-flex flex-row" v-for="phone in getPhoneNumbers()" :key="phone">
-            <p class="d-inline-flex pa-0" v-if="!phone.private || isAdmin || isUser">
-              {{ phone.number }}
-            </p>
-            <v-spacer></v-spacer>
-            <div class="d-inline-flex float-right">
-              <v-icon v-if="!phone.private">mdi-shield-outline</v-icon>
-              <v-icon v-else>mdi-shield</v-icon>
-              <v-tooltip activator="parent" location="top">{{
-                phone.private ? 'Hidden from other employees' : 'Visible to other employees'
-              }}</v-tooltip>
-            </div>
+      </v-row>
+      <v-row class="" v-for="phone in getPhoneNumbers()" :key="phone">
+        <v-col class="py-0">
+          <p class="pa-0 mb-1" v-if="!phone.private || isAdmin || isUser">{{ phone.type }}: {{ phone.number }}</p>
+        </v-col>
+        <v-col class="py-0" cols="auto">
+          <div class="float-right">
+            <v-icon v-if="!phone.private">mdi-shield-outline</v-icon>
+            <v-icon v-else>mdi-shield</v-icon>
+            <v-tooltip activator="parent" location="top">{{
+              phone.private ? 'Hidden from other employees' : 'Visible to other employees'
+            }}</v-tooltip>
           </div>
         </v-col>
       </v-row>
