@@ -14,7 +14,10 @@
               <b>Granted: </b>{{ getGrantedDate(clearance) }}
             </p>
           </div>
-          <p class="mb-1" v-if="!isEmpty(getBadgeNumber(clearance))">
+          <p v-if="!isEmpty(getGrantingOrg(clearance))" class="gray-text ml-6">
+            <b>Granting Org: </b>{{ getGrantingOrg(clearance) }}
+          </p>
+          <p v-if="!isEmpty(getBadgeNumber(clearance))" class="gray-text ml-6">
             <b>Badge Number: </b>{{ getBadgeNumber(clearance) }}
           </p>
           <p class="mb-1" v-if="!isEmpty(getBadgeExpirationDate(clearance))">
@@ -92,6 +95,16 @@ function getSubmissionDate(clearance) {
 function getGrantedDate(clearance) {
   if (!clearance.awaitingClearance) return monthDayYearFormat(clearance.grantedDate);
   else return null;
+}
+
+/**
+ * Returns employee granting org
+ *
+ * @param {*} clearance The clearance object
+ * @return String - badge number
+ */
+function getGrantingOrg(clearance) {
+  return clearance.grantingOrg;
 }
 
 /**
