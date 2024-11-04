@@ -121,7 +121,7 @@ function checkBadges() {
               extras: { id: `${user.value.employeeNumber}` }
             },
             closeable: false,
-            status: 'error',
+            status: 'info',
             color: '#f27311',
             message: `Badge ${expire} on ${formattedDate} for clearance: ${clearance.type}`,
             id: randId(),
@@ -154,7 +154,7 @@ function checkCertifications() {
             extras: { id: `${user.value.employeeNumber}` }
           },
           closeable: false,
-          status: 'error',
+          status: 'info',
           color: '#2a49a8',
           message: `Certification ${expire} on ${formattedDate} for certification: ${cert.name}`,
           // below only needed for mark seen button
