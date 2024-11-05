@@ -21,3 +21,7 @@ app.config.globalProperties.emitter = emitter;
 app.config.globalProperties.caseRed = '#bc3825';
 app.config.globalProperties.caseGray = '#415364';
 app.mount('#app');
+
+export default {
+  emitter
+};
