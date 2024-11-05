@@ -55,11 +55,22 @@
                 v-for="(emp, i) in getProjectCurrentEmployees(contract.item, item, $store.getters.employees)"
                 :key="emp.employeeNumber"
               >
-                <a @click="$router.push(`/employee/${emp.employeeNumber}`)" class="pointer">{{
-                  nicknameAndLastName(emp)
-                }}</a>
-                <span v-if="i != getProjectCurrentEmployees(contract.item, item, $store.getters.employees).length - 1"
-                  >,
+                <a
+                  @click="$router.push(`/employee/${emp.employeeNumber}`)"
+                  class="pointer"
+                  :class="
+                    _isEmpty(getOverridenValues(emp, item))
+                      ? 'text-blue-darken-4'
+                      : 'font-weight-bold text-blue-lighten-1'
+                  "
+                >
+                  {{ nicknameAndLastName(emp) }}
+                  <v-tooltip v-if="!_isEmpty(getOverridenValues(emp, item))" activator="parent">
+                    <div v-for="value in getOverridenValues(emp, item)" :key="value">{{ value }}</div>
+                  </v-tooltip>
+                </a>
+                <span v-if="i != getProjectCurrentEmployees(contract.item, item, $store.getters.employees).length - 1">
+                  ,
                 </span>
               </span>
             </span>
@@ -104,8 +115,10 @@
   </td>
 </template>
 <script setup>
+import _find from 'lodash/find';
 import _findIndex from 'lodash/findIndex';
 import _filter from 'lodash/filter';
+import _isEmpty from 'lodash/isEmpty';
 import _some from 'lodash/some';
 import { nicknameAndLastName } from '@/shared/employeeUtils';
 import ContractsEditItem from './ContractsEditItem.vue';
@@ -256,6 +269,19 @@ onBeforeMount(() => {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+function getOverridenValues(employee, item) {
+  let values = [];
+  let contract = _find(employee.contracts, (c) => _find(c.projects, (p) => p.projectId === item.id));
+  let project = _find(contract.projects, (p) => p.projectId === item.id);
+  if (project.location && project.location !== item.location) {
+    values.push(`Location: ${project.location}`);
+  }
+  if (project.workType && project.workType !== item.location) {
+    values.push(`Work Type: ${project.workType}`);
+  }
+  return values;
+}
 
 /**
  * Sets the item to be edited.

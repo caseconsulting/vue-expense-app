@@ -33,7 +33,7 @@
         </v-row>
       </v-container>
     </v-card-title>
-    <v-card-text :class="smAndDown ? 'pa-0' : ''">
+    <v-card-text :class="smAndDown ? 'pa-0' : 'pa-0'">
       <!-- Default Slot -->
       <slot></slot>
     </v-card-text>

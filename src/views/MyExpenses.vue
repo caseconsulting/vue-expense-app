@@ -428,7 +428,7 @@
                           {{ getEmployee(item.recipient) }}
                         </p>
                         <p v-if="!isEmpty(item.note)"><b>Notes: </b>{{ item.note }}</p>
-                        <p v-if="!isEmpty(item.receipt)"><b>Receipt: </b>{{ item.receipt }}</p>
+                        <p v-if="!isEmpty(item.receipt)"><b>Receipt(s): </b>{{ getReceipts(item.receipt) }}</p>
                         <p v-if="!isEmpty(item.url)">
                           <b>Url: </b> <a v-if="item.url" :href="item.url" target="_blank">{{ item.url }}</a>
                         </p>
@@ -553,7 +553,7 @@ const expense = ref({
   note: null,
   url: null,
   createdAt: null,
-  receipt: null,
+  receipt: [],
   cost: null,
   description: null,
   employeeId: null,
@@ -620,7 +620,7 @@ const propExpense = ref({
   purchaseDate: null,
   reimbursedDate: null,
   note: null,
-  receipt: null,
+  receipt: [],
   recipient: null,
   url: null,
   showOnFeed: null
@@ -958,6 +958,30 @@ function getEmployee(eId) {
   let employee = _find(store.getters.employees, ['id', eId]);
   return employeeUtils.nicknameAndLastName(employee);
 } // getEmployee
+
+/**
+ * Converts receipts array to a string of all the receipts
+ *
+ * @param receipts - the receipts of the expense
+ * @return string - the list of all the receipts in the expense
+ */
+function getReceipts(receipts) {
+  let stringifyReceipts = '';
+  if (Array.isArray(receipts)) {
+    //For all new expenses which are in arrays
+    for (let r in receipts) {
+      stringifyReceipts = stringifyReceipts + ' ' + receipts[r];
+      if (r < receipts.length - 1) {
+        stringifyReceipts = stringifyReceipts + ', ';
+      }
+    }
+  } else {
+    //For any old expense that is still of type String
+    stringifyReceipts = receipts;
+  }
+
+  return stringifyReceipts;
+}
 
 /**
  * Checks if the expense is reimbursed. Returns true if the

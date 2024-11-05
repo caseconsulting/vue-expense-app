@@ -121,7 +121,7 @@
 // |                                                  |
 // |--------------------------------------------------|
 
-import { onMounted, ref, reactive, watch, inject } from 'vue';
+import { onMounted, ref, reactive, watch, inject, onBeforeMount, defineExpose } from 'vue';
 import { useStore } from 'vuex';
 import { updateStoreUser, updateStorePtoCashOuts } from '../../utils/storeUtils';
 import {
@@ -176,22 +176,6 @@ const ranges = ref([
     { isYear: true }
   ]
 ]);
-// add current projects to `ranges`
-for (let contract of employee.value.contracts ?? []) {
-  for (let project of contract.projects) {
-    // skip if project is not active
-    if (project.endDate) continue;
-    // get YYYY-MM format of start and end dates, cutting off anything this month or before
-    let projectStart = add(getTodaysDate(), 1, 'month');
-    // get project end date for this contract year
-    let projectEnd = subtract(project.startDate, 1, 'day');
-    projectEnd = setYear(projectEnd, getTodaysDate('YYYY'));
-    projectEnd = add(projectEnd, 1, 'year');
-    // format dates and add changes
-    [projectStart, projectEnd] = [format(projectStart, null, 'YYYY-MM'), format(projectEnd, null, 'YYYY-MM')];
-    ranges.value.push([projectStart, projectEnd]);
-  }
-}
 
 // data table
 const headers = ref([
@@ -234,8 +218,32 @@ let cykPTO = (date) => {
 // |                    LIFECYCLES                    |
 // |                                                  |
 // |--------------------------------------------------|
+
 /**
- * Created lifecycle hook
+ * onBeforeMount lifecycle hook
+ */
+onBeforeMount(async () => {
+  employee.value = store.getters.employees.find((e) => e.id == props.employeeId);
+  // add current projects to `ranges`
+  for (let contract of employee.value.contracts ?? []) {
+    for (let project of contract.projects) {
+      // skip if project is not active
+      if (project.endDate) continue;
+      // get YYYY-MM format of start and end dates, cutting off anything this month or before
+      let projectStart = add(getTodaysDate(), 1, 'month');
+      // get project end date for this contract year
+      let projectEnd = subtract(project.startDate, 1, 'day');
+      projectEnd = setYear(projectEnd, getTodaysDate('YYYY'));
+      projectEnd = add(projectEnd, 1, 'year');
+      // format dates and add changes
+      [projectStart, projectEnd] = [format(projectStart, null, 'YYYY-MM'), format(projectEnd, null, 'YYYY-MM')];
+      ranges.value.push([projectStart, projectEnd]);
+    }
+  }
+});
+
+/**
+ * onMounted lifecycle hook
  */
 onMounted(async () => {
   // get the employee and PTO cashout amounts
@@ -254,6 +262,8 @@ onMounted(async () => {
       else break;
       // months are in order, can just break if current month is today or future
     }
+  } else {
+    plannedMonths.value = [];
   }
 
   // auto-select any ranges that are in the plan
@@ -290,6 +300,9 @@ onMounted(async () => {
 
   // set loading stage
   loading.value = false;
+
+  // emit to TimeData.vue that the save() function can be successfully executed now
+  emitter.emit('auto-save-pto-planner');
 }); // onMounted
 
 // |--------------------------------------------------|
@@ -297,7 +310,7 @@ onMounted(async () => {
 // |                  MONTHS PLANNER                  |
 // |                                                  |
 // |--------------------------------------------------|
-const plannedMonths = ref([]); // months that are planned
+const plannedMonths = ref(null); // months that are planned
 
 /**
  * Add a month to the plan. Used by chips by proxy of toggleMonthInPlan().
@@ -382,9 +395,12 @@ function cancel() {
 } // cancel
 
 /**
- * Save button: save info to database and emit to other components
+ * Save info to database and emit to other components. Note that this is called from TimeData.vue
+ * as a recalculation method to ensure that people don't have previous months in their plan
+ *
+ * @param preventUpload - whether or not to prevent uploading the new PTO value to the DB
  */
-async function save() {
+async function save(preventUpload = false) {
   // set loading status
   loading.value = true;
 
@@ -401,7 +417,7 @@ async function save() {
       }
     }
   };
-  await api.updateAttribute(api.EMPLOYEES, data, 'plannedPto');
+  if (!preventUpload) await api.updateAttribute(api.EMPLOYEES, data, 'plannedPto');
 
   // refresh store user from DB and reset emitter
   await updateStoreUser();
@@ -636,6 +652,10 @@ function getHolidayBalance(date = null) {
   holidayCache[date].balance = holidayBalance;
   return holidayBalance;
 } // getHolidayBalance
+
+defineExpose({
+  save
+});
 </script>
 
 <style scoped>

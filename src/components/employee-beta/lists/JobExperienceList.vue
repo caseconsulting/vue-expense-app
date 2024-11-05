@@ -13,22 +13,22 @@
         <p class="d-inline mt-3">
           <b>{{ company.companyName }}</b>
         </p>
-        <p class="my-2 ml-12 gray-text" v-if="company.positions.length === 1">
+        <p class="mb-0 ml-12 gray-text" v-if="company.positions.length === 1">
           {{ monthYearFormatBETA(company.positions[0].startDate) }} -
           {{ monthYearFormatBETA(company.positions[0].endDate) }}
         </p>
-        <p class="my-2 ml-12 gray-text" v-else>
+        <p class="mb-0 ml-12 gray-text" v-else>
           {{ monthYearFormatBETA(getTotalTimeAtCompany(company)) }} - {{ monthYearFormatBETA(endDate) }}
         </p>
       </v-list-item-title>
       <div
-        class="ml-12 mb-2 position-text"
+        class="ml-12 position-text"
         :class="isMobile() ? ' pl-4' : ''"
         v-for="(position, posIndex) in company.positions"
         :key="position.title + posIndex"
       >
         <p class="d-inline">{{ position.title }}:</p>
-        <p class="my-2 ml-5 months-text d-inline">
+        <p class="ml-5 months-text d-inline">
           <a v-if="Math.floor(getDurationOfPosition(position) / 12) > 1"
             >{{ Math.floor(getDurationOfPosition(position) / 12) }} Years and</a
           >
@@ -42,7 +42,7 @@
           <a v-else-if="getDurationOfPosition(position) % 12 == 1"> Month</a>
         </p>
       </div>
-      <v-row no-gutters class="mx-5">
+      <v-row no-gutters class="mt-2 mx-5">
         <v-divider v-if="index < list.length - 1" />
       </v-row>
     </v-list-item>

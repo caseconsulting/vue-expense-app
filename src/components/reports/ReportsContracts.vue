@@ -249,10 +249,11 @@ function buildContractsColumn() {
               let contract = store.getters.contracts.find((c) => c.id === currentCon.contractId);
               let project = contract?.projects?.find((p) => p.id === currProj.projectId);
               if (project) {
-                if (project.location && project.workType !== 'Remote') locations += `${project.location} & `;
-                else if (project.workType === 'Remote')
+                if (currProj.workType === 'Remote' || (!currProj.workType && project.workType === 'Remote'))
                   locations += userRoleIsAdmin() || userRoleIsManager() ? `${getLocation(currentEmp)} & ` : '';
-                if (project.workType) workTypes += `${project.workType} & `;
+                else if (currProj.location) locations += `${currProj.location} & `;
+                else if (project.location) locations += `${project.location} & `;
+                if (currProj.workType || project.workType) workTypes += `${currProj.workType || project.workType} & `;
               }
             }
           });
