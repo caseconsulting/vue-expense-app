@@ -356,8 +356,14 @@
               </v-col>
             </v-row>
             <v-row>
-              <v-col :cols="!isMobile() ? '4' : '12'">
-                <v-text-field v-model.trim="editedEmployee.city" label="City" data-vv-name="City"></v-text-field>
+              <!-- country of birth -->
+              <v-col>
+                <v-autocomplete
+                  v-model="editedEmployee.country"
+                  label="Country"
+                  :items="COUNTRIES"
+                  hide-details="auto"
+                ></v-autocomplete>
               </v-col>
               <v-col :class="isMobile() ? 'mb-4' : ''">
                 <v-autocomplete
@@ -368,14 +374,8 @@
                   :disabled="editedEmployee.country !== 'United States'"
                 ></v-autocomplete>
               </v-col>
-              <!-- country of birth -->
-              <v-col>
-                <v-autocomplete
-                  v-model="editedEmployee.country"
-                  label="Country"
-                  :items="COUNTRIES"
-                  hide-details="auto"
-                ></v-autocomplete>
+              <v-col :cols="!isMobile() ? '4' : '12'">
+                <v-text-field v-model.trim="editedEmployee.city" label="City" data-vv-name="City"></v-text-field>
               </v-col>
             </v-row>
           </v-col>
@@ -562,6 +562,10 @@ const { slotProps } = defineProps(['slotProps']);
 const editedEmployee = ref(slotProps.editedEmployee);
 // for some reason the DB doesn't save work status if it's zero, so fill it in if it should be 0
 if (!editedEmployee.value.workStatus && editedEmployee.value.deptDate) editedEmployee.value.workStatus = 0;
+// make it so the v-auto-complete labels fill the text box when it's empty
+if (_isEmpty(editedEmployee.value.country)) editedEmployee.value.country = null;
+if (_isEmpty(editedEmployee.value.st)) editedEmployee.value.st = null;
+if (_isEmpty(editedEmployee.value.currentState)) editedEmployee.value.currentState = null;
 
 const creatingEmployee = inject('creatingEmployee');
 const employeeId = editedEmployee.value.id;
