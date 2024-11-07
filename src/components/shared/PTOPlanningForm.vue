@@ -401,6 +401,12 @@ function cancel() {
  * @param preventUpload - whether or not to prevent uploading the new PTO value to the DB
  */
 async function save(preventUpload = false) {
+  // patch for bug where this function runs too quickly
+  if (!plannedMonths.value) {
+    setTimeout(() => save(preventUpload), 1000);
+    return;
+  }
+
   // set loading status
   loading.value = true;
 
