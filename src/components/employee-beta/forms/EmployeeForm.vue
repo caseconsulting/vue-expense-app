@@ -427,7 +427,7 @@ async function submit() {
         emitter.emit('update', updated);
       } else {
         emitter.emit('discard-edits', props.employee);
-        useDisplayError(updated.response.data.message);
+        useDisplayError(updated.response.data.message || updated.response.data.Error.message);
       }
     }
   } else {

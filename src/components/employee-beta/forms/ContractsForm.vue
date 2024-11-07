@@ -174,6 +174,33 @@
                 </v-text-field>
               </v-col>
 
+              <v-col v-if="userIsAdminOrManager" :cols="isMobile() ? '12' : '5'">
+                <v-combobox v-model="project.location" :items="getProjectLocations()" label="Location" clearable>
+                  <template #append-inner>
+                    <div>
+                      <v-icon class="ml-1" color="grey-darken-1"> mdi-information </v-icon>
+                      <v-tooltip activator="parent">Overrides employee location set on Contracts page</v-tooltip>
+                    </div>
+                  </template>
+                </v-combobox>
+              </v-col>
+
+              <v-col v-if="userIsAdminOrManager" :cols="isMobile() ? '12' : '5'">
+                <v-select
+                  v-model="project.workType"
+                  :items="['On-site', 'Hybrid', 'Remote']"
+                  label="Work Type"
+                  clearable
+                >
+                  <template #append-inner>
+                    <div>
+                      <v-icon class="ml-1" color="grey-darken-1"> mdi-information </v-icon>
+                      <v-tooltip activator="parent">Overrides employee work type set on Contracts page</v-tooltip>
+                    </div>
+                  </template>
+                </v-select>
+              </v-col>
+
               <!-- DELETE PROJECTS normal -->
               <v-col v-if="!isMobile() && contract.projects.length > 1" cols="1" align="center">
                 <v-btn variant="text" icon="" density="comfortable" @click="deleteProject(index, projIndex)">
@@ -222,10 +249,11 @@ import {
   getRequiredRules
 } from '@/shared/validationUtils';
 import { isEmpty, isMobile } from '@/utils/utils';
+import { getProjectLocations } from '@/shared/contractUtils';
 import _cloneDeep from 'lodash/cloneDeep';
 import _find from 'lodash/find';
 import _map from 'lodash/map';
-import { onBeforeMount, ref } from 'vue';
+import { computed, onBeforeMount, ref } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
 import { updateStoreContracts } from '../../../utils/storeUtils';
@@ -255,6 +283,17 @@ onBeforeMount(async () => {
   !store.getters.contracts ? await updateStoreContracts() : '';
   contracts.value = store.getters.contracts;
   contractProjects.value = store.getters.contracts?.map((c) => c.projects).flat();
+});
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+const userIsAdminOrManager = computed(() => {
+  const role = store.getters.user.employeeRole;
+  return role === 'admin' || role === 'manager';
 });
 
 // |--------------------------------------------------|

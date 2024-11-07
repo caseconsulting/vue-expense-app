@@ -5,26 +5,42 @@
     <v-card-title class="d-flex align-center text-h5 header_style">Employee Export</v-card-title>
     <!-- Modal Content -->
     <v-card-text class="d-flex justify-center">
-      <div class="w-75">
+      <div class="w-100">
         <!-- EEO vs Employee export type -->
         <h3 class="mt-4">Export Type</h3>
         <v-radio-group :disabled="loading" hide-details v-model="exportType">
           <v-radio v-for="(t, i) in exportTypes" :key="i" :label="t.title" :value="t"></v-radio>
         </v-radio-group>
 
-        <!-- Period selector -->
-        <h3 :class="exportType?.periodType ? '' : 'disabled'" class="cap-first mt-4">
-          Report {{ exportType?.periodType || 'Period' }}
+        <!-- Start and End Date selectors -->
+        <h3 class="mt-4">
+          Timeframe
+          <v-icon
+            class="pb-2 pointer"
+            color="#3f51b5"
+            size="x-small"
+            icon="mdi-information"
+            v-tooltip="'Include only employees who were active at least 1 day between these dates'"
+          />
         </h3>
-        <v-select
-          :disabled="loading || !exportType?.periodType"
-          class="d-inline-block w-100"
-          v-model="filters.period"
-          :items="filterOptions[exportType?.periodType]"
-          item-title="text"
-          item-value="value"
-          variant="underlined"
-        />
+        <v-row>
+          <v-col cols="12" sm="6">
+            <date-picker
+              v-model="filters.periodStart"
+              :disabled="exportType?.value === 'ppto'"
+              label="Start Date"
+              hide-details
+            />
+          </v-col>
+          <v-col cols="12" sm="6">
+            <date-picker
+              v-model="filters.periodEnd"
+              :disabled="exportType?.value === 'ppto'"
+              label="End Date"
+              hide-details
+            />
+          </v-col>
+        </v-row>
 
         <!-- Status selector -->
         <h3 class="mt-4">Filter by status</h3>
@@ -33,6 +49,20 @@
           label="Filter by status"
           v-model="filters.statuses"
           :items="filterOptions.statuses"
+          multiple
+          variant="underlined"
+          chips
+          closable-chips
+        >
+        </v-autocomplete>
+
+        <!-- Employee Role selector -->
+        <h3 class="mt-4">Filter by employee role</h3>
+        <v-autocomplete
+          :disabled="loading"
+          label="Filter by employee role"
+          v-model="filters.employeeRoles"
+          :items="filterOptions.employeeRoles"
           multiple
           variant="underlined"
           chips
@@ -64,7 +94,7 @@
 </template>
 
 <script setup>
-import { getTodaysDate, format, startOf, endOf, subtract, isSameOrBefore, isSameOrAfter } from '@/shared/dateUtils';
+import { getTodaysDate, format, subtract, isSameOrBefore, isAfter } from '@/shared/dateUtils';
 import _uniq from 'lodash/uniq';
 import _map from 'lodash/map';
 import _orderBy from 'lodash/orderBy';
@@ -75,9 +105,10 @@ import eeoCsv from '@/utils/csv/eeoCsv.js';
 import qbCsv from '@/utils/csv/qbCsv.js';
 import pptoCsv from '@/utils/csv/pptoCsv.js';
 import TagsFilter from '@/components/shared/TagsFilter.vue';
-import { ref, inject, onBeforeUnmount, watch, onBeforeMount } from 'vue';
+import { ref, inject, onBeforeUnmount, onBeforeMount } from 'vue';
 import { useStore } from 'vuex';
 import { updateStoreContracts, updateStoreTags } from '@/utils/storeUtils';
+import DatePicker from '@/components/shared/DatePicker.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -90,20 +121,21 @@ const props = defineProps(['employees']);
 const store = useStore();
 const exportType = ref(null);
 const exportTypes = ref([
-  { title: 'Employee Data', value: 'emp', periodType: 'year' },
-  { title: 'EEO Data', value: 'eeo', periodType: 'year' },
-  { title: 'Timesheet Data', value: 'qb', periodType: 'month' },
-  { title: 'Planned PTO Data', value: 'ppto', periodType: null }
+  { title: 'Employee Data', value: 'emp' },
+  { title: 'EEO Data', value: 'eeo' },
+  { title: 'Timesheet Data', value: 'qb' },
+  { title: 'Planned PTO Data', value: 'ppto' }
 ]);
 const tagsInfo = ref({
   selected: [],
   flipped: []
 });
 const filterOptions = ref({
-  statuses: ['Full Time', 'Part Time', 'Inactive'], // order matters to filterEmployees() > status filter
+  statuses: ['Full Time', 'Part Time', 'Inactive'], // order matters to filterEmployees() -> status filter
   tagsInfo: null,
   year: [],
-  month: []
+  month: [],
+  employeeRoles: ['Admin', 'User', 'Manager', 'Intern']
 });
 const filters = ref({
   statuses: ['Full Time', 'Part Time'],
@@ -111,7 +143,9 @@ const filters = ref({
     selected: [],
     flipped: []
   },
-  period: 'All'
+  periodStart: getTodaysDate('YYYY-MM-DD'),
+  periodEnd: getTodaysDate('YYYY-MM-DD'),
+  employeeRoles: ['Admin', 'User', 'Manager']
 });
 const status = ref(false);
 const loading = ref(false);
@@ -177,10 +211,19 @@ function close() {
 }
 
 /**
+ * Converts a date into friendly reading format for filenames and such
+ */
+function readableDate(date) {
+  return format(date, null, 'MMM DD, YYYY');
+}
+
+/**
  * Downloads employees as CSV
  */
 async function download() {
   loading.value = true; // disable download button
+  let f = filters.value; // shortcut to filters value
+  let readableDateRange = `${readableDate(f.periodStart)} - ${readableDate(f.periodEnd)}`;
 
   // filter CSV info
   let csvInfo = props.employees;
@@ -192,10 +235,9 @@ async function download() {
   }
 
   // download from proper csv util
-  let filename = `Download (${filters.value.period})`;
-  let startDate, endDate;
+  let filename = `Download (${readableDateRange})`;
   if (exportType.value.value === 'emp') {
-    filename = `Employee Export - ${filters.value.period}`;
+    filename = `Employee Export - ${readableDateRange}`;
     employeeCsv.download(csvInfo, store.getters.contracts, filterOptions.value.tags, filename);
   } else if (exportType.value.value === 'eeo') {
     let eeo = eeoCsv.fileString(csvInfo);
@@ -211,16 +253,12 @@ async function download() {
         csv: emp
       }
     ];
-    filename = `EEO Compliance Report - ${filters.value.period}`;
+    filename = `EEO Compliance Report - ${readableDateRange}`;
     baseCsv.download(csvText, filename);
   } else if (exportType.value.value === 'qb') {
-    filename = `Timesheet Report - ${filters.value.period}`;
-    startDate = startOf(filters.value.period, 'month');
-    endDate = endOf(filters.value.period, 'month');
-    startDate = format(startDate, null, 'YYYY-MM-DD');
-    endDate = format(endDate, null, 'YYYY-MM-DD');
-    loading.value = 'Downloading timesheets from QuickBooks...';
-    await qbCsv.download(csvInfo, { filename, startDate, endDate });
+    filename = `Timesheet Report - ${readableDateRange}`;
+    loading.value = 'Downloading timesheet data...';
+    await qbCsv.download(csvInfo, { filename, startDate: f.periodStart, endDate: f.periodEnd });
   } else if (this.exportType.value === 'ppto') {
     filename = `Planned PTO Report - as of ${getTodaysDate('YYYY-MM-DD')}`;
     await pptoCsv.download(csvInfo, { filename });
@@ -267,12 +305,30 @@ function filterEmployees(employees) {
   return _filter(employees, (e) => {
     // - YEAR FILTER -
     // remove employees that were hired after given year, or departed before given year
-    let yearFilterExclusions = ['ppto']; // periodTypes to exclude
-    if (f.period.value) f.period = f.period.value; // convert objects into normal
-    if (f.period != 'All' && !yearFilterExclusions.includes(exportType.value.value)) {
-      let hireYearValid = !!e.hireDate && isSameOrBefore(e.hireDate, f.period, exportType.value.periodType);
-      let deptYearValid = !f.deptDate || isSameOrAfter(e.deptDate, f.period, exportType.value.periodType);
-      if (!hireYearValid || !deptYearValid) return false;
+    let yearFilterExclusions = ['ppto']; // export types to exclude from year filter
+    if (!yearFilterExclusions.includes(exportType.value.value)) {
+      let hireDateValid = e.hireDate && isSameOrBefore(e.hireDate, f.periodEnd, 'day');
+      let deptDateValid = !e.deptDate || isAfter(e.deptDate, f.periodStart, 'day');
+      if (!hireDateValid || !deptDateValid) return false;
+    }
+
+    // - STATUS FILTER -
+    // remove employees that do not have the status
+    let statusOpts = filterOptions.value.statuses; // ['Full Time', 'Part Time', 'Inactive']
+    // mini function to map employee status (integer) to text used in form (string)
+    let statusString = (s) => {
+      if (s == 0) return statusOpts[2];
+      else if (s == 100) return statusOpts[0];
+      else return statusOpts[1];
+    };
+    // return false if status array does not include the employee's status
+    if (!f.statuses.includes(statusString(e.workStatus))) return false;
+
+    // - ROLE FILTER -
+    // remove employees that are not in the given roles
+    let lowercaseRoles = f.employeeRoles.map((role) => role.toLowerCase());
+    if (!lowercaseRoles.includes(e.employeeRole)) {
+      return false;
     }
 
     // - TAG FILTER -
@@ -289,48 +345,10 @@ function filterEmployees(employees) {
     }
     if (tagsInfo.value.selected.length > 0 && !employeeHasTag) return false;
 
-    // - STATUS FILTER -
-    // remove employees that do not have the status
-    let statusOpts = filterOptions.value.statuses; // ['Full Time', 'Part Time', 'Inactive']
-    // mini function to map employee status (integer) to text used in form (string)
-    let statusString = (s) => {
-      if (s == 0) return statusOpts[2];
-      else if (s == 100) return statusOpts[0];
-      else return statusOpts[1];
-    };
-    // return false if status array does not include the employee's status
-    if (!f.statuses.includes(statusString(e.workStatus))) return false;
-
     // passed all conditions, return this employee
     return true;
   });
 }
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                    WATCHERS                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Changes the default report year to be whatever makes sense for
- * the report type
- */
-function updatePeriodDefault() {
-  // set default period value based on type of export
-  let defaults = {
-    emp: filterOptions.value.year[0],
-    eeo: filterOptions.value.year[0],
-    qb: filterOptions.value.month[0],
-    ppto: filters.value.period
-  };
-  filters.value.period = defaults[exportType.value.value];
-}
-
-/**
- * exportType watcher
- */
-watch(exportType, updatePeriodDefault, { deep: true });
 </script>
 
 <style scoped>

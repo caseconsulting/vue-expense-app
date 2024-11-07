@@ -53,7 +53,7 @@ export function convertEmployees(employees, contracts, tags, includeEeoData = fa
       let contractsInfo = getContractsInfo(employee, contracts);
       let clearanceData = getClearancesData(employee.clearances);
       let data = {
-        // NOTE: if you change this, please also change in the catch{} below
+        // NOTE: if you change this, please also change in the catch() below
         'Employee #': employee.employeeNumber || '',
         'First Name': employee.firstName || '',
         'Middle Name': employee.middleName || '',
@@ -66,6 +66,9 @@ export function convertEmployees(employees, contracts, tags, includeEeoData = fa
         AIN: employee.agencyIdentificationNumber || '',
         'Resume Updated': format(employee.resumeUpdated, null, 'YYYY-MM-DD') || '',
         Email: employee.email || '',
+        'Phone (Cell)': getPhoneNumbers(employee, 'Cell') || '',
+        'Phone (Home)': getPhoneNumbers(employee, 'Home') || '',
+        'Phone (Work)': getPhoneNumbers(employee, 'Work') || '',
         Twitter: employee.twitter || '',
         Github: employee.github || '',
         LinkedIn: employee.linkedIn || '',
@@ -170,6 +173,24 @@ export function convertEmployees(employees, contracts, tags, includeEeoData = fa
   });
   return tempEmployees;
 } // convertEmployees
+
+/**
+ * Returns phone numbers of a particular type. Returns both private and public numbers. This
+ * will give you all numbers you have access to.
+ *
+ * @param e - employee object
+ * @param type - type of phone number (probably 'Cell'/'Home'/'Work')
+ */
+export function getPhoneNumbers(e, type) {
+  let combinedNumbers = [...(e.privatePhoneNumbers || []), ...(e.publicPhoneNumbers || [])];
+  let matchedNumbers = [];
+  for (let number of combinedNumbers) {
+    if (number.type === type) matchedNumbers.push(number.number.replace(',', ''));
+  }
+
+  if (matchedNumbers.length === 0) return '';
+  return matchedNumbers.join(', ');
+} // getPhoneNumbers
 
 /**
  * Returns a work status 'Full Time', 'Part Time', 'Inactive', or 'Invalid Status'.
@@ -355,8 +376,12 @@ export function getContractsInfo(employee, allContracts) {
       _forEach(contract.projects, (project) => {
         let p = allProjects.find((p) => p.id === project.projectId);
         projects.push(`${p.projectName} - ${(getProjectLengthInYears(project) / 12).toFixed(1)} years`);
-        workLocations.push(p.workType === 'Remote' ? getEmployeeCurrentAddress(employee) : p.location || 'No Location');
-        workTypes.push(p.workType || 'No Work Type');
+        workLocations.push(
+          project.workType === 'Remote' || (!project.workType && p.workType === 'Remote')
+            ? getEmployeeCurrentAddress(employee)
+            : project.location || p.location || 'No Location'
+        );
+        workTypes.push(project.workType || p.workType || 'No Work Type');
         let endDate = format(project.endDate || getTodaysDate(), null, 'YYYY-MM-DD');
         earliestDate = minimum([earliestDate, endDate]);
       });
@@ -577,6 +602,7 @@ export default {
   download,
   fileString,
   convertEmployees,
+  getPhoneNumbers,
   getWorkStatus,
   filterUndefined,
   getAwards,

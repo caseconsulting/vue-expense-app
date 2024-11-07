@@ -116,7 +116,7 @@ import {
   endOf,
   DEFAULT_ISOFORMAT
 } from '../shared/dateUtils';
-import { ref, onBeforeMount, computed, watch } from 'vue';
+import { ref, onBeforeMount, computed, watch, inject } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 
@@ -144,6 +144,7 @@ const loadingBudgets = ref(true);
 const loadingEvents = ref(true);
 const scheduleEntries = ref([]);
 const textMaxLength = ref(110);
+const emitter = inject('emitter');
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -605,6 +606,7 @@ function handleProfile() {
  */
 async function loadHomePageData() {
   await Promise.all([refreshEmployee(), createEvents()]);
+  emitter.emit('auto-save-pto-planner');
 } // loadHomePageData
 
 /**

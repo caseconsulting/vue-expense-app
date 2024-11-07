@@ -3,6 +3,7 @@ import router from './router';
 import store from '../store';
 import mitt from 'mitt';
 import vuetify from './vuetify';
+import VueTheMask from 'vue-the-mask';
 
 import(/* webpackMode: "eager" */ 'vuetify/dist/vuetify.min.css');
 
@@ -13,7 +14,7 @@ import App from './App.vue';
 
 export const emitter = mitt();
 
-const app = createApp(App).use(router).use(store).use(vuetify);
+const app = createApp(App).use(router).use(store).use(vuetify).use(VueTheMask);
 app.component('UserAvatar', UserAvatar);
 app.provide('emitter', emitter);
 app.config.globalProperties.emitter = emitter;

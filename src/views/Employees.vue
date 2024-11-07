@@ -267,7 +267,7 @@
     <v-dialog v-model="toggleEmployeesSyncModal" :width="isMobile() ? '100%' : '70%'" persistent>
       <employees-sync-modal :key="childKey" :sync-data="applicationSyncData" />
     </v-dialog>
-    <v-dialog v-model="showExportDataModal" :width="isMobile() ? '100%' : '50%'" persistent>
+    <v-dialog v-model="showExportDataModal" :width="isMobile() ? '80%' : '50%'" persistent>
       <export-employee-data :employees="employees" :key="childKey" />
     </v-dialog>
   </div>
