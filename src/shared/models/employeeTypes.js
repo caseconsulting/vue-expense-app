@@ -86,11 +86,16 @@
 
 /**
  * @typedef {Object} PhoneNumber
- * @typedef {Object} NotesObject
  * @property {string} number
  * @property {boolean} private
  * @property {string} type
  * @property {boolean} valid
+ */
+
+/**
+ * @typedef {Object} NotesObject
+ * @property {Object} pages
+ * @property {Object} updated
  */
 
 /**
