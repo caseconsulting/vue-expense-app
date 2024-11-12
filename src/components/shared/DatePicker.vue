@@ -139,6 +139,13 @@ function remove(item) {
   }
 } // remove
 
+watch(
+  () => props.disabled,
+  () => {
+    if (props.disabled) formattedModel.value = null;
+  }
+);
+
 /**
  * Update dates on picker select
  */
