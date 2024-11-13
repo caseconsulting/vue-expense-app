@@ -13,7 +13,7 @@
         <div :class="getButtonStyling()">
           <v-btn
             :disabled="onPage(alert.handler.page)"
-            @click="handleClick(alert.handler.page, alert.handler.extras)"
+            @click="handleClick(alert.handler.page, alert.handler.extras, alert.hash)"
             class="justify-center text-black notif-action-btn"
             elevation="0"
             color="#f5f5f5"
@@ -161,7 +161,8 @@ function checkCertifications() {
           seenButton: true,
           type: 'certification',
           id: randId(),
-          item: cert
+          item: cert,
+          hash: '#certifications+awards'
         });
       }
     });
@@ -284,8 +285,8 @@ function getButtonStyling() {
  * Redirect to the given page. There might be a more elegant way to
  * accomplish this but I've been on this story for too long so.
  */
-function handleClick(pageName, extras = {}) {
-  router.push({ name: pageName, params: extras, hash: '#certifications+awards' });
+function handleClick(pageName, extras = {}, hash) {
+  router.push({ name: pageName, params: extras, hash: hash });
 } // handleClick
 
 /**
