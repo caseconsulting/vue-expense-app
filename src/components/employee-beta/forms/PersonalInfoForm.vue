@@ -401,7 +401,7 @@
             <v-text-field
               v-model.trim="phoneNumber.number"
               label="Phone Number"
-              v-mask="'###-###-####, ext. ###'"
+              v-mask="'###-###-####, ext. ######'"
               :rules="getPhoneNumberRules()"
               data-vv-name="Phone Number"
             >
@@ -486,7 +486,7 @@
             <v-text-field
               v-model.trim="phoneNumber.number"
               label="Phone Number"
-              v-mask="'###-###-####, ext. ###'"
+              v-mask="'###-###-####, ext. ######'"
               :rules="getPhoneNumberRules()"
               data-vv-name="Phone Number"
             >

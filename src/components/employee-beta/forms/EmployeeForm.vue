@@ -96,6 +96,12 @@
                 title="Customer Orgs"
                 :class="{ invalid: !validTabs.customerOrgs }"
               ></v-list-item>
+              <v-list-item
+                @click="cardName = 'Emergency Contacts'"
+                link
+                title="Emergency Contacts"
+                :class="{ invalid: !validTabs.emergencyContacts }"
+              ></v-list-item>
             </v-list>
           </v-col>
           <v-col>
@@ -193,6 +199,16 @@
                     <customer-orgs-form :slot-props="props"></customer-orgs-form>
                   </template>
                 </base-form>
+                <base-form
+                  title="Emergency Contacts"
+                  tab-id="emergencyContacts"
+                  v-model="editedEmployee"
+                  :valid="validTabs.emergencyContacts"
+                >
+                  <template v-slot="{ props }">
+                    <emergency-contacts-form :slot-props="props"></emergency-contacts-form>
+                  </template>
+                </base-form>
               </v-expansion-panels>
               <div class="sticky-actions">
                 <v-card-actions>
@@ -260,6 +276,7 @@ import JobExperienceForm from './JobExperienceForm.vue';
 import LanguagesForm from './LanguagesForm.vue';
 import PersonalInfoForm from './PersonalInfoForm.vue';
 import TechnologiesForm from './TechnologiesForm.vue';
+import EmergencyContactsForm from './EmergencyContactsForm.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -298,7 +315,8 @@ const validTabs = reactive({
   jobExperience: true,
   languages: true,
   personal: true,
-  technologies: true
+  technologies: true,
+  emergencyContacts: true
 });
 
 // template refs
@@ -315,7 +333,8 @@ const tabs = reactive({
   jobExperience: null,
   languages: null,
   personal: null,
-  technologies: null
+  technologies: null,
+  emergencyContacts: null
 });
 
 // |--------------------------------------------------|
@@ -498,7 +517,8 @@ async function prepareTabs() {
     tabs.jobExperience?.prepareSubmit(),
     tabs.languages?.prepareSubmit(),
     tabs.personal?.prepareSubmit(),
-    tabs.technologies?.prepareSubmit()
+    tabs.technologies?.prepareSubmit(),
+    tabs.emergencyContacts?.prepareSubmit()
   ]);
 }
 
@@ -631,6 +651,10 @@ async function selectTab() {
     case 'Customer Org Exp':
       num = 8;
       card = 'Customer Orgs';
+      break;
+    case 'Emergency Contacts':
+      num = 9;
+      card = 'Emergency Contacts';
       break;
     default:
       num = 0;

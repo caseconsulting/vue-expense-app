@@ -93,16 +93,60 @@
  */
 
 /**
- * @typedef {Object} NotesObject
- * @property {Object} pages
- * @property {Object} updated
- */
-
-/**
  * @typedef {Object} Technology
  * @property {boolean} current
  * @property {string} name
  * @property {number} years
+ */
+
+/**
+ * @typedef {Object} NotesObject
+ * @property {{
+ *   career: {
+ *     jobDescription: string,
+ *     desireToMove: boolean,
+ *     misc: string,
+ *     moveReason: string,
+ *     moveTo: string
+ *   },
+ *   general: {
+ *     misc: string
+ *   },
+ *   kudos: {
+ *     custom: array,
+ *     misc: string
+ *   },
+ *   personal: {
+ *     familial: string,
+ *     medical: string,
+ *     misc: string
+ *   },
+ * }} pages
+ * @property {{
+ *   author: string,
+ *   date: string
+ * }} updated
+ */
+
+/**
+ * @typedef {Object} EmergencyContact
+ * @property {string} name
+ * @property {string} relationship
+ * @property {string} homePhone
+ * @property {string} addressLine1
+ * @property {string} addressLine2
+ * @property {string} mobilePhone
+ * @property {string} email
+ * @property {string} zipcode
+ * @property {string} city
+ * @property {string} state
+ * @property {string} country
+ * @property {string} workPhone
+ * @property {boolean} primaryContact
+ */
+
+/**
+ * @typedef {EmergencyContract[]} EmergencyContacts
  */
 
 export class Employee {
@@ -270,6 +314,9 @@ export class Employee {
     /** @type {string} */
     this.country = properties.country ?? '';
     // end place of birth fields
+
+    /** @type {EmergencyContacts} */
+    this.emergencyContacts = properties.emergencyContacts ?? [];
 
     // eeo fields
     /** @type {boolean} */
