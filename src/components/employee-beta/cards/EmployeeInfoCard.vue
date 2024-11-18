@@ -182,7 +182,7 @@ const copied = ref(false);
 let timoutId = null;
 const toggleModal = ref({
   profilePic: false,
-  emergencyContact: true
+  emergencyContact: false
 });
 
 onMounted(async () => {

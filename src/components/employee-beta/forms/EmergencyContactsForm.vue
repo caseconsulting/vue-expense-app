@@ -21,6 +21,7 @@
               label="Relationship"
               @update:model-value="congrats(contact, index)"
               :messages="relMessage[index]"
+              auto-select-first
             />
           </v-col>
           <v-col :cols="isMobile() ? 6 : 3" :order="isMobile() ? 1 : undefined">
@@ -108,13 +109,14 @@
               :items="Object.values(STATES)"
               :disabled="editedEmployee.country !== 'United States'"
               label="State"
+              auto-select-first
             />
           </v-col>
           <v-col :cols="isMobile() ? 12 : undefined">
             <v-text-field v-model="contact.zipcode" label="Zipcode" />
           </v-col>
           <v-col :cols="isMobile() ? 12 : undefined">
-            <v-autocomplete v-model="contact.country" :items="COUNTRIES" label="Country" />
+            <v-autocomplete v-model="contact.country" :items="COUNTRIES" label="Country" auto-select-first />
           </v-col>
         </v-row>
       </v-col>
@@ -185,7 +187,6 @@ const relationshipOptions = ref([
  * @param contact - contact being updated
  */
 function congrats(contact, index) {
-  console.log('Running congrats');
   let spouse = new Set(['Husband', 'Wife']);
   for (let oldContact of oldContacts) {
     if (
