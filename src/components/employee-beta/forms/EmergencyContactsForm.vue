@@ -9,12 +9,12 @@
 
     <v-row v-for="(contact, index) in editedEmployee.emergencyContacts" :key="contact + index">
       <v-col :cols="isMobile() ? 12 : undefined">
-        <!-- basic info -->
         <v-row>
-          <v-col :cols="isMobile() ? 12 : undefined" :order="isMobile() ? 2 : undefined">
+          <!-- basic info -->
+          <v-col :cols="isMobile() ? 12 : 4" :order="isMobile() ? 2 : undefined">
             <v-text-field v-model="contact.name" label="Full Name" />
           </v-col>
-          <v-col :cols="isMobile() ? 12 : undefined" :order="isMobile() ? 3 : undefined">
+          <v-col :cols="isMobile() ? 12 : 3" :order="isMobile() ? 3 : undefined">
             <v-autocomplete
               v-model="contact.relationship"
               :items="relationshipOptions"
@@ -23,13 +23,18 @@
               :messages="relMessage[index]"
             />
           </v-col>
-          <v-col :cols="isMobile() ? 12 : undefined" :order="isMobile() ? 1 : undefined">
+          <v-col :cols="isMobile() ? 6 : 3" :order="isMobile() ? 1 : undefined">
             <v-checkbox-btn
               v-model="contact.primaryContact"
               label="Primary Contact?"
               @click="setPrimaryContact(index)"
               class="mt-2"
             />
+          </v-col>
+          <v-col :cols="isMobile() ? 6 : 2">
+            <v-btn @click="removeContact(index)" icon variant="text" size="small" class="mt-3 ml-0 mr-auto">
+              <v-icon size="x-large">mdi-delete</v-icon>
+            </v-btn>
           </v-col>
         </v-row>
 
@@ -183,7 +188,12 @@ function congrats(contact, index) {
   console.log('Running congrats');
   let spouse = new Set(['Husband', 'Wife']);
   for (let oldContact of oldContacts) {
-    if (oldContact.name === contact.name && !spouse.has(oldContact.relationship) && spouse.has(contact.relationship)) {
+    if (
+      oldContact.name === contact.name &&
+      !!oldContact.relationship &&
+      !spouse.has(oldContact.relationship) &&
+      spouse.has(contact.relationship)
+    ) {
       relMessage.value[index] = 'Congratulations on your marriage!';
     }
   }
@@ -213,13 +223,21 @@ function addContact(prepend = true) {
     state: null,
     country: null,
     workPhone: null,
-    workPhoneExtension: null,
     primaryContact: isPrimary
   };
 
   // (a|pre)-pend the new contact
   if (prepend) editedEmployee.value.emergencyContacts.unshift(emptyContact);
   else editedEmployee.value.emergencyContacts.push(emptyContact);
+}
+
+/**
+ * Removes an emergency contact at index
+ *
+ * @param index
+ */
+function removeContact(index) {
+  editedEmployee.value.emergencyContacts.splice(index, 1);
 }
 
 /**

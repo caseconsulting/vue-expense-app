@@ -2,11 +2,18 @@
   <div>
     <v-row class="mt-3 align-center justify-center">
       <!-- profile picture -->
-      <v-col cols="4" class="display-inline fit-content">
-        <v-avatar class="cursor-pointer" :color="caseRed" :size="picSize" @click="toggleModal = true">
+      <v-col cols="4" class="display-inline fit-content" style="position: relative">
+        <v-avatar class="cursor-pointer" :color="caseRed" :size="picSize" @click="toggleModal.profilePic = true">
           <span class="text-h4 display-inline-block position-absolute">{{ initials }}</span>
           <v-img class="display-inline-block position-absolute" :src="avatar" :alt="altText" />
         </v-avatar>
+        <v-icon
+          @click="toggleModal.emergencyContact = true"
+          icon="mdi-hospital-box"
+          color="red"
+          size="28"
+          class="emergency-info-icon"
+        />
       </v-col>
       <!-- general info -->
       <v-col cols="8">
@@ -132,13 +139,18 @@
       </v-col>
     </v-row>
     <profile-pic-modal
-      v-model="toggleModal"
+      v-model="toggleModal.profilePic"
       :avatar="avatar"
       :initials="initials"
       :altText="altText"
       :fullName="fullName"
       :model="model"
     ></profile-pic-modal>
+    <emergency-contact-modal
+      v-model="toggleModal.emergencyContact"
+      :key="model.emergencyContacts"
+      :model="model"
+    ></emergency-contact-modal>
   </div>
 </template>
 
@@ -149,6 +161,7 @@ import { useStore } from 'vuex';
 import { isMobile } from '../../../utils/utils';
 import { updateStoreAvatars } from '../../../utils/storeUtils';
 import ProfilePicModal from '../modals/ProfilePicModal.vue';
+import EmergencyContactModal from '../modals/EmergencyContactModal.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -167,7 +180,10 @@ const props = defineProps({
 const avatar = ref(null);
 const copied = ref(false);
 let timoutId = null;
-const toggleModal = ref(false);
+const toggleModal = ref({
+  profilePic: false,
+  emergencyContact: true
+});
 
 onMounted(async () => {
   if (!store.getters.basecampAvatars) await updateStoreAvatars();
@@ -238,6 +254,18 @@ async function copyEmailList() {
 </script>
 
 <style scoped>
+.emergency-info-icon {
+  position: absolute;
+  bottom: 5px;
+  right: 14px;
+  background-color: #fff;
+  border-radius: 4px;
+}
+.emergency-info-icon:hover {
+  background-color: #eee;
+  cursor: pointer;
+}
+
 .fit-content {
   max-width: fit-content;
 }
