@@ -903,7 +903,7 @@ async function createNewEntry() {
   let newUUID = generateUUID();
   this.editedExpense['id'] = newUUID;
   this.editedExpense['createdAt'] = getTodaysDate();
-  if (this.isReceiptRequired() && this.files) {
+  if (this.isReceiptRequired() && this.files?.length > 0) {
     // if receipt required and updating receipt
     // stores files name for lookup later
     let fileNames = [];
