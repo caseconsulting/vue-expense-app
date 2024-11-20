@@ -118,14 +118,19 @@
               @submit.prevent="submit()"
             >
               <v-expansion-panels v-model="formTabs" variant="accordion" multiple>
-                <base-form title="Personal" value="Personal" :valid="validTabs.personal">
+                <base-form title="Personal" value="Personal" :valid="validTabs.personal" @click="cardName = 'Personal'">
                   <personal-info-form
                     :ref="tabRefs.personalInfo"
                     v-model="editedEmployee"
                     v-model:valid="validTabs.personal"
                   ></personal-info-form>
                 </base-form>
-                <base-form title="Clearances" value="Clearances" :valid="validTabs.clearance">
+                <base-form
+                  title="Clearances"
+                  value="Clearances"
+                  :valid="validTabs.clearance"
+                  @click="cardName = 'Clearances'"
+                >
                   <div>
                     <clearance-form
                       :ref="tabRefs.clearances"
@@ -134,7 +139,12 @@
                     ></clearance-form>
                   </div>
                 </base-form>
-                <base-form title="Contracts" value="Contracts" :valid="validTabs.contracts">
+                <base-form
+                  title="Contracts"
+                  value="Contracts"
+                  :valid="validTabs.contracts"
+                  @click="cardName = 'Contracts'"
+                >
                   <div>
                     <contracts-form
                       :ref="tabRefs.contracts"
@@ -147,6 +157,7 @@
                   title="Certifications & Awards"
                   value="Certifications & Awards"
                   :valid="validTabs.certsAndAwards"
+                  @click="cardName = 'Certifications & Awards'"
                 >
                   <div>
                     <certs-and-awards-form
@@ -156,21 +167,36 @@
                     ></certs-and-awards-form>
                   </div>
                 </base-form>
-                <base-form title="Tech and Skills" value="Tech & Skills" :valid="validTabs.technologies">
+                <base-form
+                  title="Tech and Skills"
+                  value="Tech & Skills"
+                  :valid="validTabs.technologies"
+                  @click="cardName = 'Tech & Skills'"
+                >
                   <technologies-form
                     :ref="tabRefs.technologies"
                     v-model="editedEmployee"
                     v-model:valid="validTabs.technologies"
                   ></technologies-form>
                 </base-form>
-                <base-form title="Foreign Languages" value="Languages" :valid="validTabs.languages">
+                <base-form
+                  title="Foreign Languages"
+                  value="Languages"
+                  :valid="validTabs.languages"
+                  @click="cardName = 'Languages'"
+                >
                   <languages-form
                     :ref="tabRefs.languages"
                     v-model="editedEmployee"
                     v-model:valid="validTabs.languages"
                   ></languages-form>
                 </base-form>
-                <base-form title="Job Experience" value="Job Experience" :valid="validTabs.jobExperience">
+                <base-form
+                  title="Job Experience"
+                  value="Job Experience"
+                  :valid="validTabs.jobExperience"
+                  @click="cardName = 'Job Experience'"
+                >
                   <div>
                     <job-experience-form
                       :ref="tabRefs.jobExperience"
@@ -179,7 +205,12 @@
                     ></job-experience-form>
                   </div>
                 </base-form>
-                <base-form title="Education" value="Education" :valid="validTabs.education">
+                <base-form
+                  title="Education"
+                  value="Education"
+                  :valid="validTabs.education"
+                  @click="cardName = 'Education'"
+                >
                   <div>
                     <education-form
                       :ref="tabRefs.education"
@@ -189,7 +220,12 @@
                     ></education-form>
                   </div>
                 </base-form>
-                <base-form title="Customer Orgs" value="Customer Orgs" :valid="validTabs.customerOrgs">
+                <base-form
+                  title="Customer Orgs"
+                  value="Customer Orgs"
+                  :valid="validTabs.customerOrgs"
+                  @click="cardName = 'Customer Orgs'"
+                >
                   <customer-orgs-form
                     :ref="tabRefs.customerOrgs"
                     v-model="editedEmployee"
