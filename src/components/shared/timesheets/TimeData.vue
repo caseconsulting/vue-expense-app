@@ -60,6 +60,7 @@ import { useStore } from 'vuex';
 import { difference, isBefore, now } from '@/shared/dateUtils';
 import { updateStoreContracts } from '@/utils/storeUtils';
 import { getCalendarYearPeriod, getContractYearPeriod } from './time-periods';
+import { getTodaysDate } from '@/shared/dateUtils.js';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -403,6 +404,27 @@ watch(
     clonedEmployee.value = _find(store.getters.employees, (e) => e.id === clonedEmployee.value.id);
   },
   { deep: true }
+);
+
+watch(
+  () => ptoBalances.value,
+  () => {
+    let balance = (ptoBalances.value?.['PTO']?.value ?? ptoBalances.value?.['PTO']) / 60 / 60;
+    balance = 198;
+    let ptoAccrual = 14;
+    let ptoMax = 208;
+    if (ptoAccrual > ptoMax - balance) {
+      let notification = {
+        type: 'pto-accrual',
+        closeable: true,
+        status: 'info',
+        color: '#f27311',
+        message: `You will not accrue ${balance >= ptoMax ? 'any' : `your full ${ptoAccrual} hours of`} PTO next month. Consider using your PTO balance or cashing it out using the Timesheet Widget. Your current balance is ${balance.toFixed(2)} hours.`,
+        id: `PTO-ACCRUE-WARNING-${getTodaysDate('YYYY-MM')}` // TODO: add month so it comes up next month
+      };
+      emitter.emit('add-notification', notification);
+    }
+  }
 );
 </script>
 
