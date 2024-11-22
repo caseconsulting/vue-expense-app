@@ -8,11 +8,13 @@
           <v-img class="display-inline-block position-absolute" :src="avatar" :alt="altText" />
         </v-avatar>
         <v-icon
+          v-if="isAdmin || isUser"
           @click="toggleModal.emergencyContact = true"
           icon="mdi-hospital-box"
-          color="red"
+          :color="hasEmergencyContacts ? 'red' : 'grey'"
           size="28"
           class="emergency-info-icon"
+          v-tooltip="hasEmergencyContacts ? 'Emergency Contacts' : 'No Emergency Contacts Listed'"
         />
       </v-col>
       <!-- general info -->
@@ -156,12 +158,14 @@
 
 <script setup>
 import _ from 'lodash';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, inject } from 'vue';
 import { useStore } from 'vuex';
 import { isMobile } from '../../../utils/utils';
 import { updateStoreAvatars } from '../../../utils/storeUtils';
 import ProfilePicModal from '../modals/ProfilePicModal.vue';
 import EmergencyContactModal from '../modals/EmergencyContactModal.vue';
+const isAdmin = inject('isAdmin');
+const isUser = inject('isUser');
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -197,6 +201,10 @@ onMounted(async () => {
 // |                     COMPUTED                     |
 // |                                                  |
 // |--------------------------------------------------|
+
+const hasEmergencyContacts = computed(() => {
+  return (props.model.emergencyContacts || []).length > 0;
+});
 
 const initials = computed(() => {
   if (!props.model) return '';
