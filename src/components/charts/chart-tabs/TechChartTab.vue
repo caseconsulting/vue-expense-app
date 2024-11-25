@@ -30,7 +30,7 @@
 
 <script setup>
 import { onMounted, ref, watch } from 'vue';
-import _ from 'lodash';
+import _forEach from 'lodash/forEach';
 import TechBarChart from '../custom-charts/TechBarChart.vue';
 import VueWordCloud from 'vuewordcloud';
 import { useStore } from 'vuex';
@@ -89,7 +89,7 @@ function parseEmployeeData() {
     }
   });
 
-  technologies.value = _.forEach(technologies.value, (value, key) => {
+  technologies.value = _forEach(technologies.value, (value, key) => {
     if (value > 1) {
       words.value.push([key, value]);
     }

@@ -58,6 +58,15 @@
           class="form_padding"
         ></v-autocomplete>
 
+        <!-- Expense Type Description -->
+        <div
+          v-if="selectedExpenseType"
+          class="d-flex align-center pa-1 mt-1 text-caption text-grey-darken-2 bg-blue-lighten-5 border-dashed border-thin rounded-sm"
+        >
+          <v-icon class="mr-1">mdi-information-slab-box-outline</v-icon>
+          {{ selectedExpenseType.description }}
+        </div>
+
         <!-- Category -->
         <v-select
           variant="underlined"
@@ -415,7 +424,16 @@ import { isBetween, getTodaysDate, format } from '../../shared/dateUtils';
 import { employeeFilter } from '@/shared/filterUtils';
 import { mask } from 'vue-the-mask';
 
-import _ from 'lodash';
+import _find from 'lodash/find';
+import _cloneDeep from 'lodash/cloneDeep';
+import _forEach from 'lodash/forEach';
+import _map from 'lodash/map';
+import _filter from 'lodash/filter';
+import _isEmpty from 'lodash/isEmpty';
+import _includes from 'lodash/includes';
+import _compact from 'lodash/compact';
+import _isEqual from 'lodash/isEqual';
+import _isNil from 'lodash/isNil';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -470,7 +488,7 @@ function isReimbursed() {
  * @return boolean - receipt is required
  */
 function receiptRequired() {
-  this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
+  this.selectedExpenseType = _find(this.expenseTypes, (expenseType) => {
     if (expenseType.value === this.editedExpense.expenseTypeId) {
       return expenseType;
     }
@@ -486,7 +504,7 @@ function receiptRequired() {
   }
   // otherwise, does one of it's categories require a receipt
   if (this.editedExpense.category) {
-    let category = _.find(this.selectedExpenseType.categories, (cat) => {
+    let category = _find(this.selectedExpenseType.categories, (cat) => {
       return cat.name === this.editedExpense.category;
     });
     return category.requireReceipt;
@@ -593,7 +611,7 @@ async function checkCoverage() {
     if (this.editedExpense) {
       // expense exists
       // get expense type
-      let expenseType = _.find(this.expenseTypes, (type) => this.editedExpense.expenseTypeId === type.value);
+      let expenseType = _find(this.expenseTypes, (type) => this.editedExpense.expenseTypeId === type.value);
 
       // get employee
       if (this.asUser) {
@@ -601,7 +619,7 @@ async function checkCoverage() {
         this.employee = this.$store.getters.user;
       } else {
         // creating or updating an expense as an admin
-        this.employee = _.find(this.$store.getters.employees, (e) => e.id === this.editedExpense.employeeId);
+        this.employee = _find(this.$store.getters.employees, (e) => e.id === this.editedExpense.employeeId);
       }
 
       // get budget
@@ -612,9 +630,11 @@ async function checkCoverage() {
         return b.expenseTypeId == expenseType.value && isActiveBudget;
       });
       let budgetExists = budget ? true : false;
-      let budgetAmount = parseInt(
-        _.find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id).budgetObject.amount
-      );
+
+      // get the budget amount, including legacyCarryover
+      let budgetObject = _find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id).budgetObject;
+      let budgetAmount = parseInt(budgetObject.amount);
+      let legacyCarryover = parseInt(budgetObject.legacyCarryover ?? 0);
 
       if (this.employee.workStatus == 0) {
         // emit error if user is inactive
@@ -669,7 +689,7 @@ async function checkCoverage() {
           // BRANCH 1.1 if the matching budget exists
           let committedAmount = budget.pendingAmount + budget.reimbursedAmount;
           let allExpenses = await api.getAllAggregateExpenses();
-          let match = _.find(allExpenses, (entry) => {
+          let match = _find(allExpenses, (entry) => {
             return entry.id === this.editedExpense.id;
           });
           // for subsequent calculations, remove matched entry cost from committed amount
@@ -680,15 +700,15 @@ async function checkCoverage() {
           }
           if (expenseType.odFlag && this.isFullTime(this.employee)) {
             // BRANCH 2.1 selected expense type allows overdraft and employee is full time
-            if (budgetAmount > newCommittedAmount) {
-              //BRANCH 3.1 under initial budget (not including overdraft)
-              if (newCommittedAmount + cost <= budgetAmount) {
+            if (budgetAmount + legacyCarryover > newCommittedAmount) {
+              // BRANCH 3.1 under initial budget (not including overdraft)
+              if (newCommittedAmount + cost <= budgetAmount + legacyCarryover) {
                 // BRANCH 4.1 under initial budget and not going into overdraft after applying expense
                 await this.submit();
-              } else if (newCommittedAmount + cost <= 2 * budgetAmount) {
+              } else if (newCommittedAmount + cost <= 2 * budgetAmount + legacyCarryover) {
                 // BRANCH 4.2 goes over initial budget with new expense but stays below overdraft budget
                 this.editedExpense['budget'] = budgetAmount;
-                this.editedExpense['remaining'] = budgetAmount - newCommittedAmount;
+                this.editedExpense['remaining'] = budgetAmount + legacyCarryover - newCommittedAmount;
                 this.editedExpense['od'] = true;
                 this.isCovered = true;
                 this.isOverCovered = false;
@@ -696,18 +716,18 @@ async function checkCoverage() {
               } else {
                 // BRANCH 4.3 goes over overdraft budget completely
                 this.editedExpense['budget'] = budgetAmount;
-                this.editedExpense['remaining'] = 2 * budgetAmount - newCommittedAmount;
+                this.editedExpense['remaining'] = 2 * budgetAmount + legacyCarryover - newCommittedAmount;
                 this.editedExpense['od'] = true;
                 this.isCovered = false;
                 this.isOverCovered = false;
                 this.confirming = !this.confirming;
               }
-            } else if (2 * budgetAmount > newCommittedAmount) {
+            } else if (2 * budgetAmount + legacyCarryover > newCommittedAmount) {
               // BRANCH 3.2 under overdraft budget -- expense is able to be made
-              if (newCommittedAmount + cost <= 2 * budgetAmount) {
+              if (newCommittedAmount + cost <= 2 * budgetAmount + legacyCarryover) {
                 // BRANCH 5.1 above initial budget but below overdraft budget TODO: add condirmation box handling? new flag?
                 this.editedExpense['budget'] = budgetAmount;
-                this.editedExpense['remaining'] = 2 * budgetAmount - newCommittedAmount;
+                this.editedExpense['remaining'] = 2 * budgetAmount + legacyCarryover - newCommittedAmount;
                 this.editedExpense['od'] = true;
                 this.isCovered = true;
                 this.isOverCovered = true;
@@ -715,7 +735,7 @@ async function checkCoverage() {
               } else {
                 // BRANCH 5.2 budget not maxed out before this expense (going over overdraft) but expense not fully covered. Show adusted confirmation dialog
                 this.editedExpense['budget'] = budgetAmount;
-                this.editedExpense['remaining'] = 2 * budgetAmount - newCommittedAmount;
+                this.editedExpense['remaining'] = 2 * budgetAmount + legacyCarryover - newCommittedAmount;
                 this.editedExpense['od'] = true;
                 this.isCovered = false;
                 this.isOverCovered = false;
@@ -730,16 +750,16 @@ async function checkCoverage() {
           } else {
             // BRANCH 2.2 selected expense type does not allow overdraft or employee is not full time
             this.editedExpense['od'] = false;
-            if (newCommittedAmount < budgetAmount) {
+            if (newCommittedAmount < budgetAmount + legacyCarryover) {
               // BRANCH 6.1 starts under initial budget
-              if (newCommittedAmount + cost <= budgetAmount) {
+              if (newCommittedAmount + cost <= budgetAmount + legacyCarryover) {
                 // BRANCH 7.1 doesnt go over budget
                 // reimburse the full expense
                 await this.submit();
               } else {
                 // BRANCH 7.2 goes over budget
                 this.editedExpense['budget'] = budgetAmount;
-                this.editedExpense['remaining'] = budgetAmount - newCommittedAmount;
+                this.editedExpense['remaining'] = budgetAmount + legacyCarryover - newCommittedAmount;
                 this.isCovered = false;
                 this.isOverCovered = false;
                 this.confirming = !this.confirming;
@@ -755,13 +775,13 @@ async function checkCoverage() {
           // BRANCH 1.2 budget for this expense does not exist
           if (expenseType.odFlag && this.isFullTime(this.employee)) {
             // Branch 8.1 selected expense type allows overdraft and employee is full time
-            if (cost <= budgetAmount) {
+            if (cost <= budgetAmount + legacyCarryover) {
               // full amount reimbursed
               await this.submit();
-            } else if (cost <= 2 * budgetAmount) {
+            } else if (cost <= 2 * budgetAmount + legacyCarryover) {
               // the expense goes into overdraft but fully covered
               this.editedExpense['budget'] = budgetAmount;
-              this.editedExpense['remaining'] = budgetAmount;
+              this.editedExpense['remaining'] = budgetAmount + legacyCarryover;
               this.editedExpense['od'] = true;
               this.isCovered = true;
               this.isOverCovered = false;
@@ -769,7 +789,7 @@ async function checkCoverage() {
             } else {
               // expense goes past overdraft budget completely and is partially covered
               this.editedExpense['budget'] = budgetAmount;
-              this.editedExpense['remaining'] = 2 * budgetAmount;
+              this.editedExpense['remaining'] = 2 * budgetAmount + legacyCarryover;
               this.editedExpense['od'] = true;
               this.isCovered = false;
               this.isOverCovered = false;
@@ -778,13 +798,13 @@ async function checkCoverage() {
           } else {
             // BRANCH 8.2 selected expense type does not allow overdraft or employee is not full time
             this.editedExpense['od'] = false;
-            if (cost <= budgetAmount) {
+            if (cost <= budgetAmount + legacyCarryover) {
               // reimburse the full expense
               await this.submit();
             } else {
               // expense exceeds the budget but the expense not fully covered
               this.editedExpense['budget'] = budgetAmount;
-              this.editedExpense['remaining'] = budgetAmount;
+              this.editedExpense['remaining'] = budgetAmount + legacyCarryover;
               this.isCovered = false;
               this.isOverCovered = false;
               this.confirming = !this.confirming;
@@ -816,10 +836,10 @@ function clearForm() {
 
   this.reqRecipient = false;
   this.recipientPlaceholder = null;
-  this.editedExpense = _.cloneDeep(this.expense);
+  this.editedExpense = _cloneDeep(this.expense);
   this.originalExpense = this.editedExpense;
   this.purchaseDateFormatted = null;
-  this.file = null;
+  this.files = [];
 
   this.urlInfo['url'] = '';
   this.urlInfo['category'] = '';
@@ -852,7 +872,7 @@ function costHint() {
       str += this.convertToMoneyString(this.remainingBudget);
       return str;
     }
-    let employee = _.find(this.$store.getters.employees, (e) => e.id === this.editedExpense.employeeId);
+    let employee = _find(this.$store.getters.employees, (e) => e.id === this.editedExpense.employeeId);
     let isOverdraftable =
       (this.selectedExpenseType.proRated && this.isFullTime(employee) && this.selectedExpenseType.odFlag) ||
       (!this.selectedExpenseType.proRated && this.selectedExpenseType.odFlag);
@@ -883,13 +903,17 @@ async function createNewEntry() {
   let newUUID = generateUUID();
   this.editedExpense['id'] = newUUID;
   this.editedExpense['createdAt'] = getTodaysDate();
-  if (this.isReceiptRequired() && this.file) {
+  if (this.isReceiptRequired() && this.files?.length > 0) {
     // if receipt required and updating receipt
-    // stores file name for lookup later
-    this.editedExpense['receipt'] = this.file.name;
+    // stores files name for lookup later
+    let fileNames = [];
+    for (let i = 0; i < this.files.length; i++) {
+      fileNames[i] = this.files[i].name;
+    }
+    this.editedExpense['receipt'] = fileNames;
     // upload attachment to S3
-    updatedAttachment = await api.createAttachment(this.editedExpense, this.file);
-    if (updatedAttachment.key) {
+    updatedAttachment = await api.createAttachment(this.editedExpense, this.files);
+    if (updatedAttachment[0].key) {
       // successfully uploads file
       updatedExpense = await api.createItem(api.EXPENSES, this.editedExpense);
 
@@ -916,7 +940,7 @@ async function createNewEntry() {
   } else {
     // if receipt not required or not updating receipt
     if (!this.isReceiptRequired()) {
-      this.file = null;
+      this.files = [];
       this.editedExpense['receipt'] = null;
     }
     updatedExpense = await api.createItem(api.EXPENSES, this.editedExpense);
@@ -964,10 +988,10 @@ function encodeUrl(url) {
  */
 function filteredExpenseTypes() {
   let filteredExpType = [];
-  let selectedEmployee = _.find(this.employees, ['value', this.editedExpense.employeeId]);
+  let selectedEmployee = _find(this.employees, ['value', this.editedExpense.employeeId]);
   if (!this.asUser) {
     // creating or updating an expense as an admin
-    _.forEach(this.expenseTypes, (expenseType) => {
+    _forEach(this.expenseTypes, (expenseType) => {
       if (!expenseType.isInactive) {
         // expense type is active
         if (!selectedEmployee) {
@@ -976,7 +1000,7 @@ function filteredExpenseTypes() {
           filteredExpType.push(expenseType);
         } else if (this.hasAccess(selectedEmployee, expenseType)) {
           // add expense type if the employee is selected and has access
-          let budget = _.find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id);
+          let budget = _find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id);
           let amount = budget ? budget.budgetObject.amount : this.calcAdjustedBudget(selectedEmployee, expenseType); // calculate budget
           expenseType.text = `${expenseType.budgetName} - $${Number(amount).toLocaleString().toString()}`;
           filteredExpType.push(expenseType);
@@ -986,7 +1010,7 @@ function filteredExpenseTypes() {
   } else {
     // creating or updating an expense as a user
     let employee = this.userInfo;
-    _.forEach(this.expenseTypes, (expenseType) => {
+    _forEach(this.expenseTypes, (expenseType) => {
       if (!expenseType.isInactive) {
         // expense type is active
         if (this.hasAccess(employee, expenseType)) {
@@ -996,7 +1020,7 @@ function filteredExpenseTypes() {
             isBetween(getTodaysDate(), expenseType.startDate, expenseType.endDate, 'day', '[]')
           ) {
             // expense type is active
-            let budget = _.find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id);
+            let budget = _find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id);
             let amount = budget ? budget.budgetObject.amount : expenseType.budgetAmount;
             expenseType.text = `${expenseType.budgetName} - $${Number(amount).toLocaleString().toString()}`;
             filteredExpType.push(expenseType);
@@ -1048,7 +1072,7 @@ function formatCost(e) {
 function getCategories() {
   let categories = [];
   if (this.selectedExpenseType) {
-    categories = _.map(this.selectedExpenseType.categories, (category) => {
+    categories = _map(this.selectedExpenseType.categories, (category) => {
       return category.name;
     });
   }
@@ -1065,7 +1089,7 @@ function getCategories() {
 function getExpenseTypeSelected(expenseTypeId) {
   this.editedExpense.category = null; // clear expense category (not type) to prevent it persisting
   this.$refs.form.resetValidation(); // avoid validation errors after changing category
-  return (this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
+  return (this.selectedExpenseType = _find(this.expenseTypes, (expenseType) => {
     if (expenseType.value === expenseTypeId) {
       return expenseType;
     }
@@ -1083,12 +1107,12 @@ async function getRemainingBudget() {
     } else {
       this.employeeBudgets = await api.getAllActiveEmployeeBudgets(this.editedExpense.employeeId);
     }
-    let employee = _.find(this.$store.getters.employees, (e) => e.id === this.editedExpense.employeeId);
+    let employee = _find(this.$store.getters.employees, (e) => e.id === this.editedExpense.employeeId);
     // filter out expense types that an employee does not have a budget to
-    this.expenseTypes = _.filter(
+    this.expenseTypes = _filter(
       this.expenseTypes,
       (expenseType) =>
-        this.hasAccess(employee, expenseType) && _.find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id)
+        this.hasAccess(employee, expenseType) && _find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id)
     );
   }
   if (this.editedExpense.expenseTypeId && this.editedExpense.employeeId) {
@@ -1097,9 +1121,12 @@ async function getRemainingBudget() {
         (currBudget) => currBudget.expenseTypeId === this.editedExpense.expenseTypeId
       );
 
+      let legacyCarryover = parseInt(budget.budgetObject.legacyCarryover ?? 0);
+
       if (budget) {
         this.remainingBudget =
-          budget.budgetObject.amount -
+          budget.budgetObject.amount +
+          legacyCarryover -
           budget.budgetObject.pendingAmount -
           budget.budgetObject.reimbursedAmount -
           this.editedExpense.cost;
@@ -1131,7 +1158,7 @@ function getRequireURL() {
     return getRequiredRules();
   }
   if (this.selectedExpenseType.categories.length != 0 && this.editedExpense.category) {
-    let selectedCategory = _.find(this.selectedExpenseType.categories, (category) => {
+    let selectedCategory = _find(this.selectedExpenseType.categories, (category) => {
       if (category.name === this.editedExpense.category) {
         return category;
       }
@@ -1190,7 +1217,7 @@ async function incrementURLHits() {
  * @return boolean - receipt is required
  */
 function isReceiptRequired() {
-  this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
+  this.selectedExpenseType = _find(this.expenseTypes, (expenseType) => {
     if (expenseType.value === this.editedExpense.expenseTypeId) {
       return expenseType;
     }
@@ -1202,7 +1229,7 @@ function isReceiptRequired() {
   }
   // otherwise, does one of it's categories require a receipt
   if (this.editedExpense.category) {
-    let category = _.find(this.selectedExpenseType.categories, (cat) => {
+    let category = _find(this.selectedExpenseType.categories, (cat) => {
       return cat.name === this.editedExpense.category;
     });
     return category.requireReceipt;
@@ -1227,7 +1254,7 @@ function notesRules() {
  * @return String - The cost without formatting
  */
 function parseCost(cost) {
-  if (cost && !_.isEmpty(cost)) {
+  if (cost && !_isEmpty(cost)) {
     return cost.replace(/[,\s]/g, '');
   } else {
     return cost || '';
@@ -1266,18 +1293,23 @@ function preformatFloat(float) {
 } // preformatFloat
 
 /**
- * Sets the file.
+ * Sets the files.
  *
- * @param file - receipt
+ * @param files - receipt
  */
-function setFile(file) {
-  if (file) {
+function setFile(files) {
+  if (files) {
     this.isInactive = true;
-    this.file = file;
-    this.editedExpense['receipt'] = file.name;
+    this.files = files;
+    let fileNames = [];
+    for (let i = 0; i < files.length; i++) {
+      fileNames[i] = files[i].name;
+    }
+    this.editedExpense['receipt'] = fileNames;
+    this.receipt = fileNames;
     this.isInactive = false;
   } else {
-    this.file = null;
+    this.files = [];
     this.editedExpense['receipt'] = null;
     this.receipt = null;
   }
@@ -1288,7 +1320,7 @@ function setFile(file) {
  */
 async function scanFile() {
   this.scanLoading = true;
-  let file = this.file;
+  let file = this.files;
   if (file) {
     this.isInactive = true;
     //go get text data from textract and comprehend
@@ -1304,24 +1336,24 @@ async function scanFile() {
     let totalPrice;
     let failed = false;
 
-    _.forEach(this.receiptObject.KeyValueSets, (relationship) => {
+    _forEach(this.receiptObject.KeyValueSets, (relationship) => {
       //loop through keyvaluesets
 
       let keys = Object.values(relationship.Keys); //grab the text and confidence objects
       let keyText = '';
-      _.forEach(keys, (key) => {
+      _forEach(keys, (key) => {
         // loop through each one
         keyText += key.Text.toLowerCase() + ' ';
       });
 
-      if (_.includes(keyText, 'total') && !_.includes(keyText, 'sub') && !_.includes(keyText, 'tax')) {
+      if (_includes(keyText, 'total') && !_includes(keyText, 'sub') && !_includes(keyText, 'tax')) {
         //check if there is a total in any relationship
         //if there is loop throught the values in that relationship, and build the text.
 
         let valText = '';
         let valConfidence = 100;
         //build value string
-        _.forEach(relationship.Values, (value) => {
+        _forEach(relationship.Values, (value) => {
           valText += value.Text + '';
           valConfidence = Math.min(valConfidence, value.Confidence); //key: Total: Values: USD confidence 99 141500 confidence 50
         });
@@ -1339,7 +1371,7 @@ async function scanFile() {
     let currentTotal = null;
     if (totalPrice == null) {
       //if there was no relationship that included total do it with words
-      _.forEach(this.receiptObject.Words, (word) => {
+      _forEach(this.receiptObject.Words, (word) => {
         //loop through word object
         if (isTotal) {
           //if the previous word was total
@@ -1360,7 +1392,7 @@ async function scanFile() {
           isTotal = false;
         }
         let wordText = word.Text.toLowerCase();
-        if (_.includes(wordText, 'total') && !_.includes(wordText, 'sub') && !_.includes(wordText, 'tax')) {
+        if (_includes(wordText, 'total') && !_includes(wordText, 'sub') && !_includes(wordText, 'tax')) {
           //if the current word is total
           isTotal = true;
         }
@@ -1389,7 +1421,7 @@ async function scanFile() {
     let organization = '';
     // TITLE
     let title = '';
-    _.forEach(this.receiptObject.comprehend.Entities, (entity) => {
+    _forEach(this.receiptObject.comprehend.Entities, (entity) => {
       if (entity.Type == 'DATE') {
         if (entity.Score > 0.9 && firstDate == null) {
           firstDate = entity.Text;
@@ -1460,7 +1492,7 @@ async function scanFile() {
  */
 function setDefaultExpenseTypeData() {
   let expenseTypes = this.$store.getters.expenseTypes;
-  this.expenseTypes = _.map(expenseTypes, (expenseType) => {
+  this.expenseTypes = _map(expenseTypes, (expenseType) => {
     return {
       text: `${expenseType.budgetName} - $${expenseType.budget}`,
       value: expenseType.id,
@@ -1474,7 +1506,7 @@ function setDefaultExpenseTypeData() {
  */
 function setRecipientOptions() {
   // creating or updating an expense as an admin
-  this.recipientOptions = _.compact(
+  this.recipientOptions = _compact(
     this.activeEmployees.map((employee) => {
       if (
         employee.value == this.userInfo.id ||
@@ -1538,13 +1570,18 @@ async function updateExistingEntry() {
   let updatedExpense;
 
   // if updating an expense
-  if (this.isReceiptRequired() && this.file) {
+  if (this.isReceiptRequired() && this.files) {
     // if receipt required and updating receipt
     // stores file name for lookup later
-    this.editedExpense['receipt'] = this.file.name;
+
+    let fileNames = [];
+    for (let i = 0; i < this.files.length; i++) {
+      fileNames[i] = this.files[i].name;
+    }
+    this.editedExpense['receipt'] = fileNames;
     // upload attachment to S3
-    updatedAttachment = await api.createAttachment(this.editedExpense, this.file);
-    if (updatedAttachment.key) {
+    updatedAttachment = await api.createAttachment(this.editedExpense, this.files);
+    if (updatedAttachment[0].key) {
       // successfully uploaded file
       // update item in database
       updatedExpense = await api.updateItem(api.EXPENSES, this.editedExpense);
@@ -1565,12 +1602,13 @@ async function updateExistingEntry() {
       }
     } else {
       // error uploading file
+      console.log(updatedAttachment);
       this.emitter.emit('error', updatedAttachment.response.data.message);
     }
   } else {
     // if not updating receipt
     if (!this.isReceiptRequired()) {
-      this.file = null;
+      this.files = [];
       this.editedExpense['receipt'] = null;
     }
 
@@ -1681,7 +1719,7 @@ function created() {
       return employee;
     }
   });
-  this.activeEmployees = _.compact(this.activeEmployees);
+  this.activeEmployees = _compact(this.activeEmployees);
 
   this.setRecipientOptions();
 
@@ -1740,8 +1778,8 @@ Number.prototype.pad = function (size) {
  * watcher for expense.id - sets the edited expense and original expense and determines if it is being edited.
  */
 function watchExpenseID() {
-  this.editedExpense = _.cloneDeep(this.expense);
-  this.originalExpense = _.cloneDeep(this.editedExpense);
+  this.editedExpense = _cloneDeep(this.expense);
+  this.originalExpense = _cloneDeep(this.editedExpense);
   //when model id is not empty then must be editing an expense
   if (!this.isEmpty(this.expense.id)) {
     this.emitter.emit('editing-expense'); //notify parent that expense is being edited
@@ -1751,7 +1789,7 @@ function watchExpenseID() {
     this.clearForm();
   }
 
-  this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
+  this.selectedExpenseType = _find(this.expenseTypes, (expenseType) => {
     if (expenseType.value === this.editedExpense.expenseTypeId) {
       return expenseType;
     }
@@ -1776,7 +1814,7 @@ async function watchEditedExpenseCost() {
  * watcher for editedExpense.expenseTypeId - set fields for the that expenseType.
  */
 async function watchEditedExpenseExpenseTypeID() {
-  this.selectedExpenseType = _.find(this.expenseTypes, (expenseType) => {
+  this.selectedExpenseType = _find(this.expenseTypes, (expenseType) => {
     return expenseType.value === this.editedExpense.expenseTypeId;
   });
   this.requireURLET = this.selectedExpenseType && this.selectedExpenseType.requireURL;
@@ -1807,13 +1845,13 @@ async function watchEditedExpenseExpenseTypeID() {
     // set requires recipient
     this.reqRecipient = this.selectedExpenseType.hasRecipient;
 
-    let localRecipient = _.find(this.employees, (employee) => employee.value == this.editedExpense.recipient);
+    let localRecipient = _find(this.employees, (employee) => employee.value == this.editedExpense.recipient);
     this.recipientPlaceholder = localRecipient ? localRecipient.text : '';
     // set show on company feed and require url
     if (
-      !_.isEqual(this.originalExpense, this.editedExpense) ||
-      _.isNil(this.editedExpense.id) ||
-      _.isEmpty(this.editedExpense.id)
+      !_isEqual(this.originalExpense, this.editedExpense) ||
+      _isNil(this.editedExpense.id) ||
+      _isEmpty(this.editedExpense.id)
     ) {
       // changing the expense type
       if (!this.isEdit && this.selectedExpenseType.alwaysOnFeed) {
@@ -1821,9 +1859,9 @@ async function watchEditedExpenseExpenseTypeID() {
         this.editedExpense.showOnFeed = true;
       } else {
         // if expense type is not always on feed
-        if (!_.isEmpty(this.selectedExpenseType.categories)) {
+        if (!_isEmpty(this.selectedExpenseType.categories)) {
           // expense type has categories
-          let category = _.find(this.selectedExpenseType.categories, (category) => {
+          let category = _find(this.selectedExpenseType.categories, (category) => {
             return category == this.editedExpense.category;
           });
           this.editedExpense.showOnFeed = category ? category.showOnFeed : false;
@@ -1836,18 +1874,18 @@ async function watchEditedExpenseExpenseTypeID() {
       this.editedExpense.requireURL = true;
     } else {
       // if expense type does not always require url
-      if (_.isEmpty(this.selectedExpenseType.categories)) {
+      if (_isEmpty(this.selectedExpenseType.categories)) {
         // expense type does not have categories
         this.editedExpense.requireURL = false;
       } else {
         // expense type has categories
-        let category = _.find(this.selectedExpenseType.categories, (category) => {
+        let category = _find(this.selectedExpenseType.categories, (category) => {
           return category == this.editedExpense.category;
         });
         this.editedExpense.requireURL = category ? category.requireURL : false;
       }
     }
-    this.editedExpense = _.cloneDeep(this.editedExpense); //need to clone editedExpense in order to see label URL changes
+    this.editedExpense = _cloneDeep(this.editedExpense); //need to clone editedExpense in order to see label URL changes
   } else {
     this.hint = '';
   }
@@ -1861,10 +1899,10 @@ async function watchEditedExpenseExpenseTypeID() {
  */
 function watchEditedExpenseCategory() {
   if (
-    !_.isNil(this.selectedExpenseType) &&
-    (!_.isEqual(this.originalExpense.category, this.editedExpense.category) ||
-      !_.isEqual(this.originalExpense.expenseTypeId, this.editedExpense.expenseTypeId) ||
-      _.isNil(this.editedExpense.id))
+    !_isNil(this.selectedExpenseType) &&
+    (!_isEqual(this.originalExpense.category, this.editedExpense.category) ||
+      !_isEqual(this.originalExpense.expenseTypeId, this.editedExpense.expenseTypeId) ||
+      _isNil(this.editedExpense.id))
   ) {
     // category or expense type is changed
     if (this.selectedExpenseType.alwaysOnFeed) {
@@ -1872,12 +1910,12 @@ function watchEditedExpenseCategory() {
       this.editedExpense.showOnFeed = true;
     } else {
       // if expense type is not always on feed
-      if (_.isEmpty(this.selectedExpenseType.categories)) {
+      if (_isEmpty(this.selectedExpenseType.categories)) {
         // expense type does not have categories
         this.editedExpense.showOnFeed = false;
       } else {
         // expense type has categories
-        let category = _.find(this.selectedExpenseType.categories, (category) => {
+        let category = _find(this.selectedExpenseType.categories, (category) => {
           return category.name == this.editedExpense.category;
         });
         this.editedExpense.showOnFeed = category ? category.showOnFeed : false;
@@ -1888,24 +1926,24 @@ function watchEditedExpenseCategory() {
     this.editedExpense.showOnFeed = this.originalExpense.showOnFeed;
   }
 
-  if (!_.isNil(this.selectedExpenseType)) {
+  if (!_isNil(this.selectedExpenseType)) {
     if (this.selectedExpenseType.requireURL) {
       // if expense type requires url
       this.editedExpense.requireURL = true;
     } else {
       // if expense type does not always require url
-      if (_.isEmpty(this.selectedExpenseType.categories)) {
+      if (_isEmpty(this.selectedExpenseType.categories)) {
         // expense type does not have categories
         this.editedExpense.requireURL = false;
       } else {
         // expense type has categories
-        let category = _.find(this.selectedExpenseType.categories, (category) => {
+        let category = _find(this.selectedExpenseType.categories, (category) => {
           return category.name == this.editedExpense.category;
         });
         this.editedExpense.requireURL = category ? category.requireURL : false;
       }
     }
-    this.editedExpense = _.cloneDeep(this.editedExpense); //need to clone editedExpense in order to see label URL changes
+    this.editedExpense = _cloneDeep(this.editedExpense); //need to clone editedExpense in order to see label URL changes
   }
 } // watchEditedExpenseCategory
 
@@ -1948,16 +1986,23 @@ function watchEditedExpenseReimbursedDate() {
 /**
  * watcher for file -  decides whether to disable scan button.
  */
-function watchFile() {
+function watchFiles() {
   //for disabling the scan button
-  if (this.file == null) {
+  if (this.files == [] || this.files == null) {
     //if no file
-    this.disableScan = true;
-  } else if (this.file.type != 'image/jpeg' && this.file.type != 'image/png' && this.file.type != 'application/pdf') {
-    //if file isn't jpg or png
     this.disableScan = true;
   } else {
     this.disableScan = false;
+  }
+  for (let i = 0; i < this.files.length; i++) {
+    if (
+      this.files[i].type != 'image/jpeg' &&
+      this.files[i].type != 'image/png' &&
+      this.files[i].type != 'application/pdf'
+    ) {
+      //if file isn't jpg or png
+      this.disableScan = true;
+    }
   }
 } // watchFile
 
@@ -2005,7 +2050,7 @@ export default {
       ], // rules for cost
       disableScan: true, // receipt scanned disabled
       //editedExpense: {}, // data being edited --
-      editedExpense: _.cloneDeep(this.expense),
+      editedExpense: _cloneDeep(this.expense),
       employee: null, // employee selected
       employeeBudgets: null, // selected employee's budgets
       employeeRole: '', // employee role
@@ -2013,7 +2058,7 @@ export default {
       errorSubmitting: false, // avoid clearing fields if error exists
       expenseTypes: [], // expense types
       expenseTypeName: null, //expense type name for budget
-      file: undefined, // receipt
+      files: [], // receipts
       hint: '', // form hints
       isCovered: false, // expense is fully covered
       isHighFive: false, // expense is a high five
@@ -2102,7 +2147,7 @@ export default {
     'editedExpense.employeeId': watchEditedExpenseEmployeeID,
     'editedExpense.purchaseDate': watchEditedExpensePurchaseDate,
     'editedExpense.reimbursedDate': watchEditedExpenseReimbursedDate,
-    file: watchFile
+    files: watchFiles
   }
 };
 </script>

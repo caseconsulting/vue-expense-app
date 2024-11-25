@@ -100,7 +100,12 @@
 </template>
 
 <script setup>
-import _ from 'lodash';
+import _forEach from 'lodash/forEach';
+import _orderBy from 'lodash/orderBy';
+import _map from 'lodash/map';
+import _join from 'lodash/join';
+import _sortBy from 'lodash/sortBy';
+import _filter from 'lodash/filter';
 import { employeeFilter } from '@/shared/filterUtils';
 import { add, format, getTodaysDate } from '@/shared/dateUtils';
 import { getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
@@ -201,7 +206,7 @@ function getBadgeExpiration(clearances, item) {
   let fDate = 100000000000000000;
 
   // used for sorting... only store the lowest date (closest to expire)
-  _.forEach(clearances, (clearance) => {
+  _forEach(clearances, (clearance) => {
     if (clearance.badgeExpirationDate) {
       let newDate = parseInt(format(clearance.badgeExpirationDate, null, 'X')); // seconds timestamp -> int
       dates.push(newDate);
@@ -209,16 +214,16 @@ function getBadgeExpiration(clearances, item) {
     }
   });
 
-  dates = _.orderBy(dates);
+  dates = _orderBy(dates);
 
   // used for displaying
-  dates = _.map(dates, (date) => {
+  dates = _map(dates, (date) => {
     return format(date, 'X', 'MMM Do, YYYY');
   });
 
   item.badgeExpiration = fDate;
 
-  return _.join(dates, ' | ');
+  return _join(dates, ' | ');
 } // getBadgeExpiration
 
 /**
@@ -230,13 +235,13 @@ function getBadgeExpiration(clearances, item) {
  */
 function getClearanceType(clearances, item) {
   let types = [];
-  let clearanceList = _.sortBy(clearances, (c) => c.badgeExpirationDate);
-  _.forEach(clearanceList, (clearance) => {
+  let clearanceList = _sortBy(clearances, (c) => c.badgeExpirationDate);
+  _forEach(clearanceList, (clearance) => {
     if (clearance.type) {
       clearance.awaitingClearance ? types.push(clearance.type + ' (awaiting clearance)') : types.push(clearance.type);
     }
   });
-  item.clearanceType = _.join(types, ' | ');
+  item.clearanceType = _join(types, ' | ');
   return item.clearanceType;
 } // getClearanceType
 
@@ -256,7 +261,7 @@ function populateBadgeExpirationsDropdown() {
   // formats the badge exp dropdowns to include the date in the future
   badgeExpirations.value = [];
   let dateRanges = ['30 Days', '60 Days', '90 Days', '180 Days', '365 Days'];
-  _.forEach(dateRanges, (date) => {
+  _forEach(dateRanges, (date) => {
     let search = date.split(' ');
     let num = parseInt(search[0]);
     let dateType = search[1].toLowerCase();
@@ -267,7 +272,7 @@ function populateBadgeExpirationsDropdown() {
   if (search.value) {
     // once the dropdown is in place, we want to only show options that match
     // dates found in filteredEmployees
-    badgeExpirations.value = _.filter(badgeExpirations.value, (date) => {
+    badgeExpirations.value = _filter(badgeExpirations.value, (date) => {
       let result = searchBadgeExpirationDates(date, true);
       return result;
     });
@@ -295,7 +300,7 @@ function populateDropdowns(emps) {
 function refreshDropdownItems() {
   filteredEmployees.value = employeesInfo.value;
   if (search.value) {
-    filteredEmployees.value = _.filter(filteredEmployees.value, (employee) => {
+    filteredEmployees.value = _filter(filteredEmployees.value, (employee) => {
       return employee.employeeNumber == search.value;
     });
   }
@@ -306,7 +311,7 @@ function refreshDropdownItems() {
     searchClearances(clearanceSearch.value);
   }
   if (tagsInfo.value.selected.length > 0) {
-    filteredEmployees.value = _.filter(filteredEmployees.value, (employee) => {
+    filteredEmployees.value = _filter(filteredEmployees.value, (employee) => {
       return selectedTagsHasEmployee(employee.id, tagsInfo.value);
     });
   }
@@ -331,12 +336,12 @@ function searchBadgeExpirationDates(requestedDate, forDropdown) {
 
   if (filteredEmployees.value.length > 0) {
     // means.value we already filtered by something so we want to restrict the dropdown
-    foundEmployees = _.filter(filteredEmployees.value, (employee) => {
+    foundEmployees = _filter(filteredEmployees.value, (employee) => {
       let found = [];
       // if they have no badge expirations, then badgeExpiration will be the big number
       if (employee.badgeExpiration < 100000000000000000) {
         // loop through every employee's clearances and see if any of them are in the selected range
-        _.forEach(employee.clearances, (clearance) => {
+        _forEach(employee.clearances, (clearance) => {
           let clearanceDate = parseInt(format(clearance.badgeExpirationDate, null, 'X')); // seconds timestamp -> int
           if (clearanceDate > now && clearanceDate <= upperBound && !foundEmployees.includes(employee)) {
             found.push(employee);
@@ -347,11 +352,11 @@ function searchBadgeExpirationDates(requestedDate, forDropdown) {
     });
   } else {
     // means.value we havent already filtered so we only want to filter the employees
-    foundEmployees = _.filter(employeesInfo.value, (employee) => {
+    foundEmployees = _filter(employeesInfo.value, (employee) => {
       // if they have no badge expirations, then badgeExpiration will be the big number
       if (employee.badgeExpiration < 100000000000000000) {
         // loop through every employee's clearances and see if any of them are in the selected range
-        _.forEach(employee.clearances, (clearance) => {
+        _forEach(employee.clearances, (clearance) => {
           let clearanceDate = parseInt(format(clearance.badgeExpirationDate, null, 'X')); // seconds timestamp -> int
           if (clearanceDate > now && clearanceDate <= upperBound && !foundEmployees.includes(employee))
             foundEmployees.push(employee);
@@ -373,7 +378,7 @@ function searchBadgeExpirationDates(requestedDate, forDropdown) {
  * @param search - the clearance to search for
  */
 function searchClearances(search) {
-  filteredEmployees.value = _.filter(filteredEmployees.value, (e) => {
+  filteredEmployees.value = _filter(filteredEmployees.value, (e) => {
     if (e.clearances) {
       for (let i = 0; i < e.clearances.length; i++) {
         if (e.clearances[i].type == search) return true;

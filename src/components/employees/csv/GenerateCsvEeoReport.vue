@@ -14,7 +14,7 @@
 </template>
 
 <script setup>
-import _ from 'lodash';
+import _cloneDeep from 'lodash/cloneDeep';
 import { isMobile, isSmallScreen } from '@/utils/utils';
 import eeoCsv from '@/utils/csv/eeoCsv.js';
 
@@ -38,7 +38,7 @@ const props = defineProps(['employees', 'midAction', 'loading']);
 // |--------------------------------------------------|
 
 function download() {
-  eeoCsv.download(_.cloneDeep(props.employees));
+  eeoCsv.download(_cloneDeep(props.employees));
 }
 </script>
 

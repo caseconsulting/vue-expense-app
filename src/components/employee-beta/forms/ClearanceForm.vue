@@ -1,5 +1,5 @@
 <template>
-  <v-form ref="form" v-model="valid" validate-on="lazy">
+  <div>
     <v-row v-for="(clearance, cIndex) in editedEmployee.clearances" :key="cIndex">
       <v-col>
         <v-row v-if="!isMobile()">
@@ -98,77 +98,26 @@
           <v-col>
             <v-row class="groove">
               <v-col :cols="isMobile() ? '12' : '4'">
-                <v-text-field
-                  :model-value="format(clearance.submissionDate, null, 'MM/DD/YYYY')"
-                  label="Submission Date"
-                  clearable
+                <date-picker
+                  v-model="clearance.submissionDate"
                   :rules="[...getDateOptionalRules(), ...getDateSubmissionRules(clearance)]"
-                  hint="MM/DD/YYYY format"
-                  v-mask="'##/##/####'"
-                  prepend-inner-icon="mdi-calendar"
-                  @click:clear="clearance.submissionDate = null"
-                  @click:prepend="clearance.showSubmissionMenu = true"
-                  @keypress="clearance.showSubmissionMenu = false"
-                  autocomplete="off"
-                >
-                  <v-menu
-                    activator="parent"
-                    v-model="clearance.showSubmissionMenu"
-                    :close-on-content-click="false"
-                    location="start center"
-                  >
-                    <v-date-picker
-                      v-model="clearance.submissionDate"
-                      @update:model-value="clearance.showSubmissionMenu = false"
-                      :max="maxSubmission(cIndex)"
-                      show-adjacent-months
-                      hide-actions
-                      keyboard-icon=""
-                      color="#bc3825"
-                      title="Submission Date"
-                    ></v-date-picker>
-                  </v-menu>
-                </v-text-field>
+                  :max="maxSubmission(cIndex)"
+                  label="Submission Date"
+                  variant="filled"
+                  clearable
+                ></date-picker>
               </v-col>
 
               <v-col :cols="isMobile() ? '12' : '4'">
-                <v-menu
-                  activator="parent"
-                  v-model="clearance.showGrantedMenu"
-                  :close-on-content-click="false"
-                  location="start center"
-                >
-                  <v-date-picker
-                    v-model="clearance.grantedDate"
-                    @update:model-value="clearance.showGrantedMenu = false"
-                    :min="clearance.submissionDate"
-                    show-adjacent-months
-                    hide-actions
-                    keyboard-icon=""
-                    color="#bc3825"
-                    title="Granted Date"
-                  ></v-date-picker>
-                </v-menu>
-
-                <v-text-field
-                  :model-value="format(clearance.grantedDate, null, 'MM/DD/YYYY')"
-                  label="Granted Date"
-                  clearable
-                  :rules="[...getDateOptionalRules(), ...getDateGrantedRules(clearance)]"
-                  hint="MM/DD/YYYY format"
-                  v-mask="'##/##/####'"
+                <date-picker
+                  v-model="clearance.grantedDate"
                   :disabled="clearance.awaitingClearance"
-                  @change="
-                    () => {
-                      if (clearance.grantedDate) clearance.awaitingClearance = false;
-                    }
-                  "
-                  prepend-inner-icon="mdi-calendar"
-                  @click:clear="clearance.grantedDate = null"
-                  @update:focused="clearance.grantedDate = parseEventDate()"
-                  @keypress="clearance.showGrantedMenu = false"
-                >
-                </v-text-field>
+                  :rules="[...getDateOptionalRules(), ...getDateGrantedRules(clearance)]"
+                  :min="clearance.submissionDate"
+                  label="Granted Date"
+                  variant="filled"
+                  clearable
+                ></date-picker>
               </v-col>
 
               <v-col :cols="isMobile() ? '12' : '4'">
@@ -187,150 +136,54 @@
               </v-col>
 
               <v-col :cols="isMobile() ? '12' : '4'">
-                <v-text-field
-                  :model-value="format(clearance.badgeExpirationDate, null, 'MM/DD/YYYY')"
-                  label="Badge Expiration Date"
-                  clearable
-                  :rules="[...getDateOptionalRules(), ...getDateBadgeRules(clearance)]"
-                  hint="MM/DD/YYYY format"
-                  v-mask="'##/##/####'"
+                <date-picker
+                  v-model="clearance.badgeExpirationDate"
                   :disabled="clearance.awaitingClearance"
-                  prepend-inner-icon="mdi-calendar"
-                  @click:clear="clearance.badgeExpirationDate = null"
-                  @update:focused="clearance.badgeExpirationDate = parseEventDate()"
-                  @keypress="clearance.showBadgeMenu = false"
-                  @click:prepend="clearance.showBadgeMenu = true"
-                  autocomplete="off"
-                >
-                  <v-menu
-                    activator="parent"
-                    v-model="clearance.showBadgeMenu"
-                    :close-on-content-click="false"
-                    location="start center"
-                  >
-                    <v-date-picker
-                      v-model="clearance.badgeExpirationDate"
-                      @update:model-value="clearance.showBadgeMenu = false"
-                      :min="minExpiration(cIndex)"
-                      show-adjacent-months
-                      hide-actions
-                      keyboard-icon=""
-                      color="#bc3825"
-                      title="Badge Expiration Date"
-                    ></v-date-picker>
-                  </v-menu>
-                </v-text-field>
+                  :rules="[...getDateOptionalRules(), ...getDateBadgeRules(clearance)]"
+                  :min="minExpiration(cIndex)"
+                  label="Badge Expiration Date"
+                  variant="filled"
+                  clearable
+                ></date-picker>
               </v-col>
 
               <v-col :cols="isMobile() ? '12' : '4'">
-                <v-menu
-                  activator="parent"
-                  ref="biMenu"
-                  v-model="clearance.showBIMenu"
-                  :close-on-content-click="false"
-                  location="start center"
-                >
-                  <v-date-picker
-                    v-model="clearance.biDates"
-                    :min="clearance.submissionDate"
-                    multiple
-                    show-adjacent-months
-                    hide-actions
-                    keyboard-icon=""
-                    color="#bc3825"
-                    title="BI Dates"
-                  >
-                  </v-date-picker>
-                </v-menu>
-                <v-combobox
-                  :model-value="formatDates(clearance.biDates)"
-                  multiple
+                <date-picker
+                  v-model="clearance.biDates"
+                  :min="clearance.submissionDate"
                   label="BI Dates"
-                  readonly
+                  variant="filled"
                   clearable
-                  prepend-inner-icon="mdi-calendar"
-                  @click:clear="clearance.biDates = []"
-                >
-                  <template v-slot:selection="{ item }">
-                    <v-chip variant="outlined" closable @click:close="removeBiDate(item, cIndex)">{{
-                      item.raw
-                    }}</v-chip>
-                  </template>
-                </v-combobox>
-              </v-col>
-              <v-col :cols="isMobile() ? '12' : '4'">
-                <v-menu
-                  activator="parent"
-                  ref="adjudicationMenu"
-                  v-model="clearance.showAdjudicationMenu"
-                  :close-on-content-click="false"
-                  location="start center"
-                >
-                  <v-date-picker
-                    v-model="clearance.adjudicationDates"
-                    :min="clearance.submissionDate"
-                    multiple
-                    show-adjacent-months
-                    hide-actions
-                    keyboard-icon=""
-                    color="#bc3825"
-                    title="Adjudication Dates"
-                  >
-                  </v-date-picker>
-                </v-menu>
-                <v-combobox
-                  :model-value="formatDates(clearance.adjudicationDates)"
-                  multiple
-                  label="Adjudication Dates"
-                  clearable
-                  readonly
-                  prepend-inner-icon="mdi-calendar"
-                  @click:clear="clearance.adjudicationDates = []"
-                >
-                  <template #selection="{ item }">
-                    <v-chip variant="outlined" closable @click:close="removeAdjDate(item, cIndex)">{{
-                      item.raw
-                    }}</v-chip>
-                  </template>
-                </v-combobox>
+                ></date-picker>
               </v-col>
 
               <v-col :cols="isMobile() ? '12' : '4'">
-                <v-menu
-                  activator="parent"
-                  ref="polyMenu"
-                  v-model="clearance.showPolyMenu"
-                  :close-on-content-click="false"
-                  location="start center"
-                >
-                  <v-date-picker
-                    v-model="clearance.polyDates"
-                    :min="clearance.submissionDate"
-                    multiple
-                    show-adjacent-months
-                    hide-actions
-                    keyboard-icon=""
-                    color="#bc3825"
-                    title="Poly Dates"
-                  >
-                  </v-date-picker>
-                </v-menu>
-                <v-combobox
-                  :model-value="formatDates(clearance.polyDates)"
-                  multiple
-                  label="Poly Dates"
+                <date-picker
+                  v-model="clearance.adjudicationDates"
+                  :min="clearance.submissionDate"
+                  label="Adjudication Dates"
+                  variant="filled"
                   clearable
-                  readonly
-                  prepend-inner-icon="mdi-calendar"
-                  @click:clear="clearance.polyDates = []"
-                  @click:prepend="clearance.showPolyMenu = true"
-                >
-                  <template #selection="{ item }">
-                    <v-chip variant="outlined" closable @click:close="removePolyDate(item, cIndex)">{{
-                      item.raw
-                    }}</v-chip>
-                  </template>
-                </v-combobox>
+                ></date-picker>
+              </v-col>
+
+              <v-col :cols="isMobile() ? '12' : '4'">
+                <date-picker
+                  v-model="clearance.polyDates"
+                  :min="clearance.submissionDate"
+                  label="Poly Dates"
+                  variant="filled"
+                  clearable
+                ></date-picker>
+              </v-col>
+
+              <v-col :cols="isMobile() ? '12' : '4'">
+                <v-combobox
+                  v-model="clearance.grantingOrg"
+                  prepend-inner-icon="mdi-lan"
+                  :items="grantingOrgItems"
+                  label="Granting Organization"
+                ></v-combobox>
               </v-col>
             </v-row>
           </v-col>
@@ -343,11 +196,12 @@
         <v-btn @click="addClearance()"><v-icon>mdi-plus</v-icon>Clearance</v-btn>
       </v-col>
     </v-row>
-  </v-form>
+  </div>
 </template>
 
 <script setup>
-import { DEFAULT_ISOFORMAT, format, FORMATTED_ISOFORMAT, isBefore } from '@/shared/dateUtils';
+import DatePicker from '@/components/shared/DatePicker.vue';
+import { DEFAULT_ISOFORMAT, format, isBefore } from '@/shared/dateUtils';
 import { CLEARANCE_TYPES } from '@/shared/employeeUtils';
 import {
   getBadgeNumberRules,
@@ -358,11 +212,15 @@ import {
   getDuplicateClearanceRules,
   getRequiredRules
 } from '@/shared/validationUtils';
-import _ from 'lodash';
-import { inject, onBeforeUnmount, onMounted, ref } from 'vue';
-import { mask } from 'vue-the-mask';
+import { isMobile } from '@/utils/utils';
+import _first from 'lodash/first';
+import _isEmpty from 'lodash/isEmpty';
+import _sortBy from 'lodash/sortBy';
+import { onMounted, ref } from 'vue';
 import { useDisplay } from 'vuetify/lib/framework.mjs';
-import { isMobile } from '../../../utils/utils';
+
+import { useStore } from 'vuex';
+const store = useStore();
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -370,41 +228,34 @@ import { isMobile } from '../../../utils/utils';
 // |                                                  |
 // |--------------------------------------------------|
 
-const ISOFORMAT = 'YYYY-MM-DD';
-
 const { name } = useDisplay();
-const emitter = inject('emitter');
-const vMask = mask; // custom directive
 
-const editedEmployee = defineModel({ required: true });
-const valid = defineModel('valid', { required: true });
-const form = ref(null); // template ref
-
-defineExpose({ prepareSubmit });
+// passes in all slot props as a single object
+const { slotProps } = defineProps(['slotProps']);
+const editedEmployee = ref(slotProps.editedEmployee);
+const grantingOrgItems = ref(new Set());
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                 LIFECYCLE HOOKS                  |
+// |                    LIFECYCLE                     |
 // |                                                  |
 // |--------------------------------------------------|
-
-onMounted(prepareSubmit);
-onBeforeUnmount(prepareSubmit);
+onMounted(() => {
+  // get granting org items
+  for (let e of store.getters.employees ?? []) {
+    for (let c of e.clearances ?? []) {
+      if (c.grantingOrg) grantingOrgItems.value.add(c.grantingOrg);
+    }
+  }
+  // sort granting org items a–z
+  grantingOrgItems.value = Array.from(grantingOrgItems.value).sort();
+});
 
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
-
-async function prepareSubmit() {
-  if (form.value) {
-    const result = await form.value.validate();
-    emitter.emit('validating', { tab: 'clearance', valid: result.valid });
-    return result;
-  }
-  return null;
-}
 
 /**
  * Adds a clearance.
@@ -450,18 +301,6 @@ function deleteClearance(cIndex) {
 } // deleteClearance
 
 /**
- * Formats multiple dates at once in MM/DD/YYYY format.
- * @return Array - The array of formatted dates
- */
-function formatDates(array) {
-  let formattedDates = [];
-  array.forEach((date) => {
-    formattedDates.push(format(date, null, 'MM/DD/YYYY'));
-  });
-  return formattedDates;
-} // formatDates
-
-/**
  * Return the maximum available date to be selected for submission date. Returns the granted date if it exists.
  * Returns null if the granted date doesn't exist.
  *
@@ -476,13 +315,13 @@ function maxSubmission(cIndex) {
   }
 
   // check submission date is before any poly dates
-  if (!_.isEmpty(editedEmployee.value.clearances[cIndex].polyDates)) {
+  if (!_isEmpty(editedEmployee.value.clearances[cIndex].polyDates)) {
     // poly dates exist
-    let earliest = _.first(
+    let earliest = _first(
       // get earliest poly date
-      _.sortBy(editedEmployee.value.clearances[cIndex].polyDates, (date) => {
+      _sortBy(editedEmployee.value.clearances[cIndex].polyDates, (date) => {
         // sort poly dates
-        return format(date, null, ISOFORMAT);
+        return format(date, null, DEFAULT_ISOFORMAT);
       })
     );
 
@@ -493,13 +332,13 @@ function maxSubmission(cIndex) {
   }
 
   // check submission date is before any adjudication dates
-  if (!_.isEmpty(editedEmployee.value.clearances[cIndex].adjudicationDates)) {
+  if (!_isEmpty(editedEmployee.value.clearances[cIndex].adjudicationDates)) {
     // adjudication dates exist
-    let earliest = _.first(
+    let earliest = _first(
       // get earliest adjudication date
-      _.sortBy(editedEmployee.value.clearances[cIndex].adjudicationDates, (date) => {
+      _sortBy(editedEmployee.value.clearances[cIndex].adjudicationDates, (date) => {
         // sort adjudication dates
-        return format(date, null, ISOFORMAT);
+        return format(date, null, DEFAULT_ISOFORMAT);
       })
     );
     if (isBefore(earliest, max)) {
@@ -508,7 +347,7 @@ function maxSubmission(cIndex) {
     }
   }
 
-  return max ? format(max, null, ISOFORMAT) : null;
+  return max ? format(max, null, DEFAULT_ISOFORMAT) : null;
 } // maxSubmission
 
 /**
@@ -526,60 +365,4 @@ function minExpiration(cIndex) {
     return editedEmployee.value.clearances[cIndex].submissionDate;
   }
 } // minExpiration
-
-/**
- * Parse the date after losing focus.
- *
- * @return String - The date in YYYY-MM-DD format
- */
-function parseEventDate() {
-  return format(event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD');
-} // parseEventDate
-
-/**
- * Removes the desired date from the right clearance.
- *
- * @param item - the date to remove
- * @param index - the clearance index
- */
-function removeAdjDate(item, index) {
-  item = item.raw;
-  const itemDate = format(item, null, FORMATTED_ISOFORMAT);
-  editedEmployee.value.clearances[index].adjudicationDates = editedEmployee.value.clearances[
-    index
-  ].adjudicationDates.filter((date) => {
-    let dateConvert = format(date, null, FORMATTED_ISOFORMAT);
-    return dateConvert !== itemDate;
-  });
-} // removeAdjDate
-
-/**
- * Removes the desired date from the right clearance.
- *
- * @param item - the date to remove
- * @param index - the clearance index
- */
-function removeBiDate(item, index) {
-  item = item.raw;
-  const itemDate = format(item, null, FORMATTED_ISOFORMAT);
-  editedEmployee.value.clearances[index].biDates = editedEmployee.value.clearances[index].biDates.filter((date) => {
-    let dateConvert = format(date, null, FORMATTED_ISOFORMAT);
-    return dateConvert !== itemDate;
-  });
-} // removeBiDate
-
-/**
- * Removes the desired date from the right clearance.
- *
- * @param item - the date to remove
- * @param index - the clearance index
- */
-function removePolyDate(item, index) {
-  item = item.raw;
-  const itemDate = format(item, null, FORMATTED_ISOFORMAT);
-  editedEmployee.value.clearances[index].polyDates = editedEmployee.value.clearances[index].polyDates.filter((date) => {
-    let dateConvert = format(date, null, FORMATTED_ISOFORMAT);
-    return dateConvert !== itemDate;
-  });
-} // removePolyDate
 </script>

@@ -7,7 +7,9 @@
 
 <script setup>
 import PieChart from '../base-charts/PieChart.vue';
-import _ from 'lodash';
+import _forEach from 'lodash/forEach';
+import _filter from 'lodash/filter';
+import _first from 'lodash/first';
 import { onMounted, ref, watch, inject } from 'vue';
 import { useStore } from 'vuex';
 
@@ -62,10 +64,10 @@ function initDegrees() {
   employees.value.forEach((emp) => {
     let highestDegrees = [];
     if (emp.education && emp.workStatus != 0) {
-      _.forEach(emp.education, (edu) => {
+      _forEach(emp.education, (edu) => {
         // handle universities
         if (edu.type === 'university') {
-          _.forEach(edu.degrees, (degree) => {
+          _forEach(edu.degrees, (degree) => {
             if (highestDegrees.length != 0) {
               if (highestDegrees[0].type === 'Military') {
                 highestDegrees.unshift({
@@ -78,7 +80,7 @@ function initDegrees() {
                 let result = compareDegree(highestDegrees[0].value, getDegreeValue(degree.degreeType));
                 //if a degree of a higher prestige is found, remove all previous entries except militaries
                 if (result === 1) {
-                  highestDegrees = _.filter(highestDegrees, (education) => {
+                  highestDegrees = _filter(highestDegrees, (education) => {
                     return education.type === 'Military';
                   });
                   highestDegrees.unshift({
@@ -120,7 +122,7 @@ function initDegrees() {
               let result = compareDegree(highestDegrees[0].value, getDegreeValue(edu.type));
               //if a degree of a higher prestige is found, remove all previous entries except militaries
               if (result === 1) {
-                highestDegrees = _.filter(highestDegrees, (education) => {
+                highestDegrees = _filter(highestDegrees, (education) => {
                   return education.type === 'Military';
                 });
                 highestDegrees.unshift({
@@ -366,9 +368,9 @@ function getDegreeName(value) {
 function fillData() {
   let quantities = [];
   let labels = Object.keys(educations.value);
-  _.forEach(labels, (education) => {
+  _forEach(labels, (education) => {
     let counts = 0;
-    _.forEach(educations.value[education], (count) => {
+    _forEach(educations.value[education], (count) => {
       counts += count;
       degreeCount.value += count;
     });
@@ -394,8 +396,8 @@ function fillData() {
 
   option.value = {
     onClick: (x, y) => {
-      if (_.first(y)) {
-        let index = _.first(y).index;
+      if (_first(y)) {
+        let index = _first(y).index;
         // emits to MajorsChart.vue when pie slice is clicked
         majorsEmit(chartData.value.labels[index]);
         // emits to MinorsChart.vue when pie slice is clicked

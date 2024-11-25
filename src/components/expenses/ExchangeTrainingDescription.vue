@@ -47,7 +47,7 @@
 </template>
 
 <script>
-import _ from 'lodash';
+import _isEmpty from 'lodash/isEmpty';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -91,8 +91,8 @@ export default {
       description: '',
       CHAR_MINIMUM: 150,
       descriptionRules: [
-        (v) => !_.isEmpty(v) || 'Description is required',
-        (v) => (!_.isEmpty(v) && this.charMinMet) || `Description needs at least ${this.CHAR_MINIMUM} characters.`
+        (v) => !_isEmpty(v) || 'Description is required',
+        (v) => (!_isEmpty(v) && this.charMinMet) || `Description needs at least ${this.CHAR_MINIMUM} characters.`
       ]
     };
   },

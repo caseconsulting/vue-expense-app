@@ -182,8 +182,6 @@
                   v-if="userRoleIsAdmin()"
                   :mid-action="midAction"
                   :employee="item"
-                  :contracts="contracts"
-                  :tags="tags"
                   :filename="`${item.nickname || item.firstName} ${item.lastName}`"
                 />
                 <span>
@@ -262,15 +260,15 @@
         </div>
       </v-container>
     </v-card>
-    <employee-form v-model="createEmployee" :contracts="contracts" :employee="model" />
+    <employee-form v-model="createEmployee" :employee="model" />
     <v-dialog v-model="manageTags" scrollable :width="isMobile() ? '100%' : '70%'" persistent>
       <tag-manager :key="childKey" />
     </v-dialog>
     <v-dialog v-model="toggleEmployeesSyncModal" :width="isMobile() ? '100%' : '70%'" persistent>
       <employees-sync-modal :key="childKey" :sync-data="applicationSyncData" />
     </v-dialog>
-    <v-dialog v-model="showExportDataModal" :width="isMobile() ? '100%' : '50%'" persistent>
-      <export-employee-data :employees="employees" :contracts="contracts" :key="childKey" :tags="tags" />
+    <v-dialog v-model="showExportDataModal" :width="isMobile() ? '80%' : '50%'" persistent>
+      <export-employee-data :employees="employees" :key="childKey" />
     </v-dialog>
   </div>
 </template>
@@ -278,35 +276,36 @@
 <script setup>
 import api from '@/shared/api.js';
 // import BaseCard from '../components/employee-beta/cards/BaseCard.vue';
-import { updateStoreEmployees, updateStoreAvatars, updateStoreContracts, updateStoreTags } from '@/utils/storeUtils';
+import EmployeeForm from '@/components/employee-beta/forms/EmployeeForm.vue';
 import ExportEmployeeData from '@/components/employees/csv/ExportEmployeeData.vue';
 import DeleteErrorModal from '@/components/modals/DeleteErrorModal.vue';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
-// import EmployeeForm from '../components/employees/EmployeeForm.vue'
-import EmployeeForm from '../components/employee-beta/forms/EmployeeForm.vue';
-import _ from 'lodash';
+import { updateStoreAvatars, updateStoreEmployees, updateStoreTags } from '@/utils/storeUtils';
+import _filter from 'lodash/filter';
+import _find from 'lodash/find';
+import _map from 'lodash/map';
+
 import ConvertEmployeeToCsv from '@/components/employees/csv/ConvertEmployeeToCsv.vue';
 import PowerEditContainer from '@/components/employees/power-edit/PowerEditContainer.vue';
 import TagManager from '@/components/employees/tags/TagManager.vue';
-import TagsFilter from '@/components/shared/TagsFilter.vue';
 import EmployeesSyncModal from '@/components/modals/EmployeesSyncModal.vue';
+import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSnackbar.vue';
+import TagsFilter from '@/components/shared/TagsFilter.vue';
+import { format } from '@/shared/dateUtils';
 import { selectedTagsHasEmployee } from '@/shared/employeeUtils';
+import { employeeFilter } from '@/shared/filterUtils';
 import {
   isFullTime,
   isInactive,
-  isPartTime,
   isMobile,
+  isPartTime,
   monthDayYearFormat,
-  storeIsPopulated,
   userRoleIsAdmin,
   userRoleIsManager
 } from '@/utils/utils';
-import { employeeFilter } from '@/shared/filterUtils';
-import { format } from '../shared/dateUtils';
-import { ref, inject, onBeforeMount, onBeforeUnmount, computed, watch, provide } from 'vue';
-import { useStore } from 'vuex';
+import { inject, onBeforeMount, onBeforeUnmount, provide, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { useDisplaySuccess, useDisplayError } from '@/components/shared/StatusSnackbar.vue';
+import { useStore } from 'vuex';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -326,7 +325,6 @@ provide('isUser', isUser);
 
 const applicationSyncData = ref(null);
 const childKey = ref(0);
-const contracts = ref([]);
 const createEmployee = ref(false);
 const deleteModel = ref({
   id: null
@@ -372,14 +370,14 @@ const headers = ref([
         title: 'Last Login',
         key: 'lastLoginSeconds'
       }
-    : _,
+    : '',
   userRoleIsAdmin() || userRoleIsManager()
     ? {
         title: 'Actions',
         key: 'actions',
         sortable: false
       }
-    : _
+    : ''
 ]); // datatable headers
 const midAction = ref(false);
 const powerEdit = ref(false);
@@ -420,7 +418,6 @@ const search = ref(null); // query text for datatable search field
 const sortBy = ref([{ key: 'hireDate', order: 'asc' }]); // sort datatable items
 const showExportDataModal = ref(false);
 const syncing = ref(false);
-const tags = ref([]);
 const tagsInfo = ref({
   selected: [],
   flipped: []
@@ -472,7 +469,7 @@ function employeePath(item) {
  */
 function filterEmployees() {
   //filter for Active Expense Types
-  filteredEmployees.value = _.filter(employees.value, (employee) => {
+  filteredEmployees.value = _filter(employees.value, (employee) => {
     let fullCheck = filter.value.active.includes('full') && isFullTime(employee);
     let partCheck = filter.value.active.includes('part') && isPartTime(employee);
     let inactiveCheck = filter.value.active.includes('inactive') && isInactive(employee);
@@ -520,8 +517,8 @@ function hasAdminPermissions() {
 async function loadBasecampAvatars() {
   if (!store.getters.basecampAvatars) await updateStoreAvatars();
   let avatars = store.getters.basecampAvatars;
-  _.map(employees.value, (employee) => {
-    let avatar = _.find(avatars, ['email_address', employee.email]);
+  _map(employees.value, (employee) => {
+    let avatar = _find(avatars, ['email_address', employee.email]);
     let avatarUrl = avatar ? avatar.avatar_url : null;
     employee.avatar = avatarUrl;
     return employee;
@@ -533,20 +530,16 @@ async function loadBasecampAvatars() {
  */
 async function refreshEmployees() {
   loading.value = true; // set loading status to true
-
   // assets to wait for load
-  await Promise.all([
-    !store.getters.employees ? updateStoreEmployees() : '',
-    !store.getters.contracts && (userRoleIsAdmin() || userRoleIsManager()) ? updateStoreContracts() : '',
-    !store.getters.tags && (userRoleIsAdmin() || userRoleIsManager()) ? updateStoreTags() : ''
-  ]);
+  !store.getters.employees ? await updateStoreEmployees() : '';
   employees.value = store.getters.employees; // get all employees
-  contracts.value = store.getters.contracts;
-  tags.value = store.getters.tags;
-  // assets that don't need to be awaited on, but need data that is awaited on
-  Promise.all([loadBasecampAvatars()]);
   filterEmployees(); // filter employees
   loading.value = false; // set loading status to false
+  // assets that don't need to be awaited on, but need data that is awaited on
+  Promise.all([
+    loadBasecampAvatars(),
+    !store.getters.tags && (userRoleIsAdmin() || userRoleIsManager()) ? updateStoreTags() : ''
+  ]);
 } // refreshEmployees
 
 /**
@@ -574,7 +567,7 @@ function renderManageTags() {
  */
 function employeeIsOnTag(e) {
   if (e.id) e = e.id; // just use the id
-  for (let t of tags.value) {
+  for (let t of store.getters.tags) {
     if (t.employees.includes(e)) return true;
   }
   return false;
@@ -611,7 +604,7 @@ async function validateDelete(item) {
   if (employeeIsOnTag(item.id)) {
     // remove them from the tag
     let tagPromises = [];
-    for (let t of tags.value) {
+    for (let t of store.getters.tags) {
       if (t.employees.includes(item.id)) {
         let index = t.employees.indexOf(item.id);
         t.employees.splice(index, 1);
@@ -701,18 +694,18 @@ onBeforeMount(async () => {
   }
 
   // only refresh employees if data is in store. Otherwise, set loading and wait in watcher
-  storeIsPopulated ? await refreshEmployees() : (loading.value = true);
+  await refreshEmployees();
 
   // remove admin-only actions if user is not admin (by default everything is included)
   const adminSpecific = ['lastLoginSeconds']; // requires admin role, NOT manager
   const adminPermissions = ['actions']; // requires admin level, including manager
   if (!hasAdminPermissions()) {
-    headers.value = _.filter(headers.value, (header) => {
+    headers.value = _filter(headers.value, (header) => {
       return !adminPermissions.includes(header.value);
     });
   }
   if (!userRoleIsAdmin()) {
-    headers.value = _.filter(headers.value, (header) => {
+    headers.value = _filter(headers.value, (header) => {
       return !adminSpecific.includes(header.value);
     });
   }
@@ -748,24 +741,7 @@ function watchFilterActive() {
   filterEmployees();
 } // watchFilterActive
 
-/**
- * In the case that the page has been force reloaded (and the store cleared)
- * this watcher will be activated when the store is populated again.
- */
-async function watchStoreIsPopulated() {
-  if (storeIsPopulated) await refreshEmployees();
-} // watchStoreIsPopulated
-
 watch(filter.value.active, () => watchFilterActive());
-watch(storeIsPopulated, () => watchStoreIsPopulated());
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                    COMPUTED                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-computed(storeIsPopulated);
 </script>
 
 <style>

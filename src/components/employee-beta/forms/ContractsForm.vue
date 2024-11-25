@@ -1,5 +1,5 @@
 <template>
-  <v-form ref="form" v-model="valid" validate-on="lazy">
+  <div>
     <v-row v-for="(contract, index) in editedContracts" :key="index">
       <v-col>
         <v-row>
@@ -174,6 +174,33 @@
                 </v-text-field>
               </v-col>
 
+              <v-col v-if="userIsAdminOrManager" :cols="isMobile() ? '12' : '5'">
+                <v-combobox v-model="project.location" :items="getProjectLocations()" label="Location" clearable>
+                  <template #append-inner>
+                    <div>
+                      <v-icon class="ml-1" color="grey-darken-1"> mdi-information </v-icon>
+                      <v-tooltip activator="parent">Overrides employee location set on Contracts page</v-tooltip>
+                    </div>
+                  </template>
+                </v-combobox>
+              </v-col>
+
+              <v-col v-if="userIsAdminOrManager" :cols="isMobile() ? '12' : '5'">
+                <v-select
+                  v-model="project.workType"
+                  :items="['On-site', 'Hybrid', 'Remote']"
+                  label="Work Type"
+                  clearable
+                >
+                  <template #append-inner>
+                    <div>
+                      <v-icon class="ml-1" color="grey-darken-1"> mdi-information </v-icon>
+                      <v-tooltip activator="parent">Overrides employee work type set on Contracts page</v-tooltip>
+                    </div>
+                  </template>
+                </v-select>
+              </v-col>
+
               <!-- DELETE PROJECTS normal -->
               <v-col v-if="!isMobile() && contract.projects.length > 1" cols="1" align="center">
                 <v-btn variant="text" icon="" density="comfortable" @click="deleteProject(index, projIndex)">
@@ -206,10 +233,11 @@
         </v-btn>
       </v-col>
     </v-row>
-  </v-form>
+  </div>
 </template>
 
 <script setup>
+import { usePrepareSubmit } from '@/composables/editTabCommunication';
 import { format } from '@/shared/dateUtils';
 import {
   getDateAfterRule,
@@ -221,10 +249,14 @@ import {
   getRequiredRules
 } from '@/shared/validationUtils';
 import { isEmpty, isMobile } from '@/utils/utils';
-import { cloneDeep, find, map } from 'lodash';
-import { inject, onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue';
+import { getProjectLocations } from '@/shared/contractUtils';
+import _cloneDeep from 'lodash/cloneDeep';
+import _find from 'lodash/find';
+import _map from 'lodash/map';
+import { computed, onBeforeMount, ref } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
+import { updateStoreContracts } from '../../../utils/storeUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -233,45 +265,36 @@ import { useStore } from 'vuex';
 // |--------------------------------------------------|
 
 const store = useStore();
-const emitter = inject('emitter');
 const vMask = mask; // custom directive
 
-const editedEmployee = defineModel({ required: true });
-const valid = defineModel('valid', { required: true });
-const form = ref(null); // template ref
+// passes in all slot props as a single object
+const { slotProps } = defineProps(['slotProps']);
+const editedEmployee = ref(slotProps.editedEmployee);
 
-const contracts = store.getters.contracts;
+const contracts = ref(store.getters.contracts || []);
 const editedContracts = ref([]); // stores edited contracts info
-const contractProjects = ref(store.getters.contracts.map((c) => c.projects).flat());
 const reloadKey = ref(0); // value used to trigger component re-render
+const contractProjects = ref([]);
 
-let stopPrepare = false;
-const onDiscardEdits = (employee) => {
-  stopPrepare = true;
-  editedEmployee.value = employee;
-};
-
+usePrepareSubmit('contracts', prepareSubmit);
 initialize();
 
-defineExpose({ prepareSubmit });
+onBeforeMount(async () => {
+  !store.getters.contracts ? await updateStoreContracts() : '';
+  contracts.value = store.getters.contracts;
+  contractProjects.value = store.getters.contracts?.map((c) => c.projects).flat();
+});
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                 LIFECYCLE HOOKS                  |
+// |                     COMPUTED                     |
 // |                                                  |
 // |--------------------------------------------------|
 
-onBeforeMount(() => {
-  emitter.on('discard-edits', onDiscardEdits);
+const userIsAdminOrManager = computed(() => {
+  const role = store.getters.user.employeeRole;
+  return role === 'admin' || role === 'manager';
 });
-
-onMounted(validate);
-
-onBeforeUnmount(() => {
-  emitter.off('discard-edits', onDiscardEdits);
-});
-
-onBeforeUnmount(prepareSubmit);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -280,23 +303,33 @@ onBeforeUnmount(prepareSubmit);
 // |--------------------------------------------------|
 
 async function prepareSubmit() {
-  if (!stopPrepare) {
-    await validate();
+  if (!slotProps.stopPrepare) {
+    await slotProps.validate();
 
     // delete keys that aren't stored in database
-    editedEmployee.value.contracts = map(editedContracts.value, (contract) => {
-      let newContract = cloneDeep(contract);
-      if (!newContract.contractId) {
-        newContract.contractId = find(contracts, (c) => c.contractName === newContract.contractName).id;
+    editedEmployee.value.contracts = _map(editedContracts.value, (contract) => {
+      let newContract = _cloneDeep(contract);
+      if (newContract.contractName || newContract.primeName) {
+        newContract.contractId = _find(
+          contracts.value,
+          (c) => c.contractName === newContract.contractName && c.primeName === newContract.primeName
+        ).id;
       }
       delete newContract.contractName;
       delete newContract.primeName;
 
-      newContract.projects = map(newContract.projects, (project) => {
-        if (!project.projectId) {
-          project.projectId = find(contractProjects.value, (p) => p.projectName === project.projectName).id;
+      // get all the projects on the selected contract
+      let newContractAllProjects = store.getters.contracts.find((c) => {
+        return c.id === newContract.contractId;
+      }).projects;
+
+      newContract.projects = _map(newContract.projects, (project) => {
+        if (project.projectName) {
+          project.projectId = _find(newContractAllProjects, (p) => p.projectName === project.projectName).id;
         }
         delete project.projectName;
+        delete project.showStartMenu;
+        delete project.showEndMenu;
         return project;
       });
       return newContract;
@@ -304,19 +337,10 @@ async function prepareSubmit() {
   }
 }
 
-async function validate() {
-  if (form.value) {
-    const result = await form.value.validate();
-    emitter.emit('validating', { tab: 'contracts', valid: result.valid });
-    return result;
-  }
-  return null;
-}
-
 function initialize() {
   // getting contract, prime, and project names and stores them with their respective object
-  editedContracts.value = map(editedEmployee.value.contracts, (employeeContract) => {
-    const contractObj = find(contracts, (c) => c.id === employeeContract.contractId);
+  editedContracts.value = _map(editedEmployee.value.contracts, (employeeContract) => {
+    const contractObj = _find(contracts.value, (c) => c.id === employeeContract.contractId);
 
     if (!contractObj) {
       console.warn(`Could not find contract with id: ${employeeContract.contractId}`);
@@ -328,8 +352,8 @@ function initialize() {
     employeeContract.primeName = contractObj.primeName;
 
     // modify projects property to include projectName
-    employeeContract.projects = map(employeeContract.projects, (employeeProject) => {
-      const projectObj = find(contractObj.projects, (p) => p.id === employeeProject.projectId);
+    employeeContract.projects = _map(employeeContract.projects, (employeeProject) => {
+      const projectObj = _find(contractObj.projects, (p) => p.id === employeeProject.projectId);
 
       if (!projectObj) {
         console.warn(
@@ -443,28 +467,30 @@ function deleteProject(contractIndex, projectIndex) {
  * @return Array - An array of contract names
  */
 function getContractsDropdownItems(contract) {
+  let toReturn = null;
   if (!contract) {
-    return [];
+    toReturn = [];
   } else if (contract.primeName && contract.projects.length == 1 && isEmpty(contract.projects[0].projectName)) {
     // only prime name is filled out
-    let matchedContracts = contracts.filter((c) => c.primeName === contract.primeName);
-    return matchedContracts.map((c) => c.contractName);
+    let matchedContracts = contracts.value.filter((c) => c.primeName === contract.primeName);
+    toReturn = matchedContracts.map((c) => c.contractName);
   } else if (contract.primeName) {
     // prime name and project names are filled out
     let project = contract.projects[0];
-    let matchedContracts = contracts.filter(
+    let matchedContracts = contracts.value.filter(
       (c) => c.primeName === contract.primeName && c.projects.some((p) => p.projectName === project.projectName)
     );
-    return matchedContracts.map((c) => c.contractName);
+    toReturn = matchedContracts.map((c) => c.contractName);
   } else if (isEmpty(contract.primeName) && !isEmpty(contract.projects[0].projectName)) {
     // only project names are filled out
     let project = contract.projects[0];
-    let matchedContracts = contracts.filter((c) => c.projects.some((p) => p.projectName === project.projectName));
-    return matchedContracts.map((c) => c.contractName);
+    let matchedContracts = contracts.value.filter((c) => c.projects.some((p) => p.projectName === project.projectName));
+    toReturn = matchedContracts.map((c) => c.contractName);
   } else {
     // prime and projects fields are empty
-    return contracts.map((c) => c.contractName);
+    toReturn = contracts.value.map((c) => c.contractName);
   }
+  return Array.from(new Set(toReturn));
 } // getContractsDropdownItems
 
 /**
@@ -474,28 +500,30 @@ function getContractsDropdownItems(contract) {
  * @return Array - An array of prime names
  */
 function getPrimesDropdownItems(contract) {
+  let toReturn = null;
   if (!contract) {
-    return [];
+    toReturn = [];
   } else if (contract.contractName && contract.projects.length == 1 && isEmpty(contract.projects[0].projectName)) {
     // only contract name is filled out
-    let matchedContracts = contracts.filter((c) => c.contractName === contract.contractName);
-    return matchedContracts.map((c) => c.primeName);
+    let matchedContracts = contracts.value.filter((c) => c.contractName === contract.contractName);
+    toReturn = matchedContracts.map((c) => c.primeName);
   } else if (contract.contractName) {
     // contract name and project names are filled out
     let project = contract.projects[0];
-    let matchedContracts = contracts.filter(
+    let matchedContracts = contracts.value.filter(
       (c) => c.contractName === contract.contractName && c.projects.some((p) => p.projectName === project.projectName)
     );
-    return matchedContracts.map((c) => c.primeName);
+    toReturn = matchedContracts.map((c) => c.primeName);
   } else if (isEmpty(contract.contractName) && !isEmpty(contract.projects[0].projectName)) {
     // only project names are filled out
     let project = contract.projects[0];
-    let matchedContracts = contracts.filter((c) => c.projects.some((p) => p.projectName === project.projectName));
-    return matchedContracts.map((c) => c.primeName);
+    let matchedContracts = contracts.value.filter((c) => c.projects.some((p) => p.projectName === project.projectName));
+    toReturn = matchedContracts.map((c) => c.primeName);
   } else {
     // prime and projects fields are empty
-    return contracts.map((c) => c.primeName);
+    toReturn = contracts.value.map((c) => c.primeName);
   }
+  return Array.from(new Set(toReturn));
 } // getPrimesDropdownItems
 
 /**
@@ -505,26 +533,28 @@ function getPrimesDropdownItems(contract) {
  * @return Array - An array of project names
  */
 function getProjectsDropdownItems(contract) {
+  let toReturn = null;
   if (!contract) {
-    return [];
+    toReturn = [];
   } else if (contract.contractName && contract.primeName) {
     // both field filled out
-    let matchedContracts = contracts.filter(
+    let matchedContracts = contracts.value.filter(
       (c) => c.contractName === contract.contractName && c.primeName === contract.primeName
     );
-    return matchedContracts.map((c) => c.projects.map((p) => p.projectName)).flat();
+    toReturn = matchedContracts.map((c) => c.projects.map((p) => p.projectName)).flat();
   } else if (contract.contractName && isEmpty(contract.primeName)) {
     // only contract name is filled out
-    let matchedContracts = contracts.filter((c) => c.contractName === contract.contractName);
-    return matchedContracts.map((c) => c.projects.map((p) => p.projectName)).flat();
+    let matchedContracts = contracts.value.filter((c) => c.contractName === contract.contractName);
+    toReturn = matchedContracts.map((c) => c.projects.map((p) => p.projectName)).flat();
   } else if (contract.primeName && isEmpty(contract.contractName)) {
     // only prime name is filled out
-    let matchedContracts = contracts.filter((c) => c.primeName === contract.primeName);
-    return matchedContracts.map((c) => c.projects.map((p) => p.projectName)).flat();
+    let matchedContracts = contracts.value.filter((c) => c.primeName === contract.primeName);
+    toReturn = matchedContracts.map((c) => c.projects.map((p) => p.projectName)).flat();
   } else {
     // prime and projects fields are empty
-    return contractProjects.value.map((p) => p.projectName);
+    toReturn = contractProjects.value.map((p) => p.projectName);
   }
+  return Array.from(new Set(toReturn));
 } // getProjectsDropdownItems
 
 /**

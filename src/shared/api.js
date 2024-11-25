@@ -43,7 +43,6 @@ const CONTRACT_STATUSES = {
 async function execute(method, resource, data, params) {
   // inject the accessToken for each request
   let accessToken = getAccessToken();
-
   try {
     let c = await client({
       method,
@@ -423,8 +422,9 @@ async function getResume(employeeId) {
  */
 async function createAttachment(expense, file) {
   let formData = new FormData();
-  formData.append('receipt', file);
-
+  for (let i = 0; i < file.length; i++) {
+    formData.append('receipt', file[i], file[i].name);
+  }
   return await execute('post', `/attachment/${expense.employeeId}/${expense.id}`, formData);
 } // createAttachment
 

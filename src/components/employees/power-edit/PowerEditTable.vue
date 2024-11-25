@@ -53,7 +53,10 @@
 <script setup>
 import PowerEditTableInfoItem from '@/components/employees/power-edit/PowerEditTableInfoItem.vue';
 import PowerEditTableEditItem from '@/components/employees/power-edit/PowerEditTableEditItem.vue';
-import _ from 'lodash';
+import _find from 'lodash/find';
+import _filter from 'lodash/filter';
+import _map from 'lodash/map';
+import _forEach from 'lodash/forEach';
 import api from '@/shared/api.js';
 import { openLink } from '@/utils/utils.js';
 import { computed, ref, inject, watch } from 'vue';
@@ -88,7 +91,7 @@ emitter.on('save-item', async ({ item, field }) => {
 watch(
   () => props.fields,
   () => {
-    if (!_.find(props.fields, (f) => f.key === editItem.value?.field?.key)) {
+    if (!_find(props.fields, (f) => f.key === editItem.value?.field?.key)) {
       expanded.value = [];
       editItem.value = null;
     }
@@ -102,8 +105,8 @@ watch(
 // |--------------------------------------------------|
 
 const employees = computed(() => {
-  let employees = _.filter(store.getters.employees, (e) => e.workStatus > 0 && e.workStatus <= 100);
-  return _.map(employees, (e) => {
+  let employees = _filter(store.getters.employees, (e) => e.workStatus > 0 && e.workStatus <= 100);
+  return _map(employees, (e) => {
     return { ...e, name: `${e.nickname || e.firstName} ${e.lastName}` };
   });
 });
@@ -137,13 +140,13 @@ function saveColor(item, field) {
 
 async function saveItem(item, field) {
   editItem.value = null;
-  let employee = _.find(store.getters.employees, (e) => e.id === item.id);
+  let employee = _find(store.getters.employees, (e) => e.id === item.id);
   let tmpField = field.key + 'tmp';
   employee[tmpField] = { field, saving: true };
   let resp;
   if (field.group && field.subkeys) {
     let promises = [];
-    _.forEach(field.subkeys, (key) => {
+    _forEach(field.subkeys, (key) => {
       employee[key] = item[key];
       promises.push(api.updateAttribute(api.EMPLOYEES, { id: item.id, [`${key}`]: item[key] }, key));
     });

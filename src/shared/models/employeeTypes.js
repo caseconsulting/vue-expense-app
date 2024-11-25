@@ -86,6 +86,7 @@
 
 /**
  * @typedef {Object} PhoneNumber
+ * @typedef {Object} NotesObject
  * @property {string} number
  * @property {boolean} private
  * @property {string} type
@@ -112,6 +113,9 @@ export class Employee {
 
     /** @type {string} */
     this.email = properties.email;
+
+    /** @type {string} */
+    this.employeeRole = properties.employeeRole;
 
     /** @type {number} */
     this.employeeNumber = properties.employeeNumber;
@@ -245,11 +249,11 @@ export class Employee {
     /** @type {string} */
     this.birthday = properties.birthday ?? '';
 
-    /** @type {boolean} */
-    this.employeeRole = properties.employeeRole ?? 'intern';
-
     /** @type {PhoneNumber[]} */
     this.privatePhoneNumbers = properties.privatePhoneNumbers ?? [];
+
+    /** @type {NotesObject[]} */
+    this.notes = properties.notes ?? [];
 
     // place of birth fields
     /** @type {string} */

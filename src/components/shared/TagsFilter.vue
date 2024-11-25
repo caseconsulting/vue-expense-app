@@ -30,7 +30,7 @@
 </template>
 
 <script setup>
-import _ from 'lodash';
+import _forEach from 'lodash/forEach';
 import { watch } from 'vue';
 import { useStore } from 'vuex';
 
@@ -126,7 +126,7 @@ watch(
     // use normal for loop to have the index
     for (let i = 0; i < tagsInfo.value.flipped.length; i++) {
       // try to find the current tag in the selected
-      _.forEach(tagsInfo.value.selected, (t) => {
+      _forEach(tagsInfo.value.selected, (t) => {
         if (t.id === tagsInfo.value.flipped[i]) negatedTagRemoved = false;
       });
       // if it isn't there, remove it from flipped too

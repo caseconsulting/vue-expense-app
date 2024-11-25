@@ -52,7 +52,8 @@
 import { ref, inject } from 'vue';
 import { getRequiredRules } from '@/shared/validationUtils';
 import api from '@/shared/api';
-import _ from 'lodash';
+import _cloneDeep from 'lodash/cloneDeep';
+import _findIndex from 'lodash/findIndex';
 import { useStore } from 'vuex';
 
 // |--------------------------------------------------|
@@ -65,7 +66,7 @@ const props = defineProps(['employee', 'timeData']);
 const emitter = inject('emitter');
 const store = useStore();
 
-const localEmployee = ref(_.cloneDeep(props.employee));
+const localEmployee = ref(_cloneDeep(props.employee));
 const duration = ref(null);
 const jobCode = ref(null);
 const loading = ref(false);
@@ -98,7 +99,7 @@ async function save() {
     let value = { id: props.employee.id, [`${attribute}`]: localEmployee.value[attribute] };
     await api.updateAttribute(api.EMPLOYEES, value, attribute);
     let employees = store.getters.employees;
-    let index = _.findIndex(employees, (e) => e.id === localEmployee.value.id);
+    let index = _findIndex(employees, (e) => e.id === localEmployee.value.id);
     // update store
     store.getters.employees[index] = localEmployee.value;
     loading.value = false;

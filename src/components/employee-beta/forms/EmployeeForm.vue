@@ -118,119 +118,115 @@
               @submit.prevent="submit()"
             >
               <v-expansion-panels v-model="formTabs" variant="accordion" multiple>
-                <base-form title="Personal" value="Personal" :valid="validTabs.personal" @click="cardName = 'Personal'">
-                  <personal-info-form
-                    :ref="tabRefs.personalInfo"
-                    v-model="editedEmployee"
-                    v-model:valid="validTabs.personal"
-                  ></personal-info-form>
+                <!-- personal tab -->
+                <base-form
+                  title="Personal"
+                  tab-id="personal"
+                  v-model="editedEmployee"
+                  :valid="validTabs.personal"
+                  @click="cardName = 'Personal'"
+                >
+                  <template v-slot="{ props }">
+                    <personal-info-form :slot-props="props"></personal-info-form>
+                  </template>
                 </base-form>
+
+                <!-- clearances tab -->
                 <base-form
                   title="Clearances"
-                  value="Clearances"
-                  :valid="validTabs.clearance"
+                  tab-id="clearances"
+                  v-model="editedEmployee"
+                  :valid="validTabs.clearances"
                   @click="cardName = 'Clearances'"
                 >
-                  <div>
-                    <clearance-form
-                      :ref="tabRefs.clearances"
-                      v-model="editedEmployee"
-                      v-model:valid="validTabs.clearance"
-                    ></clearance-form>
-                  </div>
+                  <template v-slot="{ props }">
+                    <clearance-form :slot-props="props"></clearance-form>
+                  </template>
                 </base-form>
+
+                <!-- contracts tab -->
                 <base-form
                   title="Contracts"
-                  value="Contracts"
+                  tab-id="contracts"
+                  v-model="editedEmployee"
                   :valid="validTabs.contracts"
                   @click="cardName = 'Contracts'"
                 >
-                  <div>
-                    <contracts-form
-                      :ref="tabRefs.contracts"
-                      v-model="editedEmployee"
-                      v-model:valid="validTabs.contracts"
-                    ></contracts-form>
-                  </div>
+                  <template v-slot="{ props }">
+                    <contracts-form :slot-props="props"></contracts-form>
+                  </template>
                 </base-form>
+
+                <!-- certifications and awards tab -->
                 <base-form
                   title="Certifications & Awards"
-                  value="Certifications & Awards"
+                  tab-id="certsAndAwards"
+                  v-model="editedEmployee"
                   :valid="validTabs.certsAndAwards"
                   @click="cardName = 'Certifications & Awards'"
                 >
-                  <div>
-                    <certs-and-awards-form
-                      :ref="tabRefs.certsAndAwards"
-                      v-model="editedEmployee"
-                      v-model:valid="validTabs.certsAndAwards"
-                    ></certs-and-awards-form>
-                  </div>
+                  <template v-slot="{ props }">
+                    <certs-and-awards-form :slot-props="props"></certs-and-awards-form>
+                  </template>
                 </base-form>
+
+                <!-- tech and skills tab -->
                 <base-form
-                  title="Tech and Skills"
-                  value="Tech & Skills"
+                  title="Tech & Skills"
+                  tab-id="technologies"
+                  v-model="editedEmployee"
                   :valid="validTabs.technologies"
                   @click="cardName = 'Tech & Skills'"
                 >
-                  <technologies-form
-                    :ref="tabRefs.technologies"
-                    v-model="editedEmployee"
-                    v-model:valid="validTabs.technologies"
-                  ></technologies-form>
+                  <template v-slot="{ props }">
+                    <technologies-form :slot-props="props"></technologies-form>
+                  </template>
                 </base-form>
+
+                <!-- languages tab -->
                 <base-form
                   title="Foreign Languages"
-                  value="Languages"
-                  :valid="validTabs.languages"
+                  tab-id="languages"
+                  v-model="editedEmployee"
+                  :valid="validTabs.education"
                   @click="cardName = 'Languages'"
                 >
-                  <languages-form
-                    :ref="tabRefs.languages"
-                    v-model="editedEmployee"
-                    v-model:valid="validTabs.languages"
-                  ></languages-form>
+                  <template v-slot="{ props }">
+                    <languages-form :slot-props="props"></languages-form>
+                  </template>
                 </base-form>
                 <base-form
                   title="Job Experience"
-                  value="Job Experience"
+                  tab-id="jobExperience"
+                  v-model="editedEmployee"
                   :valid="validTabs.jobExperience"
                   @click="cardName = 'Job Experience'"
                 >
-                  <div>
-                    <job-experience-form
-                      :ref="tabRefs.jobExperience"
-                      v-model="editedEmployee"
-                      v-model:valid="validTabs.jobExperience"
-                    ></job-experience-form>
-                  </div>
+                  <template v-slot="{ props }">
+                    <job-experience-form :slot-props="props"></job-experience-form>
+                  </template>
                 </base-form>
                 <base-form
                   title="Education"
-                  value="Education"
+                  tab-id="education"
+                  v-model="editedEmployee"
                   :valid="validTabs.education"
                   @click="cardName = 'Education'"
                 >
-                  <div>
-                    <education-form
-                      :ref="tabRefs.education"
-                      v-model="editedEmployee"
-                      v-model:valid="validTabs.education"
-                      :allowAdditions="true"
-                    ></education-form>
-                  </div>
+                  <template v-slot="{ props }">
+                    <education-form :slot-props="props"></education-form>
+                  </template>
                 </base-form>
                 <base-form
                   title="Customer Orgs"
-                  value="Customer Orgs"
+                  tab-id="customerOrgs"
+                  v-model="editedEmployee"
                   :valid="validTabs.customerOrgs"
-                  @click="cardName = 'Customer Orgs'"
+                  @click="cardName = 'Customer Orgss'"
                 >
-                  <customer-orgs-form
-                    :ref="tabRefs.customerOrgs"
-                    v-model="editedEmployee"
-                    v-model:valid="validTabs.customerOrgs"
-                  ></customer-orgs-form>
+                  <template v-slot="{ props }">
+                    <customer-orgs-form :slot-props="props"></customer-orgs-form>
+                  </template>
                 </base-form>
               </v-expansion-panels>
               <div class="sticky-actions">
@@ -267,7 +263,7 @@
       <form-cancel-confirmation :toggleSubmissionConfirmation="toggleCancelConfirmation" type="cancel">
         <!-- in the future this could display the number of changes, but with the current logic the number can be confusing -->
         <!-- (especially with arrays and nested objects) -->
-        <v-card-text v-if="numberOfChanges > 0" align="center">There are pending changes!</v-card-text>
+        <!-- <v-card-text v-if="numberOfChanges > 0" align="center">There are pending changes!</v-card-text> -->
       </form-cancel-confirmation>
     </v-card>
   </v-dialog>
@@ -278,9 +274,14 @@ import BaseForm from '@/components/employee-beta/forms/BaseForm.vue';
 import FormCancelConfirmation from '@/components/modals/FormCancelConfirmation.vue';
 import { useDisplayError } from '@/components/shared/StatusSnackbar.vue';
 import api from '@/shared/api';
-import { updateStoreEmployees, updateStoreUser } from '@/utils/storeUtils';
 import { generateUUID, isMobile } from '@/utils/utils';
-import { cloneDeep, find, findIndex, forOwn, isEqual, map, pickBy } from 'lodash';
+import _cloneDeep from 'lodash/cloneDeep';
+import _find from 'lodash/find';
+import _findIndex from 'lodash/findIndex';
+import _forOwn from 'lodash/forOwn';
+import _isEqual from 'lodash/isEqual';
+import _map from 'lodash/map';
+import _pickBy from 'lodash/pickBy';
 import { computed, inject, onBeforeMount, onBeforeUnmount, provide, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useDisplay } from 'vuetify';
@@ -307,8 +308,8 @@ const store = useStore();
 const { mdAndUp } = useDisplay();
 
 const router = useRouter();
-const props = defineProps(['employee', 'contracts']);
-const editedEmployee = ref(cloneDeep(props.employee));
+const props = defineProps(['employee']);
+const editedEmployee = ref(_cloneDeep(props.employee));
 const isUser = inject('isUser');
 
 // state
@@ -324,20 +325,23 @@ const invalidButton = ref(false);
 const numberOfChanges = ref(0);
 
 const validTabs = reactive({
-  personal: true,
   certsAndAwards: true,
-  clearance: true,
+  clearances: true,
   contracts: true,
   customerOrgs: true,
   education: true,
   jobExperience: true,
-  technologies: true,
-  languages: true
+  languages: true,
+  personal: true,
+  technologies: true
 });
 
 // template refs
 const form = ref(null);
-const tabRefs = reactive({
+
+// tabs can emit an object when they are opened, and that object will be stored here. this is used to pass data and
+// methods to this file, like `prepareSubmit()`
+const tabs = reactive({
   certsAndAwards: null,
   clearances: null,
   contracts: null,
@@ -345,7 +349,7 @@ const tabRefs = reactive({
   education: null,
   jobExperience: null,
   languages: null,
-  personalInfo: null,
+  personal: null,
   technologies: null
 });
 
@@ -358,7 +362,16 @@ const tabRefs = reactive({
 onBeforeMount(() => {
   emitter.on('editing', (card) => {
     cardName.value = card;
+    submitting.value = false;
     editing.value = true;
+  });
+
+  emitter.on('edit-tab-opened', (event) => {
+    tabs[event.name] = event.value;
+  });
+
+  emitter.on('edit-tab-closed', (event) => {
+    tabs[event.name] = null;
   });
 
   // Starts listener to see if the user cancelled to submit the form
@@ -371,8 +384,12 @@ onBeforeMount(() => {
     // this is to fix a bug where tabs would prepare after the edit modal closed, causing editedEmployee
     // to be overwritten with the edited data, even though we want to discard all edits
     emitter.emit('discard-edits', props.employee);
-    editedEmployee.value = cloneDeep(props.employee);
-    Object.keys(validTabs).forEach((key) => (validTabs[key] = true)); //reset validation
+
+    // reset editedEmployee and validation
+    editedEmployee.value = _cloneDeep(props.employee);
+    Object.keys(validTabs).forEach((key) => (validTabs[key] = true));
+
+    // close modals
     toggleCancelConfirmation.value = false;
     editing.value = false;
   });
@@ -389,6 +406,8 @@ onBeforeMount(() => {
 
 onBeforeUnmount(() => {
   emitter.off('editing');
+  emitter.off('edit-tab-opened');
+  emitter.off('edit-tab-closed');
   emitter.off('canceled-cancel');
   emitter.off('confirmed-cancel');
   emitter.off('validating');
@@ -417,25 +436,33 @@ async function submit() {
 
   valid.value = await validate();
   if (!valid.value) return cancelSubmit();
+
   //if updating a current employee
   if (!creatingEmployee.value) {
     // scans for all changed attributes
     const changes = getChanges();
+
     // if there are any changes
     if (!isEmpty(Object.keys(changes))) {
       if (changes.tags) {
-        submitTags(changes.tags);
+        await submitTags(changes.tags);
         delete changes.tags; // remove when we are done, we don't want to send this in api call
       }
+
       const updated = await api.updateAttributes(api.EMPLOYEES, props.employee.id, changes);
+
+      // if a valid employee is returned
       if (updated.id) {
-        emitter.emit('update', updated);
         // getEmployees and update store with latest data
-        if (editedEmployee.value.id === store.getters.user.id) await updateStoreUser();
-        await updateStoreEmployees();
+        if (editedEmployee.value.id === store.getters.user.id) store.dispatch('setUser', { user: updated });
+        let employees = store.getters.employees;
+        let employeeIdx = _findIndex(employees, (e) => e.id === updated.id);
+        employees[employeeIdx] = updated;
+        store.dispatch('setEmployees', { employees });
+        emitter.emit('update', updated);
       } else {
         emitter.emit('discard-edits', props.employee);
-        useDisplayError(updated.response.data.message);
+        useDisplayError(updated.response.data.message || updated.response.data.Error.message);
       }
     }
   } else {
@@ -443,7 +470,9 @@ async function submit() {
     editedEmployee.value.id = generateUUID();
     let newEmployee = await api.createItem(api.EMPLOYEES, editedEmployee.value);
     // update the store with the latest data
-    await updateStoreEmployees();
+    let employees = store.getters.employees;
+    employees.push(editedEmployee.value);
+    store.dispatch('setEmployees', { employees });
     //reroute to the newly created employee
     if (newEmployee.id) {
       router.push(`/employee/${newEmployee.employeeNumber}`);
@@ -454,7 +483,6 @@ async function submit() {
       editedEmployee.value.id = null; // reset id
     }
   }
-  submitting.value = false;
   editing.value = false; // close edit modal
 }
 
@@ -469,7 +497,7 @@ async function submitTags(editedTags) {
 
   for (let tag of editedTags) {
     // finds employee id on the given tag
-    const index = findIndex(tag.employees, (empId) => empId === employeeId);
+    const index = _findIndex(tag.employees, (empId) => empId === employeeId);
 
     // if desired id is found
     if (index > -1) {
@@ -484,8 +512,8 @@ async function submitTags(editedTags) {
   await Promise.all(promises);
 
   // update store tags
-  let updatedStoreTags = map(store.getters.tags, (tag) => {
-    let foundTag = find(editedTags, (t) => t.id === tag.id);
+  let updatedStoreTags = _map(store.getters.tags, (tag) => {
+    let foundTag = _find(editedTags, (t) => t.id === tag.id);
     return foundTag ? foundTag : tag;
   });
   store.dispatch('setTags', { tags: updatedStoreTags });
@@ -496,16 +524,16 @@ async function submitTags(editedTags) {
  * validated/prepared before unmounting.
  */
 async function prepareTabs() {
-  return Promise.allSettled([
-    tabRefs.certsAndAwards?.prepareSubmit(),
-    tabRefs.clearances?.prepareSubmit(),
-    tabRefs.contracts?.prepareSubmit(),
-    tabRefs.customerOrgs?.prepareSubmit(),
-    tabRefs.education?.prepareSubmit(),
-    tabRefs.jobExperience?.prepareSubmit(),
-    tabRefs.languages?.prepareSubmit(),
-    tabRefs.personalInfo?.prepareSubmit(),
-    tabRefs.technologies?.prepareSubmit()
+  await Promise.allSettled([
+    tabs.certsAndAwards?.prepareSubmit(),
+    tabs.clearances?.prepareSubmit(),
+    tabs.contracts?.prepareSubmit(),
+    tabs.customerOrgs?.prepareSubmit(),
+    tabs.education?.prepareSubmit(),
+    tabs.jobExperience?.prepareSubmit(),
+    tabs.languages?.prepareSubmit(),
+    tabs.personal?.prepareSubmit(),
+    tabs.technologies?.prepareSubmit()
   ]);
 }
 
@@ -520,7 +548,7 @@ async function validate() {
   console.log(validTabs);
 
   // iterates through each tab to make sure they are all valid
-  forOwn(validTabs, (value) => {
+  _forOwn(validTabs, (value) => {
     valid = valid && value;
   });
   return valid;
@@ -530,18 +558,18 @@ async function validate() {
  * Gets an object containing only the fields that were edited by the user
  */
 function getChanges() {
-  let changes = pickBy(editedEmployee.value, (value, key) => {
+  let changes = _pickBy(editedEmployee.value, (value, key) => {
     const oldValue = props.employee[key];
     const newValue = value;
 
     if (key === 'tags') return false; // tags are handled after the pickBy
 
     // if both values are empty (i.e. empty string, null, or undefined) they are treated as equal
-    return !isEqual(oldValue, newValue) && !(isEmpty(oldValue) && isEmpty(newValue));
+    return !_isEqual(oldValue, newValue) && !(isEmpty(oldValue) && isEmpty(newValue));
   });
 
   const editedTags = editedEmployee.value.tags;
-  if (editedTags && !isEmpty(editedTags)) changes.tags = cloneDeep(editedTags);
+  if (editedTags && !isEmpty(editedTags)) changes.tags = _cloneDeep(editedTags);
 
   return changes;
 }
@@ -622,7 +650,7 @@ async function selectTab() {
     case 'Languages':
     case 'Foreign Languages':
       num = 5;
-      card = 'Languages';
+      card = 'Foreign Languages';
       break;
     case 'Job Experience':
     case 'Job Experience & Education':

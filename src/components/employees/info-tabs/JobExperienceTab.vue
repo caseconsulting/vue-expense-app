@@ -73,7 +73,12 @@
 </template>
 
 <script>
-import _ from 'lodash';
+import _mapValues from 'lodash/mapValues';
+import _forEach from 'lodash/forEach';
+import _floor from 'lodash/floor';
+import _filter from 'lodash/filter';
+import _map from 'lodash/map';
+import _cloneDeep from 'lodash/cloneDeep';
 import { isEmpty, monthDayYearFormat, monthYearFormat } from '@/utils/utils';
 import { difference, format, getTodaysDate, isBefore, maximum, minimum } from '@/shared/dateUtils';
 
@@ -104,7 +109,7 @@ function created() {
  */
 function icExperience() {
   // get values from input, convert to array, and then sort them
-  let given_ranges = _.mapValues(this.model.icTimeFrames, 'range');
+  let given_ranges = _mapValues(this.model.icTimeFrames, 'range');
   given_ranges = Object.values(given_ranges);
   const durations = given_ranges
     .sort((a, b) => {
@@ -131,14 +136,14 @@ function icExperience() {
 
   let totalDurationMonths = 0; // total months
   // loop each reach to get total duration in months
-  _.forEach(ranges, (range) => {
+  _forEach(ranges, (range) => {
     let start = format(range[0], null, 'YYYY-MM');
     let end = range.length > 1 ? format(range[1], null, 'YYYY-MM') : getTodaysDate('YYYY-MM');
     let duration = difference(end, start, 'months') + 1; // calculate range duration
     totalDurationMonths += Math.max(duration, 0); // remove negative values
   });
   // set year output text
-  let totalYearOutput = _.floor(totalDurationMonths / 12);
+  let totalYearOutput = _floor(totalDurationMonths / 12);
   if (totalYearOutput < 1) {
     totalYearOutput = '';
   } else if (totalYearOutput == 1) {
@@ -181,13 +186,13 @@ function onPageChange() {
  */
 function updateCompanies(query) {
   if (query !== undefined && query !== null) {
-    this.filterCompanies = _.filter(this.model.companies, (company) => {
+    this.filterCompanies = _filter(this.model.companies, (company) => {
       if (query && company.companyName.toLowerCase().includes(query.toLowerCase())) {
         return true;
       }
     });
   } else {
-    this.filterCompanies = _.cloneDeep(this.model.companies);
+    this.filterCompanies = _cloneDeep(this.model.companies);
   }
   this.page = 1;
   this.pageList = this.filterCompanies.slice(0, 4);
@@ -216,8 +221,8 @@ export default {
   created,
   data() {
     return {
-      companyNames: _.map(this.model.companies, 'companyName'),
-      filterCompanies: _.cloneDeep(this.model.companies),
+      companyNames: _map(this.model.companies, 'companyName'),
+      filterCompanies: _cloneDeep(this.model.companies),
       filter: null,
       page: 1,
       pageList: []

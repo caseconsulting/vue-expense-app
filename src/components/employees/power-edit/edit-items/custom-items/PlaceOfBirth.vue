@@ -50,7 +50,8 @@
 import { STATES, COUNTRIES } from '@/utils/utils';
 import { inject, ref, watch } from 'vue';
 import google from '@/assets/img/trademarks/google.png';
-import _ from 'lodash';
+import _forEach from 'lodash/forEach';
+import _find from 'lodash/find';
 import api from '@/shared/api.js';
 
 // |--------------------------------------------------|
@@ -105,7 +106,7 @@ async function searchCity(query) {
   if (query?.length > 2) {
     showMenu.value = true;
     let locations = await api.getCity(query);
-    _.forEach(locations.predictions, (location) => {
+    _forEach(locations.predictions, (location) => {
       predictionsSet.add({ title: location.description, value: location.place_id });
     });
     predictions.value = [...predictionsSet];
@@ -115,7 +116,7 @@ async function searchCity(query) {
 }
 
 async function predictionSelected(event) {
-  let prediction = _.find(predictions.value, { value: event.id });
+  let prediction = _find(predictions.value, { value: event.id });
   let country = '';
   let state = '';
 

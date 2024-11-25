@@ -13,6 +13,8 @@
 
 <script setup>
 import employeeCsv from '@/utils/csv/employeeCsv.js';
+import { updateStoreContracts, updateStoreTags } from '@/utils/storeUtils';
+import { useStore } from 'vuex';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -20,7 +22,8 @@ import employeeCsv from '@/utils/csv/employeeCsv.js';
 // |                                                  |
 // |--------------------------------------------------|
 
-const props = defineProps(['contracts', 'employee', 'tags', 'midAction', 'color', 'filename']);
+const props = defineProps(['employee', 'midAction', 'color', 'filename']);
+const store = useStore();
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -30,8 +33,12 @@ const props = defineProps(['contracts', 'employee', 'tags', 'midAction', 'color'
 /**
  * Downloads employees as CSV
  */
-function download() {
-  employeeCsv.download(props.employee, props.contracts, props.tags, props.filename);
+async function download() {
+  await Promise.all([
+    !store.getters.contracts ? updateStoreContracts() : '',
+    !store.getters.tags ? updateStoreTags() : ''
+  ]);
+  employeeCsv.download(props.employee, store.getters.contracts, store.getters.tags, props.filename);
 } // download
 </script>
 

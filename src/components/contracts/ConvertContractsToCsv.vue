@@ -1,8 +1,8 @@
 <template>
   <!-- Download CSV Button -->
-  <v-btn :disabled="midAction" @click="download()" elevation="2"
-    >Download All<i class="material-icons ml-2">download</i></v-btn
-  >
+  <v-btn :disabled="midAction" @click="download()" elevation="2">
+    Download<i class="material-icons ml-2">download</i>
+  </v-btn>
 </template>
 <script setup>
 import { isMobile, isSmallScreen } from '@/utils/utils';

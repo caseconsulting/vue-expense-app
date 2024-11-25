@@ -122,7 +122,12 @@
 </template>
 
 <script>
-import _ from 'lodash';
+import _cloneDeep from 'lodash/cloneDeep';
+import _find from 'lodash/find';
+import _map from 'lodash/map';
+import _isEmpty from 'lodash/isEmpty';
+import _forEach from 'lodash/forEach';
+import _filter from 'lodash/filter';
 import api from '@/shared/api';
 import { generateUUID, isMobile } from '@/utils/utils';
 import { firstAndLastName, fullName, nicknameAndLastName } from '@/shared/employeeUtils';
@@ -144,8 +149,8 @@ import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSn
  * Created lifecycle hook
  */
 async function created() {
-  !this.$store.getters.tags ? await updateStoreTags() : _;
-  this.tags = _.cloneDeep(this.$store.getters.tags);
+  !this.$store.getters.tags ? await updateStoreTags() : _cloneDeep;
+  this.tags = _cloneDeep(this.$store.getters.tags);
   this.tags = cleanUpTags(this.tags, this.$store.getters.employees);
   this.$store.dispatch('setTags', { tags: this.tags });
   this.loading = false;
@@ -181,7 +186,7 @@ async function beforeUnmount() {
 function cleanUpTags(tags, employees) {
   tags.forEach((tag) => {
     tag.employees = tag.employees.filter((e) => {
-      return _.find(employees, (emp) => e === emp.id && emp.workStatus > 0);
+      return _find(employees, (emp) => e === emp.id && emp.workStatus > 0);
     });
   });
   return tags;
@@ -204,7 +209,7 @@ function cancelEdit() {
 async function createTag() {
   this.editedTag.id = generateUUID();
   this.editedTag = await api.createItem(api.TAGS, this.editedTag);
-  this.tags[0] = _.cloneDeep(this.editedTag);
+  this.tags[0] = _cloneDeep(this.editedTag);
   this.$store.dispatch('setTags', { tags: this.tags });
   this.editedTag = null;
   this.creatingTag = false;
@@ -216,7 +221,7 @@ async function createTag() {
 async function deleteTag() {
   try {
     this.tagLoading = true;
-    let tag = _.cloneDeep(this.deletedTag);
+    let tag = _cloneDeep(this.deletedTag);
     let response = await api.deleteItem(api.TAGS, tag.id);
     await updateStoreExpenseTypes();
     if (response instanceof AxiosError) {
@@ -241,7 +246,7 @@ async function deleteTag() {
  * @param tag Object - The tag to edit
  */
 function editTag(tag) {
-  this.editedTag = _.cloneDeep(tag);
+  this.editedTag = _cloneDeep(tag);
 } // editTag
 
 /**
@@ -250,8 +255,8 @@ function editTag(tag) {
  * @param employees Array - The list of employees on a tag
  */
 function getTagEmployees(employees) {
-  return _.map(employees, (e) => {
-    return _.find(this.$store.getters.employees, (emp) => e === emp.id);
+  return _map(employees, (e) => {
+    return _find(this.$store.getters.employees, (emp) => e === emp.id);
   });
 } // getTagEmployees
 
@@ -263,15 +268,15 @@ async function saveEditedTag() {
   if (this.valid) {
     try {
       this.tagLoading = true;
-      if (_.isEmpty(this.editedTag.id)) {
+      if (_isEmpty(this.editedTag.id)) {
         // Create new tag
         await this.createTag();
       } else {
         // Save existing tag
         let tagIndex = this.tags.findIndex((t) => t.id === this.editedTag.id);
         this.editedTag = await api.updateItem(api.TAGS, this.editedTag);
-        this.tags[tagIndex] = _.cloneDeep(this.editedTag);
-        this.tags = _.cloneDeep(this.tags);
+        this.tags[tagIndex] = _cloneDeep(this.editedTag);
+        this.tags = _cloneDeep(this.tags);
         this.$store.dispatch('setTags', { tags: this.tags });
         this.editedTag = null;
       }
@@ -296,8 +301,8 @@ function tableFilter(__, search, item) {
   let found = false;
   let lcSearch = search.toLowerCase();
   if (item.tagName.toLowerCase().includes(lcSearch)) return true; // early exit if tag name matches search
-  _.forEach(item.employees, (id) => {
-    let e = _.find(this.$store.getters.employees, (emp) => emp.id === id);
+  _forEach(item.employees, (id) => {
+    let e = _find(this.$store.getters.employees, (emp) => emp.id === id);
     if (this.employeeFilter(null, search, e)) {
       found = true;
     }
@@ -324,10 +329,10 @@ function updateSearch(value) {
  * Gets the active list of employees.
  */
 function filteredEmployees() {
-  let employees = _.filter(this.$store.getters.employees, (e) => {
+  let employees = _filter(this.$store.getters.employees, (e) => {
     return e.workStatus > 0;
   });
-  return _.map(employees, (e) => {
+  return _map(employees, (e) => {
     return {
       ...e,
       employeeName: nicknameAndLastName(e)
@@ -400,7 +405,7 @@ export default {
       search: null,
       valid: true,
       duplicateTagName: () => {
-        let arr = _.filter(this.tags, (t) => t.tagName === this.editedTag.tagName);
+        let arr = _filter(this.tags, (t) => t.tagName === this.editedTag.tagName);
         return arr.length < 2 || 'Duplicate tag name';
       }
     };

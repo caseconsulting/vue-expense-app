@@ -1,6 +1,6 @@
 <template>
   <!-- Active Filter -->
-  <div class="d-flex justify-end align-center my-0 pb-0">
+  <div>
     <span class="fieldset-title mr-3">Status:</span>
     <v-btn-toggle color="primary" class="filter_color" v-model="filter" text multiple>
       <!-- Active -->

@@ -1,5 +1,5 @@
 <template>
-  <v-form ref="form" v-model="valid" validate-on="input">
+  <div>
     <v-row :class="isMobile() ? 'mt-3' : ''"><h3>Basic Information</h3></v-row>
     <v-row class="groove">
       <!-- first name -->
@@ -17,7 +17,7 @@
           :label="editedEmployee.noMiddleName ? 'No Middle Name' : 'Middle Name *'"
           :rules="editedEmployee.noMiddleName ? [() => true] : getRequiredRules()"
           :hide-details="editedEmployee.noMiddleName ? true : 'auto'"
-          @update:model-value="if (!isEmpty(editedEmployee.middleName)) editedEmployee.noMiddleName = false;"
+          @update:model-value="if (!_isEmpty(editedEmployee.middleName)) editedEmployee.noMiddleName = false;"
         >
           <template #append-inner>
             <v-btn
@@ -46,80 +46,19 @@
         <v-text-field v-model="editedEmployee.nickname" label="Nickname"></v-text-field>
       </v-col>
     </v-row>
-    <!-- current address -->
-    <v-row :class="isMobile() ? 'mt-7' : ''"><h3>Current Address</h3></v-row>
-    <v-row class="groove">
-      <v-col>
-        <!-- private icon and search bar -->
-        <v-row align="center">
-          <v-col class="pb-0 d-flex">
-            <div class="mt-4 mb-9 ml-3 mr-7 d-inline">
-              <v-icon color="black">mdi-shield</v-icon>
-              <v-tooltip activator="parent" location="top" text="Address is always hidden from other users"></v-tooltip>
-            </div>
-            <v-autocomplete
-              class="d-inline"
-              prepend-inner-icon="mdi-magnify"
-              label="Search Locations"
-              :items="Object.keys(placeIds)"
-              no-data-text="Start searching..."
-              @update:search="updateAddressDropDown($event)"
-              ref="addressSearch"
-            >
-              <template #item="{ item, props }">
-                <v-list-item @click="autofillLocation(item, props)">{{ item.value }}</v-list-item>
-              </template>
-            </v-autocomplete>
-          </v-col>
-        </v-row>
-        <!-- actual address fields -->
-        <v-row>
-          <v-col :cols="!isMobile() ? '6' : '12'">
-            <v-text-field
-              v-model.trim="editedEmployee.currentStreet"
-              label="Street 1"
-              data-vv-name="Street 1"
-            ></v-text-field>
-          </v-col>
-          <v-col :cols="!isMobile() ? '6' : '12'">
-            <v-text-field
-              v-model.trim="editedEmployee.currentStreet2"
-              label="Street 2"
-              data-vv-name="Street 2"
-            ></v-text-field>
-          </v-col>
-          <v-col>
-            <v-text-field v-model.trim="editedEmployee.currentCity" label="City"></v-text-field>
-          </v-col>
-          <v-col>
-            <v-autocomplete
-              v-model="editedEmployee.currentState"
-              :items="Object.values(STATES)"
-              item-title="text"
-              label="State"
-            ></v-autocomplete>
-          </v-col>
-          <v-col>
-            <v-text-field
-              v-model.trim="editedEmployee.currentZIP"
-              label="ZIP"
-              data-vv-name="Current ZIP"
-            ></v-text-field>
-          </v-col>
-        </v-row>
-      </v-col>
-    </v-row>
+    <!-- CASE information -->
     <v-row class="mt-7"><h3>CASE Information</h3></v-row>
     <v-row class="groove">
       <v-col>
         <v-row>
           <!-- case email -->
-          <v-col v-if="editedEmployee.employeeRole === 'admin'">
+          <v-col v-if="userIsAdminOrManager">
             <v-text-field
               v-model="emailUsername"
               label="CASE Email *"
               @update:model-value="removeEmailDomain()"
-              :suffix="CASE_EMAIL_DOMAIN"
+              :hint="CASE_EMAIL_DOMAIN"
+              persistent-hint
               :rules="getCaseEmailRules()"
             ></v-text-field>
           </v-col>
@@ -201,10 +140,10 @@
             ></v-autocomplete>
           </v-col>
         </v-row>
-        <v-row v-if="editedEmployee.employeeRole === 'admin'">
+        <v-row v-if="userIsAdminOrManager">
           <!-- work status / full time / part time / inactive -->
           <v-col>
-            <v-radio-group v-model="workStatus" :inline="!isMobile()">
+            <v-radio-group v-model="workStatus" label="Work Status *" :inline="!isMobile()">
               <v-radio value="Full Time" label="Full Time"></v-radio>
               <v-radio value="Part Time" label="Part Time"></v-radio>
               <v-radio value="Inactive" label="Inactive"></v-radio>
@@ -218,6 +157,96 @@
                 class="work-status-box ma-4"
               ></v-text-field>
             </v-radio-group>
+            <v-text-field
+              v-if="workStatus === 'Inactive'"
+              class="d-block"
+              v-model="deptDateFormatted"
+              :rules="getDateRules()"
+              v-mask="'##/##/####'"
+              prepend-inner-icon="mdi-calendar"
+              label="Departure Date"
+              hint="MM/DD/YYYY format"
+              persistent-hint
+              @update:focused="editedEmployee.deptDate = format(deptDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
+              @click:prepend="deptMenu = true"
+              @keypress="deptMenu = false"
+              autocomplete="off"
+            >
+              <v-menu activator="parent" location="start center" :close-on-content-click="false" v-model="deptMenu">
+                <v-date-picker
+                  v-model="editedEmployee.deptDate"
+                  @update:model-value="deptMenu = false"
+                  show-adjacent-months
+                  hide-actions
+                  keyboard-icon=""
+                  color="#bc3825"
+                  title="Departure Date"
+                ></v-date-picker>
+              </v-menu>
+            </v-text-field>
+          </v-col>
+        </v-row>
+      </v-col>
+    </v-row>
+    <!-- current address -->
+    <v-row :class="isMobile() ? 'mt-7' : ''"><h3>Current Address</h3></v-row>
+    <v-row class="groove">
+      <v-col>
+        <!-- private icon and search bar -->
+        <v-row align="center">
+          <v-col class="pb-0 d-flex">
+            <div class="mt-4 mb-9 ml-3 mr-7 d-inline">
+              <v-icon color="black">mdi-shield</v-icon>
+              <v-tooltip activator="parent" location="top" text="Address is always hidden from other users"></v-tooltip>
+            </div>
+            <v-autocomplete
+              class="d-inline"
+              prepend-inner-icon="mdi-magnify"
+              label="Search Locations"
+              :items="Object.keys(placeIds)"
+              no-data-text="Start searching..."
+              @update:search="updateAddressDropDown($event)"
+              ref="addressSearch"
+            >
+              <template #item="{ item, props }">
+                <v-list-item @click="autofillLocation(item, props)">{{ item.value }}</v-list-item>
+              </template>
+            </v-autocomplete>
+          </v-col>
+        </v-row>
+        <!-- actual address fields -->
+        <v-row>
+          <v-col :cols="!isMobile() ? '6' : '12'">
+            <v-text-field
+              v-model.trim="editedEmployee.currentStreet"
+              label="Street 1"
+              data-vv-name="Street 1"
+            ></v-text-field>
+          </v-col>
+          <v-col :cols="!isMobile() ? '6' : '12'">
+            <v-text-field
+              v-model.trim="editedEmployee.currentStreet2"
+              label="Street 2"
+              data-vv-name="Street 2"
+            ></v-text-field>
+          </v-col>
+          <v-col>
+            <v-text-field v-model.trim="editedEmployee.currentCity" label="City"></v-text-field>
+          </v-col>
+          <v-col>
+            <v-autocomplete
+              v-model="editedEmployee.currentState"
+              :items="Object.values(STATES)"
+              item-title="text"
+              label="State"
+            ></v-autocomplete>
+          </v-col>
+          <v-col>
+            <v-text-field
+              v-model.trim="editedEmployee.currentZIP"
+              label="ZIP"
+              data-vv-name="Current ZIP"
+            ></v-text-field>
           </v-col>
         </v-row>
       </v-col>
@@ -232,7 +261,7 @@
               ref="formFields"
               v-mask="'##/##/####'"
               v-model="birthdayFormat"
-              :rules="[...getDateOptionalRules(), ...getNonFutureDateRules()]"
+              :rules="[getBirthdayRules()]"
               label="Birthday"
               hint="MM/DD/YYYY format"
               prepend-inner-icon="mdi-calendar"
@@ -256,7 +285,7 @@
                 </v-date-picker>
               </v-menu>
               <template #append-inner>
-                <private-button v-model="birthdayFeed"></private-button>
+                <private-button v-model="birthdayHidden"></private-button>
               </template>
             </v-text-field>
           </v-col>
@@ -327,8 +356,14 @@
               </v-col>
             </v-row>
             <v-row>
-              <v-col :cols="!isMobile() ? '4' : '12'">
-                <v-text-field v-model.trim="editedEmployee.city" label="City" data-vv-name="City"></v-text-field>
+              <!-- country of birth -->
+              <v-col>
+                <v-autocomplete
+                  v-model="editedEmployee.country"
+                  label="Country"
+                  :items="COUNTRIES"
+                  hide-details="auto"
+                ></v-autocomplete>
               </v-col>
               <v-col :class="isMobile() ? 'mb-4' : ''">
                 <v-autocomplete
@@ -339,14 +374,8 @@
                   :disabled="editedEmployee.country !== 'United States'"
                 ></v-autocomplete>
               </v-col>
-              <!-- country of birth -->
-              <v-col>
-                <v-autocomplete
-                  v-model="editedEmployee.country"
-                  label="Country"
-                  :items="COUNTRIES"
-                  hide-details="auto"
-                ></v-autocomplete>
+              <v-col :cols="!isMobile() ? '4' : '12'">
+                <v-text-field v-model.trim="editedEmployee.city" label="City" data-vv-name="City"></v-text-field>
               </v-col>
             </v-row>
           </v-col>
@@ -390,6 +419,24 @@
               </template>
             </v-text-field>
           </v-col>
+          <v-col v-if="phoneNumber.type === 'Cell'" cols="2">
+            <v-checkbox
+              :model-value="!phoneNumber.smsOptedOut"
+              @update:model-value="phoneNumber.smsOptedOut = !phoneNumber.smsOptedOut"
+              label="Opt-in"
+            >
+              <v-tooltip activator="parent" location="top">
+                <div>
+                  I consent to receive up to two monthly text message reminders for payroll time sheets on the last work
+                  day of the pay period
+                </div>
+                <div>Text 'HELP' for support</div>
+                <div>To opt-out, uncheck the box or text 'STOP'</div>
+                <div>Message and data rates may apply</div>
+                <div>NOTE: Opted-out phone numbers can be opted-in only once in 30 days</div>
+              </v-tooltip>
+            </v-checkbox>
+          </v-col>
         </v-row>
       </v-col>
       <!-- phone numbers mobile -->
@@ -417,6 +464,24 @@
               </template>
             </v-autocomplete>
           </v-col>
+          <v-col v-if="phoneNumber.type === 'Cell'" cols="auto">
+            <v-checkbox
+              :model-value="!phoneNumber.smsOptedOut"
+              @update:model-value="phoneNumber.smsOptedOut = !phoneNumber.smsOptedOut"
+              label="Opt-in"
+            >
+              <v-tooltip activator="parent" location="top">
+                <div>
+                  I consent to receive up to two monthly text message reminders for payroll time sheets on the last work
+                  day of the pay period
+                </div>
+                <div>Text 'HELP' for support</div>
+                <div>To opt-out, uncheck the box or text 'STOP'</div>
+                <div>Message and data rates may apply</div>
+                <div>NOTE: Opted-out phone numbers can be opted-in only once in 30 days</div>
+              </v-tooltip>
+            </v-checkbox>
+          </v-col>
           <v-col class="flex-grow">
             <v-text-field
               v-model.trim="phoneNumber.number"
@@ -442,22 +507,22 @@
         <e-e-o-compliance-edit-modal v-model="toggleForm" :model="editedEmployee"></e-e-o-compliance-edit-modal>
       </v-col>
     </v-row>
-  </v-form>
+  </div>
 </template>
 
 <script setup>
 import { JOB_TITLES } from '@/components/employees/form-tabs/dropdown-info/jobTitles';
 import PrivateButton from '@/components/shared/edit-fields/PrivateButton.vue';
+import { usePrepareSubmit } from '@/composables/editTabCommunication';
 import api from '@/shared/api';
 import { format, isSame } from '@/shared/dateUtils';
 import { CASE_EMAIL_DOMAIN, EMPLOYEE_ROLES, PHONE_TYPES } from '@/shared/employeeUtils';
 import {
   getAINRules,
+  getBirthdayRules,
   getCaseEmailRules,
-  getDateOptionalRules,
   getDateRules,
   getEmailRules,
-  getNonFutureDateRules,
   getNumberRules,
   getPhoneNumberRules,
   getPhoneNumberTypeRules,
@@ -466,10 +531,20 @@ import {
   getWorkStatusRules
 } from '@/shared/validationUtils';
 import { COUNTRIES, isMobile, STATES } from '@/utils/utils';
-import { cloneDeep, filter, forEach, includes, isEmpty, lowerCase, size, some, startCase, xorBy } from 'lodash';
-import { computed, inject, onBeforeMount, onBeforeUnmount, onMounted, readonly, ref, watch } from 'vue';
+import _cloneDeep from 'lodash/cloneDeep';
+import _filter from 'lodash/filter';
+import _forEach from 'lodash/forEach';
+import _includes from 'lodash/includes';
+import _isEmpty from 'lodash/isEmpty';
+import _lowerCase from 'lodash/lowerCase';
+import _some from 'lodash/some';
+import _startCase from 'lodash/startCase';
+import _uniqBy from 'lodash/uniqBy';
+import _xorBy from 'lodash/xorBy';
+import { computed, inject, onBeforeMount, onBeforeUnmount, readonly, ref, watch } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
+import { DEFAULT_ISOFORMAT } from '../../../shared/dateUtils';
 import EEOComplianceEditModal from '../modals/EEOComplianceEditModal.vue';
 
 // |--------------------------------------------------|
@@ -482,20 +557,28 @@ const store = useStore();
 const emitter = inject('emitter');
 const vMask = mask; // import v mask directive
 
-const editedEmployee = defineModel({ required: true });
+// passes in all slot props as a single object
+const { slotProps } = defineProps(['slotProps']);
+const editedEmployee = ref(slotProps.editedEmployee);
+// for some reason the DB doesn't save work status if it's zero, so fill it in if it should be 0
+if (!editedEmployee.value.workStatus && editedEmployee.value.deptDate) editedEmployee.value.workStatus = 0;
+// make it so the v-auto-complete labels fill the text box when it's empty
+if (_isEmpty(editedEmployee.value.country)) editedEmployee.value.country = null;
+if (_isEmpty(editedEmployee.value.st)) editedEmployee.value.st = null;
+if (_isEmpty(editedEmployee.value.currentState)) editedEmployee.value.currentState = null;
+
 const creatingEmployee = inject('creatingEmployee');
 const employeeId = editedEmployee.value.id;
-const valid = defineModel('valid', { required: true });
 const uneditedTags = readonly(getEmployeeTags());
-const editedTags = ref(cloneDeep(editedEmployee.value.tags ?? getEmployeeTags()));
+const editedTags = ref(_cloneDeep(getEmployeeTags()));
 const uneditedHireDate = editedEmployee.value.hireDate;
-const form = ref(null); // template ref to form
+const uneditedDeptDate = editedEmployee.value.deptDate;
 
 // reformatted data for use in form
 const emailUsername = ref(
   editedEmployee.value.email ? editedEmployee.value.email.slice(0, editedEmployee.value.email.indexOf('@')) : ''
 );
-const employeeRole = ref(startCase(editedEmployee.value.employeeRole));
+const employeeRole = ref(_startCase(editedEmployee.value.employeeRole));
 const partTimeNumber = ref(
   editedEmployee.value.workStatus === 100 || editedEmployee.value.workStatus === 0
     ? 50
@@ -505,26 +588,20 @@ const phoneNumbers = ref(initPhoneNumbers());
 
 // other refs
 const addressSearch = ref(null); // current address search input
-const birthdayFeed = ref(!editedEmployee.value.birthdayFeed);
-const birthdayFormat = ref(null); // formatted birthday
+const birthdayHidden = ref(!editedEmployee.value.birthdayFeed);
+const birthdayFormat = ref(format(editedEmployee.value.birthday, null, 'MM/DD/YYYY')); // formatted birthday
 const birthdayMenu = ref(false); // shows the birthday menu
 const birthPlaceSearch = ref(null); // birth place search input
-const hireDateFormatted = ref(null); // formatted hireDate
+const hireDateFormatted = ref(format(editedEmployee.value.hireDate, null, 'MM/DD/YYYY')); // formatted hireDate
+const deptDateFormatted = ref(format(editedEmployee.value.deptDate, null, 'MM/DD/YYYY')); // formatted deptDate
 const hireMenu = ref(false); // display hire menu
+const deptMenu = ref(false); // display dept menu
 const placeIds = ref({}); // for address autocomplete
 const predictions = ref({}); // for POB autocomplete
 const toggleForm = ref(false); // for EEO data
 const phoneAutofocus = ref(false);
-let hasExpenses = ref(false);
 
-// values to help with resetting edits after cancelling
-let stopPrepare = false;
-const onDiscardEdits = (employee) => {
-  stopPrepare = true;
-  editedEmployee.value = employee;
-};
-
-defineExpose({ prepareSubmit }); // allows parent to use refs to call prepareSubmit()
+usePrepareSubmit('personal', prepareSubmit);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -533,44 +610,14 @@ defineExpose({ prepareSubmit }); // allows parent to use refs to call prepareSub
 // |--------------------------------------------------|
 
 onBeforeMount(async () => {
-  emitter.on('discard-edits', onDiscardEdits);
   emitter.on('confirmed-cancel-eeo', () => {
     toggleForm.value = false;
   });
-
-  // set formatted birthday date
-  birthdayFormat.value = format(editedEmployee.value.birthday, null, 'MM/DD/YYYY') || birthdayFormat.value;
-  // set formatted hire date
-  hireDateFormatted.value = format(editedEmployee.value.hireDate, null, 'MM/DD/YYYY') || hireDateFormatted.value;
 });
 
-onMounted(validate);
-
 onBeforeUnmount(() => {
-  emitter.off('discard-edits', onDiscardEdits);
   emitter.off('confirmed-cancel-eeo');
 });
-
-onBeforeMount(async () => {
-  emitter.on('discard-edits', onDiscardEdits);
-  emitter.on('confirmed-cancel-eeo', () => {
-    toggleForm.value = false;
-  });
-
-  // determine if employee has expenses
-  hasExpenses.value = editedEmployee.value.id
-    ? size(await api.getAllEmployeeExpenses(editedEmployee.value.id)) > 0
-    : false;
-});
-
-onMounted(validate);
-
-onBeforeUnmount(() => {
-  emitter.off('discard-edits', onDiscardEdits);
-});
-
-onMounted(validate);
-onBeforeUnmount(prepareSubmit);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -588,7 +635,7 @@ const employeeNumberRules = computed(() => [
   ...getRequiredRules(),
   ...getNumberRules(),
   (v) => {
-    let duplicate = some(store.getters.employees, (employee) => {
+    let duplicate = _some(store.getters.employees, (employee) => {
       // ensures that the employee number being set is not the same as another employee
       employee.employeeNumber === Number(v) && employee.employeeNumber !== store.getters.user.employeeNumber;
     });
@@ -627,8 +674,8 @@ const workStatus = computed({
  * Uses the formatted/transformed data from the form and loads it into the edited employee
  */
 async function prepareSubmit() {
-  if (!stopPrepare) {
-    await validate();
+  if (!slotProps.stopPrepare) {
+    await slotProps.validate();
 
     if (editedEmployee.value.noMiddleName) editedEmployee.value.middleName = '';
 
@@ -637,18 +684,21 @@ async function prepareSubmit() {
     // if formatting has changed but date hasn't, reset it back
     if (isSame(uneditedHireDate, editedEmployee.value.hireDate, 'day'))
       editedEmployee.value.hireDate = uneditedHireDate;
+    if (isSame(uneditedDeptDate, editedEmployee.value.deptDate, 'day'))
+      editedEmployee.value.deptDate = uneditedDeptDate;
 
-    editedEmployee.value.employeeRole = lowerCase(employeeRole.value);
+    editedEmployee.value.employeeRole = _lowerCase(employeeRole.value);
 
     if (workStatus.value === 'Part Time') editedEmployee.value.workStatus = partTimeNumber.value;
 
     // the xor/symmetric difference is just the elements that have changed
     // this includes both tags the employee was added to and removed from, and no others
-    editedEmployee.value.tags = xorBy(editedTags.value, uneditedTags, 'id'); // xor by property 'id'
+    editedEmployee.value.tags = _xorBy(editedTags.value, uneditedTags, 'id'); // xor by property 'id'
+    editedEmployee.value.tags = _uniqBy(editedEmployee.value.tags, 'id');
 
     if (editedEmployee.value.country !== 'United States') editedEmployee.value.st = '';
 
-    editedEmployee.value.birthdayFeed = !birthdayFeed.value;
+    editedEmployee.value.birthdayFeed = !birthdayHidden.value;
 
     editedEmployee.value.privatePhoneNumbers = [];
     editedEmployee.value.publicPhoneNumbers = [];
@@ -672,22 +722,13 @@ async function prepareSubmit() {
   }
 }
 
-async function validate() {
-  if (form.value) {
-    const result = await form.value.validate();
-    emitter.emit('validating', { tab: 'personal', valid: result.valid });
-    return result;
-  }
-  return null;
-}
-
 /**
  * Gets tags of edited employee
  *
  * @return {any} A deep clone of the employee tags
  */
 function getEmployeeTags() {
-  return cloneDeep(filter(store.getters.tags, (tag) => includes(tag.employees, employeeId)));
+  return _cloneDeep(_filter(store.getters.tags, (tag) => _includes(tag.employees, employeeId)));
 }
 
 /**
@@ -730,7 +771,7 @@ async function updateAddressDropDown(query) {
     //object used to contain addresses and their respective ID's
     //needed later to obtain the selected address's zip code
     placeIds.value = {};
-    forEach(locations.predictions, (location) => {
+    _forEach(locations.predictions, (location) => {
       placeIds.value[location.description] = location.place_id;
     });
   } else {
@@ -745,7 +786,7 @@ async function updateAddressDropDown(query) {
 async function autofillLocation(item) {
   let search = item.value;
 
-  if (!isEmpty(search)) {
+  if (!_isEmpty(search)) {
     let fullAddress = search.split(', ');
     // fills in the first three fields
     editedEmployee.value.currentCity = fullAddress[1];
@@ -761,7 +802,7 @@ async function autofillLocation(item) {
     let res = await api.getZipCode(selectedAddress);
 
     editedEmployee.value.currentZIP = '';
-    forEach(res.result.address_components, (field) => {
+    _forEach(res.result.address_components, (field) => {
       if (field.types.includes('postal_code')) {
         editedEmployee.value.currentZIP = field.short_name;
       }
@@ -782,7 +823,7 @@ async function updateCityDropDown(query) {
     //object used to contain addresses and their respective ID's
     //needed later to obtain the selected address's zip code
     predictions.value = {};
-    forEach(locations.predictions, (location) => {
+    _forEach(locations.predictions, (location) => {
       predictions.value[location.description] = location.predictions;
     });
   } else {
@@ -797,7 +838,7 @@ async function updateCityBoxes(item) {
   let citySearchString = item.value;
   let country = '';
   let state = '';
-  if (!isEmpty(citySearchString)) {
+  if (!_isEmpty(citySearchString)) {
     let birthInfo = citySearchString.split(', ');
     let city = birthInfo[0];
 
@@ -835,6 +876,11 @@ function removeEmailDomain() {
   }
 } // removeEmailDomain
 
+function toggleEdit() {
+  emitter.emit('open-dialog');
+  toggleForm.value = true;
+}
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     WATCHERS                     |
@@ -869,10 +915,38 @@ watch(
   }
 ); // watchEditedEmployeeHireDate
 
-function toggleEdit() {
-  emitter.emit('open-dialog');
-  toggleForm.value = true;
-}
+/**
+ * watcher for editedEmployee.value.deptDate - format date on change and set contract end date
+ */
+watch(
+  () => editedEmployee.value.deptDate,
+  async () => {
+    deptDateFormatted.value = format(editedEmployee.value.deptDate, null, 'MM/DD/YYYY') || deptDateFormatted.value;
+    //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
+    if (editedEmployee.value.deptDate !== null && !format(editedEmployee.value.deptDate, null, 'MM/DD/YYYY')) {
+      editedEmployee.value.deptDate = null;
+    }
+    // update the user's current contracts to have their dept date as the end date
+    if (workStatus.value === 'Inactive') {
+      for (let c of editedEmployee.value.contracts) {
+        for (let p of c.projects) {
+          // set current project to have dept date as the end date
+          if (!p.endDate) p.endDate = format(deptDateFormatted.value, 'MM/DD/YYYY', DEFAULT_ISOFORMAT);
+        }
+      }
+    }
+  }
+); // watchEditedEmployeeDeptDate
+
+/**
+ * Watch for work status changing and remove old data
+ */
+watch(
+  () => editedEmployee.value.workStatus,
+  async () => {
+    if (editedEmployee.value.workStatus !== 'Inactive') editedEmployee.value.deptDate = null;
+  }
+);
 </script>
 
 <style scoped>

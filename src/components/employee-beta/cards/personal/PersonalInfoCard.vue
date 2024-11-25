@@ -6,70 +6,92 @@
         <h3 class="text-white">Personal Info</h3>
       </div>
     </template>
-    <v-card-text class="px-7 pt-7 pb-1 text-black">
-      <p>
-        <b>Full Name: </b
-        >{{ model.firstName + ' ' + (!model.noMiddleName ? model.middleName + ' ' : '') + model.lastName }}
-      </p>
-      <v-row v-if="!isEmpty(getPhoneNumbers())">
-        <v-col class="pr-0" cols="auto">
-          <b class="d-inline-flex">Phone Numbers:</b>
-        </v-col>
+    <v-card-text class="px-7 pt-4 pb-1 text-black">
+      <!-- full name -->
+      <v-row dense>
         <v-col>
-          <div class="d-flex flex-row" v-for="phone in getPhoneNumbers()" :key="phone">
-            <p class="d-inline-flex pa-0" v-if="!phone.private || isAdmin || isUser">
+          <b class="mb-1">Full Name: </b>
+          <p class="mb-1">
+            {{ model.firstName + ' ' + (!model.noMiddleName ? model.middleName + ' ' : '') + model.lastName }}
+          </p>
+        </v-col>
+      </v-row>
+
+      <!-- phone numbers -->
+      <v-col dense v-if="!isEmpty(getPhoneNumbers())">
+        <v-row class="pr-0 pb-1">
+          <b class="d-inline-flex">Phone Numbers:</b>
+        </v-row>
+        <v-row class="pb-1" v-for="phone in getPhoneNumbers()" :key="phone">
+          <v-col class="pa-0">
+            <p class="d-inline pa-0" v-if="!phone.private || isAdmin || isUser">
               {{ phone.number }}
             </p>
-            <v-spacer></v-spacer>
-            <div class="d-inline-flex float-right">
+          </v-col>
+          <v-col cols="auto" class="pa-0">
+            <div class="d-inline float-right">
               <v-icon v-if="!phone.private">mdi-shield-outline</v-icon>
               <v-icon v-else>mdi-shield</v-icon>
               <v-tooltip activator="parent" location="top">{{
                 phone.private ? 'Hidden from other employees' : 'Visible to other employees'
               }}</v-tooltip>
             </div>
-          </div>
-        </v-col>
-      </v-row>
-      <div>
-        <p class="d-inline-flex" v-if="!isEmpty(getBirthday()) && (isAdmin || isUser)">
-          <b class="pr-1">Birthday: </b> {{ getBirthday() }}
-        </p>
-        <div class="d-inline float-right">
-          <v-icon v-if="!model.birthdayFeed">mdi-shield</v-icon>
-          <v-icon v-else>mdi-shield-outline</v-icon>
-          <v-tooltip activator="parent" location="top">{{
-            !model.birthdayFeed ? 'Hidden from other employees' : 'Visible to other employees'
-          }}</v-tooltip>
-        </div>
+          </v-col>
+        </v-row>
+      </v-col>
+
+      <!-- birthday -->
+      <div v-if="!isEmpty(getBirthday()) && (isAdmin || isUser)">
+        <b class="mb-1">Birthday: </b>
+        <v-row dense>
+          <v-col class="d-inline-flex">
+            <p class="mb-1">{{ getBirthday() }}</p>
+          </v-col>
+          <v-col class="d-inline float-right" cols="auto">
+            <v-icon v-if="!model.birthdayFeed">mdi-shield</v-icon>
+            <v-icon v-else>mdi-shield-outline</v-icon>
+            <v-tooltip activator="parent" location="top">{{
+              !model.birthdayFeed ? 'Hidden from other employees' : 'Visible to other employees'
+            }}</v-tooltip>
+          </v-col>
+        </v-row>
       </div>
-      <div class="d-flex flex-row" v-if="!isEmpty(getCurrentAddress() && (isAdmin || isUser))">
-        <p class="d-inline-flex pr-1"><b>Address:</b></p>
-        <p class="d-inline-flex">
-          {{ getCurrentAddress() }}
-        </p>
-        <v-spacer></v-spacer>
-        <div class="d-inline">
-          <v-icon>mdi-shield</v-icon>
-          <v-tooltip activator="parent" location="top">Always hidden from other employees</v-tooltip>
-        </div>
-      </div>
-      <v-row dense v-if="!isEmpty(getPlaceOfBirth() && (isAdmin || isUser))">
-        <v-col cols="auto">
-          <p class="d-inline text-align: float-left">
-            <b>Place of Birth: </b>
-          </p>
-        </v-col>
-        <v-col>
-          <p class="d-inline">{{ getPlaceOfBirth() }}</p>
-        </v-col>
-        <v-col cols="auto">
-          <div class="d-inline-flex float-right">
-            <v-icon>mdi-shield</v-icon>
-            <v-tooltip activator="parent" location="top">Always hidden from other employees</v-tooltip>
-          </div>
-        </v-col>
-      </v-row>
+
+      <!-- current address -->
+      <v-col dense v-if="!isEmpty(getCurrentAddress() && (isAdmin || isUser))">
+        <v-row no-gutter cols="auto">
+          <b>Address:</b>
+        </v-row>
+        <v-row class="pb-1">
+          <v-col class="pa-0">
+            <p class="d-inline text-wrap">
+              {{ getCurrentAddress() }}
+            </p>
+          </v-col>
+          <v-col class="pa-0" cols="1">
+            <div class="float-right">
+              <v-icon>mdi-shield</v-icon>
+              <v-tooltip activator="parent" location="top">Always hidden from other employees</v-tooltip>
+            </div>
+          </v-col>
+        </v-row>
+      </v-col>
+
+      <!-- place of birth -->
+      <v-col dense v-if="!isEmpty(getPlaceOfBirth() && (isAdmin || isUser))">
+        <v-row>
+          <b class="pr-1">Place of Birth: </b>
+        </v-row>
+        <v-row>
+          <v-col class="pa-0 d-inline"> {{ getPlaceOfBirth() }} </v-col>
+          <v-col class="pa-0" cols="1">
+            <div class="float-right">
+              <v-icon>mdi-shield</v-icon>
+              <v-tooltip activator="parent" location="top">Always hidden from other employees</v-tooltip>
+            </div>
+          </v-col>
+        </v-row>
+      </v-col>
     </v-card-text>
   </base-card>
 </template>
@@ -129,22 +151,10 @@ function getPlaceOfBirth() {
  * @return String - Current Address.
  */
 function getCurrentAddress() {
-  let address = '';
-  if (!isEmpty(props.model.currentStreet)) {
-    address += `${props.model.currentStreet}, `;
-  }
-  if (!isEmpty(props.model.currentCity)) {
-    address += `${props.model.currentCity}, `;
-  }
-  if (!isEmpty(props.model.currentState)) {
-    address += `${props.model.currentState} `;
-  }
-  if (!isEmpty(props.model.currentZIP)) {
-    address += `${props.model.currentZIP}, `;
-  }
-
-  address = address.slice(0, -2);
-  return address;
+  let address = [];
+  let toAdd = ['currentStreet', 'currentStreet2', 'currentCity', 'currentState', 'currentZIP'];
+  for (let item of toAdd) if (!isEmpty(props.model[item])) address.push(props.model[item]);
+  return address.join(', ');
 } // getCurrentAddress
 
 /**
@@ -164,3 +174,9 @@ function getPhoneNumbers() {
   }
 } // getPhoneNumbers
 </script>
+
+<style scoped>
+.current-address {
+  min-width: 100% - 21px;
+}
+</style>

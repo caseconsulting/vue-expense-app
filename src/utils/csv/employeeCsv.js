@@ -2,8 +2,13 @@
  * Utilities to convert employee objects into objects passable to
  * csv.js
  */
-import _ from 'lodash';
+import _forEach from 'lodash/forEach';
+import _orderBy from 'lodash/orderBy';
+import _map from 'lodash/map';
+import _isEmpty from 'lodash/isEmpty';
+import _sortBy from 'lodash/sortBy';
 import { difference, format, getTodaysDate, minimum } from '@/shared/dateUtils';
+import { getEmployeeCurrentAddress } from '@/shared/employeeUtils.js';
 import csvUtils from './baseCsv.js';
 
 /**
@@ -42,13 +47,13 @@ export function download(employees, contracts, tags, filename = null) {
 export function convertEmployees(employees, contracts, tags, includeEeoData = false) {
   if (!Array.isArray(employees)) employees = [employees];
   let tempEmployees = [];
-  _.forEach(employees, (employee) => {
+  _forEach(employees, (employee) => {
     try {
       let placeOfBirth = [employee.city, employee.st, employee.country];
-      let contractsPrimesProjects = getContractPrimeProject(employee.contracts, contracts);
+      let contractsInfo = getContractsInfo(employee, contracts);
       let clearanceData = getClearancesData(employee.clearances);
       let data = {
-        // NOTE: if you change this, please also change in the catch{} below
+        // NOTE: if you change this, please also change in the catch() below
         'Employee #': employee.employeeNumber || '',
         'First Name': employee.firstName || '',
         'Middle Name': employee.middleName || '',
@@ -61,6 +66,9 @@ export function convertEmployees(employees, contracts, tags, includeEeoData = fa
         AIN: employee.agencyIdentificationNumber || '',
         'Resume Updated': format(employee.resumeUpdated, null, 'YYYY-MM-DD') || '',
         Email: employee.email || '',
+        'Phone (Cell)': getPhoneNumbers(employee, 'Cell') || '',
+        'Phone (Home)': getPhoneNumbers(employee, 'Home') || '',
+        'Phone (Work)': getPhoneNumbers(employee, 'Work') || '',
         Twitter: employee.twitter || '',
         Github: employee.github || '',
         LinkedIn: employee.linkedIn || '',
@@ -76,9 +84,11 @@ export function convertEmployees(employees, contracts, tags, includeEeoData = fa
         'Adjudication Dates': clearanceData.adjudicationDates || '',
         'Badge Number': clearanceData.badgeNum || '',
         'Badge Expiration Date': clearanceData.badgeExpDate || '',
-        Contracts: contractsPrimesProjects.contracts || '',
-        Primes: contractsPrimesProjects.primes || '',
-        Projects: contractsPrimesProjects.projects || '',
+        Contracts: contractsInfo.contracts || '',
+        Primes: contractsInfo.primes || '',
+        Projects: contractsInfo.projects || '',
+        'Work Locations': contractsInfo.workLocations || '',
+        'Work Types': contractsInfo.workTypes || '',
         'Customer Org': filterUndefined(employee.customerOrgExp, getCustomerOrgExp) || '',
         Education: filterUndefined(employee.education, getEducation) || '',
         'Job Experience': filterUndefined(employee.companies, getCompanies) || '',
@@ -90,11 +100,11 @@ export function convertEmployees(employees, contracts, tags, includeEeoData = fa
         data = {
           ...data,
           'Admin filled out form?': employee.eeoAdminHasFilledOutEeoForm ? 'Yes' : 'No',
-          'Declined to self-identify?': employee.declinedToSelfIdentify ? 'Yes' : 'No',
+          'Declined to self-identify?': employee.eeoDeclineSelfIdentify ? 'Yes' : 'No',
           Gender: employee.eeoGender?.text,
           'Has Disability?': employee.eeoHasDisability ? 'Yes' : 'No',
-          'Hispanic or Latino?': employee.eeoHispanicOrLatino ? 'Yes' : 'No',
-          'Protected Veteran?': employee.eeoProtectedVeteran ? 'Yes' : 'No',
+          'Hispanic or Latino?': employee.eeoHispanicOrLatino.value ? 'Yes' : 'No',
+          'Protected Veteran?': employee.eeoIsProtectedVeteran ? 'Yes' : 'No',
           'Job Category': employee.eeoJobCategory?.text,
           'Race/Ethnicity': employee.eeoRaceOrEthnicity?.text
         };
@@ -163,6 +173,24 @@ export function convertEmployees(employees, contracts, tags, includeEeoData = fa
   });
   return tempEmployees;
 } // convertEmployees
+
+/**
+ * Returns phone numbers of a particular type. Returns both private and public numbers. This
+ * will give you all numbers you have access to.
+ *
+ * @param e - employee object
+ * @param type - type of phone number (probably 'Cell'/'Home'/'Work')
+ */
+export function getPhoneNumbers(e, type) {
+  let combinedNumbers = [...(e.privatePhoneNumbers || []), ...(e.publicPhoneNumbers || [])];
+  let matchedNumbers = [];
+  for (let number of combinedNumbers) {
+    if (number.type === type) matchedNumbers.push(number.number.replace(',', ''));
+  }
+
+  if (matchedNumbers.length === 0) return '';
+  return matchedNumbers.join(', ');
+} // getPhoneNumbers
 
 /**
  * Returns a work status 'Full Time', 'Part Time', 'Inactive', or 'Invalid Status'.
@@ -331,20 +359,29 @@ export function getProjectLengthInYears(project) {
  *
  * @param employeeContracts - An array of objects.
  * @param allContracts - the contracts from DyanmoDB to connect employee contract IDs to
+ * @param
  * @return String - contract
  */
-export function getContractPrimeProject(employeeContracts, allContracts) {
+export function getContractsInfo(employee, allContracts) {
   let result = [];
   let toReturn = {};
   let allProjects = allContracts.map((c) => c.projects).flat();
-  if (employeeContracts) {
-    _.forEach(employeeContracts, (contract) => {
+  if (employee.contracts) {
+    _forEach(employee.contracts, (contract) => {
       let earliestDate = getTodaysDate(); // keep track of earliest start date
       // create array of project strings
       let projects = [];
-      _.forEach(contract.projects, (project) => {
+      let workLocations = [];
+      let workTypes = [];
+      _forEach(contract.projects, (project) => {
         let p = allProjects.find((p) => p.id === project.projectId);
         projects.push(`${p.projectName} - ${(getProjectLengthInYears(project) / 12).toFixed(1)} years`);
+        workLocations.push(
+          project.workType === 'Remote' || (!project.workType && p.workType === 'Remote')
+            ? getEmployeeCurrentAddress(employee)
+            : project.location || p.location || 'No Location'
+        );
+        workTypes.push(project.workType || p.workType || 'No Work Type');
         let endDate = format(project.endDate || getTodaysDate(), null, 'YYYY-MM-DD');
         earliestDate = minimum([earliestDate, endDate]);
       });
@@ -353,26 +390,41 @@ export function getContractPrimeProject(employeeContracts, allContracts) {
       result.push({
         contract: { name: c.contractName, prime: c.primeName },
         projects: projects,
+        workLocations: workLocations,
+        workTypes: workTypes,
         d: format(earliestDate, null, 'YYYYMMDD')
       });
     });
     // sort contracts by their earliest project start date
-    result = _.orderBy(result, 'd', 'desc');
+    result = _orderBy(result, 'd', 'desc');
     // extract contracts, primes, and projects into separate strings
     toReturn = {
-      contracts: _.map(result, (r) => {
+      contracts: _map(result, (r) => {
         return r.contract.name;
       }).join(', '),
-      primes: _.map(result, (r) => {
+      primes: _map(result, (r) => {
         return r.contract.prime;
       }).join(', '),
-      projects: _.map(result, (r) => {
+      projects: _map(result, (r) => {
         return r.projects.join(', ');
+      }).join(', '),
+      workLocations: _map(result, (r) => {
+        return r.workLocations.join(', ');
+      }).join(', '),
+      workTypes: _map(result, (r) => {
+        return r.workTypes.join(', ');
       }).join(', ')
     };
   }
+  if (!employee.contracts || employee.contracts?.length === 0) {
+    // employees not on a contract are assumed to be remote
+    toReturn = {
+      workLocations: getEmployeeCurrentAddress(employee),
+      workTypes: 'Remote'
+    };
+  }
   return toReturn;
-} // getContracts
+} // getContractsInfo
 
 /**
  * Returns experience data for employee
@@ -406,7 +458,7 @@ export function getEducation(education) {
   let military = [];
   let highSchool = [];
   if (education) {
-    _.forEach(education, (edu) => {
+    _forEach(education, (edu) => {
       // university type
       if (edu.type === 'university') {
         edu.degrees.forEach((degree) => {
@@ -422,7 +474,7 @@ export function getEducation(education) {
           });
 
           // add concentrations
-          if (!_.isEmpty(degree.concentrations)) {
+          if (!_isEmpty(degree.concentrations)) {
             str += ' (Concentrations: ';
             degree.concentrations.forEach((concentration, i) => {
               if (i != 0) {
@@ -434,7 +486,7 @@ export function getEducation(education) {
           }
 
           // add minors
-          if (!_.isEmpty(degree.minors)) {
+          if (!_isEmpty(degree.minors)) {
             str += ' (Minors: ';
             degree.minors.forEach((minor, i) => {
               if (i != 0) {
@@ -468,17 +520,17 @@ export function getEducation(education) {
     });
   }
   // sort entries, filter out string, and combine
-  university = _.sortBy(university, ['date']);
-  military = _.sortBy(military, ['date']);
-  highSchool = _.sortBy(highSchool, ['date']);
+  university = _sortBy(university, ['date']);
+  military = _sortBy(military, ['date']);
+  highSchool = _sortBy(highSchool, ['date']);
   let result = [
-    ..._.map(university, (item) => {
+    ..._map(university, (item) => {
       return item.str;
     }),
-    ..._.map(military, (item) => {
+    ..._map(military, (item) => {
       return item.str;
     }),
-    ..._.map(highSchool, (item) => {
+    ..._map(highSchool, (item) => {
       return item.str;
     })
   ];
@@ -550,6 +602,7 @@ export default {
   download,
   fileString,
   convertEmployees,
+  getPhoneNumbers,
   getWorkStatus,
   filterUndefined,
   getAwards,
@@ -557,7 +610,7 @@ export default {
   getClearancesData,
   getContractLengthInYears,
   getProjectLengthInYears,
-  getContractPrimeProject,
+  getContractsInfo,
   getCustomerOrgExp,
   getCompanies,
   getEducation,

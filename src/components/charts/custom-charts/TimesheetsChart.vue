@@ -58,7 +58,10 @@
 import DoughnutChart from '@/components/charts/base-charts/DoughnutChart.vue';
 import { inject, ref, onMounted, onBeforeUnmount, watch } from 'vue';
 import { formatNumber } from '@/utils/utils.js';
-import _ from 'lodash';
+import _map from 'lodash/map';
+import _pickBy from 'lodash/pickBy';
+import _sum from 'lodash/sum';
+import _slice from 'lodash/slice';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -137,12 +140,12 @@ async function fillData() {
   let colors = ['#1A237E', '#5C6BC0', '#9FA8DA'];
   let colorsOptions = ['#1A237E', '#5C6BC0', '#9FA8DA'];
   // remove pto jobcodes from chart for yearly data
-  let jobcodes = _.pickBy(props.jobcodes, (value, key) => !props.nonBillables?.includes(key));
-  let jobCodeValues = _.map(Object.values(jobcodes), (duration) => {
+  let jobcodes = _pickBy(props.jobcodes, (value, key) => !props.nonBillables?.includes(key));
+  let jobCodeValues = _map(Object.values(jobcodes), (duration) => {
     return formatNumber(Number(duration / 60 / 60));
   }); // removes decimals if a whole number
 
-  let jobCodeValuesSum = _.sum(_.map(jobCodeValues, (v) => Number(v)));
+  let jobCodeValuesSum = _sum(_map(jobCodeValues, (v) => Number(v)));
   // user inputted custom data
   let difference = Number(completed.value) - jobCodeValuesSum;
   if (difference > 0) {
@@ -154,7 +157,7 @@ async function fillData() {
     colors = [...colors, ...colorsOptions];
   }
 
-  colors = _.slice(colors, 0, jobCodeValues?.length);
+  colors = _slice(colors, 0, jobCodeValues?.length);
   colors.push('#EAEAEA'); // push grey for remaining hours
 
   chartData.value = {

@@ -37,7 +37,11 @@
 </template>
 
 <script setup>
-import _ from 'lodash';
+import _xorBy from 'lodash/xorBy';
+import _filter from 'lodash/filter';
+import _sortBy from 'lodash/sortBy';
+import _findIndex from 'lodash/findIndex';
+
 import { computed, ref } from 'vue';
 
 // |--------------------------------------------------|
@@ -56,9 +60,9 @@ const localSelectedFields = ref(props.selectedFields);
 // |--------------------------------------------------|
 
 const unSelectedFields = computed(() => {
-  let unselectedFields = _.xorBy(props.fields, localSelectedFields.value, 'title');
-  let editableUnselectedFields = _.filter(unselectedFields, (f) => f.editType);
-  editableUnselectedFields = _.sortBy(editableUnselectedFields, (f) => f.title);
+  let unselectedFields = _xorBy(props.fields, localSelectedFields.value, 'title');
+  let editableUnselectedFields = _filter(unselectedFields, (f) => f.editType);
+  editableUnselectedFields = _sortBy(editableUnselectedFields, (f) => f.title);
   return editableUnselectedFields;
 });
 
@@ -73,7 +77,7 @@ function addField(field) {
 }
 
 function removeField(field) {
-  let i = _.findIndex(localSelectedFields.value, (f) => f.title === field.title);
+  let i = _findIndex(localSelectedFields.value, (f) => f.title === field.title);
   localSelectedFields.value.splice(i, 1);
 }
 </script>

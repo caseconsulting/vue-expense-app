@@ -17,6 +17,13 @@
         </v-toolbar>
         <p class="pl-3" style="color: #828282"><i>*Click on row to see employees</i></p>
       </template>
+      <template v-slot:[`item.title`]="{ item }">
+        <span>{{ item.title }}</span>
+        <v-avatar v-if="item.info" class="ml-2 nudge-up pointer" size="x-small" density="compact">
+          <v-tooltip activator="parent" location="top">{{ item.info }}</v-tooltip>
+          <v-icon icon="mdi-information" color="#3f51b5" size="x-small" />
+        </v-avatar>
+      </template>
       <template v-slot:headers></template>
       <template v-slot:bottom></template>
     </v-data-table>
@@ -24,10 +31,10 @@
 </template>
 
 <script setup>
-import _ from 'lodash';
 import { onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
+import { updateStoreEmployees } from '@/utils/storeUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -62,7 +69,7 @@ onMounted(async () => {
 // |--------------------------------------------------|
 
 /**
- * Routes the user to the reports page and autofills the search fields.
+ * Routes the user to the employees page and autofills the search fields.
  *
  * @param value - row clicked
  */
@@ -80,90 +87,113 @@ function clickedRow(_, { item }) {
 /**
  * Gets the employee data, and sets the chart formatting and data options.
  */
-function fillData() {
-  // access store
-  employees.value = store.getters.employees;
+async function fillData() {
+  // filter out inactive employees
+  !store.getters.employees ? await updateStoreEmployees() : '';
+  employees.value = store.getters.employees.filter((emp) => emp.workStatus != 0);
 
-  // filter out inactive and interns if selected
-  employees.value = employees.value.filter((emp) => emp.workStatus != 0);
-  let billableCount = 0;
-  let internCount = 0;
-  let overheadCount = 0;
-  let overheadAwaitingClearanceCount = 0;
-  let internsAwaitingClearanceCount = 0;
-  let [billableEmployeeNames, internEmployeeNames] = [[], []];
-  let overheadEmployeeNames = _.map(employees.value, (e) => {
-    return { name: `${e.nickname || e.firstName} ${e.lastName}` };
-  });
-  // tally up counts
-  _.forEach(employees.value, (e) => {
-    let name = `${e.nickname || e.firstName} ${e.lastName}`;
-    let awaitingClearance = e.clearances && e.clearances.some((c) => c.awaitingClearance);
-    if (e.contracts && e.contracts.some((c) => c.projects.some((p) => !p.endDate))) {
-      let isBillable = false;
-      _.forEach(e.contracts, (contract) => {
-        _.forEach(contract.projects, (project) => {
-          if (!project.endDate && !isBillable) {
-            // employee is active on a contract
-            billableEmployeeNames.push(name);
-            _.remove(overheadEmployeeNames, (x) => name === x.name);
-            billableCount++;
-            isBillable = true;
-          }
-        });
-      });
-    } else if (e.jobRole === 'Intern') {
-      if (awaitingClearance) {
-        internsAwaitingClearanceCount++;
-      }
-      internEmployeeNames.push(name);
-      _.remove(overheadEmployeeNames, (x) => name === x.name);
-      internCount++;
-    } else if (awaitingClearance) {
-      overheadAwaitingClearanceCount++;
+  // counting vars
+  let billableEmployees = { employees: [], awaitingClearance: new Set() };
+  let internEmployees = { employees: [], awaitingClearance: new Set() };
+  let nonInternEmployees = { employees: [], awaitingClearance: new Set() };
+  let overheadEmployees = { employees: [], awaitingClearance: new Set() };
+
+  // quick helper to add employee to above counting vars
+  let addEmployee = (array, employee) => {
+    array['employees'].push({
+      id: employee.id,
+      nickname: employee.nickname,
+      firstName: employee.firstName,
+      lastName: employee.lastName
+    });
+    if (employee.clearances && employee.clearances.some((c) => c.awaitingClearance)) {
+      array['awaitingClearance'].add(employee.id);
     }
-  });
+  };
 
-  overheadCount = employees.value.length - billableCount - internCount;
-  overheadEmployeeNames = _.map(overheadEmployeeNames, (x) => {
-    return x.name;
-  });
+  // loop through employees and figure out which array(s) to add them to
+  for (let e of employees.value ?? []) {
+    // vars to keep track
+    let [isBillable, isIntern] = [false, false];
+    // maybe add to billable
+    if (e.contracts && e.contracts.some((c) => c.projects.some((p) => !p.endDate))) {
+      contractLoop: for (let c of e.contracts ?? []) {
+        for (let p of c.projects ?? []) {
+          if (!p.endDate) {
+            addEmployee(billableEmployees, e);
+            isBillable = true;
+            break contractLoop; // named loops! (this breaks out of both loops)
+          }
+        }
+      }
+    }
+    // maybe add to interns
+    if (e.jobRole === 'Intern') {
+      addEmployee(internEmployees, e);
+      isIntern = true;
+    }
+    // maybe add to non-interns
+    if (!isIntern) {
+      addEmployee(nonInternEmployees, e);
+    }
+    // maybe add to overhead
+    // overhead: isn't on a contract and is not an intern. eg CFO, HR
+    if (!isBillable && !isIntern) {
+      addEmployee(overheadEmployees, e);
+    }
+  }
 
+  // quick helper to get text of employee count, optionally including awaiting clearance count
+  let getEmployeeCount = (array, showAwaiting) => {
+    let count = `${array['employees'].length}`;
+    let waitingCount = array['awaitingClearance'].size;
+    if (showAwaiting && waitingCount > 0) count += ` (${waitingCount} awaiting clearance)`;
+    return count;
+  };
+  // quick helper to extract names of an array of employees
+  let getEmployeeNames = (array) => {
+    return array['employees'].map((e) => `${e.nickname || e.firstName} ${e.lastName}`);
+  };
+
+  // set table contents
   tableContents.value = [
-    { title: 'Billable Employees', value: billableCount, employeeNames: billableEmployeeNames },
+    {
+      title: 'Billable Employees',
+      value: getEmployeeCount(billableEmployees, false),
+      employeeNames: getEmployeeNames(billableEmployees)
+    },
     {
       title: 'Overhead Employees',
-      value: `${overheadCount} (${
-        overheadAwaitingClearanceCount == 0 ? 'none' : overheadAwaitingClearanceCount
-      } awaiting clearance)`,
-      employeeNames: overheadEmployeeNames
+      value: getEmployeeCount(overheadEmployees, true),
+      employeeNames: getEmployeeNames(overheadEmployees)
     },
     {
       title: 'Interns',
-      value: `${internCount} (${
-        internsAwaitingClearanceCount == 0 ? 'none' : internsAwaitingClearanceCount
-      } awaiting clearance)`,
-      employeeNames: internEmployeeNames
+      value: getEmployeeCount(internEmployees, true),
+      employeeNames: getEmployeeNames(internEmployees)
     },
-    { title: 'Total Employees', value: employees.value.length, employeeNames: [] }
+    {
+      title: 'Total Employees',
+      value: getEmployeeCount(nonInternEmployees, false),
+      employeeNames: getEmployeeNames(nonInternEmployees),
+      info: "Excludes 'Intern' job role"
+    }
   ];
 
-  // remove 'awaiting clearance' parens if value is zero
-  if (overheadCount == 0) {
-    tableContents.value[1].value = `${overheadCount}`;
-  }
-  if (internCount == 0) {
-    tableContents.value[2].value = `${internCount}`;
-  }
-
+  // set data table display
   headers.value = [
     {
       text: 'topic',
-      align: 'start',
-      value: 'title'
+      value: 'title',
+      align: 'start'
     },
-    { text: 'val', value: 'value' }
+    {
+      text: 'val',
+      value: 'value'
+    }
   ];
+
+  // set loading status
   dataReceived.value = true;
 } // fillData
 

@@ -1,6 +1,9 @@
 import api from '@/shared/api.js';
 import MobileDetect from 'mobile-detect';
-import _ from 'lodash';
+import _isArray from 'lodash/isArray';
+import _isNil from 'lodash/isNil';
+import _isString from 'lodash/isString';
+import _isEmpty from 'lodash/isEmpty';
 import { getRole } from '@/utils/auth';
 import { format, getTodaysDate, isAfter, isBefore, setYear, subtract, DEFAULT_ISOFORMAT } from '@/shared/dateUtils';
 import store from '../../store/index';
@@ -58,7 +61,7 @@ export function generateUUID() {
  * @return boolean - value is empty
  */
 export function isEmpty(value) {
-  return _.isNil(value) || (_.isString(value) && value.trim().length === 0) || (_.isArray(value) && _.isEmpty(value));
+  return _isNil(value) || (_isString(value) && value.trim().length === 0) || (_isArray(value) && _isEmpty(value));
 } // isEmpty
 
 /**
@@ -182,17 +185,8 @@ export function openLink(link) {
  * @param {employee} employee the employee to update
  */
 export async function updateEmployeeLogin(employee) {
-  await Promise.all([
-    api.updateItem(api.EMPLOYEES, employee), // updates last logged in for employee
-    api.createItem(api.AUDIT, {
-      id: generateUUID(),
-      type: 'login',
-      tags: ['account'],
-      employeeId: employee.id,
-      description: `${employee.firstName} ${employee.lastName} has logged in`,
-      timeToLive: 60
-    })
-  ]); // Create an audit of the success
+  await api.updateAttribute(api.EMPLOYEES, { id: employee.id, lastLogin: employee.lastLogin }, 'lastLogin'); // updates last logged in for employee
+  // Create an audit of the success
   if (store.getters.employees) {
     let employees = store.getters.employees;
     let i = employees.findIndex((emp) => emp.id === employee.id);

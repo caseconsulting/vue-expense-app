@@ -40,7 +40,8 @@
 </template>
 
 <script setup>
-import _ from 'lodash';
+import _mapValues from 'lodash/mapValues';
+import _forEach from 'lodash/forEach';
 import { difference, format, getTodaysDate, isBefore, minimum, maximum } from '@/shared/dateUtils';
 import { onMounted, ref, watch } from 'vue';
 import { useStore } from 'vuex';
@@ -109,7 +110,7 @@ function fillData() {
   employees.value.forEach((emp) => {
     if (emp.icTimeFrames) {
       // get values from input, convert to array, and then sort them
-      let given_ranges = _.mapValues(emp.icTimeFrames, 'range');
+      let given_ranges = _mapValues(emp.icTimeFrames, 'range');
       given_ranges = Object.values(given_ranges);
       const durations = given_ranges
         .sort((a, b) => {
@@ -135,7 +136,7 @@ function fillData() {
       });
       let totalDurationMonths = 0; // total months
       // loop each reach to get total duration in months
-      _.forEach(ranges, (range) => {
+      _forEach(ranges, (range) => {
         let start = format(range[0], null, 'YYYY-MM');
         let end = range.length > 1 ? format(range[1], null, 'YYYY-MM') : getTodaysDate();
         let duration = difference(end, start, 'months') + 1; // calculate range duration

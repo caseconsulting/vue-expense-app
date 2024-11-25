@@ -477,7 +477,13 @@ import api from '@/shared/api.js';
 import DeleteErrorModal from '@/components/modals/DeleteErrorModal.vue';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
 import ExpenseTypeForm from '@/components/expense-types/ExpenseTypeForm.vue';
-import _ from 'lodash';
+import _map from 'lodash/map';
+import _filter from 'lodash/filter';
+import _find from 'lodash/find';
+import _sortBy from 'lodash/sortBy';
+import _cloneDeep from 'lodash/cloneDeep';
+import _union from 'lodash/union';
+import _uniq from 'lodash/uniq';
 import { convertToMoneyString, userRoleIsAdmin } from '@/utils/utils';
 import {
   updateStoreExpenseTypes,
@@ -641,7 +647,7 @@ onBeforeMount(async () => {
   });
 
   if (store.getters.storeIsPopulated) {
-    loadExpenseTypesData();
+    await loadExpenseTypesData();
   }
 }); // created
 
@@ -767,8 +773,8 @@ function categoriesReqReceipt(categories) {
   let string = '';
   //first filter out those that have a receipt required. then map each match to just it's name (now it's a list).
   //finally join the array items with a comma.
-  string = _.map(
-    _.filter(categories, (cat) => {
+  string = _map(
+    _filter(categories, (cat) => {
       return cat.requireReceipt;
     }),
     (match) => {
@@ -850,7 +856,7 @@ function filterExpenseTypes() {
   filteredExpenseTypes.value = { ...expenseTypes.value };
 
   // filter expense types by active or inactive
-  filteredExpenseTypes.value = _.filter(filteredExpenseTypes.value, (expenseType) => {
+  filteredExpenseTypes.value = _filter(filteredExpenseTypes.value, (expenseType) => {
     return filter.value.active == 'active'
       ? !expenseType.isInactive
       : filter.value.active == 'notActive'
@@ -859,7 +865,7 @@ function filterExpenseTypes() {
   });
 
   // filter expense types by overdraft
-  filteredExpenseTypes.value = _.filter(filteredExpenseTypes.value, (expenseType) => {
+  filteredExpenseTypes.value = _filter(filteredExpenseTypes.value, (expenseType) => {
     return filter.value.overdraft == 'overdraft'
       ? expenseType.odFlag
       : filter.value.overdraft == 'noOverdraft'
@@ -868,7 +874,7 @@ function filterExpenseTypes() {
   });
 
   // filter expense types by recurring
-  filteredExpenseTypes.value = _.filter(filteredExpenseTypes.value, (expenseType) => {
+  filteredExpenseTypes.value = _filter(filteredExpenseTypes.value, (expenseType) => {
     return filter.value.recurring == 'recurring'
       ? expenseType.recurringFlag
       : filter.value.recurring == 'notRecurring'
@@ -884,7 +890,7 @@ function filterExpenseTypes() {
  * @return String - accessible by description
  */
 function getAccess(expenseType) {
-  let accessList = _.filter(expenseType.accessibleBy, (accessType) => {
+  let accessList = _filter(expenseType.accessibleBy, (accessType) => {
     return accessType == 'FullTime' || accessType == 'PartTime' || accessType == 'Intern' || accessType == 'Custom';
   });
   return accessList.join(', ');
@@ -897,7 +903,7 @@ function getAccess(expenseType) {
  * @return Object - basecamp name and url data
  */
 function getCampfire(url) {
-  return _.find(campfires.value, (campfire) => {
+  return _find(campfires.value, (campfire) => {
     return campfire.url == url;
   });
 } // getCampfire
@@ -913,7 +919,7 @@ function getEmployeeList(accessibleBy) {
   if (accessibleBy.includes('FullTime')) {
     // accessible by all employees
     employeesList = employeesList.concat(
-      _.filter(employees.value, (employee) => {
+      _filter(employees.value, (employee) => {
         return employee.workStatus == 100 && employee.employeeRole != 'intern';
       })
     );
@@ -921,7 +927,7 @@ function getEmployeeList(accessibleBy) {
   if (accessibleBy.includes('PartTime')) {
     // accessible by full time employees only
     employeesList = employeesList.concat(
-      _.filter(employees.value, (employee) => {
+      _filter(employees.value, (employee) => {
         return employee.workStatus < 100 && employee.workStatus > 0 && employee.employeeRole != 'intern';
       })
     );
@@ -929,7 +935,7 @@ function getEmployeeList(accessibleBy) {
   if (accessibleBy.includes('Intern')) {
     // accessible by full time employees only
     employeesList = employeesList.concat(
-      _.filter(employees.value, (employee) => {
+      _filter(employees.value, (employee) => {
         return employee.workStatus > 0 && employee.employeeRole == 'intern';
       })
     );
@@ -937,14 +943,14 @@ function getEmployeeList(accessibleBy) {
   if (accessibleBy.includes('Custom')) {
     // custom access list
     employeesList = employeesList.concat(
-      _.filter(employees.value, (employee) => {
+      _filter(employees.value, (employee) => {
         return accessibleBy.includes(employee.id);
       })
     );
   }
   employeesList = [...new Set(employeesList)];
   showAccessLength.value = employeesList.length;
-  return _.sortBy(employeesList, [
+  return _sortBy(employeesList, [
     (employee) => employee.firstName.toLowerCase(),
     (employee) => employee.lastName.toLowerCase()
   ]); // sort by first name then last name
@@ -957,7 +963,7 @@ function getEmployeeList(accessibleBy) {
  * @return String - employee full name
  */
 function getEmployeeName(employeeId) {
-  let localEmployee = _.find(employees.value, ['id', employeeId]);
+  let localEmployee = _find(employees.value, ['id', employeeId]);
   return `${localEmployee.firstName} ${localEmployee.lastName}`;
 } // getEmployeeName
 
@@ -969,19 +975,20 @@ async function loadExpenseTypesData() {
   userInfo.value = store.getters.user;
   [campfires.value] = await Promise.all([
     userRoleIsAdmin() ? api.getBasecampCampfires() : '',
-    userRoleIsAdmin() && !store.getters.tags ? updateStoreTags() : _,
-    userRoleIsAdmin() && !store.getters.employees ? updateStoreEmployees() : _,
-    userRoleIsAdmin() && !store.getters.avatars ? updateStoreAvatars() : _,
+    userRoleIsAdmin() && !store.getters.tags ? updateStoreTags() : _find && _map,
+    userRoleIsAdmin() && !store.getters.employees ? updateStoreEmployees() : _find && _map,
+    userRoleIsAdmin() && !store.getters.avatars ? updateStoreAvatars() : _find && _map,
     refreshExpenseTypes(),
     updateStoreCampfires()
   ]);
-
+  expenseTypes.value = store.getters.expenseTypes;
+  filterExpenseTypes();
   if (userRoleIsAdmin()) {
     employees.value = store.getters.employees;
     // set employee avatar
     let avatars = store.getters.basecampAvatars;
-    _.map(employees.value, (employee) => {
-      let avatar = _.find(avatars, ['email_address', employee.email]);
+    _map(employees.value, (employee) => {
+      let avatar = _find(avatars, ['email_address', employee.email]);
       let avatarUrl = avatar ? avatar.avatar_url : null;
       employee.avatar = avatarUrl;
       return employee;
@@ -1007,7 +1014,7 @@ function limitedText(val) {
  * @param item - expense type selected
  */
 function onSelect(item) {
-  model.value = _.cloneDeep(item);
+  model.value = _cloneDeep(item);
 } // onSelect
 
 /**
@@ -1030,19 +1037,19 @@ async function refreshExpenseTypes() {
     // get the active budgets for the employee
     let activeBudgets = store.getters.budgets;
     // map the active budgets
-    let activeExpTypes = _.map(activeBudgets, (budget) => {
+    let activeExpTypes = _map(activeBudgets, (budget) => {
       return budget.expenseTypeId;
     });
     // map the budgets with expenses
-    let budExpTypes = _.map(budgetsWithExpenses, (budget) => {
+    let budExpTypes = _map(budgetsWithExpenses, (budget) => {
       return budget.expenseTypeId;
     });
     // combine the two types of expenses
-    expenseTypesFiltered = _.union(activeExpTypes, budExpTypes);
+    expenseTypesFiltered = _union(activeExpTypes, budExpTypes);
     // get rid of duplicates
-    expenseTypesFiltered = _.uniq(expenseTypesFiltered);
+    expenseTypesFiltered = _uniq(expenseTypesFiltered);
     // set expenseTypes.value to only have those the user should see (expenseTypesFiltered)
-    expenseTypes.value = _.filter(expenseTypes.value, (expenseType) => {
+    expenseTypes.value = _filter(expenseTypes.value, (expenseType) => {
       return expenseTypesFiltered.includes(expenseType.id);
     });
   }
@@ -1125,9 +1132,9 @@ watch(
 /**
  * Watcher for storeIsPopulated
  */
-watch(storeIsPopulated, (newValue) => {
+watch(storeIsPopulated, async (newValue) => {
   if (newValue) {
-    loadExpenseTypesData();
+    await loadExpenseTypesData();
   }
 });
 </script>

@@ -73,7 +73,8 @@
 </template>
 
 <script>
-import _ from 'lodash';
+import _isArray from 'lodash/isArray';
+import _cloneDeep from 'lodash/cloneDeep';
 import { getDateMonthYearRules, getRequiredRules } from '@/shared/validationUtils.js';
 import { format, getTodaysDate } from '@/shared/dateUtils';
 import { asyncForEach } from '@/utils/utils';
@@ -138,7 +139,7 @@ function parseEventDate() {
 async function validateFields() {
   let errorCount = 0;
   //ensures that refs are put in an array so we can reuse forEach loop
-  let components = !_.isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
+  let components = !_isArray(this.$refs.formFields) ? [this.$refs.formFields] : this.$refs.formFields;
   await asyncForEach(components, async (field) => {
     if (field && (await field.validate()).length > 0) errorCount++;
   });
@@ -174,7 +175,7 @@ export default {
   created,
   data() {
     return {
-      editedAwards: _.cloneDeep(this.model) // stores edited awards info
+      editedAwards: _cloneDeep(this.model) // stores edited awards info
     };
   },
   directives: { mask },

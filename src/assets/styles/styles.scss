@@ -33,6 +33,10 @@ $case-darkgray: #415364;
   cursor: pointer;
 }
 
+.pointer-not-allowed {
+  cursor: not-allowed;
+}
+
 .footer-buttons {
   float: right;
 }

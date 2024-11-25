@@ -9,16 +9,19 @@
     <v-card-text class="px-7 pt-5 pb-1 text-black">
       <v-row>
         <v-col>
-          <p v-if="!isEmpty(getAIN())"><b>AIN:</b> {{ getAIN() }}</p>
-          <p v-if="!isEmpty(getEmployeeRole())"><b>Employee Role:</b> {{ _.startCase(getEmployeeRole()) }}</p>
-          <div v-if="isAdmin" class="pb-2">
+          <p class="mb-1" v-if="!isEmpty(getAIN())"><b>AIN:</b> {{ getAIN() }}</p>
+          <p class="mb-1" v-if="!isEmpty(getEmployeeRole())">
+            <b>Employee Role:</b> {{ _.startCase(getEmployeeRole()) }}
+          </p>
+          <p class="mb-1" v-if="!isEmpty(getWorkStatusLabel())"><b>Work Status:</b> {{ getWorkStatusLabel() }}</p>
+          <div class="mb-1" v-if="isAdmin">
             <p class="d-inline"><b>Employee Tags:</b></p>
             <p class="d-inline-flex pl-1" v-for="tag in getTags()" :key="tag.id">
               <v-icon size="small" color="brown-lighten-1">mdi-tag</v-icon> {{ tag.tagName }}
             </p>
             <p v-if="isEmpty(getTags())" class="d-inline pl-1">None</p>
           </div>
-          <p><b>EEO Status:</b> {{ getSelfIdentified() }} {{ eeoStatus() }}</p>
+          <p class="mb-1"><b>EEO Status:</b> {{ getSelfIdentified() }} {{ eeoStatus() }}</p>
         </v-col>
         <v-col cols="auto">
           <div>
@@ -27,7 +30,7 @@
           </div>
         </v-col>
       </v-row>
-      <div class="text-center" style="padding-bottom: 5px">
+      <div class="text-center pt-3">
         <v-btn size="small" variant="flat" color="#F3F3F3" @click="toggleView()" v-if="getEEOFilled()"
           >View EEO Data</v-btn
         >
@@ -135,6 +138,18 @@ function getTags() {
  */
 function getSelfIdentified() {
   return props.model.eeoDeclineSelfIdentify ? 'Declined self-identify, Form ' : 'Form';
+}
+
+/**
+ * Return the info label of the employee work status
+ *
+ * @return String - the employee info work status label
+ */
+function getWorkStatusLabel() {
+  const workStatus = props.model.workStatus;
+  if (workStatus === 100) return 'Full Time';
+  else if (workStatus > 0 && workStatus < 100) return `Part Time (${workStatus}%)`;
+  else return 'Inactive';
 }
 
 /**
