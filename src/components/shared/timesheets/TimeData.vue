@@ -409,7 +409,6 @@ watch(
   () => ptoBalances.value,
   () => {
     let balance = (ptoBalances.value?.['PTO']?.value ?? ptoBalances.value?.['PTO']) / 60 / 60;
-    balance = 198;
     let ptoAccrual = 14;
     let ptoMax = 208;
     if (ptoAccrual > ptoMax - balance) {
