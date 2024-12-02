@@ -19,14 +19,20 @@
           <v-icon size="x-small" color="#3f51b5">mdi-information</v-icon>
         </v-avatar>
       </div>
-      <div v-if="isYearly && !isCalendarYear && !showAddJobCode">
+      <div v-if="isYearly && !showAddJobCode">
         <v-btn icon variant="text" density="comfortable" :color="caseRed" @click="showAddJobCode = true">
           <v-icon>mdi-plus-circle-outline</v-icon>
           <v-tooltip activator="parent">Add legacy job code and duration</v-tooltip>
         </v-btn>
       </div>
     </h3>
-    <add-job-code v-if="showAddJobCode" :employee="employee" :timeData="timeData" class="ma-2"></add-job-code>
+    <add-job-code
+      v-if="showAddJobCode"
+      :employee="employee"
+      :timeData="timeData"
+      :periodType="periodType"
+      class="ma-2"
+    ></add-job-code>
     <div v-if="Object.entries(timeData || {})?.length === 0" class="my-3">No job codes for this time period</div>
     <div v-else>
       <div v-for="(duration, jobcode) in timeData" :key="jobcode">
@@ -42,7 +48,7 @@
           <div class="d-flex align-center ml-3">
             <div>{{ formatNumber(duration / 60 / 60) }}h</div>
             <v-btn
-              v-if="employee.legacyJobCodes?.hasOwnProperty(jobcode)"
+              v-if="showDelete(jobcode)"
               icon
               variant="text"
               :color="caseRed"
@@ -84,7 +90,7 @@ import { useStore } from 'vuex';
 // |                                                  |
 // |--------------------------------------------------|
 
-const props = defineProps(['employee', 'isCalendarYear', 'isYearly', 'supplementalData', 'timeData']);
+const props = defineProps(['employee', 'isCalendarYear', 'isYearly', 'supplementalData', 'timeData', 'periodType']);
 const emitter = inject('emitter');
 const store = useStore();
 
@@ -112,17 +118,30 @@ onBeforeUnmount(() => {
 // |--------------------------------------------------|
 
 /**
+ * Decides whether or not to show the delete (trash can) icon
+ *
+ * @param jobcode - jobcode to check for
+ * @return true if the trash can should be deleted
+ */
+function showDelete(jobcode) {
+  return Object.prototype.hasOwnProperty.call(
+    props.employee.legacyJobCodes?.[props.periodType] || props.employee.legacyJobCodes || {},
+    jobcode
+  );
+}
+
+/**
  * Deletes the job code object from the employee's legacy job codes and updates the store.
  *
  * @param {String} jobcode - The job code to delete
  */
 async function deleteJobCode(jobcode) {
-  let attribute = 'legacyJobCodes';
   let emp = _cloneDeep(props.employee);
-  delete emp[attribute][jobcode];
-  if (_isEmpty(emp[attribute])) emp[attribute] = null;
-  let value = { id: emp.id, [`${attribute}`]: emp[attribute] };
-  await api.updateAttribute(api.EMPLOYEES, value, attribute);
+  if (emp['legacyJobCodes'][props.periodType]) delete emp['legacyJobCodes'][props.periodType][jobcode];
+  else delete emp['legacyJobCodes'][jobcode];
+  if (_isEmpty(emp['legacyJobCodes'])) emp['legacyJobCodes'] = null;
+  let value = { id: emp.id, ['legacyJobCodes']: emp['legacyJobCodes'] };
+  await api.updateAttribute(api.EMPLOYEES, value, 'legacyJobCodes');
   // update store
   let employees = store.getters.employees;
   let index = _findIndex(employees, (e) => e.id === emp.id);

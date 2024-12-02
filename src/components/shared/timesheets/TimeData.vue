@@ -26,6 +26,7 @@
               :timesheets="timesheets || {}"
               :ptoBalances="ptoBalances || {}"
               :supplementalData="supplementalData || {}"
+              :KEYS="KEYS"
             ></time-period-hours>
             <hr class="mt-3 mb-5 mx-7" />
             <p-t-o-hours :employee="clonedEmployee" :ptoBalances="ptoBalances || {}" :system="system"></p-t-o-hours>
