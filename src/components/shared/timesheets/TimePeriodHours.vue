@@ -146,6 +146,7 @@
           :isYearly="isYearly"
           :supplementalData="supplementalDataWithPlan"
           :timeData="timeData"
+          :periodType="periodType"
         ></time-period-job-codes>
       </v-col>
       <!-- End Time Period Job Codes -->
@@ -169,7 +170,7 @@ import { useStore } from 'vuex';
 // |                                                  |
 // |--------------------------------------------------|
 
-const props = defineProps(['employee', 'ptoBalances', 'supplementalData', 'timesheets']);
+const props = defineProps(['employee', 'ptoBalances', 'supplementalData', 'timesheets', 'KEYS']);
 const emitter = inject('emitter');
 const store = useStore();
 
@@ -220,9 +221,28 @@ const dateIsCurrentPeriod = computed(() => {
  * @returns Object - Key Value pairs of jobcodes and their durations
  */
 const timeData = computed(() => {
+  // TODO: somehow legacyJobCodes is undefined when you go from Paul -> Chad -> Paul
+  console.log('a');
   let timesheets = { ...props.timesheets[periodIndex.value].timesheets };
-  if (isYearly.value && !isCalendarYear.value && props.employee.legacyJobCodes)
-    timesheets = { ...timesheets, ...props.employee.legacyJobCodes };
+  if (isYearly.value && props.employee.legacyJobCodes) {
+    console.log('b');
+    let val;
+    for (let key of Object.keys(props.employee.legacyJobCodes || {})) {
+      console.log('c');
+      val = props.employee.legacyJobCodes[key];
+      if (typeof val === 'object') {
+        console.log('d1');
+        // LJC is in new structure, only unpack if it's the right type
+        if (periodType.value === key) timesheets = { ...timesheets, ...val };
+      } else {
+        console.log('d2');
+        // LJC is in old structure, which is just contract year
+        if (periodType.value === props.KEYS.CONTRACT_YEAR) timesheets[key] = val;
+      }
+    }
+  } else {
+    console.log(isYearly.value, props.employee.legacyJobCodes);
+  }
   // add in planned pto/holiday
   if (plannedTimeData) {
     if (plannedTimeData.PTO) {
@@ -253,6 +273,11 @@ const supplementalDataWithPlan = computed(() => {
   let data = { ...props.supplementalData };
   data.nonBillables = [...data.nonBillables, 'Planned PTO', 'Planned Holiday'];
   return data;
+});
+
+let periodType = computed(() => {
+  if (!isYearly.value) return props.KEYS.PAY_PERIODS; // either bi-weekly or monthly, sometimes depends on employee and if there's a merger
+  return isCalendarYear.value ? props.KEYS.CALENDAR_YEAR : props.KEYS.CONTRACT_YEAR; // currently the only two options
 });
 
 // |--------------------------------------------------|

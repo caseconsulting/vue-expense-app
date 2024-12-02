@@ -62,7 +62,7 @@ import { useStore } from 'vuex';
 // |                                                  |
 // |--------------------------------------------------|
 
-const props = defineProps(['employee', 'timeData']);
+const props = defineProps(['employee', 'timeData', 'periodType']);
 const emitter = inject('emitter');
 const store = useStore();
 
@@ -90,18 +90,19 @@ function cancel() {
  */
 async function save() {
   if (valid.value) {
+    // set loading status
     loading.value = true;
-    let attribute = 'legacyJobCodes';
-    let legacyJobCodes = localEmployee.value[attribute] || {};
-    // set object exactly how it is set in the jobcodes section
-    let jobCodeObject = { [`${jobCode.value}`]: Number(duration.value) * 60 * 60 };
-    localEmployee.value[attribute] = { ...legacyJobCodes, ...jobCodeObject };
-    let value = { id: props.employee.id, [`${attribute}`]: localEmployee.value[attribute] };
-    await api.updateAttribute(api.EMPLOYEES, value, attribute);
-    let employees = store.getters.employees;
-    let index = _findIndex(employees, (e) => e.id === localEmployee.value.id);
-    // update store
+    // create new legacyJobCodes object in local employee
+    let legacyJobCodes = localEmployee.value['legacyJobCodes'] || {};
+    if (!legacyJobCodes[props.periodType]) legacyJobCodes[props.periodType] = {};
+    legacyJobCodes[props.periodType][jobCode.value] = Number(duration.value) * 60 * 60;
+    localEmployee.value['legacyJobCodes'] = legacyJobCodes;
+    // push new local employee value to the API and store
+    let value = { id: props.employee.id, ['legacyJobCodes']: localEmployee.value['legacyJobCodes'] };
+    await api.updateAttribute(api.EMPLOYEES, value, 'legacyJobCodes');
+    let index = _findIndex(store.getters.employees, (e) => e.id === localEmployee.value.id);
     store.getters.employees[index] = localEmployee.value;
+    // reset loading status and emit to close input box
     loading.value = false;
     emitter.emit('close-add-job-code');
   }
