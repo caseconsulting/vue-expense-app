@@ -420,7 +420,7 @@ import {
 } from '@/utils/utils';
 import { updateStoreBudgets } from '@/utils/storeUtils';
 import { getRole } from '@/utils/auth';
-import { isBetween, getTodaysDate, format } from '../../shared/dateUtils';
+import { isBetween, getTodaysDate, format, startOf, endOf } from '../../shared/dateUtils';
 import { employeeFilter } from '@/shared/filterUtils';
 import { mask } from 'vue-the-mask';
 
@@ -870,7 +870,6 @@ function costHint() {
       str += `<span class="text-red">${this.convertToMoneyString(this.remainingBudget)}`;
     } else {
       str += this.convertToMoneyString(this.remainingBudget);
-      return str;
     }
     let employee = _find(this.$store.getters.employees, (e) => e.id === this.editedExpense.employeeId);
     let isOverdraftable =
@@ -888,10 +887,72 @@ function costHint() {
     } else if (this.remainingBudget < 0 && !this.selectedExpenseType.odFlag) {
       str += ' (Not Overdraftable)';
     }
+
     str += '</span>';
+
+    // add monthly budget if applicable
+    // TODO: add up all expenses to check their monthly budget limit is being followed
+    if (!_isEmpty(this.selectedExpenseType.monthlyLimit)) {
+      let id = 'cost-hint-monthly-limit';
+      str += `<br/><span>Monthly limit left: <span id=${id} class=font-italic>Calculating...</span></span>`;
+      console.log('reset');
+      this.addMonthlyLimitHint(id);
+    }
+
     return str;
   }
 } // costHint
+
+/**
+ * Adds the monthly limit hint asyncronously. Uses and adds to monthlyLimitCache.
+ *
+ * @param id ID of element in HTML to put the value in
+ */
+async function addMonthlyLimitHint(id) {
+  // helper to wait for the hint element to exist
+  function waitForElement(selector, callback) {
+    const observer = new MutationObserver(() => {
+      const element = document.querySelector(selector);
+      if (element) {
+        observer.disconnect();
+        callback(element);
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+  }
+
+  // use cache if possible
+  let amount = this.monthlyLimitCache[this.editedExpense.employeeId]?.[this.selectedExpenseType.id];
+  // if no cached amount, set the amount from API and add it to the cache
+  if (amount === undefined) {
+    // fetch all of this employees expenses
+    let allEmployeeExpenses = await api.getAllEmployeeExpenses(this.editedExpense.employeeId);
+    // add valid exenses to used amount of monthly limit
+    amount = this.selectedExpenseType.monthlyLimit;
+    for (let e of allEmployeeExpenses) {
+      let [start, end] = [startOf(getTodaysDate(), 'month'), endOf(getTodaysDate(), 'month')];
+      let dateValid = isBetween(e.purchaseDate, start, end, 'day', '[]');
+      let idValid = this.selectedExpenseType.id == e.expenseTypeId;
+      let categoryValid = isEmpty(this.editedExpense.category) || this.editedExpense.category == e.category;
+      if (dateValid && idValid && categoryValid) amount -= e.cost;
+    }
+    // set cache
+    if (!this.monthlyLimitCache[this.editedExpense.employeeId])
+      this.monthlyLimitCache[this.editedExpense.employeeId] = {};
+    this.monthlyLimitCache[this.editedExpense.employeeId][this.selectedExpenseType.id] = amount;
+  }
+
+  // set hint
+  console.log('a');
+  waitForElement(`#${id}`, () => {
+    console.log('b');
+    let element = document.getElementById(id);
+    element.innerHTML = `$${amount.toFixed(2)}`;
+    element.classList.remove('font-italic');
+    if (amount < 0) element.classList.add('text-red');
+    console.log('c');
+  });
+}
 
 /**
  * Creates a new expense.
@@ -1886,6 +1947,14 @@ async function watchEditedExpenseExpenseTypeID() {
       }
     }
     this.editedExpense = _cloneDeep(this.editedExpense); //need to clone editedExpense in order to see label URL changes
+
+    // add monthlyLimit to costRules
+    if (!isEmpty(this.selectedExpenseType.monthlyLimit)) {
+      let limit = this.selectedExpenseType.monthlyLimit;
+      this.costRules.push((v) => Number(v) <= Number(limit) || `Cost must be within $${limit} limit`);
+    } else {
+      this.costRules = this.baseCostRules;
+    }
   } else {
     this.hint = '';
   }
@@ -2041,6 +2110,13 @@ export default {
       confirmingValid: false,
       confirmBackingOut: false,
       costFormatted: '',
+      baseCostRules: [
+        (v) => !this.isEmpty(v) || 'Cost is a required field',
+        (v) =>
+          /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?$/.test(v) ||
+          'Expense amount must be a number with two decimal digits',
+        (v) => this.parseCost(v) < 1000000000 || 'Nice try' //when a user tries to fill out expense that is over a million
+      ], // rules for cost
       costRules: [
         (v) => !this.isEmpty(v) || 'Cost is a required field',
         (v) =>
@@ -2066,6 +2142,7 @@ export default {
       isOverCovered: false, // expense is only partially covered
       loading: false, // loading
       myBudgetsView: false, // if on myBudgetsView page
+      monthlyLimitCache: {}, // cache for monthly limit storing expenses
       originalExpense: null, // expense before changes
       overdraftBudget: 0,
       purchaseDateFormatted: null, // formatted purchase date
@@ -2101,6 +2178,7 @@ export default {
     createNewEntry,
     convertToMoneyString,
     costHint,
+    addMonthlyLimitHint,
     descRedirect,
     employeeFilter,
     encodeUrl,
