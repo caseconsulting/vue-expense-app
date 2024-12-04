@@ -221,27 +221,22 @@ const dateIsCurrentPeriod = computed(() => {
  * @returns Object - Key Value pairs of jobcodes and their durations
  */
 const timeData = computed(() => {
-  // TODO: somehow legacyJobCodes is undefined when you go from Paul -> Chad -> Paul
-  console.log('a');
   let timesheets = { ...props.timesheets[periodIndex.value].timesheets };
-  if (isYearly.value && props.employee.legacyJobCodes) {
-    console.log('b');
+  // searching store employees fixes bug where switching user profiles erases legacy job codes
+  let legacyCodes = props.employee.legacyJobCodes;
+  legacyCodes = legacyCodes || store.getters.employees.find((e) => e.id === props.employee.id)?.legacyJobCodes;
+  if (isYearly.value && legacyCodes) {
     let val;
-    for (let key of Object.keys(props.employee.legacyJobCodes || {})) {
-      console.log('c');
-      val = props.employee.legacyJobCodes[key];
+    for (let key of Object.keys(legacyCodes || {})) {
+      val = legacyCodes[key];
       if (typeof val === 'object') {
-        console.log('d1');
         // LJC is in new structure, only unpack if it's the right type
         if (periodType.value === key) timesheets = { ...timesheets, ...val };
       } else {
-        console.log('d2');
         // LJC is in old structure, which is just contract year
         if (periodType.value === props.KEYS.CONTRACT_YEAR) timesheets[key] = val;
       }
     }
-  } else {
-    console.log(isYearly.value, props.employee.legacyJobCodes);
   }
   // add in planned pto/holiday
   if (plannedTimeData) {

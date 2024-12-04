@@ -124,9 +124,9 @@ onBeforeUnmount(() => {
  * @return true if the trash can should be deleted
  */
 function showDelete(jobcode) {
-  return Object.prototype.hasOwnProperty.call(
-    props.employee.legacyJobCodes?.[props.periodType] || props.employee.legacyJobCodes || {},
-    jobcode
+  return (
+    Object.prototype.hasOwnProperty.call(props.employee.legacyJobCodes || {}, jobcode) ||
+    Object.prototype.hasOwnProperty.call(props.employee.legacyJobCodes?.[props.periodType] || {}, jobcode)
   );
 }
 
@@ -137,7 +137,7 @@ function showDelete(jobcode) {
  */
 async function deleteJobCode(jobcode) {
   let emp = _cloneDeep(props.employee);
-  if (emp['legacyJobCodes'][props.periodType]) delete emp['legacyJobCodes'][props.periodType][jobcode];
+  if (emp['legacyJobCodes'][props.periodType]?.[jobcode]) delete emp['legacyJobCodes'][props.periodType][jobcode];
   else delete emp['legacyJobCodes'][jobcode];
   if (_isEmpty(emp['legacyJobCodes'])) emp['legacyJobCodes'] = null;
   let value = { id: emp.id, ['legacyJobCodes']: emp['legacyJobCodes'] };
