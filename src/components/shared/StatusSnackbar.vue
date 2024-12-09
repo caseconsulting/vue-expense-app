@@ -105,7 +105,7 @@ function displayError(err, timeout, location, color) {
   status.value['timeout'] = timeout;
   status.value['location'] = location;
   status.value['statusType'] = 'ERROR';
-  status.value['statusMessage'] = err;
+  status.value['statusMessage'] = err ?? 'Encountered an error.';
   status.value['color'] = color;
   status.value['closeColor'] = 'white';
   status.value['show'] = true;

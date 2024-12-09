@@ -145,8 +145,20 @@
             v-model="costFormatted"
             @keyup="formatCost"
           >
-            <template v-slot:message="{ message }">
+            <template #message="{ message }">
               <span v-html="message"></span>
+              <br v-if="monthlyLimit.showHint" />
+              <span v-if="monthlyLimit.showHint">
+                Monthly limit remaining:
+                <div class="d-inline" :class="monthlyLimit.remaining < 0 ? 'text-error font-weight-bold' : ''">
+                  <span v-if="monthlyLimit.remaining === undefined">Calculating...</span>
+                  <span v-else>
+                    <span v-if="monthlyLimit.remaining < 0">–</span>${{
+                      Math.abs(Number(monthlyLimit.remaining))?.toFixed(2)
+                    }}
+                  </span>
+                </div>
+              </span>
             </template>
           </v-text-field>
           <!-- Exchange Hours Calculator -->
@@ -891,38 +903,29 @@ function costHint() {
     str += '</span>';
 
     // add monthly budget if applicable
-    // TODO: add up all expenses to check their monthly budget limit is being followed
-    if (!_isEmpty(this.selectedExpenseType.monthlyLimit)) {
-      let id = 'cost-hint-monthly-limit';
-      str += `<br/><span>Monthly limit left: <span id=${id} class=font-italic>Calculating...</span></span>`;
-      console.log('reset');
-      this.addMonthlyLimitHint(id);
-    }
+    this.setMonthlyLimit();
 
     return str;
   }
 } // costHint
 
 /**
- * Adds the monthly limit hint asyncronously. Uses and adds to monthlyLimitCache.
+ * Adds the monthly limit hint asyncronously. Uses and adds to monthlyLimit.cache.
  *
  * @param id ID of element in HTML to put the value in
  */
-async function addMonthlyLimitHint(id) {
-  // helper to wait for the hint element to exist
-  function waitForElement(selector, callback) {
-    const observer = new MutationObserver(() => {
-      const element = document.querySelector(selector);
-      if (element) {
-        observer.disconnect();
-        callback(element);
-      }
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
+async function setMonthlyLimit() {
+  // exit early if expense does not have monthly limit
+  if (_isEmpty(this.selectedExpenseType?.monthlyLimit)) {
+    this.monthlyLimit.showHint = false;
+    this.monthlyLimit.remaining = undefined;
+    return;
   }
+  this.monthlyLimit.remaining = undefined;
+  this.monthlyLimit.showHint = true;
 
   // use cache if possible
-  let amount = this.monthlyLimitCache[this.editedExpense.employeeId]?.[this.selectedExpenseType.id];
+  let amount = this.monthlyLimit.cache[this.editedExpense.employeeId]?.[this.selectedExpenseType?.id];
   // if no cached amount, set the amount from API and add it to the cache
   if (amount === undefined) {
     // fetch all of this employees expenses
@@ -937,22 +940,16 @@ async function addMonthlyLimitHint(id) {
       if (dateValid && idValid && categoryValid) amount -= e.cost;
     }
     // set cache
-    if (!this.monthlyLimitCache[this.editedExpense.employeeId])
-      this.monthlyLimitCache[this.editedExpense.employeeId] = {};
-    this.monthlyLimitCache[this.editedExpense.employeeId][this.selectedExpenseType.id] = amount;
+    if (!this.monthlyLimit.cache[this.editedExpense.employeeId])
+      this.monthlyLimit.cache[this.editedExpense.employeeId] = {};
+    this.monthlyLimit.cache[this.editedExpense.employeeId][this.selectedExpenseType.id] = amount;
   }
-
-  // set hint
-  console.log('a');
-  waitForElement(`#${id}`, () => {
-    console.log('b');
-    let element = document.getElementById(id);
-    element.innerHTML = `$${amount.toFixed(2)}`;
-    element.classList.remove('font-italic');
-    if (amount < 0) element.classList.add('text-red');
-    console.log('c');
-  });
-}
+  // include the cost from the form
+  if (!this.isEmpty(this.editedExpense.id)) amount += Number(this.expense.cost);
+  amount = Math.round(amount * 100) / 100;
+  this.monthlyLimit.currentBudget = amount;
+  this.monthlyLimit.remaining = amount - this.parseCost(this.costFormatted) || 0;
+} // setMonthlyLimit
 
 /**
  * Creates a new expense.
@@ -1615,11 +1612,12 @@ async function submit() {
     this.emitter.emit('endAction');
     this.isHighFive = false; // set high five back to false
     this.reqRecipient = false;
+    let hadErrorSubmitting = this.errorSubmitting;
     this.clearForm();
 
     // update budgets in store
     await this.updateStoreBudgets();
-    this.emitter.emit('updateData');
+    if (!hadErrorSubmitting) this.emitter.emit('updateData');
   }
 } // submit
 
@@ -1663,7 +1661,6 @@ async function updateExistingEntry() {
       }
     } else {
       // error uploading file
-      console.log(updatedAttachment);
       this.emitter.emit('error', updatedAttachment.response.data.message);
     }
   } else {
@@ -1868,6 +1865,7 @@ function watchExpenseID() {
  */
 async function watchEditedExpenseCost() {
   //update remaining budget
+  this.setMonthlyLimit();
   await this.getRemainingBudget();
 } // watchEditedExpenseCost
 
@@ -1950,8 +1948,12 @@ async function watchEditedExpenseExpenseTypeID() {
 
     // add monthlyLimit to costRules
     if (!isEmpty(this.selectedExpenseType.monthlyLimit)) {
-      let limit = this.selectedExpenseType.monthlyLimit;
-      this.costRules.push((v) => Number(v) <= Number(limit) || `Cost must be within $${limit} limit`);
+      let round = (n) => Math.round(n * 100) / 100;
+      this.costRules.push(
+        (v) =>
+          round(Number(v)) <= round(Number(this.monthlyLimit.currentBudget)) ||
+          `Cost must be within $${this.monthlyLimit.currentBudget.toFixed(2)} limit`
+      );
     } else {
       this.costRules = this.baseCostRules;
     }
@@ -2142,7 +2144,13 @@ export default {
       isOverCovered: false, // expense is only partially covered
       loading: false, // loading
       myBudgetsView: false, // if on myBudgetsView page
-      monthlyLimitCache: {}, // cache for monthly limit storing expenses
+      monthlyLimit: {
+        // anything related to expense monthly limit goes here
+        cache: {},
+        remaining: undefined, // how much is remaining after all expenses (including current)
+        currentBudget: undefined, // how much is remaining after all expenses (in total)
+        showHint: false
+      },
       originalExpense: null, // expense before changes
       overdraftBudget: 0,
       purchaseDateFormatted: null, // formatted purchase date
@@ -2178,7 +2186,7 @@ export default {
     createNewEntry,
     convertToMoneyString,
     costHint,
-    addMonthlyLimitHint,
+    setMonthlyLimit,
     descRedirect,
     employeeFilter,
     encodeUrl,
