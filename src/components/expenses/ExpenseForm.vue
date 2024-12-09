@@ -1570,7 +1570,7 @@ async function updateExistingEntry() {
   let updatedExpense;
 
   // if updating an expense
-  if (this.isReceiptRequired() && this.files) {
+  if (this.isReceiptRequired() && this.allowReceipt) {
     // if receipt required and updating receipt
     // stores file name for lookup later
 
@@ -1581,7 +1581,7 @@ async function updateExistingEntry() {
     this.editedExpense['receipt'] = fileNames;
     // upload attachment to S3
     updatedAttachment = await api.createAttachment(this.editedExpense, this.files);
-    if (updatedAttachment[0].key) {
+    if (updatedAttachment[0]?.key) {
       // successfully uploaded file
       // update item in database
       updatedExpense = await api.updateItem(api.EXPENSES, this.editedExpense);
