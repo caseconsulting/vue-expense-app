@@ -5,7 +5,7 @@
         <!-- Expense Table -->
         <unreimbursed-expenses-table></unreimbursed-expenses-table>
       </v-col>
-      <v-col v-if="!isMobile()" cols="4" class="followScroll pr-7 pl-0">
+      <v-col v-if="!isMobile()" cols="4" class="pr-7 pl-0">
         <!-- Expenses Total -->
         <reimbursement-totals></reimbursement-totals>
         <!-- Expense Info -->
@@ -90,11 +90,3 @@ onBeforeUnmount(() => {
 
 computed(isMobile);
 </script>
-
-<style>
-.followScroll {
-  position: fixed;
-  left: 67.3%;
-  z-index: 999999 !important;
-}
-</style>
