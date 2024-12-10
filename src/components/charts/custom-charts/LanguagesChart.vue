@@ -8,7 +8,7 @@
 import _first from 'lodash/first';
 import BarChart from '../base-charts/BarChart.vue';
 import { isEmpty } from '@/utils/utils';
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref, watch, defineProps } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 
@@ -18,6 +18,7 @@ import { useRouter } from 'vue-router';
 // |                                                  |
 // |--------------------------------------------------|
 
+const props = defineProps(['colors']);
 const chartData = ref(null);
 const dataReceived = ref(false);
 const employees = ref(null);
@@ -89,24 +90,12 @@ function fetchData() {
  * Sets the chart formatting and options data.
  */
 function fillData() {
-  let colors = [
-    'rgba(255, 99, 132, 1)',
-    'rgba(54, 162, 235, 1)',
-    'rgba(255, 206, 86, 1)',
-    'rgba(75, 192, 192, 1)',
-    'rgba(153, 102, 255, 1)',
-    'rgba(230, 184, 156, 1)',
-    'rgba(234, 210, 172, 1)',
-    'rgba(156, 175, 183, 1)',
-    'rgba(66, 129, 164, 1)'
-  ];
-
   chartData.value = {
     labels: languages.value,
     datasets: [
       {
         data: jobQuantities.value,
-        backgroundColor: colors
+        backgroundColor: props.colors
       }
     ]
   };
@@ -154,7 +143,7 @@ function fillData() {
       },
       title: {
         display: true,
-        text: 'Top Foreign Languages CASE',
+        text: 'Top Foreign Languages at CASE',
         font: {
           size: 15
         }

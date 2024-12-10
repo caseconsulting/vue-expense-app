@@ -213,7 +213,17 @@ onMounted(() => {
   populateDropdowns(employeesInfo.value);
   buildContractsColumn();
   if (localStorage.getItem('requestedFilter')) {
-    primeSearch.value = localStorage.getItem('requestedFilter');
+    let requestedFilter = JSON.parse(localStorage.getItem('requestedFilter'));
+    switch (requestedFilter.type) {
+      case 'prime':
+        primeSearch.value = requestedFilter.search;
+        break;
+      case 'contract':
+        contractSearch.value = requestedFilter.search;
+        break;
+      default:
+        break;
+    }
     refreshDropdownItems();
     localStorage.removeItem('requestedFilter');
   }

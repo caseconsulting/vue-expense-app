@@ -8,7 +8,7 @@
 import BarChart from '../base-charts/BarChart.vue';
 import { difference, getTodaysDate } from '@/shared/dateUtils';
 import _first from 'lodash/first';
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref, watch, defineProps } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
@@ -18,6 +18,7 @@ import { useStore } from 'vuex';
 // |                                                  |
 // |--------------------------------------------------|
 
+const props = defineProps(['colors']);
 const chartData = ref(null);
 const dataReceived = ref(false);
 const employees = ref(null);
@@ -130,15 +131,15 @@ function calculateTimeDifference(startDate, endDate) {
  * Format and set data options for job experience chart.
  */
 function drawJobExpHistGraph() {
-  let experienceNum = jobExperience.value;
   let chartLabels = ['0-4', '5-9', '10-14', '15-19', '20-24', '25-29', '30-34', '35-39', '40-44', '45+'];
+  let experienceNum = jobExperience.value;
   let maxIndex = findMaxIndex();
   let data = {
     labels: chartLabels.splice(0, maxIndex + 1),
     datasets: [
       {
-        backgroundColor: '#2195f3',
-        data: experienceNum
+        data: experienceNum,
+        backgroundColor: props.colors
       }
     ]
   };
