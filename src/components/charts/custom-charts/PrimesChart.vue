@@ -7,7 +7,7 @@
 <script setup>
 import BarChart from '../base-charts/BarChart.vue';
 import _first from 'lodash/first';
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref, watch, defineProps } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 
@@ -17,6 +17,7 @@ import { useRouter } from 'vue-router';
 // |                                                  |
 // |--------------------------------------------------|
 
+const props = defineProps(['colors']);
 const chartData = ref(null);
 const dataReceived = ref(false);
 const employees = ref(null);
@@ -118,24 +119,6 @@ function fetchData() {
  * Sets the chart formatting and options data.
  */
 function fillData() {
-  // We cycle through these colors to get the bar colors
-  let colors = [
-    'rgba(254, 147, 140, 1)',
-    'rgba(230, 184, 156, 1)',
-    'rgba(234, 210, 172, 1)',
-    'rgba(156, 175, 183, 1)',
-    'rgba(66, 129, 164, 1)'
-  ];
-
-  let backgroundColors = [];
-  let borderColors = [];
-
-  // Set the background and border colors
-  for (let i = 0; i < label.value.length; i++) {
-    backgroundColors[i] = colors[i % 4];
-    borderColors[i] = colors[i % 4];
-  }
-
   // Set the chart data
   chartData.value = {
     labels: label.value,
@@ -143,8 +126,7 @@ function fillData() {
       {
         label: null,
         data: values.value,
-        backgroundColor: backgroundColors,
-        borderColor: borderColors,
+        backgroundColor: props.colors,
         borderWidth: 1
       }
     ]
@@ -178,7 +160,10 @@ function fillData() {
       if (_first(y)) {
         let index = _first(y).index;
         localStorage.setItem('requestedDataType', 'contracts');
-        localStorage.setItem('requestedFilter', chartData.value.labels[index]);
+        localStorage.setItem(
+          'requestedFilter',
+          JSON.stringify({ type: 'prime', search: chartData.value.labels[index] })
+        );
         router.push({
           path: '/reports',
           name: 'reports'

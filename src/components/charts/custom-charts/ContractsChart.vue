@@ -1,6 +1,6 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5">
-    <bar-chart ref="barChart" chartId="job-roles-chart" :options="option" :chartData="chartData" />
+    <bar-chart ref="barChart" chartId="contracts-chart" :options="option" :chartData="chartData"></bar-chart>
   </v-card>
 </template>
 
@@ -21,12 +21,12 @@ const props = defineProps(['colors']);
 const chartData = ref(null);
 const dataReceived = ref(false);
 const employees = ref(null);
-const jobTitles = ref([]);
-const jobQuantities = ref([]);
+const label = ref([]);
 const option = ref(null);
-const roles = ref({});
-const router = useRouter();
+const contracts = ref({});
 const store = useStore();
+const router = useRouter();
+const values = ref([]);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -51,31 +51,62 @@ onMounted(async () => {
 // |--------------------------------------------------|
 
 /**
- * Extracts the job role from each employee and tallies up
- * each role for active employees.
+ * Gets all of the current projects the user has.
+ *
+ * @param employee - the employee that we are getting the current projects for
+ * @return array - the current contracts
+ */
+function getCurrentProjects(employee) {
+  let currentContracts = [];
+  if (employee.contracts) {
+    employee.contracts.forEach((contract) => {
+      let currContract = {};
+      currContract.projects = [];
+      if (contract.projects) {
+        contract.projects.forEach((project) => {
+          if (currContract.projects.length === 0) {
+            let con = store.getters.contracts.find((c) => c.id === contract.contractId);
+            currContract.name = con.contractName;
+          }
+          if (!project.endDate) {
+            currContract.projects.push(project);
+          }
+        });
+      }
+      if (currContract.projects.length > 0) {
+        currentContracts.push(currContract);
+      }
+    });
+  }
+
+  return currentContracts;
+} // getCurrentProjects
+
+/**
+ * Extracts and tallies up each employees contracts.
  */
 function fetchData() {
   employees.value = store.getters.employees;
-  employees.value.forEach((emp) => {
-    if (emp.jobRole && emp.workStatus != 0) {
-      if (roles.value[emp.jobRole]) {
-        roles.value[emp.jobRole] += 1;
-      } else {
-        roles.value[emp.jobRole] = 1;
+  // Put into dictionary where key is contract and value is quantity
+  employees.value.forEach((employee) => {
+    if (employee.workStatus != 0) {
+      let currContracts = getCurrentProjects(employee);
+      for (let contract of currContracts) {
+        if (!contracts.value[contract.name]) contracts.value[contract.name] = 0;
+        contracts.value[contract.name]++;
       }
     }
   });
-  //sorts contents from most common roles to least
-  let sortedRoles = Object.entries(roles.value);
-  sortedRoles = sortedRoles.sort((a, b) => {
+
+  // We now sort the entries
+  let contractPairs = Object.entries(contracts.value);
+  contractPairs = contractPairs.sort((a, b) => {
     return b[1] - a[1];
   });
-  //10 is just a limit to prevent an extremely long and crammed graph
-  for (let i = 0; i < 10; i++) {
-    if (sortedRoles.length > i) {
-      jobTitles.value.push(sortedRoles[i][0]);
-      jobQuantities.value.push(sortedRoles[i][1]);
-    }
+
+  for (let i = 0; i < contractPairs.length; i++) {
+    label.value.push(contractPairs[i][0]);
+    values.value.push(contractPairs[i][1]);
   }
 } // fetchData
 
@@ -83,24 +114,23 @@ function fetchData() {
  * Sets the chart formatting and options data.
  */
 function fillData() {
+  // Set the chart data
   chartData.value = {
-    labels: jobTitles.value,
+    labels: label.value,
     datasets: [
       {
-        data: jobQuantities.value,
+        label: null,
+        data: values.value,
         backgroundColor: props.colors
       }
     ]
   };
-
   option.value = {
-    aspectRatio: 2,
     scales: {
       x: {
-        beginAtZero: true,
         title: {
           display: true,
-          text: 'Name of Position',
+          text: 'Contract',
           font: {
             weight: 'bold'
           }
@@ -123,8 +153,11 @@ function fillData() {
     onClick: (x, y) => {
       if (_first(y)) {
         let index = _first(y).index;
-        localStorage.setItem('requestedDataType', 'jobRoles');
-        localStorage.setItem('requestedFilter', chartData.value.labels[index]);
+        localStorage.setItem('requestedDataType', 'contracts');
+        localStorage.setItem(
+          'requestedFilter',
+          JSON.stringify({ type: 'contract', search: chartData.value.labels[index] })
+        );
         router.push({
           path: '/reports',
           name: 'reports'
@@ -137,7 +170,7 @@ function fillData() {
       },
       title: {
         display: true,
-        text: 'Top Job Roles at CASE',
+        text: 'Top ' + values.value.length + ' Contracts That We Currently Subcontract',
         font: {
           size: 15
         }
