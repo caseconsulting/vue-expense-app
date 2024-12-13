@@ -170,7 +170,7 @@ function fillData() {
       },
       title: {
         display: true,
-        text: 'Top ' + values.value.length + ' Contracts That We Currently Subcontract',
+        text: 'Top ' + values.value.length + ' Contracts',
         font: {
           size: 15
         }
