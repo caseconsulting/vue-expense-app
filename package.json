@@ -1,6 +1,6 @@
 {
   "name": "vue-expense-app",
-  "version": "4.8.0",
+  "version": "4.9.1",
   "private": true,
   "scripts": {
     "build": "export NODE_OPTIONS=--openssl-legacy-provider && vite build",

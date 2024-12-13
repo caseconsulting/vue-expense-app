@@ -1,38 +1,74 @@
 <template>
-  <v-text-field
-    v-model="formattedDate"
-    :label="label"
-    :hint="hint ?? defaults.hint"
-    :prepend-inner-icon="icon"
-    :variant="variant"
-    :hide-details="hideDetails"
-    :disabled="disabled"
-    :rules="rules"
-    v-mask="mask ?? defaults.mask"
-    :autocomplete="autocomplete"
-    :persistent-hint="persistentHint"
-    :clearable="clearable"
-    @update:focused="onFocusChange"
-    validate-on="input"
-    @click:prepend="showMenu = true"
-    @keypress="showMenu = false"
-  >
-    <v-menu activator="parent" :close-on-content-click="false" v-model="showMenu" location="start center">
-      <v-date-picker
-        v-model="date"
-        :title="label"
-        :show-adjacent-months="adjacentDays"
-        color="#bc3825"
-        keyboard-icon=""
-        hide-actions
+  <div>
+    <!-- Menu slot: this is where the user clicks a date -->
+    <slot name="menu">
+      <v-menu
+        v-if="!disabled"
+        activator="parent"
+        :close-on-content-click="false"
+        v-model="showMenu"
+        location="start center"
+      >
+        <v-date-picker
+          v-model="model"
+          :title="label"
+          :min="min"
+          :max="max"
+          :show-adjacent-months="adjacentDays"
+          :multiple="multiple"
+          color="#bc3825"
+          keyboard-icon=""
+          hide-actions
+        />
+      </v-menu>
+    </slot>
+
+    <!-- Display slot: this is where the user can see the picked date(s). Single dates support typing -->
+    <slot name="display">
+      <!-- Multiple: combo box with chips -->
+      <v-combobox
+        v-if="multiple"
+        v-model="formattedModel"
+        :multiple="multiple"
+        :label="label"
+        :disabled="disabled"
+        readonly
+        :clearable="clearable"
+        :prepend-inner-icon="icon"
+        @click:clear="model = []"
+      >
+        <template v-slot:selection="{ item }">
+          <v-chip variant="outlined" :closable="closeableChips ?? clearable" @click:close="remove(item)">
+            {{ item.raw }}
+          </v-chip>
+        </template>
+      </v-combobox>
+
+      <!-- Single: string format of date -->
+      <v-text-field
+        v-else
+        v-model="formattedModel"
+        :label="label"
+        :hint="hint ?? defaults.hint"
+        :prepend-inner-icon="icon"
+        :variant="variant"
+        :hide-details="hideDetails"
+        :disabled="disabled"
+        :rules="rules"
+        v-mask="mask ?? defaults.mask"
+        :autocomplete="autocomplete"
+        :persistent-hint="persistentHint"
+        :clearable="clearable"
+        validate-on="input"
+        @keypress="showMenu = false"
       />
-    </v-menu>
-  </v-text-field>
+    </slot>
+  </div>
 </template>
 
 <script setup>
 import { ref, watch } from 'vue';
-import { format } from '@/shared/dateUtils';
+import { format as formatUtil } from '@/shared/dateUtils';
 
 const props = defineProps({
   // DISPLAY
@@ -46,6 +82,8 @@ const props = defineProps({
 
   // LOGIC/CONFIG
   rules: { type: Array, default: () => [] },
+  min: { type: String, default: undefined },
+  max: { type: String, default: undefined },
   mask: { type: String, default: undefined },
 
   // FUNCTIONALITY
@@ -54,12 +92,7 @@ const props = defineProps({
   autocomplete: { type: String, default: 'off' },
   persistentHint: { type: Boolean, default: false },
   clearable: { type: Boolean, default: false },
-
-  // CUSTOM FUNCTIONALITY
-  // action to take when user clicks into text field. `return false` to not do any of the automatic actions.
-  onClickIn: { type: Function, default: () => true },
-  // action to take when user clicks out of text field. `return false` to not do any of the automatic actions.
-  onClickOut: { type: Function, default: () => true }
+  closeableChips: { type: Boolean, default: undefined }
 });
 
 // custom defualts that rely on other props
@@ -69,49 +102,61 @@ let defaults = {
 };
 
 // define refs
-const date = defineModel(); // v-model
-const formattedDate = ref(format(date.value, null, props.displayFormat));
+const model = defineModel(); // v-model
+const formattedModel = ref(format(model.value, null, props.displayFormat));
+const multiple = ref(Array.isArray(model.value));
 const showMenu = ref(false);
 
 /**
- * Action(s) to take when the user clicks in/out of the box
+ * Wrapper of dateUtils format() to support arrays
+ *
+ * @param date - date(s) to format
+ * @param fromFormat - format to format from
+ * @param toFormat - format to format into
+ * @return formatted date(s)
  */
-function onFocusChange(e) {
-  // Vuetify consts for what type of focus change this is
-  const [FOCUS, BLUR] = [true, false];
-
-  // on user clicking into the box
-  if (e === FOCUS) {
-    // do user actions
-    let proceed = props.onClickIn();
-    if (proceed === false) return;
-    // ... do any on-focus actions here
-  }
-
-  // on user clicking out of the box
-  if (e === BLUR) {
-    // do user actions
-    let proceed = props.onClickOut();
-    if (proceed === false) return;
-    // ... do any on-blur actions here
+function format(item, fromFormat, toFormat) {
+  if (Array.isArray(item)) {
+    let formattedItems = [];
+    for (let i of item) formattedItems.push(formatUtil(i, fromFormat, toFormat));
+    return formattedItems;
+  } else {
+    return formatUtil(item, fromFormat, toFormat);
   }
 }
+
+/**
+ * Removes an item from the model. It is assumed that the model is an array, and the
+ * item is an element in the model array.
+ *
+ * @param item item to remove
+ */
+function remove(item) {
+  let index = formattedModel.value.indexOf(item.raw);
+  if (index > -1) {
+    formattedModel.value.splice(index, 1);
+    model.value.splice(index, 1);
+  }
+} // remove
 
 /**
  * Update dates on picker select
  */
 watch(
-  () => date.value,
-  () => {
+  () => model.value,
+  (newVal, oldVal) => {
+    // if model is an array, watchers will trigger on any format, even if the values don't change
+    if (multiple.value && newVal.join() === oldVal.join()) return;
+
     // put dates into the respective formats
-    date.value = format(date.value, null, props.returnFormat) || date.value;
-    formattedDate.value = format(date.value, null, props.displayFormat) || formattedDate.value;
+    model.value = format(model.value, null, props.returnFormat) || model.value;
+    formattedModel.value = format(model.value, null, props.displayFormat) || formattedModel.value;
     // fixes v-date-picker error so that if the format of date is incorrect the date is set to null
-    if (date.value !== null && !format(date.value, null, props.displayFormat)) {
-      date.value = null;
+    if (model.value !== null && !format(model.value, null, props.displayFormat)) {
+      model.value = null;
     }
-    // hide the menu
-    showMenu.value = false;
+    // hide the menu if multiple selections is not allowed
+    if (!multiple.value) showMenu.value = false;
   }
 );
 
@@ -119,11 +164,15 @@ watch(
  * Update dates on manual user input
  */
 watch(
-  () => formattedDate.value,
-  () => {
-    let newDate = format(formattedDate.value, props.displayFormat, props.returnFormat);
+  () => formattedModel.value,
+  (newVal, oldVal) => {
+    // if formatted model is an array, watchers will trigger on any format, even if the values don't change
+    if (multiple.value && newVal.join() === oldVal.join()) return;
+
+    // get new format, and set if it formatting was successful
+    let newDate = format(formattedModel.value, props.displayFormat, props.returnFormat);
     if (!newDate) return; // user is not done typing yet
-    date.value = newDate;
+    model.value = newDate;
   }
 );
 </script>

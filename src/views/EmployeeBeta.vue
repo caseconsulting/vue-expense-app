@@ -209,7 +209,9 @@ onMounted(() => {
   //TODO: add emitters with updating employee through the editing form
   emitter.on('update', (updatedEmployee) => {
     if (updatedEmployee) {
+      let shouldUpdateHistory = updatedEmployee.employeeNumber !== model.value.employeeNumber;
       model.value = new Employee(updatedEmployee);
+      if (shouldUpdateHistory) history.pushState({}, null, model.value.employeeNumber);
       useDisplaySuccess('Employee successfully updated!');
     }
   });

@@ -321,6 +321,18 @@ watch(
     }
   }
 ); // watchFiscalDateView
+
+/**
+ * watcher to open up the budget chart once changing to a different budget year
+ */
+watch(
+  () => dropdownTitle.value,
+  async () => {
+    if (!loading.value) {
+      budgetChartDropdown.value = [0];
+    }
+  }
+);
 </script>
 
 <style scoped>

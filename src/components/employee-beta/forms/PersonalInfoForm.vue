@@ -57,7 +57,8 @@
               v-model="emailUsername"
               label="CASE Email *"
               @update:model-value="removeEmailDomain()"
-              :suffix="CASE_EMAIL_DOMAIN"
+              :hint="CASE_EMAIL_DOMAIN"
+              persistent-hint
               :rules="getCaseEmailRules()"
             ></v-text-field>
           </v-col>
@@ -355,8 +356,14 @@
               </v-col>
             </v-row>
             <v-row>
-              <v-col :cols="!isMobile() ? '4' : '12'">
-                <v-text-field v-model.trim="editedEmployee.city" label="City" data-vv-name="City"></v-text-field>
+              <!-- country of birth -->
+              <v-col>
+                <v-autocomplete
+                  v-model="editedEmployee.country"
+                  label="Country"
+                  :items="COUNTRIES"
+                  hide-details="auto"
+                ></v-autocomplete>
               </v-col>
               <v-col :class="isMobile() ? 'mb-4' : ''">
                 <v-autocomplete
@@ -367,14 +374,8 @@
                   :disabled="editedEmployee.country !== 'United States'"
                 ></v-autocomplete>
               </v-col>
-              <!-- country of birth -->
-              <v-col>
-                <v-autocomplete
-                  v-model="editedEmployee.country"
-                  label="Country"
-                  :items="COUNTRIES"
-                  hide-details="auto"
-                ></v-autocomplete>
+              <v-col :cols="!isMobile() ? '4' : '12'">
+                <v-text-field v-model.trim="editedEmployee.city" label="City" data-vv-name="City"></v-text-field>
               </v-col>
             </v-row>
           </v-col>
@@ -400,7 +401,7 @@
             <v-text-field
               v-model.trim="phoneNumber.number"
               label="Phone Number"
-              v-mask="'###-###-####, ext. ###'"
+              v-mask="'###-###-####, ext. ######'"
               :rules="getPhoneNumberRules()"
               data-vv-name="Phone Number"
             >
@@ -417,6 +418,24 @@
                 </v-col>
               </template>
             </v-text-field>
+          </v-col>
+          <v-col v-if="phoneNumber.type === 'Cell'" cols="2">
+            <v-checkbox
+              :model-value="!phoneNumber.smsOptedOut"
+              @update:model-value="phoneNumber.smsOptedOut = !phoneNumber.smsOptedOut"
+              label="Opt-in"
+            >
+              <v-tooltip activator="parent" location="top">
+                <div>
+                  I consent to receive up to two monthly text message reminders for payroll time sheets on the last work
+                  day of the pay period
+                </div>
+                <div>Text 'HELP' for support</div>
+                <div>To opt-out, uncheck the box or text 'STOP'</div>
+                <div>Message and data rates may apply</div>
+                <div>NOTE: Opted-out phone numbers can be opted-in only once in 30 days</div>
+              </v-tooltip>
+            </v-checkbox>
           </v-col>
         </v-row>
       </v-col>
@@ -445,11 +464,29 @@
               </template>
             </v-autocomplete>
           </v-col>
+          <v-col v-if="phoneNumber.type === 'Cell'" cols="auto">
+            <v-checkbox
+              :model-value="!phoneNumber.smsOptedOut"
+              @update:model-value="phoneNumber.smsOptedOut = !phoneNumber.smsOptedOut"
+              label="Opt-in"
+            >
+              <v-tooltip activator="parent" location="top">
+                <div>
+                  I consent to receive up to two monthly text message reminders for payroll time sheets on the last work
+                  day of the pay period
+                </div>
+                <div>Text 'HELP' for support</div>
+                <div>To opt-out, uncheck the box or text 'STOP'</div>
+                <div>Message and data rates may apply</div>
+                <div>NOTE: Opted-out phone numbers can be opted-in only once in 30 days</div>
+              </v-tooltip>
+            </v-checkbox>
+          </v-col>
           <v-col class="flex-grow">
             <v-text-field
               v-model.trim="phoneNumber.number"
               label="Phone Number"
-              v-mask="'###-###-####, ext. ###'"
+              v-mask="'###-###-####, ext. ######'"
               :rules="getPhoneNumberRules()"
               data-vv-name="Phone Number"
             >
@@ -525,6 +562,10 @@ const { slotProps } = defineProps(['slotProps']);
 const editedEmployee = ref(slotProps.editedEmployee);
 // for some reason the DB doesn't save work status if it's zero, so fill it in if it should be 0
 if (!editedEmployee.value.workStatus && editedEmployee.value.deptDate) editedEmployee.value.workStatus = 0;
+// make it so the v-auto-complete labels fill the text box when it's empty
+if (_isEmpty(editedEmployee.value.country)) editedEmployee.value.country = null;
+if (_isEmpty(editedEmployee.value.st)) editedEmployee.value.st = null;
+if (_isEmpty(editedEmployee.value.currentState)) editedEmployee.value.currentState = null;
 
 const creatingEmployee = inject('creatingEmployee');
 const employeeId = editedEmployee.value.id;

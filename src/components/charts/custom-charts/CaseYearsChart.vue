@@ -9,7 +9,7 @@
 import BarChart from '../base-charts/BarChart.vue';
 import { difference, getTodaysDate } from '@/shared/dateUtils';
 import _first from 'lodash/first';
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref, watch, defineProps } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 
@@ -19,6 +19,7 @@ import { useRouter } from 'vue-router';
 // |                                                  |
 // |--------------------------------------------------|
 
+const props = defineProps(['colors']);
 const caseYears = ref([]);
 const caseYearsNames = ref({});
 const chartData = ref(null);
@@ -105,8 +106,8 @@ function drawCaseYearsHistGraph() {
     labels: chartLabels.splice(0, maxIndex + 1),
     datasets: [
       {
-        backgroundColor: '#BC3825',
-        data: experienceNum
+        data: experienceNum,
+        backgroundColor: props.colors
       }
     ]
   };

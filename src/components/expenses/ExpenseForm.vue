@@ -145,8 +145,20 @@
             v-model="costFormatted"
             @keyup="formatCost"
           >
-            <template v-slot:message="{ message }">
+            <template #message="{ message }">
               <span v-html="message"></span>
+              <br v-if="monthlyLimit.showHint" />
+              <span v-if="monthlyLimit.showHint">
+                Monthly limit remaining:
+                <div class="d-inline" :class="monthlyLimit.remaining < 0 ? 'text-error font-weight-bold' : ''">
+                  <span v-if="monthlyLimit.remaining === undefined">Calculating...</span>
+                  <span v-else>
+                    <span v-if="monthlyLimit.remaining < 0">–</span>${{
+                      Math.abs(Number(monthlyLimit.remaining))?.toFixed(2)
+                    }}
+                  </span>
+                </div>
+              </span>
             </template>
           </v-text-field>
           <!-- Exchange Hours Calculator -->
@@ -420,7 +432,7 @@ import {
 } from '@/utils/utils';
 import { updateStoreBudgets } from '@/utils/storeUtils';
 import { getRole } from '@/utils/auth';
-import { isBetween, getTodaysDate, format } from '../../shared/dateUtils';
+import { isBetween, getTodaysDate, format, startOf, endOf } from '../../shared/dateUtils';
 import { employeeFilter } from '@/shared/filterUtils';
 import { mask } from 'vue-the-mask';
 
@@ -870,7 +882,6 @@ function costHint() {
       str += `<span class="text-red">${this.convertToMoneyString(this.remainingBudget)}`;
     } else {
       str += this.convertToMoneyString(this.remainingBudget);
-      return str;
     }
     let employee = _find(this.$store.getters.employees, (e) => e.id === this.editedExpense.employeeId);
     let isOverdraftable =
@@ -888,10 +899,57 @@ function costHint() {
     } else if (this.remainingBudget < 0 && !this.selectedExpenseType.odFlag) {
       str += ' (Not Overdraftable)';
     }
+
     str += '</span>';
+
+    // add monthly budget if applicable
+    this.setMonthlyLimit();
+
     return str;
   }
 } // costHint
+
+/**
+ * Adds the monthly limit hint asyncronously. Uses and adds to monthlyLimit.cache.
+ *
+ * @param id ID of element in HTML to put the value in
+ */
+async function setMonthlyLimit() {
+  // exit early if expense does not have monthly limit
+  if (_isEmpty(this.selectedExpenseType?.monthlyLimit)) {
+    this.monthlyLimit.showHint = false;
+    this.monthlyLimit.remaining = undefined;
+    return;
+  }
+  this.monthlyLimit.remaining = undefined;
+  this.monthlyLimit.showHint = true;
+
+  // use cache if possible
+  let amount = this.monthlyLimit.cache[this.editedExpense.employeeId]?.[this.selectedExpenseType?.id];
+  // if no cached amount, set the amount from API and add it to the cache
+  if (amount === undefined) {
+    // fetch all of this employees expenses
+    let allEmployeeExpenses = await api.getAllEmployeeExpenses(this.editedExpense.employeeId);
+    // add valid exenses to used amount of monthly limit
+    amount = this.selectedExpenseType.monthlyLimit;
+    for (let e of allEmployeeExpenses) {
+      let [start, end] = [startOf(getTodaysDate(), 'month'), endOf(getTodaysDate(), 'month')];
+      let dateValid = isBetween(e.purchaseDate, start, end, 'day', '[]');
+      let idValid = this.selectedExpenseType.id == e.expenseTypeId;
+      let categoryValid = isEmpty(this.editedExpense.category) || this.editedExpense.category == e.category;
+      if (dateValid && idValid && categoryValid) amount -= e.cost;
+    }
+    // set cache
+    if (!this.monthlyLimit.cache[this.editedExpense.employeeId])
+      this.monthlyLimit.cache[this.editedExpense.employeeId] = {};
+    this.monthlyLimit.cache[this.editedExpense.employeeId][this.selectedExpenseType.id] = amount;
+  }
+  // include the cost from the form
+  if (!this.isEmpty(this.editedExpense.id)) amount += Number(this.expense.cost);
+  amount = Math.round(amount * 100) / 100;
+  this.monthlyLimit.currentBudget = amount;
+  this.monthlyLimit.remaining = amount - this.parseCost(this.costFormatted) || 0;
+} // setMonthlyLimit
 
 /**
  * Creates a new expense.
@@ -903,7 +961,7 @@ async function createNewEntry() {
   let newUUID = generateUUID();
   this.editedExpense['id'] = newUUID;
   this.editedExpense['createdAt'] = getTodaysDate();
-  if (this.isReceiptRequired() && this.files) {
+  if (this.isReceiptRequired() && this.files?.length > 0) {
     // if receipt required and updating receipt
     // stores files name for lookup later
     let fileNames = [];
@@ -1554,11 +1612,12 @@ async function submit() {
     this.emitter.emit('endAction');
     this.isHighFive = false; // set high five back to false
     this.reqRecipient = false;
+    let hadErrorSubmitting = this.errorSubmitting;
     this.clearForm();
 
     // update budgets in store
     await this.updateStoreBudgets();
-    this.emitter.emit('updateData');
+    if (!hadErrorSubmitting) this.emitter.emit('updateData');
   }
 } // submit
 
@@ -1570,7 +1629,7 @@ async function updateExistingEntry() {
   let updatedExpense;
 
   // if updating an expense
-  if (this.isReceiptRequired() && this.files) {
+  if (this.isReceiptRequired() && this.allowReceipt) {
     // if receipt required and updating receipt
     // stores file name for lookup later
 
@@ -1581,7 +1640,7 @@ async function updateExistingEntry() {
     this.editedExpense['receipt'] = fileNames;
     // upload attachment to S3
     updatedAttachment = await api.createAttachment(this.editedExpense, this.files);
-    if (updatedAttachment[0].key) {
+    if (updatedAttachment[0]?.key) {
       // successfully uploaded file
       // update item in database
       updatedExpense = await api.updateItem(api.EXPENSES, this.editedExpense);
@@ -1602,7 +1661,6 @@ async function updateExistingEntry() {
       }
     } else {
       // error uploading file
-      console.log(updatedAttachment);
       this.emitter.emit('error', updatedAttachment.response.data.message);
     }
   } else {
@@ -1807,6 +1865,7 @@ function watchExpenseID() {
  */
 async function watchEditedExpenseCost() {
   //update remaining budget
+  this.setMonthlyLimit();
   await this.getRemainingBudget();
 } // watchEditedExpenseCost
 
@@ -1886,6 +1945,18 @@ async function watchEditedExpenseExpenseTypeID() {
       }
     }
     this.editedExpense = _cloneDeep(this.editedExpense); //need to clone editedExpense in order to see label URL changes
+
+    // add monthlyLimit to costRules
+    if (!isEmpty(this.selectedExpenseType.monthlyLimit)) {
+      let round = (n) => Math.round(n * 100) / 100;
+      this.costRules.push(
+        (v) =>
+          round(Number(v)) <= round(Number(this.monthlyLimit.currentBudget)) ||
+          `Cost must be within $${this.monthlyLimit.currentBudget.toFixed(2)} limit`
+      );
+    } else {
+      this.costRules = this.baseCostRules;
+    }
   } else {
     this.hint = '';
   }
@@ -2041,6 +2112,13 @@ export default {
       confirmingValid: false,
       confirmBackingOut: false,
       costFormatted: '',
+      baseCostRules: [
+        (v) => !this.isEmpty(v) || 'Cost is a required field',
+        (v) =>
+          /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?$/.test(v) ||
+          'Expense amount must be a number with two decimal digits',
+        (v) => this.parseCost(v) < 1000000000 || 'Nice try' //when a user tries to fill out expense that is over a million
+      ], // rules for cost
       costRules: [
         (v) => !this.isEmpty(v) || 'Cost is a required field',
         (v) =>
@@ -2066,6 +2144,13 @@ export default {
       isOverCovered: false, // expense is only partially covered
       loading: false, // loading
       myBudgetsView: false, // if on myBudgetsView page
+      monthlyLimit: {
+        // anything related to expense monthly limit goes here
+        cache: {},
+        remaining: undefined, // how much is remaining after all expenses (including current)
+        currentBudget: undefined, // how much is remaining after all expenses (in total)
+        showHint: false
+      },
       originalExpense: null, // expense before changes
       overdraftBudget: 0,
       purchaseDateFormatted: null, // formatted purchase date
@@ -2101,6 +2186,7 @@ export default {
     createNewEntry,
     convertToMoneyString,
     costHint,
+    setMonthlyLimit,
     descRedirect,
     employeeFilter,
     encodeUrl,

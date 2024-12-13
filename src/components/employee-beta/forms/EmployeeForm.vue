@@ -41,60 +41,77 @@
       <v-container v-show="!submitting" fluid class="pt-0">
         <v-row>
           <v-col v-if="mdAndUp" cols="auto" class="pr-0">
-            <v-list density="compact" nav id="edit-navigation">
+            <v-list density="compact" nav id="edit-navigation" class="pr-0">
               <v-list-item
                 @click="cardName = 'Personal'"
                 link
                 title="Personal"
                 :class="{ invalid: validTabs.personal === false }"
+                :border="cardName == 'Personal' ? (validTabs.personal === false ? 'error md' : 'md') : '0'"
               ></v-list-item>
               <v-list-item
                 @click="cardName = 'Clearances'"
                 link
                 title="Clearances"
                 :class="{ invalid: validTabs.clearance === false }"
+                :border="cardName == 'Clearances' ? (validTabs.clearance === false ? 'error md' : 'md') : '0'"
               ></v-list-item>
               <v-list-item
                 @click="cardName = 'Contracts'"
                 link
                 title="Contracts"
                 :class="{ invalid: validTabs.contracts === false }"
+                :border="cardName == 'Contracts' ? (validTabs.contracts === false ? 'error md' : 'md') : '0'"
               ></v-list-item>
               <v-list-item
                 @click="cardName = 'Certifications & Awards'"
                 link
                 title="Certifications & Awards"
                 :class="{ invalid: validTabs.certsAndAwards === false }"
+                :border="
+                  cardName == 'Certifications & Awards' ? (validTabs.certsAndAwards === false ? 'error md' : 'md') : '0'
+                "
               ></v-list-item>
               <v-list-item
                 @click="cardName = 'Tech & Skills'"
                 link
                 title="Tech & Skills"
                 :class="{ invalid: validTabs.technologies === false }"
+                :border="cardName == 'Tech & Skills' ? (validTabs.technologies === false ? 'error md' : 'md') : '0'"
               ></v-list-item>
               <v-list-item
                 @click="cardName = 'Languages'"
                 link
                 title="Foreign Languages"
                 :class="{ invalid: validTabs.languages === false }"
+                :border="cardName == 'Languages' ? (validTabs.languages === false ? 'error md' : 'md') : '0'"
               ></v-list-item>
               <v-list-item
                 @click="cardName = 'Job Experience'"
                 link
                 title="Job Experience"
                 :class="{ invalid: validTabs.jobExperience === false }"
+                :border="cardName == 'Job Experience' ? (validTabs.jobExperience === false ? 'error md' : 'md') : '0'"
               ></v-list-item>
               <v-list-item
                 @click="cardName = 'Education'"
                 link
                 title="Education"
                 :class="{ invalid: validTabs.education === false }"
+                :border="cardName == 'Education' ? (validTabs.education === false ? 'error md' : 'md') : '0'"
               ></v-list-item>
               <v-list-item
                 @click="cardName = 'Customer Orgs'"
                 link
                 title="Customer Orgs"
                 :class="{ invalid: !validTabs.customerOrgs }"
+                :border="cardName == 'Customer Orgs' ? (validTabs.customerOrgs === false ? 'error md' : 'md') : '0'"
+              ></v-list-item>
+              <v-list-item
+                @click="cardName = 'Emergency Contacts'"
+                link
+                title="Emergency Contacts"
+                :class="{ invalid: !validTabs.emergencyContacts }"
               ></v-list-item>
             </v-list>
           </v-col>
@@ -108,7 +125,13 @@
             >
               <v-expansion-panels v-model="formTabs" variant="accordion" multiple>
                 <!-- personal tab -->
-                <base-form title="Personal" tab-id="personal" v-model="editedEmployee" :valid="validTabs.personal">
+                <base-form
+                  title="Personal"
+                  tab-id="personal"
+                  v-model="editedEmployee"
+                  :valid="validTabs.personal"
+                  @click="cardName = 'Personal'"
+                >
                   <template v-slot="{ props }">
                     <personal-info-form :slot-props="props"></personal-info-form>
                   </template>
@@ -120,6 +143,7 @@
                   tab-id="clearances"
                   v-model="editedEmployee"
                   :valid="validTabs.clearances"
+                  @click="cardName = 'Clearances'"
                 >
                   <template v-slot="{ props }">
                     <clearance-form :slot-props="props"></clearance-form>
@@ -127,7 +151,13 @@
                 </base-form>
 
                 <!-- contracts tab -->
-                <base-form title="Contracts" tab-id="contracts" v-model="editedEmployee" :valid="validTabs.contracts">
+                <base-form
+                  title="Contracts"
+                  tab-id="contracts"
+                  v-model="editedEmployee"
+                  :valid="validTabs.contracts"
+                  @click="cardName = 'Contracts'"
+                >
                   <template v-slot="{ props }">
                     <contracts-form :slot-props="props"></contracts-form>
                   </template>
@@ -139,6 +169,7 @@
                   tab-id="certsAndAwards"
                   v-model="editedEmployee"
                   :valid="validTabs.certsAndAwards"
+                  @click="cardName = 'Certifications & Awards'"
                 >
                   <template v-slot="{ props }">
                     <certs-and-awards-form :slot-props="props"></certs-and-awards-form>
@@ -151,6 +182,7 @@
                   tab-id="technologies"
                   v-model="editedEmployee"
                   :valid="validTabs.technologies"
+                  @click="cardName = 'Tech & Skills'"
                 >
                   <template v-slot="{ props }">
                     <technologies-form :slot-props="props"></technologies-form>
@@ -163,6 +195,7 @@
                   tab-id="languages"
                   v-model="editedEmployee"
                   :valid="validTabs.education"
+                  @click="cardName = 'Languages'"
                 >
                   <template v-slot="{ props }">
                     <languages-form :slot-props="props"></languages-form>
@@ -173,12 +206,19 @@
                   tab-id="jobExperience"
                   v-model="editedEmployee"
                   :valid="validTabs.jobExperience"
+                  @click="cardName = 'Job Experience'"
                 >
                   <template v-slot="{ props }">
                     <job-experience-form :slot-props="props"></job-experience-form>
                   </template>
                 </base-form>
-                <base-form title="Education" tab-id="education" v-model="editedEmployee" :valid="validTabs.education">
+                <base-form
+                  title="Education"
+                  tab-id="education"
+                  v-model="editedEmployee"
+                  :valid="validTabs.education"
+                  @click="cardName = 'Education'"
+                >
                   <template v-slot="{ props }">
                     <education-form :slot-props="props"></education-form>
                   </template>
@@ -188,9 +228,20 @@
                   tab-id="customerOrgs"
                   v-model="editedEmployee"
                   :valid="validTabs.customerOrgs"
+                  @click="cardName = 'Customer Orgss'"
                 >
                   <template v-slot="{ props }">
                     <customer-orgs-form :slot-props="props"></customer-orgs-form>
+                  </template>
+                </base-form>
+                <base-form
+                  title="Emergency Contacts"
+                  tab-id="emergencyContacts"
+                  v-model="editedEmployee"
+                  :valid="validTabs.emergencyContacts"
+                >
+                  <template v-slot="{ props }">
+                    <emergency-contacts-form :slot-props="props"></emergency-contacts-form>
                   </template>
                 </base-form>
               </v-expansion-panels>
@@ -260,6 +311,7 @@ import JobExperienceForm from './JobExperienceForm.vue';
 import LanguagesForm from './LanguagesForm.vue';
 import PersonalInfoForm from './PersonalInfoForm.vue';
 import TechnologiesForm from './TechnologiesForm.vue';
+import EmergencyContactsForm from './EmergencyContactsForm.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -298,7 +350,8 @@ const validTabs = reactive({
   jobExperience: true,
   languages: true,
   personal: true,
-  technologies: true
+  technologies: true,
+  emergencyContacts: true
 });
 
 // template refs
@@ -315,7 +368,8 @@ const tabs = reactive({
   jobExperience: null,
   languages: null,
   personal: null,
-  technologies: null
+  technologies: null,
+  emergencyContacts: null
 });
 
 // |--------------------------------------------------|
@@ -427,7 +481,7 @@ async function submit() {
         emitter.emit('update', updated);
       } else {
         emitter.emit('discard-edits', props.employee);
-        useDisplayError(updated.response.data.message);
+        useDisplayError(updated.response.data.message || updated.response.data.Error.message);
       }
     }
   } else {
@@ -498,7 +552,8 @@ async function prepareTabs() {
     tabs.jobExperience?.prepareSubmit(),
     tabs.languages?.prepareSubmit(),
     tabs.personal?.prepareSubmit(),
-    tabs.technologies?.prepareSubmit()
+    tabs.technologies?.prepareSubmit(),
+    tabs.emergencyContacts?.prepareSubmit()
   ]);
 }
 
@@ -509,6 +564,8 @@ async function validate() {
   await prepareTabs();
 
   let valid = true;
+
+  console.log(validTabs);
 
   // iterates through each tab to make sure they are all valid
   _forOwn(validTabs, (value) => {
@@ -632,6 +689,10 @@ async function selectTab() {
       num = 8;
       card = 'Customer Orgs';
       break;
+    case 'Emergency Contacts':
+      num = 9;
+      card = 'Emergency Contacts';
+      break;
     default:
       num = 0;
       card = 'Personal';
@@ -664,7 +725,7 @@ async function selectTab() {
 
   let e = await waitForElm('employee-card');
   let tabHeight = 60;
-  e?.scroll({ top: tabHeight * num, behavior: 'smooth' });
+  e?.scrollTo({ top: tabHeight * num, behavior: 'smooth' });
 }
 
 // |--------------------------------------------------|

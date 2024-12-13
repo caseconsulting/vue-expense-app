@@ -13,7 +13,7 @@
         <div :class="getButtonStyling()">
           <v-btn
             :disabled="onPage(alert.handler.page)"
-            @click="handleClick(alert.handler.page, alert.handler.extras)"
+            @click="handleClick(alert.handler.page, alert.handler.extras, alert.hash)"
             class="justify-center text-black notif-action-btn"
             elevation="0"
             color="#f5f5f5"
@@ -121,7 +121,7 @@ function checkBadges() {
               extras: { id: `${user.value.employeeNumber}` }
             },
             closeable: false,
-            status: 'error',
+            status: 'info',
             color: '#f27311',
             message: `Badge ${expire} on ${formattedDate} for clearance: ${clearance.type}`,
             id: randId(),
@@ -154,14 +154,15 @@ function checkCertifications() {
             extras: { id: `${user.value.employeeNumber}` }
           },
           closeable: false,
-          status: 'error',
+          status: 'info',
           color: '#2a49a8',
           message: `Certification ${expire} on ${formattedDate} for certification: ${cert.name}`,
           // below only needed for mark seen button
           seenButton: true,
           type: 'certification',
           id: randId(),
-          item: cert
+          item: cert,
+          hash: '#certifications+awards'
         });
       }
     });
@@ -284,8 +285,8 @@ function getButtonStyling() {
  * Redirect to the given page. There might be a more elegant way to
  * accomplish this but I've been on this story for too long so.
  */
-function handleClick(pageName, extras = {}) {
-  router.push({ name: pageName, params: extras });
+function handleClick(pageName, extras = {}, hash) {
+  router.push({ name: pageName, params: extras, hash: hash });
 } // handleClick
 
 /**

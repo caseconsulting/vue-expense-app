@@ -8,16 +8,16 @@
           <p class="d-inline mt-3">
             <b>{{ edu.name }}</b>
           </p>
-          <p class="my-2 ml-12 px-6 date-text" v-if="edu.degrees.length === 1 && edu.degrees[0].completionDate">
+          <p class="mb-0 ml-12 px-6 date-text" v-if="edu.degrees.length === 1 && edu.degrees[0].completionDate">
             {{ monthYearFormatBETA(edu.degrees[0].completionDate) }}
           </p>
         </v-list-item-title>
         <div class="ml-12 degree-text" v-for="(degree, index) in edu.degrees" :key="degree + index">
-          <p><b>Degree: </b>{{ degree.degreeType }}</p>
+          <p class="mb-1"><b>Degree: </b>{{ degree.degreeType }}</p>
           <div class="ml-6" v-for="(major, majorIndex) in degree.majors" :key="major + majorIndex">
-            <p><b>Major(s): </b> {{ major }}</p>
-            <p v-if="degree.minors.length > 1"><b>Minor(s): </b>{{ getMinors(degree) }}</p>
-            <p v-else-if="degree.minors.length === 1"><b>Minor(s): </b>{{ degree.minors[0] }}</p>
+            <p class="mb-1"><b>Major(s): </b> {{ major }}</p>
+            <p class="mb-1" v-if="degree.minors.length > 1"><b>Minor(s): </b>{{ getMinors(degree) }}</p>
+            <p class="mb-1" v-else-if="degree.minors.length === 1"><b>Minor(s): </b>{{ degree.minors[0] }}</p>
           </div>
         </div>
       </div>
@@ -30,10 +30,10 @@
           <p class="d-inline mt-3">
             <b>{{ edu.branch }} (Military Service)</b>
           </p>
-          <p class="my-2 mx-6 px-6" style="color: #828282" v-if="edu.completeDate">
+          <p class="mb-1 mx-6 px-6" style="color: #828282" v-if="edu.completeDate">
             {{ monthYearFormatBETA(edu.startDate) }} - {{ monthYearFormatBETA(edu.completeDate) }}
           </p>
-          <p v-else>{{ monthYearFormatBETA(edu.startDate) }} - Present</p>
+          <p class="mb-1" v-else>{{ monthYearFormatBETA(edu.startDate) }} - Present</p>
         </v-list-item-title>
       </div>
       <!-- END MILITARY SECTION -->
@@ -45,13 +45,13 @@
           <p class="d-inline mt-3">
             <b>{{ edu.name }}</b>
           </p>
-          <p class="my-2 mx-6 px-6" style="color: #828282" v-if="edu.gradDate">
+          <p class="mb-1 mx-6 px-6" style="color: #828282" v-if="edu.gradDate">
             {{ monthYearFormatBETA(edu.gradDate) }}
           </p>
         </v-list-item-title>
       </div>
       <!-- END HIGHSCHOOL SECTION -->
-      <v-row no-gutters class="mx-5">
+      <v-row no-gutters class="mt-2 mx-5">
         <v-divider v-if="index < list.length - 1" />
       </v-row>
     </v-list-item>

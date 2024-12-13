@@ -1,13 +1,13 @@
 <template>
   <div>
     <base-card title="Current Contract Info">
-      <v-card-text class="pb-0 pt-3" v-if="!isEmpty(contractsList)">
+      <v-card-text class="pb-0" v-if="!isEmpty(contractsList)">
         <div v-if="!noneActive">
-          <p><b>Contract: </b>{{ getContractNameFromId(currentContractId) }}</p>
-          <p class="ml-4">Start Date: {{ getContractStartDate(currentContractId) }}</p>
-          <p><b>Prime: </b>{{ getPrimeNameFromId(currentContractId) }}</p>
-          <p v-for="(project, index) in currentProjects" :key="project.projectId + index" class="ml-4">
-            Project: {{ getProjectNameFromId(project.projectId) }}
+          <p class="mb-1"><b>Contract: </b>{{ getContractNameFromId(currentContractId) }}</p>
+          <p class="mb-1"><b>Start Date: </b>{{ getContractStartDate(currentContractId) }}</p>
+          <p class="mb-1"><b>Prime: </b>{{ getPrimeNameFromId(currentContractId) }}</p>
+          <p class="mb-1" v-for="(project, index) in currentProjects" :key="project.projectId + index">
+            <b>Project:</b> {{ getProjectNameFromId(project.projectId) }}
           </p>
         </div>
         <div v-else class="text-align: center">
