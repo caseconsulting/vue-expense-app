@@ -78,7 +78,7 @@
 
           <!-- PTO balance slot -->
           <template #[`item.ptoBalance`]="{ item }">
-            <p :class="ptoBalanceClass(getPtoBalance(item.date))">{{ getPtoBalance(item.date) }}</p>
+            <p :class="ptoBalanceClass(getPtoBalance(item.date))">{{ getPtoBalance(item.date).toFixed(2) }}</p>
           </template>
 
           <!-- holiday balance slot -->
@@ -123,7 +123,7 @@
 
 import { onMounted, ref, reactive, watch, inject, onBeforeMount, defineExpose } from 'vue';
 import { useStore } from 'vuex';
-import { updateStoreUser, updateStorePtoCashOuts } from '../../utils/storeUtils';
+import { updateStoreUser, updateStorePtoCashOuts, updateStoreTags } from '../../utils/storeUtils';
 import {
   format,
   startOf,
@@ -248,8 +248,11 @@ onBeforeMount(async () => {
 onMounted(async () => {
   // get the employee and PTO cashout amounts
   if (!store.getters.ptoCashOuts) await updateStorePtoCashOuts();
+  if (!store.getters.tags) await updateStoreTags();
 
   // update employee specific information
+  let benefitsPlan = getEmployeePlanTagName(employee.value).toLowerCase();
+  PTOPerMonth.value = PTO_ACCRUALS[benefitsPlan ?? 'red']; // default to red since it's the current 14 hours
   PTOPerMonth.value *= employee.value.workStatus / 100;
 
   // load in employee's plan from database
@@ -304,6 +307,20 @@ onMounted(async () => {
   // emit to TimeData.vue that the save() function can be successfully executed now
   emitter.emit('auto-save-pto-planner');
 }); // onMounted
+
+/**
+ * Helper function get get an employee's plan tag (ie: red/white/gray)
+ * @param emp
+ */
+function getEmployeePlanTagName(emp) {
+  let plans = ['red', 'white', 'gray'];
+  for (let tag of store.getters.tags) {
+    if (plans.includes(tag.tagName.toLowerCase()) && tag.employees.includes(emp.id)) {
+      return tag.tagName;
+    }
+  }
+  return undefined;
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -490,6 +507,11 @@ function ptoBalanceClass(balance) {
 // |                                                  |
 // |--------------------------------------------------|
 const PTOPerMonth = ref(14); // 14 hours per pay period (month), equals 21 days per year (168 hours)
+const PTO_ACCRUALS = {
+  red: 14,
+  white: 15.33333, // per Dave B, accruals are exactly this
+  gray: 15.33333 // per Dave B, accruals are exactly this
+};
 const maxPTO = ref(208); // maximum PTO hours you can have at one time
 const holidayPerYear = ref(88); // 11 days per year
 

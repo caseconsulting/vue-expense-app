@@ -58,7 +58,7 @@ import api from '@/shared/api';
 import { computed, inject, onBeforeMount, onBeforeUnmount, ref, unref, watch } from 'vue';
 import { useStore } from 'vuex';
 import { difference, isBefore, now } from '@/shared/dateUtils';
-import { updateStoreContracts } from '@/utils/storeUtils';
+import { updateStoreContracts, updateStoreTags } from '@/utils/storeUtils';
 import { getCalendarYearPeriod, getContractYearPeriod } from './time-periods';
 import { getTodaysDate } from '@/shared/dateUtils.js';
 
@@ -90,6 +90,11 @@ const KEYS = ref({
   CONTRACT_YEAR: 'contractYear'
 });
 let hasSavedPlannedPto = false;
+const PTO_ACCRUALS = {
+  red: 14,
+  white: 15.33333, // per Dave B, accruals are exactly this
+  gray: 15.33333 // per Dave B, accruals are exactly this
+};
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -389,8 +394,27 @@ async function setData(isCalendarYear, isYearly) {
  * Sets the timesheets data on initial load based on a time period (current and previous pay period displayed).
  */
 async function setInitialData() {
-  await Promise.all([setData(), !store.getters.contracts ? updateStoreContracts() : '']);
+  await Promise.all([
+    setData(),
+    !store.getters.contracts ? updateStoreContracts() : '',
+    !store.getters.tags ? updateStoreTags() : ''
+  ]);
 } // setInitialData
+
+/**
+ * Helper function get get an employee's plan tag (ie: red/white/gray)
+ * @param emp
+ */
+async function getEmployeePlanTagName(emp) {
+  if (!store.getters.tags) await updateStoreTags();
+  let plans = ['red', 'white', 'gray'];
+  for (let tag of store.getters.tags) {
+    if (plans.includes(tag.tagName.toLowerCase()) && tag.employees.includes(emp.id)) {
+      return tag.tagName;
+    }
+  }
+  return undefined;
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -408,18 +432,20 @@ watch(
 
 watch(
   () => ptoBalances.value,
-  () => {
+  async () => {
     let balance = (ptoBalances.value?.['PTO']?.value ?? ptoBalances.value?.['PTO']) / 60 / 60;
-    let ptoAccrual = 14;
+    let plan = await getEmployeePlanTagName(clonedEmployee.value);
+    plan = plan?.toLowerCase();
+    let ptoAccrual = PTO_ACCRUALS[plan ?? 'red']; // default to red to set to 14
     let ptoMax = 208;
-    if (ptoAccrual > ptoMax - balance) {
+    if (clonedEmployee.value.id === store.getters.user.id && ptoAccrual > ptoMax - balance) {
       let notification = {
         type: 'pto-accrual',
         closeable: true,
         status: 'info',
         color: '#f27311',
-        message: `You will not accrue ${balance >= ptoMax ? 'any' : `your full ${ptoAccrual} hours of`} PTO next month. Consider using your PTO balance or cashing it out using the Timesheet Widget. Your current balance is ${balance.toFixed(2)} hours.`,
-        id: `PTO-ACCRUE-WARNING-${getTodaysDate('YYYY-MM')}` // TODO: add month so it comes up next month
+        message: `You will not accrue ${balance >= ptoMax ? 'any' : `your full ${ptoAccrual.toFixed(2)} hours of`} PTO next month. Consider using your PTO balance or cashing it out using the Timesheet Widget. Your current balance is ${balance.toFixed(2)} hours.`,
+        id: `PTO-ACCRUE-WARNING-${getTodaysDate('YYYY-MM')}`
       };
       emitter.emit('add-notification', notification);
     }
