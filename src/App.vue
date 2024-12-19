@@ -131,7 +131,7 @@
             id="P"
             class="text-black"
             target="_blank"
-            href="https://3.basecamp.com/3097063/buckets/4708396/documents/8005009223"
+            href="https://3.basecamp.com/3097063/buckets/4708396/documents/8145325507"
           >
             <v-tooltip activator="parent" location="top">View Release Notes</v-tooltip>
             <strong>Version</strong> {{ version }}
