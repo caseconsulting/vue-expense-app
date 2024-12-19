@@ -24,9 +24,7 @@
         </v-row>
         <v-row class="pb-1" v-for="phone in getPhoneNumbers()" :key="phone">
           <v-col class="pa-0">
-            <p class="d-inline pa-0" v-if="!phone.private || isAdmin || isUser">
-              {{ phone.number }}
-            </p>
+            <p class="d-inline pa-0" v-if="!phone.private || isAdmin || isUser">{{ phone.type }}: {{ phone.number }}</p>
           </v-col>
           <v-col cols="auto" class="pa-0">
             <div class="d-inline float-right">

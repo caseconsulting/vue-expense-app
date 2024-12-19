@@ -1,6 +1,6 @@
 <template>
   <div v-if="alerts" class="justify-center">
-    <v-col v-for="alert in alerts" :key="alert.id" id="alert.id" class="mb-4 py-0" cols="12">
+    <v-col v-for="alert in alerts" :key="alert.id" :id="alert.id" class="mb-4 py-0" cols="12">
       <v-alert
         :type="alert.status"
         :color="alert.color"
@@ -8,12 +8,14 @@
         :closable="alert.closeable"
         class="my-0"
         density="compact"
+        @click:close="handleClose(alert)"
       >
         <p class="ma-0" style="display: inline-block">{{ alert.message }}</p>
         <div :class="getButtonStyling()">
           <v-btn
+            v-if="alert.handler"
             :disabled="onPage(alert.handler.page)"
-            @click="handleClick(alert.handler.page, alert.handler.extras)"
+            @click="handleClick(alert.handler.page, alert.handler.extras, alert.hash)"
             class="justify-center text-black notif-action-btn"
             elevation="0"
             color="#f5f5f5"
@@ -46,7 +48,7 @@ import _filter from 'lodash/filter';
 import _map from 'lodash/map';
 import _forEach from 'lodash/forEach';
 import _find from 'lodash/find';
-import { onBeforeMount, ref } from 'vue';
+import { onBeforeMount, ref, inject } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
@@ -59,6 +61,7 @@ import { useStore } from 'vuex';
 const store = useStore();
 const route = useRoute();
 const router = useRouter();
+const emitter = inject('emitter');
 
 const alerts = ref([]);
 const user = ref(null);
@@ -71,6 +74,9 @@ const user = ref(null);
 
 // Checks if there are any expiring cert and sorts by days until expiration.
 onBeforeMount(async () => {
+  emitter.on('add-notification', (data) => {
+    if (localStorage.getItem(data.id) !== 'closed') alerts.value.push(data);
+  });
   // wait to load data until router page is almost finished
   await setTimeout(async () => {
     user.value = store.getters.user;
@@ -161,7 +167,8 @@ function checkCertifications() {
           seenButton: true,
           type: 'certification',
           id: randId(),
-          item: cert
+          item: cert,
+          hash: '#certifications+awards'
         });
       }
     });
@@ -284,8 +291,8 @@ function getButtonStyling() {
  * Redirect to the given page. There might be a more elegant way to
  * accomplish this but I've been on this story for too long so.
  */
-function handleClick(pageName, extras = {}) {
-  router.push({ name: pageName, params: extras });
+function handleClick(pageName, extras = {}, hash) {
+  router.push({ name: pageName, params: extras, hash: hash });
 } // handleClick
 
 /**
@@ -312,6 +319,14 @@ async function handleMarkSeen(type, item, id) {
       break;
   }
 } // handleMarkSeen
+
+/**
+ * Handles close. Saves closed state in localStorage in some cases.
+ */
+function handleClose(alert) {
+  // convert this to switch(alert.type) if more functionality is needed
+  if (alert.type === 'pto-accrual') localStorage.setItem(alert.id, 'closed');
+}
 
 /**
  * Helper function to return a random id, odds are astronomically

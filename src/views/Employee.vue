@@ -467,7 +467,9 @@ function mounted() {
 
   this.emitter.on('update', (updatedEmployee) => {
     if (updatedEmployee) {
+      let shouldUpdateHistory = updatedEmployee.employeeNumber !== this.model.employeeNumber;
       this.model = updatedEmployee;
+      if (shouldUpdateHistory) this.pushHistoryState(this.model.employeeNumber);
     }
   });
 

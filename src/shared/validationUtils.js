@@ -6,6 +6,16 @@ import _some from 'lodash/some';
 import store from '../../store/index';
 
 /**
+ * Allow empty
+ * Usage: `:rules="optional(getSomeOtherRules())"`
+ * @param rules Array - rules to check if the value is not empty
+ * @returns Array - rule to allow empty
+ */
+export function optional(rules) {
+  return [(v) => isEmpty(v) || rules.find((rule) => rule(v) !== true)?.(v) || true];
+}
+
+/**
  * Gets the rules for valid AIN number, where it must be 7 digits that can lead with 0s, and not required
  * @returns Array - The array of rule functions
  */
@@ -163,9 +173,17 @@ export function getNumberRules() {
 export function getPhoneNumberRules() {
   return [
     (v) =>
-      /^\d{3}-\d{3}-\d{4}(?:, ext. \d{3})?$/.test(v) || 'Phone number must be valid. Format: ###-###-####, ext. ###'
+      /^\d{3}-\d{3}-\d{4}(?:, ext. \d{1,6})?$/.test(v) || 'Phone number must be valid. Format: ###-###-####, ext. ###'
   ];
 } // getPhoneNumberRules
+
+/**
+ * Gets rules for phone numbers.
+ * @return Array - The array of rule functions
+ */
+export function getPhoneNumberNoExtRules() {
+  return [(v) => /^\d{3}-\d{3}-\d{4}?$/.test(v) || 'Phone number must be valid. Format: ###-###-####'];
+} // getPhoneNumberNoExtRules
 
 /**
  * Gets the rules where a whole number must be positive.
