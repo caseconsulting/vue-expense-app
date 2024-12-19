@@ -430,12 +430,18 @@
 
                         <!-- Basecamp Campfire -->
                         <p v-if="getCampfire(item.campfire)">
-                          <b>Basecamp Campfire:</b>
+                          <b>Basecamp Campfire: </b>
                           <a :href="getCampfire(item.campfire).url" target="blank">
                             {{ getCampfire(item.campfire).name }}
                           </a>
                         </p>
                         <!-- End Basecamp Campfire -->
+
+                        <!-- Monthly Limit -->
+                        <p v-if="item.monthlyLimit">
+                          <b>Monthly Limit: </b>
+                          ${{ item.monthlyLimit }}
+                        </p>
                       </div>
                     </v-card-text>
                   </v-card>

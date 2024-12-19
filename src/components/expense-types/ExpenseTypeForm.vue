@@ -41,8 +41,20 @@
           :rules="budgetRules"
           label="Budget"
           data-vv-name="Budget"
-          @update:focused="editedExpenseType.budget = parseBudget(budgetFormatted)"
-          @update:model-value="formatBudget(budgetFormatted)"
+          @update:focused="editedExpenseType.budget = parseNumber(budgetFormatted)"
+          @update:model-value="formatBudget()"
+        ></v-text-field>
+
+        <!-- Monthly Limit -->
+        <v-text-field
+          variant="underlined"
+          prefix="$"
+          v-model="monthlyLimitFormatted"
+          id="monthlyLimit"
+          :rules="monthlyLimitRules"
+          label="Monthly Limit (optional)"
+          @update:focused="editedExpenseType.monthlyLimit = parseNumber(monthlyLimitFormatted)"
+          @update:model-value="formatMonthlyLimit()"
         ></v-text-field>
 
         <!-- Employee Access -->
@@ -423,6 +435,7 @@ import { useRouter } from 'vue-router';
 
 const activeEmployees = ref(null); // list of active employees
 const budgetFormatted = ref('');
+const monthlyLimitFormatted = ref('');
 const budgetRules = ref([
   (v) => !!v || 'Budget amount is required',
   (v) => parseFloat(v, 10) > 0 || 'Budget must be greater than 0.',
@@ -430,6 +443,13 @@ const budgetRules = ref([
     /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?$/.test(v) ||
     'Budget amount must be a number with two decimal digits.'
 ]); // rules for an expense type budget
+const monthlyLimitRules = ref([
+  (v) => isEmpty(v) || parseFloat(v, 10) > 0 || 'Limit must be greater than 0.',
+  (v) =>
+    isEmpty(v) ||
+    /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?$/.test(v) ||
+    'Limit must be a number with two decimal digits.'
+]);
 const campfires = ref([]); // basecamp campfires
 const categories = ref([]); // list of expense type categories
 const categoryInput = ref(null); // category combobox input
@@ -635,11 +655,21 @@ function clearForm() {
  * Formats the budget on the form for a nicer display.
  */
 function formatBudget() {
-  editedExpenseType.value.budget = parseBudget(budgetFormatted.value);
+  editedExpenseType.value.budget = parseNumber(budgetFormatted.value);
   if (Number(editedExpenseType.value.budget)) {
     budgetFormatted.value = Number(editedExpenseType.value.budget).toLocaleString().toString();
   }
 } // formatBudget
+
+/**
+ * Formats the budget on the form for a nicer display.
+ */
+function formatMonthlyLimit() {
+  editedExpenseType.value.monthlyLimit = parseNumber(monthlyLimitFormatted.value);
+  if (Number(editedExpenseType.value.monthlyLimit)) {
+    monthlyLimitFormatted.value = Number(editedExpenseType.value.monthlyLimit).toLocaleString().toString();
+  }
+} // formatMonthlyLimit
 
 /**
  * Checks if custom access of employees have acess to an expense type at a percentage rate. Returns true if 'CUSTOM'
@@ -672,13 +702,13 @@ function odFlagHint() {
  * @param budget - the budget to parse
  * @return String - The budget without formatting
  */
-function parseBudget(budget) {
+function parseNumber(budget) {
   if (budget && !_isEmpty(budget)) {
     return budget.replace(/[,\s]/g, '');
   } else {
     return budget;
   }
-} // parseBudget
+} // parseNumber
 
 /**
  * route to FAQ
@@ -984,6 +1014,7 @@ watch(
     editedExpenseType.value.budget = props.model.budget;
     budgetFormatted.value = editedExpenseType.value.budget;
     formatBudget();
+    formatMonthlyLimit();
   }
 ); // watchModelID
 

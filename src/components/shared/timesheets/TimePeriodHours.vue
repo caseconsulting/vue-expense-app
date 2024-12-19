@@ -146,6 +146,7 @@
           :isYearly="isYearly"
           :supplementalData="supplementalDataWithPlan"
           :timeData="timeData"
+          :periodType="periodType"
         ></time-period-job-codes>
       </v-col>
       <!-- End Time Period Job Codes -->
@@ -169,7 +170,7 @@ import { useStore } from 'vuex';
 // |                                                  |
 // |--------------------------------------------------|
 
-const props = defineProps(['employee', 'ptoBalances', 'supplementalData', 'timesheets']);
+const props = defineProps(['employee', 'ptoBalances', 'supplementalData', 'timesheets', 'KEYS']);
 const emitter = inject('emitter');
 const store = useStore();
 
@@ -221,8 +222,22 @@ const dateIsCurrentPeriod = computed(() => {
  */
 const timeData = computed(() => {
   let timesheets = { ...props.timesheets[periodIndex.value].timesheets };
-  if (isYearly.value && !isCalendarYear.value && props.employee.legacyJobCodes)
-    timesheets = { ...timesheets, ...props.employee.legacyJobCodes };
+  // searching store employees fixes bug where switching user profiles erases legacy job codes
+  let legacyCodes = props.employee.legacyJobCodes;
+  legacyCodes = legacyCodes || store.getters.employees.find((e) => e.id === props.employee.id)?.legacyJobCodes;
+  if (isYearly.value && legacyCodes) {
+    let val;
+    for (let key of Object.keys(legacyCodes || {})) {
+      val = legacyCodes[key];
+      if (typeof val === 'object') {
+        // LJC is in new structure, only unpack if it's the right type
+        if (periodType.value === key) timesheets = { ...timesheets, ...val };
+      } else {
+        // LJC is in old structure, which is just contract year
+        if (periodType.value === props.KEYS.CONTRACT_YEAR) timesheets[key] = val;
+      }
+    }
+  }
   // add in planned pto/holiday
   if (plannedTimeData) {
     if (plannedTimeData.PTO) {
@@ -253,6 +268,11 @@ const supplementalDataWithPlan = computed(() => {
   let data = { ...props.supplementalData };
   data.nonBillables = [...data.nonBillables, 'Planned PTO', 'Planned Holiday'];
   return data;
+});
+
+let periodType = computed(() => {
+  if (!isYearly.value) return props.KEYS.PAY_PERIODS; // either bi-weekly or monthly, sometimes depends on employee and if there's a merger
+  return isCalendarYear.value ? props.KEYS.CALENDAR_YEAR : props.KEYS.CONTRACT_YEAR; // currently the only two options
 });
 
 // |--------------------------------------------------|

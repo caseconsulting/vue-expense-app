@@ -137,6 +137,14 @@
             />
           </template>
 
+          <!-- Contract head counts -->
+          <template v-slot:[`item.activeEmployees`]="{ item }">
+            <span class="smaller-text description pointer d-flex align-center w-100 h-100 font-weight-bold">
+              {{ contractHeadcounts[item.id] || '0' }}
+              {{ contractHeadcounts[item.id] === 1 ? 'Employee' : 'Employees' }}
+            </span>
+          </template>
+
           <!-- Actions Slot -->
           <template v-slot:[`item.actions`]="{ item }">
             <div>
@@ -242,7 +250,7 @@ import _map from 'lodash/map';
 import api from '@/shared/api';
 import { updateStoreEmployees } from '@/utils/storeUtils';
 import { asyncForEach, isMobile } from '@/utils/utils';
-import { getProject } from '@/shared/contractUtils';
+import { getProject, getProjectCurrentEmployees } from '@/shared/contractUtils';
 import { contractFilter } from '@/shared/filterUtils';
 
 import DeleteModal from '../modals/DeleteModal.vue';
@@ -260,6 +268,7 @@ import { ref, inject, onBeforeMount, onBeforeUnmount, computed, watch } from 'vu
 import { useDisplay } from 'vuetify';
 import { useStore } from 'vuex';
 import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSnackbar.vue';
+import { updateStoreContracts } from '../../utils/storeUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -397,7 +406,7 @@ const contractHeaders = ref([
   },
   {
     title: 'Active Employees',
-    key: 'spacer',
+    key: 'activeEmployees',
     align: 'start',
     customWidth: 'large',
     disableEdit: true
@@ -410,6 +419,7 @@ const contractHeaders = ref([
     disableEdit: true
   }
 ]);
+const contractHeadcounts = ref({});
 const form = ref(null);
 
 // |--------------------------------------------------|
@@ -481,7 +491,8 @@ onBeforeMount(async () => {
   });
   resetAllCheckBoxes();
   expanded.value = _map(store.getters.contracts, 'id'); // expands all contracts in table
-}); // created
+  await getContractEmployeesHeadcount(); // get headcounts for each contract
+}); // onBeforeMount
 
 /**
  * beforeUnmount lifecycle hook - close event listeners
@@ -629,6 +640,25 @@ async function clickedDelete() {
     toggleContractDeleteModal.value = true;
   }
 } // clickedDelete
+
+/**
+ * Fills in the contractHeadcounts variable.
+ */
+async function getContractEmployeesHeadcount() {
+  if (!store.getters.employees) await updateStoreEmployees();
+  if (!store.getters.contracts) await updateStoreContracts();
+  for (let contract of store.getters.contracts) {
+    let contractEmployees = new Set();
+    let projectEmployees;
+    for (let project of contract.projects) {
+      projectEmployees = getProjectCurrentEmployees(contract, project, store.getters.employees);
+      for (let e of projectEmployees) {
+        contractEmployees.add(e.id);
+      }
+    }
+    contractHeadcounts.value[contract.id] = contractEmployees.size;
+  }
+}
 
 /**
  * Updates the status of the selected items based on the given status.
