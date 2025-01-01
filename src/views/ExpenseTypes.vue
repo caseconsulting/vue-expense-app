@@ -219,40 +219,40 @@
               <!-- Actions -->
               <template v-if="userRoleIsAdmin()" v-slot:[`item.actions`]="{ item }">
                 <div class="mr-4">
-                  <v-tooltip location="top">
-                    <template #activator="{ props }">
-                      <v-btn
-                        v-if="userRoleIsAdmin()"
-                        :disabled="midAction"
-                        variant="text"
-                        icon
-                        v-bind="props"
-                        @click="
-                          toTopOfForm();
-                          onSelect(item);
-                        "
-                      >
-                        <v-icon icon="mdi-pencil" class="case-gray" />
-                      </v-btn>
-                    </template>
-                    <span>Edit</span>
-                  </v-tooltip>
-                  <v-tooltip location="top">
-                    <template #activator="{ props }">
-                      <v-btn
-                        v-if="userRoleIsAdmin()"
-                        id="delete"
-                        :disabled="midAction"
-                        variant="text"
-                        icon
-                        v-bind="props"
-                        @click="validateDelete(item)"
-                      >
-                        <v-icon icon="mdi-delete" class="case-gray" />
-                      </v-btn>
-                    </template>
-                    <slot>Delete</slot>
-                  </v-tooltip>
+                  <v-btn
+                    v-if="userRoleIsAdmin()"
+                    :disabled="midAction"
+                    variant="text"
+                    icon
+                    @click.stop="openDisableModal(item)"
+                    v-tooltip="'Disable Employee Access'"
+                  >
+                    <v-icon icon="mdi-account-lock" class="case-gray" />
+                  </v-btn>
+                  <v-btn
+                    v-if="userRoleIsAdmin()"
+                    :disabled="midAction"
+                    variant="text"
+                    icon
+                    @click.stop="
+                      toTopOfForm();
+                      onSelect(item);
+                    "
+                    v-tooltip="'Edit'"
+                  >
+                    <v-icon icon="mdi-pencil" class="case-gray" />
+                  </v-btn>
+                  <v-btn
+                    v-if="userRoleIsAdmin()"
+                    id="delete"
+                    :disabled="midAction"
+                    variant="text"
+                    icon
+                    @click.stop="validateDelete(item)"
+                    v-tooltip="'Delete'"
+                  >
+                    <v-icon icon="mdi-delete" class="case-gray" />
+                  </v-btn>
                 </div>
               </template>
 
@@ -466,6 +466,9 @@
             />
             <delete-error-modal v-model="invalidDelete" type="expense type" />
             <!-- End Confirmation Modals -->
+            <!-- Other modals -->
+            <disable-expense-type-for-employees-modal v-model="showDisableModal" :type="disableModalItem" />
+            <!-- End Other modals -->
           </v-container>
         </v-card>
       </v-col>
@@ -482,6 +485,7 @@
 import api from '@/shared/api.js';
 import DeleteErrorModal from '@/components/modals/DeleteErrorModal.vue';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
+import DisableExpenseTypeForEmployeesModal from '@/components/modals/DisableExpenseTypeForEmployeesModal.vue';
 import ExpenseTypeForm from '@/components/expense-types/ExpenseTypeForm.vue';
 import _map from 'lodash/map';
 import _filter from 'lodash/filter';
@@ -509,6 +513,10 @@ import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSn
 // |                      SETUP                       |
 // |                                                  |
 // |--------------------------------------------------|
+
+// items for disable modal
+const showDisableModal = ref(false);
+const disableModalItem = ref(null);
 
 const campfires = ref([]); // basecamp campfires
 const deleteModel = ref({ id: '' }); // expense type to delete
@@ -603,6 +611,7 @@ onBeforeUnmount(() => {
   emitter.off('error');
   emitter.off('canceled-delete-expense-type');
   emitter.off('confirm-delete-expense-type');
+  emitter.off('refresh-expense-types');
   emitter.off('finished-editing-expense-type');
   emitter.off('editing-expense-type');
   emitter.off('invalid-expense type-delete');
@@ -649,6 +658,14 @@ onBeforeMount(async () => {
     await deleteExpenseType();
   });
   emitter.on('invalid-expense type-delete', () => {
+    midAction.value = false;
+  });
+
+  // allow expense types to be refreshed by emit
+  emitter.on('refresh-expense-types', async () => {
+    midAction.value = true;
+    await updateStoreExpenseTypes();
+    await refreshExpenseTypes();
     midAction.value = false;
   });
 
@@ -1118,6 +1135,16 @@ async function validateDelete(item) {
 function getTagByID(id) {
   return store.getters.tags.find((t) => t.id === id);
 } // getTagByID
+
+/**
+ * Opens the modal to disable/enable budgets for people
+ *
+ * @param item budget item to manage
+ */
+function openDisableModal(item) {
+  showDisableModal.value = true;
+  disableModalItem.value = item;
+} // openDisableModal
 
 // |--------------------------------------------------|
 // |                                                  |

@@ -469,6 +469,7 @@ async function submit() {
       }
 
       const updated = await api.updateAttributes(api.EMPLOYEES, props.employee.id, changes);
+      console.log(JSON.stringify(changes));
 
       // if a valid employee is returned
       if (updated.id) {
@@ -564,8 +565,6 @@ async function validate() {
   await prepareTabs();
 
   let valid = true;
-
-  console.log(validTabs);
 
   // iterates through each tab to make sure they are all valid
   _forOwn(validTabs, (value) => {
