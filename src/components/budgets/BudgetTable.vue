@@ -7,6 +7,13 @@
           <v-card>
             <!-- Budget Name -->
             <v-card-title class="d-flex align-center header_style">
+              <v-icon
+                v-if="isDisabled(item)"
+                icon="mdi-lock"
+                size="small"
+                class="mr-2 mb-1 cursor-pointer"
+                v-tooltip="'This budget has been disabled by an admin'"
+              />
               <h3 class="text-white">{{ item.expenseTypeName }}</h3>
             </v-card-title>
             <v-divider></v-divider>
@@ -196,6 +203,17 @@ function odFlagMessage(expenseType) {
 function noRemaining(budget) {
   return calcRemaining(budget) <= 0;
 } // noRemaining
+
+/**
+ * Whether or not a budget is locked for an employee (note that this is actually recorded in the expense type)
+ *
+ * @param budget budget object
+ */
+function isDisabled(budget) {
+  let expenseType = props.expenseTypes.find((et) => et.id === budget.expenseTypeId);
+  let disabledEmployees = expenseType.disabledEmployees ?? [];
+  return disabledEmployees.includes(props.employee.id);
+}
 
 /**
  * Refresh and sets the aggregated budgets to draw the graph

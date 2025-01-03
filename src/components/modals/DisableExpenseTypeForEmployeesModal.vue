@@ -1,14 +1,27 @@
 <template>
   <div>
-    <v-dialog v-model="activate" @click:outside="closeModal()" max-width="900">
+    <v-dialog v-model="activate" :persistent="waitingSet.size > 0" max-width="500">
       <v-card>
         <v-card-title class="d-flex align-center header_style">
           <h3>Disable Expense Type</h3>
         </v-card-title>
 
         <v-card-text class="font-weight-medium text-h6">
-          <h4>{{ type.budgetName }}</h4>
-          <v-data-table :items="getEmployeeList()" :headers="headers" :items-per-page="-1">
+          <h3>{{ type.budgetName }}</h3>
+          <v-autocomplete
+            :items="getEmployeeList()"
+            :custom-filter="employeeFilter"
+            auto-select-first
+            v-model="employeeSearch"
+            item-title="value"
+            id="filterEmployee"
+            class="mr-3 mb-6 pr-12"
+            label="Filter by Employee"
+            variant="underlined"
+            hide-details
+            clearable
+          />
+          <v-data-table :items="getEmployeeList()" :headers="headers" :search="employeeSearch" :items-per-page="-1">
             <!-- Empty header/footer slot to disable them -->
             <template #headers></template>
             <template #bottom></template>
@@ -20,11 +33,13 @@
             <template #[`item.actions`]="{ item }">
               <v-switch
                 class="cursor-pointer"
+                hide-details
                 v-model="invertedDisabledEmployees"
                 :value="item.id"
                 color="primary"
                 :label="''"
                 @click="toggleEmployee(item.id)"
+                :disabled="waitingSet.has(item.id)"
                 :loading="waitingSet.has(item.id) ? 'warning' : false"
               />
             </template>
@@ -32,7 +47,7 @@
         </v-card-text>
 
         <v-card-actions>
-          <v-btn @click="closeModal()">Close</v-btn>
+          <v-btn @click="closeModal()" :disabled="waitingSet.size > 0">Close</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -42,8 +57,8 @@
 <script setup>
 import { inject, ref, computed, watch } from 'vue';
 import { useStore } from 'vuex';
+import { employeeFilter } from '@/shared/filterUtils';
 import api from '@/shared/api';
-import _filter from 'lodash/filter';
 import _sortBy from 'lodash/sortBy';
 
 // |--------------------------------------------------|
@@ -64,6 +79,7 @@ const headers = ref([
   { title: 'Actions', key: 'actions', sortable: false }
 ]);
 const disabledEmployees = ref(new Set([]));
+const employeeSearch = ref(null);
 const waitingSet = ref(new Set());
 let changes = false;
 
@@ -84,56 +100,38 @@ let changes = false;
 function getEmployeeList() {
   let accessibleBy = props.type.accessibleBy; // shortcut
   let employees = store.getters.employees;
-  let employeesList = [];
+  let employeesList = new Set();
 
-  // accessible by full time employees
-  if (accessibleBy.includes('FullTime')) {
-    employeesList = employeesList.concat(
-      _filter(employees, (employee) => {
-        return employee.workStatus == 100 && employee.employeeRole != 'intern';
-      })
-    );
+  for (let e of employees) {
+    // check access based on work status
+    let workStatus = e.workStatus === 100 ? 'FullTime' : e.workStatus > 0 ? 'PartTime' : 'Inactive';
+    if (e.employeeRole === 'intern') workStatus = 'Intern';
+    // check access based on custom list
+    let hasCustomAccess = accessibleBy.includes(e.id);
+    // add employee to list if they have access
+    if (accessibleBy.includes(workStatus) || hasCustomAccess) {
+      employeesList.add({ ...e, value: `${e.nickname || e.firstName} ${e.lastName}` });
+    }
   }
-  // accessible by part time employees
-  if (accessibleBy.includes('PartTime')) {
-    employeesList = employeesList.concat(
-      _filter(employees, (employee) => {
-        return employee.workStatus < 100 && employee.workStatus > 0 && employee.employeeRole != 'intern';
-      })
-    );
-  }
-  // accessible by interns
-  if (accessibleBy.includes('Intern')) {
-    employeesList = employeesList.concat(
-      _filter(employees, (employee) => {
-        return employee.workStatus > 0 && employee.employeeRole == 'intern';
-      })
-    );
-  }
-  // custom access list
-  if (accessibleBy.includes('Custom')) {
-    employeesList = employeesList.concat(
-      _filter(employees, (employee) => {
-        return accessibleBy.includes(employee.id);
-      })
-    );
-  }
-  // TODO: remove users if a tag sets their budget to 0 (also just use a set and convert in next line)
 
-  // remove duplicates
-  employeesList = [...new Set(employeesList)];
-  return _sortBy(employeesList, [
+  // convert to an array and return sorted
+  employeesList = [...employeesList];
+  employeesList = _sortBy(employeesList, [
     (employee) => employee.firstName.toLowerCase(),
     (employee) => employee.lastName.toLowerCase()
-  ]); // sort by first name then last name
-} // getEmployeeList
+  ]);
+  return employeesList;
+}
 
 /**
  * Closes modal and emits invalid delete event
  */
 function closeModal() {
   if (changes) emitter.emit('refresh-expense-types');
-  activate.value = false;
+  if (waitingSet.value.size == 0) {
+    console.log('literally what');
+    activate.value = false;
+  }
 }
 
 /**
@@ -149,8 +147,8 @@ async function toggleEmployee(id) {
   let data = { id: props.type.id, disabledEmployees: [...disabledEmployees.value] };
   await api.updateAttribute(api.EXPENSE_TYPES, data, 'disabledEmployees');
   // unset loading status
-  changes = true;
   waitingSet.value.delete(id);
+  changes = true;
 }
 
 // |--------------------------------------------------|

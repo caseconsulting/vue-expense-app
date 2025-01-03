@@ -30,6 +30,13 @@
               <div class="d-flex justify-space-between">
                 <span>{{ budget.expenseTypeName }}:</span>
                 <v-spacer></v-spacer>
+                <v-icon
+                  v-if="isDisabled(budget)"
+                  icon="mdi-lock"
+                  size="small"
+                  class="mr-2"
+                  v-tooltip="'This budget has been disabled by an admin'"
+                />
                 <span>{{ convertToMoneyString(calcRemaining(budget)) }}</span>
               </div>
             </v-list-item>
@@ -215,6 +222,18 @@ async function refreshBudget() {
     return budget.amount != 0 || budget.reimbursedAmount != 0 || budget.pendingAmount != 0;
   });
 } // refreshBudget
+
+/**
+ * Whether or not a budget is locked for an employee (note that this is actually recorded in the expense type)
+ *
+ * @param budget budget object
+ */
+function isDisabled(budget) {
+  budget = budget.budgetObject ?? budget;
+  let expenseType = props.expenseTypes.find((et) => et.id === budget.expenseTypeId);
+  let disabledEmployees = expenseType.disabledEmployees ?? [];
+  return disabledEmployees.includes(props.employee.id);
+}
 
 /**
  * Refresh and sets employee information.
