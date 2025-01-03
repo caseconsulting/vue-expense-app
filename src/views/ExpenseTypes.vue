@@ -330,23 +330,47 @@
                         <v-row no-gutters>
                           <v-col cols="12" sm="6" md="3" class="flag">
                             <p>Pro-rated:</p>
-                            <v-icon v-if="item.proRated" icon="mdi-check-circle-outline" id="marks" class="mr-1" />
-                            <v-icon v-else icon="mdi-close-circle-outline" id="marks" class="mr-1" />
+                            <v-icon
+                              v-if="item.proRated"
+                              icon="mdi-check-circle-outline"
+                              id="marks"
+                              class="mr-1"
+                              color="green"
+                            />
+                            <v-icon v-else icon="mdi-close-circle-outline" id="marks" class="mr-1" color="red" />
                           </v-col>
                           <v-col cols="12" sm="6" md="3" class="flag">
                             <p>Overdraft Allowed:</p>
-                            <v-icon v-if="item.odFlag" icon="mdi-check-circle-outline" id="marks" class="mr-1" />
-                            <v-icon v-else icon="mdi-close-circle-outline" id="marks" class="mr-1" />
+                            <v-icon
+                              v-if="item.odFlag"
+                              icon="mdi-check-circle-outline"
+                              id="marks"
+                              class="mr-1"
+                              color="green"
+                            />
+                            <v-icon v-else icon="mdi-close-circle-outline" id="marks" class="mr-1" color="red" />
                           </v-col>
                           <v-col cols="12" sm="6" md="3" class="flag">
                             <p>Recurring:</p>
-                            <v-icon v-if="item.recurringFlag" icon="mdi-check-circle-outline" id="marks" class="mr-1" />
-                            <v-icon v-else icon="mdi-close-circle-outline" id="marks" class="mr-1" />
+                            <v-icon
+                              v-if="item.recurringFlag"
+                              icon="mdi-check-circle-outline"
+                              id="marks"
+                              class="mr-1"
+                              color="green"
+                            />
+                            <v-icon v-else icon="mdi-close-circle-outline" id="marks" class="mr-1" color="red" />
                           </v-col>
                           <v-col cols="12" sm="6" md="3" class="flag">
                             <p>Inactive:</p>
-                            <v-icon v-if="item.isInactive" icon="mdi-check-circle-outline" id="marks" class="mr-1" />
-                            <v-icon v-else icon="mdi-close-circle-outline" id="marks" class="mr-1" />
+                            <v-icon
+                              v-if="item.isInactive"
+                              icon="mdi-check-circle-outline"
+                              id="marks"
+                              class="mr-1"
+                              color="green"
+                            />
+                            <v-icon v-else icon="mdi-close-circle-outline" id="marks" class="mr-1" color="red" />
                           </v-col>
                         </v-row>
                         <!-- End Flags -->
