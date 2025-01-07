@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-dialog v-model="activate" :persistent="waitingSet.size > 0" max-width="500">
+    <v-dialog v-model="activate" @click:outside="closeModal()" :persistent="waitingSet.size > 0" max-width="500">
       <v-card>
         <v-card-title class="d-flex align-center header_style">
           <h3>Disable Expense Type</h3>
@@ -21,7 +21,15 @@
             hide-details
             clearable
           />
-          <v-data-table :items="getEmployeeList()" :headers="headers" :search="employeeSearch" :items-per-page="-1">
+          <v-data-table
+            :items="getEmployeeList()"
+            :headers="headers"
+            :search="employeeSearch"
+            :items-per-page="-1"
+            :v-model:expanded="expanded"
+            :show-expand="multiMode"
+            :expand-on-click="multiMode"
+          >
             <!-- Empty header/footer slot to disable them -->
             <template #headers></template>
             <template #bottom></template>
@@ -29,19 +37,46 @@
             <template #[`item.avatars`]="{ item }">
               <user-avatar :employee="item" :image="item.avatar" :size="35" class="text-body-1" />
             </template>
-            <!-- Action Item Slot -->
-            <template #[`item.actions`]="{ item }">
+            <!-- Single-budget (no categories) -->
+            <template #[`item.actions`]="{ item: emp }">
               <v-switch
+                v-if="!multiMode"
                 class="cursor-pointer"
                 hide-details
                 v-model="invertedDisabledEmployees"
-                :value="item.id"
+                :value="emp.id"
                 color="primary"
                 :label="''"
-                @click="toggleEmployee(item.id)"
-                :disabled="waitingSet.has(item.id)"
-                :loading="waitingSet.has(item.id) ? 'warning' : false"
+                @click="toggleEmployee(emp.id)"
+                :disabled="waitingSet.has(emp.id)"
+                :loading="waitingSet.has(emp.id) ? 'warning' : false"
               />
+            </template>
+            <!-- Categories expanded slot -->
+            <template v-slot:expanded-row="{ columns, item: emp }">
+              <tr>
+                <td :colspan="columns.length">
+                  <v-row v-for="c of type.categories" :key="c.name" class="mx-0 my-2 pa-0" align="center">
+                    <v-col class="ma-0 pa-0" cols="9">
+                      <p class="my-0 ml-6 pa-0">{{ c.name }}</p>
+                    </v-col>
+                    <v-col class="ma-0 pa-0" cols="3">
+                      <v-switch
+                        class="cursor-pointer"
+                        density="compact"
+                        hide-details
+                        v-model="invertedDisabledEmployees[c.name]"
+                        :value="emp.id"
+                        color="primary"
+                        :label="''"
+                        @click="toggleEmployee(emp.id, c.name)"
+                        :disabled="waitingSet.has([emp.id, c.name])"
+                        :loading="waitingSet.has([emp.id, c.name]) ? 'warning' : false"
+                      />
+                    </v-col>
+                  </v-row>
+                </td>
+              </tr>
             </template>
           </v-data-table>
         </v-card-text>
@@ -73,15 +108,18 @@ const props = defineProps([
 ]);
 const emitter = inject('emitter');
 const store = useStore();
+const disabledEmployees = ref(new Set([]));
+const waitingSet = ref(new Set());
+let changes = false;
+const employeeSearch = ref(null);
+// data table vars
 const headers = ref([
   { title: '', value: 'avatars', sortable: false },
   { title: 'Name', key: 'name', value: (e) => `${e.nickname || e.firstName} ${e.lastName}` },
   { title: 'Actions', key: 'actions', sortable: false }
 ]);
-const disabledEmployees = ref(new Set([]));
-const employeeSearch = ref(null);
-const waitingSet = ref(new Set());
-let changes = false;
+const expanded = ref([]);
+const multiMode = ref(false);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -128,26 +166,50 @@ function getEmployeeList() {
  */
 function closeModal() {
   if (changes) emitter.emit('refresh-expense-types');
-  if (waitingSet.value.size == 0) {
-    console.log('literally what');
-    activate.value = false;
-  }
+  if (waitingSet.value.size === 0) activate.value = false;
 }
 
 /**
  * Adds employee to list of disabled employees for this expense type and submits to DB
+ *
+ * @param empId ID of employee
+ * @param catName (optional) name of category if it exists
  */
-async function toggleEmployee(id) {
+async function toggleEmployee(empId, catName) {
   // set loading status
-  waitingSet.value.add(id);
-  // add/remove employee from disabled list
-  if (disabledEmployees.value.has(id)) disabledEmployees.value.delete(id);
-  else disabledEmployees.value.add(id);
+  let waitingSetID = multiMode.value ? [empId, catName] : empId;
+  waitingSet.value.add(waitingSetID);
+
+  // add/remove employee from disabled list var
+  if (multiMode.value) {
+    // make the category Set if it doesn't exist
+    if (!disabledEmployees.value[catName]) disabledEmployees.value[catName] = new Set();
+    // toggle the employee
+    if (disabledEmployees.value[catName].has(empId)) disabledEmployees.value[catName].delete(empId);
+    else disabledEmployees.value[catName].add(empId);
+  } else {
+    // just toggle the employee
+    if (disabledEmployees.value.has(empId)) disabledEmployees.value.delete(empId);
+    else disabledEmployees.value.add(empId);
+  }
+
+  // convert disabledEmployees from set to array for db storage
+  let convertedDE;
+  if (multiMode.value) {
+    convertedDE = {};
+    for (let category of Object.keys(disabledEmployees.value)) {
+      convertedDE[category] = [...disabledEmployees.value[category]];
+    }
+  } else {
+    convertedDE = [...disabledEmployees.value];
+  }
+
   // patch disabledEmployees value to expense types in DB
-  let data = { id: props.type.id, disabledEmployees: [...disabledEmployees.value] };
+  let data = { id: props.type.id, disabledEmployees: convertedDE };
   await api.updateAttribute(api.EXPENSE_TYPES, data, 'disabledEmployees');
+
   // unset loading status
-  waitingSet.value.delete(id);
+  waitingSet.value.delete(waitingSetID);
   changes = true;
 }
 
@@ -160,17 +222,43 @@ watch(
   () => props.type,
   () => {
     changes = false;
-    disabledEmployees.value = new Set(props.type?.disabledEmployees ?? []);
+    multiMode.value = props.type.categories?.length > 0;
+    if (multiMode.value) {
+      disabledEmployees.value = {};
+      for (let category of Object.keys(props.type.disabledEmployees ?? {})) {
+        disabledEmployees.value[category] = new Set(props.type.disabledEmployees[category]);
+      }
+    } else {
+      disabledEmployees.value = new Set(props.type.disabledEmployees ?? []);
+    }
+  }
+);
+watch(
+  () => waitingSet.value,
+  () => {
+    console.log(waitingSet.value);
   }
 );
 
 const invertedDisabledEmployees = computed(() => {
   // get list of employee IDs
-  let employees = new Set(getEmployeeList().map((e) => e.id));
-  // remove any that are in disabledEmployees list
-  for (let eId of disabledEmployees.value) employees.delete(eId);
-  // make it back into an array and return
-  employees = [...employees];
-  return employees;
+  let employees = getEmployeeList().map((e) => e.id);
+  if (multiMode.value) {
+    let toReturn = {};
+    // remove any that are in disabledEmployees list for each category
+    for (let category of Object.keys(disabledEmployees.value)) {
+      toReturn[category] = new Set(employees);
+      for (let eId of disabledEmployees.value[category]) toReturn[category].delete(eId);
+      toReturn[category] = [...toReturn[category]];
+    }
+    return toReturn;
+  } else {
+    let toReturn = new Set(employees);
+    // remove any that are in disabledEmployees list
+    for (let eId of disabledEmployees.value) toReturn.delete(eId);
+    // make it back into an array and return
+    toReturn = [...toReturn];
+    return toReturn;
+  }
 });
 </script>
