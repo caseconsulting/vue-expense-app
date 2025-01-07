@@ -469,7 +469,6 @@ async function submit() {
       }
 
       const updated = await api.updateAttributes(api.EMPLOYEES, props.employee.id, changes);
-      console.log(JSON.stringify(changes));
 
       // if a valid employee is returned
       if (updated.id) {

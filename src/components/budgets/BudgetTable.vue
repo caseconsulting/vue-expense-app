@@ -12,7 +12,7 @@
                 icon="mdi-lock"
                 size="small"
                 class="mr-2 mb-1 cursor-pointer"
-                v-tooltip="'This budget has been disabled by an admin'"
+                v-tooltip="isDisabledText(isDisabled(item))"
               />
               <h3 class="text-white">{{ item.expenseTypeName }}</h3>
             </v-card-title>
@@ -205,14 +205,35 @@ function noRemaining(budget) {
 } // noRemaining
 
 /**
- * Whether or not a budget is locked for an employee (note that this is actually recorded in the expense type)
+ * Returns disabled budget information for the employee. Has three possibilities:
+ *
+ *  TRUE: Employee's budget is disabled, and there are no categories
+ * FALSE: Employee's budget is not disabled, reglardless of categories
+ * ARRAY: Employee's budget is disabled, and these are the categories that are
  *
  * @param budget budget object
+ * @return true, false, or array depending on budget and disabled status
  */
 function isDisabled(budget) {
   let expenseType = props.expenseTypes.find((et) => et.id === budget.expenseTypeId);
-  let disabledEmployees = expenseType.disabledEmployees ?? [];
-  return disabledEmployees.includes(props.employee.id);
+  if (expenseType.categories?.length > 0) {
+    let disabledCategories = expenseType.disabledEmployees?.[props.employee.id] ?? [];
+    return disabledCategories.length > 0 ? disabledCategories : false;
+  } else {
+    return expenseType.disabledEmployees?.[props.employee.id].includes(expenseType.id);
+  }
+}
+
+/**
+ * Reurns text to explain to user their budget disabled status
+ *
+ * @param isDisabled result of isDisabled()
+ * @return String of text to give user
+ */
+function isDisabledText(isDisabled) {
+  if (!isDisabled) return '';
+  if (isDisabled === true) return 'This budget has been disabled by an admin';
+  return `The following categories have been disabled by an admin: "${isDisabled.join('", "')}"`;
 }
 
 /**

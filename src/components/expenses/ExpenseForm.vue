@@ -47,7 +47,7 @@
               </template>
               <template #subtitle>
                 <v-icon v-if="item.raw.disabled" class="mb-1" size="small" icon="mdi-lock" />
-                <span v-if="item.raw.disabled">This budget has been disabled by an admin</span>
+                <span v-if="item.raw.disabled">{{ isDisabledText(item.raw.disabled) }}</span>
               </template>
             </v-list-item>
           </template>
@@ -76,7 +76,7 @@
               </template>
               <template #subtitle>
                 <v-icon v-if="item.raw.disabled" class="mb-1" size="small" icon="mdi-lock" />
-                <span v-if="item.raw.disabled">This budget has been disabled by an admin</span>
+                <span v-if="item.raw.disabled">{{ isDisabledText(item.raw.disabled) }}</span>
               </template>
             </v-list-item>
           </template>
@@ -92,9 +92,9 @@
         </div>
 
         <!-- Category -->
-        <v-select
+        <v-autocomplete
           variant="underlined"
-          v-if="getCategories() != null && getCategories().length >= 1"
+          v-if="getCategories() != null && getCategories().length > 0"
           :rules="getRequiredRules()"
           :disabled="isInactive"
           v-model="editedExpense.category"
@@ -102,7 +102,16 @@
           label="Select Category"
           clearable
           chips
-        />
+        >
+          <template #item="{ item, props }">
+            <v-list-item v-bind="props" :disabled="isCategoryDisabled(item.title)">
+              <template #subtitle>
+                <v-icon v-if="isCategoryDisabled(item.title)" class="mb-1" size="small" icon="mdi-lock" />
+                <span v-if="isCategoryDisabled(item.title)">This category has been disabled by an admin</span>
+              </template>
+            </v-list-item>
+          </template>
+        </v-autocomplete>
 
         <!-- Update Receipt Checkbox -->
         <v-checkbox
@@ -1064,11 +1073,45 @@ function encodeUrl(url) {
 } // encodeUrl
 
 /**
- * Returns true if the expense type is disabled
- * @param type expense type object
+ * Returns disabled budget information for the employee. Has three possibilities:
+
+ *
+ * @param budget budget object
+ * @return true, false, or array depending on budget and disabled status
  */
-function isDisabled(type) {
-  return type?.disabledEmployees?.includes(this?.editedExpense?.employeeId);
+function isDisabled(expenseType) {
+  let empId = this?.editedExpense?.employeeId;
+  if (expenseType.categories?.length > 0) {
+    let disabledCategories = expenseType.disabledEmployees?.[empId] ?? [];
+    return disabledCategories.length > 0 ? disabledCategories : false;
+  } else {
+    return expenseType.disabledEmployees?.[empId].includes(expenseType.id);
+  }
+}
+
+/**
+ * Reurns text to explain to user their budget disabled status
+ *
+ * @param isDisabled result of isDisabled()
+ * @return String of text to give user
+ */
+function isDisabledText(isDisabled) {
+  if (!isDisabled) return '';
+  if (isDisabled === true) return 'This budget has been disabled by an admin';
+  return `The following categories have been disabled by an admin: "${isDisabled.join('", "')}"`;
+}
+
+/**
+ * Returns whether or not a category is disabled.
+ *
+ * @param catName name of category
+ * @return true if category is disabled
+ */
+function isCategoryDisabled(catName) {
+  let empId = this.asUser ? this.userInfo.id : this.editedExpense.employeeId;
+  let expenseType = _find(this.expenseTypes, (type) => this.editedExpense.expenseTypeId === type.value);
+  if (!empId || !expenseType || !catName) return false; // default to allowing in case of bug (disabling is rare)
+  return expenseType.disabledEmployees?.[empId]?.includes(catName) ?? false;
 }
 
 /**
@@ -1084,16 +1127,26 @@ function filteredExpenseTypes() {
     _forEach(this.expenseTypes, (expenseType) => {
       if (!expenseType.isInactive) {
         // expense type is active
+        let etDisabled = this.isDisabled(expenseType);
+        let disabledCategories = Array.isArray(etDisabled) ? etDisabled : undefined;
         if (!selectedEmployee) {
           // add expense type if no employees are selected
           expenseType.text = `${expenseType.budgetName} - $${Number(expenseType.budget).toLocaleString().toString()}`;
-          filteredExpType.push({ ...expenseType, disabled: this.isDisabled(expenseType) });
+          filteredExpType.push({
+            ...expenseType,
+            disabled: etDisabled === true,
+            disabledCategories: etDisabled
+          });
         } else if (this.hasAccess(selectedEmployee, expenseType)) {
           // add expense type if the employee is selected and has access
           let budget = _find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id);
           let amount = budget ? budget.budgetObject.amount : this.calcAdjustedBudget(selectedEmployee, expenseType); // calculate budget
           expenseType.text = `${expenseType.budgetName} - $${Number(amount).toLocaleString().toString()}`;
-          filteredExpType.push({ ...expenseType, disabled: this.isDisabled(expenseType) });
+          filteredExpType.push({
+            ...expenseType,
+            disabled: etDisabled === true,
+            disabledCategories: disabledCategories
+          });
         }
       }
     });
@@ -1113,13 +1166,18 @@ function filteredExpenseTypes() {
             let budget = _find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id);
             let amount = budget ? budget.budgetObject.amount : expenseType.budgetAmount;
             expenseType.text = `${expenseType.budgetName} - $${Number(amount).toLocaleString().toString()}`;
-            filteredExpType.push({ ...expenseType, disabled: this.isDisabled(expenseType) });
+            let etDisabled = this.isDisabled(expenseType);
+            let disabledCategories = Array.isArray(etDisabled) ? etDisabled : undefined;
+            filteredExpType.push({
+              ...expenseType,
+              disabled: etDisabled === true,
+              disabledCategories: disabledCategories
+            });
           }
         }
       }
     });
   }
-  // console.log(filteredExpType);
   return filteredExpType;
 } // filteredExpenseTypes
 
@@ -2226,6 +2284,8 @@ export default {
     employeeFilter,
     encodeUrl,
     isDisabled,
+    isDisabledText,
+    isCategoryDisabled,
     filteredExpenseTypes,
     formatCost,
     format,

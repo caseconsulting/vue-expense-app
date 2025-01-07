@@ -42,14 +42,12 @@
               <v-switch
                 v-if="!multiMode"
                 class="cursor-pointer"
-                hide-details
-                v-model="invertedDisabledEmployees"
-                :value="emp.id"
                 color="primary"
-                :label="''"
+                hide-details
+                :model-value="!isDisabled(emp.id)"
+                :disabled="isWaiting(emp.id)"
+                :loading="isWaiting(emp.id) ? 'warning' : false"
                 @click="toggleEmployee(emp.id)"
-                :disabled="waitingSet.has(emp.id)"
-                :loading="waitingSet.has(emp.id) ? 'warning' : false"
               />
             </template>
             <!-- Categories expanded slot -->
@@ -64,14 +62,12 @@
                       <v-switch
                         class="cursor-pointer"
                         density="compact"
-                        hide-details
-                        v-model="invertedDisabledEmployees[c.name]"
-                        :value="emp.id"
                         color="primary"
-                        :label="''"
+                        hide-details
+                        :model-value="!isDisabled(emp.id, c.name)"
+                        :disabled="isWaiting(emp.id, c.name)"
+                        :loading="isWaiting(emp.id, c.name) ? 'warning' : false"
                         @click="toggleEmployee(emp.id, c.name)"
-                        :disabled="waitingSet.has([emp.id, c.name])"
-                        :loading="waitingSet.has([emp.id, c.name]) ? 'warning' : false"
                       />
                     </v-col>
                   </v-row>
@@ -90,7 +86,7 @@
 </template>
 
 <script setup>
-import { inject, ref, computed, watch } from 'vue';
+import { inject, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 import { employeeFilter } from '@/shared/filterUtils';
 import api from '@/shared/api';
@@ -108,10 +104,17 @@ const props = defineProps([
 ]);
 const emitter = inject('emitter');
 const store = useStore();
-const disabledEmployees = ref(new Set([]));
-const waitingSet = ref(new Set());
-let changes = false;
-const employeeSearch = ref(null);
+
+const waitingSet = ref(new Set()); // keeps track of what v-switches have active API calls
+let changes = false; // toggle for if changes have been made at all, expense types reload if this is true
+const employeeSearch = ref(null); // var to connect search bar with table
+const disabledEmployees = ref({}); // which employees are disabled, see below structure
+// here's what this var looks like
+// const disabledEmployees = {
+//   employeeId1: ['categoryName1', 'categoryName2'], // with categories
+//   employeeId2: ['budgetID'] // without categories
+// }
+
 // data table vars
 const headers = ref([
   { title: '', value: 'avatars', sortable: false },
@@ -173,92 +176,65 @@ function closeModal() {
  * Adds employee to list of disabled employees for this expense type and submits to DB
  *
  * @param empId ID of employee
- * @param catName (optional) name of category if it exists
+ * @param catName name of category if it exists, defaults to expense type ID
  */
-async function toggleEmployee(empId, catName) {
+async function toggleEmployee(empId, catName = props.type.id) {
   // set loading status
-  let waitingSetID = multiMode.value ? [empId, catName] : empId;
-  waitingSet.value.add(waitingSetID);
+  let waitingID = `${empId}-${catName}`;
+  waitingSet.value.add(waitingID);
 
+  // ensure the employee as an entry in disabledEmployees
+  if (!disabledEmployees.value[empId]) disabledEmployees.value[empId] = [];
   // add/remove employee from disabled list var
-  if (multiMode.value) {
-    // make the category Set if it doesn't exist
-    if (!disabledEmployees.value[catName]) disabledEmployees.value[catName] = new Set();
-    // toggle the employee
-    if (disabledEmployees.value[catName].has(empId)) disabledEmployees.value[catName].delete(empId);
-    else disabledEmployees.value[catName].add(empId);
+  if (disabledEmployees.value[empId].includes(catName)) {
+    disabledEmployees.value[empId] = disabledEmployees.value[empId].filter((c) => c !== catName);
   } else {
-    // just toggle the employee
-    if (disabledEmployees.value.has(empId)) disabledEmployees.value.delete(empId);
-    else disabledEmployees.value.add(empId);
+    disabledEmployees.value[empId].push(catName);
   }
-
-  // convert disabledEmployees from set to array for db storage
-  let convertedDE;
-  if (multiMode.value) {
-    convertedDE = {};
-    for (let category of Object.keys(disabledEmployees.value)) {
-      convertedDE[category] = [...disabledEmployees.value[category]];
-    }
-  } else {
-    convertedDE = [...disabledEmployees.value];
-  }
+  // if employee has nothing disabled, just remove them
+  if (disabledEmployees.value[empId].length === 0) delete disabledEmployees.value[empId];
 
   // patch disabledEmployees value to expense types in DB
-  let data = { id: props.type.id, disabledEmployees: convertedDE };
+  let data = { id: props.type.id, disabledEmployees: disabledEmployees.value };
   await api.updateAttribute(api.EXPENSE_TYPES, data, 'disabledEmployees');
 
   // unset loading status
-  waitingSet.value.delete(waitingSetID);
+  waitingSet.value.delete(waitingID);
   changes = true;
+}
+
+/**
+ * Returns true if an employee has the budget/category disabled
+ *
+ * @param empId ID of employee
+ * @param catName name of category if it exists, defaults to expense type ID
+ */
+function isDisabled(empId, catName = props.type.id) {
+  return disabledEmployees.value[empId]?.includes(catName) ?? false;
+}
+
+/**
+ * Returns true if the employee ID/category name is waiting for API call to finish
+ *
+ * @param empId ID of employee
+ * @param catName name of category if it exists, defaults to expense type ID
+ */
+function isWaiting(empId, catName = props.type.id) {
+  return waitingSet.value.has(`${empId}-${catName}`);
 }
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     COMPUTED                     |
+// |                     WATCHERS                     |
 // |                                                  |
 // |--------------------------------------------------|
 watch(
   () => props.type,
   () => {
-    changes = false;
+    changes = false; // reset changes to not reload expense types if nothing happens
+    employeeSearch.value = null; // reset search so it doesn't persist
     multiMode.value = props.type.categories?.length > 0;
-    if (multiMode.value) {
-      disabledEmployees.value = {};
-      for (let category of Object.keys(props.type.disabledEmployees ?? {})) {
-        disabledEmployees.value[category] = new Set(props.type.disabledEmployees[category]);
-      }
-    } else {
-      disabledEmployees.value = new Set(props.type.disabledEmployees ?? []);
-    }
+    disabledEmployees.value = props.type.disabledEmployees ?? {}; // load in disabledEmployees, or make a blank one
   }
 );
-watch(
-  () => waitingSet.value,
-  () => {
-    console.log(waitingSet.value);
-  }
-);
-
-const invertedDisabledEmployees = computed(() => {
-  // get list of employee IDs
-  let employees = getEmployeeList().map((e) => e.id);
-  if (multiMode.value) {
-    let toReturn = {};
-    // remove any that are in disabledEmployees list for each category
-    for (let category of Object.keys(disabledEmployees.value)) {
-      toReturn[category] = new Set(employees);
-      for (let eId of disabledEmployees.value[category]) toReturn[category].delete(eId);
-      toReturn[category] = [...toReturn[category]];
-    }
-    return toReturn;
-  } else {
-    let toReturn = new Set(employees);
-    // remove any that are in disabledEmployees list
-    for (let eId of disabledEmployees.value) toReturn.delete(eId);
-    // make it back into an array and return
-    toReturn = [...toReturn];
-    return toReturn;
-  }
-});
 </script>

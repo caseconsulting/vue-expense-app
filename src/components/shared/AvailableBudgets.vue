@@ -35,7 +35,7 @@
                   icon="mdi-lock"
                   size="small"
                   class="mr-2"
-                  v-tooltip="'This budget has been disabled by an admin'"
+                  v-tooltip="isDisabled(budget)"
                 />
                 <span>{{ convertToMoneyString(calcRemaining(budget)) }}</span>
               </div>
@@ -227,12 +227,20 @@ async function refreshBudget() {
  * Whether or not a budget is locked for an employee (note that this is actually recorded in the expense type)
  *
  * @param budget budget object
+ * @return false or string to display if disabled
  */
 function isDisabled(budget) {
+  // get expense type and such
   budget = budget.budgetObject ?? budget;
   let expenseType = props.expenseTypes.find((et) => et.id === budget.expenseTypeId);
-  let disabledEmployees = expenseType.disabledEmployees ?? [];
-  return disabledEmployees.includes(props.employee.id);
+  // extract whether or not the budget is disabled
+  let empId = props.employee.id;
+  let disabled = expenseType.disabledEmployees?.[empId] ?? false;
+  if (disabled?.[0] === expenseType.id) disabled = true;
+  // return pretty text or false
+  if (!disabled) return false;
+  if (disabled === true) return 'This budget has been disabled by an admin';
+  return `The following categories have been disabled by an admin: "${disabled.join('", "')}"`;
 }
 
 /**
