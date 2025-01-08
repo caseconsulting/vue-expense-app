@@ -1085,7 +1085,7 @@ function isDisabled(expenseType) {
     let disabledCategories = expenseType.disabledEmployees?.[empId] ?? [];
     return disabledCategories.length > 0 ? disabledCategories : false;
   } else {
-    return expenseType.disabledEmployees?.[empId].includes(expenseType.id);
+    return expenseType.disabledEmployees?.[empId]?.includes(expenseType.id) ?? false;
   }
 }
 

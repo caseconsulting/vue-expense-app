@@ -220,7 +220,7 @@ function isDisabled(budget) {
     let disabledCategories = expenseType.disabledEmployees?.[props.employee.id] ?? [];
     return disabledCategories.length > 0 ? disabledCategories : false;
   } else {
-    return expenseType.disabledEmployees?.[props.employee.id].includes(expenseType.id);
+    return expenseType.disabledEmployees?.[props.employee.id]?.includes(expenseType.id) ?? false;
   }
 }
 
