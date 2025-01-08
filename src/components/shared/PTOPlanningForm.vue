@@ -122,8 +122,9 @@
 // |--------------------------------------------------|
 
 import { onMounted, ref, reactive, watch, inject, onBeforeMount, defineExpose } from 'vue';
+import { updateStoreUser, updateStorePtoCashOuts, updateStoreTags } from '@/utils/storeUtils';
 import { useStore } from 'vuex';
-import { updateStoreUser, updateStorePtoCashOuts, updateStoreTags } from '../../utils/storeUtils';
+
 import {
   format,
   startOf,
