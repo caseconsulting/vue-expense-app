@@ -8,17 +8,24 @@
 
     <v-container fluid>
       <v-form ref="expenseTypeForm" v-model="valid" @submit.prevent="valid ? (submitForm = true) : _" lazy-validation>
-        <!-- Budget Name -->
-        <v-text-field
-          variant="underlined"
-          v-model="editedExpenseType.budgetName"
-          id="budgetName"
-          :rules="getRequiredRules()"
-          label="Budget Name"
-          data-vv-name="Budget Name"
-          class="type_form_padding"
-        ></v-text-field>
-
+        <v-row>
+          <v-col>
+            <!-- Budget Name -->
+            <v-text-field
+              variant="underlined"
+              v-model="editedExpenseType.budgetName"
+              id="budgetName"
+              :rules="getRequiredRules()"
+              label="Budget Name"
+              data-vv-name="Budget Name"
+              class="type_form_padding"
+            ></v-text-field>
+          </v-col>
+          <v-col>
+            <!-- Inactive Flag -->
+            <v-checkbox :color="caseRed" label="Mark as Inactive" v-model="editedExpenseType.isInactive"></v-checkbox>
+          </v-col>
+        </v-row>
         <!-- Categories -->
         <v-combobox
           variant="underlined"
@@ -258,8 +265,6 @@
               v-model="editedExpenseType.requiredFlag"
               @update:model-value="toggleRequireReceipt()"
             ></v-checkbox>
-            <!-- Inactive Flag -->
-            <v-checkbox :color="caseRed" label="Mark as Inactive" v-model="editedExpenseType.isInactive"></v-checkbox>
           </v-col>
         </v-row>
 
