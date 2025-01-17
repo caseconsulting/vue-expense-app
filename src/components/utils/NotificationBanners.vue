@@ -75,7 +75,8 @@ const user = ref(null);
 // Checks if there are any expiring cert and sorts by days until expiration.
 onBeforeMount(async () => {
   emitter.on('add-notification', (data) => {
-    if (localStorage.getItem(data.id) !== 'closed') alerts.value.push(data);
+    let notifExists = alerts.value.find((item) => item.id == data.id) !== undefined;
+    if (localStorage.getItem(data.id) !== 'closed' && !notifExists) alerts.value.push(data);
   });
   // wait to load data until router page is almost finished
   await setTimeout(async () => {
