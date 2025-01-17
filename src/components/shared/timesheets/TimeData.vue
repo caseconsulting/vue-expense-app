@@ -14,6 +14,11 @@
         </v-btn>
       </v-card-title>
       <v-card-text class="mt-3 px-7">
+        <!-- Warning for not being "on track" with hours -->
+        <v-alert v-if="notOnTrack" class="mb-4" color="#f27311" type="info">
+          You are not on track to meet your 1860 hours, which may have an affect on your budgets. If you believe this is
+          an error, ensure that your timesheet data is up-to-date.
+        </v-alert>
         <v-progress-linear class="mb-3 mt-7" v-if="loading" indeterminate></v-progress-linear>
         <div v-else>
           <div v-if="errorMessage" class="d-flex flex-column justify-center align-center py-3 font-weight-bold">
@@ -95,6 +100,7 @@ const PTO_ACCRUALS = {
   white: 15.33333, // per Dave B, accruals are exactly this
   gray: 15.33333 // per Dave B, accruals are exactly this
 };
+const notOnTrack = ref(false);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -135,6 +141,10 @@ onBeforeMount(async () => {
       hiddenPtoPlanningFormRef.value.save(true);
       hasSavedPlannedPto = true;
     }
+  });
+
+  emitter.on('1860-not-on-track', () => {
+    notOnTrack.value = true;
   });
 
   loading.value = false;
@@ -463,5 +473,10 @@ watch(
 }
 .relative {
   position: relative !important;
+}
+.on-track-alert {
+  background-color: #f27311;
+  color: white;
+  border-radius: 4px;
 }
 </style>
