@@ -434,7 +434,6 @@ watch(
   () => ptoBalances.value,
   async () => {
     let balance = (ptoBalances.value?.['PTO']?.value ?? ptoBalances.value?.['PTO']) / 60 / 60;
-    balance = 200; // TODO: REMOVE
     let plan = await getEmployeePlanTagName(clonedEmployee.value);
     plan = plan?.toLowerCase();
     let ptoAccrual = PTO_ACCRUALS[plan ?? 'red']; // default to red to set to 14
