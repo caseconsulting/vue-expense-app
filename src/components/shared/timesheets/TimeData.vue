@@ -310,7 +310,7 @@ async function resetData() {
     localStorage.removeItem(KEYS.value.QB);
   }
   emitter.emit('reset-data');
-  await setInitialData(false);
+  await setInitialData();
   refreshPlannedPto();
   loading.value = false;
 } // resetData

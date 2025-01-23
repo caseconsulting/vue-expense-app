@@ -84,7 +84,8 @@ import {
   isSameOrBefore,
   format,
   getTodaysDate,
-  DEFAULT_ISOFORMAT
+  DEFAULT_ISOFORMAT,
+  startOf
 } from '@/shared/dateUtils';
 import { startOf, endOf } from '@/shared/dateUtils';
 
@@ -138,6 +139,9 @@ onMounted(() => {
   emitter.on('update-time-data-needed', (n) => {
     customNeeded.value = n;
   });
+
+  // emit if user is not on track for 1860
+  if (!isOnTrack1860()) emitter.emit('not-on-track-1860');
 }); // mounted
 
 /**
@@ -408,6 +412,15 @@ function getWorkDays(startDate, endDate, excludeProRated = false) {
 function isWeekDay(day) {
   return getIsoWeekday(day) >= 1 && getIsoWeekday(day) <= 5;
 } // isWeekDay
+
+// returns true if user is on track for 1860.
+function isOnTrack1860() {
+  // TODO: what happens if someone's time period is less than a month?
+  const MIN_1860_HOURS = 155 * (props.employee.workStatus / 100); // min hours per month is given by admin (prorated)
+  let minPerDay = MIN_1860_HOURS / totalWorkDays.value; // min hours eneded per day
+  let minNeeded = minPerDay * getWorkDays(startOf(today.value, 'M'), today.value); // min hours needed as of today
+  return periodHoursCompleted.value >= minNeeded;
+}
 </script>
 
 <style>
