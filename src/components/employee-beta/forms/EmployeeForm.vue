@@ -228,7 +228,7 @@
                   tab-id="customerOrgs"
                   v-model="editedEmployee"
                   :valid="validTabs.customerOrgs"
-                  @click="cardName = 'Customer Orgss'"
+                  @click="cardName = 'Customer Orgs'"
                 >
                   <template v-slot="{ props }">
                     <customer-orgs-form :slot-props="props"></customer-orgs-form>
