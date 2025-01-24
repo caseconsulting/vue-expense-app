@@ -128,6 +128,14 @@ const headers = ref([
     key: 'currentOrgYoE'
   },
   {
+    title: 'Contract',
+    key: 'contractNames'
+  },
+  {
+    title: 'Prime',
+    key: 'primeNames'
+  },
+  {
     title: 'Email',
     key: 'email'
   }
@@ -154,8 +162,10 @@ const tagsInfo = ref({
 onMounted(() => {
   employeesInfo.value = getActive(store.getters.employees); // default to filtered list
   filteredEmployees.value = employeesInfo.value; // one.value is shown
+  console.log(filteredEmployees.value);
   populateDropdowns(employeesInfo.value);
   buildCustomerOrgColumns();
+  buildContractsColumn();
   if (localStorage.getItem('requestedFilter')) {
     custOrgSearch.value = localStorage.getItem('requestedFilter');
     refreshDropdownItems();
@@ -197,6 +207,38 @@ function buildCustomerOrgColumns() {
     }
   });
 } // buildCustomerOrgColumns
+
+/**
+ * Modified from version of Contracts tab.
+ */
+function buildContractsColumn() {
+  employeesInfo.value.forEach((currentEmp) => {
+    let contractNames = '';
+    let primeNames = '';
+    if (currentEmp.contracts) {
+      currentEmp.contracts.forEach((currentCon) => {
+        // find current contracts
+        let current = false;
+        if (currentCon.projects) {
+          currentCon.projects.forEach((currProj) => {
+            if (!currProj.endDate) current = true;
+          });
+        }
+        // add current contracts
+        if (current) {
+          let contract = store.getters.contracts.find((c) => c.id === currentCon.contractId);
+          contractNames += `${contract.contractName} & `;
+          primeNames += `${contract.primeName} & `;
+        }
+      });
+      // remove & at the end
+      contractNames = contractNames.slice(0, -2);
+      primeNames = primeNames.slice(0, -2);
+    }
+    currentEmp.contractNames = contractNames;
+    currentEmp.primeNames = primeNames;
+  });
+} // buildContractsColumn
 
 /**
  * handles click event of the employee table entry
