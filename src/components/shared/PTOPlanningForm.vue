@@ -251,7 +251,10 @@ onMounted(async () => {
   if (!store.getters.tags) await updateStoreTags();
 
   // update employee specific information
-  let benefitsPlan = getEmployeePlanTagName(employee.value).toLowerCase();
+  let benefitsPlan = getEmployeePlanTagName(employee.value);
+  if (benefitsPlan) {
+    benefitsPlan.toLowerCase();
+  }
   PTOPerMonth.value = PTO_ACCRUALS[benefitsPlan ?? 'red']; // default to red since it's the current 14 hours
   PTOPerMonth.value *= employee.value.workStatus / 100;
 
