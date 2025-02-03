@@ -64,7 +64,7 @@ import { computed, inject, onBeforeMount, onBeforeUnmount, ref, unref, watch } f
 import { useStore } from 'vuex';
 import { difference, isBefore, now } from '@/shared/dateUtils';
 import { updateStoreContracts, updateStoreTags } from '@/utils/storeUtils';
-import { getCalendarYearPeriod, getContractYearPeriod } from './time-periods';
+import { getCalendarYearPeriods, getContractYearPeriods } from './time-periods';
 import { getTodaysDate } from '@/shared/dateUtils.js';
 
 // |--------------------------------------------------|
@@ -320,19 +320,21 @@ async function resetData() {
  *
  * @param {Boolean} isCalendarYear - Whether or not the time period is the calendar year
  * @param {Boolean} isYearly - Whether or not the time period is yearly
+ * @param {Boolean} prevYear - Whether or not to get the previous year
  */
 async function setDataFromApi(isCalendarYear, isYearly) {
   let code = !isYearly ? 2 : null;
-  let period = isYearly
-    ? isCalendarYear
-      ? getCalendarYearPeriod()
-      : getContractYearPeriod(clonedEmployee.value)
-    : null;
+  let periods = {};
+  if (isYearly) {
+    if (isCalendarYear) periods = getCalendarYearPeriods();
+    else periods = getContractYearPeriods(clonedEmployee.value);
+  }
   let timesheetsData = await api.getTimesheetsData(clonedEmployee.value.employeeNumber, {
     code,
     employeeId: clonedEmployee.value.id,
-    ...(period || {})
+    periods
   });
+
   if (!hasError(timesheetsData)) {
     timesheets.value = timesheetsData.timesheets;
     ptoBalances.value = timesheetsData.ptoBalances;

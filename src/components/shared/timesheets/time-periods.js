@@ -20,13 +20,21 @@ import {
  *
  * @returns Object - The calendar year period for timesheet collection
  */
-export function getCalendarYearPeriod() {
+export function getCalendarYearPeriods() {
   let today = getTodaysDate();
-  let startDate = format(startOf(today, 'year'), null, DEFAULT_ISOFORMAT);
-  let endDate = format(endOf(today, 'year'), null, DEFAULT_ISOFORMAT);
-  let title = format(startDate, null, 'YYYY');
-  return { startDate, endDate, title };
-} // getCalendarYearPeriod
+  let currentYear = {
+    startDate: format(startOf(today, 'year'), null, DEFAULT_ISOFORMAT),
+    endDate: format(endOf(today, 'year'), null, DEFAULT_ISOFORMAT),
+    title: format(today, null, 'YYYY')
+  };
+  let lastYearToday = subtract(today, 1, 'year');
+  let previousYear = {
+    startDate: format(startOf(lastYearToday, 'year'), null, DEFAULT_ISOFORMAT),
+    endDate: format(endOf(lastYearToday, 'year'), null, DEFAULT_ISOFORMAT),
+    title: format(lastYearToday, null, 'YYYY')
+  };
+  return [previousYear, currentYear];
+} // getCalendarYearPeriods
 
 /**
  * Gets the contract year period based on settings set on the Contracts page. For more info
@@ -35,7 +43,7 @@ export function getCalendarYearPeriod() {
  * @param {Object} employee - The employee to get the contract year period from
  * @returns Object - The contract year period for timesheet collection
  */
-export function getContractYearPeriod(employee) {
+export function getContractYearPeriods(employee) {
   let period = null;
   let curContract = _find(employee.contracts, (c) => _find(c.projects, (p) => !p.endDate));
   let contract = _find(store.getters.contracts, (c) => c.id === curContract?.contractId);
@@ -49,7 +57,7 @@ export function getContractYearPeriod(employee) {
     default:
   }
   return period;
-} // getContractYearPeriod
+} // getContractYearPeriods
 
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
@@ -114,6 +122,6 @@ function _getCurrentProject(employee) {
 } // _getCurrentProject
 
 export default {
-  getCalendarYearPeriod,
-  getContractYearPeriod
+  getCalendarYearPeriods,
+  getContractYearPeriods
 };
