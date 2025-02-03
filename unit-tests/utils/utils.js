@@ -88,6 +88,10 @@ function getName(type) {
  */
 function login(browser, username = null, password = null) {
   // get defaults for unset vars
+  if (username) {
+    username = username.toLowerCase();
+    //sets the username to lower case to fix capital letters breaking email logins
+  }
   username = username || vars.tester.username;
   password = password || vars.tester.password;
 
