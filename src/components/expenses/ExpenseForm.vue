@@ -1183,10 +1183,10 @@ async function getRemainingBudget() {
 
       if (budget) {
         this.remainingBudget =
-          budget.budgetObject.amount +
+          parseInt(budget.budgetObject.amount) +
           legacyCarryover -
-          budget.budgetObject.pendingAmount -
-          budget.budgetObject.reimbursedAmount -
+          parseInt(budget.budgetObject.pendingAmount) -
+          parseInt(budget.budgetObject.reimbursedAmount) -
           this.editedExpense.cost;
         this.expenseTypeName = budget.expenseTypeName;
         this.overdraftBudget = budget.budgetObject.amount;
