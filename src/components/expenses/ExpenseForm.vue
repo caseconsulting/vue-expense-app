@@ -903,6 +903,7 @@ function clearForm() {
  * @return String - The hint to display
  */
 function costHint() {
+  if (!this.selectedExpenseType) return '';
   if (!this.editedExpense.employeeId) {
     return 'Please choose an employee to see remaining balance.';
   } else if (!this.editedExpense.expenseTypeId) {
@@ -1178,6 +1179,15 @@ function filteredExpenseTypes() {
       }
     });
   }
+  // allow other parts of the code to add an expense type, no questions asked
+  for (let expenseType of this.overrideFilteredExpenseTypes) {
+    filteredExpType.push({
+      text: `${expenseType.budgetName} - $${expenseType.budget}`,
+      value: expenseType.id,
+      ...expenseType
+    });
+  }
+
   return filteredExpType;
 } // filteredExpenseTypes
 
@@ -1271,6 +1281,24 @@ async function getRemainingBudget() {
       let budget = this.employeeBudgets.find(
         (currBudget) => currBudget.expenseTypeId === this.editedExpense.expenseTypeId
       );
+      // if budget was not found and item is being edited, it is likely because the budget is no longer active
+      // but the expense is still valid for that expense type. this allows for that situation
+      if (!budget) {
+        budget = await api.getEmployeeBudget(
+          this.editedExpense.employeeId,
+          this.editedExpense.expenseTypeId,
+          this.editedExpense.purchaseDate
+        );
+        let expenseType = await api.getItem(api.EXPENSE_TYPES, budget.expenseTypeId);
+        budget = {
+          budgetObject: budget,
+          description: expenseType.description,
+          expenseTypeName: expenseType.budgetName,
+          odFlag: expenseType.odFlag,
+          expenseTypeId: budget.expenseTypeId
+        };
+        this.overrideFilteredExpenseTypes.push(expenseType);
+      }
 
       let legacyCarryover = parseInt(budget.budgetObject.legacyCarryover ?? 0);
 
@@ -2246,6 +2274,7 @@ export default {
       },
       originalExpense: null, // expense before changes
       overdraftBudget: 0,
+      overrideFilteredExpenseTypes: [],
       purchaseDateFormatted: null, // formatted purchase date
       purchaseMenu: false, // display purchase menu
       receiptRules: [(v) => !this.isEmpty(v) || 'Receipts are required'], // rules for receipt
