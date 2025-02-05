@@ -104,7 +104,7 @@
                 @click="cardName = 'Customer Orgs'"
                 link
                 title="Customer Orgs"
-                :class="{ invalid: !validTabs.customerOrg === false }"
+                :class="{ invalid: validTabs.customerOrg === false }"
                 :border="cardName == 'Customer Orgs' ? (validTabs.customerOrgs === false ? 'error md' : 'md') : '0'"
               ></v-list-item>
               <v-list-item
