@@ -228,7 +228,7 @@
                   tab-id="customerOrgs"
                   v-model="editedEmployee"
                   :valid="validTabs.customerOrgs"
-                  @click="cardName = 'Customer Orgss'"
+                  @click="cardName = 'Customer Orgs'"
                 >
                   <template v-slot="{ props }">
                     <customer-orgs-form :slot-props="props"></customer-orgs-form>
@@ -564,8 +564,6 @@ async function validate() {
   await prepareTabs();
 
   let valid = true;
-
-  console.log(validTabs);
 
   // iterates through each tab to make sure they are all valid
   _forOwn(validTabs, (value) => {

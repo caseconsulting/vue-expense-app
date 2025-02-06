@@ -86,6 +86,7 @@ import {
   getTodaysDate,
   DEFAULT_ISOFORMAT
 } from '@/shared/dateUtils';
+import { startOf, endOf } from '@/shared/dateUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -319,6 +320,25 @@ const totalWorkDays = computed(() => {
 // |                      METHODS                     |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Checks to see if employees is on track to meet their 1860 hours. This is defined
+ * by meeting 155 hours per month.
+ */
+function checkFor1860OnTrack() {
+  // TODO: watch
+  const ON_TRACK_MIN = 155; // per-month on-track minimum
+  let workDays = getWorkDays(startOf(today.value, 'month'), endOf(today.value, 'month'));
+  let onTrackHoursPerDay = ON_TRACK_MIN / workDays; // # hours you should work per day to meet 155 for the month
+  if (remainingAverageHoursPerDay.value > onTrackHoursPerDay) {
+    emitter.emit('1860-not-on-track');
+    console.log('NOT ON TRACK');
+  } else {
+    console.log('You are on track for 1860!');
+    console.log(remainingAverageHoursPerDay.value, onTrackHoursPerDay);
+    console.log(remainingAverageHoursPerDay.value > onTrackHoursPerDay);
+  }
+}
 
 /**
  * HELPER

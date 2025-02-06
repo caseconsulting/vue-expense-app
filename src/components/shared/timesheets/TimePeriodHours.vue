@@ -61,13 +61,7 @@
         <!-- Title -->
         <v-row dense>
           <v-col cols="3" class="d-flex align-center justify-center pa-0">
-            <v-btn
-              :disabled="isYearly || (!isYearly && periodIndex === 0)"
-              icon=""
-              variant="text"
-              density="comfortable"
-              @click="periodIndex -= 1"
-            >
+            <v-btn :disabled="periodIndex === 0" icon="" variant="text" density="comfortable" @click="periodIndex -= 1">
               <v-tooltip activator="parent" location="top">Previous Pay Period</v-tooltip>
               <v-icon size="x-large"> mdi-arrow-left-thin </v-icon>
             </v-btn>
@@ -86,7 +80,7 @@
           </v-col>
           <v-col cols="3" class="d-flex align-center justify-center pa-0">
             <v-btn
-              :disabled="isYearly || (!isYearly && dateIsCurrentPeriod)"
+              :disabled="dateIsCurrentPeriod"
               icon=""
               variant="text"
               density="comfortable"
@@ -340,8 +334,7 @@ watch(
 watch(
   () => props.timesheets,
   () => {
-    if (isYearly.value) periodIndex.value = 0;
-    else periodIndex.value = props.timesheets.length - 1;
+    periodIndex.value = props.timesheets.length - 1;
     refreshPtoPlan();
     timePeriodLoading.value = false;
   }
