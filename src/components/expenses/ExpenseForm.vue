@@ -1247,6 +1247,8 @@ function getCategories() {
  * @return Object - expense type selected
  */
 function getExpenseTypeSelected(expenseTypeId) {
+  if (!expenseTypeId) return;
+
   // some use cases of this function provide an object with `value` as the ID, others provide just the ID. this allows for both.
   expenseTypeId = expenseTypeId.value ?? expenseTypeId;
 
