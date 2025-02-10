@@ -146,7 +146,7 @@ export function getEmailRules() {
 export function getCaseEmailRules() {
   return [
     (v) => !isEmpty(v) || 'Email is required',
-    (v) => /^[a-zA-Z]+$/.test(v) || 'Not a valid @consultwithcase email address'
+    (v) => /^[a-z]+$/.test(v) || 'Not a valid @consultwithcase email address'
   ];
 }
 
