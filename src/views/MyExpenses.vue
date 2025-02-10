@@ -438,13 +438,13 @@
                           <v-icon v-if="useInactiveStyle(item)" color="green" id="marks" class="mr-1 mx-3">
                             mdi-check-circle-outline
                           </v-icon>
-                          <v-icon v-else class="mr-1 mx-3" id="marks" color="red"> mdi-close-circle-outline </v-icon>
+                          <v-icon v-else class="mr-1 mx-3 case-red" id="marks"> mdi-close-circle-outline </v-icon>
                           <br />
                           <p>Show On Feed:</p>
                           <v-icon v-if="item.showOnFeed" id="marks" class="mr-1 mx-3" color="green">
                             mdi-check-circle-outline
                           </v-icon>
-                          <v-icon v-else class="mr-1 mx-3" id="marks" color="red"> mdi-close-circle-outline </v-icon>
+                          <v-icon v-else class="mr-1 mx-3 case-red" id="marks"> mdi-close-circle-outline </v-icon>
                         </div>
                         <div v-if="!isEmpty(item?.rejections?.softRejections)">
                           <b>Revisal Requests:</b>
@@ -1201,6 +1201,10 @@ watch(storeIsPopulated, async () => {
 </script>
 
 <style>
+.case-red {
+  color: #bc3825;
+}
+
 .expandedInfo {
   border: 1px solid black;
   background-color: #f0f0f0;
