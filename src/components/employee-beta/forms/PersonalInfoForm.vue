@@ -874,7 +874,6 @@ function emailValue() {
   if (atIndex !== -1) {
     emailUsername.value = emailUsername.value.substring(0, atIndex).toLowerCase();
   }
-  emailUsername.value = emailUsername.value.toLowerCase();
 } // emailValue
 
 function toggleEdit() {
