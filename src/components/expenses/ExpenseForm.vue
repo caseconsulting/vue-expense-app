@@ -656,7 +656,7 @@ async function checkCoverage() {
     if (this.editedExpense) {
       // expense exists
       // get expense type
-      let expenseType = _find(this.expenseTypes, (type) => this.editedExpense.expenseTypeId === type.value);
+      let expenseType = _find(this.filteredExpenseTypes(), (type) => this.editedExpense.expenseTypeId === type.value);
 
       // get employee
       if (this.asUser) {
@@ -677,7 +677,9 @@ async function checkCoverage() {
       let budgetExists = budget ? true : false;
 
       // get the budget amount, including legacyCarryover
-      let budgetObject = _find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id).budgetObject;
+      let budgetObject = _find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id)?.budgetObject;
+      if (!budgetObject)
+        budgetObject = _find(this.overrideEmployeeBudgets, (b) => b.expenseTypeId === expenseType.id)?.budgetObject;
       let budgetAmount = parseInt(budgetObject.amount);
       let legacyCarryover = parseInt(budgetObject.legacyCarryover ?? 0);
 
@@ -1283,13 +1285,15 @@ async function getRemainingBudget() {
       );
       // if budget was not found and item is being edited, it is likely because the budget is no longer active
       // but the expense is still valid for that expense type. this allows for that situation
+      let expenseType;
+      let addedToOverrides = false;
       if (!budget) {
         budget = await api.getEmployeeBudget(
           this.editedExpense.employeeId,
           this.editedExpense.expenseTypeId,
           this.editedExpense.purchaseDate
         );
-        let expenseType = await api.getItem(api.EXPENSE_TYPES, budget.expenseTypeId);
+        expenseType = await api.getItem(api.EXPENSE_TYPES, budget.expenseTypeId);
         budget = {
           budgetObject: budget,
           description: expenseType.description,
@@ -1298,6 +1302,29 @@ async function getRemainingBudget() {
           expenseTypeId: budget.expenseTypeId
         };
         this.overrideFilteredExpenseTypes.push(expenseType);
+        this.overrideEmployeeBudgets.push(budget);
+        addedToOverrides = true;
+      }
+      // if the expense is marked as in active, it also needs to be pushed to the overrideFilteredExpenseTypes var so that
+      // it can display in the expense type dropdown
+      if (!expenseType) expenseType = await api.getItem(api.EXPENSE_TYPES, budget.expenseTypeId);
+      if (expenseType.isInactive) {
+        budget = await api.getEmployeeBudget(
+          this.editedExpense.employeeId,
+          this.editedExpense.expenseTypeId,
+          this.editedExpense.purchaseDate
+        );
+        budget = {
+          budgetObject: budget,
+          description: expenseType.description,
+          expenseTypeName: expenseType.budgetName,
+          odFlag: expenseType.odFlag,
+          expenseTypeId: budget.expenseTypeId
+        };
+        if (!addedToOverrides) {
+          this.overrideFilteredExpenseTypes.push(expenseType);
+          this.overrideEmployeeBudgets.push(budget);
+        }
       }
 
       let legacyCarryover = parseInt(budget.budgetObject.legacyCarryover ?? 0);
@@ -2275,6 +2302,7 @@ export default {
       originalExpense: null, // expense before changes
       overdraftBudget: 0,
       overrideFilteredExpenseTypes: [],
+      overrideEmployeeBudgets: [],
       purchaseDateFormatted: null, // formatted purchase date
       purchaseMenu: false, // display purchase menu
       receiptRules: [(v) => !this.isEmpty(v) || 'Receipts are required'], // rules for receipt
