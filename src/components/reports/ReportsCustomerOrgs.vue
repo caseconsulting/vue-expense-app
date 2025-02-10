@@ -162,7 +162,6 @@ const tagsInfo = ref({
 onMounted(() => {
   employeesInfo.value = getActive(store.getters.employees); // default to filtered list
   filteredEmployees.value = employeesInfo.value; // one.value is shown
-  console.log(filteredEmployees.value);
   populateDropdowns(employeesInfo.value);
   buildCustomerOrgColumns();
   buildContractsColumn();
