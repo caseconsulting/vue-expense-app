@@ -56,7 +56,7 @@
             <v-text-field
               v-model="emailUsername"
               label="CASE Email *"
-              @update:model-value="removeEmailDomain()"
+              @update:model-value="emailValue()"
               :hint="CASE_EMAIL_DOMAIN"
               persistent-hint
               :rules="getCaseEmailRules()"
@@ -868,13 +868,13 @@ async function updateCityBoxes(item) {
  * Removes any text after the '@' symbol on the email username input once the user clicks away.
  * This should help prevent any double domain issues for the CASE email.
  */
-function removeEmailDomain() {
+function emailValue() {
   let atIndex = emailUsername.value.indexOf('@');
 
   if (atIndex !== -1) {
-    emailUsername.value = emailUsername.value.substring(0, atIndex);
+    emailUsername.value = emailUsername.value.substring(0, atIndex).toLowerCase();
   }
-} // removeEmailDomain
+} // emailValue
 
 function toggleEdit() {
   emitter.emit('open-dialog');
