@@ -97,6 +97,7 @@ import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { selectedTagsHasEmployee } from '@/shared/employeeUtils';
 import { userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
+import { isSameOrBefore, getTodaysDate } from '@/shared/dateUtils';
 import TagsFilter from '@/components/shared/TagsFilter.vue';
 const store = useStore();
 const emitter = inject('emitter');
@@ -164,7 +165,7 @@ onMounted(() => {
   filteredEmployees.value = employeesInfo.value; // one.value is shown
   populateDropdowns(employeesInfo.value);
   buildCustomerOrgColumns();
-  buildContractsColumn();
+  buildContractsAndPrimesColumns();
   if (localStorage.getItem('requestedFilter')) {
     custOrgSearch.value = localStorage.getItem('requestedFilter');
     refreshDropdownItems();
@@ -210,34 +211,35 @@ function buildCustomerOrgColumns() {
 /**
  * Modified from version of Contracts tab.
  */
-function buildContractsColumn() {
+function buildContractsAndPrimesColumns() {
+  let today = getTodaysDate();
   employeesInfo.value.forEach((currentEmp) => {
-    let contractNames = '';
-    let primeNames = '';
+    let contractNames = [];
+    let primeNames = [];
     if (currentEmp.contracts) {
       currentEmp.contracts.forEach((currentCon) => {
-        // find current contracts
+        // find if contract is current based on projects
         let current = false;
         if (currentCon.projects) {
-          currentCon.projects.forEach((currProj) => {
-            if (!currProj.endDate) current = true;
-          });
+          for (let currentProj of currentCon.projects) {
+            if (!currentProj.endDate || isSameOrBefore(today, currentProj.endDate, 'day')) {
+              current = true;
+              break; // break for loop
+            }
+          }
         }
         // add current contracts
         if (current) {
           let contract = store.getters.contracts.find((c) => c.id === currentCon.contractId);
-          contractNames += `${contract.contractName} & `;
-          primeNames += `${contract.primeName} & `;
+          contractNames.push(contract.contractName);
+          primeNames.push(contract.primeName);
         }
       });
-      // remove & at the end
-      contractNames = contractNames.slice(0, -2);
-      primeNames = primeNames.slice(0, -2);
     }
-    currentEmp.contractNames = contractNames;
-    currentEmp.primeNames = primeNames;
+    currentEmp.contractNames = contractNames?.join(' & ');
+    currentEmp.primeNames = primeNames?.join(' & ');
   });
-} // buildContractsColumn
+} // buildContractsAndPrimesColumns
 
 /**
  * handles click event of the employee table entry
