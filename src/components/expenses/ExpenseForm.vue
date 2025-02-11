@@ -1285,17 +1285,21 @@ async function getRemainingBudget() {
       let budget = this.employeeBudgets.find(
         (currBudget) => currBudget.expenseTypeId === this.editedExpense.expenseTypeId
       );
-      // if budget was not found and item is being edited, it is likely because the budget is no longer active
-      // but the expense is still valid for that expense type. this allows for that situation
+
+      // This allows a user/admin to edit expenses that have an expense type that is either passed its expiration
+      // date or has the inactive flag set
       let expenseType;
-      let addedToOverrides = false;
-      if (!budget) {
+      if (budget) expenseType = api.getItem(api.EXPENSE_TYPES, budget.expenseTypeId);
+      if (!budget || expenseType?.isInactive) {
+        // get budget
         budget = await api.getEmployeeBudget(
           this.editedExpense.employeeId,
           this.editedExpense.expenseTypeId,
           this.editedExpense.purchaseDate
         );
-        expenseType = await api.getItem(api.EXPENSE_TYPES, budget.expenseTypeId);
+        // get expense type
+        if (!expenseType) expenseType = await api.getItem(api.EXPENSE_TYPES, budget.expenseTypeId);
+        // create budget object for setting in variables
         budget = {
           budgetObject: budget,
           description: expenseType.description,
@@ -1303,30 +1307,9 @@ async function getRemainingBudget() {
           odFlag: expenseType.odFlag,
           expenseTypeId: budget.expenseTypeId
         };
+        // force into in `filteredExpenseTypes` and `checkCoverage()` respectively
         this.overrideFilteredExpenseTypes.push(expenseType);
         this.overrideEmployeeBudgets.push(budget);
-        addedToOverrides = true;
-      }
-      // if the expense is marked as in active, it also needs to be pushed to the overrideFilteredExpenseTypes var so that
-      // it can display in the expense type dropdown
-      if (!expenseType) expenseType = await api.getItem(api.EXPENSE_TYPES, budget.expenseTypeId);
-      if (expenseType.isInactive) {
-        budget = await api.getEmployeeBudget(
-          this.editedExpense.employeeId,
-          this.editedExpense.expenseTypeId,
-          this.editedExpense.purchaseDate
-        );
-        budget = {
-          budgetObject: budget,
-          description: expenseType.description,
-          expenseTypeName: expenseType.budgetName,
-          odFlag: expenseType.odFlag,
-          expenseTypeId: budget.expenseTypeId
-        };
-        if (!addedToOverrides) {
-          this.overrideFilteredExpenseTypes.push(expenseType);
-          this.overrideEmployeeBudgets.push(budget);
-        }
       }
 
       let legacyCarryover = parseInt(budget.budgetObject.legacyCarryover ?? 0);
