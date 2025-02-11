@@ -1289,7 +1289,7 @@ async function getRemainingBudget() {
       // This allows a user/admin to edit expenses that have an expense type that is either passed its expiration
       // date or has the inactive flag set
       let expenseType;
-      if (budget) expenseType = api.getItem(api.EXPENSE_TYPES, budget.expenseTypeId);
+      if (budget) expenseType = await api.getItem(api.EXPENSE_TYPES, budget.expenseTypeId);
       if (!budget || expenseType?.isInactive) {
         // get budget
         budget = await api.getEmployeeBudget(
