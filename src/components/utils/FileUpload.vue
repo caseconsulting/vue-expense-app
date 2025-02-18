@@ -53,11 +53,14 @@ const megabytes = computed(() => {
   if (inputFiles.value) {
     let size = 0;
     for (let i = 0; i < inputFiles.value.length; i++) {
-      if (inputFiles.value[i] / 1000000 > fileSizeLimit.value) {
-        size = inputFiles.value[i] / 1000000;
+      if (inputFiles.value[i].size / 1000000 > fileSizeLimit.value) {
+        size = inputFiles.value[i].size / 1000000;
         return size;
+      } else {
+        return 0;
       }
     }
+    console.log(size);
     return size;
   } else {
     return 0;

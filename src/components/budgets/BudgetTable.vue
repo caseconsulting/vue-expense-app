@@ -7,6 +7,13 @@
           <v-card>
             <!-- Budget Name -->
             <v-card-title class="d-flex align-center header_style">
+              <v-icon
+                v-if="isDisabled(item)"
+                icon="mdi-lock"
+                size="small"
+                class="mr-2 mb-1 cursor-pointer"
+                v-tooltip="isDisabledText(isDisabled(item))"
+              />
               <h3 class="text-white">{{ item.expenseTypeName }}</h3>
             </v-card-title>
             <v-divider></v-divider>
@@ -196,6 +203,38 @@ function odFlagMessage(expenseType) {
 function noRemaining(budget) {
   return calcRemaining(budget) <= 0;
 } // noRemaining
+
+/**
+ * Returns disabled budget information for the employee. Has three possibilities:
+ *
+ *  TRUE: Employee's budget is disabled, and there are no categories
+ * FALSE: Employee's budget is not disabled, reglardless of categories
+ * ARRAY: Employee's budget is disabled, and these are the categories that are
+ *
+ * @param budget budget object
+ * @return true, false, or array depending on budget and disabled status
+ */
+function isDisabled(budget) {
+  let expenseType = props.expenseTypes.find((et) => et.id === budget.expenseTypeId);
+  if (expenseType.categories?.length > 0) {
+    let disabledCategories = expenseType.disabledEmployees?.[props.employee.id] ?? [];
+    return disabledCategories.length > 0 ? disabledCategories : false;
+  } else {
+    return expenseType.disabledEmployees?.[props.employee.id]?.includes(expenseType.id) ?? false;
+  }
+}
+
+/**
+ * Reurns text to explain to user their budget disabled status
+ *
+ * @param isDisabled result of isDisabled()
+ * @return String of text to give user
+ */
+function isDisabledText(isDisabled) {
+  if (!isDisabled) return '';
+  if (isDisabled === true) return 'This budget has been disabled by an admin';
+  return `The following categories have been disabled by an admin: "${isDisabled.join('", "')}"`;
+}
 
 /**
  * Refresh and sets the aggregated budgets to draw the graph

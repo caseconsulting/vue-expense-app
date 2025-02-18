@@ -22,7 +22,7 @@
           label="Employee"
           id="employeeName"
           class="form_padding"
-        ></v-autocomplete>
+        />
 
         <!-- Expense Type Picker if Admin -->
         <v-autocomplete
@@ -39,7 +39,19 @@
           :hint="hint"
           persistent-hint
           @update:model-value="getExpenseTypeSelected"
-        ></v-autocomplete>
+        >
+          <template #item="{ item, props }">
+            <v-list-item v-bind="props" :disabled="item.raw.disabled">
+              <template #title>
+                {{ props.title }}
+              </template>
+              <template #subtitle>
+                <v-icon v-if="item.raw.disabled" class="mb-1" size="small" icon="mdi-lock" />
+                <span v-if="item.raw.disabled">{{ isDisabledText(item.raw.disabled) }}</span>
+              </template>
+            </v-list-item>
+          </template>
+        </v-autocomplete>
 
         <!-- Expense Type Picker if User -->
         <v-autocomplete
@@ -54,9 +66,21 @@
           label="Expense Type"
           :hint="hint"
           persistent-hint
-          @update:modelValue="getExpenseTypeSelected()"
+          @update:model-value="getExpenseTypeSelected"
           class="form_padding"
-        ></v-autocomplete>
+        >
+          <template #item="{ item, props }">
+            <v-list-item v-bind="props" :disabled="item.raw.disabled">
+              <template #title>
+                {{ props.title }}
+              </template>
+              <template #subtitle>
+                <v-icon v-if="item.raw.disabled" class="mb-1" size="small" icon="mdi-lock" />
+                <span v-if="item.raw.disabled">{{ isDisabledText(item.raw.disabled) }}</span>
+              </template>
+            </v-list-item>
+          </template>
+        </v-autocomplete>
 
         <!-- Expense Type Description -->
         <div
@@ -68,9 +92,9 @@
         </div>
 
         <!-- Category -->
-        <v-select
+        <v-autocomplete
           variant="underlined"
-          v-if="getCategories() != null && getCategories().length >= 1"
+          v-if="getCategories() != null && getCategories().length > 0"
           :rules="getRequiredRules()"
           :disabled="isInactive"
           v-model="editedExpense.category"
@@ -78,7 +102,16 @@
           label="Select Category"
           clearable
           chips
-        ></v-select>
+        >
+          <template #item="{ item, props }">
+            <v-list-item v-bind="props" :disabled="isCategoryDisabled(item.title)">
+              <template #subtitle>
+                <v-icon v-if="isCategoryDisabled(item.title)" class="mb-1" size="small" icon="mdi-lock" />
+                <span v-if="isCategoryDisabled(item.title)">This category has been disabled by an admin</span>
+              </template>
+            </v-list-item>
+          </template>
+        </v-autocomplete>
 
         <!-- Update Receipt Checkbox -->
         <v-checkbox
@@ -87,7 +120,7 @@
           v-model="allowReceipt"
           label="Update the Receipt?"
           :disabled="isInactive"
-        ></v-checkbox>
+        />
 
         <!-- Old Receipt Name -->
         <v-card-text class="pa-0 font-16 form-text" v-if="!isEmpty(expense.receipt) && isEdit"
@@ -102,7 +135,7 @@
             :passedRules="receiptRules"
             :receipt="expense.receipt"
             :disabled="isInactive"
-          ></file-upload>
+          />
           <!-- Scan Receipt Button -->
           <v-tooltip location="bottom">
             <template v-slot:activator="{ props }">
@@ -146,7 +179,7 @@
             @keyup="formatCost"
           >
             <template #message="{ message }">
-              <span v-html="message"></span>
+              <span v-html="message" />
               <br v-if="monthlyLimit.showHint" />
               <span v-if="monthlyLimit.showHint">
                 Monthly limit remaining:
@@ -193,7 +226,7 @@
           :placeholder="recipientPlaceholder"
           item-title="text"
           item-value="id"
-        ></v-autocomplete>
+        />
 
         <!-- Description -->
         <v-text-field
@@ -258,7 +291,7 @@
             no-title
             color="#bc3825"
             @update:model-value="purchaseMenu = false"
-          ></v-date-picker>
+          />
         </v-menu>
 
         <!-- Reimbursed Date -->
@@ -308,7 +341,7 @@
             no-title
             color="#bc3825"
             @update:model-value="reimburseMenu = false"
-          ></v-date-picker>
+          />
         </v-menu>
 
         <!-- Notes -->
@@ -321,7 +354,7 @@
           id="notes"
           data-vv-name="Description"
           :disabled="isInactive"
-        ></v-textarea>
+        />
         <!-- Separating optional and required notes field logic since
         the rules cause issues with validation -->
         <v-textarea
@@ -332,7 +365,7 @@
           id="notes"
           data-vv-name="Description"
           :disabled="isInactive"
-        ></v-textarea>
+        />
 
         <!-- URL -->
         <v-text-field
@@ -341,7 +374,7 @@
           :rules="[...getURLRules(), getRequireURL()]"
           :label="urlLabel"
           :disabled="isInactive"
-        ></v-text-field>
+        />
 
         <!-- Show On Feed -->
         <v-switch
@@ -350,7 +383,7 @@
           v-model="editedExpense.showOnFeed"
           label="Have expense show on company feed?"
           :color="caseRed"
-        ></v-switch>
+        />
 
         <!-- Buttons -->
         <!-- Cancel Button -->
@@ -385,13 +418,13 @@
         :isOverCovered="isOverCovered"
         :toggleConfirmationBox="confirming"
         :expense="editedExpense"
-      ></confirmation-box>
+      />
       <!-- Confirmation Modal -->
       <general-confirmation-modal
         title="Are you sure you want to submit?"
         :toggleModal="confirmingValid"
         type="expense"
-      ></general-confirmation-modal>
+      />
       <!-- Cancel Confirmation Modal -->
       <cancel-confirmation :toggleSubmissionConfirmation="confirmBackingOut" type="expense"> </cancel-confirmation>
       <v-dialog v-model="showExchangeCalculator" :width="isMobile ? '100%' : '50%'" persistent>
@@ -623,7 +656,7 @@ async function checkCoverage() {
     if (this.editedExpense) {
       // expense exists
       // get expense type
-      let expenseType = _find(this.expenseTypes, (type) => this.editedExpense.expenseTypeId === type.value);
+      let expenseType = _find(this.filteredExpenseTypes(), (type) => this.editedExpense.expenseTypeId === type.value);
 
       // get employee
       if (this.asUser) {
@@ -644,7 +677,9 @@ async function checkCoverage() {
       let budgetExists = budget ? true : false;
 
       // get the budget amount, including legacyCarryover
-      let budgetObject = _find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id).budgetObject;
+      let budgetObject = _find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id)?.budgetObject;
+      if (!budgetObject)
+        budgetObject = _find(this.overrideEmployeeBudgets, (b) => b.expenseTypeId === expenseType.id)?.budgetObject;
       let budgetAmount = parseInt(budgetObject.amount);
       let legacyCarryover = parseInt(budgetObject.legacyCarryover ?? 0);
 
@@ -870,6 +905,7 @@ function clearForm() {
  * @return String - The hint to display
  */
 function costHint() {
+  if (!this.selectedExpenseType) return '';
   if (!this.editedExpense.employeeId) {
     return 'Please choose an employee to see remaining balance.';
   } else if (!this.editedExpense.expenseTypeId) {
@@ -1040,6 +1076,48 @@ function encodeUrl(url) {
 } // encodeUrl
 
 /**
+ * Returns disabled budget information for the employee. Has three possibilities:
+
+ *
+ * @param budget budget object
+ * @return true, false, or array depending on budget and disabled status
+ */
+function isDisabled(expenseType) {
+  let empId = this?.editedExpense?.employeeId;
+  if (expenseType.categories?.length > 0) {
+    let disabledCategories = expenseType.disabledEmployees?.[empId] ?? [];
+    return disabledCategories.length > 0 ? disabledCategories : false;
+  } else {
+    return expenseType.disabledEmployees?.[empId]?.includes(expenseType.id) ?? false;
+  }
+}
+
+/**
+ * Reurns text to explain to user their budget disabled status
+ *
+ * @param isDisabled result of isDisabled()
+ * @return String of text to give user
+ */
+function isDisabledText(isDisabled) {
+  if (!isDisabled) return '';
+  if (isDisabled === true) return 'This budget has been disabled by an admin';
+  return `The following categories have been disabled by an admin: "${isDisabled.join('", "')}"`;
+}
+
+/**
+ * Returns whether or not a category is disabled.
+ *
+ * @param catName name of category
+ * @return true if category is disabled
+ */
+function isCategoryDisabled(catName) {
+  let empId = this.asUser ? this.userInfo.id : this.editedExpense.employeeId;
+  let expenseType = _find(this.expenseTypes, (type) => this.editedExpense.expenseTypeId === type.value);
+  if (!empId || !expenseType || !catName) return false; // default to allowing in case of bug (disabling is rare)
+  return expenseType.disabledEmployees?.[empId]?.includes(catName) ?? false;
+}
+
+/**
  * Filters expense type. Returns the expense types that the employee has access to and the budget amount.
  *
  * @return - filtered expense types
@@ -1052,16 +1130,26 @@ function filteredExpenseTypes() {
     _forEach(this.expenseTypes, (expenseType) => {
       if (!expenseType.isInactive) {
         // expense type is active
+        let etDisabled = this.isDisabled(expenseType);
+        let disabledCategories = Array.isArray(etDisabled) ? etDisabled : undefined;
         if (!selectedEmployee) {
           // add expense type if no employees are selected
           expenseType.text = `${expenseType.budgetName} - $${Number(expenseType.budget).toLocaleString().toString()}`;
-          filteredExpType.push(expenseType);
+          filteredExpType.push({
+            ...expenseType,
+            disabled: etDisabled === true,
+            disabledCategories: etDisabled
+          });
         } else if (this.hasAccess(selectedEmployee, expenseType)) {
           // add expense type if the employee is selected and has access
           let budget = _find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id);
           let amount = budget ? budget.budgetObject.amount : this.calcAdjustedBudget(selectedEmployee, expenseType); // calculate budget
           expenseType.text = `${expenseType.budgetName} - $${Number(amount).toLocaleString().toString()}`;
-          filteredExpType.push(expenseType);
+          filteredExpType.push({
+            ...expenseType,
+            disabled: etDisabled === true,
+            disabledCategories: disabledCategories
+          });
         }
       }
     });
@@ -1081,10 +1169,24 @@ function filteredExpenseTypes() {
             let budget = _find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id);
             let amount = budget ? budget.budgetObject.amount : expenseType.budgetAmount;
             expenseType.text = `${expenseType.budgetName} - $${Number(amount).toLocaleString().toString()}`;
-            filteredExpType.push(expenseType);
+            let etDisabled = this.isDisabled(expenseType);
+            let disabledCategories = Array.isArray(etDisabled) ? etDisabled : undefined;
+            filteredExpType.push({
+              ...expenseType,
+              disabled: etDisabled === true,
+              disabledCategories: disabledCategories
+            });
           }
         }
       }
+    });
+  }
+  // allow other parts of the code to add an expense type, no questions asked
+  for (let expenseType of this.overrideFilteredExpenseTypes) {
+    filteredExpType.push({
+      text: `${expenseType.budgetName} - $${expenseType.budget}`,
+      value: expenseType.id,
+      ...expenseType
     });
   }
 
@@ -1145,6 +1247,11 @@ function getCategories() {
  * @return Object - expense type selected
  */
 function getExpenseTypeSelected(expenseTypeId) {
+  if (!expenseTypeId) return;
+
+  // some use cases of this function provide an object with `value` as the ID, others provide just the ID. this allows for both.
+  expenseTypeId = expenseTypeId.value ?? expenseTypeId;
+
   this.editedExpense.category = null; // clear expense category (not type) to prevent it persisting
   this.$refs.form.resetValidation(); // avoid validation errors after changing category
   return (this.selectedExpenseType = _find(this.expenseTypes, (expenseType) => {
@@ -1179,14 +1286,40 @@ async function getRemainingBudget() {
         (currBudget) => currBudget.expenseTypeId === this.editedExpense.expenseTypeId
       );
 
+      // This allows a user/admin to edit expenses that have an expense type that is either passed its expiration
+      // date or has the inactive flag set
+      let expenseType;
+      if (budget) expenseType = await api.getItem(api.EXPENSE_TYPES, budget.expenseTypeId);
+      if (!budget || expenseType?.isInactive) {
+        // get budget
+        budget = await api.getEmployeeBudget(
+          this.editedExpense.employeeId,
+          this.editedExpense.expenseTypeId,
+          this.editedExpense.purchaseDate
+        );
+        // get expense type
+        if (!expenseType) expenseType = await api.getItem(api.EXPENSE_TYPES, budget.expenseTypeId);
+        // create budget object for setting in variables
+        budget = {
+          budgetObject: budget,
+          description: expenseType.description,
+          expenseTypeName: expenseType.budgetName,
+          odFlag: expenseType.odFlag,
+          expenseTypeId: budget.expenseTypeId
+        };
+        // force into in `filteredExpenseTypes` and `checkCoverage()` respectively
+        this.overrideFilteredExpenseTypes.push(expenseType);
+        this.overrideEmployeeBudgets.push(budget);
+      }
+
       let legacyCarryover = parseInt(budget.budgetObject.legacyCarryover ?? 0);
 
       if (budget) {
         this.remainingBudget =
-          budget.budgetObject.amount +
+          parseInt(budget.budgetObject.amount) +
           legacyCarryover -
-          budget.budgetObject.pendingAmount -
-          budget.budgetObject.reimbursedAmount -
+          parseInt(budget.budgetObject.pendingAmount) -
+          parseInt(budget.budgetObject.reimbursedAmount) -
           this.editedExpense.cost;
         this.expenseTypeName = budget.expenseTypeName;
         this.overdraftBudget = budget.budgetObject.amount;
@@ -2153,6 +2286,8 @@ export default {
       },
       originalExpense: null, // expense before changes
       overdraftBudget: 0,
+      overrideFilteredExpenseTypes: [],
+      overrideEmployeeBudgets: [],
       purchaseDateFormatted: null, // formatted purchase date
       purchaseMenu: false, // display purchase menu
       receiptRules: [(v) => !this.isEmpty(v) || 'Receipts are required'], // rules for receipt
@@ -2190,6 +2325,9 @@ export default {
     descRedirect,
     employeeFilter,
     encodeUrl,
+    isDisabled,
+    isDisabledText,
+    isCategoryDisabled,
     filteredExpenseTypes,
     formatCost,
     format,

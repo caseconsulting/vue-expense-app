@@ -84,8 +84,13 @@ import {
   isSameOrBefore,
   format,
   getTodaysDate,
-  DEFAULT_ISOFORMAT
+  DEFAULT_ISOFORMAT,
+  startOf,
+  endOf
 } from '@/shared/dateUtils';
+import { updateStoreTags } from '@/utils/storeUtils';
+import api from '@/shared/api';
+import { useStore } from 'vuex';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -102,7 +107,9 @@ const props = defineProps([
   'supplementalData',
   'timeData'
 ]);
+import _find from 'lodash/find';
 const emitter = inject('emitter');
+const store = useStore();
 
 const clonedEmployee = ref(props.employee);
 const BONUS_YEAR_TOTAL = ref(1860);
@@ -137,6 +144,9 @@ onMounted(() => {
   emitter.on('update-time-data-needed', (n) => {
     customNeeded.value = n;
   });
+
+  // check for being on track for 1860 yearly hours in the background
+  check1860OnTrack();
 }); // mounted
 
 /**
@@ -388,6 +398,53 @@ function getWorkDays(startDate, endDate, excludeProRated = false) {
 function isWeekDay(day) {
   return getIsoWeekday(day) >= 1 && getIsoWeekday(day) <= 5;
 } // isWeekDay
+
+// Checks if a user if behind on their 1860 hours. This is designed to be run in the background, and not
+// be dependant on any other functions in this file, other than getWorkDays (and non-function variables)
+async function check1860OnTrack() {
+  // if the employee is on the 'Non Billable' tag, then they are exempt from this rule
+  // and we don't need to wait for the api call to finish
+  if (!store.getters.tags) await updateStoreTags();
+  let tags = store.getters.tags;
+  let nonBillableTag = _find(tags, (t) => t.tagName === 'Non Billable');
+  if (nonBillableTag.employees.includes(props.employee.id)) return;
+
+  // calc minimum hours that are needed per month for this employee
+  const MIN_1860_HOURS = 155 * (props.employee.workStatus / 100);
+
+  // calc time variables
+  let startOfYear = format(startOf(today.value, 'year'), null, 'YYYY-MM-DD');
+  let startOfMonth = format(startOf(today.value, 'month'), null, 'YYYY-MM-DD');
+  let workDaysThisMonth = getWorkDays(startOfMonth, endOf(today.value, 'month'));
+
+  // calc how many hours are needed total to be on track
+  let completeMonthsWorked = Number(format(today.value, null, 'M')) - 1;
+  let hoursNeeded = MIN_1860_HOURS * completeMonthsWorked; // months worked, not including current month
+  hoursNeeded += (MIN_1860_HOURS / workDaysThisMonth) * getWorkDays(startOfMonth, today.value); // include days worked in current month
+
+  // fetch employee's timesheet data from start of year to today
+  let yearlyTimesheetData = await api.getTimesheetsData(clonedEmployee.value.employeeNumber, {
+    code: null,
+    employeeId: props.employee.id,
+    periods: [{ startDate: startOfYear, endDate: today.value, title: '1860 Check' }]
+  });
+
+  // sum up employee's billable hours
+  let hoursWorked = 0;
+  let actualTimesheets = yearlyTimesheetData.timesheets[0].timesheets;
+  let nonBillables = yearlyTimesheetData.supplementalData.nonBillables;
+  _forEach(actualTimesheets, (duration, jobName) => {
+    if (!nonBillables?.includes(jobName)) {
+      hoursWorked += duration;
+    }
+  });
+  hoursWorked = hoursWorked / 60 / 60; // convert seconds to hours
+
+  // compare and emit if employee is short
+  if (hoursNeeded > hoursWorked) {
+    emitter.emit('1860-not-on-track', props.employee.id);
+  }
+}
 </script>
 
 <style>

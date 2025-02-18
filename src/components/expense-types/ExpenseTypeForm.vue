@@ -133,6 +133,50 @@
           </template>
         </v-autocomplete>
 
+        <!-- Employee Access Preview -->
+        <v-row>
+          <v-col>
+            <p class="form-text">Employee Access Preview</p>
+          </v-col>
+          <v-col>
+            <v-dialog scrollable max-width="400px">
+              <template #activator="{ props }">
+                <v-btn size="small" v-bind="props">View {{ employeeSize }} Employees</v-btn>
+              </template>
+
+              <template v-slot:default="{ isActive }">
+                <v-card>
+                  <v-card-title class="d-flex align-center header_style">
+                    <h3>Accessible Preview</h3>
+                  </v-card-title>
+                  <v-divider color="black" />
+                  <v-card-text>
+                    <v-row>
+                      <v-list color="#f0f0f0" width="376">
+                        <div v-for="employee in getEmployeeList()" :key="employee.id">
+                          <v-list-item>
+                            <!-- Employee Image -->
+                            <template #prepend>
+                              <user-avatar :employee="employee" :image="employee.avatar" />
+                            </template>
+                            <!-- Employee Name -->
+                            <v-list-item-title>{{ getEmployeeName(employee.id) }}</v-list-item-title>
+                          </v-list-item>
+                        </div>
+                      </v-list>
+                    </v-row>
+                  </v-card-text>
+                  <v-divider color="black" />
+                  <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn @click="isActive.value = false">Close</v-btn>
+                  </v-card-actions>
+                </v-card>
+              </template>
+            </v-dialog>
+          </v-col>
+        </v-row>
+
         <!-- Budget Tags -->
         <div class="form-text">
           Tag Budgets (optional)
@@ -473,6 +517,7 @@ const endDateRules = ref([
   }
 ]);
 const endDateFormatted = ref(null); // formatted end date
+const employeeSize = ref(null); //number of employees
 const expenseTypeForm = ref(null); // filled in from the template
 const props = defineProps(['model']); // expense type to be created/updated
 const editedExpenseType = ref(_cloneDeep(props.model)); // used to store edits made to an expense type or when creating new expense type
@@ -525,6 +570,8 @@ onMounted(async () => {
   // get all employees
   let employees = store.getters.employees;
   let sortedActiveEmployees = [];
+
+  getEmployeeList();
 
   // populate list of active employees
   _forEach(employees, (employee) => {
@@ -670,6 +717,61 @@ function formatMonthlyLimit() {
     monthlyLimitFormatted.value = Number(editedExpenseType.value.monthlyLimit).toLocaleString().toString();
   }
 } // formatMonthlyLimit
+
+/**
+ * Get the list of employees based on their employement status
+ *
+ * @return Array - list of employees
+ */
+function getEmployeeList() {
+  let employeeList = [];
+  if (editedExpenseType.value.accessibleBy.includes('FullTime')) {
+    employeeList = employeeList.concat(
+      _filter(store.getters.employees, (employee) => {
+        return employee.workStatus == 100 && employee.employeeRole != 'intern';
+      })
+    );
+  }
+  if (editedExpenseType.value.accessibleBy.includes('PartTime')) {
+    employeeList = employeeList.concat(
+      _filter(store.getters.employees, (employee) => {
+        return employee.workStatus < 100 && employee.workStatus > 0 && employee.employeeRole != 'intern';
+      })
+    );
+  }
+  if (editedExpenseType.value.accessibleBy.includes('Intern')) {
+    employeeList = employeeList.concat(
+      _filter(store.getters.employees, (employee) => {
+        return employee.workStatus > 0 && employee.employeeRole == 'intern';
+      })
+    );
+  }
+  if (editedExpenseType.value.accessibleBy.includes('Custom')) {
+    employeeList = employeeList.concat(
+      _filter(store.getters.employees, (employee) => {
+        return customAccess.value.includes(employee.id);
+      })
+    );
+  }
+
+  employeeList = [...new Set(employeeList)];
+  employeeSize.value = employeeList.length;
+  return _sortBy(employeeList, [
+    (employee) => employee.firstName.toLowerCase(),
+    (employee) => employee.lastName.toLowerCase()
+  ]); // sort by first name then last name
+} //getEmployeeList
+
+/**
+ * Get the employee name of an employee id.
+ *
+ * @param employeeId - employee id
+ * @return String - employee full name
+ */
+function getEmployeeName(employeeId) {
+  let localEmployee = _find(store.getters.employees, ['id', employeeId]);
+  return `${localEmployee.firstName} ${localEmployee.lastName}`;
+} // getEmployeeName
 
 /**
  * Checks if custom access of employees have acess to an expense type at a percentage rate. Returns true if 'CUSTOM'
@@ -1083,6 +1185,22 @@ watch(
     }
   }
 ); // watchEditedExpenseTypeStartDate
+
+/**
+ * watcher for editedExpensetype.accessibleBy
+ */
+watch(
+  () => editedExpenseType.value.accessibleBy,
+  () => getEmployeeList()
+);
+
+/**
+ * water for customAccess
+ */
+watch(
+  () => customAccess,
+  () => getEmployeeList()
+);
 </script>
 
 <style scoped>
