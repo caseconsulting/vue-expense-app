@@ -121,7 +121,7 @@
 // |                                                  |
 // |--------------------------------------------------|
 
-import { onMounted, ref, reactive, watch, inject, onBeforeMount, defineExpose } from 'vue';
+import { onMounted, ref, watch, inject, onBeforeMount, defineExpose } from 'vue';
 import { useStore } from 'vuex';
 import { updateStoreUser, updateStorePtoCashOuts, updateStoreTags } from '../../utils/storeUtils';
 import {
@@ -147,7 +147,7 @@ import api from '@/shared/api.js';
 // |                                                  |
 // |--------------------------------------------------|
 
-const props = defineProps(['employeeId', 'pto', 'holiday', 'isCyk']);
+const props = defineProps(['employeeId', 'pto', 'holiday']);
 const store = useStore();
 const emitter = inject('emitter');
 
@@ -192,27 +192,6 @@ const headers = ref([
   { title: 'Holiday Balance', sortable: false, width: '23%', key: 'holidayBalance' }
 ]);
 
-/**
- * CYK variables: delete this section and any logic specific to this section once
- *                the merge is completed.
- */
-const CYK = reactive({
-  USE: props.isCyk, // whether or not current employee is CYK
-  ACCRUAL_AMOUNT: 6.67, // Brandon Lally: "For CYK we accrue PTO currently at a bi-weekly rate of [exactly] 6.67 hours"
-  ACCRUAL_MONTHS: {
-    '2024-07': 2,
-    '2024-08': 3,
-    '2024-09': 2,
-    '2024-10': 2,
-    '2024-11': 2,
-    '2024-12': 2
-  }
-});
-let cykPTO = (date) => {
-  if (!CYK.ACCRUAL_MONTHS[date]) return PTOPerMonth.value;
-  return CYK.ACCRUAL_AMOUNT * CYK.ACCRUAL_MONTHS[date] * (employee.value.workStatus / 100);
-};
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                    LIFECYCLES                    |
@@ -251,10 +230,7 @@ onMounted(async () => {
   if (!store.getters.tags) await updateStoreTags();
 
   // update employee specific information
-  let benefitsPlan = getEmployeePlanTagName(employee.value);
-  if (benefitsPlan) {
-    benefitsPlan.toLowerCase();
-  }
+  let benefitsPlan = getEmployeePlanTagName(employee.value)?.toLowerCase();
   PTOPerMonth.value = PTO_ACCRUALS[benefitsPlan ?? 'red']; // default to red since it's the current 14 hours
   PTOPerMonth.value *= employee.value.workStatus / 100;
 
@@ -509,7 +485,7 @@ function ptoBalanceClass(balance) {
 // |                 BALANCE GETTERS                  |
 // |                                                  |
 // |--------------------------------------------------|
-const PTOPerMonth = ref(14); // 14 hours per pay period (month), equals 21 days per year (168 hours)
+const PTOPerMonth = ref(0); // updated in onMounted based on employee's benefit package
 const PTO_ACCRUALS = {
   red: 14,
   white: 15.33333, // per Dave B, accruals are exactly this
@@ -581,7 +557,7 @@ function getPtoBalance(date = null) {
   let ptoBalance = (props.pto ?? 0) - pendingPtoCashouts.value;
 
   // quick helper to max out PTO value
-  const maxedPTO = (pto) => (CYK.USE ? pto : Math.min(pto, maxPTO.value));
+  const maxedPTO = (pto) => Math.min(pto, maxPTO.value);
 
   // calculate and update this month's cache values
   if (!ptoCache[date]) ptoCache[date] = {};
@@ -615,7 +591,7 @@ function getPtoBalance(date = null) {
   }
 
   // factor in this month's PTO accrual and PTO taken, staying below max
-  ptoBalance += CYK.USE ? cykPTO(date) : PTOPerMonth.value;
+  ptoBalance += PTOPerMonth.value;
   ptoBalance = maxedPTO(ptoBalance);
   ptoBalance -= plannedMonthsBalance(date, 'ptoHours');
   ptoBalance = maxedPTO(ptoBalance);
