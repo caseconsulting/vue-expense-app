@@ -127,12 +127,7 @@
       </v-main>
       <v-footer v-if="isLoggedIn()" class="app-bg-color">
         <v-col class="text-right text-caption" cols="12">
-          <a
-            id="P"
-            class="text-black"
-            target="_blank"
-            href="https://3.basecamp.com/3097063/buckets/4708396/documents/8145325507"
-          >
+          <a id="P" class="text-black" target="_blank" :href="releaseNotes">
             <v-tooltip activator="parent" location="top">View Release Notes</v-tooltip>
             <strong>Version</strong> {{ version }}
           </a>
@@ -234,6 +229,7 @@ const mainNavReloadKey = ref(0);
 const logoutReloadKey = ref(0);
 
 const version = ref(null);
+const releaseNotes = ref(null);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -286,6 +282,7 @@ onBeforeMount(async () => {
   }
 
   version.value = p.version;
+  releaseNotes.value = p.releaseNotes;
 
   loadingCreated.value = false;
 }); // created
