@@ -80,11 +80,11 @@
                 :border="cardName == 'Tech & Skills' ? (validTabs.technologies === false ? 'error md' : 'md') : '0'"
               ></v-list-item>
               <v-list-item
-                @click="cardName = 'Languages'"
+                @click="cardName = 'Foreign Languages'"
                 link
                 title="Foreign Languages"
                 :class="{ invalid: validTabs.languages === false }"
-                :border="cardName == 'Languages' ? (validTabs.languages === false ? 'error md' : 'md') : '0'"
+                :border="cardName == 'Foreign Languages' ? (validTabs.languages === false ? 'error md' : 'md') : '0'"
               ></v-list-item>
               <v-list-item
                 @click="cardName = 'Job Experience'"
@@ -104,7 +104,7 @@
                 @click="cardName = 'Customer Orgs'"
                 link
                 title="Customer Orgs"
-                :class="{ invalid: !validTabs.customerOrgs }"
+                :class="{ invalid: validTabs.customerOrgs === false }"
                 :border="cardName == 'Customer Orgs' ? (validTabs.customerOrgs === false ? 'error md' : 'md') : '0'"
               ></v-list-item>
               <v-list-item
@@ -194,8 +194,8 @@
                   title="Foreign Languages"
                   tab-id="languages"
                   v-model="editedEmployee"
-                  :valid="validTabs.education"
-                  @click="cardName = 'Languages'"
+                  :valid="validTabs.languages"
+                  @click="cardName = 'Foreign Languages'"
                 >
                   <template v-slot="{ props }">
                     <languages-form :slot-props="props"></languages-form>
@@ -740,6 +740,7 @@ watch(validTabs, () => {
 
 watch(cardName, () => {
   selectTab();
+  console.log(cardName.value);
 });
 </script>
 

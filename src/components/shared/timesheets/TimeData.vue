@@ -15,7 +15,7 @@
       </v-card-title>
       <v-card-text class="mt-3 px-7">
         <!-- Warning for not being "on track" with hours -->
-        <v-alert v-if="notOnTrack" class="mb-4" color="#f27311" type="info">
+        <v-alert v-if="notOnTrack" class="mb-4" color="#5a8cd0" type="info">
           You are not on track to meet your 1860 hours, which may have an affect on your budgets. If you believe this is
           an error, ensure that your timesheet data is up-to-date.
         </v-alert>
@@ -143,8 +143,8 @@ onBeforeMount(async () => {
     }
   });
 
-  emitter.on('1860-not-on-track', () => {
-    notOnTrack.value = true;
+  emitter.on('1860-not-on-track', (empId) => {
+    if (empId === clonedEmployee.value.id) notOnTrack.value = true;
   });
 
   loading.value = false;
@@ -310,7 +310,7 @@ async function resetData() {
     localStorage.removeItem(KEYS.value.QB);
   }
   emitter.emit('reset-data');
-  await setInitialData(false);
+  await setInitialData();
   refreshPlannedPto();
   loading.value = false;
 } // resetData
@@ -323,7 +323,7 @@ async function resetData() {
  * @param {Boolean} prevYear - Whether or not to get the previous year
  */
 async function setDataFromApi(isCalendarYear, isYearly) {
-  let code = !isYearly ? 2 : null;
+  let code = isYearly ? null : 2;
   let periods = {};
   if (isYearly) {
     if (isCalendarYear) periods = getCalendarYearPeriods();

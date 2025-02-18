@@ -656,7 +656,7 @@ async function checkCoverage() {
     if (this.editedExpense) {
       // expense exists
       // get expense type
-      let expenseType = _find(this.expenseTypes, (type) => this.editedExpense.expenseTypeId === type.value);
+      let expenseType = _find(this.filteredExpenseTypes(), (type) => this.editedExpense.expenseTypeId === type.value);
 
       // get employee
       if (this.asUser) {
@@ -677,7 +677,9 @@ async function checkCoverage() {
       let budgetExists = budget ? true : false;
 
       // get the budget amount, including legacyCarryover
-      let budgetObject = _find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id).budgetObject;
+      let budgetObject = _find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id)?.budgetObject;
+      if (!budgetObject)
+        budgetObject = _find(this.overrideEmployeeBudgets, (b) => b.expenseTypeId === expenseType.id)?.budgetObject;
       let budgetAmount = parseInt(budgetObject.amount);
       let legacyCarryover = parseInt(budgetObject.legacyCarryover ?? 0);
 
@@ -903,6 +905,7 @@ function clearForm() {
  * @return String - The hint to display
  */
 function costHint() {
+  if (!this.selectedExpenseType) return '';
   if (!this.editedExpense.employeeId) {
     return 'Please choose an employee to see remaining balance.';
   } else if (!this.editedExpense.expenseTypeId) {
@@ -1178,6 +1181,15 @@ function filteredExpenseTypes() {
       }
     });
   }
+  // allow other parts of the code to add an expense type, no questions asked
+  for (let expenseType of this.overrideFilteredExpenseTypes) {
+    filteredExpType.push({
+      text: `${expenseType.budgetName} - $${expenseType.budget}`,
+      value: expenseType.id,
+      ...expenseType
+    });
+  }
+
   return filteredExpType;
 } // filteredExpenseTypes
 
@@ -1235,6 +1247,8 @@ function getCategories() {
  * @return Object - expense type selected
  */
 function getExpenseTypeSelected(expenseTypeId) {
+  if (!expenseTypeId) return;
+
   // some use cases of this function provide an object with `value` as the ID, others provide just the ID. this allows for both.
   expenseTypeId = expenseTypeId.value ?? expenseTypeId;
 
@@ -1271,6 +1285,32 @@ async function getRemainingBudget() {
       let budget = this.employeeBudgets.find(
         (currBudget) => currBudget.expenseTypeId === this.editedExpense.expenseTypeId
       );
+
+      // This allows a user/admin to edit expenses that have an expense type that is either passed its expiration
+      // date or has the inactive flag set
+      let expenseType;
+      if (budget) expenseType = await api.getItem(api.EXPENSE_TYPES, budget.expenseTypeId);
+      if (!budget || expenseType?.isInactive) {
+        // get budget
+        budget = await api.getEmployeeBudget(
+          this.editedExpense.employeeId,
+          this.editedExpense.expenseTypeId,
+          this.editedExpense.purchaseDate
+        );
+        // get expense type
+        if (!expenseType) expenseType = await api.getItem(api.EXPENSE_TYPES, budget.expenseTypeId);
+        // create budget object for setting in variables
+        budget = {
+          budgetObject: budget,
+          description: expenseType.description,
+          expenseTypeName: expenseType.budgetName,
+          odFlag: expenseType.odFlag,
+          expenseTypeId: budget.expenseTypeId
+        };
+        // force into in `filteredExpenseTypes` and `checkCoverage()` respectively
+        this.overrideFilteredExpenseTypes.push(expenseType);
+        this.overrideEmployeeBudgets.push(budget);
+      }
 
       let legacyCarryover = parseInt(budget.budgetObject.legacyCarryover ?? 0);
 
@@ -2246,6 +2286,8 @@ export default {
       },
       originalExpense: null, // expense before changes
       overdraftBudget: 0,
+      overrideFilteredExpenseTypes: [],
+      overrideEmployeeBudgets: [],
       purchaseDateFormatted: null, // formatted purchase date
       purchaseMenu: false, // display purchase menu
       receiptRules: [(v) => !this.isEmpty(v) || 'Receipts are required'], // rules for receipt
