@@ -144,9 +144,6 @@ onMounted(() => {
   emitter.on('update-time-data-needed', (n) => {
     customNeeded.value = n;
   });
-
-  // check for being on track for 1860 yearly hours in the background
-  check1860OnTrack();
 }); // mounted
 
 /**
@@ -401,6 +398,10 @@ function isWeekDay(day) {
 
 // Checks if a user if behind on their 1860 hours. This is designed to be run in the background, and not
 // be dependant on any other functions in this file, other than getWorkDays (and non-function variables)
+// ------------------------------------------------------------------------------------------------------
+// DISABLED: This function is no longer used, but may be a good reference for a future implemenetation of
+//           a very similar feature. This is an admin decision.
+// ------------------------------------------------------------------------------------------------------
 async function check1860OnTrack() {
   // if the employee is on the 'Non Billable' tag, then they are exempt from this rule
   // and we don't need to wait for the api call to finish
