@@ -30,30 +30,34 @@ class EmployeeCsvUtil extends CsvUtil {
  * @param employees - expense object to convert
  * @return a new object passable to csv.js
  */
- static async convertEmployees(employees) {
+ static async convertEmployees(employees, startDate, endDate) {
   // columns and their getter functions
-  let cols = [
+  let columns = [
     {
       title: 'CASE ID',
       getter: this.getCaseId,
-    },
-    {
-      title: 'Employee Name',
-      getter: this.getEmployeeName,
     }
-  ];
+  ].concat(this.columns());
+
+  let index = {};
+  await this.createIndex(index, employees, startDate, endDate);
 
   // build out one row per employee
   let rows = [];
   let i = 0;
   for (let e of employees) {
+    if (!index[e.employeeNumber]) continue; // TODO
     let row = {};
     // add in pre-defined columns
-    for (let col of cols) row[col.title] = col.getter(e);
+    for (let col of columns) {
+      row[col.title] = col.getter.bind(this)(e, index, startDate, endDate); // TODO
+    }
     // add employee row
     rows.push(row);
     // add in planned PTO columns
-    addAdditionalColumns(e, rows, i);
+    if (this.additionalColumns) {
+      this.additionalColumns(index, e, rows, i);
+    }
     i++;
   }
 
@@ -69,8 +73,8 @@ class EmployeeCsvUtil extends CsvUtil {
    * Downloads array of employees EEO information as csv file.
    * @param employees - array of employees objects
    */
- static async download(employees, options = { filename: null }) {
-    let convertedEmployees = await this.convertEmployees(employees); // convert employees into csv object (returns two arrays)
+ static async download(employees, options = { filename: null, startDate: null, endDate: null }) {
+    let convertedEmployees = await this.convertEmployees(employees, options.startDate, options.endDate); // convert employees into csv object (returns two arrays)
     let csvFileString = super.generate(convertedEmployees); // convert to csv file string
     if (!options.filename) options.filename = 'Employee Report';
     super.download(csvFileString, options.filename); // download csv file string as .csv

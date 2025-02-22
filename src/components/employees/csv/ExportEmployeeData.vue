@@ -102,8 +102,8 @@ import _filter from 'lodash/filter';
 import baseCsv from '@/utils/csv/baseCsv.js';
 import employeeCsv from '@/utils/csv/employeeCsv.js';
 import eeoCsv from '@/utils/csv/eeoCsv.js';
-import qbCsv from '@/utils/csv/qbCsv.js';
-import PlannedPTOCSV from '@/utils/csv/pptoCsv.js';
+import QuickBooksCsv from '@/utils/csv/qbCsv.js';
+import PlannedPtoCsv from '@/utils/csv/pptoCsv.js';
 import TagsFilter from '@/components/shared/TagsFilter.vue';
 import { ref, inject, onBeforeUnmount, onBeforeMount } from 'vue';
 import { useStore } from 'vuex';
@@ -258,10 +258,10 @@ async function download() {
   } else if (exportType.value.value === 'qb') {
     filename = `Timesheet Report - ${readableDateRange}`;
     loading.value = 'Downloading timesheet data...';
-    await qbCsv.download(csvInfo, { filename, startDate: f.periodStart, endDate: f.periodEnd });
+    await QuickBooksCsv.download(csvInfo, { filename, startDate: f.periodStart, endDate: f.periodEnd });
   } else if (this.exportType.value === 'ppto') {
     filename = `Planned PTO Report - as of ${getTodaysDate('YYYY-MM-DD')}`;
-    await PlannedPTOCSV.download(csvInfo, { filename });
+    await PlannedPtoCsv.download(csvInfo, { filename });
   }
 
   // close the modal
