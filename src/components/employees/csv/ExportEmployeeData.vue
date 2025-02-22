@@ -103,7 +103,7 @@ import baseCsv from '@/utils/csv/baseCsv.js';
 import employeeCsv from '@/utils/csv/employeeCsv.js';
 import eeoCsv from '@/utils/csv/eeoCsv.js';
 import qbCsv from '@/utils/csv/qbCsv.js';
-import pptoCsv from '@/utils/csv/pptoCsv.js';
+import PlannedPTOCSV from '@/utils/csv/pptoCsv.js';
 import TagsFilter from '@/components/shared/TagsFilter.vue';
 import { ref, inject, onBeforeUnmount, onBeforeMount } from 'vue';
 import { useStore } from 'vuex';
@@ -261,7 +261,7 @@ async function download() {
     await qbCsv.download(csvInfo, { filename, startDate: f.periodStart, endDate: f.periodEnd });
   } else if (this.exportType.value === 'ppto') {
     filename = `Planned PTO Report - as of ${getTodaysDate('YYYY-MM-DD')}`;
-    await pptoCsv.download(csvInfo, { filename });
+    await PlannedPTOCSV.download(csvInfo, { filename });
   }
 
   // close the modal
