@@ -1,13 +1,14 @@
 import CsvUtil from '@/utils/csv/csvUtil.js';
 class EmployeeCsvUtil extends CsvUtil {
   /**
-   * Gets employee CASE ID
+   * Get attribute of a data set
    *
-   * @param employee
-   * @returns {String} employee CASE ID
+   * @param dataSet
+   * @param attribute
+   * @returns attribute value
    */
-  static getCaseId(employee) {
-    return employee.employeeNumber;
+  static getAttribute(dataSet, attribute) {
+    return dataSet[attribute];
   }
 
   /**
@@ -30,27 +31,51 @@ class EmployeeCsvUtil extends CsvUtil {
  * @param employees - expense object to convert
  * @return a new object passable to csv.js
  */
- static async convertEmployees(employees, startDate, endDate) {
+ static async convertEmployees(employees, options) {
   // columns and their getter functions
   let columns = [
     {
       title: 'CASE ID',
-      getter: this.getCaseId,
+      attribute: 'employeeNumber',
     }
   ].concat(this.columns());
 
-  let index = {};
-  await this.createIndex(index, employees, startDate, endDate);
+  let index;
+  if (this.createIndex) {
+    index = {};
+    await this.createIndex(index, employees, options.startDate, options.endDate);
+  }
 
   // build out one row per employee
   let rows = [];
   let i = 0;
   for (let e of employees) {
-    if (!index[e.employeeNumber]) continue; // TODO
+    if (index && !index[e.employeeNumber]) continue;
     let row = {};
+    let clearances, contracts;
     // add in pre-defined columns
     for (let col of columns) {
-      row[col.title] = col.getter.bind(this)(e, index, startDate, endDate); // TODO
+      if (col.attribute) {
+        row[col.title] = this.getAttribute(e, col.attribute);
+      } else if (col.date) {
+        row[col.title] = this.getDate(e, col.date);
+      } else if (col.phone) {
+        row[col.title] = this.getPhoneNumbers(e, col.phone);
+      } else if (col.clearance) {
+        if (!clearances) {
+          clearances = this.getClearancesData(e.clearances);
+        }
+        row[col.title] = this.getAttribute(clearances, col.clearance);
+      } else if (col.contract) {
+        if (!contracts) {
+          contracts = this.getContractsInfo(e, options.preloaded.contracts);
+        }
+        row[col.title] = this.getAttribute(contracts, col.contract);
+      } else if (col.tags) {
+        row[col.title] = this.getTags(e, options.preloaded.tags);
+      } else {
+        row[col.title] = col.getter.bind(this)(e, index, options.startDate, options.endDate);
+      }
     }
     // add employee row
     rows.push(row);
@@ -73,10 +98,16 @@ class EmployeeCsvUtil extends CsvUtil {
    * Downloads array of employees EEO information as csv file.
    * @param employees - array of employees objects
    */
- static async download(employees, options = { filename: null, startDate: null, endDate: null }) {
-    let convertedEmployees = await this.convertEmployees(employees, options.startDate, options.endDate); // convert employees into csv object (returns two arrays)
+ static async download(employees, options = {}) {
+    options = {
+      filename: 'Employee Report',
+      startDate: null,
+      endDate: null,
+      preloaded: null,
+      ...options
+    }
+    let convertedEmployees = await this.convertEmployees(employees, options);
     let csvFileString = super.generate(convertedEmployees); // convert to csv file string
-    if (!options.filename) options.filename = 'Employee Report';
     super.download(csvFileString, options.filename); // download csv file string as .csv
   } // download
 

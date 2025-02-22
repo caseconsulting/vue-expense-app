@@ -100,7 +100,7 @@ import _map from 'lodash/map';
 import _orderBy from 'lodash/orderBy';
 import _filter from 'lodash/filter';
 import baseCsv from '@/utils/csv/baseCsv.js';
-import employeeCsv from '@/utils/csv/employeeCsv.js';
+import EmployeeCsv from '@/utils/csv/employeeCsv.js';
 import eeoCsv from '@/utils/csv/eeoCsv.js';
 import QuickBooksCsv from '@/utils/csv/qbCsv.js';
 import PlannedPtoCsv from '@/utils/csv/pptoCsv.js';
@@ -238,7 +238,9 @@ async function download() {
   let filename = `Download (${readableDateRange})`;
   if (exportType.value.value === 'emp') {
     filename = `Employee Export - ${readableDateRange}`;
-    employeeCsv.download(csvInfo, store.getters.contracts, filterOptions.value.tags, filename);
+    EmployeeCsv.download(csvInfo, {
+      filename: filename,
+      preloaded: { contracts: store.getters.contracts, tags: filterOptions.value.tags} });
   } else if (exportType.value.value === 'eeo') {
     let eeo = eeoCsv.fileString(csvInfo);
     csvInfo = filterDeclined(csvInfo);
