@@ -21,9 +21,15 @@
               class="type_form_padding"
             ></v-text-field>
           </v-col>
-          <v-col>
+          <v-col cols="auto">
             <!-- Inactive Flag -->
-            <v-checkbox :color="caseRed" label="Mark as Inactive" v-model="editedExpenseType.isInactive"></v-checkbox>
+            <v-switch
+              v-model="editedExpenseType.isInactive"
+              :color="caseRed"
+              label="Inactive"
+              hide-details
+              inset
+            ></v-switch>
           </v-col>
         </v-row>
         <!-- Categories -->
