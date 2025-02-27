@@ -27,7 +27,7 @@
           <v-col cols="12" sm="6">
             <date-picker
               v-model="filters.periodStart"
-              :disabled="exportType?.value === 'ppto'"
+              :disabled="['ppto', 'pocs'].includes(exportType?.value)"
               label="Start Date"
               hide-details
             />
@@ -35,7 +35,7 @@
           <v-col cols="12" sm="6">
             <date-picker
               v-model="filters.periodEnd"
-              :disabled="exportType?.value === 'ppto'"
+              :disabled="['ppto', 'pocs'].includes(exportType?.value)"
               label="End Date"
               hide-details
             />
@@ -104,6 +104,7 @@ import EmployeeCsv from '@/utils/csv/employeeCsv.js';
 import eeoCsv from '@/utils/csv/eeoCsv.js';
 import QuickBooksCsv from '@/utils/csv/qbCsv.js';
 import PlannedPtoCsv from '@/utils/csv/pptoCsv.js';
+import PocsCsv from '@/utils/csv/pocsCsv.js';
 import TagsFilter from '@/components/shared/TagsFilter.vue';
 import { ref, inject, onBeforeUnmount, onBeforeMount } from 'vue';
 import { useStore } from 'vuex';
@@ -124,7 +125,8 @@ const exportTypes = ref([
   { title: 'Employee Data', value: 'emp' },
   { title: 'EEO Data', value: 'eeo' },
   { title: 'Timesheet Data', value: 'qb' },
-  { title: 'Planned PTO Data', value: 'ppto' }
+  { title: 'Planned PTO Data', value: 'ppto' },
+  { title: 'Emergency Contacts', value: 'pocs' }
 ]);
 const tagsInfo = ref({
   selected: [],
@@ -268,6 +270,9 @@ async function download() {
   } else if (this.exportType.value === 'ppto') {
     filename = `Planned PTO Report - as of ${getTodaysDate('YYYY-MM-DD')}`;
     await PlannedPtoCsv.download(csvInfo, { filename });
+  } else if (this.exportType.value === 'pocs') {
+    filename = `Emergency Contacts - as of ${getTodaysDate('YYYY-MM-DD')}`;
+    await PocsCsv.download(csvInfo, filename);
   }
 
   // close the modal
@@ -311,7 +316,7 @@ function filterEmployees(employees) {
   return _filter(employees, (e) => {
     // - YEAR FILTER -
     // remove employees that were hired after given year, or departed before given year
-    let yearFilterExclusions = ['ppto']; // export types to exclude from year filter
+    let yearFilterExclusions = ['ppto', 'pocs']; // export types to exclude from year filter
     if (!yearFilterExclusions.includes(exportType.value.value)) {
       let hireDateValid = e.hireDate && isSameOrBefore(e.hireDate, f.periodEnd, 'day');
       let deptDateValid = !e.deptDate || isAfter(e.deptDate, f.periodStart, 'day');
