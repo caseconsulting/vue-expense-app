@@ -28,28 +28,29 @@ let WORK_HOURS_PER_DAY = 8;
 class QuickBooksCsv extends EmployeeCsvUtil {
   /**
    * Fills in employee timesheet information
-   *
-   * @param employees list of employees to get data for
-   * @param startDate YYYY-MM-DD to get timsheet data from
-   * @param endDate YYYY-MM-DD to get timesheet data until
    */
-  static async fillTimesheetData(employees, startDate, endDate) {
+  async fillTimesheetData() {
+    let startDate = this.startDate;
     // single month logic conversion
-    let singleMonth = startDate === endDate ? startDate : null;
+    let singleMonth = startDate === this.endDate ? startDate : null;
     if (singleMonth) startDate = subtract(startDate, 1, 'month', 'YYYY-MM-DD');
 
     // run API calls for each employee first (for easy batching)
     let batch = [];
     let batch_employees = []; // employee numbers, in same order as batch[]
     let promise, resps, resp, empNum;
-    for (let i in employees) {
+    for (let i in this.employees) {
       // build promises
-      promise = api.getTimesheetsData(employees[i].employeeNumber, { startDate, endDate, employeeId: employees[i].id });
+      promise = api.getTimesheetsData(this.employees[i].employeeNumber, {
+        startDate: startDate,
+        endDate: this.endDate,
+        employeeId: this.employees[i].id
+      });
       batch.push(promise);
-      batch_employees.push(employees[i].employeeNumber);
+      batch_employees.push(this.employees[i].employeeNumber);
 
       // run promises and fill data
-      if (batch.length == BATCH_SIZE || i == employees.length - 1) {
+      if (batch.length == BATCH_SIZE || i == this.employees.length - 1) {
         resps = await Promise.all(batch);
 
         // parse responses
@@ -77,13 +78,13 @@ class QuickBooksCsv extends EmployeeCsvUtil {
   /**
    * Fills in data from ADP, namely the ADP ID
    *
-   * @param employees - employees to look for
+   * @param index
    * @param adpInfo - raw ADP info from API call
    */
-  static fillAdpData(employees, index, adpInfo) {
+  fillAdpData(index, adpInfo) {
     // make set of employee numbers from `employees`
     let employeeNums = new Set();
-    for (let e of employees) employeeNums.add(e.employeeNumber);
+    for (let e of this.employees) employeeNums.add(e.employeeNumber);
 
     // fill in info from ADP
     let empNum, adpId;
@@ -102,21 +103,20 @@ class QuickBooksCsv extends EmployeeCsvUtil {
    * Gets employee ADP ID, based on index
    *
    * @param employee
+   * @param index
    * @returns {String} employee CASE ID
    */
-  static getAdpId(employee, index) {
+  getAdpId(employee, index) {
     return index[employee.employeeNumber]?.adpId || '---';
   }
 
   /**
    * Calculates and returns the work days between start and end dates provided
    *
-   * @param {String} startDate - The start date (in YYYY-MM-DD format)
-   * @param {String} endDate - The end date (in YYYY-MM-DD format)
-   * @param {Boolean} excludeProRated - Whether or not to pro-rate based on hire date (default is to pro-rate)
+   * @param employee
    * @return int - number of remaining working days
    */
-  static getWorkDays(employee, startDate, endDate) {
+  getWorkDays(employee) {
     // allow for employee to be null and just get total workdays in the month
     if (!employee) employee = { hireDate: subtract(getTodaysDate(), 100, 'year', 'YYYY-MM-DD') };
 
@@ -125,8 +125,8 @@ class QuickBooksCsv extends EmployeeCsvUtil {
     }
 
     let workDays = 0;
-    startDate = format(startOf(startDate, 'month'), DEFAULT_ISOFORMAT);
-    endDate = format(endOf(endDate, 'month'), DEFAULT_ISOFORMAT);
+    let startDate = format(startOf(this.startDate, 'month'), DEFAULT_ISOFORMAT);
+    let endDate = format(endOf(this.endDate, 'month'), DEFAULT_ISOFORMAT);
     if (isAfter(employee.hireDate, startDate, 'day') && isSameOrAfter(endDate, employee.hireDate, 'day')) {
       startDate = employee.hireDate;
     }
@@ -143,12 +143,10 @@ class QuickBooksCsv extends EmployeeCsvUtil {
   /**
    * Gets monthly hours for CASE
    *
-   * @param _ slot for employee, unused
-   * @param startDate
    * @returns {String} monthly hours for full-time CASE employees in MONTH
    */
-  static getMonthHours(employee, index, startDate) {
-    let totalWorkDays = this.getWorkDays(null, startOf(startDate, 'month'), endOf(startDate, 'month'));
+  getMonthHours() {
+    let totalWorkDays = this.getWorkDays(null, startOf(this.startDate, 'month'), endOf(this.startDate, 'month'));
     return totalWorkDays * WORK_HOURS_PER_DAY;
   }
 
@@ -161,13 +159,13 @@ class QuickBooksCsv extends EmployeeCsvUtil {
    * @param employee
    * @returns {String} employee prorated hours for month
    */
-  static getEmployeePotentialHours(employee, index, startDate, endDate) {
+  getEmployeePotentialHours(employee, index) {
     // get employee info and yeet if it isn't there
     let n = employee.employeeNumber;
     if (!index[n]) return '---';
 
     // total work days in the month, hours prorated as a fraction of 100 (aka a percent in decimal form)
-    let totalWorkDays = this.getWorkDays(employee, startOf(startDate, 'month'), endOf(endDate, 'month'));
+    let totalWorkDays = this.getWorkDays(employee, startOf(this.startDate, 'month'), endOf(this.endDate, 'month'));
     let proRatedHours = WORK_HOURS_PER_DAY * (employee.workStatus / 100);
 
     let result = totalWorkDays * proRatedHours;
@@ -182,7 +180,7 @@ class QuickBooksCsv extends EmployeeCsvUtil {
    * @param employee
    * @returns {String} employee hours worked
    */
-  static getEmployeeWorkedHours(employee, index) {
+  getEmployeeWorkedHours(employee, index) {
     let n = employee.employeeNumber;
     if (!index[n]) return '---';
     let timesheets = index[n].timesheets;
@@ -212,13 +210,13 @@ class QuickBooksCsv extends EmployeeCsvUtil {
    * @param employee
    * @returns {String} employee hours worked over, floored at 0
    */
-  static getEmployeeHoursOver(employee, index, startDate, endDate) {
+  getEmployeeHoursOver(employee, index) {
     let n = employee.employeeNumber;
     if (!index[n]) return '---';
 
     let hoursOver =
-      this.getEmployeeWorkedHours(employee, index, startDate, endDate) -
-      this.getEmployeePotentialHours(employee, index, startDate, endDate);
+      this.getEmployeeWorkedHours(employee, index, this.startDate, this.endDate) -
+      this.getEmployeePotentialHours(employee, index, this.startDate, this.endDate);
 
     // set min to 0 and format
     hoursOver = Math.max(0, hoursOver);
@@ -227,37 +225,37 @@ class QuickBooksCsv extends EmployeeCsvUtil {
     return hoursOver;
   }
 
-  static async createIndex(index, employees, startDate, endDate) {
+  async createIndex(index) {
     let adpPromise = api.getEmployeesFromAdp(); // run in background while qb runs
-    await this.fillTimesheetData(employees, startDate, endDate);
-    this.fillAdpData(employees, index, await adpPromise); // fill in ADP response
+    await this.fillTimesheetData();
+    this.fillAdpData(index, await adpPromise); // fill in ADP response
   } // createIndex
 
-  static columns() {
+  columns() {
     return [
       {
         title: 'ADP ID',
-        getter: this.getAdpId,
+        getter: this.getAdpId
       },
       {
         title: 'Employee Name',
-        getter: this.getEmployeeName,
+        getter: this.getEmployeeName
       },
       {
         title: 'Potential Monthly Hours',
-        getter: this.getMonthHours,
+        getter: this.getMonthHours
       },
       {
         title: 'Potential Employee Specific Hours',
-        getter: this.getEmployeePotentialHours,
+        getter: this.getEmployeePotentialHours
       },
       {
         title: 'Actual Billable Hours Worked',
-        getter: this.getEmployeeWorkedHours,
+        getter: this.getEmployeeWorkedHours
       },
       {
         title: 'Actual Hours Over Potential',
-        getter: this.getEmployeeHoursOver,
+        getter: this.getEmployeeHoursOver
       }
     ];
   }

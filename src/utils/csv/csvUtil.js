@@ -16,7 +16,7 @@ import { utils, write } from 'xlsx';
 const NEW_LINE = '\n';
 
 class CsvUtil {
-
+  constructor(options = {}) {}
   /**
    * Combines two CSV strings into one (A on top of B)
    * @param csvA - CSV string to place first
@@ -46,10 +46,10 @@ class CsvUtil {
    * @param filename (optional) - file name with which to download file
    * @param asXlsx (optional) - download file as xlsx? default is true, alternative is CSV
    */
-  static download(csvText, filename = null, asXlsx = true) {
+  download(csvText, filename = null, asXlsx = true) {
     // build filename
     let ext = asXlsx ? '.xlsx' : '.csv';
-    if (filename == undefined || filename == null) filename = 'export';
+    if (filename == null) filename = 'export';
     if (filename.substring(ext.length - 4) != ext) filename += ext;
 
     // build file contents (aka blob)
@@ -105,7 +105,7 @@ class CsvUtil {
    * @param item - array or string to escape
    * @param quotify (optional) - whether or not to surround result in quotes
    */
-  static escape(item, quotify = false) {
+  escape(item, quotify = false) {
     let to_return;
     if (Array.isArray(item)) {
       to_return = _map(item, (s) => {
@@ -123,34 +123,13 @@ class CsvUtil {
   } // escape
 
   /**
-   * Non-destructively removes undesired headers (keys)
-   * @param objects - old array of objects to filter
-   * @param desired_headers - which headers (aka keys of objects[x]) to keep
-   * @return new array of objects with only and all desired_headers keys
-   */
-  static filterHeaders(objects, desired_headers) {
-    let new_objects = [];
-    // go through each object...
-    _forEach(objects, (object) => {
-      // extract headers we want
-      let new_object = {};
-      _forEach(desired_headers, (h) => {
-        if (object[h] != undefined) new_object[h] = object[h];
-        else new_object[h] = '';
-      });
-      new_objects.push(new_object);
-    });
-    return new_objects;
-  } // filterHeaders
-
-  /**
    * Generates a valid CSV "file" string from an object. Object values may
    * be arrays. Object keys will be used as headers.
    * @param object_array - array of objects to make CSV
    * @param delimiter (optional) - string by which arrays will be separated
    * @return file-ready CSV string
    */
-  static generate(object_array, delimiter = ', ') {
+  generate(object_array, delimiter = ', ') {
     let final_csv = '';
 
     // construct headers, preserving order
@@ -221,7 +200,6 @@ class CsvUtil {
     if (!Array.isArray(key)) key = [key];
     return _sortBy(objects, key);
   } // sort
-
 }
 
 export default CsvUtil;

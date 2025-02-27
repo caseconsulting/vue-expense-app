@@ -14,8 +14,8 @@ class PlannedPtoCsv extends EmployeeCsvUtil {
    * @param e employee object
    * @param row reference to row to add
    */
-  static createIndex(plannedPtoIndex, employees) {
-    for (let e of employees) {
+  createIndex(plannedPtoIndex) {
+    for (let e of this.employees) {
       // extract plan
       let plan = e.plannedPto?.plan;
       if (!plan) continue;
@@ -38,7 +38,7 @@ class PlannedPtoCsv extends EmployeeCsvUtil {
     }
   }
 
-  static additionalColumns(plannedPtoIndex, e, rows, i) {
+  additionalColumns(plannedPtoIndex, e, rows, i) {
     let curr = earliestDate;
     if (!plannedPtoIndex[e.employeeNumber]) return;
     while (isBefore(curr, latestDate)) {
@@ -49,11 +49,13 @@ class PlannedPtoCsv extends EmployeeCsvUtil {
     }
   } // additionalColumns
 
-  static columns() {
-    return [{
-      title: 'Employee Name',
-      getter: this.getEmployeeName,
-    }];
+  columns() {
+    return [
+      {
+        title: 'Employee Name',
+        getter: this.getEmployeeName
+      }
+    ];
   }
 }
 

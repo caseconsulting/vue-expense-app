@@ -12,7 +12,6 @@ import { difference, format, getTodaysDate, minimum } from '@/shared/dateUtils';
 import { getEmployeeCurrentAddress } from '@/shared/employeeUtils.js';
 
 class EmployeeCsv extends EmployeeCsvUtil {
-
   /**
    * Gets employee date attribute
    *
@@ -20,11 +19,11 @@ class EmployeeCsv extends EmployeeCsvUtil {
    * @param dateAttribute
    * @returns date attribute value in YYYY-MM-DD format
    */
-  static getDate(employee, dateAttribute) {
+  getDate(employee, dateAttribute) {
     return format(employee[dateAttribute], null, 'YYYY-MM-DD') || '';
   } // getDate
 
-  static getPlaceOfBirth(employee) {
+  getPlaceOfBirth(employee) {
     return [employee.city, employee.st, employee.country];
   } // getPlaceOfBirth
 
@@ -35,7 +34,7 @@ class EmployeeCsv extends EmployeeCsvUtil {
    * @param e - employee object
    * @param type - type of phone number (probably 'Cell'/'Home'/'Work')
    */
-  static getPhoneNumbers(e, type) {
+  getPhoneNumbers(e, type) {
     let combinedNumbers = [...(e.privatePhoneNumbers || []), ...(e.publicPhoneNumbers || [])];
     let matchedNumbers = [];
     for (let number of combinedNumbers) {
@@ -52,7 +51,7 @@ class EmployeeCsv extends EmployeeCsvUtil {
    * @param employee
    * @return String - work status description
    */
-  static getWorkStatus(employee) {
+  getWorkStatus(employee) {
     let workStatus = employee.workStatus;
     if (workStatus == 100) {
       return 'Full Time';
@@ -71,7 +70,7 @@ class EmployeeCsv extends EmployeeCsvUtil {
    * @param employee
    * @return String - awards
    */
-  static getAwards(employee) {
+  getAwards(employee) {
     let awards = employee.awards || [];
     let a = '';
     for (let i = 0; i < awards.length; i++) {
@@ -89,7 +88,7 @@ class EmployeeCsv extends EmployeeCsvUtil {
    * @param employee
    * @return String - certifications
    */
-  static getCertifications(employee) {
+  getCertifications(employee) {
     let certifications = employee.certifications || [];
     let a = '';
     for (let i = 0; i < certifications.length; i++) {
@@ -110,7 +109,7 @@ class EmployeeCsv extends EmployeeCsvUtil {
    * @param clearance - An array of objects.
    * @return Object - clearance data
    */
-  static getClearancesData(clearances) {
+  getClearancesData(clearances) {
     // formats dates when joining. assumes there is at least
     // one date in the `items` array.
     function joinAndFormat(items, glue = '', dateFormat = 'YYYY-MM-DD') {
@@ -144,9 +143,12 @@ class EmployeeCsv extends EmployeeCsvUtil {
           ? format(clearances[i].grantedDate, null, 'YYYY-MM-DD')
           : 'No Date';
         data.biDates += clearances[i].biDates.length > 0 ? joinAndFormat(clearances[i].biDates, ' & ') : 'No Dates';
-        data.polyDates += clearances[i].polyDates.length > 0 ? joinAndFormat(clearances[i].polyDates, ' & ') : 'No Dates';
+        data.polyDates +=
+          clearances[i].polyDates.length > 0 ? joinAndFormat(clearances[i].polyDates, ' & ') : 'No Dates';
         data.adjudicationDates +=
-          clearances[i].adjudicationDates.length > 0 ? joinAndFormat(clearances[i].adjudicationDates, ' & ') : 'No Dates';
+          clearances[i].adjudicationDates.length > 0
+            ? joinAndFormat(clearances[i].adjudicationDates, ' & ')
+            : 'No Dates';
         data.badgeNum += clearances[i].badgeNum ? clearances[i].badgeNum : 'No Number';
         data.badgeExpDate += clearances[i].badgeExpirationDate ? clearances[i].badgeExpirationDate : 'No Date';
         if (i + 1 < clearances.length) {
@@ -171,7 +173,7 @@ class EmployeeCsv extends EmployeeCsvUtil {
    * @param contract the contract to get the info from
    * @return number - number of years on the contract
    */
-  static getContractLengthInYears(contract) {
+  getContractLengthInYears(contract) {
     let total = 0;
     if (contract.projects) {
       contract.projects.forEach((project) => {
@@ -187,7 +189,7 @@ class EmployeeCsv extends EmployeeCsvUtil {
    * @param project the project to convert
    * @return number - time in years
    */
-  static getProjectLengthInYears(project) {
+  getProjectLengthInYears(project) {
     let length;
     if (project.endDate) {
       length = difference(project.endDate, project.startDate, 'months');
@@ -205,7 +207,7 @@ class EmployeeCsv extends EmployeeCsvUtil {
    * @param
    * @return String - contract
    */
-  static getContractsInfo(employee, allContracts) {
+  getContractsInfo(employee, allContracts) {
     let result = [];
     let toReturn = {};
     let allProjects = allContracts.map((c) => c.projects).flat();
@@ -275,7 +277,7 @@ class EmployeeCsv extends EmployeeCsvUtil {
    * @param exp - An array of objects.
    * @return String - experience
    */
-  static getCustomerOrgExp(employee) {
+  getCustomerOrgExp(employee) {
     let exp = employee.customerOrgExp || [];
     let a = '';
     for (let i = 0; i < exp.length; i++) {
@@ -296,7 +298,7 @@ class EmployeeCsv extends EmployeeCsvUtil {
    * @param edu - An array of objects.
    * @return String - education
    */
-  static getEducation(employee) {
+  getEducation(employee) {
     let education = employee.education || [];
     let str = '';
     let university = [];
@@ -389,7 +391,7 @@ class EmployeeCsv extends EmployeeCsvUtil {
    * @param job - An array of objects.
    * @return String - companies
    */
-  static getCompanies(employee) {
+  getCompanies(employee) {
     let companies = employee.companies || [];
     let result = [];
     let toPush;
@@ -417,7 +419,7 @@ class EmployeeCsv extends EmployeeCsvUtil {
    * @param tech - An array of objects.
    * @return String - technologies
    */
-  static getTechnologies(employee) {
+  getTechnologies(employee) {
     let tech = employee.tech || [];
     let a = '';
     for (let i = 0; i < tech.length; i++) {
@@ -435,7 +437,7 @@ class EmployeeCsv extends EmployeeCsvUtil {
    * @param tags tags retrieved from db table
    * @returns String - comma separated list of tag names
    */
-  static getTags(employee, tags) {
+  getTags(employee, tags) {
     let employeeID = employee.id;
     let employeeTags = tags.filter((tag) => {
       if (tag.employees.includes(employeeID)) {
@@ -446,7 +448,7 @@ class EmployeeCsv extends EmployeeCsvUtil {
     return employeeTags && employeeTags.length > 0 ? employeeTags.map((t) => t.tagName).join(', ') : null;
   } // getTags
 
-  static columns() {
+  columns() {
     return [
       { title: 'First Name', attribute: 'firstName' },
       { title: 'Middle Name', attribute: 'middleName' },
@@ -487,7 +489,7 @@ class EmployeeCsv extends EmployeeCsvUtil {
       { title: 'Job Experience', getter: this.getCompanies },
       { title: 'Technology', getter: this.getTechnologies },
       { title: 'Tags', tags: true },
-      { title: 'id', attribute: 'id' },
+      { title: 'id', attribute: 'id' }
     ];
   }
 }

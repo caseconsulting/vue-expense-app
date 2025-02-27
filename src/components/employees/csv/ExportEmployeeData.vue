@@ -240,7 +240,11 @@ async function download() {
     filename = `Employee Export - ${readableDateRange}`;
     EmployeeCsv.download(csvInfo, {
       filename: filename,
-      preloaded: { contracts: store.getters.contracts, tags: filterOptions.value.tags} });
+      preloaded: {
+        contracts: store.getters.contracts,
+        tags: filterOptions.value.tags
+      }
+    });
   } else if (exportType.value.value === 'eeo') {
     let eeo = eeoCsv.fileString(csvInfo);
     csvInfo = filterDeclined(csvInfo);
