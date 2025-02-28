@@ -166,6 +166,12 @@ watch(
 watch(
   () => formattedModel.value,
   (newVal, oldVal) => {
+    // if newVal is null, skip to setting it to the model. otherwise functions won't work and the model will not update
+    if (newVal === null) {
+      model.value = newVal;
+      return;
+    }
+
     // if formatted model is an array, watchers will trigger on any format, even if the values don't change
     if (multiple.value && newVal.join() === oldVal.join()) return;
 
