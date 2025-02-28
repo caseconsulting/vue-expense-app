@@ -21,12 +21,18 @@ class EmployeeCsvUtil extends CsvUtil {
   }
 
   /**
-   * Should be overriden by child classes.
+   * The columns of the report.
    * @returns columns for the specified report
    */
   columns() {
-    return [];
-  } // columns
+    return [
+      {
+        title: 'Employee Name',
+        getter: this.getEmployeeName
+      }
+    ];
+  }
+
 
   /**
    * Downloads array of employees EEO information as csv file.
@@ -37,9 +43,13 @@ class EmployeeCsvUtil extends CsvUtil {
     await util.download();
   } // download
 
-  async download() {
+  async fileString() {
     let convertedEmployees = await this.convertEmployees();
-    let csvFileString = super.generate(convertedEmployees); // convert to csv file string
+    return super.generate(convertedEmployees); // convert to csv file string
+  }
+
+  async download() {
+    let csvFileString = await this.fileString();
     super.download(csvFileString, this.options.filename); // download csv file string as .csv
   } // download
 

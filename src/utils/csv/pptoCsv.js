@@ -48,15 +48,6 @@ class PlannedPtoCsv extends EmployeeCsvUtil {
       curr = add(curr, 1, 'month', 'YYYY-MM');
     }
   } // additionalColumns
-
-  columns() {
-    return [
-      {
-        title: 'Employee Name',
-        getter: this.getEmployeeName
-      }
-    ];
-  }
 }
 
 export default PlannedPtoCsv;

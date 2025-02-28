@@ -272,7 +272,7 @@ async function download() {
     await PlannedPtoCsv.download(csvInfo, { filename });
   } else if (this.exportType.value === 'pocs') {
     filename = `Emergency Contacts - as of ${getTodaysDate('YYYY-MM-DD')}`;
-    await PocsCsv.download(csvInfo, filename);
+    await PocsCsv.download(csvInfo, { filename });
   }
 
   // close the modal
