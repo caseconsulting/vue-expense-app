@@ -2,55 +2,60 @@
   <div>
     <v-container fluid class="px-1 px-md-4">
       <v-row>
-        <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
+        <v-col cols="6" xl="3" lg="3" md="3" sm="6">
           <v-autocomplete
-            id="employeesSearch"
-            v-model="search"
+            v-model="employeeSearch"
             :custom-filter="employeeFilter"
-            :items="employees"
+            :items="remindedEmployees"
             label="Search Employees"
             variant="underlined"
             auto-select-first
+            hide-details
             clearable
-            item-title="text"
-            item-value="value"
+            :item-title="(item) => formatEmployeeName(item)"
             @click:clear="
               search = null;
               refreshDropdownItems();
             "
-          ></v-autocomplete>
+          />
+        </v-col>
+        <v-col cols="2">
+          <date-picker v-model="startDate" clearable label="Start Date" />
+        </v-col>
+        <v-col cols="2">
+          <date-picker v-model="endDate" clearable label="End Date" />
+        </v-col>
+        <v-col cols="4">
+          <v-switch v-model="onlyLatest" color="primary" label="Only Latest Reminder" />
         </v-col>
       </v-row>
 
+      <div class="italics mb-4 ml-2">
+        <v-icon icon="mdi-information-outline" class="mb-1" size="small" />
+        {{ includedText }}
+      </div>
+
       <v-data-table
+        :search="employeeSearch"
         :headers="headers"
-        :items="reminders"
+        :items="filteredReminders"
+        :items-per-page="50"
         :sort-by="sortBy"
-        :items-per-page="-1"
-        class="elevation-1 row-pointer"
-      >
-        <!-- Employee Number Slot
-        <template v-slot:[`item.employeeNumber`]="{ item }">
-          <p :class="{ inactive: item.workStatus <= 0 }" class="mb-0">
-            {{ item.employeeNumber }}
-          </p>
-        </template>-->
-      </v-data-table>
+        class="elevation-1"
+      />
     </v-container>
   </div>
 </template>
 
 <script setup>
-import { onMounted, ref, inject, watch } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-import _forEach from 'lodash/forEach';
-import _filter from 'lodash/filter';
+import { format, isSameOrAfter, isSameOrBefore } from '@/shared/dateUtils';
 // import { userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
 import { employeeFilter } from '@/shared/filterUtils';
-import { selectedTagsHasEmployee } from '@/shared/employeeUtils';
 // import TagsFilter from '@/components/shared/TagsFilter.vue';
-const emitter = inject('emitter');
+import DatePicker from '@/components/shared/DatePicker.vue';
 const store = useStore();
 const router = useRouter();
 
@@ -60,39 +65,38 @@ const router = useRouter();
 // |                                                  |
 // |--------------------------------------------------|
 
-const employees = ref([]);
-const employeesInfo = ref([]);
-const filteredEmployees = ref([]);
 const headers = ref([
   {
     title: 'Employee',
-    key: 'employee.name'
+    key: 'employee.name',
+    value: (item) => formatEmployeeName(item.employee)
   },
   {
     title: 'Phone Number',
-    key: 'phoneNumber'
+    key: 'phoneNumber',
+    value: (item) => formatPhoneNumber(item.phoneNumber)
   },
   {
     title: 'Date/time',
-    key: 'timestamp'
+    key: 'timestamp',
+    value: (item) => format(item.timestamp, null, 'MMM DD YYYY HH:mm')
+  },
+  {
+    title: `Total Reminders`,
+    key: 'reminderCount',
+    value: (item) => reminderCounts.value[item.employee.id][onlyLatest.value ? 'total' : 'filtered']
   }
 ]); // datatable headers
-const awardSearch = ref(null);
-const awards = ref([]);
-const search = ref(null); // query text for datatable search field
-const showInactiveEmployees = ref(false);
-const sortBy = ref([{ key: 'timestamp' }]); // sort datatable items
-const tagsInfo = ref({
-  selected: [],
-  flipped: []
-});
+const employeeSearch = ref(null); // query text for datatable search field
+const startDate = ref(null);
+const endDate = ref(null);
+const onlyLatest = ref(false);
+const sortBy = ref([{ key: 'timestamp', order: 'desc' }]); // sort datatable items
 
-// indexed datasets
-let reminders = ref([]);
-let index = ref({
-  employee: {},
-  invocation: {}
-});
+const reminders = ref([]); // all reminders
+const remindedEmployees = ref(new Set()); // all employees who have been reminded at least once
+const reminderCounts = ref({}); // all employees who have been reminded at least once
+const latestReminder = ref({}); // quick reference for an employee's latest reminder
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -104,73 +108,128 @@ let index = ref({
  * The created lifecycle hook.
  */
 onMounted(() => {
-  employeesInfo.value = store.getters.employees; // default to filtered
-  filteredEmployees.value = employeesInfo.value; // this one is shown
-  populateDropdowns(employeesInfo.value);
-  buildAwardsColumns();
-  if (localStorage.getItem('requestedFilter')) {
-    awardSearch.value = localStorage.getItem('requestedFilter');
-    refreshDropdownItems();
-    localStorage.removeItem('requestedFilter');
-  }
-
   // index datasets for easy searching
-  for (let employee of employeesInfo.value) {
+  for (let employee of store.getters.employees) {
+    reminderCounts.value[employee.id] = { total: 0, filtered: 0 };
+    let basicEmployee = {
+      id: employee.id,
+      nickname: employee.nickname,
+      firstName: employee.firstName,
+      lastName: employee.lastName,
+      employeeNumber: employee.employeeNumber
+    };
+    // add to array of employees who have been reminded
+    if (employee.timesheetReminders?.length > 0) remindedEmployees.value.add(basicEmployee);
+    // add their reminders to array of all reminders
     for (let reminder of employee.timesheetReminders ?? []) {
-      let basicEmployee = {
-        id: employee.id,
-        name: `${employee.nickname || employee.firstName} ${employee.lastName}`
-      };
-      // add to array of all reminders
-      reminders.value.push({ ...reminder, employee: basicEmployee });
-      // add to employee index
-      if (!index.value.employee[employee.id]) index.value.employee[employee.id] = [];
-      index.value.employee[employee.id].push({ ...reminder, employee: basicEmployee });
-      // add to lamdba invocation index
-      let invocation = getInvocation(reminder);
-      if (!index.value.invocation[invocation]) index.value.invocation[invocation] = [];
-      index.value.invocation[invocation].push({ ...reminder, employee: basicEmployee });
+      let extendedReminder = { ...reminder, employee: basicEmployee, reminderCount: -1 };
+      reminders.value.push(extendedReminder);
+      addLatestReminder(extendedReminder);
+      incrementReminderCount(employee.id, 'total');
     }
   }
-  console.log(reminders.value);
-  console.log(index.value);
-
-  // initial set of table download data
-  updateTableInfo(filteredEmployees.value);
 }); // created
 
-// helper to identify lambda invocations for grouping
-function getInvocation(reminder) {
-  // TODO: round to nearest hour and return "YYYY-MM-DD-HH"
-  return reminder.timestamp;
+// format employee name for display
+function formatEmployeeName(employee) {
+  return `${employee.nickname || employee.firstName} ${employee.lastName}`;
 }
+
+// format phone numbers to be visualy friendly
+function formatPhoneNumber(phoneNumber) {
+  if (!phoneNumber) return;
+  let numbers = phoneNumber.replace(/\D/g, '');
+  if (numbers.length === 10) {
+    // format (xxx) xxx-xxxx
+    let a = numbers.substring(0, 3);
+    let b = numbers.substring(3, 6);
+    let c = numbers.substring(6, 10);
+    return `(${a}) ${b}-${c}`;
+  } else if (numbers.length === 11) {
+    // format +x (xxx) xxx-xxxx
+    let a = numbers.substring(0, 1);
+    let b = numbers.substring(1, 4);
+    let c = numbers.substring(4, 7);
+    let d = numbers.substring(7, 11);
+    return `+${a} (${b}) ${c}-${d}`;
+  }
+  // if nothing else returned then the format is uncertain,
+  // just return the orginal phone number
+  return phoneNumber;
+}
+
+// helper to compare and potentially add a reminder as the most recent one for an employee
+function addLatestReminder(rem) {
+  // if this is the employee's first reminder, just set it
+  if (!latestReminder.value[rem.employee.id]) {
+    latestReminder.value[rem.employee.id] = rem;
+    return;
+  }
+
+  // compare to currently stored reminder to the new one and replace if needed
+  let curr = latestReminder.value[rem.employee.id];
+  if (isSameOrAfter(rem.timestamp, curr.timestamp, 'hour')) {
+    latestReminder.value[rem.employee.id] = rem;
+  }
+}
+
+// resets reminder count for given employee, defaulting to filtered
+function resetReminderCount(eId, type = 'filtered') {
+  reminderCounts.value[eId][type] = 0;
+}
+
+// increments reminder count for given employee, defaulting to filtered as type
+function incrementReminderCount(eId, type = 'filtered') {
+  reminderCounts.value[eId][type]++;
+}
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+const filteredReminders = computed(() => {
+  let data = [];
+
+  let rawData = onlyLatest.value ? Object.values(latestReminder.value) : reminders.value;
+
+  // each item must pass through all filters to be added to returning data
+  let seenEmployees = new Set();
+  for (let reminder of rawData) {
+    // filter by start and end date
+    if (startDate.value && !isSameOrAfter(reminder.timestamp, startDate.value, 'day')) continue;
+    if (endDate.value && !isSameOrBefore(reminder.timestamp, endDate.value, 'day')) continue;
+
+    // handle reminder count summation
+    if (!seenEmployees.has(reminder.employee.id)) {
+      resetReminderCount(reminder.employee.id);
+      seenEmployees.add(reminder.employee.id);
+    }
+    incrementReminderCount(reminder.employee.id);
+
+    // add to returned data
+    data.push(reminder);
+  }
+
+  return data;
+});
+
+const includedText = computed(() => {
+  if (onlyLatest.value) {
+    return 'Only the most recent reminder within the start and end date is shown, but "Total Reminders" includes all reminders sent.';
+  } else if (startDate.value || endDate.value) {
+    return 'Only reminders within the selected start and end date are shown, and "Total Reminders" is the tally of these.';
+  } else {
+    return 'All reminders are shown, and "Total Reminders" is the total amount of reminders sent to the employee.';
+  }
+});
 
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
-
-/**
- * Gets all of the active awards for each employee and displays the column on the table.
- */
-function buildAwardsColumns() {
-  employeesInfo.value.forEach((currentEmp) => {
-    if (currentEmp.awards) {
-      let hasAward = false;
-      let awards = '';
-      currentEmp.awards.forEach((award) => {
-        hasAward = true;
-        awards += `${award.name} & `;
-      });
-      if (hasAward) {
-        // remove & at the end
-        awards = awards.slice(0, -2);
-        currentEmp.awardNames = awards;
-      }
-    }
-  });
-} // buildAwardsColumns
 
 /**
  * handles click event of the employee table entry
@@ -180,91 +239,6 @@ function buildAwardsColumns() {
 function handleClick(_, { item }) {
   router.push(`/employee/${item.employeeNumber}`);
 } //handleClick
-
-/**
- * Populates all awards in the search dropdown.
- */
-function populateAwardsDropdown() {
-  awards.value = [];
-  _forEach(filteredEmployees.value, (employee) =>
-    _forEach(employee.awards, (award) => {
-      awards.value.push(award.name);
-    })
-  );
-  awards.value = Array.from(new Set(awards.value));
-} // populateAwardsDropdown
-
-/**
- * Populate drop downs with information that other employees have filled out.
- *
- * @param employees - array of employees for dropdown and to get contracts
- */
-function populateDropdowns(emps) {
-  // refresh the employees autocomplete list to be those that match the query
-  // employees.value = populateEmployeesDropdown(emps);
-  populateAwardsDropdown(emps);
-} // populateDropdowns
-
-/**
- * Refresh the list based on the current queries
- */
-function refreshDropdownItems() {
-  filteredEmployees.value = employeesInfo.value;
-  if (search.value) {
-    filteredEmployees.value = _filter(filteredEmployees.value, (employee) => {
-      return employee.employeeNumber == search.value;
-    });
-  }
-  if (awardSearch.value) {
-    searchAwards();
-  }
-  if (tagsInfo.value.selected.length > 0) {
-    filteredEmployees.value = _filter(filteredEmployees.value, (employee) => {
-      return selectedTagsHasEmployee(employee.id, tagsInfo.value);
-    });
-  }
-
-  populateDropdowns(filteredEmployees.value);
-} // refreshDropdownItems
-
-/**
- * Filters employees on the data table by the award entered by the user.
- */
-function searchAwards() {
-  filteredEmployees.value = _filter(filteredEmployees.value, (employee) => {
-    if (employee.awardNames) {
-      return employee.awardNames.includes(awardSearch.value);
-    } else {
-      return false;
-    }
-  });
-} // searchAwards
-
-/**
- * Emit new data for this tab
- *
- * @param event the event data containing the table information
- */
-function updateTableInfo(event) {
-  emitter.emit('reports-table-update', { tab: 'awards', table: event, headers: headers });
-}
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     WATCHERS                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Watches the showInactiveUsers to refilter the table as needed
- */
-watch(showInactiveEmployees, () => {
-  search.value = null;
-  employeesInfo.value = store.getters.employees;
-  // if (!showInactiveEmployees.value) employeesInfo.value = employeesInfo.value;
-  populateDropdowns(employeesInfo.value);
-  refreshDropdownItems();
-}); // watchShowInactiveUsers
 </script>
 
 <style lang="css" scoped>

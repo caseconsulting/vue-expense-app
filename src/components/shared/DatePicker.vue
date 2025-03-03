@@ -166,9 +166,10 @@ watch(
 watch(
   () => formattedModel.value,
   (newVal, oldVal) => {
-    // if newVal is null, skip to setting it to the model. otherwise functions won't work and the model will not update
-    if (newVal === null) {
-      model.value = newVal;
+    // if newVal is null or blank, skip to setting it to the model. otherwise functions won't work and the model will not update
+    if (newVal === null || newVal === '') {
+      newVal = null;
+      model.value = null;
       return;
     }
 
