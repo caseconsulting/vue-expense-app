@@ -3,13 +3,10 @@ class EmployeeCsvUtil extends CsvUtil {
   constructor(employees, options = {}) {
     super(options);
     this.employees = employees;
-    this.options = options = {
-      filename: 'Employee Report',
-      startDate: null,
-      endDate: null,
-      preloaded: null,
-      ...options
-    };
+    this.options = options;
+  }
+  get fileName() {
+    return this.options.filename || 'Employee Report';
   }
 
   get startDate() {
@@ -18,6 +15,14 @@ class EmployeeCsvUtil extends CsvUtil {
 
   get endDate() {
     return this.options.endDate;
+  }
+
+  get contracts() {
+    return this.options.preloaded.contracts;
+  }
+
+  get tags() {
+    return this.options.preloaded.tags;
   }
 
   /**
@@ -33,7 +38,6 @@ class EmployeeCsvUtil extends CsvUtil {
     ];
   }
 
-
   /**
    * Downloads array of employees EEO information as csv file.
    * @param employees - array of employees objects
@@ -43,14 +47,30 @@ class EmployeeCsvUtil extends CsvUtil {
     await util.download();
   } // download
 
+  /**
+   * Returns the CSV filestring as a string.
+   * @param employees - array of employees objects
+   */
+  static async fileString(employees, options = {}) {
+    let util = new this(employees, options);
+    let fileString = util.fileString();
+    return fileString;
+  } // download
+
+  /**
+   * Returns the CSV filestring as a string.
+   *
+   */
   async fileString() {
     let convertedEmployees = await this.convertEmployees();
     return super.generate(convertedEmployees); // convert to csv file string
   }
 
-  async download() {
-    let csvFileString = await this.fileString();
-    super.download(csvFileString, this.options.filename); // download csv file string as .csv
+  async download(csvFileString = null) {
+    if (!csvFileString) {
+      let csvFileString = await this.fileString();
+    }
+    super.download(csvFileString); // download csv file string as .csv
   } // download
 
   /**
@@ -121,11 +141,9 @@ class EmployeeCsvUtil extends CsvUtil {
           row[col.title] = this.getAttribute(clearances, col.clearance);
         } else if (col.contract) {
           if (!contracts) {
-            contracts = this.getContractsInfo(e, this.options.preloaded.contracts);
+            contracts = this.getContractsInfo(e);
           }
           row[col.title] = this.getAttribute(contracts, col.contract);
-        } else if (col.tags) {
-          row[col.title] = this.getTags(e, this.options.preloaded.tags);
         } else {
           row[col.title] = col.getter.bind(this)(e, index);
         }

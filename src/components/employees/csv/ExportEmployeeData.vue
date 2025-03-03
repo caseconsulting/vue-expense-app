@@ -6,7 +6,6 @@
     <!-- Modal Content -->
     <v-card-text class="d-flex justify-center">
       <div class="w-100">
-        <!-- EEO vs Employee export type -->
         <h3 class="mt-4">Export Type</h3>
         <v-radio-group :disabled="loading" hide-details v-model="exportType">
           <v-radio v-for="(t, i) in exportTypes" :key="i" :label="t.title" :value="t"></v-radio>
@@ -99,9 +98,8 @@ import _uniq from 'lodash/uniq';
 import _map from 'lodash/map';
 import _orderBy from 'lodash/orderBy';
 import _filter from 'lodash/filter';
-import baseCsv from '@/utils/csv/baseCsv.js';
 import EmployeeCsv from '@/utils/csv/employeeCsv.js';
-import eeoCsv from '@/utils/csv/eeoCsv.js';
+import EeoCsv from '@/utils/csv/eeoCsv.js';
 import QuickBooksCsv from '@/utils/csv/qbCsv.js';
 import PlannedPtoCsv from '@/utils/csv/pptoCsv.js';
 import PocsCsv from '@/utils/csv/pocsCsv.js';
@@ -248,21 +246,8 @@ async function download() {
       }
     });
   } else if (exportType.value.value === 'eeo') {
-    let eeo = eeoCsv.fileString(csvInfo);
-    csvInfo = filterDeclined(csvInfo);
-    let emp = employeeCsv.fileString(csvInfo, store.getters.contracts, filterOptions.value.tags, true);
-    let csvText = [
-      {
-        name: 'EEO Compliance Report',
-        csv: eeo
-      },
-      {
-        name: 'Employee Info',
-        csv: emp
-      }
-    ];
     filename = `EEO Compliance Report - ${readableDateRange}`;
-    baseCsv.download(csvText, filename);
+    await EeoCsv.download(csvInfo, { filename });
   } else if (exportType.value.value === 'qb') {
     filename = `Timesheet Report - ${readableDateRange}`;
     loading.value = 'Downloading timesheet data...';
@@ -279,28 +264,6 @@ async function download() {
   loading.value = false;
   close();
 } // download
-
-/**
- * Filters through given employees, removing employees that have incomplete
- * data in their EEO form
- *
- * @param employees employees to filter through
- */
-function filterDeclined(employees) {
-  function nullOrUndefined(item) {
-    return item == undefined || item == null;
-  }
-  return _filter(employees, (e) => {
-    return (
-      !nullOrUndefined(e.eeoGender) &&
-      !nullOrUndefined(e.eeoJobCategory) &&
-      !nullOrUndefined(e.eeoRaceOrEthnicity) &&
-      !nullOrUndefined(e.eeoHispanicOrLatino) &&
-      !nullOrUndefined(e.eeoHasDisability) &&
-      !nullOrUndefined(e.eeoIsProtectedVeteran)
-    );
-  });
-}
 
 /**
  * Filters employees based on the form's information

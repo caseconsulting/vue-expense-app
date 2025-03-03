@@ -203,14 +203,12 @@ class EmployeeCsv extends EmployeeCsvUtil {
    * Returns contract data for employee
    *
    * @param employeeContracts - An array of objects.
-   * @param allContracts - the contracts from DyanmoDB to connect employee contract IDs to
-   * @param
    * @return String - contract
    */
-  getContractsInfo(employee, allContracts) {
+  getContractsInfo(employee) {
     let result = [];
     let toReturn = {};
-    let allProjects = allContracts.map((c) => c.projects).flat();
+    let allProjects = this.contracts.map((c) => c.projects).flat();
     if (employee.contracts) {
       _forEach(employee.contracts, (contract) => {
         let earliestDate = getTodaysDate(); // keep track of earliest start date
@@ -231,7 +229,7 @@ class EmployeeCsv extends EmployeeCsvUtil {
           earliestDate = minimum([earliestDate, endDate]);
         });
         // add current contract, attaching earliestDate for sorting
-        let c = allContracts.find((c) => c.id === contract.contractId);
+        let c = this.contracts.find((c) => c.id === contract.contractId);
         result.push({
           contract: { name: c.contractName, prime: c.primeName },
           projects: projects,
@@ -434,12 +432,11 @@ class EmployeeCsv extends EmployeeCsvUtil {
   /**
    * Returns tags assigned to employee
    * @param employee
-   * @param tags tags retrieved from db table
    * @returns String - comma separated list of tag names
    */
-  getTags(employee, tags) {
+  getTags(employee) {
     let employeeID = employee.id;
-    let employeeTags = tags.filter((tag) => {
+    let employeeTags = this.tags.filter((tag) => {
       if (tag.employees.includes(employeeID)) {
         return true;
       }
@@ -488,7 +485,7 @@ class EmployeeCsv extends EmployeeCsvUtil {
       { title: 'Education', getter: this.getEducation },
       { title: 'Job Experience', getter: this.getCompanies },
       { title: 'Technology', getter: this.getTechnologies },
-      { title: 'Tags', tags: true },
+      { title: 'Tags', getter: this.getTags },
       { title: 'id', attribute: 'id' }
     ];
   }

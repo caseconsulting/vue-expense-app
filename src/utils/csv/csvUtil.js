@@ -16,7 +16,13 @@ import { utils, write } from 'xlsx';
 const NEW_LINE = '\n';
 
 class CsvUtil {
-  constructor(options = {}) {}
+  constructor(options = {}) {
+    this.options = options;
+  }
+
+  get fileName() {
+    this.options.filename || 'export';
+  }
   /**
    * Combines two CSV strings into one (A on top of B)
    * @param csvA - CSV string to place first
@@ -43,13 +49,11 @@ class CsvUtil {
    * ]
    *
    * @param csvText - csv text(s) to create as file, eg output of generate
-   * @param filename (optional) - file name with which to download file
    * @param asXlsx (optional) - download file as xlsx? default is true, alternative is CSV
    */
-  download(csvText, filename = null, asXlsx = true) {
-    // build filename
+  download(csvText, asXlsx = true) {
+    let filename = this.fileName;
     let ext = asXlsx ? '.xlsx' : '.csv';
-    if (filename == null) filename = 'export';
     if (filename.substring(ext.length - 4) != ext) filename += ext;
 
     // build file contents (aka blob)
@@ -105,7 +109,7 @@ class CsvUtil {
    * @param item - array or string to escape
    * @param quotify (optional) - whether or not to surround result in quotes
    */
-  escape(item, quotify = false) {
+  static escape(item, quotify = false) {
     let to_return;
     if (Array.isArray(item)) {
       to_return = _map(item, (s) => {
@@ -145,7 +149,7 @@ class CsvUtil {
     });
 
     // add headers to CSV
-    final_csv += `${this.escape(headers, true).join(',')}${NEW_LINE}`;
+    final_csv += `${CsvUtil.escape(headers, true).join(',')}${NEW_LINE}`;
 
     // foreach line of file...
     _forEach(object_array, (object) => {
@@ -160,9 +164,9 @@ class CsvUtil {
           line.push('""');
         } else if (Array.isArray(current)) {
           current = current.filter((i) => i !== undefined);
-          line.push(`"${this.escape(current).join(delimiter)}"`);
+          line.push(`"${CsvUtil.escape(current).join(delimiter)}"`);
         } else {
-          line.push(`"${this.escape(current)}"`);
+          line.push(`"${CsvUtil.escape(current)}"`);
         }
       });
       final_csv += `${line.join(',')}${NEW_LINE}`;

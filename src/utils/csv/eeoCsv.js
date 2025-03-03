@@ -8,7 +8,9 @@
  * Utilities to download EEO reports of employees
  */
 import EmployeeCsvUtil from '@/utils/csv/employeeCsvUtil.js';
+import _filter from 'lodash/filter';
 import _forEach from 'lodash/forEach';
+import _isNil from 'lodash/isNil';
 
 // some useful constants as the exact strings might change
 const HISPANIC_LATINO = 'Hispanic or Latino';
@@ -21,17 +23,73 @@ const V_HEADERS = 1; // vertical/left headers count
 const COLUMNS_AFTER_RACE_ETHNICITY = 2;
 
 class EeoCsv extends EmployeeCsvUtil {
+  columns() {
+    // TODO
+    return [
+      {
+        'Admin filled out form?': employee.eeoAdminHasFilledOutEeoForm ? 'Yes' : 'No',
+        'Declined to self-identify?': employee.eeoDeclineSelfIdentify ? 'Yes' : 'No',
+        Gender: employee.eeoGender?.text,
+        'Has Disability?': employee.eeoHasDisability ? 'Yes' : 'No',
+        'Hispanic or Latino?': employee.eeoHispanicOrLatino.value ? 'Yes' : 'No',
+        'Protected Veteran?': employee.eeoIsProtectedVeteran ? 'Yes' : 'No',
+        'Job Category': employee.eeoJobCategory?.text,
+        'Race/Ethnicity': employee.eeoRaceOrEthnicity?.text
+      }
+    ];
+  }
+
+  fileString() {
+    let convertedEmployees = this.convertEmployees(this.employees); // convert employees into csv object (returns two arrays)
+    let csvFileStringA = EeoCsv.generateFrom2dArray(convertedEmployees[0]); // convert to csv file string
+    let csvFileStringB = EeoCsv.generateFrom2dArray(convertedEmployees[1]); // convert to csv file string
+    return EeoCsv.combine(csvFileStringA, csvFileStringB, 1); // combine and return results
+  }
+
   /**
    * Returns the CSV filestring as a string.
    *
-   * @param employees - array of employee objects
-   * @return csv as a string
    */
-  fileString(employees) {
-    let convertedEmployees = convertEmployees(); // convert employees into csv object (returns two arrays)
-    let csvFileStringA = CsvUtil.generateFrom2dArray(convertedEmployees[0]); // convert to csv file string
-    let csvFileStringB = CsvUtil.generateFrom2dArray(convertedEmployees[1]); // convert to csv file string
-    return CsvUtil.combine(csvFileStringA, csvFileStringB, 1); // combine and return results
+  async download() {
+    // get EEO data
+    let eeo = this.fileString();
+    let filtered = this.filterDeclined();
+    // get Employee data
+    let emp = await EmployeeCsvUtil.fileString(filtered);
+    // combine
+    let download = [
+      {
+        name: 'EEO Compliance Report',
+        csv: eeo
+      },
+      {
+        name: 'Employee Info',
+        csv: emp
+      }
+    ];
+    return super.download(download); // convert to csv file string
+  }
+
+  formComplete(employee) {
+    return (
+      !_isNil(employee.eeoGender) &&
+      !_isNil(employee.eeoJobCategory) &&
+      !_isNil(employee.eeoRaceOrEthnicity) &&
+      !_isNil(employee.eeoHispanicOrLatino) &&
+      !_isNil(employee.eeoHasDisability) &&
+      !_isNil(employee.eeoIsProtectedVeteran)
+    );
+  }
+  /**
+   * Filters through given employees, removing employees that have incomplete
+   * data in their EEO form
+   *
+   * @param employees employees to filter through
+   */
+  filterDeclined() {
+    return _filter(this.employees, (e) => {
+      return this.formComplete(e);
+    });
   }
 
   /**
@@ -70,7 +128,7 @@ class EeoCsv extends EmployeeCsvUtil {
         y = jobCategoriesPos[givenJobCat];
       }
       return [y, x];
-    } // convertEmployees
+    } // position
 
     /**
      * fills in empty values in `eeoData` within the range with `filler`. will skip
@@ -222,18 +280,9 @@ class EeoCsv extends EmployeeCsvUtil {
 
     // fill in EEO data
     _forEach(this.employees, (employee) => {
-      function nullOrUndefined(item) {
-        return item == undefined || item == null;
-      }
       // make sure we have all fields first
       // let declined = employee.eeoDeclineSelfIdentify && !employee.eeoAdminHasFilledOutEeoForm;
-      let formCompleted =
-        !nullOrUndefined(employee.eeoGender) &&
-        !nullOrUndefined(employee.eeoJobCategory) &&
-        !nullOrUndefined(employee.eeoRaceOrEthnicity) &&
-        !nullOrUndefined(employee.eeoHispanicOrLatino) &&
-        !nullOrUndefined(employee.eeoHasDisability) &&
-        !nullOrUndefined(employee.eeoIsProtectedVeteran);
+      let formCompleted = this.formComplete(employee);
       if (formCompleted) {
         // extract value of race/ethnicity
         let raceEthnicity = HISPANIC_LATINO;
