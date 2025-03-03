@@ -418,7 +418,7 @@ class EmployeeCsv extends EmployeeCsvUtil {
    * @return String - technologies
    */
   getTechnologies(employee) {
-    let tech = employee.tech || [];
+    let tech = employee.technologies || [];
     let a = '';
     for (let i = 0; i < tech.length; i++) {
       a += tech[i].name;

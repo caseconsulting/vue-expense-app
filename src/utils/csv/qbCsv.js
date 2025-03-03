@@ -1,6 +1,3 @@
-/**
- * Utilities to download EEO reports of employees
- */
 import EmployeeCsvUtil from '@/utils/csv/employeeCsvUtil.js';
 import {
   subtract,

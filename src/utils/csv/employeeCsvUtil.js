@@ -1,8 +1,9 @@
 import CsvUtil from '@/utils/csv/csvUtil.js';
+import _isArray from 'lodash/isArray';
 class EmployeeCsvUtil extends CsvUtil {
   constructor(employees, options = {}) {
     super(options);
-    this.employees = employees;
+    this.employees = _isArray(employees) ? employees : [employees];
     this.options = options;
   }
   get fileName() {
@@ -55,7 +56,7 @@ class EmployeeCsvUtil extends CsvUtil {
     let util = new this(employees, options);
     let fileString = util.fileString();
     return fileString;
-  } // download
+  } // fileString
 
   /**
    * Returns the CSV filestring as a string.
@@ -64,11 +65,11 @@ class EmployeeCsvUtil extends CsvUtil {
   async fileString() {
     let convertedEmployees = await this.convertEmployees();
     return super.generate(convertedEmployees); // convert to csv file string
-  }
+  } // fileString
 
   async download(csvFileString = null) {
     if (!csvFileString) {
-      let csvFileString = await this.fileString();
+      csvFileString = await this.fileString();
     }
     super.download(csvFileString); // download csv file string as .csv
   } // download
@@ -82,7 +83,7 @@ class EmployeeCsvUtil extends CsvUtil {
    */
   getAttribute(dataSet, attribute) {
     return dataSet[attribute];
-  }
+  } // getAttribute
 
   /**
    * Gets employee name
@@ -96,7 +97,7 @@ class EmployeeCsvUtil extends CsvUtil {
     if (employee.nickname) name += ` (${employee.nickname})`;
 
     return name;
-  }
+  } // getEmployeeName
 
   /**
    * Converts employees to an array of objects to pass in to csvUtils.generate(). Expects
