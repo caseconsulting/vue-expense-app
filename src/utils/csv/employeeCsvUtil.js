@@ -26,6 +26,10 @@ class EmployeeCsvUtil extends CsvUtil {
     return this.options.preloaded.tags;
   }
 
+  get skipEmpty() {
+    return this.options.skipEmpty || false;
+  }
+
   /**
    * The columns of the report.
    * @returns columns for the specified report
@@ -124,7 +128,7 @@ class EmployeeCsvUtil extends CsvUtil {
     let rows = [];
     let i = 0;
     for (let e of this.employees) {
-      if (index && !index[e.employeeNumber]) continue;
+      if (this.skipEmpty && index && !index[e.employeeNumber]) continue;
       let row = {};
       let clearances, contracts;
       // add in pre-defined columns

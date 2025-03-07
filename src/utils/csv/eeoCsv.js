@@ -23,6 +23,10 @@ const V_HEADERS = 1; // vertical/left headers count
 const COLUMNS_AFTER_RACE_ETHNICITY = 2;
 
 class EeoCsv extends EmployeeCsvUtil {
+  constructor(employees, options = {}) {
+    super(employees, { skipEmpty: true, ...options });
+  }
+
   columns() {
     // TODO
     return [
@@ -56,7 +60,7 @@ class EeoCsv extends EmployeeCsvUtil {
     let filtered = this.filterDeclined();
     // get Employee data
     let emp = await EmployeeCsvUtil.fileString(filtered);
-    // combine
+    // create sheets
     let download = [
       {
         name: 'EEO Compliance Report',
