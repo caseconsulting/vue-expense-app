@@ -8,6 +8,10 @@ import { add, format, isBefore, isAfter } from '@/shared/dateUtils.js';
 let earliestDate = '9999-12-31';
 let latestDate = '0001-01-01';
 class PlannedPtoCsv extends EmployeeCsvUtil {
+  constructor(employees, options = {}) {
+    super(employees, { skipEmpty: true, ...options });
+  }
+
   /**
    * Adds employee planned PTO columns to an employee's row
    *

@@ -2,7 +2,7 @@ import EmployeeCsvUtil from '@/utils/csv/employeeCsvUtil.js';
 import _forEach from 'lodash/forEach';
 
 class PocsCsv extends EmployeeCsvUtil {
-  additionalColumns(index, employee, rows, i) {
+  additionalColumns(employeeIndex, employee, rows, i) {
     let emergencyContacts = employee.emergencyContacts?.sort((a, b) => {
       return a.primaryContact ? -1 : 1;
     });

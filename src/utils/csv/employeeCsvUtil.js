@@ -4,7 +4,6 @@ class EmployeeCsvUtil extends CsvUtil {
   constructor(employees, options = {}) {
     super(options);
     this.employees = _isArray(employees) ? employees : [employees];
-    this.options = options;
   }
   get fileName() {
     return this.options.filename || 'Employee Report';
@@ -58,7 +57,7 @@ class EmployeeCsvUtil extends CsvUtil {
    */
   static async fileString(employees, options = {}) {
     let util = new this(employees, options);
-    let fileString = util.fileString();
+    let fileString = await util.fileString();
     return fileString;
   } // fileString
 

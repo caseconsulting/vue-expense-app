@@ -23,28 +23,8 @@ const V_HEADERS = 1; // vertical/left headers count
 const COLUMNS_AFTER_RACE_ETHNICITY = 2;
 
 class EeoCsv extends EmployeeCsvUtil {
-  constructor(employees, options = {}) {
-    super(employees, { skipEmpty: true, ...options });
-  }
-
-  columns() {
-    // TODO
-    return [
-      {
-        'Admin filled out form?': employee.eeoAdminHasFilledOutEeoForm ? 'Yes' : 'No',
-        'Declined to self-identify?': employee.eeoDeclineSelfIdentify ? 'Yes' : 'No',
-        Gender: employee.eeoGender?.text,
-        'Has Disability?': employee.eeoHasDisability ? 'Yes' : 'No',
-        'Hispanic or Latino?': employee.eeoHispanicOrLatino.value ? 'Yes' : 'No',
-        'Protected Veteran?': employee.eeoIsProtectedVeteran ? 'Yes' : 'No',
-        'Job Category': employee.eeoJobCategory?.text,
-        'Race/Ethnicity': employee.eeoRaceOrEthnicity?.text
-      }
-    ];
-  }
-
-  fileString() {
-    let convertedEmployees = this.convertEmployees(this.employees); // convert employees into csv object (returns two arrays)
+  eeoFileString() {
+    let convertedEmployees = this.eeoConvertEmployees(this.employees); // convert employees into csv object (returns two arrays)
     let csvFileStringA = EeoCsv.generateFrom2dArray(convertedEmployees[0]); // convert to csv file string
     let csvFileStringB = EeoCsv.generateFrom2dArray(convertedEmployees[1]); // convert to csv file string
     return EeoCsv.combine(csvFileStringA, csvFileStringB, 1); // combine and return results
@@ -56,10 +36,10 @@ class EeoCsv extends EmployeeCsvUtil {
    */
   async download() {
     // get EEO data
-    let eeo = this.fileString();
+    let eeo = this.eeoFileString();
     let filtered = this.filterDeclined();
     // get Employee data
-    let emp = await EmployeeCsvUtil.fileString(filtered);
+    let emp = await EeoCsv.fileString(filtered, this.options);
     // create sheets
     let download = [
       {
@@ -102,7 +82,7 @@ class EeoCsv extends EmployeeCsvUtil {
    * @param employees - expense object to convert
    * @return a new object passable to csv.js
    */
-  convertEmployees() {
+  eeoConvertEmployees() {
     /**
      * gets the y, x position in `eeoData` based on inputs
      * @param givenRaceEth - employee's race/ethnicity
@@ -316,6 +296,17 @@ class EeoCsv extends EmployeeCsvUtil {
     });
 
     return [eeoData, eeoDeclinedData];
-  } // convertEmployees
+  } // eeoConvertEmployees
+
+  additionalColumns(index, employee, rows, i) {
+    rows[i]['Admin filled out form?'] = employee.eeoAdminHasFilledOutEeoForm ? 'Yes' : 'No';
+    rows[i]['Declined to self-identify?'] = employee.eeoDeclineSelfIdentify ? 'Yes' : 'No';
+    rows[i]['Gender'] = employee.eeoGender?.text;
+    rows[i]['Has Disability?'] = employee.eeoHasDisability ? 'Yes' : 'No';
+    rows[i]['Hispanic or Latino?'] = employee.eeoHispanicOrLatino?.value ? 'Yes' : 'No';
+    rows[i]['Protected Veteran?'] = employee.eeoIsProtectedVeteran ? 'Yes' : 'No';
+    rows[i]['Job Category'] = employee.eeoJobCategory?.text;
+    rows[i]['Race/Ethnicity'] = employee.eeoRaceOrEthnicity?.text;
+  }
 }
 export default EeoCsv;
