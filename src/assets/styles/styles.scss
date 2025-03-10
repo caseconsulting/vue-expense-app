@@ -9,6 +9,9 @@ $case-darkgray: #415364;
 .case-darkgray-text {
   color: $case-darkgray !important;
 }
+.highlight-row {
+  background-color: bisque;
+}
 
 /* RolledupExpenseTypeTable.vue */
 #money-team {

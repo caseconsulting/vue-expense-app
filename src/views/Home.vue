@@ -30,25 +30,33 @@
       <v-row class="pb-3">
         <!-- Title -->
         <v-col cols="12" md="6">
-          <h1 v-if="isBirthday(employee)" align="center" justify="center" id="home-greeting">
-            Happy Birthday, {{ getEmployeePreferredName(employee) }}!
-          </h1>
-          <h1 v-else-if="isAnniversary(employee)" align="center" justify="center" id="home-greeting">
-            Happy Anniversary, {{ getEmployeePreferredName(employee) }}!
-          </h1>
-          <h1 v-else align="center" justify="center" id="home-greeting">
-            Hello, {{ getEmployeePreferredName(employee) }}!
-          </h1>
-          <div class="text-center">
-            <v-btn color="#bc3825" @click="handleProfile()" theme="dark">View Profile</v-btn>
-          </div>
-        </v-col>
+          <v-col cols="12" align="center" class="pa-2">
+            <v-row>
+              <v-col>
+                <span class="text-h5" align="center" justify="center" id="home-greeting">
+                  {{ welcomeText(employee) }}
+                </span></v-col
+              >
+              <v-col> <v-btn color="#bc3825" @click="handleProfile()" theme="dark">View Profile</v-btn></v-col></v-row
+            >
+          </v-col>
 
-        <!-- Anniversary Date -->
-        <v-col cols="12" md="6" class="px-xl-4 px-lg-2 px-md-0">
-          <anniversary-card v-if="!loading" :employee="employee" :has-budgets="true" location="home" />
+          <v-col cols="12">
+            <anniversary-card v-if="!loading" :employee="employee" :has-budgets="true" location="home" />
+          </v-col>
+
           <ConfettiExplosion
-            v-if="isBirthday(employee) || isAnniversary(employee)"
+            v-if="showConfetti(employee)"
+            :particleCount="300"
+            :particleSize="20"
+            class="ml-12"
+          ></ConfettiExplosion>
+        </v-col>
+        <v-col cols="12" md="6" class="px-xl-4 px-lg-2 px-md-0">
+          <bonus-1860-leaderboard-card :rows="3" />
+
+          <ConfettiExplosion
+            v-if="showConfetti(employee)"
             :particleCount="300"
             :particleSize="20"
             class="ml-12"
@@ -99,6 +107,7 @@ import { isEmpty, getCurrentBudgetYear } from '@/utils/utils';
 import { updateStoreExpenseTypes, updateStoreBudgets } from '@/utils/storeUtils';
 import TimeData from '@/components/shared/timesheets/TimeData';
 import AnniversaryCard from '@/components/shared/AnniversaryCard';
+import Bonus1860LeaderboardCard from '@/components/shared/Bonus1860LeaderboardCard';
 import ConfettiExplosion from 'vue-confetti-explosion';
 import {
   format,
@@ -175,6 +184,23 @@ computed(store.getters.storeIsPopulated);
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+function welcomeText(employee) {
+  let greeting = 'Hello';
+  if (isBirthday(employee)) {
+    greeting = 'Happy Birthday';
+  } else if (isAnniversary(employee)) {
+    greeting = 'Happy Anniversary';
+  }
+  return `${greeting}, ${getEmployeePreferredName(employee)}!`;
+}
+
+function showConfetti(employee) {
+  return isAnniversary(employee) || isBirthday(employee) || is1860Leader(employee);
+}
+
+function is1860Leader() {
+  return false; // TODO
+}
 
 function isBirthday(employee) {
   if (employee.birthday === undefined) {
