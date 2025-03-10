@@ -82,11 +82,7 @@
           </div>
           <small>
             *cash outs are paid during the normal payroll period
-            <v-avatar
-              @click="openLink('https://3.basecamp.com/3097063/buckets/179119/messages/6950289713')"
-              class="mb-3"
-              size="small"
-            >
+            <v-avatar @click="openLink(PTO_POLICY)" class="mb-3" size="small">
               <v-tooltip activator="parent" location="top">Click for more information</v-tooltip>
               <v-icon color="#3f51b5">mdi-information</v-icon>
             </v-avatar>
@@ -113,6 +109,7 @@
 </template>
 
 <script setup>
+import { PTO_POLICY } from '@/utils/links/basecampLinks';
 import { getNumberRules, getPTOCashOutRules, getDateOptionalRules } from '@/shared/validationUtils.js';
 import api from '@/shared/api.js';
 import dateUtils from '@/shared/dateUtils.js';

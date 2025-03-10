@@ -84,6 +84,7 @@
 </template>
 
 <script setup>
+import { NEW_HIRE, OFF_TOPIC } from '@/utils/links/basecampLinks';
 import api from '@/shared/api.js';
 import ActivityFeed from '@/components/home/ActivityFeed.vue';
 import AvailableBudgets from '@/components/shared/AvailableBudgets.vue';
@@ -256,7 +257,7 @@ async function createEvents() {
             event.text = a.firstName + ' ' + a.lastName + ' has joined the CASE team!'; //new hire message
             event.icon = 'mdi-account-plus';
             event.type = 'New Hire';
-            event.newCampfire = 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726';
+            event.newCampfire = NEW_HIRE;
           } else {
             event.date = format(anniversary, null, 'll');
             if (difference(anniversary, hireDate, 'year') == 1) {
@@ -273,7 +274,7 @@ async function createEvents() {
             event.anniversary = anniversary;
             event.icon = 'mdi-party-popper';
             event.type = 'Anniversary';
-            event.congratulateCampfire = 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726';
+            event.congratulateCampfire = OFF_TOPIC;
           }
           event.daysFromToday = difference(startOf(todaysDate, 'day'), startOf(anniversary, 'day'), 'day');
           event.color = '#bc3825';
@@ -290,8 +291,7 @@ async function createEvents() {
               anniversaries[monthDiff].date = `Anniversaries in ${format(anniversary, DEFAULT_ISOFORMAT, 'MMM YYYY')}`;
               anniversaries[monthDiff].type = 'Anniversary';
               anniversaries[monthDiff].icon = 'mdi-party-popper';
-              anniversaries[monthDiff].congratulateCampfire =
-                'https://3.basecamp.com/3097063/buckets/171415/chats/29039726';
+              anniversaries[monthDiff].congratulateCampfire = OFF_TOPIC;
               anniversaries[monthDiff].color = '#bc3825';
               anniversaries[monthDiff].events = [event];
               anniversaries[monthDiff].daysFromToday = difference(
@@ -337,7 +337,7 @@ async function createEvents() {
       event.type = 'Birthday';
       event.color = 'orange darken-3';
       event.daysFromToday = difference(startOf(now, 'day'), startOf(birthday, 'day'), 'day');
-      event.birthdayCampfire = 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726';
+      event.birthdayCampfire = OFF_TOPIC;
       if (textMaxLength.value < event.text.length) {
         event.truncatedText = _truncate(event.text, { length: textMaxLength.value });
       }
@@ -446,7 +446,7 @@ async function createEvents() {
         null,
         'MMMM'
       )}`,
-      congratulateCampfire: 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726'
+      congratulateCampfire: OFF_TOPIC
     };
     // date formatting
     award.date = format(dateSubmitted, null, 'MMM YYYY'); // default
@@ -467,7 +467,7 @@ async function createEvents() {
       type: 'Certification',
       daysFromToday: difference(startOf(now, 'day'), startOf(dateSubmitted, 'day'), 'day'),
       text: `${getEmployeePreferredName(c.employee)} ${c.employee.lastName} was certified "${c.name}"`,
-      congratulateCampfire: 'https://3.basecamp.com/3097063/buckets/171415/chats/29039726'
+      congratulateCampfire: OFF_TOPIC
     };
     // date formatting
     cert.date = format(dateSubmitted, null, 'MMM YYYY'); // default
