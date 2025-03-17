@@ -239,7 +239,7 @@ async function download() {
   if (exportType.value.value === 'emp') {
     filename = `Employee Export - ${readableDateRange}`;
     EmployeeCsv.download(csvInfo, {
-      filename: filename,
+      filename,
       preloaded: {
         contracts: store.getters.contracts,
         tags: filterOptions.value.tags
@@ -251,13 +251,22 @@ async function download() {
   } else if (exportType.value.value === 'qb') {
     filename = `Timesheet Report - ${readableDateRange}`;
     loading.value = 'Downloading timesheet data...';
-    await QuickBooksCsv.download(csvInfo, { filename, startDate: f.periodStart, endDate: f.periodEnd });
+    await QuickBooksCsv.download(csvInfo, {
+      filename,
+      startDate: f.periodStart,
+      endDate: f.periodEnd
+    });
   } else if (this.exportType.value === 'ppto') {
     filename = `Planned PTO Report - as of ${getTodaysDate('YYYY-MM-DD')}`;
     await PlannedPtoCsv.download(csvInfo, { filename });
   } else if (this.exportType.value === 'pocs') {
     filename = `Emergency Contacts - as of ${getTodaysDate('YYYY-MM-DD')}`;
-    await PocsCsv.download(csvInfo, { filename });
+    await PocsCsv.download(csvInfo, {
+      filename,
+      preloaded: {
+        contracts: store.getters.contracts
+      }
+    });
   }
 
   // close the modal
