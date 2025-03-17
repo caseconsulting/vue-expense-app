@@ -22,7 +22,31 @@
                     :label="model.settings?.timesheetsContractViewOption === key ? 'Enabled' : 'Disabled'"
                     class="d-inline-block"
                     hide-details
-                    @update:model-value="updateSettings(value, key)"
+                    @update:model-value="updateSetting('timesheetsContractViewOption', key)"
+                  />
+                  <v-tooltip v-if="value.tooltip" activator="parent" location="top">
+                    {{ value.tooltip }}
+                  </v-tooltip>
+                </div>
+              </v-col>
+            </v-row>
+          </div>
+          <h3>Employee Timesheet Reminder Texts</h3>
+          <div class="pa-6">
+            <v-row v-for="(value, key) of timesheetsReminderOptions" :key="value">
+              <v-col cols="8" class="d-flex align-center pa-0">
+                {{ value.title }}
+              </v-col>
+              <v-col cols="4" class="pa-0">
+                <div>
+                  <v-switch
+                    color="primary"
+                    density="compact"
+                    :model-value="model.settings?.timesheetsReminderOption === key"
+                    :label="model.settings?.timesheetsReminderOption === key ? 'Enabled' : 'Disabled'"
+                    class="d-inline-block"
+                    hide-details
+                    @update:model-value="updateSetting('timesheetsReminderOption', key)"
                   />
                   <v-tooltip v-if="value.tooltip" activator="parent" location="top">
                     {{ value.tooltip }}
@@ -87,7 +111,14 @@ const timesheetsContractViewOptions = ref({
     title: 'Employee current project start date',
     tooltip: "Displays yearly data based on employee's current project start date"
   },
-  1: { title: 'Contract PoP date', tooltip: 'Displays yearly data based on contract PoP start date' }
+  1: { title: 'Contract project start date', tooltip: "Displays yearly data baed on contract's project start date" },
+  2: { title: 'Contract PoP date', tooltip: 'Displays yearly data based on contract PoP start date' }
+});
+const timesheetsReminderOptions = ref({
+  0: {
+    title: 'Enable weekly reminders',
+    tooltip: 'Texts employees every Friday to enter their weekly hours, and maintains monthly submission reminders'
+  }
 });
 
 // |--------------------------------------------------|
@@ -144,14 +175,10 @@ async function save() {
 /**
  * Updates the settings timesheetsContractViewOption model to the options key.
  *
- * @param {Object} value - The timesheetsContractViewOptions value
- * @param {Number} key - The timesheetsContractViewOptions key
+ * @param {Object} setting - the setting to update
+ * @param {Number} value - the value to update the setting to
  */
-function updateSettings(__, key) {
-  _set(
-    model.value,
-    'settings.timesheetsContractViewOption',
-    model.value.settings?.timesheetsContractViewOption === key ? null : key
-  );
+function updateSetting(setting, value) {
+  _set(model.value, `settings.${setting}`, model.value.settings?.[setting] === value ? null : value);
 } // updateSettings
 </script>
