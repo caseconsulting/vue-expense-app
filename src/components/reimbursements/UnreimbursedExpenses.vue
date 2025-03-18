@@ -5,29 +5,11 @@
         <!-- Expense Table -->
         <unreimbursed-expenses-table></unreimbursed-expenses-table>
       </v-col>
-      <v-col v-if="!isMobile() && height" cols="4" class="followScroll pr-7 pl-0">
+      <v-col v-if="!isMobile()" cols="4" class="followScroll pr-7 pl-0">
         <!-- Expenses Total -->
         <reimbursement-totals></reimbursement-totals>
         <!-- Expense Info -->
-        <reimbursement-expense-details class="mb-3"></reimbursement-expense-details>
-        <!-- Status Alert -->
-        <v-alert
-          v-for="(alert, index) in alerts"
-          :key="index"
-          :type="alert.status"
-          :color="alert.color"
-          density="compact"
-          class="mt-1"
-          id="alert"
-        >
-          {{ alert.message }}
-        </v-alert>
-      </v-col>
-      <v-col v-else-if="!height" cols="4" class="pr-7 pl-0">
-        <!-- Expenses Total -->
-        <reimbursement-totals></reimbursement-totals>
-        <!-- Expense Info -->
-        <reimbursement-expense-details class="mb-3"></reimbursement-expense-details>
+        <reimbursement-expense-details></reimbursement-expense-details>
         <!-- Status Alert -->
         <v-alert
           v-for="(alert, index) in alerts"
@@ -77,7 +59,6 @@ import { ref, onBeforeMount, onBeforeUnmount, computed, inject } from 'vue';
 
 const emitter = inject('emitter');
 const alerts = ref([]); // status alerts
-const height = window.innerHeight > 800;
 
 // |--------------------------------------------------|
 // |                                                  |
