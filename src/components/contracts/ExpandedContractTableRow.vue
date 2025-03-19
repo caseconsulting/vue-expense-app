@@ -169,13 +169,6 @@ const projectHeaders = ref([
     rules: [(v) => !!v || 'Field is required', duplicateProjects.value]
   },
   {
-    title: 'Cust. Org',
-    key: 'customerOrg',
-    align: 'start',
-    customWidth: 'x-small',
-    type: 'combobox'
-  },
-  {
     title: 'Directorate',
     key: 'directorate',
     align: 'start',

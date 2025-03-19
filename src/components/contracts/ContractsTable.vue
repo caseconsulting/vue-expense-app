@@ -339,13 +339,6 @@ const contractHeaders = ref([
     rules: [(v) => !!v || 'Field is required', duplicateContractPrimeComboFromContract.value]
   },
   {
-    title: 'Cust. Org',
-    key: 'customerOrg',
-    align: 'start',
-    customWidth: 'x-small',
-    type: 'combobox'
-  },
-  {
     title: 'Directorate',
     key: 'directorate',
     align: 'start',

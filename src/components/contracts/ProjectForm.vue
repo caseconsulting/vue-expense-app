@@ -44,21 +44,11 @@
                 ></v-select>
               </v-col>
 
-              <!-- Customer Org -->
-              <v-col cols="12" sm="6" md="6">
-                <v-combobox
-                  v-model="customerOrg"
-                  :items="getOrgList('customerOrg', { directorate, org2, org3 })"
-                  label="Customer Org"
-                  variant="underlined"
-                  prepend-icon="mdi-office-building-outline"
-                ></v-combobox>
-              </v-col>
               <!-- Directorate -->
               <v-col cols="12" sm="6" md="6">
                 <v-combobox
                   v-model="directorate"
-                  :items="getOrgList('directorate', { customerOrg, org2, org3 })"
+                  :items="getOrgList('directorate', { org2, org3 })"
                   label="Directorate (Org 1)"
                   variant="underlined"
                   prepend-icon="mdi-office-building-outline"
@@ -68,7 +58,7 @@
               <v-col cols="12" sm="6" md="6">
                 <v-combobox
                   v-model="org2"
-                  :items="getOrgList('org2', { customerOrg, directorate, org3 })"
+                  :items="getOrgList('org2', { directorate, org3 })"
                   label="Org 2"
                   variant="underlined"
                   prepend-icon="mdi-office-building-outline"
@@ -78,12 +68,16 @@
               <v-col cols="12" sm="6" md="6">
                 <v-combobox
                   v-model="org3"
-                  :items="getOrgList('org3', { customerOrg, directorate, org2 })"
+                  :items="getOrgList('org3', { directorate, org2 })"
                   label="Org 3"
                   variant="underlined"
                   prepend-icon="mdi-office-building-outline"
                 ></v-combobox>
               </v-col>
+
+              <!-- spacer to put PoPs on the same line -->
+              <v-col class="d-none d-md-block"></v-col>
+
               <!-- PoP Start Date  -->
               <v-col cols="12" sm="6" md="6">
                 <v-text-field
@@ -149,7 +143,6 @@ const location = ref(null);
 const workType = ref(null);
 const description = ref(null);
 const dialog = ref(false);
-const customerOrg = ref(null);
 const directorate = ref(null);
 const org2 = ref(null);
 const org3 = ref(null);
@@ -198,7 +191,6 @@ async function createProject() {
     projectName: projectName.value,
     location: location.value,
     workType: workType.value,
-    customerOrg: customerOrg.value,
     directorate: directorate.value,
     org2: org2.value,
     org3: org3.value,
