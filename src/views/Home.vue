@@ -53,7 +53,7 @@
           ></ConfettiExplosion>
         </v-col>
         <v-col cols="12" md="6" class="px-xl-4 px-lg-2 px-md-0">
-          <bonus-1860-leaderboard-card :rows="3" />
+          <bonus-1860-podium />
 
           <ConfettiExplosion
             v-if="showConfetti(employee)"
@@ -107,7 +107,7 @@ import { isEmpty, getCurrentBudgetYear } from '@/utils/utils';
 import { updateStoreExpenseTypes, updateStoreBudgets } from '@/utils/storeUtils';
 import TimeData from '@/components/shared/timesheets/TimeData';
 import AnniversaryCard from '@/components/shared/AnniversaryCard';
-import Bonus1860LeaderboardCard from '@/components/shared/Bonus1860LeaderboardCard';
+import Bonus1860Podium from '@/components/shared/Bonus1860Podium';
 import ConfettiExplosion from 'vue-confetti-explosion';
 import {
   format,
