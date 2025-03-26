@@ -41,6 +41,7 @@
         :items="filteredReminders"
         :items-per-page="50"
         :sort-by="sortBy"
+        @click:row="handleClick"
         class="elevation-1"
       />
     </v-container>
@@ -217,7 +218,7 @@ const filteredReminders = computed(() => {
 
 const includedText = computed(() => {
   if (onlyLatest.value) {
-    return 'Only the most recent reminder within the start and end date is shown, but "Total Reminders" includes all reminders sent.';
+    return 'Only the most recent reminder sent to an employee is shown, but "Total Reminders" includes all reminders sent.';
   } else if (startDate.value || endDate.value) {
     return 'Only reminders within the selected start and end date are shown, and "Total Reminders" is the tally of these.';
   } else {
@@ -237,7 +238,7 @@ const includedText = computed(() => {
  * @param item - the employee
  */
 function handleClick(_, { item }) {
-  router.push(`/employee/${item.employeeNumber}`);
+  router.push(`/employee/${item.employee.employeeNumber}`);
 } //handleClick
 </script>
 
