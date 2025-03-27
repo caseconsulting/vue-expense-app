@@ -23,13 +23,22 @@
           </v-col>
           <v-col cols="auto">
             <!-- Inactive Flag -->
-            <v-switch
-              v-model="editedExpenseType.isInactive"
-              :color="caseRed"
-              label="Inactive"
-              hide-details
-              inset
-            ></v-switch>
+            <v-row>
+              <v-col class="pb-0">
+                <v-switch
+                  v-model="editedExpenseType.isInactive"
+                  true-value="false"
+                  false-value="true"
+                  :base-color="caseRed"
+                  hide-details
+                  style="transform: rotateY(3.142rad)"
+                  class="d-inline-block"
+                ></v-switch>
+              </v-col>
+              <v-col class="pl-0 pb-0 d-inline-block">
+                <p class="mt-4">Active</p>
+              </v-col>
+            </v-row>
           </v-col>
         </v-row>
         <!-- Categories -->
