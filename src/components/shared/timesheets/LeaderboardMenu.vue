@@ -7,10 +7,10 @@
         </v-btn>
       </template>
 
-      <bonus-1860-leaderboard-card :rows="6" />
+      <leaderboard-card :rows="6" />
     </v-menu>
   </div>
 </template>
 <script setup>
-import Bonus1860LeaderboardCard from '@/components/shared/Bonus1860LeaderboardCard';
+import LeaderboardCard from '@/components/shared/timesheets/LeaderboardCard';
 </script>

@@ -77,7 +77,7 @@
           </v-btn>
         </v-item-group>
 
-        <bonus-1860-leaderboard-menu v-if="isLoggedIn() && !isMobile()" />
+        <leaderboard-menu v-if="isLoggedIn() && !isMobile()" />
 
         <!-- User image and logout -->
         <v-menu location="bottom" theme="light" open-on-click v-if="isLoggedIn() && store.getters.user">
@@ -168,7 +168,7 @@ import NotificationBanners from '@/components/utils/NotificationBanners.vue';
 import SwitchRoleModal from '@/components/modals/SwitchRoleModal.vue';
 import TimeOutWarningModal from '@/components/modals/TimeOutWarningModal.vue';
 import StatusSnackbar from '@/components/shared/StatusSnackbar.vue';
-import Bonus1860LeaderboardMenu from '@/components/shared/Bonus1860LeaderboardMenu';
+import LeaderboardMenu from '@/components/shared/timesheets/LeaderboardMenu';
 import { onBeforeMount, onBeforeUnmount, ref, inject, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
