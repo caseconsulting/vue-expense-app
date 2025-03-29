@@ -14,16 +14,13 @@ import {
   isAfter,
   DEFAULT_ISOFORMAT
 } from '@/shared/dateUtils.js';
+import { getTimesheets } from '@/utils/timesheets.js';
 import api from '@/shared/api.js';
 
 /**
  * Global vars
  */
 let INFO = {};
-let SUPP_DATA = {
-  nonBillables: new Set(['PTO'])
-};
-let BATCH_SIZE = 50; // batch size for QB API parallel calls
 let WORK_HOURS_PER_DAY = 8;
 
 /**
@@ -110,38 +107,19 @@ async function fillTimesheetData(employees, startDate, endDate) {
   let singleMonth = startDate === endDate ? startDate : null;
   if (singleMonth) startDate = subtract(startDate, 1, 'month', 'YYYY-MM-DD');
 
-  // run API calls for each employee first (for easy batching)
-  let batch = [];
-  let batch_employees = []; // employee numbers, in same order as batch[]
-  let promise, resps, resp, empNum;
+  // calculateNonbillable if you want all non-billable timecodes, but Dave has requested
+  // to only include PTO as non-billable (yes, that means Holiday is considered billable for this)
+  let timesheetData = getTimesheets(employees, startDate, endDate, { calculateNonbillable: false });
   for (let i in employees) {
-    // build promises
-    promise = api.getTimesheetsData(employees[i].employeeNumber, { startDate, endDate, employeeId: employees[i].id });
-    batch.push(promise);
-    batch_employees.push(employees[i].employeeNumber);
-
-    // run promises and fill data
-    if (batch.length == BATCH_SIZE || i == employees.length - 1) {
-      resps = await Promise.all(batch);
-
-      // parse responses into INFO
-      for (let k in resps) {
-        // get response and map to employee
-        resp = resps[k].timesheets?.[0]?.timesheets;
-        empNum = batch_employees[k];
-        if (!resp) continue;
-        // add any non-billables we don't have
-        SUPP_DATA.nonBillables.add(...resps[k].supplementalData.nonBillables);
-        // get rid of month we don't actually care about
-        if (singleMonth) resp = { [singleMonth]: resp[singleMonth] };
-
-        // add response to employee
-        if (!INFO[empNum]) INFO[empNum] = {};
-        INFO[empNum]['timesheets'] = resp;
-      }
-      // clear batches
-      batch = [];
-      batch_employees = [];
+    let empNum = employees[i].employeeNumber;
+    // get rid of month we don't actually care about
+    if (singleMonth) timesheetData = { [singleMonth]: timesheetData[singleMonth] };
+    if (timesheetData[empNum]) {
+      if (!INFO[empNum]) INFO[empNum] = {};
+      INFO[empNum] = {
+        ...timesheetData[empNum],
+        ...INFO
+      };
     }
   }
 }
@@ -281,24 +259,12 @@ function getEmployeePotentialHours(employee, startDate, endDate) {
 function getEmployeeWorkedHours(employee) {
   let n = employee.employeeNumber;
   if (!INFO[n]) return '---';
-  let timesheets = INFO[n].timesheets;
 
-  // use SUPP_DATA.nonBillables if you want all non-billable timecodes, but Dave has requested
-  // to only include PTO as non-billable (yes, that means Holiday is considered billable for this)
-  let nonBillables = new Set(['PTO']);
-
-  // tally up hours
-  let total = 0;
-  for (let jobcode in timesheets) {
-    if (!nonBillables.has(jobcode)) {
-      total += timesheets[jobcode] / 3600; // seconds to hours
-    }
-  }
-
+  let hours = INFO[n].billableTimesheet;
   // format
-  total = total.toFixed(2).replace(/[.,]00$/, '') || null;
+  hours = hours.toFixed(2).replace(/[.,]00$/, '') || null;
 
-  return total;
+  return hours;
 }
 
 /**
@@ -312,9 +278,7 @@ function getEmployeeHoursOver(employee, startDate, endDate, tags) {
   let n = employee.employeeNumber;
   if (!INFO[n]) return '---';
 
-  let hoursOver =
-    getEmployeeWorkedHours(employee, startDate, endDate, tags) -
-    getEmployeePotentialHours(employee, startDate, endDate);
+  let hoursOver = getEmployeeWorkedHours(employee) - getEmployeePotentialHours(employee, startDate, endDate);
 
   // set min to 0 and format
   hoursOver = Math.max(0, hoursOver);
