@@ -54,6 +54,9 @@ export function getContractYearPeriods(employee) {
     case '1':
       period = _getContractPoPStartPeriod(contract);
       break;
+    case '2':
+      period = _getContractProjectPeriod(contract);
+      break;
     default:
   }
   return period;
@@ -72,7 +75,7 @@ export function getContractYearPeriods(employee) {
  * @returns Object - The time period
  */
 function _getContractCurrentProjectPeriod(employee) {
-  let project = _getCurrentProject(employee);
+  let project = _getEmployeeCurrentProject(employee);
   if (!project) return null;
   return _getYearPeriod(project.startDate);
 } // _getContractCurrentProjectPeriod
@@ -86,6 +89,20 @@ function _getContractCurrentProjectPeriod(employee) {
 function _getContractPoPStartPeriod(contract) {
   return _getYearPeriod(contract.popStartDate);
 } // _getContractPoPStartPeriod
+
+/**
+ * Gets the current project PoP based on contract's project's dates (not the employee profile)
+ *
+ * @param contract The contrcat object that the employee is currently on
+ */
+function _getContractProjectPeriod(contract, employee) {
+  let currentProject = null;
+  for (let contract of employee.contracts || {}) {
+    let project = _find(contract.projects, (p) => !p.endDate);
+    if (project) currentProject = _cloneDeep(project);
+  }
+  if (currentProject) return _getYearPeriod(project.startDate);
+}
 
 /**
  * Gets a year long period based on the start date and today's date. Today's date will fall between the time period.
@@ -112,14 +129,14 @@ function _getYearPeriod(sDate) {
  * @param {Object} employee - The employee object
  * @returns Object - The current project to show
  */
-function _getCurrentProject(employee) {
+function _getEmployeeCurrentProject(employee) {
   let currentProject = null;
   _forEach(employee.contracts, (c) => {
     let project = _find(c.projects, (p) => !p.endDate);
     if (project) currentProject = _cloneDeep(project);
   });
   return currentProject;
-} // _getCurrentProject
+} // _getEmployeeCurrentProject
 
 export default {
   getCalendarYearPeriods,
