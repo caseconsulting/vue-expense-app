@@ -55,7 +55,7 @@ export function getContractYearPeriods(employee) {
       period = _getContractPoPStartPeriod(contract);
       break;
     case '2':
-      period = _getContractProjectPeriod(contract);
+      period = _getContractProjectPeriod(contract, employee);
       break;
     default:
   }
@@ -96,12 +96,9 @@ function _getContractPoPStartPeriod(contract) {
  * @param contract The contrcat object that the employee is currently on
  */
 function _getContractProjectPeriod(contract, employee) {
-  let currentProject = null;
-  for (let contract of employee.contracts || {}) {
-    let project = _find(contract.projects, (p) => !p.endDate);
-    if (project) currentProject = _cloneDeep(project);
-  }
-  if (currentProject) return _getYearPeriod(project.startDate);
+  let employeeProjectId = _getEmployeeCurrentProject(employee)?.projectId;
+  let contractProject = _find(contract.projects, (p) => p.id == employeeProjectId);
+  if (contractProject) return _getYearPeriod(contractProject.popStartDate);
 }
 
 /**

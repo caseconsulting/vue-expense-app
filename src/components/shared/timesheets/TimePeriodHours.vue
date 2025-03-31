@@ -283,6 +283,7 @@ let periodType = computed(() => {
 function showContractYear() {
   let empCurContract = _find(props.employee.contracts, (c) => _find(c.projects, (p) => !p.endDate));
   let contract = _find(store.getters.contracts, (c) => c.id === empCurContract?.contractId);
+  console.log(contract?.settings?.timesheetsContractViewOption);
   return contract?.settings?.timesheetsContractViewOption;
 } // showContractYear
 
