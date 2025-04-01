@@ -98,25 +98,42 @@ function _getContractPoPStartPeriod(contract) {
 function _getContractProjectPeriod(contract, employee) {
   let employeeProjectId = _getEmployeeCurrentProject(employee)?.projectId;
   let contractProject = _find(contract.projects, (p) => p.id == employeeProjectId);
-  if (contractProject) return _getYearPeriod(contractProject.popStartDate);
+  if (contractProject) return _getYearPeriod(contractProject.popStartDate, contractProject.popEndDate);
 }
 
 /**
  * Gets a year long period based on the start date and today's date. Today's date will fall between the time period.
  *
  * @param {String} sDate - The start date
+ * @param {String} eDate - End Date: if provided, this function just formats the sDate and eDate into an object
  * @returns The year long period
  */
-function _getYearPeriod(sDate) {
+function _getYearPeriod(sDate, eDate) {
   let today = getTodaysDate();
   let currentYear = getYear(today);
+
+  // format start date
   let startDate = format(sDate, null, DEFAULT_ISOFORMAT);
-  startDate = setYear(startDate, currentYear);
-  if (isBefore(today, startDate, 'day')) startDate = setYear(startDate, currentYear - 1);
-  let endDate = format(add(startDate, 1, 'year'), null, DEFAULT_ISOFORMAT);
-  endDate = format(subtract(endDate, 1, 'day'), null, DEFAULT_ISOFORMAT);
+  if (!eDate) {
+    // if there is both a start and end date provided, use them verbatim
+    startDate = setYear(startDate, currentYear);
+    if (isBefore(today, startDate, 'day')) startDate = setYear(startDate, currentYear - 1);
+  }
+
+  // calculate end date
+  let endDate;
+  if (eDate) {
+    endDate = format(eDate, null, DEFAULT_ISOFORMAT);
+  } else {
+    endDate = format(add(startDate, 1, 'year'), null, DEFAULT_ISOFORMAT);
+    endDate = format(subtract(endDate, 1, 'day'), null, DEFAULT_ISOFORMAT);
+  }
+
+  // make titles
   let startDateTitle = format(startDate, null, 'MMM D, YYYY');
   let endDateTitle = format(endDate, null, 'MMM D, YYYY');
+
+  // return object
   return { startDate, endDate, title: `${startDateTitle} - ${endDateTitle}` };
 } // _getYearPeriod
 

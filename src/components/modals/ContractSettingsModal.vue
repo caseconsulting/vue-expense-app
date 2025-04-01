@@ -92,7 +92,7 @@ const timesheetsContractViewOptions = ref({
     tooltip: 'Displays yearly data based on contract PoP start date'
   },
   2: {
-    title: 'Contract project start date',
+    title: 'Project start date',
     tooltip: 'Displays yearly data based on project start date within the contracts page'
   }
 });
