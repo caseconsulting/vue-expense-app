@@ -6,7 +6,6 @@
     <!-- Modal Content -->
     <v-card-text class="d-flex justify-center">
       <div class="w-100">
-        <!-- EEO vs Employee export type -->
         <h3 class="mt-4">Export Type</h3>
         <v-radio-group :disabled="loading" hide-details v-model="exportType">
           <v-radio v-for="(t, i) in exportTypes" :key="i" :label="t.title" :value="t"></v-radio>
@@ -27,7 +26,7 @@
           <v-col cols="12" sm="6">
             <date-picker
               v-model="filters.periodStart"
-              :disabled="exportType?.value === 'ppto'"
+              :disabled="['ppto', 'pocs'].includes(exportType?.value)"
               label="Start Date"
               hide-details
             />
@@ -35,7 +34,7 @@
           <v-col cols="12" sm="6">
             <date-picker
               v-model="filters.periodEnd"
-              :disabled="exportType?.value === 'ppto'"
+              :disabled="['ppto', 'pocs'].includes(exportType?.value)"
               label="End Date"
               hide-details
             />
@@ -99,11 +98,11 @@ import _uniq from 'lodash/uniq';
 import _map from 'lodash/map';
 import _orderBy from 'lodash/orderBy';
 import _filter from 'lodash/filter';
-import baseCsv from '@/utils/csv/baseCsv.js';
-import employeeCsv from '@/utils/csv/employeeCsv.js';
-import eeoCsv from '@/utils/csv/eeoCsv.js';
-import qbCsv from '@/utils/csv/qbCsv.js';
-import pptoCsv from '@/utils/csv/pptoCsv.js';
+import EmployeeCsv from '@/utils/csv/employeeCsv.js';
+import EeoCsv from '@/utils/csv/eeoCsv.js';
+import QuickBooksCsv from '@/utils/csv/qbCsv.js';
+import PlannedPtoCsv from '@/utils/csv/pptoCsv.js';
+import PocsCsv from '@/utils/csv/pocsCsv.js';
 import TagsFilter from '@/components/shared/TagsFilter.vue';
 import { ref, inject, onBeforeUnmount, onBeforeMount } from 'vue';
 import { useStore } from 'vuex';
@@ -124,7 +123,8 @@ const exportTypes = ref([
   { title: 'Employee Data', value: 'emp' },
   { title: 'EEO Data', value: 'eeo' },
   { title: 'Timesheet Data', value: 'qb' },
-  { title: 'Planned PTO Data', value: 'ppto' }
+  { title: 'Planned PTO Data', value: 'ppto' },
+  { title: 'Emergency Contacts', value: 'pocs' }
 ]);
 const tagsInfo = ref({
   selected: [],
@@ -238,58 +238,41 @@ async function download() {
   let filename = `Download (${readableDateRange})`;
   if (exportType.value.value === 'emp') {
     filename = `Employee Export - ${readableDateRange}`;
-    employeeCsv.download(csvInfo, store.getters.contracts, filterOptions.value.tags, filename);
-  } else if (exportType.value.value === 'eeo') {
-    let eeo = eeoCsv.fileString(csvInfo);
-    csvInfo = filterDeclined(csvInfo);
-    let emp = employeeCsv.fileString(csvInfo, store.getters.contracts, filterOptions.value.tags, true);
-    let csvText = [
-      {
-        name: 'EEO Compliance Report',
-        csv: eeo
-      },
-      {
-        name: 'Employee Info',
-        csv: emp
+    EmployeeCsv.download(csvInfo, {
+      filename,
+      preloaded: {
+        contracts: store.getters.contracts,
+        tags: filterOptions.value.tags
       }
-    ];
+    });
+  } else if (exportType.value.value === 'eeo') {
     filename = `EEO Compliance Report - ${readableDateRange}`;
-    baseCsv.download(csvText, filename);
+    await EeoCsv.download(csvInfo, { filename });
   } else if (exportType.value.value === 'qb') {
     filename = `Timesheet Report - ${readableDateRange}`;
     loading.value = 'Downloading timesheet data...';
-    await qbCsv.download(csvInfo, { filename, startDate: f.periodStart, endDate: f.periodEnd });
+    await QuickBooksCsv.download(csvInfo, {
+      filename,
+      startDate: f.periodStart,
+      endDate: f.periodEnd
+    });
   } else if (this.exportType.value === 'ppto') {
     filename = `Planned PTO Report - as of ${getTodaysDate('YYYY-MM-DD')}`;
-    await pptoCsv.download(csvInfo, { filename });
+    await PlannedPtoCsv.download(csvInfo, { filename });
+  } else if (this.exportType.value === 'pocs') {
+    filename = `Emergency Contacts - as of ${getTodaysDate('YYYY-MM-DD')}`;
+    await PocsCsv.download(csvInfo, {
+      filename,
+      preloaded: {
+        contracts: store.getters.contracts
+      }
+    });
   }
 
   // close the modal
   loading.value = false;
   close();
 } // download
-
-/**
- * Filters through given employees, removing employees that have incomplete
- * data in their EEO form
- *
- * @param employees employees to filter through
- */
-function filterDeclined(employees) {
-  function nullOrUndefined(item) {
-    return item == undefined || item == null;
-  }
-  return _filter(employees, (e) => {
-    return (
-      !nullOrUndefined(e.eeoGender) &&
-      !nullOrUndefined(e.eeoJobCategory) &&
-      !nullOrUndefined(e.eeoRaceOrEthnicity) &&
-      !nullOrUndefined(e.eeoHispanicOrLatino) &&
-      !nullOrUndefined(e.eeoHasDisability) &&
-      !nullOrUndefined(e.eeoIsProtectedVeteran)
-    );
-  });
-}
 
 /**
  * Filters employees based on the form's information
@@ -305,7 +288,7 @@ function filterEmployees(employees) {
   return _filter(employees, (e) => {
     // - YEAR FILTER -
     // remove employees that were hired after given year, or departed before given year
-    let yearFilterExclusions = ['ppto']; // export types to exclude from year filter
+    let yearFilterExclusions = ['ppto', 'pocs']; // export types to exclude from year filter
     if (!yearFilterExclusions.includes(exportType.value.value)) {
       let hireDateValid = e.hireDate && isSameOrBefore(e.hireDate, f.periodEnd, 'day');
       let deptDateValid = !e.deptDate || isAfter(e.deptDate, f.periodStart, 'day');
