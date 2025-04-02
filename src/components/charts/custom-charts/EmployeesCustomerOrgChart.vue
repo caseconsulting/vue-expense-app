@@ -170,7 +170,7 @@ function getChartData() {
       datasets.push({
         label: key,
         data: getDataValues(labels, key),
-        backgroundColor: colors[i % colors.length][j % colors[i].length]
+        backgroundColor: colors[i % colors.length][j % colors[i % colors.length].length]
       });
       j++;
     });
