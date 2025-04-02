@@ -16,8 +16,7 @@
 
           <p class="pt-4 pb-0">
             Want to change your picture on
-            <a class="text-primary" :href="'https://3.basecamp.com/3097063/my/profile'" target="_blank"
-              ><u>basecamp</u></a
+            <a class="text-primary" :href="MY_PROFILE" target="_blank"><u>basecamp</u></a
             >?
           </p>
           <p class="text-start pt-2">
@@ -31,6 +30,7 @@
 
 <script setup>
 import { ref } from 'vue';
+import { MY_PROFILE } from '@/utils/links/basecampLinks';
 import { isEmpty } from '@/utils/utils';
 
 const props = defineProps(['avatar', 'initials', 'altText', 'fullName', 'model']);
