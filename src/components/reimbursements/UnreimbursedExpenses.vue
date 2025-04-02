@@ -9,7 +9,7 @@
         <!-- Expenses Total -->
         <reimbursement-totals></reimbursement-totals>
         <!-- Expense Info -->
-        <reimbursement-expense-details class="mb-3"></reimbursement-expense-details>
+        <reimbursement-expense-details></reimbursement-expense-details>
         <!-- Status Alert -->
         <v-alert
           v-for="(alert, index) in alerts"
@@ -73,7 +73,7 @@ onBeforeMount(async () => {
   emitter.on('reimburseAlert', (theAlerts) => {
     alerts.value = theAlerts;
   });
-}); // created
+}); //created
 
 /**
  * beforeUnmount lifecycle hook.

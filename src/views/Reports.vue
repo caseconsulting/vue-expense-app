@@ -298,8 +298,8 @@ function downloadTable() {
       row = csvData[i];
       // get the current projects of user
       emp = employeesIndex[row[employeeNumberHeader]];
-      currentProjects = getEmployeeCurrentProjects(emp.id, store.getters.employees);
-      currentProjects = currentProjects.map((p) => projects[p.projectId]?.projectName);
+      currentProjects = getEmployeeCurrentProjects(emp);
+      currentProjects = currentProjects.map((p) => projects[p.projectId].projectName);
       // place after contracts by copying everything in order
       csvData[i] = {};
       for (let colName in row) {

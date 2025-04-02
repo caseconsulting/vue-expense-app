@@ -5,12 +5,7 @@
         <h3>
           <v-icon>mdi-palm-tree</v-icon>
           PTO Balances
-          <v-avatar
-            @click="openLink('https://3.basecamp.com/3097063/buckets/179119/messages/6950289713')"
-            class="ml-2 mr-2 nudge-up pointer"
-            size="x-small"
-            density="compact"
-          >
+          <v-avatar @click="openLink(PTO_POLICY)" class="ml-2 mr-2 nudge-up pointer" size="x-small" density="compact">
             <v-tooltip activator="parent" location="top">Click for more information</v-tooltip>
             <v-icon size="x-small" color="#3f51b5">mdi-information</v-icon>
           </v-avatar>
@@ -82,6 +77,7 @@
 </template>
 
 <script setup>
+import { PTO_POLICY } from '@/utils/links/basecampLinks';
 import PTOCashOutForm from '@/components/shared/PTOCashOutForm.vue';
 import PTOPlanningForm from '@/components/shared/PTOPlanningForm.vue';
 import { computed, inject, ref, onMounted, onBeforeUnmount } from 'vue';

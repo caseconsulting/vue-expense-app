@@ -1,4 +1,5 @@
 import _isEmpty from 'lodash/isEmpty';
+import { getTodaysDate } from '@/shared/dateUtils';
 
 export const EMPLOYEE_ROLES = ['Admin', 'User', 'Intern', 'Manager'];
 export const PHONE_TYPES = ['Home', 'Cell', 'Work'];
@@ -188,26 +189,8 @@ export function getEmployeeCurrentAddress(employee) {
  * @param employees - list of employees
  * @return array of contract objects
  */
-export function getEmployeeCurrentContracts(employeeId, employees) {
-  let currentContracts = [];
-  // for some reason `employees.find()` is undefined
-  let contracts = [];
-  for (let e of employees) {
-    if (e.id === employeeId) {
-      contracts = e.contracts;
-      break;
-    }
-  }
-  // add any contract that has a current project
-  for (let c of contracts ?? []) {
-    for (let p of c.projects) {
-      if (!p.endDate) {
-        currentContracts.push(c);
-        break;
-      }
-    }
-  }
-  return currentContracts;
+export function getEmployeeCurrentContracts(employee) {
+  return getEmployeeCurrentProjects(employee, true);
 }
 
 /**
@@ -218,20 +201,18 @@ export function getEmployeeCurrentContracts(employeeId, employees) {
  * @param employees - list of employees
  * @return array of contract objects
  */
-export function getEmployeeCurrentProjects(employeeId, employees) {
+export function getEmployeeCurrentProjects(employee, returnContracts = false) {
+  let currentContracts = [];
   let currentProjects = [];
-  // for some reason `employees.find()` is undefined
-  let contracts = [];
-  for (let e of employees) {
-    if (e.id === employeeId) {
-      contracts = e.contracts;
-      break;
+  for (let c of employee.contracts ?? []) {
+    for (let p of c.projects) {
+      if (!p.endDate || p.endDate > getTodaysDate()) {
+        currentProjects.push(p);
+        currentContracts.push(c);
+      }
     }
   }
-  // add any projects that are current
-  for (let c of contracts ?? []) for (let p of c.projects) if (!p.endDate) currentProjects.push(p);
-  // return :)
-  return currentProjects;
+  return returnContracts ? currentContracts : currentProjects;
 }
 
 /**
