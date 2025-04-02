@@ -280,10 +280,8 @@ import EmployeeForm from '@/components/employee-beta/forms/EmployeeForm.vue';
 import ExportEmployeeData from '@/components/employees/csv/ExportEmployeeData.vue';
 import DeleteErrorModal from '@/components/modals/DeleteErrorModal.vue';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
-import { updateStoreAvatars, updateStoreEmployees, updateStoreTags } from '@/utils/storeUtils';
+import { updateStoreEmployees, updateStoreTags } from '@/utils/storeUtils';
 import _filter from 'lodash/filter';
-import _find from 'lodash/find';
-import _map from 'lodash/map';
 
 import ConvertEmployeeToCsv from '@/components/employees/csv/ConvertEmployeeToCsv.vue';
 import PowerEditContainer from '@/components/employees/power-edit/PowerEditContainer.vue';
@@ -293,6 +291,7 @@ import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSn
 import TagsFilter from '@/components/shared/TagsFilter.vue';
 import { format } from '@/shared/dateUtils';
 import { selectedTagsHasEmployee } from '@/shared/employeeUtils';
+import { loadBasecampAvatars } from '@/utils/basecamp';
 import { employeeFilter } from '@/shared/filterUtils';
 import {
   isFullTime,
@@ -512,20 +511,6 @@ function hasAdminPermissions() {
 } // hasAdminPermissions
 
 /**
- * Loads in basecamp avatars, setting them when finished
- */
-async function loadBasecampAvatars() {
-  if (!store.getters.basecampAvatars) await updateStoreAvatars();
-  let avatars = store.getters.basecampAvatars;
-  _map(employees.value, (employee) => {
-    let avatar = _find(avatars, ['email_address', employee.email]);
-    let avatarUrl = avatar ? avatar.avatar_url : null;
-    employee.avatar = avatarUrl;
-    return employee;
-  });
-}
-
-/**
  * Refresh employee data and filters employees.
  */
 async function refreshEmployees() {
@@ -537,7 +522,7 @@ async function refreshEmployees() {
   loading.value = false; // set loading status to false
   // assets that don't need to be awaited on, but need data that is awaited on
   Promise.all([
-    loadBasecampAvatars(),
+    loadBasecampAvatars(employees),
     !store.getters.tags && (userRoleIsAdmin() || userRoleIsManager()) ? updateStoreTags() : ''
   ]);
 } // refreshEmployees

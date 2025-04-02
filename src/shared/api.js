@@ -162,6 +162,15 @@ async function getEmployeePtoCashOuts(id) {
 } // getEmployeePtoCashOuts
 
 /**
+ * Gets employees
+ *
+ * @return - PTO cash outs for employee
+ */
+async function getEmployees() {
+  return execute('get', `/${EMPLOYEES}`);
+} // getEmployees
+
+/**
  * gets all the events
  *
  * @return - event data
@@ -523,6 +532,7 @@ export default {
   getEmployeeBudgets,
   getEmployeeExpenseTypes,
   getEmployeePtoCashOuts,
+  getEmployees,
   getFeedEvents,
   getFiscalDateViewBudgets,
   getItem,
