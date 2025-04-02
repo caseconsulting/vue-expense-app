@@ -6,11 +6,7 @@
         {{ isYearly ? (isCalendarYear ? 'Calendar Year' : 'Contract Year') : 'Pay Period' }} Job Codes
         <v-avatar
           v-if="isYearly && isCalendarYear"
-          @click="
-            openLink(
-              'https://3.basecamp.com/3097063/buckets/179119/messages/1426517066#:~:text=1860%20Hours%20target%20bonus'
-            )
-          "
+          @click="openLink(BONUS_1860_POLICY)"
           class="ml-2 nudge-up pointer"
           size="x-small"
           density="compact"
@@ -75,6 +71,7 @@
 </template>
 
 <script setup>
+import { BONUS_1860_POLICY } from '@/utils/links/basecampLinks';
 import { onBeforeMount, onBeforeUnmount, inject, ref } from 'vue';
 import { formatNumber, openLink } from '@/utils/utils';
 import _cloneDeep from 'lodash/cloneDeep';
