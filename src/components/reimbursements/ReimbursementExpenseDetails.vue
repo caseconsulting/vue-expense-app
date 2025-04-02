@@ -1,5 +1,10 @@
 <template>
-  <v-card v-if="expense" id="reimbursement-expense-details" class="mr-3 my-3 slide-in-blurred-right">
+  <v-card
+    v-if="expense"
+    max-height="300"
+    id="reimbursement-expense-details"
+    class="details mr-3 my-3 slide-in-blurred-right"
+  >
     <v-card-title primary-title class="pb-0 text-h5"> Expense Details </v-card-title>
     <v-card-text>
       <v-container fluid class="px-0 px-md-2 pb-0">
@@ -155,6 +160,12 @@ computed(isMobile);
 .revisal-reason {
   height: 100px;
   max-height: 100px;
+  overflow-y: auto;
+}
+
+.details {
+  height: 300px;
+  max-height: 300px;
   overflow-y: auto;
 }
 
