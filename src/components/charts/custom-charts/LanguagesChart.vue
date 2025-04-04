@@ -8,7 +8,7 @@
 import _first from 'lodash/first';
 import BarChart from '../base-charts/BarChart.vue';
 import { isEmpty } from '@/utils/utils';
-import { onMounted, ref, watch, defineProps } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 
