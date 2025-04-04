@@ -20,13 +20,31 @@
           />
         </v-col>
         <v-col cols="2">
-          <date-picker v-model="startDate" clearable label="Start Date" />
+          <date-picker
+            v-tooltip="{ text: 'Untoggle Only Latest to use date filters', 'z-index': disableDates ? 9999 : -1 }"
+            :disabled="disableDates"
+            v-model="startDate"
+            clearable
+            label="Start Date"
+          />
         </v-col>
         <v-col cols="2">
-          <date-picker v-model="endDate" clearable label="End Date" />
+          <date-picker
+            :disabled="disableDates"
+            v-tooltip="{ text: 'Untoggle Only Latest to use date filters', 'z-index': disableDates ? 9999 : -1 }"
+            v-model="endDate"
+            clearable
+            label="End Date"
+          />
         </v-col>
         <v-col cols="4">
-          <v-switch v-model="onlyLatest" color="primary" label="Only Latest Reminder" />
+          <v-switch
+            :disabled="disableOnlyLatest"
+            v-tooltip="{ text: 'Remove date filters to use this toggle', 'z-index': disableOnlyLatest ? 9999 : -1 }"
+            v-model="onlyLatest"
+            color="primary"
+            label="Only Latest Reminder"
+          />
         </v-col>
       </v-row>
 
@@ -49,7 +67,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, computed } from 'vue';
+import { onMounted, ref, computed, watch } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { format, isSameOrAfter, isSameOrBefore } from '@/shared/dateUtils';
@@ -225,6 +243,22 @@ const includedText = computed(() => {
     return 'All reminders are shown, and "Total Reminders" is the total amount of reminders sent to the employee.';
   }
 });
+
+const disableDates = computed(() => {
+  return onlyLatest.value;
+});
+
+const disableOnlyLatest = computed(() => {
+  let dateEmpty = (d) => !d || d === '';
+  return !dateEmpty(startDate.value) || !dateEmpty(endDate.value);
+});
+
+watch(
+  () => disableOnlyLatest.value,
+  () => {
+    console.log(disableOnlyLatest.value);
+  }
+);
 
 // |--------------------------------------------------|
 // |                                                  |
