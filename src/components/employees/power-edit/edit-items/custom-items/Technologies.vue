@@ -120,7 +120,7 @@ watch(
 
 async function addTech() {
   await form.value.validate();
-  if (valid.value) {
+  if (valid.value.valid) {
     technologies.value ? technologies.value.push(model.value) : (technologies.value = [model.value]);
     model.value = {
       name: null,

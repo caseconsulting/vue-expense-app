@@ -144,8 +144,8 @@ onBeforeMount(async () => {
 /**
  * sets the dateRange of the audits to get
  */
-function setDateRange() {
-  if (dateRange.value.validate()) {
+async function setDateRange() {
+  if ((await dateRange.value.validate()).valid) {
     // Hide the calendar popup
     auditsQuery.value.showRangeMenu = false;
 

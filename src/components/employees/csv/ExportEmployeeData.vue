@@ -7,7 +7,7 @@
     <v-card-text class="d-flex justify-center">
       <div class="w-100">
         <h3 class="mt-4">Export Type</h3>
-        <v-radio-group :disabled="loading" hide-details v-model="exportType">
+        <v-radio-group :disabled="!!loading" hide-details v-model="exportType">
           <v-radio v-for="(t, i) in exportTypes" :key="i" :label="t.title" :value="t"></v-radio>
         </v-radio-group>
 
@@ -44,7 +44,7 @@
         <!-- Status selector -->
         <h3 class="mt-4">Filter by status</h3>
         <v-autocomplete
-          :disabled="loading"
+          :disabled="!!loading"
           label="Filter by status"
           v-model="filters.statuses"
           :items="filterOptions.statuses"
@@ -58,7 +58,7 @@
         <!-- Employee Role selector -->
         <h3 class="mt-4">Filter by employee role</h3>
         <v-autocomplete
-          :disabled="loading"
+          :disabled="!!loading"
           label="Filter by employee role"
           v-model="filters.employeeRoles"
           :items="filterOptions.employeeRoles"
@@ -84,7 +84,7 @@
       <p class="mb-0 mr-2 w-50 text-end text-caption text-red font-italic" v-else-if="typeof status == 'string'">
         {{ status }}
       </p>
-      <v-btn :disabled="loading" color="primary" variant="outlined" @click="download()">
+      <v-btn :disabled="!!loading" color="primary" variant="outlined" @click="download()">
         Download <v-icon size="large">mdi-download</v-icon>
       </v-btn>
       <v-btn color="grey-darken-3" variant="text" @click="close()"> Close </v-btn>
