@@ -264,7 +264,7 @@ function convertToHours(seconds) {
  * @param planKey key in planResults to grab from
  */
 function addPlanToBalances(balanceKey, itemsKey, planResults, planKey) {
-  if (!ptoBalances.value[balanceKey]?.items) {
+  if (!ptoBalances.value?.[balanceKey]?.items) {
     let oldBalance = ptoBalances.value[balanceKey]?.value || ptoBalances.value[balanceKey] || 0;
     ptoBalances.value[balanceKey] = { value: oldBalance, items: {} };
   }
