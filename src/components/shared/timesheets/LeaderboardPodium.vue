@@ -1,12 +1,34 @@
 <template>
   <div>
-    <v-row class="justify-center my-3">
-      <leader v-bind:leader="first" :trophy="true" iconClass="gold" :loading="loading"></leader>
-    </v-row>
-    <v-row class="justify-space-around">
-      <leader :leader="second" :trophy="true" iconClass="silver" :loading="loading"></leader>
-      <leader :leader="third" :trophy="true" iconClass="bronze" :loading="loading"></leader>
-    </v-row>
+    <div v-if="loading">
+      <div class="text-center my-3">Loading 1860 Leaderboard...</div>
+      <v-progress-linear :indeterminate="true"></v-progress-linear>
+    </div>
+    <v-carousel v-else hide-delimiters height="155" show-arrows="hover">
+      <v-carousel-item v-for="(leaderGroup, index) in leaderGroups" :key="index">
+        <div v-if="index == 0" class="mx-1">
+          <v-row justify="center" class="my-3">
+            <leader :leader="leaderGroup[0]" iconClass="gold"></leader>
+          </v-row>
+          <v-row justify="space-around">
+            <leader :leader="leaderGroup[1]" iconClass="silver"></leader>
+            <leader :leader="leaderGroup[2]" iconClass="bronze"></leader>
+          </v-row>
+        </div>
+        <div v-else class="ms-8">
+          <v-row justify="space-around" class="my-3 me-4">
+            <div>
+              <leader :leader="leaderGroup[0]"></leader>
+              <leader :leader="leaderGroup[1]"></leader>
+            </div>
+            <div>
+              <leader :leader="leaderGroup[2]"></leader>
+              <leader :leader="leaderGroup[3]"></leader>
+            </div>
+          </v-row>
+        </div>
+      </v-carousel-item>
+    </v-carousel>
   </div>
 </template>
 
@@ -27,9 +49,7 @@ const LOCAL_STORAGE_KEY = 'leaderboard';
 
 const store = useStore();
 const loading = ref(true);
-const first = ref(null);
-const second = ref(null);
-const third = ref(null);
+const leaderGroups = ref([]);
 
 /**
  * onBeforeMount lifecycle hook
@@ -37,10 +57,10 @@ const third = ref(null);
 onBeforeMount(async () => {
   let localStorageData = localStorage.getItem(LOCAL_STORAGE_KEY);
   if (localStorageData) {
-    [first.value, second.value, third.value] = JSON.parse(localStorageData);
+    leaderGroups.value = JSON.parse(localStorageData);
   } else {
     await getLeaderboardData();
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify([first.value, second.value, third.value]));
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(leaderGroups.value));
   }
 
   loading.value = false;
@@ -57,26 +77,19 @@ async function getLeaderboardData() {
 
   let [start, end] = [startOf(getTodaysDate('YYYY-MM-DD'), 'year'), getTodaysDate('YYYY-MM-DD')];
 
-  let timesheetsByEmployeeNumber = await getTimesheets(billableEmployees, start, end);
+  let timesheets = await getTimesheets(billableEmployees, start, end);
+  let sortedTimesheets = _reverse(_sortBy(timesheets, 'billableTimesheet')).slice(0, 23);
 
-  let sortedTimesheets = _reverse(_sortBy(timesheetsByEmployeeNumber, 'billableTimesheet'));
+  let employee, group;
+  sortedTimesheets.forEach((timesheet, index) => {
+    group = Math.floor((index + 1) / 4);
+    employee = employees.find((e) => e.employeeNumber == timesheet.employeeNumber);
+    leaderGroups.value[group] ||= [];
+    leaderGroups.value[group].push({ ...employee, ...timesheet });
+  });
 
-  // setup first place
-  let firstTimesheet = sortedTimesheets[0];
-  let firstEmployee = employees.find((e) => e.employeeNumber == firstTimesheet?.employeeNumber);
-  first.value = { ...firstEmployee, ...firstTimesheet };
-
-  // setup second place
-  let secondTimesheet = sortedTimesheets[1];
-  let secondEmployee = employees.find((e) => e.employeeNumber == secondTimesheet?.employeeNumber);
-  second.value = { ...secondEmployee, ...secondTimesheet };
-
-  // setup third place
-  let thirdTimesheet = sortedTimesheets[2];
-  let thirdEmployee = employees.find((e) => e.employeeNumber == thirdTimesheet?.employeeNumber);
-  third.value = { ...thirdEmployee, ...thirdTimesheet };
   if (!store.getters.basecampAvatars) {
-    await loadBasecampAvatars(store, [first.value, second.value, third.value]);
+    await loadBasecampAvatars(store, leaderGroups.value.flat());
   }
 }
 </script>
