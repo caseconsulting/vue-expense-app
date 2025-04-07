@@ -75,7 +75,6 @@ function fetchData() {
       if (p.status === api.CONTRACT_STATUSES.ACTIVE) addDirectorate(c, p);
     });
   });
-  console.log(directorates.value);
 } // fetchData
 
 /**

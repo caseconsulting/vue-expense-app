@@ -60,7 +60,6 @@ const megabytes = computed(() => {
         return 0;
       }
     }
-    console.log(size);
     return size;
   } else {
     return 0;
