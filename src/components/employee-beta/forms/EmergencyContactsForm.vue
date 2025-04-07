@@ -150,7 +150,7 @@ import _cloneDeep from 'lodash/cloneDeep';
 // |                                                  |
 // |--------------------------------------------------|
 
-const COUNTRIES = new Set(countries_util);
+const COUNTRIES = Array.from(new Set(countries_util));
 // passes in all slot props as a single object
 const { slotProps } = defineProps(['slotProps']);
 const editedEmployee = ref(slotProps.editedEmployee);
