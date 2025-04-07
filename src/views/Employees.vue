@@ -522,7 +522,7 @@ async function refreshEmployees() {
   loading.value = false; // set loading status to false
   // assets that don't need to be awaited on, but need data that is awaited on
   Promise.all([
-    loadBasecampAvatars(employees),
+    !store.getters.basecampAvatars ? loadBasecampAvatars(store, employees.value) : '',
     !store.getters.tags && (userRoleIsAdmin() || userRoleIsManager()) ? updateStoreTags() : ''
   ]);
 } // refreshEmployees

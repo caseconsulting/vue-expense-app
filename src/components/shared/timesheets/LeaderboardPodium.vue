@@ -2,19 +2,27 @@
   <div>
     <v-row class="justify-center">
       <v-icon size="large" class="gold">mdi-trophy</v-icon>
-      <template v-slot:activator="{ props }">
-        <user-avatar class="pointer mx-3" v-bind="props" :employee="first" :image="first.avatar" />
+      <template>
+        <user-avatar :employee="first" :image="first?.avatar" :size="35" />
       </template>
-      <span>{{ first?.firstName }}</span>
+      <span>{{ first?.nickname || first?.firstName }}</span>
       <span>{{ first?.billableTimesheet }}</span>
     </v-row>
     <v-row class="justify-space-around">
       <div>
         <v-icon size="large" class="silver">mdi-trophy</v-icon>
+        <template>
+          <user-avatar :employee="second" :image="second?.avatar" :size="35" />
+        </template>
+        <span>{{ second?.nickname || second?.firstName }}</span>
         <span>{{ second?.billableTimesheet }}</span>
       </div>
       <div>
         <v-icon size="large" class="bronze">mdi-trophy</v-icon>
+        <template>
+          <user-avatar :employee="third" :image="third?.avatar" :size="35" />
+        </template>
+        <span>{{ third?.nickname || third?.firstName }}</span>
         <span>{{ third?.billableTimesheet }}</span>
       </div>
     </v-row>
@@ -58,15 +66,23 @@ onBeforeMount(async () => {
   let sortedTimesheets = _reverse(_sortBy(timesheetsByEmployeeNumber, 'billableTimesheet'));
   console.log(sortedTimesheets);
 
+  // setup first place
   let firstTimesheet = sortedTimesheets[0];
   let firstEmployee = employees.find((e) => e.employeeNumber == firstTimesheet?.employeeNumber);
   first.value = { ...firstEmployee, ...firstTimesheet };
-  console.log(first);
-  second.value = sortedTimesheets[1];
-  console.log(second);
-  third.value = sortedTimesheets[2];
-  console.log(third);
 
-  loadBasecampAvatars([first]);
+  // setup second place
+  let secondTimesheet = sortedTimesheets[1];
+  let secondEmployee = employees.find((e) => e.employeeNumber == secondTimesheet?.employeeNumber);
+  second.value = { ...secondEmployee, ...secondTimesheet };
+
+  // setup third place
+  let thirdTimesheet = sortedTimesheets[2];
+  let thirdEmployee = employees.find((e) => e.employeeNumber == thirdTimesheet?.employeeNumber);
+  third.value = { ...thirdEmployee, ...thirdTimesheet };
+  if (!store.getters.basecampAvatars) {
+    await loadBasecampAvatars(store, [first.value, second.value, third.value]);
+  }
+  console.log(first.value.avatar);
 });
 </script>
