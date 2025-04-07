@@ -36,8 +36,7 @@
 import Leader from '@/components/shared/timesheets/Leader';
 import { useStore } from 'vuex';
 import { onBeforeMount, ref } from 'vue';
-import api from '@/shared/api';
-import { updateStoreTags } from '@/utils/storeUtils';
+import { updateStoreEmployees, updateStoreTags } from '@/utils/storeUtils';
 import { nonBillableTags } from '@/utils/tags';
 import { getTimesheets } from '@/utils/timesheets';
 import { getTodaysDate, startOf } from '@/shared/dateUtils';
@@ -67,13 +66,14 @@ onBeforeMount(async () => {
 });
 
 async function getLeaderboardData() {
-  let employees = await api.getEmployees();
-  if (!store.getters.tags) {
-    await updateStoreTags();
-  }
+  await Promise.all([
+    store.getters.employees ? '' : updateStoreEmployees(),
+    store.getters.tags ? '' : updateStoreTags()
+  ]);
+
   let filteredTags = nonBillableTags(store.getters.tags);
   let nonBillableEmployeeIds = filteredTags.flatMap((tag) => tag.employees);
-  let billableEmployees = employees.filter((employee) => !nonBillableEmployeeIds.includes(employee.id));
+  let billableEmployees = store.getters.employees.filter((employee) => !nonBillableEmployeeIds.includes(employee.id));
 
   let [start, end] = [startOf(getTodaysDate('YYYY-MM-DD'), 'year'), getTodaysDate('YYYY-MM-DD')];
 
@@ -83,7 +83,7 @@ async function getLeaderboardData() {
   let employee, group;
   sortedTimesheets.forEach((timesheet, index) => {
     group = Math.floor((index + 1) / 4);
-    employee = employees.find((e) => e.employeeNumber == timesheet.employeeNumber);
+    employee = billableEmployees.find((e) => e.employeeNumber == timesheet.employeeNumber);
     leaderGroups.value[group] ||= [];
     leaderGroups.value[group].push({ ...employee, ...timesheet });
   });
