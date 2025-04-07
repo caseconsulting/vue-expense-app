@@ -34,9 +34,11 @@ export async function getTimesheets(employees, startDate, endDate, options) {
         resp = resps[k].timesheets?.[0]?.timesheets;
         employeeNumber = batchEmployees[k];
         if (!resp) continue;
-        if (options['calculateNonbillable']) {
+        if (options.calculateNonbillable) {
           // add any non-billables we don't have
-          SUPP_DATA.nonBillables.add(...resps[k].supplementalData.nonBillables);
+          resps[k].supplementalData.nonBillables.forEach((code) => {
+            SUPP_DATA.nonBillables.add(code);
+          });
         }
 
         if (!timesheetsByEmployeeNumber[employeeNumber])
@@ -44,7 +46,7 @@ export async function getTimesheets(employees, startDate, endDate, options) {
         timesheetsByEmployeeNumber[employeeNumber].timesheets = resp;
         timesheetsByEmployeeNumber[employeeNumber].billableTimesheet = getBillableHours(
           resp,
-          options['calculateNonbillable']
+          options.calculateNonbillable
         );
       }
       // clear batches

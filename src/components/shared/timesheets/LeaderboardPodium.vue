@@ -44,7 +44,7 @@ import _sortBy from 'lodash/sortBy';
 import _reverse from 'lodash/reverse';
 import { loadBasecampAvatars } from '@/utils/basecamp';
 
-const LOCAL_STORAGE_KEY = 'leaderboard';
+const LOCAL_STORAGE_KEY = `leaderboard-${getTodaysDate()}`;
 
 const store = useStore();
 const loading = ref(true);
