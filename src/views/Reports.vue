@@ -78,7 +78,7 @@
   </div>
 </template>
 <script setup>
-import { watch, onMounted, computed, ref, reactive, inject } from 'vue';
+import { watch, onMounted, computed, ref, reactive, inject, shallowRef } from 'vue';
 import { useStore } from 'vuex';
 import ContactEmployeesModal from '@/components/shared/ContactEmployeesModal.vue';
 import ReportsPageLoader from '@/components/reports/ReportsPageLoader.vue';
@@ -116,42 +116,42 @@ const tabs = ref([
   {
     key: 'contracts',
     title: 'Contracts',
-    component: ReportsContracts
+    component: shallowRef(ReportsContracts)
   },
   {
     key: 'customerOrgs',
     title: 'Customer Orgs',
-    component: ReportsCustomerOrgs
+    component: shallowRef(ReportsCustomerOrgs)
   },
   {
     key: 'certifications',
     title: 'Certifications',
-    component: ReportsCertifications
+    component: shallowRef(ReportsCertifications)
   },
   {
     key: 'awards',
     title: 'Awards',
-    component: ReportsAwards
+    component: shallowRef(ReportsAwards)
   },
   {
     key: 'foreignLanguages',
     title: 'Foreign Languages',
-    component: ReportsForeignLanguages
+    component: shallowRef(ReportsForeignLanguages)
   },
   {
     key: 'jobRoles',
     title: 'Job Roles',
-    component: ReportsJobRoles
+    component: shallowRef(ReportsJobRoles)
   },
   {
     key: 'technologies',
     title: 'Technologies',
-    component: ReportsTechnologies
+    component: shallowRef(ReportsTechnologies)
   },
   {
     key: 'securityInfo',
     title: 'Security Info',
-    component: ReportsSecurityInfo
+    component: shallowRef(ReportsSecurityInfo)
   }
 ]);
 
@@ -159,7 +159,7 @@ if (userRoleIsAdmin()) {
   tabs.value.push({
     key: 'employeeNotes',
     title: 'Employee Notes',
-    component: ReportsEmployeeNotes
+    component: shallowRef(ReportsEmployeeNotes)
   });
 }
 
@@ -197,6 +197,8 @@ onMounted(async () => {
 
   // update table download for tab that emitted
   emitter.on('reports-table-update', (data) => {
+    console.log('Updating download info for', data.tab, 'with the following data:');
+    console.log(data);
     tableData[data.tab] = data;
   });
 });
