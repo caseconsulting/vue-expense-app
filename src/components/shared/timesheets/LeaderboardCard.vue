@@ -20,7 +20,6 @@
 <script setup>
 import { ref } from 'vue';
 import { useStore } from 'vuex';
-import ProjectsEmployeesAssignedModal from '../../modals/ProjectsEmployeesAssignedModal.vue';
 
 const store = useStore();
 const props = defineProps(['rows']);

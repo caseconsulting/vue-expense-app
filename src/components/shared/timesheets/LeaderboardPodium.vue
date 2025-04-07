@@ -1,35 +1,17 @@
 <template>
   <div>
-    <v-row class="justify-center">
-      <v-icon size="large" class="gold">mdi-trophy</v-icon>
-      <template>
-        <user-avatar :employee="first" :image="first?.avatar" :size="35" />
-      </template>
-      <span>{{ first?.nickname || first?.firstName }}</span>
-      <span>{{ first?.billableTimesheet }}</span>
+    <v-row class="justify-center my-3">
+      <leader v-bind:leader="first" :trophy="true" iconClass="gold" :loading="loading"></leader>
     </v-row>
     <v-row class="justify-space-around">
-      <div>
-        <v-icon size="large" class="silver">mdi-trophy</v-icon>
-        <template>
-          <user-avatar :employee="second" :image="second?.avatar" :size="35" />
-        </template>
-        <span>{{ second?.nickname || second?.firstName }}</span>
-        <span>{{ second?.billableTimesheet }}</span>
-      </div>
-      <div>
-        <v-icon size="large" class="bronze">mdi-trophy</v-icon>
-        <template>
-          <user-avatar :employee="third" :image="third?.avatar" :size="35" />
-        </template>
-        <span>{{ third?.nickname || third?.firstName }}</span>
-        <span>{{ third?.billableTimesheet }}</span>
-      </div>
+      <leader :leader="second" :trophy="true" iconClass="silver" :loading="loading"></leader>
+      <leader :leader="third" :trophy="true" iconClass="bronze" :loading="loading"></leader>
     </v-row>
   </div>
 </template>
 
 <script setup>
+import Leader from '@/components/shared/timesheets/Leader';
 import { useStore } from 'vuex';
 import { onBeforeMount, ref } from 'vue';
 import api from '@/shared/api';
@@ -42,7 +24,7 @@ import _reverse from 'lodash/reverse';
 import { loadBasecampAvatars } from '@/utils/basecamp';
 
 const store = useStore();
-
+const loading = ref(true);
 const first = ref(null);
 const second = ref(null);
 const third = ref(null);
@@ -64,7 +46,6 @@ onBeforeMount(async () => {
   let timesheetsByEmployeeNumber = await getTimesheets(billableEmployees, start, end);
 
   let sortedTimesheets = _reverse(_sortBy(timesheetsByEmployeeNumber, 'billableTimesheet'));
-  console.log(sortedTimesheets);
 
   // setup first place
   let firstTimesheet = sortedTimesheets[0];
@@ -83,6 +64,6 @@ onBeforeMount(async () => {
   if (!store.getters.basecampAvatars) {
     await loadBasecampAvatars(store, [first.value, second.value, third.value]);
   }
-  console.log(first.value.avatar);
+  loading.value = false;
 });
 </script>
