@@ -76,7 +76,6 @@ function getDropdownItems() {
     items = getProjectLocations();
   } else {
     items = getOrgList(key, {
-      customerOrg: key !== 'customerOrg' ? props.item.customerOrg : null,
       directorate: key !== 'directorate' ? props.item.directorate : null,
       org2: key !== 'org2' ? props.item.org2 : null,
       org3: key !== 'org3' ? props.item.org3 : null

@@ -145,6 +145,7 @@
 </template>
 
 <script setup>
+import { BASECAMP, BENEFITS_BOOKLET, CASE_INFO, HOW_TO } from '@/utils/links/basecampLinks';
 import {
   isLoggedIn,
   isTimedOut,
@@ -199,21 +200,21 @@ const badgeKey = ref(0);
 const links = ref([
   { name: 'CASE Website', link: 'https://www.consultwithcase.com/' },
   { name: 'Submit New Referral', link: 'https://www.consultwithcase.com/apply-form' },
-  { name: 'CASE Information', link: 'https://3.basecamp.com/3097063/buckets/4708396/messages/650777910' },
-  { name: 'Basecamp', link: 'https://3.basecamp.com/3097063' },
+  { name: 'CASE Information', link: CASE_INFO },
+  { name: 'Basecamp', link: BASECAMP },
   { name: 'QuickBooks Time', link: 'https://tsheets.intuit.com/page/login_oii' },
   { name: 'ADP', link: 'https://workforcenow.adp.com/' },
   { name: 'BambooHR', link: 'https://consultwithcase.bamboohr.com/home/' },
   { name: 'Jira', link: 'https://consultwithcase.atlassian.net/jira/your-work' },
   {
     name: 'Portal & Basecamp How-Tos',
-    link: 'https://3.basecamp.com/3097063/buckets/34631168/message_boards/6620373851'
+    link: HOW_TO
   },
   { name: 'Workspace at Reston Town Center Map', link: floorPlan }
 ]);
 const benefitsLinks = [
   { name: 'Net Benefits/Fidelity', link: 'https://nb.fidelity.com/public/nb/default/home' },
-  { name: 'Benefits Booklet', link: 'https://3.basecamp.com/3097063/buckets/4708396/uploads/6746972426' },
+  { name: 'Benefits Booklet', link: BENEFITS_BOOKLET },
   { name: 'Medical (Health) Insurance', link: 'https://www.anthem.com/' },
   { name: 'Disability & Life Insurance', link: 'https://www.mutualofomaha.com/' },
   { name: 'Dental & Vision Insurance', link: 'https://www.sunlife.com/' },

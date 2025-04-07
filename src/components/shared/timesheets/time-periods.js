@@ -54,6 +54,9 @@ export function getContractYearPeriods(employee) {
     case '1':
       period = _getContractPoPStartPeriod(contract);
       break;
+    case '2':
+      period = _getContractProjectPeriod(contract, employee);
+      break;
     default:
   }
   return period;
@@ -72,7 +75,7 @@ export function getContractYearPeriods(employee) {
  * @returns Object - The time period
  */
 function _getContractCurrentProjectPeriod(employee) {
-  let project = _getCurrentProject(employee);
+  let project = _getEmployeeCurrentProject(employee);
   if (!project) return null;
   return _getYearPeriod(project.startDate);
 } // _getContractCurrentProjectPeriod
@@ -88,21 +91,49 @@ function _getContractPoPStartPeriod(contract) {
 } // _getContractPoPStartPeriod
 
 /**
+ * Gets the current project PoP based on contract's project's dates (not the employee profile)
+ *
+ * @param contract The contrcat object that the employee is currently on
+ */
+function _getContractProjectPeriod(contract, employee) {
+  let employeeProjectId = _getEmployeeCurrentProject(employee)?.projectId;
+  let contractProject = _find(contract.projects, (p) => p.id == employeeProjectId);
+  if (contractProject) return _getYearPeriod(contractProject.popStartDate, contractProject.popEndDate);
+}
+
+/**
  * Gets a year long period based on the start date and today's date. Today's date will fall between the time period.
  *
  * @param {String} sDate - The start date
+ * @param {String} eDate - End Date: if provided, this function just formats the sDate and eDate into an object
  * @returns The year long period
  */
-function _getYearPeriod(sDate) {
+function _getYearPeriod(sDate, eDate) {
   let today = getTodaysDate();
   let currentYear = getYear(today);
+
+  // format start date
   let startDate = format(sDate, null, DEFAULT_ISOFORMAT);
-  startDate = setYear(startDate, currentYear);
-  if (isBefore(today, startDate, 'day')) startDate = setYear(startDate, currentYear - 1);
-  let endDate = format(add(startDate, 1, 'year'), null, DEFAULT_ISOFORMAT);
-  endDate = format(subtract(endDate, 1, 'day'), null, DEFAULT_ISOFORMAT);
+  if (!eDate) {
+    // if there is both a start and end date provided, use them verbatim
+    startDate = setYear(startDate, currentYear);
+    if (isBefore(today, startDate, 'day')) startDate = setYear(startDate, currentYear - 1);
+  }
+
+  // calculate end date
+  let endDate;
+  if (eDate) {
+    endDate = format(eDate, null, DEFAULT_ISOFORMAT);
+  } else {
+    endDate = format(add(startDate, 1, 'year'), null, DEFAULT_ISOFORMAT);
+    endDate = format(subtract(endDate, 1, 'day'), null, DEFAULT_ISOFORMAT);
+  }
+
+  // make titles
   let startDateTitle = format(startDate, null, 'MMM D, YYYY');
   let endDateTitle = format(endDate, null, 'MMM D, YYYY');
+
+  // return object
   return { startDate, endDate, title: `${startDateTitle} - ${endDateTitle}` };
 } // _getYearPeriod
 
@@ -112,14 +143,14 @@ function _getYearPeriod(sDate) {
  * @param {Object} employee - The employee object
  * @returns Object - The current project to show
  */
-function _getCurrentProject(employee) {
+function _getEmployeeCurrentProject(employee) {
   let currentProject = null;
   _forEach(employee.contracts, (c) => {
     let project = _find(c.projects, (p) => !p.endDate);
     if (project) currentProject = _cloneDeep(project);
   });
   return currentProject;
-} // _getCurrentProject
+} // _getEmployeeCurrentProject
 
 export default {
   getCalendarYearPeriods,

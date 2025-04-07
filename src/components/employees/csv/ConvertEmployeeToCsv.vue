@@ -12,7 +12,7 @@
 </template>
 
 <script setup>
-import employeeCsv from '@/utils/csv/employeeCsv.js';
+import EmployeeCsv from '@/utils/csv/employeeCsv.js';
 import { updateStoreContracts, updateStoreTags } from '@/utils/storeUtils';
 import { useStore } from 'vuex';
 
@@ -38,7 +38,13 @@ async function download() {
     !store.getters.contracts ? updateStoreContracts() : '',
     !store.getters.tags ? updateStoreTags() : ''
   ]);
-  employeeCsv.download(props.employee, store.getters.contracts, store.getters.tags, props.filename);
+  EmployeeCsv.download(props.employee, {
+    filename: props.filename,
+    preloaded: {
+      contracts: store.getters.contracts,
+      tags: store.getters.tags
+    }
+  });
 } // download
 </script>
 
