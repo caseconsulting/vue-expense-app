@@ -23,6 +23,8 @@ import _sortBy from 'lodash/sortBy';
 import _reverse from 'lodash/reverse';
 import { loadBasecampAvatars } from '@/utils/basecamp';
 
+const LOCAL_STORAGE_KEY = 'leaderboard';
+
 const store = useStore();
 const loading = ref(true);
 const first = ref(null);
@@ -33,6 +35,18 @@ const third = ref(null);
  * onBeforeMount lifecycle hook
  */
 onBeforeMount(async () => {
+  let localStorageData = localStorage.getItem(LOCAL_STORAGE_KEY);
+  if (localStorageData) {
+    [first.value, second.value, third.value] = JSON.parse(localStorageData);
+  } else {
+    await getLeaderboardData();
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify([first.value, second.value, third.value]));
+  }
+
+  loading.value = false;
+});
+
+async function getLeaderboardData() {
   let employees = await api.getEmployees();
   if (!store.getters.tags) {
     await updateStoreTags();
@@ -64,6 +78,5 @@ onBeforeMount(async () => {
   if (!store.getters.basecampAvatars) {
     await loadBasecampAvatars(store, [first.value, second.value, third.value]);
   }
-  loading.value = false;
-});
+}
 </script>
