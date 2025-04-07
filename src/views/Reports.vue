@@ -197,8 +197,6 @@ onMounted(async () => {
 
   // update table download for tab that emitted
   emitter.on('reports-table-update', (data) => {
-    console.log('Updating download info for', data.tab, 'with the following data:');
-    console.log(data);
     tableData[data.tab] = data;
   });
 });
