@@ -2,8 +2,8 @@
   <v-container fluid id="full-page">
     <span v-if="loading">
       <v-row>
-        <v-col cols="12" md="6" class="px-xl-4 px-lg-2 px-md-0 d-flex justify-center align-center">
-          <v-skeleton-loader type="text" width="80%" />
+        <v-col cols="12" md="6" class="px-xl-4 px-lg-2 px-md-0">
+          <v-skeleton-loader type="list-item@2" />
         </v-col>
         <v-col cols="12" md="6" class="px-xl-4 px-lg-2 px-md-0">
           <v-skeleton-loader type="list-item@2" />
