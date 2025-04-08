@@ -78,18 +78,22 @@ async function getLeaderboardData() {
   let [start, end] = [startOf(getTodaysDate('YYYY-MM-DD'), 'year'), getTodaysDate('YYYY-MM-DD')];
 
   let timesheets = await getTimesheets(billableEmployees, start, end);
-  let sortedTimesheets = _reverse(_sortBy(timesheets, 'billableTimesheet')).slice(0, 23);
+  let sortedTimesheets = _reverse(_sortBy(timesheets, 'billableTimesheet'));
 
-  let employee, group;
-  sortedTimesheets.forEach((timesheet, index) => {
-    group = Math.floor((index + 1) / 4);
-    employee = billableEmployees.find((e) => e.employeeNumber == timesheet.employeeNumber);
-    leaderGroups.value[group] ||= [];
-    leaderGroups.value[group].push({ ...employee, ...timesheet });
-  });
+  groupLeaderboardData(sortedTimesheets, billableEmployees);
 
   if (!store.getters.basecampAvatars) {
     await loadBasecampAvatars(store, leaderGroups.value.flat());
   }
+}
+
+function groupLeaderboardData(sortedTimesheets, employees) {
+  let employee, group;
+  sortedTimesheets.slice(0, 23).forEach((timesheet, index) => {
+    group = Math.floor((index + 1) / 4);
+    employee = employees.find((e) => e.employeeNumber == timesheet.employeeNumber);
+    leaderGroups.value[group] ||= [];
+    leaderGroups.value[group].push({ ...employee, ...timesheet });
+  });
 }
 </script>

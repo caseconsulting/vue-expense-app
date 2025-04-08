@@ -11,18 +11,10 @@
       </v-row>
       <v-row>
         <v-col cols="6" class="px-xl-4 px-lg-2 px-md-0">
-          <v-skeleton-loader type="list-item@5" />
+          <v-skeleton-loader type="list-item@15" />
         </v-col>
         <v-col cols="6" class="px-xl-4 px-lg-2 px-md-0">
-          <v-skeleton-loader type="list-item@5" />
-        </v-col>
-        <v-col cols="12" class="pb-3 px-xl-4 px-lg-2 px-md-0">
-          <v-skeleton-loader type="list-item@14" />
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col mt-0 class="pa-0 px-xl-4 px-lg-2 px-md-0">
-          <v-skeleton-loader type="list-item@14" />
+          <v-skeleton-loader type="list-item@15" />
         </v-col>
       </v-row>
     </span>
@@ -196,11 +188,7 @@ function welcomeText(employee) {
 }
 
 function showConfetti(employee) {
-  return isAnniversary(employee) || isBirthday(employee) || is1860Leader(employee);
-}
-
-function is1860Leader() {
-  return false; // TODO
+  return isAnniversary(employee) || isBirthday(employee);
 }
 
 function isBirthday(employee) {

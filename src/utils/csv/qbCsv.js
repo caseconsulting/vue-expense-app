@@ -24,18 +24,13 @@ class QuickBooksCsv extends EmployeeCsvUtil {
    * Fills in employee timesheet information
    */
   async fillTimesheetData(index) {
-    let startDate = this.startDate;
-    // single month logic conversion
-    let singleMonth = startDate === this.endDate ? startDate : null;
-    if (singleMonth) startDate = subtract(startDate, 1, 'month', 'YYYY-MM-DD');
-
     // calculateNonbillable if you want all non-billable timecodes, but Dave has requested
     // to only include PTO as non-billable (yes, that means Holiday is considered billable for this)
-    let timesheetData = getTimesheets(employees, startDate, endDate, { calculateNonbillable: false });
+    let timesheetData = await getTimesheets(this.employees, this.startDate, this.endDate, {
+      calculateNonbillable: false
+    });
     for (let i in this.employees) {
-      let empNum = employees[i].employeeNumber;
-      // get rid of month we don't actually care about
-      if (singleMonth) timesheetData = { [singleMonth]: timesheetData[singleMonth] };
+      let empNum = this.employees[i].employeeNumber;
       if (timesheetData[empNum]) {
         if (!index[empNum]) index[empNum] = {};
         index[empNum] = {
@@ -142,7 +137,7 @@ class QuickBooksCsv extends EmployeeCsvUtil {
     let result = totalWorkDays * proRatedHours;
     result = result.toFixed(2).replace(/[.,]00$/, '') || null;
 
-    return result;
+    return parseFloat(result);
   }
 
   /**
@@ -157,9 +152,9 @@ class QuickBooksCsv extends EmployeeCsvUtil {
 
     let hours = index[n].billableTimesheet;
     // format
-    hours = hours.toFixed(2).replace(/[.,]00$/, '') || null;
+    hours = hours?.toFixed(2)?.replace(/[.,]00$/, '');
 
-    return hours;
+    return parseFloat(hours);
   }
 
   /**
@@ -174,14 +169,14 @@ class QuickBooksCsv extends EmployeeCsvUtil {
     if (!index[n]) return '---';
 
     let hoursOver =
-      this.getEmployeeWorkedHours(employee, index, this.startDate, this.endDate) -
+      parseInt(this.getEmployeeWorkedHours(employee, index, this.startDate, this.endDate)) -
       this.getEmployeePotentialHours(employee, index, this.startDate, this.endDate);
 
     // set min to 0 and format
     hoursOver = Math.max(0, hoursOver);
-    hoursOver = hoursOver.toFixed(2).replace(/[.,]00$/, '') || null;
+    hoursOver = hoursOver.toFixed(2).replace(/[.,]00$/, '');
 
-    return hoursOver;
+    return parseFloat(hoursOver);
   }
 
   async createIndex(index) {
