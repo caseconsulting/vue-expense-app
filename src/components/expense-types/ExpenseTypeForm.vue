@@ -27,8 +27,6 @@
               <v-col class="pb-0">
                 <v-switch
                   v-model="editedExpenseType.isInactive"
-                  true-value="false"
-                  false-value="true"
                   :base-color="caseRed"
                   hide-details
                   style="transform: rotateY(3.142rad)"
