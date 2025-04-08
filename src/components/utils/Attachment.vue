@@ -1,59 +1,29 @@
 <template>
   <div>
-    <!-- Reimbursements -->
-    <span v-if="mode === 'adminExpenseInfo'">
-      <!-- admin dashboard has attachment -->
-      <v-btn
-        v-if="!isEmpty(expense.receipt)"
-        :disabled="midAction"
-        icon
-        :color="caseGray"
-        @click="openDownloadTab"
-        size="small"
-      >
-        <v-tooltip activator="parent" location="top">Download Attachment</v-tooltip>
-        <v-icon size="x-large" class="white-text" icon="mdi-cloud-download" />
-      </v-btn>
-    </span>
-    <!-- End Reimbursements -->
-
-    <!-- Expenses -->
-    <span v-else>
-      <v-btn
-        size="small"
-        :disabled="isEmpty(expense.receipt) || midAction"
-        variant="text"
-        icon
-        @click="openDownloadTab()"
-      >
-        <v-tooltip activator="parent" location="top">Download Attachment</v-tooltip>
-        <v-icon size="x-large" class="case-gray" icon="mdi-cloud-download" />
-      </v-btn>
-    </span>
+    <v-btn
+      size="small"
+      :disabled="isEmpty(expense.receipt) || midAction"
+      variant="text"
+      icon
+      @click="openAttachmentViewer()"
+    >
+      <v-tooltip activator="parent" location="top">
+        View/Download {{ expense.receipt?.length > 1 ? 'Receipts' : 'Receipt' }}
+      </v-tooltip>
+      <v-icon size="x-large" class="case-gray" :icon="getIcon" />
+    </v-btn>
     <!-- End Expenses -->
 
-    <!-- Popup if user blocks multi-receipt download -->
-    <v-dialog v-model="popupBlocked" persistent max-width="350">
-      <v-card>
-        <v-card-text class="pb-0">
-          <h5 class="text-h5">Download failed.</h5>
-          <p class="text-body-1 pt-1">
-            Only 1 out of {{ expense.receipt.length }} receipts could be downloaded. Please enable popups in your
-            browser to download all receipts.
-          </p>
-        </v-card-text>
-        <v-card-actions>
-          <v-btn color="green-darken-1" variant="text" @click="popupBlocked = false"> OK </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <!-- Modal to view images -->
+    <attachment-viewer v-model="showViewerModal" :expense="expense" />
   </div>
 </template>
 
 <script setup>
 import api from '@/shared/api';
 import { isEmpty } from '@/utils/utils';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import AttachmentViewer from './AttachmentViewer.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -63,16 +33,30 @@ import { ref } from 'vue';
 
 const props = defineProps([
   'expense', // attachment expense
-  'mode', // attachment use
+  'icon', // user-defined icon
+  'iconMulti', // user-defined icon when multiple downloads available
   'midAction' //whether or not to disable button
 ]);
 const popupBlocked = ref(false);
+const showViewerModal = ref(false);
+
+const getIcon = computed(() => {
+  if (props.expense.receipt?.length > 1) return props.iconMulti ?? 'mdi-image-multiple';
+  else return props.icon ?? 'mdi-image';
+});
 
 // |--------------------------------------------------|
 // |                                                  |
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Opens the attachment viewer with the current information
+ */
+function openAttachmentViewer() {
+  showViewerModal.value = true;
+}
 
 /**
  * Opens a new windows tab displaying the signed url of the expense selected.
