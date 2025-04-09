@@ -8,17 +8,32 @@
 
         <!-- Modal Content -->
         <v-card-text>
-          <!-- TODO: Currently viewing image -->
-          <div>
-            <!-- TODO: Download button -->
-          </div>
+          <v-col>
+            <!-- Currently viewing image -->
+            <v-row>
+              <img :src="files?.[selectedFile]?.image" class="image-main" />
+            </v-row>
 
-          <!-- TODO: Other images -->
-          <div></div>
+            <!-- TODO: Other images thumbnail -->
+            <v-row class="mt-6">
+              <div v-for="i in files.length" :key="i" :class="'d-inline-block image-parent ' + selectedParent(i - 1)">
+                <img
+                  :src="files[i - 1].image"
+                  :class="'image-thumbnail' + selectedClass(i - 1)"
+                  @click="selectFile(i - 1)"
+                />
+              </div>
+            </v-row>
+          </v-col>
         </v-card-text>
 
         <!-- buttons -->
         <v-card-actions>
+          <!-- Download current button -->
+          <v-btn color="primary" variant="outlined" prepend-icon="mdi-download" @click="download()">
+            Download Current
+          </v-btn>
+
           <!-- Download all button -->
           <v-btn color="primary" variant="outlined" prepend-icon="mdi-download" @click="download()">Download All</v-btn>
 
@@ -47,7 +62,7 @@
 </template>
 
 <script setup>
-import { defineModel, onMounted, ref } from 'vue';
+import { watch, ref } from 'vue';
 import api from '@/shared/api';
 import axios from 'axios';
 
@@ -55,32 +70,77 @@ const props = defineProps(['expense']);
 const model = defineModel();
 
 const files = ref([]);
-const popupBlocked = ref(true);
+const selectedFile = ref(0);
+// const popupBlocked = ref(true);
 
-onMounted(() => {
-  getAllFiles();
-});
+/**
+ * Basically onMounted for dialogs
+ */
+watch(
+  () => model.value,
+  async () => {
+    if (!model.value) return;
+    await getAllFiles();
+  }
+);
 
 /**
  * Gets all the files for viewing/downloading. This could be updated to support more types of downloads,
  * if this is used somewhere other than seeing expense receipts.
  */
 async function getAllFiles() {
-  let signedURLs = await api.getAttachment(props.expense.employeeId, props.expense.id);
+  // let signedURLs;
+  // console.log(props.expense.employeeId, props.expense.id);
+  // signedURLs = await api.getAttachment(props.expense.employeeId, props.expense.id);
+  // window.open(signedURLs[0], '_blank');
 
-  let options;
-  for (let url of signedURLs) {
-    options = {
-      method: 'GET',
-      url,
-      headers: { 'Access-Control-Allow-Origin': '*' }
-    };
+  let signedURLs;
+  signedURLs = await api.getAttachment(props.expense.employeeId, props.expense.id);
+  for (let i = 0; i < signedURLs.length; i++) {
+    let resp = await axios.get(signedURLs[i], { responseType: 'blob' });
     files.value.push({
-      blob: await axios(options)
+      image: URL.createObjectURL(resp.data)
     });
   }
-
   console.log(files.value);
+
+  // let options;
+  // for (let url of signedURLs) {
+
+  // }
+
+  // console.log(files.value);
+}
+
+/**
+ * Selects a file to display
+ *
+ * @param index index in files var
+ */
+function selectFile(index) {
+  selectedFile.value = index;
+}
+
+/**
+ * Returns a special class if the given index is the same as file being viewed
+ *
+ * @param index index to check
+ */
+function selectedClass(index) {
+  return selectedFile.value === index ? ' image-selected' : '';
+}
+/**
+ * Returns a special class if the given index is the same as file being viewed
+ *
+ * @param index index to check
+ */
+function selectedParent(index) {
+  let classes = [];
+  if (selectedFile.value === index) classes.push('image-parent-selected'); // selected box
+  if (files.value.length !== index - 1) classes.push('mr-4'); // margin on middle images
+  if (index === 0) classes.push('ml-auto'); // left side centering
+  if (index === files.value.length - 1) classes.push('mr-auto'); // right side centering
+  return classes.join(' ');
 }
 
 /**
@@ -112,8 +172,35 @@ function close() {
 
 <style scoped>
 .viewer-card {
-  width: 75%;
+  width: 75vw;
   height: 80vh;
   margin: 0 auto;
+}
+
+.image-main {
+  width: 100%;
+  height: 50vh;
+  object-fit: contain;
+}
+
+.image-thumbnail {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border: 2px solid transparent;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.image-selected {
+  border-color: white;
+}
+.image-parent {
+  width: 104px;
+  height: 104px;
+  border: 2px solid transparent;
+  border-radius: 5px;
+}
+.image-parent-selected {
+  border-color: rgb(25 103 192);
 }
 </style>
