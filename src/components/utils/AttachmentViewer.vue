@@ -10,8 +10,9 @@
         <v-card-text>
           <v-col>
             <!-- Currently viewing image -->
-            <v-row>
-              <img :src="files?.[selectedFile]?.image" class="image-main" />
+            <v-row class="position-relative">
+              <img :src="files?.[selectedFile]?.image" class="image-main" ref="mainImage" />
+              <!-- <v-icon icon="mdi-download" class="downloader-single" ref="downloadOverlay" /> -->
             </v-row>
 
             <!-- TODO: Other images thumbnail -->
@@ -29,11 +30,6 @@
 
         <!-- buttons -->
         <v-card-actions>
-          <!-- Download current button -->
-          <v-btn color="primary" variant="outlined" prepend-icon="mdi-download" @click="download()">
-            Download Current
-          </v-btn>
-
           <!-- Download all button -->
           <v-btn color="primary" variant="outlined" prepend-icon="mdi-download" @click="download()">Download All</v-btn>
 
@@ -44,20 +40,17 @@
     </v-dialog>
 
     <!-- Popup if user blocks multi-receipt download -->
-    <!-- <v-dialog v-model="popupBlocked" persistent max-width="350">
+    <v-dialog v-model="popupBlocked" persistent max-width="350">
       <v-card>
         <v-card-text class="pb-0">
-          <h5 class="text-h5">Download failed.</h5>
-          <p class="text-body-1 pt-1">
-            Only 1 out of {{ files.length }} attachments could be downloaded. Please enable popups in your browser to
-            download all attachments.
-          </p>
+          <h5 class="text-h5">Download not working?</h5>
+          <p class="text-body-1 pt-1">Please ensure that popups are allowed in your browser, then try again.</p>
         </v-card-text>
         <v-card-actions>
           <v-btn color="green-darken-1" variant="text" @click="popupBlocked = false"> OK </v-btn>
         </v-card-actions>
       </v-card>
-    </v-dialog> -->
+    </v-dialog>
   </div>
 </template>
 
@@ -71,7 +64,12 @@ const model = defineModel();
 
 const files = ref([]);
 const selectedFile = ref(0);
-// const popupBlocked = ref(true);
+const popupBlocked = ref(false);
+let downloadAllCounter = { all: 0 }; // check if the user is spamming a download button, indicating that it isn't working
+
+// refs to HTML elements the template
+const mainImage = ref(null);
+const downloadOverlay = ref(null);
 
 /**
  * Basically onMounted for dialogs
@@ -80,7 +78,8 @@ watch(
   () => model.value,
   async () => {
     if (!model.value) return;
-    await getAllFiles();
+    if (files.value.length === 0) await getAllFiles();
+    for (let i in files.value) downloadAllCounter[i] = 0;
   }
 );
 
@@ -144,19 +143,22 @@ function selectedParent(index) {
 }
 
 /**
- * TODO: download the given file, or all files if no file is provided
+ * Downloads the given file, or all files if no file is provided
+ *
+ * @param index index of file in files array to download. if undefined, all will be downloaded
  */
-function download(filenames) {
+function download(index) {
+  downloadAllCounter[index ?? 'all']++;
+  if (downloadAllCounter[index ?? 'all'] % 3 === 0) popupBlocked.value = true;
+
   // build and auto-click link to download file
-  let blob, url, link;
-  for (let file of filenames) {
-    // create blob of data to download
-    blob = new Blob([file], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    url = URL.createObjectURL(blob);
+  let list = index ? files.value[index] : files.value;
+  let link;
+  for (let file of list) {
     // create link
     link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', filename);
+    link.setAttribute('href', file.image);
+    link.setAttribute('download', `Receipt Download - ${props.expense.employeeName}`);
     link.style.visibility = 'hidden';
     // put link in document, click it, and remove it
     document.body.appendChild(link);
@@ -168,6 +170,45 @@ function download(filenames) {
 function close() {
   model.value = false;
 }
+
+/**
+ * Watches the image to move the download icon
+ *
+watch(
+  () => loadingKey,
+  () => {
+    console.log('Calculating...');
+    if (!selectedFile.value || !model.value) return;
+
+    const wrapper = mainImage.value.parentElement;
+
+    const wrapperRect = wrapper.getBoundingClientRect();
+    const imgRatio = mainImage.value.naturalWidth / mainImage.value.naturalHeight;
+    const wrapperRatio = wrapperRect.width / wrapperRect.height;
+
+    let renderedWidth, renderedHeight;
+
+    if (imgRatio > wrapperRatio) {
+      // image is wider than the wrapper
+      renderedWidth = wrapperRect.width;
+      renderedHeight = wrapperRect.width / imgRatio;
+    } else {
+      // image is taller (or equal) than the wrapper
+      renderedHeight = wrapperRect.height;
+      renderedWidth = wrapperRect.height * imgRatio;
+    }
+
+    const offsetX = (wrapperRect.width - renderedWidth) / 2;
+    const offsetY = (wrapperRect.height - renderedHeight) / 2;
+
+    // Now position overlay at the actual top-right of the image pixels
+    downloadOverlay.value.style.top = `${offsetY}px`;
+    downloadOverlay.value.style.left = `${offsetX + renderedWidth - downloadOverlay.value.offsetWidth}px`;
+
+    console.log(`${offsetX + renderedWidth - downloadOverlay.value.offsetWidth}px`, `${offsetY}px`);
+  }
+);
+**/
 </script>
 
 <style scoped>
@@ -202,5 +243,10 @@ function close() {
 }
 .image-parent-selected {
   border-color: rgb(25 103 192);
+}
+
+.downloader-single {
+  position: absolute;
+  /* position set in JS */
 }
 </style>
