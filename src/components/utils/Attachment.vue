@@ -12,7 +12,6 @@
       </v-tooltip>
       <v-icon size="x-large" class="case-gray" :icon="getIcon" />
     </v-btn>
-    <!-- End Expenses -->
 
     <!-- Modal to view images -->
     <attachment-viewer v-model="showViewerModal" :expense="expense" />
@@ -20,7 +19,6 @@
 </template>
 
 <script setup>
-import api from '@/shared/api';
 import { isEmpty } from '@/utils/utils';
 import { ref, computed } from 'vue';
 import AttachmentViewer from './AttachmentViewer.vue';
@@ -37,7 +35,6 @@ const props = defineProps([
   'iconMulti', // user-defined icon when multiple downloads available
   'midAction' //whether or not to disable button
 ]);
-const popupBlocked = ref(false);
 const showViewerModal = ref(false);
 
 const getIcon = computed(() => {
@@ -57,17 +54,4 @@ const getIcon = computed(() => {
 function openAttachmentViewer() {
   showViewerModal.value = true;
 }
-
-/**
- * Opens a new windows tab displaying the signed url of the expense selected.
- */
-async function openDownloadTab() {
-  let signedURLs;
-  signedURLs = await api.getAttachment(props.expense.employeeId, props.expense.id);
-  let newWindow;
-  for (let i = 0; i < signedURLs.length; i++) {
-    newWindow = window.open(signedURLs[i], '_blank');
-    if (!newWindow) popupBlocked.value = true;
-  }
-} // openDownloadTab
 </script>

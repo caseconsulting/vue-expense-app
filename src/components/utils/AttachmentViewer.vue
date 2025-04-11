@@ -12,10 +12,9 @@
             <!-- Currently viewing image -->
             <v-row class="position-relative">
               <img :src="files?.[selectedFile]?.image" class="image-main" ref="mainImage" />
-              <!-- <v-icon icon="mdi-download" class="downloader-single" ref="downloadOverlay" /> -->
             </v-row>
 
-            <!-- TODO: Other images thumbnail -->
+            <!-- Other images thumbnail -->
             <v-row class="mt-6">
               <div v-for="i in files.length" :key="i" :class="'d-inline-block image-parent ' + selectedParent(i - 1)">
                 <img
@@ -69,7 +68,6 @@ let downloadAllCounter = { all: 0 }; // check if the user is spamming a download
 
 // refs to HTML elements the template
 const mainImage = ref(null);
-const downloadOverlay = ref(null);
 
 /**
  * Basically onMounted for dialogs
@@ -88,11 +86,6 @@ watch(
  * if this is used somewhere other than seeing expense receipts.
  */
 async function getAllFiles() {
-  // let signedURLs;
-  // console.log(props.expense.employeeId, props.expense.id);
-  // signedURLs = await api.getAttachment(props.expense.employeeId, props.expense.id);
-  // window.open(signedURLs[0], '_blank');
-
   let signedURLs;
   signedURLs = await api.getAttachment(props.expense.employeeId, props.expense.id);
   for (let i = 0; i < signedURLs.length; i++) {
@@ -101,14 +94,6 @@ async function getAllFiles() {
       image: URL.createObjectURL(resp.data)
     });
   }
-  console.log(files.value);
-
-  // let options;
-  // for (let url of signedURLs) {
-
-  // }
-
-  // console.log(files.value);
 }
 
 /**
@@ -128,6 +113,7 @@ function selectFile(index) {
 function selectedClass(index) {
   return selectedFile.value === index ? ' image-selected' : '';
 }
+
 /**
  * Returns a special class if the given index is the same as file being viewed
  *
@@ -170,45 +156,6 @@ function download(index) {
 function close() {
   model.value = false;
 }
-
-/**
- * Watches the image to move the download icon
- *
-watch(
-  () => loadingKey,
-  () => {
-    console.log('Calculating...');
-    if (!selectedFile.value || !model.value) return;
-
-    const wrapper = mainImage.value.parentElement;
-
-    const wrapperRect = wrapper.getBoundingClientRect();
-    const imgRatio = mainImage.value.naturalWidth / mainImage.value.naturalHeight;
-    const wrapperRatio = wrapperRect.width / wrapperRect.height;
-
-    let renderedWidth, renderedHeight;
-
-    if (imgRatio > wrapperRatio) {
-      // image is wider than the wrapper
-      renderedWidth = wrapperRect.width;
-      renderedHeight = wrapperRect.width / imgRatio;
-    } else {
-      // image is taller (or equal) than the wrapper
-      renderedHeight = wrapperRect.height;
-      renderedWidth = wrapperRect.height * imgRatio;
-    }
-
-    const offsetX = (wrapperRect.width - renderedWidth) / 2;
-    const offsetY = (wrapperRect.height - renderedHeight) / 2;
-
-    // Now position overlay at the actual top-right of the image pixels
-    downloadOverlay.value.style.top = `${offsetY}px`;
-    downloadOverlay.value.style.left = `${offsetX + renderedWidth - downloadOverlay.value.offsetWidth}px`;
-
-    console.log(`${offsetX + renderedWidth - downloadOverlay.value.offsetWidth}px`, `${offsetY}px`);
-  }
-);
-**/
 </script>
 
 <style scoped>
@@ -232,21 +179,19 @@ watch(
   border-radius: 3px;
   cursor: pointer;
 }
+
 .image-selected {
   border-color: white;
 }
+
 .image-parent {
   width: 104px;
   height: 104px;
   border: 2px solid transparent;
   border-radius: 5px;
 }
+
 .image-parent-selected {
   border-color: rgb(25 103 192);
-}
-
-.downloader-single {
-  position: absolute;
-  /* position set in JS */
 }
 </style>
