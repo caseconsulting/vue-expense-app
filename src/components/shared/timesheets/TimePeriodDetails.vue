@@ -88,6 +88,7 @@ import {
   startOf,
   endOf
 } from '@/shared/dateUtils';
+import { getEmployeeCurrentProjects } from '@/shared/employeeUtils';
 import { updateStoreTags } from '@/utils/storeUtils';
 import api from '@/shared/api';
 import { useStore } from 'vuex';
@@ -119,6 +120,7 @@ const customNeeded = ref(null);
 const customWorkDayInput = ref(null);
 const showCustomWorkDayInput = ref(false);
 const today = ref(format(getTodaysDate(), null, DEFAULT_ISOFORMAT));
+const contractHours = ref(undefined);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -130,6 +132,9 @@ const today = ref(format(getTodaysDate(), null, DEFAULT_ISOFORMAT));
  * The Mounted lifecycle hook
  */
 onMounted(() => {
+  // get custom contract hours if it exists
+  contractHours.value = Number(getEmployeeCurrentProjects(props.employee)?.[0]?.contractHours);
+
   emitter.emit('timesheets-chart-data', {
     completed: formatNumber(periodHoursCompleted.value),
     needed: formatNumber(totalPeriodHours.value),
@@ -310,9 +315,10 @@ const remainingAverageHoursPerDay = computed(() => {
  * @returns Number - The total number of hours needed
  */
 const totalPeriodHours = computed(() => {
+  let contractHoursFiltered = props.isYearly && !props.isCalendarYear ? contractHours.value : undefined;
   let total = totalWorkDays.value * proRatedHours.value;
   total = props.isYearly ? Math.round(total) : total;
-  return customNeeded.value ?? total;
+  return customNeeded.value ?? contractHoursFiltered ?? total;
 }); // totalPeriodHours
 
 /**

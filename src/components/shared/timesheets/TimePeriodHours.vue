@@ -112,7 +112,7 @@
       </v-col>
       <!-- Time Period Details -->
       <v-col :order="$vuetify.display.mdAndUp ? 2 : 3" cols="12" md="6" lg="6" xl="6" xxl="6" class="pa-1">
-        <v-skeleton-loader v-if="timePeriodLoading" type="list-item@4"></v-skeleton-loader>
+        <v-skeleton-loader v-if="timePeriodLoading" type="list-item@4" />
         <time-period-details
           v-else
           :key="timeData"
@@ -123,7 +123,7 @@
           :period="timesheets[periodIndex]"
           :supplementalData="supplementalDataWithPlan"
           :timeData="timeData"
-        ></time-period-details>
+        />
       </v-col>
       <!-- End Time Period Details -->
       <!-- Time Period Job Codes -->
@@ -132,7 +132,7 @@
         cols="12"
         :class="$vuetify.display.mdAndUp ? 'pa-0 mt-4' : 'pa-0 mt-8 mb-2'"
       >
-        <v-skeleton-loader v-if="timePeriodLoading" type="list-item@4"></v-skeleton-loader>
+        <v-skeleton-loader v-if="timePeriodLoading" type="list-item@4" />
         <time-period-job-codes
           v-else
           :employee="employee"
@@ -141,7 +141,7 @@
           :supplementalData="supplementalDataWithPlan"
           :timeData="timeData"
           :periodType="periodType"
-        ></time-period-job-codes>
+        />
       </v-col>
       <!-- End Time Period Job Codes -->
     </v-row>

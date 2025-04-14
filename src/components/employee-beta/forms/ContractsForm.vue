@@ -174,7 +174,7 @@
                 </v-text-field>
               </v-col>
 
-              <v-col v-if="userIsAdminOrManager" :cols="isMobile() ? '12' : '5'">
+              <v-col v-if="userIsAdminOrManager" :cols="isMobile() ? '12' : '4'">
                 <v-combobox v-model="project.location" :items="getProjectLocations()" label="Location" clearable>
                   <template #append-inner>
                     <div>
@@ -185,7 +185,7 @@
                 </v-combobox>
               </v-col>
 
-              <v-col v-if="userIsAdminOrManager" :cols="isMobile() ? '12' : '5'">
+              <v-col v-if="userIsAdminOrManager" :cols="isMobile() ? '12' : '4'">
                 <v-select
                   v-model="project.workType"
                   :items="['On-site', 'Hybrid', 'Remote']"
@@ -199,6 +199,17 @@
                     </div>
                   </template>
                 </v-select>
+              </v-col>
+
+              <v-col v-if="userIsAdminOrManager" :cols="isMobile() ? '12' : '4'">
+                <v-text-field v-model="project.contractHours" label="Contract Hours" clearable>
+                  <template #append-inner>
+                    <div>
+                      <v-icon class="ml-1" color="grey-darken-1"> mdi-information </v-icon>
+                      <v-tooltip activator="parent">Overrides contract year hours in timesheets widget</v-tooltip>
+                    </div>
+                  </template>
+                </v-text-field>
               </v-col>
 
               <!-- DELETE PROJECTS normal -->
