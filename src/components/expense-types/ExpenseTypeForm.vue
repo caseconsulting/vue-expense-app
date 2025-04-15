@@ -887,7 +887,7 @@ async function submit() {
     editedExpenseType.value.endDate = format(editedExpenseType.value.endDate, null, 'YYYY-MM-DD');
   }
 
-  if (expenseTypeForm.value && expenseTypeForm.value.validate()) {
+  if (expenseTypeForm.value && (await expenseTypeForm.value.validate()).valid) {
     for (var i = 0; i < editedExpenseType.value.categories.length; i++) {
       editedExpenseType.value.categories[i] = JSON.stringify(editedExpenseType.value.categories[i]);
     }

@@ -8,7 +8,7 @@
 import BarChart from '../base-charts/BarChart.vue';
 import { difference, getTodaysDate } from '@/shared/dateUtils';
 import _first from 'lodash/first';
-import { onMounted, ref, watch, defineProps } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 

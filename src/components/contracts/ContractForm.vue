@@ -218,7 +218,8 @@ async function createContract() {
  * Creates a validated contract.
  */
 async function submit() {
-  valid.value = form.value.validate();
+  valid.value = await form.value.validate();
+  valid.value = valid.value.valid;
   if (valid.value) {
     loading.value = true;
     let contract = await createContract();

@@ -359,7 +359,7 @@ function handleLogout() {
  */
 function handleProfile() {
   // We don't use userId.value becuase it may be null by the time we click the button
-  router.push({ name: 'employee', params: { id: `${userId.value}`, replace: true } });
+  router.push({ name: 'employee', replace: true, params: { id: `${userId.value}` } });
   emitter.emit('profile-clicked');
 } // handleProfile
 

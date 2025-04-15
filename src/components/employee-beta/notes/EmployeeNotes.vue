@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="toggleModal" max-width="1000">
+  <v-dialog max-width="1000">
     <v-card class="w-100" min-height="600">
       <!-- header -->
       <v-card-title class="header_style d-flex align-center justify-space-between py-2 pt-2">
@@ -136,7 +136,7 @@
  */
 
 // general imports
-import { ref, computed, inject, onMounted, watch } from 'vue';
+import { ref, computed, inject, onMounted, watch, shallowRef } from 'vue';
 import { format, getTodaysDate } from '@/shared/dateUtils';
 import { useStore } from 'vuex';
 import api from '@/shared/api';
@@ -195,22 +195,22 @@ const menuItems = ref([
   {
     name: 'General',
     key: 'general',
-    component: GeneralNotes
+    component: shallowRef(GeneralNotes)
   },
   {
     name: 'Career',
     key: 'career',
-    component: CareerNotes
+    component: shallowRef(CareerNotes)
   },
   {
     name: 'Personal',
     key: 'personal',
-    component: PersonalNotes
+    component: shallowRef(PersonalNotes)
   },
   {
     name: 'Kudos',
     key: 'kudos',
-    component: KudoNotes
+    component: shallowRef(KudoNotes)
   }
 ]);
 

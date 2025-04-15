@@ -170,7 +170,8 @@ function cancel() {
  * Creates a validated project.
  */
 async function submit() {
-  valid.value = form.value.validate();
+  valid.value = await form.value.validate();
+  valid.value = valid.value.valid;
   if (valid.value) {
     loading.value = true;
     await createProject();
