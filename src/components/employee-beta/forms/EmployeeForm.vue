@@ -740,7 +740,6 @@ watch(validTabs, () => {
 
 watch(cardName, () => {
   selectTab();
-  console.log(cardName.value);
 });
 </script>
 

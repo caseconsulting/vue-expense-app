@@ -133,7 +133,8 @@ const contractHours = ref(undefined);
  */
 onMounted(() => {
   // get custom contract hours if it exists
-  contractHours.value = Number(getEmployeeCurrentProjects(props.employee)?.[0]?.contractHours);
+  contractHours.value = getEmployeeCurrentProjects(props.employee)?.[0]?.contractHours;
+  if (contractHours.value) contractHours.value = Number(contractHours.value);
 
   emitter.emit('timesheets-chart-data', {
     completed: formatNumber(periodHoursCompleted.value),
