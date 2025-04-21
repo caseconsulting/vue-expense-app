@@ -189,8 +189,8 @@ async function submit() {
 /**
  * watcher for file
  */
-watch(file, () => {
-  validFile.value = submitForm.value.validate();
+watch(file, async () => {
+  validFile.value = (await submitForm.value.validate()).valid;
 }); // watchFile
 </script>
 

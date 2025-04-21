@@ -77,7 +77,7 @@
 </template>
 
 <script setup>
-import { ref, defineProps, onMounted, inject } from 'vue';
+import { ref, onMounted, inject } from 'vue';
 import _isEmpty from 'lodash/isEmpty';
 
 const isAdmin = inject('isAdmin');
