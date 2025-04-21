@@ -218,7 +218,7 @@ const timeData = computed(() => {
   let timesheets = { ...props.timesheets[periodIndex.value].timesheets };
   // searching store employees fixes bug where switching user profiles erases legacy job codes
   let legacyCodes = props.employee.legacyJobCodes;
-  legacyCodes = legacyCodes || store.getters.employees.find((e) => e.id === props.employee.id)?.legacyJobCodes;
+  legacyCodes = legacyCodes || store.getters.employees?.find((e) => e.id === props.employee.id)?.legacyJobCodes;
   if (isYearly.value && legacyCodes) {
     let val;
     for (let key of Object.keys(legacyCodes || {})) {

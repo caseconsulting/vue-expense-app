@@ -389,7 +389,7 @@ function searchAwards() {
  * @param event the event data containing the table information
  */
 function updateTableInfo(event) {
-  emitter.emit('reports-table-update', { tab: 'awards', table: event, headers: headers });
+  emitter.emit('reports-table-update', { tab: 'employeeNotes', table: event, headers: headers });
 }
 
 // |--------------------------------------------------|

@@ -114,6 +114,7 @@ function _getYearPeriod(sDate, eDate) {
 
   // format start date
   let startDate = format(sDate, null, DEFAULT_ISOFORMAT);
+  if (!startDate) startDate = startOf(today, 'year');
   if (!eDate) {
     // if there is both a start and end date provided, use them verbatim
     startDate = setYear(startDate, currentYear);

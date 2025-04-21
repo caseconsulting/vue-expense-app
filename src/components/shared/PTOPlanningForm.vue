@@ -121,7 +121,7 @@
 // |                                                  |
 // |--------------------------------------------------|
 
-import { onMounted, ref, watch, inject, onBeforeMount, defineExpose } from 'vue';
+import { onMounted, ref, watch, inject, onBeforeMount } from 'vue';
 import { useStore } from 'vuex';
 import { updateStoreUser, updateStorePtoCashOuts, updateStoreTags } from '../../utils/storeUtils';
 import {

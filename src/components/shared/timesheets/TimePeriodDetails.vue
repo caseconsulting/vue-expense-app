@@ -407,6 +407,7 @@ async function check1860OnTrack() {
   if (!store.getters.tags) await updateStoreTags();
   let tags = store.getters.tags;
   let nonBillableTag = _find(tags, (t) => t.tagName === 'Non Billable');
+  if (!nonBillableTag) return;
   if (nonBillableTag.employees.includes(props.employee.id)) return;
 
   // calc minimum hours that are needed per month for this employee

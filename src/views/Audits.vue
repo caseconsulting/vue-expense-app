@@ -21,14 +21,17 @@
               <v-list-item v-if="selectedDropdown !== 'User Logins'" @click="selectDropDown('User Logins')">
                 User Logins
               </v-list-item>
-              <v-list-item v-if="selectedDropdown !== 'Resume Parser'" @click="selectDropDown('Resume Parser')">
-                Resume Parser
+              <v-list-item
+                v-if="selectedDropdown !== 'Timesheet Reminders'"
+                @click="selectDropDown('Timesheet Reminders')"
+              >
+                Timesheet Reminders
               </v-list-item>
             </v-list>
           </v-menu>
         </v-col>
       </v-row>
-      <v-row>
+      <v-row v-if="selectedDropdown === 'User Logins'">
         <!-- Data Picker for Query -->
         <v-col cols="8" xl="2" lg="2">
           <v-form ref="dateRange">
@@ -77,19 +80,13 @@
         :query-end-date="queryB"
         :show24-hour-title="firstLoad"
       />
-      <resume-parser-audits
-        v-if="selectedDropdown === 'Resume Parser'"
-        :key="reloader"
-        :query-start-date="queryA"
-        :query-end-date="queryB"
-        :show24-hour-title="firstLoad"
-      />
+      <timesheet-reminder-audits v-if="selectedDropdown === 'Timesheet Reminders'" :key="reloader" />
     </v-container>
   </v-card>
 </template>
 
 <script setup>
-import ResumeParserAudits from '@/components/audits/ResumeParserAudits.vue';
+import TimesheetReminderAudits from '@/components/audits/TimesheetReminderAudits.vue';
 import LoginAudits from '@/components/audits/LoginAudits.vue';
 import _isEmpty from 'lodash/isEmpty';
 import { storeIsPopulated } from '@/utils/utils';
@@ -144,8 +141,8 @@ onBeforeMount(async () => {
 /**
  * sets the dateRange of the audits to get
  */
-function setDateRange() {
-  if (dateRange.value.validate()) {
+async function setDateRange() {
+  if ((await dateRange.value.validate()).valid) {
     // Hide the calendar popup
     auditsQuery.value.showRangeMenu = false;
 
@@ -197,7 +194,7 @@ function formatRange(range) {
  */
 function selectDropDown(tab) {
   // Clear date query field
-  dateRange.value.reset();
+  dateRange.value?.reset();
   // Set query to last 24 hours
   this.auditsQueryFormatted = {
     range: [
