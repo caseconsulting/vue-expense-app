@@ -135,8 +135,14 @@ function getPlaceOfBirth() {
     placeOfBirth += `${props.model.city}, `;
   }
 
+  if (!isEmpty(props.model.st)) {
+    placeOfBirth += `${props.model.st}, `;
+  }
+
   if (!isEmpty(props.model.country)) {
-    placeOfBirth += `${props.model.country}, `;
+    if (props.model.country != 'United States') {
+      placeOfBirth += `${props.model.country}, `;
+    }
   }
 
   placeOfBirth = placeOfBirth.slice(0, -2);

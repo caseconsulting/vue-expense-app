@@ -8,17 +8,37 @@
 
     <v-container fluid>
       <v-form ref="expenseTypeForm" v-model="valid" @submit.prevent="valid ? (submitForm = true) : _" lazy-validation>
-        <!-- Budget Name -->
-        <v-text-field
-          variant="underlined"
-          v-model="editedExpenseType.budgetName"
-          id="budgetName"
-          :rules="getRequiredRules()"
-          label="Budget Name"
-          data-vv-name="Budget Name"
-          class="type_form_padding"
-        ></v-text-field>
-
+        <v-row>
+          <v-col>
+            <!-- Budget Name -->
+            <v-text-field
+              variant="underlined"
+              v-model="editedExpenseType.budgetName"
+              id="budgetName"
+              :rules="getRequiredRules()"
+              label="Budget Name"
+              data-vv-name="Budget Name"
+              class="type_form_padding"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="auto">
+            <!-- Inactive Flag -->
+            <v-row>
+              <v-col class="pb-0">
+                <v-switch
+                  v-model="editedExpenseType.isInactive"
+                  :base-color="caseRed"
+                  hide-details
+                  style="transform: rotateY(3.142rad)"
+                  class="d-inline-block"
+                ></v-switch>
+              </v-col>
+              <v-col class="pl-0 pb-0 d-inline-block">
+                <p class="mt-4">Active</p>
+              </v-col>
+            </v-row>
+          </v-col>
+        </v-row>
         <!-- Categories -->
         <v-combobox
           variant="underlined"
@@ -258,8 +278,6 @@
               v-model="editedExpenseType.requiredFlag"
               @update:model-value="toggleRequireReceipt()"
             ></v-checkbox>
-            <!-- Inactive Flag -->
-            <v-checkbox :color="caseRed" label="Mark as Inactive" v-model="editedExpenseType.isInactive"></v-checkbox>
           </v-col>
         </v-row>
 
@@ -887,7 +905,7 @@ async function submit() {
     editedExpenseType.value.endDate = format(editedExpenseType.value.endDate, null, 'YYYY-MM-DD');
   }
 
-  if (expenseTypeForm.value && expenseTypeForm.value.validate()) {
+  if (expenseTypeForm.value && (await expenseTypeForm.value.validate()).valid) {
     for (var i = 0; i < editedExpenseType.value.categories.length; i++) {
       editedExpenseType.value.categories[i] = JSON.stringify(editedExpenseType.value.categories[i]);
     }

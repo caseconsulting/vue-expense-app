@@ -264,7 +264,8 @@ function getTagEmployees(employees) {
  * Either creates a tag or saves an edited tag that already exists.
  */
 async function saveEditedTag() {
-  this.valid = this.$refs.form.validate();
+  this.valid = await this.$refs.form.validate();
+  this.valid = this.valid.valid;
   if (this.valid) {
     try {
       this.tagLoading = true;

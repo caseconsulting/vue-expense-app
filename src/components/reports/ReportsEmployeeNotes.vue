@@ -7,7 +7,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, shallowRef } from 'vue';
 import EmployeeNotesGraphs from '@/components/reports/employeeNotesComponents/EmployeeNotesGraphs';
 import EmployeeNotesTable from '@/components/reports/employeeNotesComponents/EmployeeNotesTable';
 
@@ -16,12 +16,12 @@ const toggleSelected = ref(1);
 const toggleOptions = ref([
   {
     value: 'graph',
-    component: EmployeeNotesGraphs,
+    component: shallowRef(EmployeeNotesGraphs),
     label: 'Graphs'
   },
   {
     value: 'table',
-    component: EmployeeNotesTable,
+    component: shallowRef(EmployeeNotesTable),
     label: 'Table'
   }
 ]);
