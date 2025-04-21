@@ -27,7 +27,7 @@
         <v-dialog v-model="showExchangeCalculator" :width="isMobile() ? '100%' : '50%'" persistent>
           <ExchangeTrainingHoursCalculatorReverse :cost="expense.cost" />
         </v-dialog>
-        <v-row dense v-if="expense.category === 'Exchange for training hours'">
+        <v-row dense v-if="isExchangeForTrainingHours">
           <v-col cols="5"><b>Hours exchange:</b></v-col>
           <v-col cols="7"
             ><a class="text-blue-darken-2 pointer" @click.stop="showExchangeCalculator = true">Calculate</a></v-col
@@ -148,6 +148,13 @@ onBeforeUnmount(() => {
 // |--------------------------------------------------|
 
 computed(isMobile);
+
+/**
+ * Returns true if the category is exchange for training hours
+ */
+const isExchangeForTrainingHours = computed(() => {
+  return expense.value?.category?.toLowerCase() === 'exchange for training hours';
+}); // isExchangeForTrainingHours
 </script>
 
 <style scoped>
