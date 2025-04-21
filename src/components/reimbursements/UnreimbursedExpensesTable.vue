@@ -96,8 +96,8 @@
           <template v-slot:[`item.budgetName`]="{ item }">
             {{ item.budgetName }}
             {{
-              item.expenses?.some((e) => e.category === 'Exchange for training hours')
-                ? '(Exchange for training hours)'
+              item.expenses?.some((e) => e.category?.toLowerCase() === 'exchange for training hours')
+                ? '(Exchange for Training Hours)'
                 : ''
             }}</template
           >
