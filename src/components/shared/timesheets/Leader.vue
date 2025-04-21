@@ -4,7 +4,7 @@
     <span class="py-1">
       <user-avatar :employee="leader" :image="leader?.avatar" :size="45" />
       <span class="ms-1">{{ leader?.nickname || leader?.firstName }}</span>
-      <span class="ms-1">({{ Math.trunc(leader?.billableTimesheet) }})</span>
+      <span class="ms-1">({{ Math.trunc(leader?.billableHours) }})</span>
     </span>
   </div>
 </template>

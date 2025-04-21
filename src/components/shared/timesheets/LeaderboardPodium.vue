@@ -34,12 +34,11 @@
 
 <script setup>
 import Leader from '@/components/shared/timesheets/Leader';
+import { getTodaysDate } from '@/shared/dateUtils';
 import { useStore } from 'vuex';
 import { onBeforeMount, ref } from 'vue';
-import { updateStoreEmployees, updateStoreTags } from '@/utils/storeUtils';
-import { nonBillableTags } from '@/utils/tags';
-import { getTimesheets } from '@/utils/timesheets';
-import { getTodaysDate, startOf } from '@/shared/dateUtils';
+import { updateStoreEmployees } from '@/utils/storeUtils';
+import api from '@/shared/api';
 import _sortBy from 'lodash/sortBy';
 import _reverse from 'lodash/reverse';
 import { loadBasecampAvatars } from '@/utils/basecamp';
@@ -66,34 +65,25 @@ onBeforeMount(async () => {
 });
 
 async function getLeaderboardData() {
-  await Promise.all([
-    store.getters.employees ? '' : updateStoreEmployees(),
-    store.getters.tags ? '' : updateStoreTags()
-  ]);
+  if (!store.getters.employees) {
+    await updateStoreEmployees();
+  }
+  let leaderboardData = await api.getLeaderboard();
 
-  let filteredTags = nonBillableTags(store.getters.tags);
-  let nonBillableEmployeeIds = filteredTags.flatMap((tag) => tag.employees);
-  let billableEmployees = store.getters.employees.filter((employee) => !nonBillableEmployeeIds.includes(employee.id));
-
-  let [start, end] = [startOf(getTodaysDate('YYYY-MM-DD'), 'year'), getTodaysDate('YYYY-MM-DD')];
-
-  let timesheets = await getTimesheets(billableEmployees, start, end);
-  let sortedTimesheets = _reverse(_sortBy(timesheets, 'billableTimesheet'));
-
-  groupLeaderboardData(sortedTimesheets, billableEmployees);
-
+  let sortedLeaderboardData = _reverse(_sortBy(leaderboardData, 'billableHours'));
+  groupLeaderboardData(sortedLeaderboardData, store.getters.employees);
   if (!store.getters.basecampAvatars) {
     await loadBasecampAvatars(store, leaderGroups.value.flat());
   }
 }
 
-function groupLeaderboardData(sortedTimesheets, employees) {
+function groupLeaderboardData(sortedLeaderboardData, employees) {
   let employee, group;
-  sortedTimesheets.slice(0, 23).forEach((timesheet, index) => {
+  sortedLeaderboardData.slice(0, 23).forEach((leader, index) => {
     group = Math.floor((index + 1) / 4);
-    employee = employees.find((e) => e.employeeNumber == timesheet.employeeNumber);
+    employee = employees.find((e) => e.employeeNumber == leader.employeeNumber);
     leaderGroups.value[group] ||= [];
-    leaderGroups.value[group].push({ ...employee, ...timesheet });
+    leaderGroups.value[group].push({ ...employee, ...leader });
   });
 }
 </script>
