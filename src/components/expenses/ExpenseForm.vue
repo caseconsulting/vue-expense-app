@@ -199,7 +199,7 @@
             <template v-slot:activator="{ props }">
               <span v-bind="props">
                 <v-btn
-                  v-if="editedExpense.category && editedExpense.category === 'Exchange for training hours'"
+                  v-if="isExchangeForTrainingHours"
                   class="ml-3"
                   :disabled="isInactive"
                   @click="showExchangeCalculator = true"
@@ -240,11 +240,11 @@
           label="Description"
           data-vv-name="Description"
           @update:focused="descRedirect()"
-          :hint="editedExpense.category === 'Exchange for training hours' ? 'Will open in a modal' : ''"
+          :hint="isExchangeForTrainingHours ? 'Will open in a modal' : ''"
           persistent-hint
           :key="editedExpense.category"
         >
-          <template v-if="editedExpense.category === 'Exchange for training hours'" v-slot:prepend>
+          <template v-if="isExchangeForTrainingHours" v-slot:prepend>
             <div @click="descRedirect()" class="pointer">
               <v-icon :color="caseGray">mdi-open-in-new</v-icon>
             </div>
@@ -383,6 +383,17 @@
           v-model="editedExpense.showOnFeed"
           label="Have expense show on company feed?"
           :color="caseRed"
+          hide-details
+        />
+
+        <!-- Expense approval by admins -->
+        <v-checkbox
+          v-if="userRoleIsAdmin() || userRoleIsManager()"
+          :disabled="isInactive"
+          v-model="approvedByBool"
+          @update:modelValue="updateApproval"
+          :label="approvedLabel"
+          :color="caseRed"
         />
 
         <!-- Form Actions -->
@@ -505,7 +516,7 @@ function descriptionRules() {
   let rules = [(v) => !this.isEmpty(v) || 'Description is a required field'];
 
   // add rules based on form condition (eg expense type)
-  if (this.editedExpense.category == 'Exchange for training hours') {
+  if (this.isExchangeForTrainingHours) {
     rules.push(
       (v) =>
         (!this.isEmpty(v) && v.replaceAll(/\s/g, '').length >= 150) || 'Description must be at least 150 characters'
@@ -514,6 +525,17 @@ function descriptionRules() {
 
   return rules;
 } // isDifferentExpenseType
+
+function approvedLabel() {
+  // basic return if unchecked
+  if (!this.editedExpense.approvedBy) return 'Sign and approve this expense?';
+
+  // return name of person who approved, only when they are loaded in
+  console.log(this.editedExpense);
+  let approver = employeeUtils.getEmployeeByID(this.editedExpense.approvedBy, this.$store.getters.employees);
+  approver = employeeUtils.nicknameAndLastName(approver);
+  return `Approved by: ${approver}`;
+} // approvedLabel
 
 /**
  * Check if expense type is changed. Returns true if the expense type is different, otherwise returns false.
@@ -526,6 +548,13 @@ function isDifferentExpenseType() {
   }
   return false;
 } // isDifferentExpenseType
+
+/**
+ * Returns true if the category is exchange for training hours
+ */
+function isExchangeForTrainingHours() {
+  return this.editedExpense?.category?.toLowerCase() === 'exchange for training hours';
+} // isExchangeForTrainingHours
 
 /**
  * Checks if the expense is reimbursed. Returns true if the expense is reimbursed, otherwise returns false.
@@ -854,6 +883,7 @@ function clearForm() {
   this.reqRecipient = false;
   this.recipientPlaceholder = null;
   this.editedExpense = _cloneDeep(this.expense);
+  this.approvedByBool = !!this.editedExpense.approvedBy;
   this.originalExpense = this.editedExpense;
   this.purchaseDateFormatted = null;
   this.files = [];
@@ -1021,7 +1051,7 @@ async function createNewEntry() {
  * Redirects description field to modal if needed (only for exchange for training hours)
  */
 function descRedirect() {
-  if (this.editedExpense.category == 'Exchange for training hours') this.showExchangeTrainingDesc = true;
+  if (this.isExchangeForTrainingHours) this.showExchangeTrainingDesc = true;
 }
 
 /**
@@ -1909,6 +1939,14 @@ Number.prototype.pad = function (size) {
   return s;
 }; // Number.prototype.pad
 
+/**
+ * Updates the approval based on new value
+ */
+function updateApproval(checked) {
+  if (checked) this.editedExpense.approvedBy = this.userInfo.id;
+  else this.editedExpense.approvedBy = undefined;
+}
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                     WATCHERS                     |
@@ -1920,6 +1958,7 @@ Number.prototype.pad = function (size) {
  */
 function watchExpenseID() {
   this.editedExpense = _cloneDeep(this.expense);
+  this.approvedByBool = !!this.editedExpense.approvedBy;
   this.originalExpense = _cloneDeep(this.editedExpense);
   //when model id is not empty then must be editing an expense
   if (!this.isEmpty(this.expense.id)) {
@@ -2028,6 +2067,7 @@ async function watchEditedExpenseExpenseTypeID() {
       }
     }
     this.editedExpense = _cloneDeep(this.editedExpense); //need to clone editedExpense in order to see label URL changes
+    this.approvedByBool = !!this.editedExpense.approvedBy;
 
     // add monthlyLimit to costRules
     if (!isEmpty(this.selectedExpenseType.monthlyLimit)) {
@@ -2098,6 +2138,7 @@ function watchEditedExpenseCategory() {
       }
     }
     this.editedExpense = _cloneDeep(this.editedExpense); //need to clone editedExpense in order to see label URL changes
+    this.approvedByBool = !!this.editedExpense.approvedBy;
   }
 } // watchEditedExpenseCategory
 
@@ -2186,8 +2227,10 @@ export default {
     ExchangeTrainingDescription
   },
   computed: {
+    approvedLabel,
     descriptionRules,
     isDifferentExpenseType,
+    isExchangeForTrainingHours,
     isReimbursed,
     isMobile,
     receiptRequired,
@@ -2198,6 +2241,7 @@ export default {
     return {
       activeEmployees: [], // active employees
       allowReceipt: false, // allow receipt to be uploaded
+      approvedByBool: false, // approved by checkbox
       asUser: true, // user view
       confirming: false, // budget overage confirmation box activator
       confirmingValid: false,
@@ -2314,7 +2358,8 @@ export default {
     updateExistingEntry,
     userRoleIsAdmin,
     userRoleIsManager,
-    updateStoreBudgets
+    updateStoreBudgets,
+    updateApproval
   },
   props: [
     'expense', // expense to be created/updated
