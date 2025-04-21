@@ -149,6 +149,12 @@
  * @typedef {EmergencyContract[]} EmergencyContacts
  */
 
+/**
+ * @typedef {Object} timesheetReminder
+ * @property {string} phoneNumber
+ * @property {string} timestamp
+ */
+
 export class Employee {
   /**
    * Creates a new employee
@@ -266,6 +272,9 @@ export class Employee {
 
     /** @type {Technology[]} */
     this.technologies = properties.technologies ?? [];
+
+    /** @type {TimesheetReminder[]} */
+    this.timesheetReminders = properties.timesheetReminders ?? [];
 
     /** @type {string} */
     this.twitter = properties.twitter ?? '';
