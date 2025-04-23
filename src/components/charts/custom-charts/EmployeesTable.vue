@@ -35,6 +35,7 @@ import { onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import { updateStoreEmployees } from '@/utils/storeUtils';
+import _ from 'lodash';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -96,6 +97,7 @@ async function fillData() {
   let billableEmployees = { employees: [], awaitingClearance: new Set() };
   let internEmployees = { employees: [], awaitingClearance: new Set() };
   let nonInternEmployees = { employees: [], awaitingClearance: new Set() };
+  let lwopEmployees = { employees: [], awaitingClearance: new Set() };
   let overheadEmployees = { employees: [], awaitingClearance: new Set() };
 
   // quick helper to add employee to above counting vars
@@ -136,6 +138,10 @@ async function fillData() {
     if (!isIntern) {
       addEmployee(nonInternEmployees, e);
     }
+    // maybe add to lwop
+    if (_.filter(store.getters.tags, (tag) => _.includes(tag.employees, e.id)) === 'LWOP') {
+      addEmployee(lwopEmployees, e);
+    }
     // maybe add to overhead
     // overhead: isn't on a contract and is not an intern. eg CFO, HR
     if (!isBillable && !isIntern) {
@@ -161,6 +167,11 @@ async function fillData() {
       title: 'Billable Employees',
       value: getEmployeeCount(billableEmployees, false),
       employeeNames: getEmployeeNames(billableEmployees)
+    },
+    {
+      title: 'LWOP Employees',
+      value: getEmployeeCount(lwopEmployees, false),
+      employeeNames: getEmployeeNames(lwopEmployees)
     },
     {
       title: 'Overhead Employees',
