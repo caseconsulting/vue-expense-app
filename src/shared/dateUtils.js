@@ -389,7 +389,7 @@ export function setYear(date, year, dateFormat = undefined) {
  * @returns String - Start of date at given unit time
  */
 export function startOf(date, granularity) {
-  return dayjs(date).startOf(granularity).format(DEFAULT_ISOFORMAT);
+  return dayjs(date).startOf(granularity).format();
 } // startOf
 
 /**
