@@ -449,15 +449,6 @@ async function getTimesheetsData(employeeNumber, params) {
 } // getTimesheetsData
 
 /**
- * gets the leaderboard data
- *
- * @return - the leaderboard data
- */
-async function getLeaderboard() {
-  return await execute('get', `/${TIMESHEETS}/leaderboard`);
-} // getTimesheetsData
-
-/**
  * get the feed events for basecamp
  *
  * @return - the feed events
@@ -532,7 +523,6 @@ export default {
   getEmployeeBudgets,
   getEmployeeExpenseTypes,
   getEmployeePtoCashOuts,
-  getLeaderboard,
   getFeedEvents,
   getFiscalDateViewBudgets,
   getItem,
