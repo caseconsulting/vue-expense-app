@@ -388,7 +388,7 @@
 
         <!-- Expense approval by admins -->
         <v-checkbox
-          v-if="userRoleIsAdmin() || userRoleIsManager()"
+          v-if="this.editedExpense.id && (userRoleIsAdmin() || userRoleIsManager())"
           :disabled="isInactive"
           v-model="approvedByBool"
           @update:modelValue="updateApproval"
