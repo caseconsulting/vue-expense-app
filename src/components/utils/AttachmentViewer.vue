@@ -161,7 +161,7 @@ function close() {
 <style scoped>
 .viewer-card {
   width: 75vw;
-  height: 80vh;
+  height: 85vh;
   margin: 0 auto;
 }
 

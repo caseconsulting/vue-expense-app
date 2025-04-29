@@ -5,7 +5,7 @@
       :disabled="isEmpty(expense.receipt) || midAction"
       variant="text"
       icon
-      @click="openAttachmentViewer()"
+      @click.stop="openAttachmentViewer()"
     >
       <v-tooltip activator="parent" location="top">
         View/Download {{ expense.receipt?.length > 1 ? 'Receipts' : 'Receipt' }}
