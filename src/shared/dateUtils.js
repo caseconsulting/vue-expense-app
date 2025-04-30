@@ -169,12 +169,8 @@ export function getIsoWeekday(date) {
  * @param {String} format - The format output (https://day.js.org/docs/en/display/format)
  * @returns String - Today's date
  */
-export function getTodaysDate(format) {
-  if (format) {
-    return dayjs.utc().tz(DEFAULT_TIME_ZONE).format(format);
-  } else {
-    return dayjs.utc().tz(DEFAULT_TIME_ZONE).format(DEFAULT_ISOFORMAT);
-  }
+export function getTodaysDate(format = DEFAULT_ISOFORMAT) {
+  return dayjs.utc().tz(DEFAULT_TIME_ZONE).format(format);
 } // getTodaysDate
 
 /**
