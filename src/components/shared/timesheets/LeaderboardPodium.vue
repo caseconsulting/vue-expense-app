@@ -74,7 +74,7 @@ function groupLeaderboardData(sortedLeaderboardData, employees) {
   let employee, group;
   sortedLeaderboardData.slice(0, 23).forEach((leader, index) => {
     group = Math.floor((index + 1) / 4);
-    employee = employees.find((e) => e.employeeNumber == leader.employeeNumber);
+    employee = employees.find((e) => e.id == leader.employeeId);
     leaderGroups.value[group] ||= [];
     leaderGroups.value[group].push({ ...employee, ...leader });
   });
