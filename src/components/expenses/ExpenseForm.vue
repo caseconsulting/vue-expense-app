@@ -458,6 +458,7 @@ import ExchangeTrainingDescription from '@/components/expenses/ExchangeTrainingD
 
 import api from '@/shared/api.js';
 import employeeUtils from '@/shared/employeeUtils';
+import { STATES } from '@/shared/expenseUtils';
 import {
   getDateRules,
   getDateOptionalRules,
@@ -1760,10 +1761,12 @@ async function submit() {
 
       if (this.editedExpense?.rejections?.softRejections) {
         this.editedExpense.rejections.softRejections.revised = true;
+        this.editedExpense.state = STATES.REVISED;
       }
 
       if (this.isEmpty(this.editedExpense.id)) {
         // creating a new expense
+        this.editedExpense.state = STATES.CREATED;
         await this.createNewEntry();
       } else {
         // editing a current expense
@@ -1993,8 +1996,10 @@ Number.prototype.pad = function (size) {
  * Updates the approval based on new value
  */
 function updateApproval(checked) {
-  if (checked) this.editedExpense.approvedBy = this.userInfo.id;
-  else this.editedExpense.approvedBy = undefined;
+  if (checked) {
+    this.editedExpense.state = STATES.APPROVED;
+    this.editedExpense.approvedBy = this.userInfo.id;
+  } else this.editedExpense.approvedBy = undefined;
 }
 
 // |--------------------------------------------------|
@@ -2061,7 +2066,6 @@ async function watchEditedExpenseExpenseTypeID() {
         )}`;
 
     // set high five cost
-    // HARD CODE
     if (this.selectedExpenseType.budgetName === 'High Five') {
       this.costFormatted = '50.00';
       this.editedExpense.cost = '50.00';
@@ -2304,7 +2308,6 @@ export default {
         (v) => this.parseCost(v) < 1000000000 || 'Nice try' //when a user tries to fill out expense that is over a million
       ], // rules for cost
       disableScan: true, // receipt scanned disabled
-      //editedExpense: {}, // data being edited --
       editedExpense: _cloneDeep(this.expense),
       employee: null, // employee selected
       employeeBudgets: null, // selected employee's budgets
