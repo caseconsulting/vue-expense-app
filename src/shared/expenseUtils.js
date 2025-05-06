@@ -1,4 +1,4 @@
-const STATES = {
+export const STATES = {
   CREATED: 'CREATED',
   APPROVED: 'APPROVED',
   REIMBURSED: 'REIMBURSED',
