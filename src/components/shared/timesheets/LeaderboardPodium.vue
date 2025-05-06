@@ -64,15 +64,14 @@ async function getLeaderboardData() {
     await updateStoreEmployees();
   }
   let leaderboardData = await api.getLeaderboard();
-  let sortedLeaderboardData = _reverse(_sortBy(leaderboardData, 'billableHours'));
-  groupLeaderboardData(sortedLeaderboardData, store.getters.employees);
+  groupLeaderboardData(leaderboardData, store.getters.employees);
   if (!store.getters.basecampAvatars) {
     await loadBasecampAvatars(store, leaderGroups.value.flat());
   }
 }
-function groupLeaderboardData(sortedLeaderboardData, employees) {
+function groupLeaderboardData(leaderboardData, employees) {
   let employee, group;
-  sortedLeaderboardData.slice(0, 23).forEach((leader, index) => {
+  leaderboardData.forEach((leader, index) => {
     group = Math.floor((index + 1) / 4);
     employee = employees.find((e) => e.id == leader.employeeId);
     leaderGroups.value[group] ||= [];
