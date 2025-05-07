@@ -195,13 +195,6 @@ function formatRange(range) {
 function selectDropDown(tab) {
   // Clear date query field
   dateRange.value?.reset();
-  // Set query to last 24 hours
-  this.auditsQueryFormatted = {
-    range: [
-      subtract(getTodaysDate('YYYY-MM-DDTHH:mm:ssZ'), 1, 'd', 'YYYY-MM-DDTHH:mm:ssZ'),
-      getTodaysDate('YYYY-MM-DDTHH:mm:ssZ')
-    ]
-  };
   // Reset variable to show 'last 24 hours' chart title
   firstLoad.value = true;
   // Change the view to selected tab
