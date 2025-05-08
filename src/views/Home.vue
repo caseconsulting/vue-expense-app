@@ -2,8 +2,8 @@
   <v-container fluid id="full-page">
     <span v-if="loading">
       <v-row>
-        <v-col cols="12" md="6" class="px-xl-4 px-lg-2 px-md-0 d-flex justify-center align-center">
-          <v-skeleton-loader type="text" width="80%" />
+        <v-col cols="12" md="6" class="px-xl-4 px-lg-2 px-md-0">
+          <v-skeleton-loader type="list-item@2" />
         </v-col>
         <v-col cols="12" md="6" class="px-xl-4 px-lg-2 px-md-0">
           <v-skeleton-loader type="list-item@2" />
@@ -11,18 +11,10 @@
       </v-row>
       <v-row>
         <v-col cols="6" class="px-xl-4 px-lg-2 px-md-0">
-          <v-skeleton-loader type="list-item@5" />
+          <v-skeleton-loader type="list-item@15" />
         </v-col>
         <v-col cols="6" class="px-xl-4 px-lg-2 px-md-0">
-          <v-skeleton-loader type="list-item@5" />
-        </v-col>
-        <v-col cols="12" class="pb-3 px-xl-4 px-lg-2 px-md-0">
-          <v-skeleton-loader type="list-item@14" />
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col mt-0 class="pa-0 px-xl-4 px-lg-2 px-md-0">
-          <v-skeleton-loader type="list-item@14" />
+          <v-skeleton-loader type="list-item@15" />
         </v-col>
       </v-row>
     </span>
@@ -30,25 +22,33 @@
       <v-row class="pb-3">
         <!-- Title -->
         <v-col cols="12" md="6">
-          <h1 v-if="isBirthday(employee)" align="center" justify="center" id="home-greeting">
-            Happy Birthday, {{ getEmployeePreferredName(employee) }}!
-          </h1>
-          <h1 v-else-if="isAnniversary(employee)" align="center" justify="center" id="home-greeting">
-            Happy Anniversary, {{ getEmployeePreferredName(employee) }}!
-          </h1>
-          <h1 v-else align="center" justify="center" id="home-greeting">
-            Hello, {{ getEmployeePreferredName(employee) }}!
-          </h1>
-          <div class="text-center">
-            <v-btn color="#bc3825" @click="handleProfile()" theme="dark">View Profile</v-btn>
-          </div>
-        </v-col>
+          <v-col cols="12" align="center" class="pa-2">
+            <v-row>
+              <v-col>
+                <span class="text-h5" align="center" justify="center" id="home-greeting">
+                  {{ welcomeText(employee) }}
+                </span></v-col
+              >
+              <v-col> <v-btn color="#bc3825" @click="handleProfile()" theme="dark">View Profile</v-btn></v-col></v-row
+            >
+          </v-col>
 
-        <!-- Anniversary Date -->
-        <v-col cols="12" md="6" class="px-xl-4 px-lg-2 px-md-0">
-          <anniversary-card v-if="!loading" :employee="employee" :has-budgets="true" location="home" />
+          <v-col cols="12">
+            <anniversary-card v-if="!loading" :employee="employee" :has-budgets="true" location="home" />
+          </v-col>
+
           <ConfettiExplosion
-            v-if="isBirthday(employee) || isAnniversary(employee)"
+            v-if="showConfetti(employee)"
+            :particleCount="300"
+            :particleSize="20"
+            class="ml-12"
+          ></ConfettiExplosion>
+        </v-col>
+        <v-col cols="12" md="6" class="mt-3 px-xl-4 px-lg-2 px-md-0">
+          <leaderboard-podium />
+
+          <ConfettiExplosion
+            v-if="showConfetti(employee)"
             :particleCount="300"
             :particleSize="20"
             class="ml-12"
@@ -100,6 +100,7 @@ import { isEmpty, getCurrentBudgetYear } from '@/utils/utils';
 import { updateStoreExpenseTypes, updateStoreBudgets } from '@/utils/storeUtils';
 import TimeData from '@/components/shared/timesheets/TimeData';
 import AnniversaryCard from '@/components/shared/AnniversaryCard';
+import LeaderboardPodium from '@/components/shared/timesheets/LeaderboardPodium';
 import ConfettiExplosion from 'vue-confetti-explosion';
 import {
   format,
@@ -176,6 +177,19 @@ computed(store.getters.storeIsPopulated);
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+function welcomeText(employee) {
+  let greeting = 'Hello';
+  if (isBirthday(employee)) {
+    greeting = 'Happy Birthday';
+  } else if (isAnniversary(employee)) {
+    greeting = 'Happy Anniversary';
+  }
+  return `${greeting}, ${getEmployeePreferredName(employee)}!`;
+}
+
+function showConfetti(employee) {
+  return isAnniversary(employee) || isBirthday(employee);
+}
 
 function isBirthday(employee) {
   if (employee.birthday === undefined) {
