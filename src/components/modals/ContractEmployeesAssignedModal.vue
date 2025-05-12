@@ -81,8 +81,9 @@
               emit('closed-contract-employees-assigned-modal');
               activate = false;
             "
-            >Close</v-btn
           >
+            Close
+          </v-btn>
           <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>

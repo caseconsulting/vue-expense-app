@@ -24,7 +24,8 @@
             class="text-white"
             :disabled="!contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
             @click="clickedDelete()"
-            >Delete
+          >
+            Delete
           </v-btn>
           <v-btn
             class="ml-1 font-weight-medium"
@@ -32,24 +33,27 @@
             size="small"
             :disabled="!contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
             @click="clickedUpdateStatus(contractStatuses.ACTIVE)"
-            >Activate</v-btn
           >
+            Activate
+          </v-btn>
           <v-btn
             class="ml-1"
             :loading="isDeactivating"
             size="small"
             :disabled="!contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
             @click="clickedUpdateStatus(contractStatuses.UNSTAFFED)"
-            >Unstaffed</v-btn
           >
+            Unstaffed
+          </v-btn>
           <v-btn
             class="ml-1"
             :loading="isClosing"
             size="small"
             :disabled="!contractsCheckBoxes.some((c) => c.all || c.indeterminate) || contractLoading"
             @click="clickedUpdateStatus(contractStatuses.CLOSED)"
-            >Close</v-btn
           >
+            Close
+          </v-btn>
         </v-col>
       </v-row>
       <!-- START CONTRACTS DATA TABLE -->

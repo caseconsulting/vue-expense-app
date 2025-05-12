@@ -42,13 +42,10 @@ import api from '@/shared/api';
 import _sortBy from 'lodash/sortBy';
 import _reverse from 'lodash/reverse';
 import { loadBasecampAvatars } from '@/utils/basecamp';
-
 const LOCAL_STORAGE_KEY = `leaderboard-${getTodaysDate()}`;
-
 const store = useStore();
 const loading = ref(true);
 const leaderGroups = ref([]);
-
 /**
  * onBeforeMount lifecycle hook
  */
@@ -60,28 +57,23 @@ onBeforeMount(async () => {
     await getLeaderboardData();
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(leaderGroups.value));
   }
-
   loading.value = false;
 });
-
 async function getLeaderboardData() {
   if (!store.getters.employees) {
     await updateStoreEmployees();
   }
   let leaderboardData = await api.getLeaderboard();
-
-  let sortedLeaderboardData = _reverse(_sortBy(leaderboardData, 'billableHours'));
-  groupLeaderboardData(sortedLeaderboardData, store.getters.employees);
+  groupLeaderboardData(leaderboardData, store.getters.employees);
   if (!store.getters.basecampAvatars) {
     await loadBasecampAvatars(store, leaderGroups.value.flat());
   }
 }
-
-function groupLeaderboardData(sortedLeaderboardData, employees) {
+function groupLeaderboardData(leaderboardData, employees) {
   let employee, group;
-  sortedLeaderboardData.slice(0, 23).forEach((leader, index) => {
+  leaderboardData.forEach((leader, index) => {
     group = Math.floor((index + 1) / 4);
-    employee = employees.find((e) => e.employeeNumber == leader.employeeNumber);
+    employee = employees.find((e) => e.id == leader.employeeId);
     leaderGroups.value[group] ||= [];
     leaderGroups.value[group].push({ ...employee, ...leader });
   });

@@ -165,7 +165,7 @@ const selectedRanges = ref([]);
 const ranges = ref([
   // current year
   [
-    format(add(getTodaysDate(), 1, 'month'), null, 'YYYY-MM'),
+    format(getTodaysDate(), null, 'YYYY-MM'),
     format(endOf(getTodaysDate('YYYY-MM'), 'year'), null, 'YYYY-MM'),
     { isYear: true }
   ],
@@ -209,7 +209,7 @@ onBeforeMount(async () => {
       // skip if project is not active
       if (project.endDate) continue;
       // get YYYY-MM format of start and end dates, cutting off anything this month or before
-      let projectStart = add(getTodaysDate(), 1, 'month');
+      let projectStart = getTodaysDate();
       // get project end date for this contract year
       let projectEnd = subtract(project.startDate, 1, 'day');
       projectEnd = setYear(projectEnd, getTodaysDate('YYYY'));
@@ -236,11 +236,13 @@ onMounted(async () => {
 
   // load in employee's plan from database
   if (employee.value.plannedPto?.plan) {
+    console.log(employee.value.plannedPto?.plan);
     // get plannedMonths from database if user has a saved plan
     plannedMonths.value = employee.value.plannedPto.plan;
     // remove any months that are in the past
     for (var i = 0; i < plannedMonths.value.length; i++) {
-      if (isSameOrBefore(plannedMonths.value[i].date, getTodaysDate(), 'month')) plannedMonths.value.splice(i--, 1);
+      console.log(getTodaysDate());
+      if (isBefore(plannedMonths.value[i].date, getTodaysDate(), 'month')) plannedMonths.value.splice(i--, 1);
       else break;
       // months are in order, can just break if current month is today or future
     }
@@ -352,7 +354,7 @@ function refreshDates() {
   }
 
   // make sure date is in future
-  if (isSameOrBefore(startDate, getTodaysDate(), 'month')) startDate = add(getTodaysDate(), 1, 'month', 'YYYY-MM');
+  if (isSameOrBefore(startDate, getTodaysDate(), 'month')) startDate = getTodaysDate('YYYY-MM');
 
   // loop through plannedMonths and remove any bad dates
   let month;
