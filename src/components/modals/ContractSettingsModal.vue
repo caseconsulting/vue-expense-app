@@ -65,8 +65,9 @@
               activate = false;
             "
             :disabled="loading"
-            >Close</v-btn
           >
+            Close
+          </v-btn>
           <v-btn
             variant="text"
             class="text-green"

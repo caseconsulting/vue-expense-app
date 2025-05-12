@@ -72,7 +72,7 @@
           </v-col>
         </v-row>
         <v-row dense>
-          <attachment :expense="expense" :mode="'adminExpenseInfo'"></attachment>
+          <attachment v-if="expense.receipt" :expense="expense" icon="mdi-cloud-download"></attachment>
         </v-row>
       </v-container>
     </v-card-text>
