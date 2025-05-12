@@ -449,6 +449,15 @@ async function getTimesheetsData(employeeNumber, params) {
 } // getTimesheetsData
 
 /**
+ * gets the leaderboard data
+ *
+ * @return - the leaderboard data
+ */
+async function getLeaderboard() {
+  return await execute('get', `/${TIMESHEETS}/leaderboard`);
+} // getLeaderboard
+
+/**
  * get the feed events for basecamp
  *
  * @return - the feed events
@@ -530,6 +539,7 @@ export default {
   getLocation,
   getResume,
   getTimesheetsData,
+  getLeaderboard,
   getTechSkills,
   getURLInfo,
   getZipCode,
