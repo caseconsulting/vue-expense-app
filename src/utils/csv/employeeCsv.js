@@ -223,6 +223,7 @@ class EmployeeCsv extends EmployeeCsvUtil {
             console.log(
               `Employee ${employee.id ?? JSON.stringify(employee)} has a project that doesn't exist: ${project.projectId ?? JSON.stringify(project)}`
             );
+            return;
           }
           projects.push(`${p.projectName} - ${(this.getProjectLengthInYears(project) / 12).toFixed(1)} years`);
           workLocations.push(
