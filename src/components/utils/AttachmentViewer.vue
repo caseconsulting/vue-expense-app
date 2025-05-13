@@ -11,14 +11,27 @@
           <v-col>
             <!-- Currently viewing image -->
             <v-row class="position-relative">
-              <img :src="files?.[selectedFile]?.image" class="image-main" ref="mainImage" />
+              <!-- <img
+                
+                :src="files?.[selectedFile]?.data"
+                class="image-main"
+                ref="mainImage"
+              /> -->
+              <embed
+                v-if="files?.[selectedFile]?.type === 'pdf'"
+                :src="files?.[selectedFile]?.data"
+                type="application/pdf"
+                width="100%"
+                height="500px"
+              />
+              <img v-else :src="files?.[selectedFile]?.data" class="image-main" ref="mainImage" />
             </v-row>
 
             <!-- Other images thumbnail -->
             <v-row class="mt-6">
               <div v-for="i in files.length" :key="i" :class="'d-inline-block image-parent ' + selectedParent(i - 1)">
                 <img
-                  :src="files[i - 1].image"
+                  :src="files[i - 1].data"
                   :class="'image-thumbnail' + selectedClass(i - 1)"
                   @click="selectFile(i - 1)"
                 />
@@ -90,8 +103,13 @@ async function getAllFiles() {
   signedURLs = await api.getAttachment(props.expense.employeeId, props.expense.id);
   for (let i = 0; i < signedURLs.length; i++) {
     let resp = await axios.get(signedURLs[i], { responseType: 'blob' });
+    let type = new URL(resp.config.url).pathname.split('.')[1].toLowerCase();
+    let newType = (type === 'pdf' ? 'application/' : 'image/') + type;
+    console.log(resp.data);
+    console.log({ ...resp.data, type: newType });
     files.value.push({
-      image: URL.createObjectURL(resp.data)
+      data: URL.createObjectURL({ ...resp.data, type: newType }),
+      type
     });
   }
 }
@@ -143,7 +161,7 @@ function download(index) {
   for (let file of list) {
     // create link
     link = document.createElement('a');
-    link.setAttribute('href', file.image);
+    link.setAttribute('href', file.data);
     link.setAttribute('download', `Receipt Download - ${props.expense.employeeName}`);
     link.style.visibility = 'hidden';
     // put link in document, click it, and remove it
