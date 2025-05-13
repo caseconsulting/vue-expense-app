@@ -20,6 +20,7 @@
               <embed
                 v-if="files?.[selectedFile]?.type === 'pdf'"
                 :src="files?.[selectedFile]?.data"
+                class="image-main"
                 type="application/pdf"
                 width="100%"
                 height="500px"
@@ -30,7 +31,9 @@
             <!-- Other images thumbnail -->
             <v-row class="mt-6">
               <div v-for="i in files.length" :key="i" :class="'d-inline-block image-parent ' + selectedParent(i - 1)">
+                <p class="font-weight-bold pdf-thumbnail" v-if="files[i - 1].type === 'pdf'">PDF</p>
                 <img
+                  v-else
                   :src="files[i - 1].data"
                   :class="'image-thumbnail' + selectedClass(i - 1)"
                   @click="selectFile(i - 1)"
@@ -99,18 +102,24 @@ watch(
  * if this is used somewhere other than seeing expense receipts.
  */
 async function getAllFiles() {
+  // get all the signed URLs for attachments
   let signedURLs;
   signedURLs = await api.getAttachment(props.expense.employeeId, props.expense.id);
+  // get the data from each signed URL
   for (let i = 0; i < signedURLs.length; i++) {
+    // fetch from AWS
     let resp = await axios.get(signedURLs[i], { responseType: 'blob' });
+    // get type to know what to do with it, and set it in the data (default is useless)
     let type = new URL(resp.config.url).pathname.split('.')[1].toLowerCase();
     let newType = (type === 'pdf' ? 'application/' : 'image/') + type;
-    console.log(resp.data);
-    console.log({ ...resp.data, type: newType });
+    let data = resp.data.slice(0, resp.data.size, newType);
+    // add to the files
     files.value.push({
-      data: URL.createObjectURL({ ...resp.data, type: newType }),
+      data: URL.createObjectURL(data),
       type
     });
+    // hides utils in PDF viewer
+    if (type === 'pdf') files.value[i].data += '#toolbar=0&navpanes=0&scrollbar=0';
   }
 }
 
@@ -196,6 +205,22 @@ function close() {
   border: 2px solid transparent;
   border-radius: 3px;
   cursor: pointer;
+}
+.pdf-thumbnail {
+  width: 100px;
+  height: 100px;
+  text-align: center;
+  padding-top: calc(104px / 2 - 1em);
+  border: 2px solid transparent;
+  border-radius: 3px;
+  cursor: pointer;
+  color: white;
+  background-color: #e1efff;
+  text-shadow:
+    -1px -1px 0 #111,
+    1px -1px 0 #111,
+    -1px 1px 0 #111,
+    1px 1px 0 #111;
 }
 
 .image-selected {
