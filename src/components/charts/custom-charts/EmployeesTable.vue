@@ -34,8 +34,9 @@
 import { onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
-import { updateStoreEmployees } from '@/utils/storeUtils';
+import { updateStoreEmployees, updateStoreTags } from '@/utils/storeUtils';
 import _ from 'lodash';
+import forEach from 'lodash/forEach';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -93,6 +94,8 @@ async function fillData() {
   !store.getters.employees ? await updateStoreEmployees() : '';
   employees.value = store.getters.employees.filter((emp) => emp.workStatus != 0);
 
+  if (!store.getters.tags) await updateStoreTags();
+
   // counting vars
   let billableEmployees = { employees: [], awaitingClearance: new Set() };
   let internEmployees = { employees: [], awaitingClearance: new Set() };
@@ -138,10 +141,20 @@ async function fillData() {
     if (!isIntern) {
       addEmployee(nonInternEmployees, e);
     }
-    // maybe add to lwop
-    if (_.filter(store.getters.tags, (tag) => _.includes(tag.employees, e.id)) === 'LWOP') {
-      addEmployee(lwopEmployees, e);
-    }
+    // maybe add to lwop/bench
+    let tags = JSON.parse(JSON.stringify(_.filter(store.getters.tags, (tag) => _.includes(tag.employees, e.id))));
+    forEach(tags, (tag) => {
+      if (tag.tagName == 'LWOP' || tag.tagName == 'Bench') {
+        if (lwopEmployees.employees.length == 0) {
+          addEmployee(lwopEmployees, e);
+        } else if (
+          lwopEmployees.employees[lwopEmployees.employees.length - 1].id !== JSON.parse(JSON.stringify(e)).id
+        ) {
+          addEmployee(lwopEmployees, e);
+        }
+        return;
+      }
+    });
     // maybe add to overhead
     // overhead: isn't on a contract and is not an intern. eg CFO, HR
     if (!isBillable && !isIntern) {
@@ -169,7 +182,7 @@ async function fillData() {
       employeeNames: getEmployeeNames(billableEmployees)
     },
     {
-      title: 'LWOP Employees',
+      title: 'LWOP/Bench Employees',
       value: getEmployeeCount(lwopEmployees, false),
       employeeNames: getEmployeeNames(lwopEmployees)
     },
