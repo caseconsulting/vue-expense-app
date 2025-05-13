@@ -236,12 +236,10 @@ onMounted(async () => {
 
   // load in employee's plan from database
   if (employee.value.plannedPto?.plan) {
-    console.log(employee.value.plannedPto?.plan);
     // get plannedMonths from database if user has a saved plan
     plannedMonths.value = employee.value.plannedPto.plan;
     // remove any months that are in the past
     for (var i = 0; i < plannedMonths.value.length; i++) {
-      console.log(getTodaysDate());
       if (isBefore(plannedMonths.value[i].date, getTodaysDate(), 'month')) plannedMonths.value.splice(i--, 1);
       else break;
       // months are in order, can just break if current month is today or future
