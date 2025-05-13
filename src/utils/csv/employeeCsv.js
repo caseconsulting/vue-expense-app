@@ -218,6 +218,12 @@ class EmployeeCsv extends EmployeeCsvUtil {
         let workTypes = [];
         _forEach(contract.projects, (project) => {
           let p = allProjects.find((p) => p.id === project.projectId);
+          // hot fix: some projects don't exist somehow
+          if (!p) {
+            console.log(
+              `Employee ${employee.id ?? JSON.stringify(employee)} has a project that doesn't exist: ${project.projectId ?? JSON.stringify(project)}`
+            );
+          }
           projects.push(`${p.projectName} - ${(this.getProjectLengthInYears(project) / 12).toFixed(1)} years`);
           workLocations.push(
             project.workType === 'Remote' || (!project.workType && p.workType === 'Remote')
