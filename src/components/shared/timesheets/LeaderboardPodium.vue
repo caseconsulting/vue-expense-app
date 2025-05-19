@@ -2,7 +2,7 @@
   <div>
     <span align="center" class="font-weight-bold text-decoration-underline">1860 Leaderboard</span>
     <div v-if="loading">
-      <div class="text-center my-3">Loading 1860 Leaderboard...</div>
+      <div class="text-center my-3">Loading Leaderboard...</div>
       <v-progress-linear :indeterminate="true"></v-progress-linear>
     </div>
     <v-carousel v-else hide-delimiters height="155" show-arrows="hover">
@@ -76,7 +76,7 @@ function groupLeaderboardData(leaderboardData, employees) {
     group = Math.floor((index + 1) / 4);
     employee = employees.find((e) => e.id == leader.employeeId);
     leaderGroups.value[group] ||= [];
-    leaderGroups.value[group].push({ ...employee, ...leader, rank: index + 1 });
+    leaderGroups.value[group].push({ ...employee, ...leader });
   });
 }
 </script>
