@@ -76,7 +76,7 @@ function groupLeaderboardData(leaderboardData, employees) {
     group = Math.floor((index + 1) / 4);
     employee = employees.find((e) => e.id == leader.employeeId);
     leaderGroups.value[group] ||= [];
-    leaderGroups.value[group].push({ ...employee, ...leader });
+    leaderGroups.value[group].push({ ...employee, ...leader, rank: index + 1 });
   });
 }
 </script>
