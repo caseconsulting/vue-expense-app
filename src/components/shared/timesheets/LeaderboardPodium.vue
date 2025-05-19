@@ -1,6 +1,6 @@
 <template>
   <div>
-    <span align="center" class="font-weight-bold text-decoration-underline">1860 Leaderboard</span>
+    <span align="center" class="d-block font-weight-bold text-decoration-underline">1860 Leaderboard</span>
     <div v-if="loading">
       <div class="text-center my-3">Loading Leaderboard...</div>
       <v-progress-linear :indeterminate="true"></v-progress-linear>
