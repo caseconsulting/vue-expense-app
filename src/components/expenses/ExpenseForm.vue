@@ -385,33 +385,42 @@
           :color="caseRed"
         />
 
-        <!-- Buttons -->
-        <!-- Cancel Button -->
-        <v-btn
-          color="white"
-          elevation="2"
-          @click="confirmBackingOut = true"
-          class="ma-2"
-          :disabled="isInactive"
-          id="cancelButton"
-        >
-          <v-icon class="mr-1" icon="mdi-close-circle" size="large" />Cancel
-        </v-btn>
+        <!-- Form Actions -->
+        <div id="form-actions-container">
+          <!-- Buttons -->
+          <div class="d-flex">
+            <!-- Cancel Button -->
+            <v-btn
+              color="white"
+              elevation="2"
+              @click="confirmBackingOut = true"
+              class="ma-2"
+              :disabled="isInactive"
+              id="cancelButton"
+            >
+              <v-icon class="mr-1" icon="mdi-close-circle" size="large" />Cancel
+            </v-btn>
 
-        <!-- Submit Button -->
-        <v-btn
-          variant="outlined"
-          color="success"
-          type="submit"
-          :disabled="(!(userRoleIsAdmin() || userRoleIsManager()) && isReimbursed) || isInactive"
-          id="submitButton"
-          :loading="loading"
-          class="ma-2"
-        >
-          <v-icon class="mr-1" icon="mdi-content-save" size="large" />Submit
-        </v-btn>
-        <!-- End Buttons -->
+            <!-- Submit Button -->
+            <v-btn
+              variant="outlined"
+              color="success"
+              type="submit"
+              :disabled="(!(userRoleIsAdmin() || userRoleIsManager()) && isReimbursed) || isInactive"
+              id="submitButton"
+              :loading="loading"
+              class="ma-2"
+            >
+              <v-icon class="mr-1" icon="mdi-content-save" size="large" />Submit
+            </v-btn>
+            <!-- End Buttons -->
+          </div>
+
+          <div id="invalid-hint" v-if="showInvalidHint">Cannot submit! Some fields are invalid</div>
+        </div>
+        <!-- End Form Actions -->
       </v-form>
+
       <!-- Confirmation if the expense exceeds the available budget remaining -->
       <confirmation-box
         :isCovered="isCovered"
@@ -2210,6 +2219,14 @@ function watchFiles() {
   }
 } // watchFile
 
+/**
+ * Watches `valid`
+ * @param val The new value of `valid`
+ */
+function watchValid(val) {
+  this.showInvalidHint = val != null && !val;
+}
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      EXPORT                      |
@@ -2302,6 +2319,7 @@ export default {
       selectedExpenseType: {}, // selected expense types
       showExchangeCalculator: false,
       showExchangeTrainingDesc: false,
+      showInvalidHint: false, // whether to show text below the submit button that there are invalid fields
       submittedReceipt: null, // the receipt to show when editing an expense
       urlInfo: {
         id: null,
@@ -2371,7 +2389,24 @@ export default {
     'editedExpense.employeeId': watchEditedExpenseEmployeeID,
     'editedExpense.purchaseDate': watchEditedExpensePurchaseDate,
     'editedExpense.reimbursedDate': watchEditedExpenseReimbursedDate,
-    files: watchFiles
+    files: watchFiles,
+    valid: watchValid
   }
 };
 </script>
+
+<style>
+#invalid-hint {
+  padding: 10px;
+  color: #b00020;
+  align-self: center;
+  justify-self: center;
+}
+
+#form-actions-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-items: left;
+}
+</style>
