@@ -633,6 +633,7 @@ export default {
         st: '',
         technologies: [],
         twitter: '',
+        unanetPersonKey: '',
         workStatus: 100
       }, // selected employee
       search: '', // query text for datatable search field

@@ -202,6 +202,14 @@ export function getRequiredRules() {
 } // getRequiredRules
 
 /**
+ * Gets the rules for unanet person key (15 letters and numbers long)
+ * @return Array - The array of rule functions
+ */
+export function getUnanetPersonKeyRules() {
+  return [(v) => (!isEmpty(v) ? /^[a-zA-Z0-9]{15}$/.test(v) || 'Requires 15 numbers and letters' : true)];
+}
+
+/**
  * Gets the URL rules
  * @return Array - The array of rule functions
  */
@@ -446,5 +454,6 @@ export default {
   getDuplicateProjectRule,
   getDuplicateCompanyNameRule,
   getDuplicateCustomerOrgRule,
-  getWorkStatusRules
+  getWorkStatusRules,
+  getUnanetPersonKeyRules
 };

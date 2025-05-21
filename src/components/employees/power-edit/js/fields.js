@@ -50,6 +50,17 @@ export const HIRE_DATE = {
   ...smallWidth
 };
 
+export const UNANET_PERSON_KEY = {
+  title: 'Unanet Person Key',
+  key: 'unanetPersonKey',
+  selected: false,
+  editType: TYPES.DEFAULT,
+  infoType: TYPES.DEFAULT,
+  rules: [v.getUnanetPersonKeyRules()].flat(),
+  maxLength: 15,
+  ...smallWidth
+};
+
 // export const DEPARTURE_DATE = {
 //   title: 'Departure Date',
 //   key: 'deptDate',
@@ -269,6 +280,7 @@ export default {
   // WORK_STATUS,
   HIRE_DATE,
   BIRTHDAY,
+  UNANET_PERSON_KEY,
   JOB_ROLE,
   // EMPLOYEE_ROLE,
   // AWARDS,
