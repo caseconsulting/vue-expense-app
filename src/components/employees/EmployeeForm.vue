@@ -797,6 +797,7 @@ function setFormData(tab, data) {
     this.model['agencyIdentificationNumber'] = data.agencyIdentificationNumber;
     this.model['employeeRole'] = data.employeeRole;
     this.model['hireDate'] = data.hireDate;
+    this.model['unanetPersonKey'] = data.unanetPersonKey;
     this.model['workStatus'] = data.workStatus;
     this.model['deptDate'] = data.deptDate;
     this.model['eeoDeclineSelfIdentify'] = data.eeoDeclineSelfIdentify;
@@ -1181,6 +1182,7 @@ export default {
         st: null,
         technologies: [],
         twitter: null,
+        unanetPersonKey: '',
         workStatus: 100
       }, // employee info
       submitting: false, // submitting form

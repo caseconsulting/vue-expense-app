@@ -111,7 +111,7 @@
           <v-col>
             <v-text-field
               v-model="editedEmployee.agencyIdentificationNumber"
-              label="Agency Identification Number"
+              label=" Identification Number"
               :rules="getAINRules()"
               v-mask="'#######'"
             ></v-text-field>
@@ -138,6 +138,16 @@
               closeable-chips
               clearable
             ></v-autocomplete>
+          </v-col>
+        </v-row>
+        <v-row v-if="userIsAdminOrManager">
+          <v-col cols="4"
+            ><v-text-field
+              v-model="editedEmployee.unanetPersonKey"
+              label="Unanet Person Key"
+              :rules="getUnanetPersonKeyRules()"
+              maxLength="15"
+            ></v-text-field>
           </v-col>
         </v-row>
         <v-row v-if="userIsAdminOrManager">
@@ -528,7 +538,8 @@ import {
   getPhoneNumberTypeRules,
   getRequiredRules,
   getURLRules,
-  getWorkStatusRules
+  getWorkStatusRules,
+  getUnanetPersonKeyRules
 } from '@/shared/validationUtils';
 import { COUNTRIES, isMobile, STATES } from '@/utils/utils';
 import _cloneDeep from 'lodash/cloneDeep';
