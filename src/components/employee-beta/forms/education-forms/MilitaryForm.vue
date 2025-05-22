@@ -2,7 +2,7 @@
   <v-container>
     <v-row v-for="i in [0]" :key="i">
       <!-- Start military branch -->
-      <v-col :cols="isMobile() ? '12' : ''">
+      <v-col :cols="smAndDown ? '12' : ''">
         <v-autocomplete
           ref="formFields"
           :items="dodForces"
@@ -16,7 +16,7 @@
       <!-- End military branch -->
 
       <!-- Start military start date -->
-      <v-col :cols="isMobile() ? '12' : ''">
+      <v-col :cols="smAndDown ? '12' : ''">
         <v-text-field
           ref="formFields"
           :model-value="format(editedEducation[militaryIndex].startDate, null, 'MM/YYYY')"
@@ -53,7 +53,7 @@
       <!-- End military start date -->
 
       <!-- Start military end date -->
-      <v-col :cols="isMobile() ? '12' : ''">
+      <v-col :cols="smAndDown ? '12' : ''">
         <v-text-field
           ref="formFields"
           :model-value="format(editedEducation[militaryIndex].completeDate, null, 'MM/YYYY')"
@@ -88,7 +88,7 @@
         </v-text-field>
       </v-col>
       <!-- End military end date -->
-      <v-divider v-if="isMobile()" :thickness="3"></v-divider>
+      <v-divider v-if="smAndDown" :thickness="3"></v-divider>
     </v-row>
   </v-container>
 </template>
@@ -96,9 +96,9 @@
 <script setup>
 import { format } from '@/shared/dateUtils';
 import { getDateMonthYearOptionalRules, getRequiredRules, getDateMonthYearRules } from '@/shared/validationUtils';
-import { isMobile } from '@/utils/utils';
 import { computed } from 'vue';
 import { mask } from 'vue-the-mask';
+import { useDisplay } from 'vuetify/lib/framework.mjs';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -109,6 +109,7 @@ import { mask } from 'vue-the-mask';
 const editedEducation = defineModel({ required: true });
 const props = defineProps(['militaryIndex', 'attach']);
 const vMask = mask; // custom directive
+const { smAndDown } = useDisplay();
 
 const dodForces = ['Army', 'Marine Corps', 'Navy', 'Air Force', 'Space Force', 'Coast Guard', 'National Guard']; // subject to change per Paul
 
