@@ -67,7 +67,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, computed, watch } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { format, isSameOrAfter, isSameOrBefore } from '@/shared/dateUtils';
@@ -252,13 +252,6 @@ const disableOnlyLatest = computed(() => {
   let dateEmpty = (d) => !d || d === '';
   return !dateEmpty(startDate.value) || !dateEmpty(endDate.value);
 });
-
-watch(
-  () => disableOnlyLatest.value,
-  () => {
-    console.log(disableOnlyLatest.value);
-  }
-);
 
 // |--------------------------------------------------|
 // |                                                  |
