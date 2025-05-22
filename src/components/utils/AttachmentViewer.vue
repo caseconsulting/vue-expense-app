@@ -12,11 +12,11 @@
             <!-- Currently viewing image -->
             <v-row class="position-relative">
               <!-- <img
-                
                 :src="files?.[selectedFile]?.data"
                 class="image-main"
                 ref="mainImage"
               /> -->
+
               <embed
                 v-if="files?.[selectedFile]?.type === 'pdf'"
                 :src="files?.[selectedFile]?.data"
@@ -31,7 +31,9 @@
             <!-- Other images thumbnail -->
             <v-row class="mt-6">
               <div v-for="i in files.length" :key="i" :class="'d-inline-block image-parent ' + selectedParent(i - 1)">
-                <p class="font-weight-bold pdf-thumbnail" v-if="files[i - 1].type === 'pdf'">PDF</p>
+                <p class="font-weight-bold pdf-thumbnail" v-if="files[i - 1].type === 'pdf'" @click="selectFile(i - 1)">
+                  PDF
+                </p>
                 <img
                   v-else
                   :src="files[i - 1].data"
