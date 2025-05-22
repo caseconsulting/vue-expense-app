@@ -236,7 +236,7 @@ function deleteTechnology(index) {
 }
 </script>
 
-<style>
+<style scoped>
 /**
  * Ensures that text only wraps on spaces, preventing that thing where there's a single character on each line. If the
  * screen isn't big enough it'll just overflow
