@@ -226,15 +226,27 @@ export function getEmployeeCurrentProjects(employee, returnContracts = false) {
  */
 export function selectedTagsHasEmployee(employeeId, tagsInfo) {
   const { selected, flipped } = tagsInfo;
-  let inTag, tagFlipped;
-  for (let i = 0; i < selected.length; i++) {
-    inTag = selected[i].employees.includes(employeeId);
-    tagFlipped = flipped.includes(selected[i].id);
-    if (inTag != tagFlipped) {
-      return true;
+  if (selected.length === flipped.length) {
+    // all tags are flipped, include everyone by default
+    // return false for employee if they are on ANY tag
+    for (let tag of selected) {
+      let inTag = tag.employees.includes(employeeId);
+      if (inTag) return false;
     }
+    return true;
+  } else {
+    // at least some tags are not flipped
+    // return employees on unflipped tags, removing ones on flipped ones
+    let inTag, tagFlipped;
+    let includeInList = false;
+    for (let tag of selected) {
+      inTag = tag.employees.includes(employeeId);
+      tagFlipped = flipped.includes(tag.id);
+      if (inTag) includeInList = true;
+      if (inTag && tagFlipped) return false;
+    }
+    return includeInList;
   }
-  return false;
 } // selectedTagsHasEmployee
 
 export default {
