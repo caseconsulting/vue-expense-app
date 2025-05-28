@@ -77,7 +77,6 @@ import { useRoute, useRouter } from 'vue-router';
 // |                                                  |
 // |--------------------------------------------------|
 
-// would call it 'route' normally, but that name is already taken
 const route = useRoute();
 const router = useRouter();
 
@@ -168,13 +167,6 @@ const items = ref([
     alias: ['reports'],
     icon: 'mdi-clipboard-list',
     route: 'reports',
-    permission: ['admin', 'user', 'intern', 'manager'],
-    active: false
-  },
-  {
-    title: 'Training',
-    icon: 'mdi-fire',
-    route: 'training',
     permission: ['admin', 'user', 'intern', 'manager'],
     active: false
   },
