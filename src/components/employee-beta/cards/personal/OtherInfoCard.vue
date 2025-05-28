@@ -13,6 +13,9 @@
           <p class="mb-1" v-if="!isEmpty(getEmployeeRole())">
             <b>Employee Role:</b> {{ _.startCase(getEmployeeRole()) }}
           </p>
+          <p v-if="isAdmin || props.model.role === 'manager'" class="mb-1">
+            <b>Unanet Person Key:</b> {{ getUnanetPersonKey() }}
+          </p>
           <p class="mb-1" v-if="!isEmpty(getWorkStatusLabel())"><b>Work Status:</b> {{ getWorkStatusLabel() }}</p>
           <div class="mb-1" v-if="isAdmin">
             <p class="d-inline"><b>Employee Tags:</b></p>
@@ -21,6 +24,7 @@
             </p>
             <p v-if="isEmpty(getTags())" class="d-inline pl-1">None</p>
           </div>
+
           <p class="mb-1"><b>EEO Status:</b> {{ getSelfIdentified() }} {{ eeoStatus() }}</p>
         </v-col>
         <v-col cols="auto">
@@ -138,6 +142,15 @@ function getTags() {
  */
 function getSelfIdentified() {
   return props.model.eeoDeclineSelfIdentify ? 'Declined self-identify, Form ' : 'Form';
+}
+
+/**
+ * Returns the Unanet Person Key for the employee
+ *
+ * @return String - Unanet person key
+ */
+function getUnanetPersonKey() {
+  return props.model.unanetPersonKey;
 }
 
 /**
