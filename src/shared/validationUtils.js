@@ -202,11 +202,11 @@ export function getRequiredRules() {
 } // getRequiredRules
 
 /**
- * Gets the rules for unanet person key (15 letters and numbers long)
+ * Gets the rules for unanet person key
  * @return Array - The array of rule functions
  */
 export function getUnanetPersonKeyRules() {
-  return [(v) => (!isEmpty(v) ? /^[a-zA-Z0-9]{15}$/.test(v) || 'Requires 15 numbers and letters' : true)];
+  return [(v) => (!isEmpty(v) ? /^[0-9]*$/.test(v) || 'Must be a number' : true)];
 }
 
 /**
