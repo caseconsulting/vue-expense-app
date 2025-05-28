@@ -11,14 +11,32 @@
           <v-col>
             <!-- Currently viewing image -->
             <v-row class="position-relative">
-              <img :src="files?.[selectedFile]?.image" class="image-main" ref="mainImage" />
+              <!-- <img
+                
+                :src="files?.[selectedFile]?.data"
+                class="image-main"
+                ref="mainImage"
+              /> -->
+              <embed
+                v-if="files?.[selectedFile]?.type === 'pdf'"
+                :src="files?.[selectedFile]?.data"
+                class="image-main"
+                type="application/pdf"
+                width="100%"
+                height="500px"
+              />
+              <img v-else :src="files?.[selectedFile]?.data" class="image-main" ref="mainImage" />
             </v-row>
 
             <!-- Other images thumbnail -->
             <v-row class="mt-6">
               <div v-for="i in files.length" :key="i" :class="'d-inline-block image-parent ' + selectedParent(i - 1)">
+                <p class="font-weight-bold pdf-thumbnail" v-if="files[i - 1].type === 'pdf'" @click="selectFile(i - 1)">
+                  PDF
+                </p>
                 <img
-                  :src="files[i - 1].image"
+                  v-else
+                  :src="files[i - 1].data"
                   :class="'image-thumbnail' + selectedClass(i - 1)"
                   @click="selectFile(i - 1)"
                 />
@@ -86,13 +104,24 @@ watch(
  * if this is used somewhere other than seeing expense receipts.
  */
 async function getAllFiles() {
+  // get all the signed URLs for attachments
   let signedURLs;
   signedURLs = await api.getAttachment(props.expense.employeeId, props.expense.id);
+  // get the data from each signed URL
   for (let i = 0; i < signedURLs.length; i++) {
+    // fetch from AWS
     let resp = await axios.get(signedURLs[i], { responseType: 'blob' });
+    // get type to know what to do with it, and set it in the data (default is useless)
+    let type = new URL(resp.config.url).pathname.split('.')[1].toLowerCase();
+    let newType = (type === 'pdf' ? 'application/' : 'image/') + type;
+    let data = resp.data.slice(0, resp.data.size, newType);
+    // add to the files
     files.value.push({
-      image: URL.createObjectURL(resp.data)
+      data: URL.createObjectURL(data),
+      type
     });
+    // hides utils in PDF viewer
+    if (type === 'pdf') files.value[i].data += '#toolbar=0&navpanes=0&scrollbar=0';
   }
 }
 
@@ -143,7 +172,7 @@ function download(index) {
   for (let file of list) {
     // create link
     link = document.createElement('a');
-    link.setAttribute('href', file.image);
+    link.setAttribute('href', file.data);
     link.setAttribute('download', `Receipt Download - ${props.expense.employeeName}`);
     link.style.visibility = 'hidden';
     // put link in document, click it, and remove it
@@ -178,6 +207,22 @@ function close() {
   border: 2px solid transparent;
   border-radius: 3px;
   cursor: pointer;
+}
+.pdf-thumbnail {
+  width: 100px;
+  height: 100px;
+  text-align: center;
+  padding-top: calc(104px / 2 - 1em);
+  border: 2px solid transparent;
+  border-radius: 3px;
+  cursor: pointer;
+  color: white;
+  background-color: #e1efff;
+  text-shadow:
+    -1px -1px 0 #111,
+    1px -1px 0 #111,
+    -1px 1px 0 #111,
+    1px 1px 0 #111;
 }
 
 .image-selected {
