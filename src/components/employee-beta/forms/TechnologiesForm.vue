@@ -6,9 +6,12 @@
         <v-btn prepend-icon="mdi-plus" @click="addTechnology()">Add Tech/Skill</v-btn>
       </v-col>
     </v-row>
+
+    <!-- List of technologies -->
+    <v-divider class="border-opacity-25 my-5" thickness="3"></v-divider>
     <v-row v-for="(technology, index) in editedTechnologies" :key="technology + index" class="d-flex align-center">
       <!-- name -->
-      <v-col sm="10" md="8" lg="5">
+      <v-col sm="12" md="8" lg="5">
         <v-autocomplete
           v-model="technology.name"
           label="Tech/Skill"
@@ -21,27 +24,19 @@
         ></v-autocomplete>
       </v-col>
 
-      <!-- MOBILE delete tech/skill -->
-      <v-col v-if="isMobile()" sm="2" md="4">
-        <v-tooltip text="Delete Tech/Skill" location="top">
+      <!--
+        current toggle:
+        if screen is medium, place between time and delete button
+        (so that toggle and delete button are stacked)
+      -->
+      <v-col v-if="md" cols="4">
+        <v-tooltip text="Automatically increment this skill each month" location="top">
           <template #activator="{ props }">
-            <v-btn v-bind="props" icon="mdi-delete" variant="text" @click="deleteTechnology(index)"></v-btn>
-          </template>
-        </v-tooltip>
-      </v-col>
-      <!-- end MOBILE delete tech/skill -->
+            <div class="switch-container">
+              <v-switch v-bind="props" v-model="technology.current" color="primary" hide-details="auto" />
 
-      <!-- current -->
-      <v-col v-if="!isMobile()" md="4" lg="2">
-        <v-tooltip text="Enabling this will automatically increment this skill each month" location="top">
-          <template #activator="{ props }">
-            <v-switch
-              v-bind="props"
-              v-model="technology.current"
-              label="Currently using"
-              color="primary"
-              style="max-height: 50px"
-            ></v-switch>
+              <div class="word-wrap-only">Currently using</div>
+            </div>
           </template>
         </v-tooltip>
       </v-col>
@@ -72,32 +67,49 @@
         ></v-text-field>
       </v-col>
 
-      <!-- NORMAL delete tech/skill -->
-      <v-col v-if="!isMobile()" cols="1">
+      <!--
+        current toggle:
+        if screen is not medium, place between time and delete button
+        (vertically stacked with delete button, but below input fields)
+      -->
+      <v-col v-if="!md" lg="2" sm="12">
+        <v-tooltip text="Automatically increment this skill each month" location="top">
+          <template #activator="{ props }">
+            <div class="switch-container">
+              <v-switch v-bind="props" v-model="technology.current" color="primary" hide-details="auto" />
+
+              <div class="word-wrap-only">Currently using</div>
+            </div>
+          </template>
+        </v-tooltip>
+      </v-col>
+
+      <!-- delete button -->
+      <v-col :class="{ 'delete-container-mobile': smAndDown }">
         <v-tooltip text="Delete Tech/Skill" location="top">
           <template #activator="{ props }">
-            <v-btn v-bind="props" icon="mdi-delete" variant="text" @click="deleteTechnology(index)"></v-btn>
-          </template>
-        </v-tooltip>
-      </v-col>
-      <!-- end NORMAL delete tech/skill -->
+            <!-- on mobile: -->
+            <div v-if="smAndDown" class="flex-grow-1 delete-btn-container-mobile">
+              <v-btn v-bind="props" prepend-icon="mdi-delete" @click="deleteTechnology(index)">Delete</v-btn>
+            </div>
 
-      <v-col v-if="isMobile()" cols="12" md="4">
-        <v-tooltip text="Enabling this will automatically increment this skill each month" location="top">
-          <template #activator="{ props }">
-            <v-switch
+            <!-- not on mobile -->
+            <v-btn
+              v-else
               v-bind="props"
-              v-model="technology.current"
-              label="Currently using"
-              color="primary"
-              style="max-height: 50px"
-            ></v-switch>
+              class="flex-grow-1"
+              icon="mdi-delete"
+              variant="text"
+              @click="deleteTechnology(index)"
+            />
           </template>
         </v-tooltip>
       </v-col>
 
-      <v-divider v-if="index < editedTechnologies.length - 1" class="border-opacity-25 my-5" thickness="3"></v-divider>
+      <v-divider v-if="index < editedTechnologies.length" class="border-opacity-25 my-5" thickness="3"></v-divider>
     </v-row>
+    <!-- End list of technologies -->
+
     <v-row v-if="editedTechnologies.length != 0">
       <v-col class="d-flex justify-center">
         <v-btn prepend-icon="mdi-plus" @click="addTechnology(false)">Add Tech/Skill</v-btn>
@@ -110,11 +122,11 @@
 import { usePrepareSubmit } from '@/composables/editTabCommunication';
 import api from '@/shared/api';
 import { getDuplicateTechRules, getRequiredRules } from '@/shared/validationUtils';
-import { isMobile } from '@/utils/utils';
 import _isEmpty from 'lodash/isEmpty';
 import _isEqual from 'lodash/isEqual';
 import _map from 'lodash/map';
 import { ref } from 'vue';
+import { useDisplay } from 'vuetify/lib/framework.mjs';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -138,6 +150,7 @@ const editedTechnologies = ref(
 );
 const dropdownItems = ref([]);
 
+const { smAndDown, md } = useDisplay();
 usePrepareSubmit('technologies', prepareSubmit);
 
 // |--------------------------------------------------|
@@ -222,3 +235,38 @@ function deleteTechnology(index) {
   editedTechnologies.value.splice(index, 1);
 }
 </script>
+
+<style scoped>
+/**
+ * Ensures that text only wraps on spaces, preventing that thing where there's a single character on each line. If the
+ * screen isn't big enough it'll just overflow
+ */
+.word-wrap-only {
+  overflow-wrap: normal;
+}
+
+/* Flex container for switch and "Currently using" text */
+.switch-container {
+  width: 100%;
+  margin: 0;
+  display: flex;
+  flex-flow: row wrap;
+  place-items: center left;
+  justify-content: center;
+  gap: 4px;
+}
+
+/* Helps align/format the v-col that contains the button */
+.delete-container-mobile {
+  display: flex;
+  justify-content: space-around;
+  justify-items: center;
+}
+
+/* Helps align the button within the container */
+.delete-btn-container-mobile {
+  display: flex;
+  justify-content: space-around;
+  justify-items: center;
+}
+</style>

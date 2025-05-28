@@ -4,7 +4,7 @@
       <v-col>
         <v-row v-for="i in [0]" :key="i">
           <!-- Start high school name -->
-          <v-col :cols="isMobile() ? '12' : ''">
+          <v-col :cols="smAndDown ? '12' : ''">
             <v-text-field
               ref="formFields"
               v-model="editedEducation[schoolIndex].name"
@@ -16,7 +16,7 @@
           <!-- End high school name -->
 
           <!-- Start graduation date -->
-          <v-col :cols="isMobile() ? '12' : ''">
+          <v-col :cols="smAndDown ? '12' : ''">
             <v-text-field
               :model-value="format(editedEducation[schoolIndex].gradDate, null, 'MM/YYYY')"
               ref="formFields"
@@ -60,9 +60,9 @@
 <script setup>
 import { format } from '@/shared/dateUtils';
 import { getDateMonthYearOptionalRules, getRequiredRules } from '@/shared/validationUtils';
-import { isMobile } from '@/utils/utils';
 import { computed } from 'vue';
 import { mask } from 'vue-the-mask';
+import { useDisplay } from 'vuetify/lib/framework.mjs';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -73,6 +73,7 @@ import { mask } from 'vue-the-mask';
 const editedEducation = defineModel({ required: true });
 const props = defineProps(['schoolIndex', 'attach']);
 const vMask = mask; // custom directive
+const { smAndDown } = useDisplay();
 
 // |--------------------------------------------------|
 // |                                                  |
