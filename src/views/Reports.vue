@@ -90,6 +90,7 @@ import ReportsForeignLanguages from '@/components/reports/ReportsForeignLanguage
 import ReportsJobRoles from '@/components/reports/ReportsJobRoles.vue';
 import ReportsTechnologies from '@/components/reports/ReportsTechnologies.vue';
 import ReportsSecurityInfo from '@/components/reports/ReportsSecurityInfo.vue';
+import ReportsEducation from '@/components/reports/ReportsEducation.vue';
 import ReportsEmployeeNotes from '@/components/reports/ReportsEmployeeNotes.vue';
 import { updateStoreEmployees, updateStoreContracts, updateStoreTags } from '@/utils/storeUtils';
 import { isMobile, userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
@@ -152,6 +153,11 @@ const tabs = ref([
     key: 'securityInfo',
     title: 'Security Info',
     component: shallowRef(ReportsSecurityInfo)
+  },
+  {
+    key: 'education',
+    title: 'Education',
+    component: shallowRef(ReportsEducation)
   }
 ]);
 
