@@ -202,6 +202,14 @@ export function getRequiredRules() {
 } // getRequiredRules
 
 /**
+ * Gets the rules for unanet person key
+ * @return Array - The array of rule functions
+ */
+export function getUnanetPersonKeyRules() {
+  return [(v) => (!isEmpty(v) ? /^[0-9]*$/.test(v) || 'Must be a number' : true)];
+}
+
+/**
  * Gets the URL rules
  * @return Array - The array of rule functions
  */
@@ -446,5 +454,6 @@ export default {
   getDuplicateProjectRule,
   getDuplicateCompanyNameRule,
   getDuplicateCustomerOrgRule,
-  getWorkStatusRules
+  getWorkStatusRules,
+  getUnanetPersonKeyRules
 };

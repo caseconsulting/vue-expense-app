@@ -313,6 +313,9 @@ export class Employee {
     /** @type {NotesObject[]} */
     this.notes = properties.notes ?? [];
 
+    /** @type {string} */
+    this.unanetPersonKey = properties.unanetPersonKey ?? '';
+
     // place of birth fields
     /** @type {string} */
     this.st = properties.st ?? '';
