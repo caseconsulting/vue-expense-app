@@ -332,6 +332,7 @@ async function setDataFromApi(isCalendarYear, isYearly) {
   let timesheetsData = await api.getTimesheetsData(clonedEmployee.value.employeeNumber, {
     code,
     employeeId: clonedEmployee.value.id,
+    unanetPersonKey: clonedEmployee.value.unanetPersonKey,
     periods
   });
 
