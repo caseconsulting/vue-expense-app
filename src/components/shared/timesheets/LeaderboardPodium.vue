@@ -20,16 +20,16 @@
             <leader :leader="leaderGroup[2]"></leader>
           </v-row>
         </div>
-        <div v-else class="mt-2 ms-5">
-          <v-row>
-            <v-col cols="12" class="d-flex justify-center">
+        <div v-else class="ms-1">
+          <v-row justify="space-around" class="my-3 me-4">
+            <div>
               <leader :leader="leaderGroup[0]"></leader>
               <leader :leader="leaderGroup[1]"></leader>
-            </v-col>
-            <v-col cols="12" class="d-flex justify-center">
+            </div>
+            <div>
               <leader :leader="leaderGroup[2]"></leader>
               <leader :leader="leaderGroup[3]"></leader>
-            </v-col>
+            </div>
           </v-row>
         </div>
       </v-carousel-item>
