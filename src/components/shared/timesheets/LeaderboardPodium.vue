@@ -2,7 +2,7 @@
   <div>
     <div class="d-flex justify-center">
       <span class="align-content-center font-weight-bold text-decoration-underline">1860 Leaderboard</span>
-      <leader v-if="currentUserData" :leader="currentUserData" class="ms-2"></leader>
+      <leader v-if="currentUserData" :leader="currentUserData" class="ms-2 pa-1 bg-gray rounded-lg"></leader>
     </div>
 
     <div v-if="loading">
@@ -12,7 +12,7 @@
     <v-carousel v-else hide-delimiters height="155" show-arrows="hover">
       <v-carousel-item v-for="(leaderGroup, index) in leaderGroups" :key="index">
         <div v-if="index == 0" class="mx-1">
-          <v-row justify="center" class="my-3">
+          <v-row justify="center" class="my-2">
             <leader :leader="leaderGroup[0]"></leader>
           </v-row>
           <v-row justify="space-around">
@@ -21,15 +21,13 @@
           </v-row>
         </div>
         <div v-else class="ms-1">
-          <v-row justify="space-around" class="my-3 me-4">
-            <div>
-              <leader :leader="leaderGroup[0]"></leader>
-              <leader :leader="leaderGroup[1]"></leader>
-            </div>
-            <div>
-              <leader :leader="leaderGroup[2]"></leader>
-              <leader :leader="leaderGroup[3]"></leader>
-            </div>
+          <v-row justify="space-around" class="my-2 me-4">
+            <leader :leader="leaderGroup[0]"></leader>
+            <leader :leader="leaderGroup[1]"></leader>
+          </v-row>
+          <v-row justify="space-around" class="my-2 me-4">
+            <leader :leader="leaderGroup[2]"></leader>
+            <leader :leader="leaderGroup[3]"></leader>
           </v-row>
         </div>
       </v-carousel-item>
