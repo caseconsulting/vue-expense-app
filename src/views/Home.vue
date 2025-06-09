@@ -44,7 +44,7 @@
             class="ml-12"
           ></ConfettiExplosion>
         </v-col>
-        <v-col cols="12" md="6" class="mt-3 px-xl-4 px-lg-2 px-md-0">
+        <v-col cols="12" md="6" class="px-0">
           <leaderboard-podium />
 
           <ConfettiExplosion
