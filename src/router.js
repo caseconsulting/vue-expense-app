@@ -7,7 +7,7 @@ import PTOCashOuts from '@/views/PTOCashOuts.vue';
 import Employees from '@/views/Employees.vue';
 import Employee from '@/views/Employee.vue';
 import StatsDashboard from '@/views/StatsDashboard.vue';
-import Audits from '@/views/Audits.vue';
+import AuditsV2 from '@/views/AuditsV2.vue';
 import Expenses from '@/views/MyExpenses.vue';
 import Help from '@/views/Help.vue';
 import Reports from '@/views/Reports.vue';
@@ -67,7 +67,7 @@ const router = createRouter({
     {
       path: '/audits',
       name: 'audits',
-      component: Audits,
+      component: AuditsV2,
       beforeEnter: multiguard([requireAuth, isAdminOrManager])
     },
     {
