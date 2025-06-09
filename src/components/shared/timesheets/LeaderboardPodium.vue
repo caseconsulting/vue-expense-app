@@ -1,6 +1,10 @@
 <template>
   <div>
-    <span align="center" class="d-block font-weight-bold text-decoration-underline">1860 Leaderboard</span>
+    <div class="d-flex justify-center">
+      <span class="align-content-center font-weight-bold text-decoration-underline">1860 Leaderboard</span>
+      <leader v-if="currentUserData" :leader="currentUserData" class="ms-2"></leader>
+    </div>
+
     <div v-if="loading">
       <div class="text-center my-3">Loading Leaderboard...</div>
       <v-progress-linear :indeterminate="true"></v-progress-linear>
@@ -9,23 +13,23 @@
       <v-carousel-item v-for="(leaderGroup, index) in leaderGroups" :key="index">
         <div v-if="index == 0" class="mx-1">
           <v-row justify="center" class="my-3">
-            <leader :leader="leaderGroup[0]" iconClass="gold"></leader>
+            <leader :leader="leaderGroup[0]"></leader>
           </v-row>
           <v-row justify="space-around">
-            <leader :leader="leaderGroup[1]" iconClass="silver"></leader>
-            <leader :leader="leaderGroup[2]" iconClass="bronze"></leader>
+            <leader :leader="leaderGroup[1]"></leader>
+            <leader :leader="leaderGroup[2]"></leader>
           </v-row>
         </div>
-        <div v-else class="ms-8">
-          <v-row justify="space-around" class="my-3 me-4">
-            <div>
+        <div v-else class="mt-2 ms-5">
+          <v-row>
+            <v-col cols="12" class="d-flex justify-center">
               <leader :leader="leaderGroup[0]"></leader>
               <leader :leader="leaderGroup[1]"></leader>
-            </div>
-            <div>
+            </v-col>
+            <v-col cols="12" class="d-flex justify-center">
               <leader :leader="leaderGroup[2]"></leader>
               <leader :leader="leaderGroup[3]"></leader>
-            </div>
+            </v-col>
           </v-row>
         </div>
       </v-carousel-item>
@@ -46,37 +50,62 @@ import { loadBasecampAvatars } from '@/utils/basecamp';
 const LOCAL_STORAGE_KEY = `leaderboard-${getTodaysDate()}`;
 const store = useStore();
 const loading = ref(true);
+const currentUserData = ref(null);
 const leaderGroups = ref([]);
 /**
  * onBeforeMount lifecycle hook
  */
 onBeforeMount(async () => {
+  let leaderboardData;
   let localStorageData = localStorage.getItem(LOCAL_STORAGE_KEY);
+
+  // use local storage
   if (localStorageData) {
-    leaderGroups.value = JSON.parse(localStorageData);
+    leaderboardData = JSON.parse(localStorageData);
   } else {
-    await getLeaderboardData();
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(leaderGroups.value));
+    leaderboardData = await api.getLeaderboard();
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(leaderboardData));
   }
+
+  // get employees data
+  await getEmployees();
+  await getAvatars();
+
+  // set current user 1860 data
+  if (leaderboardData.currentUserData) {
+    currentUserData.value = leaderData(leaderboardData.currentUserData);
+  }
+
+  // group leader data
+  groupLeaderboardData(leaderboardData.leaderboard);
+
   loading.value = false;
 });
-async function getLeaderboardData() {
+
+async function getEmployees() {
   if (!store.getters.employees) {
     await updateStoreEmployees();
   }
-  let leaderboardData = await api.getLeaderboard();
-  groupLeaderboardData(leaderboardData, store.getters.employees);
+}
+
+async function getAvatars() {
   if (!store.getters.basecampAvatars) {
     await loadBasecampAvatars(store, leaderGroups.value.flat());
   }
 }
-function groupLeaderboardData(leaderboardData, employees) {
-  let employee, group;
+
+function groupLeaderboardData(leaderboardData) {
+  let group;
   leaderboardData.forEach((leader, index) => {
     group = Math.floor((index + 1) / 4);
-    employee = employees.find((e) => e.id == leader.employeeId);
     leaderGroups.value[group] ||= [];
-    leaderGroups.value[group].push({ ...employee, ...leader });
+    leaderGroups.value[group].push(leaderData(leader));
   });
+}
+
+function leaderData(leader) {
+  let employees = store.getters.employees;
+  let employee = employees.find((e) => e.id == leader.employeeId);
+  return { ...employee, ...leader };
 }
 </script>
