@@ -77,16 +77,8 @@ const file = ref(null);
 const loading = ref(false);
 const fileRules = [
   (v) => {
-    return !isEmpty(v) || 'File required (.png, .pdf, or .jpeg)';
-  },
-  (v) => {
-    return (
-      (!isEmpty(v) &&
-        ((v?.[0] || v).type.includes('application/pdf') ||
-          (v?.[0] || v).type.includes('image/png') ||
-          (v?.[0] || v).type.includes('image/jpeg'))) ||
-      'File unsupported, please submit a .png, .pdf, or a .jpeg file'
-    );
+    let newFile = v?.[0] || v;
+    return isValid(newFile) || 'File required (.pdf, .png or .jpeg)';
   }
 ];
 const submitForm = ref(null);
@@ -129,6 +121,10 @@ function clearForm() {
   confirmBackingOut.value = false;
   activate.value = false;
 } // clearForm
+
+function isValid(_file) {
+  return !isEmpty(_file) && ['application/pdf', 'image/png', 'image/jpeg'].includes(_file.type);
+} // isValid
 
 /**
  * When the checkbox is not selected on the resume modal, it uploads the resume and closes the window upon
@@ -189,8 +185,8 @@ async function submit() {
 /**
  * watcher for file
  */
-watch(file, async () => {
-  validFile.value = (await submitForm.value.validate()).valid;
+watch(file, async (newFile) => {
+  validFile.value = isValid(newFile);
 }); // watchFile
 </script>
 
