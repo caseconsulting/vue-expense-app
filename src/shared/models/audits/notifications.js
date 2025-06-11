@@ -7,7 +7,7 @@ export const NotificationReason = {
   EXPENSE_REVISAL_REQUEST: 'expense_revisal_request',
   EXPENSE_REJECTION: 'expense_rejection',
   WEEKLY_TIME_REMINDER: 'weekly_timesheet_reminder',
-  MONTHLY_TIME_REMINDER: 'montly_timesheet_reminder',
+  MONTHLY_TIME_REMINDER: 'monthly_timesheet_reminder',
   TRAINING_HOUR_EXCHANGE: 'training_hour_exchange',
   HIGH_FIVE: 'high_five'
 };

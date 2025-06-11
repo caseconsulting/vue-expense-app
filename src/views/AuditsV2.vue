@@ -119,8 +119,11 @@ import dayjs from 'dayjs';
 import { onBeforeMount, reactive, ref, watch } from 'vue';
 import DatePicker from '../components/shared/DatePicker.vue';
 import api from '../shared/api';
-import { AuditRequestFilters, AuditType } from '../shared/models/audits/audts';
-import { Notification, NotificationReason } from '../shared/models/audits/notifications';
+// import { AuditType } from '../shared/models/audits/audts';
+import { useStore } from 'vuex';
+import { getEmployeeByID } from '../shared/employeeUtils';
+import { NotificationReason } from '../shared/models/audits/notifications';
+const store = useStore();
 
 /**
  * A row in the data table that represents a notification audit
@@ -202,31 +205,15 @@ const headers = ref([
 // ❉                                                  ❉
 // *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
 
-function fillDummyData() {
-  for (let i = 0; i < 10; i++) {
-    const now = dayjs();
-    // for demonstration: random time between now and a month ago
-    const time = new Date(now.valueOf() - Math.random() * 7 * 24 * 60 * 60 * 1000);
-
-    const sentTo = Math.random() < 0.5 ? 'really-really-long-email@consultwithcase.com' : '555-555-5555';
-
-    /** @type NotificationRow */
-    const audit = new Notification(0, time, 'uuid', sentTo, NotificationReason.WEEKLY_TIME_REMINDER);
-    audit.name = 'Really Really Long Name';
-    audit.date = dayjs(audit.createdAt).format('MM/DD/YYYY HH:mm');
-
-    loadedAudits.value.push(audit);
-    loading.audits = false;
-    loading.graph = false;
-  }
-}
-
 /**
  * Maps the displayed notification string to the enum value and vice versa
  * @param {string} val
+ * @returns {string?} The converted value. 'None' converts to null
  */
 function notifTypeMap(val) {
   switch (val) {
+    case 'None':
+      return null;
     case 'Expense Rejection':
       return NotificationReason.EXPENSE_REJECTION;
     case 'Expense Revisal':
@@ -258,37 +245,54 @@ function notifTypeMap(val) {
 /**
  * Queries the database based on the current filters
  */
-// eslint-disable-next-line no-unused-vars
 async function query() {
   loading.audits = true;
 
-  let realType;
-  switch (filters.auditType) {
-    case 'Profile':
-    case 'Expense':
-      realType = AuditType.CRUD;
-      break;
-    case 'Login':
-      realType = AuditType.LOGIN;
-      break;
-    case 'Notification':
-      realType = AuditType.NOTIFICATION;
-      break;
-    case 'Error':
-      realType = AuditType.ERROR;
-      break;
-  }
+  // convert string audit type to database compatible type
+  // let realType;
+  // switch (filters.auditType) {
+  //   case 'Profile':
+  //   case 'Expense':
+  //     realType = AuditType.CRUD;
+  //     break;
+  //   case 'Login':
+  //     realType = AuditType.LOGIN;
+  //     break;
+  //   case 'Notification':
+  //     realType = AuditType.NOTIFICATION;
+  //     break;
+  //   case 'Error':
+  //     realType = AuditType.ERROR;
+  //     break;
+  // }
 
-  const req = new AuditRequestFilters().fromTables([realType]).betweenDates(filters.startDate, filters.endDate);
-  const res = await api.getAudits(req);
+  const res = await api.getAudits({
+    startDate: filters.startDate,
+    endDate: filters.endDate,
+    notifReason: notifTypeMap(filters.notifType)
+  });
 
   if (res instanceof AxiosError) {
-    console.error(res);
+    console.error('Server responded with error:', res);
   } else {
     try {
-      loadedAudits.value = JSON.parse(res);
+      loadedAudits.value = res;
+      const employees = store.getters.employees;
+
+      loadedAudits.value = loadedAudits.value.map((audit) => {
+        const empId = audit.receiverId;
+        const emp = getEmployeeByID(empId, employees);
+
+        return {
+          ...audit,
+          name: `${emp.firstName} ${emp.lastName}`,
+          date: dayjs(audit.createdAt).format('MM/DD/YYYY HH:mm')
+        };
+      });
+
+      filterDisplayAudits();
     } catch (err) {
-      console.error(res);
+      console.error("Couldn't parse response:", res);
     }
   }
 
@@ -342,7 +346,7 @@ function filterDisplayAudits() {
 // *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
 
 onBeforeMount(async () => {
-  // query(); // load table data
+  query(); // load table data
   loading.graph = false; // TODO: load graph
 });
 
@@ -354,8 +358,6 @@ onBeforeMount(async () => {
 
 // watch for when any of the filters change
 watch(filters, filterDisplayAudits, { deep: true });
-
-fillDummyData();
 </script>
 
 <style scoped>
