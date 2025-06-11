@@ -9,25 +9,72 @@
         </v-card-title>
 
         <v-card-text id="search-filters">
-          <span>This contains the search filters</span>
-          <h3>Type:</h3>
-          <v-autocomplete
-            v-model="filters.selectedType"
-            :items="auditTypes"
+          <span>General filters</span>
+
+          <v-text-field
+            v-model="filters.search"
+            label="Search"
+            prepend-inner-icon="mdi-magnify"
             variant="outlined"
+            density="compact"
             hide-details="auto"
             style="width: 80%"
           />
 
+          <v-autocomplete
+            id="audit-type-filter"
+            v-model="filters.auditType"
+            :items="auditTypes"
+            label="Audit Type"
+            variant="outlined"
+            density="compact"
+            hide-details="auto"
+            style="width: 80%"
+          />
+
+          <div id="audit-date-filter">
+            <date-picker
+              v-model="filters.startDate"
+              label="Start Date"
+              variant="outlined"
+              density="compact"
+              hide-details="auto"
+              clearable
+              style="flex-grow: 1"
+            />
+
+            <date-picker
+              v-model="filters.endDate"
+              label="End Date"
+              variant="outlined"
+              density="compact"
+              hide-details="auto"
+              clearable
+              style="flex-grow: 1"
+            />
+          </div>
+
           <div style="width: 80%"><v-divider /></div>
-          <span>Other settings specific to audit type</span>
+          <span> {{ filters.auditType }} filters </span>
 
           <div id="control-panel-settings">
+            <v-autocomplete
+              v-model="filters.notifType"
+              :items="displayNotifTypes"
+              item-value=""
+              variant="outlined"
+              density="compact"
+              hide-details="auto"
+              style="grid-column: span 2; width: 80%"
+            />
+
             <v-checkbox hide-details="auto" label="Checkbox" />
             <v-checkbox hide-details="auto" label="Checkbox" />
             <v-checkbox hide-details="auto" label="Checkbox" />
-            <v-text-field style="width: 80%" label="Some text" hide-details="auto" />
           </div>
+
+          <div style="width: 80%"><v-divider /></div>
+          <v-btn onclick="query()" :disabled="loading.audits"> Search </v-btn>
         </v-card-text>
       </v-card>
 
@@ -56,9 +103,7 @@
         <v-card-title class="beta_header_style">
           <h2>Audits</h2>
         </v-card-title>
-        <span>Loads some recent audits by default, otherwise contains search results</span>
-
-        <v-data-table :headers="headers" :items="audits" :search="tableSearch" :loading="loading.audits" multi-sort>
+        <v-data-table :headers="headers" :items="displayAudits" :loading="loading.audits" multi-sort>
           <template #loading>
             <v-skeleton-loader type="table-row" />
           </template>
@@ -69,8 +114,12 @@
 </template>
 
 <script setup>
+import { AxiosError } from 'axios';
 import dayjs from 'dayjs';
-import { onMounted, reactive, ref } from 'vue';
+import { onBeforeMount, reactive, ref, watch } from 'vue';
+import DatePicker from '../components/shared/DatePicker.vue';
+import api from '../shared/api';
+import { AuditRequestFilters, AuditType } from '../shared/models/audits/audts';
 import { Notification, NotificationReason } from '../shared/models/audits/notifications';
 
 /**
@@ -78,75 +127,235 @@ import { Notification, NotificationReason } from '../shared/models/audits/notifi
  * @typedef {Notification & { name: string, date: string }} NotificationRow
  */
 
-const auditTypes = ['Profile', 'Expense', 'Notification', 'Error'];
-const filters = reactive({
-  selectedType: 'Notification',
+// *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
+// ❃                                                  ❃
+// ❇                    CONSTANTS                     ❇
+// ❉                                                  ❉
+// *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
 
-  // The table will apply this search as a filter, but doesn't create a field to enter text
-  // That must be done manually, but it can be placed anywhere as long as it v-models this ref
-  search: ''
+const auditTypes = ['Profile', 'Expense', 'Login', 'Notification', 'Error'];
+const displayNotifTypes = [
+  'Expense Rejection',
+  'Expense Revisal',
+  'Timesheet (weekly)',
+  'Timesheet (monthly)',
+  'Training Hours',
+  'High Five',
+  'None'
+];
+
+// *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
+// ❃                                                  ❃
+// ❇                      STATE                       ❇
+// ❉                                                  ❉
+// *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
+
+// Filters in the control panel. these filters are reactive, but by default only filter the currently loaded data.
+// To load more data, the user must click the search button, which queries the database based on these filters.
+const filters = reactive({
+  search: '',
+  auditType: 'Notification',
+  startDate: null,
+  endDate: null,
+  notifType: 'None'
 });
+
+/**
+ * Currently loaded audits
+ * @type {import('vue').Ref<NotificationRow[]>}
+ */
+const loadedAudits = ref([]);
+
+// *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
+// ❃                                                  ❃
+// ❇                     DISPLAY                      ❇
+// ❉                                                  ❉
+// *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
+
+/**
+ * Sublist of loaded audits, filtered by the table search filter
+ * @type {NotificationRow[]}
+ * */
+const displayAudits = ref(loadedAudits.value);
+
+// display skeletons for components when loading
 const loading = reactive({
   audits: true,
   graph: true
 });
 
+// datatable header config
 const headers = ref([
   { title: 'Date', key: 'date' },
   { title: 'Employee', key: 'name' },
   {
     title: 'Type',
     key: 'reason',
-    value: (/** @type {NotificationRow} */ notif) => {
-      switch (notif.reason) {
-        case NotificationReason.EXPENSE_REJECTION:
-          return 'Expense Rejection';
-
-        case NotificationReason.EXPENSE_REVISAL_REQUEST:
-          return 'Expense Revisal';
-
-        case NotificationReason.WEEKLY_TIME_REMINDER:
-          return 'Timesheet (weekly)';
-
-        case NotificationReason.MONTHLY_TIME_REMINDER:
-          return 'Timesheet (monthly)';
-
-        case NotificationReason.TRAINING_HOUR_EXCHANGE:
-          return 'Training Hours';
-
-        case NotificationReason.HIGH_FIVE:
-          return 'High Five';
-      }
-    }
+    value: (notif) => notifTypeMap(notif.reason)
   },
   { title: 'Sent to', key: 'sentTo' }
 ]);
 
-/** @type {NotificationRow[]} */
-const audits = [];
+// *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
+// ❃                                                  ❃
+// ❇                     METHODS                      ❇
+// ❉                                                  ❉
+// *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
 
-// for demonstration: filing in dummy data
-for (let i = 0; i < 10; i++) {
-  const now = dayjs();
-  // for demonstration: random time between now and a month ago
-  const time = new Date(now.valueOf() - Math.random() * 7 * 24 * 60 * 60 * 1000);
+function fillDummyData() {
+  for (let i = 0; i < 10; i++) {
+    const now = dayjs();
+    // for demonstration: random time between now and a month ago
+    const time = new Date(now.valueOf() - Math.random() * 7 * 24 * 60 * 60 * 1000);
 
-  const sentTo = Math.random() < 0.5 ? 'really-really-long-email@consultwithcase.com' : '555-555-5555';
+    const sentTo = Math.random() < 0.5 ? 'really-really-long-email@consultwithcase.com' : '555-555-5555';
 
-  /** @type NotificationRow */
-  const audit = new Notification(0, time, 'uuid', sentTo, NotificationReason.WEEKLY_TIME_REMINDER);
-  audit.name = 'Really Really Long Name';
-  audit.date = dayjs(audit.createdAt).format('MM/DD/YYYY HH:mm');
+    /** @type NotificationRow */
+    const audit = new Notification(0, time, 'uuid', sentTo, NotificationReason.WEEKLY_TIME_REMINDER);
+    audit.name = 'Really Really Long Name';
+    audit.date = dayjs(audit.createdAt).format('MM/DD/YYYY HH:mm');
 
-  audits.push(audit);
+    loadedAudits.value.push(audit);
+    loading.audits = false;
+    loading.graph = false;
+  }
 }
 
-onMounted(async () => {
-  // for demonstration: wait a bit then stop loading
-  await new Promise((resolve) => setTimeout(resolve, 500));
+/**
+ * Maps the displayed notification string to the enum value and vice versa
+ * @param {string} val
+ */
+function notifTypeMap(val) {
+  switch (val) {
+    case 'Expense Rejection':
+      return NotificationReason.EXPENSE_REJECTION;
+    case 'Expense Revisal':
+      return NotificationReason.EXPENSE_REVISAL_REQUEST;
+    case 'Timesheet (weekly)':
+      return NotificationReason.WEEKLY_TIME_REMINDER;
+    case 'Timesheet (monthly)':
+      return NotificationReason.MONTHLY_TIME_REMINDER;
+    case 'Training Hours':
+      return NotificationReason.TRAINING_HOUR_EXCHANGE;
+    case 'High Five':
+      return NotificationReason.HIGH_FIVE;
+
+    case NotificationReason.EXPENSE_REJECTION:
+      return 'Expense Rejection';
+    case NotificationReason.EXPENSE_REVISAL_REQUEST:
+      return 'Expense Revisal';
+    case NotificationReason.WEEKLY_TIME_REMINDER:
+      return 'Timesheet (weekly)';
+    case NotificationReason.MONTHLY_TIME_REMINDER:
+      return 'Timesheet (monthly)';
+    case NotificationReason.TRAINING_HOUR_EXCHANGE:
+      return 'Training Hours';
+    case NotificationReason.HIGH_FIVE:
+      return 'High Five';
+  }
+}
+
+/**
+ * Queries the database based on the current filters
+ */
+// eslint-disable-next-line no-unused-vars
+async function query() {
+  loading.audits = true;
+
+  let realType;
+  switch (filters.auditType) {
+    case 'Profile':
+    case 'Expense':
+      realType = AuditType.CRUD;
+      break;
+    case 'Login':
+      realType = AuditType.LOGIN;
+      break;
+    case 'Notification':
+      realType = AuditType.NOTIFICATION;
+      break;
+    case 'Error':
+      realType = AuditType.ERROR;
+      break;
+  }
+
+  const req = new AuditRequestFilters().fromTables([realType]).betweenDates(filters.startDate, filters.endDate);
+  const res = await api.getAudits(req);
+
+  if (res instanceof AxiosError) {
+    console.error(res);
+  } else {
+    try {
+      loadedAudits.value = JSON.parse(res);
+    } catch (err) {
+      console.error(res);
+    }
+  }
+
   loading.audits = false;
-  loading.graph = false;
+}
+
+function filterDisplayAudits() {
+  displayAudits.value = loadedAudits.value.filter((/** @type NotificationRow */ audit) => {
+    let valid = true;
+
+    // search
+    if (filters.search) {
+      valid = Object.entries(audit).some(([key, val]) => {
+        // ignore dates/numbers/ids that are stringified
+        if (key == 'date' || key == 'id' || key == 'receiverId') return false;
+        // only check strings
+        if (typeof val != 'string') return false;
+
+        // check search string
+        if (val.toLowerCase().includes(filters.search.toLowerCase())) return true;
+      });
+    }
+
+    // dates
+    if (filters.startDate) {
+      if (!dayjs(filters.startDate).isSameOrBefore(audit.createdAt, 'day')) {
+        valid = false;
+      }
+    }
+    if (filters.endDate) {
+      if (!dayjs(audit.createdAt).isSameOrBefore(filters.endDate, 'day')) {
+        valid = false;
+      }
+    }
+
+    // notification type / reason
+    if (filters.notifType !== 'None') {
+      if (audit.reason !== notifTypeMap(filters.notifType)) {
+        valid = false;
+      }
+    }
+
+    return valid;
+  });
+}
+
+// *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
+// ❃                                                  ❃
+// ❇                 LIFECYCLE HOOKS                  ❇
+// ❉                                                  ❉
+// *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
+
+onBeforeMount(async () => {
+  // query(); // load table data
+  loading.graph = false; // TODO: load graph
 });
+
+// *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
+// ❃                                                  ❃
+// ❇                    WATCHERS                      ❇
+// ❉                                                  ❉
+// *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
+
+// watch for when any of the filters change
+watch(filters, filterDisplayAudits, { deep: true });
+
+fillDummyData();
 </script>
 
 <style scoped>
@@ -220,6 +429,16 @@ onMounted(async () => {
   place-content: center;
   place-items: center;
   gap: 0;
+}
+
+#audit-date-filter {
+  width: 80%;
+
+  display: flex;
+  flex-flow: row nowrap;
+  place-content: center;
+  place-items: start center;
+  gap: 16px;
 }
 
 /* vuetify's md breakpoint */

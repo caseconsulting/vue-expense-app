@@ -31,6 +31,7 @@
         v-model="formattedModel"
         :multiple="multiple"
         :label="label"
+        :density="density"
         :disabled="disabled"
         readonly
         :clearable="clearable"
@@ -52,6 +53,7 @@
         :hint="hint ?? defaults.hint"
         :prepend-inner-icon="icon"
         :variant="variant"
+        :density="density"
         :hide-details="hideDetails"
         :disabled="disabled"
         :rules="rules"
@@ -79,6 +81,7 @@ const props = defineProps({
   adjacentDays: { type: Boolean, default: false },
   hideDetails: { type: Boolean, default: false },
   disabled: { type: Boolean, default: false },
+  density: { type: String, default: 'default' },
 
   // LOGIC/CONFIG
   rules: { type: Array, default: () => [] },

@@ -1,20 +1,20 @@
 /**
- * Model for the notification_reason type in the audits database
+ * Enum for the notification_reason type in the audits database
+ * @readonly
+ * @enum {string}
  */
-// eslint-disable-next-line no-unused-vars
-export const NotificationReason = Object.freeze({
+export const NotificationReason = {
   EXPENSE_REVISAL_REQUEST: 'expense_revisal_request',
   EXPENSE_REJECTION: 'expense_rejection',
   WEEKLY_TIME_REMINDER: 'weekly_timesheet_reminder',
   MONTHLY_TIME_REMINDER: 'montly_timesheet_reminder',
   TRAINING_HOUR_EXCHANGE: 'training_hour_exchange',
   HIGH_FIVE: 'high_five'
-});
+};
 
 /**
  * Model for a notification in the audits database
  */
-// eslint-disable-next-line no-unused-vars
 export class Notification {
   /**
    * Creates a new model of a notificaiton

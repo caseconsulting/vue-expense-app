@@ -1,6 +1,10 @@
 import axios from 'axios';
 import { API_CONFIG } from './apiVariables';
 import { getAccessToken } from '@/utils/auth';
+// eslint-disable-next-line no-unused-vars
+import { AuditRequestFilters } from './models/audits/audts';
+
+// routes
 const EXPENSE_TYPES = 'expense-types';
 const EXPENSES = 'expenses';
 const EMPLOYEES = 'employees';
@@ -16,6 +20,7 @@ const CONTRACTS = 'contracts';
 const HIGH_FIVES = 'highFives';
 const PTO_CASH_OUTS = 'ptoCashOuts';
 const TAGS = 'tags';
+
 const API_HOSTNAME = API_CONFIG.apiHostname;
 const API_PORT = API_CONFIG.apiPort;
 const PORT = API_PORT === '443' ? '' : `:${API_PORT}`;
@@ -171,15 +176,12 @@ async function getAllEvents() {
 } // getAllEvents
 
 /**
- * gets all the audits for a specific type in a specific range
- *
- * @param type - the type of the audit
- * @param startDate - the start date of the wanted range
- * @param endDate - the end date of the wanted range
- * @return - the audit data
+ * Gets audits with specified filters
+ * @param {AuditRequestFilters?} filters Filters to query specific audits
+ * @returns {*} The api response or error
  */
-async function getAudits(type, startDate, endDate) {
-  return await execute('get', `/${AUDIT}/${type}/${startDate}/${endDate}`);
+async function getAudits(filters) {
+  return await execute('get', `/${AUDIT}`, filters);
 } // getAudits
 
 /**
