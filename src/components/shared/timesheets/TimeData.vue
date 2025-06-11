@@ -195,15 +195,14 @@ function employeeIsUser() {
  * @returns Boolean - Whether or not the API returned an error
  */
 function hasError(timesheetsData) {
-  if (timesheetsData?.name === 'AxiosError' || timesheetsData.code >= 400) {
-    errorMessage.value = timesheetsData?.response?.data?.message;
+  if (timesheetsData.err) {
+    errorMessage.value = timesheetsData?.err?.message;
     if (_isEmpty(errorMessage.value) || typeof errorMessage.value === 'object') {
       errorMessage.value = 'An error has occurred, try refreshing the widget';
     }
     return true;
-  } else {
-    return false;
   }
+  return false;
 } // hasError
 
 /**
@@ -335,6 +334,8 @@ async function setDataFromApi(isCalendarYear, isYearly) {
     unanetPersonKey: clonedEmployee.value.unanetPersonKey,
     periods
   });
+
+  console.log(timesheetsData);
 
   if (!hasError(timesheetsData)) {
     timesheets.value = timesheetsData.timesheets;
