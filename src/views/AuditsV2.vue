@@ -117,12 +117,12 @@
 import { AxiosError } from 'axios';
 import dayjs from 'dayjs';
 import { onBeforeMount, reactive, ref, watch } from 'vue';
+import { useStore } from 'vuex';
 import DatePicker from '../components/shared/DatePicker.vue';
 import api from '../shared/api';
-// import { AuditType } from '../shared/models/audits/audts';
-import { useStore } from 'vuex';
 import { getEmployeeByID } from '../shared/employeeUtils';
 import { NotificationReason } from '../shared/models/audits/notifications';
+import { updateStoreEmployees } from '../utils/storeUtils';
 const store = useStore();
 
 /**
@@ -277,7 +277,11 @@ async function query() {
   } else {
     try {
       loadedAudits.value = res;
-      const employees = store.getters.employees;
+      let employees = store.getters.employees;
+      while (!employees) {
+        await updateStoreEmployees();
+        employees = store.getters.employees;
+      }
 
       loadedAudits.value = loadedAudits.value.map((audit) => {
         const empId = audit.receiverId;
@@ -292,7 +296,7 @@ async function query() {
 
       filterDisplayAudits();
     } catch (err) {
-      console.error("Couldn't parse response:", res);
+      console.error('Error handling resposne:', err);
     }
   }
 
