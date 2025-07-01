@@ -269,7 +269,6 @@ function getChartList(directorate, org) {
           chartList.push(e.fullName);
         });
       }
-      console.log(chartList);
     });
   });
   return chartList;
