@@ -260,16 +260,16 @@ function getOrgBreakdown(item) {
  */
 function getChartList(directorate, org) {
   let contracts = store.getters.contracts;
+  let employees = store.getters.employees;
   let chartList = [];
   _forEach(contracts, (c) => {
     _forEach(c.projects, (p) => {
       let nextOrg = getOrgBreakdown(p) ?? getOrgBreakdown(c);
       if ((org == null || nextOrg === org) && p.directorate === directorate) {
-        _forEach(getProjectCurrentEmployees(c, p, store.getters.employees), (e) => {
-          chartList.push(e.fullName);
+        _forEach(getProjectCurrentEmployees(c, p, employees), (e) => {
+          chartList.push(e.fullName ?? `${e.firstName} ${e.lastName}`);
         });
       }
-      console.log(chartList);
     });
   });
   return chartList;
