@@ -62,7 +62,7 @@ import { useStore } from 'vuex';
 // |                                                  |
 // |--------------------------------------------------|
 
-const props = defineProps(['employee', 'timeData', 'periodType']);
+const props = defineProps(['employee', 'timeData', 'periodType', 'title']);
 const emitter = inject('emitter');
 const store = useStore();
 
@@ -95,7 +95,10 @@ async function save() {
     // create new legacyJobCodes object in local employee
     let legacyJobCodes = localEmployee.value['legacyJobCodes'] || {};
     if (!legacyJobCodes[props.periodType]) legacyJobCodes[props.periodType] = {};
-    legacyJobCodes[props.periodType][jobCode.value] = Number(duration.value) * 60 * 60;
+    legacyJobCodes[props.periodType][jobCode.value] = {
+      duration: Number(duration.value) * 60 * 60,
+      title: props.title
+    };
     localEmployee.value['legacyJobCodes'] = legacyJobCodes;
     // push new local employee value to the API and store
     let value = { id: props.employee.id, ['legacyJobCodes']: localEmployee.value['legacyJobCodes'] };
