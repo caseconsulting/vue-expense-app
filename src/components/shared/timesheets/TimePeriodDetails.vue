@@ -106,7 +106,8 @@ const props = defineProps([
   'isYearly',
   'period',
   'supplementalData',
-  'timeData'
+  'timeData',
+  'title'
 ]);
 import _find from 'lodash/find';
 const emitter = inject('emitter');
@@ -221,8 +222,11 @@ const hoursBehindBy = computed(() => {
 const periodHoursCompleted = computed(() => {
   let total = 0;
   _forEach(props.timeData, (duration, jobName) => {
-    if (!props.isYearly || (props.isYearly && !props.supplementalData.nonBillables?.includes(jobName))) {
-      total += duration;
+    if (
+      (duration.title == null || duration.title == props.title) &&
+      (!props.isYearly || (props.isYearly && !props.supplementalData.nonBillables?.includes(jobName)))
+    ) {
+      total += duration.duration ?? duration;
     }
   });
   // convert to hours
@@ -443,7 +447,7 @@ async function check1860OnTrack() {
   let nonBillables = yearlyTimesheetData.supplementalData.nonBillables;
   _forEach(actualTimesheets, (duration, jobName) => {
     if (!nonBillables?.includes(jobName)) {
-      hoursWorked += duration;
+      hoursWorked += duration.duration ?? duration;
     }
   });
   hoursWorked = hoursWorked / 60 / 60; // convert seconds to hours
