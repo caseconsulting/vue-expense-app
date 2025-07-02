@@ -592,45 +592,6 @@ function urlLabel() {
 // |--------------------------------------------------|
 
 /**
- * Adds an expenses url and category to the training urls page.
- *
- * @param newExpense - new expense with url and category
- */
-async function addURLInfo(newExpense) {
-  // remove trailing slash from url and convert all letter to lowercase
-  newExpense.url = newExpense.url.replace(/\/$/, '').toLowerCase();
-  if (
-    newExpense.url.length >= 12 &&
-    (newExpense.url.substring(0, 12) === 'https://www.' || newExpense.url.substring(0, 11) === 'http://www.')
-  ) {
-    // remove www from url if it exists
-    newExpense.url = newExpense.url.replace(/www\./, '');
-  }
-
-  let encodedURL = this.encodeUrl(newExpense.url); // encode url
-
-  // get url info
-  let item = await api.getURLInfo(encodedURL, newExpense.category);
-  if (item.id) {
-    // increment hits if the url already exists
-    this.urlInfo = item;
-    await this.incrementURLHits();
-  } else {
-    // create a new url and category if it does not already exist
-    this.urlInfo['id'] = newExpense.url;
-
-    //adds categories to the list if applicable
-    if (newExpense.category) {
-      this.urlInfo['category'] = newExpense.category;
-    } else {
-      this.urlInfo['category'] = null;
-    }
-    this.urlInfo['hits'] = 1;
-    await api.createItem(api.TRAINING_URLS, this.urlInfo);
-  }
-} // addURLInfo
-
-/**
  * Calculates the adjusted budget amount for an expense type based on an employee's work status. Returns the adjust
  * amount.
  *
@@ -1022,11 +983,6 @@ async function createNewEntry() {
 
       if (updatedExpense.id) {
         // successfully updates expense
-        // TODO: Only add if training expense type.
-        if (!this.isEmpty(updatedExpense.url) && !this.isEmpty(updatedExpense.category)) {
-          await this.addURLInfo(updatedExpense);
-        }
-
         this.editedExpense['id'] = updatedExpense.id;
         this.emitter.emit('add', updatedExpense);
         this.clearForm();
@@ -1050,12 +1006,6 @@ async function createNewEntry() {
 
     if (updatedExpense.id) {
       // successfully updates expense
-      // TODO: Only add if training expense type. Allow empty category
-      if (!this.isEmpty(updatedExpense.url) && !this.isEmpty(updatedExpense.category)) {
-        // add training url if url and category exist
-        await this.addURLInfo(updatedExpense);
-      }
-
       this.editedExpense['id'] = updatedExpense.id;
       this.emitter.emit('add', updatedExpense);
       this.clearForm();
@@ -1401,15 +1351,6 @@ function hasAccess(employee, expenseType) {
 
   return result;
 } // hasAccess
-
-/**
- * Increment training url hit count.
- */
-async function incrementURLHits() {
-  this.urlInfo.hits = this.urlInfo.hits + 1;
-
-  return await api.updateItem(api.TRAINING_URLS, this.urlInfo);
-} // incrementURLHits
 
 /**
  * Checks if a receipt is required. Returns true if the receipt is required, otherwise returns false.
@@ -2332,7 +2273,6 @@ export default {
   },
   directives: { mask },
   methods: {
-    addURLInfo,
     calcAdjustedBudget,
     checkCoverage,
     clearForm,
@@ -2360,7 +2300,6 @@ export default {
     getRequireURL,
     getURLRules,
     hasAccess,
-    incrementURLHits,
     isEmpty,
     isFullTime,
     isReceiptRequired,
