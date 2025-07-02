@@ -2,24 +2,15 @@
   <div>
     <v-container fluid class="px-1 px-md-4">
       <v-row>
-        <v-col cols="12" xl="2" lg="2" md="3" sm="12" class="my-0 py-0">
-          <v-autocomplete
+        <v-col cols="12" xl="4" lg="4" md="3" sm="12" class="my-0 py-0">
+          <v-text-field
             id="employeesSearch"
-            v-model="search"
-            :custom-filter="employeeFilter"
-            :items="employees"
+            v-model.trim="search"
+            append-inner-icon="mdi-magnify"
+            label="Search (comma separate terms)"
             variant="underlined"
-            label="Search By Employee Name"
-            auto-select-first
-            clearable
-            item-title="text"
-            item-value="value"
-            @update:model-value="refreshDropdownItems()"
-            @click:clear="
-              search = null;
-              refreshDropdownItems();
-            "
-          ></v-autocomplete>
+            single-line
+          />
         </v-col>
         <v-col cols="6" xl="2" lg="2" md="3" sm="6" class="my-0 py-0">
           <v-autocomplete
@@ -84,6 +75,8 @@
         :items="filteredEmployees"
         :sort-by="sortBy"
         :items-per-page="itemsPerPage"
+        :search="search"
+        :custom-filter="employeeFilter"
         class="elevation-1 row-pointer"
         @click:row="handleClick"
         @update:current-items="updateTableDownload($event)"
@@ -188,7 +181,7 @@ const locationSearch = ref(null);
 const locationsDropDown = ref([]);
 const primeSearch = ref(null);
 const primesDropDown = ref([]);
-const search = ref(null); // query text for datatable search fiel)
+const search = ref(null); // query text for datatable search field
 const showInactiveEmployees = ref(false);
 const sortBy = ref([{ key: 'employeeNumber' }]); // sort datatable item)
 const tagsInfo = ref({
@@ -221,12 +214,17 @@ onMounted(() => {
       case 'contract':
         contractSearch.value = requestedFilter.search;
         break;
+      case 'search':
+        search.value = requestedFilter.search;
+        break;
       default:
         break;
     }
     refreshDropdownItems();
     localStorage.removeItem('requestedFilter');
   }
+
+  search.value = search.value ? search.value + ' ' : null; // solution for redirecting from stats dashboard with a filter
 
   // initial set of table download data
   updateTableDownload(filteredEmployees.value);
@@ -372,11 +370,6 @@ function refreshDropdownItems() {
   }
   if (workTypeSearch.value) {
     searchWorkTypes();
-  }
-  if (search.value) {
-    filteredEmployees.value = _filter(filteredEmployees.value, (employee) => {
-      return employee.employeeNumber == search.value;
-    });
   }
   if (tagsInfo.value.selected.length > 0) {
     filteredEmployees.value = _filter(filteredEmployees.value, (employee) => {
