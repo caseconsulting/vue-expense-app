@@ -235,7 +235,7 @@ const periodHoursCompleted = computed(() => {
  * @returns The employees pro-rated hours needed per day
  */
 const proRatedHours = computed(() => {
-  if (props.isYearly) {
+  if (props.isYearly && props.isCalendarYear) {
     return (
       (BONUS_YEAR_TOTAL.value / getWorkDays(props.period.startDate, props.period.endDate, true)) *
       (props.employee.workStatus / 100)
@@ -269,7 +269,8 @@ const remainingWorkDays = computed(() => {
   if (customWorkDayInput.value && Number(customWorkDayInput.value)) {
     remainingDays = customWorkDayInput.value || remainingWorkDays.value;
   } else {
-    remainingDays = getWorkDays(today.value, props.period.endDate) - daysToSubtract;
+    let periodEnd = getEmployeeCurrentProjects(props.employee)?.[0]?.endDate || props.period.endDate;
+    remainingDays = getWorkDays(today.value, periodEnd) - daysToSubtract;
     if (!props.dateIsCurrentPeriod) {
       remainingDays = 0;
     }

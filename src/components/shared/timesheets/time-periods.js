@@ -14,6 +14,7 @@ import {
   endOf,
   DEFAULT_ISOFORMAT
 } from '../../../shared/dateUtils';
+import { getEmployeeCurrentContracts, getEmployeeCurrentProjects } from '../../../shared/employeeUtils.js';
 
 /**
  * Gets the calendar year period.
@@ -45,7 +46,7 @@ export function getCalendarYearPeriods() {
  */
 export function getContractYearPeriods(employee) {
   let period = null;
-  let curContract = _find(employee.contracts, (c) => _find(c.projects, (p) => !p.endDate));
+  let curContract = getEmployeeCurrentContracts(employee)?.[0];
   let contract = _find(store.getters.contracts, (c) => c.id === curContract?.contractId);
   switch (contract.settings?.timesheetsContractViewOption) {
     case '0':
@@ -75,7 +76,7 @@ export function getContractYearPeriods(employee) {
  * @returns Object - The time period
  */
 function _getContractCurrentProjectPeriod(employee) {
-  let project = _getEmployeeCurrentProject(employee);
+  let project = getEmployeeCurrentProjects(employee)?.[0];
   if (!project) return null;
   return _getYearPeriod(project.startDate);
 } // _getContractCurrentProjectPeriod
@@ -96,7 +97,7 @@ function _getContractPoPStartPeriod(contract) {
  * @param contract The contrcat object that the employee is currently on
  */
 function _getContractProjectPeriod(contract, employee) {
-  let employeeProjectId = _getEmployeeCurrentProject(employee)?.projectId;
+  let employeeProjectId = getEmployeeCurrentProjects(employee)?.[0]?.projectId;
   let contractProject = _find(contract.projects, (p) => p.id == employeeProjectId);
   if (contractProject) return _getYearPeriod(contractProject.popStartDate, contractProject.popEndDate);
 }
@@ -137,21 +138,6 @@ function _getYearPeriod(sDate, eDate) {
   // return object
   return { startDate, endDate, title: `${startDateTitle} - ${endDateTitle}` };
 } // _getYearPeriod
-
-/**
- * Gets the current project that is toggled to show for contract year.
- *
- * @param {Object} employee - The employee object
- * @returns Object - The current project to show
- */
-function _getEmployeeCurrentProject(employee) {
-  let currentProject = null;
-  _forEach(employee.contracts, (c) => {
-    let project = _find(c.projects, (p) => !p.endDate);
-    if (project) currentProject = _cloneDeep(project);
-  });
-  return currentProject;
-} // _getEmployeeCurrentProject
 
 export default {
   getCalendarYearPeriods,
