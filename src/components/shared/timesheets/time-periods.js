@@ -14,7 +14,7 @@ import {
   endOf,
   DEFAULT_ISOFORMAT
 } from '../../../shared/dateUtils';
-import { getEmployeeCurrentContracts, getEmployeeCurrentProjects } from '../../../shared/employeeUtils.js';
+import { getEmployeeCurrentContracts, getEmployeeCurrentProjects } from '@/shared/employeeUtils.js';
 
 /**
  * Gets the calendar year period.
