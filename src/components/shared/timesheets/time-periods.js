@@ -88,7 +88,7 @@ function _getContractCurrentProjectPeriod(employee) {
  * @returns Object - The time period
  */
 function _getContractPoPStartPeriod(contract) {
-  return _getYearPeriod(contract.popStartDate);
+  return _getYearPeriod(contract.popStartDate, contract.popEndDate);
 } // _getContractPoPStartPeriod
 
 /**
