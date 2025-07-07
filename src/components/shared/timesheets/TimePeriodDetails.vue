@@ -235,7 +235,7 @@ const periodHoursCompleted = computed(() => {
  * @returns The employees pro-rated hours needed per day
  */
 const proRatedHours = computed(() => {
-  if (props.isYearly && props.isCalendarYear) {
+  if (props.isYearly) {
     return (
       (BONUS_YEAR_TOTAL.value / getWorkDays(props.period.startDate, props.period.endDate, true)) *
       (props.employee.workStatus / 100)
