@@ -269,8 +269,7 @@ const remainingWorkDays = computed(() => {
   if (customWorkDayInput.value && Number(customWorkDayInput.value)) {
     remainingDays = customWorkDayInput.value || remainingWorkDays.value;
   } else {
-    let periodEnd = getEmployeeCurrentProjects(props.employee)?.[0]?.endDate || props.period.endDate;
-    remainingDays = getWorkDays(today.value, periodEnd) - daysToSubtract;
+    remainingDays = getWorkDays(today.value, props.period.endDate) - daysToSubtract;
     if (!props.dateIsCurrentPeriod) {
       remainingDays = 0;
     }
