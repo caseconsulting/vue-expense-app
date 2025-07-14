@@ -359,7 +359,6 @@ async function setDataFromApi(isCalendarYear, isYearly) {
     periods
   });
 
-  console.log(timesheetsData);
 
   if (!hasError(timesheetsData)) {
     timesheets.value = timesheetsData.timesheets;
