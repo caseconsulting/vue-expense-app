@@ -46,7 +46,7 @@ const emitter = inject('emitter');
 const file = ref(null);
 const status = ref(null);
 const PTODownloadLink = ref(
-  'https://consultwithcase-sand.unanet.biz/consultwithcase-sand/action/reports/people/detail/schedule/report?runFrom=S_14'
+  'https://consultwithcase-sand.unanet.biz/consultwithcase-sand/action/reports/people/detail/accrual/search'
 );
 
 // |--------------------------------------------------|
