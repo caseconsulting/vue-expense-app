@@ -1,78 +1,10 @@
 <template>
   <div id="container">
-    <div>
-      <!-- contains control panel and graphs -->
-
-      <v-card id="control-panel">
-        <v-card-title class="beta_header_style">
-          <h2>Control Panel</h2>
-        </v-card-title>
-
-        <v-card-text id="search-filters">
-          <span>General filters</span>
-          <div id="audit-date-filter">
-            <v-text-field
-              v-model="filters.search"
-              label="Search"
-              prepend-inner-icon="mdi-magnify"
-              variant="outlined"
-              density="compact"
-              style="width: 80%"
-            />
-
-            <v-autocomplete
-              id="audit-type-filter"
-              v-model="filters.auditType"
-              :items="auditTypes"
-              label="Audit Type"
-              variant="outlined"
-              density="compact"
-              style="width: 80%"
-            />
-          </div>
-
-          <div id="audit-date-filter">
-            <date-picker
-              v-model="filters.startDate"
-              label="Start Date"
-              variant="outlined"
-              density="compact"
-              clearable
-              style="flex-grow: 1"
-            />
-
-            <date-picker
-              v-model="filters.endDate"
-              label="End Date"
-              variant="outlined"
-              density="compact"
-              clearable
-              style="flex-grow: 1"
-            />
-          </div>
-
-          <div style="width: 80%"><v-divider /></div>
-          <span> {{ filters.auditType }} filters </span>
-
-          <div id="control-panel-settings">
-            <v-autocomplete
-              v-model="filters.notifType"
-              :items="displayNotifTypes"
-              item-value=""
-              variant="outlined"
-              density="compact"
-              style="grid-column: span 2; width: 80%"
-            />
-          </div>
-
-          <div style="width: 80%"><v-divider /></div>
-          <v-btn onclick="query()" :disabled="loading.audits"> Search </v-btn>
-        </v-card-text>
-      </v-card>
+    <div id="right-side">
       <!-- contains table -->
       <v-card id="table">
         <v-card-title class="beta_header_style">
-          <h2>Audits</h2>
+          <h2>Employee History</h2>
         </v-card-title>
         <v-data-table :headers="headers" :items="displayAudits" :loading="loading.audits" multi-sort>
           <template #loading>
@@ -85,38 +17,20 @@
 </template>
 
 <script setup>
-import { AxiosError } from 'axios';
+// import { AxiosError } from 'axios';
 import dayjs from 'dayjs';
 import { onBeforeMount, reactive, ref, watch } from 'vue';
-import { useStore } from 'vuex';
-import DatePicker from '../components/shared/DatePicker.vue';
-import api from '../shared/api';
-import { getEmployeeByID } from '../shared/employeeUtils';
+// import { useStore } from 'vuex';
+// import api from '../shared/api';
+// import { getEmployeeByID } from '../shared/employeeUtils';
 import { NotificationReason } from '../shared/models/audits/notifications';
-import { updateStoreEmployees } from '../utils/storeUtils';
-const store = useStore();
+// import { updateStoreEmployees } from '../utils/storeUtils';
+// const store = useStore();
 
 /**
  * A row in the data table that represents a notification audit
  * @typedef {Notification & { name: string, date: string }} NotificationRow
  */
-
-// *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
-// ❃                                                 ❃
-// ❇                    CONSTANTS                    ❇
-// ❉                                                 ❉
-// *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
-
-const auditTypes = ['Profile', 'Expense', 'Login', 'Notification', 'Error'];
-const displayNotifTypes = [
-  'Expense Rejection',
-  'Expense Revisal',
-  'Timesheet (weekly)',
-  'Timesheet (monthly)',
-  'Training Hours',
-  'High Five',
-  'None'
-];
 
 // *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
 // ❃                                                 ❃
@@ -162,12 +76,8 @@ const loading = reactive({
 const headers = ref([
   { title: 'Date', key: 'date' },
   { title: 'Employee', key: 'name' },
-  {
-    title: 'Type',
-    key: 'reason',
-    value: (notif) => notifTypeMap(notif.reason)
-  },
-  { title: 'Sent to', key: 'sentTo' }
+  { title: 'Type', key: 'reason' },
+  { title: 'Value Changed', key: 'changed' }
 ]);
 
 // *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
@@ -237,42 +147,6 @@ async function query() {
   //     break;
   // }
 
-  const res = await api.getAudits({
-    startDate: filters.startDate,
-    endDate: filters.endDate,
-    notifReason: notifTypeMap(filters.notifType)
-  });
-
-  if (res instanceof AxiosError) {
-    console.error('Server responded with error:', res);
-  } else {
-    try {
-      if (res) {
-        loadedAudits.value = res;
-      }
-      let employees = store.getters.employees;
-      while (!employees) {
-        await updateStoreEmployees();
-        employees = store.getters.employees;
-      }
-
-      loadedAudits.value = loadedAudits.value.map((audit) => {
-        const empId = audit.receiverId;
-        const emp = getEmployeeByID(empId, employees);
-
-        return {
-          ...audit,
-          name: `${emp.firstName} ${emp.lastName}`,
-          date: dayjs(audit.createdAt).format('MM/DD/YYYY HH:mm')
-        };
-      });
-
-      filterDisplayAudits();
-    } catch (err) {
-      console.error('Error handling resposne:', err);
-    }
-  }
-
   loading.audits = false;
 }
 
@@ -338,6 +212,31 @@ watch(filters, filterDisplayAudits, { deep: true });
 </script>
 
 <style scoped>
+#container {
+  display: flex;
+  flex-flow: row nowrap;
+  place-content: center space-around;
+  place-items: flex-start center;
+  gap: 16px;
+}
+
+#left-side {
+  min-width: min(300px, 100%);
+  flex-basis: 40%;
+
+  display: flex;
+  flex-flow: column nowrap;
+  place-content: center;
+  place-items: center;
+  text-align: center;
+  gap: 16px;
+}
+
+#right-side {
+  flex-grow: 1;
+  text-align: center;
+}
+
 #control-panel,
 #graphs,
 #table {
@@ -393,5 +292,30 @@ watch(filters, filterDisplayAudits, { deep: true });
   place-content: center;
   place-items: start center;
   gap: 16px;
+}
+
+/* vuetify's md breakpoint */
+@media (max-width: 960px) {
+  #container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  #left-side {
+    flex: 1 1 auto;
+    flex-flow: row nowrap;
+    align-items: start;
+  }
+
+  #right-side {
+    width: 100%;
+  }
+}
+
+/* vuetify's sm breakpoint */
+@media (max-width: 600px) {
+  #left-side {
+    flex-flow: column nowrap;
+  }
 }
 </style>
