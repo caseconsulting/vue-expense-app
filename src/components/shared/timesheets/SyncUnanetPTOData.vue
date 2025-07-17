@@ -32,7 +32,7 @@
           <v-btn color="primary" variant="tonal" @click="upload()" append-icon="mdi-upload" :disabled="!file">
             Submit
           </v-btn>
-          <p :class="`my-2 ml-6 text-${statusClass}`">{{ statusText }}</p>
+          <p :class="`my-2 ml-6 text-${statusClass} font-weight-bold`">{{ statusText }}</p>
         </v-row>
       </v-col>
     </v-card-text>
@@ -42,6 +42,7 @@
 <script setup>
 import { ref, inject, computed } from 'vue';
 import api from '@/shared/api.js';
+import { AxiosError } from 'axios';
 const emitter = inject('emitter');
 const file = ref(null);
 const status = ref(null);
@@ -57,20 +58,46 @@ const PTODownloadLink = ref(
 
 async function upload() {
   status.value = undefined;
-  let resp = await api.uploadUnanetBalances(file.value);
-  status.value = !!resp.originalname;
+  const resp = await api.uploadUnanetBalances(file.value);
+
+  if (resp instanceof AxiosError) {
+    const info = resp.response.data;
+
+    switch (info.error) {
+      // arbitrary error names from the backend, specify others here for custom messages
+      case 'missing columns':
+        // contains missing column names in the metadata
+        status.value = `File is missing required columns: ${info.meta.join(', ')}`;
+        break;
+
+      // default to backend error message
+      default:
+        status.value = info.message;
+    }
+  } else {
+    status.value = true;
+  }
 }
 
 const statusText = computed(() => {
-  if (status.value === undefined) return 'Uploading file, please wait...';
-  if (status.value === true) return 'Upload successful!';
-  if (status.value === false) return 'Upload failed, please refresh page and try again';
-  return '';
+  if (typeof status.value == 'string') return status.value;
+
+  switch (status.value) {
+    case undefined:
+      return 'Uploading file, please wait...';
+    case true:
+      return 'Upload successful!';
+    case false:
+      return 'Upload failed, please refresh page and try again';
+    default:
+      return '';
+  }
 });
 
 const statusClass = computed(() => {
-  if (status.value === true) return 'success font-weight-bold';
-  if (status.value === false) return 'error font-weight-bold';
+  if (typeof status.value == 'string') return 'error';
+  if (status.value === true) return 'success';
+  if (status.value === false) return 'error';
   return '';
 });
 
