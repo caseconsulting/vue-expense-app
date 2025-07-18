@@ -7,13 +7,27 @@
           <h2>Expense History</h2>
         </v-card-title>
         <v-container>
-          <v-sparkline :labels="labels" :model-value="value" line-width="1" padding="16" autodraw></v-sparkline>
+          <v-timeline truncate-line="both" align="start" side="end" direction="horizontal">
+            <v-timeline-item v-for="data in dummyData" :key="data.id">
+              <template v-slot:opposite>
+                <h4 class="rotate">{{ data.status }}</h4>
+              </template>
+              <div>{{ data.date }}</div>
+              <template v-slot:icon>
+                <v-btn density="compact" variant="text" icon="mdi-abacus">
+                  <v-tooltip activator="parent" location="right">
+                    <span>Click for more info</span>
+                  </v-tooltip>
+                </v-btn>
+              </template>
+            </v-timeline-item>
+          </v-timeline>
         </v-container>
       </v-card>
     </div>
     <div>
       <v-card>
-        <v-card-title class="beta_header_style">Expense at {{ labels[0] }}</v-card-title>
+        <v-card-title class="beta_header_style">Expense at [date]</v-card-title>
         <v-data-table :headers="headers" :items="displayAudits" :loading="loading.audits" multi-sort>
           <template #loading>
             <v-skeleton-loader type="table-row" />
@@ -69,8 +83,11 @@ const loadedAudits = ref([]);
 // ❉                                                 ❉
 // *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
 
-let labels = ref(['created', '3/15/25', '4/28/25', '5/30/25', 'reimbursed']); //dummy data for the graph
-let value = ref([200, 675, 410, 390, 310]);
+let dummyData = ref([
+  { date: '3/15/25', status: 'Created', id: 0 },
+  { date: '4/28/25', status: 'Updated', id: 1 },
+  { date: '5/30/25', status: 'Deleted', id: 3 }
+]); //dummy data for the graph
 
 // *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
 // ❃                                                 ❃
@@ -236,23 +253,6 @@ watch(filters, filterDisplayAudits, { deep: true });
   gap: 16px;
 }
 
-#left-side {
-  min-width: min(300px, 100%);
-  flex-basis: 40%;
-
-  display: flex;
-  flex-flow: column nowrap;
-  place-content: center;
-  place-items: center;
-  text-align: center;
-  gap: 16px;
-}
-
-#right-side {
-  flex-grow: 1;
-  text-align: center;
-}
-
 #control-panel,
 #graphs,
 #table {
@@ -276,37 +276,8 @@ watch(filters, filterDisplayAudits, { deep: true });
   text-align: center;
 }
 
-#search-filters {
-  width: 100%;
-  padding-left: 16px;
-  padding-right: 16px;
-
-  display: flex;
-  flex-flow: column nowrap;
-  place-items: center;
-  gap: 8px;
-}
-
-#control-panel-settings {
-  width: 100%;
-  padding: 0px;
-  align-self: center;
-  justify-self: center;
-
-  display: grid;
-  grid-template-columns: repeat(2, minmax(100px, 1fr));
-  place-content: center;
-  place-items: center;
-  gap: 0;
-}
-
-#audit-date-filter {
-  width: 80%;
-
-  display: flex;
-  flex-flow: row nowrap;
-  place-content: center;
-  place-items: start center;
-  gap: 16px;
+.rotate {
+  transform-origin: 45% 75%;
+  transform: rotate(270deg);
 }
 </style>

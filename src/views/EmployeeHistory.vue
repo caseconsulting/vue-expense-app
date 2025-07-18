@@ -1,11 +1,33 @@
 <template>
-  <div id="container">
-    <div id="right-side">
+  <div>
+    <div>
       <!-- contains table -->
       <v-card id="table">
         <v-card-title class="beta_header_style">
           <h2>Employee History</h2>
         </v-card-title>
+        <v-container>
+          <v-timeline truncate-line="both" align="start" side="end" direction="horizontal">
+            <v-timeline-item v-for="data in dummyData" :key="data.id">
+              <template v-slot:opposite>
+                <h4 class="rotate">{{ data.status }}</h4>
+              </template>
+              <div>{{ data.date }}</div>
+              <template v-slot:icon>
+                <v-btn density="compact" variant="text" icon="mdi-abacus">
+                  <v-tooltip activator="parent" location="right">
+                    <span>Click for more info</span>
+                  </v-tooltip>
+                </v-btn>
+              </template>
+            </v-timeline-item>
+          </v-timeline>
+        </v-container>
+      </v-card>
+    </div>
+    <div>
+      <v-card>
+        <v-card-title class="beta_header_style">Expense at [date]</v-card-title>
         <v-data-table :headers="headers" :items="displayAudits" :loading="loading.audits" multi-sort>
           <template #loading>
             <v-skeleton-loader type="table-row" />
@@ -53,6 +75,18 @@ const filters = reactive({
  * @type {import('vue').Ref<NotificationRow[]>}
  */
 const loadedAudits = ref([]);
+
+// *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
+// ❃                                                 ❃
+// ❇                    CONSTANTS                    ❇
+// ❉                                                 ❉
+// *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
+
+let dummyData = ref([
+  { date: '3/15/25', status: 'Created', id: 0 },
+  { date: '4/28/25', status: 'Updated', id: 1 },
+  { date: '5/30/25', status: 'Deleted', id: 3 }
+]); //dummy data for the graph
 
 // *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
 // ❃                                                 ❃
@@ -220,23 +254,6 @@ watch(filters, filterDisplayAudits, { deep: true });
   gap: 16px;
 }
 
-#left-side {
-  min-width: min(300px, 100%);
-  flex-basis: 40%;
-
-  display: flex;
-  flex-flow: column nowrap;
-  place-content: center;
-  place-items: center;
-  text-align: center;
-  gap: 16px;
-}
-
-#right-side {
-  flex-grow: 1;
-  text-align: center;
-}
-
 #control-panel,
 #graphs,
 #table {
@@ -260,62 +277,8 @@ watch(filters, filterDisplayAudits, { deep: true });
   text-align: center;
 }
 
-#search-filters {
-  width: 100%;
-  padding-left: 16px;
-  padding-right: 16px;
-
-  display: flex;
-  flex-flow: column nowrap;
-  place-items: center;
-  gap: 8px;
-}
-
-#control-panel-settings {
-  width: 100%;
-  padding: 0px;
-  align-self: center;
-  justify-self: center;
-
-  display: grid;
-  grid-template-columns: repeat(2, minmax(100px, 1fr));
-  place-content: center;
-  place-items: center;
-  gap: 0;
-}
-
-#audit-date-filter {
-  width: 80%;
-
-  display: flex;
-  flex-flow: row nowrap;
-  place-content: center;
-  place-items: start center;
-  gap: 16px;
-}
-
-/* vuetify's md breakpoint */
-@media (max-width: 960px) {
-  #container {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  #left-side {
-    flex: 1 1 auto;
-    flex-flow: row nowrap;
-    align-items: start;
-  }
-
-  #right-side {
-    width: 100%;
-  }
-}
-
-/* vuetify's sm breakpoint */
-@media (max-width: 600px) {
-  #left-side {
-    flex-flow: column nowrap;
-  }
+.rotate {
+  transform-origin: 45% 75%;
+  transform: rotate(270deg);
 }
 </style>
