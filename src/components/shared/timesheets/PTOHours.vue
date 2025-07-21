@@ -39,7 +39,7 @@
     <div v-if="Object.keys(ptoBalances || []).length === 0" class="my-4">No balances to display</div>
     <div v-for="jobcode in sortedBalancesByDuration" :key="jobcode">
       <div v-if="showMore || ptoBalances[jobcode] !== 0" class="d-flex justify-space-between my-3">
-        <div class="mr-3">{{ jobcode }}</div>
+        <div class="mr-3">{{ formatJobCode(jobcode) }}</div>
         <div class="dotted-line"></div>
         <div class="ml-3">{{ convertToHours(ptoBalances[jobcode].value ?? ptoBalances[jobcode]) }}h</div>
       </div>
@@ -49,7 +49,7 @@
           :key="subcode"
           class="d-flex justify-space-between ml-6 my-3"
         >
-          <div class="mr-3 font-italic">{{ subcode }}</div>
+          <div class="mr-3 font-italic">{{ formatJobCode(subcode) }}</div>
           <div class="dotted-line"></div>
           <div class="ml-3 mr-1 font-italic">{{ convertToHours(ptoBalances[jobcode].items[subcode]) }}h</div>
         </div>
@@ -82,6 +82,7 @@ import PTOCashOutForm from '@/components/shared/PTOCashOutForm.vue';
 import PTOPlanningForm from '@/components/shared/PTOPlanningForm.vue';
 import { computed, inject, ref, onMounted, onBeforeUnmount } from 'vue';
 import { openLink } from '@/utils/utils';
+import capitalize from 'lodash/capitalize';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -157,6 +158,19 @@ function convertToHours(seconds) {
     ?.toFixed(2)
     ?.replace(/[.,]00$/, ''); // removes decimals if a whole number
 } // convertToHours
+
+/**
+ * Changes casing of job codes to be more natural looking for reading
+
+ * @param {string} jobcode The job code key as found in ptoBalances
+ * @returns {string} The formatted job code
+ */
+function formatJobCode(jobcode) {
+  return jobcode
+    .split('_') // split words
+    .map((str) => (str != 'PTO' ? capitalize(str) : str)) // only capitalize first letter
+    .join(' '); // separate with spaces
+}
 </script>
 
 <style scoped>

@@ -12,12 +12,7 @@
     <v-card-text class="d-flex justify-center">
       <v-col>
         <v-row>
-          <h3>1. Download PTO report from Unanet</h3>
-        </v-row>
-        <v-row class="mt-6 ml-6">
-          <v-btn :href="PTODownloadLink" target="_blank" append-icon="mdi-open-in-new" color="primary" variant="tonal">
-            OPEN UNANET
-          </v-btn>
+          <h3>1. Get PTO report from daily Unanet email</h3>
         </v-row>
         <v-row class="mt-12">
           <h3>2. Submit the file here</h3>
@@ -46,9 +41,9 @@ import { AxiosError } from 'axios';
 const emitter = inject('emitter');
 const file = ref(null);
 const status = ref(null);
-const PTODownloadLink = ref(
-  'https://consultwithcase-sand.unanet.biz/consultwithcase-sand/action/reports/people/detail/accrual/search'
-);
+// const PTODownloadLink = ref(
+//   'https://consultwithcase-sand.unanet.biz/consultwithcase-sand/action/reports/people/detail/accrual/search'
+// );
 
 // |--------------------------------------------------|
 // |                                                  |
