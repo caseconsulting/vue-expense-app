@@ -14,14 +14,14 @@
               <b>Granted: </b>{{ getGrantedDate(clearance) }}
             </p>
           </div>
-          <p v-if="!isEmpty(getGrantingOrg(clearance))" class="gray-text ml-6">
+          <p v-if="!isEmpty(getGrantingOrg(clearance))" class="gray-text ml-6 mb-0">
             <b>Granting Org: </b>{{ getGrantingOrg(clearance) }}
           </p>
-          <p v-if="!isEmpty(getBadgeNumber(clearance))" class="gray-text ml-6">
+          <p v-if="!isEmpty(getBadgeNumber(clearance))" class="gray-text ml-6 mb-0">
             <b>Badge Number: </b>{{ getBadgeNumber(clearance) }}
           </p>
-          <p class="mb-1" v-if="!isEmpty(getBadgeExpirationDate(clearance))">
-            <b>Expiration: </b>{{ getBadgeExpirationDate(clearance) }}
+          <p v-if="!isEmpty(getBadgeExpirationDate(clearance))" class="gray-text ml-6 mb-0">
+            <b>Badge Expiration: </b>{{ getBadgeExpirationDate(clearance) }}
           </p>
           <p class="mb-1" v-if="toggleModal && !isEmpty(getAdjudicationDates(clearance))">
             <b>Adjudication Dates: </b>{{ getAdjudicationDates(clearance) }}
