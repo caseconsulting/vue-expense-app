@@ -41,7 +41,7 @@
           <div v-else>
             <time-period-hours
               :employee="clonedEmployee"
-              :timesheets="timesheets || {}"
+              :timesheets="timesheets || []"
               :ptoBalances="ptoBalances || {}"
               :supplementalData="supplementalData || {}"
               :KEYS="KEYS"
