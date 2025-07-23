@@ -17,7 +17,6 @@ import Reports from '@/views/Reports.vue';
 import Callback from '@/views/Callback';
 import EmployeeHome from '@/views/MyBudgets.vue';
 import Home from '@/views/Home.vue';
-import TrainingAnalytics from '@/views/TrainingAnalytics';
 import PageNotFound from '@/views/PageNotFound.vue';
 import Contracts from '@/views/Contracts.vue';
 import EmployeeBeta from '@/views/EmployeeBeta.vue';
@@ -143,12 +142,6 @@ const router = createRouter({
       path: '/callback',
       name: 'callback',
       component: Callback
-    },
-    {
-      path: '/training',
-      name: 'training',
-      component: TrainingAnalytics,
-      beforeEnter: requireAuth
     },
     {
       path: '/employee/:id',
