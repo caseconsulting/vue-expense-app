@@ -9,6 +9,9 @@
       <div class="text-center my-3">Loading Leaderboard...</div>
       <v-progress-linear :indeterminate="true"></v-progress-linear>
     </div>
+
+    <div v-else-if="error" class="text-center my-3">{{ error }}</div>
+
     <v-carousel v-else hide-delimiters height="155" show-arrows="hover">
       <v-carousel-item v-for="(leaderGroup, index) in leaderGroups" :key="index">
         <div v-if="index == 0" class="mx-1">
@@ -45,11 +48,17 @@ import api from '@/shared/api';
 import _sortBy from 'lodash/sortBy';
 import _reverse from 'lodash/reverse';
 import { loadBasecampAvatars } from '@/utils/basecamp';
+import { AxiosError } from 'axios';
+/** @import { Ref } from 'vue' */
+
 const LOCAL_STORAGE_KEY = `leaderboard-${getTodaysDate()}`;
 const store = useStore();
 const loading = ref(true);
+/** @type {Ref<string>} */
+const error = ref(null);
 const currentUserData = ref(null);
 const leaderGroups = ref([]);
+
 /**
  * onBeforeMount lifecycle hook
  */
@@ -62,7 +71,16 @@ onBeforeMount(async () => {
     leaderboardData = JSON.parse(localStorageData);
   } else {
     leaderboardData = await api.getLeaderboard();
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(leaderboardData));
+
+    if (leaderboardData instanceof AxiosError) {
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
+      loading.value = false;
+      error.value = 'Error loading leaderboard';
+      return;
+    } else {
+      error.value = null;
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(leaderboardData));
+    }
   }
 
   // get employees data
