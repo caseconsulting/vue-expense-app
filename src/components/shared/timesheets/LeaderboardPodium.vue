@@ -93,7 +93,7 @@ onBeforeMount(async () => {
   }
 
   // group leader data
-  groupLeaderboardData(leaderboardData);
+  groupLeaderboardData(leaderboardData.leaderboard);
 
   loading.value = false;
 });
