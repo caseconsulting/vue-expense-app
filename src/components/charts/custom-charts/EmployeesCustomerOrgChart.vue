@@ -112,10 +112,16 @@ function fillData() {
     },
     onClick: (x, y) => {
       if (_first(y)) {
-        let index = _first(y).index;
-        let labelClicked = chartData.value.labels[index];
-        localStorage.setItem('requestedDataType', 'directorates');
-        localStorage.setItem('requestedFilter', labelClicked);
+        let directorateIndex = _first(y).index;
+        let orgIndex = _first(y).datasetIndex;
+        let directorate = chartData.value.labels[directorateIndex];
+        let org = chartData.value.datasets[orgIndex].label;
+        if (directorate === org) org = null;
+        localStorage.setItem('requestedDataType', 'contracts');
+        localStorage.setItem(
+          'requestedFilter',
+          JSON.stringify({ type: 'search', search: getChartList(directorate, org) })
+        );
         router.push({
           path: '/reports',
           name: 'reports'
@@ -245,4 +251,27 @@ function addDirectorate(c, p) {
 function getOrgBreakdown(item) {
   return item.org3 || item.org2 || item.directorate;
 } // getOrgBreakdown
+
+/**
+ * Gets the employees under the directorate and org
+ *
+ * @param string directorate - The directorate
+ * @param string org - The org
+ */
+function getChartList(directorate, org) {
+  let contracts = store.getters.contracts;
+  let employees = store.getters.employees;
+  let chartList = [];
+  _forEach(contracts, (c) => {
+    _forEach(c.projects, (p) => {
+      let nextOrg = getOrgBreakdown(p) ?? getOrgBreakdown(c);
+      if ((org == null || nextOrg === org) && p.directorate === directorate) {
+        _forEach(getProjectCurrentEmployees(c, p, employees), (e) => {
+          chartList.push(e.fullName ?? `${e.firstName} ${e.lastName}`);
+        });
+      }
+    });
+  });
+  return chartList;
+}
 </script>

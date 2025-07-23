@@ -206,7 +206,7 @@ onBeforeUnmount(() => {
  * @returns Boolean - Whether or not the date is in the current month
  */
 const dateIsCurrentPeriod = computed(() => {
-  return periodIndex.value === props.timesheets.length - 1;
+  return periodIndex.value === Object.keys(props.timesheets).length - 1;
 }); // dateIsCurrentPeriod
 
 /**
@@ -215,7 +215,7 @@ const dateIsCurrentPeriod = computed(() => {
  * @returns Object - Key Value pairs of jobcodes and their durations
  */
 const timeData = computed(() => {
-  let timesheets = { ...props.timesheets[periodIndex.value].timesheets };
+  let timesheets = { ...props.timesheets[periodIndex.value]?.timesheets };
   // searching store employees fixes bug where switching user profiles erases legacy job codes
   let legacyCodes = props.employee.legacyJobCodes;
   legacyCodes = legacyCodes || store.getters.employees?.find((e) => e.id === props.employee.id)?.legacyJobCodes;
@@ -260,7 +260,7 @@ const timeData = computed(() => {
  */
 const supplementalDataWithPlan = computed(() => {
   let data = { ...props.supplementalData };
-  data.nonBillables = [...data.nonBillables, 'Planned PTO', 'Planned Holiday'];
+  data.nonBillables = [...(data.nonBillables ?? []), 'Planned PTO', 'Planned Holiday'];
   return data;
 });
 

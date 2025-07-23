@@ -87,6 +87,12 @@
             {{ getBadgeExpiration(item.clearances, item) }}
           </p>
         </template>
+        <!-- BI Dates Slot -->
+        <template v-slot:[`item.daysSinceBI`]="{ item }">
+          <p :class="{ inactive: item.workStatus <= 0 }" class="mb-0">
+            {{ daysSinceBI(item.clearances, item) }}
+          </p>
+        </template>
         <!-- Email Name Item Slot -->
         <template v-slot:[`item.email`]="{ item }">
           <p :class="{ inactive: item.workStatus <= 0 }" class="mb-0">
@@ -106,8 +112,9 @@ import _map from 'lodash/map';
 import _join from 'lodash/join';
 import _sortBy from 'lodash/sortBy';
 import _filter from 'lodash/filter';
+import _isEmpty from 'lodash/isEmpty';
 import { employeeFilter } from '@/shared/filterUtils';
-import { add, format, getTodaysDate } from '@/shared/dateUtils';
+import { add, format, getTodaysDate, maximum, difference } from '@/shared/dateUtils';
 import { getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
 import { onMounted, ref, inject, watch } from 'vue';
 import { useStore } from 'vuex';
@@ -146,10 +153,15 @@ const headers = ref([
     key: 'badgeExpiration'
   },
   {
+    title: 'Days Since Last BI',
+    key: 'daysSinceBI'
+  },
+  {
     title: 'Email',
     key: 'email'
   }
 ]); // datatable headers
+
 const badgeExpirationDateSearch = ref(null);
 const badgeExpirations = ref([]);
 const clearanceSearch = ref(null);
@@ -203,14 +215,12 @@ onMounted(() => {
  */
 function getBadgeExpiration(clearances, item) {
   let dates = [];
-  let fDate = 100000000000000000;
 
   // used for sorting... only store the lowest date (closest to expire)
   _forEach(clearances, (clearance) => {
     if (clearance.badgeExpirationDate) {
       let newDate = parseInt(format(clearance.badgeExpirationDate, null, 'X')); // seconds timestamp -> int
       dates.push(newDate);
-      if (newDate < fDate) fDate = newDate;
     }
   });
 
@@ -221,10 +231,25 @@ function getBadgeExpiration(clearances, item) {
     return format(date, 'X', 'MMM Do, YYYY');
   });
 
-  item.badgeExpiration = fDate;
+  let datesString = _join(dates, ' | ');
 
-  return _join(dates, ' | ');
+  item.badgeExpiration = datesString;
+
+  return datesString;
 } // getBadgeExpiration
+
+function daysSinceBI(clearances, item) {
+  let days = null;
+  if (clearances) {
+    let biDates = clearances.map((c) => c.biDates).flat();
+    if (!_isEmpty(biDates)) {
+      let latestBI = maximum(biDates);
+      days = difference(getTodaysDate(), latestBI, 'day');
+    }
+  }
+  item.daysSinceBI = days;
+  return days;
+} // daysSinceBI
 
 /**
  * Returns the expiration dates for all clearances.
