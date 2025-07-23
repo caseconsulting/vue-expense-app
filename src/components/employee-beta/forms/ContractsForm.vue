@@ -202,7 +202,12 @@
               </v-col>
 
               <v-col v-if="userIsAdminOrManager" :cols="isMobile() ? '12' : '4'">
-                <v-text-field v-model="project.contractHours" label="Contract Hours" clearable>
+                <v-text-field
+                  v-model="project.contractHours"
+                  @update:model-value="contractHoursUpdater(project.contractHours, index, projIndex)"
+                  label="Contract Hours"
+                  clearable
+                >
                   <template #append-inner>
                     <div>
                       <v-icon class="ml-1" color="grey-darken-1"> mdi-information </v-icon>
@@ -576,4 +581,16 @@ function getProjectsDropdownItems(contract) {
 function parseEventDate(event) {
   return format(event.target, null, 'YYYY-MM-DD');
 } // parseEventDate
+
+/**
+ * Handle specific case of contractHours being an empty string on a contract,
+ * which crashes the timesheets widget.
+ *
+ * @param value of the contractHours
+ * @param contractIndex index of the contract being edited
+ * @param projectIndex index of the project being edited
+ */
+function contractHoursUpdater(value, contractIndex, projectIndex) {
+  if (value === '') editedContracts.value[contractIndex].projects[projectIndex].contractHours = undefined;
+}
 </script>
