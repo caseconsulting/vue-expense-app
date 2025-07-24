@@ -27,6 +27,7 @@
       :employee="employee"
       :timeData="timeData"
       :periodType="periodType"
+      :title="title"
       class="ma-2"
     ></add-job-code>
     <div v-if="Object.entries(timeData || {})?.length === 0" class="my-3">No job codes for this time period</div>
@@ -34,7 +35,8 @@
       <div v-for="(duration, jobcode) in timeData" :key="jobcode">
         <div
           v-if="
-            !isYearly || showNonBillables || (!showNonBillables && !supplementalData.nonBillables.includes(jobcode))
+            (duration.title == null || duration.title == title) &&
+            (!isYearly || showNonBillables || (!showNonBillables && !supplementalData.nonBillables.includes(jobcode)))
           "
           :class="isYearly && supplementalData.nonBillables.includes(jobcode) ? 'text-grey' : ''"
           class="d-flex justify-space-between my-3"
@@ -42,7 +44,7 @@
           <div class="mr-3 truncate">{{ jobcode }}</div>
           <div class="dotted-line"></div>
           <div class="d-flex align-center ml-3">
-            <div>{{ formatNumber(duration / 60 / 60) }}h</div>
+            <div>{{ formatNumber((duration.duration ?? duration) / 60 / 60) }}h</div>
             <v-btn
               v-if="showDelete(jobcode)"
               icon
@@ -87,7 +89,15 @@ import { useStore } from 'vuex';
 // |                                                  |
 // |--------------------------------------------------|
 
-const props = defineProps(['employee', 'isCalendarYear', 'isYearly', 'supplementalData', 'timeData', 'periodType']);
+const props = defineProps([
+  'employee',
+  'isCalendarYear',
+  'isYearly',
+  'supplementalData',
+  'timeData',
+  'title',
+  'periodType'
+]);
 const emitter = inject('emitter');
 const store = useStore();
 
