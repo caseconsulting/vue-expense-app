@@ -107,12 +107,17 @@
           :key="timeData"
           :jobcodes="timeData || {}"
           :nonBillables="isYearly ? supplementalDataWithPlan.nonBillables : null"
-        ></timesheets-chart>
+        />
         <!-- End Timesheets Donut Chart -->
       </v-col>
       <!-- Time Period Details -->
       <v-col :order="$vuetify.display.mdAndUp ? 2 : 3" cols="12" md="6" lg="6" xl="6" xxl="6" class="pa-1">
         <v-skeleton-loader v-if="timePeriodLoading" type="list-item@4" />
+
+        <div v-else-if="!timesheets[periodIndex]" class="d-flex align-center justify-center">
+          Couldn't load time period info
+        </div>
+
         <time-period-details
           v-else
           :key="timeData"
@@ -290,6 +295,8 @@ function showContractYear() {
  * Refreshes PTO plan data
  */
 function refreshPtoPlan() {
+  if (props.timesheets.length == 0) return;
+
   // sum up and save the results of plan within time range
   let startDate = props.timesheets[periodIndex.value].startDate;
   let endDate = props.timesheets[periodIndex.value].endDate;
