@@ -84,6 +84,7 @@ import { updateStoreContracts, updateStoreTags } from '@/utils/storeUtils';
 import { getCalendarYearPeriods, getContractYearPeriods } from './time-periods';
 import { getTodaysDate } from '@/shared/dateUtils.js';
 import { userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
+import { AxiosError } from 'axios';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -358,6 +359,13 @@ async function setDataFromApi(isCalendarYear, isYearly) {
     unanetPersonKey: clonedEmployee.value.unanetPersonKey,
     periods
   });
+
+  if (timesheetsData instanceof AxiosError) {
+    const err = timesheetsData;
+    errorMessage.value = err.response.data;
+  } else {
+    errorMessage.value = null;
+  }
 
   if (!hasError(timesheetsData)) {
     timesheets.value = timesheetsData.timesheets;
