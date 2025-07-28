@@ -157,6 +157,7 @@
 import TimesheetsChart from '@/components/charts/custom-charts/TimesheetsChart.vue';
 import TimePeriodDetails from '@/components/shared/timesheets/TimePeriodDetails.vue';
 import TimePeriodJobCodes from '@/components/shared/timesheets/TimePeriodJobCodes.vue';
+import { getEmployeeCurrentContracts } from '@/shared/employeeUtils';
 import { isAfter, isBefore, isSameOrBefore, getTodaysDate } from '@/shared/dateUtils';
 import _find from 'lodash/find';
 import _forEach from 'lodash/forEach';
@@ -286,7 +287,7 @@ let periodType = computed(() => {
  * @returns Boolean - True if an admin has selected to show a users contract year for a project.
  */
 function showContractYear() {
-  let empCurContract = _find(props.employee.contracts, (c) => _find(c.projects, (p) => !p.endDate));
+  let empCurContract = getEmployeeCurrentContracts(props.employee)?.[0];
   let contract = _find(store.getters.contracts, (c) => c.id === empCurContract?.contractId);
   return contract?.settings?.timesheetsContractViewOption;
 } // showContractYear
