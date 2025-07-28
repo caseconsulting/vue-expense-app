@@ -108,7 +108,7 @@
           :jobcodes="timeData || {}"
           :nonBillables="isYearly ? supplementalDataWithPlan.nonBillables : null"
           :title="timesheets[periodIndex].title"
-        >
+        />
         <!-- End Timesheets Donut Chart -->
       </v-col>
       <!-- Time Period Details -->
