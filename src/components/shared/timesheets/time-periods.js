@@ -46,6 +46,7 @@ export function getCalendarYearPeriods() {
 export function getContractYearPeriods(employee) {
   let period = null;
   let curContract = _find(employee.contracts, (c) => _find(c.projects, (p) => !p.endDate));
+  console.log(employee.contracts);
   let contract = _find(store.getters.contracts, (c) => c.id === curContract?.contractId);
   switch (contract.settings?.timesheetsContractViewOption) {
     case '0':
@@ -96,8 +97,9 @@ function _getContractPoPStartPeriod(contract) {
  * @param contract The contrcat object that the employee is currently on
  */
 function _getContractProjectPeriod(contract, employee) {
-  let employeeProjectId = _getEmployeeCurrentProject(employee)?.projectId;
-  let contractProject = _find(contract.projects, (p) => p.id == employeeProjectId);
+  let allProjects = employee.contracts.map((c) => c.projects);
+  console.log(allProjects);
+  let contractProject = _find(allProjects, (p) => !p.endDate);
   if (contractProject) return _getYearPeriod(contractProject.popStartDate, contractProject.popEndDate);
 }
 
