@@ -117,10 +117,11 @@ import {
   setYear,
   endOf,
   DEFAULT_ISOFORMAT
-} from '../shared/dateUtils';
+} from '@/shared/dateUtils';
 import { ref, onBeforeMount, computed, watch, inject } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import packageJson from '~/package.json';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -232,6 +233,7 @@ function getAnniversary(date) {
  * Create the events to populate the activity feed
  */
 async function createEvents() {
+  const now = getTodaysDate();
   loadingEvents.value = true;
   if (store.getters.events) {
     events.value = store.getters.events;
@@ -249,6 +251,17 @@ async function createEvents() {
   _forEach(employees.value, (employee) => {
     employee.firstName = getEmployeePreferredName(employee);
   });
+
+  // release notes
+  let latestRelease = {
+    type: 'Latest Release',
+    icon: 'mdi-alert-decagram',
+    color: 'black',
+    text: `Release: ${packageJson.version}`,
+    date: 'Check out the latest release',
+    basecampLink: packageJson.releaseNotes,
+    link: packageJson.releaseNotes
+  };
 
   let monthsBack = 5;
   // created empty two-dimensional array
@@ -321,8 +334,6 @@ async function createEvents() {
   });
   // filter out empty arrays
   anniversaries = _filter(anniversaries, (a) => a.date);
-
-  const now = getTodaysDate();
 
   // generate birthdays
   let birthdays = _map(employees.value, (b) => {
@@ -516,7 +527,10 @@ async function createEvents() {
     ...certs,
     ...announcements
   ]; // merges lists
-  events.value = _sortBy(_compact(mergedEventsList), 'daysFromToday'); //sorts by days from today
+  events.value = [
+    latestRelease,
+    ..._sortBy(_compact(mergedEventsList), 'daysFromToday') //sorts by days from today
+  ];
   store.dispatch('setEvents', { events: events.value });
   loadingEvents.value = false;
 } //createEvents
