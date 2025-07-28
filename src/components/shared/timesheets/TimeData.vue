@@ -6,7 +6,7 @@
         <span v-if="getLastUpdatedText && employeeIsUser()" class="last-updated">
           {{ getLastUpdatedText }}
         </span>
-        <v-spacer></v-spacer>
+        <v-spacer />
         <v-btn
           v-if="userRoleIsAdmin() || userRoleIsManager()"
           class="pr-xs-1"
@@ -26,18 +26,30 @@
           </template>
         </v-btn>
       </v-card-title>
+
       <v-card-text class="mt-3 px-7">
         <!-- Warning for not being "on track" with hours -->
-        <v-alert v-if="notOnTrack" class="mb-4" color="#5a8cd0" type="info">
-          You are not on track to meet your 1860 hours, which may have an affect on your budgets. If you believe this is
-          an error, ensure that your timesheet data is up-to-date.
-        </v-alert>
-        <v-progress-linear class="mb-3 mt-7" v-if="loading" indeterminate></v-progress-linear>
+        <div class="mb-4">
+          <v-alert
+            v-for="notice of Object.values(notices)"
+            :key="notice"
+            :type="notice?.type"
+            :color="notice?.color"
+            density="compact"
+            closable
+            @click:close="notice?.closeCallback()"
+          >
+            {{ notice.message }}
+          </v-alert>
+        </div>
+
+        <v-progress-linear v-if="loading" class="mb-3 mt-7" indeterminate />
         <div v-else>
           <div v-if="errorMessage" class="d-flex flex-column justify-center align-center py-3 font-weight-bold">
             <v-icon class="mb-2">mdi-alert</v-icon>
             <span>{{ errorMessage }}</span>
           </div>
+
           <div v-else>
             <time-period-hours
               :employee="clonedEmployee"
@@ -45,13 +57,14 @@
               :ptoBalances="ptoBalances || {}"
               :supplementalData="supplementalData || {}"
               :KEYS="KEYS"
-            ></time-period-hours>
+            />
             <hr class="mt-3 mb-5 mx-7" />
             <p-t-o-hours :employee="clonedEmployee" :ptoBalances="ptoBalances || {}" :system="system"></p-t-o-hours>
           </div>
         </div>
       </v-card-text>
     </v-card>
+
     <PTOPlanningForm
       v-if="store.getters.employees"
       v-show="false"
@@ -62,6 +75,7 @@
       :pto="convertToHours(ptoBalances?.['PTO']?.value ?? ptoBalances?.['PTO'] ?? 0)"
       :holiday="convertToHours(ptoBalances?.['Holiday']?.value ?? ptoBalances?.['Holiday'] ?? 0)"
     />
+
     <v-dialog v-model="showUnanetSyncModal" class="w-50" persistent>
       <SyncUnanetPTOData :employees="employees" :key="childKey" />
     </v-dialog>
@@ -69,28 +83,38 @@
 </template>
 
 <script setup>
-import TimePeriodHours from '@/components/shared/timesheets/TimePeriodHours.vue';
-import PTOHours from '@/components/shared/timesheets/PTOHours.vue';
-import SyncUnanetPTOData from './SyncUnanetPTOData.vue';
-import _isEmpty from 'lodash/isEmpty';
-import _forEach from 'lodash/forEach';
-import _find from 'lodash/find';
 import PTOPlanningForm from '@/components/shared/PTOPlanningForm.vue';
+import PTOHours from '@/components/shared/timesheets/PTOHours.vue';
+import TimePeriodHours from '@/components/shared/timesheets/TimePeriodHours.vue';
 import api from '@/shared/api';
-import { computed, inject, onBeforeMount, onBeforeUnmount, ref, unref, watch } from 'vue';
-import { useStore } from 'vuex';
 import { difference, isBefore, now } from '@/shared/dateUtils';
-import { updateStoreContracts, updateStoreTags } from '@/utils/storeUtils';
-import { getCalendarYearPeriods, getContractYearPeriods } from './time-periods';
 import { getTodaysDate } from '@/shared/dateUtils.js';
+import { updateStoreContracts, updateStoreTags } from '@/utils/storeUtils';
 import { userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
 import { AxiosError } from 'axios';
+import _find from 'lodash/find';
+import _forEach from 'lodash/forEach';
+import _isEmpty from 'lodash/isEmpty';
+import { computed, inject, onBeforeMount, onBeforeUnmount, reactive, ref, unref, watch } from 'vue';
+import { useStore } from 'vuex';
+import SyncUnanetPTOData from './SyncUnanetPTOData.vue';
+import { getCalendarYearPeriods, getContractYearPeriods } from './time-periods';
+/** @import { Reactive } from 'vue' */
 
 // |--------------------------------------------------|
 // |                                                  |
 // |                      SETUP                       |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * @typedef {{
+ *   message: string,
+ *   color: string | undefined,
+ *   type: string | undefined,
+ *   closeCallback: (event: any | undefined) => any
+ * }} Notice
+ */
 
 const hiddenPtoPlanningFormRef = ref(null);
 
@@ -121,6 +145,21 @@ const PTO_ACCRUALS = {
 };
 const notOnTrack = ref(false);
 const showUnanetSyncModal = ref(false);
+
+const PTO_NOTICE_ACKNOWLEDGED = 'ptoNoticeAcknowledged';
+/** @type {Reactive<Record<string, Notice>>} */
+const notices = reactive({});
+
+if (!localStorage.getItem(PTO_NOTICE_ACKNOWLEDGED)) {
+  notices['ptoNotice'] = {
+    message:
+      'PTO hours have to be manually synced at the beginning of the month. PTO balances might be inaccurate for a few days',
+    type: 'info',
+    closeCallback() {
+      localStorage.setItem(PTO_NOTICE_ACKNOWLEDGED, true);
+    }
+  };
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -495,6 +534,16 @@ watch(
     }
   }
 );
+
+watch(notOnTrack, (val) => {
+  if (val) {
+    notices['notOnTrack'] = {
+      message: `You are not on track to meet your 1860 hours, which may have an affect on your budgets. If you believe
+      this is an error, ensure that your timesheet data is up-to-date.`,
+      color: '#5a8cd0'
+    };
+  }
+});
 </script>
 
 <style scoped>
