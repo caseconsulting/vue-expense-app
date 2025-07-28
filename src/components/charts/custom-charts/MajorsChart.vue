@@ -7,6 +7,12 @@
 <script setup>
 import PieChart from '../base-charts/PieChart.vue';
 import { onBeforeUnmount, onBeforeMount, onMounted, ref, inject } from 'vue';
+import _first from 'lodash/first';
+import _some from 'lodash/some';
+import _map from 'lodash/map';
+import _filter from 'lodash/filter';
+import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -24,6 +30,8 @@ const enabled = ref(false);
 const label = ref([]);
 const option = ref(null);
 const quantities = ref([]);
+const router = useRouter();
+const store = useStore();
 const text = ref('');
 
 // |--------------------------------------------------|
@@ -144,11 +152,53 @@ function fillData(title) {
         enabled: enabled.value
       }
     },
+    onClick: (x, y) => {
+      if (_first(y)) {
+        let index = _first(y).index;
+        let labelClicked = chartData.value.labels[index];
+        localStorage.setItem('requestedDataType', 'education');
+        localStorage.setItem('requestedFilter', getMajorList(labelClicked, eduKind.value));
+        router.push({
+          path: '/employees',
+          name: 'employees'
+        });
+      }
+    },
     maintainAspectRatio: false
   };
   chartKey.value++; // rerenders the chart
   dataReceived.value = true;
 } // fillData
+
+/**
+ * Gets list of employees in clicked label
+ *
+ * @param major the major that needs to be searched
+ * @param eduType the type of education/degree
+ */
+function getMajorList(major, eduType) {
+  let employees = store.getters.employees;
+  let empList = [];
+  empList = _filter(employees, (emp) => {
+    return _some(emp?.education, (edu) => {
+      if (eduType === 'High School' && edu.type === 'highSchool' && edu.name === major) {
+        return true;
+      } else if (
+        (eduType === 'Associate' || eduType === 'Bachelor' || eduType === 'Master' || eduType === 'PhD/Doctorate') &&
+        edu.type === 'university'
+      ) {
+        return _some(edu.degrees, (deg) => {
+          return (deg.degreeType === eduType || deg.degreeType === eduType + 's') && deg.majors?.includes(major);
+        });
+      } else if (eduType === 'Military' && edu.type === 'military' && edu.branch === major) {
+        return true;
+      }
+      return false;
+    });
+  });
+  empList = _map(empList, (emp) => `${emp.firstName} ${emp.lastName}`);
+  return empList;
+}
 </script>
 
 <style scoped>
