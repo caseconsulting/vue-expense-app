@@ -77,38 +77,16 @@
               <!-- DELETE PROJECTS MOBILE end -->
 
               <v-col :cols="isMobile() ? '12' : '3'">
-                <v-text-field
+                <date-picker
                   :id="'start-field-' + index + '-' + projIndex"
-                  :model-value="format(project.startDate, null, 'MM/DD/YYYY')"
+                  variant="filled"
+                  v-model="project.startDate"
                   label="Start Date"
-                  hint="MM/DD/YYYY format"
-                  v-mask="'##/##/####'"
-                  prepend-inner-icon="mdi-calendar"
+                  :max="project.endDate"
                   :rules="[...getRequiredRules(), ...getDateRules(), getDateBeforeRule(project.endDate)]"
-                  @update:focused="project.startDate = parseEventDate($event)"
                   clearable
-                  @click:prepend="project.showStartMenu = true"
-                  @keypress="project.showStartMenu = false"
                   autocomplete="off"
-                >
-                  <v-menu
-                    activator="parent"
-                    v-model="project.showStartMenu"
-                    :close-on-content-click="false"
-                    location="start center"
-                  >
-                    <v-date-picker
-                      v-model="project.startDate"
-                      @update:model-value="project.showStartMenu = false"
-                      :max="project.endDate"
-                      show-adjacent-months
-                      hide-actions
-                      keyboard-icon=""
-                      color="#bc3825"
-                      title="Start Date"
-                    ></v-date-picker>
-                  </v-menu>
-                </v-text-field>
+                ></date-picker>
               </v-col>
 
               <v-col :cols="isMobile() ? '12' : '3'">
@@ -253,6 +231,7 @@
 </template>
 
 <script setup>
+import DatePicker from '@/components/shared/DatePicker.vue';
 import { usePrepareSubmit } from '@/composables/editTabCommunication';
 import { format } from '@/shared/dateUtils';
 import {

@@ -44,7 +44,9 @@
                 :id="link"
                 :href="link"
                 target="_blank"
-              ></v-list-item>
+                :append-icon="name === 'Unanet' ? 'mdi-new-box' : ''"
+              >
+              </v-list-item>
               <!-- Benefits links -->
               <v-list-group value="Benefits">
                 <template v-slot:activator="{ props }">
@@ -199,7 +201,8 @@ const links = ref([
   { name: 'Submit New Referral', link: 'https://www.consultwithcase.com/apply-form' },
   { name: 'CASE Information', link: CASE_INFO },
   { name: 'Basecamp', link: BASECAMP },
-  { name: 'QuickBooks Time', link: 'https://tsheets.intuit.com/page/login_oii' },
+  { name: 'Unanet', link: 'https://consultwithcase.unanet.biz/consultwithcase/action/home' },
+  { name: 'QuickBooks Time (legacy)', link: 'https://tsheets.intuit.com/page/login_oii' },
   { name: 'ADP', link: 'https://workforcenow.adp.com/' },
   { name: 'BambooHR', link: 'https://consultwithcase.bamboohr.com/home/' },
   { name: 'Jira', link: 'https://consultwithcase.atlassian.net/jira/your-work' },
@@ -546,5 +549,9 @@ watch(
   bottom: 7px;
   left: 50%;
   z-index: -1;
+}
+
+.v-list-item .v-icon {
+  color: blue;
 }
 </style>
