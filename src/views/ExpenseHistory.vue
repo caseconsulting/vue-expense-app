@@ -7,14 +7,14 @@
           <h2>Expense History</h2>
         </v-card-title>
         <v-container>
-          <v-timeline truncate-line="both" align="start" side="end" direction="horizontal">
+          <v-timeline truncate-line="both" align="center" side="end" direction="horizontal">
             <v-timeline-item v-for="data in dummyData" :key="data.id">
               <template v-slot:opposite>
                 <h4 class="rotate">{{ data.status }}</h4>
               </template>
               <div>{{ data.date }}</div>
               <template v-slot:icon>
-                <v-btn density="compact" variant="text" icon="mdi-abacus">
+                <v-btn @click="handleClick(data)" density="compact" variant="text" icon="mdi-abacus">
                   <v-tooltip activator="parent" location="right">
                     <span>Click for more info</span>
                   </v-tooltip>
@@ -27,28 +27,40 @@
     </div>
     <div>
       <v-card>
-        <v-card-title class="beta_header_style">Expense at [date]</v-card-title>
-        <v-data-table :headers="headers" :items="displayAudits" :loading="loading.audits" multi-sort>
+        <v-card-title class="beta_header_style">Expense at {{ date }}</v-card-title>
+        <!-- <v-data-table :headers="headers" :items="displayAudits" :loading="loading.audits" multi-sort>
           <template #loading>
             <v-skeleton-loader type="table-row" />
           </template>
-        </v-data-table>
+        </v-data-table> -->
+        <v-card-text class="mt-2"
+          ><v-row
+            ><v-col
+              ><b>Expense Status</b>
+              <div>{{ status }}</div></v-col
+            ><v-col
+              ><b>Before</b>
+              <div>{{ before }}</div></v-col
+            ><v-col
+              ><b>After</b>
+              <div>{{ after }}</div></v-col
+            ></v-row
+          ></v-card-text
+        >
       </v-card>
     </div>
   </div>
 </template>
 
 <script setup>
-// import { AxiosError } from 'axios';
 import dayjs from 'dayjs';
 import { onBeforeMount, reactive, ref, watch } from 'vue';
-// import { useStore } from 'vuex';
-// import DatePicker from '../components/shared/DatePicker.vue';
-// import api from '../shared/api';
-// import { getEmployeeByID } from '../shared/employeeUtils';
 import { NotificationReason } from '../shared/models/audits/notifications';
-// import { updateStoreEmployees } from '../utils/storeUtils';
-// const store = useStore();
+
+const date = ref('');
+const status = ref('');
+const before = ref('');
+const after = ref('');
 
 /**
  * A row in the data table that represents a notification audit
@@ -86,6 +98,10 @@ const loadedAudits = ref([]);
 let dummyData = ref([
   { date: '3/15/25', status: 'Created', id: 0 },
   { date: '4/28/25', status: 'Updated', id: 1 },
+  { date: '4/29/25', status: 'Updated', id: 4 },
+  { date: '4/30/25', status: 'Updated', id: 5 },
+  { date: '4/31/25', status: 'Updated', id: 6 },
+  { date: '5/13/25', status: 'Updated', id: 2 },
   { date: '5/30/25', status: 'Deleted', id: 3 }
 ]); //dummy data for the graph
 
@@ -107,18 +123,30 @@ const loading = reactive({
   graph: true
 });
 
-const headers = ref([
-  { title: 'Date', key: 'date' },
-  { title: 'Employee', key: 'name' },
-  { title: 'Expense Type', key: 'reason' },
-  { title: 'Status', key: 'status' }
-]);
+// const headers = ref([
+//   { title: 'Date', key: 'date' },
+//   { title: 'Employee', key: 'name' },
+//   { title: 'Expense Type', key: 'reason' },
+//   { title: 'Status', key: 'status' }
+// ]);
 
 // *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
 // ❃                                                 ❃
 // ❇                     METHODS                     ❇
 // ❉                                                 ❉
 // *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
+
+/**
+ *
+ *
+ * @param data the data at that specific point in the expense
+ */
+function handleClick(data) {
+  date.value = data.date;
+  status.value = data.status;
+  before.value = 'Expense data before';
+  after.value = 'Expense data after';
+}
 
 /**
  * Maps the displayed notification string to the enum value and vice versa
@@ -277,7 +305,7 @@ watch(filters, filterDisplayAudits, { deep: true });
 }
 
 .rotate {
-  transform-origin: 45% 75%;
+  transform-origin: 50% 55%;
   transform: rotate(270deg);
 }
 </style>
