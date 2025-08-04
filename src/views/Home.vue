@@ -245,11 +245,6 @@ async function createEvents() {
   aggregatedAwards.value = getEmployeeAwards();
   aggregatedCerts.value = getEmployeeCerts();
 
-  //we want to use their nicknames if they have one
-  _forEach(employees.value, (employee) => {
-    employee.firstName = getEmployeePreferredName(employee);
-  });
-
   let monthsBack = 5;
   // created empty two-dimensional array
   let anniversaries = [...Array(monthsBack)].map(() => Array(monthsBack));
@@ -268,14 +263,14 @@ async function createEvents() {
         if (monthDiff >= 0 && monthDiff < monthsBack) {
           event.date = getEventDateMessage(anniversary);
           if (isSame(anniversary, hireDate, 'day')) {
-            event.text = a.firstName + ' ' + a.lastName + ' has joined the CASE team!'; //new hire message
+            event.text = getEmployeePreferredName(a) + ' ' + a.lastName + ' has joined the CASE team!'; //new hire message
             event.icon = 'mdi-account-plus';
             event.type = 'New Hire';
             event.newCampfire = NEW_HIRE;
           } else {
             event.date = format(anniversary, null, 'll');
             if (difference(anniversary, hireDate, 'year') == 1) {
-              event.text = a.firstName + ' ' + a.lastName + ' is celebrating 1 year at CASE!';
+              event.text = getEmployeePreferredName(a) + ' ' + a.lastName + ' is celebrating 1 year at CASE!';
             } else {
               event.text =
                 getEmployeePreferredName(a) +
@@ -506,6 +501,22 @@ async function createEvents() {
     };
   });
 
+  let kudos = [];
+  eventData.kudos.forEach((employeeKudos) => {
+    let employee = employeeKudos.employee;
+    employeeKudos.kudos.forEach((kudo) => {
+      const date = startOf(kudo.date, 'day');
+      kudos.push({
+        type: 'Kudo',
+        icon: 'mdi-hand-heart',
+        color: 'red',
+        text: `${getEmployeePreferredName(employee)} ${employee.lastName}: ${kudo.title}`,
+        date: getEventDateMessage(date),
+        daysFromToday: difference(now, date, 'day')
+      });
+    });
+  });
+
   let mergedEventsList = [
     ...anniversaries,
     ...newHires,
@@ -514,7 +525,8 @@ async function createEvents() {
     ...schedules,
     ...awards,
     ...certs,
-    ...announcements
+    ...announcements,
+    ...kudos
   ]; // merges lists
   events.value = _sortBy(_compact(mergedEventsList), 'daysFromToday'); //sorts by days from today
   store.dispatch('setEvents', { events: events.value });
