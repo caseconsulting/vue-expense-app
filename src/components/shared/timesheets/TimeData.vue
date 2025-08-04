@@ -168,10 +168,6 @@ onBeforeMount(async () => {
     showUnanetSyncModal.value = false;
   });
 
-  emitter.on('get-period-data', async ({ isCalendarYear, isYearly }) => {
-    await setData(isCalendarYear, isYearly);
-  });
-
   loading.value = false;
 }); // created
 
