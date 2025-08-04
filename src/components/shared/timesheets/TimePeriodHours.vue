@@ -107,6 +107,7 @@
           :key="timeData"
           :jobcodes="timeData || {}"
           :nonBillables="isYearly ? supplementalDataWithPlan.nonBillables : null"
+          :title="timesheets[periodIndex].title"
         />
         <!-- End Timesheets Donut Chart -->
       </v-col>
@@ -128,6 +129,7 @@
           :period="timesheets[periodIndex]"
           :supplementalData="supplementalDataWithPlan"
           :timeData="timeData"
+          :title="timesheets[periodIndex]?.title"
         />
       </v-col>
       <!-- End Time Period Details -->
@@ -145,6 +147,7 @@
           :isYearly="isYearly"
           :supplementalData="supplementalDataWithPlan"
           :timeData="timeData"
+          :title="timesheets[periodIndex]?.title"
           :periodType="periodType"
         />
       </v-col>
