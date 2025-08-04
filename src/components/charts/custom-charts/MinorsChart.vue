@@ -14,6 +14,12 @@
 import PieChart from '../base-charts/PieChart.vue';
 import _isEmpty from 'lodash/isEmpty';
 import { onBeforeMount, onBeforeUnmount, onMounted, ref, inject } from 'vue';
+import _first from 'lodash/first';
+import _filter from 'lodash/filter';
+import _some from 'lodash/some';
+import _map from 'lodash/map';
+import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -33,6 +39,8 @@ const minors = ref(null);
 const option = ref(null);
 const quantities = ref([]);
 const text = ref('');
+const router = useRouter();
+const store = useStore();
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -159,9 +167,41 @@ function fillData() {
         enabled: enabled.value
       }
     },
+    onClick: (x, y) => {
+      if (_first(y)) {
+        let index = _first(y).index;
+        let labelClicked = chartData.value.labels[index];
+        localStorage.setItem('requestedDataType', 'education');
+        localStorage.setItem('requestedFilter', getMinorList(labelClicked, degree.value));
+        router.push({
+          path: '/employees',
+          name: 'employees'
+        });
+      }
+    },
     maintainAspectRatio: false
   };
   chartKey.value++; // rerenders the chart
   dataReceived.value = true;
 } // fillData
+
+/**
+ * Gets list of employees in clicked label
+ *
+ * @param minor the minor that needs to be searched
+ * @param degreeType the type of degree (bachelor, master, etc.)
+ */
+function getMinorList(minor, degreeType) {
+  let employees = store.getters.employees;
+  let empList = [];
+  empList = _filter(employees, (emp) => {
+    return _some(emp?.education, (edu) => {
+      return _some(edu?.degrees, (deg) => {
+        return (deg.degreeType === degreeType || deg.degreeType === degreeType + 's') && deg.minors?.includes(minor);
+      });
+    });
+  });
+  empList = _map(empList, (emp) => `${emp.firstName} ${emp.lastName}`);
+  return empList;
+}
 </script>
