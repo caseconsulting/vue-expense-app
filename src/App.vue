@@ -157,7 +157,7 @@ import {
 } from '@/utils/auth';
 import { isMobile, isSmallScreen, storeIsPopulated, updateEmployeeLogin } from '@/utils/utils';
 import { updateStoreUser, updateStoreEmployees } from '@/utils/storeUtils';
-import p from '../package.json';
+import p from '~/package.json';
 import floorPlan from '@/assets/img/MakeOfficesfloorplan.jpg';
 import facebook from '@/assets/img/trademarks/facebook.png';
 import github from '@/assets/img/trademarks/github.png';
