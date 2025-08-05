@@ -4,6 +4,10 @@
       <h3>Plan PTO</h3>
     </v-card-title>
     <div v-if="months.length === monthsPlannable">
+      <v-alert class="py-1 px-2 my-2 mx-4" icon="mdi-alert-circle" type="warning" color="warning" :closeable="false">
+        PTO plans in Unanet are not visible here. You may use either system to plan your PTO, but they will not sync
+        with each other.
+      </v-alert>
       <v-card-text v-if="employee">
         <!-- PTO BALANCES -->
         <v-row class="text-center balances">

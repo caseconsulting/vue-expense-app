@@ -96,8 +96,8 @@ function _getContractPoPStartPeriod(contract) {
  * @param contract The contrcat object that the employee is currently on
  */
 function _getContractProjectPeriod(contract, employee) {
-  let employeeProjectId = _getEmployeeCurrentProject(employee)?.projectId;
-  let contractProject = _find(contract.projects, (p) => p.id == employeeProjectId);
+  let allProjects = employee.contracts.map((c) => c.projects);
+  let contractProject = _find(allProjects, (p) => !p.endDate);
   if (contractProject) return _getYearPeriod(contractProject.popStartDate, contractProject.popEndDate);
 }
 

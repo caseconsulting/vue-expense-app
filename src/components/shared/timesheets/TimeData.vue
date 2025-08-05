@@ -1,11 +1,24 @@
 <template>
   <div id="t-sheets-data">
     <v-card density="compact">
-      <v-card-title class="header_style d-flex align-center justify-space-between py-0 pt-2 relative">
+      <v-card-title class="header_style d-flex align-center py-0 relative">
         <h3>{{ system }} Time Data</h3>
         <span v-if="getLastUpdatedText && employeeIsUser()" class="last-updated">
           {{ getLastUpdatedText }}
         </span>
+        <v-spacer></v-spacer>
+        <v-btn
+          v-if="userRoleIsAdmin() || userRoleIsManager()"
+          class="pr-xs-1"
+          variant="text"
+          icon="mdi-file-sync-outline"
+          @click="showUnanetSyncModal = true"
+        >
+          <template v-slot:default>
+            <v-tooltip activator="parent" location="top">Sync Unanet accrual data</v-tooltip>
+            <v-icon color="white" size="large">mdi-file-sync-outline</v-icon>
+          </template>
+        </v-btn>
         <v-btn class="pr-xs-1" variant="text" icon="mdi-refresh" @click="resetData()">
           <template v-slot:default>
             <v-tooltip activator="parent" location="top">Refresh {{ system }} data</v-tooltip>
@@ -28,7 +41,7 @@
           <div v-else>
             <time-period-hours
               :employee="clonedEmployee"
-              :timesheets="timesheets || {}"
+              :timesheets="timesheets || []"
               :ptoBalances="ptoBalances || {}"
               :supplementalData="supplementalData || {}"
               :KEYS="KEYS"
@@ -49,12 +62,16 @@
       :pto="convertToHours(ptoBalances?.['PTO']?.value ?? ptoBalances?.['PTO'] ?? 0)"
       :holiday="convertToHours(ptoBalances?.['Holiday']?.value ?? ptoBalances?.['Holiday'] ?? 0)"
     />
+    <v-dialog v-model="showUnanetSyncModal" class="w-50" persistent>
+      <SyncUnanetPTOData :employees="employees" :key="childKey" />
+    </v-dialog>
   </div>
 </template>
 
 <script setup>
 import TimePeriodHours from '@/components/shared/timesheets/TimePeriodHours.vue';
 import PTOHours from '@/components/shared/timesheets/PTOHours.vue';
+import SyncUnanetPTOData from './SyncUnanetPTOData.vue';
 import _isEmpty from 'lodash/isEmpty';
 import _forEach from 'lodash/forEach';
 import _find from 'lodash/find';
@@ -66,6 +83,8 @@ import { difference, isBefore, now } from '@/shared/dateUtils';
 import { updateStoreContracts, updateStoreTags } from '@/utils/storeUtils';
 import { getCalendarYearPeriods, getContractYearPeriods } from './time-periods';
 import { getTodaysDate } from '@/shared/dateUtils.js';
+import { userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
+import { AxiosError } from 'axios';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -101,6 +120,7 @@ const PTO_ACCRUALS = {
   gray: 15.33333 // per Dave B, accruals are exactly this
 };
 const notOnTrack = ref(false);
+const showUnanetSyncModal = ref(false);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -114,6 +134,7 @@ const notOnTrack = ref(false);
 onBeforeUnmount(() => {
   emitter.off('get-period-data');
   emitter.off('auto-save-pto-planner');
+  emitter.off('close-unanet-pto-download');
 }); // beforeUnmount
 
 /**
@@ -143,8 +164,8 @@ onBeforeMount(async () => {
     }
   });
 
-  emitter.on('1860-not-on-track', (empId) => {
-    if (empId === clonedEmployee.value.id) notOnTrack.value = true;
+  emitter.on('close-unanet-pto-download', () => {
+    showUnanetSyncModal.value = false;
   });
 
   loading.value = false;
@@ -195,15 +216,14 @@ function employeeIsUser() {
  * @returns Boolean - Whether or not the API returned an error
  */
 function hasError(timesheetsData) {
-  if (timesheetsData?.name === 'AxiosError' || timesheetsData.code >= 400) {
-    errorMessage.value = timesheetsData?.response?.data?.message;
+  if (timesheetsData.err) {
+    errorMessage.value = timesheetsData?.err?.message;
     if (_isEmpty(errorMessage.value) || typeof errorMessage.value === 'object') {
       errorMessage.value = 'An error has occurred, try refreshing the widget';
     }
     return true;
-  } else {
-    return false;
   }
+  return false;
 } // hasError
 
 /**
@@ -332,8 +352,16 @@ async function setDataFromApi(isCalendarYear, isYearly) {
   let timesheetsData = await api.getTimesheetsData(clonedEmployee.value.employeeNumber, {
     code,
     employeeId: clonedEmployee.value.id,
+    unanetPersonKey: clonedEmployee.value.unanetPersonKey,
     periods
   });
+
+  if (timesheetsData instanceof AxiosError) {
+    const err = timesheetsData;
+    errorMessage.value = err.response.data;
+  } else {
+    errorMessage.value = null;
+  }
 
   if (!hasError(timesheetsData)) {
     timesheets.value = timesheetsData.timesheets;

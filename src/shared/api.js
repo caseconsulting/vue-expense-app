@@ -5,7 +5,6 @@ const EXPENSE_TYPES = 'expense-types';
 const EXPENSES = 'expenses';
 const EMPLOYEES = 'employees';
 const EMSI = 'emsi';
-const TRAINING_URLS = 'training-urls';
 const UTILITY = 'utility';
 const TIMESHEETS = 'timesheets';
 const BASECAMP = 'basecamp';
@@ -222,17 +221,6 @@ async function getAllEmployeeExpenses(id) {
 async function getAllExpenseTypeExpenses(id) {
   return await execute('get', `/${UTILITY}/getAllExpenseTypeExpenses/${id}`);
 } // getAllExpenseTypeExpenses
-
-/**
- * get the training url info
- *
- * @param id - specific training id
- * @param category - category of training info
- * @return - training url data
- */
-async function getURLInfo(id, category) {
-  return await execute('get', `/${TRAINING_URLS}/'${id}'/${category}`);
-} // getURLInfo
 
 /**
  * creates an item
@@ -492,6 +480,19 @@ async function uploadResume(employeeId, file) {
 } // uploadResume
 
 /**
+ * uploads the resume file for an employee
+ *
+ * @param file - the file of the resume
+ * @return - success code
+ */
+async function uploadUnanetBalances(file) {
+  let formData = new FormData();
+  formData.append('accruals', file);
+
+  return await execute('post', `/${TIMESHEETS}/uploadAccruals`, formData);
+} // uploadResume
+
+/**
  * Syncs application data between the Portal, BambooHR, ADP, etc.
  *
  * @return - The response from the data sync function
@@ -541,13 +542,13 @@ export default {
   getTimesheetsData,
   getLeaderboard,
   getTechSkills,
-  getURLInfo,
   getZipCode,
   getUser,
   updateAttribute,
   updateAttributes,
   updateItem,
   uploadResume,
+  uploadUnanetBalances,
   processHighFive,
   syncApplications,
   getEmployeesFromAdp,
@@ -559,7 +560,6 @@ export default {
   TAGS,
   UTILITY,
   TIMESHEETS,
-  TRAINING_URLS,
   AUDIT,
   CONTRACT_STATUSES
 };

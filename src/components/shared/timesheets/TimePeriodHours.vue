@@ -107,12 +107,17 @@
           :key="timeData"
           :jobcodes="timeData || {}"
           :nonBillables="isYearly ? supplementalDataWithPlan.nonBillables : null"
-        ></timesheets-chart>
+        />
         <!-- End Timesheets Donut Chart -->
       </v-col>
       <!-- Time Period Details -->
       <v-col :order="$vuetify.display.mdAndUp ? 2 : 3" cols="12" md="6" lg="6" xl="6" xxl="6" class="pa-1">
         <v-skeleton-loader v-if="timePeriodLoading" type="list-item@4" />
+
+        <div v-else-if="!timesheets[periodIndex]" class="d-flex align-center justify-center">
+          Couldn't load time period info
+        </div>
+
         <time-period-details
           v-else
           :key="timeData"
@@ -206,7 +211,7 @@ onBeforeUnmount(() => {
  * @returns Boolean - Whether or not the date is in the current month
  */
 const dateIsCurrentPeriod = computed(() => {
-  return periodIndex.value === props.timesheets.length - 1;
+  return periodIndex.value === Object.keys(props.timesheets).length - 1;
 }); // dateIsCurrentPeriod
 
 /**
@@ -215,7 +220,7 @@ const dateIsCurrentPeriod = computed(() => {
  * @returns Object - Key Value pairs of jobcodes and their durations
  */
 const timeData = computed(() => {
-  let timesheets = { ...props.timesheets[periodIndex.value].timesheets };
+  let timesheets = { ...props.timesheets[periodIndex.value]?.timesheets };
   // searching store employees fixes bug where switching user profiles erases legacy job codes
   let legacyCodes = props.employee.legacyJobCodes;
   legacyCodes = legacyCodes || store.getters.employees?.find((e) => e.id === props.employee.id)?.legacyJobCodes;
@@ -260,7 +265,7 @@ const timeData = computed(() => {
  */
 const supplementalDataWithPlan = computed(() => {
   let data = { ...props.supplementalData };
-  data.nonBillables = [...data.nonBillables, 'Planned PTO', 'Planned Holiday'];
+  data.nonBillables = [...(data.nonBillables ?? []), 'Planned PTO', 'Planned Holiday'];
   return data;
 });
 
@@ -290,6 +295,8 @@ function showContractYear() {
  * Refreshes PTO plan data
  */
 function refreshPtoPlan() {
+  if (props.timesheets.length == 0) return;
+
   // sum up and save the results of plan within time range
   let startDate = props.timesheets[periodIndex.value].startDate;
   let endDate = props.timesheets[periodIndex.value].endDate;
