@@ -7,14 +7,14 @@
           <h2>Expense History</h2>
         </v-card-title>
         <v-container>
-          <v-timeline truncate-line="both" align="start" side="end" direction="horizontal">
-            <v-timeline-item v-for="data in dummyData" :key="data.id">
+          <v-timeline truncate-line="both" align="center" side="end" direction="horizontal">
+            <v-timeline-item v-for="audit in displayAudits" :key="audit.id">
               <template v-slot:opposite>
-                <h4 class="rotate">{{ data.status }}</h4>
+                <h4 class="rotate">{{ determineStatus(audit) }}</h4>
               </template>
-              <div>{{ data.date }}</div>
+              <div>{{ audit.date }}</div>
               <template v-slot:icon>
-                <v-btn density="compact" variant="text" icon="mdi-abacus">
+                <v-btn @click="handleClick(audit)" density="compact" variant="text" icon="mdi-abacus">
                   <v-tooltip activator="parent" location="right">
                     <span>Click for more info</span>
                   </v-tooltip>
@@ -27,28 +27,47 @@
     </div>
     <div>
       <v-card>
-        <v-card-title class="beta_header_style">Expense at [date]</v-card-title>
-        <v-data-table :headers="headers" :items="displayAudits" :loading="loading.audits" multi-sort>
+        <v-card-title class="beta_header_style">Expense at {{ date }}</v-card-title>
+        <!-- <v-data-table :headers="headers" :items="displayAudits" :loading="loading.audits" multi-sort>
           <template #loading>
             <v-skeleton-loader type="table-row" />
           </template>
-        </v-data-table>
+        </v-data-table> -->
+        <v-card-text class="mt-2"
+          ><v-row
+            ><v-col
+              ><b>Expense Status</b>
+              <div>{{ status }}</div></v-col
+            ><v-col
+              ><b>Before</b>
+              <div v-for="data in before" :key="data.purchaseDate">{{ data }}</div></v-col
+            ><v-col
+              ><b>After</b>
+              <div v-for="data in after" :key="data.purchaseDate">{{ data }}</div></v-col
+            ></v-row
+          ></v-card-text
+        >
       </v-card>
     </div>
   </div>
 </template>
 
 <script setup>
-// import { AxiosError } from 'axios';
+import { AxiosError } from 'axios';
 import dayjs from 'dayjs';
-import { onBeforeMount, reactive, ref, watch } from 'vue';
-// import { useStore } from 'vuex';
-// import DatePicker from '../components/shared/DatePicker.vue';
-// import api from '../shared/api';
-// import { getEmployeeByID } from '../shared/employeeUtils';
-import { NotificationReason } from '../shared/models/audits/notifications';
-// import { updateStoreEmployees } from '../utils/storeUtils';
-// const store = useStore();
+import { onBeforeMount, onMounted, reactive, ref, watch } from 'vue';
+import { useStore } from 'vuex';
+import api from '../shared/api';
+import { updateStoreEmployees } from '../utils/storeUtils';
+import { getEmployeeByID } from '../shared/employeeUtils';
+import _reverse from 'lodash/reverse';
+
+const store = useStore();
+const date = ref(null);
+const status = ref(null);
+const before = ref(null);
+const after = ref(null);
+const expenseId = ref(null);
 
 /**
  * A row in the data table that represents a notification audit
@@ -79,18 +98,6 @@ const loadedAudits = ref([]);
 
 // *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
 // ❃                                                 ❃
-// ❇                    CONSTANTS                    ❇
-// ❉                                                 ❉
-// *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
-
-let dummyData = ref([
-  { date: '3/15/25', status: 'Created', id: 0 },
-  { date: '4/28/25', status: 'Updated', id: 1 },
-  { date: '5/30/25', status: 'Deleted', id: 3 }
-]); //dummy data for the graph
-
-// *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
-// ❃                                                 ❃
 // ❇                     DISPLAY                     ❇
 // ❉                                                 ❉
 // *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
@@ -107,13 +114,6 @@ const loading = reactive({
   graph: true
 });
 
-const headers = ref([
-  { title: 'Date', key: 'date' },
-  { title: 'Employee', key: 'name' },
-  { title: 'Expense Type', key: 'reason' },
-  { title: 'Status', key: 'status' }
-]);
-
 // *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
 // ❃                                                 ❃
 // ❇                     METHODS                     ❇
@@ -121,40 +121,27 @@ const headers = ref([
 // *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
 
 /**
- * Maps the displayed notification string to the enum value and vice versa
- * @param {string} val
- * @returns {string?} The converted value. 'None' converts to null
+ *
+ *
+ * @param data the data at that specific point in the expense
  */
-function notifTypeMap(val) {
-  switch (val) {
-    case 'None':
-      return null;
-    case 'Expense Rejection':
-      return NotificationReason.EXPENSE_REJECTION;
-    case 'Expense Revisal':
-      return NotificationReason.EXPENSE_REVISAL_REQUEST;
-    case 'Timesheet (weekly)':
-      return NotificationReason.WEEKLY_TIME_REMINDER;
-    case 'Timesheet (monthly)':
-      return NotificationReason.MONTHLY_TIME_REMINDER;
-    case 'Training Hours':
-      return NotificationReason.TRAINING_HOUR_EXCHANGE;
-    case 'High Five':
-      return NotificationReason.HIGH_FIVE;
-
-    case NotificationReason.EXPENSE_REJECTION:
-      return 'Expense Rejection';
-    case NotificationReason.EXPENSE_REVISAL_REQUEST:
-      return 'Expense Revisal';
-    case NotificationReason.WEEKLY_TIME_REMINDER:
-      return 'Timesheet (weekly)';
-    case NotificationReason.MONTHLY_TIME_REMINDER:
-      return 'Timesheet (monthly)';
-    case NotificationReason.TRAINING_HOUR_EXCHANGE:
-      return 'Training Hours';
-    case NotificationReason.HIGH_FIVE:
-      return 'High Five';
-  }
+function handleClick(audit) {
+  date.value = audit.date;
+  status.value = determineStatus(audit);
+  let oldImage = audit.oldImage;
+  let newImage = audit.newImage;
+  before.value = [
+    oldImage?.cost || '',
+    oldImage?.description || '',
+    oldImage?.purchaseDate || '',
+    oldImage?.showOnFeed || ''
+  ];
+  after.value = [
+    newImage?.cost || '',
+    newImage?.description || '',
+    newImage?.purchaseDate || '',
+    newImage?.showOnFeed || ''
+  ];
 }
 
 /**
@@ -164,63 +151,74 @@ async function query() {
   loading.audits = true;
 
   // convert string audit type to database compatible type
-  // let realType;
-  // switch (filters.auditType) {
-  //   case 'Profile':
-  //   case 'Expense':
-  //     realType = AuditType.CRUD;
-  //     break;
-  //   case 'Login':
-  //     realType = AuditType.LOGIN;
-  //     break;
-  //   case 'Notification':
-  //     realType = AuditType.NOTIFICATION;
-  //     break;
-  //   case 'Error':
-  //     realType = AuditType.ERROR;
-  //     break;
-  // }
+  //let realType = AuditType.CRUD;
+
+  const res = await api.getCrudAudits({
+    startDate: filters.startDate,
+    endDate: filters.endDate
+  });
+
+  if (res instanceof AxiosError) {
+    console.error('Server responded with error:', res);
+  } else {
+    try {
+      if (res) {
+        loadedAudits.value = res;
+      }
+      let employees = store.getters.employees;
+      while (!employees) {
+        await updateStoreEmployees();
+        employees = store.getters.employees;
+      }
+
+      loadedAudits.value = loadedAudits.value.map((audit) => {
+        const empId = audit.actorId;
+        const emp = getEmployeeByID(empId, employees);
+
+        return {
+          ...audit,
+          name: `${emp.firstName} ${emp.lastName}`,
+          date: dayjs(audit.createdAt).format('MM/DD/YYYY HH:mm')
+        };
+      });
+
+      expenseId.value = loadedAudits.value[0].tableItemId;
+
+      filterDisplayAudits();
+    } catch (err) {
+      console.error('Error handling resposne:', err);
+    }
+  }
+
   loading.audits = false;
 }
 
 function filterDisplayAudits() {
-  displayAudits.value = loadedAudits.value.filter((/** @type NotificationRow */ audit) => {
+  displayAudits.value = loadedAudits.value.filter((audit) => {
     let valid = true;
 
-    // search
-    if (filters.search) {
-      valid = Object.entries(audit).some(([key, val]) => {
-        // ignore dates/numbers/ids that are stringified
-        if (key == 'date' || key == 'id' || key == 'receiverId') return false;
-        // only check strings
-        if (typeof val != 'string') return false;
-
-        // check search string
-        if (val.toLowerCase().includes(filters.search.toLowerCase())) return true;
-      });
-    }
-
-    // dates
-    if (filters.startDate) {
-      if (!dayjs(filters.startDate).isSameOrBefore(audit.createdAt, 'day')) {
-        valid = false;
-      }
-    }
-    if (filters.endDate) {
-      if (!dayjs(audit.createdAt).isSameOrBefore(filters.endDate, 'day')) {
-        valid = false;
-      }
-    }
-
-    // notification type / reason
-    if (filters.notifType !== 'None') {
-      if (audit.reason !== notifTypeMap(filters.notifType)) {
-        valid = false;
-      }
+    if (audit.tableItemId !== expenseId.value) {
+      valid = false;
     }
 
     return valid;
   });
+  displayAudits.value = _reverse(displayAudits.value);
+}
+
+/**
+ * Function to determine the status of expense at each audit
+ *
+ * @param audit - audit being checked for its status
+ */
+function determineStatus(audit) {
+  if (!audit.oldImage) {
+    return 'Created';
+  }
+  if (!audit.newImage) {
+    return 'Deleted';
+  }
+  return 'Updated';
 }
 
 // *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
@@ -232,6 +230,13 @@ function filterDisplayAudits() {
 onBeforeMount(async () => {
   query(); // load table data
   loading.graph = false; // TODO: load graph
+});
+
+onMounted(() => {
+  date.value = loadedAudits.value[0];
+  status.value = loadedAudits.value[0];
+  before.value = ['Before'];
+  after.value = ['After'];
 });
 
 // *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
@@ -277,7 +282,7 @@ watch(filters, filterDisplayAudits, { deep: true });
 }
 
 .rotate {
-  transform-origin: 45% 75%;
+  transform-origin: 50% 55%;
   transform: rotate(270deg);
 }
 </style>

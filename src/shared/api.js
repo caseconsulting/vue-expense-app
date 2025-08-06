@@ -175,13 +175,22 @@ async function getAllEvents() {
 } // getAllEvents
 
 /**
- * Gets audits with specified filters
+ * Gets notification audits with specified filters
  * @param {AuditRequestFilters?} filters Filters to query specific audits
  * @returns {*} The api response or error
  */
-async function getAudits(filters) {
-  return await execute('get', `/${AUDIT}`, filters);
-} // getAudits
+async function getNotificationAudits(filters) {
+  return await execute('get', `/${AUDIT}/notification`, filters);
+} // getNotificationAudits
+
+/**
+ * Gets CRUD audits with specified filters
+ * @param {AuditRequestFilters?} filters Filters to query specific audits
+ * @returns {*} The api response or error
+ */
+async function getCrudAudits(filters) {
+  return await execute('get', `/${AUDIT}/crud`, filters);
+} // getCrudAudits
 
 /**
  * gets all items from a specific route
@@ -527,7 +536,8 @@ export default {
   getAllEvents,
   getAllExpenseTypeExpenses,
   getAttachment,
-  getAudits,
+  getNotificationAudits,
+  getCrudAudits,
   getBasecampAvatars,
   getBasecampCampfires,
   getCity,

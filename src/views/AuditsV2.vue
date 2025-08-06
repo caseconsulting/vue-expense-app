@@ -237,7 +237,7 @@ async function query() {
   //     break;
   // }
 
-  const res = await api.getAudits({
+  const res = await api.getNotificationAudits({
     startDate: filters.startDate,
     endDate: filters.endDate,
     notifReason: notifTypeMap(filters.notifType)
