@@ -258,7 +258,8 @@ async function createEvents() {
     icon: 'mdi-alert-decagram',
     color: 'black',
     text: `Release: ${packageJson.version}`,
-    date: 'Check out the latest release',
+    date: getEventDateMessage(packageJson.releaseDate),
+    daysFromToday: difference(now, packageJson.releaseDate, 'day'),
     basecampLink: packageJson.releaseNotes,
     link: packageJson.releaseNotes
   };
@@ -542,10 +543,10 @@ async function createEvents() {
     ...awards,
     ...certs,
     ...announcements,
-    ...kudos
+    ...kudos,
+    latestRelease
   ]; // merges lists
   events.value = [
-    latestRelease,
     ..._sortBy(_compact(mergedEventsList), 'daysFromToday') //sorts by days from today
   ];
   store.dispatch('setEvents', { events: events.value });
