@@ -59,7 +59,12 @@
               :KEYS="KEYS"
             />
             <hr class="mt-3 mb-5 mx-7" />
-            <p-t-o-hours :employee="clonedEmployee" :ptoBalances="ptoBalances || {}" :system="system"></p-t-o-hours>
+            <p-t-o-hours
+              :employee="clonedEmployee"
+              :ptoBalances="ptoBalances || {}"
+              :planableKeys="planableKeys"
+              :system="system"
+            />
           </div>
         </div>
       </v-card-text>
@@ -72,8 +77,8 @@
       ref="hiddenPtoPlanningFormRef"
       :employeeId="employee.id"
       :isCyk="system === 'ADP'"
-      :pto="convertToHours(ptoBalances?.['PTO']?.value ?? ptoBalances?.['PTO'] ?? 0)"
-      :holiday="convertToHours(ptoBalances?.['Holiday']?.value ?? ptoBalances?.['Holiday'] ?? 0)"
+      :pto="getPTOBalance('PTO', true)"
+      :holiday="getPTOBalance('Holiday', true)"
     />
 
     <v-dialog v-model="showUnanetSyncModal" class="w-50" persistent>
@@ -128,6 +133,7 @@ const errorMessage = ref(null);
 const lastUpdated = ref(null);
 const loading = ref(true);
 const ptoBalances = ref({});
+const planableKeys = ref({});
 const supplementalData = ref(null);
 const system = ref(null);
 const timesheets = ref(null);
@@ -249,6 +255,34 @@ function employeeIsUser() {
 } // employeeIsUser
 
 /**
+ * Returns the planableKey value for clear usage
+ *
+ * @param type Planable type
+ */
+function getPlanableKey(type) {
+  // error handling because somebody will forget this exists in the future when we add more planable types
+  let planableTypes = ['Holiday', 'PTO'];
+  if (!planableTypes.includes(type)) throw new Error(`PTO balances type must be one of: ${planableTypes.join(', ')}`);
+  return planableKeys.value?.[type];
+}
+
+/**
+ * Gets a PTO balance based on API response
+ *
+ * @param type Planable type (Holiday or PTO)
+ * @param convert whether or not to convert to hours
+ *
+ * @returns Number
+ *
+ */
+function getPTOBalance(type, convert) {
+  let bal = ptoBalances.value?.[getPlanableKey(type)] ?? 0;
+  if (bal.value) bal = bal.value;
+  if (convert) bal = convertToHours(bal);
+  return bal;
+}
+
+/**
  * Sets an error message if the API returned an error.
  *
  * @param {Object} timesheetsData - The timesheets data object
@@ -317,6 +351,15 @@ function convertToHours(seconds) {
 
 /**
  * Helper to add items to the ptoBalances object
+ * It will basically build this:
+ * ptoBalances: {
+ *     balanceKey: {
+ *         items: {
+ *           itemsKey: planResults[planKey]
+ *         }
+ *       }
+ *    }
+ *
  * @param balanceKey key in ptoBalances to modify
  * @param itemsKey key in ptoBalances[balanceKey].items object to add
  * @param planResults object of results of planned PTO
@@ -344,14 +387,14 @@ async function refreshPlannedPto() {
   };
   // yeet outta here if there is no planned PTO
   if (!planResults.endDate) {
-    delete ptoBalances.value?.['PTO']?.items?.['PTO after plan'];
-    delete ptoBalances.value?.['Holiday']?.items?.['Holiday after plan'];
+    delete ptoBalances.value?.[getPlanableKey('PTO')]?.items?.['PTO after plan'];
+    delete ptoBalances.value?.[getPlanableKey('Holiday')]?.items?.['Holiday after plan'];
     return;
   }
 
   // set planned PTO and Holiday balances
-  addPlanToBalances('PTO', 'PTO after plan', planResults, 'pto');
-  addPlanToBalances('Holiday', 'Holiday after plan', planResults, 'holiday');
+  addPlanToBalances(getPlanableKey('PTO'), 'PTO after plan', planResults, 'pto');
+  addPlanToBalances(getPlanableKey('Holiday'), 'Holiday after plan', planResults, 'holiday');
 } // refreshPlannedPto
 
 /**
@@ -405,6 +448,7 @@ async function setDataFromApi(isCalendarYear, isYearly) {
   if (!hasError(timesheetsData)) {
     timesheets.value = timesheetsData.timesheets;
     ptoBalances.value = timesheetsData.ptoBalances;
+    planableKeys.value = timesheetsData.supplementalData?.planableKeys;
     supplementalData.value = timesheetsData.supplementalData;
     system.value = timesheetsData.system;
     lastUpdated.value = now();
@@ -427,6 +471,7 @@ function setDataFromStorage(qbStorage, key) {
   supplementalData.value = qbStorage[key]?.supplementalData;
   lastUpdated.value = qbStorage[key]?.lastUpdated;
   ptoBalances.value = qbStorage?.ptoBalances;
+  planableKeys.value = qbStorage?.planableKeys;
   system.value = qbStorage?.system;
 } // setDataFromStorage
 
@@ -446,6 +491,7 @@ function setStorage(isCalendarYear, isYearly) {
       lastUpdated: lastUpdated.value
     },
     ptoBalances: ptoBalances.value,
+    planableKeys: planableKeys.value,
     system: system.value
   };
 

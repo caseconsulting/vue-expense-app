@@ -60,17 +60,17 @@
       <v-icon>{{ showMore ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
     </span>
     <v-dialog v-model="showPTOPlanningFormModal" persistent max-width="800">
-      <p-t-o-planning-form
+      <PTOPlanningForm
         :employeeId="employee.id"
         :isCyk="system === 'ADP'"
-        :pto="convertToHours(ptoBalances['PTO']?.value ?? ptoBalances['PTO'] ?? 0)"
-        :holiday="convertToHours(ptoBalances['Holiday']?.value ?? ptoBalances['Holiday'] ?? 0)"
+        :pto="convertToHours(ptoBalances[planableKeys.PTO]?.value ?? ptoBalances[planableKeys.PTO] ?? 0)"
+        :holiday="convertToHours(ptoBalances[planableKeys.Holiday]?.value ?? ptoBalances[planableKeys.Holiday] ?? 0)"
       />
     </v-dialog>
     <v-dialog v-model="showPTOCashOutFormModal" persistent max-width="500">
       <p-t-o-cash-out-form
         :employeeId="employee.id"
-        :pto="convertToHours(ptoBalances.PTO?.value || ptoBalances['PTO'])"
+        :pto="convertToHours(ptoBalances[planableKeys.PTO]?.value || ptoBalances[planableKeys.PTO])"
       />
     </v-dialog>
   </div>
@@ -90,7 +90,7 @@ import capitalize from 'lodash/capitalize';
 // |                                                  |
 // |--------------------------------------------------|
 
-const props = defineProps(['ptoBalances', 'employee', 'system']);
+const props = defineProps(['ptoBalances', 'planableKeys', 'employee', 'system']);
 const emitter = inject('emitter');
 
 const showPTOCashOutFormModal = ref(false);
