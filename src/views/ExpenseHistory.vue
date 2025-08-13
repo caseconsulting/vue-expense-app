@@ -28,11 +28,6 @@
     <div>
       <v-card>
         <v-card-title class="beta_header_style">Expense at {{ date }}</v-card-title>
-        <!-- <v-data-table :headers="headers" :items="displayAudits" :loading="loading.audits" multi-sort>
-          <template #loading>
-            <v-skeleton-loader type="table-row" />
-          </template>
-        </v-data-table> -->
         <v-card-text class="mt-2"
           ><v-row
             ><v-col
@@ -69,11 +64,6 @@ const before = ref(null);
 const after = ref(null);
 const expenseId = ref(null);
 
-/**
- * A row in the data table that represents a notification audit
- * @typedef {Notification & { name: string, date: string }} NotificationRow
- */
-
 // *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
 // ❃                                                 ❃
 // ❇                      STATE                      ❇
@@ -84,16 +74,11 @@ const expenseId = ref(null);
 // To load more data, the user must click the search button, which queries the database based on these filters.
 const filters = reactive({
   search: '',
-  auditType: 'Notification',
+  auditType: 'crud',
   startDate: null,
-  endDate: null,
-  notifType: 'None'
+  endDate: null
 });
 
-/**
- * Currently loaded audits
- * @type {import('vue').Ref<NotificationRow[]>}
- */
 const loadedAudits = ref([]);
 
 // *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
@@ -102,10 +87,6 @@ const loadedAudits = ref([]);
 // ❉                                                 ❉
 // *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
 
-/**
- * Sublist of loaded audits, filtered by the table search filter
- * @type {NotificationRow[]}
- * */
 const displayAudits = ref(loadedAudits.value);
 
 // display skeletons for components when loading
@@ -151,7 +132,6 @@ async function query() {
   loading.audits = true;
 
   // convert string audit type to database compatible type
-  //let realType = AuditType.CRUD;
 
   const res = await api.getCrudAudits({
     startDate: filters.startDate,
@@ -178,7 +158,7 @@ async function query() {
         return {
           ...audit,
           name: `${emp.firstName} ${emp.lastName}`,
-          date: dayjs(audit.createdAt).format('MM/DD/YYYY HH:mm')
+          date: dayjs(audit.createdAt).format('MM/DD/YYYY')
         };
       });
 
@@ -197,7 +177,7 @@ function filterDisplayAudits() {
   displayAudits.value = loadedAudits.value.filter((audit) => {
     let valid = true;
 
-    if (audit.tableItemId !== expenseId.value) {
+    if (audit?.tableItemId !== expenseId.value) {
       valid = false;
     }
 
@@ -228,7 +208,7 @@ function determineStatus(audit) {
 // *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
 
 onBeforeMount(async () => {
-  query(); // load table data
+  await query(); // load table data
   loading.graph = false; // TODO: load graph
 });
 
