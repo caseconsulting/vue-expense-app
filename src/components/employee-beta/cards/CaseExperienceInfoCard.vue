@@ -17,7 +17,7 @@
         <p v-if="!model.deptDate" class="info-header">Since {{ monthDayYearFormat(model.hireDate) }}</p>
         <p class="info-header" v-else>Departed {{ monthDayYearFormat(model.deptDate) }}</p>
       </div>
-      <div v-if="wasIntern">
+      <div v-if="internshipDate">
         <h2 class="fit-content" style="font-size: large">Internship date</h2>
         <div class="info-div">
           {{ internshipDate }}
@@ -48,8 +48,7 @@ import { computed, ref } from 'vue';
 // |--------------------------------------------------|
 
 const props = defineProps(['model']);
-const wasIntern = ref(props.model.employeeRole === 'intern'); //temp for now until intern start date and start date are separated
-const internshipDate = ref(monthDayYearFormat(props.model.hireDate)); //temp for now
+const internshipDate = ref(format(props.model.internshipDate, null, 'MMMM YYYY'));
 
 // |--------------------------------------------------|
 // |                                                  |
