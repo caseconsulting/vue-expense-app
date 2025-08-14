@@ -79,6 +79,7 @@ const props = defineProps({
   adjacentDays: { type: Boolean, default: false },
   hideDetails: { type: Boolean, default: false },
   disabled: { type: Boolean, default: false },
+  mode: { type: String, default: undefined },
 
   // LOGIC/CONFIG
   rules: { type: Array, default: () => [] },

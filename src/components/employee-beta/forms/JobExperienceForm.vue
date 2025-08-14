@@ -94,18 +94,18 @@
 
           <v-col :cols="isMobile() ? '2' : 'auto'">
             <v-icon class="pt-7 case-gray">mdi-information</v-icon>
-            <v-tooltip activator="parent" location="right"> Change Job Role in Personal Edit Tab </v-tooltip>
+            <v-tooltip activator="parent" location="right"> Change Job Information in Personal Edit Tab </v-tooltip>
           </v-col>
         </v-row>
 
         <v-row>
           <v-col>
-            <v-text-field
-              :model-value="format(editedEmployee.hireDate, null, 'MM/DD/YYYY')"
+            <DatePicker
+              variant="filled"
+              v-model="editedEmployee.hireDate"
               label="Start Date"
-              prepend-inner-icon="mdi-calendar"
               disabled
-            ></v-text-field>
+            />
           </v-col>
         </v-row>
         <!-- End CASE Information -->
