@@ -187,13 +187,15 @@ function kudoText(kudo) {
 }
 
 function addCustomKudo() {
-  notes.value.custom.push({
-    type: 'custom',
-    date: customKudo.value.date || getTodaysDate('YYYY-MM-DD'),
-    title: customKudo.value.title
-  });
-  customKudo.value = { date: getTodaysDate('YYYY-MM-DD') };
-  buildKudos();
+  if (customKudo.value.title) {
+    notes.value.custom.push({
+      type: 'custom',
+      date: customKudo.value.date || getTodaysDate('YYYY-MM-DD'),
+      title: customKudo.value.title
+    });
+    customKudo.value = { date: getTodaysDate('YYYY-MM-DD') };
+    buildKudos();
+  }
 }
 </script>
 

@@ -69,7 +69,7 @@ import _slice from 'lodash/slice';
 // |                                                  |
 // |--------------------------------------------------|
 
-const props = defineProps(['jobcodes', 'nonBillables']);
+const props = defineProps(['jobcodes', 'nonBillables', 'title']);
 const emitter = inject('emitter');
 
 const completed = ref(0);
@@ -140,9 +140,12 @@ async function fillData() {
   let colors = ['#1A237E', '#5C6BC0', '#9FA8DA'];
   let colorsOptions = ['#1A237E', '#5C6BC0', '#9FA8DA'];
   // remove pto jobcodes from chart for yearly data
-  let jobcodes = _pickBy(props.jobcodes, (value, key) => !props.nonBillables?.includes(key));
+  let jobcodes = _pickBy(
+    props.jobcodes,
+    (value, key) => !props.nonBillables?.includes(key) && (value.title == props.title || value.title == null)
+  );
   let jobCodeValues = _map(Object.values(jobcodes), (duration) => {
-    return formatNumber(Number(duration / 60 / 60));
+    return formatNumber(Number((duration.duration ?? duration) / 60 / 60));
   }); // removes decimals if a whole number
 
   let jobCodeValuesSum = _sum(_map(jobCodeValues, (v) => Number(v)));

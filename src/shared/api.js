@@ -457,15 +457,6 @@ async function getLeaderboard() {
 } // getLeaderboard
 
 /**
- * get the feed events for basecamp
- *
- * @return - the feed events
- */
-async function getFeedEvents() {
-  return await execute('get', `/${BASECAMP}/getFeedEvents`);
-} // getFeedEvents
-
-/**
  * Reimburses a high five, generates a gift card, emails the recipeint
  * gift card information, then stores the gift card information.
  *
@@ -545,7 +536,6 @@ export default {
   getEmployeeBudgets,
   getEmployeeExpenseTypes,
   getEmployeePtoCashOuts,
-  getFeedEvents,
   getFiscalDateViewBudgets,
   getItem,
   getItems,
