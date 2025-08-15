@@ -107,12 +107,18 @@
           :key="timeData"
           :jobcodes="timeData || {}"
           :nonBillables="isYearly ? supplementalDataWithPlan.nonBillables : null"
-        ></timesheets-chart>
+          :title="timesheets[periodIndex].title"
+        />
         <!-- End Timesheets Donut Chart -->
       </v-col>
       <!-- Time Period Details -->
       <v-col :order="$vuetify.display.mdAndUp ? 2 : 3" cols="12" md="6" lg="6" xl="6" xxl="6" class="pa-1">
         <v-skeleton-loader v-if="timePeriodLoading" type="list-item@4" />
+
+        <div v-else-if="!timesheets[periodIndex]" class="d-flex align-center justify-center">
+          Couldn't load time period info
+        </div>
+
         <time-period-details
           v-else
           :key="timeData"
@@ -123,6 +129,7 @@
           :period="timesheets[periodIndex]"
           :supplementalData="supplementalDataWithPlan"
           :timeData="timeData"
+          :title="timesheets[periodIndex]?.title"
         />
       </v-col>
       <!-- End Time Period Details -->
@@ -140,6 +147,7 @@
           :isYearly="isYearly"
           :supplementalData="supplementalDataWithPlan"
           :timeData="timeData"
+          :title="timesheets[periodIndex]?.title"
           :periodType="periodType"
         />
       </v-col>
@@ -152,6 +160,7 @@
 import TimesheetsChart from '@/components/charts/custom-charts/TimesheetsChart.vue';
 import TimePeriodDetails from '@/components/shared/timesheets/TimePeriodDetails.vue';
 import TimePeriodJobCodes from '@/components/shared/timesheets/TimePeriodJobCodes.vue';
+import { getEmployeeCurrentContracts } from '@/shared/employeeUtils';
 import { isAfter, isBefore, isSameOrBefore, getTodaysDate } from '@/shared/dateUtils';
 import _find from 'lodash/find';
 import _forEach from 'lodash/forEach';
@@ -281,7 +290,7 @@ let periodType = computed(() => {
  * @returns Boolean - True if an admin has selected to show a users contract year for a project.
  */
 function showContractYear() {
-  let empCurContract = _find(props.employee.contracts, (c) => _find(c.projects, (p) => !p.endDate));
+  let empCurContract = getEmployeeCurrentContracts(props.employee)?.[0];
   let contract = _find(store.getters.contracts, (c) => c.id === empCurContract?.contractId);
   return contract?.settings?.timesheetsContractViewOption;
 } // showContractYear
@@ -290,6 +299,8 @@ function showContractYear() {
  * Refreshes PTO plan data
  */
 function refreshPtoPlan() {
+  if (props.timesheets.length == 0) return;
+
   // sum up and save the results of plan within time range
   let startDate = props.timesheets[periodIndex.value].startDate;
   let endDate = props.timesheets[periodIndex.value].endDate;

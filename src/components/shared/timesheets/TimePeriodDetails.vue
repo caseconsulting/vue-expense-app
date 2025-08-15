@@ -73,25 +73,27 @@
 </template>
 
 <script setup>
-import _forEach from 'lodash/forEach';
-import { computed, inject, ref, onMounted, onBeforeUnmount } from 'vue';
-import { formatNumber, openLink } from '@/utils/utils';
+import api from '@/shared/api';
 import {
   add,
+  DEFAULT_ISOFORMAT,
+  endOf,
+  format,
   getIsoWeekday,
+  getTodaysDate,
   isAfter,
   isSameOrAfter,
   isSameOrBefore,
-  format,
-  getTodaysDate,
-  DEFAULT_ISOFORMAT,
-  startOf,
-  endOf
+  startOf
 } from '@/shared/dateUtils';
 import { getEmployeeCurrentProjects } from '@/shared/employeeUtils';
 import { updateStoreTags } from '@/utils/storeUtils';
-import api from '@/shared/api';
+import { formatNumber, openLink } from '@/utils/utils';
+import _find from 'lodash/find';
+import _forEach from 'lodash/forEach';
+import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useStore } from 'vuex';
+/** @import { Ref } from 'vue' */
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -106,9 +108,9 @@ const props = defineProps([
   'isYearly',
   'period',
   'supplementalData',
-  'timeData'
+  'timeData',
+  'title'
 ]);
-import _find from 'lodash/find';
 const emitter = inject('emitter');
 const store = useStore();
 
@@ -121,6 +123,9 @@ const customWorkDayInput = ref(null);
 const showCustomWorkDayInput = ref(false);
 const today = ref(format(getTodaysDate(), null, DEFAULT_ISOFORMAT));
 const contractHours = ref(undefined);
+
+/** @type {Ref<string>} */
+const errorMessage = ref(null);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -221,8 +226,11 @@ const hoursBehindBy = computed(() => {
 const periodHoursCompleted = computed(() => {
   let total = 0;
   _forEach(props.timeData, (duration, jobName) => {
-    if (!props.isYearly || (props.isYearly && !props.supplementalData.nonBillables?.includes(jobName))) {
-      total += duration;
+    if (
+      (duration.title == null || duration.title == props.title) &&
+      (!props.isYearly || (props.isYearly && !props.supplementalData.nonBillables?.includes(jobName)))
+    ) {
+      total += duration.duration ?? duration;
     }
   });
   // convert to hours
@@ -443,7 +451,7 @@ async function check1860OnTrack() {
   let nonBillables = yearlyTimesheetData.supplementalData.nonBillables;
   _forEach(actualTimesheets, (duration, jobName) => {
     if (!nonBillables?.includes(jobName)) {
-      hoursWorked += duration;
+      hoursWorked += duration.duration ?? duration;
     }
   });
   hoursWorked = hoursWorked / 60 / 60; // convert seconds to hours
@@ -453,6 +461,16 @@ async function check1860OnTrack() {
     emitter.emit('1860-not-on-track', props.employee.id);
   }
 }
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     WATCHERS                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+watch(props.period, (val) => {
+  errorMessage.value = val ? null : "Couldn't load time period";
+});
 </script>
 
 <style>
