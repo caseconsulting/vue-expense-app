@@ -498,7 +498,7 @@ watch(
 </script>
 
 <style lang="scss">
-@use 'src/assets/styles/styles' as *;
+@use '@/assets/styles/styles' as *;
 @import '../node_modules/vuetify/dist/vuetify.min.css';
 
 #app {
