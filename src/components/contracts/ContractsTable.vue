@@ -1055,7 +1055,7 @@ watch(
 </script>
 
 <style lang="scss">
-@import 'src/assets/styles/styles';
+@use 'src/assets/styles/styles' as *;
 .cell-width-x-small {
   min-width: 110px !important;
   width: 110px !important;

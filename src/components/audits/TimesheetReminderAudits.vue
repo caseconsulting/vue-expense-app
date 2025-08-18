@@ -276,7 +276,7 @@ function handleClick(_, { item }) {
 </style>
 
 <style lang="scss" scoped>
-@import 'src/assets/styles/styles';
+@use 'src/assets/styles/styles' as *;
 .inactive {
   color: $case-red;
 }
