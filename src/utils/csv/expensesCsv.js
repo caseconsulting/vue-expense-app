@@ -2,18 +2,16 @@
  * Utilities to convert expense objects into objects passable to
  * csv.js
  */
-import _forEach from 'lodash/forEach';
 import _cloneDeep from 'lodash/cloneDeep';
-import _find from 'lodash/find';
-import store from '../../../store/index.js';
-import { format, DEFAULT_ISOFORMAT } from '../../shared/dateUtils';
-import csvUtils from './baseCsv.js';
+import store from '~/store/index.js';
+import { format, DEFAULT_ISOFORMAT, FORMATTED_ISOFORMAT } from '@/shared/dateUtils';
+import csvUtils from '@/utils/csv/baseCsv.js';
 
 /**
  * Downloads array of expenses as csv file.
  * @param expenses - array of expense objects
  */
-export function download(expenses) {
+function download(expenses) {
   let filename = Array.isArray(expenses) ? 'expenses.csv' : 'expense.csv';
   let convertedExpenses = convertExpenses(expenses); // convert expenses into csv object
   let csvExpenses = csvUtils.sort(convertedExpenses, 'Purchase Date'); // sort by purchase date
@@ -22,21 +20,81 @@ export function download(expenses) {
 } // download
 
 /**
+ * Downloads array of expenses as a report for Unanet import.
+ * @param expenses - array of expense objects
+ */
+function unanetReport(expenses) {
+  let csvExpenses = unanetExpenseData(expenses); // convert expenses into csv object
+  let csvFileString = csvUtils.generate(csvExpenses); // convert to csv file string
+  csvUtils.download(csvFileString, 'unanet_report.csv'); // download csv file string as .csv
+} // unanetReport
+
+function unanetExpenseData(expenses) {
+  if (!Array.isArray(expenses)) expenses = [expenses];
+  let employees = store.getters.employees;
+  let expenseTypes = store.getters.expenseTypes;
+  return expenses.map((expense) => {
+    // add first name, last name, and employee #
+    let employee = employees.find((employee) => {
+      return employee.id === expense.employeeId;
+    });
+
+    // add expense type
+    let expenseType;
+    expenseTypes.forEach((type) => {
+      if (type.id === expense.expenseTypeId) {
+        expenseType = type.budgetName;
+      }
+    });
+
+    return {
+      username: employee.email, // email
+      purpose: '', // blank
+      location: '', // blank
+      project_org_code: '',
+      project_code: '',
+      task_name: '',
+      expense_date: format(expense.createdAt, null, FORMATTED_ISOFORMAT),
+      expense_type: expenseType,
+      currency_code: 'USD', // USD
+      amount: expense.cost,
+      exchange_rate: 1, // 1
+      payment_method: '*Employee Paid', // *Employee Paid
+      project_type: '', // blank
+      comments: '', // blank
+      receipt_included: expense.receipt ? 'Y' : 'N',
+      no_receipt_reason: '', // blank
+      vendor_name: '', // blank
+      vat_amount: 0, // 0
+      vat_location: '', // blank
+      post_date: '', // blank
+      cost_account: '', // blank
+      exp_voucher: '', // blank
+      delete: '', // blank
+      ic_amount: '', // blank
+      ic_cost_structure: '', // blank
+      ic_cost_element: '', // blank
+      amount_in: '' // blank
+    };
+  });
+}
+
+/**
  * Converts expenses to an array of objects to pass in to csvUtils.generate(). Expects
  * an array of expenses but supports having a single expense object.
  * @param expenses - expense object to convert
  * @return a new object passable to csv.js
  */
-export function convertExpenses(expenses) {
+function convertExpenses(expenses) {
   if (!Array.isArray(expenses)) expenses = [expenses];
   let tempExpenses = [];
   let employees = store.getters.employees;
   let expenseTypes = store.getters.expenseTypes;
-  _forEach(expenses, (expense) => {
+  expenses.forEach((expense) => {
     let tempExpense = _cloneDeep(expense);
 
     // add first name, last name, and employee #
-    _forEach(employees, (employee) => {
+    employees.forEach((employee) => {
       if (employee.id === tempExpense.employeeId) {
         tempExpense.employeeNumber = employee.employeeNumber;
         tempExpense.lastname = employee.lastName;
@@ -46,7 +104,7 @@ export function convertExpenses(expenses) {
     });
 
     // add expense type
-    _forEach(expenseTypes, (type) => {
+    expenseTypes.forEach((type) => {
       if (type.id === tempExpense.expenseTypeId) {
         tempExpense.expenseType = type.budgetName;
       }
@@ -84,11 +142,11 @@ export function convertExpenses(expenses) {
  * @returns String - The employees preferred name
  */
 function getRecipientName(employeeId) {
-  let employee = _find(store.getters.employees, (e) => e.id === employeeId);
+  let employee = store.getters.employees.find((e) => e.id === employeeId);
   return employee ? `${employee.nickname || employee.firstName} ${employee.lastName}` : null;
 } // getRecipientName
 
 export default {
   download,
-  convertExpenses
+  unanetReport
 };
