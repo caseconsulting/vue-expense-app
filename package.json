@@ -1,6 +1,7 @@
 {
   "name": "vue-expense-app",
   "version": "4.16.0",
+  "versionName": "Okapi",
   "releaseDate": "2025-08-05",
   "releaseNotes": "https://public.3.basecamp.com/p/dsybTyF1Zq5Ywjn1Az2Fbeqi",
   "private": true,
