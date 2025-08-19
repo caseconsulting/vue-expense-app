@@ -32,15 +32,14 @@ function unanetReport(expenses) {
 function unanetExpenseData(expenses) {
   if (!Array.isArray(expenses)) expenses = [expenses];
   let employees = store.getters.employees;
+  let employee;
   let expenseTypes = store.getters.expenseTypes;
+  let expenseType;
   return expenses.map((expense) => {
-    // add first name, last name, and employee #
-    let employee = employees.find((employee) => {
+    employee = employees.find((employee) => {
       return employee.id === expense.employeeId;
     });
 
-    // add expense type
-    let expenseType;
     expenseTypes.forEach((type) => {
       if (type.id === expense.expenseTypeId) {
         expenseType = type.budgetName;
