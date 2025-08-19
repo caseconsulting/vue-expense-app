@@ -500,8 +500,8 @@ watch(
 </script>
 
 <style lang="scss">
+@use '@/assets/styles/styles' as *;
 @import '../node_modules/vuetify/dist/vuetify.min.css';
-@import 'src/assets/styles/styles';
 
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;

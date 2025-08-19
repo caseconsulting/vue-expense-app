@@ -309,7 +309,7 @@ watch(
 </script>
 
 <style lang="scss">
-@import 'src/assets/styles/styles';
+@use '@/assets/styles/styles' as *;
 
 .projects-table > div > table > tbody > tr > td {
   padding: 0px 12px 0px 12px !important;
