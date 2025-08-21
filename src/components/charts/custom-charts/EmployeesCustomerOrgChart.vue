@@ -157,12 +157,7 @@ function fillData() {
  */
 function getChartData() {
   let datasets = [];
-  let dirBreakdowns = {};
-  let labels = getSortedLabels();
-  // set all directorate breakdowns in a non-nested object
-  _forEach(labels, (label) => {
-    dirBreakdowns = { ...dirBreakdowns, ...directorates.value[label] };
-  });
+  let { labels, totals } = getSortedLabels();
   let i = 0;
   let j = 0;
   _forEach(labels, (label) => {
@@ -182,6 +177,8 @@ function getChartData() {
     j = 0;
     i++;
   });
+  // make the label names include the total
+  for (let i in labels) labels[i] = `${labels[i]} (${totals[labels[i]]} total)`
   return {
     labels,
     datasets
@@ -202,7 +199,9 @@ function getSortedLabels() {
     });
     sortedLabelMap[directorate] = total;
   });
-  return Object.keys(sortedLabelMap).sort((a, b) => sortedLabelMap[b] - sortedLabelMap[a]);
+  let labels = Object.keys(sortedLabelMap).sort((a, b) => sortedLabelMap[b] - sortedLabelMap[a]);
+  let totals = sortedLabelMap;
+  return { labels, totals };
 } // getSortedLabels
 
 /**
