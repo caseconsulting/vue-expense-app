@@ -193,11 +193,9 @@ function fillData() {
 function getChartData() {
   let datasets = [];
   let { labels, totals } = getSortedLabels();
-  let labels_raw = [];
   let label;
   for (let i in labels) {
     label = labels[i];
-    labels_raw[i] = label; // setting here is faster than a spread operator
     // sort each directorate by total employees attached to a directorate breakdown
     let sortedDirBreakdowns = Object.keys(directorates[label]).sort(
       (a, b) => directorates[label][b] - directorates[label][a]
