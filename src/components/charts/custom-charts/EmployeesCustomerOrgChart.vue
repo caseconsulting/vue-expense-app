@@ -158,27 +158,24 @@ function fillData() {
 function getChartData() {
   let datasets = [];
   let { labels, totals } = getSortedLabels();
-  let i = 0;
-  let j = 0;
-  _forEach(labels, (label) => {
+  let label;
+  for (let i in labels) {
+    label = labels[i];
     // sort each directorate by total employees attached to a directorate breakdown
     let sortedDirBreakdowns = Object.keys(directorates.value[label]).sort(
       (a, b) => directorates.value[label][b] - directorates.value[label][a]
     );
-    _forEach(sortedDirBreakdowns, (key) => {
-      // create a dataset for each directorate breakdown
+    // create a dataset for each directorate breakdown
+    for (let j in sortedDirBreakdowns) {
       datasets.push({
-        label: key,
-        data: getDataValues(labels, key),
+        label: sortedDirBreakdowns[j],
+        data: getDataValues(labels, sortedDirBreakdowns[j]),
         backgroundColor: colors[i % colors.length][j % colors[i % colors.length].length]
       });
-      j++;
-    });
-    j = 0;
-    i++;
-  });
-  // make the label names include the total
-  for (let i in labels) labels[i] = `${labels[i]} (${totals[labels[i]]} total)`
+    }
+    // rename the label to include the total
+    labels[i] = `${label} (${totals[label]} total)`;
+  }
   return {
     labels,
     datasets
