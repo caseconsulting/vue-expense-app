@@ -11,8 +11,6 @@
 
 <script setup>
 import BarChart from '../base-charts/BarChart.vue';
-import _forEach from 'lodash/forEach';
-import _first from 'lodash/first';
 import api from '@/shared/api';
 import { onMounted, ref } from 'vue';
 import { useStore } from 'vuex';
@@ -70,11 +68,11 @@ onMounted(async () => {
  */
 function fetchData() {
   let contracts = store.getters.contracts;
-  _forEach(contracts, (c) => {
-    _forEach(c.projects, (p) => {
+  for (let c of contracts) {
+    for (let p of c.projects) {
       if (p.status === api.CONTRACT_STATUSES.ACTIVE) addDirectorate(c, p);
-    });
-  });
+    }
+  }
 } // fetchData
 
 /**
@@ -111,9 +109,9 @@ function fillData() {
       }
     },
     onClick: (x, y) => {
-      if (_first(y)) {
-        let directorateIndex = _first(y).index;
-        let orgIndex = _first(y).datasetIndex;
+      if (y[0]) {
+        let directorateIndex = y[0].index;
+        let orgIndex = y[0].datasetIndex;
         let directorate = chartData.value.labels[directorateIndex];
         let org = chartData.value.datasets[orgIndex].label;
         if (directorate === org) org = null;
@@ -189,13 +187,13 @@ function getChartData() {
  */
 function getSortedLabels() {
   let sortedLabelMap = {};
-  _forEach(directorates.value, (dirBreakdowns, directorate) => {
+  for (let [directorate, breakdown] of Object.entries(directorates.value)) {
     let total = 0;
-    _forEach(dirBreakdowns, (count) => {
+    for (let count of Object.values(breakdown)) {
       total += count;
-    });
+    }
     sortedLabelMap[directorate] = total;
-  });
+  }
   let labels = Object.keys(sortedLabelMap).sort((a, b) => sortedLabelMap[b] - sortedLabelMap[a]);
   let totals = sortedLabelMap;
   return { labels, totals };
@@ -210,9 +208,9 @@ function getSortedLabels() {
  */
 function getDataValues(labels, dirBreakdown) {
   let data = [];
-  _forEach(labels, (label) => {
+  for(let label of labels) {
     data.push(directorates.value[label]?.[dirBreakdown] || 0);
-  });
+  }
   return data;
 } // getDataValues
 
@@ -258,16 +256,18 @@ function getChartList(directorate, org) {
   let contracts = store.getters.contracts;
   let employees = store.getters.employees;
   let chartList = [];
-  _forEach(contracts, (c) => {
-    _forEach(c.projects, (p) => {
+  let currEmployees;
+  for (let c of contracts) {
+    for (let p of c.projects) {
       let nextOrg = getOrgBreakdown(p) ?? getOrgBreakdown(c);
       if ((org == null || nextOrg === org) && p.directorate === directorate) {
-        _forEach(getProjectCurrentEmployees(c, p, employees), (e) => {
+        currEmployees = getProjectCurrentEmployees(c, p, employees);
+        for (let e of currEmployees) {
           chartList.push(e.fullName ?? `${e.firstName} ${e.lastName}`);
-        });
+        }
       }
-    });
-  });
+    }
+  }
   return chartList;
 }
 </script>
