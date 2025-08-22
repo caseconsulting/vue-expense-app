@@ -1,5 +1,13 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5">
+    <div v-if="userRoleIsAdmin()" class="float-right">
+      <DownloadCSV
+        filename="directorates"
+        :csv="generateCsvData()"
+        :xlsxFormat="false"
+        tooltip="Download Active Certifications to CSV"
+      ></DownloadCSV>
+    </div>
     <bar-chart
       ref="barChart"
       chartId="employees-directorate-chart"
@@ -11,11 +19,14 @@
 
 <script setup>
 import BarChart from '../base-charts/BarChart.vue';
+import DownloadCSV from '@/components/utils/DownloadCSV.vue';
 import api from '@/shared/api';
+import { userRoleIsAdmin } from '@/utils/utils';
 import { onMounted, ref } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { getProjectCurrentEmployees } from '@/shared/contractUtils';
+import baseCsv from '@/utils/csv/baseCsv.js';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -62,6 +73,56 @@ onMounted(async () => {
 // |                      METHODS                     |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Makes the desired CSV for directorates
+ */
+function generateCsvData() {
+  // needs like:
+  //
+  // {Top level directorate}: 15
+  // {Second level dir}: 10
+  // {Second level dir}: 5
+  //
+  // {Top level directorate}: 20
+  // {Second level dir}: 10
+  // {Second level dir}: 7
+  // {Second level dir}: 3
+  //
+  // {Top level directorate}: 15
+  // {Second level dir}: 10
+  // {Second level dir}: 5
+  //
+
+  // extract chart data
+  let { labels_raw: labels, datasets } = chartData.value;
+
+  // build object categories by top level dir
+  labels = labels.map(l => ({ name: l, count: 0, items: [] }));
+  for (let item of datasets) {
+    for (let [i, v] of item.data.entries()) {
+      if (v === 0) continue;
+      labels[i].count += v;
+      labels[i].items.push({ name: item.label, count: v });
+    }
+  }
+
+  // build 2D array of top level dir, with subdirs under it
+  let dirArray = [];
+  let row = (item) => ["", `${item.name}:`, item.count];
+  let add = (item) => dirArray.push(row(item));
+  let space = () => dirArray.push(["", "", ""]);
+  space();
+  for (let label of labels) {
+    space();
+    add(label);
+    for (let item of label.items) add(item)
+  }
+
+  let csv = baseCsv.generateFrom2dArray(dirArray);
+  console.log(csv);
+  return csv;
+} // generateCsvData
 
 /**
  * Gets directorate data count from employees list.
@@ -156,9 +217,11 @@ function fillData() {
 function getChartData() {
   let datasets = [];
   let { labels, totals } = getSortedLabels();
+  let labels_raw = [];
   let label;
   for (let i in labels) {
     label = labels[i];
+    labels_raw[i] = label; // setting here is faster than a spread operator
     // sort each directorate by total employees attached to a directorate breakdown
     let sortedDirBreakdowns = Object.keys(directorates.value[label]).sort(
       (a, b) => directorates.value[label][b] - directorates.value[label][a]
@@ -176,6 +239,7 @@ function getChartData() {
   }
   return {
     labels,
+    labels_raw,
     datasets
   };
 } // getChartData
