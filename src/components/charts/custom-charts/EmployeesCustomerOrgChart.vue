@@ -5,8 +5,13 @@
         filename="directorates"
         :csv="generateCsvData()"
         :xlsxFormat="false"
+<<<<<<< HEAD
         tooltip="Download Directorates to CSV"
       />
+=======
+        tooltip="Download Active Certifications to CSV"
+      ></DownloadCSV>
+>>>>>>> 0b2b9f6a (POR-3262: add download for dir chart)
     </div>
     <bar-chart
       ref="barChart"
@@ -83,6 +88,25 @@ onMounted(async () => {
  * Makes the desired CSV for directorates
  */
 function generateCsvData() {
+<<<<<<< HEAD
+=======
+  // needs like:
+  //
+  // {Top level directorate}: 15
+  // {Second level dir}: 10
+  // {Second level dir}: 5
+  //
+  // {Top level directorate}: 20
+  // {Second level dir}: 10
+  // {Second level dir}: 7
+  // {Second level dir}: 3
+  //
+  // {Top level directorate}: 15
+  // {Second level dir}: 10
+  // {Second level dir}: 5
+  //
+
+>>>>>>> 0b2b9f6a (POR-3262: add download for dir chart)
   // extract chart data
   let { labels_raw: labels, datasets } = chartData.value;
 
@@ -109,8 +133,14 @@ function generateCsvData() {
   }
 
   let csv = baseCsv.generateFrom2dArray(dirArray);
+<<<<<<< HEAD
   return csv;
 }
+=======
+  console.log(csv);
+  return csv;
+} // generateCsvData
+>>>>>>> 0b2b9f6a (POR-3262: add download for dir chart)
 
 /**
  * Gets directorate data count from employees list.
@@ -193,9 +223,11 @@ function fillData() {
 function getChartData() {
   let datasets = [];
   let { labels, totals } = getSortedLabels();
+  let labels_raw = [];
   let label;
   for (let i in labels) {
     label = labels[i];
+    labels_raw[i] = label; // setting here is faster than a spread operator
     // sort each directorate by total employees attached to a directorate breakdown
     let sortedDirBreakdowns = Object.keys(directorates[label]).sort(
       (a, b) => directorates[label][b] - directorates[label][a]
