@@ -16,7 +16,7 @@ import baseCsv from '@/utils/csv/baseCsv.js';
 // |                                                  |
 // |--------------------------------------------------|
 
-const props = defineProps(['color', 'filename', 'generateData', 'sortKey', 'tooltip']);
+const props = defineProps(['color', 'filename', 'csv', 'generateData', 'sortKey', 'tooltip', 'xlsxFormat']);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -27,9 +27,12 @@ const props = defineProps(['color', 'filename', 'generateData', 'sortKey', 'tool
  * Downloads employees as CSV
  */
 function download() {
-  let csvData = props.generateData();
-  if (props.sortKey) csvData = baseCsv.sort(csvData, props.sortKey);
-  let csv = baseCsv.generate(csvData);
-  baseCsv.download(csv, props.filename);
+  let csv = props.csv;
+  if (!csv) {
+    let csvData = props.generateData();
+    if (props.sortKey) csvData = baseCsv.sort(csvData, props.sortKey);
+    csv = baseCsv.generate(csvData);
+  }
+  baseCsv.download(csv, props.filename, props.xlsxFormat ?? true);
 } // download
 </script>
