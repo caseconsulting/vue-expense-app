@@ -141,13 +141,30 @@
           </v-col>
         </v-row>
         <v-row v-if="userIsAdminOrManager">
-          <v-col cols="4"
-            ><v-text-field
+          <v-col cols="4">
+            <v-text-field
               v-model="editedEmployee.unanetPersonKey"
               label="Unanet Person Key"
               :rules="getUnanetPersonKeyRules()"
               maxLength="15"
             ></v-text-field>
+          </v-col>
+          <v-col cols="4">
+            <DatePicker
+              variant="filled"
+              v-model="editedEmployee.hireDate"
+              label="Start Date"
+            />
+          </v-col>
+          <v-col cols="4">
+            <DatePicker
+              variant="filled"
+              mode="month"
+              v-model="editedEmployee.internshipDate"
+              label="Internship Start Date"
+              returnFormat="YYYY-MM"
+              displayFormat="MM/YYYY"
+            />
           </v-col>
         </v-row>
         <v-row v-if="userIsAdminOrManager">
@@ -521,6 +538,7 @@
 </template>
 
 <script setup>
+import DatePicker from '@/components/shared/DatePicker.vue';
 import { JOB_TITLES } from '@/components/employees/form-tabs/dropdown-info/jobTitles';
 import PrivateButton from '@/components/shared/edit-fields/PrivateButton.vue';
 import { usePrepareSubmit } from '@/composables/editTabCommunication';
