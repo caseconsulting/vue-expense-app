@@ -1,9 +1,9 @@
 {
   "name": "vue-expense-app",
-  "version": "4.16.0",
-  "versionName": "Okapi",
-  "releaseDate": "2025-08-05",
-  "releaseNotes": "https://public.3.basecamp.com/p/dsybTyF1Zq5Ywjn1Az2Fbeqi",
+  "version": "4.17.0",
+  "versionName": "Potoroo",
+  "releaseDate": "2025-08-26",
+  "releaseNotes": "https://public.3.basecamp.com/p/wY1iRfxzTRYkNku2HvwxGjd4",
   "private": true,
   "scripts": {
     "build": "export NODE_OPTIONS=--openssl-legacy-provider && vite build",
