@@ -289,6 +289,10 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@use "sass:list";
+@use "sass:string";
+@use "sass:math";
+
 p {
   margin-bottom: 12px;
 }
@@ -315,23 +319,23 @@ $colors: (#d13447, #ffbf00, #263672);
 // stylelint-disable scss/function-unquote-no-unquoted-strings-inside
 // stylelint-disable scss/no-global-function-names
 @for $i from 0 through 150 {
-  $w: random(8);
-  $l: random(98);
+  $w: math.random(8);
+  $l: math.random(98);
   .confetti-#{$i} {
     width: #{$w}px;
     height: #{$w * 0.4}px;
-    background-color: nth($colors, random(3));
+    background-color: list.nth($colors, math.random(3));
     top: -10%;
-    left: unquote($l + '%');
-    opacity: random() + 0.5;
-    transform: rotate(#{random() * 360}deg);
-    animation: drop-#{$i} unquote(4 + random() + 's') unquote(random() + 's') infinite;
+    left: string.unquote($l + '%');
+    opacity: math.random() + 0.5;
+    transform: rotate(#{math.random() * 360}deg);
+    animation: drop-#{$i} string.unquote(4 + math.random() + 's') string.unquote(math.random() + 's') infinite;
   }
 
   @keyframes drop-#{$i} {
     100% {
       top: 110%;
-      left: unquote($l + random(15) + '%');
+      left: string.unquote($l + math.random(15) + '%');
     }
   }
 }

@@ -232,6 +232,9 @@ export class Employee {
     this.icTimeFrames = properties.icTimeFrames ?? [];
 
     /** @type {string} */
+    this.internshipDate = properties.internshipDate ?? '';
+
+    /** @type {string} */
     this.jobRole = properties.jobRole ?? '';
 
     /** @type {Language[]} */
