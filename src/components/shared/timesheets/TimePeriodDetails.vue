@@ -116,6 +116,7 @@ const store = useStore();
 
 const clonedEmployee = ref(props.employee);
 const BONUS_YEAR_TOTAL = ref(1860);
+const CONTRACT_YEAR_DEFAULT = ref(1860);
 const WORK_HOURS_PER_DAY = ref(8); // normal hours per day for full time employees
 const customCompleted = ref(null);
 const customNeeded = ref(null);
@@ -244,7 +245,7 @@ const periodHoursCompleted = computed(() => {
  */
 const proRatedHours = computed(() => {
   if (props.isYearly) {
-    let totalHours = props.isCalendarYear ? BONUS_YEAR_TOTAL.value : contractHours.value;
+    let totalHours = props.isCalendarYear ? BONUS_YEAR_TOTAL.value : (contractHours.value ?? CONTRACT_YEAR_DEFAULT.value);
     let { startDate, endDate } = props.period;
     return (totalHours / getWorkDays(startDate, endDate, true)) * (props.employee.workStatus / 100);
   } else {
