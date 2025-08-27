@@ -466,7 +466,7 @@ watch(selectedDisplayType, (val) => {
 </style>
 
 <style lang="scss" scoped>
-@import 'src/assets/styles/styles';
+@use '@/assets/styles/styles' as *;
 .inactive {
   color: $case-red;
 }

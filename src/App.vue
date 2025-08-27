@@ -129,9 +129,9 @@
       </v-main>
       <v-footer v-if="isLoggedIn()" class="app-bg-color">
         <v-col class="text-right text-caption" cols="12">
-          <a id="P" class="text-black" target="_blank" :href="releaseNotes">
+          <a class="releaseNotes text-black" target="_blank" :href="releaseNotes">
             <v-tooltip activator="parent" location="top">View Release Notes</v-tooltip>
-            <strong>Version</strong> {{ version }}
+            <strong>Version:</strong> {{ versionName }} (v{{ version }})
           </a>
         </v-col>
       </v-footer>
@@ -157,7 +157,7 @@ import {
 } from '@/utils/auth';
 import { isMobile, isSmallScreen, storeIsPopulated, updateEmployeeLogin } from '@/utils/utils';
 import { updateStoreUser, updateStoreEmployees } from '@/utils/storeUtils';
-import p from '../package.json';
+import p from '~/package.json';
 import floorPlan from '@/assets/img/MakeOfficesfloorplan.jpg';
 import facebook from '@/assets/img/trademarks/facebook.png';
 import github from '@/assets/img/trademarks/github.png';
@@ -233,6 +233,7 @@ const mainNavReloadKey = ref(0);
 const logoutReloadKey = ref(0);
 
 const version = ref(null);
+const versionName = ref(null);
 const releaseNotes = ref(null);
 
 // |--------------------------------------------------|
@@ -286,6 +287,7 @@ onBeforeMount(async () => {
   }
 
   version.value = p.version;
+  versionName.value = p.versionName;
   releaseNotes.value = p.releaseNotes;
 
   loadingCreated.value = false;
@@ -498,8 +500,8 @@ watch(
 </script>
 
 <style lang="scss">
+@use '@/assets/styles/styles' as *;
 @import '../node_modules/vuetify/dist/vuetify.min.css';
-@import 'src/assets/styles/styles';
 
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
@@ -527,8 +529,14 @@ watch(
   background: transparent;
 }
 
-#P {
+.releaseNotes {
   text-decoration: none;
+  padding: 0.5em 0.7em;
+  border-radius: 0.35em;
+}
+.releaseNotes:hover {
+  background-color: #e8e8e8;
+  cursor: pointer;
 }
 
 .whiteImage {
