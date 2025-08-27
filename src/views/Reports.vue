@@ -59,12 +59,11 @@
           <div v-else>
             <!-- user is not mobile -->
             <v-tabs color="blue" v-model="currentWindow" center-active grow show-arrows>
-              <v-tab v-for="(tab, i) in tabs" :key="i" :value="i" @click="changeTab(tab, i)">
-                {{ tab.title }}
-              </v-tab>
-            </v-tabs>
+              <v-tab v-for="tab in tabs" :key="tab.key" :value="tab.key">
+                {{ tab.title }}</v-tab>
+              </v-tabs>
             <v-window v-model="currentWindow">
-              <v-window-item v-for="tab in tabs" :key="tab" :value="tab.key" class="mx-2 my-6">
+              <v-window-item v-for="tab in tabs" :key="tab.key" :value="tab.key">
                 <component :is="tab.component" />
               </v-window-item>
             </v-window>
