@@ -206,6 +206,7 @@ onMounted(() => {
   populateDropdowns(employeesInfo.value);
   buildContractsColumn();
   if (localStorage.getItem('requestedFilter')) {
+    console.log(localStorage.getItem('requestedFilter'));
     let requestedFilter = JSON.parse(localStorage.getItem('requestedFilter'));
     switch (requestedFilter.type) {
       case 'prime':

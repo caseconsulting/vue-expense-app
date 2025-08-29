@@ -102,8 +102,10 @@ function parseEmployeeData() {
  * @param word String - The word clicked on
  */
 function wordClicked(word) {
-  localStorage.setItem('requestedDataType', 'technologies');
-  localStorage.setItem('requestedFilter', word);
+  localStorage.setItem(
+    'requestedFilter',
+    JSON.stringify({ type: 'technologies', search: word })
+  );
   router.push({
     path: '/reports',
     name: 'reports'

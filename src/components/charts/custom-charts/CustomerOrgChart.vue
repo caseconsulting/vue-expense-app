@@ -136,9 +136,10 @@ function fillData() {
   option.value = {
     onClick: (x, y) => {
       let index = _first(y).index;
-      let labelClicked = chartData.value.labels[index];
-      localStorage.setItem('requestedDataType', 'customerOrgs');
-      localStorage.setItem('requestedFilter', labelClicked);
+      localStorage.setItem(
+        'requestedFilter',
+        JSON.stringify({ type: 'customerOrgs', search: chartData.value.labels[index] })
+      );
       router.push({
         path: '/reports',
         name: 'reports'

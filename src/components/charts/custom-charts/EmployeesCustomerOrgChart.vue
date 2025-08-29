@@ -120,7 +120,6 @@ function generateCsvData() {
   }
 
   let csv = baseCsv.generateFrom2dArray(dirArray);
-  console.log(csv);
   return csv;
 } // generateCsvData
 
@@ -179,7 +178,7 @@ function fillData() {
         localStorage.setItem('requestedDataType', 'contracts');
         localStorage.setItem(
           'requestedFilter',
-          JSON.stringify({ type: 'search', search: getChartList(directorate, org) })
+          JSON.stringify({ type: 'contracts', search: getChartList(directorate, org) })
         );
         router.push({
           path: '/reports',

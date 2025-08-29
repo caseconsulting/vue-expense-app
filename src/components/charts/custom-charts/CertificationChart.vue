@@ -168,8 +168,10 @@ function fillCertData() {
         let label = Array.isArray(chartData.value.labels[index])
           ? chartData.value.labels[index].join(' ')
           : chartData.value.labels[index];
-        localStorage.setItem('requestedDataType', 'certifications');
-        localStorage.setItem('requestedFilter', label);
+        localStorage.setItem(
+          'requestedFilter',
+          JSON.stringify({ type: 'certifications', search: label })
+        );
         router.push({
           path: '/reports',
           name: 'reports'
