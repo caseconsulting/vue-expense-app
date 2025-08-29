@@ -5,13 +5,8 @@
         filename="directorates"
         :csv="generateCsvData()"
         :xlsxFormat="false"
-<<<<<<< HEAD
         tooltip="Download Directorates to CSV"
       />
-=======
-        tooltip="Download Active Certifications to CSV"
-      ></DownloadCSV>
->>>>>>> 0b2b9f6a (POR-3262: add download for dir chart)
     </div>
     <bar-chart
       ref="barChart"
@@ -88,25 +83,6 @@ onMounted(async () => {
  * Makes the desired CSV for directorates
  */
 function generateCsvData() {
-<<<<<<< HEAD
-=======
-  // needs like:
-  //
-  // {Top level directorate}: 15
-  // {Second level dir}: 10
-  // {Second level dir}: 5
-  //
-  // {Top level directorate}: 20
-  // {Second level dir}: 10
-  // {Second level dir}: 7
-  // {Second level dir}: 3
-  //
-  // {Top level directorate}: 15
-  // {Second level dir}: 10
-  // {Second level dir}: 5
-  //
-
->>>>>>> 0b2b9f6a (POR-3262: add download for dir chart)
   // extract chart data
   let { labels_raw: labels, datasets } = chartData.value;
 
@@ -133,14 +109,8 @@ function generateCsvData() {
   }
 
   let csv = baseCsv.generateFrom2dArray(dirArray);
-<<<<<<< HEAD
   return csv;
 }
-=======
-  console.log(csv);
-  return csv;
-} // generateCsvData
->>>>>>> 0b2b9f6a (POR-3262: add download for dir chart)
 
 /**
  * Gets directorate data count from employees list.
