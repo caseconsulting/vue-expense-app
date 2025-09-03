@@ -201,7 +201,7 @@ const sections = ref({
     'admin',
     {
       title: 'How do I reimburse an expense?',
-      body: 'Select the expenses that you would like to reimburse by clicking the select box either on a row (to select all expenses for that employee under that expense type) or on each of their individual expenses. Next select the $ icon at the bottom left of the page and then confirm the reimbursement.'
+      body: 'Select the expenses that you would like to reimburse by clicking the check box. Next select the "$ Reimburse" icon on the right side of the page and then confirm the reimbursement.'
     }
   ],
   employees: [
