@@ -25,20 +25,35 @@
         </v-container>
       </v-card>
     </div>
-    <div>
+    <div v-show="oldImage || newImage">
       <v-card>
-        <v-card-title class="beta_header_style">Expense at {{ date }}</v-card-title>
+        <v-card-title class="beta_header_style">Expense {{ status }} at {{ date }}</v-card-title>
         <v-card-text class="mt-2"
-          ><v-row
+          ><v-row v-if="!oldImage"
             ><v-col
-              ><b>Expense Status</b>
-              <div>{{ status }}</div></v-col
+              ><b>Original Expense Details</b>
+              <div v-for="data in after" :key="data.purchaseDate">{{ data }}</div></v-col
+            ></v-row
+          >
+          <v-row v-else-if="!newImage"
             ><v-col
-              ><b>Before</b>
+              ><b>Final Expense Details</b>
+              <div v-for="data in before" :key="data.purchaseDate">{{ data }}</div></v-col
+            ></v-row
+          >
+          <v-row v-else
+            ><v-col
+              ><b>Old Expense Details</b>
               <div v-for="data in before" :key="data.purchaseDate">{{ data }}</div></v-col
             ><v-col
-              ><b>After</b>
-              <div v-for="data in after" :key="data.purchaseDate">{{ data }}</div></v-col
+              ><b>Expense Detail Changes</b>
+              <div
+                :style="change.includes(data) ? 'background-color: yellow' : ''"
+                v-for="data in after"
+                :key="data.purchaseDate"
+              >
+                {{ data }}
+              </div></v-col
             ></v-row
           ></v-card-text
         >
@@ -50,7 +65,7 @@
 <script setup>
 import { AxiosError } from 'axios';
 import dayjs from 'dayjs';
-import { onBeforeMount, onMounted, reactive, ref, watch } from 'vue';
+import { onBeforeMount, reactive, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 import api from '../shared/api';
 import { updateStoreEmployees } from '../utils/storeUtils';
@@ -61,8 +76,11 @@ const store = useStore();
 const date = ref(null);
 const status = ref(null);
 const before = ref(null);
+const change = ref([]);
 const after = ref(null);
 const expenseId = ref(null);
+const oldImage = ref(null);
+const newImage = ref(null);
 
 // *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
 // ❃                                                 ❃
@@ -102,31 +120,79 @@ const loading = reactive({
 // *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
 
 /**
+ * Finds the changes from audit to audit and store them
+ */
+function findChanges(beforeAudit, afterAudit) {
+  change.value = [];
+  beforeAudit.forEach((detail, index) => {
+    if (!(detail === afterAudit[index])) {
+      change.value.push(afterAudit[index]);
+    }
+  });
+}
+
+/**
+ * Handles the audit details view based on what kind of audit it is
  *
- *
- * @param data the data at that specific point in the expense
+ * @param audit the audit at that specific point in the expense
  */
 function handleClick(audit) {
   date.value = audit.date;
-  status.value = determineStatus(audit);
-  let oldImage = audit.oldImage;
-  let newImage = audit.newImage;
-  before.value = [
-    oldImage?.cost || '',
-    oldImage?.description || '',
-    oldImage?.purchaseDate || '',
-    oldImage?.showOnFeed || ''
-  ];
-  after.value = [
-    newImage?.cost || '',
-    newImage?.description || '',
-    newImage?.purchaseDate || '',
-    newImage?.showOnFeed || ''
-  ];
+  status.value = determineStatus(audit).toLowerCase();
+  oldImage.value = audit.oldImage;
+  newImage.value = audit.newImage;
+  if (!oldImage.value) {
+    //for created expense audits
+    let employee = getEmployeeByID(newImage.value.employeeId, store.getters.employees);
+    after.value = [
+      'Expense Owner: ' + employee.firstName + ' ' + employee.lastName,
+      'Expense Creator: ' + audit.name,
+      'Category: ' + newImage.value.category,
+      'Cost: $' + newImage.value.cost,
+      'Purchase Date: ' + dayjs(newImage.value.purchaseDate).format('MM/DD/YYYY'),
+      'Description: ' + newImage.value.description,
+      'Show On Feed: ' + newImage.value.showOnFeed
+    ];
+  } else if (!newImage.value) {
+    //for deleted expense audits
+    let employee = getEmployeeByID(oldImage.value.employeeId, store.getters.employees);
+    before.value = [
+      'Expense Owner: ' + employee.firstName + ' ' + employee.lastName,
+      'Expense Deleter: ' + audit.name,
+      'Category: ' + oldImage.value.category,
+      'Cost: $' + oldImage.value.cost,
+      'Purchase Date: ' + dayjs(oldImage.value.purchaseDate).format('MM/DD/YYYY'),
+      'Description: ' + oldImage.value.description,
+      'Show On Feed: ' + oldImage.value.showOnFeed
+    ];
+  } else {
+    //for updated expense audits
+    let employee = getEmployeeByID(oldImage.value.employeeId, store.getters.employees);
+    before.value = [
+      'Expense Owner: ' + employee.firstName + ' ' + employee.lastName,
+      'Expense Updater: ' + audit.name,
+      'Category: ' + oldImage.value.category,
+      'Cost: $' + oldImage.value.cost,
+      'Purchase Date: ' + dayjs(oldImage.value.purchaseDate).format('MM/DD/YYYY'),
+      'Description: ' + oldImage.value.description,
+      'Show On Feed: ' + oldImage.value.showOnFeed
+    ];
+    after.value = [
+      'Expense Owner: ' + employee.firstName + ' ' + employee.lastName,
+      'Expense Updater: ' + audit.name,
+      'Category: ' + newImage.value.category,
+      'Cost: $' + newImage.value.cost,
+      'Purchase Date: ' + dayjs(newImage.value.purchaseDate).format('MM/DD/YYYY'),
+      'Description: ' + newImage.value.description,
+      'Show On Feed: ' + newImage.value.showOnFeed
+    ];
+    findChanges(before.value, after.value);
+  }
 }
 
 /**
  * Queries the database based on the current filters
+ * (TEMP) currently only grabs the most recent expense audit and any audits relating to that expense
  */
 async function query() {
   loading.audits = true;
@@ -212,13 +278,6 @@ onBeforeMount(async () => {
   loading.graph = false; // TODO: load graph
 });
 
-onMounted(() => {
-  date.value = loadedAudits.value[0];
-  status.value = loadedAudits.value[0];
-  before.value = ['Before'];
-  after.value = ['After'];
-});
-
 // *✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫✮❆✦✯✿✧✩❄✬✭❀✫*
 // ❃                                                 ❃
 // ❇                    WATCHERS                     ❇
@@ -238,8 +297,6 @@ watch(filters, filterDisplayAudits, { deep: true });
   gap: 16px;
 }
 
-#control-panel,
-#graphs,
 #table {
   width: 100%;
   padding: 0px;
@@ -251,8 +308,6 @@ watch(filters, filterDisplayAudits, { deep: true });
   gap: 8px;
 }
 
-#control-panel > *.v-card-title,
-#graphs > *.v-card-title,
 #table > *.v-card-title {
   width: 100%;
   display: flex;
