@@ -6,14 +6,14 @@
         <div class="text-h6 text-decoration-underline">Variables</div>
         <div class="mb-3">Employee Work Status (<span class="var">EWS</span>) = 0-100 (100 being full-time)</div>
         <div class="mb-3">
-          Period Work Days (<span class="var">PWD</span>) = week days from period start date TO period end date
+          Period Work Days (<span class="var">PWD</span>) = week days from period start date to period end date
         </div>
         <div class="mb-3">
           Period Work Days Pro Rated (<span class="var">PWDPR</span>) =
           <ul>
             <li>
-              Employee hire date OR contract start date falls after period start date —> hire date/contract start date
-              TO period end date
+              Employee hire date or contract start date falls after period start date —> hire date/contract start date
+              to period end date
             </li>
             <li>Otherwise —> <span>PWD</span></li>
           </ul>
@@ -33,10 +33,8 @@
           <div class="font-weight-bold d-inline-block">Period Hours Completed (<span class="var">PHC</span>)</div>
           =
           <ul>
-            <li>Pay Period —> All hours inputted in ADP/QuickBooks during the displayed time period</li>
-            <li>
-              Calendar/Contract Period —> Billable hours inputted in ADP/QuickBooks during the displayed time period
-            </li>
+            <li>Pay Period —> All hours inputted in Unanet during the displayed time period</li>
+            <li>Calendar/Contract Period —> Billable hours inputted in Unanet during the displayed time period</li>
           </ul>
         </div>
         <div>
@@ -65,7 +63,7 @@
         </div>
         <div class="mb-3">
           <div class="font-weight-bold d-inline-block">Work Days Remaining (<span class="var">WDR</span>)</div>
-          = week days from today to the period end date - future days inputted in ADP/QuickBooks day
+          = week days from today to the period end date - future days with time inputted in Unanet
         </div>
       </div>
       <div>Note: You can edit Work Days Remaining field by clicking on it</div>
