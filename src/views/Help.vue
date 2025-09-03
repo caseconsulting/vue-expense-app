@@ -2,13 +2,10 @@
   <v-container>
     <!-- Help Title -->
     <div>
-      <h1 id="help-title">Help</h1>
+      <h1 id="help-title" class="mb-2">Help</h1>
     </div>
-    <br />
-    <br />
 
-    <div class="mb-5">
-      <div class="text-center mb-3" />
+    <div>
       <v-expansion-panels variant="accordion" :model-value="panel">
         <v-expansion-panel v-for="section in sections" :key="section[0]">
           <!-- Header -->
