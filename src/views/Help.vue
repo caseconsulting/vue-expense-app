@@ -259,14 +259,6 @@ const sections = ref({
       employeeRole: 'manager'
     }
   ],
-  knownIssues: [
-    'Known Issues',
-    'user',
-    {
-      title:
-        'Google Chrome has an issue displaying (some) attachments that are PDFs. Work-around is to tell Chrome to download PDFs. Or, use a different a browser.'
-    }
-  ],
   roleAbilities: [
     // different structure here
     'Role Abilities',
