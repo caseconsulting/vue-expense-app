@@ -187,7 +187,7 @@ const sections = ref({
     },
     {
       title: 'What does the "Have this expense type show on the company feed?" switch mean?',
-      body: 'When a user creates an expense and after being reimbursed, it will display info about the expense on the activity feed in the Home page. This feature can be toggled off by the user when creating an expense or by the person reimbursing the expense.',
+      body: 'When a user creates an expense and after being reimbursed, it will display info about the expense on the activity feed in the Home page. This feature can be toggled off by an admin when creating or reimbursing the expense.',
       employeeRole: 'admin'
     },
     {
