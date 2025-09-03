@@ -79,34 +79,7 @@ const route = useRoute();
 const panel = ref(null);
 const role = ref(''); // employee role
 const sections = ref({
-  quickBooksTimeHours: [
-    'Timesheet Calculations',
-    'user',
-    {
-      title: 'Total Work Days (TWD) = week days from period start date to period end date',
-      body: ''
-    },
-    {
-      title: 'Total Work Days Pro Rated (TWDPR) = ',
-      body: '1. Employee hire date OR contract start date falls after normal start date ? —> hire date/contract start date to period end date \n2. Otherwise —> TWD'
-    },
-    {
-      title: 'What hours fall under Completed, Today, and Future?',
-      body: "Completed hours are any hours logged in ADP/QuickBooks Time from the first day of the month through the end of the day today. Today's hours are any hours logged in ADP/QuickBooks Time at any point today. Future hours are any hours logged in ADP/QuickBooks Time between the beginning of the day tomorrow and the last day of the month."
-    },
-    {
-      title: 'Why does my Avg Hours/Day or Days Remaining seem wrong?',
-      body: 'Days Remaining includes today by default. If you have already worked your hours for today you can edit Days Remaining to have one less day. This will update the Avg Hours/Day as well.'
-    },
-    {
-      title: 'How can I edit Days Remaining?',
-      body: 'Once you click on the number of Days Remaining on the right hand side you will be able to edit this number using your keyboard.'
-    },
-    {
-      title: 'Why do I not see some of my hours for today?',
-      body: 'If you are using the clock in function on ADP/QuickBooks Time, those hours may still be accumulating. Try refreshing the page.'
-    }
-  ],
+  timeHours: ['Timesheet Calculations', 'user', {}],
   myBudgets: [
     'My Budgets',
     'user',
@@ -234,10 +207,6 @@ const sections = ref({
   employees: [
     'Employees',
     'user',
-    {
-      title: 'What is an Employee #?',
-      body: "An employee's ID number will be a user's hire order. This number also corresponds to ADP/QuickBooks Time data."
-    },
     {
       title: 'What is the manager role for?',
       body: 'Managers have the same access as a user but can also edit or view any employee data. They should have the same access as admins on the employee pages.',
