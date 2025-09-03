@@ -49,9 +49,10 @@
               <v-card-text class="bg-grey-lighten-3">
                 <li v-for="(ques, index) in section" :key="ques.title">
                   <div v-if="ques.title && (!ques.employeeRole || canView(ques.employeeRole))" class="pb-1">
-                    <body :id="section[0] + '-' + index" class="italics">
+                    <span :id="section[0] + '-' + index" class="italics">
                       <v-icon>mdi-motion</v-icon> {{ ques.title }}
-                    </body>
+                    </span>
+                    <br />
                     {{ ques.body }}
                   </div>
                 </li>
