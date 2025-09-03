@@ -1924,7 +1924,7 @@ function watchExpenseID() {
   //when model id is not empty then must be editing an expense
   if (!this.isEmpty(this.expense.id)) {
     this.emitter.emit('editing-expense'); //notify parent that expense is being edited
-    this.costFormatted = Number(this.editedExpense.cost).toLocaleString();
+    this.costFormatted = Number(this.editedExpense.cost).toFixed(2).toLocaleString();
     this.submittedReceipt = this.editedExpense.receipt;
   } else {
     this.clearForm();
