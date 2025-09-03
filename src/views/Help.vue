@@ -206,7 +206,7 @@ const sections = ref({
   ],
   employees: [
     'Employees',
-    'user',
+    'manager',
     {
       title: 'What is the manager role for?',
       body: 'Managers have the same access as a user but can also edit or view any employee data. They should have the same access as admins on the employee pages.',
