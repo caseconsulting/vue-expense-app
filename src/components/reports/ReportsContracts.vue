@@ -125,7 +125,7 @@ import _uniq from 'lodash/uniq';
 import { employeeFilter } from '@/shared/filterUtils';
 import { selectedTagsHasEmployee } from '@/shared/employeeUtils';
 import { getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
-import { onMounted, ref, inject, watch } from 'vue';
+import { onMounted, ref, inject, watch, defineProps } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 const store = useStore();
