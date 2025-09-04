@@ -160,13 +160,13 @@ const items = ref([
         permission: ['admin', 'manager'],
         active: false
       },
-      {
-        title: 'Something idk',
-        icon: 'mdi-clipboard-multiple',
-        route: 'audits',
-        permission: ['admin', 'manager'],
-        active: false
-      },
+      // {
+      //   title: 'Something idk',
+      //   icon: 'mdi-clipboard-multiple',
+      //   route: 'audits',
+      //   permission: ['admin', 'manager'],
+      //   active: false
+      // },
       {
         title: 'Expense History',
         icon: 'mdi-clipboard-text-multiple',
@@ -174,13 +174,13 @@ const items = ref([
         permission: ['admin', 'manager'],
         active: false
       },
-      {
-        title: 'Employee History',
-        icon: 'mdi-clipboard-play-multiple',
-        route: 'employeeHistory',
-        permission: ['admin', 'manager'],
-        active: false
-      }
+      // {
+      //   title: 'Employee History',
+      //   icon: 'mdi-clipboard-play-multiple',
+      //   route: 'employeeHistory',
+      //   permission: ['admin', 'manager'],
+      //   active: false
+      // }
     ],
     permission: ['admin', 'manager'],
     active: false

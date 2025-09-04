@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { API_CONFIG } from './apiVariables';
 import { getAccessToken } from '@/utils/auth';
-// eslint-disable-next-line no-unused-vars
 import { AuditRequestFilters } from './models/audits/audts';
 
 // routes
