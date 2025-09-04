@@ -125,7 +125,7 @@ function fillData() {
         let index = _first(y).index;
         localStorage.setItem(
           'requestedFilter',
-          JSON.stringify({ type: 'jobRoles', search: chartData.value.labels[index] })
+          JSON.stringify({ tab: 'jobRoles', search: chartData.value.labels[index] })
         );
         router.push({
           path: '/reports',

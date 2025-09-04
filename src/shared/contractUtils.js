@@ -49,17 +49,19 @@ export function getProjectLocations() {
  */
 export function getProjectCurrentEmployees(contract, project, employees) {
   let employeesList = [];
-  _forEach(employees, (employee) => {
-    if (employee.contracts && employee.workStatus > 0) {
-      if (
-        employee.contracts.some(
-          (c) => contract.id == c.contractId && c.projects.some((p) => p.projectId == project.id && !p.endDate)
-        )
-      ) {
-        employeesList.push(employee);
+
+  // loop through every employee's projects
+  for (let employee of employees) {
+    if (employee.workStatus <= 0) continue;// exclude employees who are not active
+    for (let c of employee.contracts ?? []) {
+      if (contract.id != c.contractId) continue; // skip non-matching contracts
+      for (let p of c.projects ?? []) {
+        if (project.id != p.projectId) continue; // skip non-matching projects
+        if (isProjectActive(p)) employeesList.push(employee);
       }
     }
-  });
+  }
+
   return employeesList;
 } // getProjectCurrentEmployees
 
@@ -100,9 +102,20 @@ export function getProject(contractId, projectId, contracts) {
   return contracts.find((c) => c.id == contractId).projects.find((p) => p.id == projectId);
 } // getProject
 
+/**
+ * Returns true if the project is active.
+ * 
+ * @param project - the project to check
+ * @returns boolean - if the project is active
+ */
+export function isProjectActive(project) {
+  return project.presentDate ?? !project.endDate;
+} // isProjectActive
+
 export default {
   getOrgList,
   getProjectCurrentEmployees,
   getProjectPastEmployees,
-  getProject
+  getProject,
+  isProjectActive
 };

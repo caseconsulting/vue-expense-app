@@ -162,7 +162,7 @@ function fillData() {
         localStorage.setItem('requestedDataType', 'contracts');
         localStorage.setItem(
           'requestedFilter',
-          JSON.stringify({ type: 'prime', search: chartData.value.labels[index] })
+          JSON.stringify({ tab: 'prime', type: 'prime', search: chartData.value.labels[index] })
         );
         router.push({
           path: '/reports',

@@ -83,15 +83,16 @@ import { useStore } from 'vuex';
 import ContactEmployeesModal from '@/components/shared/ContactEmployeesModal.vue';
 import ReportsPageLoader from '@/components/reports/ReportsPageLoader.vue';
 import ReportsAwards from '@/components/reports/ReportsAwards.vue';
+import ReportsCertifications from '@/components/reports/ReportsCertifications.vue';
 import ReportsContracts from '@/components/reports/ReportsContracts.vue';
 import ReportsCustomerOrgs from '@/components/reports/ReportsCustomerOrgs.vue';
-import ReportsCertifications from '@/components/reports/ReportsCertifications.vue';
-import ReportsForeignLanguages from '@/components/reports/ReportsForeignLanguages.vue';
-import ReportsJobRoles from '@/components/reports/ReportsJobRoles.vue';
-import ReportsTechnologies from '@/components/reports/ReportsTechnologies.vue';
-import ReportsSecurityInfo from '@/components/reports/ReportsSecurityInfo.vue';
+import ReportsDirectorates from '@/components/reports/ReportsDirectorates.vue';
 import ReportsEducation from '@/components/reports/ReportsEducation.vue';
 import ReportsEmployeeNotes from '@/components/reports/ReportsEmployeeNotes.vue';
+import ReportsForeignLanguages from '@/components/reports/ReportsForeignLanguages.vue';
+import ReportsJobRoles from '@/components/reports/ReportsJobRoles.vue';
+import ReportsSecurityInfo from '@/components/reports/ReportsSecurityInfo.vue';
+import ReportsTechnologies from '@/components/reports/ReportsTechnologies.vue';
 import { updateStoreEmployees, updateStoreContracts, updateStoreTags } from '@/utils/storeUtils';
 import { isMobile, userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
 import { getEmployeeCurrentProjects } from '@/shared/employeeUtils';
@@ -126,6 +127,11 @@ const tabs = ref([
     key: 'customerOrgs',
     title: 'Customer Orgs',
     component: shallowRef(ReportsCustomerOrgs)
+  },
+  {
+    key: 'directorates',
+    title: 'Directorates',
+    component: shallowRef(ReportsDirectorates)
   },
   {
     key: 'certifications',
@@ -199,9 +205,8 @@ onMounted(async () => {
   requestedFilter.value = JSON.parse(localStorage.getItem('requestedFilter') ?? null);
   if (requestedFilter.value) {
     localStorage.removeItem('requestedFilter');
-    console.log(requestedFilter.value);
     // find requested tab and change to it
-    for (let i in tabs.value) if (tabs.value[i].key === requestedTab) changeTab(tabs.value[i]);
+    for (let i in tabs.value) if (tabs.value[i].key === requestedFilter.value.tab) changeTab(tabs.value[i]);
     wasRedirected.value = true;
     window.scrollTo(0, 0);
   }

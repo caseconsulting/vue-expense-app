@@ -88,7 +88,7 @@ import _forEach from 'lodash/forEach';
 import _filter from 'lodash/filter';
 import { employeeFilter } from '@/shared/filterUtils';
 import { getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
-import { onMounted, ref, inject, watch } from 'vue';
+import { onMounted, ref, inject, watch, defineProps } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { selectedTagsHasEmployee } from '@/shared/employeeUtils';
@@ -98,6 +98,7 @@ import TagsFilter from '@/components/shared/TagsFilter.vue';
 const store = useStore();
 const emitter = inject('emitter');
 const router = useRouter();
+const props = defineProps(['requestedFilter']);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -148,10 +149,9 @@ onMounted(() => {
   employeesInfo.value = getActive(store.getters.employees); // default to filtered list
   filteredEmployees.value = employeesInfo.value; // one.value is shown
   populateDropdowns(employeesInfo.value);
-  if (localStorage.getItem('requestedFilter')) {
-    jobRoleSearch.value = localStorage.getItem('requestedFilter');
+  if (props.requestedFilter) {
+    jobRoleSearch.value = props.requestedFilter.search;
     refreshDropdownItems();
-    localStorage.removeItem('requestedFilter');
   }
 
   // initial set of table download data

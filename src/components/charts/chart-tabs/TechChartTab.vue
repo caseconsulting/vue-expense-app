@@ -104,7 +104,7 @@ function parseEmployeeData() {
 function wordClicked(word) {
   localStorage.setItem(
     'requestedFilter',
-    JSON.stringify({ type: 'technologies', search: word })
+    JSON.stringify({ tab: 'technologies', search: word })
   );
   router.push({
     path: '/reports',

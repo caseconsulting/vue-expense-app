@@ -170,7 +170,7 @@ function fillCertData() {
           : chartData.value.labels[index];
         localStorage.setItem(
           'requestedFilter',
-          JSON.stringify({ type: 'certifications', search: label })
+          JSON.stringify({ tab: 'certifications', search: label })
         );
         router.push({
           path: '/reports',

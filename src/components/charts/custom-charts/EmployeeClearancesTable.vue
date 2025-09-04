@@ -73,7 +73,7 @@ onBeforeMount(async () => {
 function clickedRow(_, { item }) {
   localStorage.setItem(
     'requestedFilter',
-    JSON.stringify({ type: 'securityInfo', search: item.title })
+    JSON.stringify({ tab: 'securityInfo', search: item.title })
   );
   router.push({
     path: '/reports',

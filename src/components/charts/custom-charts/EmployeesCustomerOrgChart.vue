@@ -78,22 +78,6 @@ onMounted(async () => {
  * Makes the desired CSV for directorates
  */
 function generateCsvData() {
-  // needs like:
-  //
-  // {Top level directorate}: 15
-  // {Second level dir}: 10
-  // {Second level dir}: 5
-  //
-  // {Top level directorate}: 20
-  // {Second level dir}: 10
-  // {Second level dir}: 7
-  // {Second level dir}: 3
-  //
-  // {Top level directorate}: 15
-  // {Second level dir}: 10
-  // {Second level dir}: 5
-  //
-
   // extract chart data
   let { labels_raw: labels, datasets } = chartData.value;
 
@@ -178,7 +162,7 @@ function fillData() {
         localStorage.setItem('requestedDataType', 'contracts');
         localStorage.setItem(
           'requestedFilter',
-          JSON.stringify({ type: 'contracts', search: getChartList(directorate, org) })
+          JSON.stringify({ tab: 'directorates', type: 'org', search: org })
         );
         router.push({
           path: '/reports',
@@ -271,7 +255,7 @@ function getSortedLabels() {
  */
 function getDataValues(labels, dirBreakdown) {
   let data = [];
-  for(let label of labels) {
+  for (let label of labels) {
     data.push(directorates.value[label]?.[dirBreakdown] || 0);
   }
   return data;
@@ -294,8 +278,8 @@ function addDirectorate(c, p) {
 
   // if we have all three pieces of info, add it to the chart
   if (directorate && nextOrg && count) {
-    if (!directorates.value[directorate]) directorates.value[directorate] = {};
-    if (!directorates.value[directorate][nextOrg]) directorates.value[directorate][nextOrg] = 0;
+    directorates.value[directorate] ??= {};
+    directorates.value[directorate][nextOrg] ??= 0;
     directorates.value[directorate][nextOrg] += count;
   }
 } // addCustomerOrg

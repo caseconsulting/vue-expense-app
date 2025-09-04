@@ -182,7 +182,7 @@ function fillData() {
         let index = _first(y).index;
         localStorage.setItem(
           'requestedFilter',
-          JSON.stringify({ type: 'technologies', search: chartData.value.labels[index] })
+          JSON.stringify({ tab: 'technologies', search: chartData.value.labels[index] })
         );
         router.push({
           path: '/reports',

@@ -125,7 +125,7 @@ import _uniq from 'lodash/uniq';
 import { employeeFilter } from '@/shared/filterUtils';
 import { selectedTagsHasEmployee } from '@/shared/employeeUtils';
 import { getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
-import { onMounted, ref, inject, watch } from 'vue';
+import { onMounted, ref, inject, watch, defineProps } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 const store = useStore();
@@ -139,6 +139,7 @@ import TagsFilter from '@/components/shared/TagsFilter.vue';
 // |                       DATA                       |
 // |                                                  |
 // |--------------------------------------------------|
+const props = defineProps(['requestedFilter']);
 const contractsDropDown = ref([]);
 const contractSearch = ref(null);
 const employees = ref([]);
@@ -205,24 +206,20 @@ onMounted(() => {
   filteredEmployees.value = employeesInfo.value; // one.value is shown
   populateDropdowns(employeesInfo.value);
   buildContractsColumn();
-  if (localStorage.getItem('requestedFilter')) {
-    console.log(localStorage.getItem('requestedFilter'));
-    let requestedFilter = JSON.parse(localStorage.getItem('requestedFilter'));
-    switch (requestedFilter.type) {
+  if (props.requestedFilter) {
+    console.log(props.requestedFilter);
+    switch (props.requestedFilter.type) {
       case 'prime':
-        primeSearch.value = requestedFilter.search;
+        primeSearch.value = props.requestedFilter.search;
         break;
       case 'contract':
-        contractSearch.value = requestedFilter.search;
-        break;
-      case 'search':
-        search.value = requestedFilter.search;
+        contractSearch.value = props.requestedFilter.search;
         break;
       default:
+        search.value = props.requestedFilter.search
         break;
     }
     refreshDropdownItems();
-    localStorage.removeItem('requestedFilter');
   }
 
   search.value = search.value ? search.value + ' ' : null; // solution for redirecting from stats dashboard with a filter

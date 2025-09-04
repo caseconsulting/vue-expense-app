@@ -131,7 +131,7 @@ function fillData() {
         let index = _first(y).index;
         localStorage.setItem(
           'requestedFilter',
-          JSON.stringify({ type: 'foreignLanguages', search: chartData.value.labels[index] })
+          JSON.stringify({ tab: 'foreignLanguages', type: 'language', search: chartData.value.labels[index] })
         );
         router.push({
           path: '/reports',
