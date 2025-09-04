@@ -6,18 +6,12 @@
 
     <!-- Job Role and Hire Date information -->
     <v-card-text class="pb-0">
-      <div v-if="props.model.jobRole">
-        <h2 class="mt-4 fit-content" style="font-size: large">{{ props.model.jobRole }}</h2>
+      <div>
+        <h2 class="mt-4 fit-content" style="font-size: large">{{ props.model.jobRole || 'No Job Role' }}</h2>
         <p v-if="!model.deptDate" class="mb-1 info-header">Since {{ monthDayYearFormat(model.hireDate) }}</p>
         <p class="mb-1 info-header" v-else>Departed {{ monthDayYearFormat(model.deptDate) }}</p>
       </div>
-      <div v-else>
-        <!-- For testing beta purposes:) -->
-        <h2 class="mt-2" style="font-size: large">Software Dev Intern</h2>
-        <p v-if="!model.deptDate" class="info-header">Since {{ monthDayYearFormat(model.hireDate) }}</p>
-        <p class="info-header" v-else>Departed {{ monthDayYearFormat(model.deptDate) }}</p>
-      </div>
-      <div v-if="wasIntern">
+      <div v-if="internshipDate">
         <h2 class="fit-content" style="font-size: large">Internship date</h2>
         <div class="info-div">
           {{ internshipDate }}
@@ -48,14 +42,16 @@ import { computed, ref } from 'vue';
 // |--------------------------------------------------|
 
 const props = defineProps(['model']);
-const wasIntern = ref(props.model.employeeRole === 'intern'); //temp for now until intern start date and start date are separated
-const internshipDate = ref(monthDayYearFormat(props.model.hireDate)); //temp for now
 
 // |--------------------------------------------------|
 // |                                                  |
 // |                   COMPUTED                       |
 // |                                                  |
 // |--------------------------------------------------|
+
+const internshipDate = computed(() => {
+  return format(props.model.internshipDate, null, 'MMMM YYYY');
+});
 
 const getDaysUntil = computed(() => {
   let now = getTodaysDate();

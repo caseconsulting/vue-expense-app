@@ -82,6 +82,7 @@ const props = defineProps({
   hideDetails: { type: Boolean, default: false },
   disabled: { type: Boolean, default: false },
   density: { type: String, default: 'default' },
+  mode: { type: String, default: undefined },
 
   // LOGIC/CONFIG
   rules: { type: Array, default: () => [] },
