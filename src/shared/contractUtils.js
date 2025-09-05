@@ -1,5 +1,6 @@
 import _forEach from 'lodash/forEach';
 import store from '../../store/index';
+import { isAfter, getTodaysDate } from '@/shared/dateUtils';
 
 /**
  * Gets a list of orgs from a sepcific level from all contracts/projects.
@@ -57,7 +58,7 @@ export function getProjectCurrentEmployees(contract, project, employees) {
       if (contract.id != c.contractId) continue; // skip non-matching contracts
       for (let p of c.projects ?? []) {
         if (project.id != p.projectId) continue; // skip non-matching projects
-        if (isProjectActive(p)) employeesList.push(employee);
+        if (isProjectActive(project, employee)) employeesList.push(employee);
       }
     }
   }
@@ -103,13 +104,19 @@ export function getProject(contractId, projectId, contracts) {
 } // getProject
 
 /**
- * Returns true if the project is active.
+ * Returns true if the project is active for a given employee. Note that this
+ * ignores the project dates and only checks if the employee object's project.
  * 
  * @param project - the project to check
+ * @param employee - the employee to check
  * @returns boolean - if the project is active
  */
-export function isProjectActive(project) {
-  return project.presentDate ?? !project.endDate;
+export function isProjectActive(project, employee) {
+  // check if the employee is active on the project
+  for (let c of employee.contracts ?? [])
+    for (let p of c.projects ?? [])
+      if (p.projectId === project.id)
+        return !p.endDate;
 } // isProjectActive
 
 export default {

@@ -30,13 +30,24 @@
         </v-col>
         <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
           <v-autocomplete
-            v-model="custOrgSearch"
-            :items="custOrgs"
-            label="Search Orgs"
+            v-model="custOrg2Search"
+            :items="custOrgs2"
+            label="Search Org 2"
             variant="underlined"
             clearable
             auto-select-first
-            @click:clear="custOrgSearch = null"
+            @click:clear="custOrg2Search = null"
+          ></v-autocomplete>
+        </v-col>
+        <v-col cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
+          <v-autocomplete
+            v-model="custOrg3Search"
+            :items="custOrgs3"
+            label="Search Org 3"
+            variant="underlined"
+            clearable
+            auto-select-first
+            @click:clear="custOrg3Search = null"
           ></v-autocomplete>
         </v-col>
         <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="6" xl="3" lg="3" md="3" sm="6" class="my-0 py-0">
@@ -67,12 +78,6 @@
         <template v-slot:[`item.fullName`]="{ item }">
           <p :class="{ inactive: item.workStatus <= 0 }" class="mb-0">
             {{ getFullName(item) }}
-          </p>
-        </template>
-        <!-- Current Customer Org Item Slot -->
-        <template v-slot:[`item.currentOrgName`]="{ item }">
-          <p :class="{ inactive: item.workStatus <= 0 }" class="mb-0">
-            {{ item.currentOrgName }}
           </p>
         </template>
         <!-- Email Name Item Slot -->
@@ -144,9 +149,11 @@ const headers = ref([
     key: 'email'
   }
 ]); // datatable headers
-const custOrgSearch = ref(null);
+const custOrg2Search = ref(null);
+const custOrg3Search = ref(null);
 const directorateSearch = ref(null);
-const custOrgs = ref([]);
+const custOrgs2 = ref([]);
+const custOrgs3 = ref([]);
 const directorates = ref([]);
 const search = ref(null); // query text for datatable search field
 const showInactiveEmployees = ref(false);
@@ -179,10 +186,11 @@ onMounted(async () => {
       case 'directorate':
         directorateSearch.value = props.requestedFilter.search;
         break;
-      case 'org':
       case 'org2':
+        custOrg2Search.value = props.requestedFilter.search;
+        break;
       case 'org3':
-        custOrgSearch.value = props.requestedFilter.search;
+        custOrg3Search.value = props.requestedFilter.search;
         break;
       default:
         search.value = props.requestedFilter.search;
@@ -205,44 +213,25 @@ onMounted(async () => {
  * Gets all of the current customer orgs for each employee and displays the column on the table.
  */
 function buildCustomerOrgColumns() {
-  employeesInfo.value.forEach((currentEmp) => {
-    if (currentEmp.customerOrgExp) {
-      let hasCurrent = false;
-      let orgs = '';
-      let years = 0;
-      currentEmp.customerOrgExp.forEach((org) => {
-        if (org.current) {
-          hasCurrent = true;
-          orgs += `${org.name} & `;
-          years += parseFloat(org.years);
-        }
-      });
-      if (hasCurrent) {
-        // remove & at the end
-        orgs = orgs.slice(0, -2);
-        currentEmp.currentOrgName = orgs;
-        currentEmp.currentOrgYoE = years.toFixed(2) + ' years';
-      }
-    }
-  });
-
   // get the projects into a more searchable object
   let projects = {};
-  for (let { projects: p } of store.getters.contracts) {
-    for (let { id, ...rest } of p) {
-      projects[id] = rest;
+  for (let c of store.getters.contracts) {
+    for (let p of c.projects) {
+      projects[p.id] = p;
     }
   }
 
   // pull out the org levels from each contract's projects
   let orgs = ['directorate', 'org2', 'org3'];
   for (let employee of employeesInfo.value) {
+    // on page re-load, sometimes the orgs are already built. erase them and rebuild.
+    for (let key of orgs) employee[key] = [];
+    // loop through all contracts and projects to get all orgs
     for (let c of employee.contracts ?? []) {
       for (let p of c.projects ?? []) {
         let project = projects[p.projectId];
-        if (isProjectActive(project)) {
+        if (isProjectActive(project, employee)) {
           for (let key of orgs) {
-            employee[key] ??= [];
             employee[key].push(project[key] ?? undefined);
           }
         }
@@ -274,14 +263,16 @@ function populateDropdowns() {
  * Populates all current customer orgs in the search dropdown.
  */
 function populateCustomerOrgsDropdown() {
-  custOrgs.value = new Set();
+  custOrgs2.value = new Set();
+  custOrgs3.value = new Set();
   let employee;
   for (let f of filteredEmployees.value ?? []) {
     employee = employeesInfoIndex.value[f.id];
-    for (let org of employee?.org2 ?? []) if (org && org != '') custOrgs.value.add(org);
-    for (let org of employee?.org3 ?? []) if (org && org != '') custOrgs.value.add(org);
+    for (let org of employee?.org2 ?? []) if (org && org != '') custOrgs2.value.add(org);
+    for (let org of employee?.org3 ?? []) if (org && org != '') custOrgs3.value.add(org);
   }
-  custOrgs.value = Array.from(custOrgs.value);
+  custOrgs2.value = Array.from(custOrgs2.value);
+  custOrgs3.value = Array.from(custOrgs3.value);
 } // populateCustomerOrgsDropdown
 
 /**
@@ -338,11 +329,22 @@ function searchDirectorates() {
  * Filters employees on the data table by the customer org entered by the user.
  */
 function searchCustomerOrgs() {
-  if (!custOrgSearch.value) return;
-  let combOrgs;
+  if (!custOrg2Search.value && !custOrg3Search.value) return;
+  let search2 = custOrg2Search.value || undefined;
+  let search3 = custOrg3Search.value || undefined;
+
+  // whether or not to combine search of org2 and org3 together, or to require
+  // both to match
+  let combine = false; // TODO: should be a user-editable field?
+  let op = (a, b) => combine ? (a || b) : (a && b);
+
+  let org2, org3, found2, found3;
   filteredEmployees.value = filteredEmployees.value.filter((employee) => {
-    combOrgs = [...(employee.org2 ?? []), ...(employee.org3 ?? [])];
-    return combOrgs.find((org) => org === custOrgSearch.value);
+    org2 = employee.org2 ?? [];
+    org3 = employee.org3 ?? [];
+    found2 = org2.find((org) => org === search2) || (search2 === undefined);
+    found3 = org3.find((org) => org === search3) || (search3 === undefined);
+    return op(found2, found3);
   });
 } // searchCustomerOrgs
 
@@ -384,7 +386,7 @@ watch(showInactiveEmployees, () => {
 /**
  * Watches the directorate and org searches to rerun the search filters if cleared
  */
-watch([search, directorateSearch, custOrgSearch, showInactiveEmployees], () => refreshDropdownItems() );
+watch([search, directorateSearch, custOrg2Search, custOrg3Search, showInactiveEmployees], () => refreshDropdownItems() );
 </script>
 
 <style lang="css" scoped>

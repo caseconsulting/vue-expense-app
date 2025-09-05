@@ -162,7 +162,7 @@ function fillData() {
         localStorage.setItem('requestedDataType', 'contracts');
         localStorage.setItem(
           'requestedFilter',
-          JSON.stringify({ tab: 'directorates', type: 'org', search: org })
+          JSON.stringify({ tab: 'directorates', type: 'org3', search: org })
         );
         router.push({
           path: '/reports',
