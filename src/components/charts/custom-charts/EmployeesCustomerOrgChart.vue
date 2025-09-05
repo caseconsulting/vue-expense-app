@@ -5,7 +5,7 @@
         filename="directorates"
         :csv="generateCsvData()"
         :xlsxFormat="false"
-        tooltip="Download Active Certifications to CSV"
+        tooltip="Download Directorates to CSV"
       ></DownloadCSV>
     </div>
     <bar-chart

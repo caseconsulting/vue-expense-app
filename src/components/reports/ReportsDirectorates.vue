@@ -104,7 +104,7 @@ import { selectedTagsHasEmployee } from '@/shared/employeeUtils';
 import { isProjectActive } from '@/shared/contractUtils';
 import { userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
 import { isSameOrBefore, getTodaysDate } from '@/shared/dateUtils';
-import { updateStoreContracts } from '@/utils/storeUtils';
+import { updateStoreContracts, updateStoreEmployees } from '@/utils/storeUtils';
 import TagsFilter from '@/components/shared/TagsFilter.vue';
 const store = useStore();
 const emitter = inject('emitter');
@@ -173,13 +173,15 @@ const tagsInfo = ref({
  * The created lifecycle hook.
  */
 onMounted(async () => {
+  // get employees and contracts if they aren't already loaded
+  if (!store.getters.employees) await updateStoreEmployees();
+  if (!store.getters.contracts) await updateStoreContracts();
+
   employeesInfo.value = getActive(store.getters.employees); // default to filtered list
   filteredEmployees.value = employeesInfo.value; // value in table
   buildCustomerOrgColumns();
   populateDropdowns();
 
-  // get contracts if they aren't already loaded
-  if (!store.getters.contracts) await updateStoreContracts();
 
   if (props.requestedFilter) {
     switch (props.requestedFilter.type) {
