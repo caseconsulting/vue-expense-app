@@ -8,6 +8,9 @@ import Employees from '@/views/Employees.vue';
 import Employee from '@/views/Employee.vue';
 import StatsDashboard from '@/views/StatsDashboard.vue';
 import Audits from '@/views/Audits.vue';
+import AuditsV2 from '@/views/AuditsV2.vue';
+import ExpenseHistory from '@/views/ExpenseHistory.vue';
+import EmployeeHistory from '@/views/EmployeeHistory.vue';
 import Expenses from '@/views/MyExpenses.vue';
 import Help from '@/views/Help.vue';
 import Reports from '@/views/Reports.vue';
@@ -64,9 +67,27 @@ const router = createRouter({
       beforeEnter: multiguard([requireAuth, isAdminOrManager])
     },
     {
+      path: '/old-audits',
+      name: 'old-audits',
+      component: Audits,
+      beforeEnter: multiguard([requireAuth, isAdminOrManager])
+    },
+    {
       path: '/audits',
       name: 'audits',
-      component: Audits,
+      component: AuditsV2,
+      beforeEnter: multiguard([requireAuth, isAdminOrManager])
+    },
+    {
+      path: '/expenseHistory',
+      name: 'expenseHistory',
+      component: ExpenseHistory,
+      beforeEnter: multiguard([requireAuth, isAdminOrManager])
+    },
+    {
+      path: '/employeeHistory',
+      name: 'employeeHistory',
+      component: EmployeeHistory,
       beforeEnter: multiguard([requireAuth, isAdminOrManager])
     },
     {
