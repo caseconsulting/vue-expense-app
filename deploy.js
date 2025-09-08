@@ -23,7 +23,7 @@ function main() {
     return;
   }
   const STAGE = args[2]?.slice(1, args[2].length);
-  const STAGES = ['dev', 'test', 'prod'];
+  const STAGES = ['sandbox', 'dev', 'test', 'prod'];
   if (!STAGES.includes(STAGE)) {
     console.log(`${COLORS.RED}Error: expected flag of -dev -test or -prod${COLORS.NC}`);
     return;

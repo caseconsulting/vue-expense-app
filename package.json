@@ -8,6 +8,9 @@
   "scripts": {
     "build": "export NODE_OPTIONS=--openssl-legacy-provider && vite build",
     "clean": "rm -rf dist tests_output",
+    "predeploy:sandbox": "npm run download:sandbox:env",
+    "deploy:sandbox": "export NODE_OPTIONS=--openssl-legacy-provider && npm run build && node deploy.js -sandbox",
+    "postdeploy:sandbox": "npm run download:local:env",
     "predeploy:dev": "npm run download:dev:env",
     "deploy:dev": "export NODE_OPTIONS=--openssl-legacy-provider && npm run build && node deploy.js -dev",
     "postdeploy:dev": "npm run download:local:env",
@@ -17,6 +20,7 @@
     "predeploy:test": "npm run download:test:env",
     "deploy:test": "export NODE_OPTIONS=--openssl-legacy-provider && npm run build && node deploy.js -test",
     "postdeploy:test": "npm run download:local:env",
+    "download:sandbox:env": "aws s3 cp s3://case-expense-app-resources-sandbox/.env .env",
     "download:dev:env": "aws s3 cp s3://case-expense-app-resources-dev/.env .env",
     "download:local:env": "aws s3 cp s3://case-expense-app-resources-local/.env .env",
     "download:prod:env": "aws s3 cp s3://case-consulting-expense-app-resources-prod/.env .env --profile prod",
