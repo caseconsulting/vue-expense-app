@@ -476,7 +476,7 @@ function setDataFromStorage(qbStorage, key) {
 } // setDataFromStorage
 
 /**
- * Sets local storage for Quickbooks data.
+ * Sets local storage for timesheets data.
  *
  * @param {Boolean} isCalendarYear - Whether or not the time period is the calendar year
  * @param {Boolean} isYearly - Whether or not the time period is yearly
