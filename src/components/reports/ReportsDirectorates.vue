@@ -180,8 +180,6 @@ onMounted(async () => {
   employeesInfo.value = getActive(store.getters.employees); // default to filtered list
   filteredEmployees.value = employeesInfo.value; // value in table
   buildCustomerOrgColumns();
-  populateDropdowns();
-
 
   if (props.requestedFilter) {
     switch (props.requestedFilter.type) {
@@ -198,12 +196,12 @@ onMounted(async () => {
         search.value = props.requestedFilter.search;
         break;
     }
-    refreshDropdownItems();
   }
-
+  
   // initial set of table download data
+  refreshDropdownItems();
   updateTableDownload(filteredEmployees.value);
-}); // created
+}); // onMounted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -232,6 +230,7 @@ function buildCustomerOrgColumns() {
     for (let c of employee.contracts ?? []) {
       for (let p of c.projects ?? []) {
         let project = projects[p.projectId];
+        if (!project) continue;
         if (isProjectActive(project, employee)) {
           for (let key of orgs) {
             employee[key].push(project[key] ?? undefined);
@@ -337,7 +336,7 @@ function searchCustomerOrgs() {
 
   // whether or not to combine search of org2 and org3 together, or to require
   // both to match
-  let combine = false; // TODO: should be a user-editable field?
+  let combine = false; // TODO: could be a user-editable field?
   let op = (a, b) => combine ? (a || b) : (a && b);
 
   let org2, org3, found2, found3;
