@@ -84,7 +84,7 @@
     "stylelint": "16.23.1",
     "stylelint-config-recommended-scss": "16.0.0",
     "stylelint-config-recommended-vue": "1.6.1",
-    "vite": "7.1.2"
+    "vite": "7.1.5"
   },
   "browserslist": [
     "> 1%",
