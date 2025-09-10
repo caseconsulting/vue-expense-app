@@ -57,6 +57,13 @@
                     class="mx-xs-0 mx-sm-0 mx-md-5"
                     hide-details
                     label="Under Reinvestigation"
+                    @update:model-value="
+                      () => {
+                        if (!clearance.reinvestigation) {
+                          clearance.reinvestigationSubmissionDate = null;
+                        }
+                      }
+                    "
                   >
                     <template #label v-if="name === 'xs' || name === 'sm'">
                       <span class="small-text">Under Reinvestigation</span>
@@ -151,6 +158,18 @@
                   label="Granting Organization"
                 ></v-combobox>
               </v-col>
+
+              <v-col :cols="isMobile() ? '12' : '4'">
+                <date-picker
+                  v-model="clearance.reinvestigationSubmissionDate"
+                  :disabled="!clearance.reinvestigation"
+                  :rules="[...getDateOptionalRules()]"
+                  :min="clearance.grantedDate"
+                  label="Reinvestigation Submission Date"
+                  variant="filled"
+                  clearable
+                ></date-picker>
+              </v-col>
             </v-row>
           </v-col>
         </v-row>
@@ -167,7 +186,7 @@
 
 <script setup>
 import DatePicker from '@/components/shared/DatePicker.vue';
-import { DEFAULT_ISOFORMAT, format, isBefore } from '@/shared/dateUtils';
+import { DEFAULT_ISOFORMAT, format, isBefore, minimum } from '@/shared/dateUtils';
 import { CLEARANCE_TYPES } from '@/shared/employeeUtils';
 import {
   getBadgeNumberRules,
@@ -178,10 +197,7 @@ import {
   getDuplicateClearanceRules,
   getRequiredRules
 } from '@/shared/validationUtils';
-import { isMobile } from '@/utils/utils';
-import _first from 'lodash/first';
-import _isEmpty from 'lodash/isEmpty';
-import _sortBy from 'lodash/sortBy';
+import { isMobile, isEmpty } from '@/utils/utils';
 import { onMounted, ref } from 'vue';
 import { useDisplay } from 'vuetify/lib/framework.mjs';
 
@@ -231,20 +247,16 @@ function addClearance() {
   editedEmployee.value.clearances.push({
     adjudicationDates: [],
     awaitingClearance: false,
-    biDates: [],
     badgeExpirationDate: null,
+    biDates: [],
     grantedDate: null,
     polyDates: [],
-    showAdjudicationMenu: false,
-    showBadgeMenu: false,
-    showBIMenu: false,
-    showGrantedMenu: false,
-    showPolyMenu: false,
-    showSubmissionMenu: false,
+    reinvestigation: false,
+    reinvestigationSubmissionDate: null,
     submissionDate: null,
     type: null
   });
-} // addClearance
+}
 
 /**
  * Capitalize all badge numbers.
@@ -255,7 +267,7 @@ function capitalizeBadges(clearance) {
   if (clearance.badgeNum) {
     clearance.badgeNum = clearance.badgeNum.toUpperCase();
   }
-} // capitalizeBadges
+}
 
 /**
  * Deletes a clearance.
@@ -264,7 +276,7 @@ function capitalizeBadges(clearance) {
  */
 function deleteClearance(cIndex) {
   editedEmployee.value.clearances.splice(cIndex, 1);
-} // deleteClearance
+}
 
 /**
  * Return the maximum available date to be selected for submission date. Returns the granted date if it exists.
@@ -281,15 +293,9 @@ function maxSubmission(cIndex) {
   }
 
   // check submission date is before any poly dates
-  if (!_isEmpty(editedEmployee.value.clearances[cIndex].polyDates)) {
+  if (!isEmpty(editedEmployee.value.clearances[cIndex].polyDates)) {
     // poly dates exist
-    let earliest = _first(
-      // get earliest poly date
-      _sortBy(editedEmployee.value.clearances[cIndex].polyDates, (date) => {
-        // sort poly dates
-        return format(date, null, DEFAULT_ISOFORMAT);
-      })
-    );
+    let earliest = minimum(editedEmployee.value.clearances[cIndex].polyDates);
 
     if (isBefore(earliest, max)) {
       // poly date is earliest date
@@ -298,15 +304,9 @@ function maxSubmission(cIndex) {
   }
 
   // check submission date is before any adjudication dates
-  if (!_isEmpty(editedEmployee.value.clearances[cIndex].adjudicationDates)) {
+  if (!isEmpty(editedEmployee.value.clearances[cIndex].adjudicationDates)) {
     // adjudication dates exist
-    let earliest = _first(
-      // get earliest adjudication date
-      _sortBy(editedEmployee.value.clearances[cIndex].adjudicationDates, (date) => {
-        // sort adjudication dates
-        return format(date, null, DEFAULT_ISOFORMAT);
-      })
-    );
+    let earliest = minimum(editedEmployee.value.clearances[cIndex].adjudicationDates);
     if (isBefore(earliest, max)) {
       // adjudication date is earliest date
       max = earliest; // update max date
@@ -314,7 +314,7 @@ function maxSubmission(cIndex) {
   }
 
   return max ? format(max, null, DEFAULT_ISOFORMAT) : null;
-} // maxSubmission
+}
 
 /**
  * Return the minimum available date to be selected for expiration date. Returns the granted date if it exists.
@@ -330,5 +330,5 @@ function minExpiration(cIndex) {
   } else if (editedEmployee.value.clearances[cIndex].submissionDate) {
     return editedEmployee.value.clearances[cIndex].submissionDate;
   }
-} // minExpiration
+}
 </script>

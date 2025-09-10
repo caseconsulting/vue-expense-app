@@ -20,6 +20,8 @@ export class Clearance {
     /** @type {boolean} */
     this.reinvestigation = properties.reinvestigation;
     /** @type {string} */
+    this.reinvestigationSubmissionDate = properties.reinvestigationSubmissionDate;
+    /** @type {string} */
     this.submissionDate = properties.submissionDate;
     /** @type {string} */
     this.type = properties.type;

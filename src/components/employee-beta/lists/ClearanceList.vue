@@ -7,6 +7,9 @@
             <b>{{ getClearanceType(clearance) }}</b>
           </p>
           <div>
+            <p class="mb-1" v-if="!isEmpty(getReinvestigationDate(clearance))">
+              <b>Reinvestigation Submission: </b>{{ getReinvestigationDate(clearance) }}
+            </p>
             <p class="mb-1" v-if="!isEmpty(getSubmissionDate(clearance))">
               <b>Submission: </b>{{ getSubmissionDate(clearance) }}
             </p>
@@ -84,6 +87,17 @@ function getClearanceType(clearance) {
  */
 function getSubmissionDate(clearance) {
   return monthDayYearFormat(clearance.submissionDate);
+}
+
+
+/**
+ * Returns clearance submission date
+ *
+ * @param {*} clearance The clearance object
+ * @return String - submission date
+ */
+function getReinvestigationDate(clearance) {
+  return monthDayYearFormat(clearance.reinvestigationSubmissionDate);
 }
 
 /**
