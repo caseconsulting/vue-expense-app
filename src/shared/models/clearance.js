@@ -5,12 +5,20 @@ export class Clearance {
     this.adjudicationDates = properties.adjudicationDates;
     /** @type {boolean} */
     this.awaitingClearance = properties.awaitingClearance;
-    /** @type {boolean} */
-    this.reinvestigation = properties.reinvestigation;
+    /** @type {string} */
+    this.badgeExpirationDate = properties.badgeExpirationDate;
+    /** @type {string} */
+    this.badgeNum = properties.badgeNum;
     /** @type {string[]} */
     this.biDates = properties.biDates;
+    /** @type {string} */
+    this.grantedDate = properties.grantedDate;
+    /** @type {string} */
+    this.grantingOrg = properties.grantingOrg;
     /** @type {string[]} */
     this.polyDates = properties.polyDates;
+    /** @type {boolean} */
+    this.reinvestigation = properties.reinvestigation;
     /** @type {string} */
     this.submissionDate = properties.submissionDate;
     /** @type {string} */
