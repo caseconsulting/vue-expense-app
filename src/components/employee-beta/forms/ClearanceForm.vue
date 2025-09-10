@@ -2,7 +2,7 @@
   <div>
     <v-row v-for="(clearance, cIndex) in editedEmployee.clearances" :key="cIndex">
       <v-col>
-        <v-row v-if="!isMobile()">
+        <v-row>
           <v-col>
             <v-autocomplete
               v-model="clearance.type"
@@ -12,29 +12,6 @@
               data-vv-name="Type"
               clearable
             >
-              <template #append>
-                <!-- Awaiting Clearance -->
-                <v-checkbox
-                  v-model="clearance.awaitingClearance"
-                  density="compact"
-                  class="mx-xs-0 mx-sm-0 mx-md-5"
-                  hide-details
-                  label="Awaiting Clearance"
-                  @update:model-value="
-                    () => {
-                      if (clearance.awaitingClearance) {
-                        clearance.grantedDate = null;
-                        clearance.badgeExpirationDate = null;
-                        clearance.badgeNum = null;
-                      }
-                    }
-                  "
-                >
-                  <template #label v-if="name === 'xs' || name === 'sm'">
-                    <span class="small-text">Awaiting Clearance</span>
-                  </template>
-                </v-checkbox>
-              </template>
             </v-autocomplete>
           </v-col>
 
@@ -46,57 +23,46 @@
           </v-col>
         </v-row>
 
-        <!-- MOBILE LAYOUT -->
-        <v-row v-else>
-          <v-col cols="10">
-            <v-autocomplete
-              v-model="clearance.type"
-              :rules="[...getRequiredRules(), ...getDuplicateClearanceRules(editedEmployee.clearances)]"
-              :items="CLEARANCE_TYPES"
-              label="Type"
-              data-vv-name="Type"
-              clearable
-            ></v-autocomplete>
-          </v-col>
-
-          <v-col cols="2" class="mt-1">
-            <v-btn variant="text" icon="" @click="deleteClearance(cIndex)">
-              <v-tooltip activator="parent" location="bottom">Delete Clearance</v-tooltip>
-              <v-icon class="case-gray">mdi-delete</v-icon></v-btn
-            >
-          </v-col>
-
-          <v-col cols="1"></v-col>
-
-          <v-col class="groove">
-            <!-- Awaiting Clearance -->
-            <v-checkbox
-              v-model="clearance.awaitingClearance"
-              density="compact"
-              hide-details
-              label="Awaiting Clearance"
-              @update:model-value="
-                () => {
-                  if (clearance.awaitingClearance) {
-                    clearance.grantedDate = null;
-                    clearance.badgeExpirationDate = null;
-                    clearance.badgeNum = null;
-                  }
-                }
-              "
-            >
-              <template #label v-if="name === 'xs' || name === 'sm'">
-                <span class="small-text">Awaiting Clearance</span>
-              </template>
-            </v-checkbox>
-          </v-col>
-        </v-row>
-        <!-- END MOBILE LAYOUT -->
-
         <v-row class="mb-6">
           <v-col cols="1"></v-col>
           <v-col>
             <v-row class="groove">
+              <v-col :cols="isMobile() ? '12' : '6'">
+                <v-checkbox
+                    v-model="clearance.awaitingClearance"
+                    density="compact"
+                    class="mx-xs-0 mx-sm-0 mx-md-5"
+                    hide-details
+                    label="Awaiting Clearance"
+                    @update:model-value="
+                      () => {
+                        if (clearance.awaitingClearance) {
+                          clearance.grantedDate = null;
+                          clearance.badgeExpirationDate = null;
+                          clearance.badgeNum = null;
+                        }
+                      }
+                    "
+                  >
+                    <template #label v-if="name === 'xs' || name === 'sm'">
+                      <span class="small-text">Awaiting Clearance</span>
+                    </template>
+                  </v-checkbox>
+                </v-col>
+
+              <v-col :cols="isMobile() ? '12' : '6'">
+                <v-checkbox
+                    v-model="clearance.reinvestigation"
+                    density="compact"
+                    class="mx-xs-0 mx-sm-0 mx-md-5"
+                    hide-details
+                    label="Under Reinvestigation"
+                  >
+                    <template #label v-if="name === 'xs' || name === 'sm'">
+                      <span class="small-text">Under Reinvestigation</span>
+                    </template>
+                  </v-checkbox>
+                </v-col>
               <v-col :cols="isMobile() ? '12' : '4'">
                 <date-picker
                   v-model="clearance.submissionDate"

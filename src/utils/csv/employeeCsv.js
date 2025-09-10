@@ -10,6 +10,7 @@ import _isEmpty from 'lodash/isEmpty';
 import _sortBy from 'lodash/sortBy';
 import { difference, format, getTodaysDate, minimum } from '@/shared/dateUtils';
 import { getEmployeeCurrentAddress } from '@/shared/employeeUtils.js';
+import { Clearance } from '@/shared/models/clearance.js';
 
 class EmployeeCsv extends EmployeeCsvUtil {
   /**
@@ -135,22 +136,23 @@ class EmployeeCsv extends EmployeeCsvUtil {
     };
     if (clearances) {
       for (let i = 0; i < clearances.length; i++) {
-        data.titles += clearances[i].type + `${clearances[i].awaitingClearance ? ' (awaiting clearance)' : ''}`;
-        data.submissionDates += clearances[i].submissionDate
-          ? format(clearances[i].submissionDate, null, 'YYYY-MM-DD')
+        let clearance = new Clearance(clearances[i]);
+        data.titles += clearance.displayText;
+        data.submissionDates += clearance.submissionDate
+          ? format(clearance.submissionDate, null, 'YYYY-MM-DD')
           : 'No Date';
-        data.grantedDates += clearances[i].grantedDate
-          ? format(clearances[i].grantedDate, null, 'YYYY-MM-DD')
+        data.grantedDates += clearance.grantedDate
+          ? format(clearance.grantedDate, null, 'YYYY-MM-DD')
           : 'No Date';
-        data.biDates += clearances[i].biDates.length > 0 ? joinAndFormat(clearances[i].biDates, ' & ') : 'No Dates';
+        data.biDates += clearance.biDates.length > 0 ? joinAndFormat(clearance.biDates, ' & ') : 'No Dates';
         data.polyDates +=
-          clearances[i].polyDates.length > 0 ? joinAndFormat(clearances[i].polyDates, ' & ') : 'No Dates';
+          clearance.polyDates.length > 0 ? joinAndFormat(clearance.polyDates, ' & ') : 'No Dates';
         data.adjudicationDates +=
-          clearances[i].adjudicationDates.length > 0
-            ? joinAndFormat(clearances[i].adjudicationDates, ' & ')
+          clearance.adjudicationDates.length > 0
+            ? joinAndFormat(clearance.adjudicationDates, ' & ')
             : 'No Dates';
-        data.badgeNum += clearances[i].badgeNum ? clearances[i].badgeNum : 'No Number';
-        data.badgeExpDate += clearances[i].badgeExpirationDate ? clearances[i].badgeExpirationDate : 'No Date';
+        data.badgeNum += clearance.badgeNum ? clearance.badgeNum : 'No Number';
+        data.badgeExpDate += clearance.badgeExpirationDate ? clearance.badgeExpirationDate : 'No Date';
         if (i + 1 < clearances.length) {
           data.titles += ', ';
           data.submissionDates += ', ';

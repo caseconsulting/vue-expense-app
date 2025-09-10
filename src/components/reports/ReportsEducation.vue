@@ -135,8 +135,8 @@ const router = useRouter();
 
 // Useful for type-aware code completion:
 
-/** @typedef {import('../../shared/models/employeeTypes').Employee} Employee */
-/** @typedef {import('../../shared/models/employeeTypes').Education} Education */
+/** @typedef {import('@/shared/models/employee').Employee} Employee */
+/** @typedef {import('@/shared/models/employee').Education} Education */
 /** @typedef {{ title: string, key: string }} DataTableHeader */
 
 /**

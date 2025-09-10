@@ -73,7 +73,7 @@ defineProps({
  * @return String - clearance type
  */
 function getClearanceType(clearance) {
-  return clearance.awaitingClearance ? clearance.type + ' - Awaiting Clearance' : clearance.type;
+  return clearance.displayText;
 }
 
 /**
