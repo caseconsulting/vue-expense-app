@@ -219,6 +219,13 @@
       "
     >
     </v-checkbox>
+    <v-checkbox
+      v-model="model.reinvestigation"
+      hide-details
+      class="large-field"
+      label="Under Reinvestigation"
+    >
+    </v-checkbox>
   </div>
 </template>
 
@@ -256,10 +263,11 @@ const model = ref(
   props.item[props.field.key]?.[0] || {
     adjudicationDates: [],
     awaitingClearance: false,
-    biDates: [],
     badgeExpirationDate: null,
+    biDates: [],
     grantedDate: null,
     polyDates: [],
+    reinvestigation: false,
     submissionDate: null,
     type: null
   }
