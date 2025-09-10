@@ -126,7 +126,7 @@ import TagsFilter from '@/components/shared/TagsFilter.vue';
 const store = useStore();
 const emitter = inject('emitter');
 const router = useRouter();
-const props = defineProps(['requestedFilter']);
+const props = defineProps(['requestedFilter', 'name']);
 
 
 // |--------------------------------------------------|
@@ -191,7 +191,7 @@ onMounted(() => {
   populateDropdowns(employeesInfo.value);
 
   // fill in search boxes if routed from another page
-  if (props.requestedFilter) {
+  if (props.requestedFilter && props.requestedFilter.tab === props.name) {
     clearanceSearch.value = props.requestedFilter.search;
     refreshDropdownItems();
   }

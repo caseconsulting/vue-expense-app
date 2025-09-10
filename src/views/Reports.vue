@@ -53,7 +53,7 @@
               </v-list>
             </v-menu>
             <hr class="my-1" />
-            <component :is="currentWindow.component" :requestedFilter="requestedFilter" />
+            <component :is="currentWindow.component" :requestedFilter="requestedFilter" :name="currentWindow.key" />
           </div>
           <!-- user is not mobile -->
           <div v-else>
@@ -64,7 +64,7 @@
             </v-tabs>
             <v-window v-model="currentWindowKey">
               <v-window-item v-for="tab in tabs" :key="tab.key" :value="tab.key">
-                <component :is="tab.component" :requestedFilter="requestedFilter" />
+                <component :is="tab.component" :requestedFilter="requestedFilter" :name="tab.key" />
               </v-window-item>
             </v-window>
           </div>

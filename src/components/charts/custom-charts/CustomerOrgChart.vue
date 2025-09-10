@@ -1,12 +1,10 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5">
-    <pie-chart ref="pieChart" :key="chartKey" chartId="cust-org" :options="option" :chartData="chartData"></pie-chart>
+    <pie-chart ref="pieChart" :key="chartKey" chartId="cust-org" :options="options" :chartData="chartData"></pie-chart>
     <v-container class="ma-0">
       <v-row justify="center" no-gutters>
-        <v-radio-group inline v-model="showCurrent" class="d-flex justify-center">
-          <v-radio label="All" value="All"></v-radio>
-          <v-radio label="Current" value="Current"></v-radio>
-          <v-radio label="Past" value="Past"></v-radio>
+        <v-radio-group v-model="filter" class="d-flex justify-center" inline>
+          <v-radio v-for="option of filterOptions" :key="option" :label="option" :value="option" />
         </v-radio-group>
       </v-row>
     </v-container>
@@ -15,9 +13,6 @@
 
 <script setup>
 import PieChart from '../base-charts/PieChart.vue';
-import _forEach from 'lodash/forEach';
-import _isEmpty from 'lodash/isEmpty';
-import _first from 'lodash/first';
 import { onBeforeMount, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
@@ -31,12 +26,12 @@ import { useRouter } from 'vue-router';
 const chartData = ref(null);
 const chartKey = ref(0);
 const dataReceived = ref(false);
-const employees = ref(null);
 const label = ref([]);
-const option = ref(null);
+const options = ref(null);
 const quantities = ref([]);
 const router = useRouter();
-const showCurrent = ref('All');
+const filter = ref('All');
+const filterOptions = ref(['All', 'Current', 'Past']);
 const store = useStore();
 
 // |--------------------------------------------------|
@@ -67,33 +62,40 @@ onBeforeMount(async () => {
 function fetchData() {
   let allCompOrgExp = {};
   // access store
-  employees.value = store.getters.employees;
+  let employees = store.getters.employees;
+  let contracts = store.getters.contracts;
+  contracts = contracts.reduce((acc, item) => { acc[item.id] = item; return acc; }, {})
   // tally up customer org experience for active employees
-  employees.value.forEach((emp) => {
-    if (emp.customerOrgExp && emp.workStatus != 0) {
-      _forEach(emp.customerOrgExp, (org) => {
-        let orgName = org.name;
-        let orgYears = org.years;
-        // We get whether or not we want to show current or past info
-        let orgCurrent = showCurrent.value === 'Current' ? org.current : !org.current;
-
-        // error checks if orgYears is undefined
-        if (orgYears && (orgCurrent || showCurrent.value === 'All')) {
-          if (allCompOrgExp[orgName]) {
-            allCompOrgExp[orgName] += Math.round(Number(orgYears) * 100) / 100;
-          } else {
-            allCompOrgExp[orgName] = Math.round(Number(orgYears) * 100) / 100;
-          }
-        }
-      });
+  for (let emp of employees) {
+    if (emp.workStatus <= 0) continue;
+    // loop through org experience
+    for (let org of emp.customerOrgExp ?? []) {
+      // We get whether or not we want to show current or past info
+      let isOrgCurrent = filter.value === 'Current' ? org.current : !org.current;
+      // error checks if orgYears is undefined
+      if (org.years && (isOrgCurrent || filter.value === 'All')) {
+        allCompOrgExp[org.name] ??= 0;
+        allCompOrgExp[org.name] += Math.round(Number(org.years) * 100) / 100;
+      }
     }
-  });
+    // loop through current contract experience
+    for (let c of emp.contracts ?? []) {
+      let contract = contracts[c.contractId];
+      if (emp.lastName === "Ogburn") {
+        console.log(c);
+        console.log(contract);
+      }
+      for (let p of c.projects) {
+
+      }
+    }
+  }
   let labels = Object.keys(allCompOrgExp);
   quantities.value = [];
 
-  _forEach(labels, (label) => {
+  for (let label of labels ?? []) {
     quantities.value.push(allCompOrgExp[label]);
-  });
+  }
   label.value = labels;
 } // fetchData
 
@@ -104,7 +106,7 @@ function fillData() {
   let text = '';
   let colors = [];
   let enabled = true;
-  if (_isEmpty(quantities.value)) {
+  if (quantities.value.length === 0) {
     text = 'No Customer Org Data Found';
     quantities.value.push(1);
     enabled = false;
@@ -121,7 +123,7 @@ function fillData() {
       'rgba(156, 175, 183, 1)',
       'rgba(66, 129, 164, 1)'
     ];
-    text = `${showCurrent.value} Customer Org Experience (Years)`;
+    text = `${filter.value} Customer Org Experience (Years)`;
   }
   chartData.value = {
     labels: label.value,
@@ -133,9 +135,9 @@ function fillData() {
     ]
   };
 
-  option.value = {
+  options.value = {
     onClick: (x, y) => {
-      let index = _first(y).index;
+      let index = y[0]?.index;
       localStorage.setItem(
         'requestedFilter',
         JSON.stringify({ tab: 'customerOrgs', search: chartData.value.labels[index] })
@@ -177,9 +179,9 @@ function fillData() {
 // |--------------------------------------------------|
 
 /**
- * Watcher for showCurrent - fills data.
+ * Watcher for filter - fills data.
  */
-watch(showCurrent, () => {
+watch(filter, () => {
   fetchData();
   fillData(); // renders a different chart every time the radio button changes
   chartKey.value++; // rerenders the chart

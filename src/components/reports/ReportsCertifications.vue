@@ -97,7 +97,7 @@ import TagsFilter from '@/components/shared/TagsFilter.vue';
 const store = useStore();
 const emitter = inject('emitter');
 const router = useRouter();
-const props = defineProps(['requestedFilter']);
+const props = defineProps(['requestedFilter', 'name']);
 
 const employees = ref([]);
 const employeesInfo = ref([]);
@@ -146,7 +146,7 @@ onMounted(() => {
   filteredEmployees.value = employeesInfo.value; // one.value is shown
   populateDropdowns(employeesInfo.value);
   buildCertificationsColumns();
-  if (props.requestedFilter) {
+  if (props.requestedFilter && props.requestedFilter.tab === props.name) {
     certificationSearch.value = props.requestedFilter.search;
     refreshDropdownItems();
   }

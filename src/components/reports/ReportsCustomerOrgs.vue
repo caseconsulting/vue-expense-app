@@ -102,7 +102,7 @@ import TagsFilter from '@/components/shared/TagsFilter.vue';
 const store = useStore();
 const emitter = inject('emitter');
 const router = useRouter();
-const props = defineProps(['requestedFilter']);
+const props = defineProps(['requestedFilter', 'name']);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -167,7 +167,7 @@ onMounted(() => {
   populateDropdowns(employeesInfo.value);
   buildCustomerOrgColumns();
   buildContractsAndPrimesColumns();
-  if (props.requestedFilter) {
+  if (props.requestedFilter && props.requestedFilter.tab === props.name) {
     custOrgSearch.value = props.requestedFilter.search;
     refreshDropdownItems();
   }

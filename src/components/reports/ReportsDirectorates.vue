@@ -109,7 +109,7 @@ import TagsFilter from '@/components/shared/TagsFilter.vue';
 const store = useStore();
 const emitter = inject('emitter');
 const router = useRouter();
-const props = defineProps(['requestedFilter']);
+const props = defineProps(['requestedFilter', 'name']);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -156,6 +156,7 @@ const custOrgs2 = ref([]);
 const custOrgs3 = ref([]);
 const directorates = ref([]);
 const search = ref(null); // query text for datatable search field
+const combineSearch = ref({}); // query text for datatable search field
 const showInactiveEmployees = ref(false);
 const sortBy = ref([{ key: 'employeeNumber' }]); // sort datatable items
 const tagsInfo = ref({
@@ -181,15 +182,14 @@ onMounted(async () => {
   filteredEmployees.value = employeesInfo.value; // value in table
   buildCustomerOrgColumns();
 
-  if (props.requestedFilter) {
+  if (props.requestedFilter && props.requestedFilter.tab === props.name) {
     switch (props.requestedFilter.type) {
       case 'directorate':
         directorateSearch.value = props.requestedFilter.search;
         break;
-      case 'org2':
+      case 'org':
+        combineSearch.value = { do: true, temp: true }
         custOrg2Search.value = props.requestedFilter.search;
-        break;
-      case 'org3':
         custOrg3Search.value = props.requestedFilter.search;
         break;
       default:
@@ -197,9 +197,8 @@ onMounted(async () => {
         break;
     }
   }
-  
-  // initial set of table download data
-  refreshDropdownItems();
+
+  if (!props.requestedFilter) refreshDropdownItems();
   updateTableDownload(filteredEmployees.value);
 }); // onMounted
 
@@ -337,16 +336,19 @@ function searchCustomerOrgs() {
   // whether or not to combine search of org2 and org3 together, or to require
   // both to match
   let combine = false; // TODO: could be a user-editable field?
+  combine = combineSearch.value?.do ?? false;
   let op = (a, b) => combine ? (a || b) : (a && b);
-
+  
   let org2, org3, found2, found3;
   filteredEmployees.value = filteredEmployees.value.filter((employee) => {
     org2 = employee.org2 ?? [];
     org3 = employee.org3 ?? [];
-    found2 = org2.find((org) => org === search2) || (search2 === undefined);
-    found3 = org3.find((org) => org === search3) || (search3 === undefined);
+    found2 = !!org2.find((org) => org === search2) || (search2 === undefined);
+    found3 = !!org3.find((org) => org === search3) || (search3 === undefined);
     return op(found2, found3);
   });
+
+  if (combineSearch.value?.temp) combineSearch.value = {};
 } // searchCustomerOrgs
 
 /**
@@ -387,7 +389,7 @@ watch(showInactiveEmployees, () => {
 /**
  * Watches the directorate and org searches to rerun the search filters if cleared
  */
-watch([search, directorateSearch, custOrg2Search, custOrg3Search, showInactiveEmployees], () => refreshDropdownItems() );
+watch([search, directorateSearch, custOrg2Search, custOrg3Search, showInactiveEmployees], () => refreshDropdownItems());
 </script>
 
 <style lang="css" scoped>
