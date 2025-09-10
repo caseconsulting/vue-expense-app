@@ -13,6 +13,8 @@
 
 <script setup>
 import PieChart from '../base-charts/PieChart.vue';
+import { getEmployeeCurrentContracts } from '@/shared/employeeUtils';
+import { getTodaysDate, difference } from '@/shared/dateUtils';
 import { onBeforeMount, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
@@ -65,6 +67,13 @@ function fetchData() {
   let employees = store.getters.employees;
   let contracts = store.getters.contracts;
   contracts = contracts.reduce((acc, item) => { acc[item.id] = item; return acc; }, {})
+  // useful checker
+  function shouldShow(isCurrent) {
+    return filter.value === 'All'
+      || (filter.value === 'Current' && isCurrent)
+      || (filter.value === 'Past' && !isCurrent)
+  };
+  let today = getTodaysDate();
   // tally up customer org experience for active employees
   for (let emp of employees) {
     if (emp.workStatus <= 0) continue;
@@ -73,7 +82,7 @@ function fetchData() {
       // We get whether or not we want to show current or past info
       let isOrgCurrent = filter.value === 'Current' ? org.current : !org.current;
       // error checks if orgYears is undefined
-      if (org.years && (isOrgCurrent || filter.value === 'All')) {
+      if (org.years && shouldShow(isOrgCurrent)) {
         allCompOrgExp[org.name] ??= 0;
         allCompOrgExp[org.name] += Math.round(Number(org.years) * 100) / 100;
       }
@@ -81,13 +90,22 @@ function fetchData() {
     // loop through current contract experience
     for (let c of emp.contracts ?? []) {
       let contract = contracts[c.contractId];
-      if (emp.lastName === "Ogburn") {
-        console.log(c);
-        console.log(contract);
+      if (!contract?.customerOrg) continue;
+      let currentContracts = getEmployeeCurrentContracts(emp);
+      currentContracts = new Set(currentContracts.map(c => contract.id));
+      let isContractCurrent = currentContracts.has(contract.id);
+      if (!shouldShow(isContractCurrent)) continue;
+      // add contract experience
+      let duration = 0; // in days, convert to years later
+      for (let p of c.projects ?? []) {
+        let start = p.startDate;
+        let end = p.endDate ?? today;
+        duration += difference(end, start, 'day');
       }
-      for (let p of c.projects) {
-
-      }
+      duration /= 365;
+      duration = Math.round(duration * 100) / 100;
+      allCompOrgExp[contract.customerOrg] ??= 0;
+      allCompOrgExp[contract.customerOrg] += duration;
     }
   }
   let labels = Object.keys(allCompOrgExp);
