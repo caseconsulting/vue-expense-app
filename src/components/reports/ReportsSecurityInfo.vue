@@ -106,7 +106,6 @@
 </template>
 
 <script setup>
-import _forEach from 'lodash/forEach';
 import _orderBy from 'lodash/orderBy';
 import _map from 'lodash/map';
 import _join from 'lodash/join';
@@ -122,6 +121,7 @@ import { useRouter } from 'vue-router';
 import { selectedTagsHasEmployee } from '@/shared/employeeUtils';
 import { userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
 import TagsFilter from '@/components/shared/TagsFilter.vue';
+import { Clearance } from '@/shared/models/clearance.js';
 
 const store = useStore();
 const emitter = inject('emitter');
@@ -197,7 +197,7 @@ onMounted(() => {
 
   // initial set of table download data
   updateTableDownload(filteredEmployees.value);
-}); // created
+});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -217,12 +217,14 @@ function getBadgeExpiration(clearances, item) {
   let dates = [];
 
   // used for sorting... only store the lowest date (closest to expire)
-  _forEach(clearances, (clearance) => {
-    if (clearance.badgeExpirationDate) {
-      let newDate = parseInt(format(clearance.badgeExpirationDate, null, 'X')); // seconds timestamp -> int
-      dates.push(newDate);
-    }
-  });
+  if (clearances) {
+    clearances.forEach((clearance) => {
+      if (clearance.badgeExpirationDate) {
+        let newDate = parseInt(format(clearance.badgeExpirationDate, null, 'X')); // seconds timestamp -> int
+        dates.push(newDate);
+      }
+    });
+  }
 
   dates = _orderBy(dates);
 
@@ -236,7 +238,7 @@ function getBadgeExpiration(clearances, item) {
   item.badgeExpiration = datesString;
 
   return datesString;
-} // getBadgeExpiration
+}
 
 function daysSinceBI(clearances, item) {
   let days = null;
@@ -249,7 +251,7 @@ function daysSinceBI(clearances, item) {
   }
   item.daysSinceBI = days;
   return days;
-} // daysSinceBI
+}
 
 /**
  * Returns the expiration dates for all clearances.
@@ -261,14 +263,15 @@ function daysSinceBI(clearances, item) {
 function getClearanceType(clearances, item) {
   let types = [];
   let clearanceList = _sortBy(clearances, (c) => c.badgeExpirationDate);
-  _forEach(clearanceList, (clearance) => {
-    if (clearance.type) {
-      clearance.awaitingClearance ? types.push(clearance.type + ' (awaiting clearance)') : types.push(clearance.type);
+  clearanceList.forEach((clearance) => {
+    let clearanceObj = new Clearance(clearance);
+    if (clearanceObj.type) {
+      types.push(clearanceObj.displayText);
     }
   });
   item.clearanceType = _join(types, ' | ');
   return item.clearanceType;
-} // getClearanceType
+}
 
 /**
  * handles click event of the employee table entry
@@ -277,7 +280,7 @@ function getClearanceType(clearances, item) {
  */
 function handleClick(_, { item }) {
   router.push(`/employee/${item.employeeNumber}`);
-} //handleClick
+}
 
 /**
  * Populates all job roles in the search dropdown.
@@ -286,7 +289,7 @@ function populateBadgeExpirationsDropdown() {
   // formats the badge exp dropdowns to include the date in the future
   badgeExpirations.value = [];
   let dateRanges = ['30 Days', '60 Days', '90 Days', '180 Days', '365 Days'];
-  _forEach(dateRanges, (date) => {
+  dateRanges.forEach((date) => {
     let search = date.split(' ');
     let num = parseInt(search[0]);
     let dateType = search[1].toLowerCase();
@@ -306,7 +309,7 @@ function populateBadgeExpirationsDropdown() {
   badgeExpirations.value = Array.from(new Set(badgeExpirations.value));
   // refresh the employees autocomplete list to be those that match the query
   employees.value = populateEmployeesDropdown(filteredEmployees.value);
-} // populateBadgeExpirationsDropdown
+}
 
 /**
  * Populate drop downs with information that other employees have filled out.
@@ -317,7 +320,7 @@ function populateDropdowns(emps) {
   // refresh the employees autocomplete list to be those that match the query
   employees.value = populateEmployeesDropdown(emps);
   populateBadgeExpirationsDropdown(emps);
-} // populateDropdowns
+}
 
 /**
  * Refresh the list based on the current queries
@@ -342,7 +345,7 @@ function refreshDropdownItems() {
   }
 
   populateDropdowns(filteredEmployees.value);
-} // refreshDropdownItems
+}
 
 /**
  * If there is a desired badge expiration date, this will calculate what dates fall within the range.
@@ -366,7 +369,7 @@ function searchBadgeExpirationDates(requestedDate, forDropdown) {
       // if they have no badge expirations, then badgeExpiration will be the big number
       if (employee.badgeExpiration < 100000000000000000) {
         // loop through every employee's clearances and see if any of them are in the selected range
-        _forEach(employee.clearances, (clearance) => {
+        employee.clearances.forEach((clearance) => {
           let clearanceDate = parseInt(format(clearance.badgeExpirationDate, null, 'X')); // seconds timestamp -> int
           if (clearanceDate > now && clearanceDate <= upperBound && !foundEmployees.includes(employee)) {
             found.push(employee);
@@ -381,7 +384,7 @@ function searchBadgeExpirationDates(requestedDate, forDropdown) {
       // if they have no badge expirations, then badgeExpiration will be the big number
       if (employee.badgeExpiration < 100000000000000000) {
         // loop through every employee's clearances and see if any of them are in the selected range
-        _forEach(employee.clearances, (clearance) => {
+        employee.clearances.forEach((clearance) => {
           let clearanceDate = parseInt(format(clearance.badgeExpirationDate, null, 'X')); // seconds timestamp -> int
           if (clearanceDate > now && clearanceDate <= upperBound && !foundEmployees.includes(employee))
             foundEmployees.push(employee);
@@ -395,7 +398,7 @@ function searchBadgeExpirationDates(requestedDate, forDropdown) {
   } else {
     return foundEmployees.length > 0; // used to filter the dropdowns in populateDataTypeDropDowns
   }
-} // searchBadgeExpirationDates
+}
 
 /**
  * Filter by clearances, modifies the filteredEmployees variable
@@ -411,7 +414,7 @@ function searchClearances(search) {
     }
     return false;
   });
-} // searchClearances
+}
 
 /**
  * Emit new data for tab.value
