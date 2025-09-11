@@ -1,6 +1,15 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5">
-    <pie-chart ref="pieChart" chartId="cust-org" :options="chartOptions" :chartData="chartData" :key="chartKey"/>
+    <div v-if="userRoleIsAdmin()" class="float-right">
+      <DownloadCSV
+        filename="orgs"
+        :csv="csvData[filter]"
+        :xlsxFormat="false"
+        tooltip="Download Orgs to CSV"
+        :key="refreshKey"
+      />
+    </div>
+    <pie-chart ref="pieChart" chartId="cust-org" :options="chartOptions" :chartData="chartData" :key="refreshKey"/>
     <v-container class="ma-0">
       <v-row justify="center" no-gutters>
         <v-radio-group v-model="filter" class="d-flex justify-center" inline>
@@ -13,11 +22,16 @@
 
 <script setup>
 import PieChart from '@/components/charts/base-charts/PieChart.vue';
+import DownloadCSV from '@/components/utils/DownloadCSV.vue';
+import { updateStoreContracts, updateStoreEmployees } from '@/utils/storeUtils';
 import { getEmployeeCurrentContracts } from '@/shared/employeeUtils';
 import { getTodaysDate, difference } from '@/shared/dateUtils';
+import { userRoleIsAdmin } from '@/utils/utils';
+import baseCsv from '@/utils/csv/baseCsv.js';
 import { onBeforeMount, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -29,12 +43,14 @@ import { useRouter } from 'vue-router';
 const dataReceived = ref(false);
 const chartData = ref(null);
 const chartOptions = ref(null);
-const chartKey = ref(0);
+const refreshKey = ref(0);
 const filter = ref('All');
 const filterOptions = ref(['All', 'Current', 'Past']);
+const csvData = ref({});
 
 // vars for code-only
 const quantities = {};
+const experience = { All: {}, Current: {}, Past: {} };
 const router = useRouter();
 const store = useStore();
 
@@ -48,10 +64,11 @@ const store = useStore();
  * Created lifecycle hook
  */
 onBeforeMount(async () => {
-  if (store.getters.storeIsPopulated) {
-    await fetchData();
-    await fillData();
-  }
+  if (!store.getters.employees) await updateStoreEmployees();
+  if (!store.getters.contracts) await updateStoreContracts();
+  fetchData();
+  fillData();
+  generateCsvData();
 });
 
 // |--------------------------------------------------|
@@ -71,7 +88,6 @@ function fetchData() {
   let employees = store.getters.employees;
   let contracts = store.getters.contracts.reduce((acc, c) => { acc[c.id] = c; return acc; }, {});
   let today = getTodaysDate();
-  let experience = { All: [], Current: [], Past: [] };
 
   // helper: whether or not to add experience based on filter and current status
   function shouldAdd(filterType, isCurrent) {
@@ -81,7 +97,7 @@ function fetchData() {
   };
 
   // helper: adds value to allCompOrgExp[name] for all filter types that should
-  // include it skips if any inputs are missing/invalid
+  //         include it skips if any inputs are missing/invalid
   function add(name, value, isCurrent) {
     if (!name || !value || isCurrent == null) return;
     for (let filterType of filterOptions.value) {
@@ -190,6 +206,30 @@ function fillData() {
   dataReceived.value = true;
 }
 
+/**
+ * Generates data for customer org CSV download
+ */
+function generateCsvData() {
+  // blank csv data and space helper
+  let csv = { All: [], Current: [], Past: [] };
+  let space = (opt) => csv[opt].push(['', '', '']);
+
+  // for each type, add the data from experience
+  for(let option of filterOptions.value) {
+    let data = experience[filter.value];
+    data = Object.entries(data).sort(([, a], [, b]) => b - a); // sorted tuples
+    space(option);
+    space(option);
+    for (let [key, value] of data) csv[option].push(['', key, value.toFixed(2)])
+    space(option);
+    // generate csv object from array
+    csv[option] = baseCsv.generateFrom2dArray(csv[option]);
+  }
+
+  // link to download button
+  csvData.value = csv;
+}
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                    WATCHERS                      |
@@ -197,14 +237,7 @@ function fillData() {
 // |--------------------------------------------------|
 
 /**
- * Fills data on filter update
+ * Rerenders the chart on filter change
  */
-watch(
-  filter,
-  () => {
-    fetchData();
-    fillData(); // renders a different chart every time the radio button changes
-    chartKey.value++; // rerenders the chart
-  }
-);
+watch(filter, () => refreshKey.value++);
 </script>
