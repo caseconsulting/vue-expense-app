@@ -6,14 +6,14 @@
         :csv="generateCsvData()"
         :xlsxFormat="false"
         tooltip="Download Directorates to CSV"
-      ></DownloadCSV>
+      />
     </div>
     <bar-chart
       ref="barChart"
       chartId="employees-directorate-chart"
-      :options="option"
       :chartData="chartData"
-    ></bar-chart>
+      :options="options"
+    />
   </v-card>
 </template>
 
@@ -34,12 +34,16 @@ import baseCsv from '@/utils/csv/baseCsv.js';
 // |                                                  |
 // |--------------------------------------------------|
 
-const directorates = ref({});
-const chartData = ref(null);
-const dataReceived = ref(false);
-const option = ref(null);
 const router = useRouter();
 const store = useStore();
+
+// chart data for template
+const dataReceived = ref(false);
+const chartData = ref(null);
+const options = ref(null);
+
+// chart data for code-only
+const directorates = {};
 const colors = [
   // each array is a gradient of a color from darker to lighter
   ['#5E35B1', '#9575CD', '#D1C4E9', '#EDE7F6'],
@@ -66,7 +70,7 @@ onMounted(async () => {
     await fetchData();
     await fillData();
   }
-}); // mounted
+});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -105,49 +109,43 @@ function generateCsvData() {
 
   let csv = baseCsv.generateFrom2dArray(dirArray);
   return csv;
-} // generateCsvData
+}
 
 /**
  * Gets directorate data count from employees list.
  */
 function fetchData() {
-  let contracts = store.getters.contracts;
-  for (let c of contracts) {
+  dataReceived.value = false;
+  for (let c of store.getters.contracts) {
     for (let p of c.projects) {
       if (p.status === api.CONTRACT_STATUSES.ACTIVE) addDirectorate(c, p);
     }
   }
-} // fetchData
+}
 
 /**
  * Formats and sets data options for the chart.
  */
 function fillData() {
   chartData.value = getChartData();
-  option.value = {
+  options.value = {
     scales: {
       x: {
         beginAtZero: true,
         title: {
           display: true,
           text: 'Directorates',
-          font: {
-            weight: 'bold'
-          }
+          font: { weight: 'bold' }
         },
         stacked: true
       },
       y: {
         beginAtZero: true,
-        ticks: {
-          stepSize: 1
-        },
+        ticks: { stepSize: 1 },
         title: {
           display: true,
           text: 'Number of Employees',
-          font: {
-            weight: 'bold'
-          }
+          font: { weight: 'bold' }
         },
         stacked: true
       }
@@ -159,7 +157,6 @@ function fillData() {
         let directorate = chartData.value.labels[directorateIndex];
         let org = chartData.value.datasets[orgIndex].label;
         if (directorate === org) org = null;
-        localStorage.setItem('requestedDataType', 'contracts');
         localStorage.setItem(
           'requestedFilter',
           JSON.stringify({ tab: 'directorates', type: 'org', search: org })
@@ -177,22 +174,18 @@ function fillData() {
       title: {
         display: true,
         text: 'Number of Employees for Each Directorate',
-        font: {
-          size: 15
-        }
+        font: { size: 15 }
       },
       subtitle: {
         display: true,
         text: '*Click on a bar to see employees',
-        font: {
-          style: 'italic'
-        }
+        font: { style: 'italic' }
       }
     },
     maintainAspectRatio: false
   };
   dataReceived.value = true;
-} // fillData
+}
 
 /**
  * Gets the labels and data sets for the stacked bar chart.
@@ -206,8 +199,8 @@ function getChartData() {
     label = labels[i];
     labels_raw[i] = label; // setting here is faster than a spread operator
     // sort each directorate by total employees attached to a directorate breakdown
-    let sortedDirBreakdowns = Object.keys(directorates.value[label]).sort(
-      (a, b) => directorates.value[label][b] - directorates.value[label][a]
+    let sortedDirBreakdowns = Object.keys(directorates[label]).sort(
+      (a, b) => directorates[label][b] - directorates[label][a]
     );
     // create a dataset for each directorate breakdown
     for (let j in sortedDirBreakdowns) {
@@ -225,7 +218,7 @@ function getChartData() {
     labels_raw,
     datasets
   };
-} // getChartData
+}
 
 /**
  * Gets the sorted directorates by total employees connected to the directorate.
@@ -234,7 +227,7 @@ function getChartData() {
  */
 function getSortedLabels() {
   let sortedLabelMap = {};
-  for (let [directorate, breakdown] of Object.entries(directorates.value)) {
+  for (let [directorate, breakdown] of Object.entries(directorates)) {
     let total = 0;
     for (let count of Object.values(breakdown)) {
       total += count;
@@ -244,7 +237,7 @@ function getSortedLabels() {
   let labels = Object.keys(sortedLabelMap).sort((a, b) => sortedLabelMap[b] - sortedLabelMap[a]);
   let totals = sortedLabelMap;
   return { labels, totals };
-} // getSortedLabels
+}
 
 /**
  * Gets an array of total employees for each directorate with the directorate breakdown.
@@ -256,10 +249,10 @@ function getSortedLabels() {
 function getDataValues(labels, dirBreakdown) {
   let data = [];
   for (let label of labels) {
-    data.push(directorates.value[label]?.[dirBreakdown] || 0);
+    data.push(directorates[label]?.[dirBreakdown] || 0);
   }
   return data;
-} // getDataValues
+}
 
 /**
  * Add the directorate breakdown from a directorate. The directorate will breakdown to the lowest level directorate that.
@@ -269,20 +262,18 @@ function getDataValues(labels, dirBreakdown) {
  * @param {Object} p - The project
  */
 function addDirectorate(c, p) {
-  // get number of employees on project
-  let count = getProjectCurrentEmployees(c, p, store.getters.employees)?.length || 0;
-
-  // default directorate and next level of org to contract if project doesn't have one
+  // get lowest level directorate and next org, and its count
   let directorate = p.directorate ?? c.directorate;
   let nextOrg = getOrgBreakdown(p) ?? getOrgBreakdown(c);
+  let count = getProjectCurrentEmployees(c, p, store.getters.employees)?.length || 0;
 
-  // if we have all three pieces of info, add it to the chart
+  // add to chart
   if (directorate && nextOrg && count) {
-    directorates.value[directorate] ??= {};
-    directorates.value[directorate][nextOrg] ??= 0;
-    directorates.value[directorate][nextOrg] += count;
+    directorates[directorate] ??= {};
+    directorates[directorate][nextOrg] ??= 0;
+    directorates[directorate][nextOrg] += count;
   }
-} // addCustomerOrg
+}
 
 /**
  * Gets the lowest level directorate that exists in the contract or project.
@@ -291,30 +282,5 @@ function addDirectorate(c, p) {
  */
 function getOrgBreakdown(item) {
   return item.org3 || item.org2 || item.directorate;
-} // getOrgBreakdown
-
-/**
- * Gets the employees under the directorate and org
- *
- * @param string directorate - The directorate
- * @param string org - The org
- */
-function getChartList(directorate, org) {
-  let contracts = store.getters.contracts;
-  let employees = store.getters.employees;
-  let chartList = [];
-  let currEmployees;
-  for (let c of contracts) {
-    for (let p of c.projects) {
-      let nextOrg = getOrgBreakdown(p) ?? getOrgBreakdown(c);
-      if ((org == null || nextOrg === org) && p.directorate === directorate) {
-        currEmployees = getProjectCurrentEmployees(c, p, employees);
-        for (let e of currEmployees) {
-          chartList.push(e.fullName ?? `${e.firstName} ${e.lastName}`);
-        }
-      }
-    }
-  }
-  return chartList;
 }
 </script>

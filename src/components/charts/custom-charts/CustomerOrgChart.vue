@@ -52,7 +52,7 @@ onBeforeMount(async () => {
     await fetchData();
     await fillData();
   }
-}); // created
+});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -129,7 +129,7 @@ function fetchData() {
       labels: Object.keys(experience[option])
     }
   }
-} // fetchData
+}
 
 /**
  * Sets up the chart formatting and data options.
@@ -188,7 +188,7 @@ function fillData() {
 
   // show the pie chart
   dataReceived.value = true;
-} // fillData
+}
 
 // |--------------------------------------------------|
 // |                                                  |
