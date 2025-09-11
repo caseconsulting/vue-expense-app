@@ -44,6 +44,7 @@ const options = ref(null);
 
 // chart data for code-only
 const directorates = {};
+const onlyDirs = new Set(); // track which lowest-levels aren't orgs
 const colors = [
   // each array is a gradient of a color from darker to lighter
   ['#5E35B1', '#9575CD', '#D1C4E9', '#EDE7F6'],
@@ -152,14 +153,13 @@ function fillData() {
     },
     onClick: (x, y) => {
       if (y[0]) {
-        let directorateIndex = y[0].index;
         let orgIndex = y[0].datasetIndex;
-        let directorate = chartData.value.labels[directorateIndex];
         let org = chartData.value.datasets[orgIndex].label;
-        if (directorate === org) org = null;
+        let isDir = onlyDirs.has(org);
+        let type = isDir ? 'directorate' : 'org';
         localStorage.setItem(
           'requestedFilter',
-          JSON.stringify({ tab: 'directorates', type: 'org', search: org })
+          JSON.stringify({ tab: 'directorates', type, search: org })
         );
         router.push({
           path: '/reports',
@@ -272,6 +272,8 @@ function addDirectorate(c, p) {
     directorates[directorate] ??= {};
     directorates[directorate][nextOrg] ??= 0;
     directorates[directorate][nextOrg] += count;
+    // add to directorates-only if it's not lower-level
+    if (nextOrg == directorate) onlyDirs.add(directorate);
   }
 }
 
