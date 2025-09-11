@@ -9,9 +9,9 @@ export class Reinvestigation {
   }
 
   get underReinvestigation() {
-    return this.completionDate ?
-      isBetween(getTodaysDate(), this.submissionDate, this.completionDate) :
-      isSameOrAfter(getTodaysDate(), this.submissionDate);
+    return this.completionDate
+    ? isBetween(getTodaysDate(), this.submissionDate, this.completionDate)
+    : isSameOrAfter(getTodaysDate(), this.submissionDate);
   }
 
 }
