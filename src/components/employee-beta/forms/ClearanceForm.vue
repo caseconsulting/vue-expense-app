@@ -23,54 +23,33 @@
           </v-col>
         </v-row>
 
-        <v-row class="mb-6">
+        <v-row class="mb-4">
           <v-col cols="1"></v-col>
           <v-col>
             <v-row class="groove">
-              <v-col :cols="isMobile() ? '12' : '6'">
+              <v-col class="small" :cols="isMobile() ? '12' : '4'">
                 <v-checkbox
-                    v-model="clearance.awaitingClearance"
-                    density="compact"
-                    class="mx-xs-0 mx-sm-0 mx-md-5"
-                    hide-details
-                    label="Awaiting Clearance"
-                    @update:model-value="
-                      () => {
-                        if (clearance.awaitingClearance) {
-                          clearance.grantedDate = null;
-                          clearance.badgeExpirationDate = null;
-                          clearance.badgeNum = null;
-                        }
+                  v-model="clearance.awaitingClearance"
+                  density="compact"
+                  class="mx-xs-0 mx-sm-0 mx-md-5"
+                  hide-details
+                  label="Awaiting Clearance"
+                  @update:model-value="
+                    () => {
+                      if (clearance.awaitingClearance) {
+                        clearance.grantedDate = null;
+                        clearance.badgeExpirationDate = null;
+                        clearance.badgeNum = null;
                       }
-                    "
-                  >
-                    <template #label v-if="name === 'xs' || name === 'sm'">
-                      <span class="small-text">Awaiting Clearance</span>
-                    </template>
-                  </v-checkbox>
-                </v-col>
-
-              <v-col :cols="isMobile() ? '12' : '6'">
-                <v-checkbox
-                    v-model="clearance.reinvestigation"
-                    density="compact"
-                    class="mx-xs-0 mx-sm-0 mx-md-5"
-                    hide-details
-                    label="Under Reinvestigation"
-                    @update:model-value="
-                      () => {
-                        if (!clearance.reinvestigation) {
-                          clearance.reinvestigationSubmissionDate = null;
-                        }
-                      }
-                    "
-                  >
-                    <template #label v-if="name === 'xs' || name === 'sm'">
-                      <span class="small-text">Under Reinvestigation</span>
-                    </template>
-                  </v-checkbox>
-                </v-col>
-              <v-col :cols="isMobile() ? '12' : '4'">
+                    }
+                  "
+                >
+                  <template #label v-if="name === 'xs' || name === 'sm'">
+                    <span class="small-text">Awaiting Clearance</span>
+                  </template>
+                </v-checkbox>
+              </v-col>
+              <v-col class="small" :cols="isMobile() ? '12' : '4'">
                 <date-picker
                   v-model="clearance.submissionDate"
                   :rules="[...getDateOptionalRules(), ...getDateSubmissionRules(clearance)]"
@@ -81,7 +60,16 @@
                 ></date-picker>
               </v-col>
 
-              <v-col :cols="isMobile() ? '12' : '4'">
+              <v-col class="small" :cols="isMobile() ? '12' : '4'">
+                <v-combobox
+                  v-model="clearance.grantingOrg"
+                  prepend-inner-icon="mdi-lan"
+                  :items="grantingOrgItems"
+                  label="Granting Organization"
+                ></v-combobox>
+              </v-col>
+
+              <v-col class="small" :cols="isMobile() ? '12' : '4'">
                 <date-picker
                   v-model="clearance.grantedDate"
                   :disabled="clearance.awaitingClearance"
@@ -93,7 +81,7 @@
                 ></date-picker>
               </v-col>
 
-              <v-col :cols="isMobile() ? '12' : '4'">
+              <v-col class="small" :cols="isMobile() ? '12' : '4'">
                 <v-text-field
                   v-model="clearance.badgeNum"
                   prepend-inner-icon="mdi-badge-account-outline"
@@ -108,7 +96,7 @@
                 ></v-text-field>
               </v-col>
 
-              <v-col :cols="isMobile() ? '12' : '4'">
+              <v-col class="small" :cols="isMobile() ? '12' : '4'">
                 <date-picker
                   v-model="clearance.badgeExpirationDate"
                   :disabled="clearance.awaitingClearance"
@@ -120,7 +108,7 @@
                 ></date-picker>
               </v-col>
 
-              <v-col :cols="isMobile() ? '12' : '4'">
+              <v-col class="small" :cols="isMobile() ? '12' : '4'">
                 <date-picker
                   v-model="clearance.biDates"
                   :min="clearance.submissionDate"
@@ -130,7 +118,7 @@
                 ></date-picker>
               </v-col>
 
-              <v-col :cols="isMobile() ? '12' : '4'">
+              <v-col class="small" :cols="isMobile() ? '12' : '4'">
                 <date-picker
                   v-model="clearance.adjudicationDates"
                   :min="clearance.submissionDate"
@@ -140,7 +128,7 @@
                 ></date-picker>
               </v-col>
 
-              <v-col :cols="isMobile() ? '12' : '4'">
+              <v-col class="small" :cols="isMobile() ? '12' : '4'">
                 <date-picker
                   v-model="clearance.polyDates"
                   :min="clearance.submissionDate"
@@ -149,27 +137,47 @@
                   clearable
                 ></date-picker>
               </v-col>
-
-              <v-col :cols="isMobile() ? '12' : '4'">
-                <v-combobox
-                  v-model="clearance.grantingOrg"
-                  prepend-inner-icon="mdi-lan"
-                  :items="grantingOrgItems"
-                  label="Granting Organization"
-                ></v-combobox>
+            </v-row>
+            <v-row class="groove">
+              <v-col cols="12" align="center" class="py-2">
+                <v-btn @click="addReinvestigation(clearance)" variant="outlined" size="small">Add Reinvestigation</v-btn>
               </v-col>
-
-              <v-col :cols="isMobile() ? '12' : '4'">
-                <date-picker
-                  v-model="clearance.reinvestigationSubmissionDate"
-                  :disabled="!clearance.reinvestigation"
-                  :rules="[...getDateOptionalRules()]"
-                  :min="clearance.grantedDate"
-                  label="Reinvestigation Submission Date"
-                  variant="filled"
-                  clearable
-                ></date-picker>
-              </v-col>
+            </v-row>
+            <v-row v-for="(reinvestigation, rIndex) in clearance.reinvestigations" :key="rIndex" class="groove">
+              <v-col class="small" :cols="isMobile() ? '12' : '4'">
+                <v-checkbox
+                    v-model="reinvestigation.underReinvestigation"
+                    density="compact"
+                    class="mx-xs-0 mx-sm-0 mx-md-5"
+                    hide-details
+                    label="Under Reinvestigation"
+                    disabled
+                  >
+                    <template #label v-if="name === 'xs' || name === 'sm'">
+                      <span class="small-text">Under Reinvestigation</span>
+                    </template>
+                  </v-checkbox>
+                </v-col>
+                <v-col class="small" :cols="isMobile() ? '12' : '4'">
+                  <date-picker
+                    v-model="reinvestigation.submissionDate"
+                    :rules="[...getDateOptionalRules()]"
+                    :min="clearance.grantedDate"
+                    label="Submission Date"
+                    variant="filled"
+                    clearable
+                  ></date-picker>
+                </v-col>
+                <v-col class="small" :cols="isMobile() ? '12' : '4'">
+                  <date-picker
+                    v-model="reinvestigation.completionDate"
+                    :rules="[...getDateOptionalRules()]"
+                    :min="reinvestigation.submissionDate"
+                    label="Completion Date"
+                    variant="filled"
+                    clearable
+                  ></date-picker>
+                </v-col>
             </v-row>
           </v-col>
         </v-row>
@@ -202,6 +210,8 @@ import { onMounted, ref } from 'vue';
 import { useDisplay } from 'vuetify/lib/framework.mjs';
 
 import { useStore } from 'vuex';
+import { Clearance } from '@/shared/models/clearance/clearance';
+import { Reinvestigation } from '@/shared/models/clearance/reinvestigation';
 const store = useStore();
 
 // |--------------------------------------------------|
@@ -244,18 +254,14 @@ onMounted(() => {
  */
 function addClearance() {
   if (!editedEmployee.value.clearances) editedEmployee.value.clearances = [];
-  editedEmployee.value.clearances.push({
-    adjudicationDates: [],
-    awaitingClearance: false,
-    badgeExpirationDate: null,
-    biDates: [],
-    grantedDate: null,
-    polyDates: [],
-    reinvestigation: false,
-    reinvestigationSubmissionDate: null,
-    submissionDate: null,
-    type: null
-  });
+  editedEmployee.value.clearances.push(new Clearance({}));
+}
+
+/**
+ * Add reinvestigation.
+ */
+function addReinvestigation(clearance) {
+  clearance.reinvestigations.push(new Reinvestigation({}));
 }
 
 /**

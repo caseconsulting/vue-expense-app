@@ -1,4 +1,4 @@
-import { Clearance } from '@/shared/models/clearance.js';
+import { Clearance } from '@/shared/models/clearance/clearance.js';
 // Defines several data types used in the employees database
 
 /**

@@ -1,3 +1,4 @@
+import { Reinvestigation } from '@/shared/models/clearance/reinvestigation.js';
 export class Clearance {
 
   constructor(properties) {
@@ -17,16 +18,18 @@ export class Clearance {
     this.grantingOrg = properties.grantingOrg;
     /** @type {string[]} */
     this.polyDates = properties.polyDates;
-    /** @type {boolean} */
-    this.reinvestigation = properties.reinvestigation;
-    /** @type {string} */
-    this.reinvestigationSubmissionDate = properties.reinvestigationSubmissionDate;
+    /** @type {Reinvestigation[]} */
+    let reinvestigations = properties.reinvestigations ?? [];
+    this.reinvestigations = reinvestigations.map((r) => new Reinvestigation(r));
     /** @type {string} */
     this.submissionDate = properties.submissionDate;
     /** @type {string} */
     this.type = properties.type;
   }
 
+  get underReinvestigation() {
+    return this.reinvestigations.some((r) => r.underReinvestigation);
+  }
   /**
    * Returns the type of clearance
    *
@@ -37,7 +40,7 @@ export class Clearance {
     let displayText = this.type;
     if (this.awaitingClearance) {
       displayText = displayText + ' - Awaiting Clearance';
-    } else if (this.reinvestigation) {
+    } else if (this.underReinvestigation) {
       displayText = displayText + ' - Reinvestigation';
     }
     return displayText;
