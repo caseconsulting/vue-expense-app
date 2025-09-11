@@ -202,32 +202,6 @@
         </template>
       </v-combobox>
     </div>
-    <v-text-field
-      :model-value="format(model.reinvestigationSubmissionDate, null, FORMATTED_ISOFORMAT)"
-      label="Reinvestigation Submission Date"
-      :disabled="!model.reinvestigation"
-      :rules="[...getDateOptionalRules()]"
-      hint="MM/DD/YYYY format"
-      v-mask="'##/##/####'"
-      variant="underlined"
-      class="small-field mx-4"
-      @update:focused="model.reinvestigationSubmissionDate = parseEventDate()"
-      @keypress="showReinvestigationMenu = false"
-      autocomplete="off"
-    >
-      <v-menu activator="parent" v-model="showReinvestigationMenu" :close-on-content-click="false" location="start center">
-        <v-date-picker
-          v-model="model.reinvestigationSubmissionDate"
-          :min="model.grantedDate"
-          @update:model-value="showReinvestigationMenu = false"
-          show-adjacent-months
-          hide-actions
-          keyboard-icon=""
-          color="#bc3825"
-          title="Reinvestigation Submission Date"
-        ></v-date-picker>
-      </v-menu>
-    </v-text-field>
     <!-- Awaiting Clearance -->
     <v-checkbox
       v-model="model.awaitingClearance"
@@ -243,13 +217,6 @@
           }
         }
       "
-    >
-    </v-checkbox>
-    <v-checkbox
-      v-model="model.reinvestigation"
-      hide-details
-      class="large-field"
-      label="Under Reinvestigation"
     >
     </v-checkbox>
   </div>

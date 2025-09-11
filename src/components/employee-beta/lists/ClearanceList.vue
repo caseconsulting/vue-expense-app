@@ -8,7 +8,7 @@
           </p>
           <div>
             <p class="mb-1" v-if="!isEmpty(getReinvestigationDate(clearance))">
-              <b>Reinvestigation Submission: </b>{{ getReinvestigationDate(clearance) }}
+              <b><span v-if="toggleModal">Current </span>Reinvestigation Submission: </b>{{ getReinvestigationDate(clearance) }}
             </p>
             <p class="mb-1" v-if="!isEmpty(getSubmissionDate(clearance))">
               <b>Submission: </b>{{ getSubmissionDate(clearance) }}
@@ -26,15 +26,20 @@
           <p v-if="!isEmpty(getBadgeExpirationDate(clearance))" class="gray-text ml-6 mb-0">
             <b>Badge Expiration: </b>{{ getBadgeExpirationDate(clearance) }}
           </p>
-          <p class="mb-1" v-if="toggleModal && !isEmpty(getAdjudicationDates(clearance))">
-            <b>Adjudication Dates: </b>{{ getAdjudicationDates(clearance) }}
-          </p>
-          <p class="mb-1" v-if="toggleModal && !isEmpty(getBIDates(clearance))">
-            <b>BI Dates: </b>{{ getBIDates(clearance) }}
-          </p>
-          <p v-if="toggleModal && !isEmpty(getPolyDates(clearance))" class="pb-1">
-            <b>Poly Dates: </b>{{ getPolyDates(clearance) }}
-          </p>
+          <div v-if="toggleModal">
+            <p class="mb-1" v-if="!isEmpty(getAdjudicationDates(clearance))">
+              <b>Adjudication Dates: </b>{{ getAdjudicationDates(clearance) }}
+            </p>
+            <p class="mb-1" v-if="!isEmpty(getBIDates(clearance))">
+              <b>BI Dates: </b>{{ getBIDates(clearance) }}
+            </p>
+            <p v-if=" !isEmpty(getPolyDates(clearance))" class="pb-1">
+              <b>Poly Dates: </b>{{ getPolyDates(clearance) }}
+            </p>
+            <p v-if="!isEmpty(getPreviousReinvestigations(clearance))" class="pb-1">
+              <b>Previous Reinvestigations: </b>{{ getPreviousReinvestigations(clearance) }}
+            </p>
+          </div>
         </v-card-text>
       </v-row>
       <v-row no-gutters class="mx-2">
@@ -97,7 +102,14 @@ function getSubmissionDate(clearance) {
  * @return String - submission date
  */
 function getReinvestigationDate(clearance) {
-  return monthDayYearFormat(clearance.reinvestigationSubmissionDate);
+  return monthDayYearFormat(clearance.currentReinvestigation?.submissionDate);
+}
+
+function getPreviousReinvestigations(clearance) {
+  return clearance.reinvestigations
+    .filter((r) => !r.underReinvestigation && !isEmpty(r.completionDate))
+    .map((r) => `${monthDayYearFormat(r.submissionDate)} - ${monthDayYearFormat(r.completionDate)}`)
+    .join('; ');
 }
 
 /**

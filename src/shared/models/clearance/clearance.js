@@ -3,7 +3,7 @@ export class Clearance {
 
   constructor(properties) {
     /** @type {string[]} */
-    this.adjudicationDates = properties.adjudicationDates;
+    this.adjudicationDates = properties.adjudicationDates ?? [];
     /** @type {boolean} */
     this.awaitingClearance = properties.awaitingClearance;
     /** @type {string} */
@@ -11,13 +11,13 @@ export class Clearance {
     /** @type {string} */
     this.badgeNum = properties.badgeNum;
     /** @type {string[]} */
-    this.biDates = properties.biDates;
+    this.biDates = properties.biDates ?? [];
     /** @type {string} */
     this.grantedDate = properties.grantedDate;
     /** @type {string} */
     this.grantingOrg = properties.grantingOrg;
     /** @type {string[]} */
-    this.polyDates = properties.polyDates;
+    this.polyDates = properties.polyDates ?? [];
     /** @type {Reinvestigation[]} */
     let reinvestigations = properties.reinvestigations ?? [];
     this.reinvestigations = reinvestigations.map((r) => new Reinvestigation(r));
@@ -27,9 +27,15 @@ export class Clearance {
     this.type = properties.type;
   }
 
-  get underReinvestigation() {
-    return this.reinvestigations.some((r) => r.underReinvestigation);
+
+  get currentReinvestigation() {
+    return this.reinvestigations.find((r) => r.underReinvestigation);
   }
+
+  get underReinvestigation() {
+    return this.currentReinvestigation != null;
+  }
+
   /**
    * Returns the type of clearance
    *

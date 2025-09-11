@@ -22,10 +22,14 @@
         <!-- first row: name and nickname -->
         <v-row class="mr-5 align-baseline" no-gutters>
           <!-- name -->
-          <v-col class="mr-3 fit-content">
+          <v-col class="mr-3" justify="center">
             <h3 class="name-text" :style="employeeName.length >= 14 ? 'font-size: 21px' : 'font-size: 32px'">
               {{ employeeName }}
             </h3>
+            <v-icon
+              v-if="isAdmin && model.clearances && model.clearances.some((c) => c.underReinvestigation)"
+              color="red"
+              v-tooltip="'Under Reinvestigation'">mdi-account-search</v-icon>
           </v-col>
           <!-- nickname -->
           <v-col v-if="nickname" class="fit-content">
@@ -157,13 +161,12 @@
 </template>
 
 <script setup>
-import _ from 'lodash';
 import { computed, onMounted, ref, inject } from 'vue';
 import { useStore } from 'vuex';
-import { isMobile } from '../../../utils/utils';
-import { updateStoreAvatars } from '../../../utils/storeUtils';
-import ProfilePicModal from '../modals/ProfilePicModal.vue';
-import EmergencyContactModal from '../modals/EmergencyContactModal.vue';
+import { isMobile } from '@/utils/utils';
+import { updateStoreAvatars } from '@/utils/storeUtils';
+import ProfilePicModal from '@/components/employee-beta/modals/ProfilePicModal.vue';
+import EmergencyContactModal from '@/components/employee-beta/modals/EmergencyContactModal.vue';
 const isAdmin = inject('isAdmin');
 const isUser = inject('isUser');
 
@@ -192,7 +195,7 @@ const toggleModal = ref({
 onMounted(async () => {
   if (!store.getters.basecampAvatars) await updateStoreAvatars();
   let avatars = store.getters.basecampAvatars;
-  const item = _.find(avatars, ['email_address', props.model.email]);
+  const item = avatars.find((a) => a.email_address == props.model.email)
   avatar.value = item ? item.avatar_url : null;
 });
 
