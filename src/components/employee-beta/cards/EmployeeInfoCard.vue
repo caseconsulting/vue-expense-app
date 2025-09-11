@@ -195,7 +195,7 @@ const toggleModal = ref({
 onMounted(async () => {
   if (!store.getters.basecampAvatars) await updateStoreAvatars();
   let avatars = store.getters.basecampAvatars;
-  const item = avatars.find((a) => a.email_address == props.model.email)
+  const item = avatars.find((a) => a.email_address == props.model.email);
   avatar.value = item ? item.avatar_url : null;
 });
 
