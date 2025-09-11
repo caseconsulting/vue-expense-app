@@ -1,6 +1,6 @@
 <template>
   <v-card v-if="dataReceived" class="pa-5">
-    <pie-chart ref="pieChart" :key="chartKey" chartId="cust-org" :options="options" :chartData="chartData"></pie-chart>
+    <pie-chart ref="pieChart" chartId="cust-org" :options="chartOptions" :chartData="chartData" :key="chartKey"/>
     <v-container class="ma-0">
       <v-row justify="center" no-gutters>
         <v-radio-group v-model="filter" class="d-flex justify-center" inline>
@@ -12,7 +12,7 @@
 </template>
 
 <script setup>
-import PieChart from '../base-charts/PieChart.vue';
+import PieChart from '@/components/charts/base-charts/PieChart.vue';
 import { getEmployeeCurrentContracts } from '@/shared/employeeUtils';
 import { getTodaysDate, difference } from '@/shared/dateUtils';
 import { onBeforeMount, ref, watch } from 'vue';
@@ -25,15 +25,17 @@ import { useRouter } from 'vue-router';
 // |                                                  |
 // |--------------------------------------------------|
 
-const chartData = ref(null);
-const chartKey = ref(0);
+// vars that connect to template
 const dataReceived = ref(false);
-const label = ref([]);
-const options = ref(null);
-const quantities = ref([]);
-const router = useRouter();
+const chartData = ref(null);
+const chartOptions = ref(null);
+const chartKey = ref(0);
 const filter = ref('All');
 const filterOptions = ref(['All', 'Current', 'Past']);
+
+// vars for code-only
+const quantities = {};
+const router = useRouter();
 const store = useStore();
 
 // |--------------------------------------------------|
@@ -62,103 +64,104 @@ onBeforeMount(async () => {
  * Get all cust org data.
  */
 function fetchData() {
-  let allCompOrgExp = {};
-  // access store
+  // unset the table
+  dataReceived.value = false;
+
+  // init vars
   let employees = store.getters.employees;
-  let contracts = store.getters.contracts;
-  contracts = contracts.reduce((acc, item) => { acc[item.id] = item; return acc; }, {})
-  // useful checker
-  function shouldShow(isCurrent) {
-    return filter.value === 'All'
-      || (filter.value === 'Current' && isCurrent)
-      || (filter.value === 'Past' && !isCurrent)
-  };
+  let contracts = store.getters.contracts.reduce((acc, c) => { acc[c.id] = c; return acc; }, {});
   let today = getTodaysDate();
+  let experience = { All: [], Current: [], Past: [] };
+
+  // helper: whether or not to add experience based on filter and current status
+  function shouldAdd(filterType, isCurrent) {
+    return filterType === 'All'
+      || (filterType === 'Current' && isCurrent)
+      || (filterType === 'Past' && !isCurrent)
+  };
+
+  // helper: adds value to allCompOrgExp[name] for all filter types that should
+  // include it skips if any inputs are missing/invalid
+  function add(name, value, isCurrent) {
+    if (!name || !value || isCurrent == null) return;
+    for (let filterType of filterOptions.value) {
+      if (!shouldAdd(filterType, isCurrent)) continue;
+      experience[filterType][name] ??= 0;
+      experience[filterType][name] += value;
+    }
+  }
+
   // tally up customer org experience for active employees
   for (let emp of employees) {
     if (emp.workStatus <= 0) continue;
+
     // loop through org experience
     for (let org of emp.customerOrgExp ?? []) {
-      // We get whether or not we want to show current or past info
+      if (!org.years) continue; // skip if no years of experience
+      // get the status and duration of the org experience
       let isOrgCurrent = filter.value === 'Current' ? org.current : !org.current;
-      // error checks if orgYears is undefined
-      if (org.years && shouldShow(isOrgCurrent)) {
-        allCompOrgExp[org.name] ??= 0;
-        allCompOrgExp[org.name] += Math.round(Number(org.years) * 100) / 100;
-      }
+      let yearsExp = Math.round(Number(org.years) * 100) / 100;
+      // add to tallies
+      add(org.name, yearsExp, isOrgCurrent);
     }
+
     // loop through current contract experience
     for (let c of emp.contracts ?? []) {
       let contract = contracts[c.contractId];
-      if (!contract?.customerOrg) continue;
+      if (!contract?.customerOrg) continue; // exit if no org name
+      // get the status of contract
       let currentContracts = getEmployeeCurrentContracts(emp);
-      currentContracts = new Set(currentContracts.map(c => contract.id));
+      currentContracts = new Set(currentContracts.map(c => c.id));
       let isContractCurrent = currentContracts.has(contract.id);
-      if (!shouldShow(isContractCurrent)) continue;
-      // add contract experience
-      let duration = 0; // in days, convert to years later
-      for (let p of c.projects ?? []) {
-        let start = p.startDate;
-        let end = p.endDate ?? today;
-        duration += difference(end, start, 'day');
-      }
-      duration /= 365;
-      duration = Math.round(duration * 100) / 100;
-      allCompOrgExp[contract.customerOrg] ??= 0;
-      allCompOrgExp[contract.customerOrg] += duration;
+      // get the duration on the contract
+      let daysBetween = (p) => difference(p.endDate ?? today, p.startDate, 'day')
+      let duration = c.projects.reduce((acc, p) => acc + daysBetween(p), 0);
+      duration = Math.round(duration / 365 * 100) / 100;
+      // add to tallies
+      add(contract.customerOrg, duration, isContractCurrent);
     }
   }
-  let labels = Object.keys(allCompOrgExp);
-  quantities.value = [];
 
-  for (let label of labels ?? []) {
-    quantities.value.push(allCompOrgExp[label]);
+  // split org names from values, so that they can be added to pie chart
+  for (let option of filterOptions.value) {
+    quantities[option] = {
+      data: Object.values(experience[option]),
+      labels: Object.keys(experience[option])
+    }
   }
-  label.value = labels;
 } // fetchData
 
 /**
  * Sets up the chart formatting and data options.
  */
 function fillData() {
-  let text = '';
-  let colors = [];
+  // default chart options
+  let text = `${filter.value} Customer Org Experience (Years)`;
+  let { data, labels } = quantities[filter.value];
   let enabled = true;
-  if (quantities.value.length === 0) {
+  let backgroundColor = ['#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF6384', '#E6B89C', '#EAD2AC', '#9CAFB7', '#4281A4'];
+
+  // chart options if no data found
+  if (data.length === 0) {
     text = 'No Customer Org Data Found';
-    quantities.value.push(1);
+    data = [1];
     enabled = false;
-    colors = ['grey'];
-  } else {
-    colors = [
-      'rgba(54, 162, 235, 1)',
-      'rgba(255, 206, 86, 1)',
-      'rgba(75, 192, 192, 1)',
-      'rgba(153, 102, 255, 1)',
-      'rgba(255, 99, 132, 1)',
-      'rgba(230, 184, 156, 1)',
-      'rgba(234, 210, 172, 1)',
-      'rgba(156, 175, 183, 1)',
-      'rgba(66, 129, 164, 1)'
-    ];
-    text = `${filter.value} Customer Org Experience (Years)`;
+    backgroundColor = ['lightgrey'];
   }
+
+  // set chartData for template
   chartData.value = {
-    labels: label.value,
-    datasets: [
-      {
-        data: quantities.value,
-        backgroundColor: colors
-      }
-    ]
+    labels: labels,
+    datasets: [{ data, backgroundColor }]
   };
 
-  options.value = {
+  // set chartOptions for template
+  chartOptions.value = {
     onClick: (x, y) => {
       let index = y[0]?.index;
       localStorage.setItem(
         'requestedFilter',
-        JSON.stringify({ tab: 'customerOrgs', search: chartData.value.labels[index] })
+        JSON.stringify({ tab: 'customerOrgs', search: labels[index] })
       );
       router.push({
         path: '/reports',
@@ -169,24 +172,21 @@ function fillData() {
       title: {
         display: true,
         text: text,
-        font: {
-          size: 15
-        }
+        font: { size: 15 }
       },
       subtitle: {
         display: true,
         text: '*Click on a segment of the pie chart to see employees',
-        font: {
-          style: 'italic'
-        }
+        font: { style: 'italic' }
       },
       tooltip: {
-        enabled: enabled
+        enabled
       }
     },
     maintainAspectRatio: false
   };
 
+  // show the pie chart
   dataReceived.value = true;
 } // fillData
 
@@ -197,19 +197,14 @@ function fillData() {
 // |--------------------------------------------------|
 
 /**
- * Watcher for filter - fills data.
+ * Fills data on filter update
  */
-watch(filter, () => {
-  fetchData();
-  fillData(); // renders a different chart every time the radio button changes
-  chartKey.value++; // rerenders the chart
-});
-
 watch(
-  () => store.getters.storeIsPopulated,
+  filter,
   () => {
     fetchData();
-    fillData();
+    fillData(); // renders a different chart every time the radio button changes
+    chartKey.value++; // rerenders the chart
   }
 );
 </script>
