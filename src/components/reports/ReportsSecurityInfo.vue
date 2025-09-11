@@ -116,7 +116,7 @@ import { useRouter } from 'vue-router';
 import { selectedTagsHasEmployee } from '@/shared/employeeUtils';
 import { userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
 import TagsFilter from '@/components/shared/TagsFilter.vue';
-import { Clearance } from '@/shared/models/clearance/clearance.js';
+import { Clearance } from '@/models/clearance/clearance.js';
 
 const store = useStore();
 const emitter = inject('emitter');

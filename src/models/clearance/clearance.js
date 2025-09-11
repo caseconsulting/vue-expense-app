@@ -1,4 +1,4 @@
-import { Reinvestigation } from '@/shared/models/clearance/reinvestigation.js';
+import { Reinvestigation } from '@/models/clearance/reinvestigation.js';
 export class Clearance {
 
   constructor(properties) {

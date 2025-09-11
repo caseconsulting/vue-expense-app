@@ -210,8 +210,8 @@ import { onMounted, ref } from 'vue';
 import { useDisplay } from 'vuetify/lib/framework.mjs';
 
 import { useStore } from 'vuex';
-import { Clearance } from '@/shared/models/clearance/clearance';
-import { Reinvestigation } from '@/shared/models/clearance/reinvestigation';
+import { Clearance } from '@/models/clearance/clearance';
+import { Reinvestigation } from '@/models/clearance/reinvestigation';
 const store = useStore();
 
 // |--------------------------------------------------|

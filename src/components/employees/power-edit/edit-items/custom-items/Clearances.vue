@@ -237,6 +237,7 @@ import {
   getRequiredRules
 } from '@/shared/validationUtils.js';
 import { isEmpty } from '@/utils/utils.js';
+import { Clearance } from '@/models/clearance/clearance.js';
 import _cloneDeep from 'lodash/cloneDeep';
 import _sortBy from 'lodash/sortBy';
 
@@ -249,20 +250,7 @@ import _sortBy from 'lodash/sortBy';
 const props = defineProps(['field', 'item']);
 const emitter = inject('emitter');
 const vMask = (a, b) => mask(a, b);
-const model = ref(
-  props.item[props.field.key]?.[0] || {
-    adjudicationDates: [],
-    awaitingClearance: false,
-    badgeExpirationDate: null,
-    biDates: [],
-    grantedDate: null,
-    polyDates: [],
-    reinvestigation: false,
-    reinvestigationSubmissionDate: null,
-    submissionDate: null,
-    type: null
-  }
-);
+const model = ref(new Clearance(props.item[props.field.key]?.[0] || {}));
 const clearanceTypes = ref(['TS/SCI - Full Scope', 'TS/SCI - CI Poly', 'TS/SCI - No Poly', 'Top Secret', 'Secret']); // autocomplete clearance type options
 const showGrantedMenu = ref(false);
 const showSubmissionMenu = ref(false);

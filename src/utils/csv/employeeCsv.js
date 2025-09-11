@@ -10,7 +10,7 @@ import _isEmpty from 'lodash/isEmpty';
 import _sortBy from 'lodash/sortBy';
 import { difference, format, getTodaysDate, minimum } from '@/shared/dateUtils';
 import { getEmployeeCurrentAddress } from '@/shared/employeeUtils.js';
-import { Clearance } from '@/shared/models/clearance/clearance.js';
+import { Clearance } from '@/models/clearance/clearance.js';
 
 class EmployeeCsv extends EmployeeCsvUtil {
   /**
