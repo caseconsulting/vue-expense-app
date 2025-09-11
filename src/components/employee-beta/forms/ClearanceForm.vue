@@ -145,18 +145,21 @@
             </v-row>
             <v-row v-for="(reinvestigation, rIndex) in clearance.reinvestigations" :key="rIndex" class="groove">
               <v-col class="small" :cols="isMobile() ? '12' : '4'">
-                <v-checkbox
-                    v-model="reinvestigation.underReinvestigation"
-                    density="compact"
-                    class="mx-xs-0 mx-sm-0 mx-md-5"
-                    hide-details
-                    label="Under Reinvestigation"
-                    disabled
+                <div class="mx-xs-0 mx-sm-0 mx-md-5" style="display: flex; align-items: center;">
+                  <v-chip
+                    v-if="reinvestigation.underReinvestigation"
+                    color="red"
+                    variant="elevated"
+                    size="small"
+                    class="mr-2"
                   >
-                    <template #label v-if="name === 'xs' || name === 'sm'">
-                      <span class="small-text">Under Reinvestigation</span>
-                    </template>
-                  </v-checkbox>
+                    Under Reinvestigation
+                  </v-chip>
+                  <v-chip v-else
+                    variant="elevated"
+                    size="small"
+                    class="mr-2">Not Under Reinvestigation</v-chip>
+                </div>
                 </v-col>
                 <v-col class="small" :cols="isMobile() ? '12' : '4'">
                   <date-picker
