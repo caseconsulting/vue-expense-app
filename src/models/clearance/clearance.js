@@ -20,7 +20,9 @@ export class Clearance {
     this.polyDates = properties.polyDates ?? [];
     /** @type {Reinvestigation[]} */
     let reinvestigations = properties.reinvestigations ?? [];
-    this.reinvestigations = reinvestigations.map((r) => new Reinvestigation(r));
+    this.reinvestigations = reinvestigations
+      .map((r) => new Reinvestigation(r))
+      .sort((a, b) => new Date(a.submissionDate) - new Date(b.submissionDate));
     /** @type {string} */
     this.submissionDate = properties.submissionDate;
     /** @type {string} */

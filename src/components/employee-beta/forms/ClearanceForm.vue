@@ -138,13 +138,10 @@
                 ></date-picker>
               </v-col>
             </v-row>
-            <v-row class="groove">
-              <v-col cols="12" align="center" class="py-2">
-                <v-btn @click="addReinvestigation(clearance)" variant="outlined" size="small">Add Reinvestigation</v-btn>
-              </v-col>
-            </v-row>
-            <v-row v-for="(reinvestigation, rIndex) in clearance.reinvestigations" :key="rIndex" class="groove">
-              <v-col class="small" :cols="isMobile() ? '12' : '4'">
+            <v-row
+              v-for="(reinvestigation, rIndex) in clearance.reinvestigations" :key="rIndex" class="groove"
+              align="center">
+              <v-col class="small" :cols="isMobile() ? '12' : '2'">
                 <div class="mx-xs-0 mx-sm-0 mx-md-5" style="display: flex; align-items: center;">
                   <v-chip
                     v-if="reinvestigation.underReinvestigation"
@@ -153,12 +150,8 @@
                     size="small"
                     class="mr-2"
                   >
-                    Under Reinvestigation
+                    Active
                   </v-chip>
-                  <v-chip v-else
-                    variant="elevated"
-                    size="small"
-                    class="mr-2">Not Under Reinvestigation</v-chip>
                 </div>
                 </v-col>
                 <v-col class="small" :cols="isMobile() ? '12' : '4'">
@@ -181,6 +174,17 @@
                     clearable
                   ></date-picker>
                 </v-col>
+                <v-col cols="1">
+                  <v-btn variant="text" icon="" @click="deleteReinvestigation(clearance, rIndex)">
+                    <v-tooltip activator="parent" location="bottom">Delete Reinvestigation</v-tooltip>
+                    <v-icon class="case-gray">mdi-delete</v-icon></v-btn
+                  >
+                </v-col>
+            </v-row>
+            <v-row class="groove">
+              <v-col cols="12" align="center" class="py-2">
+                <v-btn @click="addReinvestigation(clearance)" variant="outlined" size="small">Add Reinvestigation</v-btn>
+              </v-col>
             </v-row>
           </v-col>
         </v-row>
@@ -285,6 +289,15 @@ function capitalizeBadges(clearance) {
  */
 function deleteClearance(cIndex) {
   editedEmployee.value.clearances.splice(cIndex, 1);
+}
+
+/**
+ * Deletes a reinvestigation.
+ *
+ * @param rIndex - array index of reinvestigation to remove.
+ */
+function deleteReinvestigation(clearance, rIndex) {
+  clearance.reinvestigations.splice(rIndex, 1);
 }
 
 /**
