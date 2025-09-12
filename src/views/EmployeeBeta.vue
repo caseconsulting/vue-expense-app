@@ -20,17 +20,6 @@
             <v-icon size="large" class="pr-1"> mdi-arrow-left-thin </v-icon>
             Back
           </v-btn>
-          <v-btn
-            if="alphaBtn"
-            rounded="xl"
-            color="#bc3825"
-            :size="isMobile() ? 'small' : 'default'"
-            @click="goBackToAlphaProfile()"
-            theme="dark"
-            class="ma-2"
-          >
-            old view
-          </v-btn>
         </v-col>
 
         <v-col
