@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-btn
-      v-if="requestedDataType"
+      v-if="requestedFilter"
       id="backBtn"
       class="mb-3"
       elevation="2"
@@ -23,7 +23,7 @@
             <template #append>
               <v-icon>mdi-download</v-icon>
             </template>
-            <v-tooltip activator="parent" location="bottom">Download current table as XLSX</v-tooltip>
+            <v-tooltip activator="parent" location="bottom">Download {{ currentWindow.title }} table as XLSX</v-tooltip>
           </v-btn>
           <v-btn @click="renderContactEmployeesModal()" v-bind="props">
             Contact
@@ -34,43 +34,44 @@
           </v-btn>
         </v-card-title>
       </v-card>
+
       <v-container fluid class="px-0 px-md-4">
         <reports-page-loader v-if="loading" />
         <div v-else>
           <!-- user is mobile -->
           <div v-if="isMobile()" class="text-center">
-            <v-menu offset="y">
+            <v-menu offset="y" :key="currentWindowKey">
               <template #activator="{ props }">
                 <v-btn variant="text" theme="dark" class="font-weight-bold" v-bind="props">
-                  {{ currentTab.title.toUpperCase() }} <v-icon class="pb-1"> mdi-chevron-down </v-icon>
+                  {{ currentWindow.title }} <v-icon class="pb-1"> mdi-chevron-down </v-icon>
                 </v-btn>
               </template>
               <v-list>
-                <v-list-item v-for="tab in tabs" :key="tab" @click="changeTab(tab)">
-                  {{ tab.title }}
+                <v-list-item v-for="tab in tabs" :key="tab.key" :value="tab.key" @click="changeTab(tab)">
+                  <v-list-item-title>{{ tab.title }}</v-list-item-title>
                 </v-list-item>
               </v-list>
             </v-menu>
             <hr class="my-1" />
-            <div v-for="tab in tabs" :key="tab">
-              <component v-if="currentTab.key === tab.key" :is="tab.component" class="text-start" />
-            </div>
+            <component :is="currentWindow.component" :requestedFilter="requestedFilter" :name="currentWindow.key" />
           </div>
+          <!-- user is not mobile -->
           <div v-else>
-            <!-- user is not mobile -->
-            <v-tabs color="blue" v-model="currentWindow" center-active grow show-arrows>
+            <v-tabs color="blue" v-model="currentWindowKey" center-active grow show-arrows>
               <v-tab v-for="tab in tabs" :key="tab.key" :value="tab.key">
-                {{ tab.title }}</v-tab>
-              </v-tabs>
-            <v-window v-model="currentWindow">
+                {{ tab.title }}
+              </v-tab>
+            </v-tabs>
+            <v-window v-model="currentWindowKey">
               <v-window-item v-for="tab in tabs" :key="tab.key" :value="tab.key">
-                <component :is="tab.component" />
+                <component :is="tab.component" :requestedFilter="requestedFilter" :name="tab.key" />
               </v-window-item>
             </v-window>
           </div>
         </div>
       </v-container>
     </v-card>
+
     <v-dialog v-model="toggleContactEmployeesModal" :width="isMobile() ? '100%' : '60%'" scrollable>
       <contact-employees-modal :passedEmployees="employeesToContact" :key="contactKey" />
     </v-dialog>
@@ -82,15 +83,16 @@ import { useStore } from 'vuex';
 import ContactEmployeesModal from '@/components/shared/ContactEmployeesModal.vue';
 import ReportsPageLoader from '@/components/reports/ReportsPageLoader.vue';
 import ReportsAwards from '@/components/reports/ReportsAwards.vue';
+import ReportsCertifications from '@/components/reports/ReportsCertifications.vue';
 import ReportsContracts from '@/components/reports/ReportsContracts.vue';
 import ReportsCustomerOrgs from '@/components/reports/ReportsCustomerOrgs.vue';
-import ReportsCertifications from '@/components/reports/ReportsCertifications.vue';
-import ReportsForeignLanguages from '@/components/reports/ReportsForeignLanguages.vue';
-import ReportsJobRoles from '@/components/reports/ReportsJobRoles.vue';
-import ReportsTechnologies from '@/components/reports/ReportsTechnologies.vue';
-import ReportsSecurityInfo from '@/components/reports/ReportsSecurityInfo.vue';
+import ReportsDirectorates from '@/components/reports/ReportsDirectorates.vue';
 import ReportsEducation from '@/components/reports/ReportsEducation.vue';
 import ReportsEmployeeNotes from '@/components/reports/ReportsEmployeeNotes.vue';
+import ReportsForeignLanguages from '@/components/reports/ReportsForeignLanguages.vue';
+import ReportsJobRoles from '@/components/reports/ReportsJobRoles.vue';
+import ReportsSecurityInfo from '@/components/reports/ReportsSecurityInfo.vue';
+import ReportsTechnologies from '@/components/reports/ReportsTechnologies.vue';
 import { updateStoreEmployees, updateStoreContracts, updateStoreTags } from '@/utils/storeUtils';
 import { isMobile, userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
 import { getEmployeeCurrentProjects } from '@/shared/employeeUtils';
@@ -102,16 +104,19 @@ import baseCsv from '@/utils/csv/baseCsv.js';
 // |                       DATA                       |
 // |                                                  |
 // |--------------------------------------------------|
+
+const store = useStore();
+const emitter = inject('emitter');
+const router = useRouter();
+const props = ref();
+
 const contactKey = ref(0);
 const employeesToContact = ref([]);
 const loading = ref(true);
 const toggleContactEmployeesModal = ref(false);
 const wasRedirected = ref(false);
-const requestedDataType = ref(localStorage.getItem('requestedDataType'));
+const requestedFilter = ref(undefined);
 const tableData = reactive({});
-const store = useStore();
-const emitter = inject('emitter');
-const router = useRouter();
 const tabs = ref([
   {
     key: 'contracts',
@@ -122,6 +127,11 @@ const tabs = ref([
     key: 'customerOrgs',
     title: 'Customer Orgs',
     component: shallowRef(ReportsCustomerOrgs)
+  },
+  {
+    key: 'directorates',
+    title: 'Directorates',
+    component: shallowRef(ReportsDirectorates)
   },
   {
     key: 'certifications',
@@ -168,9 +178,8 @@ if (userRoleIsAdmin()) {
   });
 }
 
-const props = ref();
-const currentTab = ref(tabs.value[0]);
-const currentWindow = ref(0);
+const currentWindow = ref(tabs.value[0]); // window object
+const currentWindowKey = ref(currentWindow.value.key); // writeable key for v-model
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -191,11 +200,13 @@ onMounted(async () => {
     ]);
     loading.value = false;
   }
-  if (localStorage.getItem('requestedDataType')) {
+
+  // check for requested tab and filter
+  requestedFilter.value = JSON.parse(localStorage.getItem('requestedFilter') ?? null);
+  if (requestedFilter.value) {
+    localStorage.removeItem('requestedFilter');
     // find requested tab and change to it
-    let requestedTab = localStorage.getItem('requestedDataType');
-    for (let i in tabs.value) if (tabs.value[i].key === requestedTab) changeTab(tabs.value[i], i);
-    localStorage.removeItem('requestedDataType');
+    for (let i in tabs.value) if (tabs.value[i].key === requestedFilter.value.tab) changeTab(tabs.value[i]);
     wasRedirected.value = true;
     window.scrollTo(0, 0);
   }
@@ -216,7 +227,7 @@ onMounted(async () => {
  * Handler for back button click event.
  */
 function backClick() {
-  localStorage.setItem('requestedDataType', localStorage.getItem('requestedDataType'));
+  localStorage.setItem('requestedFilter', localStorage.getItem('requestedFilter'));
   router.push({
     path: '/stats',
     name: 'stats'
@@ -226,19 +237,26 @@ function backClick() {
 /**
  * Changes the tab display.
  *
- * @param newTab - the new tab object
- * @param index - index of tab to update v-window to
+ * @param item - the new tab object, or key of the new tab
  */
-function changeTab(newTab, index) {
-  currentTab.value = newTab;
-  if (![null, undefined].includes(index)) currentWindow.value = index;
+function changeTab(item) {
+  // get key and tab object
+  let newKey = item.key ?? item;
+  let newTab = item.key ? item : tabs.value.find((tab) => tab.key === item);
+
+  // exit early if already synced (avoids loop)
+  if (currentWindowKey.value === currentWindow.value.key && currentWindowKey.value === newKey) return;
+
+  // set all of them
+  currentWindowKey.value = newKey;
+  currentWindow.value = newTab;
 } // changeTab
 
 /**
  * Filters through table data of a given tab and returns the employee
  * objects for anyone in the table
  */
-function getTableEmployeeData(tab = currentTab.value) {
+function getTableEmployeeData(tab = currentWindow.value) {
   let employees = [];
   tab = tab.key || tab;
   let data = tableData[tab].table;
@@ -264,8 +282,8 @@ function renderContactEmployeesModal() {
  */
 function downloadTable() {
   // get title and raw data
-  let title = `${currentTab.value.title} Download`;
-  let data = tableData[currentTab.value.key];
+  let title = `${currentWindow.value.title} Download`;
+  let data = tableData[currentWindow.value.key];
   let table = data.table;
   let rawHeaders = data.headers;
 
@@ -285,11 +303,11 @@ function downloadTable() {
   let extraDataReports = ['contracts'];
   // create an index of employees
   let employeesIndex = {};
-  if (extraDataReports.includes(currentTab.value.key))
+  if (extraDataReports.includes(currentWindow.value.key))
     for (let e of store.getters.employees) employeesIndex[e.employeeNumber] = e;
 
   // EXTRA DATA: contract tab - add in current project
-  if (currentTab.value.key === 'contracts') {
+  if (currentWindow.value.key === 'contracts') {
     // get contracts info so that we can get the project names
     let projects = {};
     for (let c of store.getters.contracts) for (let p of c.projects) projects[p.id] = p;
@@ -350,4 +368,8 @@ watch(storeIsPopulated, async () => {
     loading.value = false;
   }
 });
+
+// sync displayed window and chosen tab
+watch(currentWindowKey, (key) => { changeTab(key) });
+watch(currentWindow, (window) => { changeTab(window) });
 </script>

@@ -180,8 +180,10 @@ function fillData() {
     onClick: (x, y) => {
       if (_first(y)) {
         let index = _first(y).index;
-        localStorage.setItem('requestedDataType', 'technologies');
-        localStorage.setItem('requestedFilter', chartData.value.labels[index]);
+        localStorage.setItem(
+          'requestedFilter',
+          JSON.stringify({ tab: 'technologies', search: chartData.value.labels[index] })
+        );
         router.push({
           path: '/reports',
           name: 'reports'

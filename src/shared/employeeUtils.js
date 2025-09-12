@@ -197,9 +197,9 @@ export function getEmployeeCurrentContracts(employee) {
  * Returns an array of employees current projects
  *
  *
- * @param employeeId - employee ID to find projects for
- * @param employees - list of employees
- * @return array of contract objects
+ * @param employee - employee to get contracts for
+ * @param returnContracts - whether to return contracts instead of projects
+ * @return array of project objects (or contracts if specified)
  */
 export function getEmployeeCurrentProjects(employee, returnContracts = false) {
   let currentContracts = [];

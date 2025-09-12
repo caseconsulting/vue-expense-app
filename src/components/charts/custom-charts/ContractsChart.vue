@@ -153,10 +153,9 @@ function fillData() {
     onClick: (x, y) => {
       if (_first(y)) {
         let index = _first(y).index;
-        localStorage.setItem('requestedDataType', 'contracts');
         localStorage.setItem(
           'requestedFilter',
-          JSON.stringify({ type: 'contract', search: chartData.value.labels[index] })
+          JSON.stringify({ tab: 'contracts', type: 'contract',  search: chartData.value.labels[index] })
         );
         router.push({
           path: '/reports',

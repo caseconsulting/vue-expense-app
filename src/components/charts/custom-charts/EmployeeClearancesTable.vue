@@ -71,8 +71,10 @@ onBeforeMount(async () => {
  * @param value - item clicked
  */
 function clickedRow(_, { item }) {
-  localStorage.setItem('requestedDataType', 'securityInfo');
-  localStorage.setItem('requestedFilter', item.title);
+  localStorage.setItem(
+    'requestedFilter',
+    JSON.stringify({ tab: 'securityInfo', search: item.title })
+  );
   router.push({
     path: '/reports',
     name: 'reports'

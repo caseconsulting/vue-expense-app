@@ -39,7 +39,7 @@ const store = useStore();
  */
 onMounted(async () => {
   if (store.getters.storeIsPopulated) {
-    // eslint-disable-next-line no-undef
+     
     await jobExperienceData();
     await drawJobExpHistGraph();
   }
@@ -214,7 +214,7 @@ function drawJobExpHistGraph() {
 watch(
   () => store.getters.storeIsPopulated,
   () => {
-    // eslint-disable-next-line no-undef
+     
     jobExperienceData();
     drawJobExpHistGraph();
   }

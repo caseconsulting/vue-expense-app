@@ -121,6 +121,8 @@ import { Clearance } from '@/models/clearance/clearance.js';
 const store = useStore();
 const emitter = inject('emitter');
 const router = useRouter();
+const props = defineProps(['requestedFilter', 'name']);
+
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -184,10 +186,9 @@ onMounted(() => {
   populateDropdowns(employeesInfo.value);
 
   // fill in search boxes if routed from another page
-  if (localStorage.getItem('requestedFilter')) {
-    clearanceSearch.value = localStorage.getItem('requestedFilter');
+  if (props.requestedFilter && props.requestedFilter.tab === props.name) {
+    clearanceSearch.value = props.requestedFilter.search;
     refreshDropdownItems();
-    localStorage.removeItem('requestedFilter');
   }
 
   // initial set of table download data
