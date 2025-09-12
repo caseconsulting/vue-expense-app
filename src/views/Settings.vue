@@ -10,13 +10,16 @@
         Settings
       </v-card-title>
       <v-card-text>
+          <power-edit-table
+            :items="settings"
+          ></power-edit-table>
       </v-card-text>
     </v-card>
   </div>
 </template>
 
 <script setup>
-import PowerEditTable from '@/components/employees/power-edit/PowerEditTable.vue';
+import PowerEditTable from '@/components/shared/power-edit/Table.vue';
 
 const settings = [
   {

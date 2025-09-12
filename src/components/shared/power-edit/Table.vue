@@ -3,7 +3,7 @@
     <v-form v-model="valid">
       <v-data-table
         :expanded="expanded"
-        :items="employees"
+        :items="props.items"
         :headers="props.fields"
         :search="props.search"
         density="comfortable"
@@ -14,15 +14,16 @@
         class="power-edit-table mt-1"
       >
         <template v-for="field in props.fields" v-slot:[`item.${field.key}`]="{ item }">
-          <power-edit-table-edit-item
+          <edit-item
             v-if="editItem?.item?.id === item.id && editItem?.field?.key === field.key"
             :key="field"
             :field="field"
             :item="item"
             :showInfo="field.group"
             :valid="valid"
-          ></power-edit-table-edit-item>
-          <power-edit-table-info-item
+            :CustomEditItem="props.CustomEditItem"
+          ></edit-item>
+          <info-item
             v-else-if="field.infoType"
             :key="field + 1"
             @click="handleItemClick(item, field)"
@@ -30,17 +31,19 @@
             :field="field"
             :item="item"
             class="d-flex align-center w-100 h-100"
-          ></power-edit-table-info-item>
+            :CustomInfoItem="props.CustomInfoItem"
+          ></info-item>
         </template>
         <template v-slot:expanded-row>
           <tr v-if="editItem?.field && editItem?.item">
             <td colspan="12">
               <div>
-                <power-edit-table-edit-item
+                <edit-item
                   :field="editItem.field"
                   :item="editItem.item"
                   :valid="valid"
-                ></power-edit-table-edit-item>
+                  :CustomEditItem="props.CustomEditItem"
+                ></edit-item>
               </div>
             </td>
           </tr>
@@ -51,18 +54,9 @@
 </template>
 
 <script setup>
-import PowerEditTableInfoItem from '@/components/employees/power-edit/PowerEditTableInfoItem.vue';
-import PowerEditTableEditItem from '@/components/employees/power-edit/PowerEditTableEditItem.vue';
-import _find from 'lodash/find';
-import _filter from 'lodash/filter';
-import _map from 'lodash/map';
-import _forEach from 'lodash/forEach';
-import api from '@/shared/api.js';
-import { openLink } from '@/utils/utils.js';
-import { computed, ref, inject, watch } from 'vue';
-import { useStore } from 'vuex';
-import { useRouter } from 'vue-router';
-import { useDisplayCustom } from '@/components/shared/StatusSnackbar.vue';
+import InfoItem from '@/components/shared/power-edit/InfoItem.vue';
+import EditItem from '@/components/shared/power-edit/EditItem.vue';
+import { ref, inject, watch } from 'vue';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -70,16 +64,14 @@ import { useDisplayCustom } from '@/components/shared/StatusSnackbar.vue';
 // |                                                  |
 // |--------------------------------------------------|
 
-const props = defineProps(['fields', 'search']);
-const store = useStore();
+const props = defineProps(['items', 'fields', 'search', 'CustomEditItem', 'CustomInfoItem']);
 const emitter = inject('emitter');
-const router = useRouter();
 const editItem = ref(null);
 const expanded = ref([]);
 const valid = ref(true);
 
 emitter.on('save-item', async ({ item, field }) => {
-  await saveItem(item, field);
+  emitter.emit('save-edit-item', { item, editItem, field });
 });
 
 // |--------------------------------------------------|
@@ -91,7 +83,7 @@ emitter.on('save-item', async ({ item, field }) => {
 watch(
   () => props.fields,
   () => {
-    if (!_find(props.fields, (f) => f.key === editItem.value?.field?.key)) {
+    if (!props.fields.find((f) => f.key === editItem.value?.field?.key)) {
       expanded.value = [];
       editItem.value = null;
     }
@@ -100,26 +92,13 @@ watch(
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     COMPUTED                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-const employees = computed(() => {
-  let employees = _filter(store.getters.employees, (e) => e.workStatus > 0 && e.workStatus <= 100);
-  return _map(employees, (e) => {
-    return { ...e, name: `${e.nickname || e.firstName} ${e.lastName}` };
-  });
-});
-
-// |--------------------------------------------------|
-// |                                                  |
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
 
 function handleItemClick(item, field) {
-  if (field.editType) editItem.value = { item, field };
-  else if (field.fixed) openLink(router.resolve({ path: `employee/${item.employeeNumber}` })?.href);
+  console.log('handleItemClick', item, field);
+  emitter.emit('click-item', { item, editItem, field });
 }
 
 function handleRowClick() {
@@ -136,42 +115,6 @@ function saveColor(item, field) {
   else if (itemSaving?.success && field.key === itemSaving?.field?.key) itemClass = 'item-success';
   else if (itemSaving?.fail && field.key === itemSaving?.field?.key) itemClass = 'item-fail';
   return itemClass;
-}
-
-async function saveItem(item, field) {
-  editItem.value = null;
-  let employee = _find(store.getters.employees, (e) => e.id === item.id);
-  let tmpField = field.key + 'tmp';
-  employee[tmpField] = { field, saving: true };
-  let resp;
-  if (field.group && field.subkeys) {
-    let promises = [];
-    _forEach(field.subkeys, (key) => {
-      employee[key] = item[key];
-      promises.push(api.updateAttribute(api.EMPLOYEES, { id: item.id, [`${key}`]: item[key] }, key));
-    });
-    resp = await Promise.all(promises);
-  } else {
-    employee[field.key] = item[field.key];
-    resp = await api.updateAttribute(api.EMPLOYEES, { id: item.id, [`${field.key}`]: item[field.key] }, field.key);
-  }
-  if (resp.name !== 'AxiosError') {
-    employee[tmpField] = { ...employee[tmpField], success: true, saving: false };
-  } else {
-    useDisplayCustom(
-      resp?.response?.data?.message || 'An unknown error has occurred',
-      'CUSTOM',
-      8000,
-      'red',
-      '',
-      'top'
-    );
-    employee[tmpField] = { ...employee[tmpField], fail: true, saving: false };
-  }
-
-  setTimeout(() => {
-    delete employee[tmpField];
-  }, 2000);
 }
 </script>
 
