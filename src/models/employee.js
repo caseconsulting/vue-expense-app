@@ -1,3 +1,4 @@
+import { Clearance } from '@/models/clearance/clearance.js';
 // Defines several data types used in the employees database
 
 /**
@@ -15,16 +16,6 @@
  * @property {string} expirationDate
  * @property {string} expirationWasSeen
  * @property {string} name
- */
-
-/**
- * @typedef {Object} Clearance
- * @property {string[]} adjudicationDates
- * @property {boolean} awaitingClearance
- * @property {string[]} biDates
- * @property {string[]} polyDates
- * @property {string} submissionDate
- * @property {string} type
  */
 
 /**
@@ -202,7 +193,8 @@ export class Employee {
     this.certifications = properties.certifications ?? [];
 
     /** @type {Clearance[]} */
-    this.clearances = properties.clearances ?? [];
+    let clearances = properties.clearances ?? [];
+    this.clearances = clearances.map((c) => new Clearance(c));
 
     /** @type {Company[]} */
     this.companies = properties.companies ?? [];

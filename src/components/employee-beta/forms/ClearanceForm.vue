@@ -2,7 +2,7 @@
   <div>
     <v-row v-for="(clearance, cIndex) in editedEmployee.clearances" :key="cIndex">
       <v-col>
-        <v-row v-if="!isMobile()">
+        <v-row>
           <v-col>
             <v-autocomplete
               v-model="clearance.type"
@@ -12,8 +12,22 @@
               data-vv-name="Type"
               clearable
             >
-              <template #append>
-                <!-- Awaiting Clearance -->
+            </v-autocomplete>
+          </v-col>
+
+          <v-col cols="1">
+            <v-btn variant="text" icon="" @click="deleteClearance(cIndex)">
+              <v-tooltip activator="parent" location="bottom">Delete Clearance</v-tooltip>
+              <v-icon class="case-gray">mdi-delete</v-icon></v-btn
+            >
+          </v-col>
+        </v-row>
+
+        <v-row class="mb-4">
+          <v-col cols="1"></v-col>
+          <v-col>
+            <v-row class="groove">
+              <v-col class="small" :cols="isMobile() ? '12' : '4'">
                 <v-checkbox
                   v-model="clearance.awaitingClearance"
                   density="compact"
@@ -34,70 +48,8 @@
                     <span class="small-text">Awaiting Clearance</span>
                   </template>
                 </v-checkbox>
-              </template>
-            </v-autocomplete>
-          </v-col>
-
-          <v-col cols="1">
-            <v-btn variant="text" icon="" @click="deleteClearance(cIndex)">
-              <v-tooltip activator="parent" location="bottom">Delete Clearance</v-tooltip>
-              <v-icon class="case-gray">mdi-delete</v-icon></v-btn
-            >
-          </v-col>
-        </v-row>
-
-        <!-- MOBILE LAYOUT -->
-        <v-row v-else>
-          <v-col cols="10">
-            <v-autocomplete
-              v-model="clearance.type"
-              :rules="[...getRequiredRules(), ...getDuplicateClearanceRules(editedEmployee.clearances)]"
-              :items="CLEARANCE_TYPES"
-              label="Type"
-              data-vv-name="Type"
-              clearable
-            ></v-autocomplete>
-          </v-col>
-
-          <v-col cols="2" class="mt-1">
-            <v-btn variant="text" icon="" @click="deleteClearance(cIndex)">
-              <v-tooltip activator="parent" location="bottom">Delete Clearance</v-tooltip>
-              <v-icon class="case-gray">mdi-delete</v-icon></v-btn
-            >
-          </v-col>
-
-          <v-col cols="1"></v-col>
-
-          <v-col class="groove">
-            <!-- Awaiting Clearance -->
-            <v-checkbox
-              v-model="clearance.awaitingClearance"
-              density="compact"
-              hide-details
-              label="Awaiting Clearance"
-              @update:model-value="
-                () => {
-                  if (clearance.awaitingClearance) {
-                    clearance.grantedDate = null;
-                    clearance.badgeExpirationDate = null;
-                    clearance.badgeNum = null;
-                  }
-                }
-              "
-            >
-              <template #label v-if="name === 'xs' || name === 'sm'">
-                <span class="small-text">Awaiting Clearance</span>
-              </template>
-            </v-checkbox>
-          </v-col>
-        </v-row>
-        <!-- END MOBILE LAYOUT -->
-
-        <v-row class="mb-6">
-          <v-col cols="1"></v-col>
-          <v-col>
-            <v-row class="groove">
-              <v-col :cols="isMobile() ? '12' : '4'">
+              </v-col>
+              <v-col class="small" :cols="isMobile() ? '12' : '4'">
                 <date-picker
                   v-model="clearance.submissionDate"
                   :rules="[...getDateOptionalRules(), ...getDateSubmissionRules(clearance)]"
@@ -108,7 +60,16 @@
                 ></date-picker>
               </v-col>
 
-              <v-col :cols="isMobile() ? '12' : '4'">
+              <v-col class="small" :cols="isMobile() ? '12' : '4'">
+                <v-combobox
+                  v-model="clearance.grantingOrg"
+                  prepend-inner-icon="mdi-lan"
+                  :items="grantingOrgItems"
+                  label="Granting Organization"
+                ></v-combobox>
+              </v-col>
+
+              <v-col class="small" :cols="isMobile() ? '12' : '4'">
                 <date-picker
                   v-model="clearance.grantedDate"
                   :disabled="clearance.awaitingClearance"
@@ -120,7 +81,7 @@
                 ></date-picker>
               </v-col>
 
-              <v-col :cols="isMobile() ? '12' : '4'">
+              <v-col class="small" :cols="isMobile() ? '12' : '4'">
                 <v-text-field
                   v-model="clearance.badgeNum"
                   prepend-inner-icon="mdi-badge-account-outline"
@@ -135,7 +96,7 @@
                 ></v-text-field>
               </v-col>
 
-              <v-col :cols="isMobile() ? '12' : '4'">
+              <v-col class="small" :cols="isMobile() ? '12' : '4'">
                 <date-picker
                   v-model="clearance.badgeExpirationDate"
                   :disabled="clearance.awaitingClearance"
@@ -147,7 +108,7 @@
                 ></date-picker>
               </v-col>
 
-              <v-col :cols="isMobile() ? '12' : '4'">
+              <v-col class="small" :cols="isMobile() ? '12' : '4'">
                 <date-picker
                   v-model="clearance.biDates"
                   :min="clearance.submissionDate"
@@ -157,7 +118,7 @@
                 ></date-picker>
               </v-col>
 
-              <v-col :cols="isMobile() ? '12' : '4'">
+              <v-col class="small" :cols="isMobile() ? '12' : '4'">
                 <date-picker
                   v-model="clearance.adjudicationDates"
                   :min="clearance.submissionDate"
@@ -167,7 +128,7 @@
                 ></date-picker>
               </v-col>
 
-              <v-col :cols="isMobile() ? '12' : '4'">
+              <v-col class="small" :cols="isMobile() ? '12' : '4'">
                 <date-picker
                   v-model="clearance.polyDates"
                   :min="clearance.submissionDate"
@@ -176,14 +137,53 @@
                   clearable
                 ></date-picker>
               </v-col>
-
-              <v-col :cols="isMobile() ? '12' : '4'">
-                <v-combobox
-                  v-model="clearance.grantingOrg"
-                  prepend-inner-icon="mdi-lan"
-                  :items="grantingOrgItems"
-                  label="Granting Organization"
-                ></v-combobox>
+            </v-row>
+            <v-row
+              v-for="(reinvestigation, rIndex) in clearance.reinvestigations" :key="rIndex" class="groove"
+              align="center">
+              <v-col class="small" :cols="isMobile() ? '12' : '2'">
+                <div class="mx-xs-0 mx-sm-0 mx-md-5" style="display: flex; align-items: center;">
+                  <v-chip
+                    v-if="reinvestigation.underReinvestigation"
+                    color="red"
+                    variant="elevated"
+                    size="small"
+                    class="mr-2"
+                  >
+                    Active
+                  </v-chip>
+                </div>
+                </v-col>
+                <v-col class="small" :cols="isMobile() ? '12' : '4'">
+                  <date-picker
+                    v-model="reinvestigation.submissionDate"
+                    :rules="[...getDateOptionalRules()]"
+                    :min="clearance.grantedDate"
+                    label="Submission Date"
+                    variant="filled"
+                    clearable
+                  ></date-picker>
+                </v-col>
+                <v-col class="small" :cols="isMobile() ? '12' : '4'">
+                  <date-picker
+                    v-model="reinvestigation.completionDate"
+                    :rules="[...getDateOptionalRules()]"
+                    :min="reinvestigation.submissionDate"
+                    label="Completion Date"
+                    variant="filled"
+                    clearable
+                  ></date-picker>
+                </v-col>
+                <v-col cols="1">
+                  <v-btn variant="text" icon="" @click="deleteReinvestigation(clearance, rIndex)">
+                    <v-tooltip activator="parent" location="bottom">Delete Reinvestigation</v-tooltip>
+                    <v-icon class="case-gray">mdi-delete</v-icon></v-btn
+                  >
+                </v-col>
+            </v-row>
+            <v-row class="groove">
+              <v-col cols="12" align="center" class="py-2">
+                <v-btn @click="addReinvestigation(clearance)" variant="outlined" size="small">Add Reinvestigation</v-btn>
               </v-col>
             </v-row>
           </v-col>
@@ -201,7 +201,7 @@
 
 <script setup>
 import DatePicker from '@/components/shared/DatePicker.vue';
-import { DEFAULT_ISOFORMAT, format, isBefore } from '@/shared/dateUtils';
+import { DEFAULT_ISOFORMAT, format, isBefore, minimum } from '@/shared/dateUtils';
 import { CLEARANCE_TYPES } from '@/shared/employeeUtils';
 import {
   getBadgeNumberRules,
@@ -212,14 +212,13 @@ import {
   getDuplicateClearanceRules,
   getRequiredRules
 } from '@/shared/validationUtils';
-import { isMobile } from '@/utils/utils';
-import _first from 'lodash/first';
-import _isEmpty from 'lodash/isEmpty';
-import _sortBy from 'lodash/sortBy';
+import { isMobile, isEmpty } from '@/utils/utils';
 import { onMounted, ref } from 'vue';
 import { useDisplay } from 'vuetify/lib/framework.mjs';
 
 import { useStore } from 'vuex';
+import { Clearance } from '@/models/clearance/clearance';
+import { Reinvestigation } from '@/models/clearance/reinvestigation';
 const store = useStore();
 
 // |--------------------------------------------------|
@@ -262,23 +261,15 @@ onMounted(() => {
  */
 function addClearance() {
   if (!editedEmployee.value.clearances) editedEmployee.value.clearances = [];
-  editedEmployee.value.clearances.push({
-    adjudicationDates: [],
-    awaitingClearance: false,
-    biDates: [],
-    badgeExpirationDate: null,
-    grantedDate: null,
-    polyDates: [],
-    showAdjudicationMenu: false,
-    showBadgeMenu: false,
-    showBIMenu: false,
-    showGrantedMenu: false,
-    showPolyMenu: false,
-    showSubmissionMenu: false,
-    submissionDate: null,
-    type: null
-  });
-} // addClearance
+  editedEmployee.value.clearances.push(new Clearance({}));
+}
+
+/**
+ * Add reinvestigation.
+ */
+function addReinvestigation(clearance) {
+  clearance.reinvestigations.push(new Reinvestigation({}));
+}
 
 /**
  * Capitalize all badge numbers.
@@ -289,7 +280,7 @@ function capitalizeBadges(clearance) {
   if (clearance.badgeNum) {
     clearance.badgeNum = clearance.badgeNum.toUpperCase();
   }
-} // capitalizeBadges
+}
 
 /**
  * Deletes a clearance.
@@ -298,7 +289,16 @@ function capitalizeBadges(clearance) {
  */
 function deleteClearance(cIndex) {
   editedEmployee.value.clearances.splice(cIndex, 1);
-} // deleteClearance
+}
+
+/**
+ * Deletes a reinvestigation.
+ *
+ * @param rIndex - array index of reinvestigation to remove.
+ */
+function deleteReinvestigation(clearance, rIndex) {
+  clearance.reinvestigations.splice(rIndex, 1);
+}
 
 /**
  * Return the maximum available date to be selected for submission date. Returns the granted date if it exists.
@@ -315,15 +315,9 @@ function maxSubmission(cIndex) {
   }
 
   // check submission date is before any poly dates
-  if (!_isEmpty(editedEmployee.value.clearances[cIndex].polyDates)) {
+  if (!isEmpty(editedEmployee.value.clearances[cIndex].polyDates)) {
     // poly dates exist
-    let earliest = _first(
-      // get earliest poly date
-      _sortBy(editedEmployee.value.clearances[cIndex].polyDates, (date) => {
-        // sort poly dates
-        return format(date, null, DEFAULT_ISOFORMAT);
-      })
-    );
+    let earliest = minimum(editedEmployee.value.clearances[cIndex].polyDates);
 
     if (isBefore(earliest, max)) {
       // poly date is earliest date
@@ -332,15 +326,9 @@ function maxSubmission(cIndex) {
   }
 
   // check submission date is before any adjudication dates
-  if (!_isEmpty(editedEmployee.value.clearances[cIndex].adjudicationDates)) {
+  if (!isEmpty(editedEmployee.value.clearances[cIndex].adjudicationDates)) {
     // adjudication dates exist
-    let earliest = _first(
-      // get earliest adjudication date
-      _sortBy(editedEmployee.value.clearances[cIndex].adjudicationDates, (date) => {
-        // sort adjudication dates
-        return format(date, null, DEFAULT_ISOFORMAT);
-      })
-    );
+    let earliest = minimum(editedEmployee.value.clearances[cIndex].adjudicationDates);
     if (isBefore(earliest, max)) {
       // adjudication date is earliest date
       max = earliest; // update max date
@@ -348,7 +336,7 @@ function maxSubmission(cIndex) {
   }
 
   return max ? format(max, null, DEFAULT_ISOFORMAT) : null;
-} // maxSubmission
+}
 
 /**
  * Return the minimum available date to be selected for expiration date. Returns the granted date if it exists.
@@ -364,5 +352,5 @@ function minExpiration(cIndex) {
   } else if (editedEmployee.value.clearances[cIndex].submissionDate) {
     return editedEmployee.value.clearances[cIndex].submissionDate;
   }
-} // minExpiration
+}
 </script>
