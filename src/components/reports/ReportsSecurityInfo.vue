@@ -116,7 +116,7 @@ import _isEmpty from 'lodash/isEmpty';
 import { employeeFilter } from '@/shared/filterUtils';
 import { add, format, getTodaysDate, maximum, difference } from '@/shared/dateUtils';
 import { getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
-import { onMounted, ref, inject, watch, defineProps } from 'vue';
+import { onMounted, ref, inject, watch } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { selectedTagsHasEmployee } from '@/shared/employeeUtils';
