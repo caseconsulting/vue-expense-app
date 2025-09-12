@@ -97,8 +97,11 @@ watch(
 // |--------------------------------------------------|
 
 function handleItemClick(item, field) {
-  console.log('handleItemClick', item, field);
-  emitter.emit('click-item', { item, editItem, field });
+  if (field.editType) {
+    editItem.value = { item, field };
+  } else if (field.fixed) {
+    emitter.emit('open-item', { item });
+  }
 }
 
 function handleRowClick() {

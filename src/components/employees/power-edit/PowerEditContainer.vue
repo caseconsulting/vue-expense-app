@@ -41,8 +41,8 @@ const router = useRouter();
 const fields = ref(Object.values(FIELDS));
 const selectedFields = ref([FIELDS.EMPLOYEE_NUMBER, FIELDS.JOB_ROLE]);
 
-emitter.on('click-item', ({ item, editItem, field }) => {
-  handleItemClick(item, editItem, field);
+emitter.on('open-item', ({ item }) => {
+  openItem(item);
 });
 
 emitter.on('save-edit-item', async ({ item, editItem, field }) => {
@@ -68,9 +68,8 @@ const employees = computed(() => {
 // |                                                  |
 // |--------------------------------------------------|
 
-function handleItemClick(item, editItem, field) {
-  if (field.editType) editItem.value = { item, field };
-  else if (field.fixed) openLink(router.resolve({ path: `employee/${item.employeeNumber}` })?.href);
+function openItem(item) {
+  openLink(router.resolve({ path: `employee/${item.employeeNumber}` })?.href);
 }
 
 async function saveItem(item, editItem, field) {
