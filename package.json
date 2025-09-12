@@ -45,7 +45,7 @@
     "@date-io/dayjs": "3.2.0",
     "@mdi/font": "7.4.47",
     "auth0-js": "9.28.0",
-    "axios": "1.11.0",
+    "axios": "1.12.0",
     "chart.js": "4.5.0",
     "crypto-js": "4.2.0",
     "dayjs": "1.11.13",
