@@ -29,7 +29,6 @@ const props = defineProps(['color', 'filename', 'csv', 'generateData', 'sortKey'
 function download() {
   let csv = props.csv;
   if (!csv) {
-    console.log(csv);
     let csvData = props.generateData();
     if (props.sortKey) csvData = baseCsv.sort(csvData, props.sortKey);
     csv = baseCsv.generate(csvData);
