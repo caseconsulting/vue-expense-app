@@ -17,6 +17,7 @@ import Home from '@/views/Home.vue';
 import PageNotFound from '@/views/PageNotFound.vue';
 import Contracts from '@/views/Contracts.vue';
 import EmployeeBeta from '@/views/EmployeeBeta.vue';
+import Settings from '@/views/Settings.vue';
 import { requireAuth, isAdminOrManager } from '@/utils/auth';
 import multiguard from 'vue-router-multiguard';
 
@@ -134,6 +135,12 @@ const router = createRouter({
       name: 'employee-old',
       component: Employee,
       beforeEnter: requireAuth
+    },
+    {
+      path: '/settings',
+      name: 'settings',
+      component: Settings,
+      beforeEnter: multiguard([requireAuth, isAdminOrManager])
     },
     //Below catch-all code works for Vue 2
     //For Vue 3 change the path variable to path: '/:pathMatch(.*)*'
