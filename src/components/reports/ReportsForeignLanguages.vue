@@ -86,7 +86,7 @@ import _forEach from 'lodash/forEach';
 import _filter from 'lodash/filter';
 import { employeeFilter } from '@/shared/filterUtils';
 import { getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
-import { onMounted, ref, inject, watch, defineProps } from 'vue';
+import { onMounted, ref, inject, watch } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { selectedTagsHasEmployee } from '@/shared/employeeUtils';
