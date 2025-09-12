@@ -98,6 +98,7 @@ import TagsFilter from '@/components/shared/TagsFilter.vue';
 const store = useStore();
 const emitter = inject('emitter');
 const router = useRouter();
+const props = defineProps(['requestedFilter', 'name']);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -148,10 +149,9 @@ onMounted(() => {
   employeesInfo.value = getActive(store.getters.employees); // default to filtered list
   filteredEmployees.value = employeesInfo.value; // one.value is shown
   populateDropdowns(employeesInfo.value);
-  if (localStorage.getItem('requestedFilter')) {
-    jobRoleSearch.value = localStorage.getItem('requestedFilter');
+  if (props.requestedFilter && props.requestedFilter.tab === props.name) {
+    jobRoleSearch.value = props.requestedFilter.search;
     refreshDropdownItems();
-    localStorage.removeItem('requestedFilter');
   }
 
   // initial set of table download data

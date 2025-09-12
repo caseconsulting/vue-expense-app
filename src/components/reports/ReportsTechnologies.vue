@@ -100,6 +100,7 @@ import TagsFilter from '@/components/shared/TagsFilter.vue';
 const store = useStore();
 const emitter = inject('emitter');
 const router = useRouter();
+const props = defineProps(['requestedFilter', 'name']);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -152,10 +153,9 @@ onMounted(() => {
   filteredEmployees.value = employeesInfo.value; // one.value is shown
   populateDropdowns(employeesInfo.value);
   buildTechnologiesColumns();
-  if (localStorage.getItem('requestedFilter')) {
-    technologySearch.value = localStorage.getItem('requestedFilter');
+  if (props.requestedFilter && props.requestedFilter.tab === props.name) {
+    technologySearch.value = props.requestedFilter.search;
     refreshDropdownItems();
-    localStorage.removeItem('requestedFilter');
   }
 
   // initial set of table download data

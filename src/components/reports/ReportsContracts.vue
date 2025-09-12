@@ -139,6 +139,7 @@ import TagsFilter from '@/components/shared/TagsFilter.vue';
 // |                       DATA                       |
 // |                                                  |
 // |--------------------------------------------------|
+const props = defineProps(['requestedFilter', 'name']);
 const contractsDropDown = ref([]);
 const contractSearch = ref(null);
 const employees = ref([]);
@@ -205,23 +206,20 @@ onMounted(() => {
   filteredEmployees.value = employeesInfo.value; // one.value is shown
   populateDropdowns(employeesInfo.value);
   buildContractsColumn();
-  if (localStorage.getItem('requestedFilter')) {
-    let requestedFilter = JSON.parse(localStorage.getItem('requestedFilter'));
-    switch (requestedFilter.type) {
+  if (props.requestedFilter && props.requestedFilter.tab === props.name) {
+    console.log(props.requestedFilter);
+    switch (props.requestedFilter.type) {
       case 'prime':
-        primeSearch.value = requestedFilter.search;
+        primeSearch.value = props.requestedFilter.search;
         break;
       case 'contract':
-        contractSearch.value = requestedFilter.search;
-        break;
-      case 'search':
-        search.value = requestedFilter.search;
+        contractSearch.value = props.requestedFilter.search;
         break;
       default:
+        search.value = props.requestedFilter.search
         break;
     }
     refreshDropdownItems();
-    localStorage.removeItem('requestedFilter');
   }
 
   search.value = search.value ? search.value + ' ' : null; // solution for redirecting from stats dashboard with a filter
