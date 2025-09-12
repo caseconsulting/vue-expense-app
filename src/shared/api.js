@@ -1,6 +1,9 @@
 import axios from 'axios';
 import { API_CONFIG } from './apiVariables';
 import { getAccessToken } from '@/utils/auth';
+import { AuditRequestFilters } from './models/audits/audts';
+
+// routes
 const EXPENSE_TYPES = 'expense-types';
 const EXPENSES = 'expenses';
 const EMPLOYEES = 'employees';
@@ -9,12 +12,13 @@ const UTILITY = 'utility';
 const TIMESHEETS = 'timesheets';
 const BASECAMP = 'basecamp';
 const GOOGLE_MAPS = 'googleMaps';
-const AUDIT = 'audits';
+const AUDIT = 'auditsV2';
 const RESUME = 'resume';
 const CONTRACTS = 'contracts';
 const HIGH_FIVES = 'highFives';
 const PTO_CASH_OUTS = 'ptoCashOuts';
 const TAGS = 'tags';
+
 const API_HOSTNAME = API_CONFIG.apiHostname;
 const API_PORT = API_CONFIG.apiPort;
 const PORT = API_PORT === '443' ? '' : `:${API_PORT}`;
@@ -170,16 +174,22 @@ async function getAllEvents() {
 } // getAllEvents
 
 /**
- * gets all the audits for a specific type in a specific range
- *
- * @param type - the type of the audit
- * @param startDate - the start date of the wanted range
- * @param endDate - the end date of the wanted range
- * @return - the audit data
+ * Gets notification audits with specified filters
+ * @param {AuditRequestFilters?} filters Filters to query specific audits
+ * @returns {*} The api response or error
  */
-async function getAudits(type, startDate, endDate) {
-  return await execute('get', `/${AUDIT}/${type}/${startDate}/${endDate}`);
-} // getAudits
+async function getNotificationAudits(filters) {
+  return await execute('get', `/${AUDIT}/notification`, filters);
+} // getNotificationAudits
+
+/**
+ * Gets CRUD audits with specified filters
+ * @param {AuditRequestFilters?} filters Filters to query specific audits
+ * @returns {*} The api response or error
+ */
+async function getCrudAudits(filters) {
+  return await execute('get', `/${AUDIT}/crud`, filters);
+} // getCrudAudits
 
 /**
  * gets all items from a specific route
@@ -516,7 +526,8 @@ export default {
   getAllEvents,
   getAllExpenseTypeExpenses,
   getAttachment,
-  getAudits,
+  getNotificationAudits,
+  getCrudAudits,
   getBasecampAvatars,
   getBasecampCampfires,
   getCity,

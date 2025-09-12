@@ -145,7 +145,7 @@ export function nicknameAndLastName(employee) {
  * Gets an employee object based on the employee ID parameter
  * @param {Number} employeeId - employee ID
  * @param {Array} employees - list of employees
- * @returns Employee object
+ * @returns {import('./models/employeeTypes').Employee} The employee
  */
 export function getEmployeeByID(employeeId, employees) {
   return employees.find((e) => e.id == employeeId);
