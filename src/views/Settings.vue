@@ -20,24 +20,16 @@
 </template>
 
 <script setup>
+import { onMounted, ref } from 'vue';
 import PowerEditTable from '@/components/shared/power-edit/Table.vue';
 import { TYPES } from '@/components/shared/power-edit/js/fieldTypes.js';
+import api from '@/shared/api.js';
 
-const settings = [
-  {
-    id: 1,
-    key: 'test',
-    value: 'info@consultwithcase.com',
-  },
-  {
-    id: 2,
-    key: 'another',
-    value: 'another value',
-  }
-];
+const settings = ref([
+]);
 
 const fields = [{
-  title: 'Test',
+  title: 'Key',
   key: 'key',
   fixed: true,
   infoType: TYPES.DEFAULT
@@ -46,5 +38,9 @@ const fields = [{
   key: 'value',
   editType: TYPES.DEFAULT,
   infoType: TYPES.DEFAULT
-}];
+  }];
+
+onMounted(async () => {
+  settings.value = await api.getSettings();
+});
 </script>

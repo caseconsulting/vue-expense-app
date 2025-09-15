@@ -14,6 +14,7 @@ const RESUME = 'resume';
 const CONTRACTS = 'contracts';
 const HIGH_FIVES = 'highFives';
 const PTO_CASH_OUTS = 'ptoCashOuts';
+const SETTINGS = 'settings';
 const TAGS = 'tags';
 const API_HOSTNAME = API_CONFIG.apiHostname;
 const API_PORT = API_CONFIG.apiPort;
@@ -445,6 +446,10 @@ async function getLeaderboard() {
   return await execute('get', `/${TIMESHEETS}/leaderboard`);
 } // getLeaderboard
 
+async function getSettings() {
+  return await execute('get', `/${SETTINGS}`);
+}
+
 /**
  * Reimburses a high five, generates a gift card, emails the recipeint
  * gift card information, then stores the gift card information.
@@ -532,6 +537,7 @@ export default {
   getTimesheetsData,
   getLeaderboard,
   getTechSkills,
+  getSettings,
   getZipCode,
   getUser,
   updateAttribute,
