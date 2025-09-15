@@ -54,9 +54,14 @@ emitter.on('save-edit-item', async ({ item, editItem, field }) => {
   await saveItem(item, editItem, field);
 });
 
+emitter.on('add-settings', async () => {
+  add.value = false;
+  settings.value = await api.getItems(api.SETTINGS);
+});
+
 
 onMounted(async () => {
-  settings.value = await api.getSettings();
+  settings.value = await api.getItems(api.SETTINGS);
 });
 
 

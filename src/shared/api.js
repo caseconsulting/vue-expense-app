@@ -446,10 +446,6 @@ async function getLeaderboard() {
   return await execute('get', `/${TIMESHEETS}/leaderboard`);
 } // getLeaderboard
 
-async function getSettings() {
-  return await execute('get', `/${SETTINGS}`);
-}
-
 /**
  * Reimburses a high five, generates a gift card, emails the recipeint
  * gift card information, then stores the gift card information.
@@ -537,7 +533,6 @@ export default {
   getTimesheetsData,
   getLeaderboard,
   getTechSkills,
-  getSettings,
   getZipCode,
   getUser,
   updateAttribute,
