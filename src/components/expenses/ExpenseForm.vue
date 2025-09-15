@@ -467,7 +467,7 @@ import ExchangeTrainingDescription from '@/components/expenses/ExchangeTrainingD
 
 import api from '@/shared/api.js';
 import employeeUtils from '@/shared/employeeUtils';
-import { STATES } from '@/shared/expenseUtils';
+import { EXPENSE_STATES } from '@/shared/expenseUtils';
 import {
   getDateRules,
   getDateOptionalRules,
@@ -1711,15 +1711,17 @@ async function submit() {
 
       if (this.editedExpense?.rejections?.softRejections) {
         this.editedExpense.rejections.softRejections.revised = true;
-        this.editedExpense.state = STATES.REVISED;
+        this.editedExpense.state = EXPENSE_STATES.REVISED;
       }
 
       if (this.isEmpty(this.editedExpense.id)) {
         // creating a new expense
-        this.editedExpense.state = STATES.CREATED;
+        this.editedExpense.state = EXPENSE_STATES.CREATED;
         await this.createNewEntry();
       } else {
         // editing a current expense
+        if (this.editedExpense.state !== EXPENSE_STATES.CREATED)
+          this.editedExpense.state = EXPENSE_STATES.REVISED;
         await this.updateExistingEntry();
       }
     }
@@ -1947,7 +1949,7 @@ Number.prototype.pad = function (size) {
  */
 function updateApproval(checked) {
   if (checked) {
-    this.editedExpense.state = STATES.APPROVED;
+    this.editedExpense.state = EXPENSE_STATES.APPROVED;
     this.editedExpense.approvedBy = this.userInfo.id;
   } else this.editedExpense.approvedBy = undefined;
 }
