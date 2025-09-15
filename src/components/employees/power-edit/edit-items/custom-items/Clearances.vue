@@ -236,12 +236,10 @@ import {
   getDatesArrayOptionalRules,
   getRequiredRules
 } from '@/shared/validationUtils.js';
+import { isEmpty } from '@/utils/utils.js';
+import { Clearance } from '@/models/clearance/clearance.js';
 import _cloneDeep from 'lodash/cloneDeep';
-import _isEmpty from 'lodash/isEmpty';
-import _forEach from 'lodash/forEach';
 import _sortBy from 'lodash/sortBy';
-import _filter from 'lodash/filter';
-import _map from 'lodash/map';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -252,21 +250,11 @@ import _map from 'lodash/map';
 const props = defineProps(['field', 'item']);
 const emitter = inject('emitter');
 const vMask = (a, b) => mask(a, b);
-const model = ref(
-  props.item[props.field.key]?.[0] || {
-    adjudicationDates: [],
-    awaitingClearance: false,
-    biDates: [],
-    badgeExpirationDate: null,
-    grantedDate: null,
-    polyDates: [],
-    submissionDate: null,
-    type: null
-  }
-);
+const model = ref(new Clearance(props.item[props.field.key]?.[0] || {}));
 const clearanceTypes = ref(['TS/SCI - Full Scope', 'TS/SCI - CI Poly', 'TS/SCI - No Poly', 'Top Secret', 'Secret']); // autocomplete clearance type options
 const showGrantedMenu = ref(false);
 const showSubmissionMenu = ref(false);
+const showReinvestigationMenu = ref(false);
 const showBadgeMenu = ref(false);
 const showBIMenu = ref(false);
 const showAdjudicationMenu = ref(false);
@@ -282,7 +270,7 @@ watch(
   () => [model.value],
   () => {
     let clearances = _cloneDeep(props.item[props.field.key]);
-    if (_isEmpty(props.item[props.field.key])) clearances = [model.value];
+    if (isEmpty(props.item[props.field.key])) clearances = [model.value];
     else clearances[0] = model.value;
     emitter.emit('update-item', {
       field: props.field,
@@ -304,16 +292,16 @@ watch(
  */
 function formatDates(array) {
   let formattedDates = [];
-  _forEach(array, (date) => {
+  array.forEach((date) => {
     formattedDates.push(format(date, null, FORMATTED_ISOFORMAT));
   });
   return formattedDates;
-} // formatDates
+}
 
 function maxSubmission() {
   let max;
   if (model.value.grantedDate) max = format(model.value.grantedDate, null, DEFAULT_ISOFORMAT);
-  if (!_isEmpty(model.value.polyDates) || !_isEmpty(model.value.adjudicationDates)) {
+  if (!isEmpty(model.value.polyDates) || !isEmpty(model.value.adjudicationDates)) {
     let dates = [...(model.value.polyDates ?? []), ...(model.value.adjudicationDates ?? [])];
     let earliest = _sortBy(dates, (d) => format(d, null, DEFAULT_ISOFORMAT));
     if (isBefore(earliest, max)) max = earliest;
@@ -333,7 +321,7 @@ function minExpiration() {
  */
 function parseEventDate() {
   return format(event.target.value, FORMATTED_ISOFORMAT, DEFAULT_ISOFORMAT);
-} // parseEventDate
+}
 
 /**
  * Parse the dates after losing focus.
@@ -341,9 +329,9 @@ function parseEventDate() {
  * @return String - The date in YYYY-MM-DD format
  */
 function parseDates(array) {
-  let validDates = _filter(array, (d) => isValid(d, FORMATTED_ISOFORMAT));
-  return _map(validDates, (date) => format(date, FORMATTED_ISOFORMAT, DEFAULT_ISOFORMAT));
-} // parseEventDates
+  let validDates = array.filter((d) => isValid(d, FORMATTED_ISOFORMAT));
+  return validDates.map((date) => format(date, FORMATTED_ISOFORMAT, DEFAULT_ISOFORMAT));
+}
 
 /**
  * Removes the desired BI date from the clearance.
@@ -354,11 +342,11 @@ function parseDates(array) {
 function removeDate(item, key) {
   item = item.raw;
   const itemDate = format(item, null, FORMATTED_ISOFORMAT);
-  model.value[key] = _filter(model.value[key], (date) => {
+  model.value[key] = model.value[key].filter((date) => {
     let dateConvert = format(date, null, FORMATTED_ISOFORMAT);
     return dateConvert !== itemDate;
   });
-} // removeDates
+}
 </script>
 
 <style scoped>

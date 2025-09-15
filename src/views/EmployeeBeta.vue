@@ -139,7 +139,7 @@ import { computed, inject, onBeforeMount, onBeforeUnmount, onMounted, provide, r
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import { useDisplaySuccess } from '../components/shared/StatusSnackbar.vue';
-import { Employee } from '../shared/models/employeeTypes';
+import { Employee } from '@/models/employee';
 
 // |--------------------------------------------------|
 // |                                                  |
