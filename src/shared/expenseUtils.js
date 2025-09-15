@@ -1,4 +1,4 @@
-export const STATES = {
+export const EXPENSE_STATES = {
   CREATED: 'CREATED',
   APPROVED: 'APPROVED',
   REIMBURSED: 'REIMBURSED',
@@ -8,13 +8,30 @@ export const STATES = {
 };
 
 /**
- * Returns true if an employee has the right to edit an expense
+ * Quick check for admin permissions
+ * 
+ * @param employee employee to check
+ */
+function isAdminOrManager(employee) {
+  return ['admin', 'manager'].include(employee.employeeRole);
+}
+
+/**
+ * Returns true if a given user has the right to edit an expense
  *
+ * @param employee employee object to check
  * @param expense expense to check
  * @returns
  */
-export function isEditableByEmployee(expense) {
+export function isExpenseEditable(employee, expense) {
   if (!expense?.state) throw new Error('Expense has no state.');
-  let editableStates = [STATES.CREATED, STATES.REVISED, STATES.RETURNED];
+  if (!employee.employeeRole) throw new Error('employeeRole is missing from user.') 
+  
+  // admins can always edit
+  let privilegedRoles = ['admin', 'manager'];
+  if (privilegedRoles.includes(employee.employeeRole)) return true;
+
+  // other users can edit on state condition
+  let editableStates = [EXPENSE_STATES.CREATED, EXPENSE_STATES.REVISED, EXPENSE_STATES.RETURNED];
   return editableStates.includes(expense.state);
 }
