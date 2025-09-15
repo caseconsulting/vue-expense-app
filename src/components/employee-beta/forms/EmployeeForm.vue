@@ -250,16 +250,23 @@
                   <v-row class="d-flex align-center">
                     <!-- Form action buttons -->
                     <v-col cols="auto">
-                      <v-btn id="employeeCancelBtn" variant="text" class="ma-2" @click="cancel()">Cancel</v-btn>
+                      <v-btn
+                        id="employeeCancelBtn"
+                        variant="text"
+                        class="ma-1"
+                        @click="cancel()"
+                        size="small">Cancel
+                      </v-btn>
                     </v-col>
                     <v-col cols="auto">
                       <div :class="{ shake: invalidButton }">
                         <v-btn
                           id="employeeSubmitBtn"
                           variant="outlined"
-                          class="ma-2"
+                          class="ma-1"
                           :color="invalidButton ? 'error' : 'success'"
                           type="submit"
+                          size="small"
                         >
                           <v-icon class="mr-1">mdi-content-save</v-icon>Submit
                         </v-btn>

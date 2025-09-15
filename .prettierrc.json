@@ -3,6 +3,6 @@
   "printWidth": 120,
   "semi": true,
   "singleQuote": true,
-  "yaml.format.singleQuote": false
+  "yaml.format.singleQuote": false,
   "trailingComma": "none"
 }
