@@ -167,8 +167,8 @@ onMounted(() => {
   populateDropdowns(employeesInfo.value);
   buildCustomerOrgColumns();
   buildContractsAndPrimesColumns();
-  if (props.requestedFilter && props.requestedFilter.tab === props.name) {
-    custOrgSearch.value = props.requestedFilter.search;
+  if (localStorage.getItem('requestedFilter')) {
+    custOrgSearch.value = localStorage.getItem('requestedFilter');
     refreshDropdownItems();
   }
 

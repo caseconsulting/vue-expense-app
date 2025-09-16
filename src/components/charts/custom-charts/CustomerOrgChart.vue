@@ -1,5 +1,5 @@
 <template>
-  <v-card v-if="dataReceived" class="pa-5">
+  <v-card class="pa-5">
     <div v-if="userRoleIsAdmin()" class="float-right">
       <DownloadCSV
         filename="orgs"
@@ -40,8 +40,14 @@ import { useRouter } from 'vue-router';
 // |--------------------------------------------------|
 
 // vars that connect to template
+const defaultChart = {
+  text: 'No Customer Org Data Found',
+  data: [1],
+  enabled: false,
+  backgroundColor: ['lightgrey']
+}
 const dataReceived = ref(false);
-const chartData = ref(null);
+const chartData = ref(defaultChart);
 const chartOptions = ref(null);
 const refreshKey = ref(0);
 const filter = ref('All');
@@ -81,9 +87,6 @@ onBeforeMount(async () => {
  * Get all cust org data.
  */
 function fetchData() {
-  // unset the table
-  dataReceived.value = false;
-
   // init vars
   let employees = store.getters.employees;
   let contracts = store.getters.contracts.reduce((acc, c) => { acc[c.id] = c; return acc; }, {});
@@ -158,12 +161,7 @@ function fillData() {
   let backgroundColor = ['#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF6384', '#E6B89C', '#EAD2AC', '#9CAFB7', '#4281A4'];
 
   // chart options if no data found
-  if (data.length === 0) {
-    text = 'No Customer Org Data Found';
-    data = [1];
-    enabled = false;
-    backgroundColor = ['lightgrey'];
-  }
+  if (data.length == 0) ({ text, data, enabled, backgroundColor } = defaultChart);
 
   // set chartData for template
   chartData.value = {
@@ -201,9 +199,6 @@ function fillData() {
     },
     maintainAspectRatio: false
   };
-
-  // show the pie chart
-  dataReceived.value = true;
 }
 
 /**
@@ -217,7 +212,7 @@ function generateCsvData() {
   // for each type, add the data from experience
   for(let option of filterOptions.value) {
     let data = experience[filter.value];
-    data = Object.entries(data).sort(([, a], [, b]) => b - a); // sorted tuples
+    data = Object.entries(data).sort(([, a], [, b]) => b - a); // sorts by second value
     space(option);
     space(option);
     for (let [key, value] of data) csv[option].push(['', key, value.toFixed(2)])
@@ -239,5 +234,5 @@ function generateCsvData() {
 /**
  * Rerenders the chart on filter change
  */
-watch(filter, () => refreshKey.value++);
+watch(filter, () => { refreshKey.value++; fillData(); });
 </script>
