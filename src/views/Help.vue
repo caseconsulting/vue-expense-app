@@ -2,13 +2,10 @@
   <v-container>
     <!-- Help Title -->
     <div>
-      <h1 id="help-title">Help</h1>
+      <h1 id="help-title" class="mb-2">Help</h1>
     </div>
-    <br />
-    <br />
 
-    <div class="mb-5">
-      <div class="text-center mb-3" />
+    <div>
       <v-expansion-panels variant="accordion" :model-value="panel">
         <v-expansion-panel v-for="section in sections" :key="section[0]">
           <!-- Header -->
@@ -49,9 +46,10 @@
               <v-card-text class="bg-grey-lighten-3">
                 <li v-for="(ques, index) in section" :key="ques.title">
                   <div v-if="ques.title && (!ques.employeeRole || canView(ques.employeeRole))" class="pb-1">
-                    <body :id="section[0] + '-' + index" class="italics">
+                    <span :id="section[0] + '-' + index" class="italics">
                       <v-icon>mdi-motion</v-icon> {{ ques.title }}
-                    </body>
+                    </span>
+                    <br />
                     {{ ques.body }}
                   </div>
                 </li>
@@ -82,34 +80,7 @@ const route = useRoute();
 const panel = ref(null);
 const role = ref(''); // employee role
 const sections = ref({
-  quickBooksTimeHours: [
-    'Timesheet Calculations',
-    'user',
-    {
-      title: 'Total Work Days (TWD) = week days from period start date to period end date',
-      body: ''
-    },
-    {
-      title: 'Total Work Days Pro Rated (TWDPR) = ',
-      body: '1. Employee hire date OR contract start date falls after normal start date ? —> hire date/contract start date to period end date \n2. Otherwise —> TWD'
-    },
-    {
-      title: 'What hours fall under Completed, Today, and Future?',
-      body: "Completed hours are any hours logged in ADP/QuickBooks Time from the first day of the month through the end of the day today. Today's hours are any hours logged in ADP/QuickBooks Time at any point today. Future hours are any hours logged in ADP/QuickBooks Time between the beginning of the day tomorrow and the last day of the month."
-    },
-    {
-      title: 'Why does my Avg Hours/Day or Days Remaining seem wrong?',
-      body: 'Days Remaining includes today by default. If you have already worked your hours for today you can edit Days Remaining to have one less day. This will update the Avg Hours/Day as well.'
-    },
-    {
-      title: 'How can I edit Days Remaining?',
-      body: 'Once you click on the number of Days Remaining on the right hand side you will be able to edit this number using your keyboard.'
-    },
-    {
-      title: 'Why do I not see some of my hours for today?',
-      body: 'If you are using the clock in function on ADP/QuickBooks Time, those hours may still be accumulating. Try refreshing the page.'
-    }
-  ],
+  timeHours: ['Timesheet Calculations', 'user', {}],
   myBudgets: [
     'My Budgets',
     'user',
@@ -217,7 +188,7 @@ const sections = ref({
     },
     {
       title: 'What does the "Have this expense type show on the company feed?" switch mean?',
-      body: 'When a user creates an expense and after being reimbursed, it will display info about the expense on the activity feed in the Home page. This feature can be toggled off by the user when creating an expense or by the person reimbursing the expense.',
+      body: 'When a user creates an expense and after being reimbursed, it will display info about the expense on the activity feed in the Home page. This feature can be toggled off by an admin when creating or reimbursing the expense.',
       employeeRole: 'admin'
     },
     {
@@ -231,16 +202,12 @@ const sections = ref({
     'admin',
     {
       title: 'How do I reimburse an expense?',
-      body: 'Select the expenses that you would like to reimburse by clicking the select box either on a row (to select all expenses for that employee under that expense type) or on each of their individual expenses. Next select the $ icon at the bottom left of the page and then confirm the reimbursement.'
+      body: 'Select the expenses that you would like to reimburse by clicking the check box. Next select the "$ Reimburse" icon on the right side of the page and then confirm the reimbursement.'
     }
   ],
   employees: [
     'Employees',
-    'user',
-    {
-      title: 'What is an Employee #?',
-      body: "An employee's ID number will be a user's hire order. This number also corresponds to ADP/QuickBooks Time data."
-    },
+    'manager',
     {
       title: 'What is the manager role for?',
       body: 'Managers have the same access as a user but can also edit or view any employee data. They should have the same access as admins on the employee pages.',
@@ -260,14 +227,6 @@ const sections = ref({
       title: "Why can't I delete an employee?",
       body: 'An employee cannot be deleted if the employee has expenses or you are editing an employee.',
       employeeRole: 'manager'
-    }
-  ],
-  knownIssues: [
-    'Known Issues',
-    'user',
-    {
-      title:
-        'Google Chrome has an issue displaying (some) attachments that are PDFs. Work-around is to tell Chrome to download PDFs. Or, use a different a browser.'
     }
   ],
   roleAbilities: [

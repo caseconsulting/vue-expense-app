@@ -12,7 +12,7 @@
       <v-spacer></v-spacer>
     </v-row>
     <v-row>
-      <!-- Quickbooks and available budgets widgets -->
+      <!-- Timesheets and available budgets widgets -->
       <v-col cols="12" lg="4" class="pt-0">
         <v-skeleton-loader class="mb-4" type="list-item@12"></v-skeleton-loader>
         <v-skeleton-loader class="mb-4" type="list-item@20"></v-skeleton-loader>
