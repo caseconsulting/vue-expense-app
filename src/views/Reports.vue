@@ -178,7 +178,7 @@ if (userRoleIsAdmin()) {
   });
 }
 
-const currentWindow = ref(tabs.value[2]); // window object
+const currentWindow = ref(tabs.value[0]); // window object
 const currentWindowKey = ref(currentWindow.value.key); // writeable key for v-model
 
 // |--------------------------------------------------|
