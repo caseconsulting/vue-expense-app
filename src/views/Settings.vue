@@ -70,7 +70,7 @@ async function saveItem(item, editItem, field) {
   let setting = settings.value.find(s => s.id === item.id);
   if (setting) {
     setting[field.key] = item[field.key];
-    resp = await api.updateAttribute(api.SETTINGS, { id: item.id, [`${field.key}`]: item[field.key] }, field.key);
+    await api.updateAttribute(api.SETTINGS, { id: item.id, [`${field.key}`]: item[field.key] }, field.key);
   }
 }
 </script>
