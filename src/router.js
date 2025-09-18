@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import Reimbursements from '@/views/Reimbursements.vue';
 import Login from '@/views/Login.vue';
 import LoginFailed from '@/views/LoginFailed.vue';
+import ExpenseType from '@/views/ExpenseType.vue';
 import ExpenseTypes from '@/views/ExpenseTypes.vue';
 import PTOCashOuts from '@/views/PTOCashOuts.vue';
 import Employees from '@/views/Employees.vue';
@@ -50,6 +51,13 @@ const router = createRouter({
       path: '/expenseTypes',
       name: 'expenseTypes',
       component: ExpenseTypes,
+      beforeEnter: requireAuth
+    },
+
+    {
+      path: '/expenseType/:id',
+      name: 'expenseType',
+      component: ExpenseType,
       beforeEnter: requireAuth
     },
     {
