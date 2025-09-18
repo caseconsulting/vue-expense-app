@@ -1,12 +1,19 @@
 <template>
-  <v-card v-if="dataReceived" class="pa-5">
-    <pie-chart ref="pieChart" :key="chartKey" chartId="cust-org" :options="option" :chartData="chartData"></pie-chart>
+  <v-card class="pa-5">
+    <div v-if="userRoleIsAdmin()" class="float-right">
+      <DownloadCSV
+        filename="orgs"
+        :csv="csvData[filter]"
+        :xlsxFormat="false"
+        tooltip="Download Orgs to CSV"
+        :key="refreshKey"
+      />
+    </div>
+    <pie-chart ref="pieChart" chartId="cust-org" :options="chartOptions" :chartData="chartData" :key="refreshKey"/>
     <v-container class="ma-0">
       <v-row justify="center" no-gutters>
-        <v-radio-group inline v-model="showCurrent" class="d-flex justify-center">
-          <v-radio label="All" value="All"></v-radio>
-          <v-radio label="Current" value="Current"></v-radio>
-          <v-radio label="Past" value="Past"></v-radio>
+        <v-radio-group v-model="filter" class="d-flex justify-center" inline>
+          <v-radio v-for="option of filterOptions" :key="option" :label="option" :value="option" />
         </v-radio-group>
       </v-row>
     </v-container>
@@ -14,13 +21,17 @@
 </template>
 
 <script setup>
-import PieChart from '../base-charts/PieChart.vue';
-import _forEach from 'lodash/forEach';
-import _isEmpty from 'lodash/isEmpty';
-import _first from 'lodash/first';
+import PieChart from '@/components/charts/base-charts/PieChart.vue';
+import DownloadCSV from '@/components/utils/DownloadCSV.vue';
+import { updateStoreContracts, updateStoreEmployees } from '@/utils/storeUtils';
+import { getEmployeeCurrentContracts } from '@/shared/employeeUtils';
+import { getTodaysDate, difference } from '@/shared/dateUtils';
+import { userRoleIsAdmin } from '@/utils/utils';
+import baseCsv from '@/utils/csv/baseCsv.js';
 import { onBeforeMount, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -28,15 +39,25 @@ import { useRouter } from 'vue-router';
 // |                                                  |
 // |--------------------------------------------------|
 
-const chartData = ref(null);
-const chartKey = ref(0);
+// vars that connect to template
+const defaultChart = {
+  text: 'No Customer Org Data Found',
+  data: [1],
+  enabled: false,
+  backgroundColor: ['lightgrey']
+}
 const dataReceived = ref(false);
-const employees = ref(null);
-const label = ref([]);
-const option = ref(null);
-const quantities = ref([]);
+const chartData = ref(defaultChart);
+const chartOptions = ref(null);
+const refreshKey = ref(0);
+const filter = ref('All');
+const filterOptions = ref(['All', 'Current', 'Past']);
+const csvData = ref({});
+
+// vars for code-only
+const quantities = {};
+const experience = { All: {}, Current: {}, Past: {} };
 const router = useRouter();
-const showCurrent = ref('All');
 const store = useStore();
 
 // |--------------------------------------------------|
@@ -49,11 +70,12 @@ const store = useStore();
  * Created lifecycle hook
  */
 onBeforeMount(async () => {
-  if (store.getters.storeIsPopulated) {
-    await fetchData();
-    await fillData();
-  }
-}); // created
+  if (!store.getters.employees) await updateStoreEmployees();
+  if (!store.getters.contracts) await updateStoreContracts();
+  fetchData();
+  fillData();
+  generateCsvData();
+});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -65,80 +87,96 @@ onBeforeMount(async () => {
  * Get all cust org data.
  */
 function fetchData() {
-  let allCompOrgExp = {};
-  // access store
-  employees.value = store.getters.employees;
-  // tally up customer org experience for active employees
-  employees.value.forEach((emp) => {
-    if (emp.customerOrgExp && emp.workStatus != 0) {
-      _forEach(emp.customerOrgExp, (org) => {
-        let orgName = org.name;
-        let orgYears = org.years;
-        // We get whether or not we want to show current or past info
-        let orgCurrent = showCurrent.value === 'Current' ? org.current : !org.current;
+  // init vars
+  let employees = store.getters.employees;
+  let contracts = store.getters.contracts.reduce((acc, c) => { acc[c.id] = c; return acc; }, {});
+  let today = getTodaysDate();
 
-        // error checks if orgYears is undefined
-        if (orgYears && (orgCurrent || showCurrent.value === 'All')) {
-          if (allCompOrgExp[orgName]) {
-            allCompOrgExp[orgName] += Math.round(Number(orgYears) * 100) / 100;
-          } else {
-            allCompOrgExp[orgName] = Math.round(Number(orgYears) * 100) / 100;
-          }
-        }
-      });
+  // helper: whether or not to add experience based on filter and current status
+  function shouldAdd(filterType, isCurrent) {
+    return filterType === 'All'
+      || (filterType === 'Current' && isCurrent)
+      || (filterType === 'Past' && !isCurrent)
+  };
+
+  // helper: adds value to allCompOrgExp[name] for all filter types that should
+  //         include it skips if any inputs are missing/invalid
+  function add(name, value, isCurrent) {
+    if (!name || !value || isCurrent == null) return;
+    for (let filterType of filterOptions.value) {
+      if (!shouldAdd(filterType, isCurrent)) continue;
+      experience[filterType][name] ??= 0;
+      experience[filterType][name] += value;
     }
-  });
-  let labels = Object.keys(allCompOrgExp);
-  quantities.value = [];
+  }
 
-  _forEach(labels, (label) => {
-    quantities.value.push(allCompOrgExp[label]);
-  });
-  label.value = labels;
-} // fetchData
+  // tally up customer org experience for active employees
+  for (let emp of employees) {
+    if (emp.workStatus <= 0) continue;
+
+    // loop through org experience
+    for (let org of emp.customerOrgExp ?? []) {
+      if (!org.years) continue; // skip if no years of experience
+      // get the status and duration of the org experience
+      let isOrgCurrent = filter.value === 'Current' ? org.current : !org.current;
+      let yearsExp = Math.round(Number(org.years) * 100) / 100;
+      // add to tallies
+      add(org.name, yearsExp, isOrgCurrent);
+    }
+
+    // loop through current contract experience
+    for (let c of emp.contracts ?? []) {
+      let contract = contracts[c.contractId];
+      if (!contract?.customerOrg) continue; // exit if no org name
+      // get the status of contract
+      let currentContracts = getEmployeeCurrentContracts(emp);
+      currentContracts = new Set(currentContracts.map(c => c.id));
+      let isContractCurrent = currentContracts.has(contract.id);
+      // get the duration on the contract
+      let daysBetween = (p) => difference(p.endDate ?? today, p.startDate, 'day')
+      let duration = c.projects.reduce((acc, p) => acc + daysBetween(p), 0);
+      duration = Math.round(duration / 365 * 100) / 100;
+      // add to tallies
+      add(contract.customerOrg, duration, isContractCurrent);
+    }
+  }
+
+  // split org names from values, so that they can be added to pie chart
+  for (let option of filterOptions.value) {
+    quantities[option] = {
+      data: Object.values(experience[option]),
+      labels: Object.keys(experience[option])
+    }
+  }
+}
 
 /**
  * Sets up the chart formatting and data options.
  */
 function fillData() {
-  let text = '';
-  let colors = [];
+  // default chart options
+  let text = `${filter.value} Customer Org Experience (Years)`;
+  let { data, labels } = quantities[filter.value];
   let enabled = true;
-  if (_isEmpty(quantities.value)) {
-    text = 'No Customer Org Data Found';
-    quantities.value.push(1);
-    enabled = false;
-    colors = ['grey'];
-  } else {
-    colors = [
-      'rgba(54, 162, 235, 1)',
-      'rgba(255, 206, 86, 1)',
-      'rgba(75, 192, 192, 1)',
-      'rgba(153, 102, 255, 1)',
-      'rgba(255, 99, 132, 1)',
-      'rgba(230, 184, 156, 1)',
-      'rgba(234, 210, 172, 1)',
-      'rgba(156, 175, 183, 1)',
-      'rgba(66, 129, 164, 1)'
-    ];
-    text = `${showCurrent.value} Customer Org Experience (Years)`;
-  }
+  let backgroundColor = ['#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF6384', '#E6B89C', '#EAD2AC', '#9CAFB7', '#4281A4'];
+
+  // chart options if no data found
+  if (data.length == 0) ({ text, data, enabled, backgroundColor } = defaultChart);
+
+  // set chartData for template
   chartData.value = {
-    labels: label.value,
-    datasets: [
-      {
-        data: quantities.value,
-        backgroundColor: colors
-      }
-    ]
+    labels: labels,
+    datasets: [{ data, backgroundColor }]
   };
 
-  option.value = {
+  // set chartOptions for template
+  chartOptions.value = {
     onClick: (x, y) => {
-      let index = _first(y).index;
-      let labelClicked = chartData.value.labels[index];
-      localStorage.setItem('requestedDataType', 'customerOrgs');
-      localStorage.setItem('requestedFilter', labelClicked);
+      let index = y[0]?.index;
+      localStorage.setItem(
+        'requestedFilter',
+        JSON.stringify({ tab: 'customerOrgs', search: labels[index] })
+      );
       router.push({
         path: '/reports',
         name: 'reports'
@@ -148,26 +186,44 @@ function fillData() {
       title: {
         display: true,
         text: text,
-        font: {
-          size: 15
-        }
+        font: { size: 15 }
       },
       subtitle: {
         display: true,
         text: '*Click on a segment of the pie chart to see employees',
-        font: {
-          style: 'italic'
-        }
+        font: { style: 'italic' }
       },
       tooltip: {
-        enabled: enabled
+        enabled
       }
     },
     maintainAspectRatio: false
   };
+}
 
-  dataReceived.value = true;
-} // fillData
+/**
+ * Generates data for customer org CSV download
+ */
+function generateCsvData() {
+  // blank csv data and space helper
+  let csv = { All: [], Current: [], Past: [] };
+  let space = (opt) => csv[opt].push(['', '', '']);
+
+  // for each type, add the data from experience
+  for(let option of filterOptions.value) {
+    let data = experience[filter.value];
+    data = Object.entries(data).sort(([, a], [, b]) => b - a); // sorts by second value
+    space(option);
+    space(option);
+    for (let [key, value] of data) csv[option].push(['', key, value.toFixed(2)])
+    space(option);
+    // generate csv object from array
+    csv[option] = baseCsv.generateFrom2dArray(csv[option]);
+  }
+
+  // link to download button
+  csvData.value = csv;
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -176,19 +232,7 @@ function fillData() {
 // |--------------------------------------------------|
 
 /**
- * Watcher for showCurrent - fills data.
+ * Rerenders the chart on filter change
  */
-watch(showCurrent, () => {
-  fetchData();
-  fillData(); // renders a different chart every time the radio button changes
-  chartKey.value++; // rerenders the chart
-});
-
-watch(
-  () => store.getters.storeIsPopulated,
-  () => {
-    fetchData();
-    fillData();
-  }
-);
+watch(filter, () => { refreshKey.value++; fillData(); });
 </script>

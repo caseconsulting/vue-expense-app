@@ -152,20 +152,8 @@ const PTO_ACCRUALS = {
 const notOnTrack = ref(false);
 const showUnanetSyncModal = ref(false);
 
-const PTO_NOTICE_ACKNOWLEDGED = 'ptoNoticeAcknowledged';
 /** @type {Reactive<Record<string, Notice>>} */
 const notices = reactive({});
-
-if (!localStorage.getItem(PTO_NOTICE_ACKNOWLEDGED)) {
-  notices['ptoNotice'] = {
-    message:
-      'PTO data in the Portal should be up to date, but occasional sync issues with Unanet may occur. Until the new Unanet service is live, please use the Unanet PTO Accrual Report for the most accurate balance or contact HR for support.',
-    type: 'info',
-    closeCallback() {
-      localStorage.setItem(PTO_NOTICE_ACKNOWLEDGED, true);
-    }
-  };
-}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -476,7 +464,7 @@ function setDataFromStorage(qbStorage, key) {
 } // setDataFromStorage
 
 /**
- * Sets local storage for Quickbooks data.
+ * Sets local storage for timesheets data.
  *
  * @param {Boolean} isCalendarYear - Whether or not the time period is the calendar year
  * @param {Boolean} isYearly - Whether or not the time period is yearly
