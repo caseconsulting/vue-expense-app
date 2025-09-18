@@ -282,99 +282,6 @@
                           </v-col>
                         </v-row>
 
-                        <v-row no-gutters>
-                          <!-- Show on Feed -->
-                          <v-col>
-                            <div v-if="item.alwaysOnFeed">
-                              <p><b>Show On Feed:</b> All Expenses</p>
-                            </div>
-                            <div v-else>
-                              <p><b>Show On Feed:</b> {{ categoriesOnFeed(item.categories) }}</p>
-                            </div>
-                          </v-col>
-                        </v-row>
-
-                        <!-- Show Require URL -->
-                        <v-row no-gutters>
-                          <v-col>
-                            <div v-if="item.requireURL">
-                              <p><b>Require URL:</b> All Expenses</p>
-                            </div>
-                            <div v-else>
-                              <p><b>Require URL:</b> {{ categoriesReqUrl(item.categories) }}</p>
-                            </div>
-                          </v-col>
-                        </v-row>
-
-                        <!-- Show Require Receipt -->
-                        <v-row no-gutters>
-                          <v-col>
-                            <div v-if="item.requiredFlag">
-                              <p><b>Require Receipt:</b> All Expenses</p>
-                            </div>
-                            <div v-else>
-                              <p><b>Require Receipt:</b> {{ categoriesReqReceipt(item.categories) }}</p>
-                            </div>
-                          </v-col>
-                        </v-row>
-
-                        <!-- Requires Recipient -->
-                        <v-row no-gutters>
-                          <v-col>
-                            <p v-if="item.hasRecipient"><b>Requires Recipient:</b> Yes</p>
-                            <p v-else><b>Requires Recipient:</b> No</p>
-                          </v-col>
-                        </v-row>
-
-                        <!-- Flags -->
-                        <v-row no-gutters>
-                          <v-col cols="12" sm="6" md="3" class="flag">
-                            <p>Pro-rated:</p>
-                            <v-icon
-                              v-if="item.proRated"
-                              icon="mdi-check-circle-outline"
-                              id="marks"
-                              class="mr-1"
-                              color="green"
-                            />
-                            <v-icon v-else icon="mdi-close-circle-outline" id="marks" class="mr-1 case-red" />
-                          </v-col>
-                          <v-col cols="12" sm="6" md="3" class="flag">
-                            <p>Overdraft Allowed:</p>
-                            <v-icon
-                              v-if="item.odFlag"
-                              icon="mdi-check-circle-outline"
-                              id="marks"
-                              class="mr-1"
-                              color="green"
-                            />
-                            <v-icon v-else icon="mdi-close-circle-outline" id="marks" class="mr-1 case-red" />
-                          </v-col>
-                          <v-col cols="12" sm="6" md="3" class="flag">
-                            <p>Recurring:</p>
-                            <v-icon
-                              v-if="item.recurringFlag"
-                              icon="mdi-check-circle-outline"
-                              id="marks"
-                              class="mr-1"
-                              color="green"
-                            />
-                            <v-icon v-else icon="mdi-close-circle-outline" id="marks" class="mr-1 case-red" />
-                          </v-col>
-                          <v-col cols="12" sm="6" md="3" class="flag">
-                            <p>Inactive:</p>
-                            <v-icon
-                              v-if="item.isInactive"
-                              icon="mdi-check-circle-outline"
-                              id="marks"
-                              class="mr-1"
-                              color="green"
-                            />
-                            <v-icon v-else icon="mdi-close-circle-outline" id="marks" class="mr-1 case-red" />
-                          </v-col>
-                        </v-row>
-                        <!-- End Flags -->
-
                         <!-- Accessible By -->
                         <v-row v-if="userRoleIsAdmin()" no-gutters>
                           <!-- Display number of employees accessed by -->
@@ -767,75 +674,6 @@ function categoriesToString(categories) {
 } // categoriesToString
 
 /**
- * Returns a string of category names that are on the feed.
- *
- * @param categories - the categories to stringify
- * @return string - the string of categories on the feed
- */
-function categoriesOnFeed(categories) {
-  let string = '';
-  for (let i = 0; i < categories.length; i++) {
-    if (categories[i].showOnFeed) {
-      if (string.length > 0) {
-        string += ', ';
-      }
-      string += categories[i].name;
-    }
-  }
-  if (string.length == 0) {
-    string = 'None';
-  }
-  return string;
-} // categoriesOnFeed
-
-/**
- * Returns a string of category names that require a url.
- *
- * @param categories - the categories to stringify
- * @return string - the string of categories that require a url
- */
-function categoriesReqUrl(categories) {
-  let string = '';
-  for (let i = 0; i < categories.length; i++) {
-    if (categories[i].requireURL) {
-      if (string.length > 0) {
-        string += ', ';
-      }
-      string += categories[i].name;
-    }
-  }
-  if (string.length == 0) {
-    string = 'None';
-  }
-  return string;
-} // categoriesReqUrl
-
-/**
- * Returns a string of category names that require a receipt.
- *
- * @param categories - the categories to stringify
- * @return string - the string of categories that require a receipt
- */
-function categoriesReqReceipt(categories) {
-  let string = '';
-  //first filter out those that have a receipt required. then map each match to just it's name (now it's a list).
-  //finally join the array items with a comma.
-  string = _map(
-    _filter(categories, (cat) => {
-      return cat.requireReceipt;
-    }),
-    (match) => {
-      return match.name;
-    }
-  ).join(', ');
-
-  if (string.length == 0) {
-    string = 'None';
-  }
-  return string;
-} // categoriesReqReceipt
-
-/**
  * Clear the selected expense type.
  */
 function clearModel() {
@@ -1205,9 +1043,5 @@ a {
 a:hover {
   color: blue !important;
   text-decoration: none;
-}
-
-.case-red {
-  color: #bc3825;
 }
 </style>
