@@ -176,6 +176,13 @@ const items = ref([
     route: 'help',
     permission: ['admin', 'user', 'intern', 'manager'],
     active: false
+  },
+  {
+    title: 'Settings',
+    icon: 'mdi-cog',
+    route: 'settings',
+    permission: ['admin'],
+    active: false
   }
 ]); // navigation options
 const permissions = ref(''); // user role

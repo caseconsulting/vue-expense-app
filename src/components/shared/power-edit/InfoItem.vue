@@ -9,14 +9,13 @@
     :field="props.field"
     :item="props.item"
   ></date-info-item>
-  <custom-info-item v-else :field="props.field" :item="props.item"></custom-info-item>
+  <component v-else :is="props.CustomInfoItem" :field="props.field" :item="props.item"></component>
 </template>
 
 <script setup>
-import DefaultInfoItem from '@/components/employees/power-edit/info-items/DefaultItem.vue';
-import DateInfoItem from '@/components/employees/power-edit/info-items/DateItem.vue';
-import CustomInfoItem from '@/components/employees/power-edit/info-items/CustomItem.vue';
-import { TYPES } from '@/components/employees/power-edit/js/fieldTypes.js';
+import DefaultInfoItem from '@/components/shared/power-edit/info-items/DefaultItem.vue';
+import DateInfoItem from '@/components/shared/power-edit/info-items/DateItem.vue';
+import { TYPES } from '@/components/shared/power-edit/js/fieldTypes.js';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -24,5 +23,5 @@ import { TYPES } from '@/components/employees/power-edit/js/fieldTypes.js';
 // |                                                  |
 // |--------------------------------------------------|
 
-const props = defineProps(['field', 'item']);
+const props = defineProps(['field', 'item', 'CustomInfoItem']);
 </script>

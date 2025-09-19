@@ -193,9 +193,9 @@
               density="compact"
             >
               <!-- Budget Name slot -->
-              <template #[`item.budgetName`]="{ item }">
+              <template #[`item.name`]="{ item }">
                 <p class="mb-0">
-                  {{ limitedText(item.budgetName) }}
+                  {{ limitedText(item.name) }}
                 </p>
               </template>
               <!-- Budget slot -->
@@ -281,99 +281,6 @@
                             </p>
                           </v-col>
                         </v-row>
-
-                        <v-row no-gutters>
-                          <!-- Show on Feed -->
-                          <v-col>
-                            <div v-if="item.alwaysOnFeed">
-                              <p><b>Show On Feed:</b> All Expenses</p>
-                            </div>
-                            <div v-else>
-                              <p><b>Show On Feed:</b> {{ categoriesOnFeed(item.categories) }}</p>
-                            </div>
-                          </v-col>
-                        </v-row>
-
-                        <!-- Show Require URL -->
-                        <v-row no-gutters>
-                          <v-col>
-                            <div v-if="item.requireURL">
-                              <p><b>Require URL:</b> All Expenses</p>
-                            </div>
-                            <div v-else>
-                              <p><b>Require URL:</b> {{ categoriesReqUrl(item.categories) }}</p>
-                            </div>
-                          </v-col>
-                        </v-row>
-
-                        <!-- Show Require Receipt -->
-                        <v-row no-gutters>
-                          <v-col>
-                            <div v-if="item.requiredFlag">
-                              <p><b>Require Receipt:</b> All Expenses</p>
-                            </div>
-                            <div v-else>
-                              <p><b>Require Receipt:</b> {{ categoriesReqReceipt(item.categories) }}</p>
-                            </div>
-                          </v-col>
-                        </v-row>
-
-                        <!-- Requires Recipient -->
-                        <v-row no-gutters>
-                          <v-col>
-                            <p v-if="item.hasRecipient"><b>Requires Recipient:</b> Yes</p>
-                            <p v-else><b>Requires Recipient:</b> No</p>
-                          </v-col>
-                        </v-row>
-
-                        <!-- Flags -->
-                        <v-row no-gutters>
-                          <v-col cols="12" sm="6" md="3" class="flag">
-                            <p>Pro-rated:</p>
-                            <v-icon
-                              v-if="item.proRated"
-                              icon="mdi-check-circle-outline"
-                              id="marks"
-                              class="mr-1"
-                              color="green"
-                            />
-                            <v-icon v-else icon="mdi-close-circle-outline" id="marks" class="mr-1 case-red" />
-                          </v-col>
-                          <v-col cols="12" sm="6" md="3" class="flag">
-                            <p>Overdraft Allowed:</p>
-                            <v-icon
-                              v-if="item.odFlag"
-                              icon="mdi-check-circle-outline"
-                              id="marks"
-                              class="mr-1"
-                              color="green"
-                            />
-                            <v-icon v-else icon="mdi-close-circle-outline" id="marks" class="mr-1 case-red" />
-                          </v-col>
-                          <v-col cols="12" sm="6" md="3" class="flag">
-                            <p>Recurring:</p>
-                            <v-icon
-                              v-if="item.recurringFlag"
-                              icon="mdi-check-circle-outline"
-                              id="marks"
-                              class="mr-1"
-                              color="green"
-                            />
-                            <v-icon v-else icon="mdi-close-circle-outline" id="marks" class="mr-1 case-red" />
-                          </v-col>
-                          <v-col cols="12" sm="6" md="3" class="flag">
-                            <p>Inactive:</p>
-                            <v-icon
-                              v-if="item.isInactive"
-                              icon="mdi-check-circle-outline"
-                              id="marks"
-                              class="mr-1"
-                              color="green"
-                            />
-                            <v-icon v-else icon="mdi-close-circle-outline" id="marks" class="mr-1 case-red" />
-                          </v-col>
-                        </v-row>
-                        <!-- End Flags -->
 
                         <!-- Accessible By -->
                         <v-row v-if="userRoleIsAdmin()" no-gutters>
@@ -559,7 +466,7 @@ const form = ref(null);
 const headers = ref([
   {
     title: 'Expense Type',
-    key: 'budgetName',
+    key: 'name',
     show: true
   },
   {
@@ -592,9 +499,9 @@ const loading = ref(true); //loading status
 const midAction = ref(false);
 const model = ref({
   accessibleBy: ['FullTime'],
-  alwaysOnFeed: false,
+  showOnFeed: false,
   budget: 0,
-  budgetName: '',
+  name: '',
   campfire: null,
   categories: [],
   description: '',
@@ -605,7 +512,7 @@ const model = ref({
   odFlag: false,
   proRated: false,
   recurringFlag: false,
-  requiredFlag: true,
+  requireReceipt: true,
   requireURL: false,
   startDate: null,
   tagBudgets: []
@@ -613,10 +520,10 @@ const model = ref({
 const search = ref(''); // query text for datatable search field
 const showAccess = ref({}); // activate display for access list, object of ids to boolean
 const showAccessLength = ref(0); // number of employees with access
-const sortBy = ref([{ key: 'budgetName', order: 'asc' }]); // sort datatable items
+const sortBy = ref([{ key: 'name', order: 'asc' }]); // sort datatable items
 const store = useStore();
 const userInfo = ref(null); // user information
-const deleteType = ref(''); // item.budgetName for when item is deleted
+const deleteType = ref(''); // item.name for when item is deleted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -767,93 +674,24 @@ function categoriesToString(categories) {
 } // categoriesToString
 
 /**
- * Returns a string of category names that are on the feed.
- *
- * @param categories - the categories to stringify
- * @return string - the string of categories on the feed
- */
-function categoriesOnFeed(categories) {
-  let string = '';
-  for (let i = 0; i < categories.length; i++) {
-    if (categories[i].showOnFeed) {
-      if (string.length > 0) {
-        string += ', ';
-      }
-      string += categories[i].name;
-    }
-  }
-  if (string.length == 0) {
-    string = 'None';
-  }
-  return string;
-} // categoriesOnFeed
-
-/**
- * Returns a string of category names that require a url.
- *
- * @param categories - the categories to stringify
- * @return string - the string of categories that require a url
- */
-function categoriesReqUrl(categories) {
-  let string = '';
-  for (let i = 0; i < categories.length; i++) {
-    if (categories[i].requireURL) {
-      if (string.length > 0) {
-        string += ', ';
-      }
-      string += categories[i].name;
-    }
-  }
-  if (string.length == 0) {
-    string = 'None';
-  }
-  return string;
-} // categoriesReqUrl
-
-/**
- * Returns a string of category names that require a receipt.
- *
- * @param categories - the categories to stringify
- * @return string - the string of categories that require a receipt
- */
-function categoriesReqReceipt(categories) {
-  let string = '';
-  //first filter out those that have a receipt required. then map each match to just it's name (now it's a list).
-  //finally join the array items with a comma.
-  string = _map(
-    _filter(categories, (cat) => {
-      return cat.requireReceipt;
-    }),
-    (match) => {
-      return match.name;
-    }
-  ).join(', ');
-
-  if (string.length == 0) {
-    string = 'None';
-  }
-  return string;
-} // categoriesReqReceipt
-
-/**
  * Clear the selected expense type.
  */
 function clearModel() {
   model.value['id'] = '';
   model.value['budget'] = 0;
-  model.value['budgetName'] = '';
+  model.value['name'] = '';
   model.value['description'] = '';
   model.value['odFlag'] = false;
   model.value['proRated'] = false;
   model.value['startDate'] = '';
   model.value['endDate'] = '';
   model.value['recurringFlag'] = false;
-  model.value['requiredFlag'] = false;
+  model.value['requireReceipt'] = false;
   model.value['isInactive'] = false;
   model.value['categories'] = [];
   model.value['accessibleBy'] = ['FullTime'];
   model.value['hasRecipient'] = false;
-  model.value['alwaysOnFeed'] = false;
+  model.value['showOnFeed'] = false;
   model.value['campfire'] = null;
   model.value['requireURL'] = false;
   model.value['tagBudgets'] = [];
@@ -1137,7 +975,7 @@ async function updateModelInTable() {
  */
 async function validateDelete(item) {
   midAction.value = true;
-  deleteType.value = item.budgetName;
+  deleteType.value = item.name;
   try {
     let expenses = await api.getAllExpenseTypeExpenses(item.id);
     if (expenses.length <= 0) {
@@ -1205,9 +1043,5 @@ a {
 a:hover {
   color: blue !important;
   text-decoration: none;
-}
-
-.case-red {
-  color: #bc3825;
 }
 </style>

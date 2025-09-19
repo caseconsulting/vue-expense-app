@@ -1026,21 +1026,21 @@ async function loadMyExpensesData() {
   expenseTypes.value = _map(temporaryExpenseTypes, (expenseType) => {
     return {
       /* beautify preserve:start */
-      text: `${expenseType.budgetName} - $${expenseType.budget}`,
+      text: `${expenseType.name} - $${expenseType.budget}`,
       startDate: expenseType.startDate,
       endDate: expenseType.endDate,
       /* beautify preserve:end */
-      budgetName: expenseType.budgetName,
+      budgetName: expenseType.name,
       value: expenseType.id,
       budget: expenseType.budget,
       odFlag: expenseType.odFlag,
-      requiredFlag: expenseType.requiredFlag,
+      requireReceipt: expenseType.requireReceipt,
       recurringFlag: expenseType.recurringFlag,
       isInactive: expenseType.isInactive,
       categories: expenseType.categories,
       accessibleBy: expenseType.accessibleBy,
       hasRecipient: expenseType.hasRecipient,
-      alwaysOnFeed: expenseType.alwaysOnFeed
+      showOnFeed: expenseType.showOnFeed
     };
   });
   loading.value = false;

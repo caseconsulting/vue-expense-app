@@ -549,10 +549,10 @@ function receiptRequired() {
   });
 
   // if the whole expense requires receipt
-  if (this.selectedExpenseType && this.selectedExpenseType.requiredFlag) {
+  if (this.selectedExpenseType && this.selectedExpenseType.requireReceipt) {
     // return true unless expense is training and the category is exchange
     return !(
-      this.selectedExpenseType.budgetName === 'Training' &&
+      this.selectedExpenseType.name === 'Training' &&
       this.editedExpense.category === 'Exchange for training hours'
     );
   }
@@ -783,7 +783,7 @@ async function checkCoverage() {
               }
             } else {
               // BRANCH 6.2 budget is maxed out
-              this.emitter.emit('error', `${expenseType.budgetName} budget is maxed out`);
+              this.emitter.emit('error', `${expenseType.name} budget is maxed out`);
               this.loading = false; // set loading status to false
               this.emitter.emit('endAction');
             }
@@ -1093,7 +1093,7 @@ function filteredExpenseTypes() {
         let disabledCategories = Array.isArray(etDisabled) ? etDisabled : undefined;
         if (!selectedEmployee) {
           // add expense type if no employees are selected
-          expenseType.text = `${expenseType.budgetName} - $${Number(expenseType.budget).toLocaleString().toString()}`;
+          expenseType.text = `${expenseType.name} - $${Number(expenseType.budget).toLocaleString().toString()}`;
           filteredExpType.push({
             ...expenseType,
             disabled: etDisabled === true,
@@ -1103,7 +1103,7 @@ function filteredExpenseTypes() {
           // add expense type if the employee is selected and has access
           let budget = _find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id);
           let amount = budget ? budget.budgetObject.amount : this.calcAdjustedBudget(selectedEmployee, expenseType); // calculate budget
-          expenseType.text = `${expenseType.budgetName} - $${Number(amount).toLocaleString().toString()}`;
+          expenseType.text = `${expenseType.name} - $${Number(amount).toLocaleString().toString()}`;
           filteredExpType.push({
             ...expenseType,
             disabled: etDisabled === true,
@@ -1127,7 +1127,7 @@ function filteredExpenseTypes() {
             // expense type is active
             let budget = _find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id);
             let amount = budget ? budget.budgetObject.amount : expenseType.budgetAmount;
-            expenseType.text = `${expenseType.budgetName} - $${Number(amount).toLocaleString().toString()}`;
+            expenseType.text = `${expenseType.name} - $${Number(amount).toLocaleString().toString()}`;
             let etDisabled = this.isDisabled(expenseType);
             let disabledCategories = Array.isArray(etDisabled) ? etDisabled : undefined;
             filteredExpType.push({
@@ -1143,7 +1143,7 @@ function filteredExpenseTypes() {
   // allow other parts of the code to add an expense type, no questions asked
   for (let expenseType of this.overrideFilteredExpenseTypes) {
     filteredExpType.push({
-      text: `${expenseType.budgetName} - $${expenseType.budget}`,
+      text: `${expenseType.name} - $${expenseType.budget}`,
       value: expenseType.id,
       ...expenseType
     });
@@ -1262,7 +1262,7 @@ async function getRemainingBudget() {
         budget = {
           budgetObject: budget,
           description: expenseType.description,
-          expenseTypeName: expenseType.budgetName,
+          expenseTypeName: expenseType.name,
           odFlag: expenseType.odFlag,
           expenseTypeId: budget.expenseTypeId
         };
@@ -1365,8 +1365,8 @@ function isReceiptRequired() {
   });
 
   // if the whole expense requires receipt
-  if (this.selectedExpenseType && this.selectedExpenseType.requiredFlag) {
-    return this.selectedExpenseType.requiredFlag;
+  if (this.selectedExpenseType && this.selectedExpenseType.requireReceipt) {
+    return this.selectedExpenseType.requireReceipt;
   }
   // otherwise, does one of it's categories require a receipt
   if (this.editedExpense.category) {
@@ -1635,7 +1635,7 @@ function setDefaultExpenseTypeData() {
   let expenseTypes = this.$store.getters.expenseTypes;
   this.expenseTypes = _map(expenseTypes, (expenseType) => {
     return {
-      text: `${expenseType.budgetName} - $${expenseType.budget}`,
+      text: `${expenseType.name} - $${expenseType.budget}`,
       value: expenseType.id,
       ...expenseType
     };
@@ -1973,7 +1973,7 @@ async function watchEditedExpenseExpenseTypeID() {
 
     // set high five cost
     // HARD CODE
-    if (this.selectedExpenseType.budgetName === 'High Five') {
+    if (this.selectedExpenseType.name === 'High Five') {
       this.costFormatted = '50.00';
       this.editedExpense.cost = '50.00';
       this.isHighFive = true;
@@ -1996,7 +1996,7 @@ async function watchEditedExpenseExpenseTypeID() {
       _isEmpty(this.editedExpense.id)
     ) {
       // changing the expense type
-      if (!this.isEdit && this.selectedExpenseType.alwaysOnFeed) {
+      if (!this.isEdit && this.selectedExpenseType.showOnFeed) {
         // if expense type is always on feed
         this.editedExpense.showOnFeed = true;
       } else {
@@ -2059,7 +2059,7 @@ function watchEditedExpenseCategory() {
       _isNil(this.editedExpense.id))
   ) {
     // category or expense type is changed
-    if (this.selectedExpenseType.alwaysOnFeed) {
+    if (this.selectedExpenseType.showOnFeed) {
       // if expense type is always on feed
       this.editedExpense.showOnFeed = true;
     } else {
