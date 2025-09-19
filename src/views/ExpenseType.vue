@@ -31,12 +31,9 @@
         </v-col>
         <v-col cols="3">
           <span>
-            <p v-if="model.alwaysOnFeed"><b>Show On Feed:</b> All Expenses</p>
-            <p v-else><b>Show On Feed:</b> {{ model.categoriesOnFeed }}</p>
-            <p v-if="model.requireURL"><b>Require URL:</b> All Expenses</p>
-            <p v-else><b>Require URL:</b> {{ model.categoriesRequireURL }}</p>
-            <p v-if="model.requiredFlag"><b>Require Receipt:</b> All Expenses</p>
-            <p v-else><b>Require Receipt:</b> {{ model.categoriesRequireReceipt }}</p>
+            <p><b>Show On Feed:</b> {{ model.showOnFeedText }}</p>
+            <p><b>Require URL:</b> {{ model.requireURLText }}</p>
+            <p><b>Require Receipt:</b> {{ model.requireReceiptText }}</p>
           </span>
           <boolean displayText="Requires Recipient" :field="model.hasRecipient"></boolean>
           <br />

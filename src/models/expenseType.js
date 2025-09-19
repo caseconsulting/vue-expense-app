@@ -40,6 +40,18 @@ export class ExpenseType {
     this.tagBudgets = properties.tagBudgets;
   }
 
+  get showOnFeedText() {
+    return this.alwaysOnFeed ? 'All Expenses' : this.categoriesOnFeed;
+  }
+
+  get requireReceiptText() {
+    return this.requiredFlag ? 'All Expenses' : this.categoriesRequireReceipt;
+  }
+
+  get requireURLText() {
+    return this.requireURL ? 'All Expenses' : this.categoriesRequireURL;
+  }
+
   get categoriesOnFeed() {
     let categoriesOnFeed = this.categories.filter((c) => c.showOnFeed);
     return categoriesOnFeed.length > 0 ? categoriesOnFeed.map((c) => c.name).join(', ') : 'None';
