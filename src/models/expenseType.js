@@ -39,4 +39,19 @@ export class ExpenseType {
     /** @type {Object[]} */
     this.tagBudgets = properties.tagBudgets;
   }
+
+  get categoriesOnFeed() {
+    let categoriesOnFeed = this.categories.filter((c) => c.showOnFeed);
+    return categoriesOnFeed.length > 0 ? categoriesOnFeed.map((c) => c.name).join(', ') : 'None';
+  }
+
+  get categoriesRequireReceipt() {
+    let categoriesRequireReceipt = this.categories.filter((c) => c.requireReceipt);
+    return categoriesRequireReceipt.length > 0 ? categoriesRequireReceipt.map((c) => c.name).join(', ') : 'None';
+  }
+
+  get categoriesRequireURL() {
+    let categoriesRequireURL = this.categories.filter((c) => c.requireURL);
+    return categoriesRequireURL.length > 0 ? categoriesRequireURL.map((c) => c.name).join(', ') : 'None';
+  }
 }

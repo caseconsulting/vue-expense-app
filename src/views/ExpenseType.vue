@@ -32,11 +32,11 @@
         <v-col cols="3">
           <span>
             <p v-if="model.alwaysOnFeed"><b>Show On Feed:</b> All Expenses</p>
-            <p v-else><b>Show On Feed:</b> {{ categoriesOnFeed(model.categories) }}</p>
+            <p v-else><b>Show On Feed:</b> {{ model.categoriesOnFeed }}</p>
             <p v-if="model.requireURL"><b>Require URL:</b> All Expenses</p>
-            <p v-else><b>Require URL:</b> {{ categoriesReqUrl(model.categories) }}</p>
+            <p v-else><b>Require URL:</b> {{ model.categoriesRequireURL }}</p>
             <p v-if="model.requiredFlag"><b>Require Receipt:</b> All Expenses</p>
-            <p v-else><b>Require Receipt:</b> {{ categoriesReqReceipt(model.categories) }}</p>
+            <p v-else><b>Require Receipt:</b> {{ model.categoriesRequireReceipt }}</p>
           </span>
           <boolean displayText="Requires Recipient" :field="model.hasRecipient"></boolean>
           <br />
@@ -71,72 +71,6 @@ onBeforeMount(async () => {
   await updateStoreExpenseTypes();
   loadExpenseType();
 });
-
-/**
- * Returns a string of category names that are on the feed.
- *
- * @param categories - the categories to stringify
- * @return string - the string of categories on the feed
- */
-function categoriesOnFeed(categories) {
-  let string = '';
-  for (let i = 0; i < categories.length; i++) {
-    if (categories[i].showOnFeed) {
-      if (string.length > 0) {
-        string += ', ';
-      }
-      string += categories[i].name;
-    }
-  }
-  if (string.length == 0) {
-    string = 'None';
-  }
-  return string;
-}
-
-/**
- * Returns a string of category names that require a receipt.
- *
- * @param categories - the categories to stringify
- * @return string - the string of categories that require a receipt
- */
-function categoriesReqReceipt(categories) {
-  let string = '';
-  //first filter out those that have a receipt required. then map each match to just it's name (now it's a list).
-  //finally join the array items with a comma.
-  string = categories.filter((cat) => {
-    return cat.requireReceipt;
-  }).map((match) => {
-    return match.name;
-  }).join(', ');
-
-  if (string.length == 0) {
-    string = 'None';
-  }
-  return string;
-}
-
-/**
- * Returns a string of category names that require a url.
- *
- * @param categories - the categories to stringify
- * @return string - the string of categories that require a url
- */
-function categoriesReqUrl(categories) {
-  let string = '';
-  for (let i = 0; i < categories.length; i++) {
-    if (categories[i].requireURL) {
-      if (string.length > 0) {
-        string += ', ';
-      }
-      string += categories[i].name;
-    }
-  }
-  if (string.length == 0) {
-    string = 'None';
-  }
-  return string;
-}
 
 function loadExpenseType() {
   model.value = new ExpenseType(store.getters.expenseTypes.find(et => et.id === route.params.id));
