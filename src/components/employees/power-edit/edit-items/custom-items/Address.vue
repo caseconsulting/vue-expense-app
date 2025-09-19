@@ -19,7 +19,7 @@
         ></v-list>
         <v-list v-if="predictions.length > 0" @click.stop rounded="0" class="d-flex align-center">
           <span class="text-caption text-grey ml-2">powered by</span>
-          <v-img :src="google" width="50" alt="Github icon" inline class="ml-1" />
+          <v-img :src="google" width="50" alt="Google icon" inline class="ml-1" />
         </v-list>
       </v-menu>
     </v-text-field>

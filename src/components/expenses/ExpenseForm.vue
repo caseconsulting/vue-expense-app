@@ -532,7 +532,6 @@ function approvedLabel() {
   if (!this.editedExpense.approvedBy) return 'Sign and approve this expense?';
 
   // return name of person who approved, only when they are loaded in
-  console.log(this.editedExpense);
   let approver = employeeUtils.getEmployeeByID(this.editedExpense.approvedBy, this.$store.getters.employees);
   approver = employeeUtils.nicknameAndLastName(approver);
   return `Approved by: ${approver}`;
@@ -1711,19 +1710,12 @@ async function submit() {
 
       if (this.editedExpense?.rejections?.softRejections) {
         this.editedExpense.rejections.softRejections.revised = true;
-        this.editedExpense.state = EXPENSE_STATES.REVISED;
       }
 
-      if (this.isEmpty(this.editedExpense.id)) {
-        // creating a new expense
-        this.editedExpense.state = EXPENSE_STATES.CREATED;
-        await this.createNewEntry();
-      } else {
-        // editing a current expense
-        if (this.editedExpense.state !== EXPENSE_STATES.CREATED)
-          this.editedExpense.state = EXPENSE_STATES.REVISED;
-        await this.updateExistingEntry();
-      }
+      this.editedExpense.state = getExpenseState(this.editedExpense, true);
+        
+      if (this.isEmpty(this.editedExpense.id)) await this.createNewEntry(); // creating new expense
+      else await this.updateExistingEntry(); // editing existing expense
     }
     this.loading = false; // set loading status to false
 
@@ -1949,9 +1941,33 @@ Number.prototype.pad = function (size) {
  */
 function updateApproval(checked) {
   if (checked) {
-    this.editedExpense.state = EXPENSE_STATES.APPROVED;
     this.editedExpense.approvedBy = this.userInfo.id;
   } else this.editedExpense.approvedBy = undefined;
+}
+
+/**
+ * Gets the state that an expense should be in
+ * 
+ * @param expense the expense object
+ * @returns one of EXPENSE_STATE
+ */
+function getExpenseState(expense) {
+  let state;
+
+  // if expense has a reimbursedDate, it will always be reimbursed
+  if (expense.reimbursedDate) return EXPENSE_STATES.REIMBURSED;
+
+  // if expense has an approval, it will always be approved
+  if (expense.approvedBy) return EXPENSE_STATES.APPROVED;
+
+  // editing an existing expense
+  if (expense.id) {
+    if (expense.state === EXPENSE_STATES.CREATED) return EXPENSE_STATES.CREATED; // just making changes
+    return EXPENSE_STATES.REVISED; // updating for admins, due to kickback
+  }
+  
+  // default is creating new expense
+  return EXPENSE_STATES.CREATED;
 }
 
 // |--------------------------------------------------|
