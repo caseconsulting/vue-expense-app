@@ -23,7 +23,7 @@ export class ExpenseType {
     /** @type {boolean} */
     this.hasRecipient = properties.hasRecipient;
     /** @type {boolean} */
-    this.isInactive = properties.isInactive;
+    this.isInactive = properties.isInactive; // use active() to determine if currently active
     /** @type {boolean} */
     this.odFlag = properties.odFlag;
     /** @type {boolean} */
@@ -38,6 +38,10 @@ export class ExpenseType {
     this.startDate = properties.startDate;
     /** @type {Object[]} */
     this.tagBudgets = properties.tagBudgets;
+  }
+
+  get active() {
+    return this.recurringFlag ? !this.isInactive : new Date(this.endDate) >= new Date();
   }
 
   get showOnFeedText() {
