@@ -209,9 +209,9 @@ async function submit() {
     editedExpenseType.value.recurringFlag = false;
   }
 
-  if (editedExpenseType.value.requiredFlag == null) {
+  if (editedExpenseType.value.requireReceipt == null) {
     // set receipt required flag to false if checkbox is null
-    editedExpenseType.value.requiredFlag = false;
+    editedExpenseType.value.requireReceipt = false;
   }
 
   if (editedExpenseType.value.isInactive == null) {
@@ -352,9 +352,9 @@ watch(categories, (val) => {
 
     editedExpenseType.value.categories.push({
       name: val[index],
-      showOnFeed: editedExpenseType.value.alwaysOnFeed,
+      showOnFeed: editedExpenseType.value.showOnFeed,
       requireURL: editedExpenseType.value.requireURL,
-      requireReceipt: editedExpenseType.value.requiredFlag
+      requireReceipt: editedExpenseType.value.requireReceipt
     });
   } else if (val.length < editedExpenseType.value.categories.length) {
     // category was removed

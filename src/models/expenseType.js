@@ -6,11 +6,11 @@ export class ExpenseType {
     /** @type {string[]} */
     this.accessibleBy = properties.accessibleBy;
     /** @type {boolean} */
-    this.alwaysOnFeed = properties.alwaysOnFeed;
+    this.showOnFeed = properties.showOnFeed;
     /** @type {number} */
     this.budget = properties.budget;
     /** @type {string} */
-    this.budgetName = properties.budgetName;
+    this.name = properties.name;
     /** @type {string} */
     this.campfire = properties.campfire;
     /** @type {Category[]} */
@@ -31,7 +31,7 @@ export class ExpenseType {
     /** @type {boolean} */
     this.recurringFlag = properties.recurringFlag;
     /** @type {boolean} */
-    this.requiredFlag = properties.requiredFlag;
+    this.requireReceipt = properties.requireReceipt;
     /** @type {boolean} */
     this.requireURL = properties.requireURL;
     /** @type {string} */
@@ -45,11 +45,11 @@ export class ExpenseType {
   }
 
   get showOnFeedText() {
-    return this.alwaysOnFeed ? 'All Expenses' : this.categoriesOnFeed;
+    return this.showOnFeed ? 'All Expenses' : this.categoriesOnFeed;
   }
 
   get requireReceiptText() {
-    return this.requiredFlag ? 'All Expenses' : this.categoriesRequireReceipt;
+    return this.requireReceipt ? 'All Expenses' : this.categoriesRequireReceipt;
   }
 
   get requireURLText() {

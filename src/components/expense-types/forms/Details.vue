@@ -5,7 +5,7 @@
       <v-col>
         <v-text-field
           variant="underlined"
-          v-model="modelValue.budgetName"
+          v-model="modelValue.name"
           :rules="getRequiredRules()"
           label="Name"
           data-vv-name="Name"

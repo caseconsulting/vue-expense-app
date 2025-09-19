@@ -7,7 +7,7 @@
         </v-card-title>
 
         <v-card-text class="font-weight-medium text-h6">
-          <h3>{{ type.budgetName }}</h3>
+          <h3>{{ type.name }}</h3>
           <v-autocomplete
             :items="getEmployeeList()"
             :custom-filter="employeeFilter"

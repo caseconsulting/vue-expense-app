@@ -92,7 +92,7 @@
             ></v-badge>
             {{ item.employeeName }}</template
           >
-          <!-- Employee Name slot -->
+          <!-- Budget Name slot -->
           <template v-slot:[`item.budgetName`]="{ item }">
             {{ item.budgetName }}
             {{
@@ -376,9 +376,9 @@ function constructAutoComplete(aggregatedData) {
   employees.value = _uniqBy(employees.value, (e) => e.value);
   // set expense types
   expenseTypes.value = _map(aggregatedData, (data) => {
-    if (data && data.budgetName && data.expenseTypeId) {
+    if (data && data.name && data.expenseTypeId) {
       return {
-        text: data.budgetName,
+        text: data.name,
         value: data.expenseTypeId
       };
     }
@@ -408,7 +408,7 @@ function createExpenses(aggregatedData) {
     const employees = store.getters.employees;
     let employee = _find(employees, (emp) => emp.id === expense.employeeId);
     let expenseType = _find(expenseTypes.value, (expenseType) => expenseType.id === expense.expenseTypeId);
-    expense.budgetName = expenseType.budgetName;
+    expense.budgetName = expenseType.name;
     expense.employeeName = employeeUtils.firstAndLastName(employee);
     expense.firstName = employee.firstName;
     expense.middleName = employee.middleName;

@@ -9,7 +9,7 @@
       <v-col cols="auto">
         <checkbox
           label="Show On Feed"
-          v-model="modelValue.alwaysShowOnFeed"
+          v-model="modelValue.showOnFeed"
         ></checkbox>
         </v-col>
       <v-col cols="auto">
@@ -21,7 +21,7 @@
       <v-col cols="auto">
         <checkbox
           label="Receipt Required"
-          v-model="modelValue.requiredFlag"
+          v-model="modelValue.requireReceipt"
         ></checkbox>
       </v-col>
     </v-row>

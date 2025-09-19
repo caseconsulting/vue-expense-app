@@ -193,9 +193,9 @@
               density="compact"
             >
               <!-- Budget Name slot -->
-              <template #[`item.budgetName`]="{ item }">
+              <template #[`item.name`]="{ item }">
                 <p class="mb-0">
-                  {{ limitedText(item.budgetName) }}
+                  {{ limitedText(item.name) }}
                 </p>
               </template>
               <!-- Budget slot -->
@@ -466,7 +466,7 @@ const form = ref(null);
 const headers = ref([
   {
     title: 'Expense Type',
-    key: 'budgetName',
+    key: 'name',
     show: true
   },
   {
@@ -499,9 +499,9 @@ const loading = ref(true); //loading status
 const midAction = ref(false);
 const model = ref({
   accessibleBy: ['FullTime'],
-  alwaysOnFeed: false,
+  showOnFeed: false,
   budget: 0,
-  budgetName: '',
+  name: '',
   campfire: null,
   categories: [],
   description: '',
@@ -512,7 +512,7 @@ const model = ref({
   odFlag: false,
   proRated: false,
   recurringFlag: false,
-  requiredFlag: true,
+  requireReceipt: true,
   requireURL: false,
   startDate: null,
   tagBudgets: []
@@ -520,10 +520,10 @@ const model = ref({
 const search = ref(''); // query text for datatable search field
 const showAccess = ref({}); // activate display for access list, object of ids to boolean
 const showAccessLength = ref(0); // number of employees with access
-const sortBy = ref([{ key: 'budgetName', order: 'asc' }]); // sort datatable items
+const sortBy = ref([{ key: 'name', order: 'asc' }]); // sort datatable items
 const store = useStore();
 const userInfo = ref(null); // user information
-const deleteType = ref(''); // item.budgetName for when item is deleted
+const deleteType = ref(''); // item.name for when item is deleted
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -679,19 +679,19 @@ function categoriesToString(categories) {
 function clearModel() {
   model.value['id'] = '';
   model.value['budget'] = 0;
-  model.value['budgetName'] = '';
+  model.value['name'] = '';
   model.value['description'] = '';
   model.value['odFlag'] = false;
   model.value['proRated'] = false;
   model.value['startDate'] = '';
   model.value['endDate'] = '';
   model.value['recurringFlag'] = false;
-  model.value['requiredFlag'] = false;
+  model.value['requireReceipt'] = false;
   model.value['isInactive'] = false;
   model.value['categories'] = [];
   model.value['accessibleBy'] = ['FullTime'];
   model.value['hasRecipient'] = false;
-  model.value['alwaysOnFeed'] = false;
+  model.value['showOnFeed'] = false;
   model.value['campfire'] = null;
   model.value['requireURL'] = false;
   model.value['tagBudgets'] = [];
@@ -975,7 +975,7 @@ async function updateModelInTable() {
  */
 async function validateDelete(item) {
   midAction.value = true;
-  deleteType.value = item.budgetName;
+  deleteType.value = item.name;
   try {
     let expenses = await api.getAllExpenseTypeExpenses(item.id);
     if (expenses.length <= 0) {
