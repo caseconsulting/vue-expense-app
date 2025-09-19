@@ -263,6 +263,8 @@ async function buildKudos(empId) {
     return format(result, null, 'YYYY-MM-DD');
   };
 
+  let highFiveET = expenseTypes.find((et) => et.budgetName === 'High Five');
+  let highFives = await api.getAllExpenseTypeExpenses(highFiveET.id);
   let employeesToBuild = empId ? [filteredEmployees.value.find((e) => e.id == empId)] : employees;
   for (let e of employeesToBuild) {
     // find from awards
@@ -275,14 +277,9 @@ async function buildKudos(empId) {
       kudos.value[e.id] = mostRecent(kudos.value[e.id], kudo.date);
     }
 
-    // find from high fives
-    // get all high fives
-    let highFiveET = expenseTypes.find((et) => et.budgetName === 'High Five');
-    let highFives = await api.getAllExpenseTypeExpenses(highFiveET.id);
-    // filter down to only ones the user received
-    highFives = highFives.filter((hf) => hf.recipient === e.id);
-    // extract as kudo if it was reimbursed
-    for (let hf of highFives ?? []) {
+    // find from high fives, filtering by recipient and if it was reimbursed
+    let receivedHighFives = highFives.filter((hf) => hf.recipient === e.id);
+    for (let hf of receivedHighFives ?? []) {
       if (hf.reimbursedDate) kudos.value[e.id] = mostRecent(kudos.value[e.id], hf.reimbursedDate);
     }
     if (kudos.value[e.id] === undefined) kudos.value[e.id] = null;
