@@ -108,7 +108,6 @@ function convertExpenses(expenses) {
     });
 
     // combine together and add
-    console.log(expense.state);
     tempExpenses.push({
       'First Name': expense.firstName || '',
       'Last Name': expense.lastName || '',
