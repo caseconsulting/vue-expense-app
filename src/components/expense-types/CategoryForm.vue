@@ -1,14 +1,31 @@
 <template>
-  <div>
-    <details-form :model="model"></details-form>
-    <flags :model="model"></flags>
-  </div>
+  <v-card>
+    <v-card-title class="d-flex align-center header-slim">
+      <h3>Create New Category</h3>
+    </v-card-title>
+    <v-card-text>
+      <v-form ref="categoryForm" v-model="valid" @submit.prevent="valid ? (submitForm = true) : _" lazy-validation>
+        <details-form v-model="category"></details-form>
+        <flags v-model="category"></flags>
+        <v-card-actions>
+          <submit-button :valid="valid"></submit-button>
+        </v-card-actions>
+      </v-form>
+    </v-card-text>
+  </v-card>
 </template>
 <script setup>
 import DetailsForm from '@/components/expense-types/forms/Details.vue';
 import Flags from '@/components/expense-types/forms/Flags.vue';
+import SubmitButton from '@/components/shared/buttons/SubmitButton.vue';
+import { ref } from 'vue';
+import { Category } from '@/models/category';
 
 const props = defineProps({
   model: Object
 });
+
+const category = ref(new Category(props.model));
+const categoryForm = ref(null); // filled in from the template
+const valid = ref(false); // form is valid
 </script>

@@ -32,9 +32,9 @@
               </v-col>
             </v-row>
           </v-container>
-        <v-card-actions>
-          <submit-button :valid="valid"></submit-button>
-        </v-card-actions>
+          <v-card-actions>
+            <submit-button :valid="valid"></submit-button>
+          </v-card-actions>
         </v-form>
       </v-card-text>
     </v-card>

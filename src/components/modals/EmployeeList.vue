@@ -1,5 +1,5 @@
 <template>
-  <!-- Button to view names of employees with access -->
+  <!-- Button to view names of employees -->
   <v-dialog v-model="show" max-width="400px" scrollable>
     <template #activator="{ props }">
       <v-btn class="px-1 ml-3" size="x-small" variant="outlined" v-bind="props"> view </v-btn>

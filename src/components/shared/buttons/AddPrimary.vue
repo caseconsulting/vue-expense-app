@@ -10,7 +10,7 @@ defineProps({
   },
   click: {
     type: Function,
-    required: true
+    default: () => { }
   }
 });
 </script>

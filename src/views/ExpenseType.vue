@@ -96,12 +96,12 @@
             <v-card-text>
               <v-row>
                 <v-col cols="12" class="d-flex justify-center ma-1">
-                  <add-primary
+                  <create-category
                     title="Add Category"
                     :click="() => {
                       addCategory = true;
                     }"
-                  ></add-primary>
+                  ></create-category>
                 </v-col>
               </v-row>
               <v-row>
@@ -132,8 +132,8 @@
   </div>
 </template>
 <script setup>
-import AddPrimary from '@/components/shared/buttons/AddPrimary.vue';
 import Boolean from '@/components/shared/Boolean.vue';
+import CreateCategory from '@/components/modals/CreateCategory.vue';
 import EmployeeList from '@/components/modals/EmployeeList.vue';
 import { onBeforeMount, ref } from 'vue';
 import { useStore } from 'vuex';
