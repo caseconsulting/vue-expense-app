@@ -24,6 +24,8 @@ export class ExpenseType {
     this.hasRecipient = properties.hasRecipient;
     /** @type {boolean} */
     this.isInactive = properties.isInactive; // use active() to determine if currently active
+    /** @type {string} */
+    this.monthlyLimit = properties.monthlyLimit;
     /** @type {boolean} */
     this.odFlag = properties.odFlag;
     /** @type {boolean} */

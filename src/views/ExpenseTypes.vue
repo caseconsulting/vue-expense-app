@@ -262,26 +262,6 @@
                   <v-card>
                     <v-card-text>
                       <div class="expandedInfo">
-                        <!-- Description -->
-                        <v-row no-gutters>
-                          <v-col cols="12">
-                            <p v-if="item.description">
-                              <b>Description:</b>
-                              {{ item.description }}
-                            </p>
-                          </v-col>
-                        </v-row>
-
-                        <!-- Category -->
-                        <v-row no-gutters>
-                          <v-col cols="12">
-                            <p>
-                              <b>Categories:</b>
-                              {{ categoriesToString(item.categories) }}
-                            </p>
-                          </v-col>
-                        </v-row>
-
                         <!-- Accessible By -->
                         <v-row v-if="userRoleIsAdmin()" no-gutters>
                           <!-- Display number of employees accessed by -->

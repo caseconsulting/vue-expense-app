@@ -7,7 +7,52 @@
       <h1>{{ model.name }}</h1>
       <p>{{ model.description }}</p>
       <v-row>
-        <v-col cols="9">
+        <v-col cols="6">
+          <v-card>
+            <v-card-title class="header-slim">Expense Type</v-card-title>
+            <v-card-text class="mt-2">
+              <h2>Budget Amount</h2>
+              <div class="ml-4">
+                <p><b>Budget:</b> {{ model.budget }}</p>
+                <p>TODO: tags</p>
+                <p><b>Monthly Limit:</b>
+                  <span v-if="model.monthlyLimit">{{ model.monthlyLimit }}</span>
+                  <span v-else>None</span>
+                </p>
+              </div>
+              <h2>Employee Access</h2>
+              <div class="ml-4">
+                TODO
+              </div>
+              <h2>Duration</h2>
+              <div class="ml-4">
+                <boolean displayText="Recurring" :field="model.recurringFlag"></boolean>
+                <div v-if="model.recurringFlag">
+                  <boolean displayText="Inactive" :field="model.isInactive"></boolean>
+                </div>
+                <div v-else>
+                  <p><b>Start Date:</b> {{ model.startDate }}</p>
+                  <p><b>End Date:</b> {{ model.endDate }}</p>
+                </div>
+              </div>
+              <h2>Integrations</h2>
+              <div class="ml-4">
+                <p v-if="model.campfire"><b>Basecamp Campfire:</b>{{ model.campfire }}</p>
+                <p v-else> None</p>
+              </div>
+              <h2>Flags</h2>
+              <div class="ml-4">
+                <p><b>Show On Feed:</b> {{ model.showOnFeedText }}</p>
+                <p><b>Require URL:</b> {{ model.requireURLText }}</p>
+                <p><b>Require Receipt:</b> {{ model.requireReceiptText }}</p>
+                <boolean displayText="Requires Recipient" :field="model.hasRecipient"></boolean>
+                <boolean displayText="Pro-rated" :field="model.proRated"></boolean>
+                <boolean displayText="Overdraft Allowed" :field="model.odFlag"></boolean>
+              </div>
+            </v-card-text>
+          </v-card>
+        </v-col>
+        <v-col cols="6">
           <v-card>
             <v-card-title class="header-slim">Categories</v-card-title>
             <v-card-text>
@@ -28,22 +73,6 @@
               </v-list>
             </v-card-text>
           </v-card>
-        </v-col>
-        <v-col cols="3">
-          <span>
-            <p><b>Show On Feed:</b> {{ model.showOnFeedText }}</p>
-            <p><b>Require URL:</b> {{ model.requireURLText }}</p>
-            <p><b>Require Receipt:</b> {{ model.requireReceiptText }}</p>
-          </span>
-          <boolean displayText="Requires Recipient" :field="model.hasRecipient"></boolean>
-          <br />
-          <boolean displayText="Pro-rated" :field="model.proRated"></boolean>
-          <br />
-          <boolean displayText="Overdraft Allowed" :field="model.odFlag"></boolean>
-          <br />
-          <boolean displayText="Recurring" :field="model.recurringFlag"></boolean>
-          <br />
-          <boolean displayText="Inactive" :field="model.isInactive"></boolean>
         </v-col>
       </v-row>
     </div>
