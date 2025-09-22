@@ -94,19 +94,36 @@
           <v-card>
             <v-card-title class="header-slim">Categories</v-card-title>
             <v-card-text>
-              <v-list>
-                <v-list-item
-                  v-for="(category, index) in model.categories"
-                  :key="index"
-                >
-                  <v-list-item-title>{{ category.name }}</v-list-item-title>
-                  <v-list-item-subtitle class="d-block">
-                    <boolean displayText="Show On Feed" :field="category.showOnFeed"></boolean>
-                    <boolean displayText="Require URL" :field="category.requireURL"></boolean>
-                    <boolean displayText="Require Receipt" :field="category.requireReceipt"></boolean>
-                  </v-list-item-subtitle>
-                </v-list-item>
-              </v-list>
+              <v-row>
+                <v-col cols="12" class="d-flex justify-center ma-1">
+                  <add-primary
+                    title="Add Category"
+                    :click="() => {
+                      addCategory = true;
+                    }"
+                  ></add-primary>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="12" v-if="model.categories.length == 0">
+                  <p>No categories.</p>
+                </v-col>
+                <v-col cols="12" v-else>
+                  <v-list>
+                    <v-list-item
+                      v-for="(category, index) in model.categories"
+                      :key="index"
+                    >
+                      <v-list-item-title>{{ category.name }}</v-list-item-title>
+                      <v-list-item-subtitle class="d-block">
+                        <boolean displayText="Show On Feed" :field="category.showOnFeed"></boolean>
+                        <boolean displayText="Require URL" :field="category.requireURL"></boolean>
+                        <boolean displayText="Require Receipt" :field="category.requireReceipt"></boolean>
+                      </v-list-item-subtitle>
+                    </v-list-item>
+                  </v-list>
+                </v-col>
+              </v-row>
             </v-card-text>
           </v-card>
         </v-col>
@@ -115,6 +132,7 @@
   </div>
 </template>
 <script setup>
+import AddPrimary from '@/components/shared/buttons/AddPrimary.vue';
 import Boolean from '@/components/shared/Boolean.vue';
 import EmployeeList from '@/components/modals/EmployeeList.vue';
 import { onBeforeMount, ref } from 'vue';
@@ -128,6 +146,7 @@ import { ExpenseType } from '@/models/ExpenseType.js';
 const route = useRoute();
 const store = useStore();
 
+const addCategory = ref(false);
 const loading = ref(true);
 const model = ref(null); // selected expense type
 
