@@ -218,7 +218,7 @@
               </template>
               <!-- Actions -->
               <template v-if="userRoleIsAdmin()" v-slot:[`item.actions`]="{ item }">
-                <div class="mr-4">
+                <div>
                   <v-btn
                     v-if="userRoleIsAdmin()"
                     :disabled="midAction"
@@ -258,7 +258,7 @@
 
               <!-- Expanded slot item -->
               <template #expanded-row="{ columns, item }">
-                <td :colspan="columns.length" class="pa-0">
+                <td :colspan="columns.length">
                   <v-card>
                     <v-card-text>
                       <div class="expandedInfo">
@@ -306,7 +306,7 @@
                               <v-card-text class="pb-0">
                                 <v-row>
                                   <v-list color="#f0f0f0" width="376">
-                                    <div v-for="employee in getEmployeeList(item.accessibleBy)" :key="employee.id">
+                                    <div v-for="employee in getEmployeeList(item)" :key="employee.id">
                                       <v-list-item>
                                         <!-- Employee Image -->
                                         <template #prepend>
@@ -418,9 +418,6 @@ import DeleteErrorModal from '@/components/modals/DeleteErrorModal.vue';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
 import DisableExpenseTypeForEmployeesModal from '@/components/modals/DisableExpenseTypeForEmployeesModal.vue';
 import ExpenseTypeForm from '@/components/expense-types/ExpenseTypeForm.vue';
-import _map from 'lodash/map';
-import _filter from 'lodash/filter';
-import _find from 'lodash/find';
 import _sortBy from 'lodash/sortBy';
 import _cloneDeep from 'lodash/cloneDeep';
 import _union from 'lodash/union';
@@ -438,6 +435,7 @@ import { format } from '../shared/dateUtils';
 import { onBeforeMount, onBeforeUnmount, ref, watch, computed, inject } from 'vue';
 import { useStore } from 'vuex';
 import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSnackbar.vue';
+import { ExpenseType } from '@/models/expenseType.js';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -497,26 +495,7 @@ const invalidDelete = ref(false); // invalid delete staus
 const itemsPerPage = ref(-1); // items per datatable page
 const loading = ref(true); //loading status
 const midAction = ref(false);
-const model = ref({
-  accessibleBy: ['FullTime'],
-  showOnFeed: false,
-  budget: 0,
-  name: '',
-  campfire: null,
-  categories: [],
-  description: '',
-  endDate: null,
-  hasRecipient: false,
-  id: '',
-  isInactive: false,
-  odFlag: false,
-  proRated: false,
-  recurringFlag: false,
-  requireReceipt: true,
-  requireURL: false,
-  startDate: null,
-  tagBudgets: []
-}); // selected expense type
+const model = ref(new ExpenseType({})); // selected expense type
 const search = ref(''); // query text for datatable search field
 const showAccess = ref({}); // activate display for access list, object of ids to boolean
 const showAccessLength = ref(0); // number of employees with access
@@ -651,7 +630,7 @@ async function addModelToTable() {
   await refreshExpenseTypes();
 
   useDisplaySuccess('Item was successfully submitted!');
-} // addModelToTable
+}
 
 /**
  * Returns a string of category names.
@@ -671,31 +650,14 @@ function categoriesToString(categories) {
     return 'None';
   }
   return string;
-} // categoriesToString
+}
 
 /**
  * Clear the selected expense type.
  */
 function clearModel() {
-  model.value['id'] = '';
-  model.value['budget'] = 0;
-  model.value['name'] = '';
-  model.value['description'] = '';
-  model.value['odFlag'] = false;
-  model.value['proRated'] = false;
-  model.value['startDate'] = '';
-  model.value['endDate'] = '';
-  model.value['recurringFlag'] = false;
-  model.value['requireReceipt'] = false;
-  model.value['isInactive'] = false;
-  model.value['categories'] = [];
-  model.value['accessibleBy'] = ['FullTime'];
-  model.value['hasRecipient'] = false;
-  model.value['showOnFeed'] = false;
-  model.value['campfire'] = null;
-  model.value['requireURL'] = false;
-  model.value['tagBudgets'] = [];
-} // clearModel
+  model.value = new ExpenseType({});
+}
 
 /**
  * Delete an expense type and display status.
@@ -710,7 +672,7 @@ async function deleteExpenseType() {
     useDisplayError(et.response.data.message);
   }
   midAction.value = false;
-} // deleteExpenseType
+}
 
 /**
  * Refresh and updates expense type list and displays a successful delete status in the snackbar.
@@ -720,14 +682,14 @@ async function deleteModelFromTable() {
   await refreshExpenseTypes();
 
   useDisplaySuccess('Item was successfully deleted!');
-} // deleteModelFromTable
+}
 
 /**
  * Sets inAction boolean to false.
  */
 function endAction() {
   midAction.value = false;
-} // endAction
+}
 
 /** Display error from expense form */
 function expenseFormError(msg) {
@@ -738,10 +700,10 @@ function expenseFormError(msg) {
  * Filters expense types based on filter selections.
  */
 function filterExpenseTypes() {
-  filteredExpenseTypes.value = { ...expenseTypes.value };
+  filteredExpenseTypes.value = [...expenseTypes.value];
 
   // filter expense types by active or inactive
-  filteredExpenseTypes.value = _filter(filteredExpenseTypes.value, (expenseType) => {
+  filteredExpenseTypes.value = filteredExpenseTypes.value.filter((expenseType) => {
     return filter.value.active == 'active'
       ? !expenseType.isInactive
       : filter.value.active == 'notActive'
@@ -750,7 +712,7 @@ function filterExpenseTypes() {
   });
 
   // filter expense types by overdraft
-  filteredExpenseTypes.value = _filter(filteredExpenseTypes.value, (expenseType) => {
+  filteredExpenseTypes.value = filteredExpenseTypes.value.filter((expenseType) => {
     return filter.value.overdraft == 'overdraft'
       ? expenseType.odFlag
       : filter.value.overdraft == 'noOverdraft'
@@ -759,14 +721,14 @@ function filterExpenseTypes() {
   });
 
   // filter expense types by recurring
-  filteredExpenseTypes.value = _filter(filteredExpenseTypes.value, (expenseType) => {
+  filteredExpenseTypes.value = filteredExpenseTypes.value.filter((expenseType) => {
     return filter.value.recurring == 'recurring'
       ? expenseType.recurringFlag
       : filter.value.recurring == 'notRecurring'
         ? !expenseType.recurringFlag
         : { ...filteredExpenseTypes.value };
   });
-} // filterExpenseTypes
+}
 
 /**
  * Check who the expense type is accessible by. Returns a list of access types.
@@ -775,11 +737,11 @@ function filterExpenseTypes() {
  * @return String - accessible by description
  */
 function getAccess(expenseType) {
-  let accessList = _filter(expenseType.accessibleBy, (accessType) => {
+  let accessList = expenseType.accessibleBy.filter((accessType) => {
     return accessType == 'FullTime' || accessType == 'PartTime' || accessType == 'Intern' || accessType == 'Custom';
   });
   return accessList.join(', ');
-} // getAccess
+}
 
 /**
  * Gets the campfire name and url for a given url.
@@ -788,10 +750,10 @@ function getAccess(expenseType) {
  * @return Object - basecamp name and url data
  */
 function getCampfire(url) {
-  return _find(campfires.value, (campfire) => {
+  return campfires.value.find((campfire) => {
     return campfire.url == url;
   });
-} // getCampfire
+}
 
 /**
  * Get the list of employees who have access to a expense type accessible by value.
@@ -799,47 +761,14 @@ function getCampfire(url) {
  * @param accessibleBy - expense type accessible by value
  * @return Array - list of employees with access
  */
-function getEmployeeList(accessibleBy) {
-  let employeesList = [];
-  if (accessibleBy.includes('FullTime')) {
-    // accessible by all employees
-    employeesList = employeesList.concat(
-      _filter(employees.value, (employee) => {
-        return employee.workStatus == 100 && employee.employeeRole != 'intern';
-      })
-    );
-  }
-  if (accessibleBy.includes('PartTime')) {
-    // accessible by full time employees only
-    employeesList = employeesList.concat(
-      _filter(employees.value, (employee) => {
-        return employee.workStatus < 100 && employee.workStatus > 0 && employee.employeeRole != 'intern';
-      })
-    );
-  }
-  if (accessibleBy.includes('Intern')) {
-    // accessible by full time employees only
-    employeesList = employeesList.concat(
-      _filter(employees.value, (employee) => {
-        return employee.workStatus > 0 && employee.employeeRole == 'intern';
-      })
-    );
-  }
-  if (accessibleBy.includes('Custom')) {
-    // custom access list
-    employeesList = employeesList.concat(
-      _filter(employees.value, (employee) => {
-        return accessibleBy.includes(employee.id);
-      })
-    );
-  }
-  employeesList = [...new Set(employeesList)];
+function getEmployeeList(item) {
+  let employeesList = item.employeeAccess(employees.value);
   showAccessLength.value = employeesList.length;
   return _sortBy(employeesList, [
     (employee) => employee.firstName.toLowerCase(),
     (employee) => employee.lastName.toLowerCase()
   ]); // sort by first name then last name
-} // getEmployeeList
+}
 
 /**
  * Get the employee name of an employee id.
@@ -848,9 +777,9 @@ function getEmployeeList(accessibleBy) {
  * @return String - employee full name
  */
 function getEmployeeName(employeeId) {
-  let localEmployee = _find(employees.value, ['id', employeeId]);
+  let localEmployee = employees.value.find((employee) => employee.id === employeeId);
   return `${localEmployee.firstName} ${localEmployee.lastName}`;
-} // getEmployeeName
+}
 
 /**
  * Load all data required to load the page initially.
@@ -860,27 +789,27 @@ async function loadExpenseTypesData() {
   userInfo.value = store.getters.user;
   [campfires.value] = await Promise.all([
     userRoleIsAdmin() ? api.getBasecampCampfires() : '',
-    userRoleIsAdmin() && !store.getters.tags ? updateStoreTags() : _find && _map,
-    userRoleIsAdmin() && !store.getters.employees ? updateStoreEmployees() : _find && _map,
-    userRoleIsAdmin() && !store.getters.avatars ? updateStoreAvatars() : _find && _map,
+    userRoleIsAdmin() && !store.getters.tags ? updateStoreTags() : '',
+    userRoleIsAdmin() && !store.getters.employees ? updateStoreEmployees() : '',
+    userRoleIsAdmin() && !store.getters.avatars ? updateStoreAvatars() : '',
     refreshExpenseTypes(),
     updateStoreCampfires()
   ]);
-  expenseTypes.value = store.getters.expenseTypes;
+  expenseTypes.value = store.getters.expenseTypes.map((et) => new ExpenseType(et));
   filterExpenseTypes();
   if (userRoleIsAdmin()) {
     employees.value = store.getters.employees;
     // set employee avatar
     let avatars = store.getters.basecampAvatars;
-    _map(employees.value, (employee) => {
-      let avatar = _find(avatars, ['email_address', employee.email]);
+    employees.value.map((employee) => {
+      let avatar = avatars.find((avatar) => avatar.email_address === employee.email);
       let avatarUrl = avatar ? avatar.avatar_url : null;
       employee.avatar = avatarUrl;
       return employee;
     });
   }
   initialPageLoading.value = false;
-} // loadExpenseTypesData
+}
 
 /**
  * limits the length of the text
@@ -891,7 +820,7 @@ async function loadExpenseTypesData() {
 function limitedText(val) {
   // limits text displayed to 50 characters on table view
   return val.length > 50 ? `${val.substring(0, 50)}...` : val;
-} // limitedText
+}
 
 /**
  * Store the attributes of a selected expense type.
@@ -900,7 +829,7 @@ function limitedText(val) {
  */
 function onSelect(item) {
   model.value = _cloneDeep(item);
-} // onSelect
+}
 
 /**
  * Refresh expense type data and filters expense types.
@@ -922,11 +851,11 @@ async function refreshExpenseTypes() {
     // get the active budgets for the employee
     let activeBudgets = store.getters.budgets;
     // map the active budgets
-    let activeExpTypes = _map(activeBudgets, (budget) => {
+    let activeExpTypes = activeBudgets.map((budget) => {
       return budget.expenseTypeId;
     });
     // map the budgets with expenses
-    let budExpTypes = _map(budgetsWithExpenses, (budget) => {
+    let budExpTypes = budgetsWithExpenses.map((budget) => {
       return budget.expenseTypeId;
     });
     // combine the two types of expenses
@@ -934,28 +863,28 @@ async function refreshExpenseTypes() {
     // get rid of duplicates
     expenseTypesFiltered = _uniq(expenseTypesFiltered);
     // set expenseTypes.value to only have those the user should see (expenseTypesFiltered)
-    expenseTypes.value = _filter(expenseTypes.value, (expenseType) => {
+    expenseTypes.value = expenseTypes.value.filter((expenseType) => {
       return expenseTypesFiltered.includes(expenseType.id);
     });
   }
 
   filterExpenseTypes();
   loading.value = false; // set loading status to false
-} // refreshExpenseTypes
+}
 
 /**
  * set midAction to true
  */
 function startAction() {
   midAction.value = true;
-} // startAction
+}
 
 /**
  * Scrolls window back to the top of the form.
  */
 function toTopOfForm() {
   window.scrollTo(0, form.value.$el.offsetTop - 70);
-} // toTopOfForm
+}
 
 /**
  * Refresh and updates expense type list and displays a successful update status in the snackbar.
@@ -965,7 +894,7 @@ async function updateModelInTable() {
   await refreshExpenseTypes();
 
   useDisplaySuccess('Item was successfully updated!');
-} // updateModelInTable
+}
 
 /**
  * Validates if an expense type can be deleted. Returns true if the expense type has no expenses, otherwise returns
@@ -988,7 +917,7 @@ async function validateDelete(item) {
   } catch (err) {
     useDisplayError(err);
   }
-} // validateDelete
+}
 
 /**
  * Gets tag object given id
@@ -996,7 +925,7 @@ async function validateDelete(item) {
  */
 function getTagByID(id) {
   return store.getters.tags.find((t) => t.id === id);
-} // getTagByID
+}
 
 /**
  * Opens the modal to disable/enable budgets for people
@@ -1006,7 +935,7 @@ function getTagByID(id) {
 function openDisableModal(item) {
   showDisableModal.value = true;
   disableModalItem.value = item;
-} // openDisableModal
+}
 
 // |--------------------------------------------------|
 // |                                                  |

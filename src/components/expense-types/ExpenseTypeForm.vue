@@ -90,6 +90,7 @@ import { generateUUID, isEmpty } from '@/utils/utils';
 import { format } from '@/shared/dateUtils';
 import { updateStoreExpenseTypes } from '@/utils/storeUtils';
 import { onMounted, onBeforeUnmount, ref, inject, watch, nextTick } from 'vue';
+import { ExpenseType } from '@/models/expenseType.js';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -128,7 +129,7 @@ onMounted(async () => {
     submitForm.value = false;
   });
 
-  editedExpenseType.value = _cloneDeep(props.model);
+  editedExpenseType.value = new ExpenseType(props.model);
 
   clearForm();
 });
@@ -289,7 +290,7 @@ async function submit() {
 watch(
   () => props.model.id,
   () => {
-    editedExpenseType.value = _cloneDeep(props.model); //set editedExpense to new value of model
+    editedExpenseType.value = new ExpenseType(props.model); //set editedExpense to new value of model
 
     // set array used for custom access chip-selector to previously saved data but without the access strings
     // This code sucks

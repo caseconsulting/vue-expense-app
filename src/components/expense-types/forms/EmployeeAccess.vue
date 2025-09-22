@@ -210,37 +210,7 @@ function clearForm() {
  * @return Array - list of employees
  */
 function getEmployeeList() {
-  let employeeList = [];
-  if (props.modelValue.accessibleBy.includes('FullTime')) {
-    employeeList = employeeList.concat(
-      store.getters.employees.filter((employee) => {
-        return employee.workStatus == 100 && employee.employeeRole != 'intern';
-      })
-    );
-  }
-  if (props.modelValue.accessibleBy.includes('PartTime')) {
-    employeeList = employeeList.concat(
-      store.getters.employees.filter((employee) => {
-        return employee.workStatus < 100 && employee.workStatus > 0 && employee.employeeRole != 'intern';
-      })
-    );
-  }
-  if (props.modelValue.accessibleBy.includes('Intern')) {
-    employeeList = employeeList.concat(
-      store.getters.employees.filter((employee) => {
-        return employee.workStatus > 0 && employee.employeeRole == 'intern';
-      })
-    );
-  }
-  if (props.modelValue.accessibleBy.includes('Custom')) {
-    employeeList = employeeList.concat(
-      store.getters.employees.filter((employee) => {
-        return customAccess.value.includes(employee.id);
-      })
-    );
-  }
-
-  employeeList = [...new Set(employeeList)];
+  let employeeList = props.modelValue.employeeAccess(store.getters.employees, customAccess.value);
   employeeSize.value = employeeList.length;
   return _sortBy(employeeList, [
     (employee) => employee.firstName.toLowerCase(),

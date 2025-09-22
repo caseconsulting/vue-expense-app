@@ -4,7 +4,7 @@ export class ExpenseType {
     /** @type {string} */
     this.id = properties.id;
     /** @type {string[]} */
-    this.accessibleBy = properties.accessibleBy;
+    this.accessibleBy = properties.accessibleBy ?? [];
     /** @type {boolean} */
     this.showOnFeed = properties.showOnFeed;
     /** @type {number} */
@@ -37,7 +37,7 @@ export class ExpenseType {
     /** @type {string} */
     this.startDate = properties.startDate;
     /** @type {Object[]} */
-    this.tagBudgets = properties.tagBudgets;
+    this.tagBudgets = properties.tagBudgets ?? [];
   }
 
   get active() {
@@ -69,5 +69,48 @@ export class ExpenseType {
   get categoriesRequireURL() {
     let categoriesRequireURL = this.categories.filter((c) => c.requireURL);
     return categoriesRequireURL.length > 0 ? categoriesRequireURL.map((c) => c.name).join(', ') : 'None';
+  }
+
+  employeeAccess(employees, customAccess) {
+    let employeesList = [];
+    if (this.accessibleBy.includes('FullTime')) {
+      // accessible by all employees
+      employeesList = employeesList.concat(
+        employees.filter((employee) => {
+          return employee.workStatus == 100 && employee.employeeRole != 'intern';
+        })
+      );
+    }
+    if (this.accessibleBy.includes('PartTime')) {
+      // accessible by full time employees only
+      employeesList = employeesList.concat(
+        employees.filter((employee) => {
+          return employee.workStatus < 100 && employee.workStatus > 0 && employee.employeeRole != 'intern';
+        })
+      );
+    }
+    if (this.accessibleBy.includes('Intern')) {
+      // accessible by full time employees only
+      employeesList = employeesList.concat(
+        employees.filter((employee) => {
+          return employee.workStatus > 0 && employee.employeeRole == 'intern';
+        })
+      );
+    }
+    if (this.accessibleBy.includes('Custom')) {
+      // custom access list
+      employeesList = employeesList.concat(
+        employees.filter((employee) => {
+          if (customAccess) {
+            return customAccess.includes(employee.id)
+          } else {
+            return this.accessibleBy.includes(employee.id);
+          }
+        })
+      );
+    }
+    employeesList = [...new Set(employeesList)];
+
+    return employeesList;
   }
 }
