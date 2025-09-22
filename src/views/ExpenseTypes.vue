@@ -184,8 +184,7 @@
               :items-per-page="itemsPerPage"
               :headers="_headers"
               :items="expenseTypeList"
-              :expanded="expanded"
-              expand-on-click
+              @click:row="clickedRow"
               :loading="loading"
               :search="search"
               item-key="id"
@@ -262,97 +261,7 @@
                   <v-card>
                     <v-card-text>
                       <div class="expandedInfo">
-                        <!-- Accessible By -->
-                        <v-row v-if="userRoleIsAdmin()" no-gutters>
-                          <!-- Display number of employees accessed by -->
-                          <div>
-                            <p>
-                              <b>Access:</b>
-                              {{ getAccess(item) }}
-                            </p>
-                          </div>
-                          <!-- Button to view names of employees with access -->
-                          <v-dialog v-model="showAccess[item.id]" max-width="400px" scrollable>
-                            <template #activator="{ props }">
-                              <v-btn class="px-1 ml-3" size="x-small" variant="outlined" v-bind="props"> view </v-btn>
-                            </template>
-                            <v-card class="mt-3">
-                              <!-- Dialog Title -->
-                              <v-card-title class="d-flex align-center header_style">
-                                <h3>Accessible By</h3>
-                              </v-card-title>
-                              <v-divider color="black" />
-                              <!-- List of employee names/ISSUES -->
-                              <v-card-text class="pb-0">
-                                <v-row>
-                                  <v-list color="#f0f0f0" width="376">
-                                    <div v-for="employee in getEmployeeList(item)" :key="employee.id">
-                                      <v-list-item>
-                                        <!-- Employee Image -->
-                                        <template #prepend>
-                                          <user-avatar :employee="employee" :image="employee.avatar" />
-                                        </template>
-                                        <!-- Employee Name -->
-                                        <v-list-item-title>{{ getEmployeeName(employee.id) }}</v-list-item-title>
-                                      </v-list-item>
-                                    </div>
-                                  </v-list>
-                                </v-row>
-                              </v-card-text>
-
-                              <v-divider color="black" />
-                              <!-- Close dialog button -->
-                              <v-card-actions>
-                                <v-spacer />
-                                <v-btn theme="dark" variant="text" @click="showAccess[item.id] = false"> Close </v-btn>
-                              </v-card-actions>
-                            </v-card>
-                          </v-dialog>
-                        </v-row>
-                        <!-- End Accessible By -->
-
-                        <!-- Tag Budgets -->
-                        <v-row v-if="userRoleIsAdmin() && item.tagBudgets && item.tagBudgets.length > 0" no-gutters>
-                          <v-col cols="12" sm="6" md="3">
-                            <div>
-                              <p><b>Tag Budgets:</b></p>
-                            </div>
-                          </v-col>
-                          <v-col class="d-flex justify-space-between flex-wrap">
-                            <div v-for="(item, index) in item.tagBudgets" :key="index" class="d-flex px-2 pb-4">
-                              <div class="d-flex pr-3">
-                                <b>Tag(s):</b>
-                                <div class="d-flex flex-column">
-                                  <v-chip v-for="tagID in item.tags" size="small" :key="tagID">
-                                    <v-icon icon="mdi-tag" start />{{ getTagByID(tagID).tagName }}
-                                  </v-chip>
-                                </div>
-                              </div>
-                              <div class="d-flex flex-nowrap">
-                                <span>
-                                  <b>Budget: </b>
-                                  {{ convertToMoneyString(item.budget) }}
-                                </span>
-                              </div>
-                            </div>
-                          </v-col>
-                        </v-row>
-                        <!-- End Tag Budgets -->
-
-                        <!-- Basecamp Campfire -->
-                        <p v-if="getCampfire(item.campfire)">
-                          <b>Basecamp Campfire: </b>
-                          <a :href="getCampfire(item.campfire).url" target="blank">
-                            {{ getCampfire(item.campfire).name }}
-                          </a>
-                        </p>
-                        <!-- End Basecamp Campfire -->
-
-                        <!-- Monthly Limit -->
-                        <p v-if="item.monthlyLimit">
-                          <b>Monthly Limit: </b>
-                          ${{ item.monthlyLimit }}
-                        </p>
+                        TODO: What do admins want here?
                       </div>
                     </v-card-text>
                   </v-card>
@@ -405,15 +314,12 @@ import _uniq from 'lodash/uniq';
 import { convertToMoneyString, userRoleIsAdmin } from '@/utils/utils';
 import {
   updateStoreExpenseTypes,
-  updateStoreEmployees,
-  updateStoreAvatars,
   updateStoreBudgets,
-  updateStoreCampfires,
-  updateStoreTags
 } from '@/utils/storeUtils';
 import { format } from '../shared/dateUtils';
 import { onBeforeMount, onBeforeUnmount, ref, watch, computed, inject } from 'vue';
 import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSnackbar.vue';
 import { ExpenseType } from '@/models/expenseType.js';
 
@@ -423,16 +329,15 @@ import { ExpenseType } from '@/models/expenseType.js';
 // |                                                  |
 // |--------------------------------------------------|
 
+const router = useRouter();
+
 // items for disable modal
 const showDisableModal = ref(false);
 const disableModalItem = ref(null);
 
-const campfires = ref([]); // basecamp campfires
 const deleteModel = ref({ id: '' }); // expense type to delete
 const deleting = ref(false); // activate delete confirmation model
 const emitter = inject('emitter');
-const employees = ref([]); // employees
-const expanded = ref([]); // datatable expanded
 const expenseTypes = ref([]); // expense types
 const filter = ref({
   active: 'active',
@@ -477,8 +382,6 @@ const loading = ref(true); //loading status
 const midAction = ref(false);
 const model = ref(new ExpenseType({})); // selected expense type
 const search = ref(''); // query text for datatable search field
-const showAccess = ref({}); // activate display for access list, object of ids to boolean
-const showAccessLength = ref(0); // number of employees with access
 const sortBy = ref([{ key: 'name', order: 'asc' }]); // sort datatable items
 const store = useStore();
 const userInfo = ref(null); // user information
@@ -613,30 +516,19 @@ async function addModelToTable() {
 }
 
 /**
- * Returns a string of category names.
- *
- * @param categories - the categories to stringify
- * @return string - the string of categories
- */
-function categoriesToString(categories) {
-  let string = '';
-  for (let i = 0; i < categories.length; i++) {
-    string += categories[i].name;
-    if (i < categories.length - 1) {
-      string += ', ';
-    }
-  }
-  if (string.length === 0) {
-    return 'None';
-  }
-  return string;
-}
-
-/**
  * Clear the selected expense type.
  */
 function clearModel() {
   model.value = new ExpenseType({});
+}
+
+/**
+ * Routes the user to the employees page and autofills the search fields.
+ *
+ * @param value - row clicked
+ */
+function clickedRow(_, rowItem) {
+  router.push(`/expenseType/${rowItem.item.id}`);
 }
 
 /**
@@ -711,83 +603,16 @@ function filterExpenseTypes() {
 }
 
 /**
- * Check who the expense type is accessible by. Returns a list of access types.
- *
- * @param expenseType - expesne type to check
- * @return String - accessible by description
- */
-function getAccess(expenseType) {
-  let accessList = expenseType.accessibleBy.filter((accessType) => {
-    return accessType == 'FullTime' || accessType == 'PartTime' || accessType == 'Intern' || accessType == 'Custom';
-  });
-  return accessList.join(', ');
-}
-
-/**
- * Gets the campfire name and url for a given url.
- *
- * @param url - basecamp url String
- * @return Object - basecamp name and url data
- */
-function getCampfire(url) {
-  return campfires.value.find((campfire) => {
-    return campfire.url == url;
-  });
-}
-
-/**
- * Get the list of employees who have access to a expense type accessible by value.
- *
- * @param accessibleBy - expense type accessible by value
- * @return Array - list of employees with access
- */
-function getEmployeeList(item) {
-  let employeesList = item.employeeAccess(employees.value);
-  showAccessLength.value = employeesList.length;
-  return _sortBy(employeesList, [
-    (employee) => employee.firstName.toLowerCase(),
-    (employee) => employee.lastName.toLowerCase()
-  ]); // sort by first name then last name
-}
-
-/**
- * Get the employee name of an employee id.
- *
- * @param employeeId - employee id
- * @return String - employee full name
- */
-function getEmployeeName(employeeId) {
-  let localEmployee = employees.value.find((employee) => employee.id === employeeId);
-  return `${localEmployee.firstName} ${localEmployee.lastName}`;
-}
-
-/**
  * Load all data required to load the page initially.
  */
 async function loadExpenseTypesData() {
   initialPageLoading.value = true;
   userInfo.value = store.getters.user;
-  [campfires.value] = await Promise.all([
-    userRoleIsAdmin() ? api.getBasecampCampfires() : '',
-    userRoleIsAdmin() && !store.getters.tags ? updateStoreTags() : '',
-    userRoleIsAdmin() && !store.getters.employees ? updateStoreEmployees() : '',
-    userRoleIsAdmin() && !store.getters.avatars ? updateStoreAvatars() : '',
-    refreshExpenseTypes(),
-    updateStoreCampfires()
+  await Promise.all([
+    refreshExpenseTypes()
   ]);
   expenseTypes.value = store.getters.expenseTypes.map((et) => new ExpenseType(et));
   filterExpenseTypes();
-  if (userRoleIsAdmin()) {
-    employees.value = store.getters.employees;
-    // set employee avatar
-    let avatars = store.getters.basecampAvatars;
-    employees.value.map((employee) => {
-      let avatar = avatars.find((avatar) => avatar.email_address === employee.email);
-      let avatarUrl = avatar ? avatar.avatar_url : null;
-      employee.avatar = avatarUrl;
-      return employee;
-    });
-  }
   initialPageLoading.value = false;
 }
 
@@ -898,15 +723,6 @@ async function validateDelete(item) {
     useDisplayError(err);
   }
 }
-
-/**
- * Gets tag object given id
- * @param id id of tag to find
- */
-function getTagByID(id) {
-  return store.getters.tags.find((t) => t.id === id);
-}
-
 /**
  * Opens the modal to disable/enable budgets for people
  *

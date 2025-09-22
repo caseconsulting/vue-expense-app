@@ -1,7 +1,19 @@
 <template>
   <div>
     <div v-if="model == null && loading">
-      <p>Loading...</p>
+        <v-row>
+          <v-col cols="12">
+            <v-skeleton-loader type="heading"></v-skeleton-loader>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="6">
+            <v-skeleton-loader width="100%" type="text@12"></v-skeleton-loader>
+          </v-col>
+          <v-col cols="6">
+            <v-skeleton-loader width="100%" type="text@12"></v-skeleton-loader>
+          </v-col>
+        </v-row>
     </div>
     <div v-else>
       <h1>{{ model.name }}</h1>
@@ -14,15 +26,41 @@
               <h2>Budget Amount</h2>
               <div class="ml-4">
                 <p><b>Budget:</b> {{ model.budget }}</p>
-                <p>TODO: tags</p>
-                <p><b>Monthly Limit:</b>
+                <!-- Tag Budgets -->
+                <v-row v-if="userRoleIsAdmin() && model.tagBudgets && model.tagBudgets.length > 0" no-gutters>
+                  <v-col cols="12" sm="6" md="3">
+                    <div>
+                      <p><b>Tag Budgets:</b></p>
+                    </div>
+                  </v-col>
+                  <v-col class="d-flex justify-space-between flex-wrap">
+                    <div v-for="(model, index) in model.tagBudgets" :key="index" class="d-flex px-2 pb-4">
+                      <div class="d-flex pr-3">
+                        <b>Tag(s):</b>
+                        <div class="d-flex flex-column">
+                          <v-chip v-for="tagID in model.tags" size="small" :key="tagID">
+                            <v-icon icon="mdi-tag" start />{{ getTagByID(tagID).tagName }}
+                          </v-chip>
+                        </div>
+                      </div>
+                      <div class="d-flex flex-nowrap">
+                        <span>
+                          <b>Budget: </b>
+                          {{ convertToMoneyString(model.budget) }}
+                        </span>
+                      </div>
+                    </div>
+                  </v-col>
+                </v-row>
+                <p><b>Monthly Limit: </b>
                   <span v-if="model.monthlyLimit">{{ model.monthlyLimit }}</span>
                   <span v-else>None</span>
                 </p>
               </div>
               <h2>Employee Access</h2>
               <div class="ml-4">
-                TODO
+                <p><b>Access:</b> {{ model.accessText }}</p>
+                <employee-list :employees="getEmployeeAccess()"></employee-list>
               </div>
               <h2>Duration</h2>
               <div class="ml-4">
@@ -61,14 +99,12 @@
                   v-for="(category, index) in model.categories"
                   :key="index"
                 >
-                  <v-list-item-content>
-                    <v-list-item-title>{{ category.name }}</v-list-item-title>
-                    <v-list-item-subtitle class="d-block">
-                      <boolean displayText="Show On Feed" :field="category.showOnFeed"></boolean>
-                      <boolean displayText="Require URL" :field="category.requireURL"></boolean>
-                      <boolean displayText="Require Receipt" :field="category.requireReceipt"></boolean>
-                    </v-list-item-subtitle>
-                  </v-list-item-content>
+                  <v-list-item-title>{{ category.name }}</v-list-item-title>
+                  <v-list-item-subtitle class="d-block">
+                    <boolean displayText="Show On Feed" :field="category.showOnFeed"></boolean>
+                    <boolean displayText="Require URL" :field="category.requireURL"></boolean>
+                    <boolean displayText="Require Receipt" :field="category.requireReceipt"></boolean>
+                  </v-list-item-subtitle>
                 </v-list-item>
               </v-list>
             </v-card-text>
@@ -80,10 +116,13 @@
 </template>
 <script setup>
 import Boolean from '@/components/shared/Boolean.vue';
+import EmployeeList from '@/components/modals/EmployeeList.vue';
 import { onBeforeMount, ref } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
-import { updateStoreUser, updateStoreExpenseTypes } from '@/utils/storeUtils.js';
+import { convertToMoneyString, userRoleIsAdmin } from '@/utils/utils';
+import { updateStoreEmployees, updateStoreExpenseTypes, updateStoreTags, updateStoreUser } from '@/utils/storeUtils.js';
+import { loadBasecampAvatars } from '@/utils/basecamp';
 import { ExpenseType } from '@/models/ExpenseType.js';
 
 const route = useRoute();
@@ -93,10 +132,26 @@ const loading = ref(true);
 const model = ref(null); // selected expense type
 
 onBeforeMount(async () => {
+  await updateStoreEmployees();
+  await loadBasecampAvatars(store, store.getters.employees);
   await updateStoreUser();
   await updateStoreExpenseTypes();
+  await updateStoreTags();
   loadExpenseType();
 });
+
+function getEmployeeAccess() {
+  return model.value.employeeAccess(store.getters.employees);
+}
+
+/**
+ * Gets tag object given id
+ * @param id id of tag to find
+ */
+function getTagByID(id) {
+  return store.getters.tags.find((t) => t.id === id);
+}
+
 
 function loadExpenseType() {
   model.value = new ExpenseType(store.getters.expenseTypes.find(et => et.id === route.params.id));

@@ -113,10 +113,11 @@
 <script setup>
 import Checkbox from '@/components/shared/forms/Checkbox.vue';
 import Help from '@/components/shared/buttons/Help.vue';
-import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, inject, onBeforeMount, onBeforeUnmount, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 import { employeeFilter } from '@/shared/filterUtils';
 import _sortBy from 'lodash/sortBy';
+import { updateStoreEmployees } from '@/utils/storeUtils';
 
 const emitter = inject('emitter');
 const props = defineProps({
@@ -149,14 +150,14 @@ const searchString = ref('');
 /**
  * Gets and sets all employees.
  */
-onMounted(() => {
+onBeforeMount(async() => {
   emitter.on('clear-expense-type-form', clearForm);
+
+  await updateStoreEmployees();
 
   // get all employees
   let employees = store.getters.employees;
   let sortedActiveEmployees = [];
-
-  getEmployeeList();
 
   // populate list of active employees
   employees.forEach((employee) => {
@@ -229,28 +230,6 @@ function getEmployeeName(employeeId) {
   return `${localEmployee.firstName} ${localEmployee.lastName}`;
 }
 
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                     WATCHERS                     |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * watcher for editedExpensetype.accessibleBy
- */
-watch(
-  () => props.modelValue.accessibleBy,
-  () => getEmployeeList()
-);
-
-/**
- * water for customAccess
- */
-watch(
-  () => customAccess,
-  () => getEmployeeList()
-);
 </script>
 <style scoped>
 #error {

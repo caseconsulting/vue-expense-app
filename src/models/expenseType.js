@@ -6,7 +6,7 @@ export class ExpenseType {
     /** @type {string[]} */
     this.accessibleBy = properties.accessibleBy ?? [];
     /** @type {boolean} */
-    this.showOnFeed = properties.showOnFeed;
+    this.showOnFeed = properties.showOnFeed ?? false;
     /** @type {number} */
     this.budget = properties.budget;
     /** @type {string} */
@@ -21,21 +21,21 @@ export class ExpenseType {
     /** @type {string} */
     this.endDate = properties.endDate;
     /** @type {boolean} */
-    this.hasRecipient = properties.hasRecipient;
+    this.hasRecipient = properties.hasRecipient ?? false;
     /** @type {boolean} */
-    this.isInactive = properties.isInactive; // use active() to determine if currently active
+    this.isInactive = properties.isInactive ?? false; // use active() to determine if currently active
     /** @type {string} */
     this.monthlyLimit = properties.monthlyLimit;
     /** @type {boolean} */
-    this.odFlag = properties.odFlag;
+    this.odFlag = properties.odFlag ?? false;
     /** @type {boolean} */
-    this.proRated = properties.proRated;
+    this.proRated = properties.proRated ?? false;
     /** @type {boolean} */
-    this.recurringFlag = properties.recurringFlag;
+    this.recurringFlag = properties.recurringFlag ?? false;
     /** @type {boolean} */
-    this.requireReceipt = properties.requireReceipt;
+    this.requireReceipt = properties.requireReceipt ?? false;
     /** @type {boolean} */
-    this.requireURL = properties.requireURL;
+    this.requireURL = properties.requireURL ?? false;
     /** @type {string} */
     this.startDate = properties.startDate;
     /** @type {Object[]} */
@@ -44,6 +44,12 @@ export class ExpenseType {
 
   get active() {
     return this.recurringFlag ? !this.isInactive : new Date(this.endDate) >= new Date();
+  }
+
+  get accessText() {
+    return this.accessibleBy.filter((accessType) => {
+      return ['FullTime', 'PartTime', 'Intern', 'Custom'].includes(accessType);
+    }).join(', ');
   }
 
   get showOnFeedText() {

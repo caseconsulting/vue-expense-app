@@ -19,7 +19,8 @@
 </template>
 <script setup>
 import Help from '@/components/shared/buttons/Help.vue';
-import { onMounted, ref } from 'vue';
+import { updateStoreCampfires } from '@/utils/storeUtils';
+import { onBeforeMount, ref } from 'vue';
 import { useStore } from 'vuex';
 
 const props = defineProps({
@@ -32,7 +33,8 @@ const campfires = ref([]); // basecamp campfires
 /**
  * Gets and sets all employees.
  */
-onMounted(async () => {
+onBeforeMount(async () => {
+  await updateStoreCampfires();
   campfires.value = store.getters.basecampCampfires;
 });
 </script>

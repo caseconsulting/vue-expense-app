@@ -57,8 +57,9 @@
 </template>
 <script setup>
 import { getRequiredRules } from '@/shared/validationUtils';
-import { onMounted, ref } from 'vue';
+import { onBeforeMount, onMounted, ref } from 'vue';
 import { useStore } from 'vuex';
+import { updateStoreTags } from '@/utils/storeUtils';
 
 const props = defineProps({
   modelValue: Object
@@ -83,7 +84,8 @@ const tags = ref([]);
 /**
  * Gets and sets all employees.
  */
-onMounted(() => {
+onBeforeMount(async () => {
+  await updateStoreTags();
   tags.value = store.getters.tags;
 });
 
