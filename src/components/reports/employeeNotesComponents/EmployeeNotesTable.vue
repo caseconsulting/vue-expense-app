@@ -263,8 +263,12 @@ async function buildKudos(empId) {
     return format(result, null, 'YYYY-MM-DD');
   };
 
+  // build an index of high fives
   let highFiveET = expenseTypes.find((et) => et.budgetName === 'High Five');
   let highFives = await api.getAllExpenseTypeExpenses(highFiveET.id);
+  let add = (acc, { recipient, ...rest }) => { acc[recipient] ??= []; acc[recipient].push(rest); return acc; }
+  let highFivesIndex = highFives.reduce(add, {});
+
   let employeesToBuild = empId ? [filteredEmployees.value.find((e) => e.id == empId)] : employees;
   for (let e of employeesToBuild) {
     // find from awards
@@ -278,8 +282,7 @@ async function buildKudos(empId) {
     }
 
     // find from high fives, filtering by recipient and if it was reimbursed
-    let receivedHighFives = highFives.filter((hf) => hf.recipient === e.id);
-    for (let hf of receivedHighFives ?? []) {
+    for (let hf of highFivesIndex[e.id] ?? []) {
       if (hf.reimbursedDate) kudos.value[e.id] = mostRecent(kudos.value[e.id], hf.reimbursedDate);
     }
     if (kudos.value[e.id] === undefined) kudos.value[e.id] = null;
