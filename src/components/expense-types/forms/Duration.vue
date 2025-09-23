@@ -88,7 +88,7 @@
   </div>
 </template>
 <script setup>
-import Checkbox from '@/components/shared/forms/Checkbox.vue';
+import Checkbox from '@/components/shared/edit-fields/Checkbox.vue';
 import { inject, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { mask } from 'vue-the-mask';
 import { isEmpty } from '@/utils/utils';

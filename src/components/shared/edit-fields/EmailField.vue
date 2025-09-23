@@ -1,7 +1,6 @@
 <template>
   <v-text-field
-    :label="label"
-    @update:model-value="emailValue()"
+    :label="fieldLabel"
     :hint="props.caseEmail ? CASE_EMAIL_DOMAIN : ''"
     persistent-hint
     :rules="props.caseEmail ? getCaseEmailRules(props.required) : getEmailRules(props.required)"
@@ -14,24 +13,20 @@ import { CASE_EMAIL_DOMAIN } from '@/shared/employeeUtils';
 import { getCaseEmailRules, getEmailRules } from '@/shared/validationUtils';
 
 const props = defineProps({
-  modelValue: String,
   caseEmail: {
     type: Boolean,
     default: true
   },
+  label: {
+    type: String,
+    default: 'Email'
+  },
+  model: Object,
   required: {
     type: Boolean,
     default: true
-  },
-  emailValue: {
-    type: Function,
-    default: () => {}
   }
 });
 
-const label = [
-  props.caseEmail ? 'Case' : '',
-  'Email',
-  props.required ? '*' : ''
-].join(' ');
+const fieldLabel = [props.label, props.required ? '*' : ''].join(' ');
 </script>

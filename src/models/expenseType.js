@@ -5,23 +5,21 @@ export class ExpenseType {
     this.id = properties.id;
     /** @type {string[]} */
     this.accessibleBy = properties.accessibleBy ?? [];
-    /** @type {boolean} */
-    this.showOnFeed = properties.showOnFeed ?? false;
     /** @type {number} */
+    this.bcc = properties.bcc || '';
+    /** @type {string} */
     this.budget = properties.budget;
-    /** @type {string} */
-    this.cc = properties.cc;
-    /** @type {string} */
-    this.bcc = properties.bcc;
-    /** @type {string} */
-    this.name = properties.name;
     /** @type {string} */
     this.campfire = properties.campfire;
     /** @type {Category[]} */
     let categories = properties.categories ?? [];
     this.categories = categories.map((c) => new Category(c));
     /** @type {string} */
+    this.cc = properties.cc || '';
+    /** @type {string} */
     this.description = properties.description;
+    /** @type {Object} */
+    this.disabledEmployees = properties.disabledEmployees ?? {};
     /** @type {string} */
     this.endDate = properties.endDate;
     /** @type {boolean} */
@@ -30,6 +28,8 @@ export class ExpenseType {
     this.isInactive = properties.isInactive ?? false; // use active() to determine if currently active
     /** @type {string} */
     this.monthlyLimit = properties.monthlyLimit;
+    /** @type {string} */
+    this.name = properties.name;
     /** @type {boolean} */
     this.odFlag = properties.odFlag ?? false;
     /** @type {boolean} */
@@ -39,15 +39,17 @@ export class ExpenseType {
     /** @type {boolean} */
     this.requireReceipt = properties.requireReceipt ?? false;
     /** @type {string} */
-    this.replyTo = properties.replyTo;
+    this.replyTo = properties.replyTo || '';
     /** @type {boolean} */
     this.requireURL = properties.requireURL ?? false;
+    /** @type {boolean} */
+    this.showOnFeed = properties.showOnFeed ?? false;
     /** @type {string} */
     this.startDate = properties.startDate;
     /** @type {Object[]} */
     this.tagBudgets = properties.tagBudgets ?? [];
     /** @type {string} */
-    this.to = properties.to;
+    this.to = properties.to || '';
   }
 
   get active() {
@@ -58,18 +60,6 @@ export class ExpenseType {
     return this.accessibleBy.filter((accessType) => {
       return ['FullTime', 'PartTime', 'Intern', 'Custom'].includes(accessType);
     }).join(', ');
-  }
-
-  get showOnFeedText() {
-    return this.showOnFeed ? 'All Expenses' : this.categoriesOnFeed;
-  }
-
-  get requireReceiptText() {
-    return this.requireReceipt ? 'All Expenses' : this.categoriesRequireReceipt;
-  }
-
-  get requireURLText() {
-    return this.requireURL ? 'All Expenses' : this.categoriesRequireURL;
   }
 
   get categoriesOnFeed() {
@@ -85,6 +75,26 @@ export class ExpenseType {
   get categoriesRequireURL() {
     let categoriesRequireURL = this.categories.filter((c) => c.requireURL);
     return categoriesRequireURL.length > 0 ? categoriesRequireURL.map((c) => c.name).join(', ') : 'None';
+  }
+
+  get disabledEmployeesIDs() {
+    return Object.keys(this.disabledEmployees);
+  }
+
+  get disabledEmployeesText() {
+    return this.disabledEmployeesIDs.length.toString();
+  }
+
+  get requireReceiptText() {
+    return this.requireReceipt ? 'All Expenses' : this.categoriesRequireReceipt;
+  }
+
+  get requireURLText() {
+    return this.requireURL ? 'All Expenses' : this.categoriesRequireURL;
+  }
+
+  get showOnFeedText() {
+    return this.showOnFeed ? 'All Expenses' : this.categoriesOnFeed;
   }
 
   employeeAccess(employees, customAccess) {
@@ -125,8 +135,19 @@ export class ExpenseType {
         })
       );
     }
+
     employeesList = [...new Set(employeesList)];
 
+    // employeesList = employeesList.filter((employee) => {
+    //   return !this.disabledEmployees.includes(employee.id);
+    // });
+
     return employeesList;
+  }
+  
+  disabledEmployeesList(employees) {
+    return employees.filter((employee) => {
+      return this.disabledEmployeesIDs.includes(employee.id);
+    });
   }
 }

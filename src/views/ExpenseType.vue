@@ -60,7 +60,12 @@
               <h2>Employee Access</h2>
               <div class="ml-4">
                 <p><b>Access:</b> {{ model.accessText }}</p>
-                <employee-list :employees="getEmployeeAccess()"></employee-list>
+                <employee-list :employees="getEmployeeAccess()" title="Accessible By"></employee-list>
+                <p><b>Disabled Employees:</b> {{ model.disabledEmployeesText }}</p>
+                <employee-list
+                  v-if="getDisabledEmployees().length > 0"
+                  :employees="getDisabledEmployees()" title="Disabled Employees">
+                </employee-list>
               </div>
               <h2>Duration</h2>
               <div class="ml-4">
@@ -86,6 +91,25 @@
                 <boolean displayText="Requires Recipient" :field="model.hasRecipient"></boolean>
                 <boolean displayText="Pro-rated" :field="model.proRated"></boolean>
                 <boolean displayText="Overdraft Allowed" :field="model.odFlag"></boolean>
+              </div>
+              <h2>Emails</h2>
+              <div class="ml-4">
+                <p><b>To: </b>
+                  <span v-if="model.to">{{ model.to }}</span>
+                  <span v-else>None</span>
+                </p>
+                <p><b>CC: </b>
+                  <span v-if="model.cc">{{ model.cc }}</span>
+                  <span v-else>None</span>
+                </p>
+                <p><b>BCC: </b>
+                  <span v-if="model.bcc">{{ model.bcc }}</span>
+                  <span v-else>None</span>
+                </p>
+                <p><b>Reply-To: </b>
+                  <span v-if="model.replyTo">{{ model.replyTo }}</span>
+                  <span v-else>None</span>
+                </p>
               </div>
             </v-card-text>
           </v-card>
@@ -161,6 +185,10 @@ onBeforeMount(async () => {
 
 function getEmployeeAccess() {
   return model.value.employeeAccess(store.getters.employees);
+}
+
+function getDisabledEmployees() {
+  return model.value.disabledEmployeesList(store.getters.employees);
 }
 
 /**

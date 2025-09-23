@@ -28,7 +28,7 @@
   </div>
 </template>
 <script setup>
-import Checkbox from '@/components/shared/forms/Checkbox.vue';
+import Checkbox from '@/components/shared/edit-fields/Checkbox.vue';
 import Help from '@/components/shared/buttons/Help.vue';
 
 const props = defineProps({

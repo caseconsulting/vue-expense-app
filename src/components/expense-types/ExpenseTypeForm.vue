@@ -32,7 +32,7 @@
           <v-col cols="auto">
             <checkbox
               label="Overdraft Budget"
-              v-model="editedExpenseType.overdraftBudget">
+              v-model="editedExpenseType.odFlag">
             </checkbox>
           </v-col>
           <v-col cols="auto">
@@ -75,7 +75,7 @@
 
 <script setup>
 import BudgetAmount from '@/components/expense-types/forms/BudgetAmount.vue';
-import Checkbox from '@/components/shared/forms/Checkbox.vue';
+import Checkbox from '@/components/shared/edit-fields/Checkbox.vue';
 import DetailsForm from '@/components/expense-types/forms/Details.vue';
 import Duration from '@/components/expense-types/forms/Duration.vue';
 import Emails from '@/components/expense-types/forms/Emails.vue';
@@ -191,6 +191,8 @@ function parseNumber(budget) {
  * Submits an expense type.
  */
 async function submit() {
+  console.log('Submitting expense type...');
+  console.log(editedExpenseType.value);
   submitting.value = true; // set loading status to true
   emitter.emit('startAction');
 
@@ -201,30 +203,6 @@ async function submit() {
 
   // convert budget input into a floating point number
   editedExpenseType.value.budget = parseFloat(editedExpenseType.value.budget);
-
-  if (editedExpenseType.value.odFlag == null) {
-    // set overdraft flag to false if checkbox is null
-    editedExpenseType.value.odFlag = false;
-  }
-
-  if (editedExpenseType.value.recurringFlag == null) {
-    // set recurring flag to false if checkbox is null
-    editedExpenseType.value.recurringFlag = false;
-  }
-
-  if (editedExpenseType.value.requireReceipt == null) {
-    // set receipt required flag to false if checkbox is null
-    editedExpenseType.value.requireReceipt = false;
-  }
-
-  if (editedExpenseType.value.isInactive == null) {
-    // set is inactive flag to false if checkbox is null
-    editedExpenseType.value.isInactive = false;
-  }
-
-  if (editedExpenseType.value.proRated == null) {
-    editedExpenseType.value.proRated = false;
-  }
 
   // format dates
   if (editedExpenseType.value.startDate) {

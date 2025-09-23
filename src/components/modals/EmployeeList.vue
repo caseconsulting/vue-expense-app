@@ -6,8 +6,8 @@
     </template>
     <v-card class="mt-3">
       <!-- Dialog Title -->
-      <v-card-title class="d-flex align-center header_style">
-        <h3>Accessible By</h3>
+      <v-card-title class="d-flex align-center header-slim">
+        {{ props.title }}
       </v-card-title>
       <v-divider color="black" />
       <!-- List of employee names/ISSUES -->
@@ -41,7 +41,7 @@
 import UserAvatar from '@/components/shared/UserAvatar.vue';
 import { ref } from 'vue';
 
-const props = defineProps(['employees']);
+const props = defineProps(['employees', 'title']);
 
 const show = ref(false);
 
