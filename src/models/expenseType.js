@@ -10,6 +10,10 @@ export class ExpenseType {
     /** @type {number} */
     this.budget = properties.budget;
     /** @type {string} */
+    this.cc = properties.cc;
+    /** @type {string} */
+    this.bcc = properties.bcc;
+    /** @type {string} */
     this.name = properties.name;
     /** @type {string} */
     this.campfire = properties.campfire;
@@ -34,12 +38,16 @@ export class ExpenseType {
     this.recurringFlag = properties.recurringFlag ?? false;
     /** @type {boolean} */
     this.requireReceipt = properties.requireReceipt ?? false;
+    /** @type {string} */
+    this.replyTo = properties.replyTo;
     /** @type {boolean} */
     this.requireURL = properties.requireURL ?? false;
     /** @type {string} */
     this.startDate = properties.startDate;
     /** @type {Object[]} */
     this.tagBudgets = properties.tagBudgets ?? [];
+    /** @type {string} */
+    this.to = properties.to;
   }
 
   get active() {

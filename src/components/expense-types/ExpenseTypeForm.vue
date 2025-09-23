@@ -42,6 +42,7 @@
             </checkbox>
           </v-col>
         </flags>
+        <emails v-model="editedExpenseType"></emails>
         <v-row>
           <v-col cols="12">
             <strong>Categories</strong>
@@ -77,6 +78,7 @@ import BudgetAmount from '@/components/expense-types/forms/BudgetAmount.vue';
 import Checkbox from '@/components/shared/forms/Checkbox.vue';
 import DetailsForm from '@/components/expense-types/forms/Details.vue';
 import Duration from '@/components/expense-types/forms/Duration.vue';
+import Emails from '@/components/expense-types/forms/Emails.vue';
 import EmployeeAccess from '@/components/expense-types/forms/EmployeeAccess.vue';
 import Flags from '@/components/expense-types/forms/Flags.vue';
 import Help from '@/components/shared/buttons/Help.vue';
