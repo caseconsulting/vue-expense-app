@@ -233,6 +233,7 @@
               :items="Object.keys(placeIds)"
               no-data-text="Start searching..."
               @update:search="updateAddressDropDown($event)"
+              clear-on-select
               ref="addressSearch"
             >
               <template #item="{ item, props }">
@@ -570,7 +571,7 @@ import _some from 'lodash/some';
 import _startCase from 'lodash/startCase';
 import _uniqBy from 'lodash/uniqBy';
 import _xorBy from 'lodash/xorBy';
-import { computed, inject, onBeforeMount, onBeforeUnmount, readonly, ref, watch } from 'vue';
+import { computed, inject, onBeforeMount, onBeforeUnmount, readonly, ref, watch, useTemplateRef } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
 import { DEFAULT_ISOFORMAT } from '../../../shared/dateUtils';
@@ -616,7 +617,7 @@ const partTimeNumber = ref(
 const phoneNumbers = ref(initPhoneNumbers());
 
 // other refs
-const addressSearch = ref(null); // current address search input
+const addressSearch = useTemplateRef('addressSearch'); // current address search input
 const birthdayHidden = ref(!editedEmployee.value.birthdayFeed);
 const birthdayFormat = ref(format(editedEmployee.value.birthday, null, 'MM/DD/YYYY')); // formatted birthday
 const birthdayMenu = ref(false); // shows the birthday menu
@@ -794,18 +795,15 @@ function deletePhoneNumber(index) {
 /**
  * Updates the address dropdown according to the user's input.
  */
+let timeout;
 async function updateAddressDropDown(query) {
-  if (query.length > 3) {
+  if (query.length <3) return; // <3
+  if (timeout) clearTimeout(timeout);
+  timeout = setTimeout(async () => {
     let locations = await api.getLocation(query);
-    //object used to contain addresses and their respective ID's
-    //needed later to obtain the selected address's zip code
-    placeIds.value = {};
-    _forEach(locations.predictions, (location) => {
-      placeIds.value[location.description] = location.place_id;
-    });
-  } else {
-    placeIds.value = {};
-  }
+    let callback = (acc, { formattedAddress, ...rest }) => { acc[formattedAddress] = rest; return acc; };
+    placeIds.value = locations.reduce(callback, {})
+  }, 250);
 } //updateAddressDropDown
 
 /**
@@ -813,34 +811,19 @@ async function updateAddressDropDown(query) {
  * @param {import('vue').Ref<any>} item The ref to the search string
  */
 async function autofillLocation(item) {
-  let search = item.value;
+  // extract address info
+  let address = placeIds.value[item.value];
 
-  if (!_isEmpty(search)) {
-    let fullAddress = search.split(', ');
-    // fills in the first three fields
-    editedEmployee.value.currentCity = fullAddress[1];
-    editedEmployee.value.currentStreet = fullAddress[0];
-    editedEmployee.value.currentState = STATES[fullAddress[2].split(' ')[0]];
+  // update address info
+  editedEmployee.value.currentStreet = address.street1;
+  editedEmployee.value.currentStreet2 = address.street2;
+  editedEmployee.value.currentCity = address.city;
+  editedEmployee.value.currentState = address.state;
+  editedEmployee.value.currentZIP = address.zip;
 
-    // obtains the selected address's ID needed for the zip code API call
-    let selectedAddress = placeIds.value[search];
-
-    // Response contains an array of objects, with each object containing
-    // a field title 'type'. 'Type' is another array and we want the one
-    // containing the postal_code string
-    let res = await api.getZipCode(selectedAddress);
-
-    editedEmployee.value.currentZIP = '';
-    _forEach(res.result.address_components, (field) => {
-      if (field.types.includes('postal_code')) {
-        editedEmployee.value.currentZIP = field.short_name;
-      }
-    });
-    //resets addresses and ID's in dropdown
-    placeIds.value = {};
-    search = null;
-    addressSearch.value.blur();
-  }
+  //resets addresses and ID's in dropdown
+  placeIds.value = {};
+  addressSearch.value.blur();
 } // autofillLocation
 
 /**
