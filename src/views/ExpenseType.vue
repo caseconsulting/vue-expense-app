@@ -175,11 +175,16 @@ const loading = ref(true);
 const model = ref(null); // selected expense type
 
 onBeforeMount(async () => {
-  await updateStoreEmployees();
-  await loadBasecampAvatars(store, store.getters.employees);
-  await updateStoreUser();
-  await updateStoreExpenseTypes();
-  await updateStoreTags();
+  await Promise.all([
+    updateStoreUser(),
+    updateStoreEmployees(),
+  ]);
+  await Promise.all([
+    updateStoreEmployees(),
+    loadBasecampAvatars(store, store.getters.employees),
+    updateStoreExpenseTypes(),
+    updateStoreTags()
+  ]);
   loadExpenseType();
 });
 
