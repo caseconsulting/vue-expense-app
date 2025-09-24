@@ -4,7 +4,7 @@
       <h3>Create New Category</h3>
     </v-card-title>
     <v-card-text>
-      <v-form ref="categoryForm" v-model="valid" @submit.prevent="valid ? (submitForm = true) : _" lazy-validation>
+      <v-form ref="categoryForm" v-model="valid" @submit.prevent="submit()">
         <details-form v-model="category"></details-form>
         <v-row>
           <v-col cols="12">
@@ -66,6 +66,7 @@ import DetailsForm from '@/components/expense-types/forms/Details.vue';
 import SubmitButton from '@/components/shared/buttons/SubmitButton.vue';
 import { ref } from 'vue';
 import { isEmpty } from '@/utils/utils';
+import api from '@/shared/api.js';
 
 const props = defineProps({
   model: Object,
@@ -75,4 +76,15 @@ const props = defineProps({
 const category = ref(props.model);
 const categoryForm = ref(null); // filled in from the template
 const valid = ref(false); // form is valid
+
+async function submit() {
+  if (valid.value) {
+    let categories = [...props.expenseType.categories, category.value];
+    let data = {
+      id: props.expenseType.id,
+      categories: categories.map((c) => JSON.stringify(c))
+    };
+    await api.updateAttribute(api.EXPENSE_TYPES, data, 'categories');
+  }
+}
 </script>

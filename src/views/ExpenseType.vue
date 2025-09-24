@@ -1,19 +1,19 @@
 <template>
   <div>
     <div v-if="model == null && loading">
-        <v-row>
-          <v-col cols="12">
-            <v-skeleton-loader type="heading"></v-skeleton-loader>
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col cols="6">
-            <v-skeleton-loader width="100%" type="text@12"></v-skeleton-loader>
-          </v-col>
-          <v-col cols="6">
-            <v-skeleton-loader width="100%" type="text@12"></v-skeleton-loader>
-          </v-col>
-        </v-row>
+      <v-row>
+        <v-col cols="12">
+          <v-skeleton-loader type="heading"></v-skeleton-loader>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="6">
+          <v-skeleton-loader width="100%" type="text@12"></v-skeleton-loader>
+        </v-col>
+        <v-col cols="6">
+          <v-skeleton-loader width="100%" type="text@12"></v-skeleton-loader>
+        </v-col>
+      </v-row>
     </div>
     <div v-else>
       <h1>{{ model.name }}</h1>
@@ -52,7 +52,8 @@
                     </div>
                   </v-col>
                 </v-row>
-                <p><b>Monthly Limit: </b>
+                <p>
+                  <b>Monthly Limit: </b>
                   <span v-if="model.monthlyLimit">{{ model.monthlyLimit }}</span>
                   <span v-else>None</span>
                 </p>
@@ -64,7 +65,9 @@
                 <p><b>Disabled Employees:</b> {{ model.disabledEmployeesText }}</p>
                 <employee-list
                   v-if="getDisabledEmployees().length > 0"
-                  :employees="getDisabledEmployees()" title="Disabled Employees">
+                  :employees="getDisabledEmployees()"
+                  title="Disabled Employees"
+                >
                 </employee-list>
               </div>
               <h2>Duration</h2>
@@ -81,7 +84,7 @@
               <h2>Integrations</h2>
               <div class="ml-4">
                 <p v-if="model.campfire"><b>Basecamp Campfire:</b>{{ model.campfire }}</p>
-                <p v-else> None</p>
+                <p v-else>None</p>
               </div>
               <h2>Flags</h2>
               <div class="ml-4">
@@ -94,19 +97,23 @@
               </div>
               <h2>Emails</h2>
               <div class="ml-4">
-                <p><b>To: </b>
+                <p>
+                  <b>To: </b>
                   <span v-if="model.to">{{ model.to }}</span>
                   <span v-else>None</span>
                 </p>
-                <p><b>CC: </b>
+                <p>
+                  <b>CC: </b>
                   <span v-if="model.cc">{{ model.cc }}</span>
                   <span v-else>None</span>
                 </p>
-                <p><b>BCC: </b>
+                <p>
+                  <b>BCC: </b>
                   <span v-if="model.bcc">{{ model.bcc }}</span>
                   <span v-else>None</span>
                 </p>
-                <p><b>Reply-To: </b>
+                <p>
+                  <b>Reply-To: </b>
                   <span v-if="model.replyTo">{{ model.replyTo }}</span>
                   <span v-else>None</span>
                 </p>
@@ -123,9 +130,11 @@
                   <create-category
                     title="Add Category"
                     :expenseType="model"
-                    :click="() => {
-                      addCategory = true;
-                    }"
+                    :click="
+                      () => {
+                        addCategory = true;
+                      }
+                    "
                   ></create-category>
                 </v-col>
               </v-row>
@@ -135,15 +144,32 @@
                 </v-col>
                 <v-col cols="12" v-else>
                   <v-list>
-                    <v-list-item
-                      v-for="(category, index) in model.categories"
-                      :key="index"
-                    >
+                    <v-list-item v-for="(category, index) in model.categories" :key="index">
                       <v-list-item-title>{{ category.name }}</v-list-item-title>
                       <v-list-item-subtitle class="d-block">
                         <boolean displayText="Show On Feed" :field="category.showOnFeed"></boolean>
                         <boolean displayText="Require URL" :field="category.requireURL"></boolean>
                         <boolean displayText="Require Receipt" :field="category.requireReceipt"></boolean>
+                        <p>
+                          <b>To: </b>
+                          <span v-if="category.to">{{ category.to }}</span>
+                          <span v-else>None</span>
+                        </p>
+                        <p>
+                          <b>CC: </b>
+                          <span v-if="category.cc">{{ category.cc }}</span>
+                          <span v-else>None</span>
+                        </p>
+                        <p>
+                          <b>BCC: </b>
+                          <span v-if="category.bcc">{{ category.bcc }}</span>
+                          <span v-else>None</span>
+                        </p>
+                        <p>
+                          <b>Reply-To: </b>
+                          <span v-if="category.replyTo">{{ category.replyTo }}</span>
+                          <span v-else>None</span>
+                        </p>
                       </v-list-item-subtitle>
                     </v-list-item>
                   </v-list>
@@ -176,10 +202,7 @@ const loading = ref(true);
 const model = ref(null); // selected expense type
 
 onBeforeMount(async () => {
-  await Promise.all([
-    updateStoreUser(),
-    updateStoreEmployees(),
-  ]);
+  await Promise.all([updateStoreUser(), updateStoreEmployees()]);
   await Promise.all([
     updateStoreEmployees(),
     loadBasecampAvatars(store, store.getters.employees),
@@ -205,11 +228,8 @@ function getTagByID(id) {
   return store.getters.tags.find((t) => t.id === id);
 }
 
-
 function loadExpenseType() {
-  model.value = new ExpenseType(store.getters.expenseTypes.find(et => et.id === route.params.id));
+  model.value = new ExpenseType(store.getters.expenseTypes.find((et) => et.id === route.params.id));
   loading.value = false;
 }
-
-
 </script>
