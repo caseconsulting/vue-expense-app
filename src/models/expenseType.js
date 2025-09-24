@@ -6,7 +6,7 @@ export class ExpenseType {
     /** @type {string[]} */
     this.accessibleBy = properties.accessibleBy ?? [];
     /** @type {number} */
-    this.bcc = properties.bcc || '';
+    this.bcc = properties.bcc;
     /** @type {string} */
     this.budget = properties.budget;
     /** @type {string} */
@@ -15,7 +15,7 @@ export class ExpenseType {
     let categories = properties.categories ?? [];
     this.categories = categories.map((c) => new Category(c));
     /** @type {string} */
-    this.cc = properties.cc || '';
+    this.cc = properties.cc;
     /** @type {string} */
     this.description = properties.description;
     /** @type {Object} */
@@ -39,7 +39,7 @@ export class ExpenseType {
     /** @type {boolean} */
     this.requireReceipt = properties.requireReceipt ?? false;
     /** @type {string} */
-    this.replyTo = properties.replyTo || '';
+    this.replyTo = properties.replyTo;
     /** @type {boolean} */
     this.requireURL = properties.requireURL ?? false;
     /** @type {boolean} */
@@ -49,7 +49,7 @@ export class ExpenseType {
     /** @type {Object[]} */
     this.tagBudgets = properties.tagBudgets ?? [];
     /** @type {string} */
-    this.to = properties.to || '';
+    this.to = properties.to;
   }
 
   get active() {

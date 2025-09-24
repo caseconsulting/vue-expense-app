@@ -9,8 +9,12 @@
   </v-checkbox>
 </template>
 <script setup>
+const model = defineModel('model', {
+  type: Boolean,
+  default: false
+});
+
 const props = defineProps({
-  label: String,
-  model: Object
+  label: String
 });
 </script>

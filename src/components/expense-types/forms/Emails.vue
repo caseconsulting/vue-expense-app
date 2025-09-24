@@ -1,14 +1,15 @@
 <template>
   <div>
     <strong>Emails</strong>
-    <email-field v-model="modelValue.to" :caseEmail="true" :required="false" label="To Email"></email-field>
-    <email-field v-model="modelValue.cc" :caseEmail="true" :required="false" label="CC Email"></email-field>
-    <email-field v-model="modelValue.bcc" :caseEmail="true" :required="false" label="BCC Email"></email-field>
-    <email-field v-model="modelValue.replyTo" :caseEmail="true" :required="false" label="Reply-To Email"></email-field>
+    <case-email-field v-model="modelValue.to" :required="false" label="To Email"></case-email-field>
+    {{ modelValue.to }}
+    <case-email-field v-model="modelValue.cc" :required="false" label="CC Email"></case-email-field>
+    <case-email-field v-model="modelValue.bcc" :required="false" label="BCC Email"></case-email-field>
+    <case-email-field v-model="modelValue.replyTo" :required="false" label="Reply-To Email"></case-email-field>
   </div>
 </template>
 <script setup>
-import EmailField from '@/components/shared/edit-fields/EmailField.vue';
+import CaseEmailField from '@/components/shared/edit-fields/CaseEmailField.vue';
 
 const props = defineProps({
   modelValue: Object

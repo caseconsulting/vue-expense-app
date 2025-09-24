@@ -23,11 +23,12 @@ import SubmitButton from '@/components/shared/buttons/SubmitButton.vue';
 import { ref } from 'vue';
 import { Category } from '@/models/category';
 
-const props = defineProps({
-  model: Object
+const model = defineModel('model', {
+  type: Object,
+  default: {}
 });
 
-const category = ref(new Category(props.model));
+const category = ref(new Category(model.value));
 const categoryForm = ref(null); // filled in from the template
 const valid = ref(false); // form is valid
 </script>
