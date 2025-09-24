@@ -122,6 +122,7 @@
                 <v-col cols="12" class="d-flex justify-center ma-1">
                   <create-category
                     title="Add Category"
+                    :expenseType="model"
                     :click="() => {
                       addCategory = true;
                     }"
