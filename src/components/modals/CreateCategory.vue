@@ -17,5 +17,5 @@ const props = defineProps({
 });
 
 const show = ref(false);
-const model = ref(new Category(props.expenseType));
+const model = ref(new Category(props.expenseType, true));
 </script>
