@@ -60,15 +60,21 @@
               </div>
               <h2>Employee Access</h2>
               <div class="ml-4">
-                <p><b>Access:</b> {{ model.accessText }}</p>
-                <employee-list :employees="getEmployeeAccess()" title="Accessible By"></employee-list>
-                <p><b>Disabled Employees:</b> {{ model.disabledEmployeesText }}</p>
-                <employee-list
-                  v-if="getDisabledEmployees().length > 0"
-                  :employees="getDisabledEmployees()"
-                  title="Disabled Employees"
-                >
-                </employee-list>
+                <p>
+                  <b>Access:</b>
+                  {{ model.accessText }}
+                  <employee-list :employees="getEmployeeAccess()" title="Accessible By"></employee-list>
+                </p>
+                <p>
+                  <b>Disabled Employees:</b>
+                  {{ model.disabledEmployeesText }}
+                  <employee-list
+                    v-if="getDisabledEmployees().length > 0"
+                    :employees="getDisabledEmployees()"
+                    title="Disabled Employees"
+                  >
+                  </employee-list>
+                </p>
               </div>
               <h2>Duration</h2>
               <div class="ml-4">
