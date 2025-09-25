@@ -802,9 +802,9 @@ async function updateAddressDropDown(query) {
   timeout = setTimeout(async () => {
     let locations = await api.getLocation(query);
     let callback = (acc, { formattedAddress, ...rest }) => { acc[formattedAddress] = rest; return acc; };
-    placeIds.value = locations.reduce(callback, {})
+    placeIds.value = locations.reduce(callback, {});
   }, 250);
-} //updateAddressDropDown
+}
 
 /**
  * Finds the city, street, state, and zip code current address fields based on an address
@@ -824,7 +824,7 @@ async function autofillLocation(item) {
   //resets addresses and ID's in dropdown
   placeIds.value = {};
   addressSearch.value.blur();
-} // autofillLocation
+}
 
 /**
  * Updates the city dropdown according to the user's input.
@@ -841,7 +841,7 @@ async function updateCityDropDown(query) {
   } else {
     predictions.value = {};
   }
-} //updateCityDropDown
+}
 
 /**
  * Once a city has been selected, it will update the fields.
@@ -874,7 +874,7 @@ async function updateCityBoxes(item) {
     predictions.value = {};
     birthPlaceSearch.value.blur();
   }
-} // updateCityBoxes
+}
 
 /**
  * Removes any text after the '@' symbol on the email username input once the user clicks away.
@@ -911,7 +911,7 @@ watch(
       editedEmployee.value.birthday = null;
     }
   }
-); // watchEditedPersonalInfoBirthday
+);
 
 /**
  * watcher for editedEmployee.value.hireDate - format date on change.
@@ -925,7 +925,7 @@ watch(
       editedEmployee.value.hireDate = null;
     }
   }
-); // watchEditedEmployeeHireDate
+);
 
 /**
  * watcher for editedEmployee.value.deptDate - format date on change and set contract end date
@@ -948,7 +948,7 @@ watch(
       }
     }
   }
-); // watchEditedEmployeeDeptDate
+);
 
 /**
  * Watch for work status changing and remove old data
