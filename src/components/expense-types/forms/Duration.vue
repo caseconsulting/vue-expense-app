@@ -1,6 +1,9 @@
 <template>
   <div>
-    <strong>Duration</strong>
+    <div>
+      <strong>Duration</strong>
+      <help type="expenseTypes"></help>
+    </div>
     <v-row>
       <v-col class="slim">
         <checkbox label="Recurring Flag" v-model="modelValue.recurringFlag"></checkbox>
@@ -82,6 +85,7 @@
 </template>
 <script setup>
 import Checkbox from '@/components/shared/edit-fields/Checkbox.vue';
+import Help from '@/components/shared/buttons/Help.vue';
 import { inject, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { mask } from 'vue-the-mask';
 import { isEmpty } from '@/utils/utils';

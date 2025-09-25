@@ -3,7 +3,6 @@
     <v-row>
       <v-col cols="12">
         <strong>Integrations</strong>
-        <help type="expenseTypes"></help>
       </v-col>
     </v-row>
     <v-autocomplete
@@ -18,7 +17,6 @@
   </div>
 </template>
 <script setup>
-import Help from '@/components/shared/buttons/Help.vue';
 import { updateStoreCampfires } from '@/utils/storeUtils';
 import { onBeforeMount, ref } from 'vue';
 import { useStore } from 'vuex';
