@@ -24,13 +24,14 @@
         :item="props.item"
         :valid="props.valid"
       ></date-edit-item>
-      <custom-edit-item
+      <component
         v-else
+        :is="CustomEditItem"
         :field="props.field"
         :item="props.item"
         :valid="props.valid"
         :class="field.group ? 'group-row py-2' : ''"
-      ></custom-edit-item>
+      ></component>
       <v-btn
         v-if="!props.field.group"
         density="comfortable"
@@ -47,13 +48,12 @@
 </template>
 
 <script setup>
-import DefaultEditItem from '@/components/employees/power-edit/edit-items/DefaultItem.vue';
-import DateEditItem from '@/components/employees/power-edit/edit-items/DateItem.vue';
-import CustomEditItem from '@/components/employees/power-edit/edit-items/CustomItem.vue';
-import PowerEditTableInfoItem from '@/components/employees/power-edit/PowerEditTableInfoItem.vue';
+import DefaultEditItem from '@/components/shared/power-edit/edit-items/DefaultItem.vue';
+import DateEditItem from '@/components/shared/power-edit/edit-items/DateItem.vue';
+import PowerEditTableInfoItem from '@/components/shared/power-edit/InfoItem.vue';
 import _forEach from 'lodash/forEach';
 import { inject, ref, onBeforeUnmount, onMounted } from 'vue';
-import { TYPES } from '@/components/employees/power-edit/js/fieldTypes.js';
+import { TYPES } from '@/components/shared/power-edit/js/fieldTypes.js';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -61,7 +61,7 @@ import { TYPES } from '@/components/employees/power-edit/js/fieldTypes.js';
 // |                                                  |
 // |--------------------------------------------------|
 
-const props = defineProps(['field', 'item', 'showInfo', 'valid']);
+const props = defineProps(['field', 'item', 'showInfo', 'valid', 'CustomEditItem']);
 const emitter = inject('emitter');
 const clonedItem = ref(props.item);
 

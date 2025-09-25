@@ -209,7 +209,7 @@ async function checkReimbursements() {
         let expenseType = _filter(activeExpenseTypes, (t) => {
           return t.id == expense.expenseTypeId;
         })[0];
-        if (!expense.receipt && expenseType.requiredFlag) {
+        if (!expense.receipt && expenseType.requireReceipt) {
           expense.receipt = 'doNotOpenNonExistant.png';
         }
 

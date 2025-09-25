@@ -17,17 +17,7 @@
             No, keep {{ type }}
           </v-btn>
           <v-spacer></v-spacer>
-          <v-btn
-            color="green-darken-1"
-            id="confirmDelete"
-            variant="text"
-            @click="
-              emitter.emit(`confirm-delete-${type}`);
-              activate = false;
-            "
-          >
-            Delete
-          </v-btn>
+          <v-btn color="green-darken-1" id="confirmDelete" variant="text" @click="confirmDelete()"> Delete </v-btn>
           <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>
@@ -36,20 +26,37 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { inject, ref, watch } from 'vue';
 // |--------------------------------------------------|
 // |                                                  |
 // |                      SETUP                       |
 // |                                                  |
 // |--------------------------------------------------|
 
+const emitter = inject('emitter');
 const props = defineProps([
   'toggleDeleteModal', // dialog activator
   'type', // type of object being deleted
-  'deleteInfo' //delete info to be displayed
+  'deleteInfo', //delete info to be displayed
+  'deleteMethod'
 ]);
 
 const activate = ref(false); // dialog activator
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     METHODS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+function confirmDelete() {
+  if (props.deleteMethod) {
+    props.deleteMethod();
+  } else {
+    emitter.emit(`confirm-delete-${props.type}`);
+  }
+  activate.value = false;
+}
 
 // |--------------------------------------------------|
 // |                                                  |

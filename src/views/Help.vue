@@ -154,19 +154,6 @@ const sections = ref({
     'Expense Types',
     'user',
     {
-      title: 'What is a recurring expense type?',
-      body: 'This is an expense type has no start and end date and will be renewed on an employees anniversary date.'
-    },
-    {
-      title: 'What is the overdraft flag?',
-      body: 'This allows an expense type to be charged up to twice the defined amount. Subtracting the overage from next years budget.'
-    },
-    {
-      title: 'What are categories?',
-      body: 'Admins may create up to 10 different categories for employees to choose from when submitting and expense. Categories are unique to each expense type and users will be required to select one category if the expense type has them. ',
-      employeeRole: 'admin'
-    },
-    {
       title: "Why can't I delete an expense type?",
       body: 'An expense type cannot be deleted if there are expenses for that expense type or you are editing an expense type.',
       employeeRole: 'admin'
@@ -177,23 +164,46 @@ const sections = ref({
       employeeRole: 'admin'
     },
     {
-      title: 'What does the "Should the expense be pro-rated?" switch mean?',
-      body: 'By toggling this switch, it would mean that all part-time employees that can access the expense type would have a percentage of the budget amount based on their part-time percentage.',
+      title: 'What is a recurring expense type?',
+      body: 'This is an expense type has no start and end date and will be renewed on an employees anniversary date.'
+    },
+    {
+      title: 'What does "Pro-Rated" mean?',
+      body: 'If checked, part-time employees that can access the expense type would have a percentage of the budget amount based on their work status percentage.',
       employeeRole: 'admin'
     },
     {
-      title: 'What does the "Does this expense type have a recipient?" switch mean?',
-      body: 'This would mean that upon creating an expense for this expense type, the user would have to assign someone else within the company to receive the amount provided within the expense.',
+      title: 'What does "Overdraft Budget" mean?',
+      body: 'This allows an expense type to be charged up to twice the defined amount. Subtracting the overage from next years budget.'
+    },
+    {
+      title: 'What does "Has Recipient" mean?',
+      body: 'If checked, upon creating an expense for this expense type, the user would have to assign someone else within the company to receive the amount provided within the expense.',
       employeeRole: 'admin'
     },
     {
-      title: 'What does the "Have this expense type show on the company feed?" switch mean?',
-      body: 'When a user creates an expense and after being reimbursed, it will display info about the expense on the activity feed in the Home page. This feature can be toggled off by an admin when creating or reimbursing the expense.',
+      title: 'What does "Show on Feed" mean?',
+      body: 'If checked, when a user creates an expense and after being reimbursed, it will display info about the expense on the activity feed in the Home page. This feature can be toggled off by an admin when creating or reimbursing the expense.',
       employeeRole: 'admin'
     },
     {
-      title: 'What does the "Require a url for this expense?" switch mean?',
-      body: 'When a user creates an expense, by default entering a url is optional. However, by enabling this feature, this would make entering a url mandatory.',
+      title: 'What does "URL Required" mean?',
+      body: 'By default entering a url for an expense is optional. However, if checked, this would make entering a url mandatory.',
+      employeeRole: 'admin'
+    },
+    {
+      title: 'What does "Receipt Required" mean?',
+      body: 'By default entering a receipt for an expense is optional. However, if checked, this would make uploading a receipt mandatory.',
+      employeeRole: 'admin'
+    },
+    {
+      title: 'What are emails used for?',
+      body: 'Emails can be set up to notify certain people when an expense is created for this expense type. The email options are To, CC, BCC, and Reply-To. The To address must be specified for an email to be sent. The source address will be the info account email.',
+      employeeRole: 'admin'
+    },
+    {
+      title: 'What are categories?',
+      body: 'Admins may create up to 10 different categories for employees to choose from when submitting and expense. Categories are unique to each expense type and users will be required to select one category if the expense type has them. ',
       employeeRole: 'admin'
     }
   ],
