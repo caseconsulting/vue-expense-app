@@ -617,9 +617,13 @@ async function loadExpenseTypesData() {
   initialPageLoading.value = true;
   userInfo.value = store.getters.user;
   await Promise.all([refreshExpenseTypes()]);
-  expenseTypes.value = store.getters.expenseTypes.map((et) => new ExpenseType(et));
+  setExpenseTypes(store.getters.expenseTypes);
   filterExpenseTypes();
   initialPageLoading.value = false;
+}
+
+function setExpenseTypes(storeExpenseTypes) {
+  expenseTypes.value = storeExpenseTypes.map((et) => new ExpenseType(et));
 }
 
 /**
@@ -653,7 +657,7 @@ async function refreshExpenseTypes() {
     !userRoleIsAdmin() && !store.getters.budgets ? updateStoreBudgets() : '',
     !store.getters.expenseTypes ? updateStoreExpenseTypes() : ''
   ]);
-  expenseTypes.value = store.getters.expenseTypes;
+  setExpenseTypes(store.getters.expenseTypes);
 
   // filter expense types for the user
   if (!userRoleIsAdmin()) {
