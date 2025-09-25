@@ -100,6 +100,10 @@ export class ExpenseType {
     return this.showOnFeed ? 'All Expenses' : this.categoriesOnFeed;
   }
 
+  basecampCampfire(campfires) {
+    return campfires.find((c) => c.url == this.campfire);
+  }
+
   employeeAccess(employees, customAccess) {
     let employeesList = [];
     if (this.accessibleBy.includes('FullTime')) {

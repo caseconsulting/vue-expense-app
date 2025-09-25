@@ -95,7 +95,9 @@
               </div>
               <h2>Integrations</h2>
               <div class="ml-4">
-                <p v-if="model.campfire"><b>Basecamp Campfire:</b>{{ model.campfire }}</p>
+                <p v-if="model.campfire">
+                  <b>Basecamp Campfire:</b> {{ model.basecampCampfire(store.getters.basecampCampfires).name }}
+                </p>
                 <p v-else>None</p>
               </div>
               <h2>Flags</h2>
@@ -153,7 +155,13 @@ import { onBeforeMount, ref } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 import { convertToMoneyString, userRoleIsAdmin } from '@/utils/utils';
-import { updateStoreEmployees, updateStoreExpenseTypes, updateStoreTags, updateStoreUser } from '@/utils/storeUtils.js';
+import {
+  updateStoreCampfires,
+  updateStoreEmployees,
+  updateStoreExpenseTypes,
+  updateStoreTags,
+  updateStoreUser
+} from '@/utils/storeUtils.js';
 import { loadBasecampAvatars } from '@/utils/basecamp';
 import { ExpenseType } from '@/models/ExpenseType.js';
 
@@ -166,7 +174,7 @@ const model = ref(null); // selected expense type
 onBeforeMount(async () => {
   await Promise.all([updateStoreUser(), updateStoreEmployees()]);
   await Promise.all([
-    updateStoreEmployees(),
+    updateStoreCampfires(),
     loadBasecampAvatars(store, store.getters.employees),
     updateStoreExpenseTypes(),
     updateStoreTags()
