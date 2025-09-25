@@ -26,13 +26,14 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { inject, ref, watch } from 'vue';
 // |--------------------------------------------------|
 // |                                                  |
 // |                      SETUP                       |
 // |                                                  |
 // |--------------------------------------------------|
 
+const emitter = inject('emitter');
 const props = defineProps([
   'toggleDeleteModal', // dialog activator
   'type', // type of object being deleted
@@ -52,7 +53,7 @@ function confirmDelete() {
   if (props.deleteMethod) {
     props.deleteMethod();
   } else {
-    emitter.emit(`confirm-delete-${type}`);
+    emitter.emit(`confirm-delete-${props.type}`);
   }
   activate.value = false;
 }
