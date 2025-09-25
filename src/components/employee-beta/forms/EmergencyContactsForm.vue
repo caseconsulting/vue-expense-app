@@ -87,6 +87,7 @@
               :items="Object.keys(placeIds)"
               no-data-text="Start searching..."
               @update:search="updateAddressDropDown($event, index)"
+              @blur="placeIds = {}"
               v-model="contact.addressLine1"
             >
               <template #item="{ item, props }">
@@ -244,56 +245,34 @@ function removeContact(index) {
 /**
  * Updates the address dropdown according to the user's input.
  */
+let timeout;
 async function updateAddressDropDown(query) {
-  if (query.length > 3) {
+  if (query.length <3) return;
+  if (timeout) clearTimeout(timeout);
+  timeout = setTimeout(async () => {
+    placeIds.value = {};
     let locations = await api.getLocation(query);
-    //object used to contain addresses and their respective ID's
-    //needed later to obtain the selected address's zip code
-    placeIds.value = {};
-    _forEach(locations.predictions, (location) => {
-      placeIds.value[location.description] = location.place_id;
-    });
-  } else {
-    placeIds.value = {};
-  }
-} //updateAddressDropDown
+    for (let { formattedAddress, ...rest } of locations) placeIds.value[formattedAddress] = rest;
+  }, 250);
+}
 
 /**
- * Finds the city, street, state, and zip code current address fields based on an address
+ * Fills in address info to model
  * @param {import('vue').Ref<any>} item The ref to the search string
- * @param {Number} index Index of emergency contact
  */
 async function autofillLocation(item, index) {
-  let search = item.value;
+  let address = placeIds.value[item.value];
+  let contact = editedEmployee.value.emergencyContacts[index]
 
-  if (!_isEmpty(search)) {
-    let fullAddress = search.split(', ');
-    // fills in the three known fields
-    editedEmployee.value.emergencyContacts[index].city = fullAddress[1];
-    editedEmployee.value.emergencyContacts[index].addressLine1 = fullAddress[0];
-    editedEmployee.value.emergencyContacts[index].state = STATES[fullAddress[2].split(' ')[0]];
-    if (fullAddress[3] === 'USA') editedEmployee.value.emergencyContacts[index].country = 'United States';
+  // update address info
+  contact.addressLine1 = address.street1;
+  contact.city = address.city;
+  contact.state = address.state;
+  contact.zipcode = address.zip;
 
-    // obtains the selected address's ID needed for the zip code API call
-    let selectedAddress = placeIds.value[search];
-
-    // Response contains an array of objects, with each object containing
-    // a field title 'type'. 'Type' is another array and we want the one
-    // containing the postal_code string
-    let res = await api.getZipCode(selectedAddress);
-
-    editedEmployee.value.emergencyContacts[index].zipcode = '';
-    _forEach(res.result.address_components, (field) => {
-      if (field.types.includes('postal_code')) {
-        editedEmployee.value.emergencyContacts[index].zipcode = field.short_name;
-      }
-    });
-    //resets addresses and ID's in dropdown, keeping only the current street 1
-    placeIds.value = {};
-    // search = null;
-    // searchString.value.blur();
-  }
-} // autofillLocation
+  //resets addresses and ID's in dropdown
+  placeIds.value = {};
+}
 
 /**
  * Sets primary contact to only one, ensuring that all others are unchecked.
