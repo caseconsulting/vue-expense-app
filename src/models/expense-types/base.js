@@ -5,7 +5,7 @@ export class Base {
     this.replyTo = '';
 
     if (this.categories) {
-      this.categories = this.categories.forEach((c) => c.clearEmails());
+      this.categories.forEach((c) => c.clearEmails());
     }
   }
 }
