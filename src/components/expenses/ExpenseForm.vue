@@ -371,7 +371,7 @@
         <v-text-field
           variant="underlined"
           v-model="editedExpense.url"
-          :rules="[...getURLRules(), getRequireURL()]"
+          :rules="[...getURLRules(), ...getRequireURL()]"
           :label="urlLabel"
           :disabled="isInactive"
         />
@@ -552,8 +552,7 @@ function receiptRequired() {
   if (this.selectedExpenseType && this.selectedExpenseType.requireReceipt) {
     // return true unless expense is training and the category is exchange
     return !(
-      this.selectedExpenseType.name === 'Training' &&
-      this.editedExpense.category === 'Exchange for training hours'
+      this.selectedExpenseType.name === 'Training' && this.editedExpense.category === 'Exchange for training hours'
     );
   }
   // otherwise, does one of it's categories require a receipt
@@ -1302,7 +1301,7 @@ async function getRemainingBudget() {
  */
 function getRequireURL() {
   if (!this.selectedExpenseType) {
-    return true;
+    return [];
   }
   if (this.selectedExpenseType.requireURL) {
     return getRequiredRules();
@@ -1317,7 +1316,7 @@ function getRequireURL() {
       return getRequiredRules();
     }
   }
-  return true;
+  return [];
 } // getRequireURL
 
 /**
@@ -1377,7 +1376,7 @@ function isReceiptRequired() {
   }
 
   return false;
-} // receiptRequired
+}
 
 /**
  * Creates the rules for the notes section based on whether or not the current expense type requires a recipient.
