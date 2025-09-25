@@ -1,7 +1,10 @@
-import { Category } from '@/models/category.js';
+import { Base } from '@/models/expense-types/base.js';
+import { Category } from '@/models/expense-types/category.js';
 import api from '@/shared/api.js';
-export class ExpenseType {
+import { isEmpty } from '@/utils/utils';
+export class ExpenseType extends Base {
   constructor(properties) {
+    super();
     /** @type {string} */
     this.id = properties.id;
     /** @type {string[]} */
@@ -51,6 +54,25 @@ export class ExpenseType {
     this.tagBudgets = properties.tagBudgets ?? [];
     /** @type {string} */
     this.to = properties.to;
+
+    return new Proxy(this, {
+      set(target, key, value) {
+        target[key] = value;
+        switch (key) {
+          case 'to':
+            if (isEmpty(value)) {
+              target.clearEmails();
+            }
+            break;
+          case 'showOnFeed':
+          case 'requireReceipt':
+          case 'requireURL':
+            target.categories.forEach((c) => (c[key] = value));
+            break;
+        }
+        return true;
+      }
+    });
   }
 
   get active() {

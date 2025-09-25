@@ -95,7 +95,7 @@ import { generateUUID, isEmpty } from '@/utils/utils';
 import { format } from '@/shared/dateUtils';
 import { updateStoreExpenseTypes } from '@/utils/storeUtils';
 import { onMounted, onBeforeUnmount, ref, inject, watch, nextTick } from 'vue';
-import { ExpenseType } from '@/models/expenseType.js';
+import { ExpenseType } from '@/models/expense-types/expenseType.js';
 
 // |--------------------------------------------------|
 // |                                                  |

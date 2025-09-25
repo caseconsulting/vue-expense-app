@@ -1,7 +1,7 @@
 <template>
   <v-card>
     <v-card-title class="d-flex align-center header-slim">
-      <h3>Create New Category</h3>
+      <h3>Category</h3>
     </v-card-title>
     <v-card-text>
       <v-form ref="categoryForm" v-model="valid" @submit.prevent="submit()">

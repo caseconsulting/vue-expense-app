@@ -328,7 +328,7 @@ import { onBeforeMount, onBeforeUnmount, ref, watch, computed, inject } from 'vu
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSnackbar.vue';
-import { ExpenseType } from '@/models/expenseType.js';
+import { ExpenseType } from '@/models/expense-types/expenseType.js';
 
 // |--------------------------------------------------|
 // |                                                  |

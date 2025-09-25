@@ -73,8 +73,8 @@ import AddPrimary from '@/components/shared/buttons/AddPrimary.vue';
 import BooleanFlag from '@/components/shared/Boolean.vue';
 import CategoryForm from '@/components/expense-types/CategoryForm.vue';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
-import { inject, ref } from 'vue';
-import { Category } from '@/models/category.js';
+import { inject, onBeforeMount, onBeforeUnmount, ref, watch } from 'vue';
+import { Category } from '@/models/expense-types/category.js';
 
 const emitter = inject('emitter');
 
@@ -94,16 +94,31 @@ const deleteModal = ref({});
 
 const newCategory = ref(new Category(props.expenseType, true));
 
+onBeforeMount(() => {
+  emitter.on('save-category', async () => {
+    addModal.value = false;
+    editModal.value = {};
+    newCategory.value = new Category(props.expenseType, true);
+  });
+});
+
+onBeforeUnmount(() => {
+  emitter.off('save-category');
+});
+
 async function deleteCategory(index) {
   if (index !== -1) {
     props.expenseType.categories.splice(index, 1);
     await props.expenseType.updateCategories(props.expenseType.categories);
   }
+  deleteModal.value[index] = false;
 }
 
-emitter.on('save-category', async () => {
-  addModal.value = false;
-  editModal.value = {};
-  newCategory.value = new Category(props.expenseType, true);
-});
+watch(
+  () => props.expenseType,
+  () => {
+    newCategory.value = new Category(props.expenseType, true);
+  },
+  { deep: true }
+);
 </script>

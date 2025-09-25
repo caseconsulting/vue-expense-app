@@ -167,7 +167,7 @@ import {
   updateStoreUser
 } from '@/utils/storeUtils.js';
 import { loadBasecampAvatars } from '@/utils/basecamp';
-import { ExpenseType } from '@/models/ExpenseType.js';
+import { ExpenseType } from '@/models/expense-types/expenseType.js';
 
 const route = useRoute();
 const store = useStore();
