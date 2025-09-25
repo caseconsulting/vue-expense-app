@@ -229,16 +229,16 @@
           </v-col>
           <v-col :cols="!isMobile() ? '6' : '12'">
               <v-combobox
+                v-model="editedEmployee.currentStreet"
                 class="d-inline"
+                label="Street 1"
+                data-vv-name="Street 1"
                 prepend-inner-icon="mdi-magnify"
                 :items="Object.keys(placeIds)"
+                :custom-filter="() => true"
                 no-data-text="Start searching..."
                 @update:search="updateAddressDropDown($event, index)"
                 @blur="placeIds = {}"
-                
-                label="Street 1"
-                data-vv-name="Street 1"
-                v-model="editedEmployee.currentStreet"
                 ref="addressSearch"
               >
                 <template #item="{ item }">
