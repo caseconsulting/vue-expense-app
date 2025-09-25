@@ -220,38 +220,33 @@
     <v-row class="groove">
       <v-col>
         <!-- private icon and search bar -->
-        <v-row align="center">
-          <v-col class="pb-0 d-flex">
-            <div class="mt-4 mb-9 ml-3 mr-7 d-inline">
-              <v-icon color="black">mdi-shield</v-icon>
+        <v-row>
+          <v-col cols="1">
+            <div class="d-inline">
+              <v-icon color="black" class="ml-4 mt-4">mdi-shield</v-icon>
               <v-tooltip activator="parent" location="top" text="Address is always hidden from other users"></v-tooltip>
             </div>
-            <v-autocomplete
-              class="d-inline"
-              prepend-inner-icon="mdi-magnify"
-              label="Search Locations"
-              :items="Object.keys(placeIds)"
-              :custom-filter="() => true"
-              no-data-text="Start searching..."
-              @update:search="updateAddressDropDown($event)"
-              ref="addressSearch"
-            >
-              <template #item="{ item, props }">
-                <v-list-item @click="autofillLocation(item, props)">{{ item.value }}</v-list-item>
-              </template>
-            </v-autocomplete>
-          </v-col>
-        </v-row>
-        <!-- actual address fields -->
-        <v-row>
-          <v-col :cols="!isMobile() ? '6' : '12'">
-            <v-text-field
-              v-model.trim="editedEmployee.currentStreet"
-              label="Street 1"
-              data-vv-name="Street 1"
-            ></v-text-field>
           </v-col>
           <v-col :cols="!isMobile() ? '6' : '12'">
+              <v-combobox
+                class="d-inline"
+                prepend-inner-icon="mdi-magnify"
+                :items="Object.keys(placeIds)"
+                no-data-text="Start searching..."
+                @update:search="updateAddressDropDown($event, index)"
+                @blur="placeIds = {}"
+                
+                label="Street 1"
+                data-vv-name="Street 1"
+                v-model="editedEmployee.currentStreet"
+                ref="addressSearch"
+              >
+                <template #item="{ item }">
+                  <v-list-item @click="autofillLocation(item)">{{ item.value }}</v-list-item>
+                </template>
+              </v-combobox>
+          </v-col>
+          <v-col :cols="!isMobile() ? '5' : '11'">
             <v-text-field
               v-model.trim="editedEmployee.currentStreet2"
               label="Street 2"
