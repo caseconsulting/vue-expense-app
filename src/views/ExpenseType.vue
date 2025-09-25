@@ -27,13 +27,16 @@
               <div class="ml-4">
                 <p><b>Budget:</b> {{ model.budget }}</p>
                 <!-- Tag Budgets -->
-                <v-row v-if="userRoleIsAdmin() && model.tagBudgets && model.tagBudgets.length > 0" no-gutters>
-                  <v-col cols="12" sm="6" md="3">
+                <v-row v-if="userRoleIsAdmin()" no-gutters>
+                  <v-col cols="auto">
                     <div>
-                      <p><b>Tag Budgets:</b></p>
+                      <p><b>Tag Budgets: </b></p>
                     </div>
                   </v-col>
-                  <v-col class="d-flex justify-space-between flex-wrap">
+                  <v-col
+                    v-if="model.tagBudgets && model.tagBudgets.length > 0"
+                    class="d-flex justify-space-between flex-wrap"
+                  >
                     <div v-for="(model, index) in model.tagBudgets" :key="index" class="d-flex px-2 pb-4">
                       <div class="d-flex pr-3">
                         <b>Tag(s):</b>
@@ -50,6 +53,9 @@
                         </span>
                       </div>
                     </div>
+                  </v-col>
+                  <v-col v-else cols="auto">
+                    <p class="pl-1">None</p>
                   </v-col>
                 </v-row>
                 <p>
