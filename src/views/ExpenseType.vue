@@ -23,64 +23,68 @@
           <v-card>
             <v-card-title class="header-slim">Expense Type</v-card-title>
             <v-card-text class="mt-2">
-              <h2>Budget Amount</h2>
-              <div class="ml-4">
-                <p><b>Budget:</b> {{ model.budget }}</p>
-                <!-- Tag Budgets -->
-                <v-row v-if="userRoleIsAdmin()" no-gutters>
-                  <v-col cols="auto">
-                    <div>
-                      <p><b>Tag Budgets: </b></p>
-                    </div>
-                  </v-col>
-                  <v-col
-                    v-if="model.tagBudgets && model.tagBudgets.length > 0"
-                    class="d-flex justify-space-between flex-wrap"
-                  >
-                    <div v-for="(model, index) in model.tagBudgets" :key="index" class="d-flex px-2 pb-4">
-                      <div class="d-flex pr-3">
-                        <b>Tag(s):</b>
-                        <div class="d-flex flex-column">
-                          <v-chip v-for="tagID in model.tags" size="small" :key="tagID">
-                            <v-icon icon="mdi-tag" start />{{ getTagByID(tagID).tagName }}
-                          </v-chip>
+              <div v-if="userRoleIsAdmin()">
+                <h2>Budget Amount</h2>
+                <div class="ml-4">
+                  <p><b>Budget:</b> {{ model.budget }}</p>
+                  <!-- Tag Budgets -->
+                  <v-row no-gutters>
+                    <v-col cols="auto">
+                      <div>
+                        <p><b>Tag Budgets: </b></p>
+                      </div>
+                    </v-col>
+                    <v-col
+                      v-if="model.tagBudgets && model.tagBudgets.length > 0"
+                      class="d-flex justify-space-between flex-wrap"
+                    >
+                      <div v-for="(model, index) in model.tagBudgets" :key="index" class="d-flex px-2 pb-4">
+                        <div class="d-flex pr-3">
+                          <b>Tag(s):</b>
+                          <div class="d-flex flex-column">
+                            <v-chip v-for="tagID in model.tags" size="small" :key="tagID">
+                              <v-icon icon="mdi-tag" start />{{ getTagByID(tagID).tagName }}
+                            </v-chip>
+                          </div>
+                        </div>
+                        <div class="d-flex flex-nowrap">
+                          <span>
+                            <b>Budget: </b>
+                            {{ convertToMoneyString(model.budget) }}
+                          </span>
                         </div>
                       </div>
-                      <div class="d-flex flex-nowrap">
-                        <span>
-                          <b>Budget: </b>
-                          {{ convertToMoneyString(model.budget) }}
-                        </span>
-                      </div>
-                    </div>
-                  </v-col>
-                  <v-col v-else cols="auto">
-                    <p class="pl-1">None</p>
-                  </v-col>
-                </v-row>
-                <p>
-                  <b>Monthly Limit: </b>
-                  <span v-if="model.monthlyLimit">{{ model.monthlyLimit }}</span>
-                  <span v-else>None</span>
-                </p>
+                    </v-col>
+                    <v-col v-else cols="auto">
+                      <p class="pl-1">None</p>
+                    </v-col>
+                  </v-row>
+                  <p>
+                    <b>Monthly Limit: </b>
+                    <span v-if="model.monthlyLimit">{{ model.monthlyLimit }}</span>
+                    <span v-else>None</span>
+                  </p>
+                </div>
               </div>
-              <h2>Employee Access</h2>
-              <div class="ml-4">
-                <p>
-                  <b>Access:</b>
-                  {{ model.accessText }}
-                  <employee-list :employees="getEmployeeAccess()" title="Accessible By"></employee-list>
-                </p>
-                <p>
-                  <b>Disabled Employees:</b>
-                  {{ model.disabledEmployeesText }}
-                  <employee-list
-                    v-if="getDisabledEmployees().length > 0"
-                    :employees="getDisabledEmployees()"
-                    title="Disabled Employees"
-                  >
-                  </employee-list>
-                </p>
+              <div v-if="userRoleIsAdmin()">
+                <h2>Employee Access</h2>
+                <div class="ml-4">
+                  <p>
+                    <b>Access:</b>
+                    {{ model.accessText }}
+                    <employee-list :employees="getEmployeeAccess()" title="Accessible By"></employee-list>
+                  </p>
+                  <p>
+                    <b>Disabled Employees:</b>
+                    {{ model.disabledEmployeesText }}
+                    <employee-list
+                      v-if="getDisabledEmployees().length > 0"
+                      :employees="getDisabledEmployees()"
+                      title="Disabled Employees"
+                    >
+                    </employee-list>
+                  </p>
+                </div>
               </div>
               <h2>Duration</h2>
               <div class="ml-4">
