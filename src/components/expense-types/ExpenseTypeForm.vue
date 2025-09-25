@@ -6,7 +6,7 @@
     </v-card-title>
 
     <v-container fluid>
-      <v-form ref="expenseTypeForm" v-model="valid" @submit.prevent="valid ? (submitForm = true) : _" lazy-validation>
+      <v-form ref="expenseTypeForm" v-model="valid" @submit.prevent="submitForm = true">
         <details-form v-model="editedExpenseType">
           <v-textarea
             variant="underlined"
@@ -69,7 +69,7 @@
       <general-confirmation-modal
         title="Are you sure you want to submit?"
         type="type"
-        :toggleModal="submitForm"
+        :toggleModal="submitForm && valid"
       ></general-confirmation-modal>
     </v-container>
   </v-card>
