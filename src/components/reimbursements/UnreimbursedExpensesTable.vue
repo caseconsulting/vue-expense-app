@@ -376,9 +376,9 @@ function constructAutoComplete(aggregatedData) {
   employees.value = _uniqBy(employees.value, (e) => e.value);
   // set expense types
   expenseTypes.value = _map(aggregatedData, (data) => {
-    if (data && data.name && data.expenseTypeId) {
+    if (data && data.budgetName && data.expenseTypeId) {
       return {
-        text: data.name,
+        text: data.budgetName,
         value: data.expenseTypeId
       };
     }
