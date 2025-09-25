@@ -231,9 +231,9 @@
               prepend-inner-icon="mdi-magnify"
               label="Search Locations"
               :items="Object.keys(placeIds)"
+              :custom-filter="() => true"
               no-data-text="Start searching..."
               @update:search="updateAddressDropDown($event)"
-              clear-on-select
               ref="addressSearch"
             >
               <template #item="{ item, props }">
@@ -800,9 +800,9 @@ async function updateAddressDropDown(query) {
   if (query.length <3) return; // <3
   if (timeout) clearTimeout(timeout);
   timeout = setTimeout(async () => {
+    placeIds.value = {};
     let locations = await api.getLocation(query);
-    let callback = (acc, { formattedAddress, ...rest }) => { acc[formattedAddress] = rest; return acc; };
-    placeIds.value = locations.reduce(callback, {});
+    for (let { formattedAddress, ...rest } of locations) placeIds.value[formattedAddress] = rest;
   }, 250);
 }
 
