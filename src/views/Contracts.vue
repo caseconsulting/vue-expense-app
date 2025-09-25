@@ -19,7 +19,6 @@
       <v-container fluid class="px-0 px-md-2">
         <contracts-page-loader v-if="loading" />
         <contracts-table v-else />
-
         <br />
       </v-container>
     </v-card>
