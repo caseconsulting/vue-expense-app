@@ -78,9 +78,9 @@
               </div>
               <h2>Duration</h2>
               <div class="ml-4">
-                <boolean displayText="Recurring" :field="model.recurringFlag"></boolean>
+                <boolean-flag displayText="Recurring" :field="model.recurringFlag"></boolean-flag>
                 <div v-if="model.recurringFlag">
-                  <boolean displayText="Inactive" :field="model.isInactive"></boolean>
+                  <boolean-flag displayText="Inactive" :field="model.isInactive"></boolean-flag>
                 </div>
                 <div v-else>
                   <p><b>Start Date:</b> {{ model.startDate }}</p>
@@ -97,9 +97,9 @@
                 <p><b>Show On Feed:</b> {{ model.showOnFeedText }}</p>
                 <p><b>Require URL:</b> {{ model.requireURLText }}</p>
                 <p><b>Require Receipt:</b> {{ model.requireReceiptText }}</p>
-                <boolean displayText="Requires Recipient" :field="model.hasRecipient"></boolean>
-                <boolean displayText="Pro-rated" :field="model.proRated"></boolean>
-                <boolean displayText="Overdraft Allowed" :field="model.odFlag"></boolean>
+                <boolean-flag displayText="Requires Recipient" :field="model.hasRecipient"></boolean-flag>
+                <boolean-flag displayText="Pro-rated" :field="model.proRated"></boolean-flag>
+                <boolean-flag displayText="Overdraft Allowed" :field="model.odFlag"></boolean-flag>
               </div>
               <h2>Emails</h2>
               <div class="ml-4">
@@ -130,57 +130,8 @@
         <v-col cols="6">
           <v-card>
             <v-card-title class="header-slim">Categories</v-card-title>
-            <v-card-text>
-              <v-row>
-                <v-col cols="12" class="d-flex justify-center ma-1">
-                  <create-category
-                    title="Add Category"
-                    :expenseType="model"
-                    :click="
-                      () => {
-                        addCategory = true;
-                      }
-                    "
-                  ></create-category>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col cols="12" v-if="model.categories.length == 0">
-                  <p>No categories.</p>
-                </v-col>
-                <v-col cols="12" v-else>
-                  <v-list>
-                    <v-list-item v-for="(category, index) in model.categories" :key="index">
-                      <v-list-item-title>{{ category.name }}</v-list-item-title>
-                      <v-list-item-subtitle class="d-block">
-                        <boolean displayText="Show On Feed" :field="category.showOnFeed"></boolean>
-                        <boolean displayText="Require URL" :field="category.requireURL"></boolean>
-                        <boolean displayText="Require Receipt" :field="category.requireReceipt"></boolean>
-                        <p>
-                          <b>To: </b>
-                          <span v-if="category.to">{{ category.to }}</span>
-                          <span v-else>None</span>
-                        </p>
-                        <p>
-                          <b>CC: </b>
-                          <span v-if="category.cc">{{ category.cc }}</span>
-                          <span v-else>None</span>
-                        </p>
-                        <p>
-                          <b>BCC: </b>
-                          <span v-if="category.bcc">{{ category.bcc }}</span>
-                          <span v-else>None</span>
-                        </p>
-                        <p>
-                          <b>Reply-To: </b>
-                          <span v-if="category.replyTo">{{ category.replyTo }}</span>
-                          <span v-else>None</span>
-                        </p>
-                      </v-list-item-subtitle>
-                    </v-list-item>
-                  </v-list>
-                </v-col>
-              </v-row>
+            <v-card-text class="mt-2">
+              <categories :expenseType="model"></categories>
             </v-card-text>
           </v-card>
         </v-col>
@@ -189,8 +140,8 @@
   </div>
 </template>
 <script setup>
-import Boolean from '@/components/shared/Boolean.vue';
-import CreateCategory from '@/components/modals/CreateCategory.vue';
+import BooleanFlag from '@/components/shared/Boolean.vue';
+import Categories from '@/components/expense-types/Categories.vue';
 import EmployeeList from '@/components/modals/EmployeeList.vue';
 import { onBeforeMount, ref } from 'vue';
 import { useStore } from 'vuex';
@@ -203,7 +154,6 @@ import { ExpenseType } from '@/models/ExpenseType.js';
 const route = useRoute();
 const store = useStore();
 
-const addCategory = ref(false);
 const loading = ref(true);
 const model = ref(null); // selected expense type
 

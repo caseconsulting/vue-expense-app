@@ -50,7 +50,8 @@ $case-darkgray: #415364;
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
 }
 
-.beta_header_style, .header-slim {
+.beta_header_style,
+.header-slim {
   /* border-radius: 5px; */
   background-color: $case-red-beta;
   color: white;
@@ -377,6 +378,6 @@ fieldset legend {
   border-left-style: groove;
 }
 
-.v-col .small {
+.v-col.slim {
   padding: 5px;
 }

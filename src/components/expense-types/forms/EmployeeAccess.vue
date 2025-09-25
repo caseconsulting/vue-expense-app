@@ -5,7 +5,7 @@
       <help type="expenseTypes"></help>
     </div>
     <v-row no-gutters>
-      <v-col cols="6" lg="3">
+      <v-col cols="6" lg="3" class="slim">
         <checkbox
           label="Full-time"
           value="FullTime"
@@ -13,7 +13,7 @@
           :rules="checkBoxValid"
         ></checkbox>
       </v-col>
-      <v-col cols="6" lg="3">
+      <v-col cols="6" lg="3" class="slim">
         <checkbox
           label="Part-time"
           value="PartTime"
@@ -21,21 +21,11 @@
           :rules="checkBoxValid"
         ></checkbox>
       </v-col>
-      <v-col cols="6" lg="3">
-        <checkbox
-          label="Intern"
-          value="Intern"
-          v-model="modelValue.accessibleBy"
-          :rules="checkBoxValid"
-        ></checkbox>
+      <v-col cols="6" lg="3" class="slim">
+        <checkbox label="Intern" value="Intern" v-model="modelValue.accessibleBy" :rules="checkBoxValid"></checkbox>
       </v-col>
-      <v-col cols="6" lg="3">
-        <checkbox
-          label="Custom"
-          value="Custom"
-          v-model="modelValue.accessibleBy"
-          :rules="checkBoxValid"
-        ></checkbox>
+      <v-col cols="6" lg="3" class="slim">
+        <checkbox label="Custom" value="Custom" v-model="modelValue.accessibleBy" :rules="checkBoxValid"></checkbox>
       </v-col>
     </v-row>
     <p id="error" v-if="checkBoxRule">At least one checkbox must be checked</p>
@@ -70,7 +60,7 @@
       <v-col>
         <p class="form-text">Access Preview</p>
       </v-col>
-      <v-col>
+      <v-col class="slim">
         <v-dialog scrollable max-width="400px">
           <template #activator="{ props }">
             <v-btn size="small" v-bind="props">View {{ employeeSize }} Employees</v-btn>
@@ -140,7 +130,6 @@ const customAccessRules = ref([
 const employeeSize = ref(null); //number of employees
 const searchString = ref('');
 
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                 LIFECYCLE HOOKS                  |
@@ -150,7 +139,7 @@ const searchString = ref('');
 /**
  * Gets and sets all employees.
  */
-onBeforeMount(async() => {
+onBeforeMount(async () => {
   emitter.on('clear-expense-type-form', clearForm);
 
   await updateStoreEmployees();
@@ -229,7 +218,6 @@ function getEmployeeName(employeeId) {
   let localEmployee = store.getters.employees.find((employee) => employee.id === employeeId);
   return `${localEmployee.firstName} ${localEmployee.lastName}`;
 }
-
 </script>
 <style scoped>
 #error {

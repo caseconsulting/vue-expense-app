@@ -64,13 +64,18 @@ import CaseEmailField from '@/components/shared/edit-fields/CaseEmailField.vue';
 import Checkbox from '@/components/shared/edit-fields/Checkbox.vue';
 import DetailsForm from '@/components/expense-types/forms/Details.vue';
 import SubmitButton from '@/components/shared/buttons/SubmitButton.vue';
-import { ref } from 'vue';
+import { inject, ref } from 'vue';
 import { isEmpty } from '@/utils/utils';
-import api from '@/shared/api.js';
+
+const emitter = inject('emitter');
 
 const props = defineProps({
   model: Object,
-  expenseType: Object
+  expenseType: Object,
+  index: {
+    type: Number,
+    default: -1
+  }
 });
 
 const category = ref(props.model);
@@ -79,12 +84,21 @@ const valid = ref(false); // form is valid
 
 async function submit() {
   if (valid.value) {
-    let categories = [...props.expenseType.categories, category.value];
-    let data = {
-      id: props.expenseType.id,
-      categories: categories.map((c) => JSON.stringify(c))
-    };
-    await api.updateAttribute(api.EXPENSE_TYPES, data, 'categories');
+    if (props.index == -1) {
+      await addCategory();
+    } else {
+      await editCategory();
+    }
+    emitter.emit('save-category');
   }
+}
+
+async function editCategory() {
+  props.expenseType.categories[props.index] = category.value;
+  await props.expenseType.updateCategories(props.expenseType.categories);
+}
+
+async function addCategory() {
+  await props.expenseType.updateCategories([...props.expenseType.categories, category.value]);
 }
 </script>

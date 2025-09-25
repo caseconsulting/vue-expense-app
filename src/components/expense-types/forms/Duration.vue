@@ -2,18 +2,11 @@
   <div>
     <strong>Duration</strong>
     <v-row>
-      <v-col>
-        <checkbox
-          label="Recurring Flag"
-          v-model="modelValue.recurringFlag"
-        ></checkbox>
+      <v-col class="slim">
+        <checkbox label="Recurring Flag" v-model="modelValue.recurringFlag"></checkbox>
       </v-col>
-      <v-col>
-        <checkbox
-          label="Inactive"
-          v-model="modelValue.isInactive"
-          :disabled="!modelValue.recurringFlag"
-        ></checkbox>
+      <v-col class="slim">
+        <checkbox label="Inactive" v-model="modelValue.isInactive" :disabled="!modelValue.recurringFlag"></checkbox>
       </v-col>
     </v-row>
     <v-text-field
@@ -21,7 +14,7 @@
       variant="underlined"
       v-model="startDateFormatted"
       id="startDate"
-      :rules="[...getDateRules(), ...startDateRules]"
+      :rules="[...getDateRules(!modelValue.recurringFlag), ...startDateRules]"
       label="Start Date"
       hint="MM/DD/YYYY format"
       v-mask="'##/##/####'"
@@ -56,7 +49,7 @@
       variant="underlined"
       v-model="endDateFormatted"
       id="endDate"
-      :rules="[...getDateRules(), ...endDateRules]"
+      :rules="[...getDateRules(!modelValue.recurringFlag), ...endDateRules]"
       label="End Date"
       hint="MM/DD/YYYY format"
       v-mask="'##/##/####'"
@@ -103,9 +96,12 @@ const props = defineProps({
 const endDateFormatted = ref(null); // formatted end date
 const endDateRules = ref([
   (v) => {
-    return !isEmpty(v) && isValid(v, 'MM/DD/YYYY') && props.modelValue.startDate
-      ? isSameOrAfter(v, props.modelValue.startDate) || 'End date must be at or after start date'
-      : true;
+    return (
+      isEmpty(v) ||
+      (isValid(v, 'MM/DD/YYYY') && props.modelValue.startDate
+        ? isSameOrAfter(v, props.modelValue.startDate) || 'End date must be at or after start date'
+        : true)
+    );
   }
 ]);
 const showStartMenu = ref(false); // boolean for showing date picker
@@ -113,9 +109,12 @@ const showEndMenu = ref(false); // boolean for showing date picker
 const startDateFormatted = ref(null); // formateed start date
 const startDateRules = ref([
   (v) => {
-    return !isEmpty(v) && isValid(v, 'MM/DD/YYYY') && props.modelValue.endDate
-      ? isSameOrBefore(v, props.modelValue.endDate) || 'Start date must be at or before end date'
-      : true;
+    return (
+      isEmpty(v) ||
+      (isValid(v, 'MM/DD/YYYY') && props.modelValue.endDate
+        ? isSameOrBefore(v, props.modelValue.endDate) || 'Start date must be at or before end date'
+        : true)
+    );
   }
 ]);
 const vMask = mask; // custom directive
@@ -154,7 +153,6 @@ function clearForm() {
   endDateFormatted.value = null;
 }
 
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                     WATCHERS                     |
@@ -181,13 +179,11 @@ watch(
 watch(
   () => props.modelValue.startDate,
   () => {
-    startDateFormatted.value =
-      format(props.modelValue.startDate, null, 'MM/DD/YYYY') || startDateFormatted.value;
+    startDateFormatted.value = format(props.modelValue.startDate, null, 'MM/DD/YYYY') || startDateFormatted.value;
     //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
     if (props.modelValue.startDate !== null && !format(props.modelValue.startDate, null, 'MM/DD/YYYY')) {
       props.modelValue.startDate = null;
     }
   }
 );
-
 </script>

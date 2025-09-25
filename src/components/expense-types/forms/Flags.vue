@@ -6,23 +6,14 @@
         <help type="expenseTypes"></help>
       </v-col>
       <slot></slot>
-      <v-col cols="auto">
-        <checkbox
-          label="Show On Feed"
-          v-model="modelValue.showOnFeed"
-        ></checkbox>
-        </v-col>
-      <v-col cols="auto">
-        <checkbox
-          label="URL Required"
-          v-model="modelValue.requireURL"
-        ></checkbox>
-        </v-col>
-      <v-col cols="auto">
-        <checkbox
-          label="Receipt Required"
-          v-model="modelValue.requireReceipt"
-        ></checkbox>
+      <v-col cols="auto" class="slim">
+        <checkbox label="Show On Feed" v-model="modelValue.showOnFeed"></checkbox>
+      </v-col>
+      <v-col cols="auto" class="slim">
+        <checkbox label="URL Required" v-model="modelValue.requireURL"></checkbox>
+      </v-col>
+      <v-col cols="auto" class="slim">
+        <checkbox label="Receipt Required" v-model="modelValue.requireReceipt"></checkbox>
       </v-col>
     </v-row>
   </div>

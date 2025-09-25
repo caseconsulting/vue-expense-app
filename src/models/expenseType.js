@@ -1,4 +1,5 @@
 import { Category } from '@/models/category.js';
+import api from '@/shared/api.js';
 export class ExpenseType {
   constructor(properties) {
     /** @type {string} */
@@ -57,9 +58,11 @@ export class ExpenseType {
   }
 
   get accessText() {
-    return this.accessibleBy.filter((accessType) => {
-      return ['FullTime', 'PartTime', 'Intern', 'Custom'].includes(accessType);
-    }).join(', ');
+    return this.accessibleBy
+      .filter((accessType) => {
+        return ['FullTime', 'PartTime', 'Intern', 'Custom'].includes(accessType);
+      })
+      .join(', ');
   }
 
   get categoriesOnFeed() {
@@ -128,7 +131,7 @@ export class ExpenseType {
       employeesList = employeesList.concat(
         employees.filter((employee) => {
           if (customAccess) {
-            return customAccess.includes(employee.id)
+            return customAccess.includes(employee.id);
           } else {
             return this.accessibleBy.includes(employee.id);
           }
@@ -144,10 +147,32 @@ export class ExpenseType {
 
     return employeesList;
   }
-  
+
   disabledEmployeesList(employees) {
     return employees.filter((employee) => {
       return this.disabledEmployeesIDs.includes(employee.id);
     });
+  }
+
+  async updateAttribute(attribute, value) {
+    this[attribute] = value;
+    if (this.id == null) {
+      let data = {
+        id: this.id
+      };
+      data[attribute] = value;
+      await api.updateAttribute(api.EXPENSE_TYPES, data, attribute);
+    }
+  }
+
+  async updateCategories(categories) {
+    this.categories = categories;
+    if (this.id) {
+      let data = {
+        id: this.id,
+        categories: categories.map((c) => JSON.stringify(c))
+      };
+      await api.updateAttribute(api.EXPENSE_TYPES, data, 'categories');
+    }
   }
 }

@@ -23,23 +23,14 @@
         <duration v-model="editedExpenseType"></duration>
         <integrations v-model="editedExpenseType"></integrations>
         <flags v-model="editedExpenseType">
-          <v-col cols="auto">
-            <checkbox
-              label="Pro-Rated"
-              v-model="editedExpenseType.proRated">
-            </checkbox>
+          <v-col cols="auto" class="slim">
+            <checkbox label="Pro-Rated" v-model="editedExpenseType.proRated"> </checkbox>
           </v-col>
-          <v-col cols="auto">
-            <checkbox
-              label="Overdraft Budget"
-              v-model="editedExpenseType.odFlag">
-            </checkbox>
+          <v-col cols="auto" class="slim">
+            <checkbox label="Overdraft Budget" v-model="editedExpenseType.odFlag"> </checkbox>
           </v-col>
-          <v-col cols="auto">
-            <checkbox
-              label="Has Recipient"
-              v-model="editedExpenseType.hasRecipient">
-            </checkbox>
+          <v-col cols="auto" class="slim">
+            <checkbox label="Has Recipient" v-model="editedExpenseType.hasRecipient"> </checkbox>
           </v-col>
         </flags>
         <emails v-model="editedExpenseType"></emails>
@@ -48,20 +39,31 @@
             <strong>Categories</strong>
             <help type="expenseTypes"></help>
           </v-col>
-          <v-col>
-            <p>TODO!</p>
+          <v-col class="slim">
+            <categories :expenseType="editedExpenseType" :condensed="true"></categories>
           </v-col>
         </v-row>
 
         <!-- Buttons -->
         <!-- Cancel Button -->
-        <v-btn color="white " @click="clearForm" class="ma-2" elevation="2">
-          <v-icon icon="mdi-close-circle" class="mr-1" />Cancel
-        </v-btn>
-        <!-- Submit Button -->
-        <v-btn variant="outlined" type="submit" class="ma-2" color="success" id="submitButton" :loading="submitting">
-          <v-icon icon="mdi-content-save" class="mr-1" />Submit
-        </v-btn>
+        <v-row>
+          <v-col>
+            <v-btn color="white " @click="clearForm" class="ma-2" elevation="2">
+              <v-icon icon="mdi-close-circle" class="mr-1" />Cancel
+            </v-btn>
+            <!-- Submit Button -->
+            <v-btn
+              variant="outlined"
+              type="submit"
+              class="ma-2"
+              color="success"
+              id="submitButton"
+              :loading="submitting"
+            >
+              <v-icon icon="mdi-content-save" class="mr-1" />Submit
+            </v-btn>
+          </v-col>
+        </v-row>
         <!-- End Buttons -->
       </v-form>
       <general-confirmation-modal
@@ -75,6 +77,7 @@
 
 <script setup>
 import BudgetAmount from '@/components/expense-types/forms/BudgetAmount.vue';
+import Categories from '@/components/expense-types/Categories.vue';
 import Checkbox from '@/components/shared/edit-fields/Checkbox.vue';
 import DetailsForm from '@/components/expense-types/forms/Details.vue';
 import Duration from '@/components/expense-types/forms/Duration.vue';
@@ -191,8 +194,6 @@ function parseNumber(budget) {
  * Submits an expense type.
  */
 async function submit() {
-  console.log('Submitting expense type...');
-  console.log(editedExpenseType.value);
   submitting.value = true; // set loading status to true
   emitter.emit('startAction');
 
@@ -344,5 +345,4 @@ watch(categories, (val) => {
     });
   }
 });
-
 </script>

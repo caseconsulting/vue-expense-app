@@ -79,11 +79,16 @@ export function getDateMonthYearOptionalRules() {
  * Gets the date rules in MM/DD/YYYY format.
  * @return Array - The array of rule functions
  */
-export function getDateRules() {
+export function getDateRules(required = true) {
   return [
-    (v) =>
-      (!isEmpty(v) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) && isValid(v, 'MM/DD/YYYY')) ||
-      'Date must be valid. Format: MM/DD/YYYY'
+    (v) => {
+      return (
+        isEmpty(v) ||
+        (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v) && isValid(v, 'MM/DD/YYYY')) ||
+        'Date must be valid. Format: MM/DD/YYYY'
+      );
+    },
+    (v) => !required || !isEmpty(v) || 'Date is required'
   ]; // rules for a required MM/DD/YYYY date
 } // getDateRules
 
@@ -127,11 +132,15 @@ export function getDateAfterRule(date) {
  */
 export function getEmailRules(required = true) {
   return [
-    (v) => isEmpty(v) || !!String(v).toLowerCase()
-            .match(
-              /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-            ) || 'Must be a valid email address',
-    (v) => !required || !isEmpty(v) || 'Email is required',
+    (v) =>
+      isEmpty(v) ||
+      !!String(v)
+        .toLowerCase()
+        .match(
+          /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+        ) ||
+      'Must be a valid email address',
+    (v) => !required || !isEmpty(v) || 'Email is required'
   ];
 } // getEmailRules
 
@@ -142,7 +151,7 @@ export function getEmailRules(required = true) {
  */
 export function getCaseEmailRules(required = true) {
   return [
-    (v) => isEmpty(v) ||/^[a-z\-0-9]+$/.test(v) || 'Can include numbers or lowercase letters',
+    (v) => isEmpty(v) || /^[a-z\-0-9]+$/.test(v) || 'Can include numbers or lowercase letters',
     (v) => !required || !isEmpty(v) || 'Email is required'
   ];
 }
