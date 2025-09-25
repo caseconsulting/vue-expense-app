@@ -61,7 +61,7 @@
     <v-col cols="12" class="d-flex justify-center mb-3 slim">
       <v-dialog v-model="addModal" title="Create Category">
         <template #activator="{ props }">
-          <add-primary title="Category" v-bind="props"></add-primary>
+          <add-primary title="Category" v-bind="props" :disabled="expenseType.categories.length === 10"></add-primary>
         </template>
         <category-form :model="newCategory" :expenseType="expenseType"></category-form>
       </v-dialog>
