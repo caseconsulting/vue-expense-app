@@ -182,7 +182,7 @@ export class ExpenseType extends Base {
 
   async updateAttribute(attribute, value) {
     this[attribute] = value;
-    if (this.id == null) {
+    if (this.id != null) {
       let data = {
         id: this.id
       };
@@ -193,7 +193,7 @@ export class ExpenseType extends Base {
 
   async updateCategories(categories) {
     this.categories = categories;
-    if (this.id) {
+    if (this.id != null) {
       let data = {
         id: this.id,
         categories: categories.map((c) => JSON.stringify(c))
