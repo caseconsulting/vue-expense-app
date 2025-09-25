@@ -197,6 +197,11 @@ const sections = ref({
       employeeRole: 'admin'
     },
     {
+      title: 'What are emails used for?',
+      body: 'Emails can be set up to notify certain people when an expense is created for this expense type. The email options are To, CC, BCC, and Reply-To. The To address must be specified for an email to be sent. The source address will be the info account email.',
+      employeeRole: 'admin'
+    },
+    {
       title: 'What are categories?',
       body: 'Admins may create up to 10 different categories for employees to choose from when submitting and expense. Categories are unique to each expense type and users will be required to select one category if the expense type has them. ',
       employeeRole: 'admin'

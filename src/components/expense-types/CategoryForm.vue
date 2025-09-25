@@ -35,19 +35,19 @@
           ></case-email-field>
           <case-email-field
             v-model="category.cc"
-            :disabled="!isEmpty(expenseType.cc)"
+            :disabled="!isEmpty(expenseType.cc) || isEmpty(category.to)"
             :required="false"
             label="CC Email"
           ></case-email-field>
           <case-email-field
             v-model="category.bcc"
-            :disabled="!isEmpty(expenseType.bcc)"
+            :disabled="!isEmpty(expenseType.bcc) || isEmpty(category.to)"
             :required="false"
             label="BCC Email"
           ></case-email-field>
           <case-email-field
             v-model="category.replyTo"
-            :disabled="!isEmpty(expenseType.replyTo)"
+            :disabled="!isEmpty(expenseType.replyTo) || isEmpty(category.to)"
             :required="false"
             label="Reply-To Email"
           ></case-email-field>
