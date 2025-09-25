@@ -185,6 +185,7 @@
               :headers="_headers"
               :items="expenseTypeList"
               @click:row="clickedRow"
+              :expanded="expanded"
               :loading="loading"
               :search="search"
               item-key="id"
@@ -216,8 +217,17 @@
                 </p>
               </template>
               <!-- Actions -->
-              <template v-if="userRoleIsAdmin()" v-slot:[`item.actions`]="{ item }">
+              <template v-slot:[`item.actions`]="{ item }">
                 <div>
+                  <v-btn
+                    :disabled="midAction"
+                    variant="text"
+                    icon
+                    @click.stop="expanded = [item.id]"
+                    v-tooltip="'Show Condensed View'"
+                  >
+                    <v-icon icon="mdi-chevron-down" class="case-gray" />
+                  </v-btn>
                   <v-btn
                     v-if="userRoleIsAdmin()"
                     :disabled="midAction"
@@ -261,7 +271,7 @@
                   <v-card>
                     <v-card-text>
                       <div class="expandedInfo">
-                        TODO: What do admins want here?
+                        {{ limitedText(item.description, 110) }}
                       </div>
                     </v-card-text>
                   </v-card>
@@ -312,10 +322,7 @@ import _cloneDeep from 'lodash/cloneDeep';
 import _union from 'lodash/union';
 import _uniq from 'lodash/uniq';
 import { convertToMoneyString, userRoleIsAdmin } from '@/utils/utils';
-import {
-  updateStoreExpenseTypes,
-  updateStoreBudgets,
-} from '@/utils/storeUtils';
+import { updateStoreExpenseTypes, updateStoreBudgets } from '@/utils/storeUtils';
 import { format } from '../shared/dateUtils';
 import { onBeforeMount, onBeforeUnmount, ref, watch, computed, inject } from 'vue';
 import { useStore } from 'vuex';
@@ -338,6 +345,7 @@ const disableModalItem = ref(null);
 const deleteModel = ref({ id: '' }); // expense type to delete
 const deleting = ref(false); // activate delete confirmation model
 const emitter = inject('emitter');
+const expanded = ref([]); // datatable expanded
 const expenseTypes = ref([]); // expense types
 const filter = ref({
   active: 'active',
@@ -368,10 +376,10 @@ const headers = ref([
     show: true
   },
   {
-    title: '',
+    title: 'Actions',
     key: 'actions',
     sortable: false,
-    show: false,
+    show: true,
     align: 'end'
   }
 ]); // datatable headers
@@ -577,9 +585,9 @@ function filterExpenseTypes() {
   // filter expense types by active or inactive
   filteredExpenseTypes.value = filteredExpenseTypes.value.filter((expenseType) => {
     return filter.value.active == 'active'
-      ? !expenseType.isInactive
+      ? expenseType.active
       : filter.value.active == 'notActive'
-        ? expenseType.isInactive
+        ? !expenseType.active
         : { ...filteredExpenseTypes.value };
   });
 
@@ -608,9 +616,7 @@ function filterExpenseTypes() {
 async function loadExpenseTypesData() {
   initialPageLoading.value = true;
   userInfo.value = store.getters.user;
-  await Promise.all([
-    refreshExpenseTypes()
-  ]);
+  await Promise.all([refreshExpenseTypes()]);
   expenseTypes.value = store.getters.expenseTypes.map((et) => new ExpenseType(et));
   filterExpenseTypes();
   initialPageLoading.value = false;
@@ -622,9 +628,9 @@ async function loadExpenseTypesData() {
  * @param val - the string to be shortened
  * @return string - the shortened string
  */
-function limitedText(val) {
+function limitedText(val, characterLimit = 50) {
   // limits text displayed to 50 characters on table view
-  return val.length > 50 ? `${val.substring(0, 50)}...` : val;
+  return val.length > characterLimit ? `${val.substring(0, characterLimit)}...` : val;
 }
 
 /**
