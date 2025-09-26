@@ -53,7 +53,6 @@ export function getProjectCurrentEmployees(contract, project, employees) {
 
   // loop through every employee's projects
   for (let employee of employees) {
-    if (employee.workStatus <= 0) continue;// exclude employees who are not active
     for (let c of employee.contracts ?? []) {
       if (contract.id != c.contractId) continue; // skip non-matching contracts
       for (let p of c.projects ?? []) {
@@ -76,17 +75,17 @@ export function getProjectCurrentEmployees(contract, project, employees) {
  */
 export function getProjectPastEmployees(contract, project, employees) {
   let employeesList = [];
-  _forEach(employees, (employee) => {
-    if (employee.contracts && employee.workStatus > 0) {
-      if (
-        employee.contracts.some(
-          (c) => contract.id == c.contractId && c.projects.some((p) => p.projectId == project.id && !p.presentDate)
-        )
-      ) {
-        employeesList.push(employee);
+  
+  for (let employee of employees) {
+    for (let c of employee.contracts ?? []) {
+      if (contract.id != c.contractId) continue; // skip non-matching contracts
+      for (let p of c.projects ?? []) {
+        if (project.id != p.projectId) continue; // skip non-matching projects
+        if (!isProjectActive(project, employee)) employeesList.push(employee);
       }
     }
-  });
+  }
+
   return employeesList;
 } // getProjectPastEmployees
 

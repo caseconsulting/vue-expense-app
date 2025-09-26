@@ -1009,15 +1009,36 @@ computed(isMobile);
  * @return filtered out unstaffed items
  */
 const storeContracts = computed(() => {
-  let mergedCheckBoxContractsData = _merge(store.getters.contracts, contractsCheckBoxes.value);
-  mergedCheckBoxContractsData.forEach((c) => {
-    c.projects = _merge(c.projects, c.projectsCheckBoxes);
-  });
-  return mergedCheckBoxContractsData
-    .filter((c) => filter.value.includes(c.status))
-    .map((c) => {
-      return { ...c, projects: c.projects.filter((p) => filter.value.includes(p.status)) };
-    });
+  // status for contracts to have, or else get filtered out
+  let status = new Set(filter.value);
+
+  // index of checkboxes, can get check box info by doing cbIndexContracts[contractId], and is O(1)
+  let cbIndexContracts = {};
+  let cbIndexProjects = {};
+  for (let { contractId, projectsCheckBoxes, ...rest } of contractsCheckBoxes.value) {
+    cbIndexContracts[contractId] = rest;
+    for (let { projectId, checkBox } of projectsCheckBoxes) cbIndexProjects[projectId] = checkBox;
+  }
+
+  // build contracts
+  let contracts = [];
+  for (let contract of store.getters.contracts) {
+    // skip contracts that don't meet filter
+    if (!status.has(contract.status)) continue;
+
+    // get projects
+    let projects = contract.projects.filter((p) => status.has(p.status));
+    for (let p of projects) p.checkBox = cbIndexProjects[p.id];
+
+    contracts.push({
+      ...contract,
+      ...cbIndexContracts[contract.id],
+      projects
+    })
+  }
+
+  // :)
+  return contracts;
 }); // storeContracts
 
 // |--------------------------------------------------|
@@ -1029,6 +1050,7 @@ const storeContracts = computed(() => {
 watch(
   () => store.getters.contracts,
   () => {
+    // new contract created: add to table (with checkbox)
     if (store.getters.contracts.length > contractsCheckBoxes.value.length) {
       let newContract = store.getters.contracts[0];
       let checkBoxObj = {
@@ -1040,6 +1062,7 @@ watch(
       contractsCheckBoxes.value = [checkBoxObj, ...contractsCheckBoxes.value];
     }
 
+    // new project created: add to table (with checkbox inherited from contract)
     store.getters.contracts.forEach((c, index) => {
       if (c.projects.length > contractsCheckBoxes.value[index].projectsCheckBoxes.length) {
         let newProject = c.projects[0];
