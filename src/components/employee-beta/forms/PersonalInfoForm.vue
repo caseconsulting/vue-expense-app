@@ -220,37 +220,33 @@
     <v-row class="groove">
       <v-col>
         <!-- private icon and search bar -->
-        <v-row align="center">
-          <v-col class="pb-0 d-flex">
-            <div class="mt-4 mb-9 ml-3 mr-7 d-inline">
-              <v-icon color="black">mdi-shield</v-icon>
+        <v-row>
+          <v-col cols="1">
+            <div class="d-inline">
+              <v-icon color="black" class="ml-4 mt-4">mdi-shield</v-icon>
               <v-tooltip activator="parent" location="top" text="Address is always hidden from other users"></v-tooltip>
             </div>
-            <v-autocomplete
-              class="d-inline"
-              prepend-inner-icon="mdi-magnify"
-              label="Search Locations"
-              :items="Object.keys(placeIds)"
-              no-data-text="Start searching..."
-              @update:search="updateAddressDropDown($event)"
-              ref="addressSearch"
-            >
-              <template #item="{ item, props }">
-                <v-list-item @click="autofillLocation(item, props)">{{ item.value }}</v-list-item>
-              </template>
-            </v-autocomplete>
-          </v-col>
-        </v-row>
-        <!-- actual address fields -->
-        <v-row>
-          <v-col :cols="!isMobile() ? '6' : '12'">
-            <v-text-field
-              v-model.trim="editedEmployee.currentStreet"
-              label="Street 1"
-              data-vv-name="Street 1"
-            ></v-text-field>
           </v-col>
           <v-col :cols="!isMobile() ? '6' : '12'">
+              <v-combobox
+                v-model="editedEmployee.currentStreet"
+                class="d-inline"
+                label="Street 1"
+                data-vv-name="Street 1"
+                prepend-inner-icon="mdi-magnify"
+                :items="Object.keys(placeIds)"
+                :custom-filter="() => true"
+                no-data-text="Start searching..."
+                @update:search="updateAddressDropDown($event, index)"
+                @blur="placeIds = {}"
+                ref="addressSearch"
+              >
+                <template #item="{ item }">
+                  <v-list-item @click="autofillLocation(item)">{{ item.value }}</v-list-item>
+                </template>
+              </v-combobox>
+          </v-col>
+          <v-col :cols="!isMobile() ? '5' : '11'">
             <v-text-field
               v-model.trim="editedEmployee.currentStreet2"
               label="Street 2"
@@ -570,7 +566,7 @@ import _some from 'lodash/some';
 import _startCase from 'lodash/startCase';
 import _uniqBy from 'lodash/uniqBy';
 import _xorBy from 'lodash/xorBy';
-import { computed, inject, onBeforeMount, onBeforeUnmount, readonly, ref, watch } from 'vue';
+import { computed, inject, onBeforeMount, onBeforeUnmount, readonly, ref, watch, useTemplateRef } from 'vue';
 import { mask } from 'vue-the-mask';
 import { useStore } from 'vuex';
 import { DEFAULT_ISOFORMAT } from '../../../shared/dateUtils';
@@ -616,7 +612,7 @@ const partTimeNumber = ref(
 const phoneNumbers = ref(initPhoneNumbers());
 
 // other refs
-const addressSearch = ref(null); // current address search input
+const addressSearch = useTemplateRef('addressSearch'); // current address search input
 const birthdayHidden = ref(!editedEmployee.value.birthdayFeed);
 const birthdayFormat = ref(format(editedEmployee.value.birthday, null, 'MM/DD/YYYY')); // formatted birthday
 const birthdayMenu = ref(false); // shows the birthday menu
@@ -794,54 +790,36 @@ function deletePhoneNumber(index) {
 /**
  * Updates the address dropdown according to the user's input.
  */
+let timeout;
 async function updateAddressDropDown(query) {
-  if (query.length > 3) {
+  if (query.length <3) return; // <3
+  if (timeout) clearTimeout(timeout);
+  timeout = setTimeout(async () => {
+    placeIds.value = {};
     let locations = await api.getLocation(query);
-    //object used to contain addresses and their respective ID's
-    //needed later to obtain the selected address's zip code
-    placeIds.value = {};
-    _forEach(locations.predictions, (location) => {
-      placeIds.value[location.description] = location.place_id;
-    });
-  } else {
-    placeIds.value = {};
-  }
-} //updateAddressDropDown
+    for (let { formattedAddress, ...rest } of locations) placeIds.value[formattedAddress] = rest;
+  }, 250);
+}
 
 /**
  * Finds the city, street, state, and zip code current address fields based on an address
  * @param {import('vue').Ref<any>} item The ref to the search string
  */
 async function autofillLocation(item) {
-  let search = item.value;
+  // extract address info
+  let address = placeIds.value[item.value];
 
-  if (!_isEmpty(search)) {
-    let fullAddress = search.split(', ');
-    // fills in the first three fields
-    editedEmployee.value.currentCity = fullAddress[1];
-    editedEmployee.value.currentStreet = fullAddress[0];
-    editedEmployee.value.currentState = STATES[fullAddress[2].split(' ')[0]];
+  // update address info
+  editedEmployee.value.currentStreet = address.street1;
+  editedEmployee.value.currentStreet2 = address.street2;
+  editedEmployee.value.currentCity = address.city;
+  editedEmployee.value.currentState = address.state;
+  editedEmployee.value.currentZIP = address.zip;
 
-    // obtains the selected address's ID needed for the zip code API call
-    let selectedAddress = placeIds.value[search];
-
-    // Response contains an array of objects, with each object containing
-    // a field title 'type'. 'Type' is another array and we want the one
-    // containing the postal_code string
-    let res = await api.getZipCode(selectedAddress);
-
-    editedEmployee.value.currentZIP = '';
-    _forEach(res.result.address_components, (field) => {
-      if (field.types.includes('postal_code')) {
-        editedEmployee.value.currentZIP = field.short_name;
-      }
-    });
-    //resets addresses and ID's in dropdown
-    placeIds.value = {};
-    search = null;
-    addressSearch.value.blur();
-  }
-} // autofillLocation
+  //resets addresses and ID's in dropdown
+  placeIds.value = {};
+  addressSearch.value.blur();
+}
 
 /**
  * Updates the city dropdown according to the user's input.
@@ -858,7 +836,7 @@ async function updateCityDropDown(query) {
   } else {
     predictions.value = {};
   }
-} //updateCityDropDown
+}
 
 /**
  * Once a city has been selected, it will update the fields.
@@ -891,7 +869,7 @@ async function updateCityBoxes(item) {
     predictions.value = {};
     birthPlaceSearch.value.blur();
   }
-} // updateCityBoxes
+}
 
 /**
  * Removes any text after the '@' symbol on the email username input once the user clicks away.
@@ -928,7 +906,7 @@ watch(
       editedEmployee.value.birthday = null;
     }
   }
-); // watchEditedPersonalInfoBirthday
+);
 
 /**
  * watcher for editedEmployee.value.hireDate - format date on change.
@@ -942,7 +920,7 @@ watch(
       editedEmployee.value.hireDate = null;
     }
   }
-); // watchEditedEmployeeHireDate
+);
 
 /**
  * watcher for editedEmployee.value.deptDate - format date on change and set contract end date
@@ -965,7 +943,7 @@ watch(
       }
     }
   }
-); // watchEditedEmployeeDeptDate
+);
 
 /**
  * Watch for work status changing and remove old data
