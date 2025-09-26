@@ -108,7 +108,7 @@
             <v-autocomplete
               v-model="contact.state"
               :items="Object.values(STATES)"
-              :disabled="editedEmployee.country !== 'United States'"
+              :disabled="contact.country !== 'United States'"
               label="State"
               auto-select-first
             />
@@ -269,6 +269,7 @@ async function autofillLocation(item, index) {
   contact.city = address.city;
   contact.state = address.state;
   contact.zipcode = address.zip;
+  contact.country = address.country ?? 'United States';
 
   //resets addresses and ID's in dropdown
   placeIds.value = {};
