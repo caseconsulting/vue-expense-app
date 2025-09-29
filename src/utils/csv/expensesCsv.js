@@ -2,6 +2,7 @@
  * Utilities to convert expense objects into objects passable to
  * csv.js
  */
+import _cloneDeep from 'lodash/cloneDeep';
 import store from '~/store/index.js';
 import { format, DEFAULT_ISOFORMAT, FORMATTED_ISOFORMAT } from '@/shared/dateUtils';
 import csvUtils from '@/utils/csv/baseCsv.js';
@@ -88,46 +89,47 @@ function convertExpenses(expenses) {
   let tempExpenses = [];
   let employees = store.getters.employees;
   let expenseTypes = store.getters.expenseTypes;
-  for (let expense of expenses ?? []) {
+  expenses.forEach((expense) => {
+    let tempExpense = _cloneDeep(expense);
+
     // add first name, last name, and employee #
     employees.forEach((employee) => {
-      if (employee.id === expense.employeeId) {
-        expense.employeeNumber = employee.employeeNumber;
-        expense.lastname = employee.lastName;
-        expense.firstName = employee.firstName;
+      if (employee.id === tempExpense.employeeId) {
+        tempExpense.employeeNumber = employee.employeeNumber;
+        tempExpense.lastname = employee.lastName;
+        tempExpense.firstName = employee.firstName;
         return; // break loop
       }
     });
 
     // add expense type
     expenseTypes.forEach((type) => {
-      if (type.id === expense.expenseTypeId) {
-        expense.expenseType = type.budgetName;
+      if (type.id === tempExpense.expenseTypeId) {
+        tempExpense.expenseType = type.budgetName;
       }
       return; // break loop
     });
 
     // combine together and add
     tempExpenses.push({
-      'First Name': expense.firstName || '',
-      'Last Name': expense.lastName || '',
-      'Employee #': expense.employeeNumber || '',
-      'Expense State': expense.state || 'UNDEFINED',
-      'Expense Type': expense.expenseType || '',
-      'Recipient Name': getRecipientName(expense.recipient) || '',
-      Cost: expense.cost || '',
-      'Purchase Date': format(expense.purchaseDate, null, DEFAULT_ISOFORMAT) || '',
-      'Reimbused Date': format(expense.reimbursedDate, null, DEFAULT_ISOFORMAT) || '',
-      Category: expense.category || '',
+      'First Name': tempExpense.firstName || '',
+      'Last Name': tempExpense.lastName || '',
+      'Employee #': tempExpense.employeeNumber || '',
+      'Expense Type': tempExpense.expenseType || '',
+      'Recipient Name': getRecipientName(tempExpense.recipient) || '',
+      Cost: tempExpense.cost || '',
+      'Purchase Date': format(tempExpense.purchaseDate, null, DEFAULT_ISOFORMAT) || '',
+      'Reimbused Date': format(tempExpense.reimbursedDate, null, DEFAULT_ISOFORMAT) || '',
+      Category: tempExpense.category || '',
       // some descriptions have weird formatting, particularly high fives
       Description:
-        expense.description
+        tempExpense.description
           ?.replaceAll('\n', '')
           ?.replaceAll(/\s{2,}/gi, ' ')
           ?.trim() || '',
-      Note: expense.note?.trim() || ''
+      Note: tempExpense.note?.trim() || ''
     });
-  }
+  });
 
   return tempExpenses;
 } // convertExpenses

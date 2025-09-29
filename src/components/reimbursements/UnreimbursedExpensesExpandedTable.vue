@@ -69,9 +69,7 @@
 
 <script setup>
 import { convertToMoneyString, monthDayYearFormat } from '@/utils/utils';
-import { nicknameAndLastName } from '@/shared/employeeUtils';
 import { ref, inject } from 'vue';
-import store from '../../../store';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -96,14 +94,6 @@ const headers = ref([
     title: 'Description',
     key: 'description',
     align: 'center'
-  },
-  {
-    title: 'Approved By',
-    key: 'approvedBy',
-    value: (e) => getName(e.approvedBy),
-    align: 'center',
-    width: '10%',
-    sortable: true
   },
   {
     title: 'Show on Feed',
@@ -147,17 +137,6 @@ function expenseSelected(selectedExpense) {
 function expenseToggle(toggledExpense) {
   emitter.emit('toggleExpense', toggledExpense);
 } // expenseToggle
-
-/**
- * Gets the name of an employee based on their ID
- *
- * @param eId employee ID
- */
-function getName(eId) {
-  if (!eId) return; // no approvedBy
-  let employee = store.getters.employees.find((e) => e.id == eId);
-  return nicknameAndLastName(employee);
-}
 
 // |--------------------------------------------------|
 // |                                                  |

@@ -358,9 +358,8 @@
                     id="edit"
                     :disabled="
                       isEditing ||
-                      midAction ||
-                      !isExpenseEditable(store.getters.user, item) ||
-                      (!(userRoleIsAdmin() || userRoleIsManager()) && !canDelete(item))
+                      (!(userRoleIsAdmin() || userRoleIsManager()) && (isReimbursed(item) || !canDelete(item))) ||
+                      midAction
                     "
                     variant="text"
                     icon
@@ -501,7 +500,6 @@ import Attachment from '@/components/utils/Attachment.vue';
 import ConvertExpensesToCsv from '@/components/expenses/ConvertExpensesToCsv.vue';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
 import employeeUtils from '@/shared/employeeUtils';
-import { isExpenseEditable } from '@/shared/expenseUtils';
 import ExpenseForm from '@/components/expenses/ExpenseForm.vue';
 import TagsFilter from '@/components/shared/TagsFilter.vue';
 import UnreimburseModal from '@/components/modals/UnreimburseModal.vue';
@@ -892,21 +890,19 @@ async function deleteModelFromTable() {
 function filterExpenses() {
   filteredExpenses.value = expenses.value;
 
-  // filter expenses by employee search
   if (employee.value) {
+    // filter expenses by employee
     filteredExpenses.value = _filter(filteredExpenses.value, (expense) => {
       return expense.employeeId === employee.value;
     });
   }
 
-  // filter based on tags
   if (tagsInfo.value.selected?.length > 0) {
     filteredExpenses.value = _filter(filteredExpenses.value, (expense) => {
       return employeeUtils.selectedTagsHasEmployee(expense.employeeId, tagsInfo.value);
     });
   }
 
-  // filter based on generic search
   if (search.value) {
     let headerKeys = _map(headers.value, (object) => object.key);
     filteredExpenses.value = _filter(filteredExpenses.value, (expense) => {
@@ -916,14 +912,11 @@ function filterExpenses() {
     });
   }
 
-  // filter based on start and end dates
   if (startDateFilter.value && endDateFilter.value) {
     filteredExpenses.value = _filter(filteredExpenses.value, (expense) =>
       isBetween(expense.reimbursedDate, startDateFilter.value, endDateFilter.value, 'days', '[]')
     );
   }
-
-  // filter based on reimbursement status
   if (filter.value.status !== 'all') {
     // filter expenses by reimburse date
     filteredExpenses.value = _filter(filteredExpenses.value, (expense) => {
@@ -940,7 +933,6 @@ function filterExpenses() {
     });
   }
 
-  // filter based on expense type active
   if (filter.value.active !== 'both') {
     // filter expenses by active or inactive expense types (available to admin only)
     filteredExpenses.value = _filter(filteredExpenses.value, (expense) => {
