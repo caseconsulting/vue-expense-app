@@ -8,15 +8,6 @@ export const EXPENSE_STATES = {
 };
 
 /**
- * Quick check for admin permissions
- * 
- * @param employee employee to check
- */
-function isAdminOrManager(employee) {
-  return ['admin', 'manager'].include(employee.employeeRole);
-}
-
-/**
  * Returns true if a given user has the right to edit an expense
  *
  * @param employee employee object to check
