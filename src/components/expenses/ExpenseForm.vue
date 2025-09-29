@@ -199,7 +199,7 @@
             <template v-slot:activator="{ props }">
               <span v-bind="props">
                 <v-btn
-                  v-if="isExchangeForTrainingHours"
+                  v-if="editedExpense.category && editedExpense.category === 'Exchange for training hours'"
                   class="ml-3"
                   :disabled="isInactive"
                   @click="showExchangeCalculator = true"
@@ -240,11 +240,11 @@
           label="Description"
           data-vv-name="Description"
           @update:focused="descRedirect()"
-          :hint="isExchangeForTrainingHours ? 'Will open in a modal' : ''"
+          :hint="editedExpense.category === 'Exchange for training hours' ? 'Will open in a modal' : ''"
           persistent-hint
           :key="editedExpense.category"
         >
-          <template v-if="isExchangeForTrainingHours" v-slot:prepend>
+          <template v-if="editedExpense.category === 'Exchange for training hours'" v-slot:prepend>
             <div @click="descRedirect()" class="pointer">
               <v-icon :color="caseGray">mdi-open-in-new</v-icon>
             </div>
@@ -383,17 +383,6 @@
           v-model="editedExpense.showOnFeed"
           label="Have expense show on company feed?"
           :color="caseRed"
-          hide-details
-        />
-
-        <!-- Expense approval by admins -->
-        <v-checkbox
-          v-if="this.editedExpense.id && (userRoleIsAdmin() || userRoleIsManager())"
-          :disabled="isInactive"
-          v-model="approvedByBool"
-          @update:modelValue="updateApproval"
-          :label="approvedLabel"
-          :color="caseRed"
         />
 
         <!-- Form Actions -->
@@ -467,7 +456,6 @@ import ExchangeTrainingDescription from '@/components/expenses/ExchangeTrainingD
 
 import api from '@/shared/api.js';
 import employeeUtils from '@/shared/employeeUtils';
-import { EXPENSE_STATES } from '@/shared/expenseUtils';
 import {
   getDateRules,
   getDateOptionalRules,
@@ -517,7 +505,7 @@ function descriptionRules() {
   let rules = [(v) => !this.isEmpty(v) || 'Description is a required field'];
 
   // add rules based on form condition (eg expense type)
-  if (this.isExchangeForTrainingHours) {
+  if (this.editedExpense.category == 'Exchange for training hours') {
     rules.push(
       (v) =>
         (!this.isEmpty(v) && v.replaceAll(/\s/g, '').length >= 150) || 'Description must be at least 150 characters'
@@ -526,16 +514,6 @@ function descriptionRules() {
 
   return rules;
 } // isDifferentExpenseType
-
-function approvedLabel() {
-  // basic return if unchecked
-  if (!this.editedExpense.approvedBy) return 'Sign and approve this expense?';
-
-  // return name of person who approved, only when they are loaded in
-  let approver = employeeUtils.getEmployeeByID(this.editedExpense.approvedBy, this.$store.getters.employees);
-  approver = employeeUtils.nicknameAndLastName(approver);
-  return `Approved by: ${approver}`;
-} // approvedLabel
 
 /**
  * Check if expense type is changed. Returns true if the expense type is different, otherwise returns false.
@@ -548,13 +526,6 @@ function isDifferentExpenseType() {
   }
   return false;
 } // isDifferentExpenseType
-
-/**
- * Returns true if the category is exchange for training hours
- */
-function isExchangeForTrainingHours() {
-  return this.editedExpense?.category?.toLowerCase() === 'exchange for training hours';
-} // isExchangeForTrainingHours
 
 /**
  * Checks if the expense is reimbursed. Returns true if the expense is reimbursed, otherwise returns false.
@@ -883,7 +854,6 @@ function clearForm() {
   this.reqRecipient = false;
   this.recipientPlaceholder = null;
   this.editedExpense = _cloneDeep(this.expense);
-  this.approvedByBool = !!this.editedExpense.approvedBy;
   this.originalExpense = this.editedExpense;
   this.purchaseDateFormatted = null;
   this.files = [];
@@ -1051,7 +1021,7 @@ async function createNewEntry() {
  * Redirects description field to modal if needed (only for exchange for training hours)
  */
 function descRedirect() {
-  if (this.isExchangeForTrainingHours) this.showExchangeTrainingDesc = true;
+  if (this.editedExpense.category == 'Exchange for training hours') this.showExchangeTrainingDesc = true;
 }
 
 /**
@@ -1712,10 +1682,13 @@ async function submit() {
         this.editedExpense.rejections.softRejections.revised = true;
       }
 
-      this.editedExpense.state = getExpenseState(this.editedExpense, true);
-        
-      if (this.isEmpty(this.editedExpense.id)) await this.createNewEntry(); // creating new expense
-      else await this.updateExistingEntry(); // editing existing expense
+      if (this.isEmpty(this.editedExpense.id)) {
+        // creating a new expense
+        await this.createNewEntry();
+      } else {
+        // editing a current expense
+        await this.updateExistingEntry();
+      }
     }
     this.loading = false; // set loading status to false
 
@@ -1936,40 +1909,6 @@ Number.prototype.pad = function (size) {
   return s;
 }; // Number.prototype.pad
 
-/**
- * Updates the approval based on new value
- */
-function updateApproval(checked) {
-  if (checked) {
-    this.editedExpense.approvedBy = this.userInfo.id;
-  } else this.editedExpense.approvedBy = undefined;
-}
-
-/**
- * Gets the state that an expense should be in
- * 
- * @param expense the expense object
- * @returns one of EXPENSE_STATE
- */
-function getExpenseState(expense) {
-  let state;
-
-  // if expense has a reimbursedDate, it will always be reimbursed
-  if (expense.reimbursedDate) return EXPENSE_STATES.REIMBURSED;
-
-  // if expense has an approval, it will always be approved
-  if (expense.approvedBy) return EXPENSE_STATES.APPROVED;
-
-  // editing an existing expense
-  if (expense.id) {
-    if (expense.state === EXPENSE_STATES.CREATED) return EXPENSE_STATES.CREATED; // just making changes
-    return EXPENSE_STATES.REVISED; // updating for admins, due to kickback
-  }
-  
-  // default is creating new expense
-  return EXPENSE_STATES.CREATED;
-}
-
 // |--------------------------------------------------|
 // |                                                  |
 // |                     WATCHERS                     |
@@ -1981,7 +1920,6 @@ function getExpenseState(expense) {
  */
 function watchExpenseID() {
   this.editedExpense = _cloneDeep(this.expense);
-  this.approvedByBool = !!this.editedExpense.approvedBy;
   this.originalExpense = _cloneDeep(this.editedExpense);
   //when model id is not empty then must be editing an expense
   if (!this.isEmpty(this.expense.id)) {
@@ -2034,6 +1972,7 @@ async function watchEditedExpenseExpenseTypeID() {
         )}`;
 
     // set high five cost
+    // HARD CODE
     if (this.selectedExpenseType.budgetName === 'High Five') {
       this.costFormatted = '50.00';
       this.editedExpense.cost = '50.00';
@@ -2089,7 +2028,6 @@ async function watchEditedExpenseExpenseTypeID() {
       }
     }
     this.editedExpense = _cloneDeep(this.editedExpense); //need to clone editedExpense in order to see label URL changes
-    this.approvedByBool = !!this.editedExpense.approvedBy;
 
     // add monthlyLimit to costRules
     if (!isEmpty(this.selectedExpenseType.monthlyLimit)) {
@@ -2160,7 +2098,6 @@ function watchEditedExpenseCategory() {
       }
     }
     this.editedExpense = _cloneDeep(this.editedExpense); //need to clone editedExpense in order to see label URL changes
-    this.approvedByBool = !!this.editedExpense.approvedBy;
   }
 } // watchEditedExpenseCategory
 
@@ -2249,10 +2186,8 @@ export default {
     ExchangeTrainingDescription
   },
   computed: {
-    approvedLabel,
     descriptionRules,
     isDifferentExpenseType,
-    isExchangeForTrainingHours,
     isReimbursed,
     isMobile,
     receiptRequired,
@@ -2263,7 +2198,6 @@ export default {
     return {
       activeEmployees: [], // active employees
       allowReceipt: false, // allow receipt to be uploaded
-      approvedByBool: false, // approved by checkbox
       asUser: true, // user view
       confirming: false, // budget overage confirmation box activator
       confirmingValid: false,
@@ -2284,6 +2218,7 @@ export default {
         (v) => this.parseCost(v) < 1000000000 || 'Nice try' //when a user tries to fill out expense that is over a million
       ], // rules for cost
       disableScan: true, // receipt scanned disabled
+      //editedExpense: {}, // data being edited --
       editedExpense: _cloneDeep(this.expense),
       employee: null, // employee selected
       employeeBudgets: null, // selected employee's budgets
@@ -2379,8 +2314,7 @@ export default {
     updateExistingEntry,
     userRoleIsAdmin,
     userRoleIsManager,
-    updateStoreBudgets,
-    updateApproval
+    updateStoreBudgets
   },
   props: [
     'expense', // expense to be created/updated
