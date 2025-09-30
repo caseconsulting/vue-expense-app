@@ -16,7 +16,7 @@
       </v-row>
     </div>
     <div v-else>
-      <h1>{{ model.name }}</h1>
+      <h1>{{ model.budgetName }}</h1>
       <p>{{ model.description }}</p>
       <v-row>
         <v-col cols="6">
