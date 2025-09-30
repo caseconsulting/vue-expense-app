@@ -256,6 +256,7 @@ const userPto = ref(null);
 onBeforeMount(async () => {
   let promises = [];
   if (!store.getters.employees) {
+    console.log
     promises.push(updateStoreEmployees());
   }
   if (!store.getters.user) {
@@ -271,7 +272,7 @@ onBeforeMount(async () => {
     await Promise.all(promises);
   }
   loading.value = false;
-}); // created¬
+});
 
 /**
  * beforeUnmount lifecycle hook. Destroys all event listeners.
@@ -281,7 +282,7 @@ onBeforeUnmount(() => {
   emitter.off('confirm-delete-PTO cash out');
   emitter.off('canceled-delete-PTO cash out');
   emitter.off('close-pto-cash-out-form-table');
-}); // beforeUnmount
+});
 
 /**
  * Mounted lifecycle hook
@@ -301,7 +302,7 @@ onMounted(async () => {
   emitter.on('canceled-delete-PTO cash out', () => {
     clickedCancelDelete();
   });
-}); // mounted
+});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -314,6 +315,7 @@ onMounted(async () => {
  *
  * @return Array - filtered PTO cash outs
  */
+let firstLoad = true;
 const filteredPtoCashOuts = computed(() => {
   let filteredPtoCashOuts = _cloneDeep(store.getters.ptoCashOuts);
 
@@ -347,8 +349,15 @@ const filteredPtoCashOuts = computed(() => {
       );
     });
   }
+
+  // emit the first user in the list to fill in timesheet data on first load
+  if (store.getters.employees && firstLoad) {
+    rowClicked(null, { item: filteredPtoCashOuts[0] });
+    firstLoad = false;
+  }
+
   return filteredPtoCashOuts;
-}); // filteredPtoCashOuts
+});
 
 /**
  * Gets the datatable headers based on user's role. Returns all headers if user role is admin.
@@ -366,7 +375,7 @@ const roleHeaders = computed(() => {
     headers = _filter(headers, (h) => h.title != 'actions');
   }
   return headers;
-}); // roleHeaders
+});
 
 /**
  * Gets all employees with submitted PTO Cash Out Requests for autocomplete filter component.
@@ -385,7 +394,7 @@ const employees = computed(() => {
       lastName: e.lastName
     })
   );
-}); // employees
+});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -402,7 +411,7 @@ watch(selected, () => {
   } else {
     showApproveButton.value = true;
   }
-}); // watchSelected
+});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -422,8 +431,7 @@ async function approveSelectedPTOCashOuts() {
     promises.push(api.updateItem(api.PTO_CASH_OUTS, item));
   });
   return await Promise.all(promises);
-} // approveSelectedPTOCashOuts
-
+}
 /**
  * Event handler confirm clicked approve
  */
@@ -440,8 +448,7 @@ async function clickedConfirmApprove() {
     useDisplayError(err);
   }
   toggleApproveModal.value = false;
-} // clickedConfirmApprove
-
+}
 /**
  * Event handler for clicking the delete button.
  *
@@ -451,7 +458,7 @@ function clickedDelete(item) {
   clickedDeleteItem.value = item;
   isDeleting.value = true;
   toggleDeleteModal.value = !toggleDeleteModal.value;
-} // clickedDelete
+}
 
 /**
  * Event handler for clicking confirm delete in delete modal.
@@ -469,7 +476,7 @@ async function clickedConfirmDelete() {
   isDeleting.value = false;
   clickedDeleteItem.value = null;
   toggleDeleteModal.value = false;
-} // clickedConfirmDelete
+}
 
 /**
  * Event handler for clicking cancel delete in delete modal.
@@ -477,7 +484,7 @@ async function clickedConfirmDelete() {
 function clickedCancelDelete() {
   isDeleting.value = false;
   toggleDeleteModal.value = false;
-} // clickedCancelDelete
+}
 
 /**
  * Deletes PTO cash out from database. Updates vuex store accordingly.
@@ -490,7 +497,7 @@ async function deletePTOCashOut(item) {
   let deletedPTOCashOut = await api.deleteItem(api.PTO_CASH_OUTS, item.id);
   store.dispatch('setPtoCashOuts', { ptoCashOuts });
   return deletedPTOCashOut;
-} // deletePTOCashOut
+}
 
 /**
  * Changes the timesheets employee when a row is clicked
@@ -500,14 +507,14 @@ async function deletePTOCashOut(item) {
 function rowClicked(_, { item }) {
   let employee = store.getters.employees.find((e) => e.id === item.employeeId);
   emitter.emit('change-timesheets-employee', employee);
-} // rowClicked
+}
 
 /**
  * Unchecks all boxes in the data table
  */
 function uncheckAllBoxes() {
   selected.value = [];
-} // uncheckAllBoxes
+}
 
 /**
  * Event handler for clicked edit item.
@@ -524,5 +531,5 @@ async function clickedEdit(item) {
   });
   let pto = employeeBalances?.ptoBalances?.PTO / 60 / 60 || 0;
   userPto.value = formatNumber(pto);
-} // clickedEdit
+}
 </script>
