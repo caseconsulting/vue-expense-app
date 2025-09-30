@@ -16,7 +16,7 @@
       </v-col>
       <v-col cols="12" xl="4" lg="5" class="pl-lg-1 pl-sm-2">
         <!-- Timesheets -->
-        <time-data :key="employee.id" :employee="employee" />
+        <time-data :employee="employee" :title="timeDataTitle" :key="employee.id" />
       </v-col>
     </v-row>
   </div>
@@ -24,7 +24,7 @@
 <script setup>
 import PTOCashOutsTable from '@/components/shared/PTOCashOutsTable.vue';
 import TimeData from '@/components/shared/timesheets/TimeData';
-import { onBeforeMount, onBeforeUnmount, onMounted, inject, watch, ref } from 'vue';
+import { onBeforeMount, onBeforeUnmount, onMounted, inject, watch, computed, ref } from 'vue';
 import { useStore } from 'vuex';
 import { storeIsPopulated } from '../utils/utils';
 // |--------------------------------------------------|
@@ -85,4 +85,12 @@ watch(storeIsPopulated, async () => {
     loading.value = false;
   }
 }); // watchStoreIsPopulated
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+const timeDataTitle = computed(() => `${employee.value.nickname ?? employee.value.firstName} ${employee.value.lastName}'s Time Data`)
 </script>
