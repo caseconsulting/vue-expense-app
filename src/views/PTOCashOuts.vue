@@ -45,21 +45,12 @@ const employee = ref(null);
 // |                                                  |
 // |--------------------------------------------------|
 /**
- * Created lifecycle hook
- */
-onBeforeMount(() => {
-  if (store.getters.storeIsPopulated) {
-    employee.value = store.getters.user;
-    loading.value = false;
-  }
-}); // created
-
-/**
  * Mounted lifecycle hook
  */
 onMounted(() => {
   emitter.on('change-timesheets-employee', (emp) => {
     employee.value = emp;
+    loading.value = false;
   });
 }); // mounted
 
