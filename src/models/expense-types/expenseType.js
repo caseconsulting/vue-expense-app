@@ -191,9 +191,9 @@ export class ExpenseType extends Base {
     }
   }
 
-  async updateCategories(categories) {
+  async updateCategories(categories, save) {
     this.categories = categories;
-    if (this.id != null) {
+    if (this.id != null && save) {
       let data = {
         id: this.id,
         categories: categories.map((c) => JSON.stringify(c))

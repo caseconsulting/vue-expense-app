@@ -40,7 +40,7 @@
             <help type="expenseTypes"></help>
           </v-col>
           <v-col class="slim">
-            <categories :expenseType="editedExpenseType" :condensed="true"></categories>
+            <categories :expenseType="editedExpenseType" :subForm="true"></categories>
           </v-col>
         </v-row>
 

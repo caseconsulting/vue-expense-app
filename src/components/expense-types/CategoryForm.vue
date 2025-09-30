@@ -75,6 +75,10 @@ const props = defineProps({
   index: {
     type: Number,
     default: -1
+  },
+  subForm: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -95,10 +99,10 @@ async function submit() {
 
 async function editCategory() {
   props.expenseType.categories[props.index] = category.value;
-  await props.expenseType.updateCategories(props.expenseType.categories);
+  await props.expenseType.updateCategories(props.expenseType.categories, !props.subForm);
 }
 
 async function addCategory() {
-  await props.expenseType.updateCategories([...props.expenseType.categories, category.value]);
+  await props.expenseType.updateCategories([...props.expenseType.categories, category.value], !props.subForm);
 }
 </script>

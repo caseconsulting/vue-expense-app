@@ -13,7 +13,12 @@
                 <v-btn :key="`edit-${index}`" small variant="text" icon="mdi-pencil-box-outline" v-bind="props">
                 </v-btn>
               </template>
-              <category-form :model="category" :expenseType="expenseType" :index="index"></category-form>
+              <category-form
+                :model="category"
+                :expenseType="expenseType"
+                :index="index"
+                :subForm="subForm"
+              ></category-form>
             </v-dialog>
             <v-btn
               :key="`delete-${index}`"
@@ -30,7 +35,7 @@
               :delete-method="() => deleteCategory(index)"
             />
           </v-list-item-title>
-          <v-list-item-subtitle v-if="!condensed" class="d-block">
+          <v-list-item-subtitle v-if="!subForm" class="d-block">
             <boolean-flag displayText="Show On Feed" :field="category.showOnFeed"></boolean-flag>
             <boolean-flag displayText="Require URL" :field="category.requireURL"></boolean-flag>
             <boolean-flag displayText="Require Receipt" :field="category.requireReceipt"></boolean-flag>
@@ -63,7 +68,7 @@
         <template #activator="{ props }">
           <add-primary title="Category" v-bind="props" :disabled="expenseType.categories.length === 10"></add-primary>
         </template>
-        <category-form :model="newCategory" :expenseType="expenseType"></category-form>
+        <category-form :model="newCategory" :expenseType="expenseType" :subForm="subForm"></category-form>
       </v-dialog>
     </v-col>
   </v-row>
@@ -83,7 +88,7 @@ const props = defineProps({
     type: Object,
     required: true
   },
-  condensed: {
+  subForm: {
     type: Boolean,
     default: false
   }
@@ -109,7 +114,7 @@ onBeforeUnmount(() => {
 async function deleteCategory(index) {
   if (index !== -1) {
     props.expenseType.categories.splice(index, 1);
-    await props.expenseType.updateCategories(props.expenseType.categories);
+    await props.expenseType.updateCategories(props.expenseType.categories, !props.subForm);
   }
   deleteModal.value[index] = false;
 }
