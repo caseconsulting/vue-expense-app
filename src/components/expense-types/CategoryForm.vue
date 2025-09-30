@@ -5,7 +5,7 @@
     </v-card-title>
     <v-card-text>
       <v-form ref="categoryForm" v-model="valid" @submit.prevent="submit()">
-        <details-form v-model="category"></details-form>
+        <details-form v-model="category.name"></details-form>
         <v-row>
           <v-col cols="12">
             <strong>Flags</strong>

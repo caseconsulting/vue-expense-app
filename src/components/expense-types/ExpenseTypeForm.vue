@@ -7,7 +7,7 @@
 
     <v-container fluid>
       <v-form ref="expenseTypeForm" v-model="valid" @submit.prevent="submitForm = true">
-        <details-form v-model="editedExpenseType">
+        <details-form v-model="editedExpenseType.budgetName">
           <v-textarea
             variant="underlined"
             v-model="editedExpenseType.description"

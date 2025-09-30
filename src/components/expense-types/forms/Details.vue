@@ -5,7 +5,7 @@
       <v-col>
         <v-text-field
           variant="underlined"
-          v-model="modelValue.name"
+          v-model="modelValue"
           :rules="getRequiredRules()"
           label="Name"
           data-vv-name="Name"
@@ -19,7 +19,8 @@
 <script setup>
 import { getRequiredRules } from '@/shared/validationUtils';
 
-const props = defineProps({
-  modelValue: Object
+const modelValue = defineModel('modelValue', {
+  type: String,
+  required: true
 });
 </script>

@@ -14,6 +14,8 @@ export class ExpenseType extends Base {
     /** @type {string} */
     this.budget = properties.budget;
     /** @type {string} */
+    this.budgetName = properties.budgetName;
+    /** @type {string} */
     this.campfire = properties.campfire;
     /** @type {Category[]} */
     let categories = properties.categories ?? [];
@@ -32,8 +34,6 @@ export class ExpenseType extends Base {
     this.isInactive = properties.isInactive ?? false; // use active() to determine if currently active
     /** @type {string} */
     this.monthlyLimit = properties.monthlyLimit;
-    /** @type {string} */
-    this.name = properties.name;
     /** @type {boolean} */
     this.odFlag = properties.odFlag ?? false;
     /** @type {boolean} */
