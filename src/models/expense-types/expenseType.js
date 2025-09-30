@@ -1,7 +1,7 @@
 import { Base } from '@/models/expense-types/base.js';
 import { Category } from '@/models/expense-types/category.js';
 import api from '@/shared/api.js';
-import { isEmpty } from '@/utils/utils';
+import { generateUUID, isEmpty } from '@/utils/utils';
 export class ExpenseType extends Base {
   constructor(properties) {
     super();
@@ -62,8 +62,13 @@ export class ExpenseType extends Base {
           case 'to':
             if (isEmpty(value)) {
               target.clearEmails();
+            } else {
+              target.categories.forEach((c) => (c[key] = value));
             }
             break;
+          case 'cc':
+          case 'bcc':
+          case 'replyTo':
           case 'showOnFeed':
           case 'requireReceipt':
           case 'requireURL':
@@ -100,6 +105,10 @@ export class ExpenseType extends Base {
   get categoriesRequireURL() {
     let categoriesRequireURL = this.categories.filter((c) => c.requireURL);
     return categoriesRequireURL.length > 0 ? categoriesRequireURL.map((c) => c.name).join(', ') : 'None';
+  }
+
+  get categoriesToJSON() {
+    return this.categories.map((c) => JSON.stringify(c));
   }
 
   get disabledEmployeesIDs() {
@@ -167,10 +176,6 @@ export class ExpenseType extends Base {
 
     employeesList = [...new Set(employeesList)];
 
-    // employeesList = employeesList.filter((employee) => {
-    //   return !this.disabledEmployees.includes(employee.id);
-    // });
-
     return employeesList;
   }
 
@@ -178,6 +183,20 @@ export class ExpenseType extends Base {
     return employees.filter((employee) => {
       return this.disabledEmployeesIDs.includes(employee.id);
     });
+  }
+
+  async submit() {
+    let data = { ...this };
+    let response = null;
+    data.categories = this.categoriesToJSON;
+    if (this.id != null) {
+      response = await api.updateItem(api.EXPENSE_TYPES, data);
+    } else {
+      data.id = generateUUID();
+      response = await api.createItem(api.EXPENSE_TYPES, data);
+      this.id = response.id;
+    }
+    return response;
   }
 
   async updateAttribute(attribute, value) {
@@ -196,7 +215,7 @@ export class ExpenseType extends Base {
     if (this.id != null && save) {
       let data = {
         id: this.id,
-        categories: categories.map((c) => JSON.stringify(c))
+        categories: this.categoriesToJSON
       };
       await api.updateAttribute(api.EXPENSE_TYPES, data, 'categories');
     }

@@ -91,7 +91,7 @@ import { getRequiredRules } from '@/shared/validationUtils';
 import GeneralConfirmationModal from '@/components/modals/GeneralConfirmationModal.vue';
 import _cloneDeep from 'lodash/cloneDeep';
 import _union from 'lodash/union';
-import { generateUUID, isEmpty } from '@/utils/utils';
+import { isEmpty } from '@/utils/utils';
 import { format } from '@/shared/dateUtils';
 import { updateStoreExpenseTypes } from '@/utils/storeUtils';
 import { onMounted, onBeforeUnmount, ref, inject, watch, nextTick } from 'vue';
@@ -102,8 +102,6 @@ import { ExpenseType } from '@/models/expense-types/expenseType.js';
 // |                     SETUP                        |
 // |                                                  |
 // |--------------------------------------------------|
-
-const categories = ref([]); // list of expense type categories
 const emitter = inject('emitter');
 const endDateFormatted = ref(null); // formatted end date
 const expenseTypeForm = ref(null); // filled in from the template
@@ -177,20 +175,6 @@ function isCustomSelected() {
 }
 
 /**
- * Parses the budget to get rid of commas.
- *
- * @param budget - the budget to parse
- * @return String - The budget without formatting
- */
-function parseNumber(budget) {
-  if (budget && !isEmpty(budget)) {
-    return budget.replace(/[,\s]/g, '');
-  } else {
-    return budget;
-  }
-}
-
-/**
  * Submits an expense type.
  */
 async function submit() {
@@ -214,44 +198,15 @@ async function submit() {
   }
 
   if (expenseTypeForm.value && (await expenseTypeForm.value.validate()).valid) {
-    for (var i = 0; i < editedExpenseType.value.categories.length; i++) {
-      editedExpenseType.value.categories[i] = JSON.stringify(editedExpenseType.value.categories[i]);
-    }
-    // form is validated
-    if (editedExpenseType.value.recurringFlag) {
-      // clear start and end date fields if expense type is recurring
-      editedExpenseType.value['startDate'] = null;
-      editedExpenseType.value['endDate'] = null;
-    }
-
-    if (editedExpenseType.value.id) {
-      // editing an expense type
-      let newExpenseType = await api.updateItem(api.EXPENSE_TYPES, editedExpenseType.value);
-
-      if (newExpenseType.id) {
-        // successfully updates expense type
-        emitter.emit('update');
-        clearForm();
-      } else {
-        // emit error if fails to update expense type
-        emitter.emit('error', JSON.stringify(newExpenseType.response.data.message));
-      }
+    let response = await editedExpenseType.value.submit();
+    if (response.id) {
+      // successfully submit expense type
+      emitter.emit('add');
+      emitter.emit('update');
+      clearForm();
     } else {
-      // creating a new expense type
-      let newUUID = generateUUID();
-      editedExpenseType.value['id'] = newUUID;
-      let newExpenseType = await api.createItem(api.EXPENSE_TYPES, editedExpenseType.value);
-
-      if (newExpenseType.id) {
-        // successfully creates an expense type
-        editedExpenseType.value['id'] = newExpenseType.id;
-        emitter.emit('add');
-        clearForm();
-      } else {
-        // emit error if fails to create an expense type
-        emitter.emit('error', JSON.stringify(newExpenseType.response.data.message));
-        editedExpenseType.value['id'] = '';
-      }
+      // emit error if fails to update expense type
+      emitter.emit('error', JSON.stringify(response.message));
     }
   }
 
@@ -297,52 +252,9 @@ watch(
     if (!isEmpty(props.model.id)) {
       emitter.emit('editing-expense-type'); //notify parent that expense is being edited
     }
-    if (editedExpenseType.value.id != null) {
-      //map categories
-      categories.value = editedExpenseType.value.categories.map((category) => {
-        return category.name;
-      });
-    }
     startDateFormatted.value = format(editedExpenseType.value.startDate, null, 'MM/DD/YYYY');
     endDateFormatted.value = format(editedExpenseType.value.endDate, null, 'MM/DD/YYYY');
     editedExpenseType.value.budget = props.model.budget;
   }
 );
-
-/**
- * watcher for categories - limits categories and updates checkboxes
- *
- * @param val - categories list
- */
-watch(categories, (val) => {
-  // limit categories to less than 10
-  if (val.length > 10) {
-    nextTick(() => categories.value.pop());
-    nextTick(() => editedExpenseType.value.categories.pop());
-  }
-
-  // update categories checkboxes
-  if (val.length > editedExpenseType.value.categories.length) {
-    // category was added
-    let c = editedExpenseType.value.categories.map((category) => {
-      return category.name;
-    });
-
-    let index = val.findIndex((x) => {
-      return !c.includes(x);
-    });
-
-    editedExpenseType.value.categories.push({
-      name: val[index],
-      showOnFeed: editedExpenseType.value.showOnFeed,
-      requireURL: editedExpenseType.value.requireURL,
-      requireReceipt: editedExpenseType.value.requireReceipt
-    });
-  } else if (val.length < editedExpenseType.value.categories.length) {
-    // category was removed
-    editedExpenseType.value.categories = editedExpenseType.value.categories.filter((category) => {
-      return val.includes(category.name);
-    });
-  }
-});
 </script>
