@@ -42,7 +42,7 @@ function unanetExpenseData(expenses) {
 
     expenseTypes.forEach((type) => {
       if (type.id === expense.expenseTypeId) {
-        expenseType = type.name;
+        expenseType = type.budgetName;
       }
     });
 
@@ -105,7 +105,7 @@ function convertExpenses(expenses) {
     // add expense type
     expenseTypes.forEach((type) => {
       if (type.id === tempExpense.expenseTypeId) {
-        tempExpense.expenseType = type.name;
+        tempExpense.expenseType = type.budgetName;
       }
       return; // break loop
     });

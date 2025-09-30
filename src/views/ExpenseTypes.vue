@@ -193,9 +193,9 @@
               density="compact"
             >
               <!-- Budget Name slot -->
-              <template #[`item.name`]="{ item }">
+              <template #[`item.budgetName`]="{ item }">
                 <p class="mb-0">
-                  {{ limitedText(item.name) }}
+                  {{ limitedText(item.budgetName) }}
                 </p>
               </template>
               <!-- Budget slot -->
@@ -357,7 +357,7 @@ const form = ref(null);
 const headers = ref([
   {
     title: 'Expense Type',
-    key: 'name',
+    key: 'budgetName',
     show: true
   },
   {
@@ -390,10 +390,10 @@ const loading = ref(true); //loading status
 const midAction = ref(false);
 const model = ref(new ExpenseType({})); // selected expense type
 const search = ref(''); // query text for datatable search field
-const sortBy = ref([{ key: 'name', order: 'asc' }]); // sort datatable items
+const sortBy = ref([{ key: 'budgetName', order: 'asc' }]); // sort datatable items
 const store = useStore();
 const userInfo = ref(null); // user information
-const deleteType = ref(''); // item.name for when item is deleted
+const deleteType = ref('');
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -719,7 +719,7 @@ async function updateModelInTable() {
  */
 async function validateDelete(item) {
   midAction.value = true;
-  deleteType.value = item.name;
+  deleteType.value = item.budgetName;
   try {
     let expenses = await api.getAllExpenseTypeExpenses(item.id);
     if (expenses.length <= 0) {

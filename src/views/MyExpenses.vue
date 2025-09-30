@@ -1026,11 +1026,11 @@ async function loadMyExpensesData() {
   expenseTypes.value = _map(temporaryExpenseTypes, (expenseType) => {
     return {
       /* beautify preserve:start */
-      text: `${expenseType.name} - $${expenseType.budget}`,
+      text: `${expenseType.budgetName} - $${expenseType.budget}`,
       startDate: expenseType.startDate,
       endDate: expenseType.endDate,
       /* beautify preserve:end */
-      budgetName: expenseType.name,
+      budgetName: expenseType.budgetName,
       value: expenseType.id,
       budget: expenseType.budget,
       odFlag: expenseType.odFlag,

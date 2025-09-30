@@ -408,7 +408,7 @@ function createExpenses(aggregatedData) {
     const employees = store.getters.employees;
     let employee = _find(employees, (emp) => emp.id === expense.employeeId);
     let expenseType = _find(expenseTypes.value, (expenseType) => expenseType.id === expense.expenseTypeId);
-    expense.budgetName = expenseType.name;
+    expense.budgetName = expenseType.budgetName;
     expense.employeeName = employeeUtils.firstAndLastName(employee);
     expense.firstName = employee.firstName;
     expense.middleName = employee.middleName;

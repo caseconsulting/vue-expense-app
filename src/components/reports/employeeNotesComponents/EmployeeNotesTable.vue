@@ -264,7 +264,7 @@ async function buildKudos(empId) {
   };
 
   // build an index of high fives
-  let highFiveET = expenseTypes.find((et) => et.name === 'High Five');
+  let highFiveET = expenseTypes.find((et) => et.budgetName === 'High Five');
   let highFives = await api.getAllExpenseTypeExpenses(highFiveET.id);
   let add = (acc, { recipient, ...rest }) => {
     acc[recipient] ??= [];
