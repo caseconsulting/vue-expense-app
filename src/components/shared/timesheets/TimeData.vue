@@ -2,7 +2,7 @@
   <div id="t-sheets-data">
     <v-card density="compact">
       <v-card-title class="header_style d-flex align-center py-0 relative">
-        <h3>{{ system }} Time Data</h3>
+        <h3>{{ getTitle() }}</h3>
         <span v-if="getLastUpdatedText && employeeIsUser()" class="last-updated">
           {{ getLastUpdatedText }}
         </span>
@@ -123,7 +123,7 @@ import { getCalendarYearPeriods, getContractYearPeriods } from './time-periods';
 
 const hiddenPtoPlanningFormRef = ref(null);
 
-const props = defineProps(['employee']);
+const props = defineProps(['employee', 'title']);
 const emitter = inject('emitter');
 const store = useStore();
 
@@ -527,6 +527,13 @@ async function getEmployeePlanTagName(emp) {
     }
   }
   return undefined;
+}
+
+/**
+ * Gets the title for the top bar
+ */
+function getTitle() {
+  return props.title || `${system.value} Time Data`;
 }
 
 // |--------------------------------------------------|
