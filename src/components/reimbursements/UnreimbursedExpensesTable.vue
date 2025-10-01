@@ -96,8 +96,8 @@
           <template v-slot:[`item.budgetName`]="{ item }">
             {{ item.budgetName }}
             {{
-              item.expenses?.some((e) => e.category === 'Exchange for training hours')
-                ? '(Exchange for training hours)'
+              item.expenses?.some((e) => e.category?.toLowerCase() === 'exchange for training hours')
+                ? '(Exchange for Training Hours)'
                 : ''
             }}</template
           >
@@ -164,6 +164,7 @@ import { getTodaysDate } from '@/shared/dateUtils';
 import { employeeFilter } from '@/shared/filterUtils';
 import { selectedTagsHasEmployee } from '@/shared/employeeUtils';
 import employeeUtils from '@/shared/employeeUtils';
+import { EXPENSE_STATES } from '@/shared/expenseUtils';
 import TagsFilter from '@/components/shared/TagsFilter.vue';
 import { ref, onBeforeMount, onBeforeUnmount, inject, watch, computed } from 'vue';
 import { useStore } from 'vuex';
@@ -581,8 +582,10 @@ async function rejectExpenses(field, reason) {
     // set reasoning in rejection object
     let reasons = _get(expense, field + '.reasons');
     reasons = [...(reasons || []), reason];
+    let hard = field.includes('hard'); // eg "rejections.hardRejections"
     _set(expense, field + '.reasons', reasons);
     _set(expense, field + '.revised', false);
+    _set(expense, 'state', hard ? EXPENSE_STATES.REJECTED : EXPENSE_STATES.RETURNED);
     let baseExpense = removeAggregateExpenseData(expense);
     let rejectedExpense = await api.updateItem(api.EXPENSES, baseExpense);
     if (!rejectedExpense.id) {
@@ -619,6 +622,7 @@ async function reimburseExpenses() {
         emitter.emit('expenseClicked', undefined);
         expense.reimbursedDate = getTodaysDate();
         expense.reimbursementWasSeen = false;
+        expense.state = EXPENSE_STATES.REIMBURSED;
         expensesToReimburse.push(removeAggregateExpenseData(expense));
       }
     });
