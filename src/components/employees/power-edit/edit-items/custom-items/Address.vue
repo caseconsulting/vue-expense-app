@@ -65,7 +65,6 @@ import google from '@/assets/img/trademarks/google.png';
 import { STATES } from '@/utils/utils';
 import { inject, ref, watch } from 'vue';
 import { mask } from 'vue-the-mask';
-import _forEach from 'lodash/forEach';
 import _find from 'lodash/find';
 import api from '@/shared/api.js';
 const vMask = (a, b) => mask(a, b);
@@ -120,22 +119,20 @@ async function searchAddress(query) {
   if (query?.length > 3) {
     showMenu.value = true;
     let locations = await api.getLocation(query);
-    _forEach(locations.predictions, (location) => {
-      predictions.value.push({ title: location.description, value: location.place_id });
-    });
+    for (let { formattedAddress, ...rest } of locations) {
+      predictions.value.push({ title: formattedAddress, value: rest })
+    }
   } else {
     showMenu.value = false;
   }
 }
 
 async function predictionSelected(event) {
-  let prediction = _find(predictions.value, { value: event.id });
-  let [street, city, state] = prediction.title.split(', ');
-  streetModel.value = street;
-  cityModel.value = city;
-  stateModel.value = STATES[state];
-  let zipResult = await api.getZipCode(prediction.value);
-  ZIPModel.value = _find(zipResult?.result?.address_components, (c) => c.types.includes('postal_code'))?.short_name;
+  let address = event.id; // not sure why it's `id` but it is
+  streetModel.value = address.street1;
+  cityModel.value = address.city;
+  stateModel.value = address.state;
+  ZIPModel.value = address.zip;
 }
 </script>
 
