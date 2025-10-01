@@ -308,7 +308,7 @@
             <!-- My Expenses Data Table-->
             <v-data-table
               :sort-by="toSort"
-              :headers="roleHeaders"
+              :headers="getRoleHeaders()"
               :items="filteredExpenses"
               :expanded="expanded"
               :loading="loading || initialPageLoading"
@@ -321,6 +321,13 @@
               :no-data-text="'No results :('"
               expand-on-click
             >
+              <!-- State slot -->
+              <template #[`item.state`]="{ item }">
+                <td v-if="userRoleIsAdmin() || userRoleIsManager()">
+                  <v-icon :icon="getStateIcon(item.state)" size="large" />
+                  <v-tooltip activator="parent" location="right"> {{ getStateTooltip(item) }} </v-tooltip>
+                </td>
+              </template>
               <!-- Creation date slot -->
               <template #[`item.createdAt`]="{ item }">
                 <td>{{ monthDayYearFormat(item.createdAt) }}</td>
@@ -532,6 +539,8 @@ import { onBeforeMount, onBeforeUnmount, ref, watch, computed, inject } from 'vu
 import { useStore } from 'vuex';
 import { storeIsPopulated } from '../utils/utils';
 import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSnackbar.vue';
+import { EXPENSE_STATES } from '@/shared/expenseUtils';
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      SETUP                       |
@@ -574,6 +583,10 @@ const filter = ref({
 const filteredExpenses = ref([]); // filtered expenses
 const form = ref(null);
 const headers = ref([
+  {
+    title: '',
+    key: 'state'
+  },
   {
     title: 'Creation Date',
     key: 'createdAt'
@@ -744,15 +757,11 @@ onBeforeUnmount(() => {
  *
  * @return Array - datatable headers
  */
-const roleHeaders = computed(() => {
-  return userRoleIsAdmin() || userRoleIsManager()
-    ? headers.value
-    : (function getUserHeaders(headers) {
-        let localHeaders = _cloneDeep(headers); // create a local copy of all headers
-        localHeaders.splice(1, 1); // remove the employee header
-        return localHeaders; // return the remaining headers
-      })(headers.value);
-}); // roleHeaders
+function getRoleHeaders() {
+  if (userRoleIsAdmin() || userRoleIsManager()) return headers.value;
+  let toRemove = ['state', 'employeeName'];
+  return headers.value.filter((h) => !toRemove.includes(h.key));
+}
 
 /**
  * Checks if the user is inactive. Returns true if the user is
@@ -765,7 +774,7 @@ const userIsInactive = computed(() => {
     return false;
   }
   return userInfo.value.workStatus == 0;
-}); // userIsInactive
+});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -786,7 +795,7 @@ function moneyFilter(value) {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   }).format(value)}`;
-} // moneyFilter
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -794,6 +803,50 @@ function moneyFilter(value) {
 // |                                                  |
 // |--------------------------------------------------|
 
+/**
+ * Gets the icon for the state of an expense.
+ * 
+ * @param state - expenses state field
+ * @returns String - icon name
+ */
+function getStateIcon(state) {
+  switch (state) {
+    case EXPENSE_STATES.CREATED: return 'mdi-new-box';
+    case EXPENSE_STATES.APPROVED: return 'mdi-check-decagram'; // mdi-signature-freehand
+    case EXPENSE_STATES.REIMBURSED: return 'mdi-cash-check';
+    case EXPENSE_STATES.REJECTED: return 'mdi-close-box';
+    case EXPENSE_STATES.RETURNED: return 'mdi-arrow-u-left-top-bold';
+    case EXPENSE_STATES.REVISED: return 'mdi-pencil-box';
+    default: return 'mdi-help-rhombus';
+  }
+}
+
+/**
+ * Gets tooltip text for an expense based on its state.
+ * 
+ * @param state - expenses state field
+ * @returns String - tooltip text
+ */
+function getStateTooltip(item) {
+  function approvedBy() {
+    let fallback = "unknown approver";
+    if (!item.approvedBy) return fallback;
+    let approver = employeeUtils.getEmployeeByID(item.approvedBy, store.getters.employees);
+    if (!approver) return fallback;
+    return employeeUtils.nicknameAndLastName(approver);
+  }
+
+  switch (item.state) {
+    case EXPENSE_STATES.CREATED: return 'Created';
+    case EXPENSE_STATES.APPROVED: return 'Approved by ' + approvedBy();
+    case EXPENSE_STATES.REIMBURSED: return 'Reimbursed';
+    case EXPENSE_STATES.REJECTED: return 'Rejected permanantly';
+    case EXPENSE_STATES.RETURNED: return 'Returned for edits';
+    case EXPENSE_STATES.REVISED: return 'Revised';
+    default: return 'Unknown State';
+  }
+}
+ 
 /**
  * Refresh and updates expense list and displays a successful
  * create status in the snackbar.
