@@ -76,7 +76,7 @@
 <script setup>
 import AddPrimary from '@/components/shared/buttons/AddPrimary.vue';
 import BooleanFlag from '@/components/shared/Boolean.vue';
-import CategoryForm from '@/components/expense-types/CategoryForm.vue';
+import CategoryForm from '@/components/expense-types/forms/CategoryForm.vue';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
 import { inject, onBeforeMount, onBeforeUnmount, ref, watch } from 'vue';
 import { Category } from '@/models/expense-types/category.js';

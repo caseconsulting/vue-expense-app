@@ -76,16 +76,16 @@
 </template>
 
 <script setup>
-import BudgetAmount from '@/components/expense-types/forms/BudgetAmount.vue';
+import BudgetAmount from '@/components/expense-types/forms/sections/BudgetAmount.vue';
 import Categories from '@/components/expense-types/Categories.vue';
 import Checkbox from '@/components/shared/edit-fields/Checkbox.vue';
-import DetailsForm from '@/components/expense-types/forms/Details.vue';
-import Duration from '@/components/expense-types/forms/Duration.vue';
-import Emails from '@/components/expense-types/forms/Emails.vue';
-import EmployeeAccess from '@/components/expense-types/forms/EmployeeAccess.vue';
-import Flags from '@/components/expense-types/forms/Flags.vue';
+import DetailsForm from '@/components/expense-types/forms/sections/Details.vue';
+import Duration from '@/components/expense-types/forms/sections/Duration.vue';
+import Emails from '@/components/expense-types/forms/sections/Emails.vue';
+import EmployeeAccess from '@/components/expense-types/forms/sections/EmployeeAccess.vue';
+import Flags from '@/components/expense-types/forms/sections/Flags.vue';
 import Help from '@/components/shared/buttons/Help.vue';
-import Integrations from '@/components/expense-types/forms/Integrations.vue';
+import Integrations from '@/components/expense-types/forms/sections/Integrations.vue';
 import api from '@/shared/api.js';
 import { getRequiredRules } from '@/shared/validationUtils';
 import GeneralConfirmationModal from '@/components/modals/GeneralConfirmationModal.vue';

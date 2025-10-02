@@ -10,7 +10,7 @@
       label="Budget"
       data-vv-name="Budget"
     ></v-text-field>
-    <tags-budget-form v-model="props.modelValue"></tags-budget-form>
+    <tag-budgets v-model="props.modelValue"></tag-budgets>
     <v-text-field
       variant="underlined"
       prefix="$"
@@ -22,8 +22,8 @@
   </div>
 </template>
 <script setup>
-import TagsBudgetForm from '@/components/expense-types/TagsBudgetForm.vue';
-import { ref, watch } from 'vue';
+import TagBudgets from '@/components/expense-types/forms/fields/TagBudgets.vue';
+import { ref } from 'vue';
 import { isEmpty } from '@/utils/utils';
 
 const props = defineProps({

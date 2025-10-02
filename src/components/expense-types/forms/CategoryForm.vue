@@ -62,7 +62,7 @@
 <script setup>
 import CaseEmailField from '@/components/shared/edit-fields/CaseEmailField.vue';
 import Checkbox from '@/components/shared/edit-fields/Checkbox.vue';
-import DetailsForm from '@/components/expense-types/forms/Details.vue';
+import DetailsForm from '@/components/expense-types/forms/sections/Details.vue';
 import SubmitButton from '@/components/shared/buttons/SubmitButton.vue';
 import { inject, ref } from 'vue';
 import { isEmpty } from '@/utils/utils';

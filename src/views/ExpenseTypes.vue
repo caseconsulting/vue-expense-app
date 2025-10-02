@@ -316,7 +316,7 @@ import api from '@/shared/api.js';
 import DeleteErrorModal from '@/components/modals/DeleteErrorModal.vue';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
 import DisableExpenseTypeForEmployeesModal from '@/components/modals/DisableExpenseTypeForEmployeesModal.vue';
-import ExpenseTypeForm from '@/components/expense-types/ExpenseTypeForm.vue';
+import ExpenseTypeForm from '@/components/expense-types/forms/ExpenseTypeForm.vue';
 import _sortBy from 'lodash/sortBy';
 import _cloneDeep from 'lodash/cloneDeep';
 import _union from 'lodash/union';
