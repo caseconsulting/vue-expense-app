@@ -127,7 +127,7 @@ async function buildKudos() {
 
   // build high fives
   // get all high fives
-  await expenseTypes, employees;
+  (await expenseTypes, employees);
   let highFiveET = expenseTypes.find((et) => et.budgetName === 'High Five');
   let highFives = await api.getAllExpenseTypeExpenses(highFiveET.id);
   // filter down to only ones the user received

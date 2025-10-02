@@ -1,0 +1,223 @@
+import { Base } from '@/models/expense-types/base.js';
+import { Category } from '@/models/expense-types/category.js';
+import api from '@/shared/api.js';
+import { generateUUID, isEmpty } from '@/utils/utils';
+export class ExpenseType extends Base {
+  constructor(properties) {
+    super();
+    /** @type {string} */
+    this.id = properties.id;
+    /** @type {string[]} */
+    this.accessibleBy = properties.accessibleBy ?? [];
+    /** @type {number} */
+    this.bcc = properties.bcc;
+    /** @type {string} */
+    this.budget = properties.budget;
+    /** @type {string} */
+    this.budgetName = properties.budgetName;
+    /** @type {string} */
+    this.campfire = properties.campfire;
+    /** @type {Category[]} */
+    let categories = properties.categories ?? [];
+    this.categories = categories.map((c) => new Category(c));
+    /** @type {string} */
+    this.cc = properties.cc;
+    /** @type {string} */
+    this.description = properties.description;
+    /** @type {Object} */
+    this.disabledEmployees = properties.disabledEmployees ?? {};
+    /** @type {string} */
+    this.endDate = properties.endDate;
+    /** @type {boolean} */
+    this.hasRecipient = properties.hasRecipient ?? false;
+    /** @type {boolean} */
+    this.isInactive = properties.isInactive ?? false; // use active() to determine if currently active
+    /** @type {string} */
+    this.monthlyLimit = properties.monthlyLimit;
+    /** @type {boolean} */
+    this.odFlag = properties.odFlag ?? false;
+    /** @type {boolean} */
+    this.proRated = properties.proRated ?? false;
+    /** @type {boolean} */
+    this.recurringFlag = properties.recurringFlag ?? false;
+    /** @type {boolean} */
+    this.requireReceipt = properties.requireReceipt ?? false;
+    /** @type {string} */
+    this.replyTo = properties.replyTo;
+    /** @type {boolean} */
+    this.requireURL = properties.requireURL ?? false;
+    /** @type {boolean} */
+    this.showOnFeed = properties.showOnFeed ?? false;
+    /** @type {string} */
+    this.startDate = properties.startDate;
+    /** @type {Object[]} */
+    this.tagBudgets = properties.tagBudgets ?? [];
+    /** @type {string} */
+    this.to = properties.to;
+
+    return new Proxy(this, {
+      set(target, key, value) {
+        target[key] = value;
+        switch (key) {
+          case 'to':
+            if (isEmpty(value)) {
+              target.clearEmails();
+            } else {
+              target.categories.forEach((c) => (c[key] = value));
+            }
+            break;
+          case 'cc':
+          case 'bcc':
+          case 'replyTo':
+          case 'showOnFeed':
+          case 'requireReceipt':
+          case 'requireURL':
+            target.categories.forEach((c) => (c[key] = value));
+            break;
+        }
+        return true;
+      }
+    });
+  }
+
+  get active() {
+    return this.recurringFlag ? !this.isInactive : new Date(this.endDate) >= new Date();
+  }
+
+  get accessText() {
+    return this.accessibleBy
+      .filter((accessType) => {
+        return ['FullTime', 'PartTime', 'Intern', 'Custom'].includes(accessType);
+      })
+      .join(', ');
+  }
+
+  get categoriesOnFeed() {
+    let categoriesOnFeed = this.categories.filter((c) => c.showOnFeed);
+    return categoriesOnFeed.length > 0 ? categoriesOnFeed.map((c) => c.name).join(', ') : 'None';
+  }
+
+  get categoriesRequireReceipt() {
+    let categoriesRequireReceipt = this.categories.filter((c) => c.requireReceipt);
+    return categoriesRequireReceipt.length > 0 ? categoriesRequireReceipt.map((c) => c.name).join(', ') : 'None';
+  }
+
+  get categoriesRequireURL() {
+    let categoriesRequireURL = this.categories.filter((c) => c.requireURL);
+    return categoriesRequireURL.length > 0 ? categoriesRequireURL.map((c) => c.name).join(', ') : 'None';
+  }
+
+  get categoriesToJSON() {
+    return this.categories.map((c) => JSON.stringify(c));
+  }
+
+  get disabledEmployeesIDs() {
+    return Object.keys(this.disabledEmployees);
+  }
+
+  get disabledEmployeesText() {
+    return this.disabledEmployeesIDs.length.toString();
+  }
+
+  get requireReceiptText() {
+    return this.requireReceipt ? 'All Expenses' : this.categoriesRequireReceipt;
+  }
+
+  get requireURLText() {
+    return this.requireURL ? 'All Expenses' : this.categoriesRequireURL;
+  }
+
+  get showOnFeedText() {
+    return this.showOnFeed ? 'All Expenses' : this.categoriesOnFeed;
+  }
+
+  basecampCampfire(campfires) {
+    return campfires.find((c) => c.url == this.campfire);
+  }
+
+  employeeAccess(employees, customAccess) {
+    let employeesList = [];
+    if (this.accessibleBy.includes('FullTime')) {
+      // accessible by all employees
+      employeesList = employeesList.concat(
+        employees.filter((employee) => {
+          return employee.workStatus == 100 && employee.employeeRole != 'intern';
+        })
+      );
+    }
+    if (this.accessibleBy.includes('PartTime')) {
+      // accessible by full time employees only
+      employeesList = employeesList.concat(
+        employees.filter((employee) => {
+          return employee.workStatus < 100 && employee.workStatus > 0 && employee.employeeRole != 'intern';
+        })
+      );
+    }
+    if (this.accessibleBy.includes('Intern')) {
+      // accessible by full time employees only
+      employeesList = employeesList.concat(
+        employees.filter((employee) => {
+          return employee.workStatus > 0 && employee.employeeRole == 'intern';
+        })
+      );
+    }
+    if (this.accessibleBy.includes('Custom')) {
+      // custom access list
+      employeesList = employeesList.concat(
+        employees.filter((employee) => {
+          if (customAccess) {
+            return customAccess.includes(employee.id);
+          } else {
+            return this.accessibleBy.includes(employee.id);
+          }
+        })
+      );
+    }
+
+    employeesList = [...new Set(employeesList)];
+
+    return employeesList;
+  }
+
+  disabledEmployeesList(employees) {
+    return employees.filter((employee) => {
+      return this.disabledEmployeesIDs.includes(employee.id);
+    });
+  }
+
+  async submit() {
+    let data = { ...this };
+    let response = null;
+    data.categories = this.categoriesToJSON;
+    if (this.id != null) {
+      response = await api.updateItem(api.EXPENSE_TYPES, data);
+    } else {
+      data.id = generateUUID();
+      response = await api.createItem(api.EXPENSE_TYPES, data);
+      this.id = response.id;
+    }
+    return response;
+  }
+
+  async updateAttribute(attribute, value) {
+    this[attribute] = value;
+    if (this.id != null) {
+      let data = {
+        id: this.id
+      };
+      data[attribute] = value;
+      await api.updateAttribute(api.EXPENSE_TYPES, data, attribute);
+    }
+  }
+
+  async updateCategories(categories, save) {
+    this.categories = categories;
+    if (this.id != null && save) {
+      let data = {
+        id: this.id,
+        categories: this.categoriesToJSON
+      };
+      await api.updateAttribute(api.EXPENSE_TYPES, data, 'categories');
+    }
+  }
+}
