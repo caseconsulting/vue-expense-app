@@ -29,7 +29,7 @@
     "lint": "npm run eslint && npm run stylelint",
     "precommit": "npm run validate && npm run eslint && npm run stylelint && npm run test",
     "reinstall": "echo Removing old files... && rm -rf node_modules package-lock.json && echo Done. && echo && npm install && npm ci",
-    "serve": "export NODE_OPTIONS=--openssl-legacy-provider && vite dev --port 8080 --host",
+    "serve": "cross-env NODE_OPTIONS=--openssl-legacy-provider && vite dev --port 8080 --host",
     "start": "npm run serve",
     "stylelint": "stylelint src/**/*.{css,scss,vue}",
     "test": "npm run test:unit",
