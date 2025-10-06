@@ -256,7 +256,6 @@ const userPto = ref(null);
 onBeforeMount(async () => {
   let promises = [];
   if (!store.getters.employees) {
-    console.log
     promises.push(updateStoreEmployees());
   }
   if (!store.getters.user) {
