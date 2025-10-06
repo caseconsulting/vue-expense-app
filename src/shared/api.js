@@ -14,6 +14,7 @@ const RESUME = 'resume';
 const CONTRACTS = 'contracts';
 const HIGH_FIVES = 'highFives';
 const PTO_CASH_OUTS = 'ptoCashOuts';
+const SETTINGS = 'settings';
 const TAGS = 'tags';
 const API_HOSTNAME = API_CONFIG.apiHostname;
 const API_PORT = API_CONFIG.apiPort;
@@ -551,5 +552,6 @@ export default {
   UTILITY,
   TIMESHEETS,
   AUDIT,
-  CONTRACT_STATUSES
+  CONTRACT_STATUSES,
+  SETTINGS,
 };

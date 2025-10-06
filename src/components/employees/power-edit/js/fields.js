@@ -2,7 +2,7 @@ import v from '@/shared/validationUtils.js';
 const smallWidth = { width: '180px', minWidth: '180px', maxWidth: '180px' };
 const mediumWidth = { width: '250px', minWidth: '250px', maxWidth: '250px' };
 const largeWidth = { width: '350px', minWidth: '350px', maxWidth: '350px' };
-import { TYPES } from './fieldTypes.js';
+import { TYPES } from '@/components/shared/power-edit/js/fieldTypes.js';
 
 // |--------------------------------------------------|
 // |                                                  |

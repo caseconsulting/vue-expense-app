@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import Reimbursements from '@/views/Reimbursements.vue';
 import Login from '@/views/Login.vue';
 import LoginFailed from '@/views/LoginFailed.vue';
+import ExpenseType from '@/views/ExpenseType.vue';
 import ExpenseTypes from '@/views/ExpenseTypes.vue';
 import PTOCashOuts from '@/views/PTOCashOuts.vue';
 import Employees from '@/views/Employees.vue';
@@ -17,6 +18,7 @@ import Home from '@/views/Home.vue';
 import PageNotFound from '@/views/PageNotFound.vue';
 import Contracts from '@/views/Contracts.vue';
 import EmployeeBeta from '@/views/EmployeeBeta.vue';
+import Settings from '@/views/Settings.vue';
 import { requireAuth, isAdminOrManager } from '@/utils/auth';
 import multiguard from 'vue-router-multiguard';
 
@@ -49,6 +51,13 @@ const router = createRouter({
       path: '/expenseTypes',
       name: 'expenseTypes',
       component: ExpenseTypes,
+      beforeEnter: requireAuth
+    },
+
+    {
+      path: '/expenseType/:id',
+      name: 'expenseType',
+      component: ExpenseType,
       beforeEnter: requireAuth
     },
     {
@@ -134,6 +143,12 @@ const router = createRouter({
       name: 'employee-old',
       component: Employee,
       beforeEnter: requireAuth
+    },
+    {
+      path: '/settings',
+      name: 'settings',
+      component: Settings,
+      beforeEnter: multiguard([requireAuth, isAdminOrManager])
     },
     //Below catch-all code works for Vue 2
     //For Vue 3 change the path variable to path: '/:pathMatch(.*)*'

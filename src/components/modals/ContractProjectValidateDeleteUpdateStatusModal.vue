@@ -14,7 +14,9 @@
               {{ r.project.projectName }}</span
             >
             <ul class="ml-6">
-              <li v-for="e in r.employees" :key="e.id">{{ `${e.firstName} ${e.lastName}` }}</li>
+              <li v-for="e in r.employees" :key="e.id">
+                <router-link :to="`/employee/${e.employeeNumber}`" class="link"> {{ `${e.firstName} ${e.lastName}` }} </router-link>
+              </li>
             </ul>
           </div>
         </v-card-text>
@@ -78,3 +80,11 @@ function emit(msg) {
   emitter.emit(msg);
 } // emit
 </script>
+
+<style scoped>
+.link{
+  text-decoration: none;
+  cursor: pointer;
+  color: blue;
+}
+</style>
