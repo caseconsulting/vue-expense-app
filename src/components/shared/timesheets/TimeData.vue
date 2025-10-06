@@ -533,7 +533,7 @@ async function getEmployeePlanTagName(emp) {
  * Gets the title for the top bar
  */
 function getTitle() {
-  return props.title || `${system.value} Time Data`;
+  return props.title || `${system.value || 'Timesheet'} Time Data`;
 }
 
 // |--------------------------------------------------|
