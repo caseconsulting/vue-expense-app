@@ -27,7 +27,7 @@
           <v-col cols="1"></v-col>
           <v-col>
             <v-row class="groove">
-              <v-col class="small" :cols="isMobile() ? '12' : '4'">
+              <v-col class="slim" :cols="isMobile() ? '12' : '4'">
                 <v-checkbox
                   v-model="clearance.awaitingClearance"
                   density="compact"
@@ -49,7 +49,7 @@
                   </template>
                 </v-checkbox>
               </v-col>
-              <v-col class="small" :cols="isMobile() ? '12' : '4'">
+              <v-col class="slim" :cols="isMobile() ? '12' : '4'">
                 <date-picker
                   v-model="clearance.submissionDate"
                   :rules="[...getDateOptionalRules(), ...getDateSubmissionRules(clearance)]"
@@ -60,7 +60,7 @@
                 ></date-picker>
               </v-col>
 
-              <v-col class="small" :cols="isMobile() ? '12' : '4'">
+              <v-col class="slim" :cols="isMobile() ? '12' : '4'">
                 <v-combobox
                   v-model="clearance.grantingOrg"
                   prepend-inner-icon="mdi-lan"
@@ -69,7 +69,7 @@
                 ></v-combobox>
               </v-col>
 
-              <v-col class="small" :cols="isMobile() ? '12' : '4'">
+              <v-col class="slim" :cols="isMobile() ? '12' : '4'">
                 <date-picker
                   v-model="clearance.grantedDate"
                   :disabled="clearance.awaitingClearance"
@@ -81,7 +81,7 @@
                 ></date-picker>
               </v-col>
 
-              <v-col class="small" :cols="isMobile() ? '12' : '4'">
+              <v-col class="slim" :cols="isMobile() ? '12' : '4'">
                 <v-text-field
                   v-model="clearance.badgeNum"
                   prepend-inner-icon="mdi-badge-account-outline"
@@ -96,7 +96,7 @@
                 ></v-text-field>
               </v-col>
 
-              <v-col class="small" :cols="isMobile() ? '12' : '4'">
+              <v-col class="slim" :cols="isMobile() ? '12' : '4'">
                 <date-picker
                   v-model="clearance.badgeExpirationDate"
                   :disabled="clearance.awaitingClearance"
@@ -108,7 +108,7 @@
                 ></date-picker>
               </v-col>
 
-              <v-col class="small" :cols="isMobile() ? '12' : '4'">
+              <v-col class="slim" :cols="isMobile() ? '12' : '4'">
                 <date-picker
                   v-model="clearance.biDates"
                   :min="clearance.submissionDate"
@@ -118,7 +118,7 @@
                 ></date-picker>
               </v-col>
 
-              <v-col class="small" :cols="isMobile() ? '12' : '4'">
+              <v-col class="slim" :cols="isMobile() ? '12' : '4'">
                 <date-picker
                   v-model="clearance.adjudicationDates"
                   :min="clearance.submissionDate"
@@ -128,7 +128,7 @@
                 ></date-picker>
               </v-col>
 
-              <v-col class="small" :cols="isMobile() ? '12' : '4'">
+              <v-col class="slim" :cols="isMobile() ? '12' : '4'">
                 <date-picker
                   v-model="clearance.polyDates"
                   :min="clearance.submissionDate"
@@ -139,10 +139,13 @@
               </v-col>
             </v-row>
             <v-row
-              v-for="(reinvestigation, rIndex) in clearance.reinvestigations" :key="rIndex" class="groove"
-              align="center">
-              <v-col class="small" :cols="isMobile() ? '12' : '2'">
-                <div class="mx-xs-0 mx-sm-0 mx-md-5" style="display: flex; align-items: center;">
+              v-for="(reinvestigation, rIndex) in clearance.reinvestigations"
+              :key="rIndex"
+              class="groove"
+              align="center"
+            >
+              <v-col class="slim" :cols="isMobile() ? '12' : '2'">
+                <div class="mx-xs-0 mx-sm-0 mx-md-5" style="display: flex; align-items: center">
                   <v-chip
                     v-if="reinvestigation.underReinvestigation"
                     color="red"
@@ -153,37 +156,39 @@
                     Active
                   </v-chip>
                 </div>
-                </v-col>
-                <v-col class="small" :cols="isMobile() ? '12' : '4'">
-                  <date-picker
-                    v-model="reinvestigation.submissionDate"
-                    :rules="[...getDateOptionalRules()]"
-                    :min="clearance.grantedDate"
-                    label="Submission Date"
-                    variant="filled"
-                    clearable
-                  ></date-picker>
-                </v-col>
-                <v-col class="small" :cols="isMobile() ? '12' : '4'">
-                  <date-picker
-                    v-model="reinvestigation.completionDate"
-                    :rules="[...getDateOptionalRules()]"
-                    :min="reinvestigation.submissionDate"
-                    label="Completion Date"
-                    variant="filled"
-                    clearable
-                  ></date-picker>
-                </v-col>
-                <v-col cols="1">
-                  <v-btn variant="text" icon="" @click="deleteReinvestigation(clearance, rIndex)">
-                    <v-tooltip activator="parent" location="bottom">Delete Reinvestigation</v-tooltip>
-                    <v-icon class="case-gray">mdi-delete</v-icon></v-btn
-                  >
-                </v-col>
+              </v-col>
+              <v-col class="slim" :cols="isMobile() ? '12' : '4'">
+                <date-picker
+                  v-model="reinvestigation.submissionDate"
+                  :rules="[...getDateOptionalRules()]"
+                  :min="clearance.grantedDate"
+                  label="Submission Date"
+                  variant="filled"
+                  clearable
+                ></date-picker>
+              </v-col>
+              <v-col class="slim" :cols="isMobile() ? '12' : '4'">
+                <date-picker
+                  v-model="reinvestigation.completionDate"
+                  :rules="[...getDateOptionalRules()]"
+                  :min="reinvestigation.submissionDate"
+                  label="Completion Date"
+                  variant="filled"
+                  clearable
+                ></date-picker>
+              </v-col>
+              <v-col cols="1">
+                <v-btn variant="text" icon="" @click="deleteReinvestigation(clearance, rIndex)">
+                  <v-tooltip activator="parent" location="bottom">Delete Reinvestigation</v-tooltip>
+                  <v-icon class="case-gray">mdi-delete</v-icon></v-btn
+                >
+              </v-col>
             </v-row>
             <v-row class="groove">
               <v-col cols="12" align="center" class="py-2">
-                <v-btn @click="addReinvestigation(clearance)" variant="outlined" size="small">Add Reinvestigation</v-btn>
+                <v-btn @click="addReinvestigation(clearance)" variant="outlined" size="small"
+                  >Add Reinvestigation</v-btn
+                >
               </v-col>
             </v-row>
           </v-col>

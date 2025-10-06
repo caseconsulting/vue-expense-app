@@ -92,7 +92,7 @@
             ></v-badge>
             {{ item.employeeName }}</template
           >
-          <!-- Employee Name slot -->
+          <!-- Budget Name slot -->
           <template v-slot:[`item.budgetName`]="{ item }">
             {{ item.budgetName }}
             {{

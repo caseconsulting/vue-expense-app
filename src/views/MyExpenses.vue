@@ -1095,13 +1095,13 @@ async function loadMyExpensesData() {
       value: expenseType.id,
       budget: expenseType.budget,
       odFlag: expenseType.odFlag,
-      requiredFlag: expenseType.requiredFlag,
+      requireReceipt: expenseType.requireReceipt,
       recurringFlag: expenseType.recurringFlag,
       isInactive: expenseType.isInactive,
       categories: expenseType.categories,
       accessibleBy: expenseType.accessibleBy,
       hasRecipient: expenseType.hasRecipient,
-      alwaysOnFeed: expenseType.alwaysOnFeed
+      showOnFeed: expenseType.showOnFeed
     };
   });
   loading.value = false;

@@ -371,7 +371,7 @@
         <v-text-field
           variant="underlined"
           v-model="editedExpense.url"
-          :rules="[...getURLRules(), getRequireURL()]"
+          :rules="[...getURLRules(), ...getRequireURL()]"
           :label="urlLabel"
           :disabled="isInactive"
         />
@@ -578,7 +578,7 @@ function receiptRequired() {
   });
 
   // if the whole expense requires receipt
-  if (this.selectedExpenseType && this.selectedExpenseType.requiredFlag) {
+  if (this.selectedExpenseType && this.selectedExpenseType.requireReceipt) {
     // return true unless expense is training and the category is exchange
     return !(
       this.selectedExpenseType.budgetName === 'Training' &&
@@ -1332,7 +1332,7 @@ async function getRemainingBudget() {
  */
 function getRequireURL() {
   if (!this.selectedExpenseType) {
-    return true;
+    return [];
   }
   if (this.selectedExpenseType.requireURL) {
     return getRequiredRules();
@@ -1347,7 +1347,7 @@ function getRequireURL() {
       return getRequiredRules();
     }
   }
-  return true;
+  return [];
 } // getRequireURL
 
 /**
@@ -1395,8 +1395,8 @@ function isReceiptRequired() {
   });
 
   // if the whole expense requires receipt
-  if (this.selectedExpenseType && this.selectedExpenseType.requiredFlag) {
-    return this.selectedExpenseType.requiredFlag;
+  if (this.selectedExpenseType && this.selectedExpenseType.requireReceipt) {
+    return this.selectedExpenseType.requireReceipt;
   }
   // otherwise, does one of it's categories require a receipt
   if (this.editedExpense.category) {
@@ -1407,7 +1407,7 @@ function isReceiptRequired() {
   }
 
   return false;
-} // receiptRequired
+}
 
 /**
  * Creates the rules for the notes section based on whether or not the current expense type requires a recipient.
@@ -2057,7 +2057,7 @@ async function watchEditedExpenseExpenseTypeID() {
       _isEmpty(this.editedExpense.id)
     ) {
       // changing the expense type
-      if (!this.isEdit && this.selectedExpenseType.alwaysOnFeed) {
+      if (!this.isEdit && this.selectedExpenseType.showOnFeed) {
         // if expense type is always on feed
         this.editedExpense.showOnFeed = true;
       } else {
@@ -2121,7 +2121,7 @@ function watchEditedExpenseCategory() {
       _isNil(this.editedExpense.id))
   ) {
     // category or expense type is changed
-    if (this.selectedExpenseType.alwaysOnFeed) {
+    if (this.selectedExpenseType.showOnFeed) {
       // if expense type is always on feed
       this.editedExpense.showOnFeed = true;
     } else {
