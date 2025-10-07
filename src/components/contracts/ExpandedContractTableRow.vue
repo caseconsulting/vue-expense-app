@@ -6,7 +6,7 @@
         <v-data-table
           :headers="_filter(projectHeaders, (h) => props.expandOrgs || (!props.expandOrgs && !h.expandableOrg))"
           :items="contract.item.projects"
-          :sortBy="sortBy"
+          :sort-by="sortBy"
           :row-props="rowProps"
           :cellProps="(item) => cellProps(item, projectHeaders)"
           class="projects-table"
@@ -126,7 +126,7 @@ import ContractsEditItem from './ContractsEditItem.vue';
 import ContractsInfoItem from './ContractsInfoItem.vue';
 import ProjectsEmployeesAssignedModal from '../modals/ProjectsEmployeesAssignedModal.vue';
 import { getProjectCurrentEmployees } from '@/shared/contractUtils';
-import { ref, onBeforeMount, onMounted, inject, watch } from 'vue';
+import { ref, onBeforeMount, inject, watch } from 'vue';
 import { useDisplay } from 'vuetify';
 
 // |--------------------------------------------------|
@@ -151,7 +151,6 @@ const duplicateProjects = ref((v) => {
 });
 const projectLoading = ref(false);
 const editItem = ref(props.editItem);
-const sortBy = ref([...props.sortBy]);
 const toggleProjectEmployeesModal = ref(false);
 const contractEmployeesAssigned = ref(null);
 const projectEmployeesAsseigned = ref(null);
@@ -306,14 +305,6 @@ watch(
   () => {
     // sets the edit item from the contracts row so multiple items cannot be edited
     editItem.value = props.editItem;
-  }
-);
-
-watch(
-  () => props.sortBy,
-  () => {
-    sortBy.value = props.sortBy;
-    console.log(sortBy.value);
   }
 );
 </script>
