@@ -184,8 +184,8 @@
               :items-per-page="itemsPerPage"
               :headers="_headers"
               :items="expenseTypeList"
+              @click:row="clickedRow"
               :expanded="expanded"
-              expand-on-click
               :loading="loading"
               :search="search"
               item-key="id"
@@ -217,8 +217,17 @@
                 </p>
               </template>
               <!-- Actions -->
-              <template v-if="userRoleIsAdmin()" v-slot:[`item.actions`]="{ item }">
-                <div class="mr-4">
+              <template v-slot:[`item.actions`]="{ item }">
+                <div>
+                  <v-btn
+                    :disabled="midAction"
+                    variant="text"
+                    icon
+                    @click.stop="expanded = [item.id]"
+                    v-tooltip="'Show Condensed View'"
+                  >
+                    <v-icon icon="mdi-chevron-down" class="case-gray" />
+                  </v-btn>
                   <v-btn
                     v-if="userRoleIsAdmin()"
                     :disabled="midAction"
@@ -258,214 +267,11 @@
 
               <!-- Expanded slot item -->
               <template #expanded-row="{ columns, item }">
-                <td :colspan="columns.length" class="pa-0">
+                <td :colspan="columns.length">
                   <v-card>
                     <v-card-text>
                       <div class="expandedInfo">
-                        <!-- Description -->
-                        <v-row no-gutters>
-                          <v-col cols="12">
-                            <p v-if="item.description">
-                              <b>Description:</b>
-                              {{ item.description }}
-                            </p>
-                          </v-col>
-                        </v-row>
-
-                        <!-- Category -->
-                        <v-row no-gutters>
-                          <v-col cols="12">
-                            <p>
-                              <b>Categories:</b>
-                              {{ categoriesToString(item.categories) }}
-                            </p>
-                          </v-col>
-                        </v-row>
-
-                        <v-row no-gutters>
-                          <!-- Show on Feed -->
-                          <v-col>
-                            <div v-if="item.alwaysOnFeed">
-                              <p><b>Show On Feed:</b> All Expenses</p>
-                            </div>
-                            <div v-else>
-                              <p><b>Show On Feed:</b> {{ categoriesOnFeed(item.categories) }}</p>
-                            </div>
-                          </v-col>
-                        </v-row>
-
-                        <!-- Show Require URL -->
-                        <v-row no-gutters>
-                          <v-col>
-                            <div v-if="item.requireURL">
-                              <p><b>Require URL:</b> All Expenses</p>
-                            </div>
-                            <div v-else>
-                              <p><b>Require URL:</b> {{ categoriesReqUrl(item.categories) }}</p>
-                            </div>
-                          </v-col>
-                        </v-row>
-
-                        <!-- Show Require Receipt -->
-                        <v-row no-gutters>
-                          <v-col>
-                            <div v-if="item.requiredFlag">
-                              <p><b>Require Receipt:</b> All Expenses</p>
-                            </div>
-                            <div v-else>
-                              <p><b>Require Receipt:</b> {{ categoriesReqReceipt(item.categories) }}</p>
-                            </div>
-                          </v-col>
-                        </v-row>
-
-                        <!-- Requires Recipient -->
-                        <v-row no-gutters>
-                          <v-col>
-                            <p v-if="item.hasRecipient"><b>Requires Recipient:</b> Yes</p>
-                            <p v-else><b>Requires Recipient:</b> No</p>
-                          </v-col>
-                        </v-row>
-
-                        <!-- Flags -->
-                        <v-row no-gutters>
-                          <v-col cols="12" sm="6" md="3" class="flag">
-                            <p>Pro-rated:</p>
-                            <v-icon
-                              v-if="item.proRated"
-                              icon="mdi-check-circle-outline"
-                              id="marks"
-                              class="mr-1"
-                              color="green"
-                            />
-                            <v-icon v-else icon="mdi-close-circle-outline" id="marks" class="mr-1 case-red" />
-                          </v-col>
-                          <v-col cols="12" sm="6" md="3" class="flag">
-                            <p>Overdraft Allowed:</p>
-                            <v-icon
-                              v-if="item.odFlag"
-                              icon="mdi-check-circle-outline"
-                              id="marks"
-                              class="mr-1"
-                              color="green"
-                            />
-                            <v-icon v-else icon="mdi-close-circle-outline" id="marks" class="mr-1 case-red" />
-                          </v-col>
-                          <v-col cols="12" sm="6" md="3" class="flag">
-                            <p>Recurring:</p>
-                            <v-icon
-                              v-if="item.recurringFlag"
-                              icon="mdi-check-circle-outline"
-                              id="marks"
-                              class="mr-1"
-                              color="green"
-                            />
-                            <v-icon v-else icon="mdi-close-circle-outline" id="marks" class="mr-1 case-red" />
-                          </v-col>
-                          <v-col cols="12" sm="6" md="3" class="flag">
-                            <p>Inactive:</p>
-                            <v-icon
-                              v-if="item.isInactive"
-                              icon="mdi-check-circle-outline"
-                              id="marks"
-                              class="mr-1"
-                              color="green"
-                            />
-                            <v-icon v-else icon="mdi-close-circle-outline" id="marks" class="mr-1 case-red" />
-                          </v-col>
-                        </v-row>
-                        <!-- End Flags -->
-
-                        <!-- Accessible By -->
-                        <v-row v-if="userRoleIsAdmin()" no-gutters>
-                          <!-- Display number of employees accessed by -->
-                          <div>
-                            <p>
-                              <b>Access:</b>
-                              {{ getAccess(item) }}
-                            </p>
-                          </div>
-                          <!-- Button to view names of employees with access -->
-                          <v-dialog v-model="showAccess[item.id]" max-width="400px" scrollable>
-                            <template #activator="{ props }">
-                              <v-btn class="px-1 ml-3" size="x-small" variant="outlined" v-bind="props"> view </v-btn>
-                            </template>
-                            <v-card class="mt-3">
-                              <!-- Dialog Title -->
-                              <v-card-title class="d-flex align-center header_style">
-                                <h3>Accessible By</h3>
-                              </v-card-title>
-                              <v-divider color="black" />
-                              <!-- List of employee names/ISSUES -->
-                              <v-card-text class="pb-0">
-                                <v-row>
-                                  <v-list color="#f0f0f0" width="376">
-                                    <div v-for="employee in getEmployeeList(item.accessibleBy)" :key="employee.id">
-                                      <v-list-item>
-                                        <!-- Employee Image -->
-                                        <template #prepend>
-                                          <user-avatar :employee="employee" :image="employee.avatar" />
-                                        </template>
-                                        <!-- Employee Name -->
-                                        <v-list-item-title>{{ getEmployeeName(employee.id) }}</v-list-item-title>
-                                      </v-list-item>
-                                    </div>
-                                  </v-list>
-                                </v-row>
-                              </v-card-text>
-
-                              <v-divider color="black" />
-                              <!-- Close dialog button -->
-                              <v-card-actions>
-                                <v-spacer />
-                                <v-btn theme="dark" variant="text" @click="showAccess[item.id] = false"> Close </v-btn>
-                              </v-card-actions>
-                            </v-card>
-                          </v-dialog>
-                        </v-row>
-                        <!-- End Accessible By -->
-
-                        <!-- Tag Budgets -->
-                        <v-row v-if="userRoleIsAdmin() && item.tagBudgets && item.tagBudgets.length > 0" no-gutters>
-                          <v-col cols="12" sm="6" md="3">
-                            <div>
-                              <p><b>Tag Budgets:</b></p>
-                            </div>
-                          </v-col>
-                          <v-col class="d-flex justify-space-between flex-wrap">
-                            <div v-for="(item, index) in item.tagBudgets" :key="index" class="d-flex px-2 pb-4">
-                              <div class="d-flex pr-3">
-                                <b>Tag(s):</b>
-                                <div class="d-flex flex-column">
-                                  <v-chip v-for="tagID in item.tags" size="small" :key="tagID">
-                                    <v-icon icon="mdi-tag" start />{{ getTagByID(tagID).tagName }}
-                                  </v-chip>
-                                </div>
-                              </div>
-                              <div class="d-flex flex-nowrap">
-                                <span>
-                                  <b>Budget: </b>
-                                  {{ convertToMoneyString(item.budget) }}
-                                </span>
-                              </div>
-                            </div>
-                          </v-col>
-                        </v-row>
-                        <!-- End Tag Budgets -->
-
-                        <!-- Basecamp Campfire -->
-                        <p v-if="getCampfire(item.campfire)">
-                          <b>Basecamp Campfire: </b>
-                          <a :href="getCampfire(item.campfire).url" target="blank">
-                            {{ getCampfire(item.campfire).name }}
-                          </a>
-                        </p>
-                        <!-- End Basecamp Campfire -->
-
-                        <!-- Monthly Limit -->
-                        <p v-if="item.monthlyLimit">
-                          <b>Monthly Limit: </b>
-                          ${{ item.monthlyLimit }}
-                        </p>
+                        {{ limitedText(item.description, 110) }}
                       </div>
                     </v-card-text>
                   </v-card>
@@ -510,27 +316,19 @@ import api from '@/shared/api.js';
 import DeleteErrorModal from '@/components/modals/DeleteErrorModal.vue';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
 import DisableExpenseTypeForEmployeesModal from '@/components/modals/DisableExpenseTypeForEmployeesModal.vue';
-import ExpenseTypeForm from '@/components/expense-types/ExpenseTypeForm.vue';
-import _map from 'lodash/map';
-import _filter from 'lodash/filter';
-import _find from 'lodash/find';
+import ExpenseTypeForm from '@/components/expense-types/forms/ExpenseTypeForm.vue';
 import _sortBy from 'lodash/sortBy';
 import _cloneDeep from 'lodash/cloneDeep';
 import _union from 'lodash/union';
 import _uniq from 'lodash/uniq';
 import { convertToMoneyString, userRoleIsAdmin } from '@/utils/utils';
-import {
-  updateStoreExpenseTypes,
-  updateStoreEmployees,
-  updateStoreAvatars,
-  updateStoreBudgets,
-  updateStoreCampfires,
-  updateStoreTags
-} from '@/utils/storeUtils';
+import { updateStoreExpenseTypes, updateStoreBudgets } from '@/utils/storeUtils';
 import { format } from '../shared/dateUtils';
 import { onBeforeMount, onBeforeUnmount, ref, watch, computed, inject } from 'vue';
 import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSnackbar.vue';
+import { ExpenseType } from '@/models/expense-types/expenseType.js';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -538,15 +336,15 @@ import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSn
 // |                                                  |
 // |--------------------------------------------------|
 
+const router = useRouter();
+
 // items for disable modal
 const showDisableModal = ref(false);
 const disableModalItem = ref(null);
 
-const campfires = ref([]); // basecamp campfires
 const deleteModel = ref({ id: '' }); // expense type to delete
 const deleting = ref(false); // activate delete confirmation model
 const emitter = inject('emitter');
-const employees = ref([]); // employees
 const expanded = ref([]); // datatable expanded
 const expenseTypes = ref([]); // expense types
 const filter = ref({
@@ -578,10 +376,10 @@ const headers = ref([
     show: true
   },
   {
-    title: '',
+    title: 'Actions',
     key: 'actions',
     sortable: false,
-    show: false,
+    show: true,
     align: 'end'
   }
 ]); // datatable headers
@@ -590,33 +388,12 @@ const invalidDelete = ref(false); // invalid delete staus
 const itemsPerPage = ref(-1); // items per datatable page
 const loading = ref(true); //loading status
 const midAction = ref(false);
-const model = ref({
-  accessibleBy: ['FullTime'],
-  alwaysOnFeed: false,
-  budget: 0,
-  budgetName: '',
-  campfire: null,
-  categories: [],
-  description: '',
-  endDate: null,
-  hasRecipient: false,
-  id: '',
-  isInactive: false,
-  odFlag: false,
-  proRated: false,
-  recurringFlag: false,
-  requiredFlag: true,
-  requireURL: false,
-  startDate: null,
-  tagBudgets: []
-}); // selected expense type
+const model = ref(new ExpenseType({})); // selected expense type
 const search = ref(''); // query text for datatable search field
-const showAccess = ref({}); // activate display for access list, object of ids to boolean
-const showAccessLength = ref(0); // number of employees with access
 const sortBy = ref([{ key: 'budgetName', order: 'asc' }]); // sort datatable items
 const store = useStore();
 const userInfo = ref(null); // user information
-const deleteType = ref(''); // item.budgetName for when item is deleted
+const deleteType = ref('');
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -744,120 +521,23 @@ async function addModelToTable() {
   await refreshExpenseTypes();
 
   useDisplaySuccess('Item was successfully submitted!');
-} // addModelToTable
-
-/**
- * Returns a string of category names.
- *
- * @param categories - the categories to stringify
- * @return string - the string of categories
- */
-function categoriesToString(categories) {
-  let string = '';
-  for (let i = 0; i < categories.length; i++) {
-    string += categories[i].name;
-    if (i < categories.length - 1) {
-      string += ', ';
-    }
-  }
-  if (string.length === 0) {
-    return 'None';
-  }
-  return string;
-} // categoriesToString
-
-/**
- * Returns a string of category names that are on the feed.
- *
- * @param categories - the categories to stringify
- * @return string - the string of categories on the feed
- */
-function categoriesOnFeed(categories) {
-  let string = '';
-  for (let i = 0; i < categories.length; i++) {
-    if (categories[i].showOnFeed) {
-      if (string.length > 0) {
-        string += ', ';
-      }
-      string += categories[i].name;
-    }
-  }
-  if (string.length == 0) {
-    string = 'None';
-  }
-  return string;
-} // categoriesOnFeed
-
-/**
- * Returns a string of category names that require a url.
- *
- * @param categories - the categories to stringify
- * @return string - the string of categories that require a url
- */
-function categoriesReqUrl(categories) {
-  let string = '';
-  for (let i = 0; i < categories.length; i++) {
-    if (categories[i].requireURL) {
-      if (string.length > 0) {
-        string += ', ';
-      }
-      string += categories[i].name;
-    }
-  }
-  if (string.length == 0) {
-    string = 'None';
-  }
-  return string;
-} // categoriesReqUrl
-
-/**
- * Returns a string of category names that require a receipt.
- *
- * @param categories - the categories to stringify
- * @return string - the string of categories that require a receipt
- */
-function categoriesReqReceipt(categories) {
-  let string = '';
-  //first filter out those that have a receipt required. then map each match to just it's name (now it's a list).
-  //finally join the array items with a comma.
-  string = _map(
-    _filter(categories, (cat) => {
-      return cat.requireReceipt;
-    }),
-    (match) => {
-      return match.name;
-    }
-  ).join(', ');
-
-  if (string.length == 0) {
-    string = 'None';
-  }
-  return string;
-} // categoriesReqReceipt
+}
 
 /**
  * Clear the selected expense type.
  */
 function clearModel() {
-  model.value['id'] = '';
-  model.value['budget'] = 0;
-  model.value['budgetName'] = '';
-  model.value['description'] = '';
-  model.value['odFlag'] = false;
-  model.value['proRated'] = false;
-  model.value['startDate'] = '';
-  model.value['endDate'] = '';
-  model.value['recurringFlag'] = false;
-  model.value['requiredFlag'] = false;
-  model.value['isInactive'] = false;
-  model.value['categories'] = [];
-  model.value['accessibleBy'] = ['FullTime'];
-  model.value['hasRecipient'] = false;
-  model.value['alwaysOnFeed'] = false;
-  model.value['campfire'] = null;
-  model.value['requireURL'] = false;
-  model.value['tagBudgets'] = [];
-} // clearModel
+  model.value = new ExpenseType({});
+}
+
+/**
+ * Routes the user to the employees page and autofills the search fields.
+ *
+ * @param value - row clicked
+ */
+function clickedRow(_, rowItem) {
+  router.push(`/expenseType/${rowItem.item.id}`);
+}
 
 /**
  * Delete an expense type and display status.
@@ -872,7 +552,7 @@ async function deleteExpenseType() {
     useDisplayError(et.response.data.message);
   }
   midAction.value = false;
-} // deleteExpenseType
+}
 
 /**
  * Refresh and updates expense type list and displays a successful delete status in the snackbar.
@@ -882,14 +562,14 @@ async function deleteModelFromTable() {
   await refreshExpenseTypes();
 
   useDisplaySuccess('Item was successfully deleted!');
-} // deleteModelFromTable
+}
 
 /**
  * Sets inAction boolean to false.
  */
 function endAction() {
   midAction.value = false;
-} // endAction
+}
 
 /** Display error from expense form */
 function expenseFormError(msg) {
@@ -900,19 +580,19 @@ function expenseFormError(msg) {
  * Filters expense types based on filter selections.
  */
 function filterExpenseTypes() {
-  filteredExpenseTypes.value = { ...expenseTypes.value };
+  filteredExpenseTypes.value = [...expenseTypes.value];
 
   // filter expense types by active or inactive
-  filteredExpenseTypes.value = _filter(filteredExpenseTypes.value, (expenseType) => {
+  filteredExpenseTypes.value = filteredExpenseTypes.value.filter((expenseType) => {
     return filter.value.active == 'active'
-      ? !expenseType.isInactive
+      ? expenseType.active
       : filter.value.active == 'notActive'
-        ? expenseType.isInactive
+        ? !expenseType.active
         : { ...filteredExpenseTypes.value };
   });
 
   // filter expense types by overdraft
-  filteredExpenseTypes.value = _filter(filteredExpenseTypes.value, (expenseType) => {
+  filteredExpenseTypes.value = filteredExpenseTypes.value.filter((expenseType) => {
     return filter.value.overdraft == 'overdraft'
       ? expenseType.odFlag
       : filter.value.overdraft == 'noOverdraft'
@@ -921,98 +601,14 @@ function filterExpenseTypes() {
   });
 
   // filter expense types by recurring
-  filteredExpenseTypes.value = _filter(filteredExpenseTypes.value, (expenseType) => {
+  filteredExpenseTypes.value = filteredExpenseTypes.value.filter((expenseType) => {
     return filter.value.recurring == 'recurring'
       ? expenseType.recurringFlag
       : filter.value.recurring == 'notRecurring'
         ? !expenseType.recurringFlag
         : { ...filteredExpenseTypes.value };
   });
-} // filterExpenseTypes
-
-/**
- * Check who the expense type is accessible by. Returns a list of access types.
- *
- * @param expenseType - expesne type to check
- * @return String - accessible by description
- */
-function getAccess(expenseType) {
-  let accessList = _filter(expenseType.accessibleBy, (accessType) => {
-    return accessType == 'FullTime' || accessType == 'PartTime' || accessType == 'Intern' || accessType == 'Custom';
-  });
-  return accessList.join(', ');
-} // getAccess
-
-/**
- * Gets the campfire name and url for a given url.
- *
- * @param url - basecamp url String
- * @return Object - basecamp name and url data
- */
-function getCampfire(url) {
-  return _find(campfires.value, (campfire) => {
-    return campfire.url == url;
-  });
-} // getCampfire
-
-/**
- * Get the list of employees who have access to a expense type accessible by value.
- *
- * @param accessibleBy - expense type accessible by value
- * @return Array - list of employees with access
- */
-function getEmployeeList(accessibleBy) {
-  let employeesList = [];
-  if (accessibleBy.includes('FullTime')) {
-    // accessible by all employees
-    employeesList = employeesList.concat(
-      _filter(employees.value, (employee) => {
-        return employee.workStatus == 100 && employee.employeeRole != 'intern';
-      })
-    );
-  }
-  if (accessibleBy.includes('PartTime')) {
-    // accessible by full time employees only
-    employeesList = employeesList.concat(
-      _filter(employees.value, (employee) => {
-        return employee.workStatus < 100 && employee.workStatus > 0 && employee.employeeRole != 'intern';
-      })
-    );
-  }
-  if (accessibleBy.includes('Intern')) {
-    // accessible by full time employees only
-    employeesList = employeesList.concat(
-      _filter(employees.value, (employee) => {
-        return employee.workStatus > 0 && employee.employeeRole == 'intern';
-      })
-    );
-  }
-  if (accessibleBy.includes('Custom')) {
-    // custom access list
-    employeesList = employeesList.concat(
-      _filter(employees.value, (employee) => {
-        return accessibleBy.includes(employee.id);
-      })
-    );
-  }
-  employeesList = [...new Set(employeesList)];
-  showAccessLength.value = employeesList.length;
-  return _sortBy(employeesList, [
-    (employee) => employee.firstName.toLowerCase(),
-    (employee) => employee.lastName.toLowerCase()
-  ]); // sort by first name then last name
-} // getEmployeeList
-
-/**
- * Get the employee name of an employee id.
- *
- * @param employeeId - employee id
- * @return String - employee full name
- */
-function getEmployeeName(employeeId) {
-  let localEmployee = _find(employees.value, ['id', employeeId]);
-  return `${localEmployee.firstName} ${localEmployee.lastName}`;
-} // getEmployeeName
+}
 
 /**
  * Load all data required to load the page initially.
@@ -1020,29 +616,15 @@ function getEmployeeName(employeeId) {
 async function loadExpenseTypesData() {
   initialPageLoading.value = true;
   userInfo.value = store.getters.user;
-  [campfires.value] = await Promise.all([
-    userRoleIsAdmin() ? api.getBasecampCampfires() : '',
-    userRoleIsAdmin() && !store.getters.tags ? updateStoreTags() : _find && _map,
-    userRoleIsAdmin() && !store.getters.employees ? updateStoreEmployees() : _find && _map,
-    userRoleIsAdmin() && !store.getters.avatars ? updateStoreAvatars() : _find && _map,
-    refreshExpenseTypes(),
-    updateStoreCampfires()
-  ]);
-  expenseTypes.value = store.getters.expenseTypes;
+  await Promise.all([refreshExpenseTypes()]);
+  setExpenseTypes(store.getters.expenseTypes);
   filterExpenseTypes();
-  if (userRoleIsAdmin()) {
-    employees.value = store.getters.employees;
-    // set employee avatar
-    let avatars = store.getters.basecampAvatars;
-    _map(employees.value, (employee) => {
-      let avatar = _find(avatars, ['email_address', employee.email]);
-      let avatarUrl = avatar ? avatar.avatar_url : null;
-      employee.avatar = avatarUrl;
-      return employee;
-    });
-  }
   initialPageLoading.value = false;
-} // loadExpenseTypesData
+}
+
+function setExpenseTypes(storeExpenseTypes) {
+  expenseTypes.value = storeExpenseTypes.map((et) => new ExpenseType(et));
+}
 
 /**
  * limits the length of the text
@@ -1050,10 +632,10 @@ async function loadExpenseTypesData() {
  * @param val - the string to be shortened
  * @return string - the shortened string
  */
-function limitedText(val) {
+function limitedText(val, characterLimit = 50) {
   // limits text displayed to 50 characters on table view
-  return val.length > 50 ? `${val.substring(0, 50)}...` : val;
-} // limitedText
+  return val.length > characterLimit ? `${val.substring(0, characterLimit)}...` : val;
+}
 
 /**
  * Store the attributes of a selected expense type.
@@ -1062,7 +644,7 @@ function limitedText(val) {
  */
 function onSelect(item) {
   model.value = _cloneDeep(item);
-} // onSelect
+}
 
 /**
  * Refresh expense type data and filters expense types.
@@ -1075,7 +657,7 @@ async function refreshExpenseTypes() {
     !userRoleIsAdmin() && !store.getters.budgets ? updateStoreBudgets() : '',
     !store.getters.expenseTypes ? updateStoreExpenseTypes() : ''
   ]);
-  expenseTypes.value = store.getters.expenseTypes;
+  setExpenseTypes(store.getters.expenseTypes);
 
   // filter expense types for the user
   if (!userRoleIsAdmin()) {
@@ -1084,11 +666,11 @@ async function refreshExpenseTypes() {
     // get the active budgets for the employee
     let activeBudgets = store.getters.budgets;
     // map the active budgets
-    let activeExpTypes = _map(activeBudgets, (budget) => {
+    let activeExpTypes = activeBudgets.map((budget) => {
       return budget.expenseTypeId;
     });
     // map the budgets with expenses
-    let budExpTypes = _map(budgetsWithExpenses, (budget) => {
+    let budExpTypes = budgetsWithExpenses.map((budget) => {
       return budget.expenseTypeId;
     });
     // combine the two types of expenses
@@ -1096,28 +678,28 @@ async function refreshExpenseTypes() {
     // get rid of duplicates
     expenseTypesFiltered = _uniq(expenseTypesFiltered);
     // set expenseTypes.value to only have those the user should see (expenseTypesFiltered)
-    expenseTypes.value = _filter(expenseTypes.value, (expenseType) => {
+    expenseTypes.value = expenseTypes.value.filter((expenseType) => {
       return expenseTypesFiltered.includes(expenseType.id);
     });
   }
 
   filterExpenseTypes();
   loading.value = false; // set loading status to false
-} // refreshExpenseTypes
+}
 
 /**
  * set midAction to true
  */
 function startAction() {
   midAction.value = true;
-} // startAction
+}
 
 /**
  * Scrolls window back to the top of the form.
  */
 function toTopOfForm() {
   window.scrollTo(0, form.value.$el.offsetTop - 70);
-} // toTopOfForm
+}
 
 /**
  * Refresh and updates expense type list and displays a successful update status in the snackbar.
@@ -1127,7 +709,7 @@ async function updateModelInTable() {
   await refreshExpenseTypes();
 
   useDisplaySuccess('Item was successfully updated!');
-} // updateModelInTable
+}
 
 /**
  * Validates if an expense type can be deleted. Returns true if the expense type has no expenses, otherwise returns
@@ -1150,16 +732,7 @@ async function validateDelete(item) {
   } catch (err) {
     useDisplayError(err);
   }
-} // validateDelete
-
-/**
- * Gets tag object given id
- * @param id id of tag to find
- */
-function getTagByID(id) {
-  return store.getters.tags.find((t) => t.id === id);
-} // getTagByID
-
+}
 /**
  * Opens the modal to disable/enable budgets for people
  *
@@ -1168,7 +741,7 @@ function getTagByID(id) {
 function openDisableModal(item) {
   showDisableModal.value = true;
   disableModalItem.value = item;
-} // openDisableModal
+}
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -1205,9 +778,5 @@ a {
 a:hover {
   color: blue !important;
   text-decoration: none;
-}
-
-.case-red {
-  color: #bc3825;
 }
 </style>

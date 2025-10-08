@@ -260,16 +260,7 @@
                     </v-col>
                     <v-col cols="auto">
                       <div :class="{ shake: invalidButton }">
-                        <v-btn
-                          id="employeeSubmitBtn"
-                          variant="outlined"
-                          class="ma-1"
-                          :color="invalidButton ? 'error' : 'success'"
-                          type="submit"
-                          size="small"
-                        >
-                          <v-icon class="mr-1">mdi-content-save</v-icon>Submit
-                        </v-btn>
+                        <submit-button :valid="!invalidButton"></submit-button>
                       </div>
                     </v-col>
                     <!-- End form action buttons -->
@@ -319,6 +310,7 @@ import LanguagesForm from './LanguagesForm.vue';
 import PersonalInfoForm from './PersonalInfoForm.vue';
 import TechnologiesForm from './TechnologiesForm.vue';
 import EmergencyContactsForm from './EmergencyContactsForm.vue';
+import SubmitButton from '@/components/shared/buttons/SubmitButton.vue';
 
 // |--------------------------------------------------|
 // |                                                  |
