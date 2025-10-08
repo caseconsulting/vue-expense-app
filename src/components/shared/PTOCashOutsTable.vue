@@ -350,12 +350,6 @@ const filteredPtoCashOuts = computed(() => {
     });
   }
 
-  // emit the first user in the list to fill in timesheet data on first load
-  if (store.getters.employees && firstLoad) {
-    rowClicked(null, { item: filteredPtoCashOuts[0] });
-    firstLoad = false;
-  }
-
   return filteredPtoCashOuts;
 });
 
