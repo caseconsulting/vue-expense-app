@@ -449,10 +449,7 @@
               label="Opt-in"
             >
               <v-tooltip activator="parent" location="top">
-                <div>
-                  I consent to receive up to two monthly text message reminders for payroll time sheets on the last work
-                  day of the pay period
-                </div>
+                <div>I consent to receive text message reminders for payroll time sheets</div>
                 <div>Text 'HELP' for support</div>
                 <div>To opt-out, uncheck the box or text 'STOP'</div>
                 <div>Message and data rates may apply</div>
@@ -494,10 +491,7 @@
               label="Opt-in"
             >
               <v-tooltip activator="parent" location="top">
-                <div>
-                  I consent to receive up to two monthly text message reminders for payroll time sheets on the last work
-                  day of the pay period
-                </div>
+                <div>I consent to receive text message reminders for payroll time sheets</div>
                 <div>Text 'HELP' for support</div>
                 <div>To opt-out, uncheck the box or text 'STOP'</div>
                 <div>Message and data rates may apply</div>
