@@ -1,17 +1,6 @@
 <template>
   <v-col>
     <v-row>
-      <v-textarea
-        v-model="notes.misc"
-        variant="outlined"
-        label="Miscellaneous"
-        auto-grow
-        rows="3"
-        max-rows="8"
-        class="w-100 pt-1"
-      ></v-textarea>
-    </v-row>
-    <v-row>
       <v-col class="pl-0" :cols="isMobile() ? '12' : '7'" :class="isMobile() ? 'pb-0' : ''">
         <v-text-field v-model="customKudo.title" variant="outlined" label="Record kudo"></v-text-field>
       </v-col>
@@ -34,7 +23,7 @@
             <v-date-picker
               v-model="customKudo.date"
               @update:model-value="showDateMenu = false"
-              show-adjacent-months
+              show-adjacent-monthcell
               hide-actions
               keyboard-icon=""
               color="#bc3825"
@@ -62,7 +51,21 @@
             />
             <br v-if="isMobile()" />
             <span class="cursor-default">{{ kudoText(kudo) }}</span>
-            <v-avatar :class="kudo.desc ? 'pointer' : ''" density="compact">
+            <span v-if="kudo.type === 'custom'">
+              <v-icon
+                icon="mdi-pencil"
+                class="rounded-circle ml-2 mb-1 pa-3"
+                size="small"
+                @click="editKudo(kudo.index)"
+              />
+              <v-icon
+                icon="mdi-delete"
+                class="rounded-circle mx-2 mb-1 pa-3"
+                size="small"
+                @click="deleteKudo(kudo.index)"
+              />
+            </span>
+            <v-avatar v-else :class="kudo.desc ? 'pointer' : ''" density="compact">
               <v-tooltip v-if="kudo.desc" activator="parent" location="top" max-width="600">{{ kudo.desc }}</v-tooltip>
               <v-icon v-if="kudo.desc" size="x-small">mdi-text</v-icon>
             </v-avatar>
@@ -117,13 +120,14 @@ async function buildKudos() {
   }
 
   // build custom kudos
-  for (let c of notes.value.custom ?? []) {
+  notes.value.custom.forEach((c, index) => {
     kudos.value.push({
       type: 'custom',
       title: c.title,
-      date: format(c.date, null, 'YYYY-MM-DD')
+      date: format(c.date, null, 'YYYY-MM-DD'),
+      index: index
     });
-  }
+  });
 
   // build high fives
   // get all high fives
@@ -160,7 +164,7 @@ async function buildKudos() {
  */
 function parseEventDate() {
   return format(event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD');
-} // parseEventDate
+}
 
 let kudosIcons = {
   'high-five': 'mdi-hands-pray',
@@ -196,6 +200,18 @@ function addCustomKudo() {
     customKudo.value = { date: getTodaysDate('YYYY-MM-DD') };
     buildKudos();
   }
+}
+
+function deleteKudo(index) {
+  notes.value.custom.splice(index, 1);
+  buildKudos();
+}
+
+function editKudo(index) {
+  let kudo = notes.value.custom[index];
+  customKudo.value = { ...kudo };
+  notes.value.custom.splice(index, 1);
+  buildKudos();
 }
 </script>
 
