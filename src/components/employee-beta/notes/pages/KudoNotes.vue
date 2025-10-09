@@ -23,7 +23,7 @@
             <v-date-picker
               v-model="customKudo.date"
               @update:model-value="showDateMenu = false"
-              show-adjacent-monthcell
+              show-adjacent-months
               hide-actions
               keyboard-icon=""
               color="#bc3825"
@@ -164,7 +164,7 @@ async function buildKudos() {
  */
 function parseEventDate() {
   return format(event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD');
-}
+} // parseEventDate
 
 let kudosIcons = {
   'high-five': 'mdi-hands-pray',
