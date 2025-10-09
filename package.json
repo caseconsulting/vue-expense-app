@@ -6,6 +6,7 @@
   "releaseNotes": "https://public.3.basecamp.com/p/7zDjsXCmz9awrvzbHUQY1aA5",
   "private": true,
   "scripts": {
+    "build": "cross-env NODE_OPTIONS=--openssl-legacy-provider && vite build",
     "clean": "rm -rf dist tests_output",
     "predeploy:dev": "npm run download:dev:env",
     "deploy:dev": "cross-env NODE_OPTIONS=--openssl-legacy-provider && npm run build && node deploy.js -dev",
