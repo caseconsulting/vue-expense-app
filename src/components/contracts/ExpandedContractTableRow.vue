@@ -6,6 +6,7 @@
         <v-data-table
           :headers="_filter(projectHeaders, (h) => props.expandOrgs || (!props.expandOrgs && !h.expandableOrg))"
           :items="contract.item.projects"
+          :sort-by="sortBy"
           :row-props="rowProps"
           :cellProps="(item) => cellProps(item, projectHeaders)"
           class="projects-table"
@@ -134,7 +135,7 @@ import { useDisplay } from 'vuetify';
 // |                                                  |
 // |--------------------------------------------------|
 
-const props = defineProps(['contract', 'colspan', 'rowProps', 'cellProps', 'editItem', 'expandOrgs']);
+const props = defineProps(['contract', 'colspan', 'rowProps', 'cellProps', 'editItem', 'expandOrgs', 'sortBy']);
 const { lgAndDown } = useDisplay();
 const emitter = inject('emitter');
 const duplicateProjects = ref((v) => {
@@ -255,7 +256,7 @@ onBeforeMount(() => {
   emitter.on('closed-project-employees-assigned-modal', () => {
     toggleProjectEmployeesModal.value = false;
   });
-}); // created
+});
 
 // |--------------------------------------------------|
 // |                                                  |
