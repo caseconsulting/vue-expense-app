@@ -1023,18 +1023,17 @@ const storeContracts = computed(() => {
   // build contracts
   let contracts = [];
   for (let contract of store.getters.contracts) {
-    // skip contracts that don't meet filter
-    if (!status.has(contract.status)) continue;
-
     // get projects
     let projects = contract.projects.filter((p) => status.has(p.status));
-    for (let p of projects) p.checkBox = cbIndexProjects[p.id];
 
-    contracts.push({
-      ...contract,
-      ...cbIndexContracts[contract.id],
-      projects
-    })
+    if (projects.length !== 0) {
+      for (let p of projects) p.checkBox = cbIndexProjects[p.id];
+      contracts.push({
+        ...contract,
+        ...cbIndexContracts[contract.id],
+        projects
+      });
+    }
   }
 
   // :)
