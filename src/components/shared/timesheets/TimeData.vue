@@ -54,14 +54,14 @@
             <time-period-hours
               :employee="clonedEmployee"
               :timesheets="timesheets || []"
-              :ptoBalances="ptoBalances || {}"
+              :leaveBalances="leaveBalances || {}"
               :supplementalData="supplementalData || {}"
               :KEYS="KEYS"
             />
             <hr class="mt-3 mb-5 mx-7" />
             <p-t-o-hours
               :employee="clonedEmployee"
-              :ptoBalances="ptoBalances || {}"
+              :leaveBalances="leaveBalances || {}"
               :planableKeys="planableKeys"
               :system="system"
             />
@@ -132,7 +132,7 @@ const excludeIfZero = ref(['Jury Duty', 'Maternity/Paternity Time Off', 'Bereave
 const errorMessage = ref(null);
 const lastUpdated = ref(null);
 const loading = ref(true);
-const ptoBalances = ref({});
+const leaveBalances = ref({});
 const planableKeys = ref({});
 const supplementalData = ref(null);
 const system = ref(null);
@@ -264,7 +264,7 @@ function getPlanableKey(type) {
  *
  */
 function getPTOBalance(type, convert) {
-  let bal = ptoBalances.value?.[getPlanableKey(type)] ?? 0;
+  let bal = leaveBalances.value?.[getPlanableKey(type)] ?? 0;
   if (bal.value) bal = bal.value;
   if (convert) bal = convertToHours(bal);
   return bal;
@@ -310,8 +310,8 @@ function qbStorageExists() {
  * Removes a jobcode key value pair from PTO balances object if it is not relevant to a user.
  */
 function removeExcludedPtoBalances() {
-  _forEach(ptoBalances.value, (balance, jobcode) => {
-    if (excludeIfZero.value.includes(jobcode) && balance === 0) delete ptoBalances.value[jobcode];
+  _forEach(leaveBalances.value, (balance, jobcode) => {
+    if (excludeIfZero.value.includes(jobcode) && balance === 0) delete leaveBalances.value[jobcode];
   });
 } // removeExcludedPtoBalances
 
@@ -338,9 +338,9 @@ function convertToHours(seconds) {
 } // convertToHours
 
 /**
- * Helper to add items to the ptoBalances object
+ * Helper to add items to the leaveBalances object
  * It will basically build this:
- * ptoBalances: {
+ * leaveBalances: {
  *     balanceKey: {
  *         items: {
  *           itemsKey: planResults[planKey]
@@ -348,21 +348,21 @@ function convertToHours(seconds) {
  *       }
  *    }
  *
- * @param balanceKey key in ptoBalances to modify
- * @param itemsKey key in ptoBalances[balanceKey].items object to add
+ * @param balanceKey key in leaveBalances to modify
+ * @param itemsKey key in leaveBalances[balanceKey].items object to add
  * @param planResults object of results of planned PTO
  * @param planKey key in planResults to grab from
  */
 function addPlanToBalances(balanceKey, itemsKey, planResults, planKey) {
-  if (!ptoBalances.value?.[balanceKey]?.items) {
-    let oldBalance = ptoBalances.value[balanceKey]?.value || ptoBalances.value[balanceKey] || 0;
-    ptoBalances.value[balanceKey] = { value: oldBalance, items: {} };
+  if (!leaveBalances.value?.[balanceKey]?.items) {
+    let oldBalance = leaveBalances.value[balanceKey]?.value || leaveBalances.value[balanceKey] || 0;
+    leaveBalances.value[balanceKey] = { value: oldBalance, items: {} };
   }
-  ptoBalances.value[balanceKey].items[itemsKey] = convertToSeconds(planResults[planKey]);
+  leaveBalances.value[balanceKey].items[itemsKey] = convertToSeconds(planResults[planKey]);
 } // addPlanToBalances
 
 /**
- * Refreshes the PTO plan to put in the ptoBalances object, based on the
+ * Refreshes the PTO plan to put in the leaveBalances object, based on the
  * employee's plannedPto in their employee object by default.
  */
 async function refreshPlannedPto() {
@@ -375,8 +375,8 @@ async function refreshPlannedPto() {
   };
   // yeet outta here if there is no planned PTO
   if (!planResults.endDate) {
-    delete ptoBalances.value?.[getPlanableKey('PTO')]?.items?.['PTO after plan'];
-    delete ptoBalances.value?.[getPlanableKey('Holiday')]?.items?.['Holiday after plan'];
+    delete leaveBalances.value?.[getPlanableKey('PTO')]?.items?.['PTO after plan'];
+    delete leaveBalances.value?.[getPlanableKey('Holiday')]?.items?.['Holiday after plan'];
     return;
   }
 
@@ -391,7 +391,7 @@ async function refreshPlannedPto() {
 async function resetData() {
   loading.value = true;
   timesheets.value = null;
-  ptoBalances.value = null;
+  leaveBalances.value = null;
   supplementalData.value = null;
   system.value = null;
   lastUpdated.value = null;
@@ -435,7 +435,7 @@ async function setDataFromApi(isCalendarYear, isYearly) {
 
   if (!hasError(timesheetsData)) {
     timesheets.value = timesheetsData.timesheets;
-    ptoBalances.value = timesheetsData.ptoBalances;
+    leaveBalances.value = timesheetsData.leaveBalances;
     planableKeys.value = timesheetsData.supplementalData?.planableKeys;
     supplementalData.value = timesheetsData.supplementalData;
     system.value = timesheetsData.system;
@@ -458,7 +458,7 @@ function setDataFromStorage(qbStorage, key) {
   timesheets.value = qbStorage[key]?.timesheets;
   supplementalData.value = qbStorage[key]?.supplementalData;
   lastUpdated.value = qbStorage[key]?.lastUpdated;
-  ptoBalances.value = qbStorage?.ptoBalances;
+  leaveBalances.value = qbStorage?.leaveBalances;
   planableKeys.value = qbStorage?.planableKeys;
   system.value = qbStorage?.system;
 } // setDataFromStorage
@@ -478,7 +478,7 @@ function setStorage(isCalendarYear, isYearly) {
       supplementalData: supplementalData.value,
       lastUpdated: lastUpdated.value
     },
-    ptoBalances: ptoBalances.value,
+    leaveBalances: leaveBalances.value,
     planableKeys: planableKeys.value,
     system: system.value
   };
@@ -544,9 +544,9 @@ watch(
 );
 
 watch(
-  () => ptoBalances.value,
+  () => leaveBalances.value,
   async () => {
-    let balance = (ptoBalances.value?.['PTO']?.value ?? ptoBalances.value?.['PTO']) / 60 / 60;
+    let balance = (leaveBalances.value?.['PTO']?.value ?? leaveBalances.value?.['PTO']) / 60 / 60;
     let plan = await getEmployeePlanTagName(clonedEmployee.value);
     plan = plan?.toLowerCase();
     let ptoAccrual = PTO_ACCRUALS[plan ?? 'red']; // default to red to set to 14
