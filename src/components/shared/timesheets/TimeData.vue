@@ -7,18 +7,6 @@
           {{ getLastUpdatedText }}
         </span>
         <v-spacer />
-        <v-btn
-          v-if="userRoleIsAdmin() || userRoleIsManager()"
-          class="pr-xs-1"
-          variant="text"
-          icon="mdi-file-sync-outline"
-          @click="showUnanetSyncModal = true"
-        >
-          <template v-slot:default>
-            <v-tooltip activator="parent" location="top">Sync Unanet accrual data</v-tooltip>
-            <v-icon color="white" size="large">mdi-file-sync-outline</v-icon>
-          </template>
-        </v-btn>
         <v-btn class="pr-xs-1" variant="text" icon="mdi-refresh" @click="resetData()">
           <template v-slot:default>
             <v-tooltip activator="parent" location="top">Refresh {{ system }} data</v-tooltip>
@@ -80,10 +68,6 @@
       :pto="getPTOBalance('PTO', true)"
       :holiday="getPTOBalance('Holiday', true)"
     />
-
-    <v-dialog v-model="showUnanetSyncModal" class="w-50" persistent>
-      <SyncUnanetPTOData :employees="employees" :key="childKey" />
-    </v-dialog>
   </div>
 </template>
 
@@ -102,7 +86,6 @@ import _forEach from 'lodash/forEach';
 import _isEmpty from 'lodash/isEmpty';
 import { computed, inject, onBeforeMount, onBeforeUnmount, reactive, ref, unref, watch } from 'vue';
 import { useStore } from 'vuex';
-import SyncUnanetPTOData from './SyncUnanetPTOData.vue';
 import { getCalendarYearPeriods, getContractYearPeriods } from './time-periods';
 /** @import { Reactive } from 'vue' */
 
