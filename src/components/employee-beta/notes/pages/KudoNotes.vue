@@ -2,7 +2,7 @@
   <v-col>
     <v-row>
       <v-col class="pl-0" :cols="isMobile() ? '12' : '7'" :class="isMobile() ? 'pb-0' : ''">
-        <v-text-field v-model="customKudo.title" variant="outlined" label="Record kudo"></v-text-field>
+        <v-textarea v-model="customKudo.title" variant="outlined" label="Record kudo" rows="5"></v-textarea>
       </v-col>
       <v-col :cols="isMobile() ? '9' : '4'" :class="isMobile() ? 'pt-0 pl-0' : ''">
         <v-text-field
