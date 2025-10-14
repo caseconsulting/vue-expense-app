@@ -120,7 +120,7 @@ async function buildKudos() {
   }
 
   // build custom kudos
-  notes.value.custom.forEach((c, index) => {
+  notes.value.custom?.forEach((c, index) => {
     kudos.value.push({
       type: 'custom',
       title: c.title,
