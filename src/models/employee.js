@@ -105,7 +105,6 @@ import { Clearance } from '@/models/clearance/clearance.js';
  *   },
  *   kudos: {
  *     custom: array,
- *     misc: string
  *   },
  *   personal: {
  *     familial: string,
