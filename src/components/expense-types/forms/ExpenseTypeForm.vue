@@ -180,6 +180,12 @@ async function submit() {
     editedExpenseType.value.endDate = format(editedExpenseType.value.endDate, null, 'YYYY-MM-DD');
   }
 
+  // remove custom employees if custom is not checked
+  if (!editedExpenseType.value.accessibleBy.includes('Custom')) {
+    let nonCustomValues = ['FullTime', 'PartTime', 'Intern'];
+    editedExpenseType.value.accessibleBy = editedExpenseType.value.accessibleBy.filter((x) => nonCustomValues.includes(x));
+  }
+
   if (expenseTypeForm.value && (await expenseTypeForm.value.validate()).valid) {
     let response = await editedExpenseType.value.submit();
     if (response.id) {

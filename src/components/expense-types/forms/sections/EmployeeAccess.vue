@@ -11,14 +11,14 @@
           :label="opt.label"
           :value="opt.value"
           :rules="[checkBoxesValid]"
-          :key="checkBoxesValid"
+          :key="[accessCheckboxes, checkBoxesValid]"
           v-model="accessCheckboxes"
         />
       </v-col>
     </v-row>
     <p id="error" v-if="!checkBoxesValid">At least one checkbox must be checked</p>
     <v-autocomplete
-      v-if="accessCheckboxes?.includes('Custom')"
+      v-if="(accessCheckboxes || []).includes('Custom')"
       variant="underlined"
       v-model="customAccess"
       :items="activeEmployees"
@@ -90,7 +90,7 @@
 </template>
 <script setup>
 import Help from '@/components/shared/buttons/Help.vue';
-import { computed, inject, onBeforeMount, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, inject, onBeforeMount, onBeforeUnmount, ref, watch, nextTick } from 'vue';
 import { useStore } from 'vuex';
 import { employeeFilter } from '@/shared/filterUtils';
 import _sortBy from 'lodash/sortBy';
@@ -164,8 +164,10 @@ onBeforeUnmount(() => {
 // |--------------------------------------------------|
 
 function clearForm() {
-  accessCheckboxes.value = ['FullTime'];
-  customAccess.value = [];
+  nextTick(() => {
+    customAccess.value = [];
+    accessCheckboxes.value = ['FullTime'];
+  });
 }
 
 /**
