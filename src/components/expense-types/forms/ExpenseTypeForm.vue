@@ -86,7 +86,6 @@ import EmployeeAccess from '@/components/expense-types/forms/sections/EmployeeAc
 import Flags from '@/components/expense-types/forms/sections/Flags.vue';
 import Help from '@/components/shared/buttons/Help.vue';
 import Integrations from '@/components/expense-types/forms/sections/Integrations.vue';
-import api from '@/shared/api.js';
 import { getRequiredRules } from '@/shared/validationUtils';
 import GeneralConfirmationModal from '@/components/modals/GeneralConfirmationModal.vue';
 import _cloneDeep from 'lodash/cloneDeep';
@@ -161,17 +160,6 @@ function clearForm() {
   }
   emitter.emit('finished-editing-expense-type'); //notify parent no longer editing an expense type
   editedExpenseType.value.id = null;
-  editedExpenseType.value.accessibleBy = ['FullTime'];
-}
-
-/**
- * Checks if custom access of employees have acess to an expense type at a percentage rate. Returns true if 'CUSTOM'
- * is selected, otherwise returns false.
- *
- * @return boolean - custom employees have access
- */
-function isCustomSelected() {
-  return editedExpenseType.value.accessibleBy && editedExpenseType.value.accessibleBy.includes('Custom');
 }
 
 /**
@@ -180,11 +168,6 @@ function isCustomSelected() {
 async function submit() {
   submitting.value = true; // set loading status to true
   emitter.emit('startAction');
-
-  // set accessibleBy based on access radio
-  if (isCustomSelected()) {
-    editedExpenseType.value.accessibleBy = _union(editedExpenseType.value.accessibleBy, customAccess.value); // merge unique vals
-  }
 
   // convert budget input into a floating point number
   editedExpenseType.value.budget = parseFloat(editedExpenseType.value.budget);
@@ -227,26 +210,6 @@ watch(
   () => props.model.id,
   () => {
     editedExpenseType.value = new ExpenseType(props.model); //set editedExpense to new value of model
-
-    // set array used for custom access chip-selector to previously saved data but without the access strings
-    // This code sucks
-    if (editedExpenseType.value.accessibleBy.includes('Custom')) {
-      let index = 1;
-      if (editedExpenseType.value.accessibleBy.includes('FullTime')) {
-        index++;
-      }
-      if (editedExpenseType.value.accessibleBy.includes('PartTime')) {
-        index++;
-      }
-      if (editedExpenseType.value.accessibleBy.includes('Intern')) {
-        index++;
-      }
-      // set only the ids of people with custom access (don't include the access type)
-      customAccess.value = editedExpenseType.value.accessibleBy.splice(
-        index,
-        editedExpenseType.value.accessibleBy.length
-      );
-    }
 
     //when model id is not empty then must be editing an expense
     if (!isEmpty(props.model.id)) {
