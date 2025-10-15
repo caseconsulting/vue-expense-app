@@ -7,6 +7,7 @@
           :headers="_filter(projectHeaders, (h) => props.expandOrgs || (!props.expandOrgs && !h.expandableOrg))"
           :items="contract.item.projects"
           :sort-by="sortBy"
+          :search="search"
           :row-props="rowProps"
           :cellProps="(item) => cellProps(item, projectHeaders)"
           class="projects-table"
@@ -135,7 +136,7 @@ import { useDisplay } from 'vuetify';
 // |                                                  |
 // |--------------------------------------------------|
 
-const props = defineProps(['contract', 'colspan', 'rowProps', 'cellProps', 'editItem', 'expandOrgs', 'sortBy']);
+const props = defineProps(['contract', 'colspan', 'rowProps', 'cellProps', 'editItem', 'expandOrgs', 'sortBy', 'search']);
 const { lgAndDown } = useDisplay();
 const emitter = inject('emitter');
 const duplicateProjects = ref((v) => {
@@ -307,6 +308,13 @@ watch(
     editItem.value = props.editItem;
   }
 );
+
+watch(
+  () => props.search,
+  () => {
+    console.log(props.search);
+  }
+)
 </script>
 
 <style lang="scss">
