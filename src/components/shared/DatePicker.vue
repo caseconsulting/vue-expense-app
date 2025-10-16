@@ -61,13 +61,30 @@
         :clearable="clearable"
         validate-on="input"
         @keypress="showMenu = false"
-      />
+        ref="textFieldRef"
+      >
+        <template v-if="checkbox != null" v-slot:message>
+          {{ textFieldErrorMessage ?? hint ?? defaults.hint }} (click <v-icon color="black" icon="mdi-check-circle-outline" /> to mark current)
+        </template>
+        <template v-if="checkbox != null" v-slot:append-inner>
+          <v-avatar @click.stop="checkbox = !checkbox" class="pointer" size="x-small">
+            <span v-if="checkbox">
+              <v-tooltip activator="parent">Currently active</v-tooltip>
+              <v-icon color="black">mdi-check-circle</v-icon>
+            </span>
+            <span v-else>
+              <v-tooltip activator="parent">Click if active</v-tooltip>
+              <v-icon color="black">mdi-check-circle-outline</v-icon>
+            </span>
+          </v-avatar>
+        </template>
+        </v-text-field>
     </slot>
   </div>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { format as formatUtil } from '@/shared/dateUtils';
 
 const props = defineProps({
@@ -80,6 +97,7 @@ const props = defineProps({
   hideDetails: { type: Boolean, default: false },
   disabled: { type: Boolean, default: false },
   mode: { type: String, default: undefined },
+  checkboxHint: { type: String, default: 'Click if current' },
 
   // LOGIC/CONFIG
   rules: { type: Array, default: () => [] },
@@ -103,10 +121,12 @@ let defaults = {
 };
 
 // define refs
-const model = defineModel(); // v-model
+const model = defineModel({ required: true }); // v-model
+const checkbox = defineModel('checkbox', { required: false }); // v-model:checkbox
 const formattedModel = ref(format(model.value, null, props.displayFormat));
 const multiple = ref(Array.isArray(model.value));
 const showMenu = ref(false);
+const textFieldRef = ref(null);
 
 /**
  * Wrapper of dateUtils format() to support arrays
@@ -139,6 +159,29 @@ function remove(item) {
     model.value.splice(index, 1);
   }
 } // remove
+
+/**
+ * Verifies rules for v-text-field
+ */
+const textFieldErrorMessage = computed(() => {
+  return textFieldRef.value?.errorMessages?.[0] || null;
+});
+
+/**
+ * On checkbox change:
+ *  - Force validation
+ *  - Clear model if unchecked
+ */
+watch(
+  () => checkbox.value,
+  () => {
+    if (checkbox.value) {
+      model.value = null;
+      formattedModel.value = null;
+    }
+    textFieldRef.value?.validate();
+  }
+)
 
 /**
  * Update dates on picker select
