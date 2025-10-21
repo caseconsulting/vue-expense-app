@@ -128,6 +128,7 @@ import ContractsInfoItem from './ContractsInfoItem.vue';
 import ProjectsEmployeesAssignedModal from '../modals/ProjectsEmployeesAssignedModal.vue';
 import { getProjectCurrentEmployees } from '@/shared/contractUtils';
 import { ref, onBeforeMount, inject, watch, computed } from 'vue';
+import { isAfter } from '@/shared/dateUtils';
 import { useDisplay } from 'vuetify';
 
 // |--------------------------------------------------|
@@ -211,13 +212,15 @@ const projectHeaders = ref([
     title: 'PoP-Start Date',
     key: 'popStartDate',
     align: 'start',
-    customWidth: lgAndDown.value ? 'x-small' : 'medium'
+    customWidth: lgAndDown.value ? 'x-small' : 'medium',
+    sort: (a, b) => isAfter(new Date(a), new Date(b)) ? 1 : -1
   },
   {
     title: 'PoP-End Date',
     key: 'popEndDate',
     align: 'start',
-    customWidth: lgAndDown.value ? 'x-small' : 'medium'
+    customWidth: lgAndDown.value ? 'x-small' : 'medium',
+    sort: (a, b) => isAfter(new Date(a), new Date(b)) ? 1 : -1
   },
   {
     title: 'Description',
