@@ -6,7 +6,7 @@
         <v-data-table
           :headers="_filter(projectHeaders, (h) => props.expandOrgs || (!props.expandOrgs && !h.expandableOrg))"
           :items="contract.item.projects"
-          :sort-by="sortBy"
+          :sort-by="projectsSortBy"
           :search="search"
           :row-props="rowProps"
           :cellProps="(item) => cellProps(item, projectHeaders)"
@@ -127,7 +127,7 @@ import ContractsEditItem from './ContractsEditItem.vue';
 import ContractsInfoItem from './ContractsInfoItem.vue';
 import ProjectsEmployeesAssignedModal from '../modals/ProjectsEmployeesAssignedModal.vue';
 import { getProjectCurrentEmployees } from '@/shared/contractUtils';
-import { ref, onBeforeMount, inject, watch } from 'vue';
+import { ref, onBeforeMount, inject, watch, computed } from 'vue';
 import { useDisplay } from 'vuetify';
 
 // |--------------------------------------------------|
@@ -290,7 +290,7 @@ function handleItemClick(item, header) {
     editItem.value = { item, header, type: 'project', headerIndex };
     emitter.emit('change-contracts-edit-item', editItem.value);
   }
-} // handleItemClick
+}
 
 /**
  * Toggles project checkBox item
@@ -299,7 +299,18 @@ function handleItemClick(item, header) {
  */
 function toggleProjectCheckBox(projectItem) {
   emitter.emit('toggle-project-checkBox', { contract: props.contract, project: projectItem });
-} // toggleProjectCheckBox
+}
+
+/**
+ * Converts contract sortBy into sortBy for projects table, just changing values
+ * as needed
+ */
+let sortMap = { contractName: 'projectName', activeEmployees: 'projectActiveEmployees' }
+const projectsSortBy = computed(() => {
+  let { key, order } = { ...props.sortBy[0] }; // copy to avoid mutating prop
+  const mappedKey = sortMap[key] ?? key;
+  return [{ key: mappedKey, order }];
+});
 
 watch(
   () => props.editItem,
@@ -308,13 +319,6 @@ watch(
     editItem.value = props.editItem;
   }
 );
-
-watch(
-  () => props.search,
-  () => {
-    console.log(props.search);
-  }
-)
 </script>
 
 <style lang="scss">
