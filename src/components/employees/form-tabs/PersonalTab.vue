@@ -52,7 +52,7 @@
       v-model.trim="editedPersonalInfo.personalEmail"
       label="Personal Email"
       variant="underlined"
-      :rules="getEmailRules()"
+      :rules="getPersonalEmailRules()"
       ref="personalEmail"
       data-vv-name="personal email"
     ></v-text-field>
@@ -296,7 +296,7 @@ import linkedin from '@/assets/img/trademarks/linkedin.png';
 import x from '@/assets/img/trademarks/x.png';
 import {
   getDateOptionalRules,
-  getEmailRules,
+  getPersonalEmailRules,
   getNonFutureDateRules,
   getURLRules,
   getPhoneNumberRules,
@@ -641,7 +641,7 @@ export default {
   methods: {
     format,
     getDateOptionalRules,
-    getEmailRules,
+    getPersonalEmailRules,
     getNonFutureDateRules,
     getPhoneNumberRules,
     getPhoneNumberTypeRules,

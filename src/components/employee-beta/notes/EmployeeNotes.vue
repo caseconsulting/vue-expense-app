@@ -180,7 +180,6 @@ const notesTemplate = {
       misc: ''
     },
     kudos: {
-      misc: '',
       custom: []
     }
   }

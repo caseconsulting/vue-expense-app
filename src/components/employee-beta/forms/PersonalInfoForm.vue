@@ -150,11 +150,7 @@
             ></v-text-field>
           </v-col>
           <v-col cols="4">
-            <DatePicker
-              variant="filled"
-              v-model="editedEmployee.hireDate"
-              label="Start Date"
-            />
+            <DatePicker variant="filled" v-model="editedEmployee.hireDate" label="Start Date" />
           </v-col>
           <v-col cols="4">
             <DatePicker
@@ -228,23 +224,23 @@
             </div>
           </v-col>
           <v-col :cols="!isMobile() ? '6' : '12'">
-              <v-combobox
-                v-model="editedEmployee.currentStreet"
-                class="d-inline"
-                label="Street 1"
-                data-vv-name="Street 1"
-                prepend-inner-icon="mdi-magnify"
-                :items="Object.keys(placeIds)"
-                :custom-filter="() => true"
-                no-data-text="Start searching..."
-                @update:search="updateAddressDropDown($event, index)"
-                @blur="placeIds = {}"
-                ref="addressSearch"
-              >
-                <template #item="{ item }">
-                  <v-list-item @click="autofillLocation(item)">{{ item.value }}</v-list-item>
-                </template>
-              </v-combobox>
+            <v-combobox
+              v-model="editedEmployee.currentStreet"
+              class="d-inline"
+              label="Street 1"
+              data-vv-name="Street 1"
+              prepend-inner-icon="mdi-magnify"
+              :items="Object.keys(placeIds)"
+              :custom-filter="() => true"
+              no-data-text="Start searching..."
+              @update:search="updateAddressDropDown($event, index)"
+              @blur="placeIds = {}"
+              ref="addressSearch"
+            >
+              <template #item="{ item }">
+                <v-list-item @click="autofillLocation(item)">{{ item.value }}</v-list-item>
+              </template>
+            </v-combobox>
           </v-col>
           <v-col :cols="!isMobile() ? '5' : '11'">
             <v-text-field
@@ -317,7 +313,7 @@
             <v-text-field
               v-model="editedEmployee.personalEmail"
               label="Personal Email"
-              :rules="getEmailRules()"
+              :rules="getPersonalEmailRules()"
               :style="!isMobile() ? 'min-width: 350px' : ''"
             >
               <template #prepend-inner><v-icon>mdi-email</v-icon></template>
@@ -546,7 +542,7 @@ import {
   getBirthdayRules,
   getCaseEmailRules,
   getDateRules,
-  getEmailRules,
+  getPersonalEmailRules,
   getNumberRules,
   getPhoneNumberRules,
   getPhoneNumberTypeRules,
@@ -792,7 +788,7 @@ function deletePhoneNumber(index) {
  */
 let timeout;
 async function updateAddressDropDown(query) {
-  if (query.length <3) return; // <3
+  if (query.length < 3) return; // <3
   if (timeout) clearTimeout(timeout);
   timeout = setTimeout(async () => {
     placeIds.value = {};
