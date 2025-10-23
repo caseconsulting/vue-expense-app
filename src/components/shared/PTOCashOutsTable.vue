@@ -314,7 +314,6 @@ onMounted(async () => {
  *
  * @return Array - filtered PTO cash outs
  */
-let firstLoad = true;
 const filteredPtoCashOuts = computed(() => {
   let filteredPtoCashOuts = _cloneDeep(store.getters.ptoCashOuts);
 
