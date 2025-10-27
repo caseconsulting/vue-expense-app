@@ -257,7 +257,6 @@
           :close-on-content-click="false"
           v-model="purchaseMenu"
           :disabled="isReimbursed && !isDifferentExpenseType"
-          location="start center"
         >
           <template v-slot:activator="{ props }">
             <v-text-field
@@ -305,7 +304,6 @@
           transition="scale-transition"
           max-width="290px"
           min-width="290px"
-          location="start center"
         >
           <template v-slot:activator="{ props }">
             <v-text-field

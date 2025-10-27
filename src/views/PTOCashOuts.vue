@@ -16,7 +16,19 @@
       </v-col>
       <v-col cols="12" xl="4" lg="5" class="pl-lg-1 pl-sm-2">
         <!-- Timesheets -->
-        <time-data :key="employee.id" :employee="employee" />
+        <time-data v-if="employee" :employee="employee" :title="timeDataTitle" :key="employee.id" />
+        <div v-else> 
+            <div id="t-sheets-data">
+              <v-card density="compact">
+                <v-card-title class="header_style d-flex align-center py-0 relative">
+                  <h3>Time Data</h3>
+                </v-card-title>
+                <v-card-text class="mt-3 px-7">
+                  <p class="mt-6 mb-1">Select an employee to view their time data.</p>
+                </v-card-text>
+              </v-card>
+            </div>
+        </div>
       </v-col>
     </v-row>
   </div>
@@ -24,9 +36,9 @@
 <script setup>
 import PTOCashOutsTable from '@/components/shared/PTOCashOutsTable.vue';
 import TimeData from '@/components/shared/timesheets/TimeData';
-import { onBeforeMount, onBeforeUnmount, onMounted, inject, watch, ref } from 'vue';
-import { useStore } from 'vuex';
+import { onBeforeUnmount, onMounted, inject, watch, computed, ref } from 'vue';
 import { storeIsPopulated } from '../utils/utils';
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                      SETUP                       |
@@ -34,7 +46,6 @@ import { storeIsPopulated } from '../utils/utils';
 // |--------------------------------------------------|
 
 const emitter = inject('emitter');
-const store = useStore();
 
 const loading = ref(true);
 const employee = ref(null);
@@ -44,16 +55,6 @@ const employee = ref(null);
 // |                 LIFECYCLE HOOKS                  |
 // |                                                  |
 // |--------------------------------------------------|
-/**
- * Created lifecycle hook
- */
-onBeforeMount(() => {
-  if (store.getters.storeIsPopulated) {
-    employee.value = store.getters.user;
-    loading.value = false;
-  }
-}); // created
-
 /**
  * Mounted lifecycle hook
  */
@@ -80,9 +81,14 @@ onBeforeUnmount(() => {
  * A watcher for when the vuex store is populated with necessary data.
  */
 watch(storeIsPopulated, async () => {
-  if (storeIsPopulated) {
-    employee.value = store.getters.user;
-    loading.value = false;
-  }
+  if (storeIsPopulated) loading.value = false;
 }); // watchStoreIsPopulated
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
+
+const timeDataTitle = computed(() => `${employee.value.nickname ?? employee.value.firstName} ${employee.value.lastName}'s Time Data`)
 </script>
