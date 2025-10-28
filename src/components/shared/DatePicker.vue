@@ -57,6 +57,7 @@
         :rules="rules"
         v-mask="mask ?? defaults.mask"
         :autocomplete="autocomplete"
+        :autofocus="autofocus"
         :persistent-hint="persistentHint"
         :clearable="clearable"
         validate-on="input"
@@ -111,7 +112,8 @@ const props = defineProps({
   autocomplete: { type: String, default: 'off' },
   persistentHint: { type: Boolean, default: false },
   clearable: { type: Boolean, default: false },
-  closeableChips: { type: Boolean, default: undefined }
+  closeableChips: { type: Boolean, default: undefined },
+  autofocus: { type: Boolean, default: false }
 });
 
 // custom defualts that rely on other props
