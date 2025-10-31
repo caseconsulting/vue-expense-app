@@ -37,48 +37,18 @@
             ></v-text-field>
 
             <!-- Approved Date for PTO Cash Out (Optional) -->
-            <v-menu
-              v-if="userRoleIsAdmin() || userRoleIsManager()"
-              :close-on-content-click="false"
-              v-model="approvedDateMenu"
-              location="start center"
-            >
-              <template v-slot:activator="{ props }">
-                <v-text-field
-                  v-model="approvedDateFormatted"
-                  id="approvedDate"
-                  :rules="getDateOptionalRules()"
-                  v-mask="'##/##/####'"
-                  variant="underlined"
-                  label="Approved Date (optional)"
-                  hint="MM/DD/YYYY format"
-                  class="mb-4"
-                  persistent-hint
-                  v-bind="props"
-                  @update:focused="
-                    ptoCashOutObj.approvedDate = format(approvedDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')
-                  "
-                  @click:prepend="approvedDateMenu = true"
-                  @keypress="approvedDateMenu = false"
-                >
-                  <template v-slot:prepend>
-                    <div class="pointer">
-                      <v-icon color="grey-darken-1">mdi-calendar</v-icon>
-                    </div>
-                  </template>
-                </v-text-field>
-              </template>
-              <v-date-picker
-                v-model="ptoCashOutObj.approvedDate"
-                @update:model-value="approvedDateMenu = false"
-                hide-actions
-                show-adjacent-months
-                keyboard-icon=""
-                color="#bc3825"
-                title="Approved Date"
-              >
-              </v-date-picker>
-            </v-menu>
+            <date-picker
+              v-model="ptoCashOutObj.approvedDate"
+              id="approvedDate"
+              :rules="getDateOptionalRules()"
+              label="Approved Date (optional)"
+              :icon="null"
+              prepend-icon="mdi-calendar"
+              class="mb-4"
+              persistent-hint
+              hide-actions
+              show-adjacent-months
+            />
           </div>
           <small>
             *cash outs are paid during the normal payroll period
@@ -109,6 +79,7 @@
 </template>
 
 <script setup>
+import DatePicker from '@/components/shared/DatePicker.vue';
 import { PTO_POLICY } from '@/utils/links/basecampLinks';
 import { getNumberRules, getPTOCashOutRules, getDateOptionalRules } from '@/shared/validationUtils.js';
 import api from '@/shared/api.js';
@@ -132,8 +103,6 @@ const props = defineProps(['item', 'employeeId', 'pto', 'editing']);
 const store = useStore();
 const emitter = inject('emitter');
 
-const approvedDateMenu = ref(false);
-const approvedDateFormatted = ref(null);
 const employee = ref(null);
 const form = ref(null);
 const isSubmitting = ref(false);
@@ -185,20 +154,6 @@ const ptoData = computed(() => {
 // |                     WATCHERS                     |
 // |                                                  |
 // |--------------------------------------------------|
-
-/**
- * Watcher for ptoCashOutObj.approvedDate - format date.
- */
-watch(
-  () => ptoCashOutObj.value.approvedDate,
-  () => {
-    approvedDateFormatted.value =
-      format(ptoCashOutObj.value.approvedDate, null, 'MM/DD/YYYY') || approvedDateFormatted.value;
-    if (ptoCashOutObj.value.approvedDate !== null && !format(ptoCashOutObj.value.approvedDate, null, 'MM/DD/YYYY')) {
-      ptoCashOutObj.value.approvedDate = null;
-    }
-  }
-); // watchApprovedDate
 
 /**
  * Watcher for item prop.
@@ -273,7 +228,6 @@ function clearForm() {
   ptoCashOutObj.value['amount'] = null;
   ptoCashOutObj.value['creationDate'] = null;
   ptoCashOutObj.value['approvedDate'] = null;
-  approvedDateFormatted.value = null;
   form.value.reset();
   form.value.resetValidation();
 } // clearForm

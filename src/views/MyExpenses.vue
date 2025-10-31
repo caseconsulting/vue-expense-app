@@ -109,7 +109,7 @@
               <v-container fluid>
                 <v-row class="d-flex flex-wrap">
                   <!-- Active Filter -->
-                  <div class="d-inline-block pa-2">
+                  <v-col lg="3" sm="6" cols="12">
                     <h4>Active Expense Type:</h4>
                     <v-btn-toggle
                       v-model="filter.active"
@@ -157,10 +157,10 @@
                         <span>Show All</span>
                       </v-tooltip>
                     </v-btn-toggle>
-                  </div>
+                  </v-col>
                   <!-- End Active Filter -->
                   <!-- Status Filter -->
-                  <div class="d-inline-block pa-2" :class="!userRoleIsAdmin() && !userRoleIsManager() ? 'ml-3' : ''">
+                  <v-col lg="4" sm="6" cols="12">
                     <h4>Status:</h4>
                     <v-btn-toggle
                       v-model="filter.status"
@@ -221,84 +221,36 @@
                         <span>Show All Expenses</span>
                       </v-tooltip>
                     </v-btn-toggle>
-                  </div>
+                  </v-col>
                   <!-- End Status Filter -->
                   <!-- Reimbursed Date Range Filter -->
-                  <div class="pa-2">
+                  <v-col lg="5" cols="12">
                     <h4 class="ml-0 pl-0 mb-1">Reimbursed Date Range:</h4>
-                    <v-row class="ml-1">
-                      <!-- Start Date Filter -->
-                      <v-menu v-model="startDateFilterMenu" :close-on-content-click="false" location="start center">
-                        <template #activator="{ props }">
-                          <v-text-field
-                            ref="formFields"
-                            v-mask="'##/##/####'"
-                            :model-value="format(startDateFilter, null, 'MM/DD/YYYY')"
-                            :rules="getDateOptionalRules()"
-                            label="Start Date"
-                            variant="underlined"
-                            hint="MM/DD/YYYY format"
-                            prepend-icon="mdi-calendar"
-                            persistent-hint
-                            class="mr-5"
-                            v-bind="props"
-                            @update:focused="startDateFilter = parseEventDate()"
-                            @click:prepend="startDateFilterMenu = true"
-                            @keypress="startDateFilterMenu = false"
-                          />
-                        </template>
-                        <v-date-picker
+                    <!-- Start Date Filter -->
+                     <v-row>
+                      <v-col cols="6">
+                        <date-picker
                           v-model="startDateFilter"
+                          label="Start Date Filter"
+                          :rules="getDateOptionalRules()"
                           show-adjacent-months
                           hide-actions
-                          keyboard-icon=""
-                          color="#bc3825"
-                          title="Start Date Filter"
-                          @update:model-value="
-                            startDateFilterMenu = false;
-                            startDateFilter = format(startDateFilter, null, 'MM/DD/YYYY');
-                          "
+                          persistent-hint
                         />
-                      </v-menu>
-                      <!-- End Start Date Filter-->
-
+                      </v-col>
                       <!-- End Date Filter -->
-                      <v-menu v-model="endDateFilterMenu" :close-on-content-click="false" location="start center">
-                        <template #activator="{ props }">
-                          <v-text-field
-                            ref="formFields"
-                            v-mask="'##/##/####'"
-                            :model-value="format(endDateFilter, null, 'MM/DD/YYYY')"
-                            :rules="getDateOptionalRules()"
-                            label="End Date"
-                            variant="underlined"
-                            hint="MM/DD/YYYY format"
-                            prepend-icon="mdi-calendar"
-                            persistent-hint
-                            class="mr-5"
-                            v-bind="props"
-                            @update:focused="endDateFilter = parseEventDate()"
-                            @click:prepend="endDateFilterMenu = true"
-                            @keypress="endDateFilterMenu = false"
-                          />
-                        </template>
-                        <v-date-picker
+                      <v-col cols="6">
+                        <date-picker
                           v-model="endDateFilter"
+                          label="End Date Filter"
+                          :rules="getDateOptionalRules()"
                           show-adjacent-months
                           hide-actions
-                          keyboard-icon=""
-                          color="#bc3825"
-                          title="Start Date Filter"
-                          @update:model-value="
-                            endDateFilterMenu = false;
-                            endDateFilter = format(endDateFilter, null, 'MM/DD/YYYY');
-                          "
+                          persistent-hint
                         />
-                      </v-menu>
-                      <!-- End End Date Filter-->
+                      </v-col>
                     </v-row>
-                    <!-- End Date Range Filter -->
-                  </div>
+                  </v-col>
                 </v-row>
               </v-container>
             </fieldset>
@@ -510,6 +462,7 @@ import DeleteModal from '@/components/modals/DeleteModal.vue';
 import employeeUtils from '@/shared/employeeUtils';
 import { isExpenseEditable } from '@/shared/expenseUtils';
 import ExpenseForm from '@/components/expenses/ExpenseForm.vue';
+import DatePicker from '@/components/shared/DatePicker.vue';
 import TagsFilter from '@/components/shared/TagsFilter.vue';
 import UnreimburseModal from '@/components/modals/UnreimburseModal.vue';
 import _isEmpty from 'lodash/isEmpty';
@@ -556,7 +509,6 @@ const expenses = ref([]); // all expenses
 const employees = ref([]); // employee autocomplete options
 const employee = ref(null); // employee autocomplete filter
 const endDateFilter = ref(null);
-const endDateFilterMenu = ref(null);
 const expense = ref({
   id: null,
   purchaseDate: null,
@@ -643,7 +595,6 @@ const propExpense = ref({
 const search = ref(null); // query text for datatable search field
 const toSort = ref([{ key: 'createdAt', order: 'desc' }]); // default sort datatable items
 const startDateFilter = ref(null);
-const startDateFilterMenu = ref(null);
 const tagsInfo = ref({
   selected: [],
   flipped: []

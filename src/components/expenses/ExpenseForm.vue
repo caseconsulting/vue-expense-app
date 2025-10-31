@@ -252,95 +252,33 @@
         </v-text-field>
 
         <!-- Purchase Date -->
-        <v-menu
-          ref="purchaseMenu"
-          :close-on-content-click="false"
-          v-model="purchaseMenu"
-          :disabled="isReimbursed && !isDifferentExpenseType"
-        >
-          <template v-slot:activator="{ props }">
-            <v-text-field
-              variant="underlined"
-              v-model="purchaseDateFormatted"
-              id="purchaseDate"
-              :rules="[...getDateRules(), ...getNonFutureDateRules()]"
-              :disabled="(isReimbursed && !isDifferentExpenseType) || isInactive"
-              v-mask="'##/##/####'"
-              label="Purchase Date"
-              hint="MM/DD/YYYY format"
-              persistent-hint
-              v-bind="props"
-              @click:prepend="purchaseMenu = true"
-              @keypress="purchaseMenu = false"
-              @update:focused="editedExpense.purchaseDate = format(purchaseDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
-              autocomplete="off"
-            >
-              <template v-slot:prepend>
-                <div v-bind="props" class="pointer">
-                  <v-icon :color="caseGray">mdi-calendar</v-icon>
-                </div>
-              </template>
-            </v-text-field>
-          </template>
-          <v-date-picker
-            keyboard-icon=""
-            hide-actions
-            v-model="editedExpense.purchaseDate"
-            show-adjacent-months
-            no-title
-            color="#bc3825"
-            @update:model-value="purchaseMenu = false"
-          />
-        </v-menu>
+        <date-picker
+          id="purchaseDate"
+          v-model="editedExpense.purchaseDate"
+          :rules="[...getDateRules(), ...getNonFutureDateRules()]"
+          :disabled="(isReimbursed && !isDifferentExpenseType) || isInactive"
+          label="Purchase Date"
+          prepend-icon="mdi-calendar"
+          :icon="null"
+          persistent-hint
+          hide-actions
+          show-adjacent-months
+        />
 
         <!-- Reimbursed Date -->
-        <v-menu
+        <date-picker
           v-if="userRoleIsAdmin() || userRoleIsManager()"
-          ref="reimburseMenu"
-          :close-on-content-click="false"
-          v-model="reimburseMenu"
-          :offset="40"
-          :disabled="isReimbursed && !isDifferentExpenseType"
-          transition="scale-transition"
-          max-width="290px"
-          min-width="290px"
-        >
-          <template v-slot:activator="{ props }">
-            <v-text-field
-              variant="underlined"
-              v-model="reimbursedDateFormatted"
-              id="reimburseDate"
-              :rules="getDateOptionalRules()"
-              :disabled="(isReimbursed && !isDifferentExpenseType) || isInactive"
-              v-mask="'##/##/####'"
-              label="Reimburse Date (optional)"
-              hint="MM/DD/YYYY format "
-              persistent-hint
-              @click="reimburseMenu = false"
-              @update:focused="
-                editedExpense.reimbursedDate = format(reimbursedDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')
-              "
-              @update:model-value="reimburseMenu = false"
-              v-bind="props"
-              autocomplete="off"
-            >
-              <template v-slot:prepend>
-                <div v-bind="props" class="pointer">
-                  <v-icon :color="caseGray">mdi-calendar</v-icon>
-                </div>
-              </template>
-            </v-text-field>
-          </template>
-          <v-date-picker
-            keyboard-icon=""
-            hide-actions
-            v-model="editedExpense.reimbursedDate"
-            show-adjacent-months
-            no-title
-            color="#bc3825"
-            @update:model-value="reimburseMenu = false"
-          />
-        </v-menu>
+          id="reimburseDate"
+          v-model="editedExpense.reimbursedDate"
+          :rules="getDateOptionalRules()"
+          :disabled="(isReimbursed && !isDifferentExpenseType) || isInactive"
+          label="Reimburse Date (optional)"
+          prepend-icon="mdi-calendar"
+          :icon="null"
+          persistent-hint
+          hide-actions
+          show-adjacent-months
+        />
 
         <!-- Notes -->
         <v-textarea
@@ -456,6 +394,7 @@
 </template>
 
 <script>
+import DatePicker from '@/components/shared/DatePicker.vue';
 import CancelConfirmation from '@/components/modals/CancelConfirmation.vue';
 import ConfirmationBox from '@/components/modals/ConfirmationBox.vue';
 import FileUpload from '@/components/utils/FileUpload.vue';
@@ -883,7 +822,6 @@ function clearForm() {
   this.editedExpense = _cloneDeep(this.expense);
   this.approvedByBool = !!this.editedExpense.approvedBy;
   this.originalExpense = this.editedExpense;
-  this.purchaseDateFormatted = null;
   this.files = [];
 
   this.urlInfo['url'] = '';
@@ -2172,33 +2110,6 @@ async function watchEditedExpenseEmployeeID() {
 } // watchEditedExpenseEmployeeID
 
 /**
- * watcher for editedExpense.purchaseDate - format date.
- */
-function watchEditedExpensePurchaseDate() {
-  this.purchaseDateFormatted =
-    this.format(this.editedExpense.purchaseDate, null, 'MM/DD/YYYY') || this.purchaseDateFormatted;
-  //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-  if (this.editedExpense.purchaseDate !== null && !this.format(this.editedExpense.purchaseDate, null, 'MM/DD/YYYY')) {
-    this.editedExpense.purchaseDate = null;
-  }
-} // watchEditedExpensePurchaseDate
-
-/**
- * watcher for editedExpense.reimbursedDate - format date.
- */
-function watchEditedExpenseReimbursedDate() {
-  this.reimbursedDateFormatted =
-    this.format(this.editedExpense.reimbursedDate, null, 'MM/DD/YYYY') || this.reimbursedDateFormatted;
-  //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-  if (
-    this.editedExpense.reimbursedDate !== null &&
-    !this.format(this.editedExpense.reimbursedDate, null, 'MM/DD/YYYY')
-  ) {
-    this.editedExpense.reimbursedDate = null;
-  }
-} // watchEditedExpenseReimbursedDate
-
-/**
  * watcher for file -  decides whether to disable scan button.
  */
 function watchFiles() {
@@ -2239,6 +2150,7 @@ export default {
   created,
   beforeUnmount,
   components: {
+    DatePicker,
     CancelConfirmation,
     ConfirmationBox,
     FileUpload,
@@ -2309,13 +2221,9 @@ export default {
       overdraftBudget: 0,
       overrideFilteredExpenseTypes: [],
       overrideEmployeeBudgets: [],
-      purchaseDateFormatted: null, // formatted purchase date
-      purchaseMenu: false, // display purchase menu
       receiptRules: [(v) => !this.isEmpty(v) || 'Receipts are required'], // rules for receipt
       recipientOptions: [], // list of active employees to choose for high five
       recipientPlaceholder: '',
-      reimbursedDateFormatted: null, // formatted reimburse date
-      reimburseMenu: false, // display reimburse menu
       remainingBudget: 0,
       reqRecipient: false, // expense requires recipient
       scanLoading: false, // determines if the scanning functionality is loading
@@ -2390,8 +2298,6 @@ export default {
     'editedExpense.expenseTypeId': watchEditedExpenseExpenseTypeID,
     'editedExpense.category': watchEditedExpenseCategory,
     'editedExpense.employeeId': watchEditedExpenseEmployeeID,
-    'editedExpense.purchaseDate': watchEditedExpensePurchaseDate,
-    'editedExpense.reimbursedDate': watchEditedExpenseReimbursedDate,
     files: watchFiles,
     valid: watchValid
   }

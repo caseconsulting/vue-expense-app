@@ -24,18 +24,41 @@
     </slot>
 
     <!-- Display slot: this is where the user can see the picked date(s). Single dates support typing -->
-    <slot name="display">
+    <slot>
+      <!-- Range: string format on exteme dates -->
+      <v-text-field
+        v-if="range"
+        v-model="rangeDisplay"
+        :label="label"
+        :hint="hint ?? defaults.hint"
+        :prepend-inner-icon="prependInnerIcon ?? icon"
+        :prepend-icon="prependIcon"
+        :append-inner-icon="appendInnerIcon"
+        :append-icon="appendIcon"
+        :variant="variant"
+        :hide-details="hideDetails"
+        :disabled="disabled"
+        :autocomplete="autocomplete"
+        :persistent-hint="persistentHint"
+        :clearable="clearable"
+        @keypress="showMenu = false"
+        :autofocus="autofocus"
+        readonly
+      />
+
       <!-- Multiple: combo box with chips -->
       <v-combobox
-        v-if="multiple"
+        v-else-if="multiple"
         v-model="formattedModel"
         :multiple="multiple"
         :label="label"
         :disabled="disabled"
+        :variant="variant"
         readonly
         :clearable="clearable"
         :prepend-inner-icon="icon"
         @click:clear="model = []"
+        :autofocus="autofocus"
       >
         <template v-slot:selection="{ item }">
           <v-chip variant="outlined" :closable="closeableChips ?? clearable" @click:close="remove(item)">
@@ -50,14 +73,17 @@
         v-model="formattedModel"
         :label="label"
         :hint="hint ?? defaults.hint"
-        :prepend-inner-icon="icon"
+        :prepend-inner-icon="prependInnerIcon ?? icon"
+        :prepend-icon="prependIcon"
+        :append-inner-icon="appendInnerIcon"
+        :append-icon="appendIcon"
+        :autofocus="autofocus"
         :variant="variant"
         :hide-details="hideDetails"
         :disabled="disabled"
         :rules="rules"
         v-mask="mask ?? defaults.mask"
         :autocomplete="autocomplete"
-        :autofocus="autofocus"
         :persistent-hint="persistentHint"
         :clearable="clearable"
         validate-on="input"
@@ -67,8 +93,8 @@
         <template v-if="checkbox != null" v-slot:message>
           {{ textFieldErrorMessage ?? hint ?? defaults.hint }} (click <v-icon color="black" icon="mdi-check-circle-outline" /> to mark current)
         </template>
-        <template v-if="checkbox != null" v-slot:append-inner>
-          <v-avatar @click.stop="checkbox = !checkbox" class="pointer" size="x-small">
+        <template v-slot:append-inner>
+          <v-avatar v-if="checkbox != null" @click.stop="checkbox = !checkbox" class="pointer" size="x-small">
             <span v-if="checkbox">
               <v-tooltip activator="parent">Currently active</v-tooltip>
               <v-icon color="black">mdi-check-circle</v-icon>
@@ -78,6 +104,7 @@
               <v-icon color="black">mdi-check-circle-outline</v-icon>
             </span>
           </v-avatar>
+          <slot name="append-inner"></slot>
         </template>
         </v-text-field>
     </slot>
@@ -86,19 +113,24 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { format as formatUtil } from '@/shared/dateUtils';
+import { format as formatUtil, isAfter, isBefore } from '@/shared/dateUtils';
 
 const props = defineProps({
   // DISPLAY
   label: { type: String, default: 'Pick date' },
   hint: { type: String, default: undefined },
-  icon: { type: String, default: 'mdi-calendar' },
   variant: { type: String, default: 'underlined' },
   adjacentDays: { type: Boolean, default: false },
   hideDetails: { type: Boolean, default: false },
   disabled: { type: Boolean, default: false },
-  mode: { type: String, default: undefined },
-  checkboxHint: { type: String, default: 'Click if current' },
+  checkboxHint: { type: String, default: 'Click if current' }, // used for v-model:checkbox
+
+  // ICONS
+  icon: { type: String, default: 'mdi-calendar' }, // prepend-inner-icon default
+  prependInnerIcon: { type: String, default: undefined },
+  prependIcon: { type: String, default: undefined },
+  appendInnerIcon: { type: String, default: undefined },
+  appendIcon: { type: String, default: undefined },
 
   // LOGIC/CONFIG
   rules: { type: Array, default: () => [] },
@@ -110,23 +142,26 @@ const props = defineProps({
   returnFormat: { type: String, default: 'YYYY-MM-DD' },
   displayFormat: { type: String, default: 'MM/DD/YYYY' },
   autocomplete: { type: String, default: 'off' },
+  autofocus: { type: Boolean, default: false },
   persistentHint: { type: Boolean, default: false },
   clearable: { type: Boolean, default: false },
   closeableChips: { type: Boolean, default: undefined },
-  autofocus: { type: Boolean, default: false }
+  autofocus: { type: Boolean, default: false },
+  range: { type: Boolean, default: false },
+  rangeFormat: { type: String, default: 'MM/DD/YYYY' }
 });
 
 // custom defualts that rely on other props
 let defaults = {
-  hint: props.displayFormat,
-  mask: props.displayFormat.replaceAll(/\w/gi, '#')
+  hint: `${props.displayFormat} format`,
+  mask: props.displayFormat.replace(/[A-Za-z]/g, '#')
 };
 
 // define refs
 const model = defineModel({ required: true }); // v-model
 const checkbox = defineModel('checkbox', { required: false }); // v-model:checkbox
+const multiple = ref(!!props.range || Array.isArray(model.value));
 const formattedModel = ref(format(model.value, null, props.displayFormat));
-const multiple = ref(Array.isArray(model.value));
 const showMenu = ref(false);
 const textFieldRef = ref(null);
 
@@ -139,13 +174,28 @@ const textFieldRef = ref(null);
  * @return formatted date(s)
  */
 function format(item, fromFormat, toFormat) {
-  if (Array.isArray(item)) {
-    let formattedItems = [];
-    for (let i of item) formattedItems.push(formatUtil(i, fromFormat, toFormat));
-    return formattedItems;
-  } else {
-    return formatUtil(item, fromFormat, toFormat);
+  let f = (d) => formatUtil(d, fromFormat, toFormat);
+
+  if (props.range) {
+    if (item.length === 0) return [];
+    if (item.length === 1) return [f(item[0])];
+    // find min/max dates
+    let [a, b] = [item[0], item[0]];
+    for (let i of item) {
+      if (isBefore(i, a)) a = i;
+      if (isAfter(i, b)) b = i;
+    }
+    // return range format
+    return [f(a), f(b)];
   }
+
+  if (multiple.value) {
+    let formattedItems = [];
+    for (let i of item) formattedItems.push(f(i));
+    return formattedItems;
+  }
+
+  return f(item, fromFormat, toFormat);
 }
 
 /**
@@ -168,6 +218,18 @@ function remove(item) {
 const textFieldErrorMessage = computed(() => {
   return textFieldRef.value?.errorMessages?.[0] || null;
 });
+
+/**
+ * Display format for ranges
+ */
+const rangeDisplay = computed(() => {
+  if (!props.range) return;
+  if (model.value.length === 0) return null;
+  let [a, b] = model.value;
+  a = formatUtil(a, null, props.rangeFormat);
+  b = b ? formatUtil(b, null, props.rangeFormat) : 'Present';
+  return `${a} — ${b}`;
+})
 
 /**
  * On checkbox change:
