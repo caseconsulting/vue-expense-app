@@ -554,7 +554,6 @@ const phoneNumbers = ref(initPhoneNumbers());
 // other refs
 const addressSearch = useTemplateRef('addressSearch'); // current address search input
 const birthdayHidden = ref(!editedEmployee.value.birthdayFeed);
-const birthdayFormat = ref(format(editedEmployee.value.birthday, null, 'MM/DD/YYYY')); // formatted birthday
 const birthPlaceSearch = ref(null); // birth place search input
 const placeIds = ref({}); // for address autocomplete
 const predictions = ref({}); // for POB autocomplete
@@ -828,20 +827,6 @@ function toggleEdit() {
 // |                     WATCHERS                     |
 // |                                                  |
 // |--------------------------------------------------|
-
-/**
- * watcher for editedEmployee.value.birthday
- */
-watch(
-  () => editedEmployee.value.birthday,
-  () => {
-    birthdayFormat.value = format(editedEmployee.value.birthday, null, 'MM/DD/YYYY') || birthdayFormat.value;
-    //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-    if (editedEmployee.value.birthday !== null && !format(editedEmployee.value.birthday, null, 'MM/DD/YYYY')) {
-      editedEmployee.value.birthday = null;
-    }
-  }
-);
 
 /**
  * Watch for work status changing and remove old data
