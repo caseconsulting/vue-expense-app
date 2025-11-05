@@ -521,7 +521,7 @@ async function clickedEdit(item) {
     code: 1,
     employeeId: tempEmployee.id
   });
-  let pto = employeeBalances?.ptoBalances?.PTO / 60 / 60 || 0;
+  let pto = employeeBalances?.leaveBalances?.PTO / 60 / 60 || 0;
   userPto.value = formatNumber(pto);
 }
 </script>
