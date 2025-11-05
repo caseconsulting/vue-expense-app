@@ -37,7 +37,6 @@
             <v-icon class="mb-2">mdi-alert</v-icon>
             <span>{{ errorMessage }}</span>
           </div>
-
           <div v-else>
             <time-period-hours
               :employee="clonedEmployee"
@@ -260,8 +259,9 @@ function getPTOBalance(type, convert) {
  * @returns Boolean - Whether or not the API returned an error
  */
 function hasError(timesheetsData) {
-  if (timesheetsData.err) {
-    errorMessage.value = timesheetsData?.err?.message;
+  console.log(timesheetsData)
+  if (timesheetsData.err || timesheetsData instanceof AxiosError) {
+    errorMessage.value = timesheetsData?.message ?? timesheetsData?.err?.message;
     if (_isEmpty(errorMessage.value) || typeof errorMessage.value === 'object') {
       errorMessage.value = 'An error has occurred, try refreshing the widget';
     }
@@ -275,9 +275,13 @@ function hasError(timesheetsData) {
  *
  * @returns Boolean - Whether or not timesheets local storage has expired
  */
-function isStorageExpired(lastUpdated) {
+function isStorageExpired(storage) {
+  if (!storage) return true;
+  // checker for version (TODO: one day, implement real versioning, something like below)
+  // if (storage.version !== CURRENT_TIMESHEET_LAMBDA_VERSION) return true;
+  if (!storage.leaveBalances) return true;
   // last updated will either be now, or retrived from local storage
-  return isBefore(lastUpdated, now(), 'day');
+  return isBefore(storage.lastUpdated, now(), 'day');
 } // isStorageExpired
 
 /**
@@ -479,7 +483,7 @@ function setStorage(isCalendarYear, isYearly) {
 async function setData(isCalendarYear, isYearly) {
   let storage = qbStorageExists();
   let key = isYearly ? (isCalendarYear ? KEYS.value.CALENDAR_YEAR : KEYS.value.CONTRACT_YEAR) : KEYS.value.PAY_PERIODS;
-  if (storage && storage[key] && employeeIsUser() && !isStorageExpired(storage[key].lastUpdated)) {
+  if (storage && storage[key] && employeeIsUser() && !isStorageExpired(storage[key])) {
     setDataFromStorage(storage, key);
   } else {
     await setDataFromApi(isCalendarYear, isYearly);
