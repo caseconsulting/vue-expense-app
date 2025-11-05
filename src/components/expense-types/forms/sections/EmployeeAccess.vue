@@ -5,33 +5,21 @@
       <help type="expenseTypes"></help>
     </div>
     <v-row no-gutters>
-      <v-col cols="6" lg="3" class="slim">
-        <checkbox
-          label="Full-time"
-          value="FullTime"
-          v-model="modelValue.accessibleBy"
-          :rules="checkBoxValid"
-        ></checkbox>
-      </v-col>
-      <v-col cols="6" lg="3" class="slim">
-        <checkbox
-          label="Part-time"
-          value="PartTime"
-          v-model="modelValue.accessibleBy"
-          :rules="checkBoxValid"
-        ></checkbox>
-      </v-col>
-      <v-col cols="6" lg="3" class="slim">
-        <checkbox label="Intern" value="Intern" v-model="modelValue.accessibleBy" :rules="checkBoxValid"></checkbox>
-      </v-col>
-      <v-col cols="6" lg="3" class="slim">
-        <checkbox label="Custom" value="Custom" v-model="modelValue.accessibleBy" :rules="checkBoxValid"></checkbox>
+      <v-col v-for="opt of checkBoxOptions" :key="opt.value" cols="6" lg="3" class="slim">
+        <v-checkbox
+          :color="caseRed"
+          :label="opt.label"
+          :value="opt.value"
+          :rules="[checkBoxesValid]"
+          :key="[accessCheckboxes, checkBoxesValid]"
+          v-model="accessCheckboxes"
+        />
       </v-col>
     </v-row>
-    <p id="error" v-if="checkBoxRule">At least one checkbox must be checked</p>
+    <p id="error" v-if="!checkBoxesValid">At least one checkbox must be checked</p>
     <v-autocomplete
+      v-if="(accessCheckboxes || []).includes('Custom')"
       variant="underlined"
-      v-if="modelValue.accessibleBy && modelValue.accessibleBy.includes('Custom')"
       v-model="customAccess"
       :items="activeEmployees"
       :custom-filter="employeeFilter"
@@ -101,9 +89,8 @@
   </div>
 </template>
 <script setup>
-import Checkbox from '@/components/shared/edit-fields/Checkbox.vue';
 import Help from '@/components/shared/buttons/Help.vue';
-import { computed, inject, onBeforeMount, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, inject, onBeforeMount, onBeforeUnmount, ref, watch, nextTick } from 'vue';
 import { useStore } from 'vuex';
 import { employeeFilter } from '@/shared/filterUtils';
 import _sortBy from 'lodash/sortBy';
@@ -116,17 +103,19 @@ const props = defineProps({
 const store = useStore();
 
 const activeEmployees = ref(null); // list of active employees
-const checkBoxValid = ref([
-  () => {
-    return !checkBoxRule.value;
-  }
-]);
 const customAccess = ref([]); // list of employees with custom access
 const customAccessRules = ref([
   () => {
     return customAccess.value.length > 0 || 'Select at least one employee or uncheck the Custom checkbox';
   }
 ]);
+const checkBoxOptions = ref([
+  { label: 'Full-time', value: 'FullTime' },
+  { label: 'Part-time', value: 'PartTime' },
+  { label: 'Intern', value: 'Intern' },
+  { label: 'Custom', value: 'Custom' }
+]);
+const accessCheckboxes = ref(['FullTime']);
 const employeeSize = ref(null); //number of employees
 const searchString = ref('');
 
@@ -142,13 +131,13 @@ const searchString = ref('');
 onBeforeMount(async () => {
   emitter.on('clear-expense-type-form', clearForm);
 
-  await updateStoreEmployees();
+  if (!store.getters.employees) await updateStoreEmployees();
 
   // get all employees
   let employees = store.getters.employees;
   let sortedActiveEmployees = [];
 
-  // populate list of active employees
+  // populate and sort list of active employees
   employees.forEach((employee) => {
     if (employee.workStatus > 0) {
       sortedActiveEmployees.push({
@@ -157,7 +146,6 @@ onBeforeMount(async () => {
       });
     }
   });
-
   sortedActiveEmployees = _sortBy(sortedActiveEmployees, ['text']); // sort employees alphabetically
   activeEmployees.value = sortedActiveEmployees;
 });
@@ -171,27 +159,15 @@ onBeforeUnmount(() => {
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                    COMPUTED                      |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * boolean for checkBox appearance
- *
- * @return boolean - whether checkbox appears
- */
-const checkBoxRule = computed(() => {
-  return !(props.modelValue.accessibleBy && props.modelValue.accessibleBy.length > 0);
-});
-
-// |--------------------------------------------------|
-// |                                                  |
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
 
 function clearForm() {
-  customAccess.value = [];
+  nextTick(() => {
+    customAccess.value = [];
+    accessCheckboxes.value = ['FullTime'];
+  });
 }
 
 /**
@@ -218,6 +194,61 @@ function getEmployeeName(employeeId) {
   let localEmployee = store.getters.employees.find((employee) => employee.id === employeeId);
   return `${localEmployee.firstName} ${localEmployee.lastName}`;
 }
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                    COMPUTED                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * boolean for checkBox appearance
+ *
+ * @return boolean - whether checkboxes are valid
+ */
+const checkBoxesValid = computed(() => {
+  let boxes = props.modelValue.accessibleBy;
+  if (!boxes || boxes.length <= 0) return false; // no boxes selected
+  if (boxes.includes('Custom')) { // at least one custom employee added
+    let baseValues = checkBoxOptions.value.map((opt) => opt.value);
+    return boxes.some((val) => !baseValues.includes(val));
+  }
+  return true;
+});
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                    WATCHERS                      |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * On model change, update the checkboxes accordingly
+ */
+watch(
+  () => props.modelValue.id,
+  () => {
+    // set access checkboxes
+    if (!props.modelValue.accessibleBy?.length) accessCheckboxes.value = ['FullTime'];
+    else {
+      let baseValues = checkBoxOptions.value.map((opt) => opt.value);
+      accessCheckboxes.value = props.modelValue.accessibleBy.filter((val) => baseValues.includes(val));
+      customAccess.value = props.modelValue.accessibleBy.filter((val) => !baseValues.includes(val));
+    }
+  }
+)
+
+/**
+ * Keep accessibleBy up to date with high-level access (Full-time, Part-time, etc) and custom access
+ */
+watch(
+  () => [accessCheckboxes.value, customAccess.value],
+  () => {
+    if (!accessCheckboxes.value || !customAccess.value) return;
+    props.modelValue.accessibleBy = [...accessCheckboxes.value, ...customAccess.value];
+  },
+  { deep: true }
+)
 </script>
 <style scoped>
 #error {
