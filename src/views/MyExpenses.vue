@@ -109,7 +109,7 @@
               <v-container fluid>
                 <v-row class="d-flex flex-wrap">
                   <!-- Active Filter -->
-                  <div class="d-inline-block pa-2">
+                  <v-col cols="3">
                     <h4>Active Expense Type:</h4>
                     <v-btn-toggle
                       v-model="filter.active"
@@ -157,74 +157,27 @@
                         <span>Show All</span>
                       </v-tooltip>
                     </v-btn-toggle>
-                  </div>
+                  </v-col>
                   <!-- End Active Filter -->
                   <!-- Status Filter -->
-                  <div class="d-inline-block pa-2" :class="!userRoleIsAdmin() && !userRoleIsManager() ? 'ml-3' : ''">
+                  <v-col cols="3" :class="!userRoleIsAdmin() && !userRoleIsManager() ? 'ml-3' : ''">
                     <h4>Status:</h4>
-                    <v-btn-toggle
+                    <v-combobox
                       v-model="filter.status"
-                      color="primary"
-                      class="filter_color"
-                      :density="isMobile() ? 'compact' : 'comfortable'"
-                      mandatory
+                      :items="statusFilterOptions"
+                      variant="underlined"
+                      hide-details
                     >
-                      <!-- Show Reimbursed -->
-                      <v-tooltip location="top">
-                        <template #activator="{ props }">
-                          <v-btn value="reimbursed" v-bind="props" variant="text" density="comfortable">
-                            <v-icon id="reimbursedStatus" class="mr-1">
-                              mdi-check-circle{{ filter.status.includes('reimbursed') ? '' : '-outline' }}
-                            </v-icon>
-                          </v-btn>
-                        </template>
-                        <span>Show Reimbursed</span>
-                      </v-tooltip>
-
-                      <!-- Show Rejected -->
-                      <v-tooltip location="top">
-                        <template #activator="{ props }">
-                          <v-btn value="rejected" v-bind="props" variant="text">
-                            <v-icon id="showRejected">
-                              mdi-close-circle{{ filter.status.includes('rejected') ? '' : '-outline' }}
-                            </v-icon>
-                          </v-btn>
-                        </template>
-                        <span>Show Rejected</span>
-                      </v-tooltip>
-
-                      <!-- Show Pending -->
-                      <v-tooltip location="top">
-                        <template #activator="{ props }">
-                          <v-btn value="pending" v-bind="props" variant="text">
-                            <v-icon id="showPending">
-                              mdi-star-four-points-circle{{ filter.status.includes('pending') ? '' : '-outline' }}
-                            </v-icon>
-                          </v-btn>
-                        </template>
-                        <span>Show Pending</span>
-                      </v-tooltip>
-
-                      <!-- Show All -->
-                      <v-tooltip location="top">
-                        <template #activator="{ props }">
-                          <v-btn
-                            id="allStatus"
-                            value="all"
-                            v-bind="props"
-                            variant="text"
-                            :class="filter.status.includes('all') ? 'font-weight-black' : ''"
-                          >
-                            All
-                          </v-btn>
-                        </template>
-                        <span>Show All Expenses</span>
-                      </v-tooltip>
-                    </v-btn-toggle>
-                  </div>
+                    <template #item="{ props, item }">
+                      <v-list-item v-bind="props" :title="item.title">
+                        <v-list-item-title>{{ item }}</v-list-item-title>
+                      </v-list-item>
+                    </template>
+                  </v-combobox>
+                  </v-col>
                   <!-- End Status Filter -->
                   <!-- Reimbursed Date Range Filter -->
-                  <div class="pa-2">
+                  <v-col cols="6" class="pa-2">
                     <h4 class="ml-0 pl-0 mb-1">Reimbursed Date Range:</h4>
                     <v-row class="ml-1">
                       <!-- Start Date Filter -->
@@ -298,7 +251,7 @@
                       <!-- End End Date Filter-->
                     </v-row>
                     <!-- End Date Range Filter -->
-                  </div>
+                  </v-col>
                 </v-row>
               </v-container>
             </fieldset>
@@ -537,7 +490,7 @@ import { updateStoreBudgets, updateStoreExpenseTypes, updateStoreEmployees, upda
 import { mask } from 'vue-the-mask';
 import { onBeforeMount, onBeforeUnmount, ref, watch, computed, inject } from 'vue';
 import { useStore } from 'vuex';
-import { storeIsPopulated } from '../utils/utils';
+import { storeIsPopulated } from '@/utils/utils.js';
 import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSnackbar.vue';
 import { EXPENSE_STATES } from '@/shared/expenseUtils';
 
@@ -576,9 +529,13 @@ const expense = ref({
   recipient: null
 }); // selected expense
 const expenseTypes = ref([]); // expense types
+let statusFilterOptions = ref([
+  'All',
+  ...Object.values(EXPENSE_STATES).map(s => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase())
+]);
 const filter = ref({
   active: 'both',
-  status: 'pending' //default only shows expenses that are not reimbursed
+  status: 'All'//default only shows expenses that are not reimbursed
 }); // datatable filters
 const filteredExpenses = ref([]); // filtered expenses
 const form = ref(null);
@@ -977,19 +934,10 @@ function filterExpenses() {
   }
 
   // filter based on reimbursement status
-  if (filter.value.status !== 'all') {
+  if (filter.value.status !== 'All') {
     // filter expenses by reimburse date
     filteredExpenses.value = _filter(filteredExpenses.value, (expense) => {
-      if (filter.value.status === 'pending') {
-        // filter for pending expenses
-        return !isReimbursed(expense) && !(expense?.rejections?.hardRejections?.reasons?.length > 0);
-      } else if (filter.value.status === 'reimbursed') {
-        // filter for reimbursed expenses
-        return isReimbursed(expense);
-      } else if (filter.value.status === 'rejected') {
-        // filter for rejected expenses
-        return isRejected(expense);
-      }
+      return expense.state.toLowerCase() === filter.value.status.toLowerCase();
     });
   }
 
