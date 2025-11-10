@@ -33,9 +33,9 @@
 
         <v-progress-linear v-if="loading" class="mb-3 mt-7" indeterminate />
         <div v-else>
-          <div v-if="errorMessage" class="d-flex flex-column justify-center align-center py-3 font-weight-bold">
-            <v-icon class="mb-2">mdi-alert</v-icon>
-            <span>{{ errorMessage }}</span>
+          <div v-if="customMessage || errorMessage" class="d-flex flex-column justify-center align-center py-3 font-weight-bold">
+            <v-icon class="mb-2">{{ customMessage ? 'mdi-information' : 'mdi-alert' }}</v-icon>
+            <span>{{ customMessage || errorMessage }}</span>
           </div>
           <div v-else>
             <time-period-hours
@@ -112,6 +112,7 @@ const store = useStore();
 const clonedEmployee = ref(unref(props.employee));
 const excludeIfZero = ref(['Jury Duty', 'Maternity/Paternity Time Off', 'Bereavement']);
 const errorMessage = ref(null);
+const customMessage = ref(null);
 const lastUpdated = ref(null);
 const loading = ref(true);
 const leaveBalances = ref({});
@@ -163,6 +164,15 @@ onBeforeMount(async () => {
 
   // intial set of getting planned PTO data
   refreshPlannedPto();
+
+  // message for Ragnarok employees only, ending Jan 1
+  // "if for if for if" lol
+  if (new Date().getFullYear() === 2025)
+    for (let tag of store.getters.tags)
+      if (tag.tagName === "Ragnarok")
+        for (let eId of tag.employees)
+          if (eId === clonedEmployee.value.id)
+            customMessage.value = "Time data for Ragnarok employees will be available Jan 1.";
 
   // listen for planned PTO results
   emitter.on('update-planned-pto-results-time-data', (data) => {
