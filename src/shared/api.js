@@ -526,7 +526,6 @@ export default {
   updateAttributes,
   updateItem,
   uploadResume,
-  uploadUnanetBalances,
   processHighFive,
   syncApplications,
   getEmployeesFromAdp,

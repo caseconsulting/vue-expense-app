@@ -33,11 +33,10 @@
 
         <v-progress-linear v-if="loading" class="mb-3 mt-7" indeterminate />
         <div v-else>
-          <div v-if="errorMessage" class="d-flex flex-column justify-center align-center py-3 font-weight-bold">
-            <v-icon class="mb-2">mdi-alert</v-icon>
-            <span>{{ errorMessage }}</span>
+          <div v-if="customMessage || errorMessage" class="d-flex flex-column justify-center align-center py-3 font-weight-bold">
+            <v-icon class="mb-2">{{ customMessage ? 'mdi-information' : 'mdi-alert' }}</v-icon>
+            <span>{{ customMessage || errorMessage }}</span>
           </div>
-
           <div v-else>
             <time-period-hours
               :employee="clonedEmployee"
@@ -113,6 +112,7 @@ const store = useStore();
 const clonedEmployee = ref(unref(props.employee));
 const excludeIfZero = ref(['Jury Duty', 'Maternity/Paternity Time Off', 'Bereavement']);
 const errorMessage = ref(null);
+const customMessage = ref(null);
 const lastUpdated = ref(null);
 const loading = ref(true);
 const leaveBalances = ref({});
@@ -164,6 +164,15 @@ onBeforeMount(async () => {
 
   // intial set of getting planned PTO data
   refreshPlannedPto();
+
+  // message for Ragnarok employees only, ending Jan 1
+  // "if for if for if" lol
+  if (new Date().getFullYear() === 2025)
+    for (let tag of store.getters.tags)
+      if (tag.tagName === "Ragnarok")
+        for (let eId of tag.employees)
+          if (eId === clonedEmployee.value.id)
+            customMessage.value = "Time data for Ragnarok employees will be available Jan 1.";
 
   // listen for planned PTO results
   emitter.on('update-planned-pto-results-time-data', (data) => {
@@ -260,8 +269,9 @@ function getPTOBalance(type, convert) {
  * @returns Boolean - Whether or not the API returned an error
  */
 function hasError(timesheetsData) {
-  if (timesheetsData.err) {
-    errorMessage.value = timesheetsData?.err?.message;
+  console.log(timesheetsData)
+  if (timesheetsData.err || timesheetsData instanceof AxiosError) {
+    errorMessage.value = timesheetsData?.message ?? timesheetsData?.err?.message;
     if (_isEmpty(errorMessage.value) || typeof errorMessage.value === 'object') {
       errorMessage.value = 'An error has occurred, try refreshing the widget';
     }
@@ -275,9 +285,13 @@ function hasError(timesheetsData) {
  *
  * @returns Boolean - Whether or not timesheets local storage has expired
  */
-function isStorageExpired(lastUpdated) {
+function isStorageExpired(storage) {
+  if (!storage) return true;
+  // checker for version (TODO: one day, implement real versioning, something like below)
+  // if (storage.version !== CURRENT_TIMESHEET_LAMBDA_VERSION) return true;
+  if (!storage.leaveBalances) return true;
   // last updated will either be now, or retrived from local storage
-  return isBefore(lastUpdated, now(), 'day');
+  return isBefore(storage.lastUpdated, now(), 'day');
 } // isStorageExpired
 
 /**
@@ -479,7 +493,7 @@ function setStorage(isCalendarYear, isYearly) {
 async function setData(isCalendarYear, isYearly) {
   let storage = qbStorageExists();
   let key = isYearly ? (isCalendarYear ? KEYS.value.CALENDAR_YEAR : KEYS.value.CONTRACT_YEAR) : KEYS.value.PAY_PERIODS;
-  if (storage && storage[key] && employeeIsUser() && !isStorageExpired(storage[key].lastUpdated)) {
+  if (storage && storage[key] && employeeIsUser() && !isStorageExpired(storage[key])) {
     setDataFromStorage(storage, key);
   } else {
     await setDataFromApi(isCalendarYear, isYearly);
