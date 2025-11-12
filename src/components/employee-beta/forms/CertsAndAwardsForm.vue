@@ -36,14 +36,12 @@
 
           <!-- Start Cert recieved date -->
           <v-col :cols="!isMobile() ? '3' : '12'">
-            <date-picker-field
+            <date-picker
               v-model="certification.dateReceived"
+              variant="filled"
               :rules="[...getDateRules()]"
               :max="certification.expirationDate"
-              textFormat="MM/DD/YYYY"
-              dateFormat="YYYY-MM-DD"
               label="Date Received"
-              title="Date Received"
               clearable
             />
           </v-col>
@@ -51,13 +49,11 @@
 
           <!-- Start Cert expiration date -->
           <v-col :cols="!isMobile() ? '3' : '12'">
-            <date-picker-field
+            <date-picker
               v-model="certification.expirationDate"
+              variant="filled"
               :rules="[...getDateOptionalRules()]"
-              textFormat="MM/DD/YYYY"
-              dateFormat="YYYY-MM-DD"
               label="Expiration Date (optional)"
-              title="Expiration Date"
               clearable
             />
           </v-col>
@@ -129,15 +125,13 @@
 
                 <!-- Start Award received date -->
                 <v-col :cols="!isMobile() ? '5' : '12'">
-                  <date-picker-field
+                  <date-picker
                     v-model="award.dateReceived"
+                    variant="filled"
                     :rules="getDateMonthYearRules()"
-                    mask="##/####"
-                    dateFormat="YYYY-MM"
-                    textFormat="MM/YYYY"
+                    displayFormat="MM/YYYY"
+                    returnFormat="YYYY-MM"
                     label="Date Received"
-                    title="Date Received"
-                    hint="MM/YYYY format"
                     clearable
                   />
                 </v-col>
@@ -175,7 +169,7 @@
 </template>
 
 <script setup>
-import DatePickerField from '@/components/shared/edit-fields/DatePickerField.vue';
+import DatePicker from '@/components/shared/DatePicker.vue';
 import { usePrepareSubmit } from '@/composables/editTabCommunication';
 import { getTodaysDate } from '@/shared/dateUtils';
 import { getDateMonthYearRules, getDateOptionalRules, getDateRules, getRequiredRules } from '@/shared/validationUtils';

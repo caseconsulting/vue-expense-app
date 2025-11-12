@@ -17,38 +17,18 @@
 
           <!-- Start graduation date -->
           <v-col :cols="smAndDown ? '12' : ''">
-            <v-text-field
+            <date-picker
               :model-value="format(editedEducation[schoolIndex].gradDate, null, 'MM/YYYY')"
-              ref="formFields"
               :rules="getDateMonthYearOptionalRules()"
               label="Graduation Date"
-              hint="MM/YYYY format"
-              v-mask="'##/####'"
+              return-format="YYYY-MM"
+              display-format="MM/YYYY"
+              show-adjacent-months
               persistent-hint
               clearable
-              prepend-inner-icon="mdi-calendar"
-              autocomplete="off"
-              @update:focused="editedEducation[schoolIndex].gradDate = parseEventDate()"
-              @keypress="editedEducation[schoolIndex].showReceivedMenu = false"
-            >
-              <v-menu
-                activator="parent"
-                v-model="editedEducation[schoolIndex].showReceivedMenu"
-                :close-on-content-click="false"
-                :attach="isAttached"
-                location="start center"
-              >
-                <v-date-picker
-                  v-model="editedEducation[schoolIndex].gradDate"
-                  @update:model-value="editedEducation[schoolIndex].showReceivedMenu = false"
-                  show-adjacent-months
-                  hide-actions
-                  keyboard-icon=""
-                  color="#bc3825"
-                  title="Graduation Date"
-                ></v-date-picker>
-              </v-menu>
-            </v-text-field>
+              hide-actions
+              ref="formFields"
+            />
           </v-col>
           <!-- End graduation date -->
         </v-row>
@@ -58,6 +38,7 @@
 </template>
 
 <script setup>
+import DatePicker from '@/components/shared/DatePicker.vue';
 import { format } from '@/shared/dateUtils';
 import { getDateMonthYearOptionalRules, getRequiredRules } from '@/shared/validationUtils';
 import { computed } from 'vue';

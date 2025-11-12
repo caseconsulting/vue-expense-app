@@ -17,75 +17,37 @@
 
       <!-- Start military start date -->
       <v-col :cols="smAndDown ? '12' : ''">
-        <v-text-field
-          ref="formFields"
-          :model-value="format(editedEducation[militaryIndex].startDate, null, 'MM/YYYY')"
+        <date-picker
+          v-model="editedEducation[militaryIndex].startDate"
           :rules="getDateMonthYearRules()"
+          variant="filled"
           label="Starting Date"
-          hint="MM/YYYY format"
-          v-mask="'##/####'"
-          prepend-inner-icon="mdi-calendar"
-          clearable
+          return-format="YYYY-MM"
+          display-format="MM/YYYY"
           persistent-hint
-          autocomplete="off"
-          @update:focused="editedEducation[militaryIndex].startDate = parseEventDate($event)"
-          @keypress="editedEducation[militaryIndex].showStartMenu = false"
-        >
-          <v-menu
-            activator="parent"
-            v-model="editedEducation[militaryIndex].showStartMenu"
-            :close-on-content-click="false"
-            :attach="isAttached"
-            location="start center"
-          >
-            <v-date-picker
-              v-model="editedEducation[militaryIndex].startDate"
-              @update:model-value="editedEducation[militaryIndex].showStartMenu = false"
-              show-adjacent-months
-              hide-actions
-              keyboard-icon=""
-              color="#bc3825"
-              title="Starting Date"
-            ></v-date-picker>
-          </v-menu>
-        </v-text-field>
+          show-adjacent-months
+          hide-actions
+          clearable
+          ref="formFields"
+        />
       </v-col>
       <!-- End military start date -->
 
       <!-- Start military end date -->
       <v-col :cols="smAndDown ? '12' : ''">
-        <v-text-field
-          ref="formFields"
-          :model-value="format(editedEducation[militaryIndex].completeDate, null, 'MM/YYYY')"
+        <date-picker
+          v-model="editedEducation[militaryIndex].completeDate"
           :rules="getDateMonthYearOptionalRules()"
+          variant="filled"
           label="Completion Date"
-          hint="MM/YYYY format"
-          v-mask="'##/####'"
-          prepend-inner-icon="mdi-calendar"
-          clearable
+          return-format="YYYY-MM"
+          display-format="MM/YYYY"
+          show-adjacent-months
           persistent-hint
-          autocomplete="off"
-          @update:focused="editedEducation[militaryIndex].completeDate = parseEventDate()"
-          @keypress="editedEducation[militaryIndex].showCompleteMenu = false"
-        >
-          <v-menu
-            activator="parent"
-            v-model="editedEducation[militaryIndex].showCompleteMenu"
-            :close-on-content-click="false"
-            :attach="isAttached"
-            location="start center"
-          >
-            <v-date-picker
-              v-model="editedEducation[militaryIndex].completeDate"
-              @update:model-value="editedEducation[militaryIndex].showCompleteMenu = false"
-              show-adjacent-months
-              hide-actions
-              keyboard-icon=""
-              color="#bc3825"
-              title="Completion Date"
-            ></v-date-picker>
-          </v-menu>
-        </v-text-field>
+          hide-actions
+          clearable
+          ref="formFields"
+        />
       </v-col>
       <!-- End military end date -->
       <v-divider v-if="smAndDown" :thickness="3"></v-divider>
@@ -94,6 +56,7 @@
 </template>
 
 <script setup>
+import DatePicker from '@/components/shared/DatePicker.vue';
 import { format } from '@/shared/dateUtils';
 import { getDateMonthYearOptionalRules, getRequiredRules, getDateMonthYearRules } from '@/shared/validationUtils';
 import { computed } from 'vue';

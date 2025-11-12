@@ -5,32 +5,15 @@
         <v-textarea v-model="customKudo.title" variant="outlined" label="Record kudo" rows="5"></v-textarea>
       </v-col>
       <v-col :cols="isMobile() ? '9' : '4'" :class="isMobile() ? 'pt-0 pl-0' : ''">
-        <v-text-field
-          :model-value="format(customKudo.date, null, 'MM/DD/YYYY')"
+        <date-picker
+          v-model="customKudo.date"
           :class="isMobile() ? 'pt-0' : ''"
           label="Date"
-          hint="MM/DD/YYYY format"
-          v-mask="'##/##/####'"
-          prepend-inner-icon="mdi-calendar"
-          @update:focused="customKudo.date = parseEventDate($event)"
-          clearable
-          @click:prepend="showDateMenu = true"
-          @keypress="showDateMenu = false"
-          autocomplete="off"
           variant="outlined"
-        >
-          <v-menu activator="parent" v-model="showDateMenu" :close-on-content-click="false" location="start center">
-            <v-date-picker
-              v-model="customKudo.date"
-              @update:model-value="showDateMenu = false"
-              show-adjacent-months
-              hide-actions
-              keyboard-icon=""
-              color="#bc3825"
-              title="Date"
-            ></v-date-picker>
-          </v-menu>
-        </v-text-field>
+          show-adjacent-months
+          hide-actions
+          clearable
+        />
       </v-col>
       <v-col class="pr-0" :cols="isMobile() ? '3' : '1'" :class="isMobile() ? 'pt-0 pr-0' : ''">
         <v-btn icon="mdi-plus" :class="isMobile() ? 'pt-0' : ''" @click="addCustomKudo()"></v-btn>
@@ -77,6 +60,7 @@
 </template>
 
 <script setup>
+import DatePicker from '@/components/shared/DatePicker.vue';
 import { onMounted, ref } from 'vue';
 import { startOf, format, getTodaysDate } from '@/shared/dateUtils';
 import { updateStoreEmployees, updateStoreExpenseTypes } from '@/utils/storeUtils';
@@ -91,7 +75,6 @@ const notes = ref(props.modelValue);
 
 const kudos = ref([]);
 const customKudo = ref({ date: getTodaysDate('YYYY-MM-DD') });
-const showDateMenu = ref(false);
 const kudosLoading = ref(false);
 
 onMounted(async () => {

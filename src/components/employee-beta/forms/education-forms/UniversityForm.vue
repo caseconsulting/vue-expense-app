@@ -39,38 +39,19 @@
 
           <!-- Start degree completion date -->
           <div :style="xs ? 'max-width: 100%' : ''">
-            <v-text-field
-              ref="formFields"
-              :model-value="format(degree.completionDate, null, 'MM/YYYY')"
-              label="Completion Date"
+            <date-picker
+              v-model="degree.completionDate"
               :rules="getDateMonthYearOptionalRules()"
-              hint="MM/YYYY format"
-              v-mask="'##/####'"
+              variant="filled"
+              return-format="YYYY-MM"
+              display-format="MM/YYYY"
+              label="Completion Date"
+              show-adjacent-months
               persistent-hint
               clearable
-              prepend-inner-icon="mdi-calendar"
-              autocomplete="off"
-              @update:focused="degree.completionDate = parseEventDate()"
-              @keypress="degree.showEducationMenu = false"
-            >
-              <v-menu
-                activator="parent"
-                v-model="degree.showEducationMenu"
-                :close-on-content-click="false"
-                :attach="isAttached"
-                location="start center"
-              >
-                <v-date-picker
-                  v-model="degree.completionDate"
-                  @update:model-value="degree.showEducationMenu = false"
-                  show-adjacent-months
-                  hide-actions
-                  keyboard-icon=""
-                  color="#bc3825"
-                  title="Completion Date"
-                ></v-date-picker>
-              </v-menu>
-            </v-text-field>
+              hide-actions
+              ref="formFields"
+            />
           </div>
           <!-- End completion date -->
         </div>
@@ -253,6 +234,7 @@
 </template>
 
 <script setup>
+import DatePicker from '@/components/shared/DatePicker.vue'
 import { majorsAndMinors } from '@/components/employees/form-tabs/dropdown-info/majorsAndMinors';
 import { SCHOOLS } from '@/components/employees/form-tabs/dropdown-info/schools';
 import { format } from '@/shared/dateUtils';
@@ -335,7 +317,6 @@ function addDegree() {
     degreeType: null,
     majors: [null],
     minors: [],
-    showEducationMenu: false
   });
 } // addDegree
 

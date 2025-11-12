@@ -18,42 +18,28 @@
 
         <v-row>
           <v-col>
-            <div v-for="(timeFrame, index) in editedEmployee.icTimeFrames" :key="index">
-              <v-text-field
-                :model-value="formatRange(timeFrame.range)"
-                :rules="getRequiredRules()"
-                label="Date Range"
-                readonly
-                prepend-inner-icon="mdi-calendar"
-                clearable
-                autocomplete="off"
-              >
-                <v-menu
-                  activator="parent"
-                  v-model="timeFrame.showRangeMenu"
-                  :close-on-content-click="false"
-                  location="start center"
-                >
-                  <v-date-picker
-                    v-model="timeFrame.range"
-                    multiple
-                    :max="getTodaysDate('MM/DD/YYYY')"
-                    show-adjacent-months
-                    hide-actions
-                    keyboard-icon=""
-                    color="#c23010"
-                    title="Date Range"
-                  >
-                  </v-date-picker>
-                </v-menu>
-                <template v-slot:append>
-                  <v-btn icon="" density="comfortable" variant="text" @click="deleteICTimeFrame(index)">
-                    <v-tooltip activator="parent" location="top">Delete IC Time Frame</v-tooltip>
-                    <v-icon class="case-gray">mdi-delete</v-icon>
-                  </v-btn>
-                </template>
-              </v-text-field>
-            </div>
+            <v-row v-for="(timeFrame, index) in editedEmployee.icTimeFrames" :key="index">
+              <v-col cols="10">
+                <date-picker
+                  v-model="timeFrame.range"
+                  :rules="getRequiredRules()"
+                  :max="getTodaysDate('YYYY-MM-DD')"
+                  variant="filled"
+                  range-format="MMM YYYY" 
+                  label="Date Range"
+                  show-adjacent-months
+                  hide-actions
+                  clearable
+                  range
+                />
+              </v-col>
+              <v-col cols="2">
+                <v-btn icon="" density="comfortable" variant="text" @click="deleteICTimeFrame(index)">
+                  <v-tooltip activator="parent" location="top">Delete IC Time Frame</v-tooltip>
+                  <v-icon class="case-gray">mdi-delete</v-icon>
+                </v-btn>
+              </v-col>
+            </v-row>
           </v-col>
         </v-row>
 
@@ -171,105 +157,38 @@
 
               <!-- Start Date -->
               <v-col :cols="!isMobile() ? '4' : '12'">
-                <v-text-field
+                <date-picker
+                  v-model="position.startDate"
                   :id="'start-field-' + compIndex + '-' + index"
-                  :model-value="format(position.startDate, null, 'MM/YYYY')"
-                  label="Start Date"
-                  hint="MM/YYYY format"
-                  v-mask="'##/####'"
                   :rules="[...getDateMonthYearRules()]"
-                  prepend-inner-icon="mdi-calendar"
-                  @update:focused="position.startDate = parseEventDate($event)"
-                  @click:prepend="position.showStartMenu = true"
-                  @keypress="position.showStartMenu = false"
+                  :max="position.presentDate ? getTodaysDate('YYYY-MM-DD') : position.endDate"
+                  variant="filled"
+                  label="Start Date"
+                  return-format="YYYY-MM"
+                  display-format="MM/YYYY"
+                  show-adjacent-months
+                  hide-actions
                   clearable
-                  autocomplete="off"
-                >
-                  <v-menu
-                    activator="parent"
-                    v-model="position.showStartMenu"
-                    :close-on-content-click="false"
-                    location="start center"
-                  >
-                    <v-date-picker
-                      v-model="position.startDate"
-                      @update:model-value="position.showStartMenu = false"
-                      :max="position.endDate"
-                      show-adjacent-months
-                      hide-actions
-                      keyboard-icon=""
-                      color="#bc3825"
-                      title="Start Date"
-                    ></v-date-picker>
-                  </v-menu>
-                </v-text-field>
+                />
               </v-col>
               <!-- End Start Date -->
 
               <!-- End Date -->
               <v-col :cols="!isMobile() ? '3' : '12'">
-                <v-text-field
+                <date-picker
+                  v-model="position.endDate"
+                  v-model:checkbox="position.presentDate"
                   :id="'end-field-' + compIndex + '-' + index"
-                  :model-value="format(position.endDate, null, 'MM/YYYY')"
-                  :label="position.presentDate ? 'Currently active' : 'End Date'"
                   :rules="[...getDateMonthYearOptionalRules(), getEndDatePresentRule(position)]"
-                  hint="MM/YYYY format"
-                  v-mask="'##/####'"
+                  :min="position.startDate"
+                  variant="filled"
+                  label="End Date"
+                  return-format="YYYY-MM"
+                  display-format="MM/YYYY"
+                  show-adjacent-months
+                  hide-actions
                   clearable
-                  prepend-inner-icon="mdi-calendar"
-                  @click:clear="position.endDate = null"
-                  @update:focused="position.endDate = parseEventDate($event)"
-                  @click:prepend="position.showEndMenu = true"
-                  @keypress="position.showEndMenu = false"
-                  @update:model-value="
-                    position.endDate && position.endDate.length > 0 ? (position.presentDate = false) : ''
-                  "
-                  autocomplete="off"
-                >
-                  <template v-if="getEndDatePresentRule(position) !== true" v-slot:message>
-                    End Date is required (click <v-icon color="black" icon="mdi-check-circle-outline" /> to mark active)
-                  </template>
-                  <v-menu
-                    activator="parent"
-                    v-model="position.showEndMenu"
-                    :close-on-content-click="false"
-                    location="start center"
-                  >
-                    <v-date-picker
-                      v-model="position.endDate"
-                      :min="position.startDate"
-                      @update:model-value="position.showEndMenu = false"
-                      show-adjacent-months
-                      hide-actions
-                      keyboard-icon=""
-                      color="#bc3825"
-                      title="End Date"
-                    ></v-date-picker>
-                  </v-menu>
-                  <template v-slot:append-inner>
-                    <v-avatar
-                      v-if="checkPositionStatus(position)"
-                      @click.stop="position.presentDate = !position.presentDate"
-                      class="pointer"
-                      size="x-small"
-                    >
-                      <span v-if="!position.presentDate">
-                        <v-tooltip activator="parent">Click if active</v-tooltip>
-                        <v-icon color="black"> mdi-check-circle-outline </v-icon>
-                      </span>
-                      <span v-else>
-                        <v-tooltip activator="parent">Currently active</v-tooltip>
-                        <v-icon color="black"> mdi-check-circle </v-icon>
-                      </span>
-                    </v-avatar>
-                  </template>
-                  <template #append v-if="isMobile() && editedCompanies[compIndex].positions.length > 1">
-                    <v-btn variant="text" icon="" density="comfortable" @click="deletePosition(compIndex, index)">
-                      <v-tooltip activator="parent" location="bottom">Delete Position</v-tooltip>
-                      <v-icon class="case-gray">mdi-delete</v-icon>
-                    </v-btn>
-                  </template>
-                </v-text-field>
+                />
               </v-col>
               <!-- End end date -->
 
@@ -315,6 +234,7 @@
 </template>
 
 <script setup>
+import DatePicker from '@/components/shared/DatePicker.vue'
 import { usePrepareSubmit } from '@/composables/editTabCommunication';
 import { format, getTodaysDate, isAfter } from '@/shared/dateUtils';
 import {
@@ -364,8 +284,6 @@ async function prepareSubmit() {
     // delete properties from positions that should not be stored in the database
     editedEmployee.value.companies = _map(editedCompanies.value, (company) => {
       company.positions = _map(company.positions, (position) => {
-        delete position.showStartMenu;
-        delete position.showEndMenu;
         return position;
       });
       return company;
@@ -397,8 +315,6 @@ function addCompany() {
         presentDate: false,
         startDate: null,
         title: null,
-        showStartMenu: false,
-        showEndMenu: false
       }
     ]
   });
@@ -410,8 +326,7 @@ function addCompany() {
 function addICTimeFrame() {
   if (!editedEmployee.value.icTimeFrames) editedEmployee.value.icTimeFrames = [];
   editedEmployee.value.icTimeFrames.push({
-    range: [],
-    showRangeMenu: false
+    range: []
   });
 } // addICTimeFrame
 
@@ -425,8 +340,6 @@ function addPosition(compIndex) {
     title: null,
     endDate: null,
     startDate: null,
-    showStartMenu: false,
-    showEndMenu: false,
     presentDate: false
   });
 } // addPosition
