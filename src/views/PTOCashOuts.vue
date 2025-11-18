@@ -47,7 +47,7 @@ import { storeIsPopulated } from '../utils/utils';
 
 const emitter = inject('emitter');
 
-const loading = ref(true);
+const loading = ref(false);
 const employee = ref(null);
 
 // |--------------------------------------------------|
@@ -59,6 +59,8 @@ const employee = ref(null);
  * Mounted lifecycle hook
  */
 onMounted(() => {
+  loading.value = !storeIsPopulated;
+
   emitter.on('change-timesheets-employee', (emp) => {
     employee.value = emp;
   });
