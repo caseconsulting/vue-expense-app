@@ -23,8 +23,11 @@
                 <v-card-title class="header_style d-flex align-center py-0 relative">
                   <h3>Time Data</h3>
                 </v-card-title>
-                <v-card-text class="mt-3 px-7">
-                  <p class="mt-6 mb-1">Select an employee to view their time data.</p>
+                <v-card-text class="mt-3 px-7 text-center">
+                  <br v-for="i in 10" :key="i" />
+                  <v-icon icon="mdi-information" />
+                  <p class="mt-4 font-weight-bold">Select an employee to view their time data</p>
+                  <br v-for="i in 10" :key="i" />
                 </v-card-text>
               </v-card>
             </div>
