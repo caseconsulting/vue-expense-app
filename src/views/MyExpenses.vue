@@ -159,7 +159,7 @@
                     </v-btn-toggle>
                   </v-col>
                   <!-- Status Filter -->
-                  <v-col cols="3" :class="!userRoleIsAdmin() && !userRoleIsManager() ? 'ml-3' : ''">
+                  <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="3" :class="!userRoleIsAdmin() && !userRoleIsManager() ? 'ml-3' : ''">
                     <h4>Status:</h4>
                     <v-combobox
                       density="comfortable"
