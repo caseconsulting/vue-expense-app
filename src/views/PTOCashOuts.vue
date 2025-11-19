@@ -40,7 +40,8 @@
 import PTOCashOutsTable from '@/components/shared/PTOCashOutsTable.vue';
 import TimeData from '@/components/shared/timesheets/TimeData';
 import { onBeforeUnmount, onMounted, inject, watch, computed, ref } from 'vue';
-import { storeIsPopulated } from '../utils/utils';
+import { storeIsPopulated, userRoleIsUser } from '../utils/utils';
+import { useStore } from 'vuex';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -49,6 +50,7 @@ import { storeIsPopulated } from '../utils/utils';
 // |--------------------------------------------------|
 
 const emitter = inject('emitter');
+const store = useStore();
 
 const loading = ref(false);
 const employee = ref(null);
@@ -63,6 +65,8 @@ const employee = ref(null);
  */
 onMounted(() => {
   loading.value = !storeIsPopulated;
+
+  if (userRoleIsUser()) employee.value = store.getters.user;
 
   emitter.on('change-timesheets-employee', (emp) => {
     employee.value = emp;
@@ -86,7 +90,10 @@ onBeforeUnmount(() => {
  * A watcher for when the vuex store is populated with necessary data.
  */
 watch(storeIsPopulated, async () => {
-  if (storeIsPopulated) loading.value = false;
+  if (storeIsPopulated) {
+    loading.value = false;
+    if (userRoleIsUser()) employee.value = store.getters.user;
+  }
 }); // watchStoreIsPopulated
 
 // |--------------------------------------------------|

@@ -143,7 +143,7 @@
         <template v-slot:[`item.actions`]="{ item }">
           <td v-if="!unapprovedOnly" class="layout mr-0">
             <!-- Edit Button -->
-            <v-btn
+            <!-- <v-btn
               :disabled="isUnapproving || isDeleting || !!item.approvedDate"
               variant="text"
               icon=""
@@ -153,7 +153,7 @@
             >
               <v-tooltip activator="parent" location="top">Edit</v-tooltip>
               <v-icon class="case-gray">mdi-pencil</v-icon>
-            </v-btn>
+            </v-btn> -->
 
             <!-- Delete Button -->
             <v-btn
@@ -261,6 +261,11 @@ onBeforeMount(async () => {
   if (!store.getters.user) {
     promises.push(updateStoreUser());
   }
+  if (promises.length > 0) {
+    await Promise.all(promises);
+  }
+
+  promises = [];
   if (!store.getters.ptoCashOuts) {
     promises.push(updateStorePtoCashOuts());
   }
@@ -513,15 +518,18 @@ function uncheckAllBoxes() {
  *
  * @param item PTO Cash Out item to edit
  */
-async function clickedEdit(item) {
-  clickedEditItem.value = item;
-  toggleEditModal.value = true;
-  let tempEmployee = _find(store.getters.employees, (e) => e.id === item.employeeId);
-  let employeeBalances = await api.getTimesheetsData(tempEmployee.employeeNumber, {
-    code: 1,
-    employeeId: tempEmployee.id
-  });
-  let pto = employeeBalances?.leaveBalances?.PTO / 60 / 60 || 0;
-  userPto.value = formatNumber(pto);
-}
+// async function clickedEdit(item) {
+//   clickedEditItem.value = item;
+//   toggleEditModal.value = true;
+//   let tempEmployee = _find(store.getters.employees, (e) => e.id === item.employeeId);
+//   let employeeBalances = await api.getTimesheetsData(tempEmployee.employeeNumber, {
+//     code: 1,
+//     employeeId: tempEmployee.id,
+//     unanetPersonKey: tempEmployee.unanetPersonKey,
+//     periods: [{ startDate: '2000-01-01', endDate: '2001-01-01', title: 'PTO Only' }]
+//   });
+//   console.log(employeeBalances);
+//   let pto = employeeBalances?.leaveBalances?.PTO / 60 / 60 || 0;
+//   userPto.value = formatNumber(pto);
+// }
 </script>
