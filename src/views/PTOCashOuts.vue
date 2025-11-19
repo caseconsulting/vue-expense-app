@@ -23,8 +23,11 @@
                 <v-card-title class="header_style d-flex align-center py-0 relative">
                   <h3>Time Data</h3>
                 </v-card-title>
-                <v-card-text class="mt-3 px-7">
-                  <p class="mt-6 mb-1">Select an employee to view their time data.</p>
+                <v-card-text class="mt-3 px-7 text-center">
+                  <br v-for="i in 10" :key="i" />
+                  <v-icon icon="mdi-information" />
+                  <p class="mt-4 font-weight-bold">Select an employee to view their time data</p>
+                  <br v-for="i in 10" :key="i" />
                 </v-card-text>
               </v-card>
             </div>
@@ -37,7 +40,8 @@
 import PTOCashOutsTable from '@/components/shared/PTOCashOutsTable.vue';
 import TimeData from '@/components/shared/timesheets/TimeData';
 import { onBeforeUnmount, onMounted, inject, watch, computed, ref } from 'vue';
-import { storeIsPopulated } from '../utils/utils';
+import { storeIsPopulated, userRoleIsUser } from '../utils/utils';
+import { useStore } from 'vuex';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -46,8 +50,9 @@ import { storeIsPopulated } from '../utils/utils';
 // |--------------------------------------------------|
 
 const emitter = inject('emitter');
+const store = useStore();
 
-const loading = ref(true);
+const loading = ref(false);
 const employee = ref(null);
 
 // |--------------------------------------------------|
@@ -59,6 +64,10 @@ const employee = ref(null);
  * Mounted lifecycle hook
  */
 onMounted(() => {
+  loading.value = !storeIsPopulated;
+
+  if (userRoleIsUser()) employee.value = store.getters.user;
+
   emitter.on('change-timesheets-employee', (emp) => {
     employee.value = emp;
   });
@@ -81,7 +90,10 @@ onBeforeUnmount(() => {
  * A watcher for when the vuex store is populated with necessary data.
  */
 watch(storeIsPopulated, async () => {
-  if (storeIsPopulated) loading.value = false;
+  if (storeIsPopulated) {
+    loading.value = false;
+    if (userRoleIsUser()) employee.value = store.getters.user;
+  }
 }); // watchStoreIsPopulated
 
 // |--------------------------------------------------|
