@@ -324,9 +324,6 @@ const useDropDown = computed(() => {
  */
 function selectTab(name) {
   infoTab.value = name;
-  const scrollOffset = document.querySelector('.container')?.scrollTop;
-  router.replace({ hash: '#' + name });
-  window.scroll(scrollOffset);
 } // selectTab
 
 function toggleEdit() {
