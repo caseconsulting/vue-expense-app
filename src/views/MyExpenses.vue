@@ -563,7 +563,7 @@ let statusFilterOptions = ref([
 ]);
 const filter = ref({
   active: 'both',
-  status: 'All'//default only shows expenses that are not reimbursed
+  status: 'Created'
 }); // datatable filters
 const filteredExpenses = ref([]); // filtered expenses
 const form = ref(null);
@@ -1156,7 +1156,7 @@ function filterExpenses() {
   }
 
   // filter based on reimbursement status
-  if (filter.value.status !== 'All') {
+  if (filter.value.status !== 'All' && (userRoleIsAdmin() || userRoleIsManager())) {
     // filter expenses by reimburse date
     filteredExpenses.value = _filter(filteredExpenses.value, (expense) => {
       return expense.state.toLowerCase() === filter.value.status.toLowerCase();
