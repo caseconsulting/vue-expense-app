@@ -62,7 +62,8 @@
           :headers="_filter(contractHeaders, (h) => expandOrgs || (!expandOrgs && !h.expandableOrg))"
           :items="storeContracts"
           items-per-page="-1"
-          :search="search"
+          v-model:search="search"
+          v-model:sort-by="sortBy"
           :expanded="expanded"
           :row-props="rowProps"
           :cellProps="(item) => cellProps(item, contractHeaders)"
@@ -133,6 +134,8 @@
               class="overflow-y-hidden"
               :contract="{ item }"
               :colspan="columns.length"
+              :sortBy="sortBy"
+              :search="search"
               :isContractDeletingOrUpdatingStatus="isDeletingOrUpdatingStatus()"
               :rowProps="rowProps"
               :cellProps="cellProps"
@@ -327,6 +330,7 @@ const isDeleting = ref(false);
 const isActivating = ref(false);
 const isDeactivating = ref(false);
 const isClosing = ref(false);
+const sortBy = ref([]);
 const contractHeaders = ref([
   {
     title: 'Prime',

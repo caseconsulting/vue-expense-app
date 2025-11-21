@@ -6,6 +6,8 @@
         <v-data-table
           :headers="_filter(projectHeaders, (h) => props.expandOrgs || (!props.expandOrgs && !h.expandableOrg))"
           :items="contract.item.projects"
+          :sort-by="projectsSortBy"
+          :search="search"
           :row-props="rowProps"
           :cellProps="(item) => cellProps(item, projectHeaders)"
           class="projects-table"
@@ -125,7 +127,8 @@ import ContractsEditItem from './ContractsEditItem.vue';
 import ContractsInfoItem from './ContractsInfoItem.vue';
 import ProjectsEmployeesAssignedModal from '../modals/ProjectsEmployeesAssignedModal.vue';
 import { getProjectCurrentEmployees } from '@/shared/contractUtils';
-import { ref, onBeforeMount, inject, watch } from 'vue';
+import { ref, onBeforeMount, inject, watch, computed } from 'vue';
+import { isAfter } from '@/shared/dateUtils';
 import { useDisplay } from 'vuetify';
 
 // |--------------------------------------------------|
@@ -134,7 +137,7 @@ import { useDisplay } from 'vuetify';
 // |                                                  |
 // |--------------------------------------------------|
 
-const props = defineProps(['contract', 'colspan', 'rowProps', 'cellProps', 'editItem', 'expandOrgs']);
+const props = defineProps(['contract', 'colspan', 'rowProps', 'cellProps', 'editItem', 'expandOrgs', 'sortBy', 'search']);
 const { lgAndDown } = useDisplay();
 const emitter = inject('emitter');
 const duplicateProjects = ref((v) => {
@@ -209,13 +212,15 @@ const projectHeaders = ref([
     title: 'PoP-Start Date',
     key: 'popStartDate',
     align: 'start',
-    customWidth: lgAndDown.value ? 'x-small' : 'medium'
+    customWidth: lgAndDown.value ? 'x-small' : 'medium',
+    sort: (a, b) => isAfter(new Date(a), new Date(b)) ? 1 : -1
   },
   {
     title: 'PoP-End Date',
     key: 'popEndDate',
     align: 'start',
-    customWidth: lgAndDown.value ? 'x-small' : 'medium'
+    customWidth: lgAndDown.value ? 'x-small' : 'medium',
+    sort: (a, b) => isAfter(new Date(a), new Date(b)) ? 1 : -1
   },
   {
     title: 'Description',
@@ -255,7 +260,7 @@ onBeforeMount(() => {
   emitter.on('closed-project-employees-assigned-modal', () => {
     toggleProjectEmployeesModal.value = false;
   });
-}); // created
+});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -288,7 +293,7 @@ function handleItemClick(item, header) {
     editItem.value = { item, header, type: 'project', headerIndex };
     emitter.emit('change-contracts-edit-item', editItem.value);
   }
-} // handleItemClick
+}
 
 /**
  * Toggles project checkBox item
@@ -297,7 +302,18 @@ function handleItemClick(item, header) {
  */
 function toggleProjectCheckBox(projectItem) {
   emitter.emit('toggle-project-checkBox', { contract: props.contract, project: projectItem });
-} // toggleProjectCheckBox
+}
+
+/**
+ * Converts contract sortBy into sortBy for projects table, just changing values
+ * as needed
+ */
+let sortMap = { contractName: 'projectName', activeEmployees: 'projectActiveEmployees' }
+const projectsSortBy = computed(() => {
+  let { key, order } = { ...props.sortBy[0] }; // copy to avoid mutating prop
+  const mappedKey = sortMap[key] ?? key;
+  return [{ key: mappedKey, order }];
+});
 
 watch(
   () => props.editItem,

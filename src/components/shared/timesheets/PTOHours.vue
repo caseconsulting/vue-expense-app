@@ -13,7 +13,7 @@
       </div>
       <div>
         <v-btn
-          v-if="ptoBalances['PTO'] || ptoBalances['PTO'] === 0"
+          v-if="leaveBalances['PTO'] || leaveBalances['PTO'] === 0"
           @click="showPTOPlanningFormModal = true"
           variant="outlined"
           density="compact"
@@ -24,7 +24,7 @@
           Plan PTO
         </v-btn>
         <v-btn
-          v-if="(ptoBalances['PTO'] || ptoBalances['PTO'] === 0) && system !== 'ADP'"
+          v-if="(leaveBalances['PTO'] || leaveBalances['PTO'] === 0) && system !== 'ADP'"
           @click="showPTOCashOutFormModal = true"
           variant="outlined"
           density="compact"
@@ -36,26 +36,26 @@
         </v-btn>
       </div>
     </div>
-    <div v-if="Object.keys(ptoBalances || []).length === 0" class="my-4">No balances to display</div>
+    <div v-if="Object.keys(leaveBalances || []).length === 0" class="my-4">No balances to display</div>
     <div v-for="jobcode in sortedBalancesByDuration" :key="jobcode">
-      <div v-if="showMore || ptoBalances[jobcode] !== 0" class="d-flex justify-space-between my-3">
+      <div v-if="showMore || leaveBalances[jobcode] !== 0" class="d-flex justify-space-between my-3">
         <div class="mr-3">{{ formatJobCode(jobcode) }}</div>
         <div class="dotted-line"></div>
-        <div class="ml-3">{{ convertToHours(ptoBalances[jobcode].value ?? ptoBalances[jobcode]) }}h</div>
+        <div class="ml-3">{{ convertToHours(leaveBalances[jobcode].value ?? leaveBalances[jobcode]) }}h</div>
       </div>
-      <div v-if="(showMore || ptoBalances[jobcode] !== 0) && ptoBalances[jobcode].items">
+      <div v-if="(showMore || leaveBalances[jobcode] !== 0) && leaveBalances[jobcode].items">
         <div
-          v-for="subcode in Object.keys(ptoBalances[jobcode].items)"
+          v-for="subcode in Object.keys(leaveBalances[jobcode].items)"
           :key="subcode"
           class="d-flex justify-space-between ml-6 my-3"
         >
           <div class="mr-3 font-italic">{{ formatJobCode(subcode) }}</div>
           <div class="dotted-line"></div>
-          <div class="ml-3 mr-1 font-italic">{{ convertToHours(ptoBalances[jobcode].items[subcode]) }}h</div>
+          <div class="ml-3 mr-1 font-italic">{{ convertToHours(leaveBalances[jobcode].items[subcode]) }}h</div>
         </div>
       </div>
     </div>
-    <span v-if="Object.values(ptoBalances || []).includes(0)" @click="showMore = !showMore" class="pointer text-blue">
+    <span v-if="Object.values(leaveBalances || []).includes(0)" @click="showMore = !showMore" class="pointer text-blue">
       {{ showMore ? 'Show less' : 'Show more' }}
       <v-icon>{{ showMore ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
     </span>
@@ -63,14 +63,14 @@
       <PTOPlanningForm
         :employeeId="employee.id"
         :isCyk="system === 'ADP'"
-        :pto="convertToHours(ptoBalances[planableKeys.PTO]?.value ?? ptoBalances[planableKeys.PTO] ?? 0)"
-        :holiday="convertToHours(ptoBalances[planableKeys.Holiday]?.value ?? ptoBalances[planableKeys.Holiday] ?? 0)"
+        :pto="convertToHours(leaveBalances[planableKeys.PTO]?.value ?? leaveBalances[planableKeys.PTO] ?? 0)"
+        :holiday="convertToHours(leaveBalances[planableKeys.Holiday]?.value ?? leaveBalances[planableKeys.Holiday] ?? 0)"
       />
     </v-dialog>
     <v-dialog v-model="showPTOCashOutFormModal" persistent max-width="500">
       <p-t-o-cash-out-form
         :employeeId="employee.id"
-        :pto="convertToHours(ptoBalances[planableKeys.PTO]?.value || ptoBalances[planableKeys.PTO])"
+        :pto="convertToHours(leaveBalances[planableKeys.PTO]?.value || leaveBalances[planableKeys.PTO])"
       />
     </v-dialog>
   </div>
@@ -90,7 +90,7 @@ import capitalize from 'lodash/capitalize';
 // |                                                  |
 // |--------------------------------------------------|
 
-const props = defineProps(['ptoBalances', 'planableKeys', 'employee', 'system']);
+const props = defineProps(['leaveBalances', 'planableKeys', 'employee', 'system']);
 const emitter = inject('emitter');
 
 const showPTOCashOutFormModal = ref(false);
@@ -135,7 +135,7 @@ onBeforeUnmount(() => {
  * @returns Array - The array of pto jobcodes in sorted order
  */
 const sortedBalancesByDuration = computed(() => {
-  let balances = props.ptoBalances;
+  let balances = props.leaveBalances;
   let orderedKeys = Object.keys(balances || {}).sort(function (a, b) {
     return balances[b] - balances[a];
   });
@@ -162,7 +162,7 @@ function convertToHours(seconds) {
 /**
  * Changes casing of job codes to be more natural looking for reading
 
- * @param {string} jobcode The job code key as found in ptoBalances
+ * @param {string} jobcode The job code key as found in leaveBalances
  * @returns {string} The formatted job code
  */
 function formatJobCode(jobcode) {

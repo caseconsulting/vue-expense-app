@@ -173,7 +173,7 @@ import { useStore } from 'vuex';
 // |                                                  |
 // |--------------------------------------------------|
 
-const props = defineProps(['employee', 'ptoBalances', 'supplementalData', 'timesheets', 'KEYS']);
+const props = defineProps(['employee', 'leaveBalances', 'supplementalData', 'timesheets', 'KEYS']);
 const emitter = inject('emitter');
 const store = useStore();
 

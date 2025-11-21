@@ -7,18 +7,6 @@
           {{ getLastUpdatedText }}
         </span>
         <v-spacer />
-        <v-btn
-          v-if="userRoleIsAdmin() || userRoleIsManager()"
-          class="pr-xs-1"
-          variant="text"
-          icon="mdi-file-sync-outline"
-          @click="showUnanetSyncModal = true"
-        >
-          <template v-slot:default>
-            <v-tooltip activator="parent" location="top">Sync Unanet accrual data</v-tooltip>
-            <v-icon color="white" size="large">mdi-file-sync-outline</v-icon>
-          </template>
-        </v-btn>
         <v-btn class="pr-xs-1" variant="text" icon="mdi-refresh" @click="resetData()">
           <template v-slot:default>
             <v-tooltip activator="parent" location="top">Refresh {{ system }} data</v-tooltip>
@@ -45,23 +33,22 @@
 
         <v-progress-linear v-if="loading" class="mb-3 mt-7" indeterminate />
         <div v-else>
-          <div v-if="errorMessage" class="d-flex flex-column justify-center align-center py-3 font-weight-bold">
-            <v-icon class="mb-2">mdi-alert</v-icon>
-            <span>{{ errorMessage }}</span>
+          <div v-if="customMessage || errorMessage" class="d-flex flex-column justify-center align-center py-3 font-weight-bold">
+            <v-icon class="mb-2">{{ customMessage ? 'mdi-information' : 'mdi-alert' }}</v-icon>
+            <span>{{ customMessage || errorMessage }}</span>
           </div>
-
           <div v-else>
             <time-period-hours
               :employee="clonedEmployee"
               :timesheets="timesheets || []"
-              :ptoBalances="ptoBalances || {}"
+              :leaveBalances="leaveBalances || {}"
               :supplementalData="supplementalData || {}"
               :KEYS="KEYS"
             />
             <hr class="mt-3 mb-5 mx-7" />
             <p-t-o-hours
               :employee="clonedEmployee"
-              :ptoBalances="ptoBalances || {}"
+              :leaveBalances="leaveBalances || {}"
               :planableKeys="planableKeys"
               :system="system"
             />
@@ -80,10 +67,6 @@
       :pto="getPTOBalance('PTO', true)"
       :holiday="getPTOBalance('Holiday', true)"
     />
-
-    <v-dialog v-model="showUnanetSyncModal" class="w-50" persistent>
-      <SyncUnanetPTOData :employees="employees" :key="childKey" />
-    </v-dialog>
   </div>
 </template>
 
@@ -102,7 +85,6 @@ import _forEach from 'lodash/forEach';
 import _isEmpty from 'lodash/isEmpty';
 import { computed, inject, onBeforeMount, onBeforeUnmount, reactive, ref, unref, watch } from 'vue';
 import { useStore } from 'vuex';
-import SyncUnanetPTOData from './SyncUnanetPTOData.vue';
 import { getCalendarYearPeriods, getContractYearPeriods } from './time-periods';
 /** @import { Reactive } from 'vue' */
 
@@ -130,9 +112,10 @@ const store = useStore();
 const clonedEmployee = ref(unref(props.employee));
 const excludeIfZero = ref(['Jury Duty', 'Maternity/Paternity Time Off', 'Bereavement']);
 const errorMessage = ref(null);
+const customMessage = ref(null);
 const lastUpdated = ref(null);
 const loading = ref(true);
-const ptoBalances = ref({});
+const leaveBalances = ref({});
 const planableKeys = ref({});
 const supplementalData = ref(null);
 const system = ref(null);
@@ -181,6 +164,15 @@ onBeforeMount(async () => {
 
   // intial set of getting planned PTO data
   refreshPlannedPto();
+
+  // message for Ragnarok employees only, ending Jan 1
+  // "if for if for if" lol
+  if (new Date().getFullYear() === 2025)
+    for (let tag of store.getters.tags)
+      if (tag.tagName === "Ragnarok")
+        for (let eId of tag.employees)
+          if (eId === clonedEmployee.value.id)
+            customMessage.value = "Time data for Ragnarok employees will be available Jan 1.";
 
   // listen for planned PTO results
   emitter.on('update-planned-pto-results-time-data', (data) => {
@@ -264,7 +256,7 @@ function getPlanableKey(type) {
  *
  */
 function getPTOBalance(type, convert) {
-  let bal = ptoBalances.value?.[getPlanableKey(type)] ?? 0;
+  let bal = leaveBalances.value?.[getPlanableKey(type)] ?? 0;
   if (bal.value) bal = bal.value;
   if (convert) bal = convertToHours(bal);
   return bal;
@@ -277,8 +269,8 @@ function getPTOBalance(type, convert) {
  * @returns Boolean - Whether or not the API returned an error
  */
 function hasError(timesheetsData) {
-  if (timesheetsData.err) {
-    errorMessage.value = timesheetsData?.err?.message;
+  if (timesheetsData.err || timesheetsData instanceof AxiosError) {
+    errorMessage.value = timesheetsData?.message ?? timesheetsData?.err?.message;
     if (_isEmpty(errorMessage.value) || typeof errorMessage.value === 'object') {
       errorMessage.value = 'An error has occurred, try refreshing the widget';
     }
@@ -292,9 +284,13 @@ function hasError(timesheetsData) {
  *
  * @returns Boolean - Whether or not timesheets local storage has expired
  */
-function isStorageExpired(lastUpdated) {
+function isStorageExpired(storage) {
+  if (!storage) return true;
+  // checker for version (TODO: one day, implement real versioning, something like below)
+  // if (storage.version !== CURRENT_TIMESHEET_LAMBDA_VERSION) return true;
+  if (!storage.leaveBalances) return true;
   // last updated will either be now, or retrived from local storage
-  return isBefore(lastUpdated, now(), 'day');
+  return isBefore(storage.lastUpdated, now(), 'day');
 } // isStorageExpired
 
 /**
@@ -310,8 +306,8 @@ function qbStorageExists() {
  * Removes a jobcode key value pair from PTO balances object if it is not relevant to a user.
  */
 function removeExcludedPtoBalances() {
-  _forEach(ptoBalances.value, (balance, jobcode) => {
-    if (excludeIfZero.value.includes(jobcode) && balance === 0) delete ptoBalances.value[jobcode];
+  _forEach(leaveBalances.value, (balance, jobcode) => {
+    if (excludeIfZero.value.includes(jobcode) && balance === 0) delete leaveBalances.value[jobcode];
   });
 } // removeExcludedPtoBalances
 
@@ -338,9 +334,9 @@ function convertToHours(seconds) {
 } // convertToHours
 
 /**
- * Helper to add items to the ptoBalances object
+ * Helper to add items to the leaveBalances object
  * It will basically build this:
- * ptoBalances: {
+ * leaveBalances: {
  *     balanceKey: {
  *         items: {
  *           itemsKey: planResults[planKey]
@@ -348,21 +344,21 @@ function convertToHours(seconds) {
  *       }
  *    }
  *
- * @param balanceKey key in ptoBalances to modify
- * @param itemsKey key in ptoBalances[balanceKey].items object to add
+ * @param balanceKey key in leaveBalances to modify
+ * @param itemsKey key in leaveBalances[balanceKey].items object to add
  * @param planResults object of results of planned PTO
  * @param planKey key in planResults to grab from
  */
 function addPlanToBalances(balanceKey, itemsKey, planResults, planKey) {
-  if (!ptoBalances.value?.[balanceKey]?.items) {
-    let oldBalance = ptoBalances.value[balanceKey]?.value || ptoBalances.value[balanceKey] || 0;
-    ptoBalances.value[balanceKey] = { value: oldBalance, items: {} };
+  if (!leaveBalances.value?.[balanceKey]?.items) {
+    let oldBalance = leaveBalances.value[balanceKey]?.value || leaveBalances.value[balanceKey] || 0;
+    leaveBalances.value[balanceKey] = { value: oldBalance, items: {} };
   }
-  ptoBalances.value[balanceKey].items[itemsKey] = convertToSeconds(planResults[planKey]);
+  leaveBalances.value[balanceKey].items[itemsKey] = convertToSeconds(planResults[planKey]);
 } // addPlanToBalances
 
 /**
- * Refreshes the PTO plan to put in the ptoBalances object, based on the
+ * Refreshes the PTO plan to put in the leaveBalances object, based on the
  * employee's plannedPto in their employee object by default.
  */
 async function refreshPlannedPto() {
@@ -375,8 +371,8 @@ async function refreshPlannedPto() {
   };
   // yeet outta here if there is no planned PTO
   if (!planResults.endDate) {
-    delete ptoBalances.value?.[getPlanableKey('PTO')]?.items?.['PTO after plan'];
-    delete ptoBalances.value?.[getPlanableKey('Holiday')]?.items?.['Holiday after plan'];
+    delete leaveBalances.value?.[getPlanableKey('PTO')]?.items?.['PTO after plan'];
+    delete leaveBalances.value?.[getPlanableKey('Holiday')]?.items?.['Holiday after plan'];
     return;
   }
 
@@ -391,7 +387,7 @@ async function refreshPlannedPto() {
 async function resetData() {
   loading.value = true;
   timesheets.value = null;
-  ptoBalances.value = null;
+  leaveBalances.value = null;
   supplementalData.value = null;
   system.value = null;
   lastUpdated.value = null;
@@ -435,7 +431,7 @@ async function setDataFromApi(isCalendarYear, isYearly) {
 
   if (!hasError(timesheetsData)) {
     timesheets.value = timesheetsData.timesheets;
-    ptoBalances.value = timesheetsData.ptoBalances;
+    leaveBalances.value = timesheetsData.leaveBalances;
     planableKeys.value = timesheetsData.supplementalData?.planableKeys;
     supplementalData.value = timesheetsData.supplementalData;
     system.value = timesheetsData.system;
@@ -458,7 +454,7 @@ function setDataFromStorage(qbStorage, key) {
   timesheets.value = qbStorage[key]?.timesheets;
   supplementalData.value = qbStorage[key]?.supplementalData;
   lastUpdated.value = qbStorage[key]?.lastUpdated;
-  ptoBalances.value = qbStorage?.ptoBalances;
+  leaveBalances.value = qbStorage?.leaveBalances;
   planableKeys.value = qbStorage?.planableKeys;
   system.value = qbStorage?.system;
 } // setDataFromStorage
@@ -478,7 +474,7 @@ function setStorage(isCalendarYear, isYearly) {
       supplementalData: supplementalData.value,
       lastUpdated: lastUpdated.value
     },
-    ptoBalances: ptoBalances.value,
+    leaveBalances: leaveBalances.value,
     planableKeys: planableKeys.value,
     system: system.value
   };
@@ -496,7 +492,7 @@ function setStorage(isCalendarYear, isYearly) {
 async function setData(isCalendarYear, isYearly) {
   let storage = qbStorageExists();
   let key = isYearly ? (isCalendarYear ? KEYS.value.CALENDAR_YEAR : KEYS.value.CONTRACT_YEAR) : KEYS.value.PAY_PERIODS;
-  if (storage && storage[key] && employeeIsUser() && !isStorageExpired(storage[key].lastUpdated)) {
+  if (storage && storage[key] && employeeIsUser() && !isStorageExpired(storage[key])) {
     setDataFromStorage(storage, key);
   } else {
     await setDataFromApi(isCalendarYear, isYearly);
@@ -551,9 +547,9 @@ watch(
 );
 
 watch(
-  () => ptoBalances.value,
+  () => leaveBalances.value,
   async () => {
-    let balance = (ptoBalances.value?.['PTO']?.value ?? ptoBalances.value?.['PTO']) / 60 / 60;
+    let balance = (leaveBalances.value?.['PTO']?.value ?? leaveBalances.value?.['PTO']) / 60 / 60;
     let plan = await getEmployeePlanTagName(clonedEmployee.value);
     plan = plan?.toLowerCase();
     let ptoAccrual = PTO_ACCRUALS[plan ?? 'red']; // default to red to set to 14
