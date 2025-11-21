@@ -81,6 +81,7 @@
             </v-menu>
           </div>
           <small>
+            *cash outs must be requested in whole hours; partial hours cannot be cashed out.<br />
             *cash outs are paid during the normal payroll period
             <v-avatar @click="openLink(PTO_POLICY)" class="mb-3" size="small">
               <v-tooltip activator="parent" location="top">Click for more information</v-tooltip>
