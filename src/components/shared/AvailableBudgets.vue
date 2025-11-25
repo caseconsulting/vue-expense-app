@@ -235,8 +235,8 @@ function isDisabled(budget) {
   let expenseType = props.expenseTypes.find((et) => et.id === budget.expenseTypeId);
   // extract whether or not the budget is disabled
   let empId = props.employee.id;
-  let disabled = expenseType.disabledEmployees?.[empId] ?? false;
-  if (disabled?.[0] === expenseType.id) disabled = true;
+  let disabled = expenseType?.disabledEmployees?.[empId] ?? false;
+  if (!expenseType || disabled?.[0] === expenseType?.id) disabled = true;
   // return pretty text or false
   if (!disabled) return false;
   if (disabled === true) return 'This budget has been disabled by an admin';

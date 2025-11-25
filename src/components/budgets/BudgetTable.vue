@@ -216,6 +216,7 @@ function noRemaining(budget) {
  */
 function isDisabled(budget) {
   let expenseType = props.expenseTypes.find((et) => et.id === budget.expenseTypeId);
+  if (!expenseType) return true;
   if (expenseType.categories?.length > 0) {
     let disabledCategories = expenseType.disabledEmployees?.[props.employee.id] ?? [];
     return disabledCategories.length > 0 ? disabledCategories : false;
