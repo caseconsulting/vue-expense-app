@@ -57,9 +57,10 @@
                 v-for="(emp, i) in getProjectCurrentEmployees(contract.item, item, $store.getters.employees)"
                 :key="emp.employeeNumber"
               >
-                <a
-                  @click="$router.push(`/employee/${emp.employeeNumber}`)"
-                  class="pointer"
+                <router-link
+                  :to="`/employee/${emp.employeeNumber}`"
+                  class="pointer text-decoration-none"
+                  target="_blank"
                   :class="
                     _isEmpty(getOverridenValues(emp, item))
                       ? 'text-blue-darken-4'
@@ -70,7 +71,7 @@
                   <v-tooltip v-if="!_isEmpty(getOverridenValues(emp, item))" activator="parent">
                     <div v-for="value in getOverridenValues(emp, item)" :key="value">{{ value }}</div>
                   </v-tooltip>
-                </a>
+                </router-link>
                 <span v-if="i != getProjectCurrentEmployees(contract.item, item, $store.getters.employees).length - 1">
                   ,
                 </span>

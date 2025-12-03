@@ -21,12 +21,14 @@
                 >
                 <ul v-else class="pa-4">
                   <li v-for="e in currentEmployees" :key="e.id">
-                    <a
-                      @click="$router.push(`/employee/${e.employeeNumber}`)"
+                    <router-link
+                      :to="`/employee/${e.employeeNumber}`"
+                      target="_blank"
+                      class="pointer text-decoration-none"
                       :class="e.workStatus == 0 ? 'inactive' : 'active'"
-                      class="pointer"
-                      >{{ nicknameAndLastName(e) }}</a
                     >
+                      {{ nicknameAndLastName(e) }}
+                    </router-link>
                   </li>
                 </ul>
               </v-card-text></v-card
@@ -46,12 +48,13 @@
                 >
                 <ul v-else class="pa-4">
                   <li v-for="e in pastEmployees" :key="e.id">
-                    <a
-                      @click="$router.push(`/employee/${e.employeeNumber}`)"
+                    <router-link
+                      :to="`/employee/${e.employeeNumber}`"
+                      target="_blank"
                       :class="e.workStatus == 0 ? 'inactive' : 'active'"
-                      class="pointer"
-                      >{{ nicknameAndLastName(e) }}</a
-                    >
+                      class="pointer text-decoration-none"
+                      >{{ nicknameAndLastName(e) }}
+                    </router-link>
                   </li>
                 </ul>
               </v-card-text></v-card
