@@ -161,14 +161,19 @@
                   <!-- Status Filter -->
                   <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="3" :class="!userRoleIsAdmin() && !userRoleIsManager() ? 'ml-3' : ''">
                     <h4>Status:</h4>
-                    <v-combobox
+                    <v-select
                       density="comfortable"
                       v-model="filter.status"
                       :items="statusFilterOptions"
-                      :prepend-inner-icon="getStateIcon(filter.status.toUpperCase())"
+                      prepend-inner-icon="mdi-filter-variant"
                       variant="underlined"
+                      input="hello"
                       hide-details
+                      multiple
                     >
+                      <template #selection="{item}">
+                        {{ getStatusText(item) }}
+                      </template>
                       <template v-slot:item="{ props, item }">
                         <v-list-item
                           v-bind="props"
@@ -176,12 +181,12 @@
                         >
                         <template v-slot:prepend>
                           <v-avatar>
-                            <v-icon color="#111" :icon="getStateIcon(item.raw.toUpperCase())" />
+                            <v-icon :color="filter.status.includes(item.raw) ? 'primary' : '#111'" :icon="getStateIcon(item.raw.toUpperCase())" />
                           </v-avatar>
                         </template>
                         </v-list-item>
                       </template>
-                    </v-combobox>
+                    </v-select>
                   </v-col>
                   <!-- Reimbursed Date Range Filter -->
                   <v-col cols="6" class="pa-2">
@@ -270,7 +275,6 @@
               :loading="loading || initialPageLoading"
               :items-per-page="15"
               :row-props="rowClasses"
-              :search="search"
               item-value="id"
               class="elevation-4 smaller-font"
               density="compact"
@@ -558,12 +562,11 @@ const expense = ref({
 }); // selected expense
 const expenseTypes = ref([]); // expense types
 let statusFilterOptions = ref([
-  'All',
   ...Object.values(EXPENSE_STATES).map(s => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase())
 ]);
 const filter = ref({
   active: 'both',
-  status: 'All'//default only shows expenses that are not reimbursed
+  status: ['Created']
 }); // datatable filters
 const filteredExpenses = ref([]); // filtered expenses
 const form = ref(null);
@@ -775,6 +778,22 @@ function getRoleHeaders() {
   if (userRoleIsAdmin() || userRoleIsManager()) return headers.value;
   let toRemove = ['state', 'employeeName'];
   return headers.value.filter((h) => !toRemove.includes(h.key));
+}
+
+function getStatusText(item) {
+  let s = filter.value.status;
+  let once = (text) => item.raw === s[0] ? text : null;
+  switch (s.length) {
+    case 1:
+      return s[0];
+    case statusFilterOptions.value.length - 1:
+      let except = statusFilterOptions.value.find((opt) => !s.includes(opt));
+      return once(`All except ${except.toLowerCase()}`);
+    case statusFilterOptions.value.length:
+      return once("All");
+    default:
+      return once(`${s.length} selected`);
+  }
 }
 
 /**
@@ -1122,60 +1141,72 @@ async function deleteModelFromTable() {
  * Filters expenses based on filter selections.
  */
 function filterExpenses() {
-  filteredExpenses.value = expenses.value;
+  filteredExpenses.value = [];
 
-  // filter expenses by employee search
-  if (employee.value) {
-    filteredExpenses.value = _filter(filteredExpenses.value, (expense) => {
-      return expense.employeeId === employee.value;
-    });
-  }
+  for (let expense of expenses.value) {
+    // filter expenses by employee search
+    if (employee.value) {
+      if (expense.employeeId !== employee.value) continue;
+    }
 
-  // filter based on tags
-  if (tagsInfo.value.selected?.length > 0) {
-    filteredExpenses.value = _filter(filteredExpenses.value, (expense) => {
-      return employeeUtils.selectedTagsHasEmployee(expense.employeeId, tagsInfo.value);
-    });
-  }
+    // filter based on tags
+    if (tagsInfo.value.selected?.length > 0) {
+      if (!employeeUtils.selectedTagsHasEmployee(expense.employeeId, tagsInfo.value)) continue;
+    }
 
-  // filter based on generic search
-  if (search.value) {
-    let headerKeys = _map(headers.value, (object) => object.key);
-    filteredExpenses.value = _filter(filteredExpenses.value, (expense) => {
-      return _some(Object.entries(expense), ([key, value]) => {
-        return String(value)?.toLowerCase().includes(search.value?.toLowerCase()) && headerKeys?.includes(key);
-      });
-    });
-  }
-
-  // filter based on start and end dates
-  if (startDateFilter.value && endDateFilter.value) {
-    filteredExpenses.value = _filter(filteredExpenses.value, (expense) =>
-      isBetween(expense.reimbursedDate, startDateFilter.value, endDateFilter.value, 'days', '[]')
-    );
-  }
-
-  // filter based on reimbursement status
-  if (filter.value.status !== 'All') {
-    // filter expenses by reimburse date
-    filteredExpenses.value = _filter(filteredExpenses.value, (expense) => {
-      return expense.state.toLowerCase() === filter.value.status.toLowerCase();
-    });
-  }
-
-  // filter based on expense type active
-  if (filter.value.active !== 'both') {
-    // filter expenses by active or inactive expense types (available to admin only)
-    filteredExpenses.value = _filter(filteredExpenses.value, (expense) => {
-      let expenseType = _find(expenseTypes.value, (type) => expense.expenseTypeId === type.value);
-      if (filter.value.active == 'active') {
-        // filter for active expenses
-        return expenseType && !expenseType.isInactive;
-      } else {
-        // filter for inactive expenses
-        return expenseType && expenseType.isInactive;
+    // filter based on generic search
+    if (search.value) {
+      let matched = false;
+      // let headerKeys = _map(headers.value, (object) => object.key);
+      for (let [key, value] of Object.entries(expense)) {
+        let data = value; // allow modification
+        if (!data || data === '') continue; // skip empty data
+        if (typeof data === 'number') data = data.toFixed(2); // support money
+        if (key === 'receipt') data = data.join?.(' ') || data; // support receipt names
+        if (key === 'rejections') { // support rejection reasons
+          let rejData = '';
+          if (data.hardRejections?.reasons) rejData += data.hardRejections.reasons.join(' ');
+          if (data.softRejections?.reasons) rejData += data.softRejections.reasons.join(' ');
+          data = rejData;
+        }
+        // search if data is a string by now
+        if (typeof data !== 'string') continue;
+        if (['id', 'expenseTypeId', 'employeeId'].includes(key)) {
+          if (data === search.value) {
+            matched = true;
+            break;
+          }
+        } else if (data.toLowerCase().includes(search.value.toLowerCase())) {
+          matched = true;
+          break;
+        }
       }
-    });
+      if (!matched) continue;
+    }
+
+    // filter based on start and end dates
+    if (startDateFilter.value || endDateFilter.value) {
+      let start = startDateFilter.value || '1900-01-01';
+      let end = endDateFilter.value || '9999-12-31';
+      if (!isBetween(expense.reimbursedDate, start, end, 'days', '[]')) continue;
+    }
+
+    // filter based on status
+    let status = filter.value.status.map((s) => s.toLowerCase());
+    if (status.length > 0) {
+      if (!status.includes(expense.state.toLowerCase())) continue;
+    }
+
+    // filter based on expense type active
+    if (filter.value.active !== 'both') {
+      let expenseType = _find(expenseTypes.value, (type) => expense.expenseTypeId === type.value);
+      let etActive = expenseType && !expenseType.isInactive;
+      let filterActive = filter.value.status === 'active';
+      if (filterActive !== etActive) continue;
+    }
+
+    // passed all filters, add it
+    filteredExpenses.value.push(expense);
   }
 } // filterExpenses
 
