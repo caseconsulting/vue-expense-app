@@ -429,9 +429,9 @@
                           <v-icon v-else class="mr-1 mx-3 case-red" id="marks"> mdi-close-circle-outline </v-icon>
                         </div>
                         <div v-if="!isEmpty(item?.rejections?.softRejections)">
-                          <b>Revisal Requests:</b>
+                          <b>{{ getRevisalsTitle(item) }}</b>
                           <div v-for="(reason, i) in item.rejections.softRejections.reasons" :key="reason" class="ml-4">
-                            <b>Reason {{ i + 1 }}: </b>{{ reason }}
+                            <b>{{ getReasonIntro(reason, i) }}: </b>{{ reason.text ?? reason }}
                           </div>
                           <div class="ml-4">
                             <b>Revised: </b>
@@ -709,15 +709,14 @@ onBeforeMount(async () => {
     toggleExpenseRejectionModal.value = false;
     rejectingExpense.value = null;
   });
-  emitter.on('confirm-expenses-rejection', async (data) => {
-    let { field, reason } = data;
+  emitter.on('confirm-expenses-rejection', async ({ field, text }) => {
     let rejType = field.split('.')[1];
     let isHard = field.includes('hard');
 
     // update expense with new rejection
     rejectingExpense.value.rejections ??= {};
     rejectingExpense.value.rejections[rejType] ??= { reasons: [], revised: false };
-    rejectingExpense.value.rejections[rejType].reasons.push(reason);
+    rejectingExpense.value.rejections[rejType].reasons.push({ text, date: getTodaysDate('YYYY-MM-DD') });
     rejectingExpense.value.state = isHard ? EXPENSE_STATES.REJECTED : EXPENSE_STATES.RETURNED;
 
     // submit (expense is set to null in close-expenses-rejection)
@@ -816,6 +815,22 @@ function moneyFilter(value) {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Gets reason text formatted with date if available
+ */
+function getReasonIntro(reason, index) {
+  if (reason.date) return format(reason.date, null, 'MM/DD/YYYY');
+  return `Reason ${index + 1}`;
+}
+
+/**
+ * Gets number of revisal requests for an expense
+ */
+function getRevisalsTitle(expense) {
+  let length = expense.rejections.softRejections.reasons.length;
+  return `Revisal Request${length === 1 ? '' : 's'} (${length}):`
+}
 
 /**
  * Returns 0 if an expense is not over the age limit, otherwise returns the age that the expense is.
@@ -1224,19 +1239,6 @@ function getReceipts(receipts) {
 function isReimbursed(expense) {
   return expense && !isEmpty(expense.reimbursedDate);
 } // isReimbursed
-
-/**
- * Checks if the expense is rejected. Returns true if the
- * expense is reimbursed, otherwise returns false.
- *
- * @param expense - expense to check
- * @return boolean - expense is rejected
- */
-function isRejected(expense) {
-  return (
-    expense?.rejections?.softRejections?.reasons?.length > 0 || expense?.rejections?.hardRejections?.reasons?.length
-  );
-} // isRejected
 
 async function loadMyExpensesData() {
   initialPageLoading.value = true;
