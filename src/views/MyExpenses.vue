@@ -430,15 +430,15 @@
                         </div>
                         <div v-if="!isEmpty(item?.rejections?.softRejections)">
                           <b>Revisal Requests:</b>
-                          <div v-for="(reason, i) in item.rejections.softRejections.reasons" :key="reason">
-                            &nbsp;&nbsp;&nbsp;&nbsp;<b>Reason {{ i + 1 }}: </b>{{ reason }}
+                          <div v-for="(reason, i) in item.rejections.softRejections.reasons" :key="reason" class="ml-4">
+                            <b>Reason {{ i + 1 }}: </b>{{ reason }}
                           </div>
-                          <div>
-                            &nbsp;&nbsp;&nbsp;&nbsp;<b>Revised: </b>
+                          <div class="ml-4">
+                            <b>Revised: </b>
                             {{ item.rejections.softRejections.revised ? 'Yes' : 'No' }}
                           </div>
                         </div>
-                        <div v-if="!isEmpty(item?.rejections?.hardRejections)">
+                        <div v-if="!isEmpty(item?.rejections?.hardRejections)" class="ml-4">
                           <b>Rejection reason:</b>
                           {{ item?.rejections?.hardRejections?.reasons?.[0] }}
                         </div>
