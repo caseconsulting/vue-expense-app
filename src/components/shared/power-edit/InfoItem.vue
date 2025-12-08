@@ -5,7 +5,7 @@
     :item="props.item"
   ></default-info-item>
   <date-info-item
-    v-else-if="props.field.infoType === TYPES.DATE_MMYYYY || props.field.infoType === TYPES.DATE_MMDDYYYY"
+    v-else-if="props.field.infoType === TYPES.DATE_MMDDYYYY"
     :field="props.field"
     :item="props.item"
   ></date-info-item>

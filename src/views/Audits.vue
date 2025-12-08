@@ -35,32 +35,17 @@
         <!-- Data Picker for Query -->
         <v-col cols="8" xl="2" lg="2">
           <v-form ref="dateRange">
-            <v-menu v-model="auditsQuery.showRangeMenu" :close-on-content-click="false">
-              <template #activator="{ props }">
-                <v-text-field
-                  class="mt-0 ml-1 pt-0 pointer"
-                  :model-value="formatRange(auditsQuery.range)"
-                  label="Date Range"
-                  readonly
-                  variant="underlined"
-                  clearable
-                  prepend-icon="mdi-calendar"
-                  v-bind="props"
-                  :rules="requiredRules"
-                  @click:clear="auditsQuery.range = []"
-                />
-              </template>
-              <v-date-picker
-                v-model="auditsQuery.range"
-                :max="today"
-                multiple
-                show-adjacent-months
-                hide-actions
-                keyboard-icon=""
-                color="#bc3825"
-                title="Date Range"
-              />
-            </v-menu>
+            <date-picker
+              v-model="auditsQuery.range"
+              :rules="requiredRules"
+              :max="today"
+              label="Date Range"
+              range-format="MM/DD/YY"
+              show-adjacent-months
+              hide-actions
+              clearable
+              range
+            />
           </v-form>
         </v-col>
         <!-- Submit Button -->
@@ -86,6 +71,7 @@
 </template>
 
 <script setup>
+import DatePicker from '@/components/shared/DatePicker.vue';
 import TimesheetReminderAudits from '@/components/audits/TimesheetReminderAudits.vue';
 import LoginAudits from '@/components/audits/LoginAudits.vue';
 import _isEmpty from 'lodash/isEmpty';
@@ -104,7 +90,6 @@ import { ref, onBeforeMount } from 'vue';
 const store = useStore();
 const auditsQuery = ref({
   range: [],
-  showRangeMenu: false
 });
 const firstLoad = ref(true); // this is used to set chart titles to "last 24 hours" if a custom date range has not been set
 const queryA = ref(subtract(getTodaysDate('YYYY-MM-DDTHH:mm:ssZ'), 1, 'd', 'YYYY-MM-DDTHH:mm:ssZ'));
@@ -143,9 +128,6 @@ onBeforeMount(async () => {
  */
 async function setDateRange() {
   if ((await dateRange.value.validate()).valid) {
-    // Hide the calendar popup
-    auditsQuery.value.showRangeMenu = false;
-
     // Temp variables
     let start = auditsQuery.value.range[0];
     let end = auditsQuery.value.range[1];
@@ -158,34 +140,6 @@ async function setDateRange() {
     reloader.value++; // refreshes the charts
   }
 } // setDateRange
-
-/**
- * Format date range as 'DD/MM/YY' - 'DD/MM/YY' in chronological order.
- *
- * @param range - Array of String dates
- * @return String - 'DD/MM/YY' - 'DD/MM/YY' date range
- */
-function formatRange(range) {
-  if (_isEmpty(range)) {
-    return null;
-  }
-  let start = range[0];
-
-  if (range[1]) {
-    // end date selected
-    let end = range[1];
-    if (isAfter(range[0], range[1], 'day')) {
-      // start date is listed after end date
-      return `${format(end, null, 'MM/DD/YY')} - ${format(start, null, 'MM/DD/YY')}`;
-    } else {
-      // start date is listed before end date
-      return `${format(start, null, 'MM/DD/YY')} - ${format(end, null, 'MM/DD/YY')}`;
-    }
-  } else {
-    // no end date selected
-    return `${format(start, null, 'MM/DD/YY')} - Present`;
-  }
-} // formatRange
 
 /**
  * Selects which audit view to change to (Login, Resume Parser)
