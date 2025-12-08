@@ -104,10 +104,12 @@
         <timesheets-chart
           v-else
           class="mt-2"
-          :key="timeData"
           :jobcodes="timeData || {}"
-          :nonBillables="isYearly ? supplementalDataWithPlan.nonBillables : null"
+          :non-billables="isYearly ? supplementalDataWithPlan.nonBillables : null"
           :title="timesheets[periodIndex].title"
+          :employee-id="employee.id"
+          :is-calendar-year="isCalendarYear"
+          :is-yearly="isYearly"
         />
         <!-- End Timesheets Donut Chart -->
       </v-col>
@@ -121,7 +123,6 @@
 
         <time-period-details
           v-else
-          :key="timeData"
           :dateIsCurrentPeriod="dateIsCurrentPeriod"
           :employee="employee"
           :isCalendarYear="isCalendarYear"
