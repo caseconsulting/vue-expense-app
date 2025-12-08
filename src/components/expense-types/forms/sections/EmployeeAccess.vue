@@ -21,7 +21,7 @@
       v-if="(accessCheckboxes || []).includes('Custom')"
       variant="underlined"
       v-model="customAccess"
-      :items="activeEmployees"
+      :items="employeeNames"
       :custom-filter="employeeFilter"
       no-data-text="No Employees Available"
       item-props.color="gray"
@@ -41,6 +41,12 @@
         <span v-else class="text-grey text-caption"
           >{{ customAccess.length }} employee(s) have custom access to this expense type</span
         >
+      </template>
+      <template v-slot:chip="{ props: chipProps, item }">
+        <v-chip
+          v-bind="chipProps"
+          :color="isEmployeeInactive(item.value) ? 'red' : undefined"
+        />
       </template>
     </v-autocomplete>
 
@@ -102,7 +108,8 @@ const props = defineProps({
 });
 const store = useStore();
 
-const activeEmployees = ref(null); // list of active employees
+const employeeNames = ref(null); // list of active employees
+const inactiveEmployees = new Set();
 const customAccess = ref([]); // list of employees with custom access
 const customAccessRules = ref([
   () => {
@@ -139,15 +146,14 @@ onBeforeMount(async () => {
 
   // populate and sort list of active employees
   employees.forEach((employee) => {
-    if (employee.workStatus > 0) {
-      sortedActiveEmployees.push({
-        value: employee.id,
-        text: `${employee.nickname || employee.firstName} ${employee.lastName}`
-      });
-    }
+    if (employee.workStatus === 0) inactiveEmployees.add(employee.id);
+    sortedActiveEmployees.push({
+      value: employee.id,
+      text: `${employee.nickname || employee.firstName} ${employee.lastName}`,
+    });
   });
   sortedActiveEmployees = _sortBy(sortedActiveEmployees, ['text']); // sort employees alphabetically
-  activeEmployees.value = sortedActiveEmployees;
+  employeeNames.value = sortedActiveEmployees;
 });
 
 /**
@@ -193,6 +199,16 @@ function getEmployeeList() {
 function getEmployeeName(employeeId) {
   let localEmployee = store.getters.employees.find((employee) => employee.id === employeeId);
   return `${localEmployee.firstName} ${localEmployee.lastName}`;
+}
+
+/**
+ * Returns true if employee is inactive
+ * 
+ * @param employeeId ID of employee to check
+ * @return Boolean - whether or not the employee is inactive
+ */
+function isEmployeeInactive(employeeId) {
+  return inactiveEmployees.has(employeeId);
 }
 
 // |--------------------------------------------------|

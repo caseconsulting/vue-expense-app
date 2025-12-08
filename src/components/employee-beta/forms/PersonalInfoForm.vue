@@ -73,34 +73,18 @@
           <!-- hire date -->
           <v-col v-if="creatingEmployee">
             <!-- note that only admins can create an employee, so this is essentially only visible to admins -->
-            <v-text-field
+            <date-picker
+              v-model="editedEmployee.hireDate"
               id="employeeHireDateField"
-              v-model="hireDateFormatted"
               :rules="getDateRules()"
+              :max="editedEmployee.deptDate"
               v-mask="'##/##/####'"
-              prepend-inner-icon="mdi-calendar"
               label="Hire Date *"
-              hint="MM/DD/YYYY format"
               persistent-hint
-              @update:focused="editedEmployee.hireDate = format(hireDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
-              @click:prepend="hireMenu = true"
-              @keypress="hireMenu = false"
-              autocomplete="off"
-            >
-              <v-menu activator="parent" location="start center" :close-on-content-click="false" v-model="hireMenu">
-                <v-date-picker
-                  v-model="editedEmployee.hireDate"
-                  @update:model-value="hireMenu = false"
-                  :max="editedEmployee.deptDate"
-                  show-adjacent-months
-                  hide-actions
-                  keyboard-icon=""
-                  color="#bc3825"
-                  title="Hire Date"
-                ></v-date-picker>
-              </v-menu>
-            </v-text-field>
-          </v-col>
+              hide-actions
+              show-adjacent-months
+            />
+          </v-col> 
           <!-- job role -->
           <v-col>
             <v-combobox v-model="editedEmployee.jobRole" label="Job Role" :items="JOB_TITLES"></v-combobox>
@@ -180,33 +164,15 @@
                 class="work-status-box ma-4"
               ></v-text-field>
             </v-radio-group>
-            <v-text-field
+            <date-picker
               v-if="workStatus === 'Inactive'"
-              class="d-block"
-              v-model="deptDateFormatted"
-              :rules="getDateRules()"
-              v-mask="'##/##/####'"
-              prepend-inner-icon="mdi-calendar"
+              v-model="editedEmployee.deptDate"
               label="Departure Date"
-              hint="MM/DD/YYYY format"
-              persistent-hint
-              @update:focused="editedEmployee.deptDate = format(deptDateFormatted, 'MM/DD/YYYY', 'YYYY-MM-DD')"
-              @click:prepend="deptMenu = true"
-              @keypress="deptMenu = false"
-              autocomplete="off"
-            >
-              <v-menu activator="parent" location="start center" :close-on-content-click="false" v-model="deptMenu">
-                <v-date-picker
-                  v-model="editedEmployee.deptDate"
-                  @update:model-value="deptMenu = false"
-                  show-adjacent-months
-                  hide-actions
-                  keyboard-icon=""
-                  color="#bc3825"
-                  title="Departure Date"
-                ></v-date-picker>
-              </v-menu>
-            </v-text-field>
+              variant="filled"
+              show-adjacent-months
+              hide-actions
+              :rules="getDateRules()"
+            />
           </v-col>
         </v-row>
       </v-col>
@@ -276,37 +242,21 @@
         <v-row class="groove">
           <!-- birthday -->
           <v-col :cols="!isMobile() ? '4' : '12'">
-            <v-text-field
-              ref="formFields"
-              v-mask="'##/##/####'"
-              v-model="birthdayFormat"
-              :rules="[getBirthdayRules()]"
+            <date-picker
+              v-model="editedEmployee.birthday"
               label="Birthday"
-              hint="MM/DD/YYYY format"
-              prepend-inner-icon="mdi-calendar"
-              clearable
+              :rules="[getBirthdayRules()]"
+              variant="filled"
               persistent-hint
-              @update:focused="editedEmployee.birthday = format(birthdayFormat, null, 'YYYY-MM-DD')"
-              @click:prepend="birthdayMenu = true"
-              @keypress="birthdayMenu = false"
-              autocomplete="off"
+              show-adjacent-months
+              hide-actions
+              clearable
+              ref="formFields"
             >
-              <v-menu activator="parent" :close-on-content-click="false" v-model="birthdayMenu" location="start center">
-                <v-date-picker
-                  v-model="editedEmployee.birthday"
-                  @update:model-value="birthdayMenu = false"
-                  show-adjacent-months
-                  hide-actions
-                  keyboard-icon=""
-                  color="#bc3825"
-                  title="Birthday"
-                >
-                </v-date-picker>
-              </v-menu>
               <template #append-inner>
                 <private-button v-model="birthdayHidden"></private-button>
               </template>
-            </v-text-field>
+            </date-picker>
           </v-col>
           <!-- personal email -->
           <v-col>
@@ -604,13 +554,7 @@ const phoneNumbers = ref(initPhoneNumbers());
 // other refs
 const addressSearch = useTemplateRef('addressSearch'); // current address search input
 const birthdayHidden = ref(!editedEmployee.value.birthdayFeed);
-const birthdayFormat = ref(format(editedEmployee.value.birthday, null, 'MM/DD/YYYY')); // formatted birthday
-const birthdayMenu = ref(false); // shows the birthday menu
 const birthPlaceSearch = ref(null); // birth place search input
-const hireDateFormatted = ref(format(editedEmployee.value.hireDate, null, 'MM/DD/YYYY')); // formatted hireDate
-const deptDateFormatted = ref(format(editedEmployee.value.deptDate, null, 'MM/DD/YYYY')); // formatted deptDate
-const hireMenu = ref(false); // display hire menu
-const deptMenu = ref(false); // display dept menu
 const placeIds = ref({}); // for address autocomplete
 const predictions = ref({}); // for POB autocomplete
 const toggleForm = ref(false); // for EEO data
@@ -883,57 +827,6 @@ function toggleEdit() {
 // |                     WATCHERS                     |
 // |                                                  |
 // |--------------------------------------------------|
-
-/**
- * watcher for editedEmployee.value.birthday
- */
-watch(
-  () => editedEmployee.value.birthday,
-  () => {
-    birthdayFormat.value = format(editedEmployee.value.birthday, null, 'MM/DD/YYYY') || birthdayFormat.value;
-    //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-    if (editedEmployee.value.birthday !== null && !format(editedEmployee.value.birthday, null, 'MM/DD/YYYY')) {
-      editedEmployee.value.birthday = null;
-    }
-  }
-);
-
-/**
- * watcher for editedEmployee.value.hireDate - format date on change.
- */
-watch(
-  () => editedEmployee.value.hireDate,
-  async () => {
-    hireDateFormatted.value = format(editedEmployee.value.hireDate, null, 'MM/DD/YYYY') || hireDateFormatted.value;
-    //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-    if (editedEmployee.value.hireDate !== null && !format(editedEmployee.value.hireDate, null, 'MM/DD/YYYY')) {
-      editedEmployee.value.hireDate = null;
-    }
-  }
-);
-
-/**
- * watcher for editedEmployee.value.deptDate - format date on change and set contract end date
- */
-watch(
-  () => editedEmployee.value.deptDate,
-  async () => {
-    deptDateFormatted.value = format(editedEmployee.value.deptDate, null, 'MM/DD/YYYY') || deptDateFormatted.value;
-    //fixes v-date-picker error so that if the format of date is incorrect the purchaseDate is set to null
-    if (editedEmployee.value.deptDate !== null && !format(editedEmployee.value.deptDate, null, 'MM/DD/YYYY')) {
-      editedEmployee.value.deptDate = null;
-    }
-    // update the user's current contracts to have their dept date as the end date
-    if (workStatus.value === 'Inactive') {
-      for (let c of editedEmployee.value.contracts) {
-        for (let p of c.projects) {
-          // set current project to have dept date as the end date
-          if (!p.endDate) p.endDate = format(deptDateFormatted.value, 'MM/DD/YYYY', DEFAULT_ISOFORMAT);
-        }
-      }
-    }
-  }
-);
 
 /**
  * Watch for work status changing and remove old data

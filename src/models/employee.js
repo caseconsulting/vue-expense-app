@@ -279,6 +279,9 @@ export class Employee {
     /** @type {{date: string, holidayHours: number, ptoHours: number}[]} */
     this.plannedPto = properties.plannedPto ?? '';
 
+    /** @type {Object} */
+    this.preferences = properties.preferences ?? {};
+
     // current address fields
     /** @type {string} */
     this.currentStreet = properties.currentStreet ?? '';
