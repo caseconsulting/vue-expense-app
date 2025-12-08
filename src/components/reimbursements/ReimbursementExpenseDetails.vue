@@ -58,11 +58,11 @@
           <v-col cols="7">N/A</v-col>
         </v-row>
         <v-row dense v-if="!isEmpty(expense?.rejections?.softRejections)">
-          <v-col cols="5" class="text-red"><b>Revisals</b></v-col>
+          <v-col cols="5" class="text-red"><b>{{ getRevisalsTitle(expense) }}</b></v-col>
           <v-col cols="7" class="revisal-reason">
             <div v-if="!isEmpty(expense?.rejections?.softRejections)">
               <div v-for="(reason, i) in expense.rejections.softRejections.reasons" :key="reason">
-                <b>Reason {{ i + 1 }}: </b>{{ reason }}
+                <b>{{ getReasonIntro(reason, i) }}: </b>{{ reason }}
               </div>
               <div>
                 <b>Revised: </b>
@@ -113,6 +113,23 @@ function displayExpense(clickedExpense) {
     expense.value = clickedExpense;
   }
 } // displayExpense
+
+/**
+ * Gets reason text formatted with date if available
+ */
+function getReasonIntro(reason, index) {
+  let text = `Reason ${index + 1}`;
+  if (reason.date) text += `, ${monthDayYearFormat(reason.date)}`;
+  return text;
+}
+
+/**
+ * Gets number of revisal requests for an expense
+ */
+function getRevisalsTitle(expense) {
+  let length = expense.rejections.softRejections.reasons.length;
+  return `$Revisal${length === 1 ? '' : 's'} (${length}):`
+}
 
 // |--------------------------------------------------|
 // |                                                  |

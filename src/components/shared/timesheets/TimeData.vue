@@ -269,7 +269,6 @@ function getPTOBalance(type, convert) {
  * @returns Boolean - Whether or not the API returned an error
  */
 function hasError(timesheetsData) {
-  console.log(timesheetsData)
   if (timesheetsData.err || timesheetsData instanceof AxiosError) {
     errorMessage.value = timesheetsData?.message ?? timesheetsData?.err?.message;
     if (_isEmpty(errorMessage.value) || typeof errorMessage.value === 'object') {

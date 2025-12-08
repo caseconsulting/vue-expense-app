@@ -158,73 +158,38 @@
                       </v-tooltip>
                     </v-btn-toggle>
                   </v-col>
-                  <!-- End Active Filter -->
                   <!-- Status Filter -->
-                  <v-col lg="4" sm="6" cols="12">
+                  <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="3" :class="!userRoleIsAdmin() && !userRoleIsManager() ? 'ml-3' : ''">
                     <h4>Status:</h4>
-                    <v-btn-toggle
+                    <v-select
+                      density="comfortable"
                       v-model="filter.status"
-                      color="primary"
-                      class="filter_color"
-                      :density="isMobile() ? 'compact' : 'comfortable'"
-                      mandatory
+                      :items="statusFilterOptions"
+                      prepend-inner-icon="mdi-filter-variant"
+                      variant="underlined"
+                      input="hello"
+                      hide-details
+                      multiple
                     >
-                      <!-- Show Reimbursed -->
-                      <v-tooltip location="top">
-                        <template #activator="{ props }">
-                          <v-btn value="reimbursed" v-bind="props" variant="text" density="comfortable">
-                            <v-icon id="reimbursedStatus" class="mr-1">
-                              mdi-check-circle{{ filter.status.includes('reimbursed') ? '' : '-outline' }}
-                            </v-icon>
-                          </v-btn>
+                      <template #selection="{item}">
+                        {{ getStatusText(item) }}
+                      </template>
+                      <template v-slot:item="{ props, item }">
+                        <v-list-item
+                          v-bind="props"
+                          :title="item.raw"
+                        >
+                        <template v-slot:prepend>
+                          <v-avatar>
+                            <v-icon :color="filter.status.includes(item.raw) ? 'primary' : '#111'" :icon="getStateIcon(item.raw.toUpperCase())" />
+                          </v-avatar>
                         </template>
-                        <span>Show Reimbursed</span>
-                      </v-tooltip>
-
-                      <!-- Show Rejected -->
-                      <v-tooltip location="top">
-                        <template #activator="{ props }">
-                          <v-btn value="rejected" v-bind="props" variant="text">
-                            <v-icon id="showRejected">
-                              mdi-close-circle{{ filter.status.includes('rejected') ? '' : '-outline' }}
-                            </v-icon>
-                          </v-btn>
-                        </template>
-                        <span>Show Rejected</span>
-                      </v-tooltip>
-
-                      <!-- Show Pending -->
-                      <v-tooltip location="top">
-                        <template #activator="{ props }">
-                          <v-btn value="pending" v-bind="props" variant="text">
-                            <v-icon id="showPending">
-                              mdi-star-four-points-circle{{ filter.status.includes('pending') ? '' : '-outline' }}
-                            </v-icon>
-                          </v-btn>
-                        </template>
-                        <span>Show Pending</span>
-                      </v-tooltip>
-
-                      <!-- Show All -->
-                      <v-tooltip location="top">
-                        <template #activator="{ props }">
-                          <v-btn
-                            id="allStatus"
-                            value="all"
-                            v-bind="props"
-                            variant="text"
-                            :class="filter.status.includes('all') ? 'font-weight-black' : ''"
-                          >
-                            All
-                          </v-btn>
-                        </template>
-                        <span>Show All Expenses</span>
-                      </v-tooltip>
-                    </v-btn-toggle>
+                        </v-list-item>
+                      </template>
+                    </v-select>
                   </v-col>
-                  <!-- End Status Filter -->
                   <!-- Reimbursed Date Range Filter -->
-                  <v-col lg="5" cols="12">
+                  <v-col cols="6" class="pa-2">
                     <h4 class="ml-0 pl-0 mb-1">Reimbursed Date Range:</h4>
                     <!-- Start Date Filter -->
                      <v-row>
@@ -255,7 +220,6 @@
               </v-container>
             </fieldset>
             <br />
-            <!-- End Filters -->
 
             <!-- My Expenses Data Table-->
             <v-data-table
@@ -266,51 +230,83 @@
               :loading="loading || initialPageLoading"
               :items-per-page="15"
               :row-props="rowClasses"
-              :search="search"
               item-value="id"
               class="elevation-4 smaller-font"
               density="compact"
               :no-data-text="'No results :('"
               expand-on-click
             >
-              <!-- State slot -->
+              <!-- State slot, including quick menu -->
               <template #[`item.state`]="{ item }">
                 <td v-if="userRoleIsAdmin() || userRoleIsManager()">
-                  <v-icon :icon="getStateIcon(item.state)" size="large" />
+                  <v-menu>
+                    <template #activator="{ props }">
+                      <v-btn
+                        :icon="getStateIcon(item.state)"
+                        :disabled="expensesStatuses.disabled.has(item.id)"
+                        :color="getStatusIconColor(item)"
+                        variant="text"
+                        v-bind="props"
+                        density="compact"
+                      />
+                    </template>
+                    <v-list v-if="getStatesQuickMenu(item.state).length && !expensesStatuses.errored.has(item.id)">
+                      <v-list-item
+                        v-for="(menuItem, idx) in getStatesQuickMenu(item.state)"
+                        :no-data-text="`No actions for state ${item.state}`"
+                        :key="`menu-${idx}`"
+                        @click="menuItem.action(item)"
+                        slim
+                      >
+                        <template v-slot:prepend>
+                          <v-avatar>
+                            <v-icon color="#111" :icon="menuItem.icon" />
+                          </v-avatar>
+                        </template>
+                        <v-list-item-title>{{ menuItem.text }}</v-list-item-title>
+                      </v-list-item>
+                    </v-list>
+                  </v-menu>
                   <v-tooltip activator="parent" location="right"> {{ getStateTooltip(item) }} </v-tooltip>
                 </td>
               </template>
               <!-- Creation date slot -->
               <template #[`item.createdAt`]="{ item }">
-                <td>{{ monthDayYearFormat(item.createdAt) }}</td>
+                <td :class="getPurchaseCreatedAtDateClass(item)">
+                  {{ monthDayYearFormat(item.createdAt) }}
+                  <v-tooltip v-if="expenseAgeOverLimit(item)" activator="parent" location="top"> Creation date is {{ expenseAgeOverLimit(item) }} days after purchase date </v-tooltip>
+                </td>
               </template>
               <!-- Employee name slot-->
               <template #[`item.employeeName`]="{ item }">
-                <td v-if="userRoleIsAdmin() || userRoleIsManager()">
+                <td :class="getExpenseClass(item)" v-if="userRoleIsAdmin() || userRoleIsManager()">
                   {{ item.employeeName }}
                 </td>
               </template>
               <!-- Budget Name Slot -->
               <template #[`item.budgetName`]="{ item }">
-                <td>{{ item.budgetName }}</td>
+                <td :class="getExpenseClass(item)">{{ item.budgetName }}</td>
               </template>
               <!-- Cost slot -->
               <template #[`item.cost`]="{ item }">
-                <td>{{ convertToMoneyString(item.cost) }}</td>
+                <td :class="getExpenseClass(item)">{{ convertToMoneyString(item.cost) }}</td>
               </template>
               <!-- Purchase date slot -->
               <template #[`item.purchaseDate`]="{ item }">
-                <td>{{ monthDayYearFormat(item.purchaseDate) }}</td>
+                <td :class="getPurchaseCreatedAtDateClass(item)">
+                  {{ monthDayYearFormat(item.purchaseDate) }}
+                  <v-tooltip v-if="expenseAgeOverLimit(item)" activator="parent" location="top"> Creation date is {{ expenseAgeOverLimit(item) }} days after purchase date </v-tooltip>
+                </td>
               </template>
               <!-- Reimburse date Slot -->
               <template #[`item.reimbursedDate`]="{ item }">
-                <td>{{ monthDayYearFormat(item.reimbursedDate) }}</td>
+                <td :class="getExpenseClass(item)">{{ monthDayYearFormat(item.reimbursedDate) }}</td>
               </template>
               <!--Action Items-->
               <template #[`item.actions`]="{ item }">
                 <td class="d-flex justify-end mr-4">
                   <!-- Download Attachment Button -->
-                  <attachment :mid-action="midAction" :expense="item" :mode="'expenses'" />
+                  <attachment :mid-action="midAction || expensesStatuses.disabled.has(item.id)" :expense="item" :mode="'expenses'" />
 
                   <!-- Edit Button -->
                   <v-btn
@@ -318,6 +314,7 @@
                     :disabled="
                       isEditing ||
                       midAction ||
+                      expensesStatuses.disabled.has(item.id) ||
                       !isExpenseEditable(store.getters.user, item) ||
                       (!(userRoleIsAdmin() || userRoleIsManager()) && !canDelete(item))
                     "
@@ -339,6 +336,7 @@
                       isReimbursed(item) ||
                       isEditing ||
                       midAction ||
+                      expensesStatuses.disabled.has(item.id) ||
                       (!(userRoleIsAdmin() || userRoleIsManager()) && !canDelete(item))
                     "
                     variant="text"
@@ -352,23 +350,6 @@
                   >
                     <v-icon size="x-large" class="case-gray" icon="mdi-delete" />
                     <v-tooltip activator="parent" location="top"> Delete </v-tooltip>
-                  </v-btn>
-                  <!-- Unreimburse Button -->
-                  <v-btn
-                    v-if="userRoleIsAdmin() || userRoleIsManager()"
-                    id="unreimburse"
-                    :disabled="!isReimbursed(item) || isEditing || midAction"
-                    variant="text"
-                    icon
-                    size="small"
-                    @click="
-                      unreimbursing = !unreimbursing;
-                      midAction = true;
-                      propExpense = item;
-                    "
-                  >
-                    <v-icon size="x-large" class="case-gray" icon="mdi-currency-usd-off" />
-                    <v-tooltip activator="parent" location="top"> Unreimburse </v-tooltip>
                   </v-btn>
                 </td>
               </template>
@@ -407,16 +388,16 @@
                           <v-icon v-else class="mr-1 mx-3 case-red" id="marks"> mdi-close-circle-outline </v-icon>
                         </div>
                         <div v-if="!isEmpty(item?.rejections?.softRejections)">
-                          <b>Revisal Requests:</b>
-                          <div v-for="(reason, i) in item.rejections.softRejections.reasons" :key="reason">
-                            &nbsp;&nbsp;&nbsp;&nbsp;<b>Reason {{ i + 1 }}: </b>{{ reason }}
+                          <b>{{ getRevisalsTitle(item) }}</b>
+                          <div v-for="(reason, i) in item.rejections.softRejections.reasons" :key="reason" class="ml-4">
+                            <b>{{ getReasonIntro(reason, i) }}: </b>{{ reason.text ?? reason }}
                           </div>
-                          <div>
-                            &nbsp;&nbsp;&nbsp;&nbsp;<b>Revised: </b>
+                          <div class="ml-4">
+                            <b>Revised: </b>
                             {{ item.rejections.softRejections.revised ? 'Yes' : 'No' }}
                           </div>
                         </div>
-                        <div v-if="!isEmpty(item?.rejections?.hardRejections)">
+                        <div v-if="!isEmpty(item?.rejections?.hardRejections)" class="ml-4">
                           <b>Rejection reason:</b>
                           {{ item?.rejections?.hardRejections?.reasons?.[0] }}
                         </div>
@@ -433,7 +414,7 @@
             <v-card-actions>
               <convert-expenses-to-csv
                 v-if="userRoleIsAdmin() || userRoleIsManager()"
-                :mid-action="midAction"
+                :mid-action="midAction || expensesStatuses.disabled.size > 0"
                 :expenses="filteredExpenses"
               />
             </v-card-actions>
@@ -451,14 +432,21 @@
         <expense-form v-if="!initialPageLoading" ref="form" :is-edit="isEditing" :expense="expense" />
       </v-col>
     </v-row>
+
+    <!-- Rejection modal -->
+    <v-dialog v-model="toggleExpenseRejectionModal" persistent width="35%">
+      <expense-rejection-modal :defaultType="defaultRejectionType" />
+    </v-dialog>
   </div>
 </template>
 
 <script setup>
 import api from '@/shared/api.js';
+import { AxiosError } from 'axios';
 import Attachment from '@/components/utils/Attachment.vue';
 import ConvertExpensesToCsv from '@/components/expenses/ConvertExpensesToCsv.vue';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
+import ExpenseRejectionModal from '@/components/modals/ExpenseRejectionModal.vue';
 import employeeUtils from '@/shared/employeeUtils';
 import { isExpenseEditable } from '@/shared/expenseUtils';
 import ExpenseForm from '@/components/expenses/ExpenseForm.vue';
@@ -484,13 +472,13 @@ import {
   userRoleIsManager
 } from '@/utils/utils';
 import { employeeFilter } from '@/shared/filterUtils';
-import { format, isBetween } from '@/shared/dateUtils';
+import { format, isBetween, difference, getTodaysDate } from '@/shared/dateUtils';
 import { getDateOptionalRules } from '@/shared/validationUtils.js';
 import { updateStoreBudgets, updateStoreExpenseTypes, updateStoreEmployees, updateStoreTags } from '@/utils/storeUtils';
 import { mask } from 'vue-the-mask';
 import { onBeforeMount, onBeforeUnmount, ref, watch, computed, inject } from 'vue';
 import { useStore } from 'vuex';
-import { storeIsPopulated } from '../utils/utils';
+import { storeIsPopulated } from '@/utils/utils.js';
 import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSnackbar.vue';
 import { EXPENSE_STATES } from '@/shared/expenseUtils';
 
@@ -528,9 +516,12 @@ const expense = ref({
   recipient: null
 }); // selected expense
 const expenseTypes = ref([]); // expense types
+let statusFilterOptions = ref([
+  ...Object.values(EXPENSE_STATES).map(s => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase())
+]);
 const filter = ref({
   active: 'both',
-  status: 'pending' //default only shows expenses that are not reimbursed
+  status: ['Created']
 }); // datatable filters
 const filteredExpenses = ref([]); // filtered expenses
 const form = ref(null);
@@ -573,6 +564,13 @@ const headers = ref([
 const isEditing = ref(false); // whether or not an expense is being edited
 const loading = ref(true); // loading status
 const initialPageLoading = ref(true); // loading page at startup
+const defaultRejectionType = ref('soft'); // rejection modald default
+const rejectingExpense = ref(null); // for rejection modal
+const expensesStatuses = ref({
+  successes: new Set(), // expenses that succeeded API call
+  disabled: new Set(), // expenses in middle of API call
+  errored: new Set()  // expenses that errored on API call
+});
 const midAction = ref(false);
 const propExpense = ref({
   id: null,
@@ -599,6 +597,7 @@ const tagsInfo = ref({
   selected: [],
   flipped: []
 });
+const toggleExpenseRejectionModal = ref(false);
 const unreimbursing = ref(false); // activate unreimburse model when value changes
 const userInfo = ref(null); // user information
 const vMask = mask; //custom directive
@@ -661,6 +660,26 @@ onBeforeMount(async () => {
     await deleteExpense();
   });
 
+  // expense rejection modal
+  emitter.on('close-expenses-rejection', async () => {
+    defaultRejectionType.value = 'soft';
+    toggleExpenseRejectionModal.value = false;
+    rejectingExpense.value = null;
+  });
+  emitter.on('confirm-expenses-rejection', async ({ field, text }) => {
+    let rejType = field.split('.')[1];
+    let isHard = field.includes('hard');
+
+    // update expense with new rejection
+    rejectingExpense.value.rejections ??= {};
+    rejectingExpense.value.rejections[rejType] ??= { reasons: [], revised: false };
+    rejectingExpense.value.rejections[rejType].reasons.push({ text, date: getTodaysDate('YYYY-MM-DD') });
+    rejectingExpense.value.state = isHard ? EXPENSE_STATES.REJECTED : EXPENSE_STATES.RETURNED;
+
+    // submit (expense is set to null in close-expenses-rejection)
+    await updateExpense(rejectingExpense.value);
+  });
+
   if (store.getters.storeIsPopulated) {
     loadMyExpensesData();
   }
@@ -714,6 +733,22 @@ function getRoleHeaders() {
   return headers.value.filter((h) => !toRemove.includes(h.key));
 }
 
+function getStatusText(item) {
+  let s = filter.value.status;
+  let once = (text) => item.raw === s[0] ? text : null;
+  switch (s.length) {
+    case 1:
+      return s[0];
+    case statusFilterOptions.value.length - 1:
+      let except = statusFilterOptions.value.find((opt) => !s.includes(opt));
+      return once(`All except ${except.toLowerCase()}`);
+    case statusFilterOptions.value.length:
+      return once("All");
+    default:
+      return once(`${s.length} selected`);
+  }
+}
+
 /**
  * Checks if the user is inactive. Returns true if the user is
  * inactive, otherwise returns false.
@@ -755,6 +790,58 @@ function moneyFilter(value) {
 // |--------------------------------------------------|
 
 /**
+ * Gets reason text formatted with date if available
+ */
+function getReasonIntro(reason, index) {
+  if (reason.date) return format(reason.date, null, 'MM/DD/YYYY');
+  return `Reason ${index + 1}`;
+}
+
+/**
+ * Gets number of revisal requests for an expense
+ */
+function getRevisalsTitle(expense) {
+  let length = expense.rejections.softRejections.reasons.length;
+  return `Revisal Request${length === 1 ? '' : 's'} (${length}):`
+}
+
+/**
+ * Returns 0 if an expense is not over the age limit, otherwise returns the age that the expense is.
+ * @param expense expense to check
+ * @returns expense age, or 0 if within limit
+ */
+function expenseAgeOverLimit(expense) {
+  let limit = 45;
+  let diff = difference(expense.createdAt, expense.purchaseDate, 'day');
+  if (diff <= limit) return 0;
+  return diff;
+}
+
+const successColor = 'green-darken-2';
+const pendingColor = 'grey';
+const errorColor = 'red-darken-2';
+function getStatusIconColor(expense) {
+  if (expensesStatuses.value.successes.has(expense.id)) return successColor;
+  if (expensesStatuses.value.errored.has(expense.id)) return errorColor;
+  if (expensesStatuses.value.disabled.has(expense.id)) return pendingColor;
+}
+
+function getExpenseClass(expense) {
+  if (expensesStatuses.value.successes.has(expense.id)) return 'text-' + successColor;
+  if (expensesStatuses.value.errored.has(expense.id)) return `text-${errorColor} font-weight-bold`;
+  if (expensesStatuses.value.disabled.has(expense.id)) return 'text-' + pendingColor;
+}
+
+function getPurchaseCreatedAtDateClass(expense) {
+  let classes = [];
+  if (expensesStatuses.value.successes.has(expense.id)) classes.push('text-' + successColor);
+  else if (expensesStatuses.value.errored.has(expense.id)) classes.push(`text-${errorColor} font-weight-bold`);
+  else if (expensesStatuses.value.disabled.has(expense.id)) classes.push('text-' + pendingColor);
+  if (expenseAgeOverLimit(expense)) classes.push('text-' + errorColor);
+  return classes.join(' ');
+}
+
+/**
  * Gets the icon for the state of an expense.
  * 
  * @param state - expenses state field
@@ -762,8 +849,9 @@ function moneyFilter(value) {
  */
 function getStateIcon(state) {
   switch (state) {
+    case 'ALL': return 'mdi-check-all'; // special case for filter
     case EXPENSE_STATES.CREATED: return 'mdi-new-box';
-    case EXPENSE_STATES.APPROVED: return 'mdi-check-decagram'; // mdi-signature-freehand
+    case EXPENSE_STATES.APPROVED: return 'mdi-check-decagram';
     case EXPENSE_STATES.REIMBURSED: return 'mdi-cash-check';
     case EXPENSE_STATES.REJECTED: return 'mdi-close-box';
     case EXPENSE_STATES.RETURNED: return 'mdi-arrow-u-left-top-bold';
@@ -771,7 +859,7 @@ function getStateIcon(state) {
     default: return 'mdi-help-rhombus';
   }
 }
-
+  
 /**
  * Gets tooltip text for an expense based on its state.
  * 
@@ -795,6 +883,134 @@ function getStateTooltip(item) {
     case EXPENSE_STATES.RETURNED: return 'Returned for edits';
     case EXPENSE_STATES.REVISED: return 'Revised';
     default: return 'Unknown State';
+  }
+}
+
+async function updateExpense(newExpense) {
+  let { id } = newExpense;
+
+  // set expense to loading and make API call
+  expensesStatuses.value.errored.delete(id);
+  expensesStatuses.value.disabled.add(id);
+  let resp = await api.updateItem(api.EXPENSES, newExpense);
+
+  // respond to API call results
+  if (resp instanceof AxiosError) {
+    expensesStatuses.value.errored.add(id);
+  } else {
+    expensesStatuses.value.successes.add(id);
+    await setTimeout(() => { expensesStatuses.value.successes.delete(id) }, 2000);
+  }
+  expensesStatuses.value.disabled.delete(id);
+}
+
+/**
+ * Builds a little action menu item for the states quick dropdown
+ */
+const quickStatesMenuActions = {
+  APPROVE: async (e) => {
+    e.state = EXPENSE_STATES.APPROVED;
+    e.approvedBy = store.getters.user.id;
+    await updateExpense(e);
+  },
+  UNAPPROVE: async (e) => {
+    e.state = EXPENSE_STATES.CREATED;
+    e.approvedBy = undefined;
+    await updateExpense(e);
+  },
+  REJECT_RETURN: async (e) => {
+    rejectingExpense.value = e;
+    toggleExpenseRejectionModal.value = true;
+  },
+  REJECT: async (e) => {
+    defaultRejectionType.value = 'hard';
+    rejectingExpense.value = e;
+    toggleExpenseRejectionModal.value = true;
+  },
+  REMOVE_REJECTION: async (e) => {
+    if (e.state === EXPENSE_STATES.REJECTED) {
+      e.rejections.hardRejections = null;
+    }
+    if (e.rejections.softRejections) {
+      e.rejections.softRejections.reasons.pop();
+      e.rejections.softRejections.revised = true;
+      if (e.rejections.softRejections.reasons.length === 0) delete e.rejections;
+    }
+    e.state = EXPENSE_STATES.CREATED;
+    console.log(e.id);
+    await updateExpense(e);
+  },
+  REIMBURSE: async (e) => {
+    e.state = EXPENSE_STATES.REIMBURSED;
+    e.reimbursedDate = getTodaysDate('YYYY-MM-DD');
+    await updateExpense(e);
+  },
+  UNREIMBURSE: async (e) => {
+    e.state = EXPENSE_STATES.APPROVED;
+    e.reimbursedDate = null;
+    await updateExpense(e);
+  },
+}
+function getStatesQuickMenu(state) {
+  switch (state) {
+    case EXPENSE_STATES.CREATED:
+    case EXPENSE_STATES.REVISED:
+      return [
+        {
+          action: quickStatesMenuActions.APPROVE,
+          icon: getStateIcon(EXPENSE_STATES.APPROVED),
+          text: 'Approve'
+        },
+        {
+          action: quickStatesMenuActions.REJECT_RETURN,
+          icon: getStateIcon(EXPENSE_STATES.RETURNED),
+          text: 'Reject or Return'
+        }
+      ];
+    case EXPENSE_STATES.REJECTED:
+      return [
+        {
+          action: quickStatesMenuActions.REMOVE_REJECTION,
+          icon: getStateIcon(EXPENSE_STATES.CREATED),
+          text: 'Remove rejection'
+        }
+      ]
+    case EXPENSE_STATES.RETURNED:
+      return [
+        {
+          action: quickStatesMenuActions.REMOVE_REJECTION,
+          icon: getStateIcon(EXPENSE_STATES.CREATED),
+          text: 'Remove revisal'
+        },
+        {
+          action: quickStatesMenuActions.REJECT,
+          icon: getStateIcon(EXPENSE_STATES.REJECTED),
+          text: 'Reject'
+        }
+      ]
+    case EXPENSE_STATES.APPROVED:
+      return [
+        {
+          action: quickStatesMenuActions.REIMBURSE,
+          icon: getStateIcon(EXPENSE_STATES.REIMBURSED),
+          text: 'Reimburse (as of today)'
+        },
+        {
+          action: quickStatesMenuActions.UNAPPROVE,
+          icon: getStateIcon(EXPENSE_STATES.CREATED),
+          text: 'Remove approval'
+        }
+      ];
+    case EXPENSE_STATES.REIMBURSED:
+      return [
+        {
+          action: quickStatesMenuActions.UNREIMBURSE,
+          icon: getStateIcon(EXPENSE_STATES.APPROVED),
+          text: 'Remove reimbursement'
+        }
+      ];
+    default:
+      return [];
   }
 }
  
@@ -894,69 +1110,72 @@ async function deleteModelFromTable() {
  * Filters expenses based on filter selections.
  */
 function filterExpenses() {
-  filteredExpenses.value = expenses.value;
+  filteredExpenses.value = [];
 
-  // filter expenses by employee search
-  if (employee.value) {
-    filteredExpenses.value = _filter(filteredExpenses.value, (expense) => {
-      return expense.employeeId === employee.value;
-    });
-  }
+  for (let expense of expenses.value) {
+    // filter expenses by employee search
+    if (employee.value) {
+      if (expense.employeeId !== employee.value) continue;
+    }
 
-  // filter based on tags
-  if (tagsInfo.value.selected?.length > 0) {
-    filteredExpenses.value = _filter(filteredExpenses.value, (expense) => {
-      return employeeUtils.selectedTagsHasEmployee(expense.employeeId, tagsInfo.value);
-    });
-  }
+    // filter based on tags
+    if (tagsInfo.value.selected?.length > 0) {
+      if (!employeeUtils.selectedTagsHasEmployee(expense.employeeId, tagsInfo.value)) continue;
+    }
 
-  // filter based on generic search
-  if (search.value) {
-    let headerKeys = _map(headers.value, (object) => object.key);
-    filteredExpenses.value = _filter(filteredExpenses.value, (expense) => {
-      return _some(Object.entries(expense), ([key, value]) => {
-        return String(value)?.toLowerCase().includes(search.value?.toLowerCase()) && headerKeys?.includes(key);
-      });
-    });
-  }
-
-  // filter based on start and end dates
-  if (startDateFilter.value && endDateFilter.value) {
-    filteredExpenses.value = _filter(filteredExpenses.value, (expense) =>
-      isBetween(expense.reimbursedDate, startDateFilter.value, endDateFilter.value, 'days', '[]')
-    );
-  }
-
-  // filter based on reimbursement status
-  if (filter.value.status !== 'all') {
-    // filter expenses by reimburse date
-    filteredExpenses.value = _filter(filteredExpenses.value, (expense) => {
-      if (filter.value.status === 'pending') {
-        // filter for pending expenses
-        return !isReimbursed(expense) && !(expense?.rejections?.hardRejections?.reasons?.length > 0);
-      } else if (filter.value.status === 'reimbursed') {
-        // filter for reimbursed expenses
-        return isReimbursed(expense);
-      } else if (filter.value.status === 'rejected') {
-        // filter for rejected expenses
-        return isRejected(expense);
+    // filter based on generic search
+    if (search.value) {
+      let matched = false;
+      // let headerKeys = _map(headers.value, (object) => object.key);
+      for (let [key, value] of Object.entries(expense)) {
+        let data = value; // allow modification
+        if (!data || data === '') continue; // skip empty data
+        if (typeof data === 'number') data = data.toFixed(2); // support money
+        if (key === 'receipt') data = data.join?.(' ') || data; // support receipt names
+        if (key === 'rejections') { // support rejection reasons
+          let rejData = '';
+          if (data.hardRejections?.reasons) rejData += data.hardRejections.reasons.join(' ');
+          if (data.softRejections?.reasons) rejData += data.softRejections.reasons.join(' ');
+          data = rejData;
+        }
+        // search if data is a string by now
+        if (typeof data !== 'string') continue;
+        if (['id', 'expenseTypeId', 'employeeId'].includes(key)) {
+          if (data === search.value) {
+            matched = true;
+            break;
+          }
+        } else if (data.toLowerCase().includes(search.value.toLowerCase())) {
+          matched = true;
+          break;
+        }
       }
-    });
-  }
+      if (!matched) continue;
+    }
 
-  // filter based on expense type active
-  if (filter.value.active !== 'both') {
-    // filter expenses by active or inactive expense types (available to admin only)
-    filteredExpenses.value = _filter(filteredExpenses.value, (expense) => {
+    // filter based on start and end dates
+    if (startDateFilter.value || endDateFilter.value) {
+      let start = startDateFilter.value || '1900-01-01';
+      let end = endDateFilter.value || '9999-12-31';
+      if (!isBetween(expense.reimbursedDate, start, end, 'days', '[]')) continue;
+    }
+
+    // filter based on status
+    let status = filter.value.status.map((s) => s.toLowerCase());
+    if (status.length > 0) {
+      if (!status.includes(expense.state.toLowerCase())) continue;
+    }
+
+    // filter based on expense type active
+    if (filter.value.active !== 'both') {
       let expenseType = _find(expenseTypes.value, (type) => expense.expenseTypeId === type.value);
-      if (filter.value.active == 'active') {
-        // filter for active expenses
-        return expenseType && !expenseType.isInactive;
-      } else {
-        // filter for inactive expenses
-        return expenseType && expenseType.isInactive;
-      }
-    });
+      let etActive = expenseType && !expenseType.isInactive;
+      let filterActive = filter.value.status === 'active';
+      if (filterActive !== etActive) continue;
+    }
+
+    // passed all filters, add it
+    filteredExpenses.value.push(expense);
   }
 } // filterExpenses
 
@@ -1005,19 +1224,6 @@ function getReceipts(receipts) {
 function isReimbursed(expense) {
   return expense && !isEmpty(expense.reimbursedDate);
 } // isReimbursed
-
-/**
- * Checks if the expense is rejected. Returns true if the
- * expense is reimbursed, otherwise returns false.
- *
- * @param expense - expense to check
- * @return boolean - expense is rejected
- */
-function isRejected(expense) {
-  return (
-    expense?.rejections?.softRejections?.reasons?.length > 0 || expense?.rejections?.hardRejections?.reasons?.length
-  );
-} // isRejected
 
 async function loadMyExpensesData() {
   initialPageLoading.value = true;
@@ -1192,6 +1398,11 @@ function useInactiveStyle(expense) {
 // |                     WATCHERS                     |
 // |                                                  |
 // |--------------------------------------------------|
+
+watch(
+  () => rejectingExpense.value,
+  () => console.log(rejectingExpense.value)
+)
 
 /**
  * watcher for employee, filter.active, filter.reimbursed - filters expenses

@@ -36,8 +36,8 @@
         variant="text"
         :disabled="reason.length < 1"
         @click="
+          emitter.emit('confirm-expenses-rejection', { field: selectedDenialType.field, text: reason });
           emitter.emit('close-expenses-rejection');
-          emitter.emit('confirm-expenses-rejection', { field: selectedDenialType.field, reason });
           activate = false;
         "
       >
@@ -57,7 +57,7 @@ import { computed, inject, ref } from 'vue';
 // |                                                  |
 // |--------------------------------------------------|
 
-const props = defineProps(['expenses']);
+const props = defineProps(['expenses', 'defaultType']);
 const emitter = inject('emitter');
 
 const denialTypes = ref([
@@ -72,7 +72,8 @@ const denialTypes = ref([
     field: 'rejections.hardRejections'
   }
 ]);
-const selectedDenialType = ref(denialTypes.value[0]);
+let type = props.defaultType === 'hard' ? 1 : 0;
+const selectedDenialType = ref(denialTypes.value[type]);
 const reason = ref('');
 
 // |--------------------------------------------------|
