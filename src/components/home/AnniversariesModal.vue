@@ -20,7 +20,7 @@
         </div>
         <v-list-item
           v-for="anniversary in anniversaries"
-          :key="anniversary.text"
+          :key="anniversary.employeeName"
           :ripple="false"
           inactive
           :lines="isMobile() ? 'three' : 'one'"
@@ -32,7 +32,16 @@
             </v-avatar>
           </template>
           <v-list-item-title>{{ anniversary.date }}</v-list-item-title>
-          <v-list-item-subtitle>{{ anniversary.text }}</v-list-item-subtitle>
+          <v-list-item-subtitle>
+            <router-link :to="`/employee/${anniversary.employeeNumber}`" target="_blank" class="text-indigo-darken-4">
+              {{ anniversary.employeeName }}
+            </router-link>
+            is celebrating 
+            <span :class="`${anniversary.years % 5 === 0 ? 'font-weight-bold' : ''}`">
+              {{ anniversary.years }} {{ anniversary.years === 1 ? 'year' : 'years' }}
+            </span>
+            at CASE!
+          </v-list-item-subtitle>
         </v-list-item>
       </v-list>
     </v-card-text>
@@ -64,8 +73,8 @@ const emitter = inject('emitter');
 const date = ref(null);
 const anniversaries = ref(null);
 
-anniversaries.value = _cloneDeep(props.item.events);
 date.value = format(props.item.date.split(' in ')[1], 'MMM YYYY', DEFAULT_ISOFORMAT);
+populateAnniversaries();
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -96,23 +105,22 @@ function isEmployeeAnniversaryMonth(employee) {
 function populateAnniversaries() {
   anniversaries.value = [];
   let activeEmployees = _filter(store.getters.employees, (e) => e.workStatus > 0);
-  _forEach(activeEmployees, (e) => {
-    if (isEmployeeAnniversaryMonth(e)) {
-      let hireDate = format(e.hireDate, null, DEFAULT_ISOFORMAT);
-      let anniversary = setYear(hireDate, getYear(date.value));
-      let yearsDiff = difference(anniversary, hireDate, 'year');
-      let employeeAnniversaryObj = {
-        text: `${e.nickname || e.firstName} ${e.lastName} is celebrating ${yearsDiff} ${
-          yearsDiff > 1 ? 'years' : 'year'
-        } at CASE!`,
-        anniversary: anniversary,
-        icon: `mdi-party-popper`,
-        date: format(anniversary, null, 'll'),
-        color: '#bc3825'
-      };
-      anniversaries.value.push(employeeAnniversaryObj);
-    }
-  });
+  for (let e of activeEmployees) {
+    if (!isEmployeeAnniversaryMonth(e)) continue;
+    let hireDate = format(e.hireDate, null, DEFAULT_ISOFORMAT);
+    let anniversary = setYear(hireDate, getYear(date.value));
+    let yearsDiff = difference(anniversary, hireDate, 'year');
+    let employeeAnniversaryObj = {
+      employeeName: `${e.nickname || e.firstName} ${e.lastName}`,
+      employeeNumber: e.employeeNumber,
+      years: Number(yearsDiff),
+      anniversary: anniversary,
+      icon: `mdi-party-popper`,
+      date: format(anniversary, null, 'll'),
+      color: '#bc3825'
+    };
+    anniversaries.value.push(employeeAnniversaryObj);
+  }
   anniversaries.value.sort((a, b) => new Date(a.anniversary) - new Date(b.anniversary));
 }
 
