@@ -476,7 +476,7 @@ import { format, isBetween, difference, getTodaysDate } from '@/shared/dateUtils
 import { getDateOptionalRules } from '@/shared/validationUtils.js';
 import { updateStoreBudgets, updateStoreExpenseTypes, updateStoreEmployees, updateStoreTags } from '@/utils/storeUtils';
 import { mask } from 'vue-the-mask';
-import { onBeforeMount, onBeforeUnmount, ref, watch, computed, inject } from 'vue';
+import { onBeforeMount, onMounted, onBeforeUnmount, ref, watch, computed, inject } from 'vue';
 import { useStore } from 'vuex';
 import { storeIsPopulated } from '@/utils/utils.js';
 import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSnackbar.vue';
@@ -696,6 +696,10 @@ onBeforeMount(async () => {
     localStorage.removeItem('requestedFilter');
   }
 }); // onBeforeMount
+
+onMounted(() => {
+  if (!userRoleIsAdmin() && !userRoleIsManager()) filter.value.status = [];
+})
 
 /**
  * destroy listeners
