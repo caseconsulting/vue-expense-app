@@ -187,7 +187,7 @@ export function getNonFutureDateRules() {
  * @return Array - The array of rule functions
  */
 export function getNumberRules() {
-  return [(v) => /^\d+$/.test(v) || 'Must be a positive number'];
+  return [(v) => /^\d+$/.test(v) || 'Must be a positive, whole number'];
 } // getNumberRules
 
 /**

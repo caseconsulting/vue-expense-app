@@ -232,7 +232,7 @@ onBeforeMount(async () => {
   emitter.on('toggleExpense', toggleShowOnFeed);
   emitter.on('confirm-reimburse', async () => await reimburseExpenses());
   emitter.on('cancel-reimburse', () => (buttonClicked.value = false));
-  emitter.on('confirm-expenses-rejection', async ({ field, reason }) => await rejectExpenses(field, reason));
+  emitter.on('confirm-expenses-rejection', async ({ field, text }) => await rejectExpenses(field, text));
   emitter.on('reimburse-expenses', (isGeneratingAGiftCard) => {
     buttonClicked.value = true;
     isGeneratingGiftCard.value = isGeneratingAGiftCard;
@@ -570,9 +570,9 @@ function refreshExpenses() {
  * on the Reimbursements page again.
  *
  * @param {String} field - The reject property in the expense
- * @param {String} reason - The reasoning for expense rejection
+ * @param {String} text - The reasoning for expense rejection
  */
-async function rejectExpenses(field, reason) {
+async function rejectExpenses(field, text) {
   loading.value = true;
   let selectedExpenses = _filter(pendingExpenses.value, (e) => e.selected);
   await asyncForEach(selectedExpenses, async (expense) => {
@@ -581,7 +581,7 @@ async function rejectExpenses(field, reason) {
     emitter.emit('expenseClicked', undefined);
     // set reasoning in rejection object
     let reasons = _get(expense, field + '.reasons');
-    reasons = [...(reasons || []), reason];
+    reasons = [...(reasons || []), { text, date: getTodaysDate('YYYY-MM-DD') }];
     let hard = field.includes('hard'); // eg "rejections.hardRejections"
     _set(expense, field + '.reasons', reasons);
     _set(expense, field + '.revised', false);

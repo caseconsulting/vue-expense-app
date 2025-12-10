@@ -53,6 +53,7 @@ export function getProjectCurrentEmployees(contract, project, employees) {
 
   // loop through every employee's projects
   for (let employee of employees) {
+    if (employee.workStatus === 0) continue;
     for (let c of employee.contracts ?? []) {
       if (contract.id != c.contractId) continue; // skip non-matching contracts
       for (let p of c.projects ?? []) {
@@ -114,8 +115,11 @@ export function isProjectActive(project, employee) {
   // check if the employee is active on the project
   for (let c of employee.contracts ?? [])
     for (let p of c.projects ?? [])
-      if (p.projectId === project.id)
-        return !p.endDate;
+      if (p.projectId === project.id) {
+        if (employee.workStatus === 0) return false; // employee is inactive
+        if (p.presentDate != null) return p.presentDate; // presentDate exists
+        return p.endDate; // presentDate doesn't exist, default to old date method
+      }
 } // isProjectActive
 
 export default {

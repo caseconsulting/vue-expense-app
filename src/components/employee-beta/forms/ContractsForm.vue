@@ -79,77 +79,30 @@
               <v-col :cols="isMobile() ? '12' : '3'">
                 <date-picker
                   :id="'start-field-' + index + '-' + projIndex"
-                  variant="filled"
                   v-model="project.startDate"
+                  variant="filled"
                   label="Start Date"
                   :max="project.endDate"
                   :rules="[...getRequiredRules(), ...getDateRules(), getDateBeforeRule(project.endDate)]"
                   clearable
-                  autocomplete="off"
                 ></date-picker>
               </v-col>
 
               <v-col :cols="isMobile() ? '12' : '3'">
-                <v-text-field
+                <date-picker
                   :id="'end-field-' + index + '-' + projIndex"
-                  :model-value="format(project.endDate, null, 'MM/DD/YYYY')"
-                  :label="project.presentDate ? 'Currently active' : 'End Date'"
+                  v-model="project.endDate"
+                  v-model:checkbox="project.presentDate"
                   :rules="[
                     ...getDateOptionalRules(),
                     getDateAfterRule(project.startDate),
                     getEndDatePresentRule(project)
                   ]"
-                  hint="MM/DD/YYYY format"
-                  prepend-inner-icon="mdi-calendar"
-                  v-mask="'##/##/####'"
+                  :min="project.startDate"
+                  label="End Date"
+                  variant="filled"
                   clearable
-                  @click:clear="project.endDate = null"
-                  @update:focused="project.endDate = parseEventDate($event)"
-                  @click:prepend="project.showEndMenu = true"
-                  @keypress="project.showEndMenu = false"
-                  @update:model-value="
-                    project.endDate && project.endDate.length > 0 ? (project.presentDate = false) : ''
-                  "
-                  autocomplete="off"
-                >
-                  <template v-if="!getEndDatePresentRule(project) !== true" v-slot:message>
-                    End Date is required (click <v-icon color="black" icon="mdi-check-circle-outline" /> to mark active)
-                  </template>
-                  <template v-slot:append-inner>
-                    <v-avatar
-                      v-if="checkProjectStatus(project)"
-                      @click.stop="project.presentDate = !project.presentDate"
-                      class="pointer"
-                      size="x-small"
-                    >
-                      <span v-if="!project.presentDate">
-                        <v-tooltip activator="parent">Click if active</v-tooltip>
-                        <v-icon color="black"> mdi-check-circle-outline </v-icon>
-                      </span>
-                      <span v-else>
-                        <v-tooltip activator="parent">Currently active</v-tooltip>
-                        <v-icon color="black"> mdi-check-circle </v-icon>
-                      </span>
-                    </v-avatar>
-                  </template>
-                  <v-menu
-                    activator="parent"
-                    v-model="project.showEndMenu"
-                    :close-on-content-click="false"
-                    location="start center"
-                  >
-                    <v-date-picker
-                      v-model="project.endDate"
-                      :min="project.startDate"
-                      @update:model-value="project.showEndMenu = false"
-                      show-adjacent-months
-                      hide-actions
-                      keyboard-icon=""
-                      color="#bc3825"
-                      title="End Date"
-                    ></v-date-picker>
-                  </v-menu>
-                </v-text-field>
+                />
               </v-col>
 
               <v-col v-if="userIsAdminOrManager" :cols="isMobile() ? '12' : '4'">

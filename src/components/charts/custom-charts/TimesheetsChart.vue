@@ -24,18 +24,22 @@
             variant="outlined"
             class="divider ma-0 pa-1 custom-input"
             hide-details
-            @keydown.enter="showCustomCompletedInput = false"
-            @blur="showCustomCompletedInput = false"
+            @keydown.enter="leaveCustomInput()"
+            @blur="leaveCustomInput()"
           ></v-text-field>
         </div>
         <div
-          class="pointer"
-          @click="
-            showCustomNeededInput = true;
-            customNeededInput = needed;
-          "
         >
-          <div v-if="!showCustomNeededInput" class="pt-1 font-weight-medium">{{ needed }}h</div>
+          <div
+            v-if="!showCustomNeededInput"
+            class="pointer pt-1 font-weight-medium"
+            @click="
+              showCustomNeededInput = true;
+              customNeededInput = needed;
+            "
+          >
+            {{ needed }}h
+          </div>
           <v-text-field
             v-else
             v-model="customNeededInput"
@@ -44,9 +48,17 @@
             variant="outlined"
             class="ma-0 pa-1 custom-input"
             hide-details
-            @keydown.enter="showCustomNeededInput = false"
-            @blur="showCustomNeededInput = false"
-          ></v-text-field>
+            @keydown.enter="leaveCustomInput()"
+            @blur="leaveCustomInput()"
+          >
+          <template #prepend-inner>
+            <div class="icon" @click="saveCustomNeeded = !saveCustomNeeded">
+              <v-icon v-if="saveCustomNeeded" icon="mdi-lock" size="small" class="cursor-pointer" />
+              <v-icon v-else icon="mdi-lock-outline" size="small" class="cursor-pointer" />
+            </div>
+            <v-tooltip activator="parent" location="bottom">{{ lockTooltip }}</v-tooltip>
+          </template>
+        </v-text-field>
         </div>
       </div>
     </doughnut-chart>
@@ -56,20 +68,22 @@
 
 <script setup>
 import DoughnutChart from '@/components/charts/base-charts/DoughnutChart.vue';
-import { inject, ref, onMounted, onBeforeUnmount, watch } from 'vue';
+import { inject, ref, onMounted, computed, onBeforeUnmount, nextTick } from 'vue';
 import { formatNumber } from '@/utils/utils.js';
+import { useStore } from 'vuex';
+import api from '@/shared/api';
 import _map from 'lodash/map';
 import _pickBy from 'lodash/pickBy';
 import _sum from 'lodash/sum';
 import _slice from 'lodash/slice';
-
+const store = useStore();
 // |--------------------------------------------------|
 // |                                                  |
 // |                      SETUP                       |
 // |                                                  |
 // |--------------------------------------------------|
 
-const props = defineProps(['jobcodes', 'nonBillables', 'title']);
+const props = defineProps(['jobcodes', 'nonBillables', 'title', 'employeeId', 'isCalendarYear', 'isYearly']);
 const emitter = inject('emitter');
 
 const completed = ref(0);
@@ -83,6 +97,9 @@ const showCustomCompletedInput = ref(null);
 const showCustomNeededInput = ref(null);
 const chartData = ref(null);
 const dataReceived = ref(false);
+const saveCustomNeeded = ref(false);
+let timesheetPreferences = null;
+let employee = null;
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -101,12 +118,29 @@ onBeforeUnmount(() => {
  * Mounted lifecycle hook.
  */
 onMounted(async () => {
+  employee = store.getters.employees.find((e) => e.id === props.employeeId);
+  timesheetPreferences = employee.preferences?.timesheetPreferences;
+  timesheetPreferences ??= {
+    customNeeded: {
+      monthly: { use: false, value: 0 },
+      calYear: { use: false, value: 0 },
+      optYear: { use: false, value: 0 }
+    },
+  }
+
   emitter.on('timesheets-chart-data', async ({ completed: c, needed: n, remainingHours: r }) => {
     completed.value = c;
     needed.value = n;
     remainingHours.value = r;
     await fillData();
     dataReceived.value = true;
+
+    // override with timesheet widget preferences
+    let type = props.isYearly ? (props.isCalendarYear ? 'calYear' : 'optYear') : 'monthly';
+    if (timesheetPreferences?.customNeeded?.[type]?.use) {
+      needed.value = timesheetPreferences?.customNeeded?.[type]?.value;
+      saveCustomNeeded.value = true;
+    }
   });
 
   // create tooltip
@@ -223,53 +257,80 @@ async function fillData() {
   dataReceived.value = true;
 } // fillData
 
-// |--------------------------------------------------|
-// |                                                  |
-// |                     WATCHERS                     |
-// |                                                  |
-// |--------------------------------------------------|
+async function leaveCustomInput() {
+  // save preference locally
+  let type = props.isYearly ? (props.isCalendarYear ? 'calYear' : 'optYear') : 'monthly';
+  timesheetPreferences.customNeeded[type] = { use: saveCustomNeeded.value, value: customNeededInput.value };
 
-watch(
-  () => [showCustomCompletedInput.value, showCustomNeededInput.value],
-  async () => {
-    if (!showCustomCompletedInput.value && !showCustomNeededInput.value) {
-      let customCompleted, customNeeded;
-      // evaluate custom input as expressions
-      try {
-        customCompleted = eval(customCompletedInput.value);
-      } catch (err) {
-        customCompleted = completed.value;
-      }
-      try {
-        customNeeded = eval(customNeededInput.value);
-      } catch (err) {
-        customNeeded = needed.value;
-      }
-      // emit to TimePeriodDetails if input has changed
-      if (customCompleted && !isNaN(customCompleted) && !isNaN(parseFloat(customCompleted))) {
-        completed.value = customCompleted;
-        emitter.emit('update-time-data-completed', completed.value);
-      }
-      if (customNeeded && !isNaN(customNeeded) && !isNaN(parseFloat(customNeeded))) {
-        needed.value = customNeeded;
-        emitter.emit('update-time-data-needed', needed.value);
-      }
-      // update chart with custom input
-      remainingHours.value = needed.value - completed.value;
-      await fillData();
-      updateKey.value++;
-    }
+  // make preference var to user
+  let preferences = { ...(employee.preferences || {}), timesheetPreferences };
+  employee.preferences = preferences;
+
+  // update chart and save to api
+  showCustomNeededInput.value = false;
+  showCustomCompletedInput.value = false;
+  await updateCustomHours();
+  await api.updateAttribute(api.EMPLOYEES, { id: employee.id, preferences }, 'preferences');
+}
+
+async function updateCustomHours() {
+  let customCompleted, customNeeded;
+  // evaluate custom input as expressions
+  try {
+    customCompleted = eval(customCompletedInput.value);
+  } catch (err) {
+    customCompleted = completed.value;
   }
-);
+  try {
+    customNeeded = eval(customNeededInput.value);
+  } catch (err) {
+    customNeeded = needed.value;
+  }
+  // emit to TimePeriodDetails if input has changed
+  if (customCompleted && !isNaN(customCompleted) && !isNaN(parseFloat(customCompleted))) {
+    completed.value = customCompleted;
+    emitter.emit('update-time-data-completed', completed.value);
+  }
+  if (customNeeded && !isNaN(customNeeded) && !isNaN(parseFloat(customNeeded))) {
+    needed.value = customNeeded;
+    emitter.emit('update-time-data-needed', needed.value);
+  }
+  // update chart with custom input
+  remainingHours.value = needed.value - completed.value;
+  await fillData();
+  updateKey.value++;
+}
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                     COMPUTED                     |
+// |                                                  |
+// |--------------------------------------------------|
+const lockTooltip = computed(() => {
+  return saveCustomNeeded.value ? 'Saved between sessions' : 'Forgotten between sessions';
+})
 </script>
 
 <style>
 .custom-input input {
   padding: 5px 10px 3px 9px;
-  width: 78px;
+  width: 50px;
   height: 10px;
   min-height: 25px;
   font-size: 12px;
+}
+.custom-input .v-field__input {
+  text-align: center;
+  font-size: .875rem;
+  position: relative;
+  right: 0.3em;
+  font-weight: 500;
+  padding-inline-start: 0;
+  padding-inline-end: 0;
+}
+.custom-input .v-field--prepended {
+  padding-inline-start: 2px;
+  padding-bottom: 2px;
 }
 </style>
 

@@ -19,7 +19,7 @@
         :valid="props.valid"
       ></default-edit-item>
       <date-edit-item
-        v-else-if="props.field.editType === TYPES.DATE_MMYYYY || props.field.infoType === TYPES.DATE_MMDDYYYY"
+        v-else-if="props.field.infoType === TYPES.DATE_MMDDYYYY"
         :field="props.field"
         :item="props.item"
         :valid="props.valid"

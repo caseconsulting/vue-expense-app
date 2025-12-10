@@ -109,7 +109,7 @@
               <v-container fluid>
                 <v-row class="d-flex flex-wrap">
                   <!-- Active Filter -->
-                  <v-col cols="3">
+                  <v-col lg="3" sm="6" cols="12">
                     <h4>Active Expense Type:</h4>
                     <v-btn-toggle
                       v-model="filter.active"
@@ -161,14 +161,19 @@
                   <!-- Status Filter -->
                   <v-col v-if="userRoleIsAdmin() || userRoleIsManager()" cols="3" :class="!userRoleIsAdmin() && !userRoleIsManager() ? 'ml-3' : ''">
                     <h4>Status:</h4>
-                    <v-combobox
+                    <v-select
                       density="comfortable"
                       v-model="filter.status"
                       :items="statusFilterOptions"
-                      :prepend-inner-icon="getStateIcon(filter.status.toUpperCase())"
+                      prepend-inner-icon="mdi-filter-variant"
                       variant="underlined"
+                      input="hello"
                       hide-details
+                      multiple
                     >
+                      <template #selection="{item}">
+                        {{ getStatusText(item) }}
+                      </template>
                       <template v-slot:item="{ props, item }">
                         <v-list-item
                           v-bind="props"
@@ -176,84 +181,39 @@
                         >
                         <template v-slot:prepend>
                           <v-avatar>
-                            <v-icon color="#111" :icon="getStateIcon(item.raw.toUpperCase())" />
+                            <v-icon :color="filter.status.includes(item.raw) ? 'primary' : '#111'" :icon="getStateIcon(item.raw.toUpperCase())" />
                           </v-avatar>
                         </template>
                         </v-list-item>
                       </template>
-                    </v-combobox>
+                    </v-select>
                   </v-col>
                   <!-- Reimbursed Date Range Filter -->
                   <v-col cols="6" class="pa-2">
                     <h4 class="ml-0 pl-0 mb-1">Reimbursed Date Range:</h4>
-                    <v-row class="ml-1">
-                      <!-- Start Date Filter -->
-                      <v-menu v-model="startDateFilterMenu" :close-on-content-click="false" location="start center">
-                        <template #activator="{ props }">
-                          <v-text-field
-                            ref="formFields"
-                            v-mask="'##/##/####'"
-                            :model-value="format(startDateFilter, null, 'MM/DD/YYYY')"
-                            :rules="getDateOptionalRules()"
-                            label="Start Date"
-                            variant="underlined"
-                            hint="MM/DD/YYYY format"
-                            prepend-icon="mdi-calendar"
-                            persistent-hint
-                            class="mr-5"
-                            v-bind="props"
-                            @update:focused="startDateFilter = parseEventDate()"
-                            @click:prepend="startDateFilterMenu = true"
-                            @keypress="startDateFilterMenu = false"
-                          />
-                        </template>
-                        <v-date-picker
+                    <!-- Start Date Filter -->
+                     <v-row>
+                      <v-col cols="6">
+                        <date-picker
                           v-model="startDateFilter"
+                          label="Start Date Filter"
+                          :rules="getDateOptionalRules()"
                           show-adjacent-months
                           hide-actions
-                          keyboard-icon=""
-                          color="#bc3825"
-                          title="Start Date Filter"
-                          @update:model-value="
-                            startDateFilterMenu = false;
-                            startDateFilter = format(startDateFilter, null, 'MM/DD/YYYY');
-                          "
+                          persistent-hint
                         />
-                      </v-menu>
-
+                      </v-col>
                       <!-- End Date Filter -->
-                      <v-menu v-model="endDateFilterMenu" :close-on-content-click="false" location="start center">
-                        <template #activator="{ props }">
-                          <v-text-field
-                            ref="formFields"
-                            v-mask="'##/##/####'"
-                            :model-value="format(endDateFilter, null, 'MM/DD/YYYY')"
-                            :rules="getDateOptionalRules()"
-                            label="End Date"
-                            variant="underlined"
-                            hint="MM/DD/YYYY format"
-                            prepend-icon="mdi-calendar"
-                            persistent-hint
-                            class="mr-5"
-                            v-bind="props"
-                            @update:focused="endDateFilter = parseEventDate()"
-                            @click:prepend="endDateFilterMenu = true"
-                            @keypress="endDateFilterMenu = false"
-                          />
-                        </template>
-                        <v-date-picker
+                      <v-col cols="6">
+                        <date-picker
                           v-model="endDateFilter"
+                          label="End Date Filter"
+                          :rules="getDateOptionalRules()"
                           show-adjacent-months
                           hide-actions
-                          keyboard-icon=""
-                          color="#bc3825"
-                          title="Start Date Filter"
-                          @update:model-value="
-                            endDateFilterMenu = false;
-                            endDateFilter = format(endDateFilter, null, 'MM/DD/YYYY');
-                          "
+                          persistent-hint
                         />
-                      </v-menu>
+                      </v-col>
                     </v-row>
                   </v-col>
                 </v-row>
@@ -270,7 +230,6 @@
               :loading="loading || initialPageLoading"
               :items-per-page="15"
               :row-props="rowClasses"
-              :search="search"
               item-value="id"
               class="elevation-4 smaller-font"
               density="compact"
@@ -429,16 +388,16 @@
                           <v-icon v-else class="mr-1 mx-3 case-red" id="marks"> mdi-close-circle-outline </v-icon>
                         </div>
                         <div v-if="!isEmpty(item?.rejections?.softRejections)">
-                          <b>Revisal Requests:</b>
-                          <div v-for="(reason, i) in item.rejections.softRejections.reasons" :key="reason">
-                            &nbsp;&nbsp;&nbsp;&nbsp;<b>Reason {{ i + 1 }}: </b>{{ reason }}
+                          <b>{{ getRevisalsTitle(item) }}</b>
+                          <div v-for="(reason, i) in item.rejections.softRejections.reasons" :key="reason" class="ml-4">
+                            <b>{{ getReasonIntro(reason, i) }}: </b>{{ reason.text ?? reason }}
                           </div>
-                          <div>
-                            &nbsp;&nbsp;&nbsp;&nbsp;<b>Revised: </b>
+                          <div class="ml-4">
+                            <b>Revised: </b>
                             {{ item.rejections.softRejections.revised ? 'Yes' : 'No' }}
                           </div>
                         </div>
-                        <div v-if="!isEmpty(item?.rejections?.hardRejections)">
+                        <div v-if="!isEmpty(item?.rejections?.hardRejections)" class="ml-4">
                           <b>Rejection reason:</b>
                           {{ item?.rejections?.hardRejections?.reasons?.[0] }}
                         </div>
@@ -491,6 +450,7 @@ import ExpenseRejectionModal from '@/components/modals/ExpenseRejectionModal.vue
 import employeeUtils from '@/shared/employeeUtils';
 import { isExpenseEditable } from '@/shared/expenseUtils';
 import ExpenseForm from '@/components/expenses/ExpenseForm.vue';
+import DatePicker from '@/components/shared/DatePicker.vue';
 import TagsFilter from '@/components/shared/TagsFilter.vue';
 import UnreimburseModal from '@/components/modals/UnreimburseModal.vue';
 import _isEmpty from 'lodash/isEmpty';
@@ -537,7 +497,6 @@ const expenses = ref([]); // all expenses
 const employees = ref([]); // employee autocomplete options
 const employee = ref(null); // employee autocomplete filter
 const endDateFilter = ref(null);
-const endDateFilterMenu = ref(null);
 const expense = ref({
   id: null,
   purchaseDate: null,
@@ -558,12 +517,11 @@ const expense = ref({
 }); // selected expense
 const expenseTypes = ref([]); // expense types
 let statusFilterOptions = ref([
-  'All',
   ...Object.values(EXPENSE_STATES).map(s => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase())
 ]);
 const filter = ref({
   active: 'both',
-  status: 'All'//default only shows expenses that are not reimbursed
+  status: ['Created']
 }); // datatable filters
 const filteredExpenses = ref([]); // filtered expenses
 const form = ref(null);
@@ -635,7 +593,6 @@ const propExpense = ref({
 const search = ref(null); // query text for datatable search field
 const toSort = ref([{ key: 'createdAt', order: 'desc' }]); // default sort datatable items
 const startDateFilter = ref(null);
-const startDateFilterMenu = ref(null);
 const tagsInfo = ref({
   selected: [],
   flipped: []
@@ -709,15 +666,14 @@ onBeforeMount(async () => {
     toggleExpenseRejectionModal.value = false;
     rejectingExpense.value = null;
   });
-  emitter.on('confirm-expenses-rejection', async (data) => {
-    let { field, reason } = data;
+  emitter.on('confirm-expenses-rejection', async ({ field, text }) => {
     let rejType = field.split('.')[1];
     let isHard = field.includes('hard');
 
     // update expense with new rejection
     rejectingExpense.value.rejections ??= {};
     rejectingExpense.value.rejections[rejType] ??= { reasons: [], revised: false };
-    rejectingExpense.value.rejections[rejType].reasons.push(reason);
+    rejectingExpense.value.rejections[rejType].reasons.push({ text, date: getTodaysDate('YYYY-MM-DD') });
     rejectingExpense.value.state = isHard ? EXPENSE_STATES.REJECTED : EXPENSE_STATES.RETURNED;
 
     // submit (expense is set to null in close-expenses-rejection)
@@ -777,6 +733,22 @@ function getRoleHeaders() {
   return headers.value.filter((h) => !toRemove.includes(h.key));
 }
 
+function getStatusText(item) {
+  let s = filter.value.status;
+  let once = (text) => item.raw === s[0] ? text : null;
+  switch (s.length) {
+    case 1:
+      return s[0];
+    case statusFilterOptions.value.length - 1:
+      let except = statusFilterOptions.value.find((opt) => !s.includes(opt));
+      return once(`All except ${except.toLowerCase()}`);
+    case statusFilterOptions.value.length:
+      return once("All");
+    default:
+      return once(`${s.length} selected`);
+  }
+}
+
 /**
  * Checks if the user is inactive. Returns true if the user is
  * inactive, otherwise returns false.
@@ -816,6 +788,22 @@ function moneyFilter(value) {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Gets reason text formatted with date if available
+ */
+function getReasonIntro(reason, index) {
+  if (reason.date) return format(reason.date, null, 'MM/DD/YYYY');
+  return `Reason ${index + 1}`;
+}
+
+/**
+ * Gets number of revisal requests for an expense
+ */
+function getRevisalsTitle(expense) {
+  let length = expense.rejections.softRejections.reasons.length;
+  return `Revisal Request${length === 1 ? '' : 's'} (${length}):`
+}
 
 /**
  * Returns 0 if an expense is not over the age limit, otherwise returns the age that the expense is.
@@ -1122,60 +1110,72 @@ async function deleteModelFromTable() {
  * Filters expenses based on filter selections.
  */
 function filterExpenses() {
-  filteredExpenses.value = expenses.value;
+  filteredExpenses.value = [];
 
-  // filter expenses by employee search
-  if (employee.value) {
-    filteredExpenses.value = _filter(filteredExpenses.value, (expense) => {
-      return expense.employeeId === employee.value;
-    });
-  }
+  for (let expense of expenses.value) {
+    // filter expenses by employee search
+    if (employee.value) {
+      if (expense.employeeId !== employee.value) continue;
+    }
 
-  // filter based on tags
-  if (tagsInfo.value.selected?.length > 0) {
-    filteredExpenses.value = _filter(filteredExpenses.value, (expense) => {
-      return employeeUtils.selectedTagsHasEmployee(expense.employeeId, tagsInfo.value);
-    });
-  }
+    // filter based on tags
+    if (tagsInfo.value.selected?.length > 0) {
+      if (!employeeUtils.selectedTagsHasEmployee(expense.employeeId, tagsInfo.value)) continue;
+    }
 
-  // filter based on generic search
-  if (search.value) {
-    let headerKeys = _map(headers.value, (object) => object.key);
-    filteredExpenses.value = _filter(filteredExpenses.value, (expense) => {
-      return _some(Object.entries(expense), ([key, value]) => {
-        return String(value)?.toLowerCase().includes(search.value?.toLowerCase()) && headerKeys?.includes(key);
-      });
-    });
-  }
-
-  // filter based on start and end dates
-  if (startDateFilter.value && endDateFilter.value) {
-    filteredExpenses.value = _filter(filteredExpenses.value, (expense) =>
-      isBetween(expense.reimbursedDate, startDateFilter.value, endDateFilter.value, 'days', '[]')
-    );
-  }
-
-  // filter based on reimbursement status
-  if (filter.value.status !== 'All') {
-    // filter expenses by reimburse date
-    filteredExpenses.value = _filter(filteredExpenses.value, (expense) => {
-      return expense.state.toLowerCase() === filter.value.status.toLowerCase();
-    });
-  }
-
-  // filter based on expense type active
-  if (filter.value.active !== 'both') {
-    // filter expenses by active or inactive expense types (available to admin only)
-    filteredExpenses.value = _filter(filteredExpenses.value, (expense) => {
-      let expenseType = _find(expenseTypes.value, (type) => expense.expenseTypeId === type.value);
-      if (filter.value.active == 'active') {
-        // filter for active expenses
-        return expenseType && !expenseType.isInactive;
-      } else {
-        // filter for inactive expenses
-        return expenseType && expenseType.isInactive;
+    // filter based on generic search
+    if (search.value) {
+      let matched = false;
+      // let headerKeys = _map(headers.value, (object) => object.key);
+      for (let [key, value] of Object.entries(expense)) {
+        let data = value; // allow modification
+        if (!data || data === '') continue; // skip empty data
+        if (typeof data === 'number') data = data.toFixed(2); // support money
+        if (key === 'receipt') data = data.join?.(' ') || data; // support receipt names
+        if (key === 'rejections') { // support rejection reasons
+          let rejData = '';
+          if (data.hardRejections?.reasons) rejData += data.hardRejections.reasons.join(' ');
+          if (data.softRejections?.reasons) rejData += data.softRejections.reasons.join(' ');
+          data = rejData;
+        }
+        // search if data is a string by now
+        if (typeof data !== 'string') continue;
+        if (['id', 'expenseTypeId', 'employeeId'].includes(key)) {
+          if (data === search.value) {
+            matched = true;
+            break;
+          }
+        } else if (data.toLowerCase().includes(search.value.toLowerCase())) {
+          matched = true;
+          break;
+        }
       }
-    });
+      if (!matched) continue;
+    }
+
+    // filter based on start and end dates
+    if (startDateFilter.value || endDateFilter.value) {
+      let start = startDateFilter.value || '1900-01-01';
+      let end = endDateFilter.value || '9999-12-31';
+      if (!isBetween(expense.reimbursedDate, start, end, 'days', '[]')) continue;
+    }
+
+    // filter based on status
+    let status = filter.value.status.map((s) => s.toLowerCase());
+    if (status.length > 0) {
+      if (!status.includes(expense.state.toLowerCase())) continue;
+    }
+
+    // filter based on expense type active
+    if (filter.value.active !== 'both') {
+      let expenseType = _find(expenseTypes.value, (type) => expense.expenseTypeId === type.value);
+      let etActive = expenseType && !expenseType.isInactive;
+      let filterActive = filter.value.status === 'active';
+      if (filterActive !== etActive) continue;
+    }
+
+    // passed all filters, add it
+    filteredExpenses.value.push(expense);
   }
 } // filterExpenses
 
@@ -1224,19 +1224,6 @@ function getReceipts(receipts) {
 function isReimbursed(expense) {
   return expense && !isEmpty(expense.reimbursedDate);
 } // isReimbursed
-
-/**
- * Checks if the expense is rejected. Returns true if the
- * expense is reimbursed, otherwise returns false.
- *
- * @param expense - expense to check
- * @return boolean - expense is rejected
- */
-function isRejected(expense) {
-  return (
-    expense?.rejections?.softRejections?.reasons?.length > 0 || expense?.rejections?.hardRejections?.reasons?.length
-  );
-} // isRejected
 
 async function loadMyExpensesData() {
   initialPageLoading.value = true;

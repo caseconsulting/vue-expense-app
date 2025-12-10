@@ -8,60 +8,30 @@
       label="Type"
       variant="underlined"
       class="field"
-    ></v-autocomplete>
+    />
     <!-- Submission Date -->
-    <v-text-field
-      :model-value="format(model.submissionDate, null, FORMATTED_ISOFORMAT)"
-      label="Submission Date"
+    <date-picker
+      v-model="model.submissionDate"
+      :max="maxSubmission()"
       :rules="[...getDateOptionalRules(), ...getDateSubmissionRules(model)]"
-      hint="MM/DD/YYYY format"
-      v-mask="'##/##/####'"
-      variant="underlined"
+      :icon="null"
+      label="Submission Date"
       class="small-field mx-4"
-      @update:focused="model.submissionDate = parseEventDate()"
-      @keypress="showSubmissionMenu = false"
-      autocomplete="off"
-    >
-      <v-menu activator="parent" v-model="showSubmissionMenu" :close-on-content-click="false" location="start center">
-        <v-date-picker
-          v-model="model.submissionDate"
-          @update:model-value="showSubmissionMenu = false"
-          :max="maxSubmission()"
-          show-adjacent-months
-          hide-actions
-          keyboard-icon=""
-          color="#bc3825"
-          title="Submission Date"
-        ></v-date-picker>
-      </v-menu>
-    </v-text-field>
+      show-adjacent-months
+      hide-actions
+    />
     <!-- Granted Date -->
-    <v-text-field
-      :model-value="format(model.grantedDate, null, FORMATTED_ISOFORMAT)"
+     <date-picker
+      v-model="model.grantedDate"
+      :min="model.submissionDate"
+      :rules="[...getDateOptionalRules(), ...getDateGrantedRules(model)]"
+      :disabled="model.awaitingClearance"
+      :icon="null"
       label="Granted Date"
       class="small-field"
-      :rules="[...getDateOptionalRules(), ...getDateGrantedRules(model)]"
-      hint="MM/DD/YYYY format"
-      v-mask="'##/##/####'"
-      variant="underlined"
-      :disabled="model.awaitingClearance"
-      @update:focused="model.grantedDate = parseEventDate()"
-      @keypress="showGrantedMenu = false"
-      autocomplete="off"
-    >
-      <v-menu activator="parent" v-model="showGrantedMenu" :close-on-content-click="false" location="start center">
-        <v-date-picker
-          v-model="model.grantedDate"
-          @update:model-value="showGrantedMenu = false"
-          :min="model.submissionDate"
-          show-adjacent-months
-          hide-actions
-          keyboard-icon=""
-          color="#bc3825"
-          title="Granted Date"
-        ></v-date-picker>
-      </v-menu>
-    </v-text-field>
+      show-adjacent-months
+      hide-actions
+    />
     <!-- Badge Number -->
     <v-text-field
       v-model="model.badgeNum"
@@ -74,133 +44,62 @@
       class="small-field mx-4"
       :disabled="model.awaitingClearance"
       @update:focused="model.badgeNum = model.badgeNum ? model.badgeNum.toUpperCase() : undefined"
-    ></v-text-field>
+    />
     <!-- Badge Expiration Date -->
-    <v-text-field
-      :model-value="format(model.badgeExpirationDate, null, FORMATTED_ISOFORMAT)"
+    <!-- :model-value="format(model.badgeExpirationDate, null, FORMATTED_ISOFORMAT)" -->
+    <date-picker
+      v-model="model.badgeExpirationDate"
       label="Badge Exp. Date"
+      :min="minExpiration()"
       :rules="[...getDateOptionalRules(), ...getDateBadgeRules(model)]"
-      validate-on="input"
-      hint="MM/DD/YYYY format"
-      v-mask="'##/##/####'"
-      variant="underlined"
-      class="small-field"
       :disabled="model.awaitingClearance"
-      @update:focused="model.badgeExpirationDate = parseEventDate()"
-      @keypress="showBadgeMenu = false"
-      autocomplete="off"
-    >
-      <v-menu activator="parent" v-model="showBadgeMenu" :close-on-content-click="false" location="start center">
-        <v-date-picker
-          v-model="model.badgeExpirationDate"
-          @update:model-value="showBadgeMenu = false"
-          :min="minExpiration()"
-          show-adjacent-months
-          hide-actions
-          keyboard-icon=""
-          color="#bc3825"
-          title="Badge Expiration Date"
-        ></v-date-picker>
-      </v-menu>
-    </v-text-field>
+      :icon="null"
+      validate-on="input"
+      class="small-field"
+      show-adjacent-months
+      hide-actions
+    />
     <!-- Background Investigation Dates -->
     <div class="large-field mx-4">
-      <v-menu activator="parent" v-model="showBIMenu" :close-on-content-click="false" location="start center">
-        <v-date-picker
-          v-model="model.biDates"
-          :min="model.submissionDate"
-          multiple
-          show-adjacent-months
-          hide-actions
-          keyboard-icon=""
-          color="#bc3825"
-          title="BI Dates"
-        >
-        </v-date-picker>
-      </v-menu>
-      <v-combobox
+      <date-picker
         v-model="model.biDates"
-        :model-value="formatDates(model.biDates)"
-        :rules="[...getDatesArrayOptionalRules(), ...getAfterSubmissionRules(model)]"
-        multiple
         label="BI Dates"
-        v-mask="'##/##/####'"
-        variant="underlined"
-        @keypress="showBIMenu = false"
-        @update:modelValue="model.biDates = parseDates(model.biDates)"
-      >
-        <template v-slot:selection="{ item }">
-          <v-chip variant="outlined" size="x-small" closable @click:close="removeDate(item, 'biDates')">{{
-            item.raw
-          }}</v-chip>
-        </template>
-      </v-combobox>
+        :min="model.submissionDate"
+        :rules="[...getDatesArrayOptionalRules(), ...getAfterSubmissionRules(model)]"
+        :icon="null"
+        show-adjacent-months
+        closeable-chips
+        hide-actions
+        multiple
+      />
     </div>
     <!-- Adjudication Dates -->
     <div class="large-field">
-      <v-menu activator="parent" v-model="showAdjudicationMenu" :close-on-content-click="false" location="start center">
-        <v-date-picker
-          v-model="model.adjudicationDates"
-          :min="model.submissionDate"
-          multiple
-          show-adjacent-months
-          hide-actions
-          keyboard-icon=""
-          color="#bc3825"
-          title="Adjudication Dates"
-        >
-        </v-date-picker>
-      </v-menu>
-      <v-combobox
+      <date-picker
         v-model="model.adjudicationDates"
-        :model-value="formatDates(model.adjudicationDates)"
-        :rules="[...getDatesArrayOptionalRules(), ...getAfterSubmissionRules(model)]"
-        multiple
-        v-mask="'##/##/####'"
         label="Adjudication Dates"
-        variant="underlined"
-        @keypress="showAdjudicationMenu = false"
-        @update:modelValue="model.adjudicationDates = parseDates(model.adjudicationDates)"
-      >
-        <template v-slot:selection="{ item }">
-          <v-chip variant="outlined" size="x-small" closable @click:close="removeDate(item, 'adjudicationDates')">{{
-            item.raw
-          }}</v-chip>
-        </template>
-      </v-combobox>
+        :min="model.submissionDate"
+        :rules="[...getDatesArrayOptionalRules(), ...getAfterSubmissionRules(model)]"
+        :icon="null"
+        show-adjacent-months
+        closeable-chips
+        hide-actions
+        multiple
+      />
     </div>
     <!-- Polygraph Dates -->
     <div class="large-field mx-4">
-      <v-menu activator="parent" v-model="showPolyMenu" :close-on-content-click="false" location="start center">
-        <v-date-picker
-          v-model="model.polyDates"
-          :min="model.submissionDate"
-          multiple
-          show-adjacent-months
-          hide-actions
-          keyboard-icon=""
-          color="#bc3825"
-          title="Poly Dates"
-        >
-        </v-date-picker>
-      </v-menu>
-      <v-combobox
+      <date-picker
         v-model="model.polyDates"
-        :model-value="formatDates(model.polyDates)"
-        :rules="[...getDatesArrayOptionalRules(), ...getAfterSubmissionRules(model)]"
-        multiple
-        v-mask="'##/##/####'"
         label="Poly Dates"
-        variant="underlined"
-        @keypress="showPolyMenu = false"
-        @update:modelValue="model.polyDates = parseDates(model.polyDates)"
-      >
-        <template v-slot:selection="{ item }">
-          <v-chip variant="outlined" size="x-small" closable @click:close="removeDate(item, 'polyDates')">{{
-            item.raw
-          }}</v-chip>
-        </template>
-      </v-combobox>
+        :min="model.submissionDate"
+        :rules="[...getDatesArrayOptionalRules(), ...getAfterSubmissionRules(model)]"
+        :icon="null"
+        show-adjacent-months
+        closeable-chips
+        hide-actions
+        multiple
+      />
     </div>
     <!-- Awaiting Clearance -->
     <v-checkbox
@@ -217,8 +116,7 @@
           }
         }
       "
-    >
-    </v-checkbox>
+    />
   </div>
 </template>
 
@@ -226,6 +124,7 @@
 import { inject, ref, watch } from 'vue';
 import { mask } from 'vue-the-mask';
 import { format, isBefore, isValid, DEFAULT_ISOFORMAT, FORMATTED_ISOFORMAT } from '@/shared/dateUtils';
+import DatePicker from '@/components/shared/DatePicker.vue';
 import {
   getBadgeNumberRules,
   getAfterSubmissionRules,
@@ -252,13 +151,6 @@ const emitter = inject('emitter');
 const vMask = (a, b) => mask(a, b);
 const model = ref(new Clearance(props.item[props.field.key]?.[0] || {}));
 const clearanceTypes = ref(['TS/SCI - Full Scope', 'TS/SCI - CI Poly', 'TS/SCI - No Poly', 'Top Secret', 'Secret']); // autocomplete clearance type options
-const showGrantedMenu = ref(false);
-const showSubmissionMenu = ref(false);
-const showReinvestigationMenu = ref(false);
-const showBadgeMenu = ref(false);
-const showBIMenu = ref(false);
-const showAdjudicationMenu = ref(false);
-const showPolyMenu = ref(false);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -285,18 +177,6 @@ watch(
 // |                      METHODS                     |
 // |                                                  |
 // |--------------------------------------------------|
-
-/**
- * Formats multiple dates at once in MM/DD/YYYY format.
- * @return Array - The array of formatted dates
- */
-function formatDates(array) {
-  let formattedDates = [];
-  array.forEach((date) => {
-    formattedDates.push(format(date, null, FORMATTED_ISOFORMAT));
-  });
-  return formattedDates;
-}
 
 function maxSubmission() {
   let max;

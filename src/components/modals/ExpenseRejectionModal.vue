@@ -36,7 +36,7 @@
         variant="text"
         :disabled="reason.length < 1"
         @click="
-          emitter.emit('confirm-expenses-rejection', { field: selectedDenialType.field, reason });
+          emitter.emit('confirm-expenses-rejection', { field: selectedDenialType.field, text: reason });
           emitter.emit('close-expenses-rejection');
           activate = false;
         "
