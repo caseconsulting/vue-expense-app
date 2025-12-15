@@ -459,7 +459,7 @@ import ConvertExpensesToCsv from '@/components/expenses/ConvertExpensesToCsv.vue
 import DeleteModal from '@/components/modals/DeleteModal.vue';
 import ExpenseRejectionModal from '@/components/modals/ExpenseRejectionModal.vue';
 import employeeUtils from '@/shared/employeeUtils';
-import { isExpenseEditable } from '@/shared/expenseUtils';
+import { isExpenseEditable, EMPTY_APPROVAL } from '@/shared/expenseUtils';
 import ExpenseForm from '@/components/expenses/ExpenseForm.vue';
 import DatePicker from '@/components/shared/DatePicker.vue';
 import TagsFilter from '@/components/shared/TagsFilter.vue';
@@ -505,7 +505,9 @@ const vMask = mask; //custom directive
 const EXPENSE_STATES_NAMES = {
   CREATED: 'Created',
   APPROVED: 'Approved',
-  PART_APPROVED: 'Approved (Partial)',
+  // PART_APPROVED: 'Approved (Partial)', real value in DB
+  APPROVED_HRE: 'Approved (HR)', // split up HR
+  APPROVED_FIN: 'Approved (Finance)', // split up Finance
   EXT_PROC: 'External Processing',
   REIMBURSED: 'Reimbursed',
   REJECTED: 'Rejected',
@@ -622,6 +624,12 @@ const tagsInfo = ref({
 const toggleExpenseRejectionModal = ref(false);
 const unreimbursing = ref(false); // activate unreimburse model when value changes
 const userInfo = ref(null); // user information
+let userApproverType = null; // HRE vs FIN vs ADM
+let approverTypes = {
+  'HR': 'HRE',
+  'Finance': 'FIN',
+  'Admin': 'ADM'
+}; // tag name to approver type
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -730,9 +738,7 @@ onBeforeUnmount(() => {
 }); // onBeforeUnmount
 
 /**
- * Checks if the store is populated from initial page load.
- *
- * @returns boolean - True if the store is populated
+ * Runs initializing actions when store is populated.
  */
 watch(storeIsPopulated, async () => {
   if (!storeIsPopulated) return;
@@ -740,7 +746,7 @@ watch(storeIsPopulated, async () => {
   loading.value = true;
   // get user info, defaulting to params if exists
   userInfo.value = store.getters.user; // TODO: parse localstorage into string and then parse from string
-  if (localStorage.getItem('requestedFilter')) userInfo.value = JSON.parse(localStorage.getItem('requestedFilter'));
+
   await Promise.all([
     !store.getters.expenseTypes ? updateStoreExpenseTypes() : '',
     !store.getters.employees ? updateStoreEmployees() : '',
@@ -749,6 +755,16 @@ watch(storeIsPopulated, async () => {
     refreshExpenses()
   ]);
 
+  // get approver type for admins
+  if (userRoleIsAdmin() || userRoleIsManager()) {
+    for (let tag of store.getters.tags) {
+      if (approverTypes[tag.tagName] && tag.employees?.includes(userInfo.value.id)) {
+        userApproverType = approverTypes[tag.tagName];
+      }
+    }
+  }
+  
+  if (localStorage.getItem('requestedFilter')) userInfo.value = JSON.parse(localStorage.getItem('requestedFilter'));
   // get expense types
   let temporaryExpenseTypes = store.getters.expenseTypes;
   expenseTypes.value = _map(temporaryExpenseTypes, (expenseType) => {
@@ -976,184 +992,6 @@ function toTopOfForm() {
 // |--------------------------------------------------|
 
 /**
- * Returns text to show in the status filter when not clicked in.
- * 
- * @param item item of input
- */
-function getStatusText(item) {
-  let s = filter.value.status;
-  let once = (text) => item.value === s[0] ? text : null;
-  switch (s.length) {
-    case 1:
-      return item.title;
-    case statusFilterOptions.value.length - 1:
-      let except = statusFilterOptions.value.find((opt) => !s.includes(opt.value));
-      return once(`All except ${except.title.toLowerCase()}`);
-    case statusFilterOptions.value.length:
-      return once("All");
-    default:
-      return once(`${s.length} selected`);
-  }
-}
-
-/**
- * Gets tooltip text for an expense based on its state.
- * 
- * @param state - expenses state field
- * @returns String - tooltip text
- */
-function getStateTooltip(item) {
-  function approvedBy() {
-    let fallback = "unknown approver";
-    if (!item.approved?.by) return fallback;
-    let approver = employeeUtils.getEmployeeByID(item.approved.by, store.getters.employees);
-    if (!approver) return fallback;
-    return employeeUtils.nicknameAndLastName(approver);
-  }
-
-  switch (item.state) {
-    case EXPENSE_STATES.CREATED: return 'Created';
-    case EXPENSE_STATES.PART_APPROVED:
-    case EXPENSE_STATES.APPROVED: return 'Approved by ' + approvedBy();
-    case EXPENSE_STATES.EXT_PROC: return 'Procesing in external system';
-    case EXPENSE_STATES.REIMBURSED: return 'Reimbursed';
-    case EXPENSE_STATES.REJECTED: return 'Rejected permanantly';
-    case EXPENSE_STATES.RETURNED: return 'Returned for edits';
-    case EXPENSE_STATES.REVISED: return 'Revised';
-    default: return 'Unknown State';
-  }
-}
-
-/**
- * Gets the icon for the state of an expense.
- * 
- * @param state - expenses state field
- * @returns String - icon name
- */
-function getStateIcon(state) {
-  switch (state) {
-    case 'ALL': return 'mdi-check-all'; // special case for filter 
-    case EXPENSE_STATES.CREATED: return 'mdi-new-box';
-    case EXPENSE_STATES.PART_APPROVED: return 'mdi-decagram-outline';
-    case EXPENSE_STATES.APPROVED: return 'mdi-check-decagram';
-    case EXPENSE_STATES.EXT_PROC: return 'mdi-progress-clock';
-    case EXPENSE_STATES.REIMBURSED: return 'mdi-cash-check';
-    case EXPENSE_STATES.REJECTED: return 'mdi-close-box';
-    case EXPENSE_STATES.RETURNED: return 'mdi-arrow-u-left-top-bold';
-    case EXPENSE_STATES.REVISED: return 'mdi-pencil-box';
-    default: return 'mdi-help-rhombus';
-  }
-}
-
-/**
- * Gets the state quick-menu for a specified state
- * 
- * @param state current state of the expense
- */
-function getStatesQuickMenu(state) {
-  switch (state) {
-    case EXPENSE_STATES.CREATED:
-    case EXPENSE_STATES.REVISED:
-      return [
-        {
-          action: quickStatesMenuActions.APPROVE,
-          icon: getStateIcon(EXPENSE_STATES.APPROVED),
-          text: 'Approve'
-        },
-        {
-          action: quickStatesMenuActions.REJECT_RETURN,
-          icon: getStateIcon(EXPENSE_STATES.RETURNED),
-          text: 'Reject or Return'
-        }
-      ];
-    case EXPENSE_STATES.REJECTED:
-      return [
-        {
-          action: quickStatesMenuActions.REMOVE_REJECTION,
-          icon: getStateIcon(EXPENSE_STATES.CREATED),
-          text: 'Remove rejection'
-        }
-      ]
-    case EXPENSE_STATES.RETURNED:
-      return [
-        {
-          action: quickStatesMenuActions.REMOVE_REJECTION,
-          icon: getStateIcon(EXPENSE_STATES.CREATED),
-          text: 'Remove revisal'
-        },
-        {
-          action: quickStatesMenuActions.REJECT,
-          icon: getStateIcon(EXPENSE_STATES.REJECTED),
-          text: 'Reject'
-        }
-      ]
-    case EXPENSE_STATES.APPROVED:
-      return [
-        {
-          action: quickStatesMenuActions.REIMBURSE,
-          icon: getStateIcon(EXPENSE_STATES.REIMBURSED),
-          text: 'Reimburse (as of today)'
-        },
-        {
-          action: quickStatesMenuActions.UNAPPROVE,
-          icon: getStateIcon(EXPENSE_STATES.CREATED),
-          text: 'Remove approval'
-        }
-      ];
-    case EXPENSE_STATES.REIMBURSED:
-      return [
-        {
-          action: quickStatesMenuActions.UNREIMBURSE,
-          icon: getStateIcon(EXPENSE_STATES.APPROVED),
-          text: 'Remove reimbursement'
-        }
-      ];
-    default:
-      return [];
-  }
-}
-
-/**
- * watcher for employee, filter.active, filter.reimbursed - filters expenses
- */
-watch([employee, search, filter.value, startDateFilter, endDateFilter], () => {
-  filterExpenses();
-});
-
-// |--------------------------------------------------|
-// |                                                  |
-// |                DATA TABLE GENERAL                |
-// |                                                  |
-// |--------------------------------------------------|
-
-/**
- * Sets the class for a row in the data table.
- *
- * @param item - The row item
- * @returns Object - The row class
- */
-function rowClasses({ item }) {
-  if (item?.rejections?.hardRejections?.reasons?.length > 0) {
-    return { class: 'rejected-expense-row' };
-  } else if (item?.rejections?.softRejections?.reasons?.length > 0 && !item?.rejections?.softRejections?.revised) {
-    return { class: 'revised-expense-row' };
-  }
-}
-
-/**
- * Gets the datatable headers based on user's role. Returns all
- * the headers if the user's role is an admin, otherwise
- * returns all the headers except the 'Employee' header.
- *
- * @return Array - datatable headers
- */
-function getRoleHeaders() {
-  if (userRoleIsAdmin() || userRoleIsManager()) return headers.value;
-  let toRemove = ['state', 'employeeName'];
-  return headers.value.filter((h) => !toRemove.includes(h.key));
-}
-
-/**
  * Filters expenses based on filter selections.
  */
 function filterExpenses() {
@@ -1210,7 +1048,15 @@ function filterExpenses() {
     // filter based on status
     let status = filter.value.status.map((s) => s.toLowerCase());
     if (status.length > 0) {
-      if (!status.includes(expense.state.toLowerCase())) continue;
+      let approvedBy = {
+        HRE: expense.approved?.by?.HRE ?? false,
+        FIN: expense.approved?.by?.FIN ?? false
+      };
+      if (
+        !status.includes(expense.state.toLowerCase()) && // exact state match
+        !(status.includes('APPROVED_HRE') && approvedBy.HRE) && // HR approval
+        !(status.includes('APPROVED_FIN') && approvedBy.FIN) // Finance approval
+      ) continue;
     }
 
     // filter based on expense type active
@@ -1224,6 +1070,325 @@ function filterExpenses() {
     // passed all filters, add it
     filteredExpenses.value.push(expense);
   }
+}
+
+/**
+ * Returns text to show in the status filter when not clicked in.
+ * 
+ * @param item item of input
+ */
+function getStatusText(item) {
+  let s = filter.value.status;
+  let once = (text) => item.value === s[0] ? text : null;
+  switch (s.length) {
+    case 1:
+      return item.title;
+    case statusFilterOptions.value.length - 1:
+      let except = statusFilterOptions.value.find((opt) => !s.includes(opt.value));
+      return once(`All except ${except.title.toLowerCase()}`);
+    case statusFilterOptions.value.length:
+      return once("All");
+    default:
+      return once(`${s.length} selected`);
+  }
+}
+
+/**
+ * Gets tooltip text for an expense based on its state.
+ * 
+ * item.approvals.[ADM|HRE|FIN].[by|date]
+ * 
+ * @param state - expenses state field
+ * @returns String - tooltip text
+ */
+function getStateTooltip(item) {
+  function approvedBy() {
+    let fallback = "unknown approver";
+
+    let { ADM, HRE, FIN } = item.approvals || {};
+    if (!ADM && !HRE && !FIN) return fallback;
+
+    let approvers = [];
+    for (let [appr, type] of [[ADM, 'Admin'], [HRE, 'HR'], [FIN, 'Finance']]) {
+      if (appr) {
+        let user = employeeUtils.getEmployeeByID(appr.by, store.getters.employees);
+        let name = employeeUtils.nicknameAndLastName(user);
+        approvers.push(`${name} (${type})`);
+      }
+    }
+
+    if (approvers.length === 0) return fallback;
+    return approvers.join(', ');
+  }
+
+  switch (item.state) {
+    case EXPENSE_STATES.CREATED: return 'Created';
+    case EXPENSE_STATES.APPROVED_HRE:
+    case EXPENSE_STATES.APPROVED_FIN:
+    case EXPENSE_STATES.APPROVED: return 'Approved by ' + approvedBy();
+    case EXPENSE_STATES.EXT_PROC: return 'Procesing in external system';
+    case EXPENSE_STATES.REIMBURSED: return 'Reimbursed';
+    case EXPENSE_STATES.REJECTED: return 'Rejected permanantly';
+    case EXPENSE_STATES.RETURNED: return 'Returned for edits';
+    case EXPENSE_STATES.REVISED: return 'Revised';
+    default: return 'Unknown State';
+  }
+}
+
+/**
+ * Gets the icon for the state of an expense.
+ * 
+ * @param state - expenses state field
+ * @returns String - icon name
+ */
+function getStateIcon(state) {
+  switch (state) {
+    case 'ALL': return 'mdi-check-all'; // special case for filter 
+    case EXPENSE_STATES.CREATED: return 'mdi-new-box';
+    case EXPENSE_STATES.APPROVED_FIN: // same as below;
+    case EXPENSE_STATES.APPROVED_HRE: return 'mdi-decagram-outline';
+    case EXPENSE_STATES.APPROVED: return 'mdi-check-decagram';
+    case EXPENSE_STATES.EXT_PROC: return 'mdi-progress-clock';
+    case EXPENSE_STATES.REIMBURSED: return 'mdi-cash-check';
+    case EXPENSE_STATES.REJECTED: return 'mdi-close-box';
+    case EXPENSE_STATES.RETURNED: return 'mdi-arrow-u-left-top-bold';
+    case EXPENSE_STATES.REVISED: return 'mdi-pencil-box';
+    default: return 'mdi-help-rhombus';
+  }
+}
+
+/**
+ * Quick expense modifiers, to be used in quick actions menu
+ */
+async function quickApprove(exp) {
+  const stateRules = {
+    ADM: () => EXPENSE_STATES.APPROVED,
+    HRE: () => exp.state === EXPENSE_STATES.APPROVED_FIN
+      ? EXPENSE_STATES.APPROVED
+      : EXPENSE_STATES.APPROVED_HRE,
+    FIN: () => exp.state === EXPENSE_STATES.APPROVED_HRE
+      ? EXPENSE_STATES.APPROVED
+      : EXPENSE_STATES.APPROVED_FIN,
+  };
+  exp.state = stateRules[userApproverType]();
+  exp.approvals ??= {};
+  exp.approvals[userApproverType] = {
+    by: userInfo.value.id,
+    date: getTodaysDate('YYYY-MM-DD')
+  };
+  await updateExpense(exp);
+  return exp;
+}
+async function quickUnapprove(exp) {
+  exp.state = EXPENSE_STATES.CREATED;
+  exp.approvals = EMPTY_APPROVAL;
+  await updateExpense(exp);
+}
+async function quickRejectReturn(exp) {
+  rejectingExpense.value = exp;
+  toggleExpenseRejectionModal.value = true;
+}
+async function quickReject(exp) {
+  defaultRejectionType.value = 'hard';
+  rejectingExpense.value = exp;
+  toggleExpenseRejectionModal.value = true;
+}
+async function quickRemoveRejection(exp) {
+  if (exp.state === EXPENSE_STATES.REJECTED) {
+    exp.rejections.hardRejections = null;
+  }
+  if (exp.rejections.softRejections) {
+    exp.rejections.softRejections.reasons.pop();
+    exp.rejections.softRejections.revised = true;
+    if (exp.rejections.softRejections.reasons.length === 0) delete exp.rejections;
+  }
+  exp.state = EXPENSE_STATES.CREATED;
+  await updateExpense(exp);
+}
+async function quickReimburse(exp) {
+  exp.state = EXPENSE_STATES.REIMBURSED;
+  exp.reimbursedDate = getTodaysDate('YYYY-MM-DD');
+  await updateExpense(exp);
+}
+async function quickUnreimburse(exp) {
+  exp.state = EXPENSE_STATES.APPROVED;
+  exp.reimbursedDate = null;
+  await updateExpense(e);
+}
+
+/**
+ * Gets the state quick-menu for a specified state
+ * 
+ * @param state current state of the expense
+ */
+function getStatesQuickMenu(state) {
+  let actions;
+
+  switch (state) {
+    case EXPENSE_STATES.CREATED:
+    case EXPENSE_STATES.REVISED:
+      return [
+        {
+          action: quickApprove,
+          icon: getStateIcon(EXPENSE_STATES.APPROVED),
+          text: 'Approve'
+        },
+        {
+          action: quickRejectReturn,
+          icon: getStateIcon(EXPENSE_STATES.RETURNED),
+          text: 'Reject or Return'
+        }
+      ];
+    case EXPENSE_STATES.REJECTED:
+      return [
+        {
+          action: quickRemoveRejection,
+          icon: getStateIcon(EXPENSE_STATES.CREATED),
+          text: 'Remove rejection'
+        }
+      ];
+    case EXPENSE_STATES.RETURNED:
+      return [
+        {
+          action: quickRemoveRejection,
+          icon: getStateIcon(EXPENSE_STATES.CREATED),
+          text: 'Remove revisal'
+        },
+        {
+          action: quickReject,
+          icon: getStateIcon(EXPENSE_STATES.REJECTED),
+          text: 'Reject'
+        }
+      ];
+    case EXPENSE_STATES.APPROVED:
+      return [
+        {
+          action: quickReimburse,
+          icon: getStateIcon(EXPENSE_STATES.REIMBURSED),
+          text: 'Reimburse (as of today)'
+        },
+        {
+          action: quickUnapprove,
+          icon: getStateIcon(EXPENSE_STATES.CREATED),
+          text: 'Remove approval'
+        }
+      ];
+    case EXPENSE_STATES.APPROVED_FIN:
+      actions = [
+        {
+          action: quickRejectReturn,
+          icon: getStateIcon(EXPENSE_STATES.RETURNED),
+          text: 'Reject or Return'
+        },
+      ];
+      switch (userApproverType) {
+        case 'ADM':
+          actions.push({
+            action: quickApprove,
+            icon: getStateIcon(EXPENSE_STATES.APPROVED),
+            text: 'Approve as Admin'
+          });
+          break;
+        case 'HRE':
+          actions.push({
+            action: quickApprove,
+            icon: getStateIcon(EXPENSE_STATES.APPROVED_HRE),
+            text: 'Approve as HR'
+          });
+          break;
+        case 'FIN':
+          actions.push({
+            action: quickUnapprove,
+            icon: getStateIcon(EXPENSE_STATES.CREATED),
+            text: 'Remove approval'
+          });
+          break;
+      }
+      return actions;
+    case EXPENSE_STATES.APPROVED_HRE:
+      actions = [
+        {
+          action: quickRejectReturn,
+          icon: getStateIcon(EXPENSE_STATES.RETURNED),
+          text: 'Reject or Return'
+        },
+      ];
+      switch (userApproverType) {
+        case 'ADM':
+          actions.push({
+            action: quickApprove,
+            icon: getStateIcon(EXPENSE_STATES.APPROVED),
+            text: 'Approve as Admin'
+          });
+          break;
+        case 'FIN':
+          actions.push({
+            action: quickApprove,
+            icon: getStateIcon(EXPENSE_STATES.APPROVED_FIN),
+            text: 'Approve as Finance'
+          });
+          break;
+        case 'HRE':
+          actions.push({
+            action: quickUnapprove,
+            icon: getStateIcon(EXPENSE_STATES.CREATED),
+            text: 'Remove approval'
+          });
+          break;
+      }
+      return actions;
+    case EXPENSE_STATES.REIMBURSED:
+      return [
+        {
+          action: quickUnreimburse,
+          icon: getStateIcon(EXPENSE_STATES.APPROVED),
+          text: 'Remove reimbursement'
+        }
+      ];
+    default:
+      console.log(state);
+      return [];
+  }
+}
+
+/**
+ * watcher for employee, filter.active, filter.reimbursed - filters expenses
+ */
+watch([employee, search, filter.value, startDateFilter, endDateFilter], () => {
+  filterExpenses();
+});
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                DATA TABLE GENERAL                |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Sets the class for a row in the data table.
+ *
+ * @param item - The row item
+ * @returns Object - The row class
+ */
+function rowClasses({ item }) {
+  if (item?.rejections?.hardRejections?.reasons?.length > 0) {
+    return { class: 'rejected-expense-row' };
+  } else if (item?.rejections?.softRejections?.reasons?.length > 0 && !item?.rejections?.softRejections?.revised) {
+    return { class: 'revised-expense-row' };
+  }
+}
+
+/**
+ * Gets the datatable headers based on user's role. Returns all
+ * the headers if the user's role is an admin, otherwise
+ * returns all the headers except the 'Employee' header.
+ *
+ * @return Array - datatable headers
+ */
+function getRoleHeaders() {
+  if (userRoleIsAdmin() || userRoleIsManager()) return headers.value;
+  let toRemove = ['state', 'employeeName'];
+  return headers.value.filter((h) => !toRemove.includes(h.key));
 }
 
 // |--------------------------------------------------|

@@ -322,16 +322,6 @@
           hide-details
         />
 
-        <!-- Expense approval by admins -->
-        <v-checkbox
-          v-if="this.editedExpense.id && (userRoleIsAdmin() || userRoleIsManager())"
-          :disabled="isInactive"
-          v-model="approvedByBool"
-          @update:modelValue="updateApproval"
-          :label="approvedLabel"
-          :color="caseRed"
-        />
-
         <!-- Form Actions -->
         <div id="form-actions-container">
           <!-- Buttons -->
@@ -1873,23 +1863,12 @@ Number.prototype.pad = function (size) {
 }; // Number.prototype.pad
 
 /**
- * Updates the approval based on new value
- */
-function updateApproval(checked) {
-  if (checked) {
-    this.editedExpense.approvedBy = this.userInfo.id;
-  } else this.editedExpense.approvedBy = undefined;
-}
-
-/**
  * Gets the state that an expense should be in
  * 
  * @param expense the expense object
  * @returns one of EXPENSE_STATE
  */
 function getExpenseState(expense) {
-  let state;
-
   // if expense has a reimbursedDate, it will always be reimbursed
   if (expense.reimbursedDate) return EXPENSE_STATES.REIMBURSED;
 
@@ -2285,8 +2264,7 @@ export default {
     updateExistingEntry,
     userRoleIsAdmin,
     userRoleIsManager,
-    updateStoreBudgets,
-    updateApproval
+    updateStoreBudgets
   },
   props: [
     'expense', // expense to be created/updated
