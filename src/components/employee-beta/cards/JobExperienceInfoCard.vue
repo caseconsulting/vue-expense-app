@@ -66,7 +66,7 @@ const icExperience = computed(() => {
     .sort((a, b) => {
       // array has text in format YYYY-MM, so reformat to YYYYMM so
       // that it can be sorted as a regular int
-      format(a[0], 'YYYY-MM', 'YYYYMM') - format(b[0], 'YYYY-MM', 'YYYYMM');
+      return format(a[0], 'YYYY-MM', 'YYYYMM') - format(b[0], 'YYYY-MM', 'YYYYMM');
     })
     .reverse();
   let ranges = [];
