@@ -485,11 +485,10 @@ import {
 import { employeeFilter } from '@/shared/filterUtils';
 import { format, isBetween, difference, getTodaysDate } from '@/shared/dateUtils';
 import { getDateOptionalRules } from '@/shared/validationUtils.js';
-import { updateStoreBudgets, updateStoreExpenseTypes, updateStoreEmployees, updateStoreTags } from '@/utils/storeUtils';
+import { updateStoreUser, updateStoreBudgets, updateStoreExpenseTypes, updateStoreEmployees, updateStoreTags } from '@/utils/storeUtils';
 import { mask } from 'vue-the-mask';
 import { onBeforeMount, onMounted, onBeforeUnmount, ref, watch, computed, inject } from 'vue';
 import { useStore } from 'vuex';
-import { storeIsPopulated } from '@/utils/utils.js';
 import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSnackbar.vue';
 import { EXPENSE_STATES } from '@/shared/expenseUtils';
 
@@ -719,10 +718,6 @@ onBeforeMount(async () => {
   }
 });
 
-onMounted(() => {
-  if (!userRoleIsAdmin() && !userRoleIsManager()) filter.value.status = [];
-})
-
 onBeforeUnmount(() => {
   emitter.off('add');
   emitter.off('delete');
@@ -737,16 +732,13 @@ onBeforeUnmount(() => {
   emitter.off('canceled-unreimburse-expense');
 }); // onBeforeUnmount
 
-/**
- * Runs initializing actions when store is populated.
- */
+const storeIsPopulated = computed(() => store.getters.storeIsPopulated);
 watch(storeIsPopulated, async () => {
-  if (!storeIsPopulated) return;
   initialPageLoading.value = true;
   loading.value = true;
-  // get user info, defaulting to params if exists
-  userInfo.value = store.getters.user; // TODO: parse localstorage into string and then parse from string
 
+  // get user info and all expense/employe related info
+  userInfo.value = store.getters.user;
   await Promise.all([
     !store.getters.expenseTypes ? updateStoreExpenseTypes() : '',
     !store.getters.employees ? updateStoreEmployees() : '',
@@ -754,6 +746,12 @@ watch(storeIsPopulated, async () => {
     !store.getters.tags && (userRoleIsAdmin() || userRoleIsManager()) ? updateStoreTags() : '', // tags only required for admin/manager
     refreshExpenses()
   ]);
+
+  // unset status filter search if not admin
+  if (!userRoleIsAdmin() && !userRoleIsManager()) filter.value.status = [];
+
+  // parse external linking with search attached
+  if (localStorage.getItem('requestedFilter')) userInfo.value = JSON.parse(localStorage.getItem('requestedFilter'));
 
   // get approver type for admins
   if (userRoleIsAdmin() || userRoleIsManager()) {
@@ -763,17 +761,14 @@ watch(storeIsPopulated, async () => {
       }
     }
   }
-  
-  if (localStorage.getItem('requestedFilter')) userInfo.value = JSON.parse(localStorage.getItem('requestedFilter'));
+
   // get expense types
   let temporaryExpenseTypes = store.getters.expenseTypes;
-  expenseTypes.value = _map(temporaryExpenseTypes, (expenseType) => {
+  expenseTypes.value = temporaryExpenseTypes.map((expenseType) => {
     return {
-      /* beautify preserve:start */
       text: `${expenseType.budgetName} - $${expenseType.budget}`,
       startDate: expenseType.startDate,
       endDate: expenseType.endDate,
-      /* beautify preserve:end */
       budgetName: expenseType.budgetName,
       value: expenseType.id,
       budget: expenseType.budget,
@@ -787,6 +782,8 @@ watch(storeIsPopulated, async () => {
       showOnFeed: expenseType.showOnFeed
     };
   });
+
+  // unset loading
   loading.value = false;
   initialPageLoading.value = false;
 });
