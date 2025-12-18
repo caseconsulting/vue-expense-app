@@ -465,13 +465,6 @@ import DatePicker from '@/components/shared/DatePicker.vue';
 import TagsFilter from '@/components/shared/TagsFilter.vue';
 import UnreimburseModal from '@/components/modals/UnreimburseModal.vue';
 import _isEmpty from 'lodash/isEmpty';
-import _cloneDeep from 'lodash/cloneDeep';
-import _mapValues from 'lodash/mapValues';
-import _sortBy from 'lodash/sortBy';
-import _map from 'lodash/map';
-import _filter from 'lodash/filter';
-import _some from 'lodash/some';
-import _find from 'lodash/find';
 import _mergeWith from 'lodash/mergeWith';
 import _isNil from 'lodash/isNil';
 import {
@@ -915,12 +908,7 @@ async function updateExpense(newExpense) {
  * if user sets employeeId and employeeName.
  */
 function clearExpense() {
-  expense.value['description'] = null;
-  expense.value = _mapValues(expense.value, () => {
-    return null;
-  });
-  expense.value['employeeId'] = null;
-  expense.value['employeeName'] = null;
+  for (let key of Object.keys(expense.value)) expense.value[key] = null;
 }
 
 /**
@@ -930,7 +918,7 @@ function clearExpense() {
  * @return string - the name of the high five recipient
  */
 function getEmployee(eId) {
-  let employee = _find(store.getters.employees, ['id', eId]);
+  let employee = store.getters.employees.find(({ id }) => id = eId);
   return employeeUtils.nicknameAndLastName(employee);
 }
 
@@ -941,24 +929,20 @@ function getEmployee(eId) {
  * @param aggregatedData - aggregated expenses
  */
 function constructAutoComplete(aggregatedData) {
-  let seenEmployees = new Set(); // used to not add duplicates
-  employees.value = _sortBy(
-    _map(aggregatedData, (data) => {
-      if (data && data.employeeName && data.employeeId && !seenEmployees.has(data.employeeId)) {
-        seenEmployees.add(data.employeeId);
-        return {
-          text: `${data.nickname || data.firstName} ${data.lastName}`,
-          value: data.employeeId,
-          nickname: data.nickname,
-          firstName: data.firstName,
-          lastName: data.lastName
-        };
-      }
-    }).filter((data) => {
-      return data != null;
-    }),
-    (employee) => employee.text.toLowerCase()
-  );
+  employees.value = [];
+  let seenEmployees = new Set();
+  for (let data of aggregatedData) {
+    let { employeeName, employeeId, nickname, firstName, lastName } = data
+    if (seenEmployees.has(data.employeeId) || !employeeName || !employeeId) continue;
+    seenEmployees.add(employeeId);
+    employees.value.push({
+      text: `${nickname || firstName} ${lastName}`,
+      value: employeeId,
+      nickname,
+      firstName,
+      lastName
+    });
+  }
 }
 
 /**
@@ -1008,7 +992,6 @@ function filterExpenses() {
     // filter based on generic search
     if (search.value) {
       let matched = false;
-      // let headerKeys = _map(headers.value, (object) => object.key);
       for (let [key, value] of Object.entries(expense)) {
         let data = value; // allow modification
         if (!data || data === '') continue; // skip empty data
@@ -1058,7 +1041,7 @@ function filterExpenses() {
 
     // filter based on expense type active
     if (filter.value.active !== 'both') {
-      let expenseType = _find(expenseTypes.value, (type) => expense.expenseTypeId === type.value);
+      let expenseType = expenseTypes.value.find(({ value }) => expense.expenseTypeId === value);
       let etActive = expenseType && !expenseType.isInactive;
       let filterActive = filter.value.status === 'active';
       if (filterActive !== etActive) continue;
@@ -1542,7 +1525,7 @@ function getRevisalsTitle(expense) {
 function useInactiveStyle(expense) {
   if (userRoleIsAdmin() || userRoleIsManager()) {
     // admin view
-    let expenseType = _find(expenseTypes.value, (type) => expense.expenseTypeId === type.value);
+    let expenseType = expenseTypes.value.find(({ value }) => expense.expenseTypeId === value);
     return expenseType && expenseType.isInactive;
   }
 
