@@ -2,7 +2,7 @@
   <v-autocomplete
     :class="props.classProps"
     clearable
-    label="Filter by Tag (click to flip)"
+    label="Filter by Tag (click to flipp)"
     v-model="tagsInfo.selected"
     :items="store.getters.tags || []"
     multiple
@@ -11,6 +11,9 @@
     item-value="id"
     hide-details
     return-object
+    :search="search"
+    @update:search="search = $event"
+    @update:model-value="search = ''"
   >
     <template #chip="{ props, item }">
       <v-chip
@@ -31,8 +34,10 @@
 
 <script setup>
 import _forEach from 'lodash/forEach';
-import { watch } from 'vue';
+import { watch, ref } from 'vue';
 import { useStore } from 'vuex';
+
+const search = ref('');
 
 // |--------------------------------------------------|
 // |                                                  |
