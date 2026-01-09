@@ -1035,6 +1035,7 @@ const storeContracts = computed(() => {
       contracts.push({
         ...contract,
         ...cbIndexContracts[contract.id],
+        contractId: contract.id, // used for quick-edit
         projects
       });
     }
