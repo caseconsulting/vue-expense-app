@@ -84,6 +84,7 @@
 <script setup>
 import _forEach from 'lodash/forEach';
 import _filter from 'lodash/filter';
+import _cloneDeep from 'lodash/cloneDeep';
 import { getActive, getFullName, populateEmployeesDropdown } from './reports-utils';
 import { getTodaysDate, isSameOrBefore } from '@/shared/dateUtils';
 import { employeeFilter } from '@/shared/filterUtils';
@@ -132,6 +133,10 @@ const headers = ref([
   }
 ]);
 
+// code-only variables
+const certGlue = ' & ';
+const certIndex = {};
+
 // |--------------------------------------------------|
 // |                                                  |
 // |                LIFECYCLE HOOKS                   |
@@ -150,9 +155,6 @@ onMounted(() => {
     certificationSearch.value = props.requestedFilter.search;
     refreshDropdownItems();
   }
-
-  // initial set of table download data
-  updateTableDownload(filteredEmployees.value);
 }); // created
 
 // |--------------------------------------------------|
@@ -165,24 +167,17 @@ onMounted(() => {
  * Gets all of the active certifications for each employee and displays the column on the table.
  */
 function buildCertificationsColumns() {
-  employeesInfo.value.forEach((currentEmp) => {
-    if (currentEmp.certifications) {
-      let hasActiveCert = false;
-      let certs = '';
-      currentEmp.certifications.forEach((cert) => {
-        if ((cert.expirationDate && isSameOrBefore(getTodaysDate(), cert.expirationDate)) || !cert.expirationDate) {
-          hasActiveCert = true;
-          certs += `${cert.name} & `;
-        }
-      });
-      if (hasActiveCert) {
-        // remove & at the end
-        certs = certs.slice(0, -2);
-        currentEmp.certificationNames = certs;
+  for (let emp of employeesInfo.value) {
+    certIndex[emp.employeeNumber] = [];
+    let activeCerts = certIndex[emp.employeeNumber]; // pointer-esque
+    for (let cert of (emp.certifications || [])) {
+      if (!cert.expirationDate || (isSameOrBefore(getTodaysDate(), cert.expirationDate))) {
+        activeCerts.push(cert.name);
       }
     }
-  });
-} // buildCertificationsColumns
+    emp.certificationNames = activeCerts.join(certGlue);
+  }
+}
 
 /**
  * handles click event of the employee table entry
@@ -265,7 +260,40 @@ function searchCertifications() {
  * @param event the event data containing the table information
  */
 function updateTableDownload(event) {
-  emitter.emit('reports-table-update', { tab: 'certifications', table: event, headers: headers });
+  if (!event?.length) return;
+  let toDownload = [];
+  let mostCerts = 0;
+  for (let e of event) {
+    // copy everything except certification names
+    let row = _cloneDeep(e);
+    delete row.columns.certificationNames;
+    // add certifications one by one
+    let certs = certIndex[row.columns.employeeNumber];
+    for (let i = 0; i < certs.length; i++) {
+      row.columns[`Cert ${i + 1}`] = certs[i];
+    }
+    toDownload.push(row);
+    if (mostCerts < certs.length) mostCerts = certs.length;
+  }
+  // build new headers to include certs
+  let dlHeaders = _cloneDeep(headers.value);
+  for (let i in dlHeaders) {
+    if (dlHeaders[i].key === 'certificationNames') {
+      dlHeaders.splice(i, 1);
+      break;
+    }
+  }
+  for (let i = 0; i < mostCerts; i++) {
+    let c = `Cert ${i + 1}`
+    dlHeaders.push({ title: c, key: c });
+  }
+  // pad employee rows with empty certs for downloadability
+  for (let item of toDownload) {
+    for (let i = 0; i < mostCerts; i++) {
+      item.columns[`Cert ${i + 1}`] ??= '';
+    }
+  }
+  emitter.emit('reports-table-update', { tab: 'certifications', table: toDownload, headers: dlHeaders });
 }
 
 // |--------------------------------------------------|
