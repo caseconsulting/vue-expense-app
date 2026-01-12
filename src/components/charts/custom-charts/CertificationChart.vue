@@ -3,7 +3,7 @@
     <div v-if="userRoleIsAdmin()" class="float-right">
       <DownloadCSV
         filename="certifications.csv"
-        :generateData="generateCsvData()"
+        :generateData="generateCsvData"
         sortKey="Certification"
         tooltip="Download Active Certifications to CSV"
       ></DownloadCSV>

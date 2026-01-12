@@ -67,6 +67,11 @@
           item-title="employeeName"
           item-value="id"
         >
+        <!--
+          If migrating to composition API: 
+          replace: @update:search="updateSearch"
+             with: @update:search="employeeSearch = $event"
+        -->
         </v-autocomplete>
         <span v-else v-for="(emp, i) in getTagEmployees(item.employees)" :key="i">
           <a @click="$router.push(`/employee/${emp.employeeNumber}`)">{{ nicknameAndLastName(emp) }}</a>
