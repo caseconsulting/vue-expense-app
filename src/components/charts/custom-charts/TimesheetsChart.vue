@@ -120,13 +120,12 @@ onBeforeUnmount(() => {
 onMounted(async () => {
   employee = store.getters.employees.find((e) => e.id === props.employeeId);
   timesheetPreferences = employee.preferences?.timesheetPreferences;
-  timesheetPreferences ??= {
-    customNeeded: {
-      monthly: { use: false, value: 0 },
-      calYear: { use: false, value: 0 },
-      optYear: { use: false, value: 0 }
-    },
-  }
+  timesheetPreferences ??= {};
+  timesheetPreferences.customNeeded ??= {
+    monthly: { use: false, value: 0 },
+    calYear: { use: false, value: 0 },
+    optYear: { use: false, value: 0 }
+  };
 
   emitter.on('timesheets-chart-data', async ({ completed: c, needed: n, remainingHours: r }) => {
     completed.value = c;
