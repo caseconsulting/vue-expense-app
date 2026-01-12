@@ -44,7 +44,6 @@
                 :id="link"
                 :href="link"
                 target="_blank"
-                :append-icon="name === 'Unanet' ? 'mdi-new-box' : ''"
               >
               </v-list-item>
               <!-- Benefits links -->
@@ -202,14 +201,10 @@ const links = ref([
   { name: 'CASE Information', link: CASE_INFO },
   { name: 'Basecamp', link: BASECAMP },
   { name: 'Unanet', link: 'https://consultwithcase.unanet.biz/consultwithcase/action/home' },
-  { name: 'QuickBooks Time (legacy)', link: 'https://tsheets.intuit.com/page/login_oii' },
   { name: 'ADP', link: 'https://workforcenow.adp.com/' },
   { name: 'BambooHR', link: 'https://consultwithcase.bamboohr.com/home/' },
   { name: 'Jira', link: 'https://consultwithcase.atlassian.net/jira/your-work' },
-  {
-    name: 'Portal & Basecamp How-Tos',
-    link: HOW_TO
-  },
+  { name: 'Portal & Basecamp How-Tos', link: HOW_TO },
   { name: 'Workspace at Reston Town Center Map', link: floorPlan }
 ]);
 const benefitsLinks = [
@@ -217,7 +212,7 @@ const benefitsLinks = [
   { name: 'Benefits Booklet', link: BENEFITS_BOOKLET },
   { name: 'Medical (Health) Insurance', link: 'https://www.anthem.com/' },
   { name: 'Disability & Life Insurance', link: 'https://www.mutualofomaha.com/' },
-  { name: 'Dental & Vision Insurance', link: 'https://www.sunlife.com/' },
+  { name: 'Dental & Vision Insurance', link: 'https://www.standard.com/ ' },
   { name: 'Dependent Care', link: 'https://www.wageworks.com/' }
 ];
 const mediaLinks = [
