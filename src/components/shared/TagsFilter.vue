@@ -2,7 +2,7 @@
   <v-autocomplete
     :class="props.classProps"
     clearable
-    label="Filter by Tag (click to flipp)"
+    label="Filter by Tag (click to flip)"
     v-model="tagsInfo.selected"
     :items="store.getters.tags || []"
     multiple
