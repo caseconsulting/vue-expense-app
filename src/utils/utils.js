@@ -284,11 +284,9 @@ export function sortLanguagesByProficiency(languages) {
  * @param object - object to copy
  * @return copied object, with no references to the original
  */
-export function deepCopy(object) {
-  if (typeof structuredClone === 'function') 
-    return structuredClone(object);
-  else
-    return JSON.parse(JSON.stringify(object));
+export function deepClone(object) {
+  try { return structuredClone(object) }
+  catch { return JSON.parse(JSON.stringify(object)) }
 }
 
 /**
@@ -296,6 +294,7 @@ export function deepCopy(object) {
  * 
  * @param array - array to index
  * @param by - dot-notated value to index by (eg. 'id' or 'subItem.uuid')
+ * @param options (optional) - see options in assignment below
  * @return Object of indexed array, with `by` as keys
  */
 export function indexBy(array, by, options = {}) {
@@ -304,10 +303,15 @@ export function indexBy(array, by, options = {}) {
     throw new Error(`Must include Array 'array' and String 'by'.`);
 
   // pull out options
-  let { deleteBy = true } = options;
+  let {
+    deleteBy = true, // whether or not to delete the used `by` attribute
+    clone = true, // whether or not to deep-clone the object to avoid refs
+  } = options;
+  // warning that 'by' is deleted on original object if clone is false and delete is true
+  console.warn(`indexBy is deleting the original object\'s '${by}' attribute. Please ensure this is intentional!`)
 
   // set vars
-  let copy = deepCopy(array); // avoid modifications
+  let target = clone ? deepClone(array) : array;
   let indexers = by.split('.');
   indexers = indexers.map(i => !!Number(i) ? Number(i) : i); // parse Numbers to get into arrays
   let obj = {};
@@ -315,7 +319,7 @@ export function indexBy(array, by, options = {}) {
 
   // pull out items and set them to return object
   let i = 0;
-  for (let item of copy) {
+  for (let item of target) {
     key = item;
     for (let i of indexers) {
       lastAccess = key; // array/object that 'by' is inside of
@@ -324,9 +328,8 @@ export function indexBy(array, by, options = {}) {
       if (!key) throw new Error(`indexBy: No element ${by} in item`)
       }
     obj[key] = item; // set it
-    if (deleteBy) delete lastAccess[lastIndex]; // remove duplicate information
+    if (deleteBy) delete lastAccess[lastIndex];
   }
-  console.log(obj);
 
   // :)
   return obj;
@@ -709,7 +712,7 @@ export default {
   userRoleIsManager,
   userRoleIsUser,
   userRoleIsIntern,
-  deepCopy,
+  deepClone,
   indexBy,
   COUNTRIES,
   MONTHS
