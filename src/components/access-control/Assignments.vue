@@ -42,7 +42,11 @@
         </v-autocomplete>
       </v-col>
       <v-col cols="4" class="pt-0">
+        <p v-if="isAdmin" class="adminEmpAccess">
+          Admins have access to all employees
+        </p>
         <v-autocomplete
+          v-else
           label="Employees, tags, contracts, and projects"
           :items="employeesTagsContractsProjects"
           :item-title="getTitle"
@@ -83,18 +87,16 @@
 
 <script setup>
 // Vue & Component imports
-import { inject, ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useStore } from 'vuex';
 // JS/utility imports
 import { updateStoreContracts, updateStoreEmployees, updateStoreTags } from '@/utils/storeUtils';
-import { generateUUID, indexBy, deepClone } from '@/utils/utils';
-import api from '@/shared/api';
+import { deepClone } from '@/utils/utils';
 // Store and stuff
-const emitter = inject('emitter');
 const store = useStore();
 
 const assignments = defineModel();
-const props = defineProps(['indexes']);
+const props = defineProps(['indexes', 'isAdmin']);
 
 const usersModel = ref([]);
 const membersModel = ref([]);
@@ -206,3 +208,12 @@ onMounted(async () => {
   }
 });
 </script>
+
+<style scoped>
+.adminEmpAccess {
+  margin-top: 1.5em;
+  margin-left: 1.5em;
+  color: #0006;
+  font-style: italic;
+}
+</style>

@@ -19,7 +19,7 @@
                 class="overflow-auto"
                 >
                 <template #append>
-                  <v-icon v-if="isLocked(group)" icon="mdi-lock" color="black" size="small" />
+                  <v-icon v-if="isAdmin(group)" icon="mdi-lock" color="black" size="small" />
                 </template>
               </v-list-item>
             </v-list>
@@ -32,21 +32,21 @@
             </div>
             <div v-else>
               <v-row>
-                <v-col cols="10">
+                <v-col cols="10" :class="isAdmin(editGroup) ? 'cursor-not-allowed' : ''">
                   <v-text-field
                     v-model="editGroup.name"
                     variant="outlined"
                     class="h1"
                     id="groupName"
-                    :disabled="isLocked(editGroup, 'name')"
+                    :disabled="isAdmin(editGroup)"
                   />
                 </v-col>
-                <v-col cols="2">
+                <v-col cols="2" :class="isAdmin(editGroup) ? 'cursor-not-allowed' : ''">
                   <v-btn
                     variant="icon"
                     icon="mdi-delete"
                     class="mt-1"
-                    :disabled="isLocked(editGroup, 'delete')"
+                    :disabled="isAdmin(editGroup)"
                     @click="deleteCurrentGroup()"
                     v-tooltip="`Delete '${editGroup.name}'`"
                   />
@@ -64,7 +64,7 @@
                   <h2>Assignments</h2>
                   <v-btn icon="mdi-plus-circle" class="ml-2" variant="plain" size="small" @click="addAssignment(editGroup)" />
                 </div>
-                <Assignments v-model="editGroup.assignments" :indexes="indexes" :key="editGroupIndex" />
+                <Assignments v-model="editGroup.assignments" :is-admin="editGroup.name === 'Admin'" :indexes="indexes" :key="editGroupIndex" />
               </div>
               <div class="flags">
                 <h2>Flags</h2>
@@ -73,7 +73,7 @@
               <div class="permissions">
                 <h2>Permissions</h2>
                 <Permissions v-if="editGroup.name !== 'Admin'" :key="editGroupIndex" />
-                <div v-else class="ml-2"><p>The Admin group always has full access to the Portal.</p></div>
+                <div v-else class="ml-2"><p>Admins always has full access to the Portal and all its data.</p></div>
               </div>
             </div>
           </v-col>
@@ -84,6 +84,20 @@
 </template>
 
 <script setup>
+/**
+ * ACCESS CONTROL TODO
+ * - [x] Order of groups in menu bar should remain the same
+ * - [x] Remove inactive employees from backend return
+ * - [x] Fix flags - no 'locked'. Maybe add to permissions
+ * - [x] Admin should have full access
+ * - [x] Bug: profile not updating immediately
+ * - [x] Make deletion save lol
+ * - [ ] Saving UX
+ * - [ ] Add projects to dropdowns
+ * - [ ] Dropdown prefixes ("Employee: xxx", "Project: xxx")
+ * - [ ] Clean up, add comments, add logs (backend only)
+ */
+
 // Vue & Component imports
 import { inject, ref, computed, onBeforeMount, onUnmounted, nextTick } from 'vue';
 import { useStore } from 'vuex';
@@ -93,13 +107,13 @@ import Permissions from '@/components/access-control/Permissions.vue';
 // JS/utility imports
 import { updateStoreContracts, updateStoreEmployees, updateStoreTags, updateStoreAccessGroups } from '@/utils/storeUtils';
 import { generateUUID, deepClone, indexBy } from '@/utils/utils';
+import { now, difference } from '@/shared/dateUtils';
 import api from '@/shared/api';
 // Store and stuff
 const emitter = inject('emitter');
 const store = useStore();
 // Utils
 const indexes = ref({});
-const random = (array) => array[Math.floor(Math.random() * array.length)];
 
 /**
  * -----------------------------------------
@@ -109,17 +123,19 @@ const random = (array) => array[Math.floor(Math.random() * array.length)];
  * -----------------------------------------
  */
 const groups = ref([]);
-const groupsWithAssignments = ref([]);
 const editGroupIndex = ref(0); // index in array
 const editGroup = computed(() => groups.value?.[editGroupIndex.value]);
-const emptyGroup = { id: null, name: 'New Group', flags: {}, assignments: [] };
+const emptyGroup = { id: null, created: null, name: 'New Group', flags: {}, assignments: [] };
 const emptyAssignment = { id: null, name: 'New Assignment', users: {}, assignments: {} }
 
 /**
  * Gets groups data
  */
 async function buildGroups() {
+  // get groups from db and sort (db doesn't store in same order)
   groups.value = await api.getItems(api.ACCESS_GROUPS);
+  groups.value.sort((a, b) => difference(a.created, b.created));
+  // fill in group keys if there's anything new
   for (let group of groups.value)
     for (let k of Object.keys(emptyGroup))
       group[k] ??= emptyGroup[k];
@@ -129,7 +145,7 @@ async function buildGroups() {
  * Adds a new group to the list of groups
  */
 async function addGroup() {
-  groups.value.push({ ...deepClone(emptyGroup), id: generateUUID() });
+  groups.value.push({ ...deepClone(emptyGroup), id: generateUUID(), created: now() });
   editGroupIndex.value = groups.value.length - 1;
   addAssignment(groups.value[editGroupIndex.value]);
   await nextTick(); // let group be created
@@ -156,8 +172,10 @@ async function addAssignment(group) {
  * Deletes the current group
  */
 async function deleteCurrentGroup() {
-  if (!groups.value.length !== 1 && !isLocked(editGroup.value, 'delete'))
-    groups.value.splice(editGroupIndex.value--, 1); // post decrement
+  if (!isAdmin(editGroup.value)) {
+    let [{ id }] = groups.value.splice(editGroupIndex.value--, 1); // post decrement
+    await api.deleteItem(api.ACCESS_GROUPS, id);
+  }
 }
 
 async function saveCurrentGroup() {
@@ -165,11 +183,10 @@ async function saveCurrentGroup() {
 }
 
 /**
- * Whether or not a group is locked
+ * Whether or not the group is the admin group.
  */
-function isLocked(group, type = 'any') {
-  if (!group.flags) return false;
-  return group.flags.locked;
+function isAdmin(group) {
+  return group.name === 'Admin';
 }
 
 /**
