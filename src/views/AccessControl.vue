@@ -24,7 +24,8 @@
               </v-list-item>
             </v-list>
           </v-col>
-          <v-col cols="10" class="pr-0">
+          <v-col v-if="loading" cols="10"> <v-progress-linear class="my-12" indeterminate /> </v-col>
+          <v-col v-else cols="10" class="pr-0">
             <div v-if="!editGroup">
               Select a group to edit, or press
               <v-icon icon="mdi-plus-circle" size="x-small" class="text-gray mb-1" @click="addGroup()" />
@@ -66,6 +67,7 @@
                   class="ml-2"
                   append-icon="mdi-content-save"
                   @click="saveCurrentGroup()"
+                  :disabled="saving"
                 >
                   {{ saveText }}
                 </v-btn>
@@ -104,8 +106,10 @@ import api from '@/shared/api';
 const emitter = inject('emitter');
 const store = useStore();
 // Utils
-const indexes = ref({});
 function aOrAn(word) { return 'aeiouAEIOU'.split('').includes(word.charAt(0)) ? 'an' : 'a' }
+
+// UI
+const loading = ref(false);
 
 const groups = ref([]);
 const editGroupIndex = ref(0); // index in array
@@ -190,13 +194,17 @@ async function deleteCurrentGroup() {
  * TODO: patch request instead of whole object
  */
 const saveText = ref('Save');
+const saving = ref(false);
 async function saveCurrentGroup() {
+  // UI feedback
+  saving.value = true;
   // save to db
   await api.createItem(api.ACCESS_GROUPS, editGroup.value);
   // reset delete UI vars if needed
   deleteText.value = 'Delete';
   userIsSure.value = false;
   // UI feedback
+  saving.value = false;
   saveText.value = ref('Saved!');
   setTimeout(() => {
       saveText.value = 'Save';
@@ -221,8 +229,6 @@ watch(
     deleteText.value = 'Delete';
     // first run or changing groups
     if (oldGroup === undefined || newIndex !== oldIndex) return;
-    // otherwise an edit was made to the group
-    edits.value[newIndex] = true;
   },
   { deep: true }
 )
@@ -235,6 +241,9 @@ watch(
  * -----------------------------------------
  */
 onBeforeMount(async () => {
+  // feedback for loading
+  loading.value = true;
+
   // update portal data
   await Promise.all([
     store.getters.employees ? '' : updateStoreEmployees(),
@@ -244,10 +253,13 @@ onBeforeMount(async () => {
 
   // get list of projects
   let projects = [];
-  for (let c of store.getters.contracts) projects.push(...c.projects);
+  for (let c of store.getters.contracts) projects.push(...(c.projects || []));
 
   // put groups in UI
   await buildGroups();
+
+  // loading for feedback
+  loading.value = false;
 });
 
 onUnmounted(() => {

@@ -54,7 +54,7 @@ import { useStore } from 'vuex';
 import MultiAutocomplete from '@/components/access-control/MultiAutocomplete.vue';
 // JS/utility imports
 import { updateStoreContracts, updateStoreEmployees, updateStoreTags } from '@/utils/storeUtils';
-import { deepClone } from '@/utils/utils';
+import { deepClone, indexBy } from '@/utils/utils';
 // Store and stuff
 const store = useStore();
 let indexes = {};
@@ -103,7 +103,7 @@ function diverge(into, from) {
     else if (indexes.tags[id]) into.tags.push(id);
     else if (indexes.contracts[id]) into.contracts.push(id);
     else if (indexes.projects[id]) into.projects.push(id);
-    else throw new Error('Could not tell type of id' + id);
+    else throw new Error('Could not tell type of id ' + id);
   }
 }
 
@@ -139,7 +139,7 @@ onMounted(async () => {
     ...store.getters.tags,
     ...store.getters.contracts,
     ...store.getters.employees,
-    ...props.projects
+    ...(props.projects || [])
   ];
 
   // indexes for O(1) search later
@@ -147,7 +147,7 @@ onMounted(async () => {
     employees: indexBy(store.getters.employees, 'id'),
     tags: indexBy(store.getters.tags, 'id'),
     contracts: indexBy(store.getters.contracts, 'id'),
-    projects: indexBy(projects, 'id')
+    projects: indexBy((props.projects || []), 'id')
   }
 
   // converge items into dropdowns from diverged array
