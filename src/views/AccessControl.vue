@@ -48,7 +48,7 @@
                   <v-btn icon="mdi-plus-circle" class="ml-2" variant="plain" size="small" @click="addAssignment(editGroup)" />
                 </div>
                 <p class="pa-0 ma-0 ml-2 text-caption"><i>Assign Users to become {{ aOrAn(editGroup.name) }} {{ editGroup.name }} for Members</i></p>
-                <Assignments v-model="editGroup.assignments" :is-admin="editGroup.name === 'Admin'" :indexes="indexes" :key="editGroupIndex" />
+                <Assignments v-model="editGroup.assignments" :is-admin="editGroup.name === 'Admin'" :projects="projects" :key="editGroupIndex" />
               </div>
               <div class="flags">
                 <h2>Flags</h2>
@@ -105,16 +105,8 @@ const emitter = inject('emitter');
 const store = useStore();
 // Utils
 const indexes = ref({});
-const edits = ref({});
 function aOrAn(word) { return 'aeiouAEIOU'.split('').includes(word.charAt(0)) ? 'an' : 'a' }
 
-/**
- * -----------------------------------------
- * |                                       |
- * |                 Groups                |
- * |                                       |
- * -----------------------------------------
- */
 const groups = ref([]);
 const editGroupIndex = ref(0); // index in array
 const editGroup = computed(() => groups.value?.[editGroupIndex.value]);
@@ -138,10 +130,12 @@ async function buildGroups() {
  * Adds a new group to the list of groups
  */
 async function addGroup() {
+  // copy into a new group with default assignment
   groups.value.push({ ...deepClone(emptyGroup), id: generateUUID(), created: now() });
   editGroupIndex.value = groups.value.length - 1;
   addAssignment(groups.value[editGroupIndex.value]);
-  await nextTick(); // let group be created
+  // let group be created, then highlight the group name
+  await nextTick();
   let el = document.getElementById('groupName');
   el.focus();
   el.setSelectionRange(0, emptyGroup.name.length);
@@ -151,9 +145,11 @@ async function addGroup() {
  * Adds a new assignment to the given group
  */
 async function addAssignment(group) {
+  // create default assignment
   group.assignments ??= [];
   group.assignments.push({ ...deepClone(emptyAssignment), id: generateUUID() });
-  await nextTick(); // let assignment be created
+  // let assignment be created, then highlight the assignment name
+  await nextTick();
   let el = document.getElementsByClassName('assignmentNames');
   el = el[el.length - 1];
   el = el.querySelector('div > div > div > input');
@@ -167,11 +163,13 @@ async function addAssignment(group) {
 const deleteText = ref('Delete');
 const userIsSure = ref(false);
 async function deleteCurrentGroup() {
+  // first click: make sure user is sure
   if (!userIsSure.value) {
     deleteText.value = 'Are you sure?';
     userIsSure.value = true;
     return;
   }
+  // second click: delete and push to db
   if (!isAdmin(editGroup.value)) {
     let [{ id }] = groups.value.splice(editGroupIndex.value--, 1); // post decrement
     await api.deleteItem(api.ACCESS_GROUPS, id);
@@ -186,8 +184,9 @@ async function deleteCurrentGroup() {
  */
 const saveText = ref('Save');
 async function saveCurrentGroup() {
+  // save to db
   await api.createItem(api.ACCESS_GROUPS, editGroup.value);
-  if (edits.value[editGroupIndex.value] != null) edits.value[editGroupIndex.value] = false;
+  // UI feedback
   saveText.value = ref('Saved!'); 
   setTimeout(() => {
       saveText.value = 'Save';
@@ -195,14 +194,14 @@ async function saveCurrentGroup() {
 }
 
 /**
- * Whether or not the group is the admin group.
+ * Returns whether or not the group is the admin group.
  */
 function isAdmin(group) {
   return group.name === 'Admin';
 }
 
 /**
- * Simple way to check for changes
+ * Check for changes to the editing group
  */
 watch(
   () => [editGroupIndex.value, editGroup.value],
@@ -232,16 +231,12 @@ onBeforeMount(async () => {
     store.getters.tags ? '' : updateStoreTags(),
     store.getters.contracts ? '' : updateStoreContracts(),
   ]);
+
+  // get list of projects
   let projects = [];
   for (let c of store.getters.contracts) projects.push(...c.projects);
 
-  indexes.value = {
-    employees: indexBy(store.getters.employees, 'id'),
-    tags: indexBy(store.getters.tags, 'id'),
-    contracts: indexBy(store.getters.contracts, 'id'),
-    projects: indexBy(projects, 'id')
-  }
-
+  // put groups in UI
   await buildGroups();
 });
 

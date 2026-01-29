@@ -38,6 +38,9 @@ const props = defineProps({
 });
 const model = defineModel();
 
+/**
+ * Helpers to check types
+ */
 function isTag(item) {
   return !!item.tagName;
 }
@@ -51,6 +54,9 @@ function isProject(item) {
   return !!item.projectName;
 }
 
+/**
+ * Helper to get the type of an object
+ */
 function getType(rawItem) {
   let item = rawItem.raw ?? rawItem;
   if (isEmployee(item)) return 'Employee';
@@ -59,6 +65,10 @@ function getType(rawItem) {
   else if (isProject(item)) return 'Project';
 }
 
+/**
+ * Gets the title for a dropdown or chip item
+ * Adds pretext if desired
+ */
 function getTitle(rawItem, pretext) {
   let item = rawItem.raw ?? rawItem;
   let text = pretext && props.pretext ? `${getType(item)}: ` : '';
@@ -69,6 +79,9 @@ function getTitle(rawItem, pretext) {
   return text;
 }
 
+/**
+ * Gets the icon for a chip item
+ */
 function getIcon(rawItem) {
   let item = rawItem.raw ?? rawItem;
   if (isTag(item)) return 'mdi-tag';

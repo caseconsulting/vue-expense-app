@@ -57,9 +57,10 @@ import { updateStoreContracts, updateStoreEmployees, updateStoreTags } from '@/u
 import { deepClone } from '@/utils/utils';
 // Store and stuff
 const store = useStore();
+let indexes = {};
 
 const assignments = defineModel();
-const props = defineProps(['indexes', 'isAdmin']);
+const props = defineProps(['projects', 'isAdmin']);
 
 const usersModel = ref([]);
 const membersModel = ref([]);
@@ -67,33 +68,49 @@ const membersModel = ref([]);
 const usersOptions = ref([]);
 const membersOptions = ref([]);
 
+/**
+ * Deletes an assignment from local array
+ */
 function removeAssignment(index) {
   if(assignments.value.length > 1)
     assignments.value.splice(index, 1);
 }
 
+/**
+ * Diverge: take an array of different types and split them
+ *          into an object by type
+ */
 function divergeUsers(index) {
+  // create blank obj if not exists, then hand of to diverge()
   assignments.value[index].users ??= {};
   diverge(assignments.value[index].users, usersModel.value[index]);
 }
 function divergeMembers(index) {
+  // create blank obj if not exists, then hand of to diverge()
   assignments.value[index].members ??= {};
   diverge(assignments.value[index].members, membersModel.value[index]);
 }
 function diverge(into, from) {
+  // create arrays to put items in
   into.employees = [];
   into.tags = [];
   into.contracts = [];
   into.projects = [];
 
+  // look up ID in index and put it in the proper array
   for (let id of from) {
-    if (props.indexes.employees[id]) into.employees.push(id);
-    else if (props.indexes.tags[id]) into.tags.push(id);
-    else if (props.indexes.contracts[id]) into.contracts.push(id);
-    else if (props.indexes.projects[id]) into.projects.push(id);
+    if (indexes.employees[id]) into.employees.push(id);
+    else if (indexes.tags[id]) into.tags.push(id);
+    else if (indexes.contracts[id]) into.contracts.push(id);
+    else if (indexes.projects[id]) into.projects.push(id);
     else throw new Error('Could not tell type of id' + id);
   }
 }
+
+/**
+ * Converge: take an object split up into different types
+ *           and combine them all into one mega array
+ */
 function converge(into, index, from) {
   if (into?.[index] === undefined || !from) return;
   into[index] = deepClone([
@@ -112,22 +129,28 @@ onMounted(async () => {
     store.getters.contracts ? '' : updateStoreContracts(),
   ]);
 
-  let projects = [];
-  for (let c of store.getters.contracts)
-    for (let p of (c.projects ?? []))
-      projects.push(p);
-
+  // options for user dropdown
   usersOptions.value = [
     ...store.getters.tags,
     ...store.getters.employees
   ];
+  // options for members dropdown
   membersOptions.value = [
     ...store.getters.tags,
     ...store.getters.contracts,
     ...store.getters.employees,
-    ...projects
+    ...props.projects
   ];
 
+  // indexes for O(1) search later
+  indexes = {
+    employees: indexBy(store.getters.employees, 'id'),
+    tags: indexBy(store.getters.tags, 'id'),
+    contracts: indexBy(store.getters.contracts, 'id'),
+    projects: indexBy(projects, 'id')
+  }
+
+  // converge items into dropdowns from diverged array
   for (let i in assignments.value) {
     usersModel.value[i] ??= [];
     membersModel.value[i] ??= [];
