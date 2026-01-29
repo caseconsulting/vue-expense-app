@@ -162,13 +162,20 @@ async function addAssignment(group) {
  */
 const deleteText = ref('Delete');
 const userIsSure = ref(false);
+let deleteTimeout;
 async function deleteCurrentGroup() {
   // first click: make sure user is sure
   if (!userIsSure.value) {
     deleteText.value = 'Are you sure?';
     userIsSure.value = true;
+    // reset if user doesn't confirm
+    deleteTimeout = setTimeout(() => {
+      deleteText.value = 'Delete';
+      userIsSure.value = false;
+    }, 7777);
     return;
   }
+  if (deleteTimeout) clearTimeout(deleteTimeout);
   // second click: delete and push to db
   if (!isAdmin(editGroup.value)) {
     let [{ id }] = groups.value.splice(editGroupIndex.value--, 1); // post decrement
@@ -186,8 +193,11 @@ const saveText = ref('Save');
 async function saveCurrentGroup() {
   // save to db
   await api.createItem(api.ACCESS_GROUPS, editGroup.value);
+  // reset delete UI vars if needed
+  deleteText.value = 'Delete';
+  userIsSure.value = false;
   // UI feedback
-  saveText.value = ref('Saved!'); 
+  saveText.value = ref('Saved!');
   setTimeout(() => {
       saveText.value = 'Save';
     }, 2500);
