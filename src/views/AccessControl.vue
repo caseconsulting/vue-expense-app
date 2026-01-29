@@ -5,12 +5,12 @@
       <v-container>
         <v-row>
           <v-col cols="2" class="pl-0 border-e-sm">
-            <div class="d-flex align-center justify-center">
+            <div class="d-flex align-center justify-center w-100">
               <h3 class="my-0 ml-0">Groups</h3>
               <v-spacer />
               <v-btn icon="mdi-plus-circle" variant="plain" size="small" @click="addGroup()" />
             </div>
-            <v-list nav density="compact" class="pr-0">
+            <v-list nav density="compact" class="pr-0 w-100">
               <v-list-item
                 v-for="(group, i) in groups"
                 :key="i"
@@ -32,7 +32,7 @@
             </div>
             <div v-else>
               <v-row>
-                <v-col cols="10" :class="isAdmin(editGroup) ? 'cursor-not-allowed' : ''">
+                <v-col cols="13" :class="isAdmin(editGroup) ? 'cursor-not-allowed' : ''">
                   <v-text-field
                     v-model="editGroup.name"
                     variant="outlined"
@@ -41,29 +41,13 @@
                     :disabled="isAdmin(editGroup)"
                   />
                 </v-col>
-                <v-col cols="2" :class="isAdmin(editGroup) ? 'cursor-not-allowed' : ''">
-                  <v-btn
-                    variant="icon"
-                    icon="mdi-delete"
-                    class="mt-1"
-                    :disabled="isAdmin(editGroup)"
-                    @click="deleteCurrentGroup()"
-                    v-tooltip="`Delete '${editGroup.name}'`"
-                  />
-                  <v-btn
-                    variant="icon"
-                    icon="mdi-content-save"
-                    class="mt-1"
-                    @click="saveCurrentGroup()"
-                    v-tooltip="'Save'"
-                  />
-                </v-col>
               </v-row>
               <div class="users">
                 <div class="d-flex align-center justify-start">
                   <h2>Assignments</h2>
                   <v-btn icon="mdi-plus-circle" class="ml-2" variant="plain" size="small" @click="addAssignment(editGroup)" />
                 </div>
+                <p class="pa-0 ma-0 ml-2 text-caption"><i>Assign Users to become {{ aOrAn(editGroup.name) }} {{ editGroup.name }} for Members</i></p>
                 <Assignments v-model="editGroup.assignments" :is-admin="editGroup.name === 'Admin'" :indexes="indexes" :key="editGroupIndex" />
               </div>
               <div class="flags">
@@ -75,6 +59,27 @@
                 <Permissions v-if="editGroup.name !== 'Admin'" :key="editGroupIndex" />
                 <div v-else class="ml-2"><p>Admins always has full access to the Portal and all its data.</p></div>
               </div>
+              <div class="actions">
+                <v-btn
+                  variant="outlined"
+                  color="green-darken-1"
+                  class="ml-2"
+                  append-icon="mdi-content-save"
+                  @click="saveCurrentGroup()"
+                >
+                  {{ saveText }}
+                </v-btn>
+                <v-btn
+                  variant="outlined"
+                  class="ml-2 delete-button"
+                  :append-icon="userIsSure ? '' : 'mdi-delete'"
+                  :disabled="isAdmin(editGroup)"
+                  @click="deleteCurrentGroup()"
+                  :color="userIsSure ? 'red-darken-1' : undefined"
+                >
+                  {{ deleteText }}
+                </v-btn>
+              </div>
             </div>
           </v-col>
         </v-row>
@@ -84,28 +89,14 @@
 </template>
 
 <script setup>
-/**
- * ACCESS CONTROL TODO
- * - [x] Order of groups in menu bar should remain the same
- * - [x] Remove inactive employees from backend return
- * - [x] Fix flags - no 'locked'. Maybe add to permissions
- * - [x] Admin should have full access
- * - [x] Bug: profile not updating immediately
- * - [x] Make deletion save lol
- * - [ ] Saving UX
- * - [ ] Add projects to dropdowns
- * - [ ] Dropdown prefixes ("Employee: xxx", "Project: xxx")
- * - [ ] Clean up, add comments, add logs (backend only)
- */
-
 // Vue & Component imports
-import { inject, ref, computed, onBeforeMount, onUnmounted, nextTick } from 'vue';
+import { inject, ref, watch, computed, onBeforeMount, onUnmounted, nextTick } from 'vue';
 import { useStore } from 'vuex';
 import Assignments from '@/components/access-control/Assignments.vue';
 import GroupFlags from '@/components/access-control/GroupFlags.vue';
 import Permissions from '@/components/access-control/Permissions.vue';
 // JS/utility imports
-import { updateStoreContracts, updateStoreEmployees, updateStoreTags, updateStoreAccessGroups } from '@/utils/storeUtils';
+import { updateStoreContracts, updateStoreEmployees, updateStoreTags } from '@/utils/storeUtils';
 import { generateUUID, deepClone, indexBy } from '@/utils/utils';
 import { now, difference } from '@/shared/dateUtils';
 import api from '@/shared/api';
@@ -114,6 +105,8 @@ const emitter = inject('emitter');
 const store = useStore();
 // Utils
 const indexes = ref({});
+const edits = ref({});
+function aOrAn(word) { return 'aeiouAEIOU'.split('').includes(word.charAt(0)) ? 'an' : 'a' }
 
 /**
  * -----------------------------------------
@@ -171,15 +164,34 @@ async function addAssignment(group) {
 /**
  * Deletes the current group
  */
+const deleteText = ref('Delete');
+const userIsSure = ref(false);
 async function deleteCurrentGroup() {
+  if (!userIsSure.value) {
+    deleteText.value = 'Are you sure?';
+    userIsSure.value = true;
+    return;
+  }
   if (!isAdmin(editGroup.value)) {
     let [{ id }] = groups.value.splice(editGroupIndex.value--, 1); // post decrement
     await api.deleteItem(api.ACCESS_GROUPS, id);
+    deleteText.value = 'Delete';
+    userIsSure.value = false;
   }
 }
 
+/**
+ * Saves the current group
+ * TODO: patch request instead of whole object
+ */
+const saveText = ref('Save');
 async function saveCurrentGroup() {
   await api.createItem(api.ACCESS_GROUPS, editGroup.value);
+  if (edits.value[editGroupIndex.value] != null) edits.value[editGroupIndex.value] = false;
+  saveText.value = ref('Saved!'); 
+  setTimeout(() => {
+      saveText.value = 'Save';
+    }, 2500);
 }
 
 /**
@@ -188,6 +200,23 @@ async function saveCurrentGroup() {
 function isAdmin(group) {
   return group.name === 'Admin';
 }
+
+/**
+ * Simple way to check for changes
+ */
+watch(
+  () => [editGroupIndex.value, editGroup.value],
+  ([newIndex], [oldIndex, oldGroup]) => {
+    // reset deletion protection
+    userIsSure.value = false;
+    deleteText.value = 'Delete';
+    // first run or changing groups
+    if (oldGroup === undefined || newIndex !== oldIndex) return;
+    // otherwise an edit was made to the group
+    edits.value[newIndex] = true;
+  },
+  { deep: true }
+)
 
 /**
  * -----------------------------------------
@@ -228,4 +257,7 @@ onUnmounted(() => {
 
 /* Body input */
 .users, .flags, .permissions { padding-left: 1em; margin-top: 1em; }
+.actions { padding-left: 1em; margin-top: 2em; }
+.delete-button { color: #333; }
+.delete-button:hover { color: #D32F2F; }
 </style>

@@ -15,62 +15,24 @@
         />
       </v-col>
       <v-col cols="4" class="pt-0">
-        <v-autocomplete
-          label="Employees and tags"
-          :items="employeesAndTags"
-          :item-title="getTitle"
-          item-value="id"
-          variant="underlined"
-          multiple
-          chips
-          closable-chips
-          clear-on-select
-          auto-select-first
+        <MultiAutocomplete
           v-model="usersModel[i]"
+          :items="usersOptions"
+          label="Employees or Tags"
           @update:model-value="divergeUsers(i)"
-        >
-          <template #chip="{ props, item }">
-            <v-chip v-bind="props" class="ml-0 pl-1 mr-0 pr-2 cursor-pointer" label>
-              <template #prepend>
-                <v-icon :icon="getIcon(item)" size="small" class="mr-2" />
-              </template>
-              <template #close>
-                <v-icon icon="mdi-close" size="small" />
-              </template>
-            </v-chip>
-          </template>
-        </v-autocomplete>
+        />
       </v-col>
       <v-col cols="4" class="pt-0">
         <p v-if="isAdmin" class="adminEmpAccess">
           Admins have access to all employees
         </p>
-        <v-autocomplete
+        <MultiAutocomplete
           v-else
-          label="Employees, tags, contracts, and projects"
-          :items="employeesTagsContractsProjects"
-          :item-title="getTitle"
-          item-value="id"
-          variant="underlined"
-          multiple
-          chips
-          closable-chips
-          clear-on-select
-          auto-select-first
           v-model="membersModel[i]"
+          :items="membersOptions"
+          label="Employees, Tags, Contracts, or Projects"
           @update:model-value="divergeMembers(i)"
-        >
-          <template #chip="{ props, item }">
-            <v-chip v-bind="props" label>
-              <template #prepend>
-                <v-icon :icon="getIcon(item)" size="small" class="mr-2" />
-              </template>
-              <template #close>
-                <v-icon icon="mdi-close" size="small" />
-              </template>
-            </v-chip>
-          </template>
-        </v-autocomplete>
+        />
       </v-col>
       <v-col cols="2" class="pt-0">
         <v-btn
@@ -89,6 +51,7 @@
 // Vue & Component imports
 import { ref, onMounted } from 'vue';
 import { useStore } from 'vuex';
+import MultiAutocomplete from '@/components/access-control/MultiAutocomplete.vue';
 // JS/utility imports
 import { updateStoreContracts, updateStoreEmployees, updateStoreTags } from '@/utils/storeUtils';
 import { deepClone } from '@/utils/utils';
@@ -101,39 +64,8 @@ const props = defineProps(['indexes', 'isAdmin']);
 const usersModel = ref([]);
 const membersModel = ref([]);
 
-const employeesAndTags = ref([]);
-const employeesTagsContractsProjects = ref([]);
-
-function isTag(item) {
-  return !!item.tagName;
-}
-function isEmployee(item) {
-  return !!item.employeeNumber;
-}
-function isContract(item) {
-  return !!item.contractName;
-}
-function isProject(item) {
-  return !!item.projectName;
-}
-
-function getTitle(rawItem) {
-  let item = rawItem.raw ?? rawItem;
-  let text;
-  if (isTag(item)) text = item.tagName;
-  if (isEmployee(item)) text = `${item.nickname || item.firstName} ${item.lastName}`;
-  if (isContract(item)) text = item.contractName;
-  if (isProject(item)) text = item.projectName;
-  return text;
-}
-
-function getIcon(rawItem) {
-  let item = rawItem.raw ?? rawItem;
-  if (isTag(item)) return 'mdi-tag';
-  if (isEmployee(item)) return 'mdi-account';
-  if (isContract(item)) return 'mdi-file-document-multiple';
-  if (isProject(item)) return 'mdi-file-document-outline';
-}
+const usersOptions = ref([]);
+const membersOptions = ref([]);
 
 function removeAssignment(index) {
   if(assignments.value.length > 1)
@@ -154,14 +86,12 @@ function diverge(into, from) {
   into.contracts = [];
   into.projects = [];
 
-  let target;
   for (let id of from) {
     if (props.indexes.employees[id]) into.employees.push(id);
     else if (props.indexes.tags[id]) into.tags.push(id);
     else if (props.indexes.contracts[id]) into.contracts.push(id);
     else if (props.indexes.projects[id]) into.projects.push(id);
     else throw new Error('Could not tell type of id' + id);
-    // target.push(id);
   }
 }
 function converge(into, index, from) {
@@ -174,13 +104,6 @@ function converge(into, index, from) {
   ]);
 }
 
-function getType(item) {
-  if (isEmployee(item)) return 'Employee';
-  else if (isTag(item)) return 'Tag';
-  else if (isContract(item)) return 'Contract';
-  else if (isProject(item)) return 'Project';
-}
-
 onMounted(async () => {
   // update portal data
   await Promise.all([
@@ -189,15 +112,20 @@ onMounted(async () => {
     store.getters.contracts ? '' : updateStoreContracts(),
   ]);
 
-  employeesAndTags.value = [
+  let projects = [];
+  for (let c of store.getters.contracts)
+    for (let p of (c.projects ?? []))
+      projects.push(p);
+
+  usersOptions.value = [
     ...store.getters.tags,
     ...store.getters.employees
   ];
-  employeesTagsContractsProjects.value = [
+  membersOptions.value = [
     ...store.getters.tags,
     ...store.getters.contracts,
     ...store.getters.employees,
-    // TODO: projects
+    ...projects
   ];
 
   for (let i in assignments.value) {
