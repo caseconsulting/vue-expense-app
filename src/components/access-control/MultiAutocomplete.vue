@@ -4,8 +4,9 @@
       :label="label"
       :items="items"
       :item-title="getTitle"
-      item-value="id"
       :variant="variant"
+      color="indigo-darken-4"
+      item-value="id"
       multiple
       chips
       closable-chips
@@ -24,12 +25,17 @@
           </template>
         </v-chip>
       </template>
+      <template v-slot:item="{ props, item }">
+        <v-list-item
+          v-bind="props"
+          :title="getTitle(item.raw, true)"
+          :subtitle="getSubtitle(item.raw)"
+        ></v-list-item>
+      </template>
     </v-autocomplete>
   </div>
 </template>
 <script setup>
-import { inject } from 'vue';
-
 const props = defineProps({
   items: { type: Array },
   pretext: { type: Boolean, default: true },
@@ -72,11 +78,20 @@ function getType(rawItem) {
 function getTitle(rawItem, pretext) {
   let item = rawItem.raw ?? rawItem;
   let text = pretext && props.pretext ? `${getType(item)}: ` : '';
+  let primeName = pretext ? '' : `${item.primeName} `;
   if (isTag(item)) text += item.tagName;
   if (isEmployee(item)) text += `${item.nickname || item.firstName} ${item.lastName}`;
-  if (isContract(item)) text += item.contractName;
+  if (isContract(item)) text += primeName + item.contractName;
   if (isProject(item)) text += item.projectName;
   return text;
+}
+
+/**
+ * Gets the subtitle for a dropdown item, if exists
+ */
+function getSubtitle(rawItem) {
+  let item = rawItem.raw ?? rawItem;
+  return item.primeName;
 }
 
 /**

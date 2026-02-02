@@ -308,7 +308,8 @@ export function indexBy(array, by, options = {}) {
     clone = true, // whether or not to deep-clone the object to avoid refs
   } = options;
   // warning that 'by' is deleted on original object if clone is false and delete is true
-  console.warn(`indexBy is deleting the original object\'s '${by}' attribute. Please ensure this is intentional!`)
+  if (deleteBy && !clone)
+    console.warn(`indexBy is deleting the original object\'s '${by}' attribute. Please ensure this is intentional!`)
 
   // set vars
   let target = clone ? deepClone(array) : array;

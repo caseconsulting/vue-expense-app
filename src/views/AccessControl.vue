@@ -6,7 +6,7 @@
         <v-row>
           <v-col cols="2" class="pl-0 border-e-sm">
             <div class="d-flex align-center justify-center w-100">
-              <h3 class="my-0 ml-0">Groups</h3>
+              <h3 class="my-0 ml-0">Roles</h3>
               <v-spacer />
               <v-btn icon="mdi-plus-circle" variant="plain" size="small" @click="addGroup()" />
             </div>
@@ -72,7 +72,7 @@
                   {{ saveText }}
                 </v-btn>
                 <v-btn
-                  variant="outlined"
+                  :variant="userIsSure ? 'tonal' : 'outlined'"
                   class="ml-2 delete-button"
                   :append-icon="userIsSure ? '' : 'mdi-delete'"
                   :disabled="isAdmin(editGroup)"
@@ -94,6 +94,7 @@
 // Vue & Component imports
 import { inject, ref, watch, computed, onBeforeMount, onUnmounted, nextTick } from 'vue';
 import { useStore } from 'vuex';
+import { useDisplaySuccess, useDisplayError } from '@/components/shared/StatusSnackbar.vue';
 import Assignments from '@/components/access-control/Assignments.vue';
 import GroupFlags from '@/components/access-control/GroupFlags.vue';
 import Permissions from '@/components/access-control/Permissions.vue';
@@ -115,7 +116,8 @@ const groups = ref([]);
 const editGroupIndex = ref(0); // index in array
 const editGroup = computed(() => groups.value?.[editGroupIndex.value]);
 const emptyGroup = { id: null, created: null, name: 'New Group', flags: {}, assignments: [] };
-const emptyAssignment = { id: null, name: 'New Assignment', users: {}, assignments: {} }
+const emptyAssignment = { id: null, name: 'New Assignment', users: {}, assignments: {} };
+const projects = ref([]);
 
 /**
  * Gets groups data
@@ -182,10 +184,15 @@ async function deleteCurrentGroup() {
   if (deleteTimeout) clearTimeout(deleteTimeout);
   // second click: delete and push to db
   if (!isAdmin(editGroup.value)) {
-    let [{ id }] = groups.value.splice(editGroupIndex.value--, 1); // post decrement
-    await api.deleteItem(api.ACCESS_GROUPS, id);
-    deleteText.value = 'Delete';
-    userIsSure.value = false;
+    try {
+      let [{ id }] = groups.value.splice(editGroupIndex.value--, 1); // post decrement
+      await api.deleteItem(api.ACCESS_GROUPS, id);
+      deleteText.value = 'Delete';
+      userIsSure.value = false;
+      useDisplaySuccess('Delete success!');
+    } catch (e) {
+      useDisplayError('Failed to delete Role');
+    }
   }
 }
 
@@ -199,16 +206,21 @@ async function saveCurrentGroup() {
   // UI feedback
   saving.value = true;
   // save to db
-  await api.createItem(api.ACCESS_GROUPS, editGroup.value);
-  // reset delete UI vars if needed
-  deleteText.value = 'Delete';
-  userIsSure.value = false;
-  // UI feedback
-  saving.value = false;
-  saveText.value = ref('Saved!');
-  setTimeout(() => {
+  try {
+    await api.createItem(api.ACCESS_GROUPS, editGroup.value);
+    // reset delete UI vars if needed
+    deleteText.value = 'Delete';
+    userIsSure.value = false;
+    // UI feedback
+    saving.value = false;
+    saveText.value = ref('Saved!');
+    setTimeout(() => {
       saveText.value = 'Save';
     }, 2500);
+    useDisplaySuccess('Update success!');
+  } catch (e) {
+    useDisplayError('Failed to update Role');
+  }
 }
 
 /**
@@ -252,8 +264,8 @@ onBeforeMount(async () => {
   ]);
 
   // get list of projects
-  let projects = [];
-  for (let c of store.getters.contracts) projects.push(...(c.projects || []));
+  projects.value = [];
+  for (let c of store.getters.contracts) projects.value.push(...(c.projects || []));
 
   // put groups in UI
   await buildGroups();

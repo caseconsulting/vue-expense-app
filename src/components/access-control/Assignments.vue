@@ -1,9 +1,9 @@
 <template>
   <v-col>
     <v-row dense>
-      <v-col cols="2" class="pb-0"><p class="mb-0"><strong>Name</strong></p></v-col>
-      <v-col cols="4" class="pb-0"><p class="mb-0"><strong>Users</strong></p></v-col>
-      <v-col cols="4" class="pb-0"><p class="mb-0"><strong>Members</strong></p></v-col>
+      <v-col cols="2" class="pb-0"><p class="mb-0"><strong>Assignment Name</strong></p></v-col>
+      <v-col cols="4" class="pb-0"><p class="mb-0"><strong>Responsible Party</strong></p></v-col>
+      <v-col cols="4" class="pb-0"><p class="mb-0"><strong>Responsible For</strong></p></v-col>
       <v-col cols="2" class="pb-0"></v-col>
     </v-row>
     <v-row v-for="(assignment, i) in assignments" :key="assignment.id" dense>
@@ -36,7 +36,7 @@
       </v-col>
       <v-col cols="2" class="pt-0">
         <v-btn
-          variant="icon"
+          variant="text"
           icon="mdi-delete"
           :disabled="assignments.length == 1"
           @click="removeAssignment(i)"

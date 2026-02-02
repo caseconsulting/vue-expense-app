@@ -71,7 +71,7 @@ const router = createRouter({
       path: '/accessControl',
       name: 'accessControl',
       component: AccessControl,
-      beforeEnter: requireAuth
+      beforeEnter: multiguard([requireAuth, isAdminOrManager])
     },
     {
       path: '/contracts',
