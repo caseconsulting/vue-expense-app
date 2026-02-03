@@ -278,6 +278,60 @@ export function sortLanguagesByProficiency(languages) {
   return sortedByProficiency;
 }
 
+/**
+ * The Portal's very own deep copy of objects. No more lodash.
+ * 
+ * @param object - object to copy
+ * @return copied object, with no references to the original
+ */
+export function deepCopy(object) {
+  if (typeof structuredClone === 'function') 
+    return structuredClone(object);
+  else
+    return JSON.parse(JSON.stringify(object));
+}
+
+/**
+ * Indexes an array by a given value. Nondestructive.
+ * 
+ * @param array - array to index
+ * @param by - dot-notated value to index by (eg. 'id' or 'subItem.uuid')
+ * @return Object of indexed array, with `by` as keys
+ */
+export function indexBy(array, by, options = {}) {
+  // input check
+  if (!array || !by || !Array.isArray(array) || typeof by !== 'string')
+    throw new Error(`Must include Array 'array' and String 'by'.`);
+
+  // pull out options
+  let { deleteBy = true } = options;
+
+  // set vars
+  let copy = deepCopy(array); // avoid modifications
+  let indexers = by.split('.');
+  indexers = indexers.map(i => !!Number(i) ? Number(i) : i); // parse Numbers to get into arrays
+  let obj = {};
+  let key, lastAccess, lastIndex;
+
+  // pull out items and set them to return object
+  let i = 0;
+  for (let item of copy) {
+    key = item;
+    for (let i of indexers) {
+      lastAccess = key; // array/object that 'by' is inside of
+      lastIndex = i; // index to use to access 'by'
+      key = key[i] ?? key[String(i)];
+      if (!key) throw new Error(`indexBy: No element ${by} in item`)
+      }
+    obj[key] = item; // set it
+    if (deleteBy) delete lastAccess[lastIndex]; // remove duplicate information
+  }
+  console.log(obj);
+
+  // :)
+  return obj;
+}
+
 export const STATES = {
   AL: 'Alabama',
   AK: 'Alaska',
@@ -655,6 +709,8 @@ export default {
   userRoleIsManager,
   userRoleIsUser,
   userRoleIsIntern,
+  deepCopy,
+  indexBy,
   COUNTRIES,
   MONTHS
 };
