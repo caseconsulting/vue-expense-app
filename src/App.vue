@@ -210,6 +210,7 @@ const links = ref([
 const benefitsLinks = [
   { name: 'Net Benefits/Fidelity', link: 'https://nb.fidelity.com/public/nb/default/home' },
   { name: 'Benefits Booklet', link: BENEFITS_BOOKLET },
+  { name: 'Employee Navigator', link: 'https://www.employeenavigator.com/employee/Home' },
   { name: 'Medical (Health) Insurance', link: 'https://www.anthem.com/' },
   { name: 'Disability & Life Insurance', link: 'https://www.mutualofomaha.com/' },
   { name: 'Dental & Vision Insurance', link: 'https://www.standard.com/ ' },
