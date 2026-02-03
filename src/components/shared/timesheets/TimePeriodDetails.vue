@@ -142,11 +142,7 @@ onMounted(() => {
   contractHours.value = getEmployeeCurrentProjects(props.employee)?.[0]?.contractHours;
   if (contractHours.value) contractHours.value = Number(contractHours.value);
 
-  emitter.emit('timesheets-chart-data', {
-    completed: formatNumber(periodHoursCompleted.value),
-    needed: formatNumber(totalPeriodHours.value),
-    remainingHours: remainingHours.value
-  });
+  updateDonutChart();
   emitter.on('update-planned-pto-results-time-period', (data) => {
     clonedEmployee.value.plannedPto = data;
   });
@@ -380,6 +376,17 @@ function getPlannedPTO(convertToDays) {
 } // getPlannedPTO
 
 /**
+ * Emits to the donut chart the values calculated here
+ */
+function updateDonutChart() {
+  emitter.emit('timesheets-chart-data', {
+    completed: formatNumber(periodHoursCompleted.value),
+    needed: formatNumber(totalPeriodHours.value),
+    remainingHours: remainingHours.value
+  });
+}
+
+/**
  * Calculates and returns the work days between start and end dates provided
  *
  * @param {String} startDate - The start date
@@ -471,6 +478,12 @@ async function check1860OnTrack() {
 watch(props.period, (val) => {
   errorMessage.value = val ? null : "Couldn't load time period";
 });
+
+watch(
+  () => [periodHoursCompleted.value, totalPeriodHours.value, remainingHours.value],
+  updateDonutChart
+)
+
 </script>
 
 <style>
