@@ -1,6 +1,6 @@
 <template>
   <v-card>
-    <v-card-title class="d-flex align-center justify-space-between beta_header_style">
+    <v-card-title @click="printAC" class="d-flex align-center justify-space-between beta_header_style">
       <h3 class="text-white">CASE Information</h3>
     </v-card-title>
 
@@ -30,7 +30,7 @@
         <p class="info-div mb-0" v-else>{{ getDaysUntil }} Days until Anniversary</p>
       </div>
 
-      <!-- Access Control stuff -->
+      <!-- Access Control stuff (not ready for prime time yet)
        <div>
         <h2 class="fit-content" style="font-size: large">Reports To</h2>
         <div class="info-div" v-if="accessControlUsers.length">
@@ -38,14 +38,15 @@
         </div>
         <div v-else class="info-div">Nobody</div>
        </div>
+       -->
     </v-card-text>
   </v-card>
 </template>
 
 <script setup>
 import { add, getTodaysDate, isAfter, setYear, difference, format } from '@/shared/dateUtils';
-import { monthDayYearFormat } from '@/utils/utils';
-import { computed, ref } from 'vue';
+import { monthDayYearFormat, userRoleIsAdmin } from '@/utils/utils';
+import { computed, onMounted } from 'vue';
 import { useStore } from 'vuex';
 
 // |--------------------------------------------------|
@@ -65,16 +66,17 @@ const store = useStore();
 
 const accessControlUsers = computed(() => {
   let items = [];
-  console.log(props.accessControl);
   for (let position of Object.keys(props.accessControl ?? {})) {
     for (let id of props.accessControl[position]) {
       let emp = store.getters.employees.find((e) => e.id === id);
       items.push({ position, name: `${emp.nickname || emp.firstName} ${emp.lastName}` });
     }
   }
-  console.log(items);
   return items;
 });
+function printAC() {
+  if (userRoleIsAdmin()) console.log(accessControlUsers.value);
+}
 
 const internshipDate = computed(() => {
   return format(props.model.internshipDate, null, 'MMMM YYYY');
