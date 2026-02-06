@@ -459,6 +459,15 @@ async function processHighFive(highFive) {
 } // processHighFive
 
 /**
+ * Returns all generated gift cards
+ * 
+ * @returns - Gift cards database
+ */
+async function getAllGiftCards() {
+  return await execute('get', `/${HIGH_FIVES}/readAll`);
+}
+
+/**
  * uploads the resume file for an employee
  *
  * @param employeeId - the id of the employee
@@ -548,6 +557,7 @@ export default {
   updateItem,
   uploadResume,
   processHighFive,
+  getAllGiftCards,
   syncApplications,
   getEmployeesFromAdp,
   getAccessControlUsers,

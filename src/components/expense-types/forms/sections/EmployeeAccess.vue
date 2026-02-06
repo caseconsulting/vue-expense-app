@@ -32,6 +32,7 @@
       closable-chips
       class="mt-0 pt-0"
       :search="searchString"
+      @update:search="searchString = $event"
       @update:model-value="searchString = ''"
       item-title="text"
       item-value="value"

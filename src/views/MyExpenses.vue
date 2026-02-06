@@ -306,7 +306,8 @@
               <template #[`item.actions`]="{ item }">
                 <td class="d-flex justify-end mr-4">
                   <!-- Download Attachment Button -->
-                  <attachment :mid-action="midAction || expensesStatuses.disabled.has(item.id)" :expense="item" :mode="'expenses'" />
+                  <GiftCardInfoModal v-if="item.budgetName === 'High Five'" :expense="item" :gcInfo="giftCards[item.id]" />
+                  <attachment v-else :mid-action="midAction || expensesStatuses.disabled.has(item.id)" :expense="item" :mode="'expenses'" />
 
                   <!-- Edit Button -->
                   <v-btn
@@ -457,6 +458,7 @@ import { AxiosError } from 'axios';
 import Attachment from '@/components/utils/Attachment.vue';
 import ConvertExpensesToCsv from '@/components/expenses/ConvertExpensesToCsv.vue';
 import DeleteModal from '@/components/modals/DeleteModal.vue';
+import GiftCardInfoModal from '@/components/modals/GiftCardInfoModal.vue';
 import ExpenseRejectionModal from '@/components/modals/ExpenseRejectionModal.vue';
 import employeeUtils from '@/shared/employeeUtils';
 import { isExpenseEditable } from '@/shared/expenseUtils';
@@ -489,7 +491,7 @@ import { updateStoreBudgets, updateStoreExpenseTypes, updateStoreEmployees, upda
 import { mask } from 'vue-the-mask';
 import { onBeforeMount, onMounted, onBeforeUnmount, ref, watch, computed, inject } from 'vue';
 import { useStore } from 'vuex';
-import { storeIsPopulated } from '@/utils/utils.js';
+import { storeIsPopulated, indexBy } from '@/utils/utils.js';
 import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSnackbar.vue';
 import { EXPENSE_STATES } from '@/shared/expenseUtils';
 
@@ -516,6 +518,7 @@ const EXPENSE_STATES_NAMES = {
 const deleting = ref(false); // activate delete model
 const expanded = ref([]); // datatable expanded
 const expenses = ref([]); // all expenses
+const giftCards = ref({});
 const employees = ref([]); // employee autocomplete options
 const employee = ref(null); // employee autocomplete filter
 const endDateFilter = ref(null);

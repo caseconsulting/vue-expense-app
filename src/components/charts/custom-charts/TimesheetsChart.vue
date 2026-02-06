@@ -68,7 +68,7 @@
 
 <script setup>
 import DoughnutChart from '@/components/charts/base-charts/DoughnutChart.vue';
-import { inject, ref, onMounted, computed, onBeforeUnmount, nextTick } from 'vue';
+import { inject, ref, onMounted, computed, onBeforeUnmount, watch } from 'vue';
 import { formatNumber } from '@/utils/utils.js';
 import { useStore } from 'vuex';
 import api from '@/shared/api';
@@ -120,20 +120,18 @@ onBeforeUnmount(() => {
 onMounted(async () => {
   employee = store.getters.employees.find((e) => e.id === props.employeeId);
   timesheetPreferences = employee.preferences?.timesheetPreferences;
-  timesheetPreferences ??= {
-    customNeeded: {
-      monthly: { use: false, value: 0 },
-      calYear: { use: false, value: 0 },
-      optYear: { use: false, value: 0 }
-    },
-  }
+  timesheetPreferences ??= {};
+  timesheetPreferences.customNeeded ??= {
+    monthly: { use: false, value: 0 },
+    calYear: { use: false, value: 0 },
+    optYear: { use: false, value: 0 }
+  };
 
   emitter.on('timesheets-chart-data', async ({ completed: c, needed: n, remainingHours: r }) => {
     completed.value = c;
     needed.value = n;
     remainingHours.value = r;
     await fillData();
-    dataReceived.value = true;
 
     // override with timesheet widget preferences
     let type = props.isYearly ? (props.isCalendarYear ? 'calYear' : 'optYear') : 'monthly';
@@ -306,9 +304,18 @@ async function updateCustomHours() {
 // |                     COMPUTED                     |
 // |                                                  |
 // |--------------------------------------------------|
+
 const lockTooltip = computed(() => {
   return saveCustomNeeded.value ? 'Saved between sessions' : 'Forgotten between sessions';
 })
+
+watch(
+  () => [props.jobcodes],
+  async () => {
+    await fillData();
+    updateKey.value++;
+  }
+);
 </script>
 
 <style>
