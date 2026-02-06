@@ -1981,7 +1981,7 @@ async function watchEditedExpenseExpenseTypeID() {
     // set show on company feed and require url
     if (
       !_isEqual(this.originalExpense, this.editedExpense) ||
-      _isNil(this.editedExpense.ifd) ||
+      _isNil(this.editedExpense.id) ||
       _isEmpty(this.editedExpense.id)
     ) {
       // changing the expense type
