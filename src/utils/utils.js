@@ -326,7 +326,6 @@ export function indexBy(array, by, options = {}) {
     obj[key] = item; // set it
     if (deleteBy) delete lastAccess[lastIndex]; // remove duplicate information
   }
-  console.log(obj);
 
   // :)
   return obj;
