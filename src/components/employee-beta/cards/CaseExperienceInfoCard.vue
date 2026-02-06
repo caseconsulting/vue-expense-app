@@ -1,6 +1,6 @@
 <template>
   <v-card>
-    <v-card-title class="d-flex align-center justify-space-between beta_header_style">
+    <v-card-title @click="printAC" class="d-flex align-center justify-space-between beta_header_style">
       <h3 class="text-white">CASE Information</h3>
     </v-card-title>
 
@@ -11,29 +11,43 @@
         <p v-if="!model.deptDate" class="mb-1 info-header">Since {{ monthDayYearFormat(model.hireDate) }}</p>
         <p class="mb-1 info-header" v-else>Departed {{ monthDayYearFormat(model.deptDate) }}</p>
       </div>
+
       <div v-if="internshipDate">
         <h2 class="fit-content" style="font-size: large">Internship date</h2>
         <div class="info-div">
           {{ internshipDate }}
         </div>
       </div>
+
       <div>
         <h2 class="fit-content" style="font-size: large">Time with CASE</h2>
         <div class="info-div">{{ getYearsWith }} {{ getDaysWith }}</div>
       </div>
+
       <div>
-        <h2 style="font-size: large">Anniversary Countdown</h2>
-        <p class="info-header" v-if="!model.hireDate">It's your Anniversary!</p>
-        <p class="info-header" v-else>{{ getDaysUntil }} Days until Anniversary</p>
+        <h2 class="fit-content" style="font-size: large">Anniversary Countdown</h2>
+        <p class="info-div" v-if="!model.hireDate">It's your Anniversary!</p>
+        <p class="info-div mb-0" v-else>{{ getDaysUntil }} Days until Anniversary</p>
       </div>
+
+      <!-- Access Control stuff (not ready for prime time yet)
+       <div>
+        <h2 class="fit-content" style="font-size: large">Reports To</h2>
+        <div class="info-div" v-if="accessControlUsers.length">
+          <p v-for="{ name, position } of accessControlUsers" :key="name" class="my-0">{{ position }}: {{ name }}</p>
+        </div>
+        <div v-else class="info-div">Nobody</div>
+       </div>
+       -->
     </v-card-text>
   </v-card>
 </template>
 
 <script setup>
 import { add, getTodaysDate, isAfter, setYear, difference, format } from '@/shared/dateUtils';
-import { monthDayYearFormat } from '@/utils/utils';
-import { computed, ref } from 'vue';
+import { monthDayYearFormat, userRoleIsAdmin } from '@/utils/utils';
+import { computed, onMounted } from 'vue';
+import { useStore } from 'vuex';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -41,13 +55,28 @@ import { computed, ref } from 'vue';
 // |                                                  |
 // |--------------------------------------------------|
 
-const props = defineProps(['model']);
+const props = defineProps(['model', 'accessControl']);
+const store = useStore();
 
 // |--------------------------------------------------|
 // |                                                  |
 // |                   COMPUTED                       |
 // |                                                  |
 // |--------------------------------------------------|
+
+const accessControlUsers = computed(() => {
+  let items = [];
+  for (let position of Object.keys(props.accessControl ?? {})) {
+    for (let id of props.accessControl[position]) {
+      let emp = store.getters.employees.find((e) => e.id === id);
+      items.push({ position, name: `${emp.nickname || emp.firstName} ${emp.lastName}` });
+    }
+  }
+  return items;
+});
+function printAC() {
+  if (userRoleIsAdmin()) console.log(accessControlUsers.value);
+}
 
 const internshipDate = computed(() => {
   return format(props.model.internshipDate, null, 'MMMM YYYY');

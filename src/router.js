@@ -7,6 +7,7 @@ import ExpenseTypes from '@/views/ExpenseTypes.vue';
 import PTOCashOuts from '@/views/PTOCashOuts.vue';
 import Employees from '@/views/Employees.vue';
 import Employee from '@/views/Employee.vue';
+import AccessControl from '@/views/AccessControl.vue';
 import StatsDashboard from '@/views/StatsDashboard.vue';
 import Audits from '@/views/Audits.vue';
 import Expenses from '@/views/MyExpenses.vue';
@@ -65,6 +66,12 @@ const router = createRouter({
       name: 'employees',
       component: Employees,
       beforeEnter: requireAuth
+    },
+    {
+      path: '/accessControl',
+      name: 'accessControl',
+      component: AccessControl,
+      beforeEnter: multiguard([requireAuth, isAdminOrManager])
     },
     {
       path: '/contracts',
