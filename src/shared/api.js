@@ -16,6 +16,7 @@ const HIGH_FIVES = 'highFives';
 const PTO_CASH_OUTS = 'ptoCashOuts';
 const SETTINGS = 'settings';
 const TAGS = 'tags';
+const ACCESS_GROUPS = 'accessGroups';
 const API_HOSTNAME = API_CONFIG.apiHostname;
 const API_PORT = API_CONFIG.apiPort;
 const PORT = API_PORT === '443' ? '' : `:${API_PORT}`;
@@ -498,6 +499,26 @@ async function getEmployeesFromAdp() {
   return await execute('get', `/${UTILITY}/getEmployeesFromAdp`);
 }
 
+/**
+ * Gets an employee's Users based on access control.
+ * ie who is above them and can see their data.
+ * 
+ * @return - Array of IDs of employees who can see the user's data
+ */
+async function getAccessControlUsers(id) {
+  return await execute('get', `/${ACCESS_GROUPS}/employee/groupUsers/${id}`)
+}
+
+/**
+ * Gets an employee's Users based on access control, for showing on the profile.
+ * ie who is above them and can see their data.
+ * 
+ * @return - Array of IDs of employees who can see the user's data
+ */
+async function getUserProfileAccessControl(id) {
+  return await execute('get', `/${ACCESS_GROUPS}/employee/showOnProfile/${id}`)
+}
+
 export default {
   createAttachment,
   createItem,
@@ -539,12 +560,15 @@ export default {
   getAllGiftCards,
   syncApplications,
   getEmployeesFromAdp,
+  getAccessControlUsers,
+  getUserProfileAccessControl,
   EXPENSE_TYPES,
   EXPENSES,
   EMPLOYEES,
   CONTRACTS,
   PTO_CASH_OUTS,
   TAGS,
+  ACCESS_GROUPS,
   UTILITY,
   TIMESHEETS,
   AUDIT,

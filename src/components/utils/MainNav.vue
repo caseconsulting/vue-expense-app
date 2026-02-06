@@ -140,6 +140,14 @@ const items = ref([
     active: false
   },
   {
+    title: 'Access Control',
+    alias: ['accessControl'],
+    icon: 'mdi-key',
+    route: 'accessControl',
+    permission: ['admin'],
+    active: false
+  },
+  {
     title: 'Statistics Dashboard',
     alias: ['stats'],
     icon: 'mdi-chart-bar',

@@ -18,6 +18,7 @@ let isBudgetsLoading = false;
 let isPtoCashOutsLoading = false;
 let isExpenseTypesLoading = false;
 let isTagsLoading = false;
+let isAccessGroupsLoading = false;
 
 let employees = null;
 let user = null;
@@ -28,6 +29,7 @@ let budgets = null;
 let ptoCashOuts = null;
 let expenseTypes = null;
 let tags = null;
+let accessGroups = null;
 
 /**
  * Update store with latest user data
@@ -199,6 +201,23 @@ export async function updateStoreTags() {
   }
 } // updateStoreTags
 
+/**
+ * Update store with latest access group data
+ */
+export async function updateStoreAccessGroups() {
+  try {
+    if (!isAccessGroupsLoading) {
+      isAccessGroupsLoading = true;
+      accessGroups = api.getItems(api.TAGS);
+    }
+    accessGroups = await accessGroups;
+    store.dispatch('setAcessGroups', { accessGroups });
+    isAccessGroupsLoading = false;
+  } catch (err) {
+    console.error(err);
+  }
+} // updateStoreTags
+
 export default {
   updateStoreUser,
   updateStoreEmployees,
@@ -208,5 +227,6 @@ export default {
   updateStoreBudgets,
   updateStorePtoCashOuts,
   updateStoreExpenseTypes,
-  updateStoreTags
+  updateStoreTags,
+  updateStoreAccessGroups
 };

@@ -42,6 +42,7 @@
                     v-if="isUser"
                     :class="!isMobile() ? 'text-h6 text-sm-h4 text-center mb-0' : 'text-center mb-0'"
                     style="font-family: 'Avenir', Helvetica, Arial, sans-serif; font-size: 30px"
+                    @click="getAccessControl()"
                   >
                     <b>{{ 'Hello, ' + model.firstName + '!' }}</b>
                   </p>
@@ -108,6 +109,7 @@
         <v-col cols="12" :lg="displayTimeAndBalances ? 8 : 11" class="pa-0">
           <employee-info
             v-model="model"
+            :accessControl="accessControl"
             :contracts="contracts"
             :loading="loading"
             :refreshKey="refreshKey"
@@ -179,6 +181,7 @@ const refreshKey = readonly({
 const user = ref(null);
 const inSearchMode = ref(false);
 const dropdownEmployee = ref(null);
+const accessControl = ref(null);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -186,11 +189,16 @@ const dropdownEmployee = ref(null);
 // |                                                  |
 // |--------------------------------------------------|
 
+async function getAccessControl() {
+  console.log(await api.getUserProfileAccessControl(model.value.id));
+}
+
 onBeforeMount(async () => {
   if (storeIsPopulated) {
     await getProfileData();
   }
   if (!store.getters.employees) await updateStoreEmployees();
+  accessControl.value = await api.getUserProfileAccessControl(model.value.id);
 });
 
 onMounted(() => {
@@ -263,7 +271,7 @@ async function checkForBudgetAccess() {
 async function getProfileData() {
   loading.value = true;
   basicEmployeeDataLoading.value = true;
-  await Promise.all([
+  let resps = await Promise.all([
     !store.getters.employees ? updateStoreEmployees() : '',
     !store.getters.user ? updateStoreUser() : '',
     !store.getters.contracts ? updateStoreContracts() : '',

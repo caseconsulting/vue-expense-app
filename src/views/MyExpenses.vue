@@ -177,11 +177,11 @@
                       <template v-slot:item="{ props, item }">
                         <v-list-item
                           v-bind="props"
-                          :title="item.raw"
+                          :title="item.raw.title"
                         >
                         <template v-slot:prepend>
                           <v-avatar>
-                            <v-icon :color="filter.status.includes(item.raw) ? 'primary' : '#111'" :icon="getStateIcon(item.raw.toUpperCase())" />
+                            <v-icon :color="filter.status.includes(item.raw) ? 'primary' : '#111'" :icon="getStateIcon(item.raw.value)" />
                           </v-avatar>
                         </template>
                         </v-list-item>
@@ -334,7 +334,7 @@
                   <v-btn
                     id="delete"
                     :disabled="
-                      isReimbursed(item) ||
+                      (expense && !isEmpty(expense.reimbursedDate)) ||
                       isEditing ||
                       midAction ||
                       expensesStatuses.disabled.has(item.id) ||
@@ -442,6 +442,17 @@
 </template>
 
 <script setup>
+
+/**
+ * TODO:
+ * - [x] Reorganize code to by logic, not type
+ * - [ ] Add partial approval to filter
+ * - [ ] Add partial approval as a tag
+ * - [ ] Add partial approval to quick actions
+ * - [ ] Differentiate between admin/HR/Finance approval based on tag
+ * - [ ] Get rid of lodash
+ */
+
 import api from '@/shared/api.js';
 import { AxiosError } from 'axios';
 import Attachment from '@/components/utils/Attachment.vue';
@@ -492,6 +503,17 @@ import { EXPENSE_STATES } from '@/shared/expenseUtils';
 
 const emitter = inject('emitter');
 const store = useStore();
+const vMask = mask; //custom directive
+const EXPENSE_STATES_NAMES = {
+  CREATED: 'Created',
+  APPROVED: 'Approved',
+  PART_APPROVED: 'Approved (Partial)',
+  EXT_PROC: 'External Processing',
+  REIMBURSED: 'Reimbursed',
+  REJECTED: 'Rejected',
+  RETURNED: 'Returned',
+  REVISED: 'Revised'
+}
 
 const deleting = ref(false); // activate delete model
 const expanded = ref([]); // datatable expanded
@@ -519,13 +541,13 @@ const expense = ref({
   recipient: null
 }); // selected expense
 const expenseTypes = ref([]); // expense types
-let statusFilterOptions = ref([
-  ...Object.values(EXPENSE_STATES).map(s => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase())
-]);
+let statusFilterOptions = ref(
+  Object.entries(EXPENSE_STATES_NAMES).map(([k, v]) => ({ value: k, title: v }))
+); // status filter dropdown options
 const filter = ref({
   active: 'both',
-  status: ['Created']
-}); // datatable filters
+  status: [EXPENSE_STATES.CREATED]
+}); // forms to filter table
 const filteredExpenses = ref([]); // filtered expenses
 const form = ref(null);
 const headers = ref([
@@ -603,7 +625,6 @@ const tagsInfo = ref({
 const toggleExpenseRejectionModal = ref(false);
 const unreimbursing = ref(false); // activate unreimburse model when value changes
 const userInfo = ref(null); // user information
-const vMask = mask; //custom directive
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -611,9 +632,6 @@ const vMask = mask; //custom directive
 // |                                                  |
 // |--------------------------------------------------|
 
-/**
- *  Gets and sets user info, expense types, and expenses. Creates event listeners.
- */
 onBeforeMount(async () => {
   // expense form listeners
   emitter.on('add', () => {
@@ -683,10 +701,6 @@ onBeforeMount(async () => {
     await updateExpense(rejectingExpense.value);
   });
 
-  if (store.getters.storeIsPopulated) {
-    loadMyExpensesData();
-  }
-
   // if coming from budgets chart scroll to top and fill in filter data
   if (!_isEmpty(localStorage.getItem('requestedFilter'))) {
     window.scrollTo(0, 0);
@@ -698,15 +712,12 @@ onBeforeMount(async () => {
     ];
     localStorage.removeItem('requestedFilter');
   }
-}); // onBeforeMount
+});
 
 onMounted(() => {
   if (!userRoleIsAdmin() && !userRoleIsManager()) filter.value.status = [];
 })
 
-/**
- * destroy listeners
- */
 onBeforeUnmount(() => {
   emitter.off('add');
   emitter.off('delete');
@@ -721,178 +732,156 @@ onBeforeUnmount(() => {
   emitter.off('canceled-unreimburse-expense');
 }); // onBeforeUnmount
 
-// |--------------------------------------------------|
-// |                                                  |
-// |                     COMPUTED                     |
-// |                                                  |
-// |--------------------------------------------------|
-
 /**
- * Gets the datatable headers based on user's role. Returns all
- * the headers if the user's role is an admin, otherwise
- * returns all the headers except the 'Employee' header.
+ * Checks if the store is populated from initial page load.
  *
- * @return Array - datatable headers
+ * @returns boolean - True if the store is populated
  */
-function getRoleHeaders() {
-  if (userRoleIsAdmin() || userRoleIsManager()) return headers.value;
-  let toRemove = ['state', 'employeeName'];
-  return headers.value.filter((h) => !toRemove.includes(h.key));
-}
+watch(storeIsPopulated, async () => {
+  if (!storeIsPopulated) return;
+  initialPageLoading.value = true;
+  loading.value = true;
+  // get user info, defaulting to params if exists
+  userInfo.value = store.getters.user; // TODO: parse localstorage into string and then parse from string
+  if (localStorage.getItem('requestedFilter')) userInfo.value = JSON.parse(localStorage.getItem('requestedFilter'));
+  await Promise.all([
+    !store.getters.expenseTypes ? updateStoreExpenseTypes() : '',
+    !store.getters.employees ? updateStoreEmployees() : '',
+    !store.getters.budgets ? updateStoreBudgets() : '',
+    !store.getters.tags && (userRoleIsAdmin() || userRoleIsManager()) ? updateStoreTags() : '', // tags only required for admin/manager
+    refreshExpenses()
+  ]);
 
-function getStatusText(item) {
-  let s = filter.value.status;
-  let once = (text) => item.raw === s[0] ? text : null;
-  switch (s.length) {
-    case 1:
-      return s[0];
-    case statusFilterOptions.value.length - 1:
-      let except = statusFilterOptions.value.find((opt) => !s.includes(opt));
-      return once(`All except ${except.toLowerCase()}`);
-    case statusFilterOptions.value.length:
-      return once("All");
-    default:
-      return once(`${s.length} selected`);
-  }
-}
-
-/**
- * Checks if the user is inactive. Returns true if the user is
- * inactive, otherwise returns false.
- *
- * @return boolean - whether or not the user is inactive
- */
-const userIsInactive = computed(() => {
-  if (userInfo.value == null) {
-    return false;
-  }
-  return userInfo.value.workStatus == 0;
+  // get expense types
+  let temporaryExpenseTypes = store.getters.expenseTypes;
+  expenseTypes.value = _map(temporaryExpenseTypes, (expenseType) => {
+    return {
+      /* beautify preserve:start */
+      text: `${expenseType.budgetName} - $${expenseType.budget}`,
+      startDate: expenseType.startDate,
+      endDate: expenseType.endDate,
+      /* beautify preserve:end */
+      budgetName: expenseType.budgetName,
+      value: expenseType.id,
+      budget: expenseType.budget,
+      odFlag: expenseType.odFlag,
+      requireReceipt: expenseType.requireReceipt,
+      recurringFlag: expenseType.recurringFlag,
+      isInactive: expenseType.isInactive,
+      categories: expenseType.categories,
+      accessibleBy: expenseType.accessibleBy,
+      hasRecipient: expenseType.hasRecipient,
+      showOnFeed: expenseType.showOnFeed
+    };
+  });
+  loading.value = false;
+  initialPageLoading.value = false;
 });
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     FILTERS                      |
+// |                EMITTER FUNCTIONS                 |
 // |                                                  |
 // |--------------------------------------------------|
 
 /**
- * Returns a number with two decimal point precision as a string.
- *
- * @param value - number to filter
- * @return String - number with two decimal points
+ * Refresh and updates expense list and displays a successful
+ * create status in the snackbar.
  */
-function moneyFilter(value) {
-  return `${new Intl.NumberFormat('en-US', {
-    style: 'decimal',
-    useGrouping: false,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(value)}`;
+async function addModelToTable() {
+  await refreshExpenses();
+  useDisplaySuccess('Item was successfully submitted!');
+}
+
+/**
+ * Refresh and updates expense list and displays a successful
+ * delete status in the snackbar.
+ */
+async function deleteModelFromTable() {
+  await refreshExpenses();
+  useDisplaySuccess('Item was successfully deleted!');
+}
+
+/**
+ * set midAction to true
+ */
+function startAction() {
+  midAction.value = true;
+}
+
+/**
+ * Refresh and updates expense list and displays a successful
+ * update status in the snackbar.
+ */
+async function updateModelInTable() {
+  await refreshExpenses();
+  useDisplaySuccess('Item was successfully updated!');
+}
+
+/**
+ * Delete a selected expense.
+ */
+async function deleteExpense() {
+  loading.value = true; // set loading status to true
+  if (propExpense.value.id) {
+    // expense is selected
+    let deletedExpense = propExpense.value;
+    let deleted = await api.deleteItem(api.EXPENSES, propExpense.value.id);
+    if (deleted.id) {
+      // successfully deletes expense
+      await deleteModelFromTable();
+      if (!isEmpty(deletedExpense.receipt)) {
+        // delete attachment from s3 if deleted expense has a receipt
+        let deletedAttachment = await api.deleteAttachment(deleted);
+        if (deletedAttachment.code) {
+          // emit alert if error deleting file
+          useDisplayError(`Error Deleting Receipt: ${deletedAttachment.message}`);
+        }
+      }
+    } else {
+      // fails to delete expense
+      useDisplayError('Error Deleting Expense');
+    }
+    // update budgets in store
+    await updateStoreBudgets();
+
+    midAction.value = false;
+  }
+  loading.value = false; // set loading status to false
+}
+
+/**
+ * Unreimburse an expense.
+ */
+async function unreimburseExpense() {
+  loading.value = true; // set loading status to true
+
+  propExpense.value.reimbursedDate = null; // clear reimburse date field
+  let updatedExpense = await api.updateItem(api.EXPENSES, propExpense.value);
+
+  if (updatedExpense.id) {
+    // successfully unreimburses expense
+    useDisplaySuccess('Item was successfully unreimbursed!');
+  } else {
+    // fails to unreimburse expense
+    useDisplayError('Error Unreimburseing Expense');
+  }
+
+  await refreshExpenses();
+  loading.value = false; // set loading status to false
+  midAction.value = false;
 }
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     METHODS                      |
+// |              HELPERS AND API CALLS               |
 // |                                                  |
 // |--------------------------------------------------|
 
 /**
- * Gets reason text formatted with date if available
+ * Helper to update an expense through API
+ * @param newExpense new expense object (ID matches to old expense)
  */
-function getReasonIntro(reason, index) {
-  if (reason.date) return format(reason.date, null, 'MM/DD/YYYY');
-  return `Reason ${index + 1}`;
-}
-
-/**
- * Gets number of revisal requests for an expense
- */
-function getRevisalsTitle(expense) {
-  let length = expense.rejections.softRejections.reasons.length;
-  return `Revisal Request${length === 1 ? '' : 's'} (${length}):`
-}
-
-/**
- * Returns 0 if an expense is not over the age limit, otherwise returns the age that the expense is.
- * @param expense expense to check
- * @returns expense age, or 0 if within limit
- */
-function expenseAgeOverLimit(expense) {
-  let limit = 45;
-  let diff = difference(expense.createdAt, expense.purchaseDate, 'day');
-  if (diff <= limit) return 0;
-  return diff;
-}
-
-const successColor = 'green-darken-2';
-const pendingColor = 'grey';
-const errorColor = 'red-darken-2';
-function getStatusIconColor(expense) {
-  if (expensesStatuses.value.successes.has(expense.id)) return successColor;
-  if (expensesStatuses.value.errored.has(expense.id)) return errorColor;
-  if (expensesStatuses.value.disabled.has(expense.id)) return pendingColor;
-}
-
-function getExpenseClass(expense) {
-  if (expensesStatuses.value.successes.has(expense.id)) return 'text-' + successColor;
-  if (expensesStatuses.value.errored.has(expense.id)) return `text-${errorColor} font-weight-bold`;
-  if (expensesStatuses.value.disabled.has(expense.id)) return 'text-' + pendingColor;
-}
-
-function getPurchaseCreatedAtDateClass(expense) {
-  let classes = [];
-  if (expensesStatuses.value.successes.has(expense.id)) classes.push('text-' + successColor);
-  else if (expensesStatuses.value.errored.has(expense.id)) classes.push(`text-${errorColor} font-weight-bold`);
-  else if (expensesStatuses.value.disabled.has(expense.id)) classes.push('text-' + pendingColor);
-  if (expenseAgeOverLimit(expense)) classes.push('text-' + errorColor);
-  return classes.join(' ');
-}
-
-/**
- * Gets the icon for the state of an expense.
- * 
- * @param state - expenses state field
- * @returns String - icon name
- */
-function getStateIcon(state) {
-  switch (state) {
-    case 'ALL': return 'mdi-check-all'; // special case for filter
-    case EXPENSE_STATES.CREATED: return 'mdi-new-box';
-    case EXPENSE_STATES.APPROVED: return 'mdi-check-decagram';
-    case EXPENSE_STATES.REIMBURSED: return 'mdi-cash-check';
-    case EXPENSE_STATES.REJECTED: return 'mdi-close-box';
-    case EXPENSE_STATES.RETURNED: return 'mdi-arrow-u-left-top-bold';
-    case EXPENSE_STATES.REVISED: return 'mdi-pencil-box';
-    default: return 'mdi-help-rhombus';
-  }
-}
-  
-/**
- * Gets tooltip text for an expense based on its state.
- * 
- * @param state - expenses state field
- * @returns String - tooltip text
- */
-function getStateTooltip(item) {
-  function approvedBy() {
-    let fallback = "unknown approver";
-    if (!item.approvedBy) return fallback;
-    let approver = employeeUtils.getEmployeeByID(item.approvedBy, store.getters.employees);
-    if (!approver) return fallback;
-    return employeeUtils.nicknameAndLastName(approver);
-  }
-
-  switch (item.state) {
-    case EXPENSE_STATES.CREATED: return 'Created';
-    case EXPENSE_STATES.APPROVED: return 'Approved by ' + approvedBy();
-    case EXPENSE_STATES.REIMBURSED: return 'Reimbursed';
-    case EXPENSE_STATES.REJECTED: return 'Rejected permanantly';
-    case EXPENSE_STATES.RETURNED: return 'Returned for edits';
-    case EXPENSE_STATES.REVISED: return 'Revised';
-    default: return 'Unknown State';
-  }
-}
-
 async function updateExpense(newExpense) {
   let { id } = newExpense;
 
@@ -912,52 +901,158 @@ async function updateExpense(newExpense) {
 }
 
 /**
- * Builds a little action menu item for the states quick dropdown
+ * Clear the selected expense by setting all values to null and
+ * if user sets employeeId and employeeName.
  */
-const quickStatesMenuActions = {
-  APPROVE: async (e) => {
-    e.state = EXPENSE_STATES.APPROVED;
-    e.approvedBy = store.getters.user.id;
-    await updateExpense(e);
-  },
-  UNAPPROVE: async (e) => {
-    e.state = EXPENSE_STATES.CREATED;
-    e.approvedBy = undefined;
-    await updateExpense(e);
-  },
-  REJECT_RETURN: async (e) => {
-    rejectingExpense.value = e;
-    toggleExpenseRejectionModal.value = true;
-  },
-  REJECT: async (e) => {
-    defaultRejectionType.value = 'hard';
-    rejectingExpense.value = e;
-    toggleExpenseRejectionModal.value = true;
-  },
-  REMOVE_REJECTION: async (e) => {
-    if (e.state === EXPENSE_STATES.REJECTED) {
-      e.rejections.hardRejections = null;
-    }
-    if (e.rejections.softRejections) {
-      e.rejections.softRejections.reasons.pop();
-      e.rejections.softRejections.revised = true;
-      if (e.rejections.softRejections.reasons.length === 0) delete e.rejections;
-    }
-    e.state = EXPENSE_STATES.CREATED;
-    console.log(e.id);
-    await updateExpense(e);
-  },
-  REIMBURSE: async (e) => {
-    e.state = EXPENSE_STATES.REIMBURSED;
-    e.reimbursedDate = getTodaysDate('YYYY-MM-DD');
-    await updateExpense(e);
-  },
-  UNREIMBURSE: async (e) => {
-    e.state = EXPENSE_STATES.APPROVED;
-    e.reimbursedDate = null;
-    await updateExpense(e);
-  },
+function clearExpense() {
+  expense.value['description'] = null;
+  expense.value = _mapValues(expense.value, () => {
+    return null;
+  });
+  expense.value['employeeId'] = null;
+  expense.value['employeeName'] = null;
 }
+
+/**
+ * Converts an employee ID into their full name.
+ *
+ * @param  eId - the employee id to find
+ * @return string - the name of the high five recipient
+ */
+function getEmployee(eId) {
+  let employee = _find(store.getters.employees, ['id', eId]);
+  return employeeUtils.nicknameAndLastName(employee);
+}
+
+/**
+ * Sets a mapping of employee name to employee id of an expense for
+ * the autocomplete options.
+ *
+ * @param aggregatedData - aggregated expenses
+ */
+function constructAutoComplete(aggregatedData) {
+  let seenEmployees = new Set(); // used to not add duplicates
+  employees.value = _sortBy(
+    _map(aggregatedData, (data) => {
+      if (data && data.employeeName && data.employeeId && !seenEmployees.has(data.employeeId)) {
+        seenEmployees.add(data.employeeId);
+        return {
+          text: `${data.nickname || data.firstName} ${data.lastName}`,
+          value: data.employeeId,
+          nickname: data.nickname,
+          firstName: data.firstName,
+          lastName: data.lastName
+        };
+      }
+    }).filter((data) => {
+      return data != null;
+    }),
+    (employee) => employee.text.toLowerCase()
+  );
+}
+
+/**
+ * Refresh expense data and filters expenses.
+ */
+async function refreshExpenses() {
+  loading.value = true; // set loading status to true
+  // load expenses if employee role is user or admin
+  expenses.value = await api.getAllAggregateExpenses();
+  constructAutoComplete(expenses.value); // set autocomplete options
+
+  filterExpenses(); // filter expenses
+
+  loading.value = false; // set loading status to false
+}
+
+/**
+ * Scrolls window back to the top of the form.
+ */
+function toTopOfForm() {
+  window.scrollTo(0, form.value.$el.offsetTop - 70);
+}
+
+// |--------------------------------------------------|
+// |                                                  |
+// |               SEARCHING / FILTERS                |
+// |                                                  |
+// |--------------------------------------------------|
+
+/**
+ * Returns text to show in the status filter when not clicked in.
+ * 
+ * @param item item of input
+ */
+function getStatusText(item) {
+  let s = filter.value.status;
+  let once = (text) => item.value === s[0] ? text : null;
+  switch (s.length) {
+    case 1:
+      return item.title;
+    case statusFilterOptions.value.length - 1:
+      let except = statusFilterOptions.value.find((opt) => !s.includes(opt.value));
+      return once(`All except ${except.title.toLowerCase()}`);
+    case statusFilterOptions.value.length:
+      return once("All");
+    default:
+      return once(`${s.length} selected`);
+  }
+}
+
+/**
+ * Gets tooltip text for an expense based on its state.
+ * 
+ * @param state - expenses state field
+ * @returns String - tooltip text
+ */
+function getStateTooltip(item) {
+  function approvedBy() {
+    let fallback = "unknown approver";
+    if (!item.approved?.by) return fallback;
+    let approver = employeeUtils.getEmployeeByID(item.approved.by, store.getters.employees);
+    if (!approver) return fallback;
+    return employeeUtils.nicknameAndLastName(approver);
+  }
+
+  switch (item.state) {
+    case EXPENSE_STATES.CREATED: return 'Created';
+    case EXPENSE_STATES.PART_APPROVED:
+    case EXPENSE_STATES.APPROVED: return 'Approved by ' + approvedBy();
+    case EXPENSE_STATES.EXT_PROC: return 'Procesing in external system';
+    case EXPENSE_STATES.REIMBURSED: return 'Reimbursed';
+    case EXPENSE_STATES.REJECTED: return 'Rejected permanantly';
+    case EXPENSE_STATES.RETURNED: return 'Returned for edits';
+    case EXPENSE_STATES.REVISED: return 'Revised';
+    default: return 'Unknown State';
+  }
+}
+
+/**
+ * Gets the icon for the state of an expense.
+ * 
+ * @param state - expenses state field
+ * @returns String - icon name
+ */
+function getStateIcon(state) {
+  switch (state) {
+    case 'ALL': return 'mdi-check-all'; // special case for filter 
+    case EXPENSE_STATES.CREATED: return 'mdi-new-box';
+    case EXPENSE_STATES.PART_APPROVED: return 'mdi-decagram-outline';
+    case EXPENSE_STATES.APPROVED: return 'mdi-check-decagram';
+    case EXPENSE_STATES.EXT_PROC: return 'mdi-progress-clock';
+    case EXPENSE_STATES.REIMBURSED: return 'mdi-cash-check';
+    case EXPENSE_STATES.REJECTED: return 'mdi-close-box';
+    case EXPENSE_STATES.RETURNED: return 'mdi-arrow-u-left-top-bold';
+    case EXPENSE_STATES.REVISED: return 'mdi-pencil-box';
+    default: return 'mdi-help-rhombus';
+  }
+}
+
+/**
+ * Gets the state quick-menu for a specified state
+ * 
+ * @param state current state of the expense
+ */
 function getStatesQuickMenu(state) {
   switch (state) {
     case EXPENSE_STATES.CREATED:
@@ -1020,98 +1115,46 @@ function getStatesQuickMenu(state) {
       return [];
   }
 }
- 
+
 /**
- * Refresh and updates expense list and displays a successful
- * create status in the snackbar.
+ * watcher for employee, filter.active, filter.reimbursed - filters expenses
  */
-async function addModelToTable() {
-  await refreshExpenses();
+watch([employee, search, filter.value, startDateFilter, endDateFilter], () => {
+  filterExpenses();
+});
 
-  useDisplaySuccess('Item was successfully submitted!');
-} // addModelToTable
-
-/**
- * Clear the selected expense by setting all values to null and
- * if user sets employeeId and employeeName.
- */
-function clearExpense() {
-  expense.value['description'] = null;
-  expense.value = _mapValues(expense.value, () => {
-    return null;
-  });
-  expense.value['employeeId'] = null;
-  expense.value['employeeName'] = null;
-} // clearExpense
+// |--------------------------------------------------|
+// |                                                  |
+// |                DATA TABLE GENERAL                |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
- * Sets a mapping of employee name to employee id of an expense for
- * the autocomplete options.
+ * Sets the class for a row in the data table.
  *
- * @param aggregatedData - aggregated expenses
+ * @param item - The row item
+ * @returns Object - The row class
  */
-function constructAutoComplete(aggregatedData) {
-  let seenEmployees = new Set(); // used to not add duplicates
-  employees.value = _sortBy(
-    _map(aggregatedData, (data) => {
-      if (data && data.employeeName && data.employeeId && !seenEmployees.has(data.employeeId)) {
-        seenEmployees.add(data.employeeId);
-        return {
-          text: `${data.nickname || data.firstName} ${data.lastName}`,
-          value: data.employeeId,
-          nickname: data.nickname,
-          firstName: data.firstName,
-          lastName: data.lastName
-        };
-      }
-    }).filter((data) => {
-      return data != null;
-    }),
-    (employee) => employee.text.toLowerCase()
-  );
-} // constructAutoComplete
-
-/**
- * Delete a selected expense.
- */
-async function deleteExpense() {
-  loading.value = true; // set loading status to true
-  if (propExpense.value.id) {
-    // expense is selected
-    let deletedExpense = propExpense.value;
-    let deleted = await api.deleteItem(api.EXPENSES, propExpense.value.id);
-    if (deleted.id) {
-      // successfully deletes expense
-      await deleteModelFromTable(deletedExpense);
-      if (!isEmpty(deletedExpense.receipt)) {
-        // delete attachment from s3 if deleted expense has a receipt
-        let deletedAttachment = await api.deleteAttachment(deleted);
-        if (deletedAttachment.code) {
-          // emit alert if error deleting file
-          useDisplayError(`Error Deleting Receipt: ${deletedAttachment.message}`);
-        }
-      }
-    } else {
-      // fails to delete expense
-      useDisplayError('Error Deleting Expense');
-    }
-    // update budgets in store
-    await updateStoreBudgets();
-
-    midAction.value = false;
+function rowClasses({ item }) {
+  if (item?.rejections?.hardRejections?.reasons?.length > 0) {
+    return { class: 'rejected-expense-row' };
+  } else if (item?.rejections?.softRejections?.reasons?.length > 0 && !item?.rejections?.softRejections?.revised) {
+    return { class: 'revised-expense-row' };
   }
-  loading.value = false; // set loading status to false
-} // deleteExpense
+}
 
 /**
- * Refresh and updates expense list and displays a successful
- * delete status in the snackbar.
+ * Gets the datatable headers based on user's role. Returns all
+ * the headers if the user's role is an admin, otherwise
+ * returns all the headers except the 'Employee' header.
+ *
+ * @return Array - datatable headers
  */
-async function deleteModelFromTable() {
-  await refreshExpenses();
-
-  useDisplaySuccess('Item was successfully deleted!');
-} // deleteModelFromTable
+function getRoleHeaders() {
+  if (userRoleIsAdmin() || userRoleIsManager()) return headers.value;
+  let toRemove = ['state', 'employeeName'];
+  return headers.value.filter((h) => !toRemove.includes(h.key));
+}
 
 /**
  * Filters expenses based on filter selections.
@@ -1184,18 +1227,70 @@ function filterExpenses() {
     // passed all filters, add it
     filteredExpenses.value.push(expense);
   }
-} // filterExpenses
+}
+
+// |--------------------------------------------------|
+// |                                                  |
+// |                  DATA TABLE ROW                  |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
- * Converts an employee ID into their full name.
- *
- * @param  eId - the employee id to find
- * @return string - the name of the high five recipient
+ * Gets reason text formatted with date if available
  */
-function getEmployee(eId) {
-  let employee = _find(store.getters.employees, ['id', eId]);
-  return employeeUtils.nicknameAndLastName(employee);
-} // getEmployee
+function getReasonIntro(reason, index) {
+  if (reason.date) return format(reason.date, null, 'MM/DD/YYYY');
+  return `Reason ${index + 1}`;
+}
+
+/**
+ * Returns 0 if an expense is not over the age limit, otherwise returns the age that the expense is.
+ * @param expense expense to check
+ * @returns expense age, or 0 if within limit
+ */
+function expenseAgeOverLimit(expense) {
+  let limit = 45;
+  let diff = difference(expense.createdAt, expense.purchaseDate, 'day');
+  if (diff <= limit) return 0;
+  return diff;
+}
+
+/**
+ * Gets the status icon color for status icon on expense row
+ * 
+ * @param expense expense of the row to get status for
+ */
+const successColor = 'green-darken-2';
+const pendingColor = 'grey';
+const errorColor = 'red-darken-2';
+function getStatusIconColor(expense) {
+  if (expensesStatuses.value.successes.has(expense.id)) return successColor;
+  if (expensesStatuses.value.errored.has(expense.id)) return errorColor;
+  if (expensesStatuses.value.disabled.has(expense.id)) return pendingColor;
+}
+
+/**
+ * Get CSS class for text of expense row
+ * @param expense 
+ */
+function getExpenseClass(expense) {
+  if (expensesStatuses.value.successes.has(expense.id)) return 'text-' + successColor;
+  if (expensesStatuses.value.errored.has(expense.id)) return `text-${errorColor} font-weight-bold`;
+  if (expensesStatuses.value.disabled.has(expense.id)) return 'text-' + pendingColor;
+}
+
+/**
+ * Get CSS class for purchase date and created at for expense row
+ * @param expense 
+ */
+function getPurchaseCreatedAtDateClass(expense) {
+  let classes = [];
+  if (expensesStatuses.value.successes.has(expense.id)) classes.push('text-' + successColor);
+  else if (expensesStatuses.value.errored.has(expense.id)) classes.push(`text-${errorColor} font-weight-bold`);
+  else if (expensesStatuses.value.disabled.has(expense.id)) classes.push('text-' + pendingColor);
+  if (expenseAgeOverLimit(expense)) classes.push('text-' + errorColor);
+  return classes.join(' ');
+}
 
 /**
  * Converts receipts array to a string of all the receipts
@@ -1222,57 +1317,6 @@ function getReceipts(receipts) {
 }
 
 /**
- * Checks if the expense is reimbursed. Returns true if the
- * expense is reimbursed, otherwise returns false.
- *
- * @param expense - expense to check
- * @return boolean - expense is reimbursed
- */
-function isReimbursed(expense) {
-  return expense && !isEmpty(expense.reimbursedDate);
-} // isReimbursed
-
-async function loadMyExpensesData() {
-  initialPageLoading.value = true;
-  loading.value = true;
-  // get user info, defaulting to params if exists
-  userInfo.value = store.getters.user; // TODO: parse localstorage into string and then parse from string
-  if (localStorage.getItem('requestedFilter')) userInfo.value = JSON.parse(localStorage.getItem('requestedFilter'));
-  await Promise.all([
-    !store.getters.expenseTypes ? updateStoreExpenseTypes() : '',
-    !store.getters.employees ? updateStoreEmployees() : '',
-    !store.getters.budgets ? updateStoreBudgets() : '',
-    !store.getters.tags && (userRoleIsAdmin() || userRoleIsManager()) ? updateStoreTags() : '', // tags only required for admin/manager
-    refreshExpenses()
-  ]);
-
-  // get expense types
-  let temporaryExpenseTypes = store.getters.expenseTypes;
-  expenseTypes.value = _map(temporaryExpenseTypes, (expenseType) => {
-    return {
-      /* beautify preserve:start */
-      text: `${expenseType.budgetName} - $${expenseType.budget}`,
-      startDate: expenseType.startDate,
-      endDate: expenseType.endDate,
-      /* beautify preserve:end */
-      budgetName: expenseType.budgetName,
-      value: expenseType.id,
-      budget: expenseType.budget,
-      odFlag: expenseType.odFlag,
-      requireReceipt: expenseType.requireReceipt,
-      recurringFlag: expenseType.recurringFlag,
-      isInactive: expenseType.isInactive,
-      categories: expenseType.categories,
-      accessibleBy: expenseType.accessibleBy,
-      hasRecipient: expenseType.hasRecipient,
-      showOnFeed: expenseType.showOnFeed
-    };
-  });
-  loading.value = false;
-  initialPageLoading.value = false;
-}
-
-/**
  * Checks the canDelete optional boolean and if it exists and is true returns true
  *
  * @param expense - expense to check
@@ -1283,7 +1327,22 @@ function canDelete(expense) {
     (expense.canDelete === undefined || expense.canDelete === null || expense.canDelete) &&
     !expense.rejections?.hardRejections?.reasons
   );
-} // canDelete
+}
+
+/**
+ * Returns a number with two decimal point precision as a string.
+ *
+ * @param value - number to filter
+ * @return String - number with two decimal points
+ */
+function moneyFilter(value) {
+  return `${new Intl.NumberFormat('en-US', {
+    style: 'decimal',
+    useGrouping: false,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(value)}`;
+}
 
 /**
  * Store the attributes of a selected expense.
@@ -1298,92 +1357,21 @@ function onSelect(item) {
   isEditing.value = true;
   expense.value.edit = true;
   expense.value['cost'] = moneyFilter(item.cost);
-} // onSelect
+}
+
+// |--------------------------------------------------|
+// |                                                  |
+// |              DATA TABLE EXPANDED ROW             |
+// |                                                  |
+// |--------------------------------------------------|
 
 /**
- * Parse the date after losing focus.
- *
- * @return String - The date in YYYY-MM-DD format
+ * Gets number of revisal requests for an expense
  */
-function parseEventDate() {
-  return format(event.target.value, 'MM/DD/YYYY', 'YYYY-MM-DD');
-} // parseEventDate
-
-/**
- * Refresh expense data and filters expenses.
- */
-async function refreshExpenses() {
-  loading.value = true; // set loading status to true
-  // load expenses if employee role is user or admin
-  expenses.value = await api.getAllAggregateExpenses();
-  let allGCs = await api.getAllGiftCards();
-  giftCards.value = indexBy(allGCs, 'expenseId');
-  constructAutoComplete(expenses.value); // set autocomplete options
-
-  filterExpenses(); // filter expenses
-
-  loading.value = false; // set loading status to false
-} // refreshExpenses
-
-/**
- * set midAction to true
- */
-function startAction() {
-  midAction.value = true;
-} // startAction
-
-/**
- * Scrolls window back to the top of the form.
- */
-function toTopOfForm() {
-  window.scrollTo(0, form.value.$el.offsetTop - 70);
-} // toTopOfForm
-
-/**
- * Sets the class for a row in the data table.
- *
- * @param item - The row item
- * @returns Object - The row class
- */
-function rowClasses({ item }) {
-  if (item?.rejections?.hardRejections?.reasons?.length > 0) {
-    return { class: 'rejected-expense-row' };
-  } else if (item?.rejections?.softRejections?.reasons?.length > 0 && !item?.rejections?.softRejections?.revised) {
-    return { class: 'revised-expense-row' };
-  }
-} // rowClasses
-
-/**
- * Unreimburse an expense.
- */
-async function unreimburseExpense() {
-  loading.value = true; // set loading status to true
-
-  propExpense.value.reimbursedDate = null; // clear reimburse date field
-  let updatedExpense = await api.updateItem(api.EXPENSES, propExpense.value);
-
-  if (updatedExpense.id) {
-    // successfully unreimburses expense
-    useDisplaySuccess('Item was successfully unreimbursed!');
-  } else {
-    // fails to unreimburse expense
-    useDisplayError('Error Unreimburseing Expense');
-  }
-
-  await refreshExpenses();
-  loading.value = false; // set loading status to false
-  midAction.value = false;
-} // unreimburseExpense
-
-/**
- * Refresh and updates expense list and displays a successful
- * update status in the snackbar.
- */
-async function updateModelInTable() {
-  await refreshExpenses();
-
-  useDisplaySuccess('Item was successfully updated!');
-} // updateModelInTable
+function getRevisalsTitle(expense) {
+  let length = expense.rejections.softRejections.reasons.length;
+  return `Revisal Request${length === 1 ? '' : 's'} (${length}):`
+}
 
 /**
  * Checks if an inactive style shoud be applied for an expense. Returns
@@ -1400,36 +1388,26 @@ function useInactiveStyle(expense) {
   }
 
   return false;
-} // useInactiveStyle
+}
 
 // |--------------------------------------------------|
 // |                                                  |
-// |                     WATCHERS                     |
+// |                   EXPENSE FORM                   |
 // |                                                  |
 // |--------------------------------------------------|
 
-watch(
-  () => rejectingExpense.value,
-  () => console.log(rejectingExpense.value)
-)
-
 /**
- * watcher for employee, filter.active, filter.reimbursed - filters expenses
- */
-watch([employee, search, filter.value, startDateFilter, endDateFilter], () => {
-  filterExpenses();
-}); // watchFilterExpenses
-
-/**
- * Checks if the store is populated from initial page load.
+ * Checks if the user is inactive. Returns true if the user is
+ * inactive, otherwise returns false.
  *
- * @returns boolean - True if the store is populated
+ * @return boolean - whether or not the user is inactive
  */
-watch(storeIsPopulated, async () => {
-  if (storeIsPopulated) {
-    loadMyExpensesData();
+const userIsInactive = computed(() => {
+  if (userInfo.value == null) {
+    return false;
   }
-}); // watchStorePopulated
+  return userInfo.value.workStatus == 0;
+});
 </script>
 
 <style>
