@@ -3,8 +3,8 @@
       <v-checkbox
         class="d-inline-block pr-2"
         v-model="flags.showOnMemberProfile"
-        label="Show on member profile"
-        v-tooltip="{text: `Show members who their ${groupName.toLowerCase()} is`, location: 'top', offset: -10 }"
+        label="Show on employee profile"
+        v-tooltip="{text: `Show employees who their ${groupName.toLowerCase()} is`, location: 'top', offset: -10 }"
       />
         <v-checkbox
         class="d-inline-block pr-2"
