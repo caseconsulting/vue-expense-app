@@ -24,7 +24,7 @@
       </v-col>
       <v-col cols="4" class="pt-0">
         <p v-if="isAdmin" class="adminEmpAccess">
-          Admins have access to all employees
+          Admins are responsible for all employees
         </p>
         <MultiAutocomplete
           v-else

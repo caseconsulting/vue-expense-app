@@ -461,7 +461,7 @@ import DeleteModal from '@/components/modals/DeleteModal.vue';
 import GiftCardInfoModal from '@/components/modals/GiftCardInfoModal.vue';
 import ExpenseRejectionModal from '@/components/modals/ExpenseRejectionModal.vue';
 import employeeUtils from '@/shared/employeeUtils';
-import { isExpenseEditable } from '@/shared/expenseUtils';
+import { isExpenseEditable, quickStatesMenuActions } from '@/shared/expenseUtils';
 import ExpenseForm from '@/components/expenses/ExpenseForm.vue';
 import DatePicker from '@/components/shared/DatePicker.vue';
 import TagsFilter from '@/components/shared/TagsFilter.vue';

@@ -48,7 +48,6 @@
                   <h2>Assignments</h2>
                   <v-btn icon="mdi-plus-circle" class="ml-2" variant="plain" size="small" @click="addAssignment(editGroup)" />
                 </div>
-                <p class="pa-0 ma-0 ml-2 text-caption"><i>Assign Users to become {{ aOrAn(editGroup.name) }} {{ editGroup.name }} for Members</i></p>
                 <Assignments v-model="editGroup.assignments" :is-admin="editGroup.name === 'Admin'" :projects="projects" :key="editGroupIndex" />
               </div>
               <div class="flags">
