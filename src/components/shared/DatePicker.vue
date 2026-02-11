@@ -281,6 +281,9 @@ watch(
       return;
     }
 
+    // reset the checkbox on any input
+    if (checkbox?.value != null) checkbox.value = false;
+
     // if formatted model is an array, watchers will trigger on any format, even if the values don't change
     if (multiple.value && newVal.join() === oldVal.join()) return;
 

@@ -278,6 +278,64 @@ export function sortLanguagesByProficiency(languages) {
   return sortedByProficiency;
 }
 
+/**
+ * The Portal's very own deep copy of objects. No more lodash.
+ * 
+ * @param object - object to copy
+ * @return copied object, with no references to the original
+ */
+export function deepClone(object) {
+  try { return structuredClone(object) }
+  catch { return JSON.parse(JSON.stringify(object)) }
+}
+
+/**
+ * Indexes an array by a given value. Nondestructive.
+ * 
+ * @param array - array to index
+ * @param by - dot-notated value to index by (eg. 'id' or 'subItem.uuid')
+ * @param options (optional) - see options in assignment below
+ * @return Object of indexed array, with `by` as keys
+ */
+export function indexBy(array, by, options = {}) {
+  // input check
+  if (!array || !by || !Array.isArray(array) || typeof by !== 'string')
+    throw new Error(`Must include Array 'array' and String 'by'.`);
+
+  // pull out options
+  let {
+    deleteBy = true, // whether or not to delete the used `by` attribute
+    clone = true, // whether or not to deep-clone the object to avoid refs
+  } = options;
+  // warning that 'by' is deleted on original object if clone is false and delete is true
+  if (deleteBy && !clone)
+    console.warn(`indexBy is deleting the original object\'s '${by}' attribute. Please ensure this is intentional!`)
+
+  // set vars
+  let target = clone ? deepClone(array) : array;
+  let indexers = by.split('.');
+  indexers = indexers.map(i => !!Number(i) ? Number(i) : i); // parse Numbers to get into arrays
+  let obj = {};
+  let key, lastAccess, lastIndex;
+
+  // pull out items and set them to return object
+  let i = 0;
+  for (let item of target) {
+    key = item;
+    for (let i of indexers) {
+      lastAccess = key; // array/object that 'by' is inside of
+      lastIndex = i; // index to use to access 'by'
+      key = key[i] ?? key[String(i)];
+      if (!key) throw new Error(`indexBy: No element ${by} in item`)
+      }
+    obj[key] = item; // set it
+    if (deleteBy) delete lastAccess[lastIndex];
+  }
+
+  // :)
+  return obj;
+}
+
 export const STATES = {
   AL: 'Alabama',
   AK: 'Alaska',
@@ -655,6 +713,8 @@ export default {
   userRoleIsManager,
   userRoleIsUser,
   userRoleIsIntern,
+  deepClone,
+  indexBy,
   COUNTRIES,
   MONTHS
 };

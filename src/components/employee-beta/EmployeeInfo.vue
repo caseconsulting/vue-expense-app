@@ -63,7 +63,7 @@
               <v-row class="ma-2">
                 <!-- case info -->
                 <v-col>
-                  <case-experience-info-card :model="model"></case-experience-info-card>
+                  <case-experience-info-card :model="model" :accessControl="accessControl"></case-experience-info-card>
                 </v-col>
                 <v-col>
                   <contract-info-card :contracts="contracts" :model="model"></contract-info-card>
@@ -240,7 +240,7 @@ const route = useRoute();
 const router = useRouter();
 
 const model = defineModel();
-defineProps(['contracts', 'loading']);
+const props = defineProps(['contracts', 'loading', 'accessControl']);
 const emitter = inject('emitter');
 const isAdmin = inject('isAdmin');
 const isUser = inject('isUser');

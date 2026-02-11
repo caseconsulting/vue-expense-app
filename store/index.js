@@ -30,7 +30,8 @@ export default createStore({
       user: null,
       userRole: null,
       storeIsPopulated: false,
-      tags: null
+      tags: null,
+      accessGroups: null
     };
   },
   mutations: {
@@ -71,6 +72,9 @@ export default createStore({
     },
     setTags(state, payload) {
       state.tags = payload.tags;
+    },
+    setAccessGroups(state, payload) {
+      state.accessGroups = payload.accessGroups;
     }
   },
   actions: {
@@ -109,6 +113,9 @@ export default createStore({
     },
     setTags(context, payload) {
       context.commit('setTags', payload);
+    },
+    setAccessGroups(context, payload) {
+      context.commit('setAccessGroups', payload);
     }
   },
   getters: {
@@ -153,6 +160,9 @@ export default createStore({
     },
     tags(state) {
       return state.tags;
+    },
+    accessGroups(state) {
+      return state.accessGroups;
     }
   }
 });
