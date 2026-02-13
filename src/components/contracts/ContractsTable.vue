@@ -255,7 +255,7 @@ import _forEach from 'lodash/forEach';
 import _some from 'lodash/some';
 import _map from 'lodash/map';
 import api from '@/shared/api';
-import { updateStoreEmployees } from '@/utils/storeUtils';
+import { updateStoreEmployees, updateStoreContracts, updateStoreAccessRoles } from '@/utils/storeUtils';
 import { asyncForEach, isMobile } from '@/utils/utils';
 import { getProject, getProjectCurrentEmployees } from '@/shared/contractUtils';
 import { contractFilter } from '@/shared/filterUtils';
@@ -275,7 +275,6 @@ import { ref, inject, onBeforeMount, onBeforeUnmount, computed, watch } from 'vu
 import { useDisplay } from 'vuetify';
 import { useStore } from 'vuex';
 import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSnackbar.vue';
-import { updateStoreContracts } from '../../utils/storeUtils';
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -406,6 +405,13 @@ const contractHeaders = ref([
     type: 'textarea'
   },
   {
+    title: 'Access Control',
+    key: 'accessControlLink',
+    align: 'start',
+    customWidth: 'large',
+    disableEdit: true
+  },
+  {
     title: 'Active Employees',
     key: 'activeEmployees',
     align: 'start',
@@ -422,6 +428,8 @@ const contractHeaders = ref([
 ]);
 const contractHeadcounts = ref({});
 const form = ref(null);
+
+let accessControl = {};
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -490,6 +498,21 @@ onBeforeMount(async () => {
   emitter.on('toggle-project-checkBox', ({ contract, project }) => {
     toggleProjectCheckBox(contract, project);
   });
+
+  // get any missing data from API
+  let [contractAC, projectAC] = await Promise.all([
+    api.getContractAccessControl(),
+    api.getProjectAccessControl(),
+    store.getters.employees ? '' : updateStoreEmployees(),
+    store.getters.contracts ? '' : updateStoreContracts()
+  ]);
+
+  accessControl = {
+    contract: contractAC,
+    project: projectAC
+  }
+
+  // set everything for UI
   resetAllCheckBoxes();
   expanded.value = _map(store.getters.contracts, 'id'); // expands all contracts in table
   await getContractEmployeesHeadcount(); // get headcounts for each contract
@@ -646,8 +669,6 @@ async function clickedDelete() {
  * Fills in the contractHeadcounts variable.
  */
 async function getContractEmployeesHeadcount() {
-  if (!store.getters.employees) await updateStoreEmployees();
-  if (!store.getters.contracts) await updateStoreContracts();
   for (let contract of store.getters.contracts) {
     let contractEmployees = new Set();
     let projectEmployees;
@@ -719,9 +740,6 @@ async function updateStatus(status) {
  *        [{contract: "", prime: "", project: {...}, employees: [...]}, ...]
  */
 async function getActiveEmployeeContractRelationships(contract, project = null) {
-  if (!store.getters.employees) {
-    await updateStoreEmployees();
-  }
   let employees = store.getters.employees;
   let theRelationships = [];
   employees.forEach((e) => {
@@ -778,9 +796,6 @@ async function getActiveEmployeeContractRelationships(contract, project = null) 
  *        [{contract: "", prime: "", project: {...}, employees: [...]}, ...]
  */
 async function getEmployeeContractRelationships(contract, project = null) {
-  if (!store.getters.employees) {
-    await updateStoreEmployees();
-  }
   let employees = store.getters.employees;
   let theRelationships = [];
   employees.forEach((e) => {
@@ -1030,15 +1045,14 @@ const storeContracts = computed(() => {
     // get projects
     let projects = contract.projects.filter((p) => status.has(p.status));
 
-    if (projects.length !== 0) {
-      for (let p of projects) p.checkBox = cbIndexProjects[p.id];
-      contracts.push({
-        ...contract,
-        ...cbIndexContracts[contract.id],
-        contractId: contract.id, // used for quick-edit
-        projects
-      });
-    }
+    for (let p of (projects || [])) p.checkBox = cbIndexProjects[p.id];
+
+    contracts.push({
+      ...contract,
+      ...cbIndexContracts[contract.id],
+      contractId: contract.id, // used for quick-edit
+      projects
+    });
   }
 
   // :)

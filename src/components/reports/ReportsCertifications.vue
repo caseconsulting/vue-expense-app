@@ -170,7 +170,7 @@ function buildCertificationsColumns() {
   for (let emp of employeesInfo.value) {
     certIndex[emp.employeeNumber] = [];
     let activeCerts = certIndex[emp.employeeNumber]; // pointer-esque
-    for (let cert of (emp.certifications || [])) {
+    for (let cert of emp.certifications || []) {
       if (!cert.expirationDate || (isSameOrBefore(getTodaysDate(), cert.expirationDate))) {
         activeCerts.push(cert.name);
       }
