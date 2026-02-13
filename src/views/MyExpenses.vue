@@ -714,8 +714,9 @@ onBeforeMount(async () => {
   }
 });
 
-onMounted(() => {
+onMounted(async () => {
   if (!userRoleIsAdmin() && !userRoleIsManager()) filter.value.status = [];
+  if (storeIsPopulated) await loadStoreData();
 })
 
 onBeforeUnmount(() => {
@@ -732,12 +733,7 @@ onBeforeUnmount(() => {
   emitter.off('canceled-unreimburse-expense');
 }); // onBeforeUnmount
 
-/**
- * Checks if the store is populated from initial page load.
- *
- * @returns boolean - True if the store is populated
- */
-watch(storeIsPopulated, async () => {
+async function loadStoreData() {
   if (!storeIsPopulated) return;
   initialPageLoading.value = true;
   loading.value = true;
@@ -776,6 +772,15 @@ watch(storeIsPopulated, async () => {
   });
   loading.value = false;
   initialPageLoading.value = false;
+}
+
+/**
+ * Checks if the store is populated from initial page load.
+ *
+ * @returns boolean - True if the store is populated
+ */
+watch(storeIsPopulated, async () => {
+  await loadStoreData();
 });
 
 // |--------------------------------------------------|
