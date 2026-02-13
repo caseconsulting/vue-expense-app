@@ -31,7 +31,7 @@ export default createStore({
       userRole: null,
       storeIsPopulated: false,
       tags: null,
-      accessGroups: null
+      accessRoles: null
     };
   },
   mutations: {
@@ -73,8 +73,8 @@ export default createStore({
     setTags(state, payload) {
       state.tags = payload.tags;
     },
-    setAccessGroups(state, payload) {
-      state.accessGroups = payload.accessGroups;
+    setAccessRoles(state, payload) {
+      state.accessRoles = payload.accessRoles;
     }
   },
   actions: {
@@ -114,8 +114,8 @@ export default createStore({
     setTags(context, payload) {
       context.commit('setTags', payload);
     },
-    setAccessGroups(context, payload) {
-      context.commit('setAccessGroups', payload);
+    setAccessRoles(context, payload) {
+      context.commit('setAccessRoles', payload);
     }
   },
   getters: {
@@ -161,8 +161,8 @@ export default createStore({
     tags(state) {
       return state.tags;
     },
-    accessGroups(state) {
-      return state.accessGroups;
+    accessRoles(state) {
+      return state.accessRoles;
     }
   }
 });

@@ -17,7 +17,6 @@ const PTO_CASH_OUTS = 'ptoCashOuts';
 const SETTINGS = 'settings';
 const TAGS = 'tags';
 const ACCESS_ROLES = 'accessRoles';
-const UNANET = 'unanet';
 const API_HOSTNAME = API_CONFIG.apiHostname;
 const API_PORT = API_CONFIG.apiPort;
 const PORT = API_PORT === '443' ? '' : `:${API_PORT}`;
@@ -508,7 +507,7 @@ async function getEmployeesFromAdp() {
  * @return - Array of IDs of employees who can see the user's data
  */
 async function getAccessControlUsers(id) {
-  return await execute('get', `/${ACCESS_ROLES}/employee/groupUsers/${id}`);
+  return await execute('get', `/${ACCESS_ROLES}/employee/roleUsers/${id}`)
 }
 
 /**
@@ -518,31 +517,7 @@ async function getAccessControlUsers(id) {
  * @return - Array of IDs of employees who can see the user's data
  */
 async function getUserProfileAccessControl(id) {
-  return await execute('get', `/${ACCESS_ROLES}/link/showOnProfile/${id}`);
-}
-
-/**
- * Gets Unanet expense type data. Useful for exports to Unanet.
- */
-async function getUnanetExpenseTypes() {
-  return await execute('get', `/${UNANET}/expenseTypes`);
-}
-
-/**
- * Gets Unanet expense type data. Useful for exports to Unanet.
- */
-async function getUnanetProjects() {
-  return await execute('get', `/${UNANET}/projects`);
-}
-
-/**
- * Uploads a given expense to Unanet
- * 
- * @param expense - the expense to upload
- * @return success or fail
- */
-async function uploadUnanetExpense(expense) {
-  return await execute('post', `/${UNANET}/uploadExpense`, expense);
+  return await execute('get', `/${ACCESS_ROLES}/link/showOnProfile/${id}`)
 }
 
 /**
@@ -552,7 +527,7 @@ async function uploadUnanetExpense(expense) {
  * @return - Array of IDs of employees who can see the user's data
  */
 async function getProjectAccessControl() {
-  return await execute('get', `/${ACCESS_ROLES}/link/type/projects`);
+  return await execute('get', `/${ACCESS_ROLES}/link/projects`);
 }
 
 /**
@@ -562,7 +537,7 @@ async function getProjectAccessControl() {
  * @return - Array of IDs of employees who can see the user's data
  */
 async function getContractAccessControl() {
-  return await execute('get', `/${ACCESS_ROLES}/link/type/contracts`);
+  return await execute('get', `/${ACCESS_ROLES}/link/contracts`);
 }
 
 export default {
@@ -608,14 +583,10 @@ export default {
   getEmployeesFromAdp,
   getAccessControlUsers,
   getUserProfileAccessControl,
-  getUnanetExpenseTypes,
-<<<<<<< HEAD
-  getUnanetProjects,
-  uploadUnanetExpense,
-=======
->>>>>>> 10de7e44 (put access control back???)
   getProjectAccessControl,
   getContractAccessControl,
+  getContractAccessControl,
+  getProjectAccessControl,
   EXPENSE_TYPES,
   EXPENSES,
   EMPLOYEES,
