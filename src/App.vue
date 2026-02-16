@@ -38,7 +38,7 @@
               <!-- Misc links -->
               <v-list-item
                 v-for="({ name, link }, i) in links"
-                @click="badumbadumdodooodoo(i)"
+                @click="link"
                 :title="name"
                 :key="i"
                 :id="link"
@@ -53,7 +53,7 @@
                 </template>
                 <v-list-item
                   v-for="({ name, link }, i) in benefitsLinks"
-                  @click="badumbadumdodooodoo(i)"
+                  @click="link"
                   :title="name"
                   :key="i"
                   :id="link"
