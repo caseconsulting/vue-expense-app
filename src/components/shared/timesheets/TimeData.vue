@@ -85,7 +85,7 @@ import _forEach from 'lodash/forEach';
 import _isEmpty from 'lodash/isEmpty';
 import { computed, inject, onBeforeMount, onBeforeUnmount, reactive, ref, unref, watch } from 'vue';
 import { useStore } from 'vuex';
-import { getCalendarYearPeriods, getContractYearPeriods } from './time-periods';
+import { getCalendarYearPeriods, getContractYearPeriods, getYearsInMonths } from './time-periods';
 /** @import { Reactive } from 'vue' */
 
 // |--------------------------------------------------|
@@ -414,9 +414,11 @@ async function setDataFromApi(isCalendarYear, isYearly) {
   if (isYearly) {
     if (isCalendarYear) periods = getCalendarYearPeriods();
     else periods = getContractYearPeriods(clonedEmployee.value);
+  } else {
+    periods = getYearsInMonths();
   }
+
   let timesheetsData = await api.getTimesheetsData(clonedEmployee.value.employeeNumber, {
-    code,
     employeeId: clonedEmployee.value.id,
     unanetPersonKey: clonedEmployee.value.unanetPersonKey,
     periods
