@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div @click="api.getContractAccessControl()">
     <v-container fluid class="pa-0 pa-md-2">
       <v-row class="d-flex justify-space-between">
         <v-col cols="12" md="3">
@@ -256,7 +256,7 @@ import _some from 'lodash/some';
 import _map from 'lodash/map';
 import api from '@/shared/api';
 import { updateStoreEmployees, updateStoreContracts, updateStoreAccessRoles } from '@/utils/storeUtils';
-import { asyncForEach, isMobile } from '@/utils/utils';
+import { asyncForEach, isMobile, indexBy } from '@/utils/utils';
 import { getProject, getProjectCurrentEmployees } from '@/shared/contractUtils';
 import { contractFilter } from '@/shared/filterUtils';
 
@@ -430,6 +430,7 @@ const contractHeadcounts = ref({});
 const form = ref(null);
 
 let accessControl = {};
+let employeeIndex = {};
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -512,6 +513,8 @@ onBeforeMount(async () => {
     project: projectAC
   }
 
+  employeeIndex = indexBy(store.getters.employees, 'id');
+
   // set everything for UI
   resetAllCheckBoxes();
   expanded.value = _map(store.getters.contracts, 'id'); // expands all contracts in table
@@ -542,6 +545,20 @@ onBeforeUnmount(() => {
 // |                     METHODS                      |
 // |                                                  |
 // |--------------------------------------------------|
+
+/**
+ * Digs into the access control link and makes it users instead of IDs
+ * 
+ * @param id ID of project or contract
+ */
+function ACExpand(id) {
+  let names = [];
+  let getName = (eId) => `${employeeIndex[eId]?.nickname || employeeIndex[eId]?.firstName} ${employeeIndex[eId]?.lastName}`
+  // go through contract or project arrays and add names to matches
+  for (let eId of accessControl.contract?.[id] ?? []) names.push(getName(eId));
+  for (let eId of accessControl.project?.[id] ?? []) names.push(getName(eId));
+  return names;
+}
 
 /**
  * Sets the item to be edited.
@@ -1045,11 +1062,15 @@ const storeContracts = computed(() => {
     // get projects
     let projects = contract.projects.filter((p) => status.has(p.status));
 
-    for (let p of (projects || [])) p.checkBox = cbIndexProjects[p.id];
+    for (let p of (projects || [])) {
+      p.checkBox = cbIndexProjects[p.id];
+      p.accessControlLink = ACExpand(p.id).join(', ')
+    }
 
     contracts.push({
       ...contract,
       ...cbIndexContracts[contract.id],
+      accessControlLink: ACExpand(contract.id).join(', '),
       contractId: contract.id, // used for quick-edit
       projects
     });

@@ -526,7 +526,7 @@ async function getUserProfileAccessControl(id) {
  * @return - Array of IDs of employees who can see the user's data
  */
 async function getProjectAccessControl() {
-  return await execute('get', `/${ACCESS_ROLES}/link/projects`);
+  return await execute('get', `/${ACCESS_ROLES}/link/type/projects`);
 }
 
 /**
@@ -536,7 +536,7 @@ async function getProjectAccessControl() {
  * @return - Array of IDs of employees who can see the user's data
  */
 async function getContractAccessControl() {
-  return await execute('get', `/${ACCESS_ROLES}/link/contracts`);
+  return await execute('get', `/${ACCESS_ROLES}/link/type/contracts`);
 }
 
 export default {
