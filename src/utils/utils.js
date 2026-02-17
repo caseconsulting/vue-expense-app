@@ -327,7 +327,7 @@ export function indexBy(array, by, options = {}) {
       lastIndex = i; // index to use to access 'by'
       key = key[i] ?? key[String(i)];
       if (!key) throw new Error(`indexBy: No element ${by} in item`)
-      }
+    }
     obj[key] = item; // set it
     if (deleteBy) delete lastAccess[lastIndex];
   }

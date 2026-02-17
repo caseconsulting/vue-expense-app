@@ -112,8 +112,43 @@ async function getAllFiles() {
     // fetch from AWS
     let resp = await axios.get(signedURLs[i], { responseType: 'blob' });
     // get type to know what to do with it, and set it in the data (default is useless)
-    let type = new URL(resp.config.url).pathname.split('.')[1].toLowerCase();
-    let newType = (type === 'pdf' ? 'application/' : 'image/') + type;
+    let type = new URL(resp.config.url).pathname.split('.').pop().toLowerCase();
+    let newType;
+    switch (type) {
+      case 'pdf':
+        newType = 'application/pdf';
+        break;
+      case 'gif':
+        newType = 'image/gif';
+        break;
+      case 'jpeg':
+      case 'jpg':
+        newType = 'image/jpeg';
+        break;
+      case 'png':
+        newType = 'image/png';
+        break;
+      case 'bmp':
+        newType = 'image/bmp';
+        break;
+      case 'xlsx':
+        newType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+        break;
+      case 'xls':
+      case 'xlt':
+      case 'xla':
+        newType = 'application/vnd.ms-excel';
+        break;
+      case 'doc':
+        newType = 'application/msword';
+        break;
+      case 'docx':
+        newType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+        break;
+      default:
+        // fallback for unknown types
+        newType = 'application/octet-stream';
+    }
     let data = resp.data.slice(0, resp.data.size, newType);
     // add to the files
     files.value.push({

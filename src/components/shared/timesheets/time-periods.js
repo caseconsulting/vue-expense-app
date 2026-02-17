@@ -6,6 +6,7 @@ import {
   add,
   subtract,
   isBefore,
+  isSame,
   format,
   getTodaysDate,
   getYear,
@@ -15,6 +16,29 @@ import {
   DEFAULT_ISOFORMAT
 } from '../../../shared/dateUtils';
 import { getEmployeeCurrentContracts, getEmployeeCurrentProjects } from '@/shared/employeeUtils.js';
+
+/**
+ * Gets the calendar year period.
+ *
+ * @returns Object - The calendar year period for timesheet collection
+ */
+export function getYearsInMonths() {
+  let periods = [];
+
+  let today = getTodaysDate();
+  let date = startOf(subtract(today, 1, 'year'), 'year'); // jan of last year
+  while (isBefore(date, today, 'day')) {
+    let displayFormat = isSame(date, today, 'year') ? 'MMMM' : 'MMM \'YY';
+    periods.push({
+      startDate: format(startOf(date, 'month'), null, DEFAULT_ISOFORMAT),
+      endDate: format(endOf(date, 'month'), null, DEFAULT_ISOFORMAT),
+      title: format(date, null, displayFormat)
+    });
+    date = format(add(date, 1, 'month'), null, 'YYYY-MM-DD');
+  }
+
+  return periods;
+} // getCalendarYearPeriods
 
 /**
  * Gets the calendar year period.
