@@ -893,6 +893,7 @@ async function updateExpense(newExpense) {
   // set expense to loading and make API call
   expensesStatuses.value.errored.delete(id);
   expensesStatuses.value.disabled.add(id);
+  console.log(newExpense);
   let resp = await api.updateItem(api.EXPENSES, newExpense);
 
   // respond to API call results
@@ -1013,8 +1014,8 @@ function getStatusText(item) {
 function getStateTooltip(item) {
   function approvedBy() {
     let fallback = "unknown approver";
-    if (!item.approved?.by) return fallback;
-    let approver = employeeUtils.getEmployeeByID(item.approved.by, store.getters.employees);
+    if (!item.approvals?.by) return fallback;
+    let approver = employeeUtils.getEmployeeByID(item.approvals.by, store.getters.employees);
     if (!approver) return fallback;
     return employeeUtils.nicknameAndLastName(approver);
   }
@@ -1060,17 +1061,15 @@ function getStateIcon(state) {
  * Quick expense modifiers, to be used in quick actions menu
  */
 async function quickApprove(exp) {
-  let id = store.getters.user.id;
+  let id = userInfo.value.id;
   exp.state = EXPENSE_STATES.APPROVED;
   exp.approvals = { by: id, date: getTodaysDate('YYYY-MM-DD') };
   await updateExpense(exp);
-  return exp;
 }
 async function quickUnapprove(exp) {
   exp.state = EXPENSE_STATES.CREATED;
   exp.approvals = EMPTY_APPROVAL;
   await updateExpense(exp);
-  return exp
 }
 async function quickRejectReturn(exp) {
   rejectingExpense.value = exp;
@@ -1092,19 +1091,16 @@ async function quickRemoveRejection(exp) {
   }
   exp.state = EXPENSE_STATES.CREATED;
   await updateExpense(exp);
-  return exp;
 }
 async function quickReimburse(exp) {
   exp.state = EXPENSE_STATES.REIMBURSED;
   exp.reimbursedDate = getTodaysDate('YYYY-MM-DD');
   await updateExpense(exp);
-  return exp;
 }
 async function quickUnreimburse(exp) {
   exp.state = EXPENSE_STATES.APPROVED;
   exp.reimbursedDate = null;
   await updateExpense(e);
-  return exp;
 }
 
 /**
