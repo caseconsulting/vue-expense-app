@@ -1,9 +1,9 @@
 {
   "name": "vue-expense-app",
-  "version": "4.23.0",
-  "versionName": "Vicuña",
-  "releaseDate": "2026-01-12",
-  "releaseNotes": "https://3.basecamp.com/3097063/buckets/4708396/documents/9570062834",
+  "version": "4.24.0",
+  "versionName": "Wallaby",
+  "releaseDate": "2026-02-18",
+  "releaseNotes": "https://3.basecamp.com/3097063/buckets/4708396/documents/9593423455",
   "private": true,
   "scripts": {
     "build": "cross-env NODE_OPTIONS=--openssl-legacy-provider && vite build",
