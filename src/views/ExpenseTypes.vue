@@ -245,6 +245,19 @@
                     icon
                     @click.stop="
                       toTopOfForm();
+                      copyToForm(item);
+                    "
+                    v-tooltip="'Copy to form'"
+                  >
+                    <v-icon icon="mdi-content-copy" class="case-gray" />
+                  </v-btn>
+                  <v-btn
+                    v-if="userRoleIsAdmin()"
+                    :disabled="midAction"
+                    variant="text"
+                    icon
+                    @click.stop="
+                      toTopOfForm();
                       onSelect(item);
                     "
                     v-tooltip="'Edit'"
@@ -644,6 +657,17 @@ function limitedText(val, characterLimit = 50) {
  */
 function onSelect(item) {
   model.value = _cloneDeep(item);
+}
+
+/**
+ * Copy the values of the selected item to make a new type.
+ *
+ * @param item - expense type selected
+ */
+function copyToForm(item) {
+  startAction();
+  model.value = _cloneDeep(item);
+  model.value.id = null;
 }
 
 /**
