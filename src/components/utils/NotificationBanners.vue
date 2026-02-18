@@ -130,7 +130,7 @@ function checkBadges() {
             closeable: false,
             status: 'info',
             color: '#f27311',
-            message: `Badge ${expire} on ${formattedDate} for clearance: ${clearance.type}`,
+            message: `Badge ${expire} on ${formattedDate} for clearance: ${clearance.type}. Please contact your Team Lead and CASE PM for renewal guidance.`,
             id: randId(),
             item: clearance
           });
