@@ -461,7 +461,7 @@ import DeleteModal from '@/components/modals/DeleteModal.vue';
 import GiftCardInfoModal from '@/components/modals/GiftCardInfoModal.vue';
 import ExpenseRejectionModal from '@/components/modals/ExpenseRejectionModal.vue';
 import employeeUtils from '@/shared/employeeUtils';
-import { isExpenseEditable, quickStatesMenuActions } from '@/shared/expenseUtils';
+import { isExpenseEditable, EMPTY_APPROVAL } from '@/shared/expenseUtils';
 import ExpenseForm from '@/components/expenses/ExpenseForm.vue';
 import DatePicker from '@/components/shared/DatePicker.vue';
 import TagsFilter from '@/components/shared/TagsFilter.vue';
@@ -714,8 +714,9 @@ onBeforeMount(async () => {
   }
 });
 
-onMounted(() => {
+onMounted(async () => {
   if (!userRoleIsAdmin() && !userRoleIsManager()) filter.value.status = [];
+  if (storeIsPopulated) await loadStoreData();
 })
 
 onBeforeUnmount(() => {
@@ -732,12 +733,7 @@ onBeforeUnmount(() => {
   emitter.off('canceled-unreimburse-expense');
 }); // onBeforeUnmount
 
-/**
- * Checks if the store is populated from initial page load.
- *
- * @returns boolean - True if the store is populated
- */
-watch(storeIsPopulated, async () => {
+async function loadStoreData() {
   if (!storeIsPopulated) return;
   initialPageLoading.value = true;
   loading.value = true;
@@ -776,6 +772,15 @@ watch(storeIsPopulated, async () => {
   });
   loading.value = false;
   initialPageLoading.value = false;
+}
+
+/**
+ * Checks if the store is populated from initial page load.
+ *
+ * @returns boolean - True if the store is populated
+ */
+watch(storeIsPopulated, async () => {
+  await loadStoreData();
 });
 
 // |--------------------------------------------------|
@@ -888,6 +893,7 @@ async function updateExpense(newExpense) {
   // set expense to loading and make API call
   expensesStatuses.value.errored.delete(id);
   expensesStatuses.value.disabled.add(id);
+  console.log(newExpense);
   let resp = await api.updateItem(api.EXPENSES, newExpense);
 
   // respond to API call results
@@ -1008,8 +1014,8 @@ function getStatusText(item) {
 function getStateTooltip(item) {
   function approvedBy() {
     let fallback = "unknown approver";
-    if (!item.approved?.by) return fallback;
-    let approver = employeeUtils.getEmployeeByID(item.approved.by, store.getters.employees);
+    if (!item.approvals?.by) return fallback;
+    let approver = employeeUtils.getEmployeeByID(item.approvals.by, store.getters.employees);
     if (!approver) return fallback;
     return employeeUtils.nicknameAndLastName(approver);
   }
@@ -1048,6 +1054,55 @@ function getStateIcon(state) {
   }
 }
 
+
+
+
+/**
+ * Quick expense modifiers, to be used in quick actions menu
+ */
+async function quickApprove(exp) {
+  let id = userInfo.value.id;
+  exp.state = EXPENSE_STATES.APPROVED;
+  exp.approvals = { by: id, date: getTodaysDate('YYYY-MM-DD') };
+  await updateExpense(exp);
+}
+async function quickUnapprove(exp) {
+  exp.state = EXPENSE_STATES.CREATED;
+  exp.approvals = EMPTY_APPROVAL;
+  await updateExpense(exp);
+}
+async function quickRejectReturn(exp) {
+  rejectingExpense.value = exp;
+  toggleExpenseRejectionModal.value = true;
+}
+async function quickReject(exp) {
+  defaultRejectionType.value = 'hard';
+  rejectingExpense.value = exp;
+  toggleExpenseRejectionModal.value = true;
+}
+async function quickRemoveRejection(exp) {
+  if (exp.state === EXPENSE_STATES.REJECTED) {
+    exp.rejections.hardRejections = null;
+  }
+  if (exp.rejections.softRejections) {
+    exp.rejections.softRejections.reasons.pop();
+    exp.rejections.softRejections.revised = true;
+    if (exp.rejections.softRejections.reasons.length === 0) delete exp.rejections;
+  }
+  exp.state = EXPENSE_STATES.CREATED;
+  await updateExpense(exp);
+}
+async function quickReimburse(exp) {
+  exp.state = EXPENSE_STATES.REIMBURSED;
+  exp.reimbursedDate = getTodaysDate('YYYY-MM-DD');
+  await updateExpense(exp);
+}
+async function quickUnreimburse(exp) {
+  exp.state = EXPENSE_STATES.APPROVED;
+  exp.reimbursedDate = null;
+  await updateExpense(e);
+}
+
 /**
  * Gets the state quick-menu for a specified state
  * 
@@ -1059,12 +1114,12 @@ function getStatesQuickMenu(state) {
     case EXPENSE_STATES.REVISED:
       return [
         {
-          action: quickStatesMenuActions.APPROVE,
+          action: quickApprove,
           icon: getStateIcon(EXPENSE_STATES.APPROVED),
           text: 'Approve'
         },
         {
-          action: quickStatesMenuActions.REJECT_RETURN,
+          action: quickRejectReturn,
           icon: getStateIcon(EXPENSE_STATES.RETURNED),
           text: 'Reject or Return'
         }
@@ -1072,7 +1127,7 @@ function getStatesQuickMenu(state) {
     case EXPENSE_STATES.REJECTED:
       return [
         {
-          action: quickStatesMenuActions.REMOVE_REJECTION,
+          action: quickRemoveRejection,
           icon: getStateIcon(EXPENSE_STATES.CREATED),
           text: 'Remove rejection'
         }
@@ -1080,12 +1135,12 @@ function getStatesQuickMenu(state) {
     case EXPENSE_STATES.RETURNED:
       return [
         {
-          action: quickStatesMenuActions.REMOVE_REJECTION,
+          action: quickRemoveRejection,
           icon: getStateIcon(EXPENSE_STATES.CREATED),
           text: 'Remove revisal'
         },
         {
-          action: quickStatesMenuActions.REJECT,
+          action: quickReject,
           icon: getStateIcon(EXPENSE_STATES.REJECTED),
           text: 'Reject'
         }
@@ -1093,12 +1148,12 @@ function getStatesQuickMenu(state) {
     case EXPENSE_STATES.APPROVED:
       return [
         {
-          action: quickStatesMenuActions.REIMBURSE,
+          action: quickReimburse,
           icon: getStateIcon(EXPENSE_STATES.REIMBURSED),
           text: 'Reimburse (as of today)'
         },
         {
-          action: quickStatesMenuActions.UNAPPROVE,
+          action: quickUnapprove,
           icon: getStateIcon(EXPENSE_STATES.CREATED),
           text: 'Remove approval'
         }
@@ -1106,7 +1161,7 @@ function getStatesQuickMenu(state) {
     case EXPENSE_STATES.REIMBURSED:
       return [
         {
-          action: quickStatesMenuActions.UNREIMBURSE,
+          action: quickUnreimburse,
           icon: getStateIcon(EXPENSE_STATES.APPROVED),
           text: 'Remove reimbursement'
         }

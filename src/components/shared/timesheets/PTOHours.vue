@@ -4,7 +4,8 @@
       <div class="mb-2">
         <h3>
           <v-icon>mdi-palm-tree</v-icon>
-          PTO Balances
+          Leave Balances
+          <span v-tooltip:top="'Balances include any usage from future months'">*</span>
           <v-avatar @click="openLink(PTO_POLICY)" class="ml-2 mr-2 nudge-up pointer" size="x-small" density="compact">
             <v-tooltip activator="parent" location="top">Click for more information</v-tooltip>
             <v-icon size="x-small" color="#3f51b5">mdi-information</v-icon>

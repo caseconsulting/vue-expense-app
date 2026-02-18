@@ -115,51 +115,27 @@
 
         <!-- Update Receipt Checkbox -->
         <v-checkbox
-          v-if="receiptRequired && isEdit && !isEmpty(expense.receipt)"
+          v-if="(!isEmpty(expense.receipt) || receiptRequired) && isEdit"
           class="py-0"
           v-model="allowReceipt"
           label="Update the Receipt?"
           :disabled="isInactive"
+          hide-details
         />
 
         <!-- Old Receipt Name -->
-        <v-card-text class="pa-0 font-16 form-text" v-if="!isEmpty(expense.receipt) && isEdit"
-          >Current Receipt: {{ submittedReceipt }}</v-card-text
-        >
+        <v-card-text class="pa-0 mb-6 font-16 form-text" v-if="!isEmpty(expense.receipt) && isEdit">
+          Current Receipt: {{ submittedReceipt }}
+        </v-card-text>
 
         <!-- Upload Receipt -->
-        <v-row class="mt-2 justify-space-between">
-          <file-upload
-            v-if="receiptRequired && ((allowReceipt && isEdit) || !isEdit || isEmpty(expense.receipt))"
-            class="ml-1 mb-2 py-0 w-70"
-            :passedRules="receiptRules"
-            :receipt="expense.receipt"
-            :disabled="isInactive"
-          />
-          <!-- Scan Receipt Button -->
-          <v-tooltip location="bottom">
-            <template v-slot:activator="{ props }">
-              <span v-bind="props" class="d-flex align-center">
-                <v-btn
-                  v-if="receiptRequired && ((allowReceipt && isEdit) || !isEdit || isEmpty(expense.receipt))"
-                  color="black"
-                  @click="scanFile"
-                  class="mx-3 mb-5"
-                  variant="outlined"
-                  elevation="1"
-                  :disabled="isInactive || disableScan"
-                  :loading="scanLoading"
-                >
-                  <v-icon>mdi-barcode-scan</v-icon>
-                </v-btn>
-              </span>
-            </template>
-            <span v-if="!scanLoading">
-              Scans the receipt and autofills fields. Scanning only works for pdfs, pngs, and jpegs.
-            </span>
-            <span v-else>Scanning your receipt, this may take up to 15 seconds</span>
-          </v-tooltip>
-        </v-row>
+        <file-upload
+          v-if="(!isEdit && receiptRequired) || (isEdit && allowReceipt)"
+          class="ml-1 my-2 py-0 w-70"
+          :passedRules="receiptRules"
+          :receipt="expense.receipt"
+          :disabled="isInactive"
+        />
 
         <!-- Cost -->
         <v-row class="mx-1">
@@ -288,7 +264,7 @@
           :rules="notesRules()"
           :label="notesLabel"
           id="notes"
-          data-vv-name="Description"
+          data-vv-name="Notes"
           :disabled="isInactive"
         />
         <!-- Separating optional and required notes field logic since
@@ -299,7 +275,7 @@
           v-model="editedExpense.note"
           :label="notesLabel"
           id="notes"
-          data-vv-name="Description"
+          data-vv-name="Notes"
           :disabled="isInactive"
         />
 
@@ -508,26 +484,33 @@ function isReimbursed() {
  * @return boolean - receipt is required
  */
 function receiptRequired() {
-  this.selectedExpenseType = _find(this.expenseTypes, (expenseType) => {
+  this.selectedExpenseType = undefined;
+  for (let expenseType of this.filteredExpenseTypes()) {
     if (expenseType.value === this.editedExpense.expenseTypeId) {
-      return expenseType;
+      this.selectedExpenseType = expenseType;
     }
-  });
+  }
 
   // if the whole expense requires receipt
-  if (this.selectedExpenseType && this.selectedExpenseType.requireReceipt) {
+  if (this.selectedExpenseType && this.selectedExpenseType?.requireReceipt) {
     // return true unless expense is training and the category is exchange
     return !(
       this.selectedExpenseType.budgetName === 'Training' &&
       this.editedExpense.category === 'Exchange for training hours'
     );
   }
+
   // otherwise, does one of it's categories require a receipt
-  if (this.editedExpense.category) {
-    let category = _find(this.selectedExpenseType.categories, (cat) => {
-      return cat.name === this.editedExpense.category;
-    });
-    return category.requireReceipt;
+  if (this.editedExpense.category && this.selectedExpenseType?.categories) {
+    let category = undefined;
+    for (let c of this.selectedExpenseType.categories) {
+      c = JSON.parse(c);
+      if (c.name === this.editedExpense.category) {
+        category = c;
+        break;
+      }
+    }
+    return category?.requireReceipt;
   }
 
   return false;
@@ -1052,6 +1035,7 @@ function filteredExpenseTypes() {
   let selectedEmployee = _find(this.employees, ['value', this.editedExpense.employeeId]);
   if (!this.asUser) {
     // creating or updating an expense as an admin
+    let addedExpenseTypes = new Set();
     _forEach(this.expenseTypes, (expenseType) => {
       if (!expenseType.isInactive) {
         // expense type is active
@@ -1060,21 +1044,27 @@ function filteredExpenseTypes() {
         if (!selectedEmployee) {
           // add expense type if no employees are selected
           expenseType.text = `${expenseType.budgetName} - $${Number(expenseType.budget).toLocaleString().toString()}`;
-          filteredExpType.push({
-            ...expenseType,
-            disabled: etDisabled === true,
-            disabledCategories: etDisabled
-          });
+          if (!addedExpenseTypes.has(expenseType.id)) {
+            addedExpenseTypes.add(expenseType.id);
+            filteredExpType.push({
+              ...expenseType,
+              disabled: etDisabled === true,
+              disabledCategories: etDisabled
+            });
+          }
         } else if (this.hasAccess(selectedEmployee, expenseType)) {
           // add expense type if the employee is selected and has access
           let budget = _find(this.employeeBudgets, (b) => b.expenseTypeId === expenseType.id);
           let amount = budget ? budget.budgetObject.amount : this.calcAdjustedBudget(selectedEmployee, expenseType); // calculate budget
           expenseType.text = `${expenseType.budgetName} - $${Number(amount).toLocaleString().toString()}`;
-          filteredExpType.push({
-            ...expenseType,
-            disabled: etDisabled === true,
-            disabledCategories: disabledCategories
-          });
+          if (!addedExpenseTypes.has(expenseType.id)) {
+            addedExpenseTypes.add(expenseType.id);
+            filteredExpType.push({
+              ...expenseType,
+              disabled: etDisabled === true,
+              disabledCategories: disabledCategories
+            });
+          }
         }
       }
     });
@@ -1108,6 +1098,8 @@ function filteredExpenseTypes() {
   }
   // allow other parts of the code to add an expense type, no questions asked
   for (let expenseType of this.overrideFilteredExpenseTypes) {
+    let hasET = filteredExpType.find((et) => et.value === expenseType.id);
+    if (hasET) continue;
     filteredExpType.push({
       text: `${expenseType.budgetName} - $${expenseType.budget}`,
       value: expenseType.id,
