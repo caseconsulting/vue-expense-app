@@ -18,7 +18,7 @@ let isBudgetsLoading = false;
 let isPtoCashOutsLoading = false;
 let isExpenseTypesLoading = false;
 let isTagsLoading = false;
-let isAccessGroupsLoading = false;
+let isAccessRolesLoading = false;
 
 let employees = null;
 let user = null;
@@ -29,7 +29,7 @@ let budgets = null;
 let ptoCashOuts = null;
 let expenseTypes = null;
 let tags = null;
-let accessGroups = null;
+let accessRoles = null;
 
 /**
  * Update store with latest user data
@@ -202,17 +202,17 @@ export async function updateStoreTags() {
 } // updateStoreTags
 
 /**
- * Update store with latest access group data
+ * Update store with latest access role data
  */
-export async function updateStoreAccessGroups() {
+export async function updateStoreAccessRoles() {
   try {
-    if (!isAccessGroupsLoading) {
-      isAccessGroupsLoading = true;
-      accessGroups = api.getItems(api.TAGS);
+    if (!isAccessRolesLoading) {
+      isAccessRolesLoading = true;
+      accessRoles = api.getItems(api.TAGS);
     }
-    accessGroups = await accessGroups;
-    store.dispatch('setAcessGroups', { accessGroups });
-    isAccessGroupsLoading = false;
+    accessRoles = await accessRoles;
+    store.dispatch('setAcessRoles', { accessRoles });
+    isAccessRolesLoading = false;
   } catch (err) {
     console.error(err);
   }
@@ -228,5 +228,5 @@ export default {
   updateStorePtoCashOuts,
   updateStoreExpenseTypes,
   updateStoreTags,
-  updateStoreAccessGroups
+  updateStoreAccessRoles
 };
