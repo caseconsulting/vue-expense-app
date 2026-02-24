@@ -487,7 +487,7 @@ import {
 import { employeeFilter } from '@/shared/filterUtils';
 import { format, isBetween, difference, getTodaysDate } from '@/shared/dateUtils';
 import { getDateOptionalRules } from '@/shared/validationUtils.js';
-import { updateStoreBudgets, updateStoreExpenseTypes, updateStoreEmployees, updateStoreTags } from '@/utils/storeUtils';
+import { updateStoreBudgets, updateStoreExpenseTypes, updateStoreEmployees, updateStoreTags, updateStoreUser } from '@/utils/storeUtils';
 import { mask } from 'vue-the-mask';
 import { onBeforeMount, onMounted, onBeforeUnmount, ref, watch, computed, inject } from 'vue';
 import { useStore } from 'vuex';
@@ -738,7 +738,8 @@ async function loadStoreData() {
   initialPageLoading.value = true;
   loading.value = true;
   // get user info, defaulting to params if exists
-  userInfo.value = store.getters.user; // TODO: parse localstorage into string and then parse from string
+  if (!store.getters.user) await updateStoreUser();
+  userInfo.value = store.getters.user;
   if (localStorage.getItem('requestedFilter')) userInfo.value = JSON.parse(localStorage.getItem('requestedFilter'));
   await Promise.all([
     !store.getters.expenseTypes ? updateStoreExpenseTypes() : '',
