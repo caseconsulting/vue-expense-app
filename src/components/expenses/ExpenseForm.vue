@@ -484,6 +484,7 @@ function isReimbursed() {
  * @return boolean - receipt is required
  */
 function receiptRequired() {
+  // find expense type selected in form
   this.selectedExpenseType = undefined;
   for (let expenseType of this.filteredExpenseTypes()) {
     if (expenseType.value === this.editedExpense.expenseTypeId) {
@@ -492,26 +493,16 @@ function receiptRequired() {
   }
 
   // if the whole expense requires receipt
-  if (this.selectedExpenseType && this.selectedExpenseType?.requireReceipt) {
-    // return true unless expense is training and the category is exchange
-    return !(
-      this.selectedExpenseType.budgetName === 'Training' &&
-      this.editedExpense.category === 'Exchange for training hours'
-    );
+  if (this.selectedExpenseType?.requireReceipt) return true;
+
+  // if selected category requires receipt
+  for (let category of this.selectedExpenseType?.categories || []) {
+    // skip non-matching categories
+    if (category.name && category.name !== this.editedExpense?.category) continue;
+    return category.requireReceipt;
   }
 
-  // otherwise, does one of it's categories require a receipt
-  if (this.editedExpense.category && this.selectedExpenseType?.categories) {
-    let category = undefined;
-    for (let c of this.selectedExpenseType.categories) {
-      if (c.name === this.editedExpense.category) {
-        category = c;
-        break;
-      }
-    }
-    return category?.requireReceipt;
-  }
-
+  // default to false if nothing else returned
   return false;
 } // receiptRequired
 
