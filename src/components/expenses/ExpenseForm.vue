@@ -504,7 +504,6 @@ function receiptRequired() {
   if (this.editedExpense.category && this.selectedExpenseType?.categories) {
     let category = undefined;
     for (let c of this.selectedExpenseType.categories) {
-      c = JSON.parse(c);
       if (c.name === this.editedExpense.category) {
         category = c;
         break;
