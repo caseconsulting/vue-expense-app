@@ -1,12 +1,21 @@
 <template>
   <div>
+    <h4>Unanet</h4>
+    <hr class="mb-4"/>
     <v-row>
-      <h4>Unanet</h4>
-      <div>
+      <v-col cols="6">
         <v-autocomplete
+          label="Project Org Code"
           v-model="editedEmployee.integrationData.unanet.projectOrgCode"
+          :items="projectOrgCodeItems"
         />
-      </div>
+      </v-col>
+      <v-col cols="6">
+        <v-text-field
+          label="Person Key"
+          v-model="editedEmployee.unanetPersonKey"
+        />
+      </v-col>
     </v-row>
   </div>
 </template>
@@ -25,22 +34,24 @@ import { ref, onBeforeMount } from 'vue';
 const { slotProps } = defineProps(['slotProps']);
 const editedEmployee = ref(slotProps.editedEmployee);
 
+const projectOrgCodeItems = ref(["I_CASE", "I_HR", "I_FINANCE", "I_OPERATIONS", "I_EXECUTIVE"]);
+
 onBeforeMount(() => {
   const requiredFields = {
     // dot-noted-object: default-value
-    'editedEmployee.integrationData.unanet.projectOrgCode': null
+    'integrationData.unanet.projectOrgCode': null
   };
-  for (let [field, dflt] of Object.entries(requiredFields)) {
-    let curr;
-    for (let sub of field.split('.')) {
-      if (!curr) {
-        curr = field[sub];
-      } else {
-        curr[sub] ??= {};
-        curr = curr[sub];
-      }
+
+  // fill in fields as needed
+  for (let [field, defaultVal] of Object.entries(requiredFields)) {
+    let curr = editedEmployee.value;
+    let subs = field.split('.');
+    let last = subs.pop();
+    for (let sub of subs) {
+      curr[sub] ??= {};
+      curr = curr[sub];
     }
-    curr = dflt;
+    curr[last] = defaultVal;
   }
 })
 
