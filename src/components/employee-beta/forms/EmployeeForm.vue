@@ -114,10 +114,10 @@
                 :class="{ invalid: !validTabs.emergencyContacts }"
               ></v-list-item>
               <v-list-item
-                @click="cardName = 'Integration Data'"
+                @click="cardName = 'Integrations'"
                 link
-                title="Integration Data"
-                :class="{ invalid: !validTabs.integrationData }"
+                title="Integrations"
+                :class="{ invalid: false }"
               ></v-list-item>
             </v-list>
           </v-col>
@@ -251,10 +251,10 @@
                   </template>
                 </base-form>
                 <base-form
-                  title="Integration Data"
+                  title="Integrations"
                   tab-id="integration"
                   v-model="editedEmployee"
-                  :valid="validTabs.integration"
+                  :valid="true"
                 >
                   <template v-slot="{ props }">
                     <integration-data-form :slot-props="props"></integration-data-form>
@@ -367,7 +367,8 @@ const validTabs = reactive({
   languages: true,
   personal: true,
   technologies: true,
-  emergencyContacts: true
+  emergencyContacts: true,
+  integration: true,
 });
 
 // template refs
@@ -706,6 +707,10 @@ async function selectTab() {
     case 'Emergency Contacts':
       num = 9;
       card = 'Emergency Contacts';
+      break;
+    case 'Integrations':
+      num = 10;
+      card = 'Integrations'
       break;
     default:
       num = 0;
