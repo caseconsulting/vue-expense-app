@@ -282,6 +282,9 @@ export class Employee {
     /** @type {Object} */
     this.preferences = properties.preferences ?? {};
 
+    /** @type {Object} */
+    this.integrationData = properties.integrationData ?? {};
+
     // current address fields
     /** @type {string} */
     this.currentStreet = properties.currentStreet ?? '';

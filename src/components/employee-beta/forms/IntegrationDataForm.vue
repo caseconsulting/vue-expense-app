@@ -51,7 +51,7 @@ onBeforeMount(() => {
       curr[sub] ??= {};
       curr = curr[sub];
     }
-    curr[last] = defaultVal;
+    curr[last] ??= defaultVal;
   }
 })
 
