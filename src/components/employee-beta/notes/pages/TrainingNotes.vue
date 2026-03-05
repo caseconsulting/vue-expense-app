@@ -51,33 +51,6 @@
 </template>
 
 <script setup>
-/**
- * TODO:
- *  - [x] make for employee, not user (oops)
- *  - [x] category filter with auto to what they likely want
- *  - [x] show training hour conversions
- *  - [x] summary of training hours conversions
- *  - [ ] notes section defaulting to desc but editable (do not edit expense, just notes)
- */
-
- /*
-
- {
- "id": "aa22c281-f87f-4e93-ab62-83274f38b08a",
- "employeeId": "21769931-4379-4902-ac13-b1f52069cf43",
- "createdAt": "2025-11-14",
- "expenseTypeId": "00670837-e7b9-4198-8ed1-f6146d821bfc",
- "description": "bjnk",
- "purchaseDate": "2025-11-05T05:00:00.000Z",
- "showOnFeed": true,
- "state": "CREATED",
- "cost": 9,
- "category": "Certifications,",
- "receipt": [ "Portal_Report_(Ragnarok_Technologies).xlsx" ]
- }
-
- */
-
 import { ref, computed, onMounted } from 'vue';
 import { format, difference } from '@/shared/dateUtils';
 import api from '@/shared/api';
