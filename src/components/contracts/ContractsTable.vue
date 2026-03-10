@@ -1030,20 +1030,29 @@ const storeContracts = computed(() => {
     // get projects
     let projects = contract.projects.filter((p) => status.has(p.status));
 
-    if (projects.length !== 0) {
-      for (let p of projects) p.checkBox = cbIndexProjects[p.id];
-      contracts.push({
-        ...contract,
-        ...cbIndexContracts[contract.id],
-        contractId: contract.id, // used for quick-edit
-        projects
-      });
+    // skip any with no projects
+    if (!projects.length) continue;
+
+    // get access control for project
+    for (let p of (projects || [])) {
+      p.checkBox = cbIndexProjects[p.id];
+      p.accessControlLink = ACExpand(p.id).join(', ')
     }
+
+    // add to table
+    contracts.push({
+      ...contract,
+      ...cbIndexContracts[contract.id],
+      accessControlLink: ACExpand(contract.id).join(', '),
+      contractId: contract.id, // used for quick-edit
+      projects
+    });
   }
 
   // :)
   return contracts;
 }); // storeContracts
+
 
 // |--------------------------------------------------|
 // |                                                  |
