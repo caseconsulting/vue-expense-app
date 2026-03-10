@@ -1062,11 +1062,16 @@ const storeContracts = computed(() => {
     // get projects
     let projects = contract.projects.filter((p) => status.has(p.status));
 
+    // skip any with no projects
+    if (!projects.length) continue;
+
+    // get access control for project
     for (let p of (projects || [])) {
       p.checkBox = cbIndexProjects[p.id];
       p.accessControlLink = ACExpand(p.id).join(', ')
     }
 
+    // add to table
     contracts.push({
       ...contract,
       ...cbIndexContracts[contract.id],
@@ -1079,6 +1084,7 @@ const storeContracts = computed(() => {
   // :)
   return contracts;
 }); // storeContracts
+
 
 // |--------------------------------------------------|
 // |                                                  |
