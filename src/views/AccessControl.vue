@@ -8,55 +8,55 @@
             <div class="d-flex align-center justify-center w-100">
               <h3 class="my-0 ml-0">Roles</h3>
               <v-spacer />
-              <v-btn icon="mdi-plus-circle" variant="plain" size="small" @click="addGroup()" />
+              <v-btn icon="mdi-plus-circle" variant="plain" size="small" @click="addRole()" />
             </div>
             <v-list nav density="compact" class="pr-0 w-100">
               <v-list-item
-                v-for="(group, i) in groups"
+                v-for="(role, i) in roles"
                 :key="i"
-                :title="group.name"
-                @click="editGroupIndex = i"
+                :title="role.name"
+                @click="editRoleIndex = i"
                 class="overflow-auto"
                 >
                 <template #append>
-                  <v-icon v-if="isAdmin(group)" icon="mdi-lock" color="black" size="small" />
+                  <v-icon v-if="isAdmin(role)" icon="mdi-lock" color="black" size="small" />
                 </template>
               </v-list-item>
             </v-list>
           </v-col>
           <v-col v-if="loading" cols="10"> <v-progress-linear class="my-12" indeterminate /> </v-col>
           <v-col v-else cols="10" class="pr-0">
-            <div v-if="!editGroup">
-              Select a group to edit, or press
-              <v-icon icon="mdi-plus-circle" size="x-small" class="text-gray mb-1" @click="addGroup()" />
+            <div v-if="!editRole">
+              Select a role to edit, or press
+              <v-icon icon="mdi-plus-circle" size="x-small" class="text-gray mb-1" @click="addRole()" />
               to make a new one.
             </div>
             <div v-else>
               <v-row>
-                <v-col cols="13" :class="isAdmin(editGroup) ? 'cursor-not-allowed' : ''">
+                <v-col cols="13" :class="isAdmin(editRole) ? 'cursor-not-allowed' : ''">
                   <v-text-field
-                    v-model="editGroup.name"
+                    v-model="editRole.name"
                     variant="outlined"
                     class="h1"
-                    id="groupName"
-                    :disabled="isAdmin(editGroup)"
+                    id="roleName"
+                    :disabled="isAdmin(editRole)"
                   />
                 </v-col>
               </v-row>
               <div class="users">
                 <div class="d-flex align-center justify-start">
                   <h2>Assignments</h2>
-                  <v-btn icon="mdi-plus-circle" class="ml-2" variant="plain" size="small" @click="addAssignment(editGroup)" />
+                  <v-btn icon="mdi-plus-circle" class="ml-2" variant="plain" size="small" @click="addAssignment(editRole)" />
                 </div>
-                <Assignments v-model="editGroup.assignments" :is-admin="editGroup.name === 'Admin'" :projects="projects" :key="editGroupIndex" />
+                <Assignments v-model="editRole.assignments" :is-admin="editRole.name === 'Admin'" :projects="projects" :key="editRoleIndex" />
               </div>
               <div class="flags">
                 <h2>Flags</h2>
-                <GroupFlags v-model="editGroup.flags" :group-name="editGroup.name" class="ml-1" :key="editGroupIndex" />
+                <RoleFlags v-model="editRole.flags" :role-name="editRole.name" class="ml-1" :key="editRoleIndex" />
               </div>
               <div class="permissions">
                 <h2>Permissions</h2>
-                <Permissions v-if="editGroup.name !== 'Admin'" :key="editGroupIndex" />
+                <Permissions v-if="editRole.name !== 'Admin'" :key="editRoleIndex" />
                 <div v-else class="ml-2"><p>Admins always has full access to the Portal and all its data.</p></div>
               </div>
               <div class="actions">
@@ -65,7 +65,7 @@
                   color="green-darken-1"
                   class="ml-2"
                   append-icon="mdi-content-save"
-                  @click="saveCurrentGroup()"
+                  @click="saveCurrentRole()"
                   :disabled="saving"
                 >
                   {{ saveText }}
@@ -74,8 +74,8 @@
                   :variant="userIsSure ? 'tonal' : 'outlined'"
                   class="ml-2 delete-button"
                   :append-icon="userIsSure ? '' : 'mdi-delete'"
-                  :disabled="isAdmin(editGroup)"
-                  @click="deleteCurrentGroup()"
+                  :disabled="isAdmin(editRole)"
+                  @click="deleteCurrentRole()"
                   :color="userIsSure ? 'red-darken-1' : undefined"
                 >
                   {{ deleteText }}
@@ -95,7 +95,7 @@ import { inject, ref, watch, computed, onBeforeMount, onUnmounted, nextTick } fr
 import { useStore } from 'vuex';
 import { useDisplaySuccess, useDisplayError } from '@/components/shared/StatusSnackbar.vue';
 import Assignments from '@/components/access-control/Assignments.vue';
-import GroupFlags from '@/components/access-control/GroupFlags.vue';
+import RoleFlags from '@/components/access-control/RoleFlags.vue';
 import Permissions from '@/components/access-control/Permissions.vue';
 // JS/utility imports
 import { updateStoreContracts, updateStoreEmployees, updateStoreTags } from '@/utils/storeUtils';
@@ -111,48 +111,48 @@ function aOrAn(word) { return 'aeiouAEIOU'.split('').includes(word.charAt(0)) ? 
 // UI
 const loading = ref(false);
 
-const groups = ref([]);
-const editGroupIndex = ref(0); // index in array
-const editGroup = computed(() => groups.value?.[editGroupIndex.value]);
-const emptyGroup = { id: null, created: null, name: 'New Group', flags: {}, assignments: [] };
+const roles = ref([]);
+const editRoleIndex = ref(0); // index in array
+const editRole = computed(() => roles.value?.[editRoleIndex.value]);
+const emptyRole = { id: null, created: null, name: 'New Role', flags: {}, assignments: [] };
 const emptyAssignment = { id: null, name: 'New Assignment', users: {}, assignments: {} };
 const projects = ref([]);
 
 /**
- * Gets groups data
+ * Gets role data
  */
-async function buildGroups() {
-  // get groups from db and sort (db doesn't store in same order)
-  groups.value = await api.getItems(api.ACCESS_GROUPS);
-  groups.value.sort((a, b) => difference(a.created, b.created));
-  // fill in group keys if there's anything new
-  for (let group of groups.value)
-    for (let k of Object.keys(emptyGroup))
-      group[k] ??= emptyGroup[k];
+async function buildRoles() {
+  // get roles from db and sort (db doesn't store in same order)
+  roles.value = await api.getItems(api.ACCESS_ROLES);
+  roles.value.sort((a, b) => difference(a.created, b.created));
+  // fill in role keys if there's anything new
+  for (let role of roles.value)
+    for (let k of Object.keys(emptyRole))
+      role[k] ??= emptyRole[k];
 }
 
 /**
- * Adds a new group to the list of groups
+ * Adds a new role to the list of roles
  */
-async function addGroup() {
-  // copy into a new group with default assignment
-  groups.value.push({ ...deepClone(emptyGroup), id: generateUUID(), created: now() });
-  editGroupIndex.value = groups.value.length - 1;
-  addAssignment(groups.value[editGroupIndex.value]);
-  // let group be created, then highlight the group name
+async function addRole() {
+  // copy into a new role with default assignment
+  roles.value.push({ ...deepClone(emptyRole), id: generateUUID(), created: now() });
+  editRoleIndex.value = roles.value.length - 1;
+  addAssignment(roles.value[editRoleIndex.value]);
+  // let role be created, then highlight the role name
   await nextTick();
-  let el = document.getElementById('groupName');
+  let el = document.getElementById('roleName');
   el.focus();
-  el.setSelectionRange(0, emptyGroup.name.length);
+  el.setSelectionRange(0, emptyRole.name.length);
 }
 
 /**
- * Adds a new assignment to the given group
+ * Adds a new assignment to the given role
  */
-async function addAssignment(group) {
+async function addAssignment(role) {
   // create default assignment
-  group.assignments ??= [];
-  group.assignments.push({ ...deepClone(emptyAssignment), id: generateUUID() });
+  role.assignments ??= [];
+  role.assignments.push({ ...deepClone(emptyAssignment), id: generateUUID() });
   // let assignment be created, then highlight the assignment name
   await nextTick();
   let el = document.getElementsByClassName('assignmentNames');
@@ -163,12 +163,12 @@ async function addAssignment(group) {
 }
 
 /**
- * Deletes the current group
+ * Deletes the current role
  */
 const deleteText = ref('Delete');
 const userIsSure = ref(false);
 let deleteTimeout;
-async function deleteCurrentGroup() {
+async function deleteCurrentRole() {
   // first click: make sure user is sure
   if (!userIsSure.value) {
     deleteText.value = 'Are you sure?';
@@ -182,10 +182,10 @@ async function deleteCurrentGroup() {
   }
   if (deleteTimeout) clearTimeout(deleteTimeout);
   // second click: delete and push to db
-  if (!isAdmin(editGroup.value)) {
+  if (!isAdmin(editRole.value)) {
     try {
-      let [{ id }] = groups.value.splice(editGroupIndex.value--, 1); // post decrement
-      await api.deleteItem(api.ACCESS_GROUPS, id);
+      let [{ id }] = roles.value.splice(editRoleIndex.value--, 1); // post decrement
+      await api.deleteItem(api.ACCESS_ROLES, id);
       deleteText.value = 'Delete';
       userIsSure.value = false;
       useDisplaySuccess('Delete success!');
@@ -196,17 +196,17 @@ async function deleteCurrentGroup() {
 }
 
 /**
- * Saves the current group
+ * Saves the current role
  * TODO: patch request instead of whole object
  */
 const saveText = ref('Save');
 const saving = ref(false);
-async function saveCurrentGroup() {
+async function saveCurrentRole() {
   // UI feedback
   saving.value = true;
   // save to db
   try {
-    await api.createItem(api.ACCESS_GROUPS, editGroup.value);
+    await api.createItem(api.ACCESS_ROLES, editRole.value);
     // reset delete UI vars if needed
     deleteText.value = 'Delete';
     userIsSure.value = false;
@@ -223,23 +223,23 @@ async function saveCurrentGroup() {
 }
 
 /**
- * Returns whether or not the group is the admin group.
+ * Returns whether or not the role is the admin role.
  */
-function isAdmin(group) {
-  return group.name === 'Admin';
+function isAdmin(role) {
+  return role.name === 'Admin';
 }
 
 /**
- * Check for changes to the editing group
+ * Check for changes to the editing role
  */
 watch(
-  () => [editGroupIndex.value, editGroup.value],
-  ([newIndex], [oldIndex, oldGroup]) => {
+  () => [editRoleIndex.value, editRole.value],
+  ([newIndex], [oldIndex, oldRole]) => {
     // reset deletion protection
     userIsSure.value = false;
     deleteText.value = 'Delete';
-    // first run or changing groups
-    if (oldGroup === undefined || newIndex !== oldIndex) return;
+    // first run or changing roles
+    if (oldRole === undefined || newIndex !== oldIndex) return;
   },
   { deep: true }
 )
@@ -266,8 +266,8 @@ onBeforeMount(async () => {
   projects.value = [];
   for (let c of store.getters.contracts) projects.value.push(...(c.projects || []));
 
-  // put groups in UI
-  await buildGroups();
+  // put roles in UI
+  await buildRoles();
 
   // loading for feedback
   loading.value = false;
