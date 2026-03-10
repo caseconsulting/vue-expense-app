@@ -1,5 +1,5 @@
 <template>
-  <div @click="api.getContractAccessControl()">
+  <div>
     <v-container fluid class="pa-0 pa-md-2">
       <v-row class="d-flex justify-space-between">
         <v-col cols="12" md="3">
