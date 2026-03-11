@@ -99,10 +99,10 @@ function diverge(into, from) {
 
   // look up ID in index and put it in the proper array
   for (let id of from) {
-    if (indexes.employees[id]) into.employees.push(id);
-    else if (indexes.tags[id]) into.tags.push(id);
-    else if (indexes.contracts[id]) into.contracts.push(id);
-    else if (indexes.projects[id]) into.projects.push(id);
+    if (indexes.employees?.[id]) into.employees.push(id);
+    else if (indexes.tags?.[id]) into.tags.push(id);
+    else if (indexes.contracts?.[id]) into.contracts.push(id);
+    else if (indexes.projects?.[id]) into.projects.push(id);
     else throw new Error('Could not tell type of id ' + id);
   }
 }
