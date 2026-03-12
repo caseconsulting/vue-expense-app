@@ -2,8 +2,10 @@
  * Utilities to convert expense objects into objects passable to
  * csv.js
  */
-import store from '~/store/index.js';
 import { format, DEFAULT_ISOFORMAT, FORMATTED_ISOFORMAT } from '@/shared/dateUtils';
+import { indexBy } from '@/utils/utils.js';
+import store from '~/store/index.js';
+import api from '~/src/shared/api.js';
 import csvUtils from '@/utils/csv/baseCsv.js';
 
 /**
@@ -22,58 +24,95 @@ function download(expenses) {
  * Downloads array of expenses as a report for Unanet import.
  * @param expenses - array of expense objects
  */
-function unanetReport(expenses) {
-  let csvExpenses = unanetExpenseData(expenses); // convert expenses into csv object
+async function unanetReport(expenses) {
+  let csvExpenses = await unanetExpenseData(expenses); // convert expenses into csv object
   let csvFileString = csvUtils.generate(csvExpenses); // convert to csv file string
   csvUtils.download(csvFileString, 'unanet_report.csv'); // download csv file string as .csv
 } // unanetReport
 
-function unanetExpenseData(expenses) {
+async function unanetExpenseData(expenses) {
   if (!Array.isArray(expenses)) expenses = [expenses];
-  let employees = store.getters.employees;
-  let employee;
-  let expenseTypes = store.getters.expenseTypes;
-  let expenseType;
+  let employees = indexBy(store.getters.employees, 'id');
+  let expenseTypes = indexBy(store.getters.expenseTypes, 'id');
+  let { projects: unanetProjects, expenseTypes: unanetETs } = await api.getUnanetExpenseTypes();
+  unanetProjects = indexBy(unanetProjects, 'key');
+  unanetETs = indexBy(unanetETs, 'key');
+  
+  let employee, expenseType, unanetET, unanetProject;
+  let orgCode, projCode, taskName, expType;
   return expenses.map((expense) => {
-    employee = employees.find((employee) => {
-      return employee.id === expense.employeeId;
-    });
+    employee = employees[expense.employeeId];
+    expenseType = expenseTypes[expense.expenseTypeId];
+    unanetET = unanetETs[expenseType.unanetExpenseType]
+    unanetProject = unanetProjects[expenseType.unanetProject];
 
-    expenseTypes.forEach((type) => {
-      if (type.id === expense.expenseTypeId) {
-        expenseType = type.budgetName;
-      }
-    });
+    console.log(unanetET);
+    console.log(unanetProject);
+
+    orgCode = unanetProject?.orgCode ?? ''; // eg. I_CASE
+    projCode = unanetProject?.code ?? ''; // eg. FRINGE.BENEFITS.GRAY
+    taskName = unanetET?.code?.toLowerCase() === 'team leads' ? 'Team Leads' : ''; // 'Team Leads' or nothing
+    expType = unanetET?.code; // eg. PHONE.INTERNET
 
     return {
-      username: employee.email, // email
-      purpose: '', // blank
-      location: '', // blank
-      project_org_code: '',
-      project_code: '',
-      task_name: '',
-      expense_date: format(expense.createdAt, null, FORMATTED_ISOFORMAT),
-      expense_type: expenseType,
-      currency_code: 'USD', // USD
-      amount: expense.cost,
-      exchange_rate: 1, // 1
-      payment_method: '*Employee Paid', // *Employee Paid
-      project_type: '', // blank
-      comments: '', // blank
-      receipt_included: expense.receipt ? 'Y' : 'N',
-      no_receipt_reason: '', // blank
-      vendor_name: '', // blank
-      vat_amount: 0, // 0
-      vat_location: '', // blank
-      post_date: '', // blank
-      cost_account: '', // blank
-      exp_voucher: '', // blank
-      delete: '', // blank
-      ic_amount: '', // blank
-      ic_cost_structure: '', // blank
-      ic_cost_element: '', // blank
-      amount_in: '' // blank
-    };
+      'username': employee.email,
+      'purpose': expenseType.budgetName,
+      'location': '', // blank
+      'project_org_code': orgCode,
+      'project_code': projCode,
+      'task_name': taskName,
+      'expense_date': format(expense.createdAt, null, FORMATTED_ISOFORMAT),
+      'expense_type': expType,
+      'currency_code': 'USD',
+      'amount': expense.cost,
+      'exchange_rate': 1, // USD -> USD is just 1
+      'payment_method': '*Employee Paid', // *Employee Paid
+      'project_type': '', // blank
+      'comments': '', // blank
+      'receipt_included': expense.receipt ? 'Y' : 'N',
+      'no_receipt_reason': '', // blank
+      'vendor_name': '', // blank
+      'vat_amount': 0, // always 0
+      'vat_location': '', // blank
+      'post_date': '', // blank
+      'cost_account': '', // blank
+      'exp_voucher': '', // blank
+      'delete': '', // blank
+      'ic_amount': '', // blank
+      'ic_cost_structure': '', // blank
+      'ic_cost_element': '', // blank
+      'amount_in': '' // blank
+    }
+
+    // return {
+    //   username: employee.email, // email
+    //   purpose: expenseType, // blank
+    //   location: '', // blank
+    //   project_org_code: '',
+    //   project_code: '',
+    //   task_name: '',
+    //   expense_date: format(expense.createdAt, null, FORMATTED_ISOFORMAT),
+    //   expense_type: expenseType,
+    //   currency_code: 'USD', // USD
+    //   amount: expense.cost,
+    //   exchange_rate: 1, // 1
+    //   payment_method: '*Employee Paid', // *Employee Paid
+    //   project_type: '', // blank
+    //   comments: '', // blank
+    //   receipt_included: expense.receipt ? 'Y' : 'N',
+    //   no_receipt_reason: '', // blank
+    //   vendor_name: '', // blank
+    //   vat_amount: 0, // 0
+    //   vat_location: '', // blank
+    //   post_date: '', // blank
+    //   cost_account: '', // blank
+    //   exp_voucher: '', // blank
+    //   delete: '', // blank
+    //   ic_amount: '', // blank
+    //   ic_cost_structure: '', // blank
+    //   ic_cost_element: '', // blank
+    //   amount_in: '' // blank
+    // };
   });
 }
 

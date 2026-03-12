@@ -13,7 +13,42 @@
       item-value="url"
       label="Basecamp Campfire (optional)"
       clearable
+<<<<<<< HEAD
     ></v-autocomplete>
+=======
+    />
+    <div v-tooltip:top="unanetETs.length == 0 ? 'No Unanet expense types found' : null">
+      <v-autocomplete
+        variant="underlined"
+        :items="unanetETs"
+        v-model="modelValue.unanetExpenseType"
+        item-title="name"
+        item-value="key"
+        label="Unanet Expense Type (optional)"
+        :disabled="unanetETs.length == 0"
+        clearable
+      />
+    </div>
+    <div v-tooltip:top="unanetProjects.length == 0 ? 'No Unanet projects found' : null">
+      <v-autocomplete
+        variant="underlined"
+        :items="unanetProjects"
+        v-model="modelValue.unanetProject"
+        item-title="name"
+        item-value="key"
+        label="Unanet Project (optional)"
+        :disabled="unanetProjects.length == 0"
+        clearable
+      >
+        <template v-slot:item="{ props, item }">
+          <v-list-item
+            v-bind="props"
+            :subtitle="item.raw.orgCode"
+          ></v-list-item>
+        </template>
+      </v-autocomplete>
+    </div>
+>>>>>>> ab9de798 (donezo)
   </div>
 </template>
 <script setup>
