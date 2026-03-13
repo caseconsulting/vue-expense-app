@@ -182,6 +182,9 @@ const notesTemplate = {
     },
     kudos: {
       custom: []
+    },
+    training: {
+      expenses: {}
     }
   }
 };

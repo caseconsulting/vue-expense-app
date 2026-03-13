@@ -8,6 +8,7 @@
       <v-autocomplete
         :items="categories"
         v-model="filters.categories"
+        label="Filter by category"
         variant="outlined"
         density="compact"
         multiple
@@ -21,10 +22,28 @@
           <v-col cols="6" class="font-weight-bold">Description</v-col>
         </v-row>
         <p v-if="filteredTrainings.length === 0" class="mt-4">No trainings found.</p>
-        <v-row v-else v-for="training in filteredTrainings" :key="training.id" @click="gotoExpense(training.id)">
+        <v-row v-else v-for="training in filteredTrainings" :key="training.id">
           <v-col cols="3">{{ format(training.purchaseDate, null, 'MMM DD, YYYY') }}</v-col>
           <v-col cols="3">{{ training.category ?? 'None' }}</v-col>
-          <v-col cols="6">{{ training.description }}</v-col>
+          <v-col cols="6"  v-if="editing[training.id]" class="py-1">
+            <v-textarea
+              v-model="notes.expenses[training.id]"
+              variant="outlined"
+              density="compact"
+              class="pa-0"
+              rows="1"
+              append-inner-icon="mdi-content-save"
+              @click:append-inner="editing[training.id] = false"
+              @blur="editing[training.id] = false"
+              @keydown.enter="editing[training.id] = false"
+              hide-details
+              auto-grow
+              autofocus
+            />
+          </v-col>
+          <v-col cols="6" v-else @click="editDesc(training)" :class="(getDesc(training)?.modified ? 'font-italic' : '') + ' editable-desc'">
+            {{ getDesc(training)?.text }}
+          </v-col>
         </v-row>
       </div>
     </div>
@@ -38,7 +57,7 @@
  *  - [x] category filter with auto to what they likely want
  *  - [x] show training hour conversions
  *  - [x] summary of training hours conversions
- *  - [ ] notes section defauling to desc but editable (do not edit expense, just notes)
+ *  - [ ] notes section defaulting to desc but editable (do not edit expense, just notes)
  */
 
  /*
@@ -70,11 +89,12 @@ const props = defineProps(['modelValue', 'user']);
 const notes = ref(props.modelValue);
 const categories = ref([]);
 const filters = ref({
-  categories: ['Certifications', 'Training', 'Exchange for Training Hours', 'Conferences']
+  categories: ['Certifications', 'Certifications,', 'Training', 'Exchange for Training Hours', 'Conferences']
 })
 const store = useStore();
 let trainings = ref(null);
 const trainingHours = ref({ pending: 0, reimbursed: 0 })
+const editing = ref({});
 
 onMounted(async () => {
   // fetch all data
@@ -93,6 +113,11 @@ onMounted(async () => {
     }
   }
 
+  // Remove non-existant categories from auto-filled categories
+  for (let i = 0; i < filters.value.categories.length; i++)
+    if (!allCategory.has(filters.value.categories[i]))
+      filters.value.categories.splice(i--, 1);
+
   // get exchanges for training hours
   for (let e of expenses) {
     if (e.category?.toLowerCase() === 'exchange for training hours') {
@@ -107,6 +132,18 @@ onMounted(async () => {
   trainings.value = expenses.filter((e) => trainingIds.has(e.expenseTypeId));
   trainings.value = trainings.value.sort((a, b) => difference(b.purchaseDate, a.purchaseDate, 'day'));
 });
+
+function editDesc(training) {
+  notes.value.expenses[training.id] ??= training.description;
+  editing.value[training.id] = true;
+}
+
+function getDesc(training) {
+  let note = notes.value.expenses[training.id];
+  if (note && note !== '') return { text: note, modified: true }; 
+  if (!training.description || training.description === '') return { text: 'No description', modified: true };
+  return { text: training.description, modifed: false };
+}
 
 const filteredTrainings = computed(() => {
   if (!trainings.value) return null;
@@ -127,3 +164,15 @@ const filteredTrainings = computed(() => {
   return filtered;
 });
 </script>
+
+<style scoped>
+.editable-desc:hover {
+  cursor: pointer;
+  background-color: #eee;
+  border-radius: 0.7em;
+}
+input[type="text"].v-field__input {
+  color: red !important;
+  padding-left: 0;
+}
+</style>
