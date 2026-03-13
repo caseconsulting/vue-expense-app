@@ -83,6 +83,11 @@ onMounted(async () => {
     }
   }
 
+  // Remove non-existant categories from auto-filled categories
+  for (let i = 0; i < filters.value.categories.length; i++)
+    if (!allCategory.has(filters.value.categories[i]))
+      filters.value.categories.splice(i--, 1);
+
   // get exchanges for training hours
   for (let e of expenses) {
     if (e.category?.toLowerCase() === 'exchange for training hours') {
