@@ -24,7 +24,7 @@
         <v-row v-if="kudosLoading">
           <v-progress-linear indeterminate></v-progress-linear>
         </v-row>
-        <v-row v-else v-for="kudo in kudos" :key="kudo.desc" class="my-2">
+        <v-row v-else v-for="(kudo, i) in kudos" :key="kudo.desc" class="my-2">
           <div class="mb-1">
             <span class="text-grey font-italic">{{ format(kudo.date, 'YYYY-MM-DD', 'MM/DD/YYYY') }}</span>
             <v-icon
@@ -48,9 +48,13 @@
                 @click="deleteKudo(kudo.index)"
               />
             </span>
-            <v-avatar v-else :class="kudo.desc ? 'pointer' : ''" density="compact">
-              <v-tooltip v-if="kudo.desc" activator="parent" location="top" max-width="600">{{ kudo.desc }}</v-tooltip>
-              <v-icon v-if="kudo.desc" size="x-small">mdi-text</v-icon>
+            <v-avatar  v-if="kudo.desc" :class="kudo.desc ? 'pointer' : ''" density="compact">
+              <v-tooltip activator="parent" location="top" max-width="600">{{ kudo.desc }}</v-tooltip>
+              <v-icon size="x-small">mdi-text</v-icon>
+            </v-avatar>
+            <v-avatar>
+              <v-icon v-if="kudo.copy && !copied[i]" size="x-small" @click="copy(kudo, i)">mdi-content-copy</v-icon>
+              <v-icon v-if="kudo.copy && copied[i]" size="x-small" color="green">mdi-check-bold</v-icon>
             </v-avatar>
           </div>
         </v-row>
@@ -76,6 +80,7 @@ const notes = ref(props.modelValue);
 const kudos = ref([]);
 const customKudo = ref({ date: getTodaysDate('YYYY-MM-DD') });
 const kudosLoading = ref(false);
+const copied = ref({});
 
 onMounted(async () => {
   buildKudos();
@@ -88,16 +93,20 @@ onMounted(async () => {
 async function buildKudos() {
   kudosLoading.value = true;
   kudos.value = [];
+  let { nickname, firstName, lastName } = props.user;
+  let name = `${nickname || firstName} ${lastName}`;
 
   // fetch data while doing other things
   let expenseTypes = store.getters.expenseTypes ?? updateStoreExpenseTypes();
   let employees = store.getters.employees ?? updateStoreEmployees();
 
   // build awards
+  console.log(props.user);
   for (let award of props.user.awards ?? []) {
     kudos.value.push({
       type: 'award',
       title: award.name,
+      copy: `${name} got an award: ${award.name}`,
       date: format(startOf(award.dateReceived, 'month'), null, 'YYYY-MM-DD')
     });
   }
@@ -107,6 +116,7 @@ async function buildKudos() {
     kudos.value.push({
       type: 'custom',
       title: c.title,
+      copy: c.title,
       date: format(c.date, null, 'YYYY-MM-DD'),
       index: index
     });
@@ -126,6 +136,7 @@ async function buildKudos() {
       type: 'high-five',
       from: `${from.nickname || from.firstName} ${from.lastName}`,
       desc: hf.note,
+      copy: `${from.nickname || from.firstName} ${from.lastName} gave ${name} a high five and wrote: ${hf.note}`,
       date: format(hf.reimbursedDate, null, 'YYYY-MM-DD')
     });
   }
@@ -195,6 +206,12 @@ function editKudo(index) {
   customKudo.value = { ...kudo };
   notes.value.custom.splice(index, 1);
   buildKudos();
+}
+
+async function copy(kudo, i) {
+  await navigator.clipboard.writeText(kudo.copy);
+  copied.value[i] = true;
+  setTimeout(() => copied.value[i] = false, 3000);
 }
 </script>
 
