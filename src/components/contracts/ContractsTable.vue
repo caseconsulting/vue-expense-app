@@ -1036,14 +1036,12 @@ const storeContracts = computed(() => {
     // get access control for project
     for (let p of (projects || [])) {
       p.checkBox = cbIndexProjects[p.id];
-      p.accessControlLink = ACExpand(p.id).join(', ')
     }
 
     // add to table
     contracts.push({
       ...contract,
       ...cbIndexContracts[contract.id],
-      accessControlLink: ACExpand(contract.id).join(', '),
       contractId: contract.id, // used for quick-edit
       projects
     });
