@@ -1101,7 +1101,7 @@ async function quickReimburse(exp) {
 async function quickUnreimburse(exp) {
   exp.state = EXPENSE_STATES.APPROVED;
   exp.reimbursedDate = null;
-  await updateExpense(e);
+  await updateExpense(exp);
 }
 
 /**

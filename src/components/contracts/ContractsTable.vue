@@ -255,7 +255,7 @@ import _forEach from 'lodash/forEach';
 import _some from 'lodash/some';
 import _map from 'lodash/map';
 import api from '@/shared/api';
-import { updateStoreEmployees, updateStoreContracts, updateStoreAccessRoles } from '@/utils/storeUtils';
+import { updateStoreEmployees, updateStoreContracts } from '@/utils/storeUtils';
 import { asyncForEach, isMobile, indexBy } from '@/utils/utils';
 import { getProject, getProjectCurrentEmployees } from '@/shared/contractUtils';
 import { contractFilter } from '@/shared/filterUtils';

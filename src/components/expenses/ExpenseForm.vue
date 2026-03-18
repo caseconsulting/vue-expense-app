@@ -871,24 +871,29 @@ async function setMonthlyLimit() {
 
   // use cache if possible
   let amount = this.monthlyLimit.cache[this.editedExpense.employeeId]?.[this.selectedExpenseType?.id];
-  // if no cached amount, set the amount from API and add it to the cache
+
+  // no cached amount, set the amount from API and add it to the cache
   if (amount === undefined) {
     // fetch all of this employees expenses
     let allEmployeeExpenses = await api.getAllEmployeeExpenses(this.editedExpense.employeeId);
     // add valid exenses to used amount of monthly limit
     amount = this.selectedExpenseType.monthlyLimit;
-    for (let e of allEmployeeExpenses) {
-      let [start, end] = [startOf(getTodaysDate(), 'month'), endOf(getTodaysDate(), 'month')];
-      let dateValid = isBetween(e.purchaseDate, start, end, 'day', '[]');
-      let idValid = this.selectedExpenseType.id == e.expenseTypeId;
-      let categoryValid = isEmpty(this.editedExpense.category) || this.editedExpense.category == e.category;
-      if (dateValid && idValid && categoryValid) amount -= e.cost;
+    let date = this.editedExpense.purchaseDate ?? getTodaysDate();
+    for (let exp of allEmployeeExpenses) {
+      // filter out expenses not in expense type or category
+      if (this.selectedExpenseType.id !== exp.expenseTypeId) continue;
+      if (this.selectedExpenseType.categories?.length && this.editedExpense.category !== exp.category) continue;
+      // filter out expenses outside of purchase date month
+      let [start, end] = [startOf(date, 'month'), endOf(date, 'month')];
+      if (!isBetween(exp.purchaseDate, start, end, 'day', '[]')) continue;
+      // filters passed: decrement monthly limit
+      amount -= exp.cost;
     }
     // set cache
-    if (!this.monthlyLimit.cache[this.editedExpense.employeeId])
-      this.monthlyLimit.cache[this.editedExpense.employeeId] = {};
+    this.monthlyLimit.cache[this.editedExpense.employeeId] ??= {};
     this.monthlyLimit.cache[this.editedExpense.employeeId][this.selectedExpenseType.id] = amount;
   }
+
   // include the cost from the form
   if (!this.isEmpty(this.editedExpense.id)) amount += Number(this.expense.cost);
   amount = Math.round(amount * 100) / 100;
