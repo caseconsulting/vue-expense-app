@@ -11,6 +11,7 @@
       chips
       closable-chips
       clear-on-select
+      :custom-filter="filter"
       auto-select-first
       v-model="model"
     >
