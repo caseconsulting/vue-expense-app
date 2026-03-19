@@ -34,8 +34,11 @@
             <div v-else>
               <v-row>
                 <v-col cols="13" :class="isAdmin(editGroup) ? 'cursor-not-allowed' : ''">
-                  <v-text-field
+                  <v-textarea
                     v-model="editGroup.name"
+                    auto-grow
+                    rows="1"
+                    density="compact"
                     variant="outlined"
                     class="h1"
                     id="groupName"
