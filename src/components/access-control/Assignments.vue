@@ -72,8 +72,11 @@ const membersOptions = ref([]);
  * Deletes an assignment from local array
  */
 function removeAssignment(index) {
-  if(assignments.value.length > 1)
+  if (assignments.value.length > 1) {
     assignments.value.splice(index, 1);
+    usersModel.value.splice(index, 1);
+    membersModel.value.splice(index, 1);
+  }
 }
 
 /**
