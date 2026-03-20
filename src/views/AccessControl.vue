@@ -43,6 +43,8 @@
                     class="h1"
                     id="groupName"
                     :disabled="isAdmin(editGroup)"
+                    validate-on="blur"
+                    :rules="[(v) => (!!v && v == '') || 'Name cannot be blank']"
                   />
                 </v-col>
               </v-row>
@@ -205,6 +207,8 @@ async function deleteCurrentGroup() {
 const saveText = ref('Save');
 const saving = ref(false);
 async function saveCurrentGroup() {
+  // basic valitation, could be better but it's just one field so
+  if (!editGroup.value.name || editGroup.value.name == '') return;
   // UI feedback
   saving.value = true;
   // save to db
@@ -215,13 +219,17 @@ async function saveCurrentGroup() {
     userIsSure.value = false;
     // UI feedback
     saving.value = false;
-    saveText.value = ref('Saved!');
+    saveText.value = 'Saved!';
     setTimeout(() => {
       saveText.value = 'Save';
     }, 2500);
     useDisplaySuccess('Update success!');
   } catch (e) {
     useDisplayError('Failed to update Role');
+    saving.value = false;
+    userIsSure.value = false;
+    deleteText.value = 'Delete';
+    saveText.value = 'Saved!';
   }
 }
 
