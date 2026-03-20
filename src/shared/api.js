@@ -17,6 +17,8 @@ const PTO_CASH_OUTS = 'ptoCashOuts';
 const SETTINGS = 'settings';
 const TAGS = 'tags';
 const ACCESS_ROLES = 'accessRoles';
+const ACCESS_GROUPS = 'accessGroups';
+const UNANET = 'unanet';
 const API_HOSTNAME = API_CONFIG.apiHostname;
 const API_PORT = API_CONFIG.apiPort;
 const PORT = API_PORT === '443' ? '' : `:${API_PORT}`;
@@ -506,7 +508,7 @@ async function getEmployeesFromAdp() {
  * @return - Array of IDs of employees who can see the user's data
  */
 async function getAccessControlUsers(id) {
-  return await execute('get', `/${ACCESS_ROLES}/employee/roleUsers/${id}`)
+  return await execute('get', `/${ACCESS_GROUPS}/employee/groupUsers/${id}`);
 }
 
 /**
@@ -516,27 +518,14 @@ async function getAccessControlUsers(id) {
  * @return - Array of IDs of employees who can see the user's data
  */
 async function getUserProfileAccessControl(id) {
-  return await execute('get', `/${ACCESS_ROLES}/link/showOnProfile/${id}`)
+  return await execute('get', `/${ACCESS_GROUPS}/employee/showOnProfile/${id}`);
 }
 
 /**
- * Gets access control data linked to contracts and projects.
- * Convenience wrapper for projects and contracts
- * 
- * @return - Array of IDs of employees who can see the user's data
+ * Gets Unanet expense type data. Useful for exports to Unanet.
  */
-async function getProjectAccessControl() {
-  return await execute('get', `/${ACCESS_ROLES}/link/type/projects`);
-}
-
-/**
- * Gets access control data linked to contracts and projects.
- * Convenience wrapper for projects and contracts
- * 
- * @return - Array of IDs of employees who can see the user's data
- */
-async function getContractAccessControl() {
-  return await execute('get', `/${ACCESS_ROLES}/link/type/contracts`);
+async function getUnanetExpenseTypes() {
+  return await execute('get', `/${UNANET}/expenseTypes`);
 }
 
 export default {
@@ -582,8 +571,7 @@ export default {
   getEmployeesFromAdp,
   getAccessControlUsers,
   getUserProfileAccessControl,
-  getContractAccessControl,
-  getProjectAccessControl,
+  getUnanetExpenseTypes,
   EXPENSE_TYPES,
   EXPENSES,
   EMPLOYEES,
