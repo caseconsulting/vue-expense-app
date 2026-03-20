@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-card>
-      <v-card-title class="d-flex align-center header_style">Access Control</v-card-title>
+      <v-card-title class="d-flex align-center header_style"> Access Control </v-card-title>
       <v-container>
         <v-row>
           <v-col cols="2" class="pl-0 border-e-sm">
@@ -53,7 +53,7 @@
                   <h2>Assignments</h2>
                   <v-btn icon="mdi-plus-circle" class="ml-2" variant="plain" size="small" @click="addAssignment(editGroup)" />
                 </div>
-                <Assignments v-model="editGroup.assignments" :is-admin="editGroup.name === 'Admin'" :projects="projects" :key="editGroupIndex" />
+                <Assignments v-model="editGroup.assignments" :is-admin="isAdmin(editGroup)" :quick-save="quickSave" :projects="projects" :key="editGroupIndex" />
               </div>
               <div class="flags">
                 <h2>Flags</h2>
@@ -96,7 +96,7 @@
 
 <script setup>
 // Vue & Component imports
-import { inject, ref, watch, computed, onBeforeMount, onUnmounted, nextTick } from 'vue';
+import { inject, ref, watch, computed, onMounted, onBeforeMount, onUnmounted, nextTick } from 'vue';
 import { useStore } from 'vuex';
 import { useDisplaySuccess, useDisplayError } from '@/components/shared/StatusSnackbar.vue';
 import Assignments from '@/components/access-control/Assignments.vue';
@@ -110,8 +110,6 @@ import api from '@/shared/api';
 // Store and stuff
 const emitter = inject('emitter');
 const store = useStore();
-// Utils
-function aOrAn(word) { return 'aeiouAEIOU'.split('').includes(word.charAt(0)) ? 'an' : 'a' }
 
 // UI
 const loading = ref(false);
@@ -122,6 +120,7 @@ const editGroup = computed(() => groups.value?.[editGroupIndex.value]);
 const emptyGroup = { id: null, created: null, name: 'New Group', flags: {}, assignments: [] };
 const emptyAssignment = { id: null, name: 'New Assignment', users: {}, assignments: {} };
 const projects = ref([]);
+const quickSave = ref({});
 
 /**
  * Gets groups data
@@ -220,9 +219,7 @@ async function saveCurrentGroup() {
     // UI feedback
     saving.value = false;
     saveText.value = 'Saved!';
-    setTimeout(() => {
-      saveText.value = 'Save';
-    }, 2500);
+    setTimeout(() => saveText.value = 'Save', 2500);
     useDisplaySuccess('Update success!');
   } catch (e) {
     useDisplayError('Failed to update Role');
@@ -285,8 +282,27 @@ onBeforeMount(async () => {
 });
 
 onUnmounted(() => {
-  emitter.off('save-edit-item');
+  emitter.off('access-control-quick-save');
 });
+
+var saveTimers = {};
+async function autosave(a, b) {
+  console.log(JSON.stringify(a));
+  console.log(JSON.stringify(b));
+
+  quickSave.value[id] = 'saving';
+  if (saveTimers[id]) clearTimeout(saveTimers[id]);
+
+  try {
+    await saveCurrentGroup();
+    quickSave.value[id] = 'saved';
+    setTimeout(() => { delete quickSave.value[id]; }, 2500);
+  } catch (e) {
+    quickSave.value[id] = 'failed';
+  }
+}
+
+watch(() => editGroup.value, autosave, { deep: true })
 </script>
 
 <style scoped>
