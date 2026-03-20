@@ -49,7 +49,7 @@ export function getProjectLocations() {
  * @return list of passed employees
  */
 export function getProjectCurrentEmployees(contract, project, employees) {
-  let employeesList = [];
+  let employeesList = new Set();
 
   // loop through every employee's projects
   for (let employee of employees) {
@@ -58,12 +58,12 @@ export function getProjectCurrentEmployees(contract, project, employees) {
       if (contract.id != c.contractId) continue; // skip non-matching contracts
       for (let p of c.projects ?? []) {
         if (project.id != p.projectId) continue; // skip non-matching projects
-        if (isProjectActive(project, employee)) employeesList.push(employee);
+        if (isProjectActive(project, employee)) employeesList.add(employee);
       }
     }
   }
 
-  return employeesList;
+  return Array.from(employeesList);
 } // getProjectCurrentEmployees
 
 /**
@@ -112,15 +112,20 @@ export function getProject(contractId, projectId, contracts) {
  * @returns boolean - if the project is active
  */
 export function isProjectActive(project, employee) {
+  // employee is inactive
+  if (employee.workStatus === 0) return false;
+  
   // check if the employee is active on the project
   for (let c of employee.contracts ?? []) {
     for (let p of c.projects ?? []) {
       if (p.projectId !== project.id) continue; // skip nonmatching projects
-      if (employee.workStatus === 0) return false; // employee is inactive
-      if (p.presentDate != null) return p.presentDate; // presentDate exists
-      return !p.endDate; // presentDate doesn't exist, default to old date method
+      if (p.presentDate != null && p.presentDate === true) return true; // presentDate exists and is true
+      if (!p.endDate) return true; // presentDate doesn't exist, default to old date method
     }
   }
+
+  // false if nothing found
+  return false;
 } // isProjectActive
 
 export default {
