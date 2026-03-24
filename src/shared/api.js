@@ -519,6 +519,26 @@ async function getUserProfileAccessControl(id) {
   return await execute('get', `/${ACCESS_GROUPS}/employee/showOnProfile/${id}`)
 }
 
+/**
+ * Gets access control data linked to contracts and projects.
+ * Convenience wrapper for projects and contracts
+ * 
+ * @return - Array of IDs of employees who can see the user's data
+ */
+async function getProjectAccessControl() {
+  return await execute('get', `/${ACCESS_ROLES}/link/type/projects`);
+}
+
+/**
+ * Gets access control data linked to contracts and projects.
+ * Convenience wrapper for projects and contracts
+ * 
+ * @return - Array of IDs of employees who can see the user's data
+ */
+async function getContractAccessControl() {
+  return await execute('get', `/${ACCESS_ROLES}/link/type/contracts`);
+}
+
 export default {
   createAttachment,
   createItem,
@@ -562,6 +582,8 @@ export default {
   getEmployeesFromAdp,
   getAccessControlUsers,
   getUserProfileAccessControl,
+  getProjectAccessControl,
+  getContractAccessControl,
   EXPENSE_TYPES,
   EXPENSES,
   EMPLOYEES,
