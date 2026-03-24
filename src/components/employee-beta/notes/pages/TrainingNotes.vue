@@ -97,7 +97,6 @@ onMounted(async () => {
   // fetch all data
   let { id } = props.user;
   let [expenses, expenseTypes] = await Promise.all([api.getAllEmployeeExpenses(id), api.getEmployeeExpenseTypes(id)]);
-
   // get all training expense type IDs
   let trainingIds = new Set();
   let allCategory = new Set();
