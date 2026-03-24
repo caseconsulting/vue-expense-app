@@ -124,12 +124,13 @@ async function getEmployeeBudget(id, expenseTypeId, date) {
 } // getEmployeeBudget
 
 /**
- * Gets expense types for an employee
+ * Gets expense types for an employee. If no ID provided, the current user
+ * will be assumed.
  *
  * @return - expense types for employee
  */
-async function getEmployeeExpenseTypes() {
-  return execute('get', `/${UTILITY}/getEmployeeExpenseTypes`);
+async function getEmployeeExpenseTypes(id = '') {
+  return execute('get', `/${UTILITY}/getEmployeeExpenseTypes/${id}`);
 } // getEmployeeExpenseTypes
 
 /**
