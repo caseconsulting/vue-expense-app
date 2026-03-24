@@ -70,6 +70,7 @@ onMounted(async () => {
   // fetch all data
   let { id } = props.user;
   let [expenses, expenseTypes] = await Promise.all([api.getAllEmployeeExpenses(id), api.getEmployeeExpenseTypes(id)]);
+  
   // get all training expense type IDs
   let trainingIds = new Set();
   let allCategory = new Set();
@@ -82,11 +83,6 @@ onMounted(async () => {
       }
     }
   }
-
-  // Remove non-existant categories from auto-filled categories
-  for (let i = 0; i < filters.value.categories.length; i++)
-    if (!allCategory.has(filters.value.categories[i]))
-      filters.value.categories.splice(i--, 1);
 
   // get exchanges for training hours
   for (let e of expenses) {
