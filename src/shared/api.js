@@ -527,6 +527,26 @@ async function getUnanetExpenseTypes() {
   return await execute('get', `/${UNANET}/expenseTypes`);
 }
 
+/**
+ * Gets access control data linked to contracts and projects.
+ * Convenience wrapper for projects and contracts
+ * 
+ * @return - Array of IDs of employees who can see the user's data
+ */
+async function getProjectAccessControl() {
+  return await execute('get', `/${ACCESS_ROLES}/link/type/projects`);
+}
+
+/**
+ * Gets access control data linked to contracts and projects.
+ * Convenience wrapper for projects and contracts
+ * 
+ * @return - Array of IDs of employees who can see the user's data
+ */
+async function getContractAccessControl() {
+  return await execute('get', `/${ACCESS_ROLES}/link/type/contracts`);
+}
+
 export default {
   createAttachment,
   createItem,
@@ -571,6 +591,8 @@ export default {
   getAccessControlUsers,
   getUserProfileAccessControl,
   getUnanetExpenseTypes,
+  getProjectAccessControl,
+  getContractAccessControl,
   EXPENSE_TYPES,
   EXPENSES,
   EMPLOYEES,
