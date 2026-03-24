@@ -591,6 +591,7 @@ export default {
   getEmployeesFromAdp,
   getAccessControlUsers,
   getUserProfileAccessControl,
+  getUnanetExpenseTypes,
   getProjectAccessControl,
   getContractAccessControl,
   EXPENSE_TYPES,
