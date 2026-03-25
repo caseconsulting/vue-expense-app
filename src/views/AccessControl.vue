@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-card>
-      <v-card-title class="d-flex align-center header_style">Access Control</v-card-title>
+      <v-card-title class="d-flex align-center header_style"> Access Control </v-card-title>
       <v-container>
         <v-row>
           <v-col cols="2" class="pl-0 border-e-sm">
@@ -40,6 +40,11 @@
                     class="h1"
                     id="roleName"
                     :disabled="isAdmin(editRole)"
+                    auto-grow
+                    rows="1"
+                    density="compact"
+                    validate-on="blur"
+                    :rules="[(v) => (!!v && v == '') || 'Name cannot be blank']"
                   />
                 </v-col>
               </v-row>
@@ -48,7 +53,7 @@
                   <h2>Assignments</h2>
                   <v-btn icon="mdi-plus-circle" class="ml-2" variant="plain" size="small" @click="addAssignment(editRole)" />
                 </div>
-                <Assignments v-model="editRole.assignments" :is-admin="editRole.name === 'Admin'" :projects="projects" :key="editRoleIndex" />
+                <Assignments v-model="editGroup.assignments" :is-admin="isAdmin(editGroup)" :quick-save="quickSave" :projects="projects" :key="editGroupIndex" />
               </div>
               <div class="flags">
                 <h2>Flags</h2>
@@ -91,7 +96,7 @@
 
 <script setup>
 // Vue & Component imports
-import { inject, ref, watch, computed, onBeforeMount, onUnmounted, nextTick } from 'vue';
+import { inject, ref, watch, computed, onMounted, onBeforeMount, onUnmounted, nextTick } from 'vue';
 import { useStore } from 'vuex';
 import { useDisplaySuccess, useDisplayError } from '@/components/shared/StatusSnackbar.vue';
 import Assignments from '@/components/access-control/Assignments.vue';
@@ -105,8 +110,6 @@ import api from '@/shared/api';
 // Store and stuff
 const emitter = inject('emitter');
 const store = useStore();
-// Utils
-function aOrAn(word) { return 'aeiouAEIOU'.split('').includes(word.charAt(0)) ? 'an' : 'a' }
 
 // UI
 const loading = ref(false);
@@ -117,6 +120,7 @@ const editRole = computed(() => roles.value?.[editRoleIndex.value]);
 const emptyRole = { id: null, created: null, name: 'New Role', flags: {}, assignments: [] };
 const emptyAssignment = { id: null, name: 'New Assignment', users: {}, assignments: {} };
 const projects = ref([]);
+const quickSave = ref({});
 
 /**
  * Gets role data
@@ -201,7 +205,9 @@ async function deleteCurrentRole() {
  */
 const saveText = ref('Save');
 const saving = ref(false);
-async function saveCurrentRole() {
+async function saveCurrentGroup() {
+  // basic valitation, could be better but it's just one field so
+  if (!editGroup.value.name || editGroup.value.name == '') return;
   // UI feedback
   saving.value = true;
   // save to db
@@ -212,13 +218,15 @@ async function saveCurrentRole() {
     userIsSure.value = false;
     // UI feedback
     saving.value = false;
-    saveText.value = ref('Saved!');
-    setTimeout(() => {
-      saveText.value = 'Save';
-    }, 2500);
+    saveText.value = 'Saved!';
+    setTimeout(() => saveText.value = 'Save', 2500);
     useDisplaySuccess('Update success!');
   } catch (e) {
     useDisplayError('Failed to update Role');
+    saving.value = false;
+    userIsSure.value = false;
+    deleteText.value = 'Delete';
+    saveText.value = 'Saved!';
   }
 }
 
@@ -274,8 +282,27 @@ onBeforeMount(async () => {
 });
 
 onUnmounted(() => {
-  emitter.off('save-edit-item');
+  emitter.off('access-control-quick-save');
 });
+
+var saveTimers = {};
+async function autosave(a, b) {
+  console.log(JSON.stringify(a));
+  console.log(JSON.stringify(b));
+
+  quickSave.value[id] = 'saving';
+  if (saveTimers[id]) clearTimeout(saveTimers[id]);
+
+  try {
+    await saveCurrentGroup();
+    quickSave.value[id] = 'saved';
+    setTimeout(() => { delete quickSave.value[id]; }, 2500);
+  } catch (e) {
+    quickSave.value[id] = 'failed';
+  }
+}
+
+watch(() => editGroup.value, autosave, { deep: true })
 </script>
 
 <style scoped>

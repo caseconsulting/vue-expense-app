@@ -313,8 +313,7 @@ function getPageName(pageIndex) {
 }
 
 /**
- * Autosaves the notes. Default is to set a timer of 5 seconds and save after the timer is up,
- * but setting `saveNow` to true will skip this timer.
+ * Autosaves the notes.
  */
 var saveTimer = null;
 function autosave() {
