@@ -34,7 +34,7 @@
             <div v-else>
               <v-row>
                 <v-col cols="13" :class="isAdmin(editRole) ? 'cursor-not-allowed' : ''">
-                  <v-text-field
+                  <v-textarea
                     v-model="editRole.name"
                     variant="outlined"
                     class="h1"
