@@ -53,7 +53,7 @@
                   <h2>Assignments</h2>
                   <v-btn icon="mdi-plus-circle" class="ml-2" variant="plain" size="small" @click="addAssignment(editRole)" />
                 </div>
-                <Assignments v-model="editGroup.assignments" :is-admin="isAdmin(editGroup)" :quick-save="quickSave" :projects="projects" :key="editGroupIndex" />
+                <Assignments v-model="editRole.assignments" :is-admin="isAdmin(editRole)" :quick-save="quickSave" :projects="projects" :key="editRoleIndex" />
               </div>
               <div class="flags">
                 <h2>Flags</h2>
@@ -207,7 +207,7 @@ const saveText = ref('Save');
 const saving = ref(false);
 async function saveCurrentGroup() {
   // basic valitation, could be better but it's just one field so
-  if (!editGroup.value.name || editGroup.value.name == '') return;
+  if (!editRole.value.name || editRole.value.name == '') return;
   // UI feedback
   saving.value = true;
   // save to db
@@ -302,7 +302,7 @@ async function autosave(a, b) {
   }
 }
 
-watch(() => editGroup.value, autosave, { deep: true })
+watch(() => editRole.value, autosave, { deep: true })
 </script>
 
 <style scoped>
