@@ -139,7 +139,11 @@ function filter(value, query, item) {
   // exit early on filter failure
   if (filters[type] && !filters[type](raw)) return false;
 
-  // return true if query matches some field
+  // search for type
+  if (type.toLowerCase().includes(query.toLowerCase()))
+    return true;
+
+  // search for query matching some field
   for (let field of fields[type])
     if (`${raw[field]}`.toLowerCase().includes(query.toLowerCase()))
       return true;
