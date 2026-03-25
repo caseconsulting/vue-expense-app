@@ -2,11 +2,11 @@
   <div>
     <!-- Download CSV Buttons -->
     <v-btn :disabled="midAction" @click="download" elevation="2">
-      <i class="material-icons">file_download</i> Download Grid Items</v-btn
-    >
-    <v-btn :disabled="midAction" @click="unanetReport" elevation="2" prepend-icon="mdi-file-download"
-      >Export Unanet Data</v-btn
-    >
+      <i class="material-icons">file_download</i> Download Grid Items
+    </v-btn>
+    <v-btn :disabled="midAction" @click="unanetReport" elevation="2" prepend-icon="mdi-file-download">
+      Export Unanet Data
+    </v-btn>
   </div>
 </template>
 
@@ -29,8 +29,8 @@ function download() {
 /**
  * Downloads expenses as CSV
  */
-function unanetReport() {
-  expensesCsv.unanetReport(this.expenses);
+async function unanetReport() {
+  await expensesCsv.unanetReport(this.expenses);
 } // download
 
 // |--------------------------------------------------|

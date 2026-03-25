@@ -4,7 +4,7 @@
       <v-col cols="2" class="pb-0"><p class="mb-0"><strong>Assignment Name</strong></p></v-col>
       <v-col cols="4" class="pb-0"><p class="mb-0"><strong>Responsible Party</strong></p></v-col>
       <v-col cols="4" class="pb-0"><p class="mb-0"><strong>Responsible For</strong></p></v-col>
-      <v-col cols="2" class="pb-0"></v-col>
+      <v-col cols="2" class="pb-0"><!-- spacer for action buttons --></v-col>
     </v-row>
     <v-row v-for="(assignment, i) in assignments" :key="assignment.id" dense>
       <v-col cols="2" class="pt-0">
@@ -42,6 +42,9 @@
           @click="removeAssignment(i)"
           v-tooltip="`Delete '${assignment.name}'`"
         />
+        <v-icon v-if="quickSaveLink[assignment.id] === 'saved'" icon="mdi-check-circle" color="success" />
+        <v-icon v-else-if="quickSaveLink[assignment.id] === 'saving'" icon="mdi-sync-circle" color="warning" />
+        <v-icon v-else-if="quickSaveLink[assignment.id] === 'failed'" icon="mdi-close-circle" color="error" />
       </v-col>
     </v-row>
   </v-col>
@@ -49,7 +52,7 @@
 
 <script setup>
 // Vue & Component imports
-import { ref, onMounted } from 'vue';
+import { ref, inject, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import MultiAutocomplete from '@/components/access-control/MultiAutocomplete.vue';
 // JS/utility imports
@@ -57,10 +60,13 @@ import { updateStoreContracts, updateStoreEmployees, updateStoreTags } from '@/u
 import { deepClone, indexBy } from '@/utils/utils';
 // Store and stuff
 const store = useStore();
+const emitter = inject('emitter');
 let indexes = {};
 
 const assignments = defineModel();
-const props = defineProps(['projects', 'isAdmin']);
+const props = defineProps(['projects', 'isAdmin', 'quickSave']);
+
+const quickSaveLink = ref(props.quickSave);
 
 const usersModel = ref([]);
 const membersModel = ref([]);
@@ -72,8 +78,11 @@ const membersOptions = ref([]);
  * Deletes an assignment from local array
  */
 function removeAssignment(index) {
-  if(assignments.value.length > 1)
+  if (assignments.value.length > 1) {
     assignments.value.splice(index, 1);
+    usersModel.value.splice(index, 1);
+    membersModel.value.splice(index, 1);
+  }
 }
 
 /**
