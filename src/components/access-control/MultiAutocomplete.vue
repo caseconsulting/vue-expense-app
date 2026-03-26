@@ -104,4 +104,50 @@ function getIcon(rawItem) {
   if (isContract(item)) return 'mdi-file-document-multiple';
   if (isProject(item)) return 'mdi-file-document-outline';
 }
+
+/**
+ * Custom filter to search all types
+ * 
+ * value: text of current item being searched
+ * query: what the user is typing to search
+ *  item: the object being searched; use item.raw
+ * 
+ */
+function filter(value, query, item) {
+  // exit early conditions
+  if (!query || query === '') return true;
+
+  // allows for removing entries based on criteria
+  // should return true if item should be included, else false
+  let filters = {
+    Employee: (e) => e.workStatus > 0
+  };
+
+  // fields to search on various types
+  let fields = {
+    Employee: ['nickname', 'firstName', 'lastName', 'email', 'employeeNumber'],
+    Tag: ['tagName'],
+    Contract: ['contractName', 'primeName'],
+    Project: ['projectName']
+  };
+
+  // extract object
+  let { raw } = item;
+  let type = getType(raw);
+
+  // exit early on filter failure
+  if (filters[type] && !filters[type](raw)) return false;
+
+  // search for type
+  if ((type?.toLowerCase() ?? '').includes(query.toLowerCase()))
+    return true;
+
+  // search for query matching some field
+  for (let field of fields[type] ?? [])
+    if (`${raw[field]}`.toLowerCase().includes(query.toLowerCase()))
+      return true;
+
+  // no match
+  return false;
+}
 </script>

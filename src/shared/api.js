@@ -517,7 +517,14 @@ async function getAccessControlUsers(id) {
  * @return - Array of IDs of employees who can see the user's data
  */
 async function getUserProfileAccessControl(id) {
-  return await execute('get', `/${ACCESS_GROUPS}/employee/showOnProfile/${id}`)
+  return await execute('get', `/${ACCESS_ROLES}/link/showOnProfile/${id}`);
+}
+
+/**
+ * Gets Unanet expense type data. Useful for exports to Unanet.
+ */
+async function getUnanetExpenseTypes() {
+  return await execute('get', `/${UNANET}/expenseTypes`);
 }
 
 /**
