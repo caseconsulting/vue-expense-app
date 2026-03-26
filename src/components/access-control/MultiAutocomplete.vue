@@ -140,11 +140,11 @@ function filter(value, query, item) {
   if (filters[type] && !filters[type](raw)) return false;
 
   // search for type
-  if (type.toLowerCase().includes(query.toLowerCase()))
+  if ((type?.toLowerCase() ?? '').includes(query.toLowerCase()))
     return true;
 
   // search for query matching some field
-  for (let field of fields[type])
+  for (let field of fields[type] ?? [])
     if (`${raw[field]}`.toLowerCase().includes(query.toLowerCase()))
       return true;
 
