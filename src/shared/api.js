@@ -518,7 +518,7 @@ async function getAccessControlUsers(id) {
  * @return - Array of IDs of employees who can see the user's data
  */
 async function getUserProfileAccessControl(id) {
-  return await execute('get', `/${ACCESS_ROLES}/employee/showOnProfile/${id}`);
+  return await execute('get', `/${ACCESS_ROLES}/link/showOnProfile/${id}`);
 }
 
 /**
