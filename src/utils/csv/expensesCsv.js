@@ -112,6 +112,7 @@ function convertExpenses(expenses) {
       'First Name': expense.firstName || '',
       'Last Name': expense.lastName || '',
       'Employee #': expense.employeeNumber || '',
+      'Expense ID': expense.humanId || 'UNDEFINED',
       'Expense State': expense.state || 'UNDEFINED',
       'Expense Type': expense.expenseType || '',
       'Recipient Name': getRecipientName(expense.recipient) || '',
