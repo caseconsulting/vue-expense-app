@@ -231,7 +231,7 @@
       :contract="clickedContract"
       :toggleModal="toggleContractSettingsModal"
     ></contract-settings-modal>
-    <delete-modal :toggleDeleteModal="toggleContractDeleteModal" :type="'contract'"></delete-modal>
+    <delete-modal :toggleDeleteModal="toggleContractDeleteModal" :type="'contract'" />
     <contract-project-validate-delete-update-status-modal
       :toggleModal="toggleValidateModal"
       :relationships="relationships"
@@ -756,11 +756,11 @@ async function updateStatus(status) {
  * @return list of relationships in the following format
  *        [{contract: "", prime: "", project: {...}, employees: [...]}, ...]
  */
-async function getActiveEmployeeContractRelationships(contract, project = null) {
+function getActiveEmployeeContractRelationships(contract, project = null) {
   let employees = store.getters.employees;
   let theRelationships = [];
   employees.forEach((e) => {
-    if (e.contracts && e.workStatus > 0) {
+    if (e.contracts) {
       let contractObj = e.contracts.find((c) => c.contractId == contract.id);
       if (contractObj) {
         if (project) {
