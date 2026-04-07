@@ -232,6 +232,13 @@ const projectHeaders = ref([
     type: 'textarea'
   },
   {
+    title: 'Access Control',
+    key: 'accessControlLink',
+    align: 'start',
+    customWidth: 'large',
+    disableEdit: true
+  },
+  {
     title: 'Active Employees',
     key: 'projectActiveEmployees',
     align: 'start',
