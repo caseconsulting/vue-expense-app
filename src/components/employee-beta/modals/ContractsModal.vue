@@ -81,6 +81,8 @@ function getContractName(contract) {
   try {
     return props.contracts.find((c) => c.id === contract.contractId).contractName;
   } catch (e) {
+    console.error('Could not find contract with ID ' + contract.contractId);
+    console.error(e);
     error.value = true;
   }
 } // getContractName
@@ -94,6 +96,8 @@ function getPrimeName(contract) {
   try {
     return props.contracts.find((c) => c.id === contract.contractId).primeName;
   } catch (e) {
+    console.error('Could not find contract with ID ' + contract.contractId);
+    console.error(e);
     error.value = true;
   }
 } // getPrimeName
@@ -131,6 +135,8 @@ function getProjectNameFromId(projectId) {
   try {
     return props.projectsList.find((p) => p.id === projectId).projectName;
   } catch (e) {
+    console.error('Could not find project with ID ' + projectId);
+    console.error(e);
     error.value = true;
   }
 } //getProjectNameFromId
