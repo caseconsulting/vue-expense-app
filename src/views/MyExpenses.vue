@@ -305,6 +305,21 @@
               <!--Action Items-->
               <template #[`item.actions`]="{ item }">
                 <td class="d-flex justify-end mr-4">
+
+                  <!-- External API connection -->
+                  <v-btn
+                    v-if="userRoleIsAdmin() || userRoleIsManager()"
+                    id="external"
+                    variant="text"
+                    icon
+                    size="small"
+                    :key="item.unanetData"
+                    @click.stop="externalExpenseAction(item)"
+                  >
+                    <v-icon size="x-large" class="case-gray" :icon="getExternalExpenseIcon(item)" />
+                    <v-tooltip activator="parent" location="top"> {{ getExternalExpenseTooltip(item) }} </v-tooltip>
+                  </v-btn>
+
                   <!-- Download Attachment Button -->
                   <GiftCardInfoModal v-if="item.budgetName === 'High Five'" :expense="item" :gcInfo="giftCards[item.id]" />
                   <attachment v-else :mid-action="midAction || expensesStatuses.disabled.has(item.id)" :expense="item" :mode="'expenses'" />
@@ -986,6 +1001,41 @@ function toTopOfForm() {
 // |--------------------------------------------------|
 
 /**
+ * Gets the external expense icon
+ */
+const syncingExpenses = ref(new Set());
+function getExternalExpenseIcon(expense) {
+  if (expense?.unanetData?.expenseKey) return 'mdi-cloud-check-variant';
+  else if (syncingExpenses.value.has(expense.id)) return 'mdi-cloud-sync-outline'
+  else return 'mdi-cloud-upload-outline';
+}
+
+/**
+ * Gets the external expense icon
+ */
+function getExternalExpenseTooltip(expense) {
+  if (expense?.unanetData?.expenseKey) return 'Open in Unanet';
+  else if (syncingExpenses.value.has(expense.id)) return 'Uploading...'
+  else return 'Send to Unanet';
+}
+
+/**
+ * Runs the proper function for external expense button click
+ */
+async function externalExpenseAction(expense) {
+  if (expense?.unanetData?.expenseKey) {
+    let SAND = import.meta.env.STAGE == 'prod' ? '' : '-sand'
+    let UNANET_URL = `https://consultwithcase${SAND}.unanet.biz/consultwithcase${SAND}/action/people/expense/view?erkey=`;
+    window.open(UNANET_URL + expense.unanetData.expenseKey, "_blank");
+  } else {
+    syncingExpenses.value.add(expense.id);
+    let updated = await api.uploadUnanetExpense(expense);
+    filteredExpenses.value.find((e) => e.id === expense.id).unanetData = updated.unanetData;
+    syncingExpenses.value.delete(expense.id);
+  }
+}
+
+/**
  * Returns text to show in the status filter when not clicked in.
  * 
  * @param item item of input
@@ -1054,9 +1104,6 @@ function getStateIcon(state) {
     default: return 'mdi-help-rhombus';
   }
 }
-
-
-
 
 /**
  * Quick expense modifiers, to be used in quick actions menu

@@ -536,6 +536,16 @@ async function getUnanetProjects() {
 }
 
 /**
+ * Uploads a given expense to Unanet
+ * 
+ * @param expense - the expense to upload
+ * @return success or fail
+ */
+async function uploadUnanetExpense(expense) {
+  return await execute('post', `/${UNANET}/uploadExpense`, expense);
+}
+
+/**
  * Gets access control data linked to contracts and projects.
  * Convenience wrapper for projects and contracts
  * 
@@ -600,6 +610,7 @@ export default {
   getUserProfileAccessControl,
   getUnanetExpenseTypes,
   getUnanetProjects,
+  uploadUnanetExpense,
   getProjectAccessControl,
   getContractAccessControl,
   EXPENSE_TYPES,
