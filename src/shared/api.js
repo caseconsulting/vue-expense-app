@@ -529,6 +529,13 @@ async function getUnanetExpenseTypes() {
 }
 
 /**
+ * Gets Unanet expense type data. Useful for exports to Unanet.
+ */
+async function getUnanetProjects() {
+  return await execute('get', `/${UNANET}/projects`);
+}
+
+/**
  * Gets access control data linked to contracts and projects.
  * Convenience wrapper for projects and contracts
  * 
@@ -592,6 +599,7 @@ export default {
   getAccessControlUsers,
   getUserProfileAccessControl,
   getUnanetExpenseTypes,
+  getUnanetProjects,
   getProjectAccessControl,
   getContractAccessControl,
   EXPENSE_TYPES,

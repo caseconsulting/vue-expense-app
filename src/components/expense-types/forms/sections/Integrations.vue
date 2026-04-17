@@ -67,11 +67,11 @@ const unanetETs = ref([]); // Unanet expense types
  */
 onBeforeMount(async () => {
   // fetch data
-  let [unanetData, /* drop rest */] = await Promise.all([api.getUnanetExpenseTypes(), updateStoreCampfires()]);
+  let [apiExpenseTypes, apiProjects] = await Promise.all([api.getUnanetExpenseTypes(), api.getUnanetProjects(), updateStoreCampfires()]);
 
   // load data into variables
-  unanetProjects.value = unanetData.projects;
-  unanetETs.value = unanetData.expenseTypes;
+  unanetETs.value = apiExpenseTypes;
+  unanetProjects.value = apiProjects;
   campfires.value = store.getters.basecampCampfires;
 });
 </script>
