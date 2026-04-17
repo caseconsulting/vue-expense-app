@@ -69,6 +69,8 @@ onBeforeMount(async () => {
   // fetch data
   let [apiExpenseTypes, apiProjects] = await Promise.all([api.getUnanetExpenseTypes(), api.getUnanetProjects(), updateStoreCampfires()]);
 
+  console.log(apiExpenseTypes);
+
   // load data into variables
   unanetETs.value = apiExpenseTypes;
   unanetProjects.value = apiProjects;

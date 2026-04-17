@@ -54,6 +54,10 @@ export class ExpenseType extends Base {
     this.tagBudgets = properties.tagBudgets ?? [];
     /** @type {string} */
     this.to = properties.to;
+    /** @type {number} */
+    this.unanetExpenseType = properties.unanetExpenseType;
+    /** @type {number} */
+    this.unanetProject = properties.unanetProject;
 
     return new Proxy(this, {
       set(target, key, value) {
