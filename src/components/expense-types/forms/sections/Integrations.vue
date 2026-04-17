@@ -13,9 +13,6 @@
       item-value="url"
       label="Basecamp Campfire (optional)"
       clearable
-<<<<<<< HEAD
-    ></v-autocomplete>
-=======
     />
     <div v-tooltip:top="unanetETs.length == 0 ? 'No Unanet expense types found' : null">
       <v-autocomplete
@@ -48,7 +45,6 @@
         </template>
       </v-autocomplete>
     </div>
->>>>>>> ab9de798 (donezo)
   </div>
 </template>
 <script setup>
