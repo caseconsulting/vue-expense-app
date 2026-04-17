@@ -13,9 +13,6 @@
       item-value="url"
       label="Basecamp Campfire (optional)"
       clearable
-<<<<<<< HEAD
-    ></v-autocomplete>
-=======
     />
     <div v-tooltip:top="unanetETs.length == 0 ? 'No Unanet expense types found' : null">
       <v-autocomplete
@@ -48,26 +45,33 @@
         </template>
       </v-autocomplete>
     </div>
->>>>>>> ab9de798 (donezo)
   </div>
 </template>
 <script setup>
 import { updateStoreCampfires } from '@/utils/storeUtils';
 import { onBeforeMount, ref } from 'vue';
 import { useStore } from 'vuex';
+import api from '@/shared/api.js';
 
 const props = defineProps({
   modelValue: Object
 });
 const store = useStore();
 
-const campfires = ref([]); // basecamp campfires
+const campfires = ref([]); // Basecamp campfires
+const unanetProjects = ref([]); // Unanet projects
+const unanetETs = ref([]); // Unanet expense types
 
 /**
  * Gets and sets all employees.
  */
 onBeforeMount(async () => {
-  await updateStoreCampfires();
+  // fetch data
+  let [unanetData, /* drop rest */] = await Promise.all([api.getUnanetExpenseTypes(), updateStoreCampfires()]);
+
+  // load data into variables
+  unanetProjects.value = unanetData.projects;
+  unanetETs.value = unanetData.expenseTypes;
   campfires.value = store.getters.basecampCampfires;
 });
 </script>
