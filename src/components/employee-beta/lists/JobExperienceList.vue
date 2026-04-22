@@ -18,7 +18,7 @@
           {{ monthYearFormatBETA(company.positions[0].endDate) }}
         </p>
         <p class="mb-0 ml-12 gray-text" v-else>
-          {{ monthYearFormatBETA(getTotalTimeAtCompany(company)) }} - {{ monthYearFormatBETA(endDate) }}
+          {{ monthYearFormatBETA(getTotalTimeAtCompany(company)) }} - {{ monthYearFormatBETA(endDate[company.companyName]) }}
         </p>
       </v-list-item-title>
       <div
@@ -66,8 +66,7 @@ import { isMobile } from '../../../utils/utils';
 
 const props = defineProps(['list', 'model', 'onModal']);
 
-const earliestStartDate = ref(null);
-const endDate = ref(null);
+const endDate = ref({});
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -83,7 +82,7 @@ const icExperience = computed(() => {
     .sort((a, b) => {
       // array has text in format YYYY-MM, so reformat to YYYYMM so
       // that it can be sorted as a regular int
-      format(a[0], 'YYYY-MM', 'YYYYMM') - format(b[0], 'YYYY-MM', 'YYYYMM');
+      return format(a[0], 'YYYY-MM', 'YYYYMM') - format(b[0], 'YYYY-MM', 'YYYYMM');
     })
     .reverse();
   let ranges = [];
@@ -147,10 +146,10 @@ function getTotalTimeAtCompany(company) {
     startDates.push(company.positions[p].startDate);
   }
 
-  earliestStartDate.value = minimum(startDates);
-  endDate.value = add(earliestStartDate.value, totalTime, 'M');
+  let earliestStartDate = minimum(startDates);
+  endDate.value[company.companyName] = add(earliestStartDate, totalTime, 'M');
 
-  return earliestStartDate.value;
+  return earliestStartDate;
 }
 
 function getDurationOfPosition(position) {

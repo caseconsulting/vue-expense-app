@@ -149,6 +149,7 @@ const emitter = inject('emitter');
 
 // import note pages
 import GeneralNotes from './pages/GeneralNotes.vue';
+import TrainingNotes from './pages/TrainingNotes.vue';
 import PersonalNotes from './pages/PersonalNotes.vue';
 import CareerNotes from './pages/CareerNotes.vue';
 import KudoNotes from './pages/KudoNotes.vue';
@@ -181,6 +182,9 @@ const notesTemplate = {
     },
     kudos: {
       custom: []
+    },
+    training: {
+      expenses: {}
     }
   }
 };
@@ -195,6 +199,11 @@ const menuItems = ref([
     name: 'General',
     key: 'general',
     component: shallowRef(GeneralNotes)
+  },
+  {
+    name: 'Training',
+    key: 'training',
+    component: shallowRef(TrainingNotes)
   },
   {
     name: 'Career',

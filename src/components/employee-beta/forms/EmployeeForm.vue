@@ -113,6 +113,12 @@
                 title="Emergency Contacts"
                 :class="{ invalid: !validTabs.emergencyContacts }"
               ></v-list-item>
+              <v-list-item
+                @click="cardName = 'Integrations'"
+                link
+                title="Integrations"
+                :class="{ invalid: false }"
+              ></v-list-item>
             </v-list>
           </v-col>
           <v-col>
@@ -244,6 +250,16 @@
                     <emergency-contacts-form :slot-props="props"></emergency-contacts-form>
                   </template>
                 </base-form>
+                <base-form
+                  title="Integrations"
+                  tab-id="integration"
+                  v-model="editedEmployee"
+                  :valid="true"
+                >
+                  <template v-slot="{ props }">
+                    <integration-data-form :slot-props="props"></integration-data-form>
+                  </template>
+                </base-form>
               </v-expansion-panels>
               <div class="sticky-actions">
                 <v-card-actions>
@@ -310,6 +326,7 @@ import LanguagesForm from './LanguagesForm.vue';
 import PersonalInfoForm from './PersonalInfoForm.vue';
 import TechnologiesForm from './TechnologiesForm.vue';
 import EmergencyContactsForm from './EmergencyContactsForm.vue';
+import IntegrationDataForm from './IntegrationDataForm.vue';
 import SubmitButton from '@/components/shared/buttons/SubmitButton.vue';
 
 // |--------------------------------------------------|
@@ -350,7 +367,8 @@ const validTabs = reactive({
   languages: true,
   personal: true,
   technologies: true,
-  emergencyContacts: true
+  emergencyContacts: true,
+  integration: true,
 });
 
 // template refs
@@ -689,6 +707,10 @@ async function selectTab() {
     case 'Emergency Contacts':
       num = 9;
       card = 'Emergency Contacts';
+      break;
+    case 'Integrations':
+      num = 10;
+      card = 'Integrations'
       break;
     default:
       num = 0;
