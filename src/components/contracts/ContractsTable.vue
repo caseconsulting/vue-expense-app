@@ -405,7 +405,7 @@ const contractHeaders = ref([
     type: 'textarea'
   },
   {
-    title: 'Access Control',
+    title: 'Manager',
     key: 'accessControlLink',
     align: 'start',
     customWidth: 'large',
