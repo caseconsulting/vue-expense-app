@@ -34,7 +34,7 @@
             <div v-else>
               <v-row>
                 <v-col cols="13" :class="isAdmin(editRole) ? 'cursor-not-allowed' : ''">
-                  <v-text-field
+                  <v-textarea
                     v-model="editRole.name"
                     variant="outlined"
                     class="h1"
@@ -44,7 +44,7 @@
                     rows="1"
                     density="compact"
                     validate-on="blur"
-                    :rules="[(v) => (!!v && v == '') || 'Name cannot be blank']"
+                    :rules="[(v) => (!!v && v != '') || 'Name cannot be blank']"
                   />
                 </v-col>
               </v-row>
@@ -205,7 +205,7 @@ async function deleteCurrentRole() {
  */
 const saveText = ref('Save');
 const saving = ref(false);
-async function saveCurrentGroup() {
+async function saveCurrentRole() {
   // basic valitation, could be better but it's just one field so
   if (!editRole.value.name || editRole.value.name == '') return;
   // UI feedback
@@ -287,14 +287,13 @@ onUnmounted(() => {
 
 var saveTimers = {};
 async function autosave(a, b) {
-  console.log(JSON.stringify(a));
-  console.log(JSON.stringify(b));
+  return;
 
   quickSave.value[id] = 'saving';
   if (saveTimers[id]) clearTimeout(saveTimers[id]);
 
   try {
-    await saveCurrentGroup();
+    await saveCurrentRole();
     quickSave.value[id] = 'saved';
     setTimeout(() => { delete quickSave.value[id]; }, 2500);
   } catch (e) {
