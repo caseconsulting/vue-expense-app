@@ -600,6 +600,7 @@ export default {
   CONTRACTS,
   PTO_CASH_OUTS,
   TAGS,
+  ACCESS_ROLES,
   UTILITY,
   TIMESHEETS,
   AUDIT,
