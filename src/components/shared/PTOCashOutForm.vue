@@ -36,8 +36,9 @@
               required
             ></v-text-field>
 
-            <!-- Approved Date for PTO Cash Out (Optional) -->
+            <!-- Approved Date for PTO Cash Out -->
             <date-picker
+              v-if="userRoleIsAdmin() || userRoleIsManager()"
               v-model="ptoCashOutObj.approvedDate"
               id="approvedDate"
               :rules="getDateOptionalRules()"
