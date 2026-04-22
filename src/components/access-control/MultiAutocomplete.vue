@@ -145,7 +145,6 @@ function filter(value, query, item) {
 
   // search for query matching some field
   for (let word of query.split(' ').filter(Boolean))
-    // console.log(word);
     for (let field of fields[type] ?? [])
       if (`${raw[field]}`.toLowerCase().includes(word.toLowerCase()))
         return true;
