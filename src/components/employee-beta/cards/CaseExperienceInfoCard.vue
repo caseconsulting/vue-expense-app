@@ -30,7 +30,7 @@
         <p class="info-div mb-0" v-else>{{ getDaysUntil }} Days until Anniversary</p>
       </div>
 
-      <!-- Access Control stuff (not ready for prime time yet)
+      <!-- Access Control stuff -->
        <div>
         <h2 class="fit-content" style="font-size: large">Reports To</h2>
         <div class="info-div" v-if="accessControlUsers.length">
@@ -38,7 +38,6 @@
         </div>
         <div v-else class="info-div">Nobody</div>
        </div>
-       -->
     </v-card-text>
   </v-card>
 </template>
