@@ -1,8 +1,10 @@
 <template>
   <base-info-modal title="All Contract Info">
     <div class="mt-3">
-      <v-card-text class="text-align: center" v-if="isEmpty(contractsList)">
-        <p>No available contract information</p>
+      <v-card-text class="text-align: center my-8" v-if="error || isEmpty(contractsList)">
+        <p>
+          {{ error ? 'There was an error fetching the contract information' : 'No available contract information' }}
+        </p>
       </v-card-text>
 
       <v-card-text v-else v-for="(contract, index) in contractsList" :key="contract.contractId + index" class="pt-0">
@@ -37,12 +39,14 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
 import BaseInfoModal from './BaseInfoModal.vue';
 import { difference, getTodaysDate } from '@/shared/dateUtils';
 import { monthDayYearFormat } from '../../../utils/utils';
 import { isEmpty, isMobile } from '@/utils/utils';
 
 const props = defineProps(['contractsList', 'contracts', 'projectsList']);
+const error = ref(false);
 
 // |--------------------------------------------------|
 // |                                                  |
@@ -74,7 +78,13 @@ function getContractLengthInMonths(contract) {
  * @param contract - The employees contract object
  */
 function getContractName(contract) {
-  return props.contracts.find((c) => c.id === contract.contractId).contractName;
+  try {
+    return props.contracts.find((c) => c.id === contract.contractId).contractName;
+  } catch (e) {
+    console.error('Could not find contract with ID ' + contract.contractId);
+    console.error(e);
+    error.value = true;
+  }
 } // getContractName
 
 /**
@@ -83,7 +93,13 @@ function getContractName(contract) {
  * @param contract - The employees contract object
  */
 function getPrimeName(contract) {
-  return props.contracts.find((c) => c.id === contract.contractId).primeName;
+  try {
+    return props.contracts.find((c) => c.id === contract.contractId).primeName;
+  } catch (e) {
+    console.error('Could not find contract with ID ' + contract.contractId);
+    console.error(e);
+    error.value = true;
+  }
 } // getPrimeName
 
 /**
@@ -116,7 +132,13 @@ function getProjectEndDate(project) {
  * @return the project name
  */
 function getProjectNameFromId(projectId) {
-  return props.projectsList.find((p) => p.id === projectId).projectName;
+  try {
+    return props.projectsList.find((p) => p.id === projectId).projectName;
+  } catch (e) {
+    console.error('Could not find project with ID ' + projectId);
+    console.error(e);
+    error.value = true;
+  }
 } //getProjectNameFromId
 
 /**

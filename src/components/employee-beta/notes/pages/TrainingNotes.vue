@@ -79,8 +79,6 @@
  */
 
 import { ref, computed, onMounted } from 'vue';
-import { useStore } from 'vuex';
-import { updateStoreUser } from '@/utils/storeUtils';
 import { format, difference } from '@/shared/dateUtils';
 import api from '@/shared/api';
 import { EXPENSE_STATES } from '@/shared/expenseUtils';
@@ -91,7 +89,6 @@ const categories = ref([]);
 const filters = ref({
   categories: ['Certifications', 'Certifications,', 'Training', 'Exchange for Training Hours', 'Conferences']
 })
-const store = useStore();
 let trainings = ref(null);
 const trainingHours = ref({ pending: 0, reimbursed: 0 })
 const editing = ref({});
@@ -100,7 +97,6 @@ onMounted(async () => {
   // fetch all data
   let { id } = props.user;
   let [expenses, expenseTypes] = await Promise.all([api.getAllEmployeeExpenses(id), api.getEmployeeExpenseTypes(id)]);
-  
   // get all training expense type IDs
   let trainingIds = new Set();
   let allCategory = new Set();
