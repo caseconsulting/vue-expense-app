@@ -42,7 +42,6 @@
                     v-if="isUser"
                     :class="!isMobile() ? 'text-h6 text-sm-h4 text-center mb-0' : 'text-center mb-0'"
                     style="font-family: 'Avenir', Helvetica, Arial, sans-serif; font-size: 30px"
-                    @click="getAccessControl()"
                   >
                     <b>{{ 'Hello, ' + model.firstName + '!' }}</b>
                   </p>
@@ -135,7 +134,7 @@ import {
   updateStoreTags,
   updateStoreUser
 } from '@/utils/storeUtils';
-import { getCurrentBudgetYear, isMobile, storeIsPopulated, userRoleIsAdmin, userRoleIsManager } from '@/utils/utils.js';
+import { getCurrentBudgetYear, isMobile, storeIsPopulated, userRoleIsAdmin, userRoleIsManager, indexBy, deepClone } from '@/utils/utils.js';
 import _ from 'lodash';
 import { computed, inject, onBeforeMount, onBeforeUnmount, onMounted, provide, readonly, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -189,16 +188,11 @@ const accessControl = ref(null);
 // |                                                  |
 // |--------------------------------------------------|
 
-async function getAccessControl() {
-  console.log(await api.getUserProfileAccessControl(model.value.id));
-}
-
 onBeforeMount(async () => {
   if (storeIsPopulated) {
     await getProfileData();
   }
   if (!store.getters.employees) await updateStoreEmployees();
-  accessControl.value = await api.getUserProfileAccessControl(model.value.id);
 });
 
 onMounted(() => {
@@ -268,35 +262,38 @@ async function checkForBudgetAccess() {
 /**
  * Get employee data.
  */
+let empIndex;
 async function getProfileData() {
   loading.value = true;
   basicEmployeeDataLoading.value = true;
-  let resps = await Promise.all([
-    !store.getters.employees ? updateStoreEmployees() : '',
-    !store.getters.user ? updateStoreUser() : '',
-    !store.getters.contracts ? updateStoreContracts() : '',
-    hasAdminPermissions() && !store.getters.tags ? updateStoreTags() : ''
+
+  // get employee data for finding profile
+  await Promise.all([
+    !store.getters.employees ? updateStoreEmployees() : null,
+    !store.getters.user ? updateStoreUser() : null
   ]);
-  if (store.getters.user.employeeNumber == route.params.id) {
-    // user looking at their own profile
-    model.value = new Employee(store.getters.user);
-  } else {
-    // user looking at another employees profile
-    let employees = store.getters.employees;
-    let found = _.find(employees, (employee) => {
-      return employee.employeeNumber == route.params.id;
-    });
-    model.value = found ? new Employee(found) : undefined;
-  }
+  empIndex ??= indexBy(store.getters.employees, 'employeeNumber', { deleteBy: false });
+
+  // set model
+  if (empIndex[route.params.id]) model.value = new Employee(empIndex[route.params.id]);
+  else model.value = undefined;
+
+  // get all data needed for page
+  let [accessControlResp] = await Promise.all([
+    model.value ? api.getUserProfileAccessControl(model.value.id) : null,
+    !store.getters.contracts ? updateStoreContracts() : null,
+    hasAdminPermissions() && !store.getters.tags ? updateStoreTags() : null
+  ]);
+
+  // set values
+  accessControl.value = accessControlResp;
   user.value = store.getters.user;
   contracts.value = store.getters.contracts;
   displayTimeAndBalances.value = userRoleIsAdmin() || userIsEmployee();
   isAdmin.value = hasAdminPermissions();
   isUser.value = userIsEmployee();
   basicEmployeeDataLoading.value = false;
-  if (model.value) {
-    refreshExpenseData(true);
-  }
+  if (model.value) refreshExpenseData(true);
   loading.value = false;
 } // getProfileData
 
@@ -361,27 +358,25 @@ async function onSearchUpdate() {
 }
 /**
  * Navigates to an employee
- * future: support custom loops
  *
  * @input num - amount of employees to move fowards (may be negative for backwards)
  */
+let loop, pos;
 async function navEmployee(num) {
-  // set vars
-  let loop, pos, res;
-  let currId = model.value.employeeNumber;
-
   // create 'loop' of employees in order of their employee number
-  loop = store.getters.employees || (await updateStoreEmployees());
-  loop = loop.filter((e) => e.workStatus !== 0);
-  loop = _.sortBy(loop, ['employeeNumber']);
+  if (!loop) {
+    loop = store.getters.employees || (await updateStoreEmployees());
+    loop = loop.filter((e) => e.workStatus !== 0);
+    loop = loop.sort((a, b) => a.employeeNumber - b.employeeNumber);
+  }
 
   // get the employee we're currently at and grab the employee `num` after in
   // the loop (this can be negative to go backwards, and can be more than 1)
-  pos = _.findIndex(loop, (e) => e.employeeNumber == currId);
-  res = (pos + num) % loop.length;
-  if (res < 0) res = loop.length - 1;
-  dropdownEmployee.value = _.cloneDeep(loop[res]);
-  dropdownEmployee.value.itemTitle = `${dropdownEmployee.value.lastName}, ${dropdownEmployee.value.nickname || dropdownEmployee.value.firstName}`; //add the itemTitle for the searchbar
+  pos ??= loop.findIndex((e) => e.employeeNumber == model.value.employeeNumber);
+  pos = (pos + num) % loop.length;
+  if (pos < 0) pos = loop.length - 1;
+  dropdownEmployee.value = deepClone(loop[pos]);
+  dropdownEmployee.value.itemTitle = `${dropdownEmployee.value.lastName}, ${dropdownEmployee.value.nickname || dropdownEmployee.value.firstName}`; // add the itemTitle for the searchbar
 
   // budget information needs to be reloaded specifically as it does not update
   // when the model does
