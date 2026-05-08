@@ -528,6 +528,36 @@ async function getUnanetExpenseTypes() {
 }
 
 /**
+<<<<<<< HEAD
+=======
+ * Gets Unanet expense type data. Useful for exports to Unanet.
+ */
+async function getUnanetProjects() {
+  return await execute('get', `/${UNANET}/projects`);
+}
+
+/**
+ * Uploads a given expense to Unanet
+ * 
+ * @param expense - the expense to upload
+ * @return success or fail
+ */
+async function uploadUnanetExpense(expense) {
+  return await execute('post', `/${UNANET}/uploadExpense`, expense);
+}
+
+/**
+ * Uploads a given expense to Unanet
+ * 
+ * @param expense - the expense to upload
+ * @return success or fail
+ */
+async function syncUnanetExpense(expense) {
+  return await execute('post', `/${UNANET}/uploadExpense`, expense);
+}
+
+/**
+>>>>>>> 04eac358 (update unanet with task support)
  * Gets access control data linked to contracts and projects.
  * Convenience wrapper for projects and contracts
  * 
@@ -591,6 +621,12 @@ export default {
   getAccessControlUsers,
   getUserProfileAccessControl,
   getUnanetExpenseTypes,
+<<<<<<< HEAD
+=======
+  getUnanetProjects,
+  uploadUnanetExpense,
+  syncUnanetExpense,
+>>>>>>> 04eac358 (update unanet with task support)
   getProjectAccessControl,
   getContractAccessControl,
   EXPENSE_TYPES,

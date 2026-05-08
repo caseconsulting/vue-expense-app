@@ -253,6 +253,7 @@
                     <v-list v-if="getStatesQuickMenu(item.state).length && !expensesStatuses.errored.has(item.id)">
                       <v-list-item
                         v-for="(menuItem, idx) in getStatesQuickMenu(item.state)"
+                        :disabled="menuItem.id === 'unanet-sync' && unanetUploadDisabled(item, true)"
                         :no-data-text="`No actions for state ${item.state}`"
                         :key="`menu-${idx}`"
                         @click="menuItem.action(item)"
@@ -307,18 +308,21 @@
                 <td class="d-flex justify-end mr-4">
 
                   <!-- External API connection -->
-                  <v-btn
-                    v-if="userRoleIsAdmin() || userRoleIsManager()"
-                    id="external"
-                    variant="text"
-                    icon
-                    size="small"
-                    :key="item.unanetData"
-                    @click.stop="externalExpenseAction(item)"
-                  >
-                    <v-icon size="x-large" class="case-gray" :icon="getExternalExpenseIcon(item)" />
-                    <v-tooltip activator="parent" location="top"> {{ getExternalExpenseTooltip(item) }} </v-tooltip>
-                  </v-btn>
+                  <span v-tooltip="{ text: unanetUploadDisabled(item), location: 'top', offset: -2 }">
+                    <v-btn
+                      v-if="userRoleIsAdmin() || userRoleIsManager()"
+                      :disabled="unanetUploadDisabled(item) || expensesStatuses.disabled.has(item.id)"
+                      id="external"
+                      variant="text"
+                      icon
+                      size="small"
+                      :key="item.unanetData"
+                      @click.stop="externalExpenseAction(item)"
+                    >
+                      <v-icon size="x-large" class="case-gray" :icon="getExternalExpenseIcon(item)" />
+                      <v-tooltip activator="parent" location="top" offset="-2"> {{ getExternalExpenseTooltip(item) }} </v-tooltip>
+                    </v-btn>
+                  </span>
 
                   <!-- Download Attachment Button -->
                   <GiftCardInfoModal v-if="item.budgetName === 'High Five'" :expense="item" :gcInfo="giftCards[item.id]" />
@@ -917,7 +921,7 @@ async function updateExpense(newExpense) {
     expensesStatuses.value.errored.add(id);
   } else {
     expensesStatuses.value.successes.add(id);
-    await setTimeout(() => { expensesStatuses.value.successes.delete(id) }, 2000);
+    setTimeout(() => { expensesStatuses.value.successes.delete(id) }, 2000);
   }
   expensesStatuses.value.disabled.delete(id);
 }
@@ -1001,6 +1005,35 @@ function toTopOfForm() {
 // |--------------------------------------------------|
 
 /**
+ * Disables the external expense button if required data is not present
+ */
+function unanetUploadDisabled(expense, isQuickAction = false) {
+  // -- check for disable conditions as defined by admin --
+  // check for final approval status
+  let allowedStates = [EXPENSE_STATES.APPROVED, EXPENSE_STATES.REIMBURSED];
+  if (!allowedStates.includes(expense.state)) return 'Expense must be approved to send to Unanet';
+  // check company card used
+  if (expense.companyCard?.used) return 'Expenses paid with company card must be added to Unanet manually';
+
+  // -- Quick action allows for override even if required fields not met --
+  if (isQuickAction) return false;
+
+  // -- check for required fields --
+  // check expense
+  if (!expense.purchaseDate) return 'Missing purchase date';
+  if (!expense.cost) return 'Missing cost';
+  if (!expense.id) return 'Missing expense ID';
+  // check expense type
+  let expenseType = store.getters.expenseTypes.find((type) => type.id === expense.expenseTypeId);
+  if (!expenseType) return 'Missing expense type';
+  if (!expenseType.unanetExpenseType) return 'Expense type missing Unanet expense type';
+  if (!expenseType.budgetName) return 'Expense type missing budget name';
+  if (!expenseType.unanetProject) return 'Expense type missing Unanet project';
+  // no missing data
+  return false;
+}
+
+/**
  * Gets the external expense icon
  */
 const syncingExpenses = ref(new Set());
@@ -1029,9 +1062,21 @@ async function externalExpenseAction(expense) {
     window.open(UNANET_URL + expense.unanetData.expenseKey, "_blank");
   } else {
     syncingExpenses.value.add(expense.id);
-    let updated = await api.uploadUnanetExpense(expense);
-    filteredExpenses.value.find((e) => e.id === expense.id).unanetData = updated.unanetData;
+    let resp = await api.uploadUnanetExpense(expense);
     syncingExpenses.value.delete(expense.id);
+    if (resp.err || resp instanceof AxiosError) {
+      expensesStatuses.value.errored.add(expense.id);
+      console.log(resp); // log for detail when trying to debug
+      let msg = 'Unknown error';
+      if (resp.messages?.[0]?.message) msg = resp.messages[0].message; // Unanet message
+      else if (resp.err.message) msg = resp.err.message; // custom message from lambda function
+      if (resp.messages?.[0]?.invalidValue) msg = resp.messages?.[0]?.invalidValue + ': ' + msg; // Unanet detail
+      useDisplayError('Error uploading expense to Unanet: ' + msg);
+    } else {
+      filteredExpenses.value.find((e) => e.id === expense.id).unanetData = resp.unanetData;
+      console.log(resp.unanetData);
+      useDisplaySuccess('Expense uploaded to Unanet successfully!');
+    }
   }
 }
 
@@ -1150,6 +1195,20 @@ async function quickUnreimburse(exp) {
   exp.reimbursedDate = null;
   await updateExpense(exp);
 }
+async function quickExternalSync(exp) {
+  // run command
+  expensesStatuses.value.disabled.add(exp.id);
+  let resp = await api.syncUnanetExpense(exp);
+  expensesStatuses.value.disabled.delete(exp.id);
+  // handle response
+  if (resp.err || resp instanceof AxiosError) {
+    expensesStatuses.value.errored.add(exp.id);
+  } else {
+    exp.unanetData = resp.unanetData;
+    expensesStatuses.value.successes.add(exp.id);
+    setTimeout(() => { expensesStatuses.value.successes.delete(exp.id) }, 2000);
+  }
+}
 
 /**
  * Gets the state quick-menu for a specified state
@@ -1157,6 +1216,16 @@ async function quickUnreimburse(exp) {
  * @param state current state of the expense
  */
 function getStatesQuickMenu(state) {
+  // actions to add to the end of all
+  const all = [
+    {
+      action: quickExternalSync,
+      icon: 'mdi-cloud-sync',
+      text: 'Sync with Unanet',
+      id: 'unanet-sync'
+    }
+  ];
+
   switch (state) {
     case EXPENSE_STATES.CREATED:
     case EXPENSE_STATES.REVISED:
@@ -1170,7 +1239,8 @@ function getStatesQuickMenu(state) {
           action: quickRejectReturn,
           icon: getStateIcon(EXPENSE_STATES.RETURNED),
           text: 'Reject or Return'
-        }
+        },
+        ...all
       ];
     case EXPENSE_STATES.REJECTED:
       return [
@@ -1178,7 +1248,8 @@ function getStatesQuickMenu(state) {
           action: quickRemoveRejection,
           icon: getStateIcon(EXPENSE_STATES.CREATED),
           text: 'Remove rejection'
-        }
+        },
+        ...all
       ]
     case EXPENSE_STATES.RETURNED:
       return [
@@ -1191,7 +1262,8 @@ function getStatesQuickMenu(state) {
           action: quickReject,
           icon: getStateIcon(EXPENSE_STATES.REJECTED),
           text: 'Reject'
-        }
+        },
+        ...all
       ]
     case EXPENSE_STATES.APPROVED:
       return [
@@ -1204,7 +1276,8 @@ function getStatesQuickMenu(state) {
           action: quickUnapprove,
           icon: getStateIcon(EXPENSE_STATES.CREATED),
           text: 'Remove approval'
-        }
+        },
+        ...all
       ];
     case EXPENSE_STATES.REIMBURSED:
       return [
@@ -1212,7 +1285,8 @@ function getStatesQuickMenu(state) {
           action: quickUnreimburse,
           icon: getStateIcon(EXPENSE_STATES.APPROVED),
           text: 'Remove reimbursement'
-        }
+        },
+        ...all
       ];
     default:
       return [];

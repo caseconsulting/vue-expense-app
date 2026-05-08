@@ -35,6 +35,7 @@
         item-value="key"
         label="Unanet Project (optional)"
         :disabled="unanetProjects.length == 0"
+        @update:model-value="modelValue.unanetTask = undefined"
         clearable
       >
         <template v-slot:item="{ props, item }">
@@ -44,6 +45,19 @@
           ></v-list-item>
         </template>
       </v-autocomplete>
+    </div>
+    <div v-tooltip:top="Object.keys(unanetTasks).length == 0 ? 'No Unanet tasks found' : null">
+      <v-autocomplete
+        variant="underlined"
+        :items="unanetTasks[modelValue.unanetProject]"
+        v-model="modelValue.unanetTask"
+        item-title="name"
+        item-value="key"
+        label="Unanet Task (optional)"
+        no-data-text="No Tasks are associated with this Unanet Project"
+        :disabled="Object.keys(unanetTasks).length == 0"
+        clearable
+      />
     </div>
   </div>
 </template>
@@ -59,8 +73,9 @@ const props = defineProps({
 const store = useStore();
 
 const campfires = ref([]); // Basecamp campfires
-const unanetProjects = ref([]); // Unanet projects
 const unanetETs = ref([]); // Unanet expense types
+const unanetProjects = ref([]); // Unanet projects
+const unanetTasks = ref({}); // Unanet tasks (tied to projects)
 
 /**
  * Gets and sets all employees.
@@ -69,11 +84,12 @@ onBeforeMount(async () => {
   // fetch data
   let [apiExpenseTypes, apiProjects] = await Promise.all([api.getUnanetExpenseTypes(), api.getUnanetProjects(), updateStoreCampfires()]);
 
-  console.log(apiExpenseTypes);
-
   // load data into variables
   unanetETs.value = apiExpenseTypes;
   unanetProjects.value = apiProjects;
   campfires.value = store.getters.basecampCampfires;
+
+  // index tasks by project id
+  for (let { key, tasks } of unanetProjects.value) unanetTasks.value[key] = tasks;
 });
 </script>
