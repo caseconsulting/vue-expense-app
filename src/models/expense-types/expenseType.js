@@ -58,6 +58,8 @@ export class ExpenseType extends Base {
     this.unanetExpenseType = properties.unanetExpenseType;
     /** @type {number} */
     this.unanetProject = properties.unanetProject;
+    /** @type {string} */
+    this.unanetTask = properties.unanetTask;
 
     return new Proxy(this, {
       set(target, key, value) {
