@@ -36,8 +36,10 @@ async function unanetExpenseData(expenses) {
   let employees = indexBy(store.getters.employees, 'id');
   let expenseTypes = indexBy(store.getters.expenseTypes, 'id');
   let { projects: unanetProjects, expenseTypes: unanetETs } = await api.getUnanetExpenseTypes();
-  unanetProjects = indexBy(unanetProjects, 'key');
+  let unanetTasks = {};
+  for (let { tasks } of unanetProjects) for (let t of tasks) unanetTasks[t.key] = name;
   unanetETs = indexBy(unanetETs, 'key');
+  unanetProjects = indexBy(unanetProjects, 'key');
   
   let employee, expenseType, unanetET, unanetProject;
   let orgCode, projCode, taskName, expType;
@@ -52,7 +54,7 @@ async function unanetExpenseData(expenses) {
 
     orgCode = unanetProject?.orgCode ?? ''; // eg. I_CASE
     projCode = unanetProject?.code ?? ''; // eg. FRINGE.BENEFITS.GRAY
-    taskName = unanetET?.code?.toLowerCase() === 'team leads' ? 'Team Leads' : ''; // 'Team Leads' or nothing
+    taskName = unanetTasks[expenseType.unanetTask] ?? '';
     expType = unanetET?.code; // eg. PHONE.INTERNET
 
     return {
