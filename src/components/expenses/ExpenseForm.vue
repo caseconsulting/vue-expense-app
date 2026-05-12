@@ -138,54 +138,71 @@
         />
 
         <!-- Cost -->
-        <v-row class="mx-1">
-          <v-text-field
-            variant="underlined"
-            prefix="$"
-            :rules="costRules"
-            :disabled="isReimbursed || isInactive || isHighFive"
-            label="Cost"
-            id="cost"
-            class="py-0"
-            maxlength="12"
-            data-vv-name="Cost"
-            persistent-hint
-            :hint="costHint()"
-            v-model="costFormatted"
-            @keyup="formatCost"
-          >
-            <template #message="{ message }">
-              <span v-html="message" />
-              <br v-if="monthlyLimit.showHint" />
-              <span v-if="monthlyLimit.showHint">
-                Monthly limit remaining:
-                <div class="d-inline" :class="monthlyLimit.remaining < 0 ? 'text-error font-weight-bold' : ''">
-                  <span v-if="monthlyLimit.remaining === undefined">Calculating...</span>
-                  <span v-else>
-                    <span v-if="monthlyLimit.remaining < 0">–</span>${{
-                      Math.abs(Number(monthlyLimit.remaining))?.toFixed(2)
-                    }}
-                  </span>
-                </div>
-              </span>
-            </template>
-          </v-text-field>
-          <!-- Exchange Hours Calculator -->
-          <v-tooltip location="bottom">
-            <template v-slot:activator="{ props }">
-              <span v-bind="props">
-                <v-btn
-                  v-if="isExchangeForTrainingHours"
-                  class="ml-3"
-                  :disabled="isInactive"
-                  @click="showExchangeCalculator = true"
-                >
-                  <v-icon>mdi-calculator</v-icon>
-                </v-btn>
-              </span>
-            </template>
-            <span>Show Exchange Calculator</span>
-          </v-tooltip>
+        <v-row class="mx-1" no-gutters>
+          <v-col :cols="selectedExpenseType?.allowCompanyCard ? 10 : 12">
+            <v-text-field
+              variant="underlined"
+              prefix="$"
+              :rules="costRules"
+              :disabled="isReimbursed || isInactive || isHighFive"
+              label="Cost"
+              id="cost"
+              class="py-0"
+              maxlength="12"
+              data-vv-name="Cost"
+              persistent-hint
+              :hint="costHint()"
+              v-model="costFormatted"
+              @keyup="formatCost"
+            >
+              <template #message="{ message }">
+                <span v-html="message" />
+                <br v-if="monthlyLimit.showHint" />
+                <span v-if="monthlyLimit.showHint">
+                  Monthly limit remaining:
+                  <div class="d-inline" :class="monthlyLimit.remaining < 0 ? 'text-error font-weight-bold' : ''">
+                    <span v-if="monthlyLimit.remaining === undefined">Calculating...</span>
+                    <span v-else>
+                      <span v-if="monthlyLimit.remaining < 0">–</span>${{
+                        Math.abs(Number(monthlyLimit.remaining))?.toFixed(2)
+                      }}
+                    </span>
+                  </div>
+                </span>
+              </template>
+            </v-text-field>
+            <!-- Exchange Hours Calculator -->
+            <v-tooltip location="bottom">
+              <template v-slot:activator="{ props }">
+                <span v-bind="props">
+                  <v-btn
+                    v-if="isExchangeForTrainingHours"
+                    class="ml-3"
+                    :disabled="isInactive"
+                    @click="showExchangeCalculator = true"
+                  >
+                    <v-icon>mdi-calculator</v-icon>
+                  </v-btn>
+                </span>
+              </template>
+              <span>Show Exchange Calculator</span>
+            </v-tooltip>
+          </v-col>
+          <v-col :cols="selectedExpenseType?.allowCompanyCard ? 2 : 0">
+            <v-btn
+              v-if="selectedExpenseType?.allowCompanyCard"
+              @click="editedExpense.companyCard.used = !editedExpense.companyCard.used"
+              variant="text"
+              class="ml-4"
+              icon
+              v-tooltip="{ text: `${editedExpense.companyCard.used ? 'Used' : 'Did not use'} company card`, location: 'left' }"
+            >
+              <v-icon
+                :icon="editedExpense.companyCard.used ? 'mdi-account-credit-card' : 'mdi-account-credit-card-outline'"
+                :color="editedExpense.companyCard.used ? '#BC3825' : 'grey-darken-2'"
+              />
+            </v-btn>
+          </v-col>
         </v-row>
 
         <!-- Recipient Employee Selection List -->

@@ -115,7 +115,8 @@ const expense = ref({
   category: null,
   showOnFeed: false,
   employeeName: null,
-  budgetName: null
+  budgetName: null,
+  companyCard: { used: false }
 }); // blank expense for the expense form
 const expenses = ref(null);
 const expenseTypes = ref(null);

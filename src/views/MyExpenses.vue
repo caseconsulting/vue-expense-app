@@ -557,7 +557,8 @@ const expense = ref({
   showOnFeed: null,
   employeeName: null,
   budgetName: null,
-  recipient: null
+  recipient: null,
+  companyCard: { used: false }
 }); // selected expense
 const expenseTypes = ref([]); // expense types
 let statusFilterOptions = ref(
