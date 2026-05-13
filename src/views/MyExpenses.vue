@@ -308,9 +308,12 @@
                 <td class="d-flex justify-end mr-4">
 
                   <!-- External API connection -->
-                  <span v-tooltip="{ text: unanetUploadDisabled(item), location: 'top', offset: -2 }">
+                  <span v-tooltip="{ text: item.companyCard?.used ? 'Paid with company card' : unanetUploadDisabled(item), location: 'top', offset: -2 }">
+                    <v-btn v-if="item.companyCard?.used && (userRoleIsAdmin() || userRoleIsManager())" variant="text" icon size="small">
+                      <v-icon size="x-large" class="case-gray" icon="mdi-account-credit-card" />
+                    </v-btn>
                     <v-btn
-                      v-if="userRoleIsAdmin() || userRoleIsManager()"
+                      v-else-if="userRoleIsAdmin() || userRoleIsManager()"
                       :disabled="unanetUploadDisabled(item) || expensesStatuses.disabled.has(item.id)"
                       id="external"
                       variant="text"
@@ -1010,11 +1013,11 @@ function toTopOfForm() {
  */
 function unanetUploadDisabled(expense, isQuickAction = false) {
   // -- check for disable conditions as defined by admin --
+  // check company card used
+  if (expense.companyCard?.used) return 'Expenses paid with company card must be added to Unanet manually';
   // check for final approval status
   let allowedStates = [EXPENSE_STATES.APPROVED, EXPENSE_STATES.REIMBURSED];
   if (!allowedStates.includes(expense.state)) return 'Expense must be approved to send to Unanet';
-  // check company card used
-  if (expense.companyCard?.used) return 'Expenses paid with company card must be added to Unanet manually';
 
   // -- Quick action allows for override even if required fields not met --
   if (isQuickAction) return false;
