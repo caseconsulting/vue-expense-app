@@ -307,7 +307,7 @@
               <template #[`item.actions`]="{ item }">
                 <td class="d-flex justify-end mr-4">
 
-                  <!-- External API connection -->
+                  <!-- External API connection and Company Card -->
                   <span v-tooltip="{ text: item.companyCard?.used ? 'Paid with company card' : unanetUploadDisabled(item), location: 'top', offset: -2 }">
                     <v-btn v-if="item.companyCard?.used && (userRoleIsAdmin() || userRoleIsManager())" variant="text" icon size="small">
                       <v-icon size="x-large" class="case-gray" icon="mdi-account-credit-card" />
@@ -534,7 +534,8 @@ const EXPENSE_STATES_NAMES = {
   REIMBURSED: 'Reimbursed',
   REJECTED: 'Rejected',
   RETURNED: 'Returned',
-  REVISED: 'Revised'
+  REVISED: 'Revised',
+  TRACKING: 'Tracking'
 }
 
 const deleting = ref(false); // activate delete model
@@ -1015,6 +1016,8 @@ function unanetUploadDisabled(expense, isQuickAction = false) {
   // -- check for disable conditions as defined by admin --
   // check company card used
   if (expense.companyCard?.used) return 'Expenses paid with company card must be added to Unanet manually';
+  // check tracking-only expense
+  if (expense.state === EXPENSE_STATES.TRACKING) return 'Tracking expenses are Portal-only';
   // check for final approval status
   let allowedStates = [EXPENSE_STATES.APPROVED, EXPENSE_STATES.REIMBURSED];
   if (!allowedStates.includes(expense.state)) return 'Expense must be approved to send to Unanet';
@@ -1129,6 +1132,7 @@ function getStateTooltip(item) {
     case EXPENSE_STATES.REJECTED: return 'Rejected permanantly';
     case EXPENSE_STATES.RETURNED: return 'Returned for edits';
     case EXPENSE_STATES.REVISED: return 'Revised';
+    case EXPENSE_STATES.TRACKING: return 'Tracking';
     default: return 'Unknown State';
   }
 }
@@ -1150,6 +1154,7 @@ function getStateIcon(state) {
     case EXPENSE_STATES.REJECTED: return 'mdi-close-box';
     case EXPENSE_STATES.RETURNED: return 'mdi-arrow-u-left-top-bold';
     case EXPENSE_STATES.REVISED: return 'mdi-pencil-box';
+    case EXPENSE_STATES.TRACKING: return 'mdi-note';
     default: return 'mdi-help-rhombus';
   }
 }
@@ -1213,6 +1218,18 @@ async function quickExternalSync(exp) {
     setTimeout(() => { expensesStatuses.value.successes.delete(exp.id) }, 2000);
   }
 }
+async function quickSetTracking(exp) {
+  exp.state = EXPENSE_STATES.TRACKING;
+  exp.reimbursedDate = getTodaysDate('YYYY-MM-DD');
+  await updateExpense(exp);
+}
+async function quickReset(exp) {
+  exp.state = EXPENSE_STATES.CREATED;
+  exp.approvals = EMPTY_APPROVAL;
+  exp.reimbursedDate = null;
+  exp.rejections = null;
+  await updateExpense(exp);
+}
 
 /**
  * Gets the state quick-menu for a specified state
@@ -1227,6 +1244,12 @@ function getStatesQuickMenu(state) {
       icon: 'mdi-cloud-sync',
       text: 'Sync with Unanet',
       id: 'unanet-sync'
+    },
+    {
+      action: quickSetTracking,
+      icon: 'mdi-note',
+      text: 'Tracking',
+      id: 'tracking'
     }
   ];
 
@@ -1291,6 +1314,14 @@ function getStatesQuickMenu(state) {
           text: 'Remove reimbursement'
         },
         ...all
+      ];
+    case EXPENSE_STATES.TRACKING:
+      return [
+        {
+          action: quickReset,
+          icon: getStateIcon(EXPENSE_STATES.CREATED),
+          text: 'Reset'
+        }
       ];
     default:
       return [];
