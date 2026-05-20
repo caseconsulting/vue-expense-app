@@ -33,16 +33,16 @@
             </div>
             <div v-else>
               <v-row>
-                <v-col cols="13" :class="isAdmin(editGroup) ? 'cursor-not-allowed' : ''">
+                <v-col cols="13" :class="isAdmin(editRole) ? 'cursor-not-allowed' : ''">
                   <v-textarea
-                    v-model="editGroup.name"
-                    auto-grow
-                    rows="1"
-                    density="compact"
+                    v-model="editRole.name"
                     variant="outlined"
                     class="h1"
                     id="roleName"
                     :disabled="isAdmin(editRole)"
+                    auto-grow
+                    rows="1"
+                    density="compact"
                     validate-on="blur"
                     :rules="[(v) => (!!v && v != '') || 'Name cannot be blank']"
                   />

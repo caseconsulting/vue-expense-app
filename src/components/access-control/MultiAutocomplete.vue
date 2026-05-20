@@ -144,16 +144,10 @@ function filter(value, query, item) {
     return true;
 
   // search for query matching some field
-<<<<<<< HEAD
   for (let word of query.split(' ').filter(Boolean))
     for (let field of fields[type] ?? [])
       if (`${raw[field]}`.toLowerCase().includes(word.toLowerCase()))
         return true;
-=======
-  for (let field of fields[type] ?? [])
-    if (`${raw[field]}`.toLowerCase().includes(query.toLowerCase()))
-      return true;
->>>>>>> 20d7792c (bug fixes)
 
   // no match
   return false;
