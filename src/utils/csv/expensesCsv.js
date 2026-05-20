@@ -2,9 +2,10 @@
  * Utilities to convert expense objects into objects passable to
  * csv.js
  */
+import _cloneDeep from 'lodash/cloneDeep';
+import store from '~/store/index.js';
 import { format, DEFAULT_ISOFORMAT, FORMATTED_ISOFORMAT } from '@/shared/dateUtils';
 import { indexBy } from '@/utils/utils.js';
-import store from '~/store/index.js';
 import api from '~/src/shared/api.js';
 import csvUtils from '@/utils/csv/baseCsv.js';
 
@@ -35,8 +36,10 @@ async function unanetExpenseData(expenses) {
   let employees = indexBy(store.getters.employees, 'id');
   let expenseTypes = indexBy(store.getters.expenseTypes, 'id');
   let { projects: unanetProjects, expenseTypes: unanetETs } = await api.getUnanetExpenseTypes();
-  unanetProjects = indexBy(unanetProjects, 'key');
+  let unanetTasks = {};
+  for (let { tasks } of unanetProjects) for (let t of tasks) unanetTasks[t.key] = name;
   unanetETs = indexBy(unanetETs, 'key');
+  unanetProjects = indexBy(unanetProjects, 'key');
   
   let employee, expenseType, unanetET, unanetProject;
   let orgCode, projCode, taskName, expType;
@@ -51,7 +54,7 @@ async function unanetExpenseData(expenses) {
 
     orgCode = unanetProject?.orgCode ?? ''; // eg. I_CASE
     projCode = unanetProject?.code ?? ''; // eg. FRINGE.BENEFITS.GRAY
-    taskName = unanetET?.code?.toLowerCase() === 'team leads' ? 'Team Leads' : ''; // 'Team Leads' or nothing
+    taskName = unanetTasks[expenseType.unanetTask] ?? '';
     expType = unanetET?.code; // eg. PHONE.INTERNET
 
     return {
@@ -127,21 +130,23 @@ function convertExpenses(expenses) {
   let tempExpenses = [];
   let employees = store.getters.employees;
   let expenseTypes = store.getters.expenseTypes;
-  for (let expense of expenses ?? []) {
+  expenses.forEach((expense) => {
+    let tempExpense = _cloneDeep(expense);
+
     // add first name, last name, and employee #
     employees.forEach((employee) => {
-      if (employee.id === expense.employeeId) {
-        expense.employeeNumber = employee.employeeNumber;
-        expense.lastname = employee.lastName;
-        expense.firstName = employee.firstName;
+      if (employee.id === tempExpense.employeeId) {
+        tempExpense.employeeNumber = employee.employeeNumber;
+        tempExpense.lastname = employee.lastName;
+        tempExpense.firstName = employee.firstName;
         return; // break loop
       }
     });
 
     // add expense type
     expenseTypes.forEach((type) => {
-      if (type.id === expense.expenseTypeId) {
-        expense.expenseType = type.budgetName;
+      if (type.id === tempExpense.expenseTypeId) {
+        tempExpense.expenseType = type.budgetName;
       }
       return; // break loop
     });
@@ -167,7 +172,7 @@ function convertExpenses(expenses) {
           ?.trim() || '',
       Note: expense.note?.trim() || ''
     });
-  }
+  });
 
   return tempExpenses;
 } // convertExpenses
