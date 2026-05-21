@@ -187,6 +187,7 @@ const avgDayColor = computed(() => {
 const futureDays = computed(() => {
   // future work days planned
   let days = props.supplementalData?.future?.days || 0;
+  days = Number(days) || 0;
   // future PTO days planned
   days += getPlannedPTO(true);
   return days;
