@@ -17,6 +17,7 @@ const PTO_CASH_OUTS = 'ptoCashOuts';
 const SETTINGS = 'settings';
 const TAGS = 'tags';
 const ACCESS_ROLES = 'accessRoles';
+const UNANET = 'unanet';
 const API_HOSTNAME = API_CONFIG.apiHostname;
 const API_PORT = API_CONFIG.apiPort;
 const PORT = API_PORT === '443' ? '' : `:${API_PORT}`;

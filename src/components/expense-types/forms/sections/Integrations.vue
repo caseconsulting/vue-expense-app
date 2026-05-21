@@ -14,7 +14,7 @@
       label="Basecamp Campfire (optional)"
       clearable
     />
-    <div v-tooltip:top="unanetETs.length == 0 ? 'No Unanet expense types found' : null">
+    <div v-tooltip:top="tooltipText('unanetETs')">
       <v-autocomplete
         variant="underlined"
         :items="unanetETs"
@@ -26,7 +26,7 @@
         clearable
       />
     </div>
-    <div v-tooltip:top="unanetProjects.length == 0 ? 'No Unanet projects found' : null">
+    <div v-tooltip:top="tooltipText('unanetProjects')">
       <v-autocomplete
         variant="underlined"
         :items="unanetProjects"
@@ -46,7 +46,7 @@
         </template>
       </v-autocomplete>
     </div>
-    <div v-tooltip:top="Object.keys(unanetTasks).length == 0 ? 'No Unanet tasks found' : null">
+    <div v-tooltip:top="tooltipText('unanetTasks')">
       <v-autocomplete
         variant="underlined"
         :items="unanetTasks[modelValue.unanetProject]"
@@ -63,7 +63,7 @@
 </template>
 <script setup>
 import { updateStoreCampfires } from '@/utils/storeUtils';
-import { onBeforeMount, ref } from 'vue';
+import { onBeforeMount, ref, computed } from 'vue';
 import { useStore } from 'vuex';
 import api from '@/shared/api.js';
 
@@ -77,12 +77,26 @@ const unanetETs = ref([]); // Unanet expense types
 const unanetProjects = ref([]); // Unanet projects
 const unanetTasks = ref({}); // Unanet tasks (tied to projects)
 
+let gettingAPIData = ref(false);
+function tooltipText(type) {
+  if (gettingAPIData.value) return 'Waiting for Unanet data...';
+  if (type == 'unanetETs' && unanetETs.value.length == 0) return 'No Unanet expense types found';
+  if (type == 'unanetProjects' && unanetProjects.value.length == 0) return 'No Unanet projects found';
+  if (type == 'unanetTasks' && Object.keys(unanetTasks.value).length == 0) return 'No Unanet tasks found';
+  return null;
+}
+
 /**
  * Gets and sets all employees.
  */
 onBeforeMount(async () => {
+  // sets tooltip text
+  gettingAPIData.value = true;
+
   // fetch data
   let [apiExpenseTypes, apiProjects] = await Promise.all([api.getUnanetExpenseTypes(), api.getUnanetProjects(), updateStoreCampfires()]);
+
+  console.log(apiExpenseTypes, apiProjects);
 
   // load data into variables
   unanetETs.value = apiExpenseTypes;
@@ -91,5 +105,6 @@ onBeforeMount(async () => {
 
   // index tasks by project id
   for (let { key, tasks } of unanetProjects.value) unanetTasks.value[key] = tasks;
+  gettingAPIData.value = false;
 });
 </script>
