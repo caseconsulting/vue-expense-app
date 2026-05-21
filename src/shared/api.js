@@ -508,7 +508,7 @@ async function getEmployeesFromAdp() {
  * @return - Array of IDs of employees who can see the user's data
  */
 async function getAccessControlUsers(id) {
-  return await execute('get', `/${ACCESS_ROLES}/employee/groupUsers/${id}`);
+  return await execute('get', `/${ACCESS_ROLES}/employee/roleUsers/${id}`)
 }
 
 /**
@@ -526,6 +526,33 @@ async function getUserProfileAccessControl(id) {
  */
 async function getUnanetExpenseTypes() {
   return await execute('get', `/${UNANET}/expenseTypes`);
+}
+
+/**
+ * Gets Unanet expense type data. Useful for exports to Unanet.
+ */
+async function getUnanetProjects() {
+  return await execute('get', `/${UNANET}/projects`);
+}
+
+/**
+ * Uploads a given expense to Unanet
+ * 
+ * @param expense - the expense to upload
+ * @return success or fail
+ */
+async function uploadUnanetExpense(expense) {
+  return await execute('post', `/${UNANET}/uploadExpense`, expense);
+}
+
+/**
+ * Uploads a given expense to Unanet
+ * 
+ * @param expense - the expense to upload
+ * @return success or fail
+ */
+async function syncUnanetExpense(expense) {
+  return await execute('post', `/${UNANET}/uploadExpense`, expense);
 }
 
 /**
@@ -592,6 +619,9 @@ export default {
   getAccessControlUsers,
   getUserProfileAccessControl,
   getUnanetExpenseTypes,
+  getUnanetProjects,
+  uploadUnanetExpense,
+  syncUnanetExpense,
   getProjectAccessControl,
   getContractAccessControl,
   EXPENSE_TYPES,
