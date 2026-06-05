@@ -133,7 +133,7 @@ function getProjectEndDate(project) {
  */
 function getProjectNameFromId(projectId) {
   try {
-    return props.projectsList.find((p) => p.id === projectId).projectName;
+    return props.projectsList.find((p) => p.id === projectId)?.projectName;
   } catch (e) {
     console.error('Could not find project with ID ' + projectId);
     console.error(e);
