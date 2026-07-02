@@ -127,11 +127,6 @@ const KEYS = ref({
   CONTRACT_YEAR: 'contractYear'
 });
 let hasSavedPlannedPto = false;
-const PTO_ACCRUALS = {
-  red: 14,
-  white: 15.33333, // per Dave B, accruals are exactly this
-  gray: 15.33333 // per Dave B, accruals are exactly this
-};
 const notOnTrack = ref(false);
 const showUnanetSyncModal = ref(false);
 
@@ -513,21 +508,6 @@ async function setInitialData() {
 } // setInitialData
 
 /**
- * Helper function get get an employee's plan tag (ie: red/white/gray)
- * @param emp
- */
-async function getEmployeePlanTagName(emp) {
-  if (!store.getters.tags) await updateStoreTags();
-  let plans = ['red', 'white', 'gray'];
-  for (let tag of store.getters.tags) {
-    if (plans.includes(tag.tagName.toLowerCase()) && tag.employees.includes(emp.id)) {
-      return tag.tagName;
-    }
-  }
-  return undefined;
-}
-
-/**
  * Gets the title for the top bar
  */
 function getTitle() {
@@ -546,28 +526,6 @@ watch(
     clonedEmployee.value = _find(store.getters.employees, (e) => e.id === clonedEmployee.value.id);
   },
   { deep: true }
-);
-
-watch(
-  () => leaveBalances.value,
-  async () => {
-    let balance = (leaveBalances.value?.['PTO']?.value ?? leaveBalances.value?.['PTO']) / 60 / 60;
-    let plan = await getEmployeePlanTagName(clonedEmployee.value);
-    plan = plan?.toLowerCase();
-    let ptoAccrual = PTO_ACCRUALS[plan ?? 'red']; // default to red to set to 14
-    let ptoMax = 208;
-    if (clonedEmployee.value.id === store.getters.user.id && ptoAccrual > ptoMax - balance) {
-      let notification = {
-        type: 'pto-accrual',
-        closeable: true,
-        status: 'info',
-        color: '#f27311',
-        message: `You will not accrue ${balance >= ptoMax ? 'any' : `your full ${ptoAccrual.toFixed(2)} hours of`} PTO next month. Consider using your PTO balance or cashing it out using the Timesheet Widget. Your current balance is ${balance.toFixed(2)} hours.`,
-        id: `PTO-ACCRUE-WARNING-${getTodaysDate('YYYY-MM')}`
-      };
-      emitter.emit('add-notification', notification);
-    }
-  }
 );
 
 watch(notOnTrack, (val) => {
