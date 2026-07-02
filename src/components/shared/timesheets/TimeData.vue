@@ -76,7 +76,6 @@ import PTOHours from '@/components/shared/timesheets/PTOHours.vue';
 import TimePeriodHours from '@/components/shared/timesheets/TimePeriodHours.vue';
 import api from '@/shared/api';
 import { difference, isBefore, now } from '@/shared/dateUtils';
-import { getTodaysDate } from '@/shared/dateUtils.js';
 import { updateStoreContracts, updateStoreTags } from '@/utils/storeUtils';
 import { userRoleIsAdmin, userRoleIsManager } from '@/utils/utils';
 import { AxiosError } from 'axios';
