@@ -197,12 +197,12 @@ function setCreations() {
  * * Sets up and formats failures found by the data sync function response.
  */
 function setFailures() {
-  let failures = [
+  let allFailures = [
     ...props.syncData.caseAndBambooSyncResult.failures,
     ...props.syncData.bambooAndADPSyncResult.failures
   ];
   failures.value = [];
-  _forEach(failures, (f) => {
+  _forEach(allFailures, (f) => {
     const [eNum, error] = Object.entries(f)[0];
     failures.value.push({ [getName(eNum)]: error });
   });
