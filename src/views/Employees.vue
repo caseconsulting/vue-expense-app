@@ -582,7 +582,12 @@ function syncPortalToBamboo() {
     .then(async (res) => {
       await updateStoreEmployees();
       await refreshEmployees();
-      applicationSyncData.value = res.body;
+      const body = res.body ?? {};
+      applicationSyncData.value = {
+        caseAndBambooSyncResult:
+          body.caseAndBambooSyncResult ?? { fieldsUpdated: [], usersCreated: [], failures: [], fields: [] },
+        bambooAndADPSyncResult: body.bambooAndADPSyncResult ?? { fieldsUpdated: [], failures: [], fields: [] }
+      };
     })
     .catch((err) => {
       applicationSyncData.value = err;
