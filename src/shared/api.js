@@ -492,6 +492,14 @@ async function syncApplications() {
   return await execute('post', `/${UTILITY}/syncApplications`, {});
 } // syncApplications
 
+async function syncPortalToBamboo() {
+  return await execute('post', `/${UTILITY}/syncPortalToBamboo`, {});
+} // syncPortalToBamboo
+
+async function syncBambooToADP() {
+  return await execute('post', `/${UTILITY}/syncBambooToADP`, {});
+} // syncBambooToADP
+
 /**
  * Gets employee's ADP info
  *
@@ -615,6 +623,8 @@ export default {
   processHighFive,
   getAllGiftCards,
   syncApplications,
+  syncPortalToBamboo,
+  syncBambooToADP,
   getEmployeesFromAdp,
   getAccessControlUsers,
   getUserProfileAccessControl,
