@@ -122,7 +122,7 @@
             <v-icon class="pl-2"> mdi-tag-multiple </v-icon>
           </v-btn>
 
-          <!-- Sync Applications -->
+          <!-- Sync Portal → Bamboo -->
           <v-btn
             v-if="hasAdminPermissions()"
             id="syncBambooBtn"
