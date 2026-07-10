@@ -125,16 +125,30 @@
           <!-- Sync Applications -->
           <v-btn
             v-if="hasAdminPermissions()"
-            id="syncApplicationsBtn"
+            id="syncBambooBtn"
             class="mb-5 ml-2 ml-md-4"
             :disabled="loading || syncing"
             elevation="2"
             :size="isMobile() ? 'small' : 'default'"
-            @click="syncApplications()"
+            @click="syncPortalToBamboo()"
           >
-            {{ isMobile() ? 'Sync Apps' : 'Sync Applications' }}
+            {{ isMobile() ? 'Sync Bamboo' : 'Sync Portal → Bamboo' }}
+            <v-progress-circular v-if="syncing === 'bamboo'" class="ml-2" :size="25" indeterminate color="grey" />
+            <v-icon v-else class="pl-2"> mdi-web-sync </v-icon>
+          </v-btn>
 
-            <v-progress-circular v-if="syncing" class="ml-2" :size="25" indeterminate color="grey" />
+          <!-- Sync BambooHR to ADP -->
+          <v-btn
+            v-if="hasAdminPermissions()"
+            id="syncADPBtn"
+            class="mb-5 ml-2 ml-md-4"
+            :disabled="loading || syncing"
+            elevation="2"
+            :size="isMobile() ? 'small' : 'default'"
+            @click="syncBambooToADP()"
+          >
+            {{ isMobile() ? 'Sync ADP' : 'Sync Bamboo → ADP' }}
+            <v-progress-circular v-if="syncing === 'adp'" class="ml-2" :size="25" indeterminate color="grey" />
             <v-icon v-else class="pl-2"> mdi-web-sync </v-icon>
           </v-btn>
 
@@ -559,12 +573,12 @@ function employeeIsOnTag(e) {
 } // employeeIsOnTag
 
 /**
- * Syncs data between different applications (Portal, BambooHR, ADP, ...).
+ * Syncs data between Portal and BambooHR.
  */
-function syncApplications() {
-  syncing.value = true;
+function syncPortalToBamboo() {
+  syncing.value = 'bamboo';
   api
-    .syncApplications()
+    .syncPortalToBamboo()
     .then(async (res) => {
       await updateStoreEmployees();
       await refreshEmployees();
@@ -577,7 +591,28 @@ function syncApplications() {
       toggleEmployeesSyncModal.value = true;
       syncing.value = false;
     });
-} // syncApplications
+} // syncPortalToBamboo
+
+/**
+ * Syncs data between BambooHR and ADP.
+ */
+function syncBambooToADP() {
+  syncing.value = 'adp';
+  api
+    .syncBambooToADP()
+    .then(async (res) => {
+      await updateStoreEmployees();
+      await refreshEmployees();
+      applicationSyncData.value = res.body;
+    })
+    .catch((err) => {
+      applicationSyncData.value = err;
+    })
+    .finally(() => {
+      toggleEmployeesSyncModal.value = true;
+      syncing.value = false;
+    });
+} // syncBambooToADP
 
 /**
  * Validates if an employee can be deleted. Returns true if the employee has no expenses, otherwise returns false.
