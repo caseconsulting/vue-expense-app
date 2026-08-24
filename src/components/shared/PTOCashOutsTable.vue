@@ -33,7 +33,7 @@
               @click="toggleApproveModal = true"
               id="custom-button-color"
               :loading="isApproving"
-              v-show="showApproveButton"
+              :disabled="!showApproveButton"
               size="large"
               fixed
               class="reimburse_button"
@@ -212,7 +212,12 @@ import { useDisplayError, useDisplaySuccess } from '@/components/shared/StatusSn
 // |                                                  |
 // |--------------------------------------------------|
 
-const props = defineProps(['unapprovedOnly']);
+const props = defineProps({
+  unapprovedOnly: {
+    type: Boolean,
+    default: false
+  }
+});
 const store = useStore();
 const emitter = inject('emitter');
 const loading = ref(true);

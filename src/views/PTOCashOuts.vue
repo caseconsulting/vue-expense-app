@@ -12,7 +12,13 @@
     </v-row>
     <v-row v-else>
       <v-col cols="12" xl="8" lg="7">
-        <p-t-o-cash-outs-table />
+        <div v-if="userRoleIsAdmin() || userRoleIsManager()" class="mt-3 mb-2">
+          <v-btn-toggle v-model="unapprovedOnly" mandatory>
+            <v-btn :value="true">Unapproved Only</v-btn>
+            <v-btn :value="false">All PTO Cash Outs</v-btn>
+          </v-btn-toggle>
+        </div>
+        <p-t-o-cash-outs-table :unapproved-only="unapprovedOnly" />
       </v-col>
       <v-col cols="12" xl="4" lg="5" class="pl-lg-1 pl-sm-2">
         <!-- Timesheets -->
@@ -40,7 +46,7 @@
 import PTOCashOutsTable from '@/components/shared/PTOCashOutsTable.vue';
 import TimeData from '@/components/shared/timesheets/TimeData';
 import { onBeforeUnmount, onMounted, inject, watch, computed, ref } from 'vue';
-import { storeIsPopulated, userRoleIsUser } from '../utils/utils';
+import { storeIsPopulated, userRoleIsAdmin, userRoleIsManager, userRoleIsUser } from '../utils/utils';
 import { useStore } from 'vuex';
 
 // |--------------------------------------------------|
@@ -54,6 +60,7 @@ const store = useStore();
 
 const loading = ref(false);
 const employee = ref(null);
+const unapprovedOnly = ref(userRoleIsAdmin() || userRoleIsManager());
 
 // |--------------------------------------------------|
 // |                                                  |
